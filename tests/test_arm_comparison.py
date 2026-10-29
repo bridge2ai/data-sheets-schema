@@ -347,15 +347,86 @@ def test_cross_arm_absolute_paths_are_bounded_and_unsupported_relocation_stays_u
         assert path.is_relative_to(root), "external live input read"
         return read_bytes(path)
     monkeypatch.setattr(Path, "read_bytes", bounded_read)
-    # A matching suffix (including ambiguous repeated suffixes) is not an owner.
-    for outside in (tmp_path / "elsewhere" / "data" / "preprocessed" / local.name,
-                    tmp_path / "data" / "preprocessed" / "old" / "data" / "preprocessed" / local.name):
+    # Exactly one foreign tail maps to local bytes, independently checked pins.
+    moved = deepcopy(record)
+    moved["inputs"]["bundle_path"] = str(tmp_path / "elsewhere" / "data" / "preprocessed" / local.name)
+    result = bundle_drift(moved, root)
+    assert result["disk_status"] == result["manifest_status"] == "match"
+    assert result["disk_md5"] == result["manifest_md5"] == hashlib.md5(b"original").hexdigest()
+    assert result["manifest_basis"] == "pinned manifest on disk"
+
+    # Both candidate tails exist and match: neither may resolve ambiguity.
+    ambiguous = root / "data/preprocessed/old/data/preprocessed" / local.name
+    ambiguous.parent.mkdir(parents=True)
+    ambiguous.write_bytes(b"original")
+    for outside in (tmp_path / "elsewhere" / local.name,
+                    tmp_path / "data/preprocessed/old/data/preprocessed" / local.name,
+                    tmp_path / "data/preprocessed/../../data/preprocessed" / local.name):
         moved = deepcopy(record)
         moved["inputs"]["bundle_path"] = str(outside)
         result = bundle_drift(moved, root)
         assert result["disk_status"] == result["manifest_status"] == "unknown"
-        assert result["disk_md5"] is None
-        assert "external absolute-path relocation is unsupported" in result["disk_reason"]
+        assert result["disk_md5"] is result["manifest_md5"] is None
+        assert "exactly one data/preprocessed pair" in result["disk_reason"]
+        assert "unsupported or ambiguous relocation stays unknown" in result["disk_reason"]
+
+    from data_sheets_schema.evaluation.arm_comparison import compare_bundle_drift, render_bundle_drift
+    report = "\n".join(render_bundle_drift(compare_bundle_drift({"v8": [record, moved]}, root)))
+    assert "Foreign absolute paths with exactly one data/preprocessed pair support relocation" in report
+    assert "Unsupported or ambiguous relocation (including repeated data/preprocessed pairs) stays unknown" in report
+    assert "External absolute paths remain unknown" not in report
+
+
+def test_ambiguous_foreign_manifest_is_refused_even_with_matching_local_candidates(tmp_path, monkeypatch):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    root = tmp_path / "checkout"
+    root.mkdir()
+    record, manifest, raw = _bundle_record(root)
+    for tail in ("data/preprocessed", "data/preprocessed/old/data/preprocessed"):
+        candidate = root / tail / manifest.name
+        candidate.parent.mkdir(parents=True, exist_ok=True)
+        candidate.write_bytes(raw)
+    record["inputs"]["chunks"]["path"] = str(tmp_path / "foreign/data/preprocessed/old/data/preprocessed" / manifest.name)
+    read_bytes = Path.read_bytes
+    def bounded_read(path):
+        assert path.is_relative_to(root), "external live input read"
+        return read_bytes(path)
+    monkeypatch.setattr(Path, "read_bytes", bounded_read)
+    def no_recovery(*args, **kwargs):
+        pytest.fail("ambiguous manifest must not select a historical path")
+    result = bundle_drift(record, root, recover=no_recovery)
+    assert result["disk_status"] == "match"
+    assert result["manifest_status"] == "unknown"
+    assert result["manifest_md5"] is result["manifest_basis"] is None
+
+
+def test_owned_repeated_preprocessed_pairs_keep_exact_live_and_historical_paths(tmp_path, monkeypatch):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    root = tmp_path / "checkout"
+    folder = root / "archive-copy/data/preprocessed/old/data/preprocessed"
+    folder.mkdir(parents=True)
+    record, manifest, raw = _bundle_record(folder)
+    record["inputs"]["bundle_path"] = str(folder / record["inputs"]["bundle_path"])
+    record["inputs"]["chunks"]["path"] = str(manifest)
+    read_bytes = Path.read_bytes
+    def bounded_read(path):
+        assert path.is_relative_to(root), "external live input read"
+        return read_bytes(path)
+    monkeypatch.setattr(Path, "read_bytes", bounded_read)
+    result = bundle_drift(record, root)
+    assert result["disk_status"] == result["manifest_status"] == "match"
+    manifest.write_bytes(b"changed manifest")
+    requested = []
+    exact = manifest.relative_to(root).as_posix()
+    def recover(relative, **pins):
+        requested.append((relative, pins))
+        return (raw, "historical") if relative == exact else None
+    result = bundle_drift(record, root, recover=recover)
+    assert result["disk_status"] == result["manifest_status"] == "match"
+    assert result["manifest_basis"] == "pinned manifest recovered from history"
+    assert requested == [(exact, {"md5": None, "sha256": hashlib.sha256(raw).hexdigest()})]
 
 
 def test_cross_arm_cli_json_and_markdown_expose_same_pins(tmp_path, capsys):

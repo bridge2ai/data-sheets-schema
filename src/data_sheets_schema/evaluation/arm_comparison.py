@@ -42,22 +42,39 @@ def _digest(value: Any, size: int) -> str | None:
     return None
 
 
-def _path(root: Path, value: Any) -> Path | None:
-    if not isinstance(value, str) or not value:
+def _lexical_relative(root: Path, value: Any) -> Path | None:
+    """Preserve owned paths; relocate only a unique foreign preprocessed tail.
+
+    Live reads and historical lookup use the same lexical name. Count pairs
+    before normalization so traversal cannot hide an ambiguous foreign tail.
+    This record-only policy is local; other provenance resolvers have different
+    ownership context.
+    """
+    if not isinstance(value, str) or not value or "\x00" in value:
         return None
     try:
         raw = Path(value)
         lexical = Path(os.path.abspath(root / raw))
         try:
-            lexical.relative_to(root)
+            return lexical.relative_to(root)
         except ValueError:
-            from data_sheets_schema.provenance import _repo_preprocessed_tail
-            tail = _repo_preprocessed_tail(raw) if raw.is_absolute() else None
-            if tail is None:
+            pairs = [i for i in range(len(raw.parts) - 1)
+                     if raw.parts[i:i + 2] == ("data", "preprocessed")]
+            if not raw.is_absolute() or len(pairs) != 1:
                 return None
+            tail = Path(*raw.parts[pairs[0]:])
             lexical = Path(os.path.abspath(root / tail))
-            lexical.relative_to(root)
-        path = lexical.resolve()
+            return lexical.relative_to(root)
+    except (OSError, RuntimeError, ValueError):
+        return None
+
+
+def _path(root: Path, value: Any) -> Path | None:
+    rel = _lexical_relative(root, value)
+    if rel is None:
+        return None
+    try:
+        path = (root / rel).resolve()
         path.relative_to(root)
         return path
     except (OSError, RuntimeError, ValueError):
@@ -117,7 +134,10 @@ def bundle_drift(
     if bundle is None:
         result["disk_reason"] = "bundle path missing or outside selected checkout"
         if isinstance(inputs.get("bundle_path"), str) and Path(inputs["bundle_path"]).is_absolute():
-            result["disk_reason"] += "; external absolute-path relocation is unsupported"
+            result["disk_reason"] += (
+                "; absolute-path resolution refused: foreign relocation requires exactly "
+                "one data/preprocessed pair and containment in the selected checkout; "
+                "unsupported or ambiguous relocation stays unknown")
     else:
         try:
             result["disk_md5"] = hashlib.md5(bundle.read_bytes()).hexdigest()
@@ -146,14 +166,12 @@ def bundle_drift(
         result["manifest_basis"] = "pinned manifest on disk"
     else:
         # Git names the recorded path, not the destination of today's symlink.
-        # _path already bounded live IO; normalize this lexical path separately.
-        cpath = Path(chunks["path"])
-        if cpath.is_absolute():
-            from data_sheets_schema.provenance import _repo_preprocessed_tail
-            tail = _repo_preprocessed_tail(cpath)
-            if tail is not None:
-                cpath = tail
-        relative = Path(os.path.abspath(root / cpath)).relative_to(root).as_posix()
+        # _path already bounded live IO; preserve the same lexical policy here.
+        rel_manifest = _lexical_relative(root, chunks["path"])
+        if rel_manifest is None:
+            result["manifest_reason"] = "recorded chunk-manifest path/hash missing or malformed"
+            return result
+        relative = rel_manifest.as_posix()
         try:
             found = ((recover(relative, md5=md5, sha256=sha) if recover is not None
                       else _recover(root, relative, md5=md5, sha256=sha)))
@@ -286,9 +304,12 @@ def render_bundle_drift(comparisons: Mapping[str, Any]) -> list[str]:
         "Each record is compared separately with today's bundle and the chunk manifest "
         "whose hashes it recorded. A source-ranking manifest is not a bundle-byte pin. "
         "Unknown evidence is not a match; drift describes changed inputs, not generation quality. "
-        "Absolute input paths inside the selected checkout are supported. External absolute "
-        "paths remain unknown: this record-only interface lacks the provenance-file ownership "
-        "needed for the repository's relocation resolver and never reads an external file.", "",
+        "Absolute input paths inside the selected checkout keep their owned relative paths. "
+        "Foreign absolute paths with exactly one data/preprocessed pair support relocation "
+        "under the selected checkout, where disk bytes and the pinned manifest are checked. "
+        "Unsupported or ambiguous relocation (including repeated data/preprocessed pairs) "
+        "stays unknown. Lexical and resolved paths must remain inside the selected checkout; "
+        "external files are never read. Relocation alone does not establish bundle identity.", "",
         "| arm | records | disk: match / drift / unknown | pinned manifest: match / drift / unknown |",
         "|---|---:|---|---|",
     ]
