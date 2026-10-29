@@ -39,7 +39,7 @@ from data_sheets_schema.evaluation_context import unwrap_document
 FORMAT = "blind_source_review_pack_v1"
 BLINDING_VERSION = "identity_aware_sorted_v1"
 FINGERPRINT_NOTICE = (
-    "Reviewer copies preserve scientific wording. Spelling, process prose, content origin, "
+    "Reviewer copies preserve scientific wording. Slot structure, size, spelling, process prose, content origin, "
     "and matching against public source text can still reveal a generation arm. Counts are "
     "textual hints, not arm attribution or proof of blinding; zero is not assurance. Keep "
     "new outputs unpublished until blinded review completes. Historical public records "
@@ -279,8 +279,12 @@ def _fingerprints(blinded: bytes) -> dict:
     """Count hints in each decoded scientific string, never across strings."""
     from data_sheets_schema.grounding import BRITISH_INSTRUMENT, BRITISH_PATTERNS
 
-    strings = list(_strings(registered._yaml(blinded)))
+    document = unwrap_document(registered._yaml(blinded))
+    strings = list(_strings(document))
+    paths = _key_paths(document)
     return {
+        "top_level_slots": sorted(document), "key_paths": paths,
+        "key_path_count": len(paths), "blinded_bytes": len(blinded),
         "british_form_occurrences": sum(
             len(pattern.findall(text.lower())) for text in strings for pattern in BRITISH_PATTERNS
         ),
@@ -291,6 +295,45 @@ def _fingerprints(blinded: bytes) -> dict:
         "british_basis": "BRITISH_PATTERNS applied to lowercase strings, including quoted scientific text",
         "crate_basis": "case-insensitive Unicode word-boundary matches for crate/crates, RO-Crate, RO Crate, ROCrate",
     }
+
+
+def _key_paths(value, prefix=()):
+    """Unique mapping paths, with typed steps and list positions collapsed."""
+    paths = set()
+    if isinstance(value, dict):
+        for key, child in value.items():
+            path = (*prefix, ("key", key))
+            paths.add(json.dumps(path, ensure_ascii=False, separators=(",", ":")))
+            paths.update(_key_paths(child, path))
+    elif isinstance(value, list):
+        for child in value:
+            paths.update(_key_paths(child, (*prefix, ("item",))))
+    return sorted(paths)
+
+
+def _separability(entries):
+    """Descriptive per-project arm contrasts; no content changes or approval."""
+    from itertools import combinations
+    result = {}
+    for project in sorted({r["project"] for r in entries}):
+        groups = {}
+        for entry in entries:
+            if entry["project"] == project:
+                groups.setdefault(entry["arm"], []).append(entry["fingerprint_diagnostics"])
+        comparisons = []
+        for left, right in combinations(sorted(groups), 2):
+            paths = {arm: [set(r["key_paths"]) for r in groups[arm]] for arm in (left, right)}
+            exclusive = {arm: sorted(set.intersection(*paths[arm]) - set.union(*paths[other]))
+                         for arm, other in ((left, right), (right, left))}
+            sizes = {arm: [min(r["blinded_bytes"] for r in groups[arm]),
+                           max(r["blinded_bytes"] for r in groups[arm])] for arm in (left, right)}
+            comparisons.append({"arms": [left, right], "record_counts": {a: len(groups[a]) for a in (left, right)},
+                "exclusive_key_paths": exclusive, "key_path_separable": any(exclusive.values()),
+                "blinded_size_ranges": sizes,
+                "size_ranges_overlap": max(sizes[left][0], sizes[right][0]) <= min(sizes[left][1], sizes[right][1])})
+        result[project] = {"status": "descriptive_only" if comparisons else "insufficient_comparison_arms",
+                           "comparisons": comparisons}
+    return result
 
 
 def _identifier_leaked(ident_folded: str, text_folded: str) -> bool:
@@ -511,6 +554,7 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
         "blinding_version": BLINDING_VERSION,
         "normalization": "sorted mapping keys; scientific scalar values and list order preserved",
         "residual_fingerprint_notice": FINGERPRINT_NOTICE,
+        "structural_separability": _separability(entries),
         "timestamp_basis": "caller_supplied_unverified" if generated_at else "omitted_for_reproducibility",
         "cohort": cohort, "cohort_manifest": cohort_pin, "generator": {
             "algorithm": "sha256_seed_identity_order_v1",
