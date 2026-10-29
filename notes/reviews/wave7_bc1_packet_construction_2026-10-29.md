@@ -106,3 +106,18 @@ was applied with retained `resolve_wave7_bc1_conflicts_20261029.py a13`;
 The following A13 roster path/digest checks remain intact. The final #5211
 merge will additionally carry its reviewed pending-registration-write handling.
 `git diff --check` passes; this is not a pytest result.
+
+A13 merge commit: `4f3c5bfa4d0ad6c890c7cfcd1423fad263d7fcae`.
+
+## Merge 2: A14 / #5162
+
+First parent `4f3c5bfa4d0ad6c890c7cfcd1423fad263d7fcae`; incoming
+`8b885ee68262474275316755c3fc55dc05517dcb`; sole actual base
+`cd07f2a3738e146eeaa30ae86d35d3161eb3413b` (protected C blob).
+The incoming protected blob is A `f0b55f73e6e9e5bdc9cbb42b175b9a7bdff9d839`.
+Both sides differ from C, so the driver retained B. Ordinary files merged
+cleanly; no manual resolution was needed. Preflight attributes/modes/path
+lineage and postflight HEAD/index/worktree checks passed. Evidence:
+`wave7_bc1_merge_evidence_2026-10-29/02-a14-{preflight,postflight}.json`.
+The branch still deliberately lacks A14's protected-file changes until the
+separate proposal is applied in a validation archive. No tests have run.
