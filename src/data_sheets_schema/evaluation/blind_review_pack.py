@@ -12,7 +12,6 @@ remaining in source text causes refusal and requires explicit blinding review.
 from __future__ import annotations
 
 import argparse
-from collections import Counter
 import csv
 from dataclasses import dataclass
 from datetime import datetime
@@ -526,13 +525,17 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
             if not isinstance(prov_doc, dict):
                 raise ValueError(f"campaign record provenance at {prov_candidate} is not a YAML mapping")
             run_block = prov_doc.get("run") or {}
-            if isinstance(run_block, dict):
-                if run_block.get("label") and run_block.get("label") != record.label:
-                    raise ValueError("campaign record label does not match sibling provenance run.label")
-                declaration = next(r for r in declared if
-                    (r["arm"], r["project"], r["label"]) == record.identity)
-                if any(run_block.get(key) != declaration[key] for key in ("project", "label", "condition", "method")):
-                    raise ValueError("campaign record identity differs from the declared cohort provenance")
+            if isinstance(run_block, dict) and run_block.get("label") and run_block["label"] != record.label:
+                raise ValueError("campaign record label does not match sibling provenance run.label")
+            declaration = next(r for r in declared if
+                (r["arm"], r["project"], r["label"]) == record.identity)
+            from .run_identity import same_run
+            if (not same_run(run_block, {**declaration, "arm": declaration["input_arm"]})
+                    or run_block.get("condition") != declaration["condition"]
+                    or (run_block.get("replicate") is not None and
+                        (type(run_block["replicate"]) is not int or run_block["replicate"] != declaration["replicate"]))):
+                raise ValueError("campaign record identity differs from the declared cohort provenance")
+            forbidden.update((declaration["condition"], declaration["method"], f'rep{declaration["replicate"]}'))
             val_block = prov_doc.get("validation") or {}
             artifacts = val_block.get("artifacts") if isinstance(val_block, dict) else None
             full_art = artifacts.get("full") if isinstance(artifacts, dict) else None

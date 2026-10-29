@@ -59,3 +59,20 @@ def test_f9_padded_or_edge_punctuation_identity_is_refused(tmp_path, arm, label)
 
 def test_f9_short_id_search_checks_overlapping_matches():
     assert pack._identifier_leaked("a-a", "xa-a-a")
+
+
+@pytest.mark.parametrize("fault", ["run-shape", "input-arm"])
+def test_f5_review_campaign_identity_cannot_bypass_manifest(tmp_path, fault):
+    from tests.test_blind_review_pack import campaign, build
+    records = campaign(tmp_path)
+    record = records[0]
+    provenance = (record.source_path.parent.parent.parent / "claudecode_api_core" /
+                  record.label / (record.project + "_provenance.yaml"))
+    doc = yaml.safe_load(provenance.read_bytes())
+    if fault == "run-shape":
+        doc["run"] = "not-a-mapping"
+    else:
+        doc["run"]["arm"] = "crate_only"
+    provenance.write_text(yaml.safe_dump(doc))
+    with pytest.raises(ValueError, match="declared cohort provenance"):
+        build(tmp_path, records, cohort="campaign")

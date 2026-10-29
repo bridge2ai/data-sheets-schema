@@ -460,7 +460,9 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         require(len(assignments) == 1 and same_run(
             {**assignments[0], "arm": assignments[0]["input_arm"]}, run)
             and assignments[0]["condition"] == provenance["run"].get("condition")
-            and provenance["run"].get("replicate") in (None, assignments[0]["replicate"]),
+            and (provenance["run"].get("replicate") is None or
+                 (type(provenance["run"]["replicate"]) is int
+                  and provenance["run"]["replicate"] == assignments[0]["replicate"])),
             "registered_arm_mapping_undeclared_or_mismatched")
         prior = mapping(mapping(provenance.get("shared_generation")).get("authority"))
         require(prior.get("registration") == {"sha256": sha(generation_raw),

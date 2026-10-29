@@ -165,7 +165,7 @@ def campaign(tmp_path):
                 full_dir.mkdir(parents=True, exist_ok=True)
                 core_dir.mkdir(parents=True, exist_ok=True)
                 path = full_dir / f"{project}_d4d.yaml"
-                raw = f"# Label: {label}\nid: example:{project}:rep{replicate}\nname: Scientific record\n".encode("utf-8")
+                raw = f"# Label: {label}\nid: example:{project}:sample{replicate}\nname: Scientific record\n".encode("utf-8")
                 path.write_bytes(raw)
                 prov_path = core_dir / f"{project}_provenance.yaml"
                 prov_path.write_text(
@@ -175,6 +175,7 @@ def campaign(tmp_path):
                             "label": label,
                             "condition": "generic_v8" if arm == "v8" else "generic_v10",
                             "method": "claudecode_api",
+                            "arm": "baseline", "replicate": replicate,
                         },
                         "validation": {
                             "artifacts": {
@@ -603,7 +604,7 @@ def test_campaign_v10_label_and_sibling_provenance_validation(tmp_path):
     # Provenance with mismatched full hash refuses
     core_prov.write_text(
         yaml.safe_dump({
-            "run": {"project": v10_rec.project, "label": v10_rec.label, "condition": "generic_v10", "method": "claudecode_api"},
+            "run": {"project": v10_rec.project, "label": v10_rec.label, "condition": "generic_v10", "method": "claudecode_api", "arm": "baseline"},
             "validation": {"artifacts": {"full": {"sha256": "0" * 64}}},
         }),
         encoding="utf-8",
