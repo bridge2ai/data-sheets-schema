@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Purpose: offline frozen-source D52 scoring tests with import, protected-file and JUnit evidence.
 # Inputs: clean local checkout, base/head pins, explicit test modules, physical venv.
-# Outputs: fresh external evidence directory and actual instrument identity; D52, 2026-10-28.
+# Outputs: fresh external evidence directory and actual instrument identity; D52, #2912 / #5121, 2026-10-28.
 """No providers; Python network hooks supplement (do not replace) the host sandbox."""
 import argparse
 import importlib
