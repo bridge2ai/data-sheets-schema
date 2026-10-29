@@ -439,6 +439,13 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
             require(authorities.get(pin["path"]) == pin, "registered_authority_not_captured")
             return capture.pinned(pin)
 
+        # Extra authority roots admit registrations and their inputs, never the
+        # audited record or provenance. Compare canonical paths, not two Nones
+        # returned by local_path for unrelated paths outside the audit root.
+        record_path = Path(checked_pin(plan.get("record"))["path"]).resolve()
+        provenance_path = Path(checked_pin(plan.get("generation_provenance"))["path"]).resolve()
+        require(record_path.is_relative_to(root), "registered_record_outside_root")
+        require(provenance_path.is_relative_to(root), "registered_provenance_outside_root")
         generation_raw = original_pin("generation_registration")
         generation = document(generation_raw, json_only=True)
         require(generation.get("format") == runner.shared.FORMAT
@@ -493,14 +500,14 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         artifact = mapping(mapping(mapping(provenance.get("validation")).get("artifacts")).get("full"))
         resolved = (resolve_record_input(Path(artifact["path"]), Path(plan["generation_provenance"]["path"]))
                     if isinstance(artifact.get("path"), str) else None)
-        require(resolved is not None and local_path(root, str(resolved)) == local_path(root, plan["record"]["path"]),
+        require(resolved is not None and resolved.resolve() == record_path,
                 "registered_provenance_full_path_mismatch")
         hashes = {key: artifact[key] for key in ("md5", "sha256") if key in artifact}
         require(hashes and all(isinstance(value, str) and hashlib.new(key, original).hexdigest() == value
                               for key, value in hashes.items()), "registered_provenance_full_hash_mismatch")
-        record.update(record_path=relative(root, local_path(root, plan["record"]["path"])),
+        record.update(record_path=relative(root, record_path),
             record_sha256=sha(original), provenance_sha256=sha(provenance_raw),
-            provenance_files=[relative(root, local_path(root, plan["generation_provenance"]["path"]))],
+            provenance_files=[relative(root, provenance_path)],
             validation_passed=mapping(provenance.get("validation")).get("passed"))
         require(record["validation_passed"] is not False, "generation_record_declared_invalid")
         require(record["validation_passed"] is None or type(record["validation_passed"]) is bool,
@@ -718,7 +725,7 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
                 "registered_attempt_directories_changed")
         package["status"] = "bound_ratings" if package["rows"] else "no_validated_ratings"
         package["receipt_status"] = receipt["status"]
-    except (OSError, ValueError, TypeError, KeyError, UnicodeError, yaml.YAMLError, RecursionError,
+    except (OSError, ValueError, TypeError, KeyError, UnicodeError, yaml.YAMLError, RuntimeError,
             agent_pin.StaleAgentDefinition, agent_pin.NoDiscriminatingChallenge) as exc:
         reason = str(exc) if isinstance(exc, RegisteredRefusal) else "registered_evidence_invalid_or_unavailable"
         package["reasons"] = [reason]
