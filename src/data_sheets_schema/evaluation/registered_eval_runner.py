@@ -529,7 +529,7 @@ def _accept(prepared: PreparedEvaluation, events: list[dict]) -> tuple[dict, Dec
     runtime, instrument = plan["runtime"], plan["instrument"]
     if any(not isinstance(event, dict) or not (
         event.get("type") in {"assistant", "result"}
-        or (event.get("type") == "system" and event.get("subtype") == "init")
+        or (event.get("type") == "system" and event.get("subtype") in {"init", "status"})
     ) for event in events):
         raise ValueError("event type is not allowed in an isolated no-tools run")
     init = [e for e in events if e.get("type") == "system" and e.get("subtype") == "init"]

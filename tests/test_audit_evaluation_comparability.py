@@ -66,6 +66,7 @@ def corpus(tmp_path):
         "outputs": {"full": {"path": relative}},
     }
     provenance.write_text(yaml.safe_dump(doc))
+    legacy_roster(tmp_path)
     return tmp_path, record, provenance, doc
 
 
@@ -444,6 +445,7 @@ def registered_roster(case):
     path.write_text(yaml.safe_dump({"format": "evaluation_cohort_v1", "cells": [
         {"arm": "explicit-v10", "projects": [run["project"]], "replicates": [17],
          "label_template": run["label"], "method": run["method"],
+         "comparison_arm": prepared.document()["blinding"]["arm"],
          "condition": "generic_v10", "input_arm": run["arm"]}]}))
     return path
 
@@ -517,7 +519,7 @@ def test_actual_registered_runner_output_satisfies_only_its_exact_ingestion_tupl
     assert len({row["sha256"] for row in accepted["files"]}) == 1  # identical scores are legitimate
     assert all(row["transcript_sha256"] and row["manifest_sha256"] and row["receipt_sha256"]
                and row["original_sha256"] != row["input_hashes"]["input_sha256"]
-               and row["transcript_pin_supplied"] is False for row in accepted["files"])
+               and row["transcript_pin_supplied"] is True for row in accepted["files"])
     assert result["targets"]["context_human_review_verified"] is False
     assert before == {str(path): path.read_bytes() for path in output.rglob("*") if path.is_file()}
     assert audit.markdown(result) == audit.markdown(registered_audit(registered_case))
@@ -632,7 +634,8 @@ def test_registered_join_mutations_are_visible_and_never_accepted(registered_cas
     assert reason in registered_problem(result), result["registered_evaluations"]
     assert result["totals"]["bound_registered_rating_files"] == 0
     if fault == "record-role":
-        assert result["records"] == []
+        assert len(result["records"]) == 1  # the declared full-record tuple stays pending
+        assert len(result["rescore_tuples"]) == 2
 
 
 @pytest.mark.parametrize("fault", ["echo", "assistant", "session", "model", "tools", "reused-session"])
@@ -891,6 +894,8 @@ def test_registered_alias_retarget_refuses_without_mutating_captured_target(
     checked = []
 
     def retarget_after_capture(capture):
+        if capture.directory != output.resolve():
+            return unchanged(capture)  # lock snapshots have their own independent capture
         checked.append(capture)
         assert alias.resolve() == original_target
         alias.unlink()

@@ -22,6 +22,10 @@ cells can assign different labels to one comparison arm. Duplicate identities
 are refused. The manifest's path, SHA256 and byte count are recorded in the
 audit and the private review key.
 
+A cell may explicitly set `comparison_arm` when its audit grouping label is
+different (for example, two cohort groups sharing one blinded comparison arm).
+Otherwise it equals `arm`. The registered plan must match this declaration.
+
 For registered packages, the audit grouping arm must have a matching manifest
 assignment for the bound project, label, method, condition and input arm.
 The summary exposes the bound generation identity beside the grouping arm.

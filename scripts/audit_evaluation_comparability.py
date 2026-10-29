@@ -509,6 +509,8 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         # merging. Later package failures belong to the package, not the record.
         package["record"] = record
         blinding = plan.get("blinding")
+        require(mapping(blinding).get("arm") == assignments[0]["comparison_arm"],
+                "registered_blinding_unsupported_or_mismatched")
         emitter = yaml_emitter_identity()
         require(mapping(blinding).get("pyyaml_version") == emitter["pyyaml_version"],
                 "registered_yaml_emitter_version_mismatch")

@@ -24,9 +24,10 @@ def read_cohort(path):
     records, identities = [], set()
     required = {"arm", "projects", "replicates", "label_template", "method", "condition", "input_arm"}
     for cell in doc["cells"]:
-        if not isinstance(cell, dict) or set(cell) != required:
+        if not isinstance(cell, dict) or not required <= set(cell) or set(cell) - required - {"comparison_arm"}:
             raise ValueError("cohort cell requires " + ", ".join(sorted(required)))
-        for name in ("arm", "label_template", "method", "condition", "input_arm"):
+        cell = {**cell, "comparison_arm": cell.get("comparison_arm", cell["arm"])}
+        for name in ("arm", "label_template", "method", "condition", "input_arm", "comparison_arm"):
             value = cell[name]
             if (not isinstance(value, str) or not value or value.strip() != value
                     or len(value) > 4096 or any(ord(c) < 32 for c in value)):
@@ -55,5 +56,6 @@ def read_cohort(path):
                 identities.add(identity)
                 records.append({"arm": cell["arm"], "project": project, "label": label,
                                 "replicate": replicate, "method": cell["method"],
-                                "condition": cell["condition"], "input_arm": cell["input_arm"]})
+                                "condition": cell["condition"], "input_arm": cell["input_arm"],
+                                "comparison_arm": cell["comparison_arm"]})
     return sorted(records, key=lambda r: (r["arm"], r["project"], r["label"])), runner.shared.file_pin(path, raw)

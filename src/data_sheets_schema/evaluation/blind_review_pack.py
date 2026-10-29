@@ -535,7 +535,8 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
                     or (run_block.get("replicate") is not None and
                         (type(run_block["replicate"]) is not int or run_block["replicate"] != declaration["replicate"]))):
                 raise ValueError("campaign record identity differs from the declared cohort provenance")
-            forbidden.update((declaration["condition"], declaration["method"], f'rep{declaration["replicate"]}'))
+            forbidden.update((declaration["comparison_arm"], declaration["condition"],
+                              declaration["method"], f'rep{declaration["replicate"]}'))
             val_block = prov_doc.get("validation") or {}
             artifacts = val_block.get("artifacts") if isinstance(val_block, dict) else None
             full_art = artifacts.get("full") if isinstance(artifacts, dict) else None
