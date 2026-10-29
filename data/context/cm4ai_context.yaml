@@ -1,0 +1,31 @@
+# Evaluation applicability context for CM4AI (Cell Maps for AI)
+# Bridge2AI Data Generation Project: in vitro multi-scale cell architecture mapping
+# Format: d4d-evaluation-context-1
+
+human_subjects:
+  value: false
+  evidence: "CM4AI generates data from continuous cell lines (e.g., MDA-MB-468, HeLa) in vitro; no living human participants, clinical interventions, or human subject recruitment."
+
+regulated_access:
+  value: false
+  evidence: "CM4AI data is publicly accessible via open repositories (e.g., Fairscape, NDEx, Dataverse) under standard open licenses without Data Access Committee (DAC) approval or credentialed gatekeeping."
+
+shared_dataset:
+  value: true
+  evidence: "CM4AI releases open-access public dataset packages with persistent identifiers and standard schemas."
+
+data_collection:
+  value: true
+  evidence: "CM4AI collects experimental microscopy, mass spectrometry, and biophysical measurements directly."
+
+data_processing:
+  value: true
+  evidence: "CM4AI applies image processing, feature extraction, calibration, and graph construction pipelines."
+
+processing_software:
+  value: true
+  evidence: "CM4AI publishes and documents open-source processing tools, containerized pipelines, and software repositories."
+
+ml_training_dataset:
+  value: true
+  evidence: "CM4AI benchmarks and architectures are designed for training and validating predictive cell models."

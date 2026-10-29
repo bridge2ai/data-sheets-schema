@@ -2332,6 +2332,16 @@ def evidence_phase_contract(phase: str, render_version: int, *, _include_shared:
         if render_version in (25, 27) and phase in {"report", "report_regate"}:
             from .shared_generation import role_instruction
             contract += "\n\n" + role_instruction()
+            contract += ("\n\nIn the final report's ## Evidence assertions JSON block, top-level "
+                         "claims must be a flat list of assertion objects (each either "
+                         "{\"source\", \"chunk\", \"quote\"} or {\"artifact\", \"path\", \"op\", "
+                         "\"quote\"}), never {\"text\", \"evidence\"} wrappers. In source_review, "
+                         "every supported claim requires claim_status == source_status "
+                         "(source_status: \"unstated\" is valid only with verdict: \"revise\"). "
+                         "Any scope-limiting or negative qualification clause cited to a source "
+                         "passage must use matching claim_status and source_status rather than "
+                         "pairing claim_status: \"fact\" with source_status: \"capability\", "
+                         "\"planned\", or \"in_progress\".")
         return contract
     return contract.replace("protocol v1", "protocol v2") if render_version >= 11 else contract
 

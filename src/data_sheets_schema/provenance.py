@@ -1006,10 +1006,56 @@ def artifact_root(record: Path) -> Path | None:
     return None if record.is_absolute() else Path.cwd()
 
 
+def _repo_preprocessed_tail(path: Path) -> Path | None:
+    """Repository-relative ``data/preprocessed/...`` tail of a worktree-absolute input path."""
+    parts = path.parts
+    for i in range(len(parts) - 1):
+        if parts[i:i + 2] == ("data", "preprocessed"):
+            return Path(*parts[i:])
+    return None
+
+
+def _record_resource_root(record: Path | None) -> Path | None:
+    if record is None or not Path(record).is_file():
+        return None
+    try:
+        doc = yaml.safe_load(Path(record).read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    if not isinstance(doc, dict):
+        return None
+    repo = doc.get("repo")
+    if not isinstance(repo, dict):
+        return None
+    rr = repo.get("resource_root")
+    if isinstance(rr, str) and rr.strip():
+        p = Path(rr)
+        if p.is_absolute():
+            return p
+    return None
+
+
+def _allow_preprocessed_remap(path: Path, record: Path | None) -> bool:
+    resource_root = _record_resource_root(record)
+    if resource_root is None:
+        return True
+    try:
+        path.relative_to(resource_root)
+        return True
+    except ValueError:
+        return False
+
+
 def resolve_record_input(path: Path, record: Path) -> Path | None:
     """Resolve a recorded input without borrowing an unrelated caller base."""
     path = Path(path)
     if path.is_absolute():
+        if path.exists():
+            return path
+        tail = _repo_preprocessed_tail(path)
+        owner = artifact_root(record) if (tail is not None and _allow_preprocessed_remap(path, record)) else None
+        if owner is not None and (owner / tail).exists():
+            return owner / tail
         return path
     owner = artifact_root(record)
     return owner / path if owner is not None else None
@@ -1025,6 +1071,15 @@ def verify_entry(entry: dict[str, Any], *, record: Path | None = None) -> bool |
     from data_sheets_schema.resources import is_resource, resource_path
     if Path(path).is_absolute():
         resolved = Path(path)
+        if not resolved.exists():
+            tail = _repo_preprocessed_tail(resolved)
+            owner = (
+                (artifact_root(record) if record is not None else _REPO_ROOT)
+                if (tail is not None and _allow_preprocessed_remap(resolved, record))
+                else None
+            )
+            if owner is not None and (owner / tail).exists():
+                resolved = owner / tail
     elif record is not None:
         # A flat override can itself sit inside the conventional directory.
         # Its non-corpus pin must not acquire the containing corpus's base.
@@ -2262,6 +2317,10 @@ def bundle_bytes_for(bundle_path: str, md5: str | None = None,
     --at-run-commit` recovers a run's source manifest the same way (#3050)."""
     if not md5 and not sha256:
         return None
+    if "\0" not in bundle_path and Path(bundle_path).is_absolute():
+        tail = _repo_preprocessed_tail(Path(bundle_path))
+        if tail is not None:
+            bundle_path = tail.as_posix()
     for entry in bundle_blob_history(bundle_path):
         # Every hash given must match (#1187 review, S2): a version that
         # matches one and not the other is not the version the record read.
@@ -2297,6 +2356,10 @@ def bundle_blob_history(bundle_path: str) -> tuple[dict[str, str], ...]:
     one-commit history reads as "no version matches" for every record
     whose bytes an earlier commit holds — rather than returning an empty
     or truncated history."""
+    if "\0" not in bundle_path and Path(bundle_path).is_absolute():
+        tail = _repo_preprocessed_tail(Path(bundle_path))
+        if tail is not None:
+            bundle_path = tail.as_posix()
     shallow = subprocess.run(["git", "rev-parse", "--is-shallow-repository"],
                              capture_output=True, text=True, check=False, cwd=_REPO_ROOT)
     if shallow.returncode != 0:

@@ -935,6 +935,11 @@ def record_chunk_texts(inputs: Mapping[str, Any], root: Path | str = ".") -> tup
     else:
         raw, basis = None, ""
         disk = Path(root) / path
+        if "\0" not in str(path) and Path(path).is_absolute():
+            from data_sheets_schema.provenance import _repo_preprocessed_tail
+            tail = _repo_preprocessed_tail(Path(path))
+            if tail is not None and (Path(root) / tail).is_file():
+                disk = Path(root) / tail
         if disk.is_file():
             b = disk.read_bytes()
             if (not md5 or hashlib.md5(b).hexdigest() == md5) and (not sha or hashlib.sha256(b).hexdigest() == sha):

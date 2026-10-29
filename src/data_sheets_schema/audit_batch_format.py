@@ -186,12 +186,14 @@ INTEGRATION_RULES = (
 
 TYPED_RULES = (
     "This is explicitly selected grammar/batch/output version 2 with evidence protocol 7. Optional kind uses only role_placement, status_scope, date_scope, absence_or_self_narration, quotation_fidelity, identifier_count, attribution, omission or other. A missing kind remains untyped; do not add null, infer a kind or coerce it to other. This vocabulary is provisional, not scientific calibration.",
+    "Each value review row's claims[].text must be contiguous literal substrings that together cover the original_full value at that exact row.path; never quote a neighboring or parent slot's value as the claim text for row.path.",
     "omission_candidates is an optional nonempty list of distinct nonblank candidate IDs, permitted only with kind=omission and record=full. The selected typed consumer requires it on every omission finding and checks exact captured candidate authority; grammar alone cannot establish that authority. Do not invent populated review_paths for absent slots or assert core/both from the full-record omission inventory.",
     "The example candidate and slot are invented shape examples; no omission request, source authority or scientific novelty is established by the example. Every real omission reference must resolve to the separately captured request and checked raw response.",
 )
 TYPED_INTEGRATION_RULES = (
     "kind is exactly audit_integration_v2. omission_dispositions is a required array with exactly one entry per captured omission candidate, each with candidate_id, action=retain|drop, nonblank reason and evidence. IDs are unique. drop requires nonempty document/artifact evidence; retain may have empty evidence because its candidate evidence is separately pinned.",
     "Every retained candidate occurs in omission_candidates of exactly one final full-record omission finding; several candidates may share one finding. Dropped, unknown, repeated or unaccounted candidates fail the selected consumer. An empty disposition array is valid only when the checked complete omission response contains no candidates. Pure batch shape validation does not establish complete chunk/candidate coverage, source support, novelty or recall.",
+    "Verify every worker row's claims[].text against the original_full value at that exact row.path. Emit a row_replacements entry whenever a worker row quotes a neighboring or parent slot's value, fails literal substring coverage of its own path, or would leave a revise claim unlinked after dropping or replacing a finding.",
 )
 
 

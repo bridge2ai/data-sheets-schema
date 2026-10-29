@@ -1,0 +1,31 @@
+# Evaluation applicability context for AI-READI
+# Bridge2AI Data Generation Project: prospective multimodal cohort investigating type 2 diabetes
+# Format: d4d-evaluation-context-1
+
+human_subjects:
+  value: true
+  evidence: "AI-READI collects exhaustive prospective multimodal health data from human participants stratified by type 2 diabetes status across diverse demographic groups."
+
+regulated_access:
+  value: true
+  evidence: "AI-READI datasets require controlled data access governance, data access agreement execution, and compliance with ethical and participant consent restrictions for human genomic and clinical data."
+
+shared_dataset:
+  value: true
+  evidence: "AI-READI releases public and controlled-tier datasets to qualified biomedical researchers following Bridge2AI standards."
+
+data_collection:
+  value: true
+  evidence: "AI-READI conducts prospective multi-site data collection including retinal imaging, continuous glucose monitoring, physical activity telemetry, clinical lab assays, and surveys."
+
+data_processing:
+  value: true
+  evidence: "AI-READI applies rigorous quality control, image standardization, time-series harmonization, and HIPAA Safe Harbor de-identification protocols."
+
+processing_software:
+  value: true
+  evidence: "AI-READI develops and deploys standardized data ingestion workflows, automated imaging quality pipelines, and schema-validation tooling."
+
+ml_training_dataset:
+  value: true
+  evidence: "AI-READI provides multimodal, AI-ready datasets tailored for machine learning models investigating type 2 diabetes etiology and complications."

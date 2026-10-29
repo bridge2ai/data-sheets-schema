@@ -1,0 +1,31 @@
+# Evaluation applicability context for VOICE_PEDIATRIC (Bridge2AI Pediatric Voice)
+# Bridge2AI Data Generation Project: pediatric acoustic voice recordings and clinical metadata
+# Format: d4d-evaluation-context-1
+
+human_subjects:
+  value: true
+  evidence: "VOICE_PEDIATRIC acquires acoustic voice recordings, speech tasks, and clinical phenotyping from pediatric human participants with parental/guardian permission and assent."
+
+regulated_access:
+  value: true
+  evidence: "Pediatric human acoustic recordings and clinical metadata require controlled credentialed access, ethical/consent compliance, and DUA governance."
+
+shared_dataset:
+  value: true
+  evidence: "VOICE_PEDIATRIC releases standardized pediatric acoustic recordings and clinical metadata to approved research investigators."
+
+data_collection:
+  value: true
+  evidence: "VOICE_PEDIATRIC captures structured pediatric speech protocols, voice tasks, and clinical metadata across participating pediatric clinical centers."
+
+data_processing:
+  value: true
+  evidence: "VOICE_PEDIATRIC audio and clinical data undergo acoustic feature extraction, audio quality verification, HIPAA de-identification, and metadata structuring."
+
+processing_software:
+  value: true
+  evidence: "VOICE_PEDIATRIC employs standardized audio capture applications, acoustic signal processing libraries, and automated quality-control software."
+
+ml_training_dataset:
+  value: true
+  evidence: "VOICE_PEDIATRIC dataset is designed to benchmark and train AI models using pediatric voice and speech as digital biomarkers."
