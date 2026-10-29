@@ -348,15 +348,16 @@ def _fold_identity(value):
 
 
 def _identifier_leaked(ident_folded: str, text_folded: str) -> bool:
-    """Short IDs require boundaries outside Unicode letters/numbers/marks.
+    """Short IDs and replicate tokens require Unicode word boundaries.
 
-    Punctuation and underscores remain delimiters. Longer identifiers retain
-    exact case-folded substring matching; no source text is normalized away.
+    Letters, numbers and combining marks are word characters; punctuation and
+    underscores delimit tokens. Other long IDs retain substring matching.
+    No source text is normalized away.
     """
     ident_folded, text_folded = _fold_identity(ident_folded), _fold_identity(text_folded)
     if not ident_folded:
         return False
-    if len(ident_folded) < 4:
+    if len(ident_folded) < 4 or re.fullmatch(r"rep[1-9][0-9]*", ident_folded):
         def word_character(char):
             return char.isalnum() or unicodedata.category(char).startswith("M")
 

@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
 
 from tests.test_audit_evaluation_comparability import (
     audit, isolated_execution_locks, no_network, no_unmocked_runtime,
@@ -92,3 +93,53 @@ def test_r4_disallowed_event_has_specific_refusal_after_repinning(registered_cas
     save(output / "receipt.json", receipt)
     anchor_synthetic_receipt(output)
     assert registered_problem(registered_audit(registered_case)) == ["registered_event_type_not_allowed"]
+
+
+@pytest.mark.parametrize("text,leaks", [
+    ("prep17", False), ("rep170", False), ("xrep17", False),
+    ("rep17α", False), ("rep17\u0301", False),
+    ("rep17", True), ("_rep17", True), ("rep17_", True), ("(REP17)", True),
+])
+def test_r6_registered_replicate_token_requires_delimiters(registered_generation_inputs, tmp_path, text, leaks):
+    from tests import test_registered_eval_runner as support
+    raw = yaml.safe_dump({"id": "example:data", "description": text}).encode()
+    inputs = support.rebind_record(dict(registered_generation_inputs), tmp_path, raw)
+    provenance = inputs["provenance"]
+    doc = yaml.safe_load(provenance.read_bytes())
+    doc["run"]["replicate"] = 17
+    provenance.write_text(yaml.safe_dump(doc))
+    inputs["provenance_sha256"] = audit.sha(provenance.read_bytes())
+    if leaks:
+        with pytest.raises(ValueError, match="^generation identity remains in reviewer content; explicit blinding review required$"):
+            support.runner.prepare(**inputs)
+    else:
+        prepared = support.runner.prepare(**inputs)
+        assert prepared.document()["blinding"]["replicate_token"] == "rep17"
+        assert yaml.safe_load(prepared.blinded) == yaml.safe_load(raw)
+
+
+@pytest.mark.parametrize("text,leaks", [
+    ("prep1", False), ("rep10", False), ("xrep1", False),
+    ("rep1α", False), ("rep1\u0301", False),
+    ("rep1", True), ("_rep1", True), ("rep1_", True), ("(REP1)", True),
+])
+def test_r6_campaign_replicate_token_requires_delimiters(tmp_path, text, leaks):
+    from tests.test_blind_review_pack import campaign, build
+    records = campaign(tmp_path)
+    record = records[0]
+    raw = record.source_path.read_bytes() + yaml.safe_dump({"description": text}).encode()
+    record.source_path.write_bytes(raw)
+    provenance = (record.source_path.parent.parent.parent / "claudecode_api_core" /
+                  record.label / (record.project + "_provenance.yaml"))
+    doc = yaml.safe_load(provenance.read_bytes())
+    doc["validation"]["artifacts"]["full"]["sha256"] = audit.sha(raw)
+    provenance.write_text(yaml.safe_dump(doc))
+    if leaks:
+        with pytest.raises(ValueError, match="^generation identity remains in reviewer content; explicit blinding review required$"):
+            build(tmp_path, records, cohort="campaign")
+    else:
+        output, key = build(tmp_path, records, cohort="campaign")
+        selected = next(row for row in key["records"] if row["label"] == record.label
+                        and row["project"] == record.project and row["arm"] == record.arm)
+        blinded = output / (selected["blind_id"] + ".yaml")
+        assert yaml.safe_load(blinded.read_bytes())["description"] == text
