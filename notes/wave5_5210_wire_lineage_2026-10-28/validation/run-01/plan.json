@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "scripts/adhoc/derive_5210_wire_baseline_20261028.py",
+    "--base",
+    "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+    "--head",
+    "e5fdedb109fabf84cf4839fd1180733e70dc09fe",
+    "--output",
+    "/private/tmp/d4d-wave5-5210-wire-old-control-20261028"
+  ],
+  "base": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+  "credential_names_removed": [
+    "CBORG_API_KEY",
+    "KB_AUTH_TOKEN",
+    "OPENSCIENTIST_API_KEY"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave5-5210-wire-old-control-20261028",
+  "dependency_bytes_attested": false,
+  "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+  "fixture_constant_relocation": [
+    "ROOT",
+    "CHORUS_BUNDLE"
+  ],
+  "fixture_file_sha256": "64b8061fc6df32d7a1dbd14a1cec1a4c11857334a85310efd461be0a597db174",
+  "fixture_source": "aaa6f5bec2a0c7832d36143c4c7470d51cb8cee4",
+  "fixture_source_sha256": "1cf90e19274cccbd1fff2f41dab3a03ce726109198e839e5c14443c2f544ed08",
+  "head": "e5fdedb109fabf84cf4839fd1180733e70dc09fe",
+  "network_hook": true,
+  "pth_disabled": true,
+  "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+  "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages"
+}

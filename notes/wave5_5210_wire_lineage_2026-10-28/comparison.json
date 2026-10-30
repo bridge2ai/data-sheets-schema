@@ -1,0 +1,823 @@
+{
+  "assets": [
+    {
+      "hunks": [
+        {
+          "new": "  data. A public license such as Creative Commons, a download page asking\n  the user to confirm that license, a request to cite, or a form asking who\n",
+          "new_lines": [
+            317,
+            318
+          ],
+          "old": "  data. A public licence such as Creative Commons, a download page asking\n  the user to confirm that licence, a request to cite, or a form asking who\n",
+          "old_lines": [
+            317,
+            318
+          ],
+          "path": ".claude/commands/d4d-uniform-rules-v2.md"
+        },
+        {
+          "new": "  data use agreement or dataset-specific license that the requester or their\n",
+          "new_lines": [
+            322,
+            322
+          ],
+          "old": "  data use agreement or dataset-specific licence that the requester or their\n",
+          "old_lines": [
+            322,
+            322
+          ],
+          "path": ".claude/commands/d4d-uniform-rules-v2.md"
+        }
+      ],
+      "new_sha256": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e",
+      "old_sha256": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+      "path": ".claude/commands/d4d-uniform-rules-v2.md"
+    },
+    {
+      "hunks": [
+        {
+          "new": "  condition below for the same data. A public license such as Creative\n  Commons, a download page asking the user to confirm that license, a\n",
+          "new_lines": [
+            392,
+            393
+          ],
+          "old": "  condition below for the same data. A public licence such as Creative\n  Commons, a download page asking the user to confirm that licence, a\n",
+          "old_lines": [
+            392,
+            393
+          ],
+          "path": "src/download/prompts/d4d_generic_arm_prompt_v10.md"
+        },
+        {
+          "new": "  dataset-specific license that the requester or their institution signs or\n",
+          "new_lines": [
+            398,
+            398
+          ],
+          "old": "  dataset-specific licence that the requester or their institution signs or\n",
+          "old_lines": [
+            398,
+            398
+          ],
+          "path": "src/download/prompts/d4d_generic_arm_prompt_v10.md"
+        },
+        {
+          "new": "  receipt for one. Where no passage states the category the slot stays\n  empty \u2014 an empty enumeration slot is a gap the reader can see, a guessed\n  one an error the reader cannot \u2014 except where the schema requires the\n  slot, in which case the entry itself is what the evidence must support: a\n  related dataset is recorded only where a passage states what the relation\n  is. A file's `format`, `file_type`, `media_type` and `encoding`, and a\n  file's or collection's `compression`, are read from the file the bundle\n  names \u2014 its name and extension are the passage for them \u2014 and this rule\n  does not reach those.\n",
+          "new_lines": [
+            430,
+            438
+          ],
+          "old": "  receipt for one. Where no passage states the category the slot stays empty\n  \u2014 an empty enumeration slot is a gap the reader can see, a guessed one an\n  error the reader cannot \u2014 except where the schema requires the slot, in\n  which case the entry itself is what the evidence must support: a related\n  dataset is recorded only where a passage states what the relation is. A\n  file's `format`, `file_type`, `media_type` and `encoding`, and a file's or\n  collection's `compression`, are read from the file the bundle names \u2014 its\n  name and extension are the passage for them \u2014 and this rule does not reach\n  those.\n",
+          "old_lines": [
+            430,
+            438
+          ],
+          "path": "src/download/prompts/d4d_generic_arm_prompt_v10.md"
+        }
+      ],
+      "new_sha256": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db",
+      "old_sha256": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+      "path": "src/download/prompts/d4d_generic_arm_prompt_v10.md"
+    }
+  ],
+  "inherited_protected_commits": "02e5ad588c7a6a85b03bfdbf1bbb7f4b2a61fd98 Merge branch 'feat/4766-report-audit-totals' into feat/v10-preflight-scripts\nf73764e0685f436a07e802766e16030572d29a18 Pin D38 R9 American English prompt and uniform-rules hashes (#5048, #5170, #5171)\n6a0f8acfed6d58fac8747d891b8a05975534a5c5 D38: American English 'license' in R9 text, re-wrap v10 R9 tail, and fix tautological mutation meta-tests (#5048)\n67f6acc6c2295489f2e0397ab1bfc360cb869059 Address PR #5093 R2 review findings F3, F4, and F5 without rotating prompt pins (#5048, #5097, #5098, #5099, #5102)\n",
+  "new_base": "04799422669fb2bd9f571bf8c0800dfc4b0ef008",
+  "new_evidence": "/private/tmp/d4d-wave5-5210-wire-baseline-20261028",
+  "new_outcome_sha256": "c8866ed889a96ed221501e26f58e779f14bf4101e5d5f79249289cd82bc64d60",
+  "old_base": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+  "old_evidence": "/private/tmp/d4d-wave5-5210-wire-old-control-20261028",
+  "old_outcome_sha256": "11f687e8bc65a168d7a1b08114147ae63d26cd195cfa2a7e1859fc261d85aafb",
+  "phases": {
+    "reconcile_full": {
+      "canonical_patch_replay_byte_identical": true,
+      "changes": [
+        {
+          "asset_hunks_explain_exact_string": true,
+          "edits": [
+            {
+              "new": "s",
+              "old": "c",
+              "old_byte_span": [
+                24390,
+                24391
+              ],
+              "old_character_span": [
+                24286,
+                24287
+              ]
+            },
+            {
+              "new": "s",
+              "old": "c",
+              "old_byte_span": [
+                24474,
+                24475
+              ],
+              "old_character_span": [
+                24370,
+                24371
+              ]
+            },
+            {
+              "new": "s",
+              "old": "c",
+              "old_byte_span": [
+                24784,
+                24785
+              ],
+              "old_character_span": [
+                24680,
+                24681
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27182,
+                27182
+              ],
+              "old_character_span": [
+                27070,
+                27070
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27188,
+                27190
+              ],
+              "old_character_span": [
+                27076,
+                27078
+              ]
+            },
+            {
+              "new": "\n  one an",
+              "old": " one an\n ",
+              "old_byte_span": [
+                27259,
+                27268
+              ],
+              "old_character_span": [
+                27145,
+                27154
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27333,
+                27333
+              ],
+              "old_character_span": [
+                27217,
+                27217
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27342,
+                27344
+              ],
+              "old_character_span": [
+                27226,
+                27228
+              ]
+            },
+            {
+              "new": "\n  related",
+              "old": " related\n ",
+              "old_byte_span": [
+                27409,
+                27419
+              ],
+              "old_character_span": [
+                27293,
+                27303
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27485,
+                27485
+              ],
+              "old_character_span": [
+                27369,
+                27369
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27491,
+                27493
+              ],
+              "old_character_span": [
+                27375,
+                27377
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27558,
+                27558
+              ],
+              "old_character_span": [
+                27442,
+                27442
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27568,
+                27570
+              ],
+              "old_character_span": [
+                27452,
+                27454
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27632,
+                27632
+              ],
+              "old_character_span": [
+                27516,
+                27516
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27646,
+                27648
+              ],
+              "old_character_span": [
+                27528,
+                27530
+              ]
+            },
+            {
+              "new": "\n  does not reach",
+              "old": " does not reach\n ",
+              "old_byte_span": [
+                27710,
+                27727
+              ],
+              "old_character_span": [
+                27590,
+                27607
+              ]
+            }
+          ],
+          "inherited_asset_hunks_applied": [
+            {
+              "asset": "src/download/prompts/d4d_generic_arm_prompt_v10.md",
+              "occurrences": 1,
+              "old_lines": [
+                392,
+                393
+              ]
+            },
+            {
+              "asset": "src/download/prompts/d4d_generic_arm_prompt_v10.md",
+              "occurrences": 1,
+              "old_lines": [
+                398,
+                398
+              ]
+            },
+            {
+              "asset": "src/download/prompts/d4d_generic_arm_prompt_v10.md",
+              "occurrences": 1,
+              "old_lines": [
+                430,
+                438
+              ]
+            }
+          ],
+          "new_sha256": "dcd39858b369e6d9a7d9e7b74a3fa0c8911d02d8780cbc44dfcbdc32a445fd0d",
+          "old_sha256": "1a9883092f7507532c66a73712fb5bd280d3bc1bdd64b3476d4300a92e19d18b",
+          "path": [
+            "messages",
+            0,
+            "content",
+            2,
+            "text"
+          ]
+        }
+      ],
+      "new_bytes": 190453,
+      "new_sha256": "31340b31d787baa1da17c2b738c99d21efd2a1db9150eb0d0aaf917f1ac6160c",
+      "old_bytes": 190453,
+      "old_golden_reproduced": true,
+      "old_sha256": "b4f8f925e29b54d80cc95ad7c5bbe3f170e7295ccb1c8b8eb3a3dcaf97421daa",
+      "only_inherited_asset_hunks": true
+    },
+    "report": {
+      "canonical_patch_replay_byte_identical": true,
+      "changes": [
+        {
+          "asset_hunks_explain_exact_string": true,
+          "edits": [
+            {
+              "new": "s",
+              "old": "c",
+              "old_byte_span": [
+                24390,
+                24391
+              ],
+              "old_character_span": [
+                24286,
+                24287
+              ]
+            },
+            {
+              "new": "s",
+              "old": "c",
+              "old_byte_span": [
+                24474,
+                24475
+              ],
+              "old_character_span": [
+                24370,
+                24371
+              ]
+            },
+            {
+              "new": "s",
+              "old": "c",
+              "old_byte_span": [
+                24784,
+                24785
+              ],
+              "old_character_span": [
+                24680,
+                24681
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27182,
+                27182
+              ],
+              "old_character_span": [
+                27070,
+                27070
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27188,
+                27190
+              ],
+              "old_character_span": [
+                27076,
+                27078
+              ]
+            },
+            {
+              "new": "\n  one an",
+              "old": " one an\n ",
+              "old_byte_span": [
+                27259,
+                27268
+              ],
+              "old_character_span": [
+                27145,
+                27154
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27333,
+                27333
+              ],
+              "old_character_span": [
+                27217,
+                27217
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27342,
+                27344
+              ],
+              "old_character_span": [
+                27226,
+                27228
+              ]
+            },
+            {
+              "new": "\n  related",
+              "old": " related\n ",
+              "old_byte_span": [
+                27409,
+                27419
+              ],
+              "old_character_span": [
+                27293,
+                27303
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27485,
+                27485
+              ],
+              "old_character_span": [
+                27369,
+                27369
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27491,
+                27493
+              ],
+              "old_character_span": [
+                27375,
+                27377
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27558,
+                27558
+              ],
+              "old_character_span": [
+                27442,
+                27442
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27568,
+                27570
+              ],
+              "old_character_span": [
+                27452,
+                27454
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27632,
+                27632
+              ],
+              "old_character_span": [
+                27516,
+                27516
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27646,
+                27648
+              ],
+              "old_character_span": [
+                27528,
+                27530
+              ]
+            },
+            {
+              "new": "\n  does not reach",
+              "old": " does not reach\n ",
+              "old_byte_span": [
+                27710,
+                27727
+              ],
+              "old_character_span": [
+                27590,
+                27607
+              ]
+            }
+          ],
+          "inherited_asset_hunks_applied": [
+            {
+              "asset": "src/download/prompts/d4d_generic_arm_prompt_v10.md",
+              "occurrences": 1,
+              "old_lines": [
+                392,
+                393
+              ]
+            },
+            {
+              "asset": "src/download/prompts/d4d_generic_arm_prompt_v10.md",
+              "occurrences": 1,
+              "old_lines": [
+                398,
+                398
+              ]
+            },
+            {
+              "asset": "src/download/prompts/d4d_generic_arm_prompt_v10.md",
+              "occurrences": 1,
+              "old_lines": [
+                430,
+                438
+              ]
+            }
+          ],
+          "new_sha256": "f05b0511986da5593d3c5047c4e1517a6e01d033a15e3b36c14f62feb15b6232",
+          "old_sha256": "1b0331a9f7f810853b324764742d8265b5a92251d0e1ff01890d6a5b45e55f5d",
+          "path": [
+            "messages",
+            0,
+            "content",
+            2,
+            "text"
+          ]
+        }
+      ],
+      "new_bytes": 193993,
+      "new_sha256": "eea1fe34d3de44efbc85a681b5b2d58c0f66bcc70f7b64450378db75fc996749",
+      "old_bytes": 193993,
+      "old_golden_reproduced": true,
+      "old_sha256": "9a13ed423b0c5bb7c0da908100ead81128f713dfc0dc0b565ecd4bd11c8bfbe8",
+      "only_inherited_asset_hunks": true
+    },
+    "report_regate": {
+      "canonical_patch_replay_byte_identical": true,
+      "changes": [
+        {
+          "asset_hunks_explain_exact_string": true,
+          "edits": [
+            {
+              "new": "s",
+              "old": "c",
+              "old_byte_span": [
+                24390,
+                24391
+              ],
+              "old_character_span": [
+                24286,
+                24287
+              ]
+            },
+            {
+              "new": "s",
+              "old": "c",
+              "old_byte_span": [
+                24474,
+                24475
+              ],
+              "old_character_span": [
+                24370,
+                24371
+              ]
+            },
+            {
+              "new": "s",
+              "old": "c",
+              "old_byte_span": [
+                24784,
+                24785
+              ],
+              "old_character_span": [
+                24680,
+                24681
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27182,
+                27182
+              ],
+              "old_character_span": [
+                27070,
+                27070
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27188,
+                27190
+              ],
+              "old_character_span": [
+                27076,
+                27078
+              ]
+            },
+            {
+              "new": "\n  one an",
+              "old": " one an\n ",
+              "old_byte_span": [
+                27259,
+                27268
+              ],
+              "old_character_span": [
+                27145,
+                27154
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27333,
+                27333
+              ],
+              "old_character_span": [
+                27217,
+                27217
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27342,
+                27344
+              ],
+              "old_character_span": [
+                27226,
+                27228
+              ]
+            },
+            {
+              "new": "\n  related",
+              "old": " related\n ",
+              "old_byte_span": [
+                27409,
+                27419
+              ],
+              "old_character_span": [
+                27293,
+                27303
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27485,
+                27485
+              ],
+              "old_character_span": [
+                27369,
+                27369
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27491,
+                27493
+              ],
+              "old_character_span": [
+                27375,
+                27377
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27558,
+                27558
+              ],
+              "old_character_span": [
+                27442,
+                27442
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27568,
+                27570
+              ],
+              "old_character_span": [
+                27452,
+                27454
+              ]
+            },
+            {
+              "new": "\n ",
+              "old": "",
+              "old_byte_span": [
+                27632,
+                27632
+              ],
+              "old_character_span": [
+                27516,
+                27516
+              ]
+            },
+            {
+              "new": "",
+              "old": "\n ",
+              "old_byte_span": [
+                27646,
+                27648
+              ],
+              "old_character_span": [
+                27528,
+                27530
+              ]
+            },
+            {
+              "new": "\n  does not reach",
+              "old": " does not reach\n ",
+              "old_byte_span": [
+                27710,
+                27727
+              ],
+              "old_character_span": [
+                27590,
+                27607
+              ]
+            }
+          ],
+          "inherited_asset_hunks_applied": [
+            {
+              "asset": "src/download/prompts/d4d_generic_arm_prompt_v10.md",
+              "occurrences": 1,
+              "old_lines": [
+                392,
+                393
+              ]
+            },
+            {
+              "asset": "src/download/prompts/d4d_generic_arm_prompt_v10.md",
+              "occurrences": 1,
+              "old_lines": [
+                398,
+                398
+              ]
+            },
+            {
+              "asset": "src/download/prompts/d4d_generic_arm_prompt_v10.md",
+              "occurrences": 1,
+              "old_lines": [
+                430,
+                438
+              ]
+            }
+          ],
+          "new_sha256": "f05b0511986da5593d3c5047c4e1517a6e01d033a15e3b36c14f62feb15b6232",
+          "old_sha256": "1b0331a9f7f810853b324764742d8265b5a92251d0e1ff01890d6a5b45e55f5d",
+          "path": [
+            "messages",
+            0,
+            "content",
+            2,
+            "text"
+          ]
+        }
+      ],
+      "new_bytes": 194777,
+      "new_sha256": "d085cabccdc8d0b7e1e99d498e6f3cfe59b80322c907d3e8d49b177aaf672f1d",
+      "old_bytes": 194777,
+      "old_golden_reproduced": true,
+      "old_sha256": "300b1213e94825e41fc22a38bb4100aabebbb533ec0de49487485dfac49a79a9",
+      "only_inherited_asset_hunks": true
+    }
+  },
+  "protected_asset_diff": "diff --git a/.claude/commands/d4d-uniform-rules-v2.md b/.claude/commands/d4d-uniform-rules-v2.md\nindex b5f80fbe2..dd9996d2f 100644\n--- a/.claude/commands/d4d-uniform-rules-v2.md\n+++ b/.claude/commands/d4d-uniform-rules-v2.md\n@@ -314,12 +314,12 @@ to every project:\n   available to download, that anyone can download them, or that downloading\n   them needs no account, registration, approval or signed agreement supports\n   `unrestricted`, unless a passage states a condition below for the same\n-  data. A public licence such as Creative Commons, a download page asking\n-  the user to confirm that licence, a request to cite, or a form asking who\n+  data. A public license such as Creative Commons, a download page asking\n+  the user to confirm that license, a request to cite, or a form asking who\n   is downloading is not such a condition. A passage stating that access\n   requires registration or an account, verified identity or credentials,\n   approval of the request, sign-off by the requester's institution, or a\n-  data use agreement or dataset-specific licence that the requester or their\n+  data use agreement or dataset-specific license that the requester or their\n   institution signs or accepts supports `restricted`. A passage stating that\n   each request is reviewed before access is granted, by a data access\n   committee or office or by an institutional review board or ethics\ndiff --git a/src/data_sheets_schema/shared_generation.py b/src/data_sheets_schema/shared_generation.py\nindex ae9d68d6c..3fbe1b2c1 100644\n--- a/src/data_sheets_schema/shared_generation.py\n+++ b/src/data_sheets_schema/shared_generation.py\n@@ -29,9 +29,9 @@ SELECTED_PLAYBOOKS = (\n ASSET_HASHES = {'.claude/agents/d4d-provenance-guard-v2.md': '10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085',\n  '.claude/commands/d4d-agent-v2.md': 'dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299',\n  '.claude/commands/d4d-full-core-v2.md': '2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124',\n- '.claude/commands/d4d-uniform-rules-v2.md': 'cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f',\n+ '.claude/commands/d4d-uniform-rules-v2.md': '22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e',\n  'src/download/prompts/api_playbook_v2.md': '5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719',\n- 'src/download/prompts/d4d_generic_arm_prompt_v10.md': '95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99',\n+ 'src/download/prompts/d4d_generic_arm_prompt_v10.md': 'ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db',\n  'src/download/prompts/receipt_completion_runtime_v2.md': 'c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c',\n  'src/download/prompts/shared_generation_v1.md': '34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450'}\n \ndiff --git a/src/download/prompts/canonical_hashes.yaml b/src/download/prompts/canonical_hashes.yaml\nindex 52d63f212..9cb1fca5d 100644\n--- a/src/download/prompts/canonical_hashes.yaml\n+++ b/src/download/prompts/canonical_hashes.yaml\n@@ -37,12 +37,13 @@ files:\n   .claude/commands/d4d-uniform-rules-v2.md:\n     body_sha256: null\n     bytes: 29867\n-    pinned_at_commit: dfe54586e3988e83079dcbb1d5deda01dc4861c9\n+    pinned_at_commit: 6a0f8acfed6d58fac8747d891b8a05975534a5c5\n     pinned_blob_path: .claude/commands/d4d-uniform-rules-v2.md\n     pinned_in_repository: /private/tmp/d4d-pr5093\n-    pinned_on: '2026-10-23'\n-    reason: \"D-E, issues #5097\\u2013#5099, #5102\"\n-    sha256: cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f\n+    pinned_on: '2026-10-25'\n+    reason: \"D30 R9 criteria-defined enumerations (#5048, #5097\\u2013#5099, #5102), D38 American\\\n+      \\ spelling\"\n+    sha256: 22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e\n     superseded:\n     - pinned_on: '2026-10-03'\n       reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every\n@@ -54,6 +55,12 @@ files:\n         at the generic_v10 boundary (#5048); preserve v8/v9 prompt digests unchanged.\n       retired_on: '2026-10-23'\n       sha256: 5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129\n+    - pinned_on: '2026-10-23'\n+      reason: \"R9 criteria-defined enums replaced per owner decision D-E/D30 (2026-10-23):\\\n+        \\ closed to confidentiality_level and hipaa_compliant, criteria inline, precedence,\\\n+        \\ tier and tier-name rules, HIPAA de-identification (#5048, #5097\\u2013#5099, #5102).\"\n+      retired_on: '2026-10-25'\n+      sha256: cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f\n   src/download/prompts/api_playbook_v1.md:\n     body_sha256: ce2f644cad14496c2cb4684fc371fca4a2409268f793061c47e00087069038f6\n     bytes: 4558\n@@ -133,14 +140,15 @@ files:\n       retired_on: '2026-08-13'\n       sha256: 0fbc626bc3a51d74a8ba3d8e2813752f3bc5ce9366ee5f19c99089afdfd9e8dc\n   src/download/prompts/d4d_generic_arm_prompt_v10.md:\n-    body_sha256: 3bf4cebcaa0509db0b4a84a5d88cd8a140902dcfb33f3d1400108ca12ef73744\n+    body_sha256: d2987be77291daa724f671a0b35622211f00365916ba24eda4bba366c95b27e0\n     bytes: 32568\n-    pinned_at_commit: dfe54586e3988e83079dcbb1d5deda01dc4861c9\n+    pinned_at_commit: 6a0f8acfed6d58fac8747d891b8a05975534a5c5\n     pinned_blob_path: src/download/prompts/d4d_generic_arm_prompt_v10.md\n     pinned_in_repository: /private/tmp/d4d-pr5093\n-    pinned_on: '2026-10-23'\n-    reason: \"D-E, issues #5097\\u2013#5099, #5102\"\n-    sha256: 95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99\n+    pinned_on: '2026-10-25'\n+    reason: \"D30 R9 criteria-defined enumerations (#5048, #5097\\u2013#5099, #5102), D38 American\\\n+      \\ spelling\"\n+    sha256: ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db\n     superseded:\n     - pinned_on: '2026-10-03'\n       reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every\n@@ -152,6 +160,12 @@ files:\n         at the generic_v10 boundary (#5048); preserve v8/v9 prompt digests unchanged.\n       retired_on: '2026-10-23'\n       sha256: 7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb\n+    - pinned_on: '2026-10-23'\n+      reason: \"R9 criteria-defined enums replaced per owner decision D-E/D30 (2026-10-23):\\\n+        \\ closed to confidentiality_level and hipaa_compliant, criteria inline, precedence,\\\n+        \\ tier and tier-name rules, HIPAA de-identification (#5048, #5097\\u2013#5099, #5102).\"\n+      retired_on: '2026-10-25'\n+      sha256: 95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99\n   src/download/prompts/d4d_generic_arm_prompt_v2.md:\n     body_sha256: 6b639abb906c44af91a5b3a7f6391da3fc6dd8f039de9e7d6544858e1fb17410\n     bytes: 10099\ndiff --git a/src/download/prompts/d4d_generic_arm_prompt_v10.md b/src/download/prompts/d4d_generic_arm_prompt_v10.md\nindex b1540d380..abfe15bc6 100644\n--- a/src/download/prompts/d4d_generic_arm_prompt_v10.md\n+++ b/src/download/prompts/d4d_generic_arm_prompt_v10.md\n@@ -389,13 +389,13 @@ UNIFORM DECISION RULES \u2014 these apply identically to every project and every ar\n   that the data are publicly available to download, that anyone can download\n   them, or that downloading them needs no account, registration, approval or\n   signed agreement supports `unrestricted`, unless a passage states a\n-  condition below for the same data. A public licence such as Creative\n-  Commons, a download page asking the user to confirm that licence, a\n+  condition below for the same data. A public license such as Creative\n+  Commons, a download page asking the user to confirm that license, a\n   request to cite, or a form asking who is downloading is not such a\n   condition. A passage stating that access requires registration or an\n   account, verified identity or credentials, approval of the request,\n   sign-off by the requester's institution, or a data use agreement or\n-  dataset-specific licence that the requester or their institution signs or\n+  dataset-specific license that the requester or their institution signs or\n   accepts supports `restricted`. A passage stating that each request is\n   reviewed before access is granted, by a data access committee or office or\n   by an institutional review board or ethics committee approving the\n@@ -427,15 +427,15 @@ UNIFORM DECISION RULES \u2014 these apply identically to every project and every ar\n   an institution's data-security level such as \"Level 3\", an HL7\n   confidentiality code such as \"HL7:2N\" \u2014 is recorded as prose where\n   relevant and is never mapped to an enumeration value or used as the\n-  receipt for one. Where no passage states the category the slot stays empty\n-  \u2014 an empty enumeration slot is a gap the reader can see, a guessed one an\n-  error the reader cannot \u2014 except where the schema requires the slot, in\n-  which case the entry itself is what the evidence must support: a related\n-  dataset is recorded only where a passage states what the relation is. A\n-  file's `format`, `file_type`, `media_type` and `encoding`, and a file's or\n-  collection's `compression`, are read from the file the bundle names \u2014 its\n-  name and extension are the passage for them \u2014 and this rule does not reach\n-  those.\n+  receipt for one. Where no passage states the category the slot stays\n+  empty \u2014 an empty enumeration slot is a gap the reader can see, a guessed\n+  one an error the reader cannot \u2014 except where the schema requires the\n+  slot, in which case the entry itself is what the evidence must support: a\n+  related dataset is recorded only where a passage states what the relation\n+  is. A file's `format`, `file_type`, `media_type` and `encoding`, and a\n+  file's or collection's `compression`, are read from the file the bundle\n+  names \u2014 its name and extension are the passage for them \u2014 and this rule\n+  does not reach those.\n - `raw_data_format` names the form the data took before any processing this\n   dataset applied, and only where a passage states that form. The standard\n   the release conforms to, the extension the distributed files carry and the\n",
+  "scientific_acceptance": "not_assessed"
+}

@@ -1,0 +1,10 @@
+........................................................................ [ 72%]
+............................                                             [100%]
+=============================== warnings summary ===============================
+tests/test_report_audit_totals.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /private/tmp/d4d-wave5-5094-legacy-targeted-20261028/pytest.xml -
+100 passed, 12 warnings in 53.67s

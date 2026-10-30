@@ -1,0 +1,28 @@
+{
+  "error": null,
+  "passed": true,
+  "returncode": 0,
+  "scientific_acceptance": "not_assessed",
+  "source_unchanged": true,
+  "wall_seconds": 133.4408134589903,
+  "wires": {
+    "reconcile_full": {
+      "bytes": 190453,
+      "matches_old_golden": true,
+      "old_golden": "b4f8f925e29b54d80cc95ad7c5bbe3f170e7295ccb1c8b8eb3a3dcaf97421daa",
+      "sha256": "b4f8f925e29b54d80cc95ad7c5bbe3f170e7295ccb1c8b8eb3a3dcaf97421daa"
+    },
+    "report": {
+      "bytes": 193993,
+      "matches_old_golden": true,
+      "old_golden": "9a13ed423b0c5bb7c0da908100ead81128f713dfc0dc0b565ecd4bd11c8bfbe8",
+      "sha256": "9a13ed423b0c5bb7c0da908100ead81128f713dfc0dc0b565ecd4bd11c8bfbe8"
+    },
+    "report_regate": {
+      "bytes": 194777,
+      "matches_old_golden": true,
+      "old_golden": "300b1213e94825e41fc22a38bb4100aabebbb533ec0de49487485dfac49a79a9",
+      "sha256": "300b1213e94825e41fc22a38bb4100aabebbb533ec0de49487485dfac49a79a9"
+    }
+  }
+}
