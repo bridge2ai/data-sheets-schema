@@ -697,7 +697,8 @@ def test_fresh_generation_does_not_import_old_abandoned_stream_charges(tmp_path)
     ({"label": "another_rep1"}, False), ({"label": "another_rep1"}, True),
     ({"label": "another_rep1"}, "unbound"),
     ({"method": "another_method"}, False),
-    ({"condition": "tuned", "condition_mismatch_allowed": True}, False),
+    # D67 retires fresh tuned runs; a supported condition still changes identity.
+    ({"condition": "generic_v3", "condition_mismatch_allowed": True}, False),
 ])
 def test_new_identity_in_a_shared_directory_starts_its_own_generation(tmp_path, monkeypatch, change, stale_progress):
     old = spec(out_dir=tmp_path)

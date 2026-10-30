@@ -170,6 +170,11 @@ def test_cli_context_mismatch_creates_no_output(saved, tmp_path, monkeypatch):
     from data_sheets_schema.cli.runs import runs as cli
     root = tmp_path / "d4d_concatenated"
     _sources(root, RECORDS)  # Historical unspecified profile is bridge2ai, not neutral.
+    for label in RECORDS:
+        path = root / "claudecode_agent_core" / label / "P_provenance.yaml"
+        document = yaml.safe_load(path.read_text())
+        document['record_generated_at'] = '2026-09-01T00:00:00Z'
+        path.write_text(yaml.safe_dump(document))
     monkeypatch.setattr(runs, "CONCAT_DIR", root)
     before = _snapshot(root)
     # Make the mismatch independent of which vocabulary slots the real schema contains.

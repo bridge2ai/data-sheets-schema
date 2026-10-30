@@ -206,7 +206,11 @@ class TestCommittedMapperOutputs(unittest.TestCase):
         table_sha = hashlib.sha256((ROOT / MAPPING_TSV).read_bytes()).hexdigest()
         rules_sha = hashlib.sha256(json.dumps(table_rows, ensure_ascii=False,
                                              sort_keys=True).encode()).hexdigest()
-        schema_sha = hashlib.sha256((ROOT / FULL_SCHEMA).read_bytes()).hexdigest()
+        # These retained sidecars were generated under 3.0.0. D66's 3.1.0
+        # release must not restamp their historical schema identity.
+        releases = yaml.safe_load((ROOT / "src/data_sheets_schema/schema/release_history.yaml").read_bytes())
+        schema_sha = next(row["full_merged_sha256"] for row in releases["releases"]
+                          if row["version"] == "3.0.0")
         for project in ("CHORUS", "CM4AI", "VOICE"):
             with self.subTest(project=project):
                 processed = PACKAGES / project / "processed"

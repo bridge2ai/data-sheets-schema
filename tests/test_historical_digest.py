@@ -281,6 +281,7 @@ def test_candidate_lookup_cannot_mutate_the_original_snapshot(candidate, monkeyp
 
 def test_profile_unknown_stays_unknown_and_schema_is_recovered_once(candidate, monkeypatch, tmp_path):
     root, record = candidate
+    record['record_generated_at'] = '2026-09-01T00:00:00Z'
     path = tmp_path / 'old.yaml'
     path.write_bytes(SCHEMA)
     record['schema']['full_path'] = str(path)

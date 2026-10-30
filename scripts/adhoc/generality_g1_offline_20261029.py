@@ -16,14 +16,20 @@ sys.prefix = sys.exec_prefix = str(venv)
 # CI initializes this local dependency. Put its actual package ahead of the
 # enclosing checkout, whose submodule directory can otherwise become a cached
 # namespace package during whole-tree collection.
-sys.path[:0] = [str(ROOT / 'src'), str(ROOT / 'fairscape_models'), str(ROOT)]
+if not sys.flags.isolated:
+    sys.path[:0] = [str(ROOT / 'src'), str(ROOT / 'fairscape_models'), str(ROOT)]
 sys.path.extend(p for p in os.environ.get('G1_TEST_EXTRA_PATHS', '').split(os.pathsep) if p)
 sys.path.append(str(site))
 os.environ.update(PYTHONDONTWRITEBYTECODE='1', PYTEST_DISABLE_PLUGIN_AUTOLOAD='1',
-                  PIP_NO_INDEX='1', UV_OFFLINE='1', GIT_NO_LAZY_FETCH='1')
-for key in list(os.environ):
-    if key.endswith('_API_KEY'):
-        os.environ.pop(key, None)
+                  PIP_NO_INDEX='1', UV_OFFLINE='1', GIT_NO_LAZY_FETCH='1',
+                  VIRTUAL_ENV=str(venv))
+# Clear actual credentials before tests start. Descendants must retain the
+# synthetic credentials that tests subsequently install for local fake peers.
+if os.environ.get('G1_PROVIDER_KEYS_CLEARED') != '1':
+    for key in list(os.environ):
+        if key.endswith('_API_KEY'):
+            os.environ.pop(key, None)
+os.environ['G1_PROVIDER_KEYS_CLEARED'] = '1'
 
 def offline(event, args):
     if event in {'socket.connect', 'socket.getaddrinfo', 'socket.sendto'}:
@@ -39,6 +45,18 @@ def offline(event, args):
         raise RuntimeError('G1 offline checks forbid network: ' + event)
 
 sys.addaudithook(offline)
+# -S suppresses ambient site startup, but tests explicitly install import guards
+# on PYTHONPATH. Honor that one declared hook without processing any .pth files.
+if not sys.flags.ignore_environment:
+    for directory in os.environ.get('PYTHONPATH', '').split(os.pathsep):
+        hook = Path(directory) / 'sitecustomize.py'
+        if directory and hook.is_file():
+            import importlib.util
+            hook_spec = importlib.util.spec_from_file_location('sitecustomize', hook)
+            hook_module = importlib.util.module_from_spec(hook_spec)
+            sys.modules['sitecustomize'] = hook_module
+            hook_spec.loader.exec_module(hook_module)
+            break
 # Carry -S and the socket guard into Python/LinkML children as well. Existing
 # explicitly isolated children (including the foreign-tree authority fixtures)
 # retain their own declared sys.path and environment.
@@ -51,10 +69,28 @@ class OfflinePopen(_Popen):
     def __init__(self, args, *positional, **kwargs):
         if isinstance(args, (list, tuple)) and args:
             command = str(args[0])
+            if (Path(command).name == 'poetry' and len(args) > 2 and args[1] == 'run'
+                    and args[2] in {'python', 'gen-linkml', 'gen-project', 'd4d', 'linkml-validate'}):
+                # Use the selected installed entry point, with no Poetry
+                # environment creation or site/.pth startup in the child.
+                args = [_python, '-S', '-B', _launcher, *args[2:]]
+                command = _python
             if command == _python and '-S' not in args:
-                args = [_python, '-S', '-B', _launcher, *args[1:]]
+                rest = list(args[1:])
+                flags = []
+                # execnet's offline xdist coverage tests use python -u -c.
+                while rest and rest[0] in ('-u', '-B', '-I', '-E', '-O', '-OO'):
+                    flags.append(rest.pop(0))
+                if rest and rest[0] in ('-V', '-VV', '--version'):
+                    args = [_python, '-S', '-B', *flags, *rest]
+                else:
+                    args = [_python, '-S', '-B', *flags, _launcher, *rest]
             elif command == str(Path(_python).parent / 'linkml-validate'):
                 args = [_python, '-S', '-B', _launcher, 'linkml-validate', *args[1:]]
+            if _launcher in args and kwargs.get('env') is not None:
+                # Native controls intentionally whitelist the child environment.
+                # Carry the root's sanitization fact without modifying their dict.
+                kwargs['env'] = dict(kwargs['env'], G1_PROVIDER_KEYS_CLEARED='1')
         super().__init__(args, *positional, **kwargs)
 
 
@@ -66,11 +102,21 @@ if target == '-m':
     target, *args = args
 sys.argv = [target, *args]
 if target == '-c':
+    import types
     source, *args = args
     sys.argv = ['-c', *args]
-    exec(compile(source, '<isolated-child>', 'exec'), {'__name__': '__main__'})
+    main_module = types.ModuleType('__main__')
+    sys.modules['__main__'] = main_module
+    exec(compile(source, '<string>', 'exec'), main_module.__dict__)
+elif target in ('-V', '-VV', '--version'):
+    raise SystemExit(subprocess.call([_python, '-S', target, *args]))
 elif target == 'pytest':
     import pytest
+    if any(a == '-n' or a.startswith('--numprocesses') for a in args) and 'xdist.plugin' not in args:
+        # Autoload stays disabled; explicitly load the plugin only when a
+        # nested CI-partition coverage test requests workers. Top-level runs
+        # remain serial, as required for this host.
+        args += ['-p', 'xdist.plugin']
 
     class ImmediateFailures:
         def pytest_runtest_logreport(self, report):
@@ -84,6 +130,8 @@ elif target == 'pytest':
 
     raise SystemExit(pytest.main(args, plugins=[ImmediateFailures()]))
 elif target.endswith('.py'):
+    if not sys.flags.isolated:
+        sys.path.insert(0, str(Path(target).resolve().parent))
     runpy.run_path(target, run_name='__main__')
 elif target in {'gen-linkml', 'gen-project', 'd4d', 'linkml-validate'}:
     from importlib.metadata import entry_points

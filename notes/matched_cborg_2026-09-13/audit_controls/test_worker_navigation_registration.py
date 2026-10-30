@@ -161,7 +161,7 @@ def test_api_generation_refuses23_before_output_lock(monkeypatch, private):
     monkeypatch.setattr(api_runner, '_exclusive_run', lambda *a, **k: pytest.fail('output lock reached'))
     with pytest.raises(ValueError, match='separately registered audit continuation'):
         (api_runner._execute if private else api_runner.execute)(
-            SimpleNamespace(render_version=23, _replay_only=False), resume=False, client=object())
+            SimpleNamespace(render_version=23, _replay_only=False, condition='generic'), resume=False, client=object())
 
 
 @pytest.mark.parametrize('version', [23, '23'])

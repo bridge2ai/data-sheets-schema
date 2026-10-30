@@ -183,7 +183,8 @@ def report_tree(tmp_path, monkeypatch):
             path.write_text("id: https://example.org/dataset\nname: Test\n", encoding="utf-8")
         core.with_name(f"{project}_reconciliation.md").write_text("# report\n", encoding="utf-8")
         provenance = core.with_name(f"{project}_provenance.yaml")
-        record = {"record_mode": "reconstructed", "validation": {
+        record = {"record_mode": "reconstructed", "record_generated_at": "2026-07-10T00:00:00Z",
+                  "validation": {
             "passed": True, "artifacts": {
                 name: {"path": str(path), "md5": hashlib.md5(path.read_bytes()).hexdigest()}
                 for name, path in (("full", full), ("core", core))}}}

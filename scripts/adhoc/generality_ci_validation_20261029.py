@@ -15,10 +15,14 @@ import xml.etree.ElementTree as ET
 
 import yaml
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(os.environ.get('G1_CHECKOUT_ROOT', Path(__file__).resolve().parents[2]))
+LAUNCHER = Path(os.environ.get('G1_OFFLINE_LAUNCHER',
+                              ROOT / 'scripts/adhoc/generality_g1_offline_20261029.py'))
 parser = argparse.ArgumentParser()
 parser.add_argument('unit')
 parser.add_argument('output', type=Path)
+parser.add_argument('--nodes', type=Path, help='replay exact node IDs from a saved JSON list')
+parser.add_argument('--also', action='append', default=[], help='include shared fixture users in a replay')
 args = parser.parse_args()
 assert Path.cwd() == ROOT
 assert not args.output.resolve().is_relative_to(ROOT)
@@ -45,6 +49,14 @@ for job in ('offline-canary', 'offline-audit', 'offline-evaluation'):
         extra_paths[name] = os.pathsep.join(str(ROOT / p) for p in
             step.get('env', {}).get('PYTHONPATH', '').split(':') if p and p != 'src')
 
+if args.nodes:
+    nodes = json.loads(args.nodes.read_text())
+    nodes = [node for node in nodes if not any(node == extra or node.startswith((extra + '::', extra + '['))
+                                              for extra in args.also)] + args.also
+    units[args.unit] = [*nodes, '-v', '--durations=25']
+    if any(node.startswith('notes/') for node in nodes):
+        extra_paths[args.unit] = os.pathsep.join(dict.fromkeys(
+            path for paths in extra_paths.values() for path in paths.split(os.pathsep) if path))
 selected = list(units) if args.unit in ('all', 'remaining') else [args.unit]
 head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
 for name in selected:
@@ -53,7 +65,7 @@ for name in selected:
         saved = json.loads(previous.read_text())
         assert saved['head'] == head and saved['returncode'] in (0, 1), saved
         continue
-    command = [sys.executable, '-S', '-B', str(ROOT / 'scripts/adhoc/generality_g1_offline_20261029.py'),
+    command = [sys.executable, '-S', '-B', str(LAUNCHER),
         'pytest', *units[name], '-p', 'no:cacheprovider',
         f'--basetemp=/private/tmp/g1-validation-{name}',
         f'--junitxml={args.output / (name + ".xml")}']
@@ -64,12 +76,17 @@ for name in selected:
         if key.endswith('_API_KEY'):
             env.pop(key)
     started = time.time()
+    patch = subprocess.check_output(['git', 'diff', 'HEAD', '--binary'])
+    (args.output / (name + '.worktree.patch')).write_bytes(patch)
+    launcher_sha256 = hashlib.sha256(LAUNCHER.read_bytes()).hexdigest()
     print('START', name, flush=True)
     with (args.output / (name + '.log')).open('w') as log:
         proc = subprocess.run(command, env=env, stdout=log, stderr=subprocess.STDOUT)
     result = {'unit': name, 'command': command, 'returncode': proc.returncode,
               'seconds': time.time() - started, 'python': sys.version,
               'head': head,
+              'worktree_patch_sha256': hashlib.sha256(patch).hexdigest(),
+              'launcher_sha256': launcher_sha256,
               'workflow_sha256': hashlib.sha256(workflow_path.read_bytes()).hexdigest()}
     (args.output / (name + '.result.json')).write_text(json.dumps(result, indent=2) + '\n')
     assert (args.output / (name + '.log')).stat().st_size
