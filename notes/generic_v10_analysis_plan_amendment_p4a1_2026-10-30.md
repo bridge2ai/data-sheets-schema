@@ -2,7 +2,7 @@
 
 **Status: draft, written by claude (lead) on 2026-10-30.**
 - **Not binding until** a Claude reviewer and a Codex CLI pass have reviewed it (each finding filed as an issue) and the owner has ratified it by naming its sha256.
-- **The byte figures in §2 are provisional.** They come from claude's independent review of generality G1 (`0ba88ba12`). The G1 fix round re-proves them, including the EDAM prefix. They are final only when that proof is pasted here and reviewed.
+- **The byte figures in §2 are final:** from claude's independent re-review of the G1 fix round (`f7fedae48`), 2026-10-30.
 
 ## Authority
 - **The plan being amended:** `notes/generic_v10_analysis_plan.md`, ratified at commit `5b17ae079c8eb1fa4abdda3261054bfd22e4c2f1`, sha256 `b4a4f9a596173d3bdeb817b01ea53fb1a1d77574e121c7cecaf6f63b67fd4b4b` (D65), and merged by #5163. That file is not edited; this amendment stands beside it.
@@ -16,32 +16,46 @@
 
 No other plan text changes. The plan does not mention the `tuned` condition (retired for new runs by D67), and nothing in this amendment selects the new rubric v5 instruments; see §4.
 
-## 2. What changes in the A21 condition: model-facing bytes (provisional)
+## 2. What changes in the A21 condition: model-facing bytes
 **The schema edit** (3.0.0 → 3.1.0):
 - `data_substrate` gains the annotation `d4d:termSources: "EDAM Data, EDAM Format, IANA media types"`;
-- its description becomes "Type or format of data …", naming EDAM and IANA terms beside the selected profile's pinned registry;
-- the `EDAM: http://edamontology.org/` prefix is declared (G1 review N7).
+- its description becomes "Type or format of data …" (four edits, +89 bytes);
+- the prefix `EDAM: http://edamontology.org/` is declared (G1 review N7).
 
 **What does not move:** no range, constraint or required slot, and validation semantics are unchanged. The release history keeps 3.0.0's hashes.
 
-**Measured on CHORUS shared-v1** (renderer 25, shared generation 1, playbook 2, receipt completion 2), canonical JSON, before and after the G1 schema change:
+**How it was measured.** By claude's independent re-review of the G1 fix round (`rev-g1-fix`), capturing CHORUS shared-generation-v1 requests offline at the step-0 base `55c7b94b8` and at G1's head `f7fedae48`:
+- the typed-audit requests were built with the runtime's own builders;
+- the canonical JSON is `sg.canonical`: sorted keys, compact separators, UTF-8;
+- the same capture on the integration target (a scratch main, then the same plus G1) gives identical deltas and leaf edits.
 
-| Request | Δ bytes | What moves |
-|---|---|---|
-| `full` | +135 | the digest's `data_substrate` source line, and the schema catalog's size and hash |
-| `reconcile_full`, `report`, `report_regate`, `report_after_repair` | +224 | the above, plus the `data_substrate` description (+89) in the schema context |
-| typed-audit omission and integration, and workers assigned an `instances` path | ⟨to be measured⟩ | the `data_substrate` description |
-| any request, from the EDAM prefix | ⟨to be measured⟩ | the schema catalog |
+| Request | Base (B) | G1 (B) | Δ | What moves |
+|---|---|---|---|---|
+| `full` | 227,700 | 227,835 | **+135** | the digest gains " a term from EDAM Data, EDAM Format, IANA media types (the source's own identifier, as an IRI or CURIE, when the documents supply one);" after "`data_substrate` draws from"; the schema catalog's bytes field (1442513 → 1442833) and sha256 (`eb543e15…` → `4b1a98e0…`, 3.1.0's `full_merged_sha256`), which are length-preserving |
+| `reconcile_full`, `report` (and, by the shared renderer, `report_regate` and `report_after_repair`) | 467,073 / 589,639 | 467,297 / 589,863 | **+224** | the +135 digest insertion, plus the `data_substrate` description (+89) in the rendered schema context, plus the catalog fields |
+| typed-audit omission | 598,307 | 598,485 | **+178** | the +89 description twice (the schema context and the inner typed-stage request), the catalog fields, and the derived binding hashes (0 bytes) |
+| typed-audit worker assigned an `instances` path (worker_0002 in this plan) | 352,257 | 352,346 | **+89** | the description, the catalog fields, and the hashes |
+| other typed-audit workers (worker_0001, worker_0003) | 353,196 / 346,391 | same | **0** | the catalog fields and hashes only; no prose |
+| typed-audit integration | — | — | *(expected +89; not measurable offline)* | it renders the same schema context |
 
-**What nothing else moves:** the system prompt, bundle, naming, scope, ranking, generation context, playbook, instruction, binding and provider settings. No `3.x` string appears in any API request.
+**The registration's identity also moves:**
+- the full and core schema pins;
+- `request_code_sha256` for four files:
+  - `api_runner.py` (the D67 tuned refusal);
+  - `profile_identity.py` and `provenance.py` (G1 N3);
+  - `profiles.py` (F18).
 
-**The schema catalog's sha256** becomes 3.1.0's `full_merged_sha256`, ⟨`1af17d22…` before N7; final value to be filled⟩.
+**What nothing else moves:** no other leaf moves in any request, and no `3.x` string appears in any request. The native arm reads the schema files directly, so it also sees the description, the annotation, the prefix and `version: 3.1.0`.
 
 ## 3. What this adds to the declared confounds
 The v8–v10 comparison already declares the schema version and "the change in the digest's term source" (line 922). It now also includes the following:
 - **What v10 records may now carry:** a v10 `data_substrate` value may be an EDAM Data or Format term, or an IANA media type, where v8 offered only the profile's `B2AI_SUBSTRATE` registry.
 - **How metrics treat it:** any metric that reads `data_substrate`, such as term validity or registry membership, reports the two term sources separately for v10. It does not adjust or pool them.
 - **Blinding:** the identifier forms of the two vocabularies differ, so a blind reviewer may see them. Like the schema-version difference, this is listed among what blinding cannot remove (line 1450).
+
+- **Two measurement effects of the EDAM prefix** (G1 re-review NF2). They are disclosed here; no code changes.
+  - **The write-time normaliser** on the API path now compacts an EDAM IRI in a `uriorcurie` slot to a CURIE. For example `http://edamontology.org/format_3752` becomes `EDAM:format_3752`; 3.0.0 kept the IRI. IANA media types already became `mediatypes:` under both versions. Each rewrite is logged in the record's `normalisation.identifier_form` block.
+  - **The undeclared-prefix counter** (`grounding.undeclared_prefixes`, which feeds a gated canary row) no longer counts `EDAM:` or `edam:`; under 3.0.0 it did. That row therefore means something slightly different for A21 than for the 3.0.0 CHORUS canaries 2026-10-20a and 2026-10-22a. Any comparison of it across the schema boundary says so.
 
 ## 4. Generality changes that leave the plan's text unchanged
 These come from the same package (generality G1 and the E3x fixes), under the owner's standing rule. They are recorded here so that the A21 registration review can check them; none needs a plan-text change.
@@ -61,6 +75,6 @@ These come from the same package (generality G1 and the E3x fixes), under the ow
 - the P4b agenda.
 
 ## 6. Procedure
-1. The G1 fix round's final byte proof is pasted into §2, replacing every ⟨…⟩.
+1. The final byte proof is in §2 (done 2026-10-30).
 2. A Claude reviewer and a Codex CLI pass review this amendment against the ratified plan and the composed A21 condition. Each finding is filed as an issue.
 3. The owner ratifies it by naming its sha256, before the A21 launch word.
