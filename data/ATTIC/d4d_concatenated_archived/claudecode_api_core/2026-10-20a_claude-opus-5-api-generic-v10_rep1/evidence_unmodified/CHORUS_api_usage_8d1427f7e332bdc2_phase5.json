@@ -1,0 +1,604 @@
+{
+  "version": 1,
+  "identity": {
+    "project": "CHORUS",
+    "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+    "method": "claudecode_api",
+    "condition": "generic_v10"
+  },
+  "generation_id": "d4b09f0816e04ca3a8f2ee8abdfc034e",
+  "prior_generation_ids": [],
+  "accept_legacy": true,
+  "rows": [
+    {
+      "usage_id": "dd63564c51c6489aa90c25b08a91fdcc",
+      "phase": "full",
+      "attempt": 1,
+      "started_at": "2026-10-21T06:14:10+00:00",
+      "seconds": 509.489,
+      "input_tokens": 41113,
+      "output_tokens": 46884,
+      "thinking_tokens": 35384,
+      "cache_read": 0,
+      "cache_write": 32869,
+      "max_tokens": 128000,
+      "stop_reason": "end_turn"
+    },
+    {
+      "usage_id": "223cf6484a6d47d0b1a69ba408e7c76c",
+      "phase": "full_receipt_completion",
+      "attempt": 1,
+      "started_at": "2026-10-21T06:44:27+00:00",
+      "seconds": 14.188,
+      "input_tokens": 67325,
+      "output_tokens": 1279,
+      "thinking_tokens": 837,
+      "cache_read": 0,
+      "cache_write": 32869,
+      "max_tokens": 4000,
+      "stop_reason": "end_turn"
+    },
+    {
+      "usage_id": "eb3330ce02be47eaa985a4edbf2ce976",
+      "phase": "typed_audit_worker",
+      "attempt": 1,
+      "started_at": "2026-10-21T07:00:25+00:00",
+      "seconds": 299.189,
+      "max_tokens": 25000,
+      "input_tokens": 2,
+      "output_tokens": 25000,
+      "cache_read": 0,
+      "cache_write": 139353,
+      "thinking_tokens": 25000,
+      "stop_reason": "max_tokens"
+    },
+    {
+      "usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+      "phase": "typed_audit_worker",
+      "attempt": 1,
+      "started_at": "2026-10-21T08:05:08+00:00",
+      "seconds": 541.771,
+      "max_tokens": 64000,
+      "input_tokens": 2,
+      "output_tokens": 53204,
+      "cache_read": 0,
+      "cache_write": 138000,
+      "thinking_tokens": 30294,
+      "stop_reason": "end_turn"
+    },
+    {
+      "usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+      "phase": "typed_audit_worker",
+      "attempt": 1,
+      "started_at": "2026-10-21T08:14:13+00:00",
+      "seconds": 235.708,
+      "max_tokens": 64000,
+      "input_tokens": 2,
+      "output_tokens": 25946,
+      "cache_read": 0,
+      "cache_write": 138084,
+      "thinking_tokens": 6947,
+      "stop_reason": "end_turn"
+    },
+    {
+      "usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+      "phase": "typed_audit_worker",
+      "attempt": 1,
+      "started_at": "2026-10-21T08:18:14+00:00",
+      "seconds": 490.518,
+      "max_tokens": 64000,
+      "input_tokens": 2,
+      "output_tokens": 44230,
+      "cache_read": 0,
+      "cache_write": 137758,
+      "thinking_tokens": 29909,
+      "stop_reason": "end_turn"
+    },
+    {
+      "usage_id": "30cbdaeefed54ff4b0bad11b03e81658",
+      "phase": "typed_audit_omission",
+      "attempt": 1,
+      "started_at": "2026-10-21T08:26:30+00:00",
+      "seconds": 240.578,
+      "max_tokens": 32000,
+      "input_tokens": 2,
+      "output_tokens": 21316,
+      "cache_read": 0,
+      "cache_write": 95290,
+      "thinking_tokens": 12532,
+      "stop_reason": "end_turn"
+    },
+    {
+      "usage_id": "51ed3b8231984bce989c70062a9403be",
+      "phase": "typed_audit_integration",
+      "attempt": 1,
+      "started_at": "2026-10-21T08:30:38+00:00",
+      "seconds": 271.199,
+      "max_tokens": 32000,
+      "input_tokens": 2,
+      "output_tokens": 22990,
+      "cache_read": 0,
+      "cache_write": 354153,
+      "thinking_tokens": 14232,
+      "stop_reason": "end_turn"
+    },
+    {
+      "usage_id": "7a1a9a2a0cfe499f996d3145281b4c13",
+      "phase": "reconcile_full",
+      "attempt": 1,
+      "started_at": "2026-10-22T00:09:48+00:00",
+      "seconds": 115.748,
+      "input_tokens": 125866,
+      "output_tokens": 10861,
+      "thinking_tokens": 2167,
+      "cache_read": 0,
+      "cache_write": 32869,
+      "max_tokens": 96000,
+      "stop_reason": "end_turn"
+    },
+    {
+      "source_review_admission": {
+        "state": "pending",
+        "response_sha256": "d1df3ae1cec6402955efee391b898a01c688955b2180dce69344bbb70a829834"
+      },
+      "usage_id": "72ac7d9a77bb438798e7d8d55ff1bf0f",
+      "phase": "report",
+      "attempt": 1,
+      "started_at": "2026-10-22T00:12:01+00:00",
+      "seconds": 1141.513,
+      "input_tokens": 167639,
+      "output_tokens": 78928,
+      "thinking_tokens": 13150,
+      "cache_read": 0,
+      "cache_write": 32869,
+      "max_tokens": 96000,
+      "stop_reason": "end_turn"
+    }
+  ],
+  "input_identity": {
+    "receipt_completion_schema": {
+      "sources": [
+        {
+          "name": "data-sheets-schema",
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+          "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+        }
+      ]
+    },
+    "shared_generation": {
+      "registration": {
+        "sha256": "4f94102c47bf2245b1bd7deaf0371df5eefc12e78f3fba92d85e295b2aa4c447",
+        "raw_json": "{\"audit_limits\":{\"aggregate_input_tokens\":4000000,\"aggregate_output_tokens\":320000,\"context_limit_basis\":\"Route context window 1,000,000 tokens; sized for largest bundle\",\"context_limit_tokens\":1000000,\"integration_output_tokens\":32000,\"max_calls\":18,\"max_input_tokens_per_call\":1000000,\"max_inventory_bytes\":12288,\"max_paths\":80,\"max_request_bytes\":32000000,\"max_workers\":4,\"omission_output_tokens\":32000,\"worker_output_tokens\":64000},\"audit_transport\":{\"malformed_response_retries\":0,\"sdk_max_retries\":0,\"transport_attempts\":1},\"format\":\"shared_generation_registration_v1\",\"inputs\":{\"bundle\":{\"bytes\":35920,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt\",\"sha256\":\"27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c\"},\"chunk_manifest\":{\"bytes\":1945,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml\",\"sha256\":\"ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a\"},\"context\":{\"bytes\":6476,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json\",\"sha256\":\"ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0\"},\"core_schema\":{\"root\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml\",\"sources\":[{\"bytes\":1299200,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml\",\"sha256\":\"09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a\"}]},\"full_schema\":{\"root\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml\",\"sources\":[{\"bytes\":1442513,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml\",\"sha256\":\"eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f\"}]},\"profile\":{\"basis\":\"manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81\",\"name\":\"bridge2ai\",\"vocabulary\":{\"bytes\":6115,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml\",\"sha256\":\"e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914\"}},\"project\":\"CHORUS\",\"source_manifest\":{\"bytes\":40612,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml\",\"sha256\":\"0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528\"}},\"receipt\":{\"condition\":\"generic_v10\",\"context_limit_basis\":\"Route context window 1,000,000 tokens; sized for largest bundle\",\"context_limit_tokens\":1000000,\"coverage_floor\":{\"mode\":\"diagnostic_pilot\",\"state\":\"pending\"},\"format\":\"receipt_completion_registration_v2\",\"max_output_tokens\":4000,\"max_request_bytes\":32000000,\"receipt_instrument_version\":4,\"registration_id\":\"generic-v10-receipt\",\"runtime_policy_sha256\":\"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c\"},\"registration_id\":\"generic-v10-chorus-2026-10-20a_claude-opus-5-api-generic-v10_rep1\",\"registration_path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/registration_chorus_2026-10-20a_claude-opus-5-api-generic-v10_rep1.json\",\"run\":{\"arm\":\"BASELINE (input documents only)\",\"label\":\"2026-10-20a_claude-opus-5-api-generic-v10_rep1\",\"method\":\"claudecode_api\",\"project\":\"CHORUS\"},\"runtime\":{\"base_url\":\"https://api.cborg.lbl.gov\",\"config\":{\"bytes\":6250,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/.github/workflows/d4d_assistant_deterministic.config\",\"sha256\":\"0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91\"},\"effort\":null,\"model\":\"claude-opus-5\",\"provider\":\"LBL CBORG (proxy to Anthropic)\",\"temperature\":null,\"thinking\":{\"display\":\"summarized\",\"type\":\"adaptive\"}},\"selection\":{\"api_playbook_version\":2,\"assets\":{\".claude/agents/d4d-provenance-guard-v2.md\":\"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085\",\".claude/commands/d4d-agent-v2.md\":\"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299\",\".claude/commands/d4d-full-core-v2.md\":\"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124\",\".claude/commands/d4d-uniform-rules-v2.md\":\"5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129\",\"src/download/prompts/api_playbook_v2.md\":\"5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719\",\"src/download/prompts/d4d_generic_arm_prompt_v10.md\":\"7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb\",\"src/download/prompts/receipt_completion_runtime_v2.md\":\"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c\",\"src/download/prompts/shared_generation_v1.md\":\"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450\"},\"condition\":\"generic_v10\",\"protocol\":\"shared_generation_v1\",\"receipt_completion_version\":2,\"renderer\":25,\"runtime\":\"Claude API (direct)\",\"typed_protocol\":\"typed_audit_protocol_v1\",\"version\":1}}"
+      },
+      "files": [
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json",
+          "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0",
+          "bytes": 6476
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/registration_chorus_2026-10-20a_claude-opus-5-api-generic-v10_rep1.json",
+          "sha256": "4f94102c47bf2245b1bd7deaf0371df5eefc12e78f3fba92d85e295b2aa4c447",
+          "bytes": 5177
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/.github/workflows/d4d_assistant_deterministic.config",
+          "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91",
+          "bytes": 6250
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml",
+          "sha256": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a",
+          "bytes": 1945
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+          "sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+          "bytes": 35920
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml",
+          "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528",
+          "bytes": 40612
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+          "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914",
+          "bytes": 6115
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+          "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f",
+          "bytes": 1442513
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+          "sha256": "09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a",
+          "bytes": 1299200
+        }
+      ]
+    },
+    "bundle": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c"
+    },
+    "source_manifest": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml",
+      "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+    },
+    "chunks": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml",
+      "sha256": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a"
+    },
+    "profile": {
+      "name": "bridge2ai",
+      "digest_md5": "6be1582236d9320bac6040b9a8b92da9"
+    },
+    "instruction": {
+      "render_version": 25,
+      "spec": {
+        "api_playbook_version": 2,
+        "api_playbook_sha256": "5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719",
+        "receipt_completion_version": 2,
+        "receipt_completion_policy_sha256": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c",
+        "receipt_completion_registration": {
+          "sha256": "7ad04a03e1cb5fa1f7a7e6d284e8831a96759267360b8685e79bab4a2528415a",
+          "raw_json": "{\"condition\":\"generic_v10\",\"context_limit_basis\":\"Route context window 1,000,000 tokens; sized for largest bundle\",\"context_limit_tokens\":1000000,\"coverage_floor\":{\"mode\":\"diagnostic_pilot\",\"state\":\"pending\"},\"format\":\"receipt_completion_registration_v2\",\"max_output_tokens\":4000,\"max_request_bytes\":32000000,\"receipt_instrument_version\":4,\"registration_id\":\"generic-v10-receipt\",\"runtime_policy_sha256\":\"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c\"}"
+        },
+        "shared_generation_version": 1,
+        "shared_generation_registration": {
+          "sha256": "4f94102c47bf2245b1bd7deaf0371df5eefc12e78f3fba92d85e295b2aa4c447",
+          "raw_json": "{\"audit_limits\":{\"aggregate_input_tokens\":4000000,\"aggregate_output_tokens\":320000,\"context_limit_basis\":\"Route context window 1,000,000 tokens; sized for largest bundle\",\"context_limit_tokens\":1000000,\"integration_output_tokens\":32000,\"max_calls\":18,\"max_input_tokens_per_call\":1000000,\"max_inventory_bytes\":12288,\"max_paths\":80,\"max_request_bytes\":32000000,\"max_workers\":4,\"omission_output_tokens\":32000,\"worker_output_tokens\":64000},\"audit_transport\":{\"malformed_response_retries\":0,\"sdk_max_retries\":0,\"transport_attempts\":1},\"format\":\"shared_generation_registration_v1\",\"inputs\":{\"bundle\":{\"bytes\":35920,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt\",\"sha256\":\"27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c\"},\"chunk_manifest\":{\"bytes\":1945,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml\",\"sha256\":\"ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a\"},\"context\":{\"bytes\":6476,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json\",\"sha256\":\"ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0\"},\"core_schema\":{\"root\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml\",\"sources\":[{\"bytes\":1299200,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml\",\"sha256\":\"09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a\"}]},\"full_schema\":{\"root\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml\",\"sources\":[{\"bytes\":1442513,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml\",\"sha256\":\"eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f\"}]},\"profile\":{\"basis\":\"manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81\",\"name\":\"bridge2ai\",\"vocabulary\":{\"bytes\":6115,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml\",\"sha256\":\"e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914\"}},\"project\":\"CHORUS\",\"source_manifest\":{\"bytes\":40612,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml\",\"sha256\":\"0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528\"}},\"receipt\":{\"condition\":\"generic_v10\",\"context_limit_basis\":\"Route context window 1,000,000 tokens; sized for largest bundle\",\"context_limit_tokens\":1000000,\"coverage_floor\":{\"mode\":\"diagnostic_pilot\",\"state\":\"pending\"},\"format\":\"receipt_completion_registration_v2\",\"max_output_tokens\":4000,\"max_request_bytes\":32000000,\"receipt_instrument_version\":4,\"registration_id\":\"generic-v10-receipt\",\"runtime_policy_sha256\":\"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c\"},\"registration_id\":\"generic-v10-chorus-2026-10-20a_claude-opus-5-api-generic-v10_rep1\",\"registration_path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/registration_chorus_2026-10-20a_claude-opus-5-api-generic-v10_rep1.json\",\"run\":{\"arm\":\"BASELINE (input documents only)\",\"label\":\"2026-10-20a_claude-opus-5-api-generic-v10_rep1\",\"method\":\"claudecode_api\",\"project\":\"CHORUS\"},\"runtime\":{\"base_url\":\"https://api.cborg.lbl.gov\",\"config\":{\"bytes\":6250,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/.github/workflows/d4d_assistant_deterministic.config\",\"sha256\":\"0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91\"},\"effort\":null,\"model\":\"claude-opus-5\",\"provider\":\"LBL CBORG (proxy to Anthropic)\",\"temperature\":null,\"thinking\":{\"display\":\"summarized\",\"type\":\"adaptive\"}},\"selection\":{\"api_playbook_version\":2,\"assets\":{\".claude/agents/d4d-provenance-guard-v2.md\":\"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085\",\".claude/commands/d4d-agent-v2.md\":\"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299\",\".claude/commands/d4d-full-core-v2.md\":\"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124\",\".claude/commands/d4d-uniform-rules-v2.md\":\"5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129\",\"src/download/prompts/api_playbook_v2.md\":\"5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719\",\"src/download/prompts/d4d_generic_arm_prompt_v10.md\":\"7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb\",\"src/download/prompts/receipt_completion_runtime_v2.md\":\"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c\",\"src/download/prompts/shared_generation_v1.md\":\"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450\"},\"condition\":\"generic_v10\",\"protocol\":\"shared_generation_v1\",\"receipt_completion_version\":2,\"renderer\":25,\"runtime\":\"Claude API (direct)\",\"typed_protocol\":\"typed_audit_protocol_v1\",\"version\":1}}"
+        },
+        "shared_generation_assets": {
+          ".claude/agents/d4d-provenance-guard-v2.md": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",
+          ".claude/commands/d4d-agent-v2.md": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",
+          ".claude/commands/d4d-full-core-v2.md": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",
+          ".claude/commands/d4d-uniform-rules-v2.md": "5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129",
+          "src/download/prompts/api_playbook_v2.md": "5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719",
+          "src/download/prompts/d4d_generic_arm_prompt_v10.md": "7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb",
+          "src/download/prompts/receipt_completion_runtime_v2.md": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c",
+          "src/download/prompts/shared_generation_v1.md": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+        },
+        "api_header_values": {
+          "Temperature": "not sent (claude-opus-5 rejects the parameter; the config's value did not reach the request)",
+          "Model": "claude-opus-5",
+          "Reasoning effort": "not set by the request (the provider's own choice; not recorded as a value)"
+        },
+        "render_version": 25,
+        "chunk_manifest": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml",
+        "condition": "generic_v10",
+        "arm": "BASELINE (input documents only)",
+        "manifest_line": "# Source manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml",
+        "run_date": "2026-10-21",
+        "manifest": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml",
+        "profile": "bridge2ai",
+        "runtime": "Claude API (direct)",
+        "provider": "LBL CBORG (proxy to Anthropic)",
+        "bundle": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+      },
+      "sha256": "7f45e316310c9cd222500b0ac5b9c857e32cd71622319195a829477f3c2264fa"
+    }
+  },
+  "abandoned_journal_offset": 0,
+  "receipt_completion_transcript": {
+    "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_transcript.json",
+    "sha256": "b7491ded52de4ec10578bf6f3cc0fcfb62ca89d5e34d4efc360f3d67647c860c"
+  },
+  "receipt_completion_full": {
+    "full_sha256": "d3b91e60e7a61c65fc7771c4f6bc419a3861f89881b36e5b13b7d0b928fddbd7",
+    "receipt_sha256": "51f728d8a8a5d9f540fa716851bd88f08d9d16cea5d71a7fbf84f2a2be88db9f",
+    "transcript": {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_transcript.json",
+      "sha256": "b7491ded52de4ec10578bf6f3cc0fcfb62ca89d5e34d4efc360f3d67647c860c"
+    },
+    "usage_id": "dd63564c51c6489aa90c25b08a91fdcc"
+  },
+  "receipt_completion": {
+    "state": "complete",
+    "inputs": {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_inputs.json",
+      "sha256": "765be7819adf3b29c5b5d6c5577d26b1c8932ae1e2ff35aa14d81db4bc051125"
+    },
+    "request": {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_request.json",
+      "sha256": "3f3e8b7f541c86a0ce74ba11c4c05d1a6738f38477a3ff6ec3bb8e27eafc03f0"
+    },
+    "context": {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_context.json",
+      "sha256": "d47ff9cfca827f6f9508d9f296784249274aef03b91ced744bb844d4ac0c4b51"
+    },
+    "requested_paths": [
+      "instances[0].instance_type",
+      "instances[1].instance_type",
+      "instances[2].instance_type",
+      "instances[3].instance_type",
+      "intended_uses[0].use_category",
+      "intended_uses[1].use_category",
+      "intended_uses[2].use_category"
+    ],
+    "usage_id": "223cf6484a6d47d0b1a69ba408e7c76c",
+    "response": {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_response.json",
+      "sha256": "5a2a66d3366f2eb2d9124517460aac0e002648724b7380249c76adb50a7423b9"
+    },
+    "result": {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_result_2.json",
+      "sha256": "4ac0d135f69013b44d4a89f805e44b4355e59ca32cfca321dc8605f112e86cd5"
+    }
+  },
+  "typed_audit": {
+    "format": "shared_generation_typed_audit_v1",
+    "generation_id": "d4b09f0816e04ca3a8f2ee8abdfc034e",
+    "authority": {
+      "registration": {
+        "sha256": "4f94102c47bf2245b1bd7deaf0371df5eefc12e78f3fba92d85e295b2aa4c447",
+        "raw_json": "{\"audit_limits\":{\"aggregate_input_tokens\":4000000,\"aggregate_output_tokens\":320000,\"context_limit_basis\":\"Route context window 1,000,000 tokens; sized for largest bundle\",\"context_limit_tokens\":1000000,\"integration_output_tokens\":32000,\"max_calls\":18,\"max_input_tokens_per_call\":1000000,\"max_inventory_bytes\":12288,\"max_paths\":80,\"max_request_bytes\":32000000,\"max_workers\":4,\"omission_output_tokens\":32000,\"worker_output_tokens\":64000},\"audit_transport\":{\"malformed_response_retries\":0,\"sdk_max_retries\":0,\"transport_attempts\":1},\"format\":\"shared_generation_registration_v1\",\"inputs\":{\"bundle\":{\"bytes\":35920,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt\",\"sha256\":\"27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c\"},\"chunk_manifest\":{\"bytes\":1945,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml\",\"sha256\":\"ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a\"},\"context\":{\"bytes\":6476,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json\",\"sha256\":\"ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0\"},\"core_schema\":{\"root\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml\",\"sources\":[{\"bytes\":1299200,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml\",\"sha256\":\"09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a\"}]},\"full_schema\":{\"root\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml\",\"sources\":[{\"bytes\":1442513,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml\",\"sha256\":\"eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f\"}]},\"profile\":{\"basis\":\"manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81\",\"name\":\"bridge2ai\",\"vocabulary\":{\"bytes\":6115,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml\",\"sha256\":\"e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914\"}},\"project\":\"CHORUS\",\"source_manifest\":{\"bytes\":40612,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml\",\"sha256\":\"0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528\"}},\"receipt\":{\"condition\":\"generic_v10\",\"context_limit_basis\":\"Route context window 1,000,000 tokens; sized for largest bundle\",\"context_limit_tokens\":1000000,\"coverage_floor\":{\"mode\":\"diagnostic_pilot\",\"state\":\"pending\"},\"format\":\"receipt_completion_registration_v2\",\"max_output_tokens\":4000,\"max_request_bytes\":32000000,\"receipt_instrument_version\":4,\"registration_id\":\"generic-v10-receipt\",\"runtime_policy_sha256\":\"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c\"},\"registration_id\":\"generic-v10-chorus-2026-10-20a_claude-opus-5-api-generic-v10_rep1\",\"registration_path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/registration_chorus_2026-10-20a_claude-opus-5-api-generic-v10_rep1.json\",\"run\":{\"arm\":\"BASELINE (input documents only)\",\"label\":\"2026-10-20a_claude-opus-5-api-generic-v10_rep1\",\"method\":\"claudecode_api\",\"project\":\"CHORUS\"},\"runtime\":{\"base_url\":\"https://api.cborg.lbl.gov\",\"config\":{\"bytes\":6250,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/.github/workflows/d4d_assistant_deterministic.config\",\"sha256\":\"0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91\"},\"effort\":null,\"model\":\"claude-opus-5\",\"provider\":\"LBL CBORG (proxy to Anthropic)\",\"temperature\":null,\"thinking\":{\"display\":\"summarized\",\"type\":\"adaptive\"}},\"selection\":{\"api_playbook_version\":2,\"assets\":{\".claude/agents/d4d-provenance-guard-v2.md\":\"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085\",\".claude/commands/d4d-agent-v2.md\":\"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299\",\".claude/commands/d4d-full-core-v2.md\":\"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124\",\".claude/commands/d4d-uniform-rules-v2.md\":\"5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129\",\"src/download/prompts/api_playbook_v2.md\":\"5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719\",\"src/download/prompts/d4d_generic_arm_prompt_v10.md\":\"7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb\",\"src/download/prompts/receipt_completion_runtime_v2.md\":\"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c\",\"src/download/prompts/shared_generation_v1.md\":\"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450\"},\"condition\":\"generic_v10\",\"protocol\":\"shared_generation_v1\",\"receipt_completion_version\":2,\"renderer\":25,\"runtime\":\"Claude API (direct)\",\"typed_protocol\":\"typed_audit_protocol_v1\",\"version\":1}}"
+      },
+      "files": [
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json",
+          "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0",
+          "bytes": 6476
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/registration_chorus_2026-10-20a_claude-opus-5-api-generic-v10_rep1.json",
+          "sha256": "4f94102c47bf2245b1bd7deaf0371df5eefc12e78f3fba92d85e295b2aa4c447",
+          "bytes": 5177
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/.github/workflows/d4d_assistant_deterministic.config",
+          "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91",
+          "bytes": 6250
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml",
+          "sha256": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a",
+          "bytes": 1945
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+          "sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+          "bytes": 35920
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml",
+          "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528",
+          "bytes": 40612
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+          "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914",
+          "bytes": 6115
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+          "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f",
+          "bytes": 1442513
+        },
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+          "sha256": "09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a",
+          "bytes": 1299200
+        }
+      ]
+    },
+    "state": "accepted",
+    "packet": {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_packet_2.json",
+      "sha256": "87221959a6ba951fb6e973de0fe00a4f1a60adcf42b1f4052e87664ad902d90b"
+    },
+    "roster": [
+      {
+        "phase": "typed_audit_worker",
+        "worker_id": "worker_0001"
+      },
+      {
+        "phase": "typed_audit_worker",
+        "worker_id": "worker_0002"
+      },
+      {
+        "phase": "typed_audit_worker",
+        "worker_id": "worker_0003"
+      },
+      {
+        "phase": "typed_audit_omission"
+      },
+      {
+        "phase": "typed_audit_integration"
+      }
+    ],
+    "settings": {
+      "name": "claude-opus-5",
+      "temperature": 0.0,
+      "max_tokens": 16000,
+      "config_path": ".github/workflows/d4d_assistant_deterministic.config",
+      "temperature_applies": false,
+      "thinking": {
+        "type": "adaptive",
+        "display": "summarized"
+      },
+      "temperature_note": "claude-opus-5 rejects `temperature` (400: deprecated for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config is not sent and does not apply. Sampling for this model family is selected by model-name suffix (-low/-medium/-high/-xhigh/-max), not by parameter."
+    },
+    "stages": [
+      {
+        "selection": {
+          "phase": "typed_audit_worker",
+          "worker_id": "worker_0001"
+        },
+        "state": "checked",
+        "request": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_0_request_2.json",
+          "sha256": "f2fdbd0fc180031630000fcec7e2dceaa110a897b3b546f3e405c1a4dc7f3712"
+        },
+        "context": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_0_context_2.json",
+          "sha256": "bd5c54ad367cc6dd8e17b3ad45057ef34b11f278a0c87c708a97c1f50f867d06"
+        },
+        "usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+        "response": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_0_response_2.json",
+          "sha256": "1e07b1e1404987f4a2415953b02bb88f2a0c9dba82205722084a23d561b5ccc9"
+        }
+      },
+      {
+        "selection": {
+          "phase": "typed_audit_worker",
+          "worker_id": "worker_0002"
+        },
+        "state": "checked",
+        "request": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_1_request.json",
+          "sha256": "26b405acf524436245caeadb636dc0f20fe231a08c7d6734e0b2f2ff3df1f86e"
+        },
+        "context": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_1_context.json",
+          "sha256": "4b887639e78832b444ac7fa6ad27c88f3924b6e4428004f70651090e5e7ec7ce"
+        },
+        "usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+        "response": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_1_response.json",
+          "sha256": "8394a6914dd60433e1fb2c04a3b75bd8072d7ec0a62d42e3cbaf168d08cde37a"
+        }
+      },
+      {
+        "selection": {
+          "phase": "typed_audit_worker",
+          "worker_id": "worker_0003"
+        },
+        "state": "checked",
+        "request": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_2_request.json",
+          "sha256": "412a78de4eefc380726255c1f5dcb06f0be47110f1706de3cad4d0f7b739ce7c"
+        },
+        "context": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_2_context.json",
+          "sha256": "767f31e7b2b2b50fd645402c4dca789078230c75a6aa75156090c88d4696f779"
+        },
+        "usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+        "response": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_2_response.json",
+          "sha256": "dc19f3441a07e6ea33b7c3130f4c1fd77d760980b1eace47f1a3bc302776fa39"
+        }
+      },
+      {
+        "selection": {
+          "phase": "typed_audit_omission"
+        },
+        "state": "checked",
+        "request": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_3_request.json",
+          "sha256": "a738946dd5c231159e16d0c9da065c74356bfdb2951b42fa05dd499cc13fc49f"
+        },
+        "context": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_3_context.json",
+          "sha256": "f7e6f148bb3f50fd36530833c1603dbc3ccbc6b6b5518436d17e9bfe6a7676cb"
+        },
+        "usage_id": "30cbdaeefed54ff4b0bad11b03e81658",
+        "response": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_3_response.json",
+          "sha256": "1a3644dbb89945426dd9aea4c5e6752cd80444921efc6b882d5cce7f4b85dbb8"
+        }
+      },
+      {
+        "selection": {
+          "phase": "typed_audit_integration"
+        },
+        "state": "checked",
+        "request": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_4_request.json",
+          "sha256": "98b3fbd523f2ceb1c205eea96d626cf5dc514ef66dffbff3ebb95463bf4d8ade"
+        },
+        "context": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_4_context.json",
+          "sha256": "edd13fb839d893678796dafe752f985bb860828372550757fa2b115d57f16947"
+        },
+        "usage_id": "51ed3b8231984bce989c70062a9403be",
+        "response": {
+          "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_4_response.json",
+          "sha256": "236761f38f82b2dc9f28f2a4c6ee5891173d4fad137b0199f5bfe61b245fa25c"
+        }
+      }
+    ],
+    "assembly": {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_assembly.json",
+      "sha256": "80cd7c58cc630aff67565e49b153a6d39e426ea066b2c05bd711a6996e6021e6"
+    }
+  },
+  "evidence_refusal": {
+    "stage": "report",
+    "reading": {
+      "instrument": "evidence_assertions v7 / source_review v2 (#2192)",
+      "checked": true,
+      "source_review_final": {
+        "instrument": "source_review v2 (#2169)",
+        "artifact": "final_full",
+        "sha256": "ac182648cf2921e8eeda117879c3c8021cac14b35943b3b24ddfdccb55e75aba",
+        "values_required": 152,
+        "values_reviewed": 152,
+        "claims_checked": 219,
+        "findings": [
+          {
+            "kind": "source_review_contract",
+            "detail": "declared source status does not support the claim's status",
+            "path": "/preprocessing_strategies/3/preprocessing_details",
+            "claim": 2
+          },
+          {
+            "kind": "source_review_contract",
+            "detail": "declared source status does not support the claim's status",
+            "path": "/external_resources/3/external_resources/0",
+            "claim": 1
+          },
+          {
+            "kind": "source_review_contract",
+            "detail": "declared source status does not support the claim's status",
+            "path": "/external_resources/4/external_resources/0",
+            "claim": 1
+          },
+          {
+            "kind": "source_review_contract",
+            "detail": "declared source status does not support the claim's status",
+            "path": "/source_caveats",
+            "claim": 8
+          }
+        ],
+        "scope": "Coverage and declared evidence/scope consistency only; semantic classifications and entailment require independent review."
+      },
+      "findings": [
+        {
+          "kind": "source_review_contract",
+          "detail": "declared source status does not support the claim's status",
+          "path": "/preprocessing_strategies/3/preprocessing_details",
+          "claim": 2
+        },
+        {
+          "kind": "source_review_contract",
+          "detail": "declared source status does not support the claim's status",
+          "path": "/external_resources/3/external_resources/0",
+          "claim": 1
+        },
+        {
+          "kind": "source_review_contract",
+          "detail": "declared source status does not support the claim's status",
+          "path": "/external_resources/4/external_resources/0",
+          "claim": 1
+        },
+        {
+          "kind": "source_review_contract",
+          "detail": "declared source status does not support the claim's status",
+          "path": "/source_caveats",
+          "claim": 8
+        }
+      ],
+      "source_sha256": {
+        "bundle": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+        "chunk_manifest": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a",
+        "source_manifest": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+      },
+      "phase": "report",
+      "usage_id": "72ac7d9a77bb438798e7d8d55ff1bf0f",
+      "response_sha256": "d1df3ae1cec6402955efee391b898a01c688955b2180dce69344bbb70a829834"
+    }
+  }
+}
