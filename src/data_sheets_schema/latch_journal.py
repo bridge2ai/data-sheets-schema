@@ -9,7 +9,6 @@ from __future__ import annotations
 import copy
 from contextlib import contextmanager
 from datetime import datetime
-from functools import lru_cache
 import hashlib
 import json
 import os
@@ -33,16 +32,17 @@ D41_COMMIT = "8ab03fda923d2c8caa9a2e65e558be73e92500e9"
 D41_COMMITTED_AT = "2026-10-25T22:11:01-07:00"
 
 
-@lru_cache(maxsize=4096)
 def _commit_age(commit, root):
-    if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-f]{7,40}", commit):
+    if not isinstance(commit, str) or not commit:
         return None
     env = {**os.environ, "GIT_NO_LAZY_FETCH": "1", "GIT_NO_REPLACE_OBJECTS": "1"}
     def git(*args):
         return subprocess.run(["git", "--no-replace-objects", "-C", root, *args],
                               env=env, capture_output=True, text=True, timeout=10)
     try:
-        resolved = git("rev-parse", "--verify", commit + "^{commit}")
+        # Let Git resolve its own identifiers, including uppercase/short hashes.
+        # Symbolic refs may move, so resolution must not be memoized by spelling.
+        resolved = git("rev-parse", "--verify", "--end-of-options", commit + "^{commit}")
         boundary = git("rev-parse", "--verify", D41_COMMIT + "^{commit}")
         if resolved.returncode or boundary.returncode:
             return None
