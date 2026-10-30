@@ -19,6 +19,10 @@ case "$e3x_temporary/" in
 esac
 mkdir -p "$e3x_output" "$e3x_temporary"
 test ! -e "$e3x_output/$e3x_label.log"
+# Whole-checkout snapshot fixtures include ignored logs. Publish only after pytest.
+e3x_live="$e3x_temporary/$e3x_label-evidence"
+mkdir -p "$e3x_live"
+test ! -e "$e3x_live/$e3x_label.log"
 unset ANTHROPIC_API_KEY CBORG_API_KEY OPENAI_API_KEY AZURE_OPENAI_API_KEY
 unset GOOGLE_API_KEY GEMINI_API_KEY OPENROUTER_API_KEY D4D_INSTALL_TESTS
 unset ANTHROPIC_AUTH_TOKEN AZURE_OPENAI_AD_TOKEN
@@ -42,14 +46,20 @@ fi
     shasum -a 256 poetry.lock src/data_sheets_schema/evaluation/arm_comparison.py tests/test_arm_comparison.py
     shasum -a 256 "$0" scripts/adhoc/e3x_offline_20261029.sb .github/workflows/main.yaml utils/pytest_shard.py utils/ci_test_durations.json
     uptime
+    printf 'network_sandbox=%s\nnotes_controls=%s\n' "${E3X_LOOPBACK_SANDBOX:-0}" "${E3X_NOTES_CONTROLS:-0}"
+    printf 'pytest_arg=%q\n' "$@"
 } > "$e3x_output/$e3x_label.inputs"
 set +e
 "${e3x_command[@]}" -m pytest -o addopts='' -p no:cacheprovider \
     --basetemp="$e3x_temporary/$e3x_label-tmp" \
-    --junitxml="$e3x_output/$e3x_label.xml" "$@" \
-    > "$e3x_output/$e3x_label.log" 2>&1
+    --junitxml="$e3x_live/$e3x_label.xml" "$@" \
+    > "$e3x_live/$e3x_label.log" 2>&1
 e3x_status=$?
 set -e
+cp "$e3x_live/$e3x_label.log" "$e3x_output/$e3x_label.log"
+if [[ -s "$e3x_live/$e3x_label.xml" ]]; then
+    cp "$e3x_live/$e3x_label.xml" "$e3x_output/$e3x_label.xml"
+fi
 printf '%s\n' "$e3x_status" > "$e3x_output/$e3x_label.exit"
 test -s "$e3x_output/$e3x_label.log"
 tail -n 12 "$e3x_output/$e3x_label.log"
