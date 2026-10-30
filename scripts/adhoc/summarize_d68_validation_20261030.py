@@ -17,11 +17,13 @@ raw = ROOT / ".d68-validation"
 archive = ROOT / "notes/reviews/d41_legacy_recovery_evidence_20261029/authentic_controls.tar.gz"
 with tarfile.open(archive) as tar:
     old = json.load(tar.extractfile("ci/result.json"))
+    old_collection = json.load(tar.extractfile("collect/result.json"))
 base_failures = [row for row in old["reports"] if row["outcome"] == "failed"]
 base_nodes = {row["nodeid"] for row in base_failures}
 summary = {"base": {"head": old["head"], "archive_sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
-                    "failures": base_failures}, "runs": {}}
-for path in sorted(raw.glob("*/d68-result.json")):
+                    "failures": base_failures, "collection_errors": old_collection["collection_errors"]}, "runs": {}}
+paths = [*raw.glob("*/d68-result.json"), *raw.glob("merge/.d68-validation/*/d68-result.json")]
+for path in sorted(paths):
     data = json.loads(path.read_text())
     failures = [row for row in data["reports"] if row["outcome"] == "failed"]
     for row in failures:
@@ -32,6 +34,14 @@ for path in sorted(raw.glob("*/d68-result.json")):
         "selected": len(data["selected"]),
         "phases": dict(Counter(f'{r["when"]}:{r["outcome"]}' for r in data["reports"])),
         "collection_errors": data["collection_errors"], "failures": failures}
+    if "shard" in path.parent.name or "routing-" in path.parent.name:
+        required = {"test_latch_journal.py", "test_api_latch_guard.py", "test_pr5212_d55_fixes.py",
+                    "test_d42_claude_d55.py", "test_pr5212_r3_fixes.py", "test_pr5212_r4_fixes.py",
+                    "test_d41_request_parity.py"}
+        selected = [node for node in data["selected"] if Path(node.split("::")[0]).name in required]
+        summary["runs"][path.parent.name]["d41_selected"] = len(selected)
+        summary["runs"][path.parent.name]["d41_call_outcomes"] = dict(Counter(
+            row["outcome"] for row in data["reports"] if row["when"] == "call" and row["nodeid"] in selected))
 specificity = raw / "specificity.json"
 if specificity.exists():
     audit = json.loads(specificity.read_text())

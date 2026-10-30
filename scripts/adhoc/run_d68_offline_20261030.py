@@ -12,6 +12,8 @@ import sys
 import json
 import tempfile
 import subprocess
+import shlex
+import shutil
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from d41_legacy_controls_20261029 import bootstrap
@@ -22,6 +24,14 @@ base = Path(args[args.index("--basetemp") + 1]).resolve()
 assert base.is_relative_to(root) and "d4d-executions" in base.parts
 base.parent.mkdir(parents=True, exist_ok=True)
 environment = bootstrap(root, base.parent)
+git_binary = shutil.which("git")
+assert git_binary
+def no_remote_git(event, arguments):
+    if event == "subprocess.Popen" and Path(os.fsdecode(arguments[0])).name == "git":
+        argv = arguments[1]
+        if isinstance(argv, (list, tuple)) and any(word in {"fetch", "ls-remote", "push", "pull"} for word in argv[1:]):
+            raise RuntimeError("D68 offline validation refuses Git remote commands, including local fixture remotes")
+sys.addaudithook(no_remote_git)
 environment["head"] = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
 os.environ.pop("PYTEST_DISABLE_PLUGIN_AUTOLOAD", None)
 venv = Path(sys.executable).parent.parent
@@ -42,9 +52,16 @@ class Observe:
         scratch = config._tmp_path_factory.getbasetemp()
         temporary = scratch / "temporary"
         temporary.mkdir()
+        binary_dir = scratch / "offline-bin"
+        binary_dir.mkdir()
+        wrapper = binary_dir / "git"
+        wrapper.write_text((root / "scripts/adhoc/d68_local_git_20261030.sh").read_text().replace(
+            "__D68_GIT_BINARY__", shlex.quote(git_binary)))
+        wrapper.chmod(0o700)
         tempfile.tempdir = str(temporary)
         os.environ.update(TMPDIR=str(temporary), PYTHONPYCACHEPREFIX=str(scratch / "pycache"),
-                          POETRY_CACHE_DIR=str(scratch / "poetry"), MPLCONFIGDIR=str(scratch / "matplotlib"))
+                          POETRY_CACHE_DIR=str(scratch / "poetry"), MPLCONFIGDIR=str(scratch / "matplotlib"),
+                          PATH=str(binary_dir) + os.pathsep + os.environ["PATH"])
 
     def pytest_collection_finish(self, session):
         self.selected = [item.nodeid for item in session.items]
