@@ -192,13 +192,12 @@ def test_explicit_restart_preserves_an_unreadable_snapshot_index(external):
     original = b"incomplete prior index bytes\n"
     path.write_bytes(original)
     refused = FakeClient()
-    with pytest.raises(ledger.UsageLedgerError, match="cannot recover generation snapshots"):
+    with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
         api.execute(external, client=refused)
     assert refused.messages.calls == [] and path.read_bytes() == original
-    api.execute(external, resume=False, client=FakeClient())
-    assert json.loads(path.read_text())["generation_id"] == ledger.generation_id(external)
-    assert any(archive.read_bytes() == original
-               for archive in path.parent.glob(f"{path.stem}.previous-*.json"))
+    with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
+        api.execute(external, resume=False, client=refused)
+    assert refused.messages.calls == [] and path.read_bytes() == original
 
 
 @pytest.mark.parametrize("damage", [None, "custom", "unsupported-rule", "bundle", "missing-bundle", "chunks", "missing-chunks", "sources"])

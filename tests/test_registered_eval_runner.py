@@ -69,8 +69,10 @@ def registration(tmp_path_factory):
     files[reg["registration_path"]] = Path(reg["registration_path"]).read_bytes()
     captured = shared._capture_bytes(files[reg["registration_path"]], reg, files)
     provenance = directory / "generation-provenance.yaml"
+    from tests.test_api_latch_guard import clean_integrity
     provenance.write_text(yaml.safe_dump({
         "record_type": "d4d_generation_provenance", "run": reg["run"],
+        "model": {"runtime_integrity": clean_integrity()},
         "shared_generation": {"authority": captured.identity()},
         "validation": {"artifacts": {"full": {
             "path": str(record), "md5": hashlib.md5(record.read_bytes()).hexdigest(),

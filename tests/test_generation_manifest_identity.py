@@ -249,7 +249,7 @@ def test_legacy_progress_without_input_evidence_requires_explicit_restart(extern
     path.parent.mkdir(parents=True)
     path.write_text(json.dumps({"label": external.label, "completed": ["full", "core"]}))
     client = FakeClient()
-    with pytest.raises(ledger.UsageLedgerError, match="no recorded generation input identity"):
+    with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
         api.execute(external, client=client)
     assert client.messages.calls == []
     assert json.loads(path.read_text())["completed"] == ["full", "core"]

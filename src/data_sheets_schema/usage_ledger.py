@@ -563,6 +563,8 @@ def cancel_call(spec, identifier: str) -> None:
 
 def prepare_usage(spec, *, resume: bool) -> str:
     """Establish the generation boundary before any call can be made (#1291)."""
+    from data_sheets_schema.latch_journal import refuse_legacy_execution
+    refuse_legacy_execution(spec)  # D68/D69: before archival or activation writes.
     if getattr(spec, "_replay_only", False):
         # A replay spec carries no instrument; it must not open or continue
         # a generation (#1568).

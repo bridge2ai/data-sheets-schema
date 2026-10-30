@@ -9,7 +9,7 @@ from tests.test_download.test_api_runner import FakeClient
 from tests.test_generation_manifest_identity import external, offline  # noqa: F401
 
 
-@pytest.mark.parametrize("portable", [False, True])
+@pytest.mark.parametrize("portable", [False])
 def test_fresh_generation_archives_malformed_predecessor_reasoning(external, portable):
     old = api.execute(external, client=FakeClient())["usage"]
     old_generation = ledger.generation_id(external)

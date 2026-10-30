@@ -169,18 +169,20 @@ def checks_from_record(record: dict[str, Any]) -> dict[str, Any]:
     model = record.get("model")
     integrity = ({"runtime_integrity": model["runtime_integrity"]}
                  if isinstance(model, dict) and "runtime_integrity" in model else {})
+    from .latch_journal import record_eligibility_problem
+    problem = record_eligibility_problem(record)
+    if problem:
+        integrity["runtime_integrity_problem"] = problem
     return {"pair": record.get("pair_consistency"), "validation": record.get("validation"),
             "report": record.get("report_claims"), "grounding": record.get("grounding"),
             "form": record.get("form"), "receipts": receipt, **integrity}
 
 
 def _require_eligible_baseline(record, path):
-    model = record.get("model") if isinstance(record, dict) else None
-    if isinstance(model, dict) and "runtime_integrity" in model:
-        from .latch_journal import eligibility_problem
-        problem = eligibility_problem(model["runtime_integrity"])
-        if problem:
-            raise LookupError(f"baseline runtime integrity is ineligible: {path}: {problem}")
+    from .latch_journal import record_eligibility_problem
+    problem = record_eligibility_problem(record)
+    if problem:
+        raise LookupError(f"baseline runtime integrity is ineligible: {path}: {problem}")
 
 
 def offline_verdict(record: dict[str, Any], project: str, label_prefix: str,
@@ -549,9 +551,9 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
 
     # Eligibility is separate from the measured quality counts. A disclosed
     # assisted/unverifiable run cannot authorize a clean campaign fan-out.
-    if "runtime_integrity" in (checks or {}):
+    if "runtime_integrity" in (checks or {}) or (checks or {}).get("runtime_integrity_problem"):
         from .latch_journal import eligibility_problem
-        problem = eligibility_problem(checks["runtime_integrity"])
+        problem = checks.get("runtime_integrity_problem") or eligibility_problem(checks["runtime_integrity"])
         if problem:
             blind.append("runtime integrity")
             rows.append({"metric": "runtime integrity", "run": None,

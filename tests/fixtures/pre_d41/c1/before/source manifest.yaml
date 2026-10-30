@@ -1,0 +1,11 @@
+naming:
+  EXTERNAL:
+    canonical_label: External Cohort
+projects:
+  EXTERNAL:
+    bundle: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/c1/test_fresh_restart_does_not_ac0/cohort
+      source.txt
+    sources:
+    - id: protocol
+      priority: 1
+      source_type: documentation

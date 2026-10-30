@@ -232,6 +232,14 @@ class PreparedEvaluation:
             raise ValueError("prepared definition challenge changed")
 
 
+def require_eligible_generation(record):
+    """D70 campaign eligibility, separate from evaluation quality checks."""
+    from data_sheets_schema.latch_journal import record_eligibility_problem
+    problem = record_eligibility_problem(record)
+    if problem:
+        raise ValueError(f"generation runtime integrity is ineligible for registered evaluation: {problem}")
+
+
 def prepare(
     registration: Path, record: Path, context: Path, *, rubric: str,
     instrument_version: str, context_sha256: str, model: str | None = None,
@@ -321,12 +329,7 @@ def prepare(
         key: prior["run"].get(key) for key in reg["run"]
     } != reg["run"]:
         raise ValueError("record provenance identifies another registered run")
-    model_facts = prior.get("model")
-    if isinstance(model_facts, dict) and "runtime_integrity" in model_facts:
-        from data_sheets_schema.latch_journal import eligibility_problem
-        problem = eligibility_problem(model_facts["runtime_integrity"])
-        if problem:
-            raise ValueError(f"generation runtime integrity is ineligible for registered evaluation: {problem}")
+    require_eligible_generation(prior)
     if (not isinstance(prior.get("shared_generation"), dict)
             or prior["shared_generation"].get("authority") != captured.identity()):
         raise ValueError("record provenance is not bound to this generation registration")

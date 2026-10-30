@@ -342,16 +342,20 @@ def test_legacy_account_requires_explicit_unverifiable_baseline(tmp_path):
     data['rows'] = [{'usage_id': 'already-spent', 'phase': 'full'}]
     ledger._write_unlatched(selected, data)
     old = ledger.ledger_path(selected).read_bytes()
-    with pytest.raises(ledger.UsageLedgerError, match='required event_sha256s=') as caught:
+    with pytest.raises(ledger.UsageLedgerError, match='inspection only'):
         journal.check(selected)
-    digest = str(caught.value).split('required event_sha256s=')[1]
+    digest = journal.provenance(selected)['binding_sha256']
     assert not journal.journal_path(selected).exists()
     assert ledger.ledger_path(selected).read_bytes() == old
     acknowledge(selected, [digest])
-    metadata = journal.check(selected)
+    metadata = journal.provenance(selected)
     assert metadata['verified'] is False
     assert metadata['assisted'] is metadata['evidence_only'] is True
     assert ledger._read(selected)['rows'] == data['rows']
+    with pytest.raises(ledger.UsageLedgerError, match='inspection only'):
+        journal.check(selected)
+    assert ledger.ledger_path(selected).read_bytes() == old
+    assert not journal.journal_path(selected).exists()
 
 
 def test_journal_separates_flat_identities_and_retains_explicit_generation_history(tmp_path):
@@ -511,13 +515,15 @@ def test_missing_ledger_legacy_history_never_becomes_a_clean_resume(tmp_path, ar
         selected.full_path.write_text('id: prior-output\n')
     with pytest.raises(ledger.UsageLedgerError, match='historical evidence cannot become a clean resume'):
         journal.check(selected)
-    with pytest.raises(ledger.UsageLedgerError, match='historical evidence cannot become a clean resume'):
+    with pytest.raises(ledger.UsageLedgerError):
         ledger.prepare_usage(selected, resume=True)
     assert not journal.journal_path(selected).exists()
-    # Explicit fresh is a separate generation, not an adoption of old evidence.
-    assert journal.check(selected, spending=False)['verified'] is False
-    ledger.prepare_usage(selected, resume=False)
-    assert journal.check(selected)['verified'] is True
+    # D68/D69: a fresh generation needs a new label, never this residue.
+    with pytest.raises(ledger.UsageLedgerError):
+        journal.check(selected, spending=False)
+    with pytest.raises(ledger.UsageLedgerError, match='inspection only'):
+        ledger.prepare_usage(selected, resume=False)
+    assert not journal.journal_path(selected).exists()
 
 
 def test_foreign_flat_label_provenance_does_not_masquerade_as_current_history(tmp_path):

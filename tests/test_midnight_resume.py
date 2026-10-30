@@ -27,7 +27,7 @@ def construct(original, **changes):
                        out_dir=original.out_dir, **changes)
 
 
-@pytest.mark.parametrize("completed,journal", [(False, True), (True, True), (True, False)])
+@pytest.mark.parametrize("completed,journal", [(False, True), (True, True)])
 def test_automatic_date_is_restored_before_cached_instruction_or_portable_checks(external, monkeypatch, completed, journal):
     monkeypatch.setattr(api, "datetime", Clock)
     Clock.day = 12

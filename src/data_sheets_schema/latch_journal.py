@@ -9,12 +9,14 @@ from __future__ import annotations
 import copy
 from contextlib import contextmanager
 from datetime import datetime
+from functools import lru_cache
 import hashlib
 import json
 import os
 from pathlib import Path
 import re
 import stat
+import subprocess
 import sys
 
 from data_sheets_schema import usage_ledger as ledger
@@ -23,6 +25,102 @@ FORMAT = "d4d_latch_guard_v1"
 OVERRIDE_FORMAT = "d4d_latch_override_v1"
 _HEX = re.compile(r"[0-9a-f]{64}")
 _MISSING = {"__d4d_latch_missing__": True}
+
+# D70: derived offline with
+# git log --all --diff-filter=A --format='%H %cI' -- src/data_sheets_schema/latch_journal.py
+# Use ancestry, not wall-clock comparison, when the recorded commit resolves.
+D41_COMMIT = "8ab03fda923d2c8caa9a2e65e558be73e92500e9"
+D41_COMMITTED_AT = "2026-10-25T22:11:01-07:00"
+
+
+@lru_cache(maxsize=4096)
+def _commit_age(commit, root):
+    if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-f]{7,40}", commit):
+        return None
+    env = {**os.environ, "GIT_NO_LAZY_FETCH": "1", "GIT_NO_REPLACE_OBJECTS": "1"}
+    def git(*args):
+        return subprocess.run(["git", "--no-replace-objects", "-C", root, *args],
+                              env=env, capture_output=True, text=True, timeout=10)
+    try:
+        resolved = git("rev-parse", "--verify", commit + "^{commit}")
+        boundary = git("rev-parse", "--verify", D41_COMMIT + "^{commit}")
+        if resolved.returncode or boundary.returncode:
+            return None
+        descendant = git("merge-base", "--is-ancestor", D41_COMMIT, resolved.stdout.strip())
+        if descendant.returncode == 0:
+            return "post-D41"
+        # A shallow graph cannot establish a negative ancestry result.
+        shallow = git("rev-parse", "--is-shallow-repository")
+        if descendant.returncode == 1 and shallow.returncode == 0 and shallow.stdout.strip() == "false":
+            return "pre-D41"
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    return None
+
+
+def record_age(record, *, repo_root=None):
+    """Positive recorded ancestry, else a strictly earlier recorded timestamp.
+
+    A recent timestamp alone never establishes post-D41 ancestry. Missing
+    journal/integrity fields convey no age evidence. No remote Git operation.
+    """
+    record = record if isinstance(record, dict) else {}
+    repo = record.get("repo")
+    root = str(repo_root or Path(__file__).resolve().parents[2])
+    age = _commit_age(repo.get("commit") if isinstance(repo, dict) else None, root)
+    if age:
+        return age
+    value = record.get("record_generated_at")
+    try:
+        when = value if isinstance(value, datetime) else datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if when.tzinfo is not None and when < datetime.fromisoformat(D41_COMMITTED_AT):
+            return "pre-D41"
+    except (ValueError, TypeError):
+        pass
+    return "age unestablished"
+
+
+def record_eligibility_problem(record):
+    model = record.get("model") if isinstance(record, dict) else None
+    if isinstance(model, dict) and "runtime_integrity" in model:
+        return eligibility_problem(model["runtime_integrity"])
+    age = record_age(record)
+    return None if age == "pre-D41" else f"{age}: missing runtime_integrity block"
+
+
+def _record(spec):
+    import yaml
+    if not spec.provenance_path.exists():
+        return {}
+    try:
+        value = yaml.safe_load(_bytes(spec.provenance_path))
+        return value if isinstance(value, dict) and ledger.record_matches(spec, value.get("run")) else {}
+    except (ValueError, yaml.YAMLError):
+        return {}
+
+
+def refuse_legacy_execution(spec):
+    """Read-only pre-lock refusal; repeat the guard at write/spend boundaries."""
+    try:
+        events = _events(spec)
+    except ledger.UsageLedgerError as exc:
+        # Preserve D57 even though this check now precedes launch_record.
+        message = re.sub(r'[0-9a-fA-F]{64,}',
+                         lambda match: match[0][:8] + '…(unverified, not a resume anchor)', str(exc))
+        print(f'latch journal refused: {message} (not a resume anchor)', file=sys.stderr, flush=True)
+        raise ledger.UsageLedgerError(message) from None
+    if not _mine(spec, events):
+        path = ledger.ledger_path(spec)
+        if path.is_file():
+            try:
+                data = _json(_bytes(path))
+            except (ValueError, TypeError):
+                data = {}
+            if isinstance(data, dict) and "latch_journal" in data:
+                _fail("journal was deleted from a guarded ledger; found=missing journal (not a resume anchor)")
+        if path.exists() or path.is_symlink() or _legacy_evidence(spec):
+            _fail(f"{record_age(_record(spec))}: journal-less run is inspection only; "
+                  "relaunch with a new label; legacy recovery never spends")
 
 
 def _canonical(value) -> bytes:
@@ -344,28 +442,15 @@ def _apply_override(spec, data, events, mine, discrepancies):
 
 
 def _legacy(spec, data, events):
-    # Preview hash is deterministic and disclosed before any write; no automatic
-    # adoption of an already-spent legacy account as a clean generation.
+    # D69: an in-memory evidence binding, never an adoption or a ledger write.
     event = _event(spec, data, events, "legacy_unverifiable",
                    {"ledger_sha256": _sha(_bytes(ledger.ledger_path(spec))),
-                    "reason": "historical latches cannot be independently established"})
-    acknowledgement = _override(spec, data, {event["sha256"]})
-    if any(key.startswith('terminal:') for key in _observations(data)):
-        _fail('historical terminal failure; legacy override cannot authorize continuation')
-    _append(spec, events, event)
+                    "reason": "historical latches cannot be independently established",
+                    "age": record_age(_record(spec))})
     mine = [event]
-    for key, value in _observations(data).items():
-        latch = _event(spec, data, events, "latch", {"key": key, "value": value})
-        _append(spec, events, latch)
-        mine.append(latch)
-    acknowledgement["discrepancies"] = [{"event_sha256": event["sha256"], "key": "legacy_unverifiable",
-                                          "expected": "independent historical latches", "found": "unavailable"}]
-    applied = _event(spec, data, events, "override", acknowledgement)
-    _append(spec, events, applied)
-    mine.append(applied)
-    data["latch_journal"] = _checkpoint(spec, applied)
-    data["latch_overrides"] = _acknowledgements(mine)
-    ledger._write_unlatched(spec, data)
+    if override_path(spec).exists():
+        acknowledgement = _override(spec, data, {event["sha256"]})
+        mine.append(_event(spec, data, [*events, event], "override", acknowledgement))
     return mine
 
 
@@ -397,6 +482,12 @@ def _legacy_evidence(spec):
         for path in (spec.full_path, spec.core_path, spec.report_path):
             if path.exists() or path.is_symlink():
                 found.append(str(path))
+        # Partial/archived deliveries are residue too, even if progress,
+        # provenance and the active ledger were all removed (P5).
+        for folder in (spec.metadata_dir, spec.metadata_dir / "intermediate"):
+            for path in folder.glob(f"{spec.project}_*"):
+                if path.is_file() or path.is_symlink():
+                    found.append(str(path))
     return found
 
 
@@ -461,16 +552,16 @@ def _recover_update(spec, data, events, mine):
     ledger._write_unlatched(spec, data)
 
 
-def _validated(spec, *, spending=False, allow_new=False, startup=False):
+def _validated(spec, *, spending=False, allow_new=False, startup=False, mutation=False):
     events = _events(spec)
     own = _mine(spec, events)
     path = ledger.ledger_path(spec)
     if not path.exists() and not path.is_symlink():
         if own:
             _fail(f"usage ledger deleted while its generation journal survives: expected generation={own[-1]['generation_id']}; found=missing ledger")
-        if not allow_new and _legacy_evidence(spec):
+        if _legacy_evidence(spec):
             _fail("surviving historical outputs/progress have no usage ledger or latch history; "
-                  "restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume")
+                  "relaunch with a new label; historical evidence cannot become a clean resume")
         return None, events, []
     # Strict decoding also rejects duplicate keys before the ordinary shape guard.
     try:
@@ -481,7 +572,10 @@ def _validated(spec, *, spending=False, allow_new=False, startup=False):
     if not own:
         if "latch_journal" in data:
             _fail(f"journal was deleted from a guarded ledger: expected={data['latch_journal']}; found=missing journal")
+        if spending or startup or mutation:
+            _fail("journal-less run is inspection only; relaunch with a new label; legacy recovery never spends")
         mine = _legacy(spec, data, events)
+        return data, events, mine
     else:
         if not mine or own[-1]["generation_id"] != data["generation_id"]:
             _fail(f"current generation does not match the last journaled boundary: expected={own[-1]['generation_id']}; found={data['generation_id']}")
@@ -489,6 +583,8 @@ def _validated(spec, *, spending=False, allow_new=False, startup=False):
             _recover_update(spec, data, events, mine)
         if data.get("latch_overrides", []) != _acknowledgements(mine):
             _fail(f"durable override history was changed or removed: expected={_acknowledgements(mine)}; found={data.get('latch_overrides')}")
+    if (spending or startup or mutation) and any(e['kind'] == 'legacy_unverifiable' for e in mine):
+        _fail("previously adopted legacy run is inspection only; legacy recovery never spends")
     discrepancies = _mismatches(spec, data, mine)
     mine = _apply_override(spec, data, events, mine, discrepancies)
     if (spending or startup and discrepancies) and any(key.startswith("terminal:") for key in _latches(mine)):
@@ -554,7 +650,7 @@ def _carry_guard_fields(spec, data, previous, mine):
 def before_ledger_write(spec, data, *, snapshot=None):
     """Validate persisted state before accepting a caller's proposed mutation."""
     explicit_fresh = data.get("accept_legacy") is False and data.get("rows") == []
-    previous, events, mine = _validated(spec, allow_new=explicit_fresh)
+    previous, events, mine = _validated(spec, allow_new=explicit_fresh, mutation=True)
     ledger._validate_data(spec, data, ledger.ledger_path(spec))
     same_generation = previous is not None and previous["generation_id"] == data["generation_id"]
     _check_transcript_transition(spec, previous if same_generation else None, data)
@@ -617,14 +713,19 @@ def remember_snapshot(spec, entry, *, index_path):
 
 def _metadata(spec, events, mine):
     overrides = _acknowledgements(mine)
+    legacy = [event for event in mine if event['kind'] == 'legacy_unverifiable']
     result = {"format": FORMAT, "verified": bool(mine) and not any(event["kind"] == "legacy_unverifiable" for event in mine),
-              "assisted": bool(overrides), "evidence_only": bool(overrides),
+              "assisted": bool(overrides), "evidence_only": bool(overrides or legacy),
               "overrides": overrides, "authentication": "not_cryptographically_authenticated"}
     if events:
         result["journal"] = {"path": str(journal_path(spec)), "sha256": _sha(_bytes(journal_path(spec))),
                              "head_sha256": events[-1]["sha256"], "line_count": len(events)}
     else:
         result["journal"] = None
+    if legacy:
+        result["legacy_unverifiable"] = legacy[0]["payload"]
+        result["binding_sha256"] = legacy[0]["sha256"]
+        result["accounting_completeness"] = "unknown"
     return result
 
 
@@ -685,6 +786,138 @@ def provenance(spec):
     """Expose qualified history without granting permission to continue spending."""
     _, events, mine = _validated(spec)
     return _metadata(spec, events, mine)
+
+
+def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
+    """Read-only generic-v6 evidence verification, including relocated captures.
+
+    The explicit root mapping changes only file lookup, never captured bytes or
+    instruction substitutions. No execution, lock, repair or usage initializer
+    is reachable. Shared/receipt controllers require their own future verifier.
+    Returns a separate evidence-only envelope; never restamps the old record.
+    """
+    import yaml
+    from data_sheets_schema import api_runner as api
+    from data_sheets_schema.provenance import check_record
+    from data_sheets_schema.duplicate_keys import duplicate_keys_in
+
+    root, old = Path(evidence_root).resolve(), Path(recorded_root)
+    path = Path(record_path).absolute()
+    if not old.is_absolute() or not path.is_relative_to(root):
+        _fail("verification requires absolute evidence and recorded roots")
+
+    def inventory():
+        result = {}
+        for item in sorted(root.rglob("*")):
+            if item.is_symlink():
+                _fail("verification refuses symlinks")
+            if item.is_file():
+                result[str(item.relative_to(root))] = _sha(_bytes(item))
+        return result
+
+    before = inventory()
+    if duplicate_keys_in(path):
+        _fail("duplicate keys in legacy provenance")
+    record = yaml.safe_load(_bytes(path))
+    if not isinstance(record, dict) or record_age(record) != "pre-D41":
+        _fail("completed legacy verification requires positive pre-D41 age evidence")
+    run = record.get("run") or {}
+    model = record.get("model") or {}
+    if "runtime_integrity" in model or any(name.endswith("_latch_journal.jsonl") for name in before):
+        _fail("guarded history cannot enter legacy verification")
+    request = (record.get("prompts") or {}).get("request") or {}
+    rendered = request.get("spec") or {}
+    if run.get("condition") != "generic_v6" or any(rendered.get(key) for key in (
+            "shared_generation_version", "receipt_completion_version", "removal_repair_version")):
+        _fail("legacy verifier currently supports generic_v6 only; other controllers are unaddressed")
+    if any(name.endswith("_api_progress.json") for name in before):
+        _fail("legacy run is incomplete: progress survives")
+    issues, failure = check_record(record)
+    if issues or failure:
+        _fail(f"legacy provenance conformance failed: {failure or issues}")
+    replay = api.RunSpec.from_render_spec(rendered, **{k: run[k] for k in ("project", "method", "label")})
+    if _sha(replay.instruction.encode()) != request.get("sha256"):
+        _fail("legacy instruction binding changed")
+
+    def local(value):
+        source = Path(value)
+        if not source.is_absolute() or not source.is_relative_to(old) or ".." in source.parts:
+            _fail(f"evidence path is outside recorded root: {value}")
+        return root / source.relative_to(old)
+
+    def verify(entry):
+        if not isinstance(entry, dict) or not entry.get("path"):
+            _fail("missing legacy file binding")
+        raw = _bytes(local(entry["path"]))
+        hashes = {key: entry[key] for key in ("sha256", "md5") if entry.get(key)}
+        if not hashes or any(hashlib.new(key, raw).hexdigest() != value for key, value in hashes.items()):
+            _fail(f"legacy file hash mismatch: {entry['path']}")
+
+    inputs = record["inputs"]
+    verify({"path": inputs["bundle_path"], "md5": inputs.get("bundle_md5"),
+            "sha256": inputs.get("bundle_sha256")})
+    for key in ("source_manifest", "chunks"):
+        verify(inputs[key])
+    for entry in record["validation"]["artifacts"].values():
+        verify(entry)
+    verify(record["report_claims"]["artifacts"]["report"])
+    verify(record["companions"]["reasoning_log"])
+    intermediates = record.get("intermediates") or []
+    if not intermediates:
+        _fail("missing completed intermediate bindings")
+    for entry in intermediates:
+        verify(entry)
+    repo = Path(__file__).resolve().parents[2]
+    for role in ("full", "core"):
+        schema = record["schema"]
+        schema_path = Path(schema[role + "_path"])
+        if schema_path.is_absolute() or ".." in schema_path.parts:
+            _fail("invalid schema resource path")
+        if _sha(_bytes(repo / schema_path)) != schema[role + "_sha256"]:
+            _fail("legacy schema binding changed")
+    usage = record.get("api_usage")
+    if not isinstance(usage, list) or not {"full", "audit", "reconcile_full", "report"}.issubset(
+            {row.get("phase") for row in usage}):
+        _fail("missing completed phase accounting")
+    accounted = {row.get("usage_id") for row in usage}
+    generation = run.get("generation_id")
+    identity = {k: run.get(k) for k in ("project", "label", "method", "condition")}
+    # Current local completion checks cannot repair or call a provider.
+    replay.out_dir = path.parent
+    if api._unrecorded_reasoning(replay, record):
+        _fail("unaccounted legacy reasoning usage")
+    validation = api.validate_outputs(replay)
+    if validation:
+        _fail(f"legacy outputs fail current validation: {validation}")
+    for role in ("full", "core", "report"):
+        if local(record["outputs"][role]["path"]) != getattr(replay, role + "_path"):
+            _fail("legacy output ownership mismatch")
+    for name in before:
+        item = root / name
+        if "_api_usage_" in item.name and item.suffix == ".json":
+            data = _json(_bytes(item))
+            if any(k in data for k in ("latch_journal", "latch_overrides", "latch_snapshots")):
+                _fail("guarded ledger cannot enter legacy verification")
+            if data.get("identity") != identity or data.get("generation_id") != generation:
+                _fail("unaccounted legacy ledger identity")
+            if data.get("rows") != usage or data.get("pending_call") or data.get("evidence_refusal"):
+                _fail("incomplete or inconsistent legacy accounting")
+        if "_snapshot_index" in item.name and item.suffix == ".json":
+            index = _json(_bytes(item))
+            if index.get("run_identity") != identity or index.get("generation_id") != generation:
+                _fail("unaccounted legacy snapshot generation")
+            for entry in index["snapshots"]:
+                verify(entry)
+                if entry.get("usage_id") and entry["usage_id"] not in accounted:
+                    _fail("unaccounted legacy snapshot attempt")
+    if before != inventory():
+        _fail("legacy evidence changed during verification")
+    return {"already_complete": True, "legacy_unverifiable": True, "evidence_only": True,
+            "campaign_eligible": False, "age": "pre-D41", "new_calls": 0,
+            "accounting_completeness": "unknown", "observed_usage": usage,
+            "record_sha256": _sha(_bytes(path)), "tree_sha256": _sha(_canonical(before)),
+            "recorded_root": str(old), "evidence_root": str(root),
+            "verification": "recorded identity, instruction, schema, files and observed accounting"}
 
 
 def eligibility_problem(block):

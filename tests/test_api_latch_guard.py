@@ -366,6 +366,8 @@ def test_clean_or_legacy_integrity_does_not_fabricate_a_new_quality_measurement(
     assert canary.verdict(canary.checks_from_record(record), {}, baseline_requested=False)["status"] == canary.OK
     record.pop("model")
     assert "runtime_integrity" not in canary.checks_from_record(record)
+    assert canary.verdict(canary.checks_from_record(record), {}, baseline_requested=False)["status"] != canary.OK
+    record["record_generated_at"] = "2026-09-12T12:00:00Z"
     assert canary.verdict(canary.checks_from_record(record), {}, baseline_requested=False)["status"] == canary.OK
 
 

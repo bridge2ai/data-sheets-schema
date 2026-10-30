@@ -1,0 +1,12 @@
+# full
+# Sources: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/c7/test_automatic_date_is_restore0/outputs/EXTERNAL_d4d.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+
+conforms_to_class: CoreDataset
+conforms_to_schema: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+keywords:
+- a
+title: T
+id: x
+name: n
+description: d

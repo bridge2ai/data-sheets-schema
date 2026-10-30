@@ -29,6 +29,8 @@ import traceback
 PRE = "f8c5ac73caba610d40c49aaceddb31ead3590a72"
 BASE = "d9b69d84d9a6936809681ae240bb8e767649ca11"
 CASES = {
+    "i1": ("tests/test_midnight_resume.py::test_automatic_date_is_restored_before_cached_instruction_or_portable_checks[True-True]", [2]),
+    "i2": ("tests/test_midnight_resume.py::test_automatic_date_is_restored_before_cached_instruction_or_portable_checks[False-True]", [2]),
     "c1": ("tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_does_not_accept_unrelated_archived_attempts", [2]),
     "c2": ("tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_records_an_orphaned_partial_predecessor[malformed]", [2]),
     "c3": ("tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_records_an_orphaned_partial_predecessor[missing]", [2]),

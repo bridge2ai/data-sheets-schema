@@ -6907,7 +6907,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         from .output_ownership import require_selected_resume_owner
         assert_current(spec)  # authority isolation precedes even sidecar lock writes
         require_selected_resume_owner(spec, resume=resume)
-    from .latch_journal import launch_record
+    from .latch_journal import launch_record, refuse_legacy_execution
+    refuse_legacy_execution(spec)  # D68: refuse before even sidecar lock writes.
     with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256):
         if getattr(spec, 'shared_generation_version', 0):
             # Another sequential writer may have changed ownership while we waited.
