@@ -186,18 +186,10 @@ def test_drift_before_receipt_readdressing_keeps_delivered_response(external):
     assert not spec.full_path.exists() and not spec.provenance_path.exists()
 
 
-def test_explicit_restart_preserves_an_unreadable_snapshot_index(external):
-    path = snapshot_store.index_path(external.metadata_dir, external.project)
-    path.parent.mkdir(parents=True)
-    original = b"incomplete prior index bytes\n"
-    path.write_bytes(original)
-    refused = FakeClient()
-    with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
-        api.execute(external, client=refused)
-    assert refused.messages.calls == [] and path.read_bytes() == original
-    with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
-        api.execute(external, resume=False, client=refused)
-    assert refused.messages.calls == [] and path.read_bytes() == original
+@pytest.mark.parametrize("resume", [True, False])
+def test_explicit_restart_preserves_an_unreadable_snapshot_index(tmp_path, resume):
+    from tests.test_d68_legacy_readonly import test_authentic_legacy_refuses_without_calls_or_tree_changes
+    test_authentic_legacy_refuses_without_calls_or_tree_changes("c6", "execute", resume, tmp_path)
 
 
 @pytest.mark.parametrize("damage", [None, "custom", "unsupported-rule", "bundle", "missing-bundle", "chunks", "missing-chunks", "sources"])

@@ -256,7 +256,8 @@ class TestTheGateReading(unittest.TestCase):
                                ("rep2", {"checked": True, "findings": [], "claims_checked": 4}),
                                ("rep3", {"checked": False, "reason": "no report"})):
                 d = root / "m_core" / f"2026-01-01_x_{rep}"; d.mkdir(parents=True)
-                (d / "P_provenance.yaml").write_text(yaml.safe_dump({"report_claims": block}))
+                (d / "P_provenance.yaml").write_text(yaml.safe_dump({
+                    "record_generated_at": "2026-01-01T00:00:00Z", "report_claims": block}))
             self.assertEqual(canary.report_basis("P", "2026-01-01_x", method="m", concat_dir=root),
                              {"measured": 1, "vacuous": 1, "unchecked": 1})
 
@@ -268,6 +269,7 @@ class TestTheGateReading(unittest.TestCase):
                                ("rep2", {"checked": True, "findings": [], "claims_checked": 0})):
                 d = root / "m_core" / f"2026-01-01_x_{rep}"; d.mkdir(parents=True)
                 (d / "P_provenance.yaml").write_text(yaml.safe_dump({
+                    "record_generated_at": "2026-01-01T00:00:00Z",
                     "pair_consistency": {"ran": True, "errors": 1}, "report_claims": block,
                     "grounding": {"checked": True}, "form": {"checked": True}}))
             bar = canary.baseline_for("P", "2026-01-01_x", method="m", concat_dir=root)

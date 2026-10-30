@@ -109,7 +109,10 @@ def refuse_legacy_execution(spec):
                          lambda match: match[0][:8] + '…(unverified, not a resume anchor)', str(exc))
         print(f'latch journal refused: {message} (not a resume anchor)', file=sys.stderr, flush=True)
         raise ledger.UsageLedgerError(message) from None
-    if not _mine(spec, events):
+    own = _mine(spec, events)
+    if any(event["kind"] == "legacy_unverifiable" for event in own):
+        _fail("previously adopted legacy run is inspection only; legacy recovery never spends")
+    if not own:
         path = ledger.ledger_path(spec)
         if path.is_file():
             try:
@@ -458,6 +461,14 @@ def _legacy_evidence(spec):
     """Bounded known-artifact inspection includes ignored files by direct reads."""
     from data_sheets_schema.snapshot_store import index_path
     import yaml
+    events = _events(spec)
+    def guarded_foreign(identity):
+        if not isinstance(identity, dict) or not ledger.identity_is_foreign(spec, identity):
+            return False
+        selected = {key: identity.get(key) for key in ledger.run_identity(spec)}
+        history = [event for event in events if event["identity"] == selected]
+        return (any(event["kind"] == "generation" for event in history)
+                and not any(event["kind"] == "legacy_unverifiable" for event in history))
     candidates = [(spec.provenance_path, "run", "yaml"),
                   (spec.metadata_dir / f"{spec.project}_api_progress.json", "run_identity", "json"),
                   (index_path(spec.metadata_dir, spec.project), "run_identity", "json")]
@@ -474,7 +485,7 @@ def _legacy_evidence(spec):
         identity = value.get(identity_key) if isinstance(value, dict) else None
         foreign_label = (isinstance(value, dict) and value.get("label") is not None
                          and value["label"] != spec.label)
-        if ledger.identity_is_foreign(spec, identity) or foreign_label:
+        if (ledger.identity_is_foreign(spec, identity) or foreign_label) and guarded_foreign(identity):
             foreign = True
             continue
         found.append(str(path))
@@ -486,6 +497,15 @@ def _legacy_evidence(spec):
         # provenance and the active ledger were all removed (P5).
         for folder in (spec.metadata_dir, spec.metadata_dir / "intermediate"):
             for path in folder.glob(f"{spec.project}_*"):
+                if path == journal_path(spec):
+                    continue  # _events/_mine already selected the guarded identity.
+                if path.name.startswith(f"{spec.project}_api_usage_") or path == override_path(spec):
+                    try:
+                        value = _json(_bytes(path))
+                    except (ValueError, ledger.UsageLedgerError):
+                        value = None
+                    if isinstance(value, dict) and guarded_foreign(value.get("identity")):
+                        continue
                 if path.is_file() or path.is_symlink():
                     found.append(str(path))
     return found
@@ -569,6 +589,8 @@ def _validated(spec, *, spending=False, allow_new=False, startup=False, mutation
     except (ValueError, TypeError) as exc:
         _fail(f"invalid usage ledger: {exc}")
     mine = _mine(spec, events, data["generation_id"])
+    if (spending or startup or mutation) and any(e['kind'] == 'legacy_unverifiable' for e in mine):
+        _fail("previously adopted legacy run is inspection only; legacy recovery never spends")
     if not own:
         if "latch_journal" in data:
             _fail(f"journal was deleted from a guarded ledger: expected={data['latch_journal']}; found=missing journal")
@@ -583,8 +605,6 @@ def _validated(spec, *, spending=False, allow_new=False, startup=False, mutation
             _recover_update(spec, data, events, mine)
         if data.get("latch_overrides", []) != _acknowledgements(mine):
             _fail(f"durable override history was changed or removed: expected={_acknowledgements(mine)}; found={data.get('latch_overrides')}")
-    if (spending or startup or mutation) and any(e['kind'] == 'legacy_unverifiable' for e in mine):
-        _fail("previously adopted legacy run is inspection only; legacy recovery never spends")
     discrepancies = _mismatches(spec, data, mine)
     mine = _apply_override(spec, data, events, mine, discrepancies)
     if (spending or startup and discrepancies) and any(key.startswith("terminal:") for key in _latches(mine)):
@@ -882,10 +902,18 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
     accounted = {row.get("usage_id") for row in usage}
     generation = run.get("generation_id")
     identity = {k: run.get(k) for k in ("project", "label", "method", "condition")}
+    expected_inputs = {
+        "bundle": {"path": inputs["bundle_path"], "sha256": _sha(_bytes(local(inputs["bundle_path"])))},
+        **{key: {"path": inputs[key]["path"], "sha256": _sha(_bytes(local(inputs[key]["path"])))}
+           for key in ("source_manifest", "chunks")},
+        "profile": {"name": record["schema"]["profile"], "digest_md5": record["schema"]["digest_md5"]},
+        "instruction": {"render_version": replay.render_version, "sha256": request["sha256"], "spec": rendered}}
     # Current local completion checks cannot repair or call a provider.
     replay.out_dir = path.parent
     if api._unrecorded_reasoning(replay, record):
         _fail("unaccounted legacy reasoning usage")
+    if api._unrecorded_abandoned(replay, record):
+        _fail("unaccounted legacy abandoned usage")
     validation = api.validate_outputs(replay)
     if validation:
         _fail(f"legacy outputs fail current validation: {validation}")
@@ -895,17 +923,23 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
     for name in before:
         item = root / name
         if "_api_usage_" in item.name and item.suffix == ".json":
-            data = _json(_bytes(item))
+            data = ledger._validate_data(replay, _json(_bytes(item)), item)
             if any(k in data for k in ("latch_journal", "latch_overrides", "latch_snapshots")):
                 _fail("guarded ledger cannot enter legacy verification")
             if data.get("identity") != identity or data.get("generation_id") != generation:
                 _fail("unaccounted legacy ledger identity")
             if data.get("rows") != usage or data.get("pending_call") or data.get("evidence_refusal"):
                 _fail("incomplete or inconsistent legacy accounting")
+            if (ledger._identity_differs(data.get("input_identity"), expected_inputs)
+                    or data.get("pending_snapshot_activation") or data.get("pending_reasoning_archive")
+                    or any(key.startswith("terminal:") for key in _observations(data))):
+                _fail("legacy ledger input or completion state is inconsistent")
         if "_snapshot_index" in item.name and item.suffix == ".json":
             index = _json(_bytes(item))
             if index.get("run_identity") != identity or index.get("generation_id") != generation:
                 _fail("unaccounted legacy snapshot generation")
+            if index.get("version") != 1 or ledger._identity_differs(index.get("input_identity"), expected_inputs):
+                _fail("legacy snapshot input identity is inconsistent")
             for entry in index["snapshots"]:
                 verify(entry)
                 if entry.get("usage_id") and entry["usage_id"] not in accounted:

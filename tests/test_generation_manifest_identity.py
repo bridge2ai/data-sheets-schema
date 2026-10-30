@@ -244,15 +244,9 @@ def test_changed_inputs_in_portable_record_are_refused_without_a_ledger(external
     assert snapshot(external.out_dir) == before
 
 
-def test_legacy_progress_without_input_evidence_requires_explicit_restart(external):
-    path = api._progress_path(external)
-    path.parent.mkdir(parents=True)
-    path.write_text(json.dumps({"label": external.label, "completed": ["full", "core"]}))
-    client = FakeClient()
-    with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
-        api.execute(external, client=client)
-    assert client.messages.calls == []
-    assert json.loads(path.read_text())["completed"] == ["full", "core"]
+def test_legacy_progress_without_input_evidence_requires_explicit_restart(tmp_path):
+    from tests.test_d68_legacy_readonly import test_authentic_legacy_refuses_without_calls_or_tree_changes
+    test_authentic_legacy_refuses_without_calls_or_tree_changes("c5", "execute", True, tmp_path)
 
 
 def test_current_and_legacy_prompt_specs_both_verify_against_their_own_hash(external):

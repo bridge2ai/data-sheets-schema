@@ -16,8 +16,8 @@ CI; its i1/i2 selectors reproduce the reviewer's extra cases.
 | C2 malformed ledger | Rewritten against authentic c2; no archival or spending. |
 | C3 missing ledger | Rewritten against authentic c3; fresh restart now refuses. |
 | C4 interrupted index activation | Rewritten against authentic call 3; prepared journal-less ledger never resumes. |
-| C5 missing input identity | Retained as an explicit synthetic malformed-progress negative; earlier no-spend refusal replaces the old diagnostic. It was never production-emitted evidence. |
-| C6 unreadable index | Retained as an explicit synthetic malformed-index negative; both resume modes refuse, preserving bytes. It was never production-emitted evidence. |
+| C5 missing input identity | Rewritten against exact f8 call-1 before-tree; earlier no-spend refusal replaces the old diagnostic. The captured historical test hand-wrote this progress, so it is not production-emitted evidence. |
+| C6 unreadable index | Rewritten against exact f8 call-1 before-tree; both resume modes refuse, preserving every byte. The captured historical test hand-wrote this index, so it is not production-emitted evidence. |
 | C7 portable completed run | Old current-ledger-deletion parameter retired: it tested guarded damage, not pre-D41 history. Authentic c7 now verifies read-only and refuses execution. Current guarded damage remains covered by the D41 suites. |
 | C8 malformed prior reasoning | Old portable/current-ledger-deletion parameter retired for the same age conflation. Authentic c8 now refuses without changes. The intact current-journal restart parameter remains. |
 
@@ -26,6 +26,11 @@ ledger. Both refuse execution; i1 additionally passes read-only verification.
 Absence of a journal does not classify i2/C2/C4 as pre-D41 at runtime: without
 a surviving provenance commit or timestamp their runtime age is unestablished.
 Their fixture origin is independently established by the pinned capture source.
+
+C5/C6 come from the committed design evidence archive, imported one case at a
+time with the same manifest-checking helper. CI reads only the resulting plain
+trees. Their source archive SHA-256 is
+`314ad171427e2a42244fe963874c1082137ea99228bc40d6f12809058a36de6a`.
 
 No recovery authorization or import is implemented (review item 5 is superseded
 by the owner's Option 3). Pre-D41 shared-v2 verification remains unaddressed and

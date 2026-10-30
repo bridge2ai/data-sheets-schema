@@ -533,9 +533,12 @@ def test_foreign_flat_label_provenance_does_not_masquerade_as_current_history(tm
     selected.provenance_path.parent.mkdir(parents=True, exist_ok=True)
     selected.provenance_path.write_text(yaml.safe_dump({'run': ledger.run_identity(foreign)}))
     selected.full_path.write_text('id: foreign-output\n')
-    assert journal.check(selected)['verified'] is False
-    ledger.prepare_usage(selected, resume=True)
-    assert journal.check(selected)['verified'] is True
+    # D68: a different label cannot overwrite an unguarded evidence directory.
+    with pytest.raises(ledger.UsageLedgerError):
+        journal.check(selected)
+    with pytest.raises(ledger.UsageLedgerError):
+        ledger.prepare_usage(selected, resume=True)
+    assert not journal.journal_path(selected).exists()
 
 
 def test_discrepancy_error_names_key_expected_and_found_without_large_payload(tmp_path):

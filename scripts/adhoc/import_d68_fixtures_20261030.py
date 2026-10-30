@@ -10,12 +10,21 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
+import tarfile
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("source", type=Path)
 parser.add_argument("case")
 parser.add_argument("--call", type=int, default=2)
 args = parser.parse_args()
+if args.source.is_file():
+    staging = Path(__file__).resolve().parents[2] / ".d68-validation/import-source"
+    prefix = f"captures/{args.case}/call-{args.call}/"
+    with tarfile.open(args.source) as tar:
+        members = [item for item in tar.getmembers() if item.name.startswith(prefix)
+                   and ("/before/" in item.name or item.name.endswith(("/before-manifest.json", "/invocation.json")))]
+        tar.extractall(staging, members=members, filter="data")
+    args.source = staging / "captures"
 source = args.source / args.case / f"call-{args.call}"
 dest = Path(__file__).resolve().parents[2] / "tests/fixtures/pre_d41" / args.case
 manifest = json.loads((source / "before-manifest.json").read_text())
