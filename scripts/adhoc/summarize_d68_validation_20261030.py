@@ -23,15 +23,26 @@ with tarfile.open(archive) as tar:
     old = json.load(tar.extractfile("ci/result.json"))
     old_collection = json.load(tar.extractfile("collect/result.json"))
 base_failures = [row for row in old["reports"] if row["outcome"] == "failed"]
-base_nodes = {row["nodeid"] for row in base_failures}
+base_nodes = {(row["nodeid"], row["when"]) for row in base_failures}
 summary = {"base": {"head": old["head"], "archive_sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
                     "failures": base_failures, "collection_errors": old_collection["collection_errors"]}, "runs": {}}
-paths = [*raw.glob("*/d68-result.json"), *raw.glob("merge/.d68-validation/*/d68-result.json")]
+baseline_paths = list(raw.glob("base/.d68-validation/*/d68-result.json"))
+same_restrictions = {}
+for path in baseline_paths:
+    data = json.loads(path.read_text())
+    assert data["environment"]["head"] == old["head"]
+    for row in data["reports"]:
+        if row["outcome"] == "failed":
+            same_restrictions.setdefault((row["nodeid"], row["when"]), []).append(str(path.relative_to(ROOT)))
+paths = [*raw.glob("*/d68-result.json"), *raw.glob("merge/.d68-validation/*/d68-result.json"), *baseline_paths]
 for path in sorted(paths):
     data = json.loads(path.read_text())
     failures = [row for row in data["reports"] if row["outcome"] == "failed"]
     for row in failures:
-        row["also_failed_on_d9"] = row["nodeid"] in base_nodes
+        key = (row["nodeid"], row["when"])
+        row["original_d9_archive_failed"] = key in base_nodes
+        row["same_restrictions_d9_evidence"] = same_restrictions.get(key, [])
+        row["also_failed_on_d9"] = key in base_nodes or key in same_restrictions
     summary["runs"][path.parent.name] = {
         "source": str(path.relative_to(ROOT)), "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         "exit_code": data["exit_code"], "head": data["environment"].get("head"),
@@ -84,5 +95,7 @@ for name, row in summary["runs"].items():
     for failure in row["failures"]:
         print("  FAIL", failure["nodeid"], failure["when"], "also d9:", failure["also_failed_on_d9"])
 print("specificity", summary.get("specificity"))
-print("coverage", summary.get("final_coverage"))
+coverage = summary.get("final_coverage")
+print("coverage", ({key: len(value) if isinstance(value, list) else value
+                    for key, value in coverage.items()} if coverage else None))
 print("base failures", [(row["nodeid"], row["when"]) for row in base_failures])
