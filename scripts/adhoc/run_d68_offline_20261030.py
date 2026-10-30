@@ -24,6 +24,18 @@ base = Path(args[args.index("--basetemp") + 1]).resolve()
 assert base.is_relative_to(root) and "d4d-executions" in base.parts
 base.parent.mkdir(parents=True, exist_ok=True)
 environment = bootstrap(root, base.parent)
+notes_controls = any(arg.startswith("notes/") for arg in args)
+if notes_controls:
+    # CI's pinned transport probe rejects a bytecode prefix. Preserve its
+    # no-bytecode environment and explicit import paths without editing notes.
+    extra = [root / "notes/matched_cborg_2026-09-13",
+             root / "notes/matched_cborg_2026-09-13/native_controls",
+             root / "notes/matched_cborg_2026-09-13/evaluation_controls"]
+    sys.path[:0] = list(map(str, extra))
+    os.environ["PYTHONPATH"] += os.pathsep + os.pathsep.join(map(str, extra))
+    os.environ.pop("PYTHONPYCACHEPREFIX", None)
+    sys.pycache_prefix = None
+environment["notes_controls"] = notes_controls
 git_binary = shutil.which("git")
 assert git_binary
 def no_remote_git(event, arguments):
@@ -62,6 +74,8 @@ class Observe:
         os.environ.update(TMPDIR=str(temporary), PYTHONPYCACHEPREFIX=str(scratch / "pycache"),
                           POETRY_CACHE_DIR=str(scratch / "poetry"), MPLCONFIGDIR=str(scratch / "matplotlib"),
                           PATH=str(binary_dir) + os.pathsep + os.environ["PATH"])
+        if notes_controls:
+            os.environ.pop("PYTHONPYCACHEPREFIX", None)
 
     def pytest_collection_finish(self, session):
         self.selected = [item.nodeid for item in session.items]

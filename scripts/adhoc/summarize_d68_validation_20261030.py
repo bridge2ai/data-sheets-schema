@@ -6,6 +6,7 @@ Output: compact validation summary with artifact hashes and base failure IDs.
 No raw evidence mutation, Git remotes or provider calls.
 """
 from collections import Counter
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -14,6 +15,9 @@ import tarfile
 
 ROOT = Path(__file__).resolve().parents[2]
 raw = ROOT / ".d68-validation"
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--tag", default="merge-strict")
+args = parser.parse_args()
 archive = ROOT / "notes/reviews/d41_legacy_recovery_evidence_20261029/authentic_controls.tar.gz"
 with tarfile.open(archive) as tar:
     old = json.load(tar.extractfile("ci/result.json"))
@@ -59,9 +63,26 @@ if specificity.exists():
                               "inherited_unchanged_from_design": inherited_design,
                               "introduced_since_d9": sum(item["path"] in changed for item in audit["violations"])}
 dest = raw / "validation-summary.json"
+merged = raw / "merge/.d68-validation"
+gate = merged / f"{args.tag}-shards.json"
+if gate.exists():
+    stage = json.loads(gate.read_text())
+    reports = [json.loads((merged.parent / row["report"]).read_text()) for row in stage["runs"]]
+    collection_path = merged / f"{args.tag}-collect-ci/d68-result.json"
+    collection = json.loads(collection_path.read_text()) if collection_path.exists() else None
+    selected = Counter(node for data in reports for node in data["selected"])
+    expected = Counter(collection["selected"]) if collection else Counter()
+    completed = Counter(row["nodeid"] for data in reports for row in data["reports"] if row["when"] == "teardown")
+    summary["final_coverage"] = {"tag": args.tag, "head": stage["head"], "runs": len(reports),
+        "selected": sum(selected.values()), "expected": sum(expected.values()),
+        "missing": list((expected - selected).elements()), "extra": list((selected - expected).elements()),
+        "incomplete": list((selected - completed).elements()),
+        "complete": len(reports) == 10 and bool(collection) and selected == expected == completed}
 dest.write_text(json.dumps(summary, indent=2) + "\n")
 for name, row in summary["runs"].items():
     print(name, row["exit_code"], row["selected"], row["phases"], "collection errors", len(row["collection_errors"]))
     for failure in row["failures"]:
         print("  FAIL", failure["nodeid"], failure["when"], "also d9:", failure["also_failed_on_d9"])
 print("specificity", summary.get("specificity"))
+print("coverage", summary.get("final_coverage"))
+print("base failures", [(row["nodeid"], row["when"]) for row in base_failures])
