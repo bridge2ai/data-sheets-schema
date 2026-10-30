@@ -11,13 +11,18 @@ from pathlib import Path
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("report", type=Path)
+parser.add_argument("--limit", type=int)
 args = parser.parse_args()
 data = json.loads(args.report.read_text())
 print("head", data["environment"]["head"], "exit", data["exit_code"], "selected", len(data["selected"]))
 print(dict(Counter(f'{row["when"]}:{row["outcome"]}' for row in data["reports"])))
 for row in data["collection_errors"]:
     print("COLLECTION", row)
+shown = 0
 for row in data["reports"]:
     if row["outcome"] == "failed":
+        if args.limit is not None and shown >= args.limit:
+            break
         print("FAIL", row["nodeid"], row["when"])
         print(row["message"])
+        shown += 1

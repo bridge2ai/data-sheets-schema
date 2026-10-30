@@ -12,16 +12,18 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
+from d68_process_logging_20261030 import run_logged
 
 ROOT = Path(__file__).resolve().parents[2]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("python")
-parser.add_argument("stage", choices=("canary", "collect", "shards", "notes-canary", "notes"))
+parser.add_argument("stage", choices=("canary", "logging-canary", "collect", "shards", "notes-canary", "notes"))
 parser.add_argument("--tag", default="merge-final")
 args = parser.parse_args()
 storage = ROOT / ".d68-validation"
 storage.mkdir(exist_ok=True)
 head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+
 
 if args.stage in {"shards", "notes"}:
     subprocess.run(["git", "merge-base", "--is-ancestor", "50bc50af6", head], cwd=ROOT, check=True)
@@ -31,6 +33,8 @@ if args.stage in {"shards", "notes"}:
 
 if args.stage == "canary":
     cases = [("canary", ["tests/test_d68_legacy_readonly.py::test_completed_legacy_verifier_is_readonly[i1]"])]
+elif args.stage == "logging-canary":
+    cases = [("logging-canary", ["tests/test_preflight_resource_authority.py::test_positional_draft_context_worktree_selects_vocabulary"])]
 elif args.stage == "collect":
     cases = [("collect-whole", ["--collect-only"]), ("collect-ci", ["tests", "--collect-only"])]
 elif args.stage == "shards":
@@ -65,7 +69,7 @@ for name, selected in cases:
                "-S", "-P", "-B", str(ROOT / "scripts/adhoc/run_d68_offline_20261030.py"),
                *selected, "-q", "--tb=short", "--basetemp", str(base)]
     print(f"START {name} {head}", flush=True)
-    code = subprocess.run(command, cwd=ROOT).returncode
+    code = run_logged(command, base, cwd=ROOT)
     report = base / "d68-result.json"
     result = json.loads(report.read_text())
     assert report.stat().st_size and result["environment"]["head"] == head
@@ -74,7 +78,7 @@ for name, selected in cases:
     ledger["runs"].append(row)
     destination.write_text(json.dumps(ledger, indent=2) + "\n")
     print(f"FINISH {json.dumps(row)}", flush=True)
-    if args.stage in {"canary", "notes-canary"}:
+    if args.stage in {"canary", "notes-canary", "logging-canary"}:
         assert code == 0 and row["selected"] == 1
     if args.stage in {"shards", "notes"}:
         assert not result["collection_errors"]
