@@ -1,0 +1,9 @@
+; Purpose: permit offline loopback test servers, refuse external networking.
+; Inputs: pytest and descendants. Output: OS-enforced network boundary.
+; E3x x #5096 validation, 2026-10-29. No provider or external HTTP access.
+(version 1)
+(allow default)
+(deny network*)
+(allow network-bind (local ip "localhost:*"))
+(allow network-inbound (local ip "localhost:*"))
+(allow network-outbound (remote ip "localhost:*"))
