@@ -1,0 +1,70 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 51 items
+
+tests/test_self_disclaimed_baseline.py::test_companions_are_the_last_numbered_snapshot_and_the_receipt PASSED [  1%]
+tests/test_self_disclaimed_baseline.py::test_counts_by_method_and_label PASSED [  3%]
+tests/test_self_disclaimed_baseline.py::test_the_note_names_the_lexicon_and_counts_every_version PASSED [  5%]
+tests/test_self_disclaimed_baseline.py::test_an_unregistered_lexicon_file_is_reported_not_counted PASSED [  7%]
+tests/test_self_disclaimed_baseline.py::test_a_changed_or_missing_pinned_file_is_stale_and_a_new_record_is_reported PASSED [  9%]
+tests/test_self_disclaimed_baseline.py::test_pins_round_trip_and_a_malformed_pin_is_stale PASSED [ 11%]
+tests/test_self_disclaimed_baseline.py::test_a_record_is_refused_exactly_where_the_cli_refuses_it[a: 1\na: 2\n] PASSED [ 13%]
+tests/test_self_disclaimed_baseline.py::test_a_record_is_refused_exactly_where_the_cli_refuses_it[true: 1\nTrue: 2\n] PASSED [ 15%]
+tests/test_self_disclaimed_baseline.py::test_a_record_is_refused_exactly_where_the_cli_refuses_it[1: a\n1.0: b\n] PASSED [ 17%]
+tests/test_self_disclaimed_baseline.py::test_a_record_is_refused_exactly_where_the_cli_refuses_it[a:\n- b: 1\n  b: 2\n] PASSED [ 19%]
+tests/test_self_disclaimed_baseline.py::test_a_record_is_refused_exactly_where_the_cli_refuses_it[1: a\n'1': b\n] PASSED [ 21%]
+tests/test_self_disclaimed_baseline.py::test_a_record_is_refused_exactly_where_the_cli_refuses_it[x: &x {k: 1}\nz:\n  <<: *x\n  k: 2\n] PASSED [ 23%]
+tests/test_self_disclaimed_baseline.py::test_a_record_is_refused_exactly_where_the_cli_refuses_it[x: &x {k: 1}\ny: &y {k: 2}\nz:\n  <<: [*x, *y]\n] PASSED [ 25%]
+tests/test_self_disclaimed_baseline.py::test_a_record_is_refused_exactly_where_the_cli_refuses_it[x: &x {k: 1}\nz:\n  <<: *x\n  <<: *x\n] PASSED [ 27%]
+tests/test_self_disclaimed_baseline.py::test_the_parse_is_the_clis_own_function PASSED [ 29%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[tab in a plain scalar] PASSED [ 31%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[tab in a flow plain scalar] PASSED [ 33%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[mid-stream byte-order mark] PASSED [ 35%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[mid-stream byte-order mark after a document end] PASSED [ 37%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[byte-order mark before a key] PASSED [ 39%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[byte-order mark in a scalar] PASSED [ 41%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[leading byte-order mark] PASSED [ 43%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[two leading byte-order marks] PASSED [ 45%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[tab in a quoted scalar] PASSED [ 47%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[tab as separation] PASSED [ 49%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[duplicate key] PASSED [ 50%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[merge key] PASSED [ 52%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[two documents] PASSED [ 54%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[not a mapping] PASSED [ 56%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[empty] PASSED [ 58%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[NUL byte] PASSED [ 60%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[unclosed flow] PASSED [ 62%]
+tests/test_self_disclaimed_baseline.py::test_the_baseline_parses_each_edge_text_as_the_cli_does[nested past the recursion limit] PASSED [ 64%]
+tests/test_self_disclaimed_baseline.py::test_a_record_libyaml_loads_and_the_cli_rejects_is_refused[tab in a plain scalar] PASSED [ 66%]
+tests/test_self_disclaimed_baseline.py::test_a_record_libyaml_loads_and_the_cli_rejects_is_refused[mid-stream byte-order mark] PASSED [ 68%]
+tests/test_self_disclaimed_baseline.py::test_a_record_the_cli_loads_and_libyaml_rejects_is_loaded PASSED [ 70%]
+tests/test_self_disclaimed_baseline.py::test_a_record_too_deep_to_scan_is_refused_as_the_cli_refuses_it[a: 1\na: 2\nb: ] PASSED [ 72%]
+tests/test_self_disclaimed_baseline.py::test_a_record_too_deep_to_scan_is_refused_as_the_cli_refuses_it[b: ] PASSED [ 74%]
+tests/test_self_disclaimed_baseline.py::test_a_record_nested_fifty_thousand_deep_is_refused_without_crashing[flow mappings] PASSED [ 76%]
+tests/test_self_disclaimed_baseline.py::test_a_record_nested_fifty_thousand_deep_is_refused_without_crashing[byte-order mark, block sequence] PASSED [ 78%]
+tests/test_self_disclaimed_baseline.py::test_a_record_nested_fifty_thousand_deep_is_refused_without_crashing[byte-order mark, flow mappings] PASSED [ 80%]
+tests/test_self_disclaimed_baseline.py::test_the_note_carries_the_pr1_subtotal_and_says_which_finals_it_counted PASSED [ 82%]
+tests/test_self_disclaimed_baseline.py::test_an_unreadable_file_is_listed_and_its_pair_is_not_diffed PASSED [ 84%]
+tests/test_self_disclaimed_baseline.py::test_a_receipt_beside_a_refused_final_is_not_counted_as_checked[final] PASSED [ 86%]
+tests/test_self_disclaimed_baseline.py::test_a_receipt_beside_a_refused_final_is_not_counted_as_checked[both] PASSED [ 88%]
+tests/test_self_disclaimed_baseline.py::test_a_refused_receipt_is_neither_checked_nor_not_checked[chunks: [\n-False] PASSED [ 90%]
+tests/test_self_disclaimed_baseline.py::test_a_refused_receipt_is_neither_checked_nor_not_checked[chunks: [\n-True] PASSED [ 92%]
+tests/test_self_disclaimed_baseline.py::test_a_refused_receipt_is_neither_checked_nor_not_checked[chunks: {}\n-False] PASSED [ 94%]
+tests/test_self_disclaimed_baseline.py::test_a_refused_receipt_is_neither_checked_nor_not_checked[chunks: {}\n-True] PASSED [ 96%]
+tests/test_self_disclaimed_baseline.py::test_check_is_read_only_and_fails_when_stale PASSED [ 98%]
+tests/test_self_disclaimed_baseline.py::test_the_committed_baseline_is_what_its_pinned_records_reproduce PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_self_disclaimed_baseline.py::test_counts_by_method_and_label
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_self_disclaimed_baseline.py::test_the_committed_baseline_is_what_its_pinned_records_reproduce
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_self_disclaimed_baseline.py:440: UserWarning: 8 full record(s) are not in the self_disclaimed baseline's pinned set and are not counted (reported, not stale), e.g. ['rocrate_mapped/2026-10-07_deterministic-v2/CHORUS_d4d.yaml', 'rocrate_mapped/2026-10-07_deterministic-v2/CM4AI_d4d.yaml', 'rocrate_static_map/2026-10-07_ourmap-v3/CHORUS_d4d.yaml']; --repin counts them
+    warnings.warn(f"{len(new)} full record(s) are not in the self_disclaimed baseline's pinned set and are "
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_53-xml-71nkevek/pytest.xml -
+================== 51 passed, 2 warnings in 105.94s (0:01:45) ==================

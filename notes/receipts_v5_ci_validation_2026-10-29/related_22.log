@@ -1,0 +1,31 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 12 items
+
+tests/test_manifest_corpus_review_r3.py::test_explicit_corpus_owns_artifact_verification_and_preservation[changed] PASSED [  8%]
+tests/test_manifest_corpus_review_r3.py::test_explicit_corpus_owns_artifact_verification_and_preservation[missing] PASSED [ 16%]
+tests/test_manifest_corpus_review_r3.py::test_explicit_corpus_owns_artifact_verification_and_preservation[unchanged] PASSED [ 25%]
+tests/test_manifest_corpus_review_r3.py::test_explicit_no_manifest_owns_only_caller_outputs PASSED [ 33%]
+tests/test_manifest_corpus_review_r3.py::test_unused_manifest_still_owns_receipt_commands[Claude Code-crate_only] PASSED [ 41%]
+tests/test_manifest_corpus_review_r3.py::test_unused_manifest_still_owns_receipt_commands[Claude Code-healthsheet] PASSED [ 50%]
+tests/test_manifest_corpus_review_r3.py::test_unused_manifest_still_owns_receipt_commands[Codex CLI-crate_only] PASSED [ 58%]
+tests/test_manifest_corpus_review_r3.py::test_unused_manifest_still_owns_receipt_commands[Codex CLI-healthsheet] PASSED [ 66%]
+tests/test_manifest_corpus_review_r3.py::test_no_manifest_receipt_check_explicitly_disables_ambient_selection PASSED [ 75%]
+tests/test_manifest_corpus_review_r3.py::test_unused_manifest_recorder_keeps_the_selected_output_owner PASSED [ 83%]
+tests/test_manifest_corpus_review_r3.py::test_nested_renderer5_backfill_restores_recorded_destinations[5] PASSED [ 91%]
+tests/test_manifest_corpus_review_r3.py::test_nested_renderer5_backfill_restores_recorded_destinations[6] PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_manifest_corpus_review_r3.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_22-xml-39sh1l88/pytest.xml -
+======================= 12 passed, 13 warnings in 10.94s =======================

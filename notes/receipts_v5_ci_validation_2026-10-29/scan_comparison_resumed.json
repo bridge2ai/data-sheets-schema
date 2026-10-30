@@ -1,0 +1,66 @@
+{
+  "head_totals": {
+    "biomedical_clinical": {
+      "hits": 1689,
+      "model_facing": 1393,
+      "with_reason": 1348
+    },
+    "bridge2ai_program": {
+      "hits": 2478,
+      "model_facing": 2374,
+      "with_reason": 2368
+    },
+    "gc_project": {
+      "hits": 1079,
+      "model_facing": 322,
+      "with_reason": 403
+    },
+    "violations": 96,
+    "violations_by_approach": {
+      "api": 0,
+      "deterministic": 0,
+      "github_assistant": 0,
+      "interactive_session": 2,
+      "legacy_monolithic": 78,
+      "native_agentic": 7,
+      "offline_draft": 0,
+      "other_model_client": 0,
+      "run_controllers": 11,
+      "shared_input": 0,
+      "shared_schema": 0
+    }
+  },
+  "main": "49dd8f0eb7d9a6a349fd3bab8749804786ddb82b",
+  "main_totals": {
+    "biomedical_clinical": {
+      "hits": 1688,
+      "model_facing": 1393,
+      "with_reason": 1348
+    },
+    "bridge2ai_program": {
+      "hits": 2477,
+      "model_facing": 2374,
+      "with_reason": 2368
+    },
+    "gc_project": {
+      "hits": 1079,
+      "model_facing": 322,
+      "with_reason": 403
+    },
+    "violations": 96,
+    "violations_by_approach": {
+      "api": 0,
+      "deterministic": 0,
+      "github_assistant": 0,
+      "interactive_session": 2,
+      "legacy_monolithic": 78,
+      "native_agentic": 7,
+      "offline_draft": 0,
+      "other_model_client": 0,
+      "run_controllers": 11,
+      "shared_input": 0,
+      "shared_schema": 0
+    }
+  },
+  "new_violations": []
+}

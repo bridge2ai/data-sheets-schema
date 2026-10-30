@@ -1,0 +1,2 @@
+2026-10-20a request==saved: True 3f3e8b7f541c86a0 | result==saved: {'CHORUS_receipt_completion_result.json': False, 'CHORUS_receipt_completion_result_2.json': True} | v4 at_receipt: 58 / 58 | v3 with/receiptable: 58 / 63
+2026-10-22a request==saved: True 086dd23c1f491419 | result==saved: {'CHORUS_receipt_completion_result.json': True} | v4 at_receipt: 64 / 64 | v3 with/receiptable: 64 / 75
