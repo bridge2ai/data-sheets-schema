@@ -4363,9 +4363,16 @@ def report_audit_totals_block(spec: RunSpec, carry: dict[str, str] | None = None
     audit_source = carry.get("Audit findings") if carry else None
     if audit_source is None:
         from data_sheets_schema import snapshot_store
-        indexed, snapshot = snapshot_store.read_latest(
-            spec.metadata_dir, spec.project, f"{spec.project}_audit.json", spec=spec,
-            record=record if record and ("run" in record or "intermediates" in record) else None)
+        try:
+            indexed, snapshot = snapshot_store.read_latest(
+                spec.metadata_dir, spec.project, f"{spec.project}_audit.json", spec=spec,
+                record=record if record and ("run" in record or "intermediates" in record) else None)
+        except UsageLedgerError as exc:
+            # An ambiguous or unavailable snapshot is not a fresh measurement.
+            # Resume can retain its checked prior without guessing ownership.
+            out = check_report_audit_totals(spec.report_path, None)
+            out["reason"] = f"audit snapshot unavailable: {exc}"
+            return out
         if snapshot is not None:
             audit_source = snapshot[1].decode("utf-8")
         elif not indexed:
