@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Purpose: retain G1 scanner, validation and synthetic-project evidence compactly.
-# Inputs: external offline check outputs; outputs: notes/reviews evidence files.
+# Inputs: external offline check outputs; outputs: external review evidence files.
 # Findings F2-F19 / D66-D67, 2026-10-29. No network, scoring or run mutation.
 import argparse
 import ast
@@ -13,7 +13,7 @@ import subprocess
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / 'notes/reviews/generality_g1_evidence_2026-10-29'
+OUT = ROOT.parent / 'plans/reviews/generality_g1_evidence_2026-10-29'
 BASE = '55c7b94b838eb500888055da5a47acf2ee9e2e15'
 
 

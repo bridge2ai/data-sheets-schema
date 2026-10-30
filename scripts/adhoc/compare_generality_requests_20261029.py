@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Purpose: exact G1 CHORUS shared-v1 payload delta, including embedded catalog JSON.
-# Inputs: external before/after captures; outputs: committed diff and gzip evidence.
+# Inputs: external before/after captures; outputs: external diff and gzip evidence.
 # Generality F6 byte proof, 2026-10-29. Does not normalize hashes or payload bytes.
 import difflib
 import gzip
@@ -9,8 +9,8 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / 'notes/reviews/generality_g1_evidence_2026-10-29'
-OUT.mkdir(exist_ok=True)
+OUT = ROOT.parent / 'plans/reviews/generality_g1_evidence_2026-10-29'
+OUT.mkdir(parents=True, exist_ok=True)
 before = json.loads(Path('/private/tmp/g1-request-before.json').read_bytes())
 after = json.loads(Path('/private/tmp/g1-request-after.json').read_bytes())
 changes = []
