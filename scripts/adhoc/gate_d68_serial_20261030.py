@@ -34,7 +34,7 @@ if args.stage in {"shards", "notes"}:
 if args.stage == "canary":
     cases = [("canary", ["tests/test_d68_legacy_readonly.py::test_completed_legacy_verifier_is_readonly[i1]"])]
 elif args.stage == "logging-canary":
-    cases = [("logging-canary", ["tests/test_preflight_resource_authority.py::test_positional_draft_context_worktree_selects_vocabulary"])]
+    cases = [("logging-canary", ["scripts/adhoc/d68_logging_probe_20261030.py::test_live_log_preserves_checkout"])]
 elif args.stage == "collect":
     cases = [("collect-whole", ["--collect-only"]), ("collect-ci", ["tests", "--collect-only"])]
 elif args.stage == "shards":
