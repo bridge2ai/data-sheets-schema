@@ -485,6 +485,15 @@ def _legacy_evidence(spec):
         identity = value.get(identity_key) if isinstance(value, dict) else None
         foreign_label = (isinstance(value, dict) and value.get("label") is not None
                          and value["label"] != spec.label)
+        # Older progress omits run_identity but can still positively bind a
+        # guarded foreign generation. A label alone cannot establish that.
+        if identity is None and foreign_label and value.get("generation_id"):
+            identities = [event["identity"] for event in events
+                          if event["generation_id"] == value["generation_id"]
+                          and event["identity"].get("label") == value["label"]]
+            if identities and all(guarded_foreign(item) for item in identities):
+                foreign = True
+                continue
         if (ledger.identity_is_foreign(spec, identity) or foreign_label) and guarded_foreign(identity):
             foreign = True
             continue

@@ -367,8 +367,13 @@ def test_output_aliases_share_the_physical_file_lock(tmp_path):
     owner.full_path.write_text("record")
     alias.full_path.symlink_to(owner.full_path)
     with ledger.exclusive_run(owner):
-        client = FakeClient()
+        # Test physical locking directly; D68 now refuses orphan output
+        # evidence before execute reaches the lock acquisition.
         with pytest.raises(ledger.UsageLedgerError, match="already active"):
+            with ledger.exclusive_run(alias):
+                pytest.fail("overlapping physical output lock was acquired")
+        client = FakeClient()
+        with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
             api.execute(alias, client=client)
         assert client.messages.calls == []
     with ledger.exclusive_run(alias):
@@ -659,6 +664,7 @@ def test_fresh_generation_does_not_import_old_abandoned_stream_charges(tmp_path)
 
 @pytest.mark.parametrize("change,stale_progress", [
     ({"label": "another_rep1"}, False), ({"label": "another_rep1"}, True),
+    ({"label": "another_rep1"}, "unbound"),
     ({"method": "another_method"}, False),
     ({"condition": "tuned", "condition_mismatch_allowed": True}, False),
 ])
@@ -681,8 +687,18 @@ def test_new_identity_in_a_shared_directory_starts_its_own_generation(tmp_path, 
         # Older progress carries the label/generation but no full identity.
         data = json.loads(api._progress_path(old).read_text())
         data.pop("run_identity", None)
+        if stale_progress == "unbound":
+            data.pop("generation_id", None)
         api._progress_path(old).write_text(json.dumps(data))
     current = replace(old, **change)
+    if stale_progress == "unbound":
+        from tests.test_d68_legacy_readonly import tree
+        before = tree(tmp_path)
+        client = FakeClient()
+        with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
+            api.execute(current, client=client)
+        assert client.messages.calls == [] and tree(tmp_path) == before
+        return
 
     class Started(Exception):
         pass

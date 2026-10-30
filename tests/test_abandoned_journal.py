@@ -350,15 +350,19 @@ def test_a_journal_that_cannot_be_read_is_refused(tmp_path, how):
 
 
 def test_a_legacy_continuation_adopts_rows_without_a_generation_before_its_boundary(tmp_path):
-    """#2889, #2883: rows journaled before any ledger carry no generation; a legacy
-    continuation, opened by resume, adopts them as its own charges."""
+    """D69 supersedes #2889/#2883 adoption: inspect old charges, never continue."""
+    from tests.test_d68_legacy_readonly import tree
     s = spec(out_dir=tmp_path)
     journal = api._abandoned_ledger(s)
     journal.parent.mkdir(parents=True, exist_ok=True)
     legacy = {"phase": "full", "attempt": 1, "snapshot": "legacy-snapshot.txt", "output_tokens": 7}
     journal.write_text(json.dumps(legacy) + "\n")
-    ledger.prepare_usage(s, resume=True)
-    assert ledger.abandoned_journal_offset(s) == len(journal.read_bytes())
+    before = tree(tmp_path)
+    for resume in (True, False):
+        with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
+            ledger.prepare_usage(s, resume=resume)
+        assert tree(tmp_path) == before
+    assert ledger.abandoned_journal_offset(s) is None
     assert api.merge_abandoned_rows(s, []) == [legacy]
 
 
