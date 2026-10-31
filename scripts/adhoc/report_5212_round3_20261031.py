@@ -35,6 +35,12 @@ def relative(value):
 
 head = git("rev-parse", "HEAD")
 main = git("rev-parse", "origin/main")
+integration_merges = []
+for merge in git("log", "--first-parent", "--merges", "--format=%H", "c9567e3c3..HEAD").splitlines():
+    difference = git("show", "--remerge-diff", "--format=", "--no-ext-diff", merge)
+    integration_merges.append({"head": merge,
+        "parents": git("show", "-s", "--format=%P", merge).split(),
+        "remerge_diff": difference, "remerge_diff_bytes": len(difference.encode())})
 phases = []
 artifact_censuses = []
 for name in args.phases:
@@ -72,12 +78,16 @@ assert not git("diff", "--name-only") and not git("diff", "--cached", "--name-on
 compaction = json.loads((ROOT / "notes/reviews/d73_5212_evidence_20261031/compaction.json").read_text())
 summary = {"head": head, "main": main, "commits": git("log", "--reverse", "--format=%H %s",
     "c9567e3c3..HEAD").splitlines(), "phases": phases, "census": census,
+    "integration_merges": integration_merges,
     "protected_path_changes": [], "evidence_compaction": compaction,
     "artifact_censuses": artifact_censuses}
 destination = SCRATCH / (args.prefix + ".json")
 destination.write_text(json.dumps(summary, indent=2) + "\n")
 lines = [f"# D68–D70 / D73 round-three implementation: `{head}`", "",
-    f"Local main remains `{main}`. No additional main merge was needed.",
+    f"Local main is `{main}`.",
+    *[f"Integration merge `{row['head']}`; parents `{', '.join(row['parents'])}`; "
+      f"remerge diff {row['remerge_diff_bytes']} bytes."
+      for row in integration_merges],
     "All validation below uses complete pinned git archives with isolated HEAD/index metadata and local object alternates. "
     "The pinned FAIRSCAPE submodule is restored from local Git. Provider keys are removed; the OS sandbox blocks external network. "
     "Tests run serially except the single requested ordinary xdist shard and its one-node canary. "
@@ -113,6 +123,9 @@ for phase in phases:
         f"{len(phase['collection_errors'])} | {phase['selected']} |")
 lines += ["", "Phase counts overlap; they are not summed as unique tests. Raw reports, exact arguments, "
     f"hashes and per-file counts: `{relative(destination)}`.", "",
+    "Before-fix controls overlay the committed regression tests onto older pinned source; "
+    "final validation uses unmodified final-commit archives. Earlier NF3-B/#5409 dispositions "
+    "for all 16 nodes remain in notes/reviews/d73_5212_review_followup_2026-10-31.md.", "",
     "The before-fix 26 failures are expected defect witnesses on c9567e3c3. Exploratory "
     "runs also found a batch-test mock target typo, three torn-journal fixtures lacking "
     "per-file ownership, an exact missing-ledger diagnostic mismatch, and a shared "
@@ -142,7 +155,9 @@ lines += ["", "Phase counts overlap; they are not summed as unique tests. Raw re
 for census_row in artifact_censuses:
     lines.append(f"- `{census_row['phase']}/{census_row['case']}`: "
         f"{census_row['singletons']} artifacts, {census_row['refusal_checks']} refusal checks.")
-lines += ["", "Corpus census (every committed generation/derived record):", ""]
+lines += ["", "Corpus census (every committed generation/derived record):", "",
+    "Eligibility here means runtime-integrity/D70 admission for each consumer. "
+    "Separate quality thresholds and registration requirements are not asserted by this census.", ""]
 for label in ("before", "after"):
     counts = census[label]
     ages = {kind: counts['age'].get(kind, 0) for kind in
