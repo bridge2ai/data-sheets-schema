@@ -16,6 +16,7 @@ import unittest.mock
 from pathlib import Path
 
 from data_sheets_schema import schema_digest
+from tests.backoff_sleep import BackoffSleeps
 from data_sheets_schema.api_runner import (
     GENERIC_PROMPT,
     PHASE_INSTRUCTIONS,
@@ -1379,9 +1380,11 @@ class TestResumeAndRetry(unittest.TestCase):
         import unittest.mock as _mock
         s = spec(out_dir=self.out)
         client = FakeClient(); client.messages = TruncMessages()
-        with _mock.patch("data_sheets_schema.api_runner.time.sleep"):
+        with _mock.patch("data_sheets_schema.api_runner.time.sleep", BackoffSleeps()) as sleeps:
             with self.assertRaises(RuntimeError) as ctx:
                 self.api.execute(s, client=client)
+        self.assertEqual(sleeps, [self.api.BACKOFF_BASE_SECONDS ** attempt
+                                  for attempt in range(1, self.api.MAX_ATTEMPTS)])
         # Retried first — a ceiling one attempt overran is not a fact about the
         # phase — but never written, which is the property that matters.
         self.assertIn("max_tokens", str(ctx.exception))
@@ -1413,9 +1416,10 @@ class TestResumeAndRetry(unittest.TestCase):
         s = spec(out_dir=self.out)
         client = FakeClient()
         client.messages = OneDud()
-        with _mock.patch("data_sheets_schema.api_runner.time.sleep"):
+        with _mock.patch("data_sheets_schema.api_runner.time.sleep", BackoffSleeps()) as sleeps:
             self.api.execute(s, client=client)
 
+        self.assertEqual(sleeps, [self.api.BACKOFF_BASE_SECONDS])
         self.assertEqual(duds["n"], 1, "the dud never landed")
         self.assertTrue(s.core_path.exists(),
                         "the retry did not recover the core record")
