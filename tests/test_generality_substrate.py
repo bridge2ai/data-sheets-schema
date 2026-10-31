@@ -24,6 +24,11 @@ def test_declared_substrate_sources_survive_merge_and_neutral_rendering():
                      'data_sheets_schema_core_all.yaml'):
         doc = yaml.safe_load((schema / filename).read_text())
         slot = doc['classes']['Instance']['attributes']['data_substrate']
+        assert slot['description'].startswith(
+            "Type or format of data (e.g., raw text, images): an EDAM Data or Format term "
+            "or an IANA media type, written as a CURIE with the schema's declared `EDAM` "
+            "or `mediatypes` prefix, when the documents supply one; or a term from the "
+            "selected profile's pinned standards registry. A *term*, not a description:")
         annotation = slot['annotations']['d4d:termSources']
         assert (annotation.get('value') if isinstance(annotation, dict) else annotation) == SOURCES
     neutral = schema_digest.digest_text('Dataset', profile=NEUTRAL)

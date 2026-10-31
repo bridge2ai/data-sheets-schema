@@ -5991,7 +5991,7 @@
                     ]
                 },
                 "data_substrate": {
-                    "description": "Type or format of data (e.g., raw text, images) as an EDAM Data or Format term URI, an IANA media-type URI, or a term from the selected profile's pinned standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no declared term fits, prefer omission here and describe it there.\n",
+                    "description": "Type or format of data (e.g., raw text, images): an EDAM Data or Format term or an IANA media type, written as a CURIE with the schema's declared `EDAM` or `mediatypes` prefix, when the documents supply one; or a term from the selected profile's pinned standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no declared term fits, prefer omission here and describe it there.\n",
                     "type": [
                         "string",
                         "null"
