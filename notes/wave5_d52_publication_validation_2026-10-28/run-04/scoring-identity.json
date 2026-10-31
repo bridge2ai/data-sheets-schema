@@ -1,0 +1,11 @@
+{
+  "inputs": {
+    "context_policy": "e27856877cac196034cad20ca5429906afb6d85fce28d5eaf10b24ab14d0878e",
+    "rubric10": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
+    "rubric20": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+    "runner": "aa917606353a0b078a0596025d0ce0f0de970886b717c280989ab6155198426a"
+  },
+  "kind": "deterministic_presence",
+  "sha256": "b38117d96e73987f236d4d3d47da5b84a952401537f9a2ae4d2c44bf981fc064",
+  "version": "2.0"
+}

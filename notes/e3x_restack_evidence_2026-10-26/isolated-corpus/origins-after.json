@@ -1,0 +1,191 @@
+{
+  "data_sheets_schema": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema",
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema"
+  ],
+  "data_sheets_schema.agent_pin": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/agent_pin.py"
+  ],
+  "data_sheets_schema.american_spelling": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/american_spelling.py"
+  ],
+  "data_sheets_schema.api_runner": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/api_runner.py"
+  ],
+  "data_sheets_schema.audit_omissions": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/audit_omissions.py"
+  ],
+  "data_sheets_schema.backfill_checks": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/backfill_checks.py"
+  ],
+  "data_sheets_schema.canary": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/canary.py"
+  ],
+  "data_sheets_schema.chunking": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/chunking.py"
+  ],
+  "data_sheets_schema.corpus": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/corpus.py"
+  ],
+  "data_sheets_schema.cross_family_panel": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/cross_family_panel.py"
+  ],
+  "data_sheets_schema.cross_family_panel_analysis": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/cross_family_panel_analysis.py"
+  ],
+  "data_sheets_schema.cross_family_panel_results": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/cross_family_panel_results.py"
+  ],
+  "data_sheets_schema.duplicate_keys": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/duplicate_keys.py"
+  ],
+  "data_sheets_schema.evaluation": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation",
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation/__init__.py"
+  ],
+  "data_sheets_schema.evaluation.arm_comparison": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation/arm_comparison.py"
+  ],
+  "data_sheets_schema.evaluation.blind_review_pack": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation/blind_review_pack.py"
+  ],
+  "data_sheets_schema.evaluation.registered_eval_runner": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation/registered_eval_runner.py"
+  ],
+  "data_sheets_schema.evaluation.validate": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation/validate.py"
+  ],
+  "data_sheets_schema.evaluation_context": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation_context.py"
+  ],
+  "data_sheets_schema.evaluation_model": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation_model.py"
+  ],
+  "data_sheets_schema.evidence_assertions": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evidence_assertions.py"
+  ],
+  "data_sheets_schema.evidence_score": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evidence_score.py"
+  ],
+  "data_sheets_schema.grounding": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/grounding.py"
+  ],
+  "data_sheets_schema.identifiers": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/identifiers.py"
+  ],
+  "data_sheets_schema.judge_contract": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/judge_contract.py"
+  ],
+  "data_sheets_schema.nested_support_results": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/nested_support_results.py"
+  ],
+  "data_sheets_schema.profiles": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/profiles.py"
+  ],
+  "data_sheets_schema.provenance": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/provenance.py"
+  ],
+  "data_sheets_schema.reasoning": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/reasoning.py"
+  ],
+  "data_sheets_schema.receipt_completion_policy": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/receipt_completion_policy.py"
+  ],
+  "data_sheets_schema.receipts": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/receipts.py"
+  ],
+  "data_sheets_schema.reconstructed_bytes": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/reconstructed_bytes.py"
+  ],
+  "data_sheets_schema.redundancy": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/redundancy.py"
+  ],
+  "data_sheets_schema.registry": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/registry.py"
+  ],
+  "data_sheets_schema.release_inventory": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/release_inventory.py"
+  ],
+  "data_sheets_schema.removals": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/removals.py"
+  ],
+  "data_sheets_schema.replicate_structure": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/replicate_structure.py"
+  ],
+  "data_sheets_schema.report_claims": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/report_claims.py"
+  ],
+  "data_sheets_schema.resources": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/resources.py"
+  ],
+  "data_sheets_schema.run_schema": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/run_schema.py"
+  ],
+  "data_sheets_schema.runs": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/runs.py"
+  ],
+  "data_sheets_schema.schema_cache": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/schema_cache.py"
+  ],
+  "data_sheets_schema.schema_digest": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/schema_digest.py"
+  ],
+  "data_sheets_schema.schema_snapshot": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/schema_snapshot.py"
+  ],
+  "data_sheets_schema.schema_view": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/schema_view.py"
+  ],
+  "data_sheets_schema.scope": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/scope.py"
+  ],
+  "data_sheets_schema.semantic_comparison": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/semantic_comparison.py"
+  ],
+  "data_sheets_schema.semantic_instrument": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/semantic_instrument.py"
+  ],
+  "data_sheets_schema.semantic_scope": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/semantic_scope.py"
+  ],
+  "data_sheets_schema.shared_generation": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/shared_generation.py"
+  ],
+  "data_sheets_schema.snapshot_store": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/snapshot_store.py"
+  ],
+  "data_sheets_schema.source_heading_routing": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/source_heading_routing.py"
+  ],
+  "data_sheets_schema.source_heading_runtime": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/source_heading_runtime.py"
+  ],
+  "data_sheets_schema.source_metadata": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/source_metadata.py"
+  ],
+  "data_sheets_schema.stream_evidence": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/stream_evidence.py"
+  ],
+  "data_sheets_schema.support_judge": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/support_judge.py"
+  ],
+  "data_sheets_schema.support_plan": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/support_plan.py"
+  ],
+  "data_sheets_schema.support_targets": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/support_targets.py"
+  ],
+  "data_sheets_schema.usage_ledger": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/usage_ledger.py"
+  ],
+  "tests": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/tests",
+    "/private/tmp/d4d-codex-e3x-restack-20261026/tests/__init__.py"
+  ],
+  "tests.conftest": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/tests/conftest.py"
+  ],
+  "tests.test_arm_comparison": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/tests/test_arm_comparison.py"
+  ]
+}

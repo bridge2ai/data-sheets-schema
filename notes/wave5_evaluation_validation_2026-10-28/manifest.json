@@ -1,0 +1,125 @@
+{
+  "format": "wave5_compact_validation_evidence_v1",
+  "helpers": [
+    {
+      "name": "preserve_wave5_validation_20261028.py",
+      "sha256": "e2057f41cc3022202918321e3dd6047e1348581a63f9d133d7f0ae04e7939f05"
+    },
+    {
+      "name": "archive_n2_restack_validation_20261027.py",
+      "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+    }
+  ],
+  "runs": [
+    {
+      "files": [
+        {
+          "bytes": 406,
+          "name": "bootstrap.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 21592,
+          "name": "origins-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "7a117f182765e54be590a583e32a71e18520259b07269b6955e21ac22700a6f3"
+        },
+        {
+          "bytes": 15136,
+          "name": "origins-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "14c754e3fde96ddac9b31b5b29a0a9aaee58937b4b83fac05565a869729bc6a2"
+        },
+        {
+          "bytes": 607,
+          "name": "outcome.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "5aa06e6451d568915bda01c1a3cb071428fefdc6398ca5a2e0c3ff22002a53ff"
+        },
+        {
+          "bytes": 4639,
+          "name": "plan.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "f95ec2906308c9a64cf8b8088f6cd4385d8e872e13d482397dc067114f1a5dee"
+        },
+        {
+          "bytes": 720,
+          "name": "pytest-command.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "94d548c9fb0ab4dd9c16a3db59c37fbd9e8f30adf6138d4142f3468bb684083e"
+        },
+        {
+          "bytes": 841,
+          "name": "pytest.log",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "fb1c96572117efcfaadde22d8b358e15e1a2f2c908cf1e1ca2087da811634b88"
+        },
+        {
+          "bytes": 90780,
+          "name": "pytest.xml",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "1a005d3365028fd3409aba7fee770b7de7c38513b131365927a780d2d8d159ec"
+        },
+        {
+          "bytes": 497,
+          "name": "scoring-identity.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "732f1b6a0dc89d58eb0e540d3970e0952ebbbe333d92ffa12a1d66cf2e53cf1b"
+        },
+        {
+          "bytes": 2988084,
+          "name": "source-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "dbdcbe476f9be9ecd9465338a25adc35143104544a70a274340088ec3b95f455"
+        },
+        {
+          "bytes": 2988084,
+          "name": "source-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "dbdcbe476f9be9ecd9465338a25adc35143104544a70a274340088ec3b95f455"
+        }
+      ],
+      "original_outcome": {
+        "invalid_junit_cases": [],
+        "passed": true,
+        "passed_cases_by_module": {
+          "test_arm_comparison": 72,
+          "test_audit_evaluation_comparability": 115,
+          "test_blind_review_pack": 146,
+          "test_d52_scoring": 31,
+          "test_evaluation.test_evaluate_d4d": 18,
+          "test_evaluation.test_explicit_dataset_scope": 22,
+          "test_evaluation.test_general_context": 25,
+          "test_evaluation.test_rubric20_scoring": 16,
+          "test_registered_eval_runner": 143
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 719.6319682920002
+      },
+      "original_root": "/private/tmp/d4d-wave5-evaluation-validation-20261028",
+      "packet_directory": "run-01",
+      "pass_claim": "copied outcome only; no new acceptance inferred",
+      "unread_external_directories": [
+        "cases"
+      ]
+    }
+  ],
+  "scope": "compact results, external raw inventory digests, no historical score changes",
+  "selection": "explicit top-level regular JSON/log/XML files, including ignored files",
+  "source_and_origin_inventories_embedded": false
+}

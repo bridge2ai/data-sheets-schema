@@ -243,6 +243,209 @@ def test_bundle_drift_cli_reads_explicit_cohort_without_writing(tmp_path, capsys
         main(["--root", str(tmp_path), "--arm", "v6=record.yaml", "--arm", "v6=record.yaml"])
 
 
+def test_cross_arm_recorded_identity_is_independent_of_current_disk_drift(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import compare_bundle_drift, render_bundle_drift
+
+    record, _, _ = _bundle_record(tmp_path, current=b"new")
+    result = compare_bundle_drift({"v8": [record], "v10": [record, record]}, tmp_path)
+    digest = record["inputs"]["bundle_md5"]
+    for arm, count in (("v8", 1), ("v10", 2)):
+        cell = result[arm]["recorded_bundles_by_project"]["AI_READI"]
+        assert cell == {"record_count": count, "md5_counts": {digest: count},
+                        "missing_count": 0, "malformed_count": 0,
+                        "cross_arm_status": "unique_shared_recorded_identity"}
+        assert result[arm]["disk"] == {"match": 0, "drift": count, "unknown": 0}
+        assert result[arm]["manifest"] == {"match": count, "drift": 0, "unknown": 0}
+    text = "\n".join(render_bundle_drift(result))
+    assert f"{digest} × 2" in text and "unique shared recorded identity" in text
+    assert "not proof that historical bytes were recovered" in text
+    assert "Different source inputs can confound" in text
+
+
+def test_cross_arm_different_recorded_bundles_can_each_match_their_manifest(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import compare_bundle_drift
+
+    records = []
+    for directory, value in (("old", b"old input"), ("new", b"new input")):
+        root = tmp_path / directory
+        root.mkdir()
+        record, _, _ = _bundle_record(root, old=value)
+        record["inputs"]["bundle_path"] = directory + "/" + record["inputs"]["bundle_path"]
+        record["inputs"]["chunks"]["path"] = directory + "/" + record["inputs"]["chunks"]["path"]
+        records.append(record)
+    result = compare_bundle_drift({"v8": [records[0]], "v10": [records[1]]}, tmp_path)
+    for block in result.values():
+        assert block["manifest"] == {"match": 1, "drift": 0, "unknown": 0}
+        assert block["recorded_bundles_by_project"]["AI_READI"]["cross_arm_status"] == "different_recorded_identities"
+
+
+@pytest.mark.parametrize("case,status", [
+    ("mixed", "heterogeneous_evidence"), ("missing", "insufficient_evidence"),
+    ("malformed", "insufficient_evidence"), ("empty", "insufficient_evidence"),
+    ("one_arm", "insufficient_evidence"),
+])
+def test_cross_arm_identity_never_chooses_a_representative_or_fills_unknowns(tmp_path, case, status):
+    from copy import deepcopy
+    from data_sheets_schema.evaluation.arm_comparison import compare_bundle_drift
+
+    record, _, _ = _bundle_record(tmp_path)
+    second = deepcopy(record)
+    second["run"]["label"] = "rep2"
+    if case == "mixed":
+        second["inputs"]["bundle_md5"] = "a" * 32
+    elif case == "missing":
+        second["inputs"].pop("bundle_md5")
+    elif case == "malformed":
+        second["inputs"]["bundle_md5"] = "bad pin"
+    arms = {"v8": [record, second], "v10": [] if case == "empty" else [record]}
+    if case == "one_arm":
+        arms.pop("v10")
+    result = compare_bundle_drift(arms, tmp_path)
+    cell = result["v8"]["recorded_bundles_by_project"]["AI_READI"]
+    assert cell["cross_arm_status"] == status
+    assert sum(cell["md5_counts"].values()) + cell["missing_count"] + cell["malformed_count"] == cell["record_count"] == 2
+    assert cell["missing_count"] == int(case == "missing")
+    assert cell["malformed_count"] == int(case == "malformed")
+    if case == "mixed":
+        assert cell["md5_counts"] == dict(sorted({record["inputs"]["bundle_md5"]: 1, "a" * 32: 1}.items()))
+    if case == "empty":
+        assert result["v10"]["recorded_bundles_by_project"]["AI_READI"] == {
+            "record_count": 0, "md5_counts": {}, "missing_count": 0, "malformed_count": 0,
+            "cross_arm_status": status}
+
+
+def test_cross_arm_summaries_and_table_are_invariant_to_input_order(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import compare_bundle_drift, recorded_bundle_identity, render_bundle_drift
+
+    first, _, _ = _bundle_record(tmp_path, "CHORUS")
+    second, _, _ = _bundle_record(tmp_path, "VOICE")
+    a = compare_bundle_drift({"v8": [first, second], "v10": [second, first]}, tmp_path)
+    b = compare_bundle_drift({"v10": [first, second], "v8": [second, first]}, tmp_path)
+    assert recorded_bundle_identity(a) == recorded_bundle_identity(b)
+    assert list(recorded_bundle_identity(a)) == ["CHORUS", "VOICE"]
+    assert "\n".join(render_bundle_drift(a)).split("Each record is compared separately")[0] == "\n".join(render_bundle_drift(b)).split("Each record is compared separately")[0]
+    for arm in a:
+        assert a[arm]["recorded_bundles_by_project"] == b[arm]["recorded_bundles_by_project"]
+
+
+def test_cross_arm_absolute_paths_are_bounded_and_unsupported_relocation_stays_unknown(tmp_path, monkeypatch):
+    from copy import deepcopy
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    root = tmp_path / "checkout"
+    root.mkdir()
+    record, manifest, _ = _bundle_record(root)
+    record["inputs"]["bundle_path"] = str(root / "AI_READI.txt")
+    record["inputs"]["chunks"]["path"] = str(manifest)
+    assert bundle_drift(record, root)["manifest_status"] == "match"
+    assert bundle_drift(record, root)["disk_status"] == "match"
+    local = root / "data" / "preprocessed" / "AI_READI.txt"
+    local.parent.mkdir(parents=True)
+    local.write_bytes(b"original")
+    read_bytes = Path.read_bytes
+    def bounded_read(path):
+        assert path.is_relative_to(root), "external live input read"
+        return read_bytes(path)
+    monkeypatch.setattr(Path, "read_bytes", bounded_read)
+    # Exactly one foreign tail maps to local bytes, independently checked pins.
+    moved = deepcopy(record)
+    moved["inputs"]["bundle_path"] = str(tmp_path / "elsewhere" / "data" / "preprocessed" / local.name)
+    result = bundle_drift(moved, root)
+    assert result["disk_status"] == result["manifest_status"] == "match"
+    assert result["disk_md5"] == result["manifest_md5"] == hashlib.md5(b"original").hexdigest()
+    assert result["manifest_basis"] == "pinned manifest on disk"
+
+    # Both candidate tails exist and match: neither may resolve ambiguity.
+    ambiguous = root / "data/preprocessed/old/data/preprocessed" / local.name
+    ambiguous.parent.mkdir(parents=True)
+    ambiguous.write_bytes(b"original")
+    for outside in (tmp_path / "elsewhere" / local.name,
+                    tmp_path / "data/preprocessed/old/data/preprocessed" / local.name,
+                    tmp_path / "data/preprocessed/../../data/preprocessed" / local.name):
+        moved = deepcopy(record)
+        moved["inputs"]["bundle_path"] = str(outside)
+        result = bundle_drift(moved, root)
+        assert result["disk_status"] == result["manifest_status"] == "unknown"
+        assert result["disk_md5"] is result["manifest_md5"] is None
+        assert "exactly one data/preprocessed pair" in result["disk_reason"]
+        assert "unsupported or ambiguous relocation stays unknown" in result["disk_reason"]
+
+    from data_sheets_schema.evaluation.arm_comparison import compare_bundle_drift, render_bundle_drift
+    report = "\n".join(render_bundle_drift(compare_bundle_drift({"v8": [record, moved]}, root)))
+    assert "Foreign absolute paths with exactly one data/preprocessed pair support relocation" in report
+    assert "Unsupported or ambiguous relocation (including repeated data/preprocessed pairs) stays unknown" in report
+    assert "External absolute paths remain unknown" not in report
+
+
+def test_ambiguous_foreign_manifest_is_refused_even_with_matching_local_candidates(tmp_path, monkeypatch):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    root = tmp_path / "checkout"
+    root.mkdir()
+    record, manifest, raw = _bundle_record(root)
+    for tail in ("data/preprocessed", "data/preprocessed/old/data/preprocessed"):
+        candidate = root / tail / manifest.name
+        candidate.parent.mkdir(parents=True, exist_ok=True)
+        candidate.write_bytes(raw)
+    record["inputs"]["chunks"]["path"] = str(tmp_path / "foreign/data/preprocessed/old/data/preprocessed" / manifest.name)
+    read_bytes = Path.read_bytes
+    def bounded_read(path):
+        assert path.is_relative_to(root), "external live input read"
+        return read_bytes(path)
+    monkeypatch.setattr(Path, "read_bytes", bounded_read)
+    def no_recovery(*args, **kwargs):
+        pytest.fail("ambiguous manifest must not select a historical path")
+    result = bundle_drift(record, root, recover=no_recovery)
+    assert result["disk_status"] == "match"
+    assert result["manifest_status"] == "unknown"
+    assert result["manifest_md5"] is result["manifest_basis"] is None
+
+
+def test_owned_repeated_preprocessed_pairs_keep_exact_live_and_historical_paths(tmp_path, monkeypatch):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    root = tmp_path / "checkout"
+    folder = root / "archive-copy/data/preprocessed/old/data/preprocessed"
+    folder.mkdir(parents=True)
+    record, manifest, raw = _bundle_record(folder)
+    record["inputs"]["bundle_path"] = str(folder / record["inputs"]["bundle_path"])
+    record["inputs"]["chunks"]["path"] = str(manifest)
+    read_bytes = Path.read_bytes
+    def bounded_read(path):
+        assert path.is_relative_to(root), "external live input read"
+        return read_bytes(path)
+    monkeypatch.setattr(Path, "read_bytes", bounded_read)
+    result = bundle_drift(record, root)
+    assert result["disk_status"] == result["manifest_status"] == "match"
+    manifest.write_bytes(b"changed manifest")
+    requested = []
+    exact = manifest.relative_to(root).as_posix()
+    def recover(relative, **pins):
+        requested.append((relative, pins))
+        return (raw, "historical") if relative == exact else None
+    result = bundle_drift(record, root, recover=recover)
+    assert result["disk_status"] == result["manifest_status"] == "match"
+    assert result["manifest_basis"] == "pinned manifest recovered from history"
+    assert requested == [(exact, {"md5": None, "sha256": hashlib.sha256(raw).hexdigest()})]
+
+
+def test_cross_arm_cli_json_and_markdown_expose_same_pins(tmp_path, capsys):
+    import json
+    import yaml
+    from data_sheets_schema.evaluation.arm_comparison import main
+
+    record, _, _ = _bundle_record(tmp_path)
+    (tmp_path / "record.yaml").write_text(yaml.safe_dump(record))
+    args = ["--root", str(tmp_path), "--arm", "v8=record.yaml", "--arm", "v10=record.yaml"]
+    assert main(args + ["--format", "json"]) == 0
+    result = json.loads(capsys.readouterr().out)
+    assert result["v8"]["recorded_bundles_by_project"]["AI_READI"]["cross_arm_status"] == "unique_shared_recorded_identity"
+    assert main(args + ["--format", "markdown"]) == 0
+    text = capsys.readouterr().out
+    assert f"{record['inputs']['bundle_md5']} × 1" in text
+    assert "| project | v10 | v8 | cross-arm recorded identity |" in text
+
+
 class Rate(unittest.TestCase):
     def setUp(self):
         self.m = _module()
@@ -396,7 +599,7 @@ def test_report_cells_keep_unmeasured_zeros_out_of_the_mean():
     assert m.cell([{"report": None}], "report", "reps") == "– [–]"
 
 
-def test_check_detects_report_changes_without_overwriting_any_output(tmp_path, monkeypatch):
+def test_check_detects_report_changes_without_overwriting_any_output(tmp_path, monkeypatch, capsys):
     m = _module()
     data = {k: {p: [] for p in m.PROJECTS} for k, *_ in m.ARMS}
     data["v8prod"]["CHORUS"] = [{"report": 0, "claims_checked": 5}]
@@ -412,6 +615,8 @@ def test_check_detects_report_changes_without_overwriting_any_output(tmp_path, m
     assert m.main() == 0
     data["v8prod"]["CHORUS"][0]["report"] = 2
     assert m.main() == 1
+    message = capsys.readouterr().err
+    assert "GitUnavailable" in message and "--no-figures" in message
     assert m.OUT_MD.read_text() == original
     m.OUT_MD.unlink()
     assert m.main() == 1
@@ -463,21 +668,79 @@ def test_bundle_drift_survives_real_metrics_collection(tmp_path, monkeypatch):
     assert result["records"][0]["label"] == "fixture_rep1"
 
 
+def _assert_selected_bundle_invariants(m, data, comparisons):
+    """Every selected provenance identity survives; observations may change."""
+    assert list(comparisons) == [arm for arm, *_ in m.ARMS]
+    states = {"match", "drift", "unknown"}
+    for arm, block in comparisons.items():
+        selected = sorted(((project, row["label"], row["rec"])
+            for project in m.PROJECTS for row in data[arm][project]),
+            key=lambda row: (row[0], row[1]))
+        expected = [(record["run"]["project"], record["run"]["label"], record.get("inputs", {}).get("bundle_path"))
+            for _, _, record in selected]
+        rows = block["records"]
+        assert block["count"] == len(selected) == len(rows)
+        assert [(row["project"], row["label"], row["bundle_path"]) for row in rows] == expected
+        for basis in ("disk", "manifest"):
+            assert set(block[basis]) == states
+            assert sum(block[basis].values()) == len(selected)
+            assert all(type(value) is int and value >= 0 for value in block[basis].values())
+            for state in states:
+                assert block[basis][state] == sum(row[basis + "_status"] == state for row in rows)
+            for row in rows:
+                assert row[basis + "_status"] in states
+                if row["recorded_md5"] is None or row[basis + "_md5"] is None:
+                    assert row[basis + "_status"] == "unknown"
+
+
+def test_bundle_invariants_survive_legitimate_revision_and_replicate_reordering(tmp_path, monkeypatch):
+    m = _module()
+    monkeypatch.setattr(m, "ROOT", tmp_path)
+    data = {arm: {project: [] for project in m.PROJECTS} for arm, *_ in m.ARMS}
+    record, _, _ = _bundle_record(tmp_path, "CHORUS")
+    for label in ("rep2", "rep1"):
+        rec = {**record, "run": {**record["run"], "label": label}}
+        data["v6agentic"]["CHORUS"].append({"label": label, "rec": rec})
+    unknown = {"run": {"project": "CHORUS", "label": "unknown"}, "inputs": {}}
+    data["v8prod"]["CHORUS"].append({"label": "unknown", "rec": unknown})
+    before = m.bundle_drift_by_arm(data)
+    _assert_selected_bundle_invariants(m, data, before)
+    assert [row["label"] for row in before["v6agentic"]["records"]] == ["rep1", "rep2"]
+    (tmp_path / "CHORUS.txt").write_bytes(b"legitimate source revision")
+    data["v6agentic"]["CHORUS"].reverse()
+    after = m.bundle_drift_by_arm(data)
+    _assert_selected_bundle_invariants(m, data, after)
+    assert before["v6agentic"]["disk"] == {"match": 2, "drift": 0, "unknown": 0}
+    assert after["v6agentic"]["disk"] == {"match": 0, "drift": 2, "unknown": 0}
+    assert before["v8prod"]["disk"] == after["v8prod"]["disk"] == {"match": 0, "drift": 0, "unknown": 1}
+
+
+def test_bundle_history_unavailable_remains_unknown(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+    from data_sheets_schema.provenance import GitUnavailable
+    record, manifest, _ = _bundle_record(tmp_path)
+    manifest.write_bytes(b"replaced manifest")
+    def unavailable(*args, **kwargs):
+        raise GitUnavailable("shallow clone")
+    result = bundle_drift(record, tmp_path, recover=unavailable)
+    assert result["manifest_status"] == "unknown" and result["manifest_md5"] is None
+    assert result["manifest_reason"] == "manifest recovery unavailable: GitUnavailable"
+
+
 @pytest.mark.corpus
 def test_committed_comparison_matches_current_records():
-    """Catch changed report measurements that leave the published rows stale."""
+    """Catch stale measurements without fixing current bundle contents in tests."""
     m = _module()
     data = m.collect()
-    drift = m.bundle_drift_by_arm(data)["v6agentic"]
-    assert drift["disk"] == {"match": 3, "drift": 9, "unknown": 0}
-    assert {row["project"]: row["disk_status"] for row in drift["records"]} == {
-        "AI_READI": "drift", "CHORUS": "match", "CM4AI": "drift", "VOICE": "drift"}
+    _assert_selected_bundle_invariants(m, data, m.bundle_drift_by_arm(data))
     scores = {rubric: {key: {p: m.rubric_scores(prefix, p, rubric) for p in m.PROJECTS}
                       for key, _display, prefix, *_ in m.ARMS} for rubric in m.EVAL_DIRS}
     rendered = m.render_markdown(data, scores)
     assert "## Bundle identity by arm" in rendered
     assert m.OUT_MD.read_text(encoding="utf-8") == rendered, (
-        "Run scripts/arm_comparison.py to refresh the committed table and figures")
+        "Inspect unavailable evidence (including GitUnavailable or shallow history) first; "
+        "restore required history when available. After reviewing input changes, run "
+        "scripts/arm_comparison.py --no-figures to refresh the committed Markdown.")
 
 
 class RemovalRows(unittest.TestCase):

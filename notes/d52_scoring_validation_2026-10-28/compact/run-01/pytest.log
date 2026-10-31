@@ -1,0 +1,200 @@
+F...FF.F...........FFFF.FF....F                                          [100%]
+=================================== FAILURES ===================================
+____________ test_q9_approved_contacts_are_one_criterion[contacts0] ____________
+
+contacts = ('data_governance.committee_contact',)
+
+    @pytest.mark.parametrize("contacts", [(MODERN,), (LEGACY,), (MODERN, LEGACY)])
+    def test_q9_approved_contacts_are_one_criterion(contacts):
+        ev = evaluator({"regulated_access": True})
+        result = ev._score_rubric20_question(record(*contacts), q9(ev))
+>       assert result.score == 5
+E       AssertionError
+
+tests/test_d52_scoring.py:48: AssertionError
+_ test_alias_presence_extraction_and_raw_values_use_actual_source[data_governance.committee_contact-regulatory_restrictions.governance_committee_contact] _
+
+criterion = 'data_governance.committee_contact'
+source = 'regulatory_restrictions.governance_committee_contact'
+
+    @pytest.mark.parametrize("source", [MODERN, LEGACY])
+    @pytest.mark.parametrize("criterion", [MODERN, LEGACY])
+    def test_alias_presence_extraction_and_raw_values_use_actual_source(criterion, source):
+        ev = evaluator()
+        parent, key = source.split(".")
+        data = {parent: {key: copy.deepcopy(PERSON)}}
+        present, evidence = ev._is_field_present(data, [criterion])
+>       assert present
+E       AssertionError
+
+tests/test_d52_scoring.py:60: AssertionError
+_ test_alias_presence_extraction_and_raw_values_use_actual_source[regulatory_restrictions.governance_committee_contact-data_governance.committee_contact] _
+
+criterion = 'regulatory_restrictions.governance_committee_contact'
+source = 'data_governance.committee_contact'
+
+    @pytest.mark.parametrize("source", [MODERN, LEGACY])
+    @pytest.mark.parametrize("criterion", [MODERN, LEGACY])
+    def test_alias_presence_extraction_and_raw_values_use_actual_source(criterion, source):
+        ev = evaluator()
+        parent, key = source.split(".")
+        data = {parent: {key: copy.deepcopy(PERSON)}}
+        present, evidence = ev._is_field_present(data, [criterion])
+>       assert present
+E       AssertionError
+
+tests/test_d52_scoring.py:60: AssertionError
+________ test_alias_evidence_and_raw_values_deduplicate_exact_pointers _________
+
+    def test_alias_evidence_and_raw_values_deduplicate_exact_pointers():
+        ev = evaluator()
+        data = record(MODERN, LEGACY)
+        present, evidence = ev._is_field_present(data, [MODERN, LEGACY, MODERN])
+        assert present
+>       assert len(evidence) == len(set(evidence)) == 2
+E       AssertionError
+
+tests/test_d52_scoring.py:72: AssertionError
+_ test_frozen_rubric10_legacy_criterion_accepts_approved_nested_contact[data_governance.committee_contact] _
+
+source = 'data_governance.committee_contact'
+
+    @pytest.mark.parametrize("source", [MODERN, LEGACY])
+    def test_frozen_rubric10_legacy_criterion_accepts_approved_nested_contact(source):
+        ev = evaluator({"regulated_access": True})
+        parent, key = source.split(".")
+        data = {parent: {key: copy.deepcopy(PERSON)}}
+        # Frozen E2.2 spells this criterion without a parent; no asset rewrite.
+        element = next(e for e in ev.rubric10["d4d_complex_proxy_rubric"]["rubric"] if e["id"] == 2)
+        criterion = next(s for s in element["sub_elements"] if s.get("item_id") == "E2.2")
+        assert "governance_committee_contact" in criterion["field"]
+>       assert ev._is_field_present(data, ["governance_committee_contact"])[0]
+E       AssertionError
+
+tests/test_d52_scoring.py:107: AssertionError
+_ test_frozen_rubric10_legacy_criterion_accepts_approved_nested_contact[regulatory_restrictions.governance_committee_contact] _
+
+source = 'regulatory_restrictions.governance_committee_contact'
+
+    @pytest.mark.parametrize("source", [MODERN, LEGACY])
+    def test_frozen_rubric10_legacy_criterion_accepts_approved_nested_contact(source):
+        ev = evaluator({"regulated_access": True})
+        parent, key = source.split(".")
+        data = {parent: {key: copy.deepcopy(PERSON)}}
+        # Frozen E2.2 spells this criterion without a parent; no asset rewrite.
+        element = next(e for e in ev.rubric10["d4d_complex_proxy_rubric"]["rubric"] if e["id"] == 2)
+        criterion = next(s for s in element["sub_elements"] if s.get("item_id") == "E2.2")
+        assert "governance_committee_contact" in criterion["field"]
+>       assert ev._is_field_present(data, ["governance_committee_contact"])[0]
+E       AssertionError
+
+tests/test_d52_scoring.py:107: AssertionError
+______ test_collection_members_use_their_own_contacts_and_evidence[False] ______
+
+tmp_path = PosixPath('/private/tmp/d4d-d52-baseline-validation-20261028/cases/test_collection_members_use_th0')
+reverse = False
+
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_collection_members_use_their_own_contacts_and_evidence(tmp_path, reverse):
+        members = [record(LEGACY), record(MODERN)]
+        if reverse:
+            members.reverse()
+        path = tmp_path / "collection.yaml"
+        path.write_text(yaml.safe_dump({"DatasetCollection": {"resources": members}}))
+        ev = evaluator()
+        result = ev.evaluate_d4d_file(path, "EXAMPLE", "manual")
+        scored = next(q for q in result.rubric20_scores if q.question_id == 9)
+>       assert scored.score == 5 and [u["score"] for u in scored.unit_scores] == [5, 5]
+E       AssertionError
+
+tests/test_d52_scoring.py:124: AssertionError
+______ test_collection_members_use_their_own_contacts_and_evidence[True] _______
+
+tmp_path = PosixPath('/private/tmp/d4d-d52-baseline-validation-20261028/cases/test_collection_members_use_th1')
+reverse = True
+
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_collection_members_use_their_own_contacts_and_evidence(tmp_path, reverse):
+        members = [record(LEGACY), record(MODERN)]
+        if reverse:
+            members.reverse()
+        path = tmp_path / "collection.yaml"
+        path.write_text(yaml.safe_dump({"DatasetCollection": {"resources": members}}))
+        ev = evaluator()
+        result = ev.evaluate_d4d_file(path, "EXAMPLE", "manual")
+        scored = next(q for q in result.rubric20_scores if q.question_id == 9)
+>       assert scored.score == 5 and [u["score"] for u in scored.unit_scores] == [5, 5]
+E       AssertionError
+
+tests/test_d52_scoring.py:124: AssertionError
+____ test_only_explicit_false_excludes_exactly_four_q9_fields[context0-3-5] ____
+
+context = {'regulated_access': False}, denominator = 3, score = 5
+tmp_path = PosixPath('/private/tmp/d4d-d52-baseline-validation-20261028/cases/test_only_explicit_false_exclu0')
+
+    @pytest.mark.parametrize("context,denominator,score", [
+        ({"regulated_access": False}, 3, 5),
+        ({"regulated_access": {"value": False, "evidence": "D52 synthetic approved declaration"}}, 3, 5),
+        ({"regulated_access": True}, 7, 3), ({"regulated_access": None}, 7, 3), ({}, 7, 3),
+        ({"human_subjects": False}, 7, 3),
+    ])
+    def test_only_explicit_false_excludes_exactly_four_q9_fields(context, denominator, score, tmp_path):
+        ev = evaluator(context)
+        question = q9(ev)
+        before = copy.deepcopy(question)
+        data = record()
+        data["regulatory_restrictions"] = {"description": "No additional source evidence"}
+        result = ev._score_rubric20_question(data, question)
+>       assert result.score == score and f"3/{denominator} fields populated" in result.score_label
+E       AssertionError
+
+tests/test_d52_scoring.py:162: AssertionError
+____ test_only_explicit_false_excludes_exactly_four_q9_fields[context1-3-5] ____
+
+context = {'regulated_access': {'evidence': 'D52 synthetic approved declaration', 'value': False}}
+denominator = 3, score = 5
+tmp_path = PosixPath('/private/tmp/d4d-d52-baseline-validation-20261028/cases/test_only_explicit_false_exclu1')
+
+    @pytest.mark.parametrize("context,denominator,score", [
+        ({"regulated_access": False}, 3, 5),
+        ({"regulated_access": {"value": False, "evidence": "D52 synthetic approved declaration"}}, 3, 5),
+        ({"regulated_access": True}, 7, 3), ({"regulated_access": None}, 7, 3), ({}, 7, 3),
+        ({"human_subjects": False}, 7, 3),
+    ])
+    def test_only_explicit_false_excludes_exactly_four_q9_fields(context, denominator, score, tmp_path):
+        ev = evaluator(context)
+        question = q9(ev)
+        before = copy.deepcopy(question)
+        data = record()
+        data["regulatory_restrictions"] = {"description": "No additional source evidence"}
+        result = ev._score_rubric20_question(data, question)
+>       assert result.score == score and f"3/{denominator} fields populated" in result.score_label
+E       AssertionError
+
+tests/test_d52_scoring.py:162: AssertionError
+_______ test_scoring_change_has_distinct_source_and_instrument_identity ________
+
+    def test_scoring_change_has_distinct_source_and_instrument_identity():
+        ev = evaluator()
+        actual_sha = hashlib.sha256(Path(scoring.__file__).read_bytes()).hexdigest()
+        assert ev.instrument["inputs"]["runner"] == actual_sha == scoring.SOURCE_SHA256
+        previous = {**ev.instrument["inputs"], "runner": BASE_RUNNER_SHA256}
+        previous_identity = hashlib.sha256(json.dumps(previous, sort_keys=True).encode()).hexdigest()
+>       assert actual_sha != BASE_RUNNER_SHA256
+E       AssertionError
+
+tests/test_d52_scoring.py:187: AssertionError
+- generated xml file: /private/tmp/d4d-d52-baseline-validation-20261028/pytest.xml -
+=========================== short test summary info ============================
+FAILED tests/test_d52_scoring.py::test_q9_approved_contacts_are_one_criterion[contacts0]
+FAILED tests/test_d52_scoring.py::test_alias_presence_extraction_and_raw_values_use_actual_source[data_governance.committee_contact-regulatory_restrictions.governance_committee_contact]
+FAILED tests/test_d52_scoring.py::test_alias_presence_extraction_and_raw_values_use_actual_source[regulatory_restrictions.governance_committee_contact-data_governance.committee_contact]
+FAILED tests/test_d52_scoring.py::test_alias_evidence_and_raw_values_deduplicate_exact_pointers
+FAILED tests/test_d52_scoring.py::test_frozen_rubric10_legacy_criterion_accepts_approved_nested_contact[data_governance.committee_contact]
+FAILED tests/test_d52_scoring.py::test_frozen_rubric10_legacy_criterion_accepts_approved_nested_contact[regulatory_restrictions.governance_committee_contact]
+FAILED tests/test_d52_scoring.py::test_collection_members_use_their_own_contacts_and_evidence[False]
+FAILED tests/test_d52_scoring.py::test_collection_members_use_their_own_contacts_and_evidence[True]
+FAILED tests/test_d52_scoring.py::test_only_explicit_false_excludes_exactly_four_q9_fields[context0-3-5]
+FAILED tests/test_d52_scoring.py::test_only_explicit_false_excludes_exactly_four_q9_fields[context1-3-5]
+FAILED tests/test_d52_scoring.py::test_scoring_change_has_distinct_source_and_instrument_identity
+11 failed, 20 passed in 1.14s

@@ -1,0 +1,8 @@
+format: evaluation_cohort_v1
+cells:
+  - {arm: v4, projects: [AI_READI, CHORUS, CM4AI, VOICE], replicates: [1, 2, 3], label_template: '2026-08-13_claude-opus-5-api-generic-v4_rep{replicate}', method: claudecode_agent, condition: generic_v4, input_arm: baseline}
+  - {arm: 22c, projects: [AI_READI, CHORUS, CM4AI, VOICE], replicates: [1, 2, 3], label_template: '2026-08-22c_claude-opus-5-api-generic-v5_rep{replicate}', method: claudecode_agent, condition: generic_v5, input_arm: baseline}
+  - {arm: v6, projects: [AI_READI, CHORUS, CM4AI, VOICE], replicates: [1, 2, 3], label_template: '2026-08-28_claude-opus-5-claudecode-generic-v6_rep{replicate}', method: claudecode_agent, condition: generic_v6, input_arm: baseline}
+  - {arm: v7, projects: [AI_READI, CHORUS, CM4AI, VOICE], replicates: [1, 2, 3], label_template: '2026-09-01_claude-opus-5-api-generic-v7_rep{replicate}', method: claudecode_agent, condition: generic_v7, input_arm: baseline}
+  - {arm: v8_04f, projects: [CHORUS, VOICE], replicates: [1, 2, 3], label_template: '2026-09-04f_claude-opus-5-api-generic-v8_rep{replicate}', method: claudecode_api, condition: generic_v8, input_arm: baseline}
+  - {arm: v8_04g, projects: [AI_READI, CM4AI], replicates: [1, 2, 3], label_template: '2026-09-04g_claude-opus-5-api-generic-v8_rep{replicate}', method: claudecode_api, condition: generic_v8, input_arm: baseline}
