@@ -1,0 +1,216 @@
+{
+  "format": "wave5_compact_validation_evidence_v1",
+  "helpers": [
+    {
+      "name": "preserve_wave5_validation_20261028.py",
+      "sha256": "230a36b1df400de203623cbb29865205724cd1c821ab8a6b8670b3a0c7ed4b08"
+    },
+    {
+      "name": "archive_n2_restack_validation_20261027.py",
+      "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+    }
+  ],
+  "runs": [
+    {
+      "files": [
+        {
+          "bytes": 406,
+          "name": "bootstrap.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 16990,
+          "name": "origins-after.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "ada7328c06123b4a522aba5264ea460fab22e7ba57db6239a92a68f33d4a7d39"
+        },
+        {
+          "bytes": 13274,
+          "name": "origins-before.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "5c2789364c72a5f79d68baba9af5f3c96c0c36d1ced8d2df61a9e6befcdcba0e"
+        },
+        {
+          "bytes": 539,
+          "name": "outcome.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "91a94c849f16d3d368857a7a1b0063e3c9302f485d77627c6d17d2e7013a55ed"
+        },
+        {
+          "bytes": 3736,
+          "name": "plan.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "efc7cbe9a675105c0c4f343b566abc624d7602f3d181718b06af0e72aebbbaed"
+        },
+        {
+          "bytes": 387,
+          "name": "pytest-command.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "681693b9e57eef3953e83e4ab383a139d4dae8aed15f56803634537d17dc8b95"
+        },
+        {
+          "bytes": 2147,
+          "name": "pytest.log",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "0a6bcc4e4556d6d3483d2751890811af4407baf8971885365f770d2afb1c6d46"
+        },
+        {
+          "bytes": 35908,
+          "name": "pytest.xml",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "300637f08667298818e1000e88e0cfbe12f58fa01d847964918150a7d5fcff6d"
+        },
+        {
+          "bytes": 2991667,
+          "name": "source-after.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "48b30891579143db668370eb3f0a89135efef07799d9c0d573051057e42518f1"
+        },
+        {
+          "bytes": 2991667,
+          "name": "source-before.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "48b30891579143db668370eb3f0a89135efef07799d9c0d573051057e42518f1"
+        }
+      ],
+      "original_outcome": {
+        "invalid_junit_cases": [
+          {
+            "identity": [
+              "tests.test_report_admission",
+              "test_chorus_wire_is_byte_identical_to_the_base_and_is_what_was_counted"
+            ],
+            "tags": [
+              "failure"
+            ]
+          }
+        ],
+        "passed": false,
+        "passed_cases_by_module": {
+          "test_download.test_api_runner": 156,
+          "test_report_admission": 21,
+          "test_usage_ledger": 59
+        },
+        "returncode": 1,
+        "scientific_acceptance": "not_assessed",
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 3983.899230582989
+      },
+      "original_root": "/private/tmp/d4d-wave5-5210-full-20261028",
+      "packet_directory": "run-01",
+      "pass_claim": "copied outcome only; no new acceptance inferred",
+      "unread_external_directories": [
+        "cases"
+      ]
+    },
+    {
+      "files": [
+        {
+          "bytes": 406,
+          "name": "bootstrap.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 16584,
+          "name": "origins-after.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "0845d69345653aba6b87e6bae7ce5c29986c5d064fe242300996355fe0642898"
+        },
+        {
+          "bytes": 13274,
+          "name": "origins-before.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "5c2789364c72a5f79d68baba9af5f3c96c0c36d1ced8d2df61a9e6befcdcba0e"
+        },
+        {
+          "bytes": 328,
+          "name": "outcome.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "c5f16887e38b10c795d0c1650468b9ab0efd831696cabe13d0b10ea9b0867f77"
+        },
+        {
+          "bytes": 4698,
+          "name": "plan.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "481a9e6dc6f1a00684cf349794ca9c048a73981f36557abf339cafd5a3eae78c"
+        },
+        {
+          "bytes": 391,
+          "name": "pytest-command.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "08a6308743a12b0361e6fdbf0796ab2ac40ad47871e75ec29b47322a685e3a9f"
+        },
+        {
+          "bytes": 866,
+          "name": "pytest.log",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "16bebc9f0810d3aad22bb11c2f41130d5dfdb6ea79386ef509f1259a86d7d950"
+        },
+        {
+          "bytes": 382,
+          "name": "pytest.xml",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "325305f8bf5629112a26b72aa23a1aaffa36b0615b073182e592b030a58ea9b7"
+        },
+        {
+          "bytes": 2994592,
+          "name": "source-after.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "7d1b4ef86f8c5bd39a574e35429b8c4eea44e16ba951d9906d5da50686631ccf"
+        },
+        {
+          "bytes": 2994592,
+          "name": "source-before.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "7d1b4ef86f8c5bd39a574e35429b8c4eea44e16ba951d9906d5da50686631ccf"
+        }
+      ],
+      "original_outcome": {
+        "invalid_junit_cases": [],
+        "passed": true,
+        "passed_cases_by_module": {
+          "test_download.test_api_runner": 0,
+          "test_report_admission": 1,
+          "test_usage_ledger": 0
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 250.3476891659957
+      },
+      "original_root": "/private/tmp/d4d-wave5-5210-wire-fixed-20261028",
+      "packet_directory": "run-02",
+      "pass_claim": "copied outcome only; no new acceptance inferred",
+      "unread_external_directories": [
+        "cases"
+      ]
+    }
+  ],
+  "scope": "compact results, external raw inventory digests, no historical score changes",
+  "selection": "explicit top-level regular JSON/log/XML files, including ignored files",
+  "source_and_origin_inventories_embedded": false
+}

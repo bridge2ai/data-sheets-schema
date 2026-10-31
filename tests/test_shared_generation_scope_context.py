@@ -242,7 +242,43 @@ def test_actual_cli_scope_delivery_regate_and_completed_replay(tmp_path, monkeyp
     calls = []
     for phase, call in zip(phases, peer.calls):
         sg.require_generation_context(spec, call['messages'])
-        assert _blocks(call['messages']).count(expected) == 1
+        wire_blocks = _blocks(call['messages'])
+        assert wire_blocks.count(expected) == 1
+        if phase == runtime.WORKER_PHASE:
+            exact_stage_json = next(s for s in wire_blocks if s.startswith('# Exact typed stage request\n\n')).split('\n\n', 1)[1]
+            schema_ctx_json = next(s for s in wire_blocks if s.startswith(sg.SCHEMA_CONTEXT_HEADER))[len(sg.SCHEMA_CONTEXT_HEADER):]
+            assigned = set(json.loads(json.loads(exact_stage_json)['payload']['stage'])['assignment']['paths'])
+            worker_dataset_slots = json.loads(schema_ctx_json)['classes']['Dataset']
+            assigned_slots = [sdef for sname, sdef in worker_dataset_slots.items()
+                              if any(p == f'/{sname}' or p.startswith(f'/{sname}/') for p in assigned)]
+            unassigned_slots = [sdef for sname, sdef in worker_dataset_slots.items()
+                                if not any(p == f'/{sname}' or p.startswith(f'/{sname}/') for p in assigned)]
+            assert assigned_slots and any('description' in sdef for sdef in assigned_slots)
+            assert unassigned_slots and all('description' not in sdef and 'comments' not in sdef for sdef in unassigned_slots)
+        elif phase == runtime.OMISSION_PHASE:
+            binding_json = next(s for s in wire_blocks if s.startswith(runtime.BINDING_HEADER)).split('\n\n', 1)[1]
+            exact_stage_json = next(s for s in wire_blocks if s.startswith('# Exact typed stage request\n\n')).split('\n\n', 1)[1]
+            schema_ctx_json = next(s for s in wire_blocks if s.startswith(sg.SCHEMA_CONTEXT_HEADER))[len(sg.SCHEMA_CONTEXT_HEADER):]
+            binding_doc = json.loads(binding_json)
+            wire_inner_doc = json.loads(exact_stage_json)
+            omission_dataset_slots = json.loads(schema_ctx_json)['classes']['Dataset']
+            assert all('description' in omission_dataset_slots[k] for k in ('id', 'name', 'description'))
+            assert binding_doc['inner_request_sha256'] == sg.sha(exact_stage_json.encode('utf-8'))
+            assert 'packet_inner_request_sha256' in binding_doc
+            assert binding_doc['packet_inner_request_sha256'] != binding_doc['inner_request_sha256']
+            assert wire_inner_doc['request_sha256'] == sg.sha(sg.canonical(wire_inner_doc['payload']))
+            assert 'packet_request_sha256' in wire_inner_doc
+            assert wire_inner_doc['packet_request_sha256'] != wire_inner_doc['request_sha256']
+            assert 'classes' in wire_inner_doc['payload']['schema']
+            assert 'DataSubset' in wire_inner_doc['payload']['schema']['classes']
+            id_slot_def = wire_inner_doc['payload']['schema']['classes']['Dataset']['slots']['id']['definition']
+            assert 'description' in id_slot_def
+            assert 'domain_of' not in id_slot_def
+            assert 'from_schema' not in id_slot_def
+        elif phase == runtime.INTEGRATION_PHASE:
+            schema_ctx_json = next(s for s in wire_blocks if s.startswith(sg.SCHEMA_CONTEXT_HEADER))[len(sg.SCHEMA_CONTEXT_HEADER):]
+            integration_dataset_slots = json.loads(schema_ctx_json)['classes']['Dataset']
+            assert all('description' in integration_dataset_slots[k] for k in ('id', 'name', 'description'))
         calls.append({'phase': phase, 'sha256': sg.sha(sg.canonical(call)),
                       'scope_sha256': sg.sha(expected.encode())})
     assert spec.provenance_path.exists()
@@ -251,6 +287,7 @@ def test_actual_cli_scope_delivery_regate_and_completed_replay(tmp_path, monkeyp
     assert accounting.get('pending_call') is None
     record = yaml.safe_load(spec.provenance_path.read_bytes())
     assert record['shared_generation']['scientific_support'] == 'unverified evaluator declarations'
+    assert record['shared_generation']['schema_context_version'] == sg.SCHEMA_CONTEXT_VERSION == 2
     baseline = files(spec)
     no_calls = CandidatesScript(spec)
     repeated = api.execute(replace(spec), client=scripted_client(no_calls))
@@ -273,3 +310,183 @@ def test_actual_cli_scope_delivery_regate_and_completed_replay(tmp_path, monkeyp
         'completed_replay_no_calls': True, 'cli_reuse_refused_without_calls': True,
         'all_originals_preserved': True, 'provider_calls': False,
         'scientific_approval': False}, indent=2) + '\n')
+
+
+def test_s7_trim_retains_descriptions_by_stage_and_binds_wire_identity(selected, monkeypatch):
+    """D-C5 (A14): S7 keeps descriptions in generation/omission/integration/report,
+    trims non-assigned worker slot descriptions, keeps all reachable classes in
+    omission wire schema, hashes wire_inner in inner_request_sha256 (#5148), and
+    binds S7 trim + stage contract digests in descriptor() (#5113, #5114, #5143).
+    """
+    from data_sheets_schema import audit_batch_format, receipt_completion as rc
+    expected_trimmed_keys = (
+        'domain_of', 'from_schema', 'alias', 'owner', '@type',
+        'slot_uri', 'annotations', 'exact_mappings', 'broad_mappings',
+    )
+    assert sg._TRIMMED_SLOT_KEYS == expected_trimmed_keys
+    # 1. Generation / integration / omission / report schema_context retains descriptions.
+    full_ctx_block = sg.schema_context(selected, RECORD)
+    full_ctx = json.loads(full_ctx_block[len(sg.SCHEMA_CONTEXT_HEADER):])
+    dataset_slots = full_ctx['classes']['Dataset']
+    assert 'description' in dataset_slots['id']
+    assert 'description' in dataset_slots['name']
+    assert 'description' in dataset_slots['description']
+    for k in expected_trimmed_keys:
+        assert k not in dataset_slots['id']
+
+    # 2. Worker schema_context retains description only on the worker batch's assigned paths.
+    worker_ctx_block = sg.schema_context(selected, RECORD, retain_description_paths=('/id',))
+    worker_ctx = json.loads(worker_ctx_block[len(sg.SCHEMA_CONTEXT_HEADER):])
+    w_dataset_slots = worker_ctx['classes']['Dataset']
+    assert 'description' in w_dataset_slots['id']
+    assert 'description' not in w_dataset_slots['name']
+    assert 'comments' not in w_dataset_slots['name']
+    assert 'description' not in w_dataset_slots['description']
+    if 'Software' in worker_ctx['classes']:
+        assert all('description' not in sdef for sdef in worker_ctx['classes']['Software'].values())
+
+    # 3. trim_omission_schema keeps all reachable classes and slot descriptions, dropping bookkeeping keys.
+    sample_omission_schema = {
+        'root_class': 'Dataset',
+        'slots': {'id': {'name': 'id', 'description': 'top-level slot table dropped'}},
+        'classes': {
+            'Dataset': {
+                'definition': {'name': 'Dataset', 'description': 'A dataset.', 'from_schema': 'x', 'annotations': {}},
+                'slots': {
+                    'id': {
+                        'definition': {'name': 'id', 'description': 'Identifier.', 'domain_of': ['Dataset'], 'slot_uri': 'dcterms:identifier'},
+                        'inline': False,
+                        'range_class': False,
+                    },
+                },
+            },
+            'DataSubset': {
+                'definition': {'name': 'DataSubset', 'description': 'A subset.', 'exact_mappings': ['x:Subset']},
+                'slots': {
+                    'is_data_split': {
+                        'definition': {'name': 'is_data_split', 'description': 'Split flag.', 'owner': 'DataSubset'},
+                        'inline': False,
+                        'range_class': False,
+                    },
+                },
+            },
+        },
+    }
+    trimmed_omission = sg.trim_omission_schema(sample_omission_schema)
+    assert 'slots' not in trimmed_omission
+    assert set(trimmed_omission['classes']) == {'Dataset', 'DataSubset'}
+    assert trimmed_omission['classes']['Dataset']['definition']['description'] == 'A dataset.'
+    assert 'from_schema' not in trimmed_omission['classes']['Dataset']['definition']
+    assert trimmed_omission['classes']['Dataset']['slots']['id']['definition']['description'] == 'Identifier.'
+    assert 'domain_of' not in trimmed_omission['classes']['Dataset']['slots']['id']['definition']
+    assert trimmed_omission['classes']['DataSubset']['slots']['is_data_split']['definition']['description'] == 'Split flag.'
+    assert 'owner' not in trimmed_omission['classes']['DataSubset']['slots']['is_data_split']['definition']
+
+    # 4. descriptor() binds S7 trim and stage contract digests (#5113, #5114, #5143).
+    base_desc = sg.descriptor()
+    assert base_desc['schema_context_version'] == sg.SCHEMA_CONTEXT_VERSION == 2
+    assert base_desc['schema_context_trim']['omission_all_reachable_classes'] is True
+    assert base_desc['schema_context_trim']['omission_retained_top_keys'] == ['classes', 'enums', 'root_class', 'sources']
+    assert base_desc['schema_context_trim']['generation_dropped_slot_keys'] == list(expected_trimmed_keys)
+    assert 'description' not in base_desc['schema_context_trim']['generation_dropped_slot_keys']
+    assert 'description' in base_desc['schema_context_trim']['worker_non_assigned_dropped_slot_keys']
+    assert set(base_desc['stage_contracts']) == {
+        'phase_system_sha256',
+        'phase_instructions_sha256',
+        'phase_max_tokens_sha256',
+        'regate_headers_sha256',
+        'repair_instruction_sha256',
+        'readdress_header_sha256',
+        'shared_evidence_contract_sha256',
+        'evidence_protocol_sha256',
+        'api_playbook_probe_sha256',
+        'chunk_projection_probe_sha256',
+        'schema_context_header_sha256',
+        'generation_context_header_sha256',
+        'typed_audit_system_sha256',
+        'typed_binding_header_sha256',
+        'typed_audit_worker_format_sha256',
+        'typed_audit_integration_format_sha256',
+        'omission_assets_sha256',
+        'receipt_completion_policy_sha256',
+        'receipt_completion_audit_carry_sha256',
+        'request_code_sha256',
+    }
+    assert 'reader_runtime' in base_desc
+    assert 'linkml_dumper_probe_sha256' in base_desc['schema_context_trim']
+    assert base_desc['stage_contracts']['phase_instructions_sha256'] == {
+        p: sg.sha(api.phase_instruction(p, 25).encode('utf-8'))
+        for p in sorted(api.PHASE_INSTRUCTIONS)
+    }
+    assert base_desc['stage_contracts']['shared_evidence_contract_sha256'] == sg.sha(
+        api.shared_evidence_contract().encode('utf-8')
+    )
+    assert base_desc['stage_contracts']['receipt_completion_policy_sha256'] == sg.sha(
+        sg.canonical(rc.policy_identity(version=2))
+    )
+    stale_reg = json.loads(selected.shared_generation_registration)
+    stale_reg['selection'].pop('schema_context_version')
+    with pytest.raises(ValueError, match='shared registration names a different protocol or selected assets'):
+        sg.parse_registration(sg.canonical(stale_reg))
+    monkeypatch.setattr(rc, 'AUDIT_HEADER', rc.AUDIT_HEADER + '\nChanged contract.')
+    assert sg.descriptor()['stage_contracts']['receipt_completion_policy_sha256'] != base_desc['stage_contracts']['receipt_completion_policy_sha256']
+    monkeypatch.setattr(runtime, 'SYSTEM', runtime.SYSTEM + '\nChanged system.')
+    assert sg.descriptor()['stage_contracts']['typed_audit_system_sha256'] != base_desc['stage_contracts']['typed_audit_system_sha256']
+
+
+
+def test_a14_r2_f1_probes_move_descriptor_or_refuse(selected, monkeypatch, tmp_path):
+    """A14 R2 F1 (n01-n05): evidence_protocol_v7.md, api_playbook, evidence_assertions,
+    linkml_runtime json_dumper, reader_runtime, and D4D_RECEIPT_FULL_MAX_TOKENS
+    are all bound in v1 descriptor() or refused before admission.
+    """
+    from data_sheets_schema import api_playbook, evidence_assertions, prompt_registry, resources
+    from linkml_runtime.dumpers import json_dumper
+
+    base_desc = sg.descriptor()
+    assert 'src/download/prompts/evidence_protocol_v7.md' in sg.ASSET_HASHES
+    assert 'src/download/prompts/evidence_protocol_v7.md' in prompt_registry.pins()
+
+    # n01: evidence_protocol_v7.md drift refuses in captured_assets() / descriptor()
+    orig_res = resources.resource_path
+    edited_ep = tmp_path / 'evidence_protocol_v7.md'
+    edited_ep.write_bytes(orig_res('src/download/prompts/evidence_protocol_v7.md').read_bytes() + b'\nChanged rule.\n')
+    with monkeypatch.context() as mp:
+        mp.setattr(resources, 'resource_path',
+                   lambda name: edited_ep if str(name) == 'src/download/prompts/evidence_protocol_v7.md' else orig_res(name))
+        with pytest.raises(ValueError, match='shared-generation selected asset changed'):
+            sg.descriptor()
+
+    # n02: api_playbook.adapt_template change moves stage_contracts
+    with monkeypatch.context() as mp:
+        orig_adapt = api_playbook.adapt_template
+        mp.setattr(api_playbook, 'adapt_template', lambda text, version=2: orig_adapt(text, version=version) + '\nExtra.')
+        assert sg.descriptor()['stage_contracts']['api_playbook_probe_sha256'] != base_desc['stage_contracts']['api_playbook_probe_sha256']
+
+    # n03: evidence_assertions.source_chunks_from_bytes change moves stage_contracts
+    with monkeypatch.context() as mp:
+        orig_chunks = evidence_assertions.source_chunks_from_bytes
+        def altered_chunks(bundle, manifest):
+            chunks, pins = orig_chunks(bundle, manifest)
+            return ({k: {**v, 'text': v['text'] + 'x'} for k, v in chunks.items()}, pins)
+        mp.setattr(evidence_assertions, 'source_chunks_from_bytes', altered_chunks)
+        assert sg.descriptor()['stage_contracts']['chunk_projection_probe_sha256'] != base_desc['stage_contracts']['chunk_projection_probe_sha256']
+
+    # n04: linkml-runtime json_dumper emitting an extra slot field moves schema_context_trim
+    with monkeypatch.context() as mp:
+        orig_dumps = json_dumper.dumps
+        def altered_dumps(element, *a, **k):
+            data = json.loads(orig_dumps(element, *a, **k))
+            data['simulated_extra_linkml_field'] = 'v'
+            return json.dumps(data)
+        mp.setattr(json_dumper, 'dumps', altered_dumps)
+        assert sg.descriptor()['schema_context_trim']['linkml_dumper_probe_sha256'] != base_desc['schema_context_trim']['linkml_dumper_probe_sha256']
+
+    # n05: D4D_RECEIPT_FULL_MAX_TOKENS is refused in phase_max_tokens and preflight for shared runs, and moves stage_contracts
+    with monkeypatch.context() as mp:
+        mp.setenv('D4D_RECEIPT_FULL_MAX_TOKENS', '77777')
+        assert sg.descriptor()['stage_contracts']['phase_max_tokens_sha256'] != base_desc['stage_contracts']['phase_max_tokens_sha256']
+        with pytest.raises(ValueError, match='D4D_RECEIPT_FULL_MAX_TOKENS is not permitted'):
+            api.phase_max_tokens(selected, 'full', api.DEFAULT_MAX_TOKENS)
+        with pytest.raises(ValueError, match='D4D_RECEIPT_FULL_MAX_TOKENS is not permitted'):
+            sg.preflight(selected, api._model_settings(selected.condition))

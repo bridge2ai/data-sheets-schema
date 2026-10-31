@@ -10,6 +10,7 @@ import re
 import time
 import unittest
 
+import pytest
 import yaml
 import unittest.mock
 from pathlib import Path
@@ -27,6 +28,231 @@ from data_sheets_schema.api_runner import (
 )
 
 BUNDLE = Path("data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+
+
+class TestValidatorRepairRefreshCheckpoint:
+    """R9b/#5157: accepted shape repair survives its later report interruption."""
+
+    @pytest.fixture(autouse=True)
+    def offline_refresh(self, monkeypatch):
+        import socket
+        from data_sheets_schema import api_runner as api
+        monkeypatch.setattr(socket.socket, "connect", lambda *a, **k: pytest.fail("network forbidden"))
+        monkeypatch.setattr(api, "provider_identity", lambda: {"provider": None, "base_url": None, "key_env": None})
+        monkeypatch.setattr(api, "MAX_ATTEMPTS", 1)
+
+    def pending(self, tmp_path, monkeypatch):
+        from data_sheets_schema import api_runner as api
+        from tests.test_report_admission import Counted, client_for, example, repaired_once
+        repaired_once(monkeypatch, "full")
+        selected = example(tmp_path)
+        real_refresh = api._regenerate_report
+
+        def interrupted(*args, **kwargs):
+            raise KeyboardInterrupt("R9b interruption before refreshed report admission")
+
+        monkeypatch.setattr(api, "_regenerate_report", interrupted)
+        messages = Counted(selected)
+        with pytest.raises(KeyboardInterrupt, match="R9b interruption"):
+            api.execute(selected, client=client_for(messages))
+        monkeypatch.setattr(api, "_regenerate_report", real_refresh)
+        return selected, messages
+
+    def test_refused_refresh_preserves_the_repaired_artifact_progress(self, tmp_path, monkeypatch):
+        """Original R9b reproducer, plus terminal refusal and repair-history retention."""
+        from dataclasses import replace
+        import hashlib
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for, example, repaired_once
+        repaired_once(monkeypatch, "full")
+        selected = example(tmp_path)
+        messages = Counted(selected, counts={"report_after_repair": 772001})
+        with pytest.raises(RuntimeError, match="report_refresh_not_admitted"):
+            api.execute(selected, client=client_for(messages))
+        assert ledger.evidence_refusal(selected)["reading"]["findings"][0]["kind"] == "report_refresh_not_admitted"
+        assert "report_after_repair" not in messages.phases
+        progress = json.loads(api._progress_path(selected).read_bytes())
+        assert progress["artifact_md5"]["full"] == hashlib.md5(selected.full_path.read_bytes()).hexdigest()
+        checkpoint = ledger.validator_refresh(selected)["checkpoint"]
+        assert progress[api.VALIDATOR_REFRESH_KEY] == checkpoint
+        assert checkpoint["repair"] == [{"phase": "repair_full", "round": 1, "outcome": "synthetic rewrite"}]
+        before = (api._progress_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes())
+        again = Counted(selected)
+        with pytest.raises(RuntimeError, match="report_refresh_not_admitted"):
+            api.execute(replace(selected), client=client_for(again))
+        assert not again.calls and not again.count_calls
+        assert before == (api._progress_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes())
+
+    def test_interruption_before_refresh_does_not_restart_the_sealed_full(self, tmp_path, monkeypatch):
+        """Original R9b reproducer strengthened to require exactly the owed refresh."""
+        from dataclasses import replace
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for
+        selected, first = self.pending(tmp_path, monkeypatch)
+        assert ledger.evidence_refusal(selected) is None
+        state = ledger.validator_refresh(selected)
+        assert state["state"] == "pending" and "usage_id" not in state
+        from data_sheets_schema import snapshot_store
+        initial = ledger._read(selected)
+        generation, old_ids = initial["generation_id"], {row["usage_id"] for row in initial["rows"]}
+        receipt = initial["receipt_completion"]
+        original_snapshot = snapshot_store.read_latest(selected.provenance_path.parent, selected.project,
+            f"{selected.project}_full.yaml", spec=selected)[1][1]
+        monkeypatch.setattr(api, "_repair_invalid", lambda *a, **k: pytest.fail("accepted repair must not repeat"))
+        again = Counted(selected)
+        result = api.execute(replace(selected), client=client_for(again))
+        assert "full" not in again.phases
+        assert again.phases == ["report_after_repair"]
+        assert again.counted == ["report_after_repair"]
+        assert result["validation_problems"] == []
+        record = yaml.safe_load(selected.provenance_path.read_bytes())
+        assert record["repair"] == state["checkpoint"]["repair"]
+        assert record["report_regenerated_after_repair"]["refreshed"] is True
+        settled = ledger._read(selected)
+        assert settled["receipt_completion"] == receipt
+        assert settled["generation_id"] == generation
+        assert old_ids < {row["usage_id"] for row in settled["rows"]}
+        assert len(settled["rows"]) == len(old_ids) + 1
+        assert snapshot_store.read_latest(selected.provenance_path.parent, selected.project,
+            f"{selected.project}_full.yaml", spec=selected)[1][1] == original_snapshot
+        assert ledger.validator_refresh(selected)["state"] == "accepted"
+        assert len(record["api_usage"]) == len(first.phases) + 1
+        replay = Counted(selected)
+        assert api.execute(replace(selected), client=client_for(replay))["already_complete"]
+        assert not replay.calls and not replay.count_calls
+
+    def test_missing_corrupt_or_stale_checkpoint_refuses_before_calls(self, tmp_path, monkeypatch):
+        from dataclasses import replace
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for
+        selected, _ = self.pending(tmp_path, monkeypatch)
+        progress_path, ledger_path = api._progress_path(selected), ledger.ledger_path(selected)
+        original = {p: p.read_bytes() for p in (progress_path, ledger_path, selected.full_path,
+                                               selected.core_path, selected.report_path)}
+        progress = json.loads(original[progress_path])
+        data = json.loads(original[ledger_path])
+        mutations = [
+            (progress_path, None), (progress_path, b"{broken"), (progress_path, b"[]"),
+            (progress_path, json.dumps({k: v for k, v in progress.items() if k != api.VALIDATOR_REFRESH_KEY}).encode()),
+            (progress_path, json.dumps({**progress, "completed": ["full"]}).encode()),
+            (progress_path, json.dumps({**progress, "artifact_md5": {"full": "0" * 32}}).encode()),
+            (progress_path, json.dumps({**progress, "Audit findings": "{}"}).encode()),
+            (selected.full_path, original[selected.full_path] + b"\n# external change\n"),
+            (selected.core_path, original[selected.core_path] + b"\n# external change\n"),
+            (selected.report_path, original[selected.report_path] + b"\nChanged report.\n"),
+            (ledger_path, json.dumps({**data, api.VALIDATOR_REFRESH_KEY: None}).encode()),
+            (ledger_path, json.dumps({**data, api.VALIDATOR_REFRESH_KEY: {
+                **data[api.VALIDATOR_REFRESH_KEY], "state": "unknown"}}).encode()),
+            (ledger_path, json.dumps({k: v for k, v in data.items() if k != api.VALIDATOR_REFRESH_KEY}).encode()),
+        ]
+        for path, changed in mutations:
+            if changed is None:
+                path.unlink()
+            else:
+                path.write_bytes(changed)
+            before_attempt = {p: p.read_bytes() if p.exists() else None for p in original}
+            again = Counted(selected)
+            # The existing selected-output ownership guard parses declarations
+            # before controller recovery. Preserve its earlier strict refusals.
+            error, message = ledger.UsageLedgerError, "validator repair report refresh"
+            if path == progress_path and changed == b"{broken":
+                error, message = ValueError, "^unreadable selected ownership declaration:"
+            elif path == progress_path and changed == b"[]":
+                error, message = ValueError, "^selected ownership declaration must be a mapping:"
+            with pytest.raises(error, match=message):
+                api.execute(replace(selected), client=client_for(again))
+            assert not again.calls and not again.count_calls
+            assert {p: p.read_bytes() if p.exists() else None for p in original} == before_attempt
+            for saved, raw in original.items():
+                saved.write_bytes(raw)
+        again = Counted(selected)
+        api.execute(replace(selected), client=client_for(again))
+        assert again.phases == ["report_after_repair"]
+
+    def test_paid_refresh_interruption_refuses_duplicate_dispatch(self, tmp_path, monkeypatch):
+        from dataclasses import replace
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for, example, repaired_once
+        repaired_once(monkeypatch, "full")
+        selected = example(tmp_path)
+        real_refresh = api._regenerate_report
+
+        def interrupted(*args, **kwargs):
+            assert real_refresh(*args, **kwargs)
+            raise KeyboardInterrupt("after paid refresh write, before accepted checkpoint")
+
+        monkeypatch.setattr(api, "_regenerate_report", interrupted)
+        first = Counted(selected)
+        with pytest.raises(KeyboardInterrupt, match="after paid refresh"):
+            api.execute(selected, client=client_for(first))
+        assert first.phases.count("report_after_repair") == 1
+        assert ledger.validator_refresh(selected)["state"] == "in_flight"
+        monkeypatch.setattr(api, "_regenerate_report", real_refresh)
+        for _ in range(2):
+            again = Counted(selected)
+            with pytest.raises(ledger.UsageLedgerError, match="without an accepted completion"):
+                api.execute(replace(selected), client=client_for(again))
+            assert not again.calls and not again.count_calls
+
+    @pytest.mark.parametrize("bad_report", [False, True])
+    def test_accepted_refresh_survives_interrupted_completion_checkpoint(self, tmp_path, monkeypatch, bad_report):
+        from dataclasses import replace
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for, example, repaired_once
+        repaired_once(monkeypatch, "full")
+        selected = example(tmp_path)
+        real_finish = ledger.finish_validator_refresh
+
+        def interrupted(spec):
+            real_finish(spec)
+            raise KeyboardInterrupt("after accepted refresh, before progress/final provenance")
+
+        monkeypatch.setattr(ledger, "finish_validator_refresh", interrupted)
+        first = Counted(selected, bad_report=bad_report)
+        with pytest.raises(KeyboardInterrupt, match="after accepted refresh"):
+            api.execute(selected, client=client_for(first))
+        assert first.phases.count("report_after_repair") == 1
+        assert ledger.validator_refresh(selected)["state"] == "accepted"
+        monkeypatch.setattr(ledger, "finish_validator_refresh", real_finish)
+        monkeypatch.setattr(api, "_repair_invalid", lambda *a, **k: pytest.fail("accepted repair must not repeat"))
+        again = Counted(selected, bad_report=bad_report)
+        api.execute(replace(selected), client=client_for(again))
+        assert again.phases == (["report_regate"] if bad_report else [])
+        assert again.counted == again.phases
+        record = yaml.safe_load(selected.provenance_path.read_bytes())
+        assert record["report_regenerated_after_repair"]["refreshed"] is True
+        assert record["repair"] == ledger.validator_refresh(selected)["checkpoint"]["repair"]
+        replay = Counted(selected)
+        assert api.execute(replace(selected), client=client_for(replay))["already_complete"]
+        assert not replay.calls and not replay.count_calls
+
+    def test_accepted_refresh_does_not_disable_later_invalid_run_repair(self, tmp_path, monkeypatch):
+        """The prior #361 completed-invalid repair-on-resume behavior remains."""
+        from dataclasses import replace
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for, example, REPAIR_MARK
+        selected = example(tmp_path)
+        repairs = []
+        finding = {"artifact": str(selected.full_path), "class": "Dataset", "error": "synthetic persistent finding"}
+        monkeypatch.setattr(api, "validate_outputs", lambda spec: [finding])
+
+        def repair(spec, client, settings, usage):
+            repairs.append(len(repairs) + 1)
+            spec.full_path.write_text(spec.full_path.read_text() + REPAIR_MARK + str(repairs[-1]) + "\n")
+            return [{"phase": "repair_full", "round": 1, "outcome": "synthetic rewrite " + str(repairs[-1])}]
+
+        monkeypatch.setattr(api, "_repair_invalid", repair)
+        first = Counted(selected)
+        assert api.execute(selected, client=client_for(first))["validation_problems"] == [finding]
+        assert ledger.validator_refresh(selected)["state"] == "accepted"
+        assert api._progress_path(selected).is_file()
+        again = Counted(selected)
+        assert api.execute(replace(selected), client=client_for(again))["validation_problems"] == [finding]
+        assert repairs == [1, 2]
+        assert again.phases == ["report_after_repair"]
+        record = yaml.safe_load(selected.provenance_path.read_bytes())
+        assert [row["outcome"] for row in record["repair"]] == ["synthetic rewrite 1", "synthetic rewrite 2"]
+        assert sum(row["phase"] == "report_after_repair" for row in ledger._read(selected)["rows"]) == 2
 
 
 def spec(**kw):

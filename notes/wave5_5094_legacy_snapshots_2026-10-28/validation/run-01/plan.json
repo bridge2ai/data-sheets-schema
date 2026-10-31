@@ -1,0 +1,34 @@
+{
+  "base": "3f202bd3e320672fed8a49b0c4b82ef7e124a43f",
+  "command": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-S",
+    "-P",
+    "-B",
+    "/private/tmp/d4d-codex-wave5-5094-legacy-baseline-20261028/scripts/adhoc/validate_wave5_5094_legacy_20261028.py",
+    "--root",
+    "/private/tmp/d4d-codex-wave5-5094-legacy-baseline-20261028",
+    "--output",
+    "/private/tmp/d4d-wave5-5094-legacy-baseline-20261028",
+    "--head",
+    "dfd0b9d4b0932cf6990971db6d70d39109e404af",
+    "--group",
+    "canary",
+    "--child"
+  ],
+  "credential_names_removed": [
+    "CBORG_API_KEY",
+    "GIT_PAGER",
+    "KB_AUTH_TOKEN",
+    "OPENSCIENTIST_API_KEY"
+  ],
+  "head": "dfd0b9d4b0932cf6990971db6d70d39109e404af",
+  "helper_sha256": "43116c26092b7112164f6ec949567fd75271b1b86aaf9b8830aef509dac54435",
+  "modules": [
+    "test_wave5_5094_legacy_snapshots"
+  ],
+  "production_changes": [],
+  "support_blob": "scripts/adhoc/wave3_validation_common_20261027.py",
+  "support_commit": "808415a0db55bd8bda76d42ca5e5982c099f6a6a",
+  "support_sha256": "f3e12dbd488941281cff46889ea48da32502e81db31f29020fe9177e20b5c229"
+}

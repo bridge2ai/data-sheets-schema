@@ -1,31 +1,39 @@
 # Evaluation applicability context for VOICE_PEDIATRIC (Bridge2AI Pediatric Voice)
 # Bridge2AI Data Generation Project: pediatric acoustic voice recordings and clinical metadata
 # Format: d4d-evaluation-context-1
+# Bundle chunks: data/preprocessed/chunks/VOICE_PEDIATRIC_chunks.yaml (rule.version: 2, 13 chunks)
 
 human_subjects:
   value: true
-  evidence: "VOICE_PEDIATRIC acquires acoustic voice recordings, speech tasks, and clinical phenotyping from pediatric human participants with parental/guardian permission and assent."
+  # chunks: [c002, c003, c004, c005, c006, c010]
+  evidence: "[chunks: c002, c003, c004, c005, c006, c010] Bridge2AI-Voice Pediatric Dataset collects voice recordings, demographics, and pediatric clinical/questionnaire data from human pediatric participants recruited at the Hospital for Sick Children (c002) with parental consent and child assent under approval by the Research Ethics Board at the Hospital for Sick Children (v1.1.0 on PhysioNet, c002, c003; pediatric protocol and ReproSchema forms in c004, c005, c006; NIH project 3OT2OD032720-01S1 in c010)."
 
 regulated_access:
   value: true
-  evidence: "Pediatric human acoustic recordings and clinical metadata require controlled credentialed access, ethical/consent compliance, and DUA governance."
+  # chunks: [c002, c003, c007]
+  evidence: "[chunks: c002, c003, c007] Bridge2AI-Voice Pediatric Dataset v1.1.0 on PhysioNet (doi:10.13026/mf9s-5r03, c002, c003) is distributed under PhysioNet Credentialed Access governed by the Bridge2AI Voice Registered Access License and Data Use Agreement (c002, c003, c007)."
 
 shared_dataset:
   value: true
-  evidence: "VOICE_PEDIATRIC releases standardized pediatric acoustic recordings and clinical metadata to approved research investigators."
+  # chunks: [c002, c003]
+  evidence: "[chunks: c002, c003] Bridge2AI-Voice Pediatric Dataset v1.1.0 is publicly shared with credentialed researchers on PhysioNet (https://physionet.org/content/b2ai-voice-pediatric/1.1.0/, doi:10.13026/mf9s-5r03, c002, c003) as Parquet feature bundles, static acoustic feature TSVs, and pediatric phenotype TSV/JSON files."
 
 data_collection:
   value: true
-  evidence: "VOICE_PEDIATRIC captures structured pediatric speech protocols, voice tasks, and clinical metadata across participating pediatric clinical centers."
+  # chunks: [c002, c003, c004, c005, c006]
+  evidence: "[chunks: c002, c003, c004, c005, c006] Pediatric participants recruited at the Hospital for Sick Children (c002, c003) are screened, consented/assented, and recorded using a headset for most participants (with built-in tablet microphones for the remaining recordings) and custom data collection application (reproschema-ui, c002) across pediatric voice and speech tasks alongside REDCap / ReproSchema pediatric demographic, confounder, diagnosis, and clinical questionnaires (c002, c003, c004, c005, c006)."
 
 data_processing:
   value: true
-  evidence: "VOICE_PEDIATRIC audio and clinical data undergo acoustic feature extraction, audio quality verification, HIPAA de-identification, and metadata structuring."
+  # chunks: [c002, c003, c007]
+  evidence: "[chunks: c002, c003, c007] Raw pediatric audio recordings are transformed into 400-point FFT spectrograms, Mel-filterbanks, 60 MFCCs, pitch, and openSMILE and Praat/Parselmouth acoustic features under HIPAA de-identification rules; in v1.1.0, audio features are released for all free speech tasks after manual checking for unconsented speakers and PII (c002, c003, c007)."
 
 processing_software:
   value: true
-  evidence: "VOICE_PEDIATRIC employs standardized audio capture applications, acoustic signal processing libraries, and automated quality-control software."
+  # chunks: [c002, c003]
+  evidence: "[chunks: c002, c003] Data collection, feature extraction, and phenotype table packaging are performed with reproschema-ui (c002), the open-source b2aiprep library (github.com/sensein/b2aiprep), TorchAudio, openSMILE, Praat, and Parselmouth (c002, c003)."
 
 ml_training_dataset:
   value: true
-  evidence: "VOICE_PEDIATRIC dataset is designed to benchmark and train AI models using pediatric voice and speech as digital biomarkers."
+  # chunks: [c002, c006, c007, c010]
+  evidence: "[chunks: c002, c006, c007, c010] Produced under the NIH Bridge2AI Voice as a Biomarker of Health project (3OT2OD032720-01S1, c002, c010), the pediatric dataset is specifically curated to enable AI/ML model training and evaluation for detecting pediatric voice, speech, developmental, and respiratory conditions (c002, c006, c007, c010)."

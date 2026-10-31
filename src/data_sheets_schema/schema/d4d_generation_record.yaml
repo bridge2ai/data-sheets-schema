@@ -673,6 +673,11 @@ classes:
       protocol:
         range: SharedGenerationProtocol
         required: true
+      schema_context_version:
+        description: >-
+          Explicit version of the shared-generation schema-context wire projection
+          and stage-specific trim contract (2 after A14).
+        range: integer
       generation_id:
         pattern: '^[0-9a-f]{32}$'
         required: true

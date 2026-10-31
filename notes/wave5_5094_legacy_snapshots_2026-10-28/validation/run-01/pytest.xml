@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.251" timestamp="2026-10-28T11:39:44.826510" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_wave5_5094_legacy_snapshots" name="test_committed_voice_ambiguity_is_unchecked_and_preserves_prior" time="0.199"><failure message="AssertionError: {'runner': {'raised': 'UsageLedgerError', 'reason': 'portable phase snapshots have ambiguous generation ownership; restore their index'}, 'backfill': {'checked': True, 'instrument_version': 3, 'reason': None, 'stated_total': 18, 'stated_totals': [18], 'stated_by_severity': {}, 'stated_severity_summaries': [], 'stated_severity_counts': {}, 'computed_total': 21, 'computed_by_severity': {'high': 3, 'low': 11, 'medium': 7}, 'mismatches': [{'kind': 'finding_total_mismatch', 'record': 'report', 'detail': 'report states 18 findings; structured audit has 21', 'stated': 18, 'computed': 21}], 'findings': [{'kind': 'finding_total_mismatch', 'record': 'report', 'detail': 'report states 18 findings; structured audit has 21', 'stated': 18, 'computed': 21}], 'status': 'mismatch', 'recorded_by': 'backfill_checks'}}">tmp_path = PosixPath('/private/tmp/d4d-wave5-5094-legacy-baseline-20261028/cases/test_committed_voice_ambiguity0')
+
+    def test_committed_voice_ambiguity_is_unchecked_and_preserves_prior(tmp_path):
+        """Representative canary: both N2 and N3 use the actual two-snapshot shape."""
+        historical = {path: path.read_bytes() for path in (
+            VOICE / 'VOICE_provenance.yaml', VOICE / 'VOICE_reconciliation.md',
+            VOICE / 'intermediate/VOICE_audit.json', VOICE / 'intermediate/VOICE_audit_2.json')}
+        record = yaml.safe_load(historical[VOICE / 'VOICE_provenance.yaml'])
+        assert 'generation_id' not in record['run']
+        audits = [row for row in record['intermediates'] if Path(row['path']).name in
+                  {'VOICE_audit.json', 'VOICE_audit_2.json'}]
+        assert len(audits) == 2 and all('phase' not in row and 'generation_id' not in row for row in audits)
+        selected = make_spec(tmp_path, 'VOICE', record['run']['label'], record['run']['method'])
+        selected.report_path.write_bytes(historical[VOICE / 'VOICE_reconciliation.md'])
+        for row in audits:
+            target = api._intermediate_dir(selected) / Path(row['path']).name
+            target.write_bytes(historical[VOICE / 'intermediate' / target.name])
+            assert hashlib.sha256(target.read_bytes()).hexdigest() == row['sha256']
+            row['path'] = str(target)
+        write_record(selected, record)
+        first, second = (api._intermediate_dir(selected) / name for name in ('VOICE_audit.json', 'VOICE_audit_2.json'))
+        assert api.audit_counts(first.read_text())['total'] == 21
+        prior = check_report_audit_totals(selected.report_path, second)
+        assert prior['checked'] and prior['status'] == 'consistent' and prior['computed_total'] == 18
+        before = {path: path.read_bytes() for path in (selected.provenance_path, selected.report_path, first, second)}
+        # Exercise both readers before asserting, so the frozen pre-fix canary
+        # captures N2's exception and N3's false 21-versus-18 mismatch together.
+        try:
+            fresh = api.report_audit_totals_block(selected, record=record)
+        except usage_ledger.UsageLedgerError as error:
+            fresh = {'raised': type(error).__name__, 'reason': str(error)}
+        computed = backfill.compute(selected.provenance_path, only={'report_audit_totals'})['report_audit_totals']
+&gt;       assert fresh.get('status') == computed['status'] == 'not_checked', {
+            'runner': fresh, 'backfill': computed}
+E       AssertionError: {'runner': {'raised': 'UsageLedgerError', 'reason': 'portable phase snapshots have ambiguous generation ownership; restore their index'}, 'backfill': {'checked': True, 'instrument_version': 3, 'reason': None, 'stated_total': 18, 'stated_totals': [18], 'stated_by_severity': {}, 'stated_severity_summaries': [], 'stated_severity_counts': {}, 'computed_total': 21, 'computed_by_severity': {'high': 3, 'low': 11, 'medium': 7}, 'mismatches': [{'kind': 'finding_total_mismatch', 'record': 'report', 'detail': 'report states 18 findings; structured audit has 21', 'stated': 18, 'computed': 21}], 'findings': [{'kind': 'finding_total_mismatch', 'record': 'report', 'detail': 'report states 18 findings; structured audit has 21', 'stated': 18, 'computed': 21}], 'status': 'mismatch', 'recorded_by': 'backfill_checks'}}
+
+tests/test_wave5_5094_legacy_snapshots.py:86: AssertionError</failure></testcase></testsuite></testsuites>

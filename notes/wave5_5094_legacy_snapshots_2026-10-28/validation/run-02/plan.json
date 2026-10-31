@@ -1,0 +1,37 @@
+{
+  "base": "3f202bd3e320672fed8a49b0c4b82ef7e124a43f",
+  "command": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-S",
+    "-P",
+    "-B",
+    "/private/tmp/d4d-codex-wave5-5094-legacy-20261028/scripts/adhoc/validate_wave5_5094_legacy_20261028.py",
+    "--root",
+    "/private/tmp/d4d-codex-wave5-5094-legacy-20261028",
+    "--output",
+    "/private/tmp/d4d-wave5-5094-legacy-canary-20261028",
+    "--head",
+    "de56f9dd7efc9009704dec2e24cc3378dbb24f32",
+    "--group",
+    "canary",
+    "--child"
+  ],
+  "credential_names_removed": [
+    "CBORG_API_KEY",
+    "GIT_PAGER",
+    "KB_AUTH_TOKEN",
+    "OPENSCIENTIST_API_KEY"
+  ],
+  "head": "de56f9dd7efc9009704dec2e24cc3378dbb24f32",
+  "helper_sha256": "896ee83291f53741b05c581939d501dce2713046a9b68df4ca0f4b8c476f0b08",
+  "modules": [
+    "test_wave5_5094_legacy_snapshots"
+  ],
+  "production_changes": [
+    "src/data_sheets_schema/api_runner.py",
+    "src/data_sheets_schema/backfill_checks.py"
+  ],
+  "support_blob": "scripts/adhoc/wave3_validation_common_20261027.py",
+  "support_commit": "808415a0db55bd8bda76d42ca5e5982c099f6a6a",
+  "support_sha256": "f3e12dbd488941281cff46889ea48da32502e81db31f29020fe9177e20b5c229"
+}

@@ -72,6 +72,11 @@ def test_worktree_override_uses_selected_tree_schema_resources(tmp_path):
         path = target / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(raw)
+    # A14 binds executable request dependencies in both descriptor versions.
+    for name in sg.REQUEST_CODE:
+        path = target / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / name, path)
     for pin in (initial["runtime"]["config"], initial["inputs"]["profile"]["vocabulary"]):
         if pin and Path(pin["path"]).is_relative_to(ROOT):
             original = Path(pin["path"])

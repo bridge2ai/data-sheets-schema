@@ -32,11 +32,13 @@ ASSET_HASHES = {'.claude/agents/d4d-provenance-guard-v2.md': '10dc4689e1855096ef
  '.claude/commands/d4d-uniform-rules-v2.md': '22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e',
  'src/download/prompts/api_playbook_v2.md': '5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719',
  'src/download/prompts/d4d_generic_arm_prompt_v10.md': 'ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db',
+ 'src/download/prompts/evidence_protocol_v7.md': '72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6',
  'src/download/prompts/receipt_completion_runtime_v2.md': 'c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c',
  'src/download/prompts/shared_generation_v1.md': '34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450'}
 
 
 ROUTING_FORMAT = "shared_generation_registration_v2"
+SCHEMA_CONTEXT_VERSION = 2
 ROUTING_ASSET_HASHES = {'src/download/prompts/shared_generation_v2.md': '1e444c4b7f099fc1f35ecf52d78ff7bf4a9ca874697ae7252d452aee40c2d2e9', 'src/download/prompts/api_playbook_v3.md': 'cd4c4880f1ce50370718d604b6eb2a438e87b3b7b6a2df91b04662c6865397c4', 'src/download/prompts/receipt_completion_runtime_v3.md': '1246095f7e6366e58a78be4c9f5be2afd80dcc057d090a31d28068b49f12be84'}
 ROUTING_POLICY = "src/download/prompts/shared_generation_v2.md"
 ROUTING_API_POLICY = "src/download/prompts/api_playbook_v3.md"
@@ -91,6 +93,9 @@ ROUTING_CODE = ("src/data_sheets_schema/source_heading_runtime.py",
                 "src/data_sheets_schema/cache_dependencies.py",
                 "src/data_sheets_schema/historical_digest.py",
                 "src/data_sheets_schema/run_schema.py")
+REQUEST_CODE = (*ROUTING_CODE,
+                "src/data_sheets_schema/corpus.py",
+                "src/data_sheets_schema/shared_write_footprint.py")
 
 
 def sha(raw: bytes) -> str:
@@ -137,30 +142,110 @@ def captured_assets(*, version=1) -> dict[str, bytes]:
     return captured
 
 
+def _contracts_digest(version: int) -> dict:
+    import os
+    from . import api_playbook, api_runner as api, chunking, evidence_assertions
+    from . import audit_batch_format, audit_omissions, receipt_completion as rc, typed_audit_runtime
+    from .resources import resource_path
+    render_ver = 25 if version == 1 else 27
+    phases = {p: sha(api.phase_instruction(p, render_ver).encode('utf-8'))
+              for p in sorted(api.PHASE_INSTRUCTIONS)}
+    carry_probe = rc._audit_carry({
+        'input_identity': {}, 'registration': {}, 'journal': {'result': {}},
+        'unsupported_audit_candidates': [],
+    })
+    max_tokens = {
+        'phase_max_tokens': api.PHASE_MAX_TOKENS,
+        'receipt_phase_max_tokens': api.RECEIPT_PHASE_MAX_TOKENS,
+        'default_max_tokens': api.DEFAULT_MAX_TOKENS,
+        'shared_phase_max_tokens': getattr(api, 'SHARED_PHASE_MAX_TOKENS', None),
+        'env_receipt_full_max_tokens': os.environ.get('D4D_RECEIPT_FULL_MAX_TOKENS', '').strip() or None,
+    }
+    chunk_manifest_probe = canonical(chunking.manifest_from_bytes(b'line\n', 'probe'))
+    chunk_probe = evidence_assertions.source_chunks_from_bytes(b'line\n', chunk_manifest_probe)[0]
+    protocol_ver = evidence_assertions.protocol_for_renderer(render_ver)
+    return {
+        'phase_system_sha256': sha(api.PHASE_SYSTEM.encode('utf-8')),
+        'phase_instructions_sha256': phases,
+        'phase_max_tokens_sha256': sha(canonical(max_tokens)),
+        'regate_headers_sha256': sha(canonical(api.REGATE_HEADERS)),
+        'repair_instruction_sha256': sha(api.REPAIR_INSTRUCTION.encode('utf-8')),
+        'readdress_header_sha256': sha(api.READDRESS_HEADER.encode('utf-8')),
+        'shared_evidence_contract_sha256': sha(api.shared_evidence_contract().encode('utf-8')),
+        'evidence_protocol_sha256': sha(resource_path(f'src/download/prompts/evidence_protocol_v{protocol_ver}.md').read_bytes()),
+        'api_playbook_probe_sha256': sha(api_playbook.adapt_template(api.prompt_body(api.GENERIC_PROMPT_V10), version=2 if version == 1 else 3).encode('utf-8')),
+        'chunk_projection_probe_sha256': sha(canonical(chunk_probe)),
+        'schema_context_header_sha256': sha(SCHEMA_CONTEXT_HEADER.encode('utf-8')),
+        'generation_context_header_sha256': sha(GENERATION_CONTEXT_HEADER.encode('utf-8')),
+        'typed_audit_system_sha256': sha(typed_audit_runtime.SYSTEM.encode('utf-8')),
+        'typed_binding_header_sha256': sha(typed_audit_runtime.BINDING_HEADER.encode('utf-8')),
+        'typed_audit_worker_format_sha256': sha(audit_batch_format.render('worker', version=2).encode('utf-8')),
+        'typed_audit_integration_format_sha256': sha(audit_batch_format.render('integration', version=2).encode('utf-8')),
+        'omission_assets_sha256': {name: sha((audit_omissions.ASSETS / name).read_bytes())
+                                   for name in sorted(audit_omissions.ASSET_SHA256)},
+        'receipt_completion_policy_sha256': sha(canonical(rc.policy_identity(version=version + 1))),
+        'receipt_completion_audit_carry_sha256': sha(carry_probe.encode('utf-8')),
+        'request_code_sha256': {name: sha(resource_path(name).read_bytes()) for name in REQUEST_CODE},
+    }
+
+
+def _schema_trim_descriptor() -> dict:
+    from linkml_runtime.dumpers import json_dumper
+    from linkml_runtime.linkml_model.meta import ClassDefinition, EnumDefinition, SlotDefinition
+    probe = trim_omission_schema({
+        'classes': {'Dataset': {'definition': {'description': 'd'}, 'slots': {'id': {'definition': {'description': 'd'}}}}},
+        'enums': {'E': {}},
+        'root_class': 'Dataset',
+        'sources': [],
+        'slots': {'id': {}},
+    })
+    dumped_slot = {k: v for k, v in json.loads(json_dumper.dumps(SlotDefinition(name='id', description='d'))).items()
+                   if k not in _TRIMMED_SLOT_KEYS}
+    dumped_class = {k: v for k, v in json.loads(json_dumper.dumps(ClassDefinition(name='Dataset', description='d'))).items()
+                    if k not in _TRIMMED_SLOT_KEYS and k not in {'attributes', 'slot_usage', 'slots'}}
+    dumped_enum = json.loads(json_dumper.dumps(EnumDefinition(name='E', description='d')))
+    return {
+        'generation_dropped_slot_keys': list(_TRIMMED_SLOT_KEYS),
+        'worker_non_assigned_dropped_slot_keys': list(_WORKER_NON_ASSIGNED_TRIMMED_SLOT_KEYS),
+        'omission_schema_dropped_slot_keys': list(_TRIMMED_SLOT_KEYS),
+        'omission_retained_top_keys': sorted(probe),
+        'omission_all_reachable_classes': 'classes' in probe and 'Dataset' in probe.get('classes', {}),
+        'linkml_dumper_probe_sha256': sha(canonical({'slot': dumped_slot, 'class': dumped_class, 'enum': dumped_enum})),
+    }
+
+
 def descriptor(*, version=1, condition=None) -> dict:
+    from importlib.metadata import version as package_version
+    import sys
     captured_assets(version=version)
+    reader_runtime = {"python": list(sys.version_info[:2]), "packages": {name: package_version(name)
+        for name in ("linkml", "linkml-runtime", "PyYAML", "jsonschema", "referencing")}}
     if version == 2:
         from .source_heading_runtime import MODES
         from .resources import resource_path
-        from importlib.metadata import version as package_version
-        import sys
         if condition not in MODES.values():
             raise ValueError("routing descriptor requires its explicit condition")
         return {"protocol": "shared_generation_v2", "version": 2,
+            "schema_context_version": SCHEMA_CONTEXT_VERSION,
             "condition": condition, "renderer": 27, "runtime": "Claude API (direct)",
             "typed_protocol": "typed_audit_protocol_v1", "api_playbook_version": 3,
             "receipt_completion_version": 3,
             "assets": {**ASSET_HASHES, **ROUTING_ASSET_HASHES},
             "routing_code": {name: sha(resource_path(name).read_bytes()) for name in ROUTING_CODE},
-            "reader_runtime": {"python": list(sys.version_info[:2]), "packages": {name: package_version(name)
-                for name in ("linkml", "linkml-runtime", "PyYAML", "jsonschema", "referencing")}},
+            "reader_runtime": reader_runtime,
+            "schema_context_trim": _schema_trim_descriptor(),
+            "stage_contracts": _contracts_digest(version),
             "scientific_readiness": "draft/unreviewed"}
     if condition not in (None, "generic_v10"):
         raise ValueError("shared v1 descriptor requires generic_v10")
-    return {"protocol": NAME, "version": 1, "condition": "generic_v10",
+    return {"protocol": NAME, "version": 1, "schema_context_version": SCHEMA_CONTEXT_VERSION,
+            "condition": "generic_v10",
             "renderer": 25, "runtime": "Claude API (direct)",
             "typed_protocol": "typed_audit_protocol_v1", "api_playbook_version": 2,
-            "receipt_completion_version": 2, "assets": dict(ASSET_HASHES)}
+            "receipt_completion_version": 2, "assets": dict(ASSET_HASHES),
+            "reader_runtime": reader_runtime,
+            "schema_context_trim": _schema_trim_descriptor(),
+            "stage_contracts": _contracts_digest(version)}
 
 
 def policy_text(*, version=1) -> str:
@@ -554,6 +639,9 @@ def _request_settings(settings):
 
 
 def preflight(spec, settings) -> Capture:
+    import os
+    if os.environ.get("D4D_RECEIPT_FULL_MAX_TOKENS", "").strip():
+        raise ValueError("D4D_RECEIPT_FULL_MAX_TOKENS is not permitted for shared-generation runs")
     captured = assert_current(spec)
     reg = captured.document()
     expected = reg["runtime"]
@@ -640,25 +728,50 @@ def require_generation_context(spec, messages) -> None:
         raise UsageLedgerError('actual shared request omits, changes or duplicates captured generation scope')
 
 
-def schema_context(spec, record: str | None = None) -> str:
+def schema_context(spec, record: str | None = None, *, retain_description_paths: tuple[str, ...] | list[str] | None = None) -> str:
     """Actual induced keys plus complete occupied owners; no role inference.
 
     All mapping-valued schema owners are supplied, not a hand-maintained list
     of role names. The instruction asks for scientific relationship review.
     Software's induced keys are included for generation before values exist.
+    When retain_description_paths is None (generation, integration, omission,
+    report), all induced slots retain their descriptions and comments. When
+    retain_description_paths is a sequence of JSON-Pointer paths (typed_audit
+    worker stage), only slots belonging to those assigned paths retain their
+    descriptions and comments.
     """
     captured = _context_capture(spec)
+    retain = None if retain_description_paths is None else tuple(sorted({str(p) for p in retain_description_paths}))
     return memo(spec, 'schema_context', [canonical(schema_pin(captured.full_schema)),
         *[raw for _name, _path, raw in captured.full_schema.sources],
-        canonical(record)], lambda: _schema_context(captured, record))
+        canonical(record), canonical(retain)], lambda: _schema_context(captured, record, retain))
 
 
 _TRIMMED_SLOT_KEYS = ('domain_of', 'from_schema', 'alias', 'owner', '@type',
-                      'slot_uri', 'annotations', 'exact_mappings', 'description',
-                      'broad_mappings', 'comments')
+                      'slot_uri', 'annotations', 'exact_mappings', 'broad_mappings')
+_WORKER_NON_ASSIGNED_TRIMMED_SLOT_KEYS = _TRIMMED_SLOT_KEYS + ('description', 'comments')
 
 
-def _schema_context(captured, record):
+def trim_omission_schema(schema: dict) -> dict:
+    """Keep all reachable classes and slot descriptions/comments while dropping LinkML bookkeeping keys."""
+    raw_classes = schema.get('classes') or {}
+    trimmed_classes = {}
+    for cls_name, cls_entry in raw_classes.items():
+        entry = dict(cls_entry)
+        entry['definition'] = {k: v for k, v in entry['definition'].items()
+                               if k not in _TRIMMED_SLOT_KEYS}
+        entry['slots'] = {
+            sname: {**sdef, 'definition': {k: v for k, v in sdef['definition'].items()
+                                           if k not in _TRIMMED_SLOT_KEYS}}
+            for sname, sdef in entry['slots'].items()
+        }
+        trimmed_classes[cls_name] = entry
+    out = {k: v for k, v in schema.items() if k != 'slots'}
+    out['classes'] = trimmed_classes
+    return out
+
+
+def _schema_context(captured, record, retain=None):
     from .schema_view import captured_view
     from .audit_omissions import _mapping
     from linkml_runtime.dumpers import json_dumper
@@ -699,6 +812,29 @@ def _schema_context(captured, record):
                                        for k, v in child.items())
                     else:
                         pending.append((child, target, child_pointer))
+    if retain is not None:
+        retained_slots: set[tuple[str, str]] = set()
+        for row in owners:
+            owner_path = row['path']
+            owner_cls = row['class']
+            prefix = owner_path + '/'
+            for p in retain:
+                if p.startswith(prefix):
+                    seg = p[len(prefix):].split('/', 1)[0].replace('~1', '/').replace('~0', '~')
+                    if seg in classes.get(owner_cls, {}):
+                        retained_slots.add((owner_cls, seg))
+        if not owners:
+            for p in retain:
+                if p.startswith('/'):
+                    seg = p[1:].split('/', 1)[0].replace('~1', '/').replace('~0', '~')
+                    for cls_name, cls_slots in classes.items():
+                        if seg in cls_slots:
+                            retained_slots.add((cls_name, seg))
+        for cls_name, cls_slots in classes.items():
+            for sname, sdef in list(cls_slots.items()):
+                if (cls_name, sname) not in retained_slots:
+                    cls_slots[sname] = {k: v for k, v in sdef.items()
+                                        if k not in _WORKER_NON_ASSIGNED_TRIMMED_SLOT_KEYS}
     return SCHEMA_CONTEXT_HEADER + canonical({'schema': schema_pin(captured.full_schema),
         'classes': classes, 'owners': owners,
         'scope': 'Actual schema structure and complete values; relationship support is an evaluator declaration.'}).decode('utf-8')

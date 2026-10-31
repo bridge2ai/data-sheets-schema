@@ -1,0 +1,14 @@
+{
+  "invalid_junit_cases": [],
+  "passed": true,
+  "passed_cases_by_module": {
+    "test_download.test_api_runner": 0,
+    "test_report_admission": 1,
+    "test_usage_ledger": 0
+  },
+  "returncode": 0,
+  "scientific_acceptance": "not_assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 250.3476891659957
+}

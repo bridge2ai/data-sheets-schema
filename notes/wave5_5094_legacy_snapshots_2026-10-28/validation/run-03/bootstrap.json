@@ -1,0 +1,17 @@
+{
+  "dependency_bytes_attested": false,
+  "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+  "network_control": "Python audit hook, not an OS-level subprocess network sandbox",
+  "pth_execution": "disabled",
+  "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+  "site_startup": "disabled",
+  "sys_path": [
+    "/private/tmp/d4d-codex-wave5-5094-legacy-20261028/src",
+    "/private/tmp/d4d-codex-wave5-5094-legacy-20261028/scripts",
+    "/private/tmp/d4d-codex-wave5-5094-legacy-20261028",
+    "/opt/homebrew/Caskroom/miniforge/base/lib/python313.zip",
+    "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13",
+    "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/lib-dynload",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages"
+  ]
+}

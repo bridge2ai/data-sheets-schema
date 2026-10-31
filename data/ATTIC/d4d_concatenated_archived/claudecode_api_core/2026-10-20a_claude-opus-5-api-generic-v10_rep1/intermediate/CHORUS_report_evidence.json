@@ -1,0 +1,11 @@
+{
+  "instrument": "evidence_assertions v7 / source_review v2 (#2192)",
+  "checked": false,
+  "assertions_checked": 0,
+  "findings": [
+    {
+      "kind": "evidence_inputs_unusable",
+      "detail": "[Errno 2] No such file or directory: 'data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/CHORUS_reconciliation.md'"
+    }
+  ]
+}

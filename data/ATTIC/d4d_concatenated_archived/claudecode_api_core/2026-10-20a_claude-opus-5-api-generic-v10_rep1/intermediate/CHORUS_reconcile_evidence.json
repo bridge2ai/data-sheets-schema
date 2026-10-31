@@ -1,0 +1,26 @@
+{
+  "instrument": "evidence_assertions v7 / source_review v2 (#2192)",
+  "checked": true,
+  "assertions_checked": 26,
+  "findings": [],
+  "source_review_original": {
+    "instrument": "source_review v2 (#2169)",
+    "artifact": "original_full",
+    "sha256": "d3b91e60e7a61c65fc7771c4f6bc419a3861f89881b36e5b13b7d0b928fddbd7",
+    "values_required": 147,
+    "values_reviewed": 147,
+    "claims_checked": 191,
+    "findings": [],
+    "scope": "Coverage and declared evidence/scope consistency only; semantic classifications and entailment require independent review."
+  },
+  "artifact_sha256": {
+    "bundle": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+    "chunk_manifest": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a",
+    "source_manifest": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528",
+    "audit": "0ceeb53b2dbb8a5bffc7992609a7f5ea88733bdc9fd39b8b684874d1d2ec56ca",
+    "original_full": "d3b91e60e7a61c65fc7771c4f6bc419a3861f89881b36e5b13b7d0b928fddbd7",
+    "original_core": "b98be2d4fd5670d015c1842de74ff69d3f120cf416dc09431f68aed4fa93eddc",
+    "final_full": "ac182648cf2921e8eeda117879c3c8021cac14b35943b3b24ddfdccb55e75aba"
+  },
+  "scope": "Declared evidence only; semantic support and omitted claims require independent review."
+}

@@ -1885,7 +1885,9 @@ def main() -> int:
             ap.error(str(exc))
     if args.check:
         if not OUT_MD.exists() or OUT_MD.read_text(encoding="utf-8") != render_markdown(data, scores):
-            print("stale comparison Markdown; run scripts/arm_comparison.py to regenerate the table and figures",
+            print("comparison Markdown differs; inspect unavailable evidence (including GitUnavailable "
+                  "or shallow history) first and restore required history when available. After reviewing "
+                  "input changes, run scripts/arm_comparison.py --no-figures to refresh Markdown",
                   file=sys.stderr)
             return 1
         print("comparison Markdown matches current records")

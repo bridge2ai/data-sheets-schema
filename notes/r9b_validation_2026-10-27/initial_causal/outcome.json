@@ -1,0 +1,13 @@
+{
+  "junit": {
+    "cases": 7,
+    "errors": 0,
+    "failures": 1,
+    "skipped": 0
+  },
+  "pytest_returncode": 1,
+  "returncode": 1,
+  "scientific_acceptance": "not_assessed",
+  "source_unchanged": true,
+  "wall_seconds": 1040.975720040995
+}

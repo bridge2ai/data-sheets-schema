@@ -1,0 +1,263 @@
+{
+  "base": "3f202bd3e320672fed8a49b0c4b82ef7e124a43f",
+  "baseline_causal_head": "dfd0b9d4b0932cf6990971db6d70d39109e404af",
+  "canary_function_identical": true,
+  "canary_function_sha256": "8b05ae70bf7d5b0088d3a85878adee9e6375f8296792b7ed6878d7c0faa0ee43",
+  "copied_provenance_changes": "Only declared audit path rebasing; no backfill application",
+  "distinct_passing_cases": 100,
+  "expected_baseline_failures": 1,
+  "historical_files_unchanged": true,
+  "historical_source_files": {
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_provenance.yaml": {
+      "bytes": 32544,
+      "git_blob": "e7bfbe597064d334e4085c7f6cf59d9f5572b707",
+      "sha256": "e2e0765638113e6d3a92d46f50e276f62bb9519225f44a85001690e986e05cdd"
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_reconciliation.md": {
+      "bytes": 17699,
+      "git_blob": "707a327da3b1317e33e6de82d4af43b8a0442f49",
+      "sha256": "159dd7aa7a0d5b27b8c6237fd491d2bca949cc7a44619d8720cec059eb8ac80a"
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/intermediate/VOICE_audit.json": {
+      "bytes": 12407,
+      "git_blob": "254ba9216d0961da4325742d649674c119553315",
+      "sha256": "58114e19b7fefe186f0fc9d96157473a779803d63b8ce75e5a26af8a4498dbe6"
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/intermediate/VOICE_audit_2.json": {
+      "bytes": 11515,
+      "git_blob": "7d95bf14f7906a65b2cdb78e042b8d18f99b882d",
+      "sha256": "53be5f936bb75ccce651570813f04bac1f96c36dd01dd98cfafd039c26095a46"
+    }
+  },
+  "production_changes": [
+    "src/data_sheets_schema/api_runner.py",
+    "src/data_sheets_schema/backfill_checks.py"
+  ],
+  "runs": {
+    "baseline": {
+      "case_count": 1,
+      "cases": {
+        "tests.test_wave5_5094_legacy_snapshots::test_committed_voice_ambiguity_is_unchecked_and_preserves_prior": "failure"
+      },
+      "head": "dfd0b9d4b0932cf6990971db6d70d39109e404af",
+      "outcome": {
+        "invalid_cases": [
+          {
+            "identity": [
+              "tests.test_wave5_5094_legacy_snapshots",
+              "test_committed_voice_ambiguity_is_unchecked_and_preserves_prior"
+            ],
+            "tags": [
+              "failure"
+            ]
+          }
+        ],
+        "origins_complete": true,
+        "passed": false,
+        "passes_by_module": {
+          "test_wave5_5094_legacy_snapshots": 0
+        },
+        "returncode": 1,
+        "scientific_acceptance": "not assessed",
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 6.381445916020311
+      },
+      "result_sha256": {
+        "origins-after.json": "ba6fe09be447c999d8cc447064ff4f0873cf826547f2dd8c7e5e5c669cf15d82",
+        "origins-before.json": "9f0399b939ec1f3b26b56523e360f1434a455f4509de3ade6b1ef799622e491b",
+        "outcome.json": "84659a2539a8a8e8720b13d7888ebc28e7fa4b5c0149586599946ff74f049019",
+        "plan.json": "dbfa4b1ef679f6ef07b5a01cd982fb520adeb63191b94d2a6aa0cd647535c376",
+        "pytest.log": "e40b0c4da07e1a067f27bd6a31a6624daed9dbcece6860352cae7406fe992a51",
+        "pytest.xml": "e157b422b3bf3da9768c7ec962ae3ae1fcae6d1ec17bc2cd2a4a6ce3402024a1",
+        "source-after.json": "2096e7837f35814f55859cb329c08c2f86c7731be3e6b763aedae2b466a5a087",
+        "source-before.json": "2096e7837f35814f55859cb329c08c2f86c7731be3e6b763aedae2b466a5a087"
+      },
+      "retained_copy_sha256": {
+        "VOICE_provenance.yaml": "57f0771d0c0b8bdcc45276da75dd9425d7181c2dc47de54bb3d0b866fd2c67d8",
+        "VOICE_reconciliation.md": "159dd7aa7a0d5b27b8c6237fd491d2bca949cc7a44619d8720cec059eb8ac80a",
+        "intermediate/VOICE_audit.json": "58114e19b7fefe186f0fc9d96157473a779803d63b8ce75e5a26af8a4498dbe6",
+        "intermediate/VOICE_audit_2.json": "53be5f936bb75ccce651570813f04bac1f96c36dd01dd98cfafd039c26095a46"
+      },
+      "root": "/private/tmp/d4d-wave5-5094-legacy-baseline-20261028"
+    },
+    "canary": {
+      "case_count": 1,
+      "cases": {
+        "tests.test_wave5_5094_legacy_snapshots::test_committed_voice_ambiguity_is_unchecked_and_preserves_prior": "passed"
+      },
+      "head": "de56f9dd7efc9009704dec2e24cc3378dbb24f32",
+      "outcome": {
+        "invalid_cases": [],
+        "origins_complete": true,
+        "passed": true,
+        "passes_by_module": {
+          "test_wave5_5094_legacy_snapshots": 1
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not assessed",
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 2.8679312920139637
+      },
+      "result_sha256": {
+        "origins-after.json": "2cc1dae01f92ace588d201ebd542b46379a6cbbfa459191533f93b2e7f2496f7",
+        "origins-before.json": "784cac40220ae3864f26f060a44167f76e0266b32277bd4491db9c32b3c82dff",
+        "outcome.json": "fa0bff7cc127f6c4cab9a1f3dd4c40459dbc69ebaab6d17a2a13305ab6533e93",
+        "plan.json": "dce3988e43c76bfc87968acebb0b2b956b47c9be7976e69f2f5e043d78061b69",
+        "pytest.log": "cc167b66815a44ded4529336a938711614e62e88fa53b25fabc01d18d509dcee",
+        "pytest.xml": "18484fcd6be160fb5876e88d860d096ce2c1b7911395e592cd1012b1506c1782",
+        "source-after.json": "b52d21531184bff67584b8c9a4aa937697e916f28e22eccc478eee13a0b4271c",
+        "source-before.json": "b52d21531184bff67584b8c9a4aa937697e916f28e22eccc478eee13a0b4271c"
+      },
+      "retained_copy_sha256": {
+        "VOICE_provenance.yaml": "5566587dc4044f964100fc04df9febc1066ac0fbf8bfe8704e85965d07a206db",
+        "VOICE_reconciliation.md": "159dd7aa7a0d5b27b8c6237fd491d2bca949cc7a44619d8720cec059eb8ac80a",
+        "intermediate/VOICE_audit.json": "58114e19b7fefe186f0fc9d96157473a779803d63b8ce75e5a26af8a4498dbe6",
+        "intermediate/VOICE_audit_2.json": "53be5f936bb75ccce651570813f04bac1f96c36dd01dd98cfafd039c26095a46"
+      },
+      "root": "/private/tmp/d4d-wave5-5094-legacy-canary-20261028"
+    },
+    "targeted": {
+      "case_count": 100,
+      "cases": {
+        "tests.test_backfill_checks.ApplyTest::test_an_existing_block_is_left_alone": "passed",
+        "tests.test_backfill_checks.ApplyTest::test_overwrite_replaces_it": "passed",
+        "tests.test_backfill_checks.ApplyTest::test_writing_is_additive_and_keeps_the_header": "passed",
+        "tests.test_backfill_checks.CorpusTest::test_a_backfilled_pair_verdict_pins_its_schema": "passed",
+        "tests.test_backfill_checks.CorpusTest::test_a_backfilled_report_verdict_pins_what_it_read": "passed",
+        "tests.test_backfill_checks.CorpusTest::test_backfilled_blocks_say_so": "passed",
+        "tests.test_backfill_checks.CorpusTest::test_every_backfilled_report_block_in_the_corpus_pins_all_inputs": "passed",
+        "tests.test_backfill_checks.CorpusTest::test_grounding_is_declined_for_a_drifted_bundle": "passed",
+        "tests.test_backfill_checks.CorpusTest::test_historical_report_blocks_keep_their_registered_instrument": "passed",
+        "tests.test_backfill_checks.CorpusTest::test_the_agentic_arm_is_clean_once_the_guard_is_applied": "passed",
+        "tests.test_backfill_checks.CorpusTest::test_the_computation_itself_pins_all_inputs": "passed",
+        "tests.test_backfill_checks.CorpusTest::test_the_v4_arm_still_diverges_with_the_guard": "passed",
+        "tests.test_backfill_checks.HeaderTest::test_a_record_with_extra_comments_keeps_them": "passed",
+        "tests.test_backfill_checks.HeaderTest::test_comments_are_split_off_and_survive_a_rewrite": "passed",
+        "tests.test_backfill_checks.NeverEraseAMeasurement::test_an_unchecked_recomputation_does_not_overwrite_a_checked_block": "passed",
+        "tests.test_backfill_checks.PathTest::test_declared_bundle": "passed",
+        "tests.test_backfill_checks.PathTest::test_the_full_record_is_not_beside_the_provenance_file": "passed",
+        "tests.test_backfill_checks.RefusalTest::test_a_record_that_is_not_a_mapping_is_refused": "passed",
+        "tests.test_backfill_checks.RefusalTest::test_an_all_comment_file_is_refused_rather_than_filled_in": "passed",
+        "tests.test_pr5094_round2::test_corpus_subset_does_not_enter_regate[directory0-VOICE-medium-2]": "passed",
+        "tests.test_pr5094_round2::test_corpus_subset_does_not_enter_regate[directory1-AI_READI-high-1]": "passed",
+        "tests.test_pr5094_round2::test_corpus_wrapped_low_mismatch_is_kept": "passed",
+        "tests.test_pr5094_round2::test_disposition_fallback_is_not_a_total[Twelve findings resulted in changes.]": "passed",
+        "tests.test_pr5094_round2::test_disposition_fallback_is_not_a_total[Two findings produced no change beyond what is described above.]": "passed",
+        "tests.test_pr5094_round2::test_full_record_corpus_total[claudecode_agent_core-2026-09-01_claude-opus-5-api-generic-v7_rep3-CM4AI-22-mismatch]": "passed",
+        "tests.test_pr5094_round2::test_full_record_corpus_total[claudecode_api_core-2026-09-04f_claude-opus-5-api-generic-v8_rep1-AI_READI-17-consistent]": "passed",
+        "tests.test_pr5094_round2::test_full_record_is_global_in_each_reader[Full record findings by severity: 2 high, 4 medium, 6 low.]": "passed",
+        "tests.test_pr5094_round2::test_full_record_is_global_in_each_reader[The audit returned 13 findings against the full record: 2 high, 4 medium, 7 low.]": "passed",
+        "tests.test_pr5094_round2::test_full_record_is_global_in_each_reader[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\nFull record severity summary: 2 high, 4 medium, 6 low.]": "passed",
+        "tests.test_pr5094_round2::test_global_breakdown_after_wrap_or_intro[It returned 13 findings: 2 high, 4 medium,\\n6 low. No fabricated facts were found.]": "passed",
+        "tests.test_pr5094_round2::test_global_breakdown_after_wrap_or_intro[The audit identified 13 findings:\\n- 2 high (identifiers)\\n- 4 medium (placement)\\n- 6 low (shape)]": "passed",
+        "tests.test_pr5094_round2::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings (all resolved): 2 high, 4 medium, 6 low.]": "passed",
+        "tests.test_pr5094_round2::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings, e.g. 2 high, 4 medium, 6 low.]": "passed",
+        "tests.test_pr5094_round2::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings, i.e. 2 high, 4 medium, 6 low.]": "passed",
+        "tests.test_pr5094_round2::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings, including 2 high, 4 medium and 6 low.]": "passed",
+        "tests.test_pr5094_round2::test_heading_or_paragraph_scoped_summary[-### Core record\\n\\n]": "passed",
+        "tests.test_pr5094_round2::test_heading_or_paragraph_scoped_summary[-### Core record\\n]": "passed",
+        "tests.test_pr5094_round2::test_heading_or_paragraph_scoped_summary[-### Deferred findings\\n]": "passed",
+        "tests.test_pr5094_round2::test_heading_or_paragraph_scoped_summary[-Core record:\\n]": "passed",
+        "tests.test_pr5094_round2::test_heading_or_paragraph_scoped_summary[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\n\\n-### Core record\\n\\n]": "passed",
+        "tests.test_pr5094_round2::test_heading_or_paragraph_scoped_summary[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\n\\n-### Core record\\n]": "passed",
+        "tests.test_pr5094_round2::test_heading_or_paragraph_scoped_summary[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\n\\n-### Deferred findings\\n]": "passed",
+        "tests.test_pr5094_round2::test_heading_or_paragraph_scoped_summary[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\n\\n-Core record:\\n]": "passed",
+        "tests.test_pr5094_round2::test_heading_scope_ends_at_next_peer_heading": "passed",
+        "tests.test_pr5094_round2::test_later_subset_counts_do_not_add_mismatches[**Audit input:** 13 findings \\u2014 2 high, 3 medium (core), 1 medium (full), 7 low.-expected3]": "passed",
+        "tests.test_pr5094_round2::test_later_subset_counts_do_not_add_mismatches[Findings by severity: 2 high, 4 medium, 7 low.\\nFindings still open after reconciliation: 0 high, 1 medium, 2 low.-expected4]": "passed",
+        "tests.test_pr5094_round2::test_later_subset_counts_do_not_add_mismatches[The audit returned 13 findings: 2 high (1 high withdrawn on re-check), 4 medium, 7 low.-expected1]": "passed",
+        "tests.test_pr5094_round2::test_later_subset_counts_do_not_add_mismatches[The audit returned 13 findings: 2 high, 4 medium, 7 low, touching 3 high-priority slots.-expected2]": "passed",
+        "tests.test_pr5094_round2::test_later_subset_counts_do_not_add_mismatches[The audit returned 13 findings: 2 high, 4 medium, 7 low; 2 medium were deferred.-expected0]": "passed",
+        "tests.test_pr5094_round2::test_legacy_ambiguous_snapshots_preserve_checked_prior": "passed",
+        "tests.test_pr5094_round2::test_no_total_compares_two_global_clauses": "passed",
+        "tests.test_pr5094_round2::test_resume_keeps_newer_instrument_with_sources_present": "passed",
+        "tests.test_pr5094_round2::test_resume_reads_attested_second_snapshot[13]": "passed",
+        "tests.test_pr5094_round2::test_resume_reads_attested_second_snapshot[14]": "passed",
+        "tests.test_pr5094_round2::test_resume_recomputes_noninteger_instrument": "passed",
+        "tests.test_pr5094_round2::test_unchecked_blocks_have_uniform_shape[audit-path]": "passed",
+        "tests.test_pr5094_round2::test_unchecked_blocks_have_uniform_shape[invalid-audit]": "passed",
+        "tests.test_pr5094_round2::test_unchecked_blocks_have_uniform_shape[no-audit]": "passed",
+        "tests.test_pr5094_round2::test_unchecked_blocks_have_uniform_shape[no-report]": "passed",
+        "tests.test_pr5094_round2::test_unchecked_blocks_have_uniform_shape[report-path]": "passed",
+        "tests.test_pr5094_round2::test_unparseable_or_oversized_counts_are_bounded[10-digits]": "passed",
+        "tests.test_pr5094_round2::test_unparseable_or_oversized_counts_are_bounded[5000-digits]": "passed",
+        "tests.test_pr5094_round2::test_unparseable_or_oversized_counts_are_bounded[superscript]": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsGate::test_audit_total_mismatch_triggers_report_regate": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsGate::test_consistent_totals_cause_no_report_regate": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsGate::test_intermediate_audit_fallback_and_v1_recompute": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsGate::test_regate_rollback_when_core_report_claims_contradictions_increase": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsUnit::test_conflicting_totals_within_same_report_detected": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsUnit::test_f9_no_total_prose_and_mid_sentence_subset_list_not_flagged": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsUnit::test_malformed_or_missing_audit": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsUnit::test_n2_non_sentence_start_totals_and_no_total_subsets": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsUnit::test_parse_number": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsUnit::test_report_stating_no_total_recorded_as_no_total_stated": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsUnit::test_severity_mismatch_detected_even_when_no_total_stated": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsUnit::test_string_file_path_and_findings_copy": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsUnit::test_subset_counts_and_historical_false_positives_rejected": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsUnit::test_synthetic_v10g_shape_matching": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsUnit::test_synthetic_v10g_shape_with_mismatches": "passed",
+        "tests.test_report_audit_totals.TestReportAuditTotalsUnit::test_v10_chorus_canary_phrasing_supported": "passed",
+        "tests.test_snapshot_attestation::test_byte_refusal_remains_required_with_optional_metadata[False]": "passed",
+        "tests.test_snapshot_attestation::test_byte_refusal_remains_required_with_optional_metadata[True]": "passed",
+        "tests.test_snapshot_attestation::test_selected_attestation_preserves_default_tuple_and_copies_authority[index]": "passed",
+        "tests.test_snapshot_attestation::test_selected_attestation_preserves_default_tuple_and_copies_authority[missing_index]": "passed",
+        "tests.test_snapshot_attestation::test_selected_attestation_preserves_default_tuple_and_copies_authority[supplied_record]": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_backfill_uses_latest_attested_snapshot_without_filename_guessing[False]": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_backfill_uses_latest_attested_snapshot_without_filename_guessing[True]": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_committed_voice_ambiguity_is_unchecked_and_preserves_prior": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_default_backfill_discovers_portable_latest_without_first_file": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_explicit_live_carry_does_not_consult_ambiguous_saved_history": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_invalid_snapshot_authority_never_falls_back_to_first_audit[changed]": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_invalid_snapshot_authority_never_falls_back_to_first_audit[foreign-generation]": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_invalid_snapshot_authority_never_falls_back_to_first_audit[missing-attestation]": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_invalid_snapshot_authority_never_falls_back_to_first_audit[missing]": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_invalid_snapshot_authority_never_falls_back_to_first_audit[wrong-project]": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_latest_attested_malformed_audit_is_not_replaced_by_first": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_unindexed_legacy_fallback_requires_a_single_snapshot[False]": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_unindexed_legacy_fallback_requires_a_single_snapshot[True]": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_unregistered_standalone_backfill_keeps_only_safe_legacy_fallback[absent]": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_unregistered_standalone_backfill_keeps_only_safe_legacy_fallback[current]": "passed",
+        "tests.test_wave5_5094_legacy_snapshots::test_unregistered_standalone_backfill_keeps_only_safe_legacy_fallback[previous]": "passed"
+      },
+      "head": "de56f9dd7efc9009704dec2e24cc3378dbb24f32",
+      "outcome": {
+        "invalid_cases": [],
+        "origins_complete": true,
+        "passed": true,
+        "passes_by_module": {
+          "test_backfill_checks": 19,
+          "test_pr5094_round2": 44,
+          "test_report_audit_totals": 16,
+          "test_snapshot_attestation": 5,
+          "test_wave5_5094_legacy_snapshots": 16
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not assessed",
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 59.77581562497653
+      },
+      "result_sha256": {
+        "origins-after.json": "2e460d2773aaa3f6acf96205ae529d7b1d33e5c8d69f6aa9f30e712d76b80874",
+        "origins-before.json": "d6f17a69fbee780c618fa0bb1d616a54c1bcb1252c1b20b9635c94048fdc1ce8",
+        "outcome.json": "57773ea35e59dc04cb5e0f9be0db023c5727f887fb39acc64bea565e849394a3",
+        "plan.json": "59d81544fab74797168082e8befd4a642bf34a85c138a078a385c45a051d1be2",
+        "pytest.log": "9852d6c4421aba569d3de426b00905b8bdf02ef5b341c0542ae7e523da9cf0dd",
+        "pytest.xml": "9a59a6068069a8055b45a61affc620498934ba34acd91bb7354ce8dbf071a54d",
+        "source-after.json": "b52d21531184bff67584b8c9a4aa937697e916f28e22eccc478eee13a0b4271c",
+        "source-before.json": "b52d21531184bff67584b8c9a4aa937697e916f28e22eccc478eee13a0b4271c"
+      },
+      "retained_copy_sha256": {
+        "VOICE_provenance.yaml": "b110cf25b550bf4114412911f7756e8ef57a5a39b48f4f353778c8a2e823f861",
+        "VOICE_reconciliation.md": "159dd7aa7a0d5b27b8c6237fd491d2bca949cc7a44619d8720cec059eb8ac80a",
+        "intermediate/VOICE_audit.json": "58114e19b7fefe186f0fc9d96157473a779803d63b8ce75e5a26af8a4498dbe6",
+        "intermediate/VOICE_audit_2.json": "53be5f936bb75ccce651570813f04bac1f96c36dd01dd98cfafd039c26095a46"
+      },
+      "root": "/private/tmp/d4d-wave5-5094-legacy-targeted-20261028"
+    }
+  },
+  "tested_fix_head": "de56f9dd7efc9009704dec2e24cc3378dbb24f32"
+}

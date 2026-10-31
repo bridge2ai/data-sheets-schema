@@ -532,6 +532,22 @@ class TestProvenanceModeReportingAndArchive(unittest.TestCase):
 
         self.assertIn("3 file(s) in 2 run directories", text)
 
+    def test_the_archive_note_counts_run_dirs_not_intermediate_subdirs(self):
+        """Nested `intermediate/` files belong to the same `<method>/<label>`
+        run directory and must not inflate the directory count (R5 N9)."""
+        import tempfile
+        from data_sheets_schema.runs import _write_archive_note
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            moved = [(root / "x", root / "m" / "L" / "P_d4d.yaml"),
+                     (root / "y", root / "m_core" / "L" / "P_d4d_core.yaml"),
+                     (root / "z", root / "m_core" / "L" / "intermediate" / "P_full.yaml")]
+            _write_archive_note(root, moved, "r")
+            text = (root / "README.md").read_text()
+
+        self.assertIn("3 file(s) in 2 run directories", text)
+
     def test_the_archive_note_names_the_method_not_just_the_label(self):
         """`claudecode_agent` and `claudecode_agent_core` hold the same label,
         so the last two path segments alone do not identify the file."""

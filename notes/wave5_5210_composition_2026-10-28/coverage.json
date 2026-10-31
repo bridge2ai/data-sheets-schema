@@ -1,0 +1,99 @@
+{
+  "distinct_passes_by_module": {
+    "tests.test_download.test_api_runner": 156,
+    "tests.test_report_admission": 22,
+    "tests.test_usage_ledger": 59
+  },
+  "distinct_passing_cases": 237,
+  "fixed": {
+    "head": "ad1f950df173f8ed07023faeff612feb32b4dec7",
+    "outcome": {
+      "invalid_junit_cases": [],
+      "passed": true,
+      "passed_cases_by_module": {
+        "test_download.test_api_runner": 0,
+        "test_report_admission": 1,
+        "test_usage_ledger": 0
+      },
+      "returncode": 0,
+      "scientific_acceptance": "not_assessed",
+      "skipped": [],
+      "source_unchanged": true,
+      "wall_seconds": 250.3476891659957
+    },
+    "raw_sha256": {
+      "outcome.json": "c5f16887e38b10c795d0c1650468b9ab0efd831696cabe13d0b10ea9b0867f77",
+      "pytest.xml": "325305f8bf5629112a26b72aa23a1aaffa36b0615b073182e592b030a58ea9b7",
+      "source-after.json": "7d1b4ef86f8c5bd39a574e35429b8c4eea44e16ba951d9906d5da50686631ccf",
+      "source-before.json": "7d1b4ef86f8c5bd39a574e35429b8c4eea44e16ba951d9906d5da50686631ccf"
+    },
+    "root": "/private/tmp/d4d-wave5-5210-wire-fixed-20261028"
+  },
+  "fixture_ast_verification": {
+    "all_other_module_ast_unchanged": true,
+    "current_golden_consumers": [
+      "test_chorus_wire_is_byte_identical_to_the_base_and_is_what_was_counted"
+    ],
+    "historical_f8": {
+      "reconcile_full": "b4f8f925e29b54d80cc95ad7c5bbe3f170e7295ccb1c8b8eb3a3dcaf97421daa",
+      "report": "9a13ed423b0c5bb7c0da908100ead81128f713dfc0dc0b565ecd4bd11c8bfbe8",
+      "report_regate": "300b1213e94825e41fc22a38bb4100aabebbb533ec0de49487485dfac49a79a9"
+    },
+    "historical_values_preserved": true,
+    "incoming_a13": {
+      "reconcile_full": "31340b31d787baa1da17c2b738c99d21efd2a1db9150eb0d0aaf917f1ac6160c",
+      "report": "eea1fe34d3de44efbc85a681b5b2d58c0f66bcc70f7b64450378db75fc996749",
+      "report_regate": "d085cabccdc8d0b7e1e99d498e6f3cfe59b80322c907d3e8d49b177aaf672f1d"
+    }
+  },
+  "format": "wave5_5210_distinct_case_coverage_v1",
+  "initial": {
+    "head": "dc9ca46701e74e712bf1800fbda8542b84e4c91e",
+    "outcome": {
+      "invalid_junit_cases": [
+        {
+          "identity": [
+            "tests.test_report_admission",
+            "test_chorus_wire_is_byte_identical_to_the_base_and_is_what_was_counted"
+          ],
+          "tags": [
+            "failure"
+          ]
+        }
+      ],
+      "passed": false,
+      "passed_cases_by_module": {
+        "test_download.test_api_runner": 156,
+        "test_report_admission": 21,
+        "test_usage_ledger": 59
+      },
+      "returncode": 1,
+      "scientific_acceptance": "not_assessed",
+      "skipped": [],
+      "source_unchanged": true,
+      "wall_seconds": 3983.899230582989
+    },
+    "raw_sha256": {
+      "outcome.json": "91a94c849f16d3d368857a7a1b0063e3c9302f485d77627c6d17d2e7013a55ed",
+      "pytest.xml": "300637f08667298818e1000e88e0cfbe12f58fa01d847964918150a7d5fcff6d",
+      "source-after.json": "48b30891579143db668370eb3f0a89135efef07799d9c0d573051057e42518f1",
+      "source-before.json": "48b30891579143db668370eb3f0a89135efef07799d9c0d573051057e42518f1"
+    },
+    "root": "/private/tmp/d4d-wave5-5210-full-20261028"
+  },
+  "one_green_full_suite_claimed": false,
+  "only_changed_test": "tests/test_report_admission.py",
+  "original_failure_retained": [
+    "tests.test_report_admission",
+    "test_chorus_wire_is_byte_identical_to_the_base_and_is_what_was_counted"
+  ],
+  "scientific_acceptance": "not_assessed",
+  "unchanged_scopes_between_tested_heads": [
+    "src",
+    "data",
+    ".claude",
+    ".github",
+    "scripts/build_api_registrations.py",
+    "notes/reviews/v10_human_decisions_and_context_review_2026-10-20.md"
+  ]
+}

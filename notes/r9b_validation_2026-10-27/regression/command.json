@@ -1,0 +1,17 @@
+{
+  "cwd": "/private/tmp/d4d-codex-5157-r9b-regression-20261027",
+  "pytest_args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-r9b-wave2-c16b88c7b/regression/cases",
+    "--junitxml",
+    "/private/tmp/d4d-r9b-wave2-c16b88c7b/regression/pytest.xml",
+    "tests/test_download/test_api_runner.py",
+    "tests/test_usage_ledger.py",
+    "tests/test_report_admission.py",
+    "-k",
+    "not ValidatorRepairRefreshCheckpoint"
+  ]
+}

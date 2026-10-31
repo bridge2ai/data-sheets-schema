@@ -1,7 +1,7 @@
 # Human Review & Owner Decision Package for `generic_v10` D4D Generation and Evaluation
 
-- **Date**: 2026-10-20 (updated through 2026-10-28: owner decisions `D26`–`D45` and `D50`–`D60`, with `D51`'s description corrected on 2026-10-28; the `D46`–`D49` entries were not owner decisions and are retired, see §5.10)
-- **Status**: `PARTIALLY DECIDED / LAUNCHES HELD` (`D05`–`D07`, `D10`, `D17`, `D19`, `D22`, `D23`, `D26`–`D45` and `D50`–`D60` decided (`D46`–`D49` retired: not owner decisions, §5.10); two `CHORUS` API canaries `2026-10-20a` and `2026-10-22a` ran and were archived to `data/ATTIC/` as assisted/invalid evidence under `D31` and `D40`; the clean `CHORUS` API re-canary `A21`, fan-out, native canary, and evaluation runs remain held pending explicit owner launch word per `D07`/`D22`)
+- **Date**: 2026-10-20 (updated through 2026-10-28: owner decisions `D26`–`D45` and `D50`–`D61`, with `D51`'s description corrected on 2026-10-28; the `D46`–`D49` entries were not owner decisions and are retired, see §5.10)
+- **Status**: `PARTIALLY DECIDED / LAUNCHES HELD` (`D05`–`D07`, `D10`, `D17`, `D19`, `D22`, `D23`, `D26`–`D45` and `D50`–`D61` decided (`D46`–`D49` retired: not owner decisions, §5.10); two `CHORUS` API canaries `2026-10-20a` and `2026-10-22a` ran and were archived to `data/ATTIC/` as assisted/invalid evidence under `D31` and `D40`; the clean `CHORUS` API re-canary `A21`, fan-out, native canary, and evaluation runs remain held pending explicit owner launch word per `D07`/`D22`)
 - **Branches & Lanes**:
   - **AGY + Codex Lane X1 Integrated**: `/private/tmp/d4d-v10-readiness-20261019` (`feat/v10-preflight-scripts`, PR `#5095`, plus `codex/track-e-eval-runner`)
   - **Codex Lane X2**: `/private/tmp/d4d-codex-track-n-20261020` (`codex/track-n-direct-adapter`, HEAD `3bcde8004`)
@@ -19,12 +19,12 @@ All 6 project applicability context files under `data/context/` (`schema_version
 
 | Project | Context File | Normalized Context Digest (`SHA-256`) | `human_subjects` | `regulated_access` | `shared_dataset` | `data_collection` | `data_processing` | `processing_software` | `ml_training_dataset` | Rubric 10 Applicable (`max`) | Rubric 20 Applicable (`max`) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **AI_READI** | `data/context/ai_readi_context.yaml` | `2d3da438de3d365e54467ba5a6144b20d954198fd2e03e7b101a7b6d81880418` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
-| **CHORUS** | `data/context/chorus_context.yaml` | `21f63f6eaaa3d236210c3f10103b0e283f8b52724b875045c9773cabf46e9c0d` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
-| **CM4AI** | `data/context/cm4ai_context.yaml` | `9077caaaff2112c84dd3fd261eb2ce5025607eacb7f4997150cc8847660286e9` | `false` | `false` | `true` | `true` | `true` | `true` | `true` | `44 / 50` (`44.0`) | `18 / 20` (`78.0`) |
-| **VOICE** | `data/context/voice_context.yaml` | `ddf1dcb4127a7d4158515c04307d8f378f5d70268b9bb17f0242af871d863ebd` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
-| **VOICE_PEDIATRIC** | `data/context/voice_pediatric_context.yaml` | `740276bb518a875d98ea8208c0992679aac1c50b14f5f28d1b51dcf2d3e28855` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
-| **KIDS_FIRST** | `data/context/kids_first_context.yaml` | `b43d7baba4c1621c4748db1a493adc216000135da8ec774b717d750d6cabaae5` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **AI_READI** | `data/context/ai_readi_context.yaml` | `f8339eeacc6c41d0516449f482f4ac9f7bdde60067975664e29f0b17f5a961be` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **CHORUS** | `data/context/chorus_context.yaml` | `300645af08fb5b2e4a986a941337b1ba01ed644e532a7c7cf2c958fe1ff33d2c` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **CM4AI** | `data/context/cm4ai_context.yaml` | `97047473e7e4f2b8c7fa78169f52be33be2a67e70a287ca1d4c9b2e66540eb76` | `false` | `false` | `true` | `true` | `true` | `true` | `true` | `44 / 50` (`44.0`) | `18 / 20` (`78.0`) |
+| **VOICE** | `data/context/voice_context.yaml` | `0dc82e8f96455552ed52feef1f6a00dd0cfbd691bed08019741ce81999b7b2e9` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **VOICE_PEDIATRIC** | `data/context/voice_pediatric_context.yaml` | `5b941e87f05454581e26b4d9f2d1f6227368405ce6fc4406c994e4fb9720a92b` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **KIDS_FIRST** | `data/context/kids_first_context.yaml` | `4732910a6c51493a1a9cf65d82625de1c002e399e22e50499fad836aee0352a9` | `true` | `true` | `true` | `true` | `true` | `true` | `false` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
 
 ### 1.2 The 5 Hold Questions Requiring Human Confirmation (`#2912`)
 
@@ -47,13 +47,13 @@ All 6 project applicability context files under `data/context/` (`schema_version
    - **Owner decision (`D52`, 2026-10-27, §5.11)**: both rules accepted. `evaluate_d4d.py` on this branch implements neither yet; that is follow-up work.
 5. **Adult vs Pediatric Cohort Contexts (`VOICE` vs `VOICE_PEDIATRIC`, `CHORUS`, `KIDS_FIRST`)**:
    - **Proposed Setting**: Both `VOICE` (`voice_context.yaml`) and `VOICE_PEDIATRIC` (`voice_pediatric_context.yaml`), along with `CHORUS` and `KIDS_FIRST`, have all 7 boolean applicability flags (`human_subjects`, `regulated_access`, `shared_dataset`, `data_collection`, `data_processing`, `processing_software`, `ml_training_dataset`) set to `true` (`50 / 50` (`50.0`) on Rubric 10, `20 / 20` (`88.0`) on Rubric 20), with cohort-specific `rationale` entries distinguishing adult vs pediatric scope.
-   - **Owner decision (`D52`, 2026-10-27, §5.11)**: accepted.
+   - **Owner decision (`D52`, 2026-10-27, §5.11)**: the cohort-specific rationales are accepted. The all-`true` setting above does not hold for `KIDS_FIRST`, whose `ml_training_dataset` is `false` (item 2).
 
 ---
 
 ## 2. Omission Contexts (`Step A5d` / `#1763`, `#5120`) — `DECIDED (D51, 2026-10-27; §5.11)`
 
-Six `omission_context_v1` files have been generated in `data/omission_contexts/` via `scripts/build_draft_contexts.py`. The table shows them as they stand on this branch (`#5095`). `#5164` (A23) changes two of them, `VOICE` and `VOICE_PEDIATRIC`, and declares `CHORUS`'s release in `source_manifest.yaml`. The owner approved `#5164`'s contexts and manifest edit as `D51` (§5.11):
+Six `omission_context_v1` files have been generated in `data/omission_contexts/` via `scripts/build_draft_contexts.py`. The table is rendered from the committed context files by `scripts/render_v10_context_review_tables.py`. `#5164` (A23) changed two of them, `VOICE` and `VOICE_PEDIATRIC`, and declared `CHORUS`'s release in `source_manifest.yaml`. The owner approved `#5164`'s contexts and manifest edit as `D51` (§5.11):
 
 | Project | Draft Omission Context File | `scopes[0].referent` | `scopes[0].release` | `source_policy.basis` | `vocabulary` |
 | --- | --- | --- | --- | --- | --- |
@@ -95,7 +95,7 @@ Six `omission_context_v1` files have been generated in `data/omission_contexts/`
 
 ---
 
-## 4. Owner Decisions Status (`D01`–`D60`; `D46`–`D49` retired)
+## 4. Owner Decisions Status (`D01`–`D61`; `D46`–`D49` retired)
 
 | Decision ID | Status | Summary / Owner Ruling |
 | --- | --- | --- |
@@ -143,15 +143,16 @@ Six `omission_context_v1` files have been generated in `data/omission_contexts/`
 | **`D58`** (the v10 path after BC1's fit and cost review) | **DECIDED (2026-10-28T16:41Z)** | **`"Fix, canary, then decide (Recommended)"`**: BC1 is fixed for all projects; the `A21` slice is raised to $60; the CHORUS re-canary runs under the fixed BC1; the matrix's scope and budget are decided on its measured cost. |
 | **`D59`** (BC1's request shape, the `D44` design choice) | **DECIDED (2026-10-28T16:41Z)** | **`"Dedup; A14 downstream (Recommended)"`**: typed-audit calls send the full schema catalog once, drop the per-slot `domain_of` lists (redundant with each class's slot list) and send the bundle once; the full, receipt completion, reconcile, report and regate calls keep v10's A14 schema digest. |
 | **`D60`** (typed-stage prompt cache, revisiting `D06`) | **DECIDED (2026-10-28T16:41Z)** | **`"No, keep D06"`**: no typed-stage cache breakpoint. |
+| **`D61`** (scope of `D52`'s committee-contact rule) | **DECIDED (2026-10-28T18:23Z)** | **`"In scope (Recommended)"`**: the equivalence of `data_governance.committee_contact` and `regulatory_restrictions.governance_committee_contact` holds wherever `governance_committee_contact` is scored, rubric10 `E2.2` included. |
 | **`D02` (`#5042`, `P2`)** | **`PENDING OWNER`** | Choose Option `(a)`, `(b)`, `(c)`, or `(d)` for the `AI_READI` `v8` comparator and canary baseline. |
 | **`D04` (`#2914`)** | **`PENDING OWNER`** | Confirm `CHORUS` corpus policy (`Path B` frozen 17-file bundle `9b2ef4b6` for `v10` comparability vs `Path A` prune). |
 | **`D03`, `D08`, `D09`, `D11`–`D16`, `D18`, `D20`, `D21`, `D24`, `D25`** | **`PENDING OWNER`** | Documented with recommendations and `[proposed; owner fixes at P4]` rules in `notes/generic_v10_analysis_plan.md` and `notes/coordination/2026-10-25-owner-decision-packet.md`. |
 
 ---
 
-## 5. Decided Rulings of 2026-10-23 – 2026-10-28 (`D26`–`D45`, `D50`–`D60`; `D46`–`D49` retired)
+## 5. Decided Rulings of 2026-10-23 – 2026-10-28 (`D26`–`D45`, `D50`–`D61`; `D46`–`D49` retired)
 
-On **2026-10-23T23:35Z**, the owner directed `"next address these based on current recommendations"` across `D-A`, `D-C` (subsets), `D-E`, and `D-F` (supplementing the earlier 2026-10-23 direction `"focus the canary on the native agentic approach not api"`, with `D27`/`D-B` treated as following from `D26`/`D-A` and later explicitly confirmed by the owner on **2026-10-25T22:41Z**), followed on **2026-10-24T00:48Z** by `"confirm"` on the three R9 judgement calls `J3′`, `J5`, and `J6`, on **2026-10-24** by `"decision 1 = a"` (`D32`), on **2026-10-25T17:43Z** by the four group-1 rulings `D33`–`D36`, on **2026-10-25T19:44Z** by `D37` (replacing `D32` with Option `(b)`) and `D38` (R9 `"license"` spelling and re-pin), on **2026-10-25T22:41Z** by `D27` confirmation and `D39` (`A17` worker-contract wording), on **2026-10-25T23:28Z** by `D40` (archiving `2026-10-22a` to `data/ATTIC/` as evidence-only) and `D41` (no-touch operating rule plus runner latch guard), and on **2026-10-26** by `D42` (`D41` guard comparison), `D43` (`"You launch it (Recommended)"`, amending `D41`'s operator clause), `D44` (`"Redesign first, one canary"` for `BC1` bounded carry), `D45` (`"Yes, decide in the redesign (Recommended)"` for worker granularity inside `BC1`); and on **2026-10-27** by `D50` (agy's role, §5.10) and `D51`–`D54` (the omission and evaluation contexts, the no-touch rule with the archive ratification, and dropping the retired "`D48`" and "`D49`" texts, §5.11), with `D51`'s description corrected and re-approved on **2026-10-28**; and on **2026-10-28** by `D55`–`D57` (the `D42` pick and two `D41` guard rulings, §5.12), and `D58`–`D60` (the v10 path, BC1's shape and the cache, after BC1's fit and cost review, §5.13). Entries written here as `D46`–`D49` were not owner decisions and are retired (§5.10). Because the `notes/coordination/` directory is untracked, the authoritative record of each decision is preserved here under `D26`–`D45` and `D50`–`D60`.
+On **2026-10-23T23:35Z**, the owner directed `"next address these based on current recommendations"` across `D-A`, `D-C` (subsets), `D-E`, and `D-F` (supplementing the earlier 2026-10-23 direction `"focus the canary on the native agentic approach not api"`, with `D27`/`D-B` treated as following from `D26`/`D-A` and later explicitly confirmed by the owner on **2026-10-25T22:41Z**), followed on **2026-10-24T00:48Z** by `"confirm"` on the three R9 judgement calls `J3′`, `J5`, and `J6`, on **2026-10-24** by `"decision 1 = a"` (`D32`), on **2026-10-25T17:43Z** by the four group-1 rulings `D33`–`D36`, on **2026-10-25T19:44Z** by `D37` (replacing `D32` with Option `(b)`) and `D38` (R9 `"license"` spelling and re-pin), on **2026-10-25T22:41Z** by `D27` confirmation and `D39` (`A17` worker-contract wording), on **2026-10-25T23:28Z** by `D40` (archiving `2026-10-22a` to `data/ATTIC/` as evidence-only) and `D41` (no-touch operating rule plus runner latch guard), and on **2026-10-26** by `D42` (`D41` guard comparison), `D43` (`"You launch it (Recommended)"`, amending `D41`'s operator clause), `D44` (`"Redesign first, one canary"` for `BC1` bounded carry), `D45` (`"Yes, decide in the redesign (Recommended)"` for worker granularity inside `BC1`); and on **2026-10-27** by `D50` (agy's role, §5.10) and `D51`–`D54` (the omission and evaluation contexts, the no-touch rule with the archive ratification, and dropping the retired "`D48`" and "`D49`" texts, §5.11), with `D51`'s description corrected and re-approved on **2026-10-28**; and on **2026-10-28** by `D55`–`D57` (the `D42` pick and two `D41` guard rulings, §5.12), and `D58`–`D60` (the v10 path, BC1's shape and the cache, after BC1's fit and cost review, §5.13), and `D61` (the scope of `D52`'s first scoring rule, §5.14). Entries written here as `D46`–`D49` were not owner decisions and are retired (§5.10). Because the `notes/coordination/` directory is untracked, the authoritative record of each decision is preserved here under `D26`–`D45` and `D50`–`D61`.
 
 ### 5.1 `D28` (`D-C`): Void `2026-10-22b` (`CHORUS` × 3), Run One Clean `CHORUS` API Re-Canary After Fixes, and Update Registration/Runtime Rules
 
@@ -479,3 +480,71 @@ These follow claude's independent review of both `D41` guard candidates (`d4d-ex
    - **The full, receipt completion, reconcile, report and regate calls:** keep v10's A14 schema digest, which the 10-20a and 10-22a canaries ran with.
    - **Expected fit:** every project then fits per call, except Kids First integration at caps, which is borderline. This is to be verified on the implementation.
 3. **`D60`: the typed-stage prompt cache.** The owner chose "No, keep D06". No typed-stage cache breakpoint; `D06` stands.
+
+### 5.14 Decided by the owner, 2026-10-28T18:23Z (`D61`): the scope of `D52`'s first scoring rule
+
+claude's independent review of codex's evaluator packet (`4cd8f2a51`; `d4d-executions/plans/reviews/pr5096_b0978d6e6_d52_4cd8f2a51_claude_review_2026-10-28.md`, finding D2) asked whether rule 1 applies to rubric10 `E2.2`, "Regulatory Compliance and Confidentiality Classification". `governance_committee_contact` is already one of `E2.2`'s fields.
+
+1. **`D61`.** The owner chose "In scope (Recommended)".
+   - The two committee-contact locations count as the same criterion wherever `governance_committee_contact` is scored, `E2.2` included.
+   - A record whose only such evidence is `data_governance.committee_contact` now passes `E2.2`.
+   - Four committed CHORUS records move from 0 to 1 under the new evaluator instrument. Historical scores are not rewritten.
+
+### 5.15 Decided by the owner, 2026-10-28T20:12:01Z (`D62`–`D63`): BC1's fit gate for `A21`, and one token-count calibration
+
+**The evidence:** claude's independent review of BC1's `D59` fix, `d4d-executions/plans/reviews/bc1_8f83d6cb3_claude_review_2026-10-28.md`. It was offline, with no provider calls.
+
+1. **`D62`: BC1's fit gate.** The owner chose "Floor + caps; 4.5M (Recommended)".
+   - The gate checks the floor scenario and the caps scenario, with the measured 1.25× escape factor. The escaped bound is reported, not gated.
+   - Request bytes are sized at 2.48 bytes per token, and future-response bytes at 1.75.
+   - The CHORUS `A21` registration declares `aggregate_input_tokens` = 4,500,000. CHORUS needs about 4.06M, and every call is at or below 0.85 of its room. The added spend exposure is at most $3.13.
+2. **`D63`: the calibration.** The owner chose "Yes, one call by agy (Recommended)".
+   - agy runs exactly one `count_tokens` call, on one named and fixed `D59` CHORUS worker request, from the launch-base checkout.
+   - agy logs the request's sha256 and the count. There is no generation and no other provider call.
+   - The measured ratio replaces the extrapolated 2.48 before registration.
+   - **Where it runs:** the owner's question named the launch-base checkout. That checkout predates the `D59` code, so the call runs from codex's BC1 worktree (`b7e4d3ef7`), through the same count-only route. claude reported the difference to the owner.
+
+### 5.16 Decided by the owner, by 2026-10-28T23:23Z (`D64`): the answers to all 37 P4a items of the analysis plan
+
+**The packet:** `d4d-executions/plans/p4a_decision_packet_2026-10-28.md`. The owner answered its eight attention items in two rounds, and accepted the other 27 as recommended.
+
+1. **The eight attention items:**
+   - item 32: content slip, with one contingency;
+   - items 3, 4 and 16: one `A21` attempt at $60. Redelivery is decided after `A21`, through an amendment and a diagnostic canary;
+   - **item 7: "agy, stop command only"**, not the recommendation. agy runs only `d4d api stop`, at the spend trigger (about $51) or at the 3 h clock. This amends the monitor-only rule of `D41` and `D43` for `A21`;
+   - item 14: a new no-crate v8 run, if AI_READI is funded;
+   - item 28: the lowest accepted pilot, capped at 19/20, with the scope branch;
+   - item 29: `A21` stays descriptive, for good;
+   - item 19: v10 ≥ v8 − 0.05, with the numerator reported;
+   - item 6: a 3 h wall clock.
+2. **The other 27 items:** accepted as recommended ("Accept all 27 (Recommended)").
+3. **Pending decisions this settles:**
+   - `D02`, its comparator parts;
+   - `D03`;
+   - `D08`, `A21`'s risk acceptance. The CBORG follow-up still needs the owner's separate yes;
+   - `D20` and `D21`.
+4. **Still open:** P4b's items 38–41, and the later items 42–43.
+
+### 5.17 Performed by the owner, 2026-10-29T00:25:02Z (`D65`): the P4a word
+
+1. **`D65`.** The owner said "Ratify b4a4f9a5… and merge #5163".
+   - **What is ratified:** the generic_v10 analysis plan, `notes/generic_v10_analysis_plan.md` at commit `5b17ae079c8eb1fa4abdda3261054bfd22e4c2f1`. Its sha256 is `b4a4f9a596173d3bdeb817b01ea53fb1a1d77574e121c7cecaf6f63b67fd4b4b`, and it has 2,559 lines. It carries `D64`.
+   - **These exact bytes are binding.** Any change is a dated amendment.
+   - **Checked before the word:** both P3 passes found the plan ready. They were claude's, which re-hashed the plan independently, and codex's.
+   - **The merge:** the owner also approved merging `#5163` into main, with a merge commit, once its CI is green.
+   - **`A21`** may proceed once its engineering and its registration review are done.
+   - **Still open:** P4b's items 38–41, and the later items 42–43.
+
+### 5.18 Decided by the owner, 2026-10-29T00:28:46Z (`D66`–`D67`): two findings of the generality review
+
+**The evidence:** claude's independent review of whether the generation pipeline is hard-coded to particular projects or to Bridge2AI, `d4d-executions/plans/reviews/generation_pipeline_generality_review_2026-10-28.md`. It made 19 findings: 12 violations and 7 project-specific interventions.
+
+**The rule it applied:** the owner's standing rule of 2026-10-28T23:37Z, "the methods need to be generalized which also means no specific interventions or fixes unless they are part of a generalized approach".
+
+1. **`D66` (F6).** The owner chose "Fix before A21 (Recommended)".
+   - The schema's `data_substrate` slot gets declared, neutral term sources, such as EDAM Data/Format or IANA media types, as `data_topic` declares its sources. A dataset outside Bridge2AI can then fill it.
+   - **This is model-facing.** BC1's catalog changes the CHORUS request bytes, so under `D35` it lands before the `A21` rebuild.
+2. **`D67` (F17).** The owner chose "Retire for new runs (Recommended)".
+   - The runner refuses the per-project `tuned` condition for any new registration.
+   - Historical tuned records and prompts stay as evidence.
+3. **The other generality findings** (F1–F5, F7–F16, F18 and F19) are fixed under the owner's standing rule. Because of `D35`, the runner-code fixes also land before `A21`; that avoids a diagnostic canary after the freeze.

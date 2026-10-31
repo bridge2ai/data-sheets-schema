@@ -1,0 +1,29 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_public_omission_response_matches_exact_saved_request[different_projection] _
+
+prepared = Prepared(payload_json='{"chunks":[{"chunk":"c001","prior_receipt_status":"nothing_relevant","source":"<preamble>","tex...fe243d965dfc"},{"name":"linkml:types","sha256":"582c6dc9299038cd907c07a1cfdf288451fcda631b1fdd885438849d968ee817"}]}}')
+response_identity = 'different_projection'
+
+    @pytest.mark.parametrize('response_identity', ['actual_request', 'different_projection'])
+    def test_public_omission_response_matches_exact_saved_request(prepared, response_identity):
+        request = prepared.request()
+        response = answer(prepared, candidate=False)
+        if response_identity == 'different_projection':
+            # No shared-generation selector was used: this is a different payload
+            # from the one the public API prepared and its caller saved.
+            projected = {**request['payload'], 'schema': sg.trim_omission_schema(request['payload']['schema'])}
+            response['request_sha256'] = sg.sha(sg.canonical(projected))
+            assert response['request_sha256'] != request['request_sha256']
+        report = prepared.check(raw(response), saved_request=request)
+        if response_identity == 'actual_request':
+            assert report['protocol_complete']
+        else:
+>           assert not report['protocol_complete'], 'checker accepted a response naming an unsent schema projection'
+E           AssertionError: checker accepted a response naming an unsent schema projection
+
+tests/test_wave4_a14_review.py:26: AssertionError
+-- generated xml file: /private/tmp/d4d-wave4-a14-causal-20261028/pytest.xml ---
+=========================== short test summary info ============================
+FAILED tests/test_wave4_a14_review.py::test_public_omission_response_matches_exact_saved_request[different_projection]
+1 failed, 1 passed in 0.41s

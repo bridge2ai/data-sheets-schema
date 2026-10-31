@@ -1,0 +1,15 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave5-5210-full-20261028/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave5-5210-full-20261028/pytest.xml",
+    "tests/test_download/test_api_runner.py",
+    "tests/test_usage_ledger.py",
+    "tests/test_report_admission.py"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave5-5210-20261028"
+}

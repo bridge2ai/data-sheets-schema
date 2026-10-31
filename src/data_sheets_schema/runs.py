@@ -2709,7 +2709,16 @@ def _write_archive_note(root: Path, moved: list[tuple[Path, Path]],
     """
     from datetime import date
 
-    dirs = sorted({dest.parent for _, dest in moved})
+    def _run_dir(dest: Path) -> Path:
+        try:
+            parts = dest.relative_to(root).parts
+            if len(parts) >= 2:
+                return root / parts[0] / parts[1]
+        except ValueError:
+            pass
+        return dest.parent
+
+    dirs = sorted({_run_dir(dest) for _, dest in moved})
     heading = (f"{len(moved)} file(s) in {len(dirs)} run "
                f"director{'y' if len(dirs) == 1 else 'ies'}")
     section = [f"\n## Archived {date.today().isoformat()} — {heading}\n",

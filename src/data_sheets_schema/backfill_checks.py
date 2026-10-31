@@ -33,6 +33,7 @@ whose staleness is already detectable by their pinned hashes.
 from __future__ import annotations
 
 from pathlib import Path
+import re
 from typing import Any
 
 import yaml
@@ -265,8 +266,18 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
 
     # --- report audit totals (#4766) --------------------------------------
     audit_path = provenance.parent / "intermediate" / f"{paths['project']}_audit.json"
+    audit_pattern = re.compile(re.escape(paths["project"]) + r"_audit(?:_[0-9]+)?\.json")
+    audit_candidates = [p for p in audit_path.parent.glob(f"{paths['project']}_audit*.json")
+                        if audit_pattern.fullmatch(p.name)]
+    inventory = record.get("intermediates")
+    portable_audit = isinstance(inventory, list) and any(
+        isinstance(entry, dict) and (entry.get("phase") == audit_path.name or (
+            isinstance(entry.get("path"), str)
+            and audit_pattern.fullmatch(Path(entry["path"]).name)))
+        for entry in inventory
+    )
     if (only is not None and "report_audit_totals" in only) or (
-        only is None and ("report_audit_totals" in record or audit_path.exists())
+        only is None and ("report_audit_totals" in record or audit_candidates or portable_audit)
     ):
         from data_sheets_schema.report_audit_totals import check_report_audit_totals
         if not report.exists():
@@ -275,8 +286,37 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                                           "reason": "no reconciliation report",
                                           "recorded_by": RECORDED_BY}
         else:
+            from data_sheets_schema import snapshot_store
+            from data_sheets_schema.usage_ledger import UsageLedgerError
+            audit_source = None
+            unavailable = None
+            try:
+                owner_declared = "run" in record or "intermediates" in record
+                index = snapshot_store.index_path(provenance.parent, paths["project"])
+                has_index = index.exists() or any(index.parent.glob(f"{index.stem}.previous-*.json"))
+                if owner_declared or has_index:
+                    indexed, snapshot = snapshot_store.read_latest(
+                        provenance.parent, paths["project"], audit_path.name,
+                        record=record if owner_declared else None)
+                else:
+                    # Older standalone records carry no snapshot ownership at
+                    # all; preserve their single-file fallback. A declared owner
+                    # or index always takes the strict path above.
+                    indexed, snapshot = False, None
+                if snapshot is not None:
+                    audit_source = snapshot[1].decode("utf-8")
+                elif not indexed:
+                    # Match the runner's legacy single-snapshot fallback. An
+                    # unowned numbered history must never select its first file.
+                    if len(audit_candidates) == 1:
+                        audit_source = audit_candidates[0]
+            except UsageLedgerError as exc:
+                unavailable = f"audit snapshot unavailable: {exc}"
+            block = check_report_audit_totals(report, audit_source)
+            if unavailable is not None:
+                block["reason"] = unavailable
             out["report_audit_totals"] = {
-                **check_report_audit_totals(report, audit_path if audit_path.exists() else None),
+                **block,
                 "recorded_by": RECORDED_BY,
             }
 

@@ -1,0 +1,1 @@
+{"capacity_authority":"caller assertion","context_limit_basis":"Route context window 1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"input_tokens":95213,"method":"endpoint messages.count_tokens","request_sha256":"a738946dd5c231159e16d0c9da065c74356bfdb2951b42fa05dd499cc13fc49f"}
