@@ -139,7 +139,7 @@ def refuse_legacy_execution(spec):
     own = _mine(spec, events)
     path = ledger.ledger_path(spec)
     if own and not path.exists() and not path.is_symlink():
-        _fail(f"usage ledger deleted while its generation journal survives: expected generation={own[-1]['generation_id']}; found=missing ledger: {path}")
+        _fail(f"usage ledger deleted while its generation journal survives: expected generation={own[-1]['generation_id']}; found=missing ledger")
     if any(event["kind"] == "legacy_unverifiable" for event in own):
         _fail("previously adopted legacy run is inspection only; legacy recovery never spends")
     if not own:

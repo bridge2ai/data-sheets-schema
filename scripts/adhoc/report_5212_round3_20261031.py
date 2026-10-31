@@ -36,6 +36,7 @@ def relative(value):
 head = git("rev-parse", "HEAD")
 main = git("rev-parse", "origin/main")
 phases = []
+artifact_censuses = []
 for name in args.phases:
     path = SCRATCH / name / "d73-result.json"
     raw = path.read_bytes()
@@ -55,6 +56,12 @@ for name in args.phases:
         "raw_report": relative(path), "raw_sha256": hashlib.sha256(raw).hexdigest(),
         "passed_by_file": dict(Counter(r["nodeid"].split("::", 1)[0] for r in result["reports"]
                                        if r["when"] == "call" and r["outcome"] == "passed"))})
+    if final:
+        for path in sorted((SCRATCH / name).glob("*/artifact-census.json")):
+            if path.parent.is_symlink():
+                continue
+            artifact_censuses.append({"phase": name, "case": path.parent.name,
+                "source": relative(path), **json.loads(path.read_text())})
 census = json.loads((SCRATCH / args.census).read_text())
 assert census["after_head"] == head
 protected = git("diff", "--name-only", "c9567e3c3", head, "--", "data",
@@ -65,7 +72,8 @@ assert not git("diff", "--name-only") and not git("diff", "--cached", "--name-on
 compaction = json.loads((ROOT / "notes/reviews/d73_5212_evidence_20261031/compaction.json").read_text())
 summary = {"head": head, "main": main, "commits": git("log", "--reverse", "--format=%H %s",
     "c9567e3c3..HEAD").splitlines(), "phases": phases, "census": census,
-    "protected_path_changes": [], "evidence_compaction": compaction}
+    "protected_path_changes": [], "evidence_compaction": compaction,
+    "artifact_censuses": artifact_censuses}
 destination = SCRATCH / (args.prefix + ".json")
 destination.write_text(json.dumps(summary, indent=2) + "\n")
 lines = [f"# D68–D70 / D73 round-three implementation: `{head}`", "",
@@ -103,10 +111,21 @@ for phase in phases:
         f"{counts.get('passed', 0)} | {counts.get('failed', 0)} | {phase['skipped']} | "
         f"{len(phase['collection_errors'])} | {phase['selected']} |")
 lines += ["", "Phase counts overlap; they are not summed as unique tests. Raw reports, exact arguments, "
-    f"hashes and per-file counts: `{relative(destination)}`.", "", "Corpus census (every committed generation/derived record):", ""]
+    f"hashes and per-file counts: `{relative(destination)}`.", "",
+    "The before-fix 26 failures are expected defect witnesses on c9567e3c3. Exploratory "
+    "runs also found a batch-test mock target typo, three torn-journal fixtures lacking "
+    "per-file ownership, and an exact missing-ledger diagnostic mismatch. Those were "
+    "corrected before final validation. The interrupted focused-c run is partial evidence only.", "",
+    "Final-archive artifact censuses (separate runs can overlap):", ""]
+for census_row in artifact_censuses:
+    lines.append(f"- `{census_row['phase']}/{census_row['case']}`: "
+        f"{census_row['singletons']} artifacts, {census_row['refusal_checks']} refusal checks.")
+lines += ["", "Corpus census (every committed generation/derived record):", ""]
 for label in ("before", "after"):
     counts = census[label]
-    lines.append(f"- {label}: {counts['records']} records; ages `{json.dumps(counts['age'], sort_keys=True)}`; "
+    ages = {kind: counts['age'].get(kind, 0) for kind in
+            ("pre-D41", "post-D41", "age unestablished")}
+    lines.append(f"- {label}: {counts['records']} records; ages `{json.dumps(ages, sort_keys=True)}`; "
         f"canary eligible {counts['after']['canary']}; evaluation eligible {counts['after']['evaluation']}; "
         f"v8 records {counts['v8_records']}.")
 lines += ["- Round-three per-record eligibility changes: 0. V8 comparator changes: 0.", "",
