@@ -1,0 +1,29 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 10 items
+
+tests/test_manifest_corpus_root.py::test_conventional_bundle_follows_the_explicit_manifest PASSED [ 10%]
+tests/test_manifest_corpus_root.py::test_manifest_paths_share_the_manifest_corpus_root PASSED [ 20%]
+tests/test_manifest_corpus_root.py::test_ancestor_discovery_keeps_context_bundles_and_chunks_in_one_tree PASSED [ 30%]
+tests/test_manifest_corpus_root.py::test_generation_outputs_follow_the_explicit_manifest PASSED [ 40%]
+tests/test_manifest_corpus_root.py::test_explicit_output_directory_remains_the_callers_override PASSED [ 50%]
+tests/test_manifest_corpus_root.py::test_a_standalone_manifest_uses_its_own_directory PASSED [ 60%]
+tests/test_manifest_corpus_root.py::test_generated_run_is_discoverable_and_grounded_from_a_nested_directory PASSED [ 70%]
+tests/test_manifest_corpus_root.py::test_corpus_consumers_use_the_selected_tree_without_writing_elsewhere PASSED [ 80%]
+tests/test_manifest_corpus_root.py::test_environment_selection_roots_corpus_helpers PASSED [ 90%]
+tests/test_manifest_corpus_root.py::test_no_selected_manifest_keeps_new_outputs_in_the_callers_directory PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_manifest_corpus_root.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_23-xml-5d51awn0/pytest.xml -
+======================= 10 passed, 13 warnings in 29.48s =======================

@@ -1,0 +1,85 @@
+{
+  "base": "148c869dde865915221db847b2e89f15f319b365",
+  "base_source_sha256": {
+    "src/data_sheets_schema/api_runner.py": "c5287825d123c8da96d29f3e10c5b37695fb80fc6041b6f09e8e8cbac5875a95",
+    "src/data_sheets_schema/backfill_checks.py": "b099224f7ebc37f59c3f5f19964ff91009521d22872dbd92be7ba00c3ad90b2f",
+    "src/data_sheets_schema/receipt_completion.py": "d9f72b79a463d19d77b309e19b24c9e96001cb03ca4f69ba1121fe40f6aa1c87",
+    "src/data_sheets_schema/receipt_completion_policy.py": "3c7c727213369638827af0bdfd71484ebdb66661d88ae8942a591990c91b4f23",
+    "src/data_sheets_schema/receipts.py": "658195581a9ca6a3dcf4700d25dd90d403985c2815c423069d2603b58b33d64d",
+    "src/data_sheets_schema/report_claims.py": "2d005a3a371f7d2b85ca3b45de3cebc591f05cda3a710195b2932ff5e5c10776",
+    "src/data_sheets_schema/shared_generation.py": "3ae7e8f5b039c65a7feaf61efdbb9dc25f2f38e5f5fc920111267aab4e8fcad0"
+  },
+  "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+  "head": "4b87bf52d276a44135c9bd55d9e8b513b117ed77",
+  "normalization": "Only each checkout absolute path is replaced by <TREE>.",
+  "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+  "slices": {
+    "assembly": {
+      "N11_routing_sg2_r27": {
+        "base": "e4fe1bd474ee8d0600a60d869b2b644168979859f37443b4d52661560e9793d3",
+        "head": "b6e8e7c7fdc2642c4adf5ab1efebd11968cbe064a90137fe976a1cc8ea4f2a0b"
+      },
+      "equal": true,
+      "identities": {
+        "descriptor_v1": "83d13d6270c49b59a6dec631e77852f19c63aad2a2a3435b8e2bdfd4a41c9e19",
+        "r24_rc1": "12e03e3911ff1cb16d2d69817fa55b121e36ff22bc20e64e1f468d052a5d89dc",
+        "r8_rc1": "e1da2a6015b0a75f917142d8bcd369e4b59e9d29f8b9114ad58c0c9ffc0d216b",
+        "v10_sg1_r25": "9e59f3db581c168d397793848579c62a9462e8a2e4236101af05f48803baa90e"
+      }
+    },
+    "chorus": {
+      "base_sha256": "830eb7055ba303dc03ee40352b61552d0ca1308a82f93a5a18aebe5a3f07f3d6",
+      "bytes": 142637,
+      "equal": true,
+      "head_sha256": "830eb7055ba303dc03ee40352b61552d0ca1308a82f93a5a18aebe5a3f07f3d6",
+      "runs": {
+        "2026-10-20a": {
+          "d37": [
+            58,
+            58
+          ],
+          "request_equals_saved_bytes": true,
+          "request_sha256": "3f3e8b7f541c86a0ce74ba11c4c05d1a6738f38477a3ff6ec3bb8e27eafc03f0",
+          "result_equals_saved": {
+            "CHORUS_receipt_completion_result.json": false,
+            "CHORUS_receipt_completion_result_2.json": true
+          },
+          "result_sha256": "21d3af543c2583a3323ecb1a105811d69b6a60a990994ceaa67186b038ecf90c"
+        },
+        "2026-10-22a": {
+          "d37": [
+            64,
+            64
+          ],
+          "request_equals_saved_bytes": true,
+          "request_sha256": "086dd23c1f4914195574f3e3dc4be8ec9a603b8c84d60e565cfd3c07aedc6249",
+          "result_equals_saved": {
+            "CHORUS_receipt_completion_result.json": true
+          },
+          "result_sha256": "f8dbba99b8c694c7be5563f52b4c471ac73f33d621ab5fd7a0c8b35dfa2a8a1d"
+        }
+      }
+    },
+    "corpus": {
+      "base_sha256": "52b997f6f75365ac7d80400ddf7aca145f062f0c3edff82b76dccecd84fa7ed7",
+      "bytes": 6834351,
+      "checked": 48,
+      "equal": true,
+      "head_sha256": "52b997f6f75365ac7d80400ddf7aca145f062f0c3edff82b76dccecd84fa7ed7",
+      "matches_reviewer_saved_baseline": true,
+      "records": 54,
+      "snapshots": 36
+    },
+    "report": {
+      "base_sha256": "c659ce494b0545a077abcae29a593ad0dff572a1cbb9ab99f25370ce91c65018",
+      "bytes": 2725514,
+      "checked_v7": 325,
+      "checked_v8": 325,
+      "equal": true,
+      "head_sha256": "c659ce494b0545a077abcae29a593ad0dff572a1cbb9ab99f25370ce91c65018",
+      "matches_reviewer_saved_baseline": true,
+      "records": 335
+    }
+  },
+  "v5": "off: no explicit v5 selection; RECEIPTS_V5_INSTRUMENT unset"
+}

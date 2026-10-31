@@ -1,0 +1,21 @@
+..........................s.s.s.s.s.s.s.s.s.s.s.s.s.s.s.s.s.s.s......... [  7%]
+........................................................................ [ 15%]
+........................................................................ [ 23%]
+........................................................................ [ 31%]
+........................................................................ [ 39%]
+........................................................................ [ 47%]
+........................................................................ [ 54%]
+........................................................................ [ 62%]
+........................................................................ [ 70%]
+........................................................................ [ 78%]
+........................................................................ [ 86%]
+........................................................................ [ 94%]
+......................................................                   [100%]
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5r4-acceptance.xml -
+899 passed, 19 skipped, 1 warning in 71.23s (0:01:11)

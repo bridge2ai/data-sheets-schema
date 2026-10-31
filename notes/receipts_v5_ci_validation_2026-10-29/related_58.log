@@ -1,0 +1,37 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 18 items
+
+tests/test_source_heading_runtime_api.py::test_actual_sent_routing_counts_usage_and_completed_zero_calls PASSED [  5%]
+tests/test_source_heading_runtime_api.py::test_actual_dispatch_refuses_bounds_before_admission[max_output_tokens-32000-0] PASSED [ 11%]
+tests/test_source_heading_runtime_api.py::test_actual_dispatch_refuses_bounds_before_admission[max_request_bytes-1-0] PASSED [ 16%]
+tests/test_source_heading_runtime_api.py::test_actual_dispatch_refuses_bounds_before_admission[max_input_tokens_per_call-1-1] PASSED [ 22%]
+tests/test_source_heading_runtime_api.py::test_actual_cli_render_selects_exact_registered_version_and_refuses_crossed_flag PASSED [ 27%]
+tests/test_source_heading_runtime_api.py::test_v2_record_contract_is_distinct_and_keeps_v1_closed PASSED [ 33%]
+tests/test_source_heading_runtime_api.py::test_strict_selected_request_and_crossed_mode_refusal PASSED [ 38%]
+tests/test_source_heading_runtime_api.py::test_completed_sdk_usage_survives_routing_response_save_failure PASSED [ 44%]
+tests/test_source_heading_runtime_api.py::test_actual_completed_capture_is_portable_and_refuses_changed_bytes PASSED [ 50%]
+tests/test_source_heading_runtime_api.py::test_actual_regated_report_captured_lineage PASSED [ 55%]
+tests/test_source_heading_runtime_api.py::test_selected_registration_binds_actual_normalization_bytes[american_spelling.py] PASSED [ 61%]
+tests/test_source_heading_runtime_api.py::test_selected_registration_binds_actual_normalization_bytes[profiles.py] PASSED [ 66%]
+tests/test_source_heading_runtime_api.py::test_nonempty_captured_vocabulary_does_not_resolve_original_path PASSED [ 72%]
+tests/test_source_heading_runtime_api.py::test_selected_form_captures_actual_default_instrument_per_invocation PASSED [ 77%]
+tests/test_source_heading_runtime_api.py::test_actual_default_layout_completed_capture PASSED [ 83%]
+tests/test_source_heading_runtime_api.py::test_selected_registration_binds_live_historical_validation[profile_identity.py] PASSED [ 88%]
+tests/test_source_heading_runtime_api.py::test_selected_registration_binds_live_historical_validation[cache_dependencies.py] PASSED [ 94%]
+tests/test_source_heading_runtime_api.py::test_selected_registration_binds_live_historical_validation[historical_digest.py] PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_source_heading_runtime_api.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_58-xml-7655wudd/pytest.xml -
+================= 18 passed, 13 warnings in 2947.49s (0:49:07) =================

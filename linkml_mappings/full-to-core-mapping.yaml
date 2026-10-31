@@ -1,0 +1,249 @@
+id: https://w3id.org/bridge2ai/data-sheets-schema/full-to-core-mapping
+title: D4D Full Dataset to CoreDataset Declarative Transformation Specification
+source_schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+target_schema: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+comments:
+  - >-
+    Declarative LinkML-Map TransformationSpecification for projecting a D4D
+    Dataset record into a CoreDataset record (#694, Slide 8 transformation
+    receipts). Shared identity slots are copied 1:1; `resources` is projected
+    recursively by id; `distributions` is constructed by projecting each
+    `FileCollection` (with `total_bytes` mapped to `bytes` when `bytes` is
+    absent) followed by each nested `File` under `file_collections[*].resources`;
+    `dialect` is derived when all `File.dialect` entries agree on a single
+    value; `conforms_to_class` and `conforms_to_schema` are set to the core
+    target constants.
+class_derivations:
+  CoreDataset:
+    populated_from: Dataset
+    slot_derivations:
+      acquisition_methods:
+        populated_from: acquisition_methods
+      addressing_gaps:
+        populated_from: addressing_gaps
+      annotation_analyses:
+        populated_from: annotation_analyses
+      anomalies:
+        populated_from: anomalies
+      at_risk_populations:
+        populated_from: at_risk_populations
+      cleaning_strategies:
+        populated_from: cleaning_strategies
+      collection_mechanisms:
+        populated_from: collection_mechanisms
+      collection_timeframes:
+        populated_from: collection_timeframes
+      compression:
+        populated_from: compression
+      confidential_elements:
+        populated_from: confidential_elements
+      conforms_to:
+        populated_from: conforms_to
+      conforms_to_class:
+        expr: "'CoreDataset'"
+      conforms_to_schema:
+        expr: "'src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml'"
+      conforms_to_standard:
+        populated_from: conforms_to_standard
+      content_warnings:
+        populated_from: content_warnings
+      created_by:
+        populated_from: created_by
+      created_on:
+        populated_from: created_on
+      creators:
+        populated_from: creators
+      data_collectors:
+        populated_from: data_collectors
+      data_governance:
+        populated_from: data_governance
+      data_protection_impacts:
+        populated_from: data_protection_impacts
+      description:
+        populated_from: description
+      dialect:
+        expr: "consensus_dialect(file_collections[*].resources[*].dialect)"
+      discouraged_uses:
+        populated_from: discouraged_uses
+      distribution_dates:
+        populated_from: distribution_dates
+      distribution_formats:
+        populated_from: distribution_formats
+      distributions:
+        expr: "project_collections_and_files(file_collections)"
+      doi:
+        populated_from: doi
+      download_url:
+        populated_from: download_url
+      errata:
+        populated_from: errata
+      ethical_reviews:
+        populated_from: ethical_reviews
+      existing_uses:
+        populated_from: existing_uses
+      extension_mechanism:
+        populated_from: extension_mechanism
+      external_resources:
+        populated_from: external_resources
+      funders:
+        populated_from: funders
+      future_use_impacts:
+        populated_from: future_use_impacts
+      human_subject_research:
+        populated_from: human_subject_research
+      id:
+        populated_from: id
+      imputation_protocols:
+        populated_from: imputation_protocols
+      informed_consent:
+        populated_from: informed_consent
+      instances:
+        populated_from: instances
+      intended_uses:
+        populated_from: intended_uses
+      ip_restrictions:
+        populated_from: ip_restrictions
+      is_deidentified:
+        populated_from: is_deidentified
+      is_tabular:
+        populated_from: is_tabular
+      issued:
+        populated_from: issued
+      keywords:
+        populated_from: keywords
+      known_biases:
+        populated_from: known_biases
+      known_limitations:
+        populated_from: known_limitations
+      labeling_strategies:
+        populated_from: labeling_strategies
+      language:
+        populated_from: language
+      last_updated_on:
+        populated_from: last_updated_on
+      license:
+        populated_from: license
+      license_and_use_terms:
+        populated_from: license_and_use_terms
+      machine_annotation_tools:
+        populated_from: machine_annotation_tools
+      maintainers:
+        populated_from: maintainers
+      missing_data_documentation:
+        populated_from: missing_data_documentation
+      modified_by:
+        populated_from: modified_by
+      name:
+        populated_from: name
+      notes:
+        populated_from: notes
+      other_tasks:
+        populated_from: other_tasks
+      page:
+        populated_from: page
+      preprocessing_strategies:
+        populated_from: preprocessing_strategies
+      prohibited_uses:
+        populated_from: prohibited_uses
+      publisher:
+        populated_from: publisher
+      purposes:
+        populated_from: purposes
+      raw_data_sources:
+        populated_from: raw_data_sources
+      raw_sources:
+        populated_from: raw_sources
+      regulatory_restrictions:
+        populated_from: regulatory_restrictions
+      related_datasets:
+        populated_from: related_datasets
+      resources:
+        populated_from: resources
+        expr: "project_resources_by_id(resources)"
+      retention_limit:
+        populated_from: retention_limit
+      sampling_strategies:
+        populated_from: sampling_strategies
+      sensitive_elements:
+        populated_from: sensitive_elements
+      source_caveats:
+        populated_from: source_caveats
+      status:
+        populated_from: status
+      subpopulations:
+        populated_from: subpopulations
+      tasks:
+        populated_from: tasks
+      title:
+        populated_from: title
+      updates:
+        populated_from: updates
+      use_repository:
+        populated_from: use_repository
+      version:
+        populated_from: version
+      version_access:
+        populated_from: version_access
+      was_derived_from:
+        populated_from: was_derived_from
+  CoreDistributionFromCollection:
+    target_definition: CoreDistribution
+    populated_from: FileCollection
+    slot_derivations:
+      bytes:
+        populated_from: total_bytes
+        expr: "coalesce(bytes, total_bytes)"
+      compression:
+        populated_from: compression
+      conforms_to:
+        populated_from: conforms_to
+      conforms_to_standard:
+        populated_from: conforms_to_standard
+      description:
+        populated_from: description
+      id:
+        populated_from: id
+      name:
+        populated_from: name
+      notes:
+        populated_from: notes
+      path:
+        populated_from: path
+      source_caveats:
+        populated_from: source_caveats
+  CoreDistributionFromFile:
+    target_definition: CoreDistribution
+    populated_from: File
+    slot_derivations:
+      bytes:
+        populated_from: bytes
+      compression:
+        populated_from: compression
+      conforms_to:
+        populated_from: conforms_to
+      conforms_to_standard:
+        populated_from: conforms_to_standard
+      description:
+        populated_from: description
+      encoding:
+        populated_from: encoding
+      format:
+        populated_from: format
+      hash:
+        populated_from: hash
+      id:
+        populated_from: id
+      md5:
+        populated_from: md5
+      media_type:
+        populated_from: media_type
+      name:
+        populated_from: name
+      notes:
+        populated_from: notes
+      path:
+        populated_from: path
+      sha256:
+        populated_from: sha256
+      source_caveats:
+        populated_from: source_caveats

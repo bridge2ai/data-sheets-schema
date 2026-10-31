@@ -1,0 +1,38 @@
+{
+  "command": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-S",
+    "-B",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/scripts/adhoc/validate_receipts_v5_merge_20261029.py",
+    "--",
+    "tests/test_canary_controller_receipts.py",
+    "tests/test_canary_gate.py",
+    "tests/test_derive_core.py",
+    "tests/test_receipt_completion_policy.py",
+    "tests/test_receipt_origin.py",
+    "tests/test_receipt_origin_captured.py",
+    "tests/test_receipt_rereceipt.py",
+    "tests/test_receipts.py",
+    "tests/test_receipts_v5_merge_n1.py",
+    "tests/test_receipts_v5_merge_n3.py",
+    "tests/test_receipts_v5_merge_n4.py",
+    "tests/test_receipts_v5_upgrade.py",
+    "tests/test_report_claims.py",
+    "tests/test_rereceipt_completion.py",
+    "tests/test_review_receipts_v5_20261026.py",
+    "tests/test_wave3_receipt_integration.py",
+    "tests/test_wave3_receipts_core.py",
+    "tests/test_wave3_watermark_transform.py",
+    "tests/test_receipts_v5_merge_r4.py",
+    "--basetemp=/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-acceptance-pt",
+    "--junitxml=/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-acceptance-xml-09whvu5h/pytest.xml"
+  ],
+  "load": [
+    11.2568359375,
+    9.71630859375,
+    10.455078125
+  ],
+  "receipts_sha256": "f68c875b4e3b972d4e03ad39322a077c6b64497ece5f1e71ac5bc08aa4e9c10a",
+  "returncode": 0,
+  "seconds": 79.3818579170038
+}

@@ -1,0 +1,2727 @@
+{
+ "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_provenance.yaml": {
+  "block": {
+   "artifacts": {
+    "manifest": {
+     "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/data/preprocessed/chunks/CHORUS_chunks.yaml",
+     "sha256": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a"
+    },
+    "receipt": {
+     "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_coverage_receipt.yaml",
+     "sha256": "5619e50e6720194b1cd837efa38caaa60da8f72495ae460a8bcad6b0041b3950"
+    }
+   },
+   "bundle_basis": {
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+    "source": "bundle on disk"
+   },
+   "checked": true,
+   "chunks": {
+    "by_status": {
+     "duplicate_of": 0,
+     "extracted": 7,
+     "nothing_relevant": 1,
+     "redundant_with": 0
+    },
+    "reviewed": 8,
+    "total": 8,
+    "unreviewed": []
+   },
+   "expected": true,
+   "findings": [],
+   "findings_gated": 0,
+   "findings_truncated": null,
+   "identity_rules": {
+    "bases": [
+     [
+      "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#",
+      "d4dpreprocessing"
+     ],
+     [
+      "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#",
+      "d4ddatagovernance"
+     ],
+     [
+      "https://w3id.org/bridge2ai/data-sheets-schema/distribution#",
+      "d4ddistribution"
+     ],
+     [
+      "https://w3id.org/bridge2ai/standards-datasubstrate-schema/",
+      "B2AI_SUBSTRATE"
+     ],
+     [
+      "https://w3id.org/bridge2ai/data-sheets-schema/composition#",
+      "d4dcomposition"
+     ],
+     [
+      "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#",
+      "d4dmaintenance"
+     ],
+     [
+      "https://w3id.org/bridge2ai/standards-organization-schema/",
+      "B2AI_ORG"
+     ],
+     [
+      "https://w3id.org/bridge2ai/data-sheets-schema/motivation#",
+      "d4dmotivation"
+     ],
+     [
+      "https://w3id.org/bridge2ai/data-sheets-schema/variables#",
+      "d4dvariables"
+     ],
+     [
+      "https://w3id.org/bridge2ai/standards-datatopic-schema/",
+      "B2AI_TOPIC"
+     ],
+     [
+      "https://w3id.org/bridge2ai/data-sheets-schema/ethics#",
+      "d4dethics"
+     ],
+     [
+      "https://w3id.org/bridge2ai/standards-dataset-schema/",
+      "B2AI_DATA"
+     ],
+     [
+      "https://w3id.org/bridge2ai/data-sheets-schema/human#",
+      "d4dhuman"
+     ],
+     [
+      "https://w3id.org/bridge2ai/b2ai-standards-registry/",
+      "B2AI_STANDARD"
+     ],
+     [
+      "https://w3id.org/bridge2ai/data-sheets-schema/uses#",
+      "d4duses"
+     ],
+     [
+      "https://w3id.org/bridge2ai/data-sheets-schema/",
+      "d4d"
+     ],
+     [
+      "https://w3id.org/bridge2ai/data-sheets-schema/",
+      "data_sheets_schema"
+     ],
+     [
+      "https://www.iana.org/assignments/media-types/",
+      "mediatypes"
+     ],
+     [
+      "http://www.w3.org/2004/02/skos/core#",
+      "skos"
+     ],
+     [
+      "http://mlcommons.org/croissant/rai/",
+      "rai"
+     ],
+     [
+      "http://purl.obolibrary.org/obo/duo_",
+      "DUO"
+     ],
+     [
+      "http://www.w3.org/2001/xmlschema#",
+      "xsd"
+     ],
+     [
+      "https://w3id.org/biolink/vocab/",
+      "biolink"
+     ],
+     [
+      "http://qudt.org/schema/qudt/",
+      "qudt"
+     ],
+     [
+      "http://www.w3.org/ns/dcat#",
+      "dcat"
+     ],
+     [
+      "http://www.w3.org/ns/prov#",
+      "prov"
+     ],
+     [
+      "http://www.w3.org/ns/shex#",
+      "shex"
+     ],
+     [
+      "http://spdx.org/rdf/terms#",
+      "spdx"
+     ],
+     [
+      "http://purl.org/dc/terms/",
+      "dcterms"
+     ],
+     [
+      "https://w3id.org/linkml/",
+      "linkml"
+     ],
+     [
+      "https://w3id.org/shacl/",
+      "sh"
+     ],
+     [
+      "https://w3id.org/aio/",
+      "AIO"
+     ],
+     [
+      "https://example.org/",
+      "example"
+     ],
+     [
+      "http://schema.org/",
+      "schema"
+     ],
+     [
+      "https://orcid.org/",
+      "ORCID"
+     ],
+     [
+      "https://ror.org/",
+      "ROR"
+     ],
+     [
+      "https://doi.org/",
+      "doi"
+     ]
+    ],
+    "bases_sha256": "85a1aaa8600f345d0133426da2895492ba6f7fb4d267ba3e66f26af6b8320ad5",
+    "boundary_rule": "delimiter-terminated resolver bases; ordered first match",
+    "declared_bases_sha256": "69e787d99f4c94adc826383fde859f4f19801bb929db9f599450cdd8f4033438",
+    "instrument": "receipt-identity-rules-v1",
+    "schema_basis": {
+     "commit": "c1725b7af7ed90590a28aef6892cc29078b1d7b2",
+     "matched_on": [
+      "sha256"
+     ],
+     "path": "src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+     "sha256": "ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da",
+     "source": "the run's schema, a git blob"
+    }
+   },
+   "instrument": "v3 (#1053): an entry whose identity key the final list no longer carries anywhere (a minted id reconciliation stripped) is located as a keyless entry \u2014 by overlap, else by position for the same shape when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`) \u2014 instead of declared dropped; v2 (#1123): a fragment minted on an identifier the record carries for the dataset at its top level \u2014 its id in CURIE or resolver form, its doi, its page \u2014 is exempt like one on its own id; `slots.exempt_on_carried_identifier` counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage, commentary and own-id fragments exempt, unattesting snippets counted apart",
+   "non_checks": [
+    "that a chunk marked nothing_relevant truly held nothing for the record \u2014 a judgement; sample by chunk id in review",
+    "that a verified snippet supports the value it is attached to \u2014 a snippet can be real and irrelevant; sample by slot path in review"
+   ],
+   "recorded_by": "backfill_checks",
+   "slots": {
+    "added_after_receipt": 2,
+    "addressing_slips": [],
+    "addressing_slips_count": 0,
+    "exempt": 21,
+    "exempt_on_carried_identifier": 0,
+    "index_reused_by_another_entry": [],
+    "index_reused_by_another_entry_count": 0,
+    "located_after_key_stripped": [],
+    "located_after_key_stripped_count": 0,
+    "never_receipted": 12,
+    "path_not_in_snapshot": [],
+    "path_not_in_snapshot_count": 0,
+    "path_off_by_one": [],
+    "path_off_by_one_count": 0,
+    "populated": 150,
+    "receipt_paths": 93,
+    "receiptable": 129,
+    "receipts_to_removed_values": 14,
+    "remapped_by_identity": [],
+    "remapped_by_identity_count": 0,
+    "reshaped_by_reconcile": [
+     "collection_timeframes[0].timeframe_details",
+     "direct_collection[0]",
+     "distribution_formats[0]",
+     "distribution_formats[1]",
+     "distribution_formats[2]",
+     "distribution_formats[3]",
+     "distribution_formats[4]",
+     "distribution_formats[5]",
+     "external_resources[2]",
+     "known_limitations[3]",
+     "labeling_strategies[0]",
+     "maintainers[1]",
+     "maintainers[2]",
+     "splits[0]"
+    ],
+    "unresolved": [],
+    "value_changed_after_receipt": [
+     {
+      "path": "acquisition_methods[0]",
+      "resolved_path": "acquisition_methods[0]"
+     },
+     {
+      "path": "data_governance.access_review_process",
+      "resolved_path": "data_governance.access_review_process"
+     },
+     {
+      "path": "external_resources[0]",
+      "resolved_path": "external_resources[0]"
+     },
+     {
+      "path": "funders[0]",
+      "resolved_path": "funders[0]"
+     },
+     {
+      "path": "funders[0].notes",
+      "resolved_path": "funders[0].notes"
+     },
+     {
+      "path": "instances[1]",
+      "resolved_path": "instances[1]"
+     },
+     {
+      "path": "maintainers[0]",
+      "resolved_path": "maintainers[0]"
+     },
+     {
+      "path": "source_caveats",
+      "resolved_path": "source_caveats"
+     }
+    ],
+    "value_changed_after_receipt_count": 8,
+    "with_receipt": 115,
+    "without_receipt": [
+     "name",
+     "conforms_to_standard",
+     "instances[3].instance_type",
+     "instances[3].data_substrate",
+     "instances[3].data_topic",
+     "raw_data_sources[2].source_description",
+     "raw_data_sources[2].source_type",
+     "raw_data_sources[4].source_description",
+     "raw_data_sources[4].source_type",
+     "is_deidentified.method",
+     "confidential_elements[0].confidential_elements_present",
+     "ethical_reviews[0].reviewing_organization",
+     "ethical_reviews[0].review_details",
+     "known_limitations[2].limitation_description"
+    ],
+    "without_receipt_truncated": null
+   },
+   "snippets": {
+    "adjacent": 0,
+    "artifact_elided": 0,
+    "elsewhere": 0,
+    "entry_single_leaf": 2,
+    "entry_single_leaf_sample": [
+     {
+      "chunk": "c006",
+      "leaves": 3,
+      "overlapping": 1,
+      "slot": "instances[0]"
+     },
+     {
+      "chunk": "c006",
+      "leaves": 3,
+      "overlapping": 1,
+      "slot": "instances[2]"
+     }
+    ],
+    "linewrap_joined": 0,
+    "mismatched": 0,
+    "no_value_overlap": 1,
+    "no_value_overlap_sample": [
+     {
+      "chunk": "c002",
+      "slot": "funders[0].grantor",
+      "snippet": "As part of the NIH Common Fund"
+     }
+    ],
+    "spans_boundary": 0,
+    "split_at_linebreaks": 0,
+    "total": 125,
+    "unattesting": 0,
+    "unattesting_sample": [],
+    "unchecked": 0,
+    "verified": 125
+   },
+   "summary": "chunks 8/8 reviewed \u00b7 snippets 125/125 verified (1 bearing on no token of their value) (2 entry receipt(s) overlapping one leaf) \u00b7 slots 115/129 with a receipt (12 never receipted, 2 added after the receipt) (21 exempt) \u00b7 14 receipt path(s) reshaped by reconcile \u00b7 8 value(s) changed after the receipt"
+  },
+  "claims": {
+   "bundle_md5": "9b2ef4b65d67957f79362266cab0bc7a",
+   "slots": {
+    "acquisition_methods[0]": {
+     "core_path": "acquisition_methods[0]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "acquire, standardize, tokenize, store, visualize, and label data"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "Retrospective data collection"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "acquisition_methods[0]",
+     "value_at_receipt": "{'acquisition_details': 'Retrospective collection of existing clinical data from hospital systems of record at contributing sites, which are then acquired, standardized to the OMOP Common Data Model, tokenized, stored, and labeled.'}"
+    },
+    "addressing_gaps[0]": {
+     "core_path": "addressing_gaps[0]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "There is an urgent need for infrastructure to support artificial intelligence and machine learning (AI/ML) in critical care."
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "addressing_gaps[0]"
+    },
+    "addressing_gaps[1]": {
+     "core_path": "addressing_gaps[1]",
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Unified standards will harmonize multi-modal EHR, waveform, imaging, and text data."
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "addressing_gaps[1]"
+    },
+    "cleaning_strategies[0]": {
+     "core_path": "cleaning_strategies[0]",
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Standard operating protocols (SOPs) to instruct data contributing sites about best"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "an interactive workflow diagram describing the step-by-step process for"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "cleaning_strategies[0]"
+    },
+    "cleaning_strategies[1]": {
+     "core_path": "cleaning_strategies[1]",
+     "receipts": [
+      {
+       "chunk": "c008",
+       "snippet": "This repo is dedicated to producing characterization reports to return to sites following their"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "cleaning_strategies[1]"
+    },
+    "collection_mechanisms[0]": {
+     "core_path": "collection_mechanisms[0]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Waveform telemetry (bedside monitors,\ngateway/middleware)"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "collection_mechanisms[0]"
+    },
+    "collection_mechanisms[1]": {
+     "core_path": "collection_mechanisms[1]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Imaging (from PACS)"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "collection_mechanisms[1]"
+    },
+    "collection_mechanisms[2]": {
+     "core_path": "collection_mechanisms[2]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Waveform EEG (hospital\ndatabase)"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "collection_mechanisms[2]"
+    },
+    "collection_mechanisms[3]": {
+     "core_path": "collection_mechanisms[3]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "and tokenized using OHNLP"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "collection_mechanisms[3]"
+    },
+    "collection_mechanisms[4]": {
+     "core_path": "collection_mechanisms[4]",
+     "receipts": [
+      {
+       "chunk": "c008",
+       "snippet": "Repository with tools to create and upload a CHoRUS Data Extract"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "collection_mechanisms[4]"
+    },
+    "collection_timeframes[0].timeframe_details": {
+     "core_path": "collection_timeframes[0].timeframe_details",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Retrospective data collection"
+      }
+     ],
+     "resolution": "leaf_dropped",
+     "resolved_path": null
+    },
+    "confidential_elements[0].confidentiality_details": {
+     "core_path": "confidential_elements[0].confidentiality_details",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Clinical notes \u2013 stored locally except tokens"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "confidential_elements[0].confidentiality_details"
+    },
+    "conforms_to": {
+     "core_path": "conforms_to",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "standardize data to the OMOP Common Data Model"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "conforms_to"
+    },
+    "creators[0].affiliations[0]": {
+     "core_path": "creators[0].affiliations[0]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Organization: MASSACHUSETTS GENERAL HOSPITAL"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "creators[0].affiliations[0]"
+    },
+    "creators[0].principal_investigator": {
+     "core_path": "creators[0].principal_investigator",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Principal investigator: ROSENTHAL, ERIC S."
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "creators[0].principal_investigator"
+    },
+    "data_collectors[0]": {
+     "core_path": "data_collectors[0]",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "The CHoRUS project is the collection of multi-modal data across 14 different hospitals."
+      },
+      {
+       "chunk": "c007",
+       "snippet": "This collaboration spans 20 academic centers, of which 14 will contribute as Data"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "data_collectors[0]"
+    },
+    "data_governance.access_review_process": {
+     "core_path": "data_governance.access_review_process",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "out a registration form with name, email, and institution"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "Once access is granted and compute is provisioned, an email will be sent"
+      },
+      {
+       "chunk": "c005",
+       "snippet": "In order to gain access to"
+      },
+      {
+       "chunk": "c005",
+       "snippet": "Program administrators will\nassist with this access if needed."
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "data_governance.access_review_process",
+     "value_at_receipt": "Access is granted through a registration process: prospective users complete a registration form giving name, email, and institution, and sign the licensing agreement included in that form; once access is granted and compute is provisioned, an email is sent. For the AIM-AHEAD Bridge2AI for Clinical \u2026"
+    },
+    "description": {
+     "core_path": "description",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "acquiring an AI-ready data set from more than 100,000 critically ill patients"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "Bridge2AI CHoRUS Leadership Team"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "Multicenter\n\nMultimodal &\nHigh-Resolution"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "OMOP and telemetry in enclave except"
+      },
+      {
+       "chunk": "c006",
+       "snippet": "The CHoRUS project is one data generation project of four in the National Institute of Health (NIH) funded Bridge2AI consortium."
+      },
+      {
+       "chunk": "c006",
+       "snippet": "60+\n\nCHoRUS consortium members across 20 different institutions"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "This collaboration spans 20 academic centers, of which 14 will contribute as Data"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "description"
+    },
+    "direct_collection[0]": {
+     "core_path": "direct_collection[0]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Imaging (from PACS)"
+      }
+     ],
+     "resolution": "leaf_dropped",
+     "resolved_path": null
+    },
+    "distribution_formats[0]": {
+     "core_path": "distribution_formats[0]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (OMOP schema)"
+      }
+     ],
+     "resolution": "leaf_dropped",
+     "resolved_path": null
+    },
+    "distribution_formats[1]": {
+     "core_path": "distribution_formats[1]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (OHNLP open source"
+      }
+     ],
+     "resolution": "leaf_dropped",
+     "resolved_path": null
+    },
+    "distribution_formats[2]": {
+     "core_path": "distribution_formats[2]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (DICOM schema)"
+      }
+     ],
+     "resolution": "leaf_dropped",
+     "resolved_path": null
+    },
+    "distribution_formats[3]": {
+     "core_path": "distribution_formats[3]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (PhysioNet schema"
+      }
+     ],
+     "resolution": "leaf_dropped",
+     "resolved_path": null
+    },
+    "distribution_formats[4]": {
+     "core_path": "distribution_formats[4]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (open source EDF+ and"
+      }
+     ],
+     "resolution": "leaf_dropped",
+     "resolved_path": null
+    },
+    "distribution_formats[5]": {
+     "core_path": "distribution_formats[5]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Persyst schema)"
+      }
+     ],
+     "resolution": "leaf_dropped",
+     "resolved_path": null
+    },
+    "existing_uses[0]": {
+     "core_path": "existing_uses[0]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Datasets are being used for training"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "existing_uses[0]"
+    },
+    "existing_uses[1]": {
+     "core_path": "existing_uses[1]",
+     "receipts": [
+      {
+       "chunk": "c004",
+       "snippet": "Trainees will receive hands-on training on the Bridge2AI AI/ML for Clinical Care Network"
+      },
+      {
+       "chunk": "c004",
+       "snippet": "leverage the data and tools to create practical use cases"
+      },
+      {
+       "chunk": "c005",
+       "snippet": "Up to 30 trainees will be selected"
+      },
+      {
+       "chunk": "c005",
+       "snippet": "Program Start Date\n\nNovember 17, 2025...Program End Date\n\nJuly 31,  2026"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "existing_uses[1]"
+    },
+    "extension_mechanism.contribution_url": {
+     "core_path": "extension_mechanism.contribution_url",
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "https://github.com/chorus-ai"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "extension_mechanism.contribution_url"
+    },
+    "extension_mechanism.extension_details": {
+     "core_path": "extension_mechanism.extension_details",
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "established a chorus-mapping repository with documentation and pooled tabular mappings"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "Standards Discussions\n\nData Acquisition Discussions"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "extension_mechanism.extension_details"
+    },
+    "external_resources[0]": {
+     "core_path": "external_resources[0]",
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Software and tooling to interact with and extract insight from clinical data in diverse"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "This project is licensed under the MIT License."
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "external_resources[0]",
+     "value_at_receipt": "{'external_resources': 'The chorus-ai GitHub organization at https://github.com/chorus-ai hosts software and tooling for interacting with clinical data, validated semantic mappings, standard operating protocols for contributing sites, and project management overviews; the project there is licensed u\u2026"
+    },
+    "external_resources[1]": {
+     "core_path": "external_resources[1]",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Learn of different opportunities to gain hands-on training using the CHoRUS dataset"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "external_resources[1]"
+    },
+    "external_resources[2]": {
+     "core_path": "external_resources[2]",
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Website: www.bridge2ai.org/chorus"
+      }
+     ],
+     "resolution": "entry_dropped",
+     "resolved_path": null
+    },
+    "funders[0]": {
+     "core_path": "funders[0]",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "This project is funded by the NIH under award number OT2OD032701."
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "funders[0]",
+     "value_at_receipt": "{'grantor': 'National Institutes of Health', 'grants': [{'grant_number': 'OT2OD032701', 'notes': 'NIH RePORTER records project number 1OT2OD032701-01 and application ID 10472824 under this core project number.'}], 'notes': 'Awarded through the NIH Common Fund Bridge2AI program; the fiscal year 2022 \u2026"
+    },
+    "funders[0].grantor": {
+     "core_path": "funders[0].grantor",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "As part of the NIH Common Fund"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "funders[0].grantor"
+    },
+    "funders[0].grants[0].grant_number": {
+     "core_path": "funders[0].grants[0].grant_number",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Core project number: OT2OD032701"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "funders[0].grants[0].grant_number"
+    },
+    "funders[0].grants[0].notes": {
+     "core_path": "funders[0].grants[0].notes",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Application ID: 10472824\nProject number: 1OT2OD032701-01"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "funders[0].grants[0].notes"
+    },
+    "funders[0].notes": {
+     "core_path": "funders[0].notes",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Award amount: 5880300"
+      },
+      {
+       "chunk": "c002",
+       "snippet": "Project start: 2022-09-01T00:00:00\nProject end: 2026-11-30T00:00:00"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "funders[0].notes",
+     "value_at_receipt": "Awarded through the NIH Common Fund Bridge2AI program; the fiscal year 2022 award amount recorded by NIH RePORTER is 5,880,300 US dollars, with a project period of 2022-09-01 to 2026-11-30."
+    },
+    "future_use_impacts[0]": {
+     "core_path": "future_use_impacts[0]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "catalyze the biomedical research and expertise necessary to promote the patient-focused deployment of AI in acute and critical care"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "future_use_impacts[0]"
+    },
+    "future_use_impacts[1]": {
+     "core_path": "future_use_impacts[1]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "ensuring the methods promote privacy, accountability, and clinical benefit"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "future_use_impacts[1]"
+    },
+    "id": {
+     "core_path": "id",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Source URL: https://chorus4ai.org/"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "id"
+    },
+    "instances[0]": {
+     "core_path": "instances[0]",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "50,000\nPatient admissions from ICU, PICU, and NICU"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "instances[0]"
+    },
+    "instances[1]": {
+     "core_path": "instances[1]",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "1.6 Billion\nRows of EHR OMOP data"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "instances[1]",
+     "value_at_receipt": "{'instance_type': 'Row of electronic health record data standardized to the OMOP Common Data Model', 'counts': 1600000000, 'data_topic': 'B2AI_TOPIC:9', 'source_caveats': 'The project website states 1.6 Billion rows of EHR OMOP data; the count is transcribed here in full digits.'}"
+    },
+    "instances[2]": {
+     "core_path": "instances[2]",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "7,642\nAdmissions with Radiology Data"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "instances[2]"
+    },
+    "instances[3].notes": {
+     "core_path": "instances[3].notes",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "23 Tb\nWaveform data"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "instances[3].notes"
+    },
+    "intended_uses[0]": {
+     "core_path": "intended_uses[0]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "It equips trainees to apply AI/ML methods"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "intended_uses[0]"
+    },
+    "intended_uses[1]": {
+     "core_path": "intended_uses[1]",
+     "receipts": [
+      {
+       "chunk": "c004",
+       "snippet": "Workshops on using Jupyter\nNotebooks"
+      },
+      {
+       "chunk": "c004",
+       "snippet": "Workshops on the OHDSI/OMOP\ncommon data model"
+      },
+      {
+       "chunk": "c004",
+       "snippet": "The Bridge2AI AI/ML for Clinical Care Collaborative Cloud."
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "intended_uses[1]"
+    },
+    "is_deidentified.deidentification_details": {
+     "core_path": "is_deidentified.deidentification_details",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "transform data using approaches that limit re-identification"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "with de-id in process for larger cohort"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "is_deidentified.deidentification_details"
+    },
+    "keywords": {
+     "core_path": "keywords",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Critical Care;Critical Illness;Data;Data Element"
+      },
+      {
+       "chunk": "c002",
+       "snippet": "acute care;care delivery;care outcomes;data acquisition;data modeling;data standards"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "keywords"
+    },
+    "known_limitations[0]": {
+     "core_path": "known_limitations[0]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Imaging \u2013 currently 1000 images available"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "known_limitations[0]"
+    },
+    "known_limitations[1]": {
+     "core_path": "known_limitations[1]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "EEG \u2013 extraction in process at this point"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "known_limitations[1]"
+    },
+    "known_limitations[3]": {
+     "core_path": "known_limitations[3]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Published metadata\nschema"
+      }
+     ],
+     "resolution": "entry_dropped",
+     "resolved_path": null
+    },
+    "labeling_strategies[0]": {
+     "core_path": "labeling_strategies[0]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "acquire, standardize, tokenize, store, visualize, and label data such as structured electronic health record data"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "A visualization and annotation environment will label data with targets important for"
+      }
+     ],
+     "resolution": "leaf_dropped",
+     "resolved_path": null
+    },
+    "license_and_use_terms.license_terms": {
+     "core_path": "license_and_use_terms.license_terms",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "All participants must sign a licensing agreement included in the registration form before gaining"
+      },
+      {
+       "chunk": "c004",
+       "snippet": "access to the dataset"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "license_and_use_terms.license_terms"
+    },
+    "machine_annotation_tools[0]": {
+     "core_path": "machine_annotation_tools[0]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "and tokenized using OHNLP"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "machine_annotation_tools[0]"
+    },
+    "maintainers[0]": {
+     "core_path": "maintainers[0]",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Ciera McCrary, MGH, Program Manager"
+      },
+      {
+       "chunk": "c006",
+       "snippet": "cmccrary@mgh.havard.edu"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "maintainers[0]",
+     "value_at_receipt": "{'maintainer_details': 'Ciera McCrary, Program Manager, Massachusetts General Hospital, is the contact listed on the CHoRUS project website, reachable at cmccrary@mgh.havard.edu.'}"
+    },
+    "maintainers[1]": {
+     "core_path": "maintainers[1]",
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Request access: dbold@emory.edu"
+      }
+     ],
+     "resolution": "entry_dropped",
+     "resolved_path": null
+    },
+    "maintainers[2]": {
+     "core_path": "maintainers[2]",
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "jared.houghtaling@tuftsmedicine.org"
+      }
+     ],
+     "resolution": "entry_dropped",
+     "resolved_path": null
+    },
+    "notes": {
+     "core_path": "notes",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "This repoitory is under review for potential modification in compliance with Administration directives."
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "notes"
+    },
+    "page": {
+     "core_path": "page",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Source URL: https://chorus4ai.org/"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "page"
+    },
+    "preprocessing_strategies[0]": {
+     "core_path": "preprocessing_strategies[0]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "E) acquire data, standardize data to the OMOP Common Data Model"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "preprocessing_strategies[0]"
+    },
+    "preprocessing_strategies[1]": {
+     "core_path": "preprocessing_strategies[1]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "tokenized unstructured electronic health record data"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "preprocessing_strategies[1]"
+    },
+    "preprocessing_strategies[2]": {
+     "core_path": "preprocessing_strategies[2]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "transform data using approaches that limit re-identification"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "preprocessing_strategies[2]"
+    },
+    "preprocessing_strategies[3]": {
+     "core_path": "preprocessing_strategies[3]",
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Validated semantic mappings for connecting clinical data in various source formats to"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "along with an associated clinical validation SOP for contributing to mapping efforts"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "preprocessing_strategies[3]"
+    },
+    "purposes[0]": {
+     "core_path": "purposes[0]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "generating data for ML/AI applications aimed at characterizing acute and critical care illness, predicting complications, and measuring treatment response"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "purposes[0]"
+    },
+    "purposes[1]": {
+     "core_path": "purposes[1]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "The dataset will also provision a holdout test set, accessible for model external validation to aid marketplace adoption of AI-developed models"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "purposes[1]"
+    },
+    "purposes[2]": {
+     "core_path": "purposes[2]",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "create ethically sourced datasets and tools around Artificial Intelligence and to create best practices for AI in health"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "sourced, AI-ready data set to answer the grand challenge of improving recovery from acute"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "purposes[2]"
+    },
+    "raw_data_sources[0]": {
+     "core_path": "raw_data_sources[0]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "structured electronic health record data"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "raw_data_sources[0]"
+    },
+    "raw_data_sources[1]": {
+     "core_path": "raw_data_sources[1]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "tokenized unstructured electronic health record data"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "raw_data_sources[1]"
+    },
+    "raw_data_sources[3]": {
+     "core_path": "raw_data_sources[3]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "telemetry and EEG waveforms, imaging, and social determinants of health"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "raw_data_sources[3]"
+    },
+    "sampling_strategies[0]": {
+     "core_path": "sampling_strategies[0]",
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Federated access will enable sampling methods to ensure a balanced and diverse cohort."
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "sampling_strategies[0]"
+    },
+    "sampling_strategies[1]": {
+     "core_path": "sampling_strategies[1]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "sampling to ensure comprehensive sets of patient conditions and clinical treatment strategies"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "sampling_strategies[1]"
+    },
+    "sensitive_elements[0]": {
+     "core_path": "sensitive_elements[0]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "telemetry and EEG waveforms, imaging, and social determinants of health"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "sensitive_elements[0]"
+    },
+    "source_caveats": {
+     "core_path": "source_caveats",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "As of August 2025, covers 14 different"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "hospitals with over 45K unique admissions"
+      },
+      {
+       "chunk": "c006",
+       "snippet": "cmccrary@mgh.havard.edu"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "This project is licensed under the MIT License."
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "source_caveats",
+     "value_at_receipt": "Admission counts differ between sources: the project website (project_documentation, tier 2) reports a current released dataset of 50,000 patient admissions, while the cohort 2 webinar (tutorial, tier 4) states that as of August 2025 the dataset covered 14 different hospitals with over 45K unique ad\u2026"
+    },
+    "splits[0]": {
+     "core_path": "splits[0]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "sequestering holdout datasets for external validation"
+      }
+     ],
+     "resolution": "leaf_dropped",
+     "resolved_path": null
+    },
+    "subpopulations[0]": {
+     "core_path": "subpopulations[0]",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Patient admissions from ICU, PICU, and NICU"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subpopulations[0]"
+    },
+    "subpopulations[1]": {
+     "core_path": "subpopulations[1]",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Patient admissions from ICU, PICU, and NICU"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subpopulations[1]"
+    },
+    "subpopulations[2]": {
+     "core_path": "subpopulations[2]",
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Patient admissions from ICU, PICU, and NICU"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subpopulations[2]"
+    },
+    "subsets[0]": {
+     "core_path": "subsets[0]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Demographics OMOP"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subsets[0]"
+    },
+    "subsets[1]": {
+     "core_path": "subsets[1]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Medication administration"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subsets[1]"
+    },
+    "subsets[2]": {
+     "core_path": "subsets[2]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Procedures (documentation"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subsets[2]"
+    },
+    "subsets[3]": {
+     "core_path": "subsets[3]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Nursing flowsheets"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subsets[3]"
+    },
+    "subsets[3].conforms_to": {
+     "core_path": "subsets[3].conforms_to",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (OMOP schema with\nextensions)"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subsets[3].conforms_to"
+    },
+    "subsets[4]": {
+     "core_path": "subsets[4]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Diagnoses (documentation"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subsets[4]"
+    },
+    "subsets[5]": {
+     "core_path": "subsets[5]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (OHNLP open source"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subsets[5]"
+    },
+    "subsets[6]": {
+     "core_path": "subsets[6]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (DICOM schema)"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subsets[6]"
+    },
+    "subsets[7]": {
+     "core_path": "subsets[7]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Waveform telemetry (bedside monitors,"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subsets[7]"
+    },
+    "subsets[8]": {
+     "core_path": "subsets[8]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Waveform EEG (hospital"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "subsets[8]"
+    },
+    "tasks[0]": {
+     "core_path": "tasks[0]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "characterizing acute and critical care illness"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "tasks[0]"
+    },
+    "tasks[1]": {
+     "core_path": "tasks[1]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "predicting complications, and measuring treatment response among patients with acute or critical illness"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "tasks[1]"
+    },
+    "tasks[2]": {
+     "core_path": "tasks[2]",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "measuring treatment response among patients with acute or critical illness"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "tasks[2]"
+    },
+    "third_party_sharing[0]": {
+     "core_path": "third_party_sharing[0]",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "expands access to Bridge2AI CHoRUS data through engagement, AI"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "third_party_sharing[0]"
+    },
+    "title": {
+     "core_path": "title",
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "title"
+    },
+    "updates.update_details": {
+     "core_path": "updates.update_details",
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "with de-id in process for larger cohort"
+      },
+      {
+       "chunk": "c006",
+       "snippet": "Anticipated Final Dataset\n\n100,000\n\nPatient admissions"
+      },
+      {
+       "chunk": "c006",
+       "snippet": "9\n\nDifferent data modalities\n\n14\n\nData contributing hospitals"
+      }
+     ],
+     "resolution": "same",
+     "resolved_path": "updates.update_details"
+    }
+   }
+  },
+  "claims_bare": {
+   "bundle_md5": "9b2ef4b65d67957f79362266cab0bc7a",
+   "slots": {
+    "acquisition_methods[0]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "acquire, standardize, tokenize, store, visualize, and label data"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "Retrospective data collection"
+      }
+     ]
+    },
+    "addressing_gaps[0]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "There is an urgent need for infrastructure to support artificial intelligence and machine learning (AI/ML) in critical care."
+      }
+     ]
+    },
+    "addressing_gaps[1]": {
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Unified standards will harmonize multi-modal EHR, waveform, imaging, and text data."
+      }
+     ]
+    },
+    "cleaning_strategies[0]": {
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Standard operating protocols (SOPs) to instruct data contributing sites about best"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "an interactive workflow diagram describing the step-by-step process for"
+      }
+     ]
+    },
+    "cleaning_strategies[1]": {
+     "receipts": [
+      {
+       "chunk": "c008",
+       "snippet": "This repo is dedicated to producing characterization reports to return to sites following their"
+      }
+     ]
+    },
+    "collection_mechanisms[0]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Waveform telemetry (bedside monitors,\ngateway/middleware)"
+      }
+     ]
+    },
+    "collection_mechanisms[1]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Imaging (from PACS)"
+      }
+     ]
+    },
+    "collection_mechanisms[2]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Waveform EEG (hospital\ndatabase)"
+      }
+     ]
+    },
+    "collection_mechanisms[3]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "and tokenized using OHNLP"
+      }
+     ]
+    },
+    "collection_mechanisms[4]": {
+     "receipts": [
+      {
+       "chunk": "c008",
+       "snippet": "Repository with tools to create and upload a CHoRUS Data Extract"
+      }
+     ]
+    },
+    "collection_timeframes[0].timeframe_details": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Retrospective data collection"
+      }
+     ]
+    },
+    "confidential_elements[0].confidentiality_details": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Clinical notes \u2013 stored locally except tokens"
+      }
+     ]
+    },
+    "conforms_to": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "standardize data to the OMOP Common Data Model"
+      }
+     ]
+    },
+    "creators[0].affiliations[0]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Organization: MASSACHUSETTS GENERAL HOSPITAL"
+      }
+     ]
+    },
+    "creators[0].principal_investigator": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Principal investigator: ROSENTHAL, ERIC S."
+      }
+     ]
+    },
+    "data_collectors[0]": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "The CHoRUS project is the collection of multi-modal data across 14 different hospitals."
+      },
+      {
+       "chunk": "c007",
+       "snippet": "This collaboration spans 20 academic centers, of which 14 will contribute as Data"
+      }
+     ]
+    },
+    "data_governance.access_review_process": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "out a registration form with name, email, and institution"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "Once access is granted and compute is provisioned, an email will be sent"
+      },
+      {
+       "chunk": "c005",
+       "snippet": "In order to gain access to"
+      },
+      {
+       "chunk": "c005",
+       "snippet": "Program administrators will\nassist with this access if needed."
+      }
+     ]
+    },
+    "description": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "acquiring an AI-ready data set from more than 100,000 critically ill patients"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "Bridge2AI CHoRUS Leadership Team"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "Multicenter\n\nMultimodal &\nHigh-Resolution"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "OMOP and telemetry in enclave except"
+      },
+      {
+       "chunk": "c006",
+       "snippet": "The CHoRUS project is one data generation project of four in the National Institute of Health (NIH) funded Bridge2AI consortium."
+      },
+      {
+       "chunk": "c006",
+       "snippet": "60+\n\nCHoRUS consortium members across 20 different institutions"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "This collaboration spans 20 academic centers, of which 14 will contribute as Data"
+      }
+     ]
+    },
+    "direct_collection[0]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Imaging (from PACS)"
+      }
+     ]
+    },
+    "distribution_formats[0]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (OMOP schema)"
+      }
+     ]
+    },
+    "distribution_formats[1]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (OHNLP open source"
+      }
+     ]
+    },
+    "distribution_formats[2]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (DICOM schema)"
+      }
+     ]
+    },
+    "distribution_formats[3]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (PhysioNet schema"
+      }
+     ]
+    },
+    "distribution_formats[4]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (open source EDF+ and"
+      }
+     ]
+    },
+    "distribution_formats[5]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Persyst schema)"
+      }
+     ]
+    },
+    "existing_uses[0]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Datasets are being used for training"
+      }
+     ]
+    },
+    "existing_uses[1]": {
+     "receipts": [
+      {
+       "chunk": "c004",
+       "snippet": "Trainees will receive hands-on training on the Bridge2AI AI/ML for Clinical Care Network"
+      },
+      {
+       "chunk": "c004",
+       "snippet": "leverage the data and tools to create practical use cases"
+      },
+      {
+       "chunk": "c005",
+       "snippet": "Up to 30 trainees will be selected"
+      },
+      {
+       "chunk": "c005",
+       "snippet": "Program Start Date\n\nNovember 17, 2025...Program End Date\n\nJuly 31,  2026"
+      }
+     ]
+    },
+    "extension_mechanism.contribution_url": {
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "https://github.com/chorus-ai"
+      }
+     ]
+    },
+    "extension_mechanism.extension_details": {
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "established a chorus-mapping repository with documentation and pooled tabular mappings"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "Standards Discussions\n\nData Acquisition Discussions"
+      }
+     ]
+    },
+    "external_resources[0]": {
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Software and tooling to interact with and extract insight from clinical data in diverse"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "This project is licensed under the MIT License."
+      }
+     ]
+    },
+    "external_resources[1]": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Learn of different opportunities to gain hands-on training using the CHoRUS dataset"
+      }
+     ]
+    },
+    "external_resources[2]": {
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Website: www.bridge2ai.org/chorus"
+      }
+     ]
+    },
+    "funders[0]": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "This project is funded by the NIH under award number OT2OD032701."
+      }
+     ]
+    },
+    "funders[0].grantor": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "As part of the NIH Common Fund"
+      }
+     ]
+    },
+    "funders[0].grants[0].grant_number": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Core project number: OT2OD032701"
+      }
+     ]
+    },
+    "funders[0].grants[0].notes": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Application ID: 10472824\nProject number: 1OT2OD032701-01"
+      }
+     ]
+    },
+    "funders[0].notes": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Award amount: 5880300"
+      },
+      {
+       "chunk": "c002",
+       "snippet": "Project start: 2022-09-01T00:00:00\nProject end: 2026-11-30T00:00:00"
+      }
+     ]
+    },
+    "future_use_impacts[0]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "catalyze the biomedical research and expertise necessary to promote the patient-focused deployment of AI in acute and critical care"
+      }
+     ]
+    },
+    "future_use_impacts[1]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "ensuring the methods promote privacy, accountability, and clinical benefit"
+      }
+     ]
+    },
+    "id": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Source URL: https://chorus4ai.org/"
+      }
+     ]
+    },
+    "instances[0]": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "50,000\nPatient admissions from ICU, PICU, and NICU"
+      }
+     ]
+    },
+    "instances[1]": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "1.6 Billion\nRows of EHR OMOP data"
+      }
+     ]
+    },
+    "instances[2]": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "7,642\nAdmissions with Radiology Data"
+      }
+     ]
+    },
+    "instances[3].notes": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "23 Tb\nWaveform data"
+      }
+     ]
+    },
+    "intended_uses[0]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "It equips trainees to apply AI/ML methods"
+      }
+     ]
+    },
+    "intended_uses[1]": {
+     "receipts": [
+      {
+       "chunk": "c004",
+       "snippet": "Workshops on using Jupyter\nNotebooks"
+      },
+      {
+       "chunk": "c004",
+       "snippet": "Workshops on the OHDSI/OMOP\ncommon data model"
+      },
+      {
+       "chunk": "c004",
+       "snippet": "The Bridge2AI AI/ML for Clinical Care Collaborative Cloud."
+      }
+     ]
+    },
+    "is_deidentified.deidentification_details": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "transform data using approaches that limit re-identification"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "with de-id in process for larger cohort"
+      }
+     ]
+    },
+    "keywords": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Critical Care;Critical Illness;Data;Data Element"
+      },
+      {
+       "chunk": "c002",
+       "snippet": "acute care;care delivery;care outcomes;data acquisition;data modeling;data standards"
+      }
+     ]
+    },
+    "known_limitations[0]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Imaging \u2013 currently 1000 images available"
+      }
+     ]
+    },
+    "known_limitations[1]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "EEG \u2013 extraction in process at this point"
+      }
+     ]
+    },
+    "known_limitations[3]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Published metadata\nschema"
+      }
+     ]
+    },
+    "labeling_strategies[0]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "acquire, standardize, tokenize, store, visualize, and label data such as structured electronic health record data"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "A visualization and annotation environment will label data with targets important for"
+      }
+     ]
+    },
+    "license_and_use_terms.license_terms": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "All participants must sign a licensing agreement included in the registration form before gaining"
+      },
+      {
+       "chunk": "c004",
+       "snippet": "access to the dataset"
+      }
+     ]
+    },
+    "machine_annotation_tools[0]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "and tokenized using OHNLP"
+      }
+     ]
+    },
+    "maintainers[0]": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Ciera McCrary, MGH, Program Manager"
+      },
+      {
+       "chunk": "c006",
+       "snippet": "cmccrary@mgh.havard.edu"
+      }
+     ]
+    },
+    "maintainers[1]": {
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Request access: dbold@emory.edu"
+      }
+     ]
+    },
+    "maintainers[2]": {
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "jared.houghtaling@tuftsmedicine.org"
+      }
+     ]
+    },
+    "notes": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "This repoitory is under review for potential modification in compliance with Administration directives."
+      }
+     ]
+    },
+    "page": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Source URL: https://chorus4ai.org/"
+      }
+     ]
+    },
+    "preprocessing_strategies[0]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "E) acquire data, standardize data to the OMOP Common Data Model"
+      }
+     ]
+    },
+    "preprocessing_strategies[1]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "tokenized unstructured electronic health record data"
+      }
+     ]
+    },
+    "preprocessing_strategies[2]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "transform data using approaches that limit re-identification"
+      }
+     ]
+    },
+    "preprocessing_strategies[3]": {
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Validated semantic mappings for connecting clinical data in various source formats to"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "along with an associated clinical validation SOP for contributing to mapping efforts"
+      }
+     ]
+    },
+    "purposes[0]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "generating data for ML/AI applications aimed at characterizing acute and critical care illness, predicting complications, and measuring treatment response"
+      }
+     ]
+    },
+    "purposes[1]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "The dataset will also provision a holdout test set, accessible for model external validation to aid marketplace adoption of AI-developed models"
+      }
+     ]
+    },
+    "purposes[2]": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "create ethically sourced datasets and tools around Artificial Intelligence and to create best practices for AI in health"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "sourced, AI-ready data set to answer the grand challenge of improving recovery from acute"
+      }
+     ]
+    },
+    "raw_data_sources[0]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "structured electronic health record data"
+      }
+     ]
+    },
+    "raw_data_sources[1]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "tokenized unstructured electronic health record data"
+      }
+     ]
+    },
+    "raw_data_sources[3]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "telemetry and EEG waveforms, imaging, and social determinants of health"
+      }
+     ]
+    },
+    "sampling_strategies[0]": {
+     "receipts": [
+      {
+       "chunk": "c007",
+       "snippet": "Federated access will enable sampling methods to ensure a balanced and diverse cohort."
+      }
+     ]
+    },
+    "sampling_strategies[1]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "sampling to ensure comprehensive sets of patient conditions and clinical treatment strategies"
+      }
+     ]
+    },
+    "sensitive_elements[0]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "telemetry and EEG waveforms, imaging, and social determinants of health"
+      }
+     ]
+    },
+    "source_caveats": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "As of August 2025, covers 14 different"
+      },
+      {
+       "chunk": "c003",
+       "snippet": "hospitals with over 45K unique admissions"
+      },
+      {
+       "chunk": "c006",
+       "snippet": "cmccrary@mgh.havard.edu"
+      },
+      {
+       "chunk": "c007",
+       "snippet": "This project is licensed under the MIT License."
+      }
+     ]
+    },
+    "splits[0]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "sequestering holdout datasets for external validation"
+      }
+     ]
+    },
+    "subpopulations[0]": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Patient admissions from ICU, PICU, and NICU"
+      }
+     ]
+    },
+    "subpopulations[1]": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Patient admissions from ICU, PICU, and NICU"
+      }
+     ]
+    },
+    "subpopulations[2]": {
+     "receipts": [
+      {
+       "chunk": "c006",
+       "snippet": "Patient admissions from ICU, PICU, and NICU"
+      }
+     ]
+    },
+    "subsets[0]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Demographics OMOP"
+      }
+     ]
+    },
+    "subsets[1]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Medication administration"
+      }
+     ]
+    },
+    "subsets[2]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Procedures (documentation"
+      }
+     ]
+    },
+    "subsets[3]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Nursing flowsheets"
+      }
+     ]
+    },
+    "subsets[3].conforms_to": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (OMOP schema with\nextensions)"
+      }
+     ]
+    },
+    "subsets[4]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Diagnoses (documentation"
+      }
+     ]
+    },
+    "subsets[5]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (OHNLP open source"
+      }
+     ]
+    },
+    "subsets[6]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Yes (DICOM schema)"
+      }
+     ]
+    },
+    "subsets[7]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Waveform telemetry (bedside monitors,"
+      }
+     ]
+    },
+    "subsets[8]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "Waveform EEG (hospital"
+      }
+     ]
+    },
+    "tasks[0]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "characterizing acute and critical care illness"
+      }
+     ]
+    },
+    "tasks[1]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "predicting complications, and measuring treatment response among patients with acute or critical illness"
+      }
+     ]
+    },
+    "tasks[2]": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "measuring treatment response among patients with acute or critical illness"
+      }
+     ]
+    },
+    "third_party_sharing[0]": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "expands access to Bridge2AI CHoRUS data through engagement, AI"
+      }
+     ]
+    },
+    "title": {
+     "receipts": [
+      {
+       "chunk": "c002",
+       "snippet": "Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI"
+      }
+     ]
+    },
+    "updates.update_details": {
+     "receipts": [
+      {
+       "chunk": "c003",
+       "snippet": "with de-id in process for larger cohort"
+      },
+      {
+       "chunk": "c006",
+       "snippet": "Anticipated Final Dataset\n\n100,000\n\nPatient admissions"
+      },
+      {
+       "chunk": "c006",
+       "snippet": "9\n\nDifferent data modalities\n\n14\n\nData contributing hospitals"
+      }
+     ]
+    }
+   }
+  },
+  "has_snapshot": true,
+  "uncovered": [
+   "name",
+   "conforms_to_standard",
+   "instances[3].instance_type",
+   "instances[3].data_substrate",
+   "instances[3].data_topic",
+   "raw_data_sources[2].source_description",
+   "raw_data_sources[2].source_type",
+   "raw_data_sources[4].source_description",
+   "raw_data_sources[4].source_type",
+   "is_deidentified.method",
+   "confidential_elements[0].confidential_elements_present",
+   "ethical_reviews[0].reviewing_organization",
+   "ethical_reviews[0].review_details",
+   "known_limitations[2].limitation_description"
+  ],
+  "v3": {
+   "checked": true,
+   "chunks": {
+    "by_status": {
+     "duplicate_of": 0,
+     "extracted": 7,
+     "nothing_relevant": 1,
+     "redundant_with": 0
+    },
+    "reviewed": 8,
+    "total": 8,
+    "unreviewed": []
+   },
+   "findings": [],
+   "findings_gated": 0,
+   "findings_truncated": null,
+   "instrument": "v3 (#1053): an entry whose identity key the final list no longer carries anywhere (a minted id reconciliation stripped) is located as a keyless entry \u2014 by overlap, else by position for the same shape when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`) \u2014 instead of declared dropped; v2 (#1123): a fragment minted on an identifier the record carries for the dataset at its top level \u2014 its id in CURIE or resolver form, its doi, its page \u2014 is exempt like one on its own id; `slots.exempt_on_carried_identifier` counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage, commentary and own-id fragments exempt, unattesting snippets counted apart",
+   "non_checks": [
+    "that a chunk marked nothing_relevant truly held nothing for the record \u2014 a judgement; sample by chunk id in review",
+    "that a verified snippet supports the value it is attached to \u2014 a snippet can be real and irrelevant; sample by slot path in review"
+   ],
+   "slots": {
+    "added_after_receipt": 2,
+    "addressing_slips": [],
+    "addressing_slips_count": 0,
+    "exempt": 21,
+    "exempt_on_carried_identifier": 0,
+    "index_reused_by_another_entry": [],
+    "index_reused_by_another_entry_count": 0,
+    "located_after_key_stripped": [],
+    "located_after_key_stripped_count": 0,
+    "never_receipted": 12,
+    "path_not_in_snapshot": [],
+    "path_not_in_snapshot_count": 0,
+    "path_off_by_one": [],
+    "path_off_by_one_count": 0,
+    "populated": 150,
+    "receipt_paths": 93,
+    "receiptable": 129,
+    "receipts_to_removed_values": 14,
+    "remapped_by_identity": [],
+    "remapped_by_identity_count": 0,
+    "reshaped_by_reconcile": [
+     "collection_timeframes[0].timeframe_details",
+     "direct_collection[0]",
+     "distribution_formats[0]",
+     "distribution_formats[1]",
+     "distribution_formats[2]",
+     "distribution_formats[3]",
+     "distribution_formats[4]",
+     "distribution_formats[5]",
+     "external_resources[2]",
+     "known_limitations[3]",
+     "labeling_strategies[0]",
+     "maintainers[1]",
+     "maintainers[2]",
+     "splits[0]"
+    ],
+    "unresolved": [],
+    "value_changed_after_receipt": [
+     {
+      "path": "acquisition_methods[0]",
+      "resolved_path": "acquisition_methods[0]"
+     },
+     {
+      "path": "data_governance.access_review_process",
+      "resolved_path": "data_governance.access_review_process"
+     },
+     {
+      "path": "external_resources[0]",
+      "resolved_path": "external_resources[0]"
+     },
+     {
+      "path": "funders[0]",
+      "resolved_path": "funders[0]"
+     },
+     {
+      "path": "funders[0].notes",
+      "resolved_path": "funders[0].notes"
+     },
+     {
+      "path": "instances[1]",
+      "resolved_path": "instances[1]"
+     },
+     {
+      "path": "maintainers[0]",
+      "resolved_path": "maintainers[0]"
+     },
+     {
+      "path": "source_caveats",
+      "resolved_path": "source_caveats"
+     }
+    ],
+    "value_changed_after_receipt_count": 8,
+    "with_receipt": 115,
+    "without_receipt": [
+     "name",
+     "conforms_to_standard",
+     "instances[3].instance_type",
+     "instances[3].data_substrate",
+     "instances[3].data_topic",
+     "raw_data_sources[2].source_description",
+     "raw_data_sources[2].source_type",
+     "raw_data_sources[4].source_description",
+     "raw_data_sources[4].source_type",
+     "is_deidentified.method",
+     "confidential_elements[0].confidential_elements_present",
+     "ethical_reviews[0].reviewing_organization",
+     "ethical_reviews[0].review_details",
+     "known_limitations[2].limitation_description"
+    ],
+    "without_receipt_truncated": null
+   },
+   "snippets": {
+    "adjacent": 0,
+    "artifact_elided": 0,
+    "elsewhere": 0,
+    "entry_single_leaf": 2,
+    "entry_single_leaf_sample": [
+     {
+      "chunk": "c006",
+      "leaves": 3,
+      "overlapping": 1,
+      "slot": "instances[0]"
+     },
+     {
+      "chunk": "c006",
+      "leaves": 3,
+      "overlapping": 1,
+      "slot": "instances[2]"
+     }
+    ],
+    "linewrap_joined": 0,
+    "mismatched": 0,
+    "no_value_overlap": 1,
+    "no_value_overlap_sample": [
+     {
+      "chunk": "c002",
+      "slot": "funders[0].grantor",
+      "snippet": "As part of the NIH Common Fund"
+     }
+    ],
+    "spans_boundary": 0,
+    "split_at_linebreaks": 0,
+    "total": 125,
+    "unattesting": 0,
+    "unattesting_sample": [],
+    "unchecked": 0,
+    "verified": 125
+   },
+   "summary": "chunks 8/8 reviewed \u00b7 snippets 125/125 verified (1 bearing on no token of their value) (2 entry receipt(s) overlapping one leaf) \u00b7 slots 115/129 with a receipt (12 never receipted, 2 added after the receipt) (21 exempt) \u00b7 14 receipt path(s) reshaped by reconcile \u00b7 8 value(s) changed after the receipt"
+  },
+  "v4": {
+   "checked": true,
+   "chunks": {
+    "by_status": {
+     "duplicate_of": 0,
+     "extracted": 7,
+     "nothing_relevant": 1,
+     "redundant_with": 0
+    },
+    "reviewed": 8,
+    "total": 8,
+    "unreviewed": []
+   },
+   "findings": [],
+   "findings_gated": 0,
+   "findings_truncated": null,
+   "instrument": "v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics split by declared phase1/rereceipt/unknown origin, with recorded chunk-status reversals counted separately. Origin markers are accounting metadata, not proof of authorship or semantic support. v3 (#1053): an entry whose identity key the final list no longer carries anywhere (a minted id reconciliation stripped) is located as a keyless entry \u2014 by overlap, else by position for the same shape when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`) \u2014 instead of declared dropped; v2 (#1123): a fragment minted on an identifier the record carries for the dataset at its top level \u2014 its id in CURIE or resolver form, its doi, its page \u2014 is exempt like one on its own id; `slots.exempt_on_carried_identifier` counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage, commentary and own-id fragments exempt, unattesting snippets counted apart",
+   "non_checks": [
+    "that a chunk marked nothing_relevant truly held nothing for the record \u2014 a judgement; sample by chunk id in review",
+    "that a verified snippet supports the value it is attached to \u2014 a snippet can be real and irrelevant; sample by slot path in review"
+   ],
+   "rereceipt": {
+    "status_reversal_count": 0,
+    "status_reversals": [],
+    "unusable_prior_chunks": [],
+    "unusable_prior_count": 0
+   },
+   "slots": {
+    "added_after_receipt": 2,
+    "addressing_slips": [],
+    "addressing_slips_count": 0,
+    "exempt": 21,
+    "exempt_on_carried_identifier": 0,
+    "index_reused_by_another_entry": [],
+    "index_reused_by_another_entry_count": 0,
+    "located_after_key_stripped": [],
+    "located_after_key_stripped_count": 0,
+    "never_receipted": 12,
+    "path_not_in_snapshot": [],
+    "path_not_in_snapshot_count": 0,
+    "path_off_by_one": [],
+    "path_off_by_one_count": 0,
+    "populated": 150,
+    "receipt_paths": 93,
+    "receiptable": 129,
+    "receiptable_at_receipt": 142,
+    "receipts_to_removed_values": 14,
+    "remapped_by_identity": [],
+    "remapped_by_identity_count": 0,
+    "reshaped_by_reconcile": [
+     "collection_timeframes[0].timeframe_details",
+     "direct_collection[0]",
+     "distribution_formats[0]",
+     "distribution_formats[1]",
+     "distribution_formats[2]",
+     "distribution_formats[3]",
+     "distribution_formats[4]",
+     "distribution_formats[5]",
+     "external_resources[2]",
+     "known_limitations[3]",
+     "labeling_strategies[0]",
+     "maintainers[1]",
+     "maintainers[2]",
+     "splits[0]"
+    ],
+    "unresolved": [],
+    "value_changed_after_receipt": [
+     {
+      "path": "acquisition_methods[0]",
+      "resolved_path": "acquisition_methods[0]"
+     },
+     {
+      "path": "data_governance.access_review_process",
+      "resolved_path": "data_governance.access_review_process"
+     },
+     {
+      "path": "external_resources[0]",
+      "resolved_path": "external_resources[0]"
+     },
+     {
+      "path": "funders[0]",
+      "resolved_path": "funders[0]"
+     },
+     {
+      "path": "funders[0].notes",
+      "resolved_path": "funders[0].notes"
+     },
+     {
+      "path": "instances[1]",
+      "resolved_path": "instances[1]"
+     },
+     {
+      "path": "maintainers[0]",
+      "resolved_path": "maintainers[0]"
+     },
+     {
+      "path": "source_caveats",
+      "resolved_path": "source_caveats"
+     }
+    ],
+    "value_changed_after_receipt_count": 8,
+    "with_receipt": 115,
+    "with_receipt_at_receipt": 130,
+    "without_receipt": [
+     "name",
+     "conforms_to_standard",
+     "instances[3].instance_type",
+     "instances[3].data_substrate",
+     "instances[3].data_topic",
+     "raw_data_sources[2].source_description",
+     "raw_data_sources[2].source_type",
+     "raw_data_sources[4].source_description",
+     "raw_data_sources[4].source_type",
+     "is_deidentified.method",
+     "confidential_elements[0].confidential_elements_present",
+     "ethical_reviews[0].reviewing_organization",
+     "ethical_reviews[0].review_details",
+     "known_limitations[2].limitation_description"
+    ],
+    "without_receipt_truncated": null
+   },
+   "snippets": {
+    "adjacent": 0,
+    "artifact_elided": 0,
+    "by_origin": {
+     "phase1": {
+      "entry_single_leaf": 2,
+      "no_value_overlap": 1,
+      "total": 125,
+      "unattesting": 0
+     },
+     "rereceipt": {
+      "entry_single_leaf": 0,
+      "no_value_overlap": 0,
+      "total": 0,
+      "unattesting": 0
+     },
+     "unknown": {
+      "entry_single_leaf": 0,
+      "no_value_overlap": 0,
+      "total": 0,
+      "unattesting": 0
+     }
+    },
+    "elsewhere": 0,
+    "entry_single_leaf": 2,
+    "entry_single_leaf_sample": [
+     {
+      "chunk": "c006",
+      "leaves": 3,
+      "overlapping": 1,
+      "slot": "instances[0]"
+     },
+     {
+      "chunk": "c006",
+      "leaves": 3,
+      "overlapping": 1,
+      "slot": "instances[2]"
+     }
+    ],
+    "linewrap_joined": 0,
+    "mismatched": 0,
+    "no_value_overlap": 1,
+    "no_value_overlap_sample": [
+     {
+      "chunk": "c002",
+      "slot": "funders[0].grantor",
+      "snippet": "As part of the NIH Common Fund"
+     }
+    ],
+    "spans_boundary": 0,
+    "split_at_linebreaks": 0,
+    "total": 125,
+    "unattesting": 0,
+    "unattesting_sample": [],
+    "unchecked": 0,
+    "verified": 125
+   },
+   "summary": "chunks 8/8 reviewed \u00b7 snippets 125/125 verified (1 bearing on no token of their value) (2 entry receipt(s) overlapping one leaf) \u00b7 slots 115/129 with a receipt (12 never receipted, 2 added after the receipt) (21 exempt) \u00b7 14 receipt path(s) reshaped by reconcile \u00b7 8 value(s) changed after the receipt"
+  }
+ }
+}
