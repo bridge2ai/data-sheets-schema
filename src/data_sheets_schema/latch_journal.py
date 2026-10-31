@@ -10,6 +10,7 @@ import copy
 from contextlib import contextmanager
 from datetime import datetime
 import hashlib
+from functools import lru_cache
 import json
 import os
 from pathlib import Path
@@ -32,26 +33,52 @@ D41_COMMIT = "8ab03fda923d2c8caa9a2e65e558be73e92500e9"
 D41_COMMITTED_AT = "2026-10-25T22:11:01-07:00"
 
 
-def _commit_age(commit, root):
-    if not isinstance(commit, str) or not commit:
-        return None
+def _age_git(root, *args):
     env = {**os.environ, "GIT_NO_LAZY_FETCH": "1", "GIT_NO_REPLACE_OBJECTS": "1"}
-    def git(*args):
-        return subprocess.run(["git", "--no-replace-objects", "-C", root, *args],
-                              env=env, capture_output=True, text=True, timeout=10)
+    return subprocess.run(["git", "--no-replace-objects", "-C", root, *args],
+                          env=env, capture_output=True, text=True, timeout=10)
+
+
+def _resolve_recorded_commit(commit, root):
+    result = _age_git(root, "rev-parse", "--verify", "--end-of-options", commit + "^{commit}")
+    full = result.stdout.strip().lower()
+    if not result.returncode and re.fullmatch(r"[0-9a-f]{40}", full) and full.startswith(commit):
+        return full
+    return None
+
+
+@lru_cache(maxsize=4096)
+def _resolve_full_commit(commit, root):
+    # Full object IDs are immutable. Short prefixes are resolved afresh because
+    # new local objects could make an abbreviation ambiguous.
+    return _resolve_recorded_commit(commit, root)
+
+
+@lru_cache(maxsize=128)
+def _age_repository_constants(root):
+    boundary = _resolve_full_commit(D41_COMMIT, root)
+    shallow = _age_git(root, "rev-parse", "--is-shallow-repository")
+    return boundary, shallow.stdout.strip() if shallow.returncode == 0 else None
+
+
+def _commit_age(commit, root):
+    if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-fA-F]{4,40}", commit):
+        return None
+    commit = commit.lower()
     try:
-        # Let Git resolve its own identifiers, including uppercase/short hashes.
-        # Symbolic refs may move, so resolution must not be memoized by spelling.
-        resolved = git("rev-parse", "--verify", "--end-of-options", commit + "^{commit}")
-        boundary = git("rev-parse", "--verify", D41_COMMIT + "^{commit}")
-        if resolved.returncode or boundary.returncode:
+        # Recorded commit evidence must be immutable, never a movable ref.
+        full = (_resolve_full_commit(commit, root) if len(commit) == 40
+                else _resolve_recorded_commit(commit, root))
+        if full is None:
             return None
-        descendant = git("merge-base", "--is-ancestor", D41_COMMIT, resolved.stdout.strip())
+        boundary, shallow = _age_repository_constants(root)
+        if boundary is None:
+            return None
+        descendant = _age_git(root, "merge-base", "--is-ancestor", boundary, full)
         if descendant.returncode == 0:
             return "post-D41"
         # A shallow graph cannot establish a negative ancestry result.
-        shallow = git("rev-parse", "--is-shallow-repository")
-        if descendant.returncode == 1 and shallow.returncode == 0 and shallow.stdout.strip() == "false":
+        if descendant.returncode == 1 and shallow == "false":
             return "pre-D41"
     except (OSError, subprocess.TimeoutExpired):
         pass
@@ -450,8 +477,7 @@ def _legacy(spec, data, events):
     # D69: an in-memory evidence binding, never an adoption or a ledger write.
     event = _event(spec, data, events, "legacy_unverifiable",
                    {"ledger_sha256": _sha(_bytes(ledger.ledger_path(spec))),
-                    "reason": "historical latches cannot be independently established",
-                    "age": record_age(_record(spec))})
+                    "reason": "historical latches cannot be independently established"})
     mine = [event]
     if override_path(spec).exists():
         acknowledgement = _override(spec, data, {event["sha256"]})
@@ -806,6 +832,7 @@ def _metadata(spec, events, mine):
         result["legacy_unverifiable"] = legacy[0]["payload"]
         result["binding_sha256"] = legacy[0]["sha256"]
         result["accounting_completeness"] = "unknown"
+        result["record_age"] = record_age(_record(spec))
     return result
 
 

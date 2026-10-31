@@ -358,6 +358,30 @@ def test_legacy_account_requires_explicit_unverifiable_baseline(tmp_path):
     assert not journal.journal_path(selected).exists()
 
 
+def test_legacy_binding_and_override_are_stable_without_git(tmp_path, monkeypatch):
+    import yaml
+    from tests.test_d68_legacy_readonly import tree
+    selected = spec(out_dir=tmp_path)
+    ledger._write_unlatched(selected, ledger._empty(selected, accept_legacy=True))
+    selected.provenance_path.write_text(yaml.safe_dump({
+        "run": ledger.run_identity(selected),
+        "repo": {"commit": "f8c5ac73caba610d40c49aaceddb31ead3590a72"}}))
+    initial = journal.provenance(selected)
+    assert initial["record_age"] == "pre-D41"
+    assert set(initial["legacy_unverifiable"]) == {"ledger_sha256", "reason"}
+    acknowledge(selected, [initial["binding_sha256"]])
+    with_git = journal.provenance(selected)
+    before = tree(tmp_path)
+    monkeypatch.setenv("PATH", str(tmp_path / "no-git-binary"))
+    without_git = journal.provenance(selected)
+    assert without_git["record_age"] == "age unestablished"
+    assert without_git["binding_sha256"] == with_git["binding_sha256"] == initial["binding_sha256"]
+    assert without_git["legacy_unverifiable"] == with_git["legacy_unverifiable"]
+    assert without_git["overrides"] == with_git["overrides"]
+    assert without_git["assisted"] and without_git["evidence_only"]
+    assert tree(tmp_path) == before
+
+
 def test_journal_separates_flat_identities_and_retains_explicit_generation_history(tmp_path):
     selected = start(tmp_path)
     generation = ledger.generation_id(selected)
@@ -515,11 +539,11 @@ def test_missing_ledger_legacy_history_never_becomes_a_clean_resume(tmp_path, ar
         selected.full_path.write_text('id: prior-output\n')
     with pytest.raises(ledger.UsageLedgerError, match='historical evidence cannot become a clean resume'):
         journal.check(selected)
-    with pytest.raises(ledger.UsageLedgerError):
+    with pytest.raises(ledger.UsageLedgerError, match='inspection only|relaunch with a new label|cannot become a clean resume'):
         ledger.prepare_usage(selected, resume=True)
     assert not journal.journal_path(selected).exists()
     # D68/D69: a fresh generation needs a new label, never this residue.
-    with pytest.raises(ledger.UsageLedgerError):
+    with pytest.raises(ledger.UsageLedgerError, match='inspection only|relaunch with a new label|cannot become a clean resume'):
         journal.check(selected, spending=False)
     with pytest.raises(ledger.UsageLedgerError, match='inspection only'):
         ledger.prepare_usage(selected, resume=False)
@@ -534,9 +558,9 @@ def test_foreign_flat_label_provenance_does_not_masquerade_as_current_history(tm
     selected.provenance_path.write_text(yaml.safe_dump({'run': ledger.run_identity(foreign)}))
     selected.full_path.write_text('id: foreign-output\n')
     # D68: a different label cannot overwrite an unguarded evidence directory.
-    with pytest.raises(ledger.UsageLedgerError):
+    with pytest.raises(ledger.UsageLedgerError, match='inspection only|relaunch with a new label|cannot become a clean resume'):
         journal.check(selected)
-    with pytest.raises(ledger.UsageLedgerError):
+    with pytest.raises(ledger.UsageLedgerError, match='inspection only|relaunch with a new label|cannot become a clean resume'):
         ledger.prepare_usage(selected, resume=True)
     assert not journal.journal_path(selected).exists()
 

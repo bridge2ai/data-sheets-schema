@@ -8,6 +8,18 @@ from tests.test_api_latch_guard import clean_integrity, record_with
 PRE = "f8c5ac73caba610d40c49aaceddb31ead3590a72"
 
 
+def test_d41_commit_remains_in_full_repository_ancestry():
+    root = Path(__file__).resolve().parents[1]
+    shallow = subprocess.check_output(["git", "rev-parse", "--is-shallow-repository"],
+                                      cwd=root, text=True).strip()
+    if shallow == "true":
+        pytest.skip("A shallow repository cannot prove the retained D41 ancestry boundary")
+    assert shallow == "false"
+    result = subprocess.run(["git", "merge-base", "--is-ancestor", journal.D41_COMMIT, "HEAD"],
+                            cwd=root, capture_output=True, text=True)
+    assert result.returncode == 0, "#5212 requires a merge commit retaining D41_COMMIT; no squash or rebase"
+
+
 @pytest.mark.parametrize("commit,stamp,age", [
     (PRE, None, "pre-D41"),
     (PRE.upper(), None, "pre-D41"),
@@ -63,13 +75,86 @@ def test_short_hash_uses_positive_git_ancestry():
                                "record_generated_at": "2000-01-01T00:00:00Z"}) == "post-D41"
 
 
-def test_symbolic_commit_resolution_is_not_cached_across_ref_movement(tmp_path):
+def repository_with_alternate_objects(tmp_path):
     root = Path(__file__).resolve().parents[1]
     common = subprocess.check_output(["git", "rev-parse", "--git-common-dir"], cwd=root, text=True).strip()
     objects = (root / common / "objects").resolve()
     subprocess.run(["git", "init", "--quiet", str(tmp_path)], check=True)
     (tmp_path / ".git/objects/info/alternates").write_text(str(objects) + "\n")
-    record = {"repo": {"commit": "refs/heads/age-evidence"}, "record_generated_at": "2000-01-01T00:00:00Z"}
-    for commit, age in ((PRE, "pre-D41"), (journal.D41_COMMIT, "post-D41")):
-        subprocess.run(["git", "-C", str(tmp_path), "update-ref", record["repo"]["commit"], commit], check=True)
-        assert journal.record_age(record, repo_root=tmp_path) == age
+    return tmp_path
+
+
+@pytest.mark.parametrize("reference", ["HEAD", "refs/heads/x"])
+def test_symbolic_refs_are_unresolvable_recorded_commits(tmp_path, reference):
+    root = repository_with_alternate_objects(tmp_path)
+    for name in ("HEAD", "refs/heads/x"):
+        subprocess.run(["git", "-C", str(root), "update-ref", name, journal.D41_COMMIT], check=True)
+    assert subprocess.check_output(["git", "-C", str(root), "rev-parse", reference],
+                                   text=True).strip() == journal.D41_COMMIT
+    record = {"repo": {"commit": reference}}
+    assert journal.record_age(record, repo_root=root) == "age unestablished"
+    record["record_generated_at"] = "2000-01-01T00:00:00Z"
+    assert journal.record_age(record, repo_root=root) == "pre-D41"
+
+
+def test_hex_named_ref_must_resolve_to_its_own_prefix(tmp_path):
+    root = repository_with_alternate_objects(tmp_path)
+    subprocess.run(["git", "-C", str(root), "update-ref", "refs/heads/abcd", journal.D41_COMMIT], check=True)
+    assert not journal.D41_COMMIT.startswith("abcd")
+    record = {"repo": {"commit": "abcd"}}
+    assert journal.record_age(record, repo_root=root) == "age unestablished"
+    record["record_generated_at"] = "2000-01-01T00:00:00Z"
+    assert journal.record_age(record, repo_root=root) == "pre-D41"
+
+
+@pytest.mark.parametrize("commit", ["abc", "a" * 41, "HEAD~1", "--all", "f8c5ac73c^{commit}"])
+def test_non_commit_identifiers_use_only_timestamp_evidence(commit):
+    record = {"repo": {"commit": commit}}
+    assert journal.record_age(record) == "age unestablished"
+    record["record_generated_at"] = "2000-01-01T00:00:00Z"
+    assert journal.record_age(record) == "pre-D41"
+
+
+def test_negative_ancestry_in_shallow_history_uses_timestamp_fallback(tmp_path):
+    root = repository_with_alternate_objects(tmp_path)
+    source = Path(__file__).resolve().parents[1]
+    post = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source, text=True).strip()
+    subprocess.run(["git", "-C", str(root), "update-ref", "HEAD", post], check=True)
+    (root / ".git/shallow").write_text(post + "\n")
+    for commit in (journal.D41_COMMIT, post):
+        subprocess.run(["git", "-C", str(root), "cat-file", "-e", commit + "^{commit}"], check=True)
+    negative = subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor",
+                               journal.D41_COMMIT, post], capture_output=True)
+    assert negative.returncode == 1  # Both objects exist, but the intervening graph is cut.
+    record = {"repo": {"commit": post}}
+    assert journal.record_age(record, repo_root=root) == "age unestablished"
+    record["record_generated_at"] = "2000-01-01T00:00:00Z"
+    assert journal.record_age(record, repo_root=root) == "pre-D41"
+    record["record_generated_at"] = journal.D41_COMMITTED_AT
+    assert journal.record_age(record, repo_root=root) == "age unestablished"
+
+
+def test_missing_git_binary_uses_timestamp_fallback(tmp_path, monkeypatch):
+    monkeypatch.setenv("PATH", str(tmp_path / "no-git-binary"))
+    record = {"repo": {"commit": journal.D41_COMMIT}}
+    assert journal.record_age(record, repo_root=tmp_path) == "age unestablished"
+    record["record_generated_at"] = "2000-01-01T00:00:00Z"
+    assert journal.record_age(record, repo_root=tmp_path) == "pre-D41"
+
+
+def test_constant_git_answers_and_full_sha_resolution_are_cached(tmp_path, monkeypatch):
+    root = repository_with_alternate_objects(tmp_path)
+    actual = subprocess.run
+    calls = []
+
+    def observed(command, **kwargs):
+        calls.append(tuple(command[4:]))
+        return actual(command, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", observed)
+    for commit in (PRE, PRE.upper(), PRE):
+        assert journal.record_age({"repo": {"commit": commit}}, repo_root=root) == "pre-D41"
+    for commit in (PRE, journal.D41_COMMIT):
+        assert calls.count(("rev-parse", "--verify", "--end-of-options", commit + "^{commit}")) == 1
+    assert calls.count(("rev-parse", "--is-shallow-repository")) == 1
+    assert calls.count(("merge-base", "--is-ancestor", journal.D41_COMMIT, PRE)) == 3
