@@ -17,8 +17,14 @@ from d68_process_logging_20261030 import run_logged
 ROOT = Path(__file__).resolve().parents[2]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("python")
-parser.add_argument("stage", choices=("canary", "logging-canary", "collect", "shards", "notes-canary", "notes"))
+parser.add_argument("stage", choices=("canary", "logging-canary", "collect", "shards", "notes-canary", "notes",
+                                     "repair-canary", "repairs", "d41"))
 parser.add_argument("--tag", default="merge-final")
+parser.add_argument("--canary-node", help="One explicit ordinary test node for an unchanged baseline")
+parser.add_argument("--only", action="append", choices=(
+    *(f"shard-{i}-of-6" for i in range(1, 7)),
+    "routing-dispatch", "routing-portable", "routing-regate", "routing-default-layout"),
+    help="Rerun explicitly affected CI jobs; retained full coverage must account for the other jobs")
 args = parser.parse_args()
 storage = ROOT / ".d68-validation"
 storage.mkdir(exist_ok=True)
@@ -27,14 +33,30 @@ head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
 
 if args.stage in {"shards", "notes"}:
     subprocess.run(["git", "merge-base", "--is-ancestor", "50bc50af6", head], cwd=ROOT, check=True)
-    prerequisite = "notes-canary" if args.stage == "notes" else "canary"
+if args.stage in {"shards", "notes", "repairs", "d41"}:
+    prerequisite = ("notes-canary" if args.stage == "notes" else
+                    "repair-canary" if args.stage == "repairs" else "canary")
     canary = json.loads((storage / f"{args.tag}-{prerequisite}.json").read_text())
     assert canary["head"] == head and canary["runs"][0]["exit_code"] == 0
 
 if args.stage == "canary":
-    cases = [("canary", ["tests/test_d68_legacy_readonly.py::test_completed_legacy_verifier_is_readonly[i1]"])]
+    canary_node = args.canary_node or "tests/test_d68_legacy_readonly.py::test_completed_legacy_verifier_is_readonly[i1]"
+    assert "::" in canary_node and not canary_node.startswith("-"), canary_node
+    cases = [("canary", [canary_node])]
 elif args.stage == "logging-canary":
     cases = [("logging-canary", ["scripts/adhoc/d68_logging_probe_20261030.py::test_live_log_preserves_checkout"])]
+elif args.stage == "repair-canary":
+    cases = [("repair-canary", ["tests/test_d68_legacy_readonly.py::test_cli_refuses_legacy_and_stripped_runs_readonly[P4]"])]
+elif args.stage == "repairs":
+    cases = [("repairs", [
+        "tests/test_d68_legacy_readonly.py::test_cli_refuses_legacy_and_stripped_runs_readonly",
+        "tests/test_shared_output_ownership_entrypoints.py::test_legacy_public_boundary_refuses_residue_before_any_write",
+        "tests/test_profiles.py::TestRoundFour::test_a_repair_round_sends_the_specs_digest"])]
+elif args.stage == "d41":
+    cases = [("d41", [f"tests/{name}" for name in (
+        "test_latch_journal.py", "test_api_latch_guard.py", "test_pr5212_d55_fixes.py",
+        "test_d42_claude_d55.py", "test_pr5212_r3_fixes.py", "test_pr5212_r4_fixes.py",
+        "test_d41_request_parity.py")])]
 elif args.stage == "collect":
     cases = [("collect-whole", ["--collect-only"]), ("collect-ci", ["tests", "--collect-only"])]
 elif args.stage == "shards":
@@ -59,6 +81,11 @@ else:
             cases.append((f"{job}-{number}", paths))
     assert len(cases) == 4, cases
 
+if args.only:
+    assert args.stage == "shards", "--only selects complete CI shard/lane jobs"
+    cases = [case for case in cases if case[0] in args.only]
+assert args.canary_node is None or args.stage == "canary"
+
 ledger = {"head": head, "stage": args.stage, "runs": []}
 destination = storage / f"{args.tag}-{args.stage}.json"
 for name, selected in cases:
@@ -78,9 +105,11 @@ for name, selected in cases:
     ledger["runs"].append(row)
     destination.write_text(json.dumps(ledger, indent=2) + "\n")
     print(f"FINISH {json.dumps(row)}", flush=True)
-    if args.stage in {"canary", "notes-canary", "logging-canary"}:
+    if args.stage in {"canary", "notes-canary", "logging-canary", "repair-canary"}:
         assert code == 0 and row["selected"] == 1
-    if args.stage in {"shards", "notes"}:
+    if args.stage == "repairs":
+        assert code == 0 and row["selected"] == 12
+    if args.stage in {"shards", "notes", "repairs", "d41"}:
         assert not result["collection_errors"]
         assert len([r for r in result["reports"] if r["when"] == "teardown"]) == row["selected"]
 print(f"COMPLETE {destination}", flush=True)

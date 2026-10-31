@@ -605,11 +605,12 @@ class TestRoundFour(_Clean):
                            bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt")
             self.assertEqual(spec.profile, "bridge2ai")
             spec.full_path.parent.mkdir(parents=True, exist_ok=True)
+            # Repair belongs to a current guarded generation, not orphan residue.
+            api_runner._prepare_usage(spec, resume=False)
             spec.full_path.write_text("# Generated: 2026-09-13\nid: 123\ntitle: T\n", encoding="utf-8")   # id is not a uriorcurie
             os.environ["D4D_PROFILE"] = "neutral"
             schema_digest._TEXT_CACHE.clear()
             client = self._fake_client()
-            api_runner._prepare_usage(spec, resume=False)
             api_runner._repair_invalid(spec, client, api_runner._model_settings(), [])
             repairs = [kw for kw in client.messages.calls if api_runner.REPAIR_INSTRUCTION in
                        " ".join(p.get("text", "") for p in kw["messages"][0]["content"])]

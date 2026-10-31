@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 import tarfile
 
@@ -17,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 raw = ROOT / ".d68-validation"
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--tag", default="merge-strict")
+parser.add_argument("--reuse-tag", help="Retain unaffected complete jobs from an earlier serial gate")
 args = parser.parse_args()
 archive = ROOT / "notes/reviews/d41_legacy_recovery_evidence_20261029/authentic_controls.tar.gz"
 with tarfile.open(archive) as tar:
@@ -49,6 +51,15 @@ for path in sorted(paths):
         "selected": len(data["selected"]),
         "phases": dict(Counter(f'{r["when"]}:{r["outcome"]}' for r in data["reports"])),
         "collection_errors": data["collection_errors"], "failures": failures}
+    collection_evidence = []
+    for error in data["collection_errors"]:
+        prior = [message for message in old_collection["collection_errors"] if error["nodeid"] in message]
+        def error_lines(message):
+            return [line.strip() for line in message.splitlines() if re.match(r"^E\s", line)]
+        collection_evidence.append({"nodeid": error["nodeid"], "current_error_lines": error_lines(error["message"]),
+            "original_d9_traces": prior,
+            "same_error_lines_on_d9": any(error_lines(message) == error_lines(error["message"]) for message in prior)})
+    summary["runs"][path.parent.name]["collection_base_evidence"] = collection_evidence
     if "shard" in path.parent.name or "routing-" in path.parent.name:
         required = {"test_latch_journal.py", "test_api_latch_guard.py", "test_pr5212_d55_fixes.py",
                     "test_d42_claude_d55.py", "test_pr5212_r3_fixes.py", "test_pr5212_r4_fixes.py",
@@ -78,13 +89,36 @@ merged = raw / "merge/.d68-validation"
 gate = merged / f"{args.tag}-shards.json"
 if gate.exists():
     stage = json.loads(gate.read_text())
-    reports = [json.loads((merged.parent / row["report"]).read_text()) for row in stage["runs"]]
+    jobs = {row["name"]: row for row in stage["runs"]}
+    reused = []
+    if args.reuse_tag:
+        prior = json.loads((merged / f"{args.reuse_tag}-shards.json").read_text())
+        assert len(prior["runs"]) == 10
+        changed = subprocess.check_output([
+            "git", "diff", "--name-only", prior["head"], stage["head"]], cwd=ROOT, text=True).splitlines()
+        # This composition is only for test-body repairs and validation helpers.
+        # A production, configuration, fixture or test-helper change needs all jobs.
+        repaired_files = {
+            "tests/test_d68_legacy_readonly.py", "tests/test_profiles.py",
+            "tests/test_shared_output_ownership_entrypoints.py"}
+        assert all(name in repaired_files or name.startswith("scripts/adhoc/") for name in changed), changed
+        for row in prior["runs"]:
+            if row["name"] in jobs:
+                continue
+            data = json.loads((merged.parent / row["report"]).read_text())
+            assert not {node.split("::")[0] for node in data["selected"]}.intersection(changed), row["name"]
+            jobs[row["name"]] = row
+            reused.append({"name": row["name"], "tested_head": prior["head"],
+                           "report": row["report"], "changed_paths": changed,
+                           "basis": "No production/configuration/fixture change and no changed test file in this selection"})
+    reports = [json.loads((merged.parent / row["report"]).read_text()) for row in jobs.values()]
     collection_path = merged / f"{args.tag}-collect-ci/d68-result.json"
     collection = json.loads(collection_path.read_text()) if collection_path.exists() else None
     selected = Counter(node for data in reports for node in data["selected"])
     expected = Counter(collection["selected"]) if collection else Counter()
     completed = Counter(row["nodeid"] for data in reports for row in data["reports"] if row["when"] == "teardown")
     summary["final_coverage"] = {"tag": args.tag, "head": stage["head"], "runs": len(reports),
+        "job_reports": list(jobs.values()), "reused_jobs": reused,
         "selected": sum(selected.values()), "expected": sum(expected.values()),
         "missing": list((expected - selected).elements()), "extra": list((selected - expected).elements()),
         "incomplete": list((selected - completed).elements()),
@@ -92,6 +126,8 @@ if gate.exists():
 dest.write_text(json.dumps(summary, indent=2) + "\n")
 for name, row in summary["runs"].items():
     print(name, row["exit_code"], row["selected"], row["phases"], "collection errors", len(row["collection_errors"]))
+    for error in row["collection_base_evidence"]:
+        print("  COLLECTION", error["nodeid"], "same d9 error:", error["same_error_lines_on_d9"])
     for failure in row["failures"]:
         print("  FAIL", failure["nodeid"], failure["when"], "also d9:", failure["also_failed_on_d9"])
 print("specificity", summary.get("specificity"))

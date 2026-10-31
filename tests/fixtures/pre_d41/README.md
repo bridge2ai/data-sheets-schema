@@ -1,6 +1,6 @@
 # Authentic pre-D41 controls for D68/D69
 
-The plain `before/` trees are exact captures emitted by
+The i1/i2 and C1–C8 plain `before/` trees are exact captures emitted by
 `f8c5ac73caba610d40c49aaceddb31ead3590a72`, retained by the independent reviewer
 under `review-d41-legacy-20261030/run1/evidence/captures/`. Each invocation and
 SHA-256/size manifest is retained. `import_d68_fixtures_20261030.py` verifies both
@@ -9,6 +9,17 @@ Tests relocate only the invocation and pass an explicit root mapping to the
 read-only verifier. Neither the original paths nor the review workspace are
 accessed by CI. The f8 generator remains pinned under `scripts/adhoc/`, outside
 CI; its i1/i2 selectors reproduce the reviewer's extra cases.
+
+The additional `split` before-tree was generated on 2026-10-31 by
+`scripts/adhoc/capture_d68_split_layout_20261031.py`, using the same pinned f8
+checkout's real runner and offline FakeClient. Its ordinary `out_dir=None`
+layout puts full output under `custom/synthetic` and core output/provenance
+under `custom_core/synthetic`. The canary completed four fake calls, persisted
+20 files and recorded f8 itself as `repo.commit`; no captured provenance bytes
+were rewritten. This establishes pre-D41 code ancestry despite the later
+capture timestamp. The original generator report remains under
+`.d68-validation/split-layout-f8/generation.json`. CI reads the committed plain
+capture, manifest and invocation, without the generator or old checkout.
 
 | Original case | Disposition under D68/D69 |
 |---|---|

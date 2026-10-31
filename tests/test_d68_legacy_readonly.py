@@ -42,7 +42,7 @@ def fixture(case, tmp_path):
     return root, old, api.RunSpec(**kwargs)
 
 
-@pytest.mark.parametrize("case", ["i1", "i2", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8"])
+@pytest.mark.parametrize("case", ["i1", "i2", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "split"])
 @pytest.mark.parametrize("entry", ["execute", "internal", "prepare", "write", "spend", "begin_call"])
 @pytest.mark.parametrize("resume", [True, False])
 def test_authentic_legacy_refuses_without_calls_or_tree_changes(case, entry, resume, tmp_path):
@@ -66,10 +66,7 @@ def test_authentic_legacy_refuses_without_calls_or_tree_changes(case, entry, res
     assert tree(root) == before
 
 
-@pytest.mark.parametrize("case", ["i1", "c7"])
-def test_completed_legacy_verifier_is_readonly(case, tmp_path, monkeypatch):
-    root, old, selected = fixture(case, tmp_path)
-    before = tree(root)
+def no_verifier_execution(monkeypatch):
     def forbidden(*args, **kwargs):
         pytest.fail("verifier reached execution or mutation")
     for owner, names in ((api, ["execute", "_execute", "_client"]),
@@ -77,6 +74,13 @@ def test_completed_legacy_verifier_is_readonly(case, tmp_path, monkeypatch):
                          (journal, ["_append"])):
         for name in names:
             monkeypatch.setattr(owner, name, forbidden)
+
+
+@pytest.mark.parametrize("case", ["i1", "c7", "split"])
+def test_completed_legacy_verifier_is_readonly(case, tmp_path, monkeypatch):
+    root, old, selected = fixture(case, tmp_path)
+    before = tree(root)
+    no_verifier_execution(monkeypatch)
     result = journal.verify_completed_legacy(selected.provenance_path,
                     evidence_root=root, recorded_root=old)
     assert result["already_complete"] and result["evidence_only"]
@@ -86,9 +90,30 @@ def test_completed_legacy_verifier_is_readonly(case, tmp_path, monkeypatch):
     assert tree(root) == before
 
 
-@pytest.mark.parametrize("damage", ["output", "report", "instruction", "age", "accounting", "progress", "symlink", "ledger-input", "index-input"])
-def test_verifier_rejects_incomplete_or_changed_evidence(tmp_path, damage):
+@pytest.mark.parametrize("case", ["i1", "split"])
+def test_verifier_ignores_unrelated_projects(case, tmp_path, monkeypatch):
+    root, old, selected = fixture(case, tmp_path)
+    no_verifier_execution(monkeypatch)
+    for name in ("UNRELATED_api_progress.json", "UNRELATED_latch_journal.jsonl",
+                 "UNRELATED_api_usage_other.json", "intermediate/UNRELATED_snapshot_index.json"):
+        (selected.metadata_dir / name).write_text("unrelated and deliberately unreadable")
+    (root / "unrelated-link").symlink_to("/etc/passwd")
+    other_label = root / "another-label"
+    other_label.mkdir()
+    (other_label / f"{selected.project}_api_progress.json").write_text("unrelated label")
+    before = tree(root)
+    result = journal.verify_completed_legacy(selected.provenance_path,
+                    evidence_root=root, recorded_root=old)
+    assert result["already_complete"] and result["new_calls"] == 0
+    assert not any("UNRELATED" in name or "another-label" in name
+                   for name in result["verified_files"])
+    assert tree(root) == before
+
+
+@pytest.mark.parametrize("damage", ["output", "report", "instruction", "age", "accounting", "progress", "symlink", "symlink-parent", "ledger-input", "index-input", "validation-path", "reasoning-path", "report-path"])
+def test_verifier_rejects_incomplete_or_changed_evidence(tmp_path, damage, monkeypatch):
     root, old, selected = fixture("i1", tmp_path)
+    no_verifier_execution(monkeypatch)
     record = yaml.safe_load(selected.provenance_path.read_text())
     if damage == "output":
         selected.full_path.write_text("changed")
@@ -97,7 +122,22 @@ def test_verifier_rejects_incomplete_or_changed_evidence(tmp_path, damage):
     elif damage == "progress":
         (selected.metadata_dir / f"{selected.project}_api_progress.json").write_text("{}")
     elif damage == "symlink":
-        (root / "escape").symlink_to("/etc/passwd")
+        selected.full_path.unlink()
+        selected.full_path.symlink_to("/etc/passwd")
+    elif damage == "symlink-parent":
+        directory = selected.metadata_dir / "intermediate"
+        moved = root / "moved-intermediate"
+        directory.rename(moved)
+        directory.symlink_to(moved, target_is_directory=True)
+    elif damage in ("validation-path", "reasoning-path", "report-path"):
+        entry = (record["validation"]["artifacts"]["full"] if damage == "validation-path" else
+                 record["companions"]["reasoning_log"] if damage == "reasoning-path" else
+                 record["report_claims"]["artifacts"]["report"])
+        source = root / Path(entry["path"]).relative_to(old)
+        borrowed = root / ("borrowed-" + source.name)
+        borrowed.write_bytes(source.read_bytes())
+        entry["path"] = str(old / borrowed.relative_to(root))
+        selected.provenance_path.write_text(yaml.safe_dump(record))
     elif damage in ("ledger-input", "index-input"):
         target = ledger.ledger_path(selected) if damage == "ledger-input" else next(root.rglob("*_snapshot_index.json"))
         data = json.loads(target.read_text())
@@ -189,6 +229,7 @@ def test_p3_p5_real_current_run_stripped_after_dispatch(tmp_path, completed, res
 def test_cli_refuses_legacy_and_stripped_runs_readonly(tmp_path, monkeypatch, case):
     from click.testing import CliRunner
     from data_sheets_schema.cli import cli, api as command
+    from data_sheets_schema.resources import checkout_at
     if case.startswith("P"):
         selected = spec(out_dir=tmp_path)
         ledger.prepare_usage(selected, resume=True)
@@ -220,11 +261,15 @@ def test_cli_refuses_legacy_and_stripped_runs_readonly(tmp_path, monkeypatch, ca
         "approx_total_input_tokens": 0, "model": {"name": "offline"}})
     monkeypatch.setattr(api, "_client", lambda: pytest.fail("CLI constructed a provider client"))
     before = tree(root)
+    # Exercise the legacy refusal after satisfying the independent cwd guard.
+    # Nested validation worktrees resolve to their outer checkout; selected
+    # evidence paths are absolute and remain confined to this test's fixture.
+    monkeypatch.chdir(checkout_at(Path(__file__).resolve().parents[1]))
     result = CliRunner().invoke(cli, ["api", "run", "--project", selected.project,
                                      "--label", selected.label, "--yes"])
     message = result.output + str(result.exception)
     assert result.exit_code != 0 and any(reason in message for reason in (
-        "inspection only", "a run label is never reused"))
+        "inspection only", "a run label is never reused")), message
     assert tree(root) == before
 
 

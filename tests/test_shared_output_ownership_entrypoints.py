@@ -179,16 +179,18 @@ def test_matching_owner_preserves_actual_automatic_date_recovery(registered, tmp
     assert {p: p.read_bytes() for p in authorities} == authorities
 
 
-def test_legacy_public_boundary_is_unchanged(external, tmp_path, monkeypatch):
+@pytest.mark.parametrize('resume', [True, False])
+def test_legacy_public_boundary_refuses_residue_before_any_write(external, tmp_path, monkeypatch, resume):
+    from tests.test_d68_legacy_readonly import tree as whole_tree
     spec = external
     spec.full_path.parent.mkdir(parents=True)
     spec.full_path.write_text('legacy partial bytes without selected ownership\n')
-    before = tree(tmp_path)
-    seen = []
-    monkeypatch.setattr(api, '_execute', lambda current, **kw: seen.append(current) or {'legacy': True})
-    assert api.execute(spec) == {'legacy': True}
-    assert seen == [spec]
-    assert_preserved(before)
+    before = whole_tree(tmp_path)
+    seen = no_execution(monkeypatch)
+    with pytest.raises(ledger.UsageLedgerError, match='inspection only'):
+        api.execute(spec, resume=resume)
+    assert seen == []
+    assert whole_tree(tmp_path) == before
 
 
 def alias_pair(specs):
