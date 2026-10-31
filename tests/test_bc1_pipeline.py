@@ -71,7 +71,8 @@ class BC1Script(Script):
         return response(codec.encode_candidate(value, dictionary=payload["dictionary"], max_bytes=maximum).decode())
 
 
-def test_public_bc1_pipeline_multiple_groups_final_and_completed_replay(registered):
+def test_public_bc1_pipeline_multiple_groups_final_and_completed_replay(registered, journal_launch_monitor):
+    # Retain the first launch's independent checkpoint for intact completed replay.
     reg = json.loads(registered.shared_generation_registration)
     reg["audit_limits"]["max_paths"] = 2
     raw = shared.canonical(reg)
