@@ -1,0 +1,27 @@
+{
+  "applied": false,
+  "branch_protected_source_unchanged": true,
+  "branch_source_sha256": "1c4436b5ea689fcd674c848a722dd9a86495692ad83401682f3d805f49acb6d6",
+  "candidate_bytes": 57877,
+  "candidate_source_sha256": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",
+  "canonical_hashes_sha256": "39b93c009457681a1d8d8b8afee5a869bbd6f5e70b6f4332522db5d7e22d0584",
+  "d41_equals_main_plus_unique_journal_dependency": true,
+  "date": "2026-10-30",
+  "format": "wave7_bc1_protected_proposal_v2",
+  "helper_sha256": "9068b7332536bbeb5b497408e164d165111158609545488f8b288a4895f03578",
+  "packet_head_before_proposal": "d2f7261a480f4209b9637cc5198a1bfdee991cff",
+  "proposal_bytes": 15387,
+  "proposal_sha256": "274411de3448c32be0600bec33fd794bce747e24bffa7eff6dede01eb568c719",
+  "protected_source": "src/data_sheets_schema/shared_generation.py",
+  "removing_hooks_yields_exact_d41_source": true,
+  "repin": "Only fresh private validation archive; no publication or protected branch edit.",
+  "reviewed_transformer_sha256": "ccf8ed59a509be7a0f0f4ea7d928c6b969d98bb9c1b959bb0a969793a4109651",
+  "six_bc1_hooks_exact_parent_delta": true,
+  "sources": {
+    "bc1": "b7e4d3ef76b8ceee2c1c9ee5fdabba9ff00949e6",
+    "d41": "20def9d63a3131ef9b56eca39b61fbf5f6aaab49",
+    "main": "50bc50af678ae5216b3985c340fe1344da26c05e",
+    "pre_bc1": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+    "prior_packet": "d00acf1e7d6d485abb4776f9ffb1cd12d2640baf"
+  }
+}
