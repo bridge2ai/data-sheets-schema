@@ -821,8 +821,11 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
     """Read-only generic-v6 evidence verification, including relocated captures.
 
     The explicit root mapping changes only file lookup, never captured bytes or
-    instruction substitutions. No execution, lock, repair or usage initializer
-    is reachable. Shared/receipt controllers require their own future verifier.
+    instruction substitutions. Inventory covers selected-project artifacts and
+    their bound inputs, including the ordinary split full/core layout, rather
+    than unrelated projects sharing a capture root. No execution, lock, repair
+    or usage initializer is reachable. Shared/receipt controllers require their
+    own future verifier.
     Returns a separate evidence-only envelope; never restamps the old record.
     """
     import yaml
@@ -832,35 +835,34 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
 
     root, old = Path(evidence_root).resolve(), Path(recorded_root)
     path = Path(record_path).absolute()
-    if not old.is_absolute() or not path.is_relative_to(root):
+    if not old.is_absolute() or ".." in old.parts or not path.is_relative_to(root):
         _fail("verification requires absolute evidence and recorded roots")
 
-    def inventory():
-        result = {}
-        for item in sorted(root.rglob("*")):
-            if item.is_symlink():
+    def safe(item):
+        if not item.is_relative_to(root) or ".." in item.parts:
+            _fail("verification path escapes the evidence root")
+        for ancestor in (item, *item.parents):
+            if ancestor.is_symlink():
                 _fail("verification refuses symlinks")
-            if item.is_file():
-                result[str(item.relative_to(root))] = _sha(_bytes(item))
-        return result
+            if ancestor == root:
+                break
+        return item
 
-    before = inventory()
+    raw_record = _bytes(safe(path))
     if duplicate_keys_in(path):
         _fail("duplicate keys in legacy provenance")
-    record = yaml.safe_load(_bytes(path))
+    record = yaml.safe_load(raw_record)
     if not isinstance(record, dict) or record_age(record) != "pre-D41":
         _fail("completed legacy verification requires positive pre-D41 age evidence")
     run = record.get("run") or {}
     model = record.get("model") or {}
-    if "runtime_integrity" in model or any(name.endswith("_latch_journal.jsonl") for name in before):
+    if "runtime_integrity" in model:
         _fail("guarded history cannot enter legacy verification")
     request = (record.get("prompts") or {}).get("request") or {}
     rendered = request.get("spec") or {}
     if run.get("condition") != "generic_v6" or any(rendered.get(key) for key in (
             "shared_generation_version", "receipt_completion_version", "removal_repair_version")):
         _fail("legacy verifier currently supports generic_v6 only; other controllers are unaddressed")
-    if any(name.endswith("_api_progress.json") for name in before):
-        _fail("legacy run is incomplete: progress survives")
     issues, failure = check_record(record)
     if issues or failure:
         _fail(f"legacy provenance conformance failed: {failure or issues}")
@@ -872,29 +874,74 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
         source = Path(value)
         if not source.is_absolute() or not source.is_relative_to(old) or ".." in source.parts:
             _fail(f"evidence path is outside recorded root: {value}")
-        return root / source.relative_to(old)
+        return safe(root / source.relative_to(old))
 
-    def verify(entry):
-        if not isinstance(entry, dict) or not entry.get("path"):
-            _fail("missing legacy file binding")
-        raw = _bytes(local(entry["path"]))
-        hashes = {key: entry[key] for key in ("sha256", "md5") if entry.get(key)}
-        if not hashes or any(hashlib.new(key, raw).hexdigest() != value for key, value in hashes.items()):
-            _fail(f"legacy file hash mismatch: {entry['path']}")
+    outputs = {role: local(record["outputs"][role]["path"]) for role in ("full", "core", "report")}
+    project, method, label = (run[key] for key in ("project", "method", "label"))
+    expected_names = {"full": f"{project}_d4d.yaml", "core": f"{project}_d4d_core.yaml",
+                      "report": f"{project}_reconciliation.md"}
+    if (path.name != f"{project}_provenance.yaml"
+            or any(outputs[role].name != name for role, name in expected_names.items())
+            or outputs["core"].parent != path.parent or outputs["report"].parent != path.parent):
+        _fail("legacy output ownership mismatch")
+    full_dir, metadata_dir = outputs["full"].parent, path.parent
+    if full_dir != metadata_dir and not (
+            full_dir.name == metadata_dir.name == label
+            and full_dir.parent.name == method and metadata_dir.parent.name == method + "_core"
+            and full_dir.parent.parent == metadata_dir.parent.parent):
+        _fail("legacy output layout is not the recorded flat or split layout")
+    for role in ("full", "core"):
+        if local(record["validation"]["artifacts"][role]["path"]) != outputs[role]:
+            _fail("legacy validation binding names a different output")
+    if local(record["report_claims"]["artifacts"]["report"]["path"]) != outputs["report"]:
+        _fail("legacy report binding names a different output")
+    if local(record["companions"]["reasoning_log"]["path"]) != metadata_dir / f"{project}_reasoning.jsonl":
+        _fail("legacy reasoning binding names a different run artifact")
 
     inputs = record["inputs"]
-    verify({"path": inputs["bundle_path"], "md5": inputs.get("bundle_md5"),
-            "sha256": inputs.get("bundle_sha256")})
-    for key in ("source_manifest", "chunks"):
-        verify(inputs[key])
-    for entry in record["validation"]["artifacts"].values():
-        verify(entry)
-    verify(record["report_claims"]["artifacts"]["report"])
-    verify(record["companions"]["reasoning_log"])
     intermediates = record.get("intermediates") or []
     if not intermediates:
         _fail("missing completed intermediate bindings")
     for entry in intermediates:
+        item = local(entry["path"])
+        if not item.is_relative_to(metadata_dir / "intermediate") or not item.name.startswith(project + "_"):
+            _fail("legacy intermediate ownership mismatch")
+    bindings = [
+        {"path": inputs["bundle_path"], "md5": inputs.get("bundle_md5"), "sha256": inputs.get("bundle_sha256")},
+        inputs["source_manifest"], inputs["chunks"],
+        *record["validation"]["artifacts"].values(), record["report_claims"]["artifacts"]["report"],
+        record["companions"]["reasoning_log"], *intermediates]
+    bound = {path, *(local(entry["path"]) for entry in bindings)}
+
+    def inventory():
+        candidates = set(bound)
+        for directory in {full_dir, metadata_dir}:
+            for item in directory.rglob("*"):
+                if item.name.startswith((project + "_", "." + project + "_")) and (
+                        not item.is_dir() or item.is_symlink()):
+                    candidates.add(item)
+        return {str(item.relative_to(root)): _sha(_bytes(safe(item))) for item in sorted(candidates)}
+
+    before = inventory()
+    if before[str(path.relative_to(root))] != _sha(raw_record):
+        _fail("legacy provenance changed during verification")
+    if any(name.endswith("_latch_journal.jsonl") for name in before):
+        _fail("guarded history cannot enter legacy verification")
+    if any(name.endswith("_api_progress.json") for name in before):
+        _fail("legacy run is incomplete: progress survives")
+
+    def verify(entry):
+        if not isinstance(entry, dict) or not entry.get("path"):
+            _fail("missing legacy file binding")
+        item = local(entry["path"])
+        if str(item.relative_to(root)) not in before:
+            _fail("legacy snapshot binding is outside the selected run evidence")
+        raw = _bytes(item)
+        hashes = {key: entry[key] for key in ("sha256", "md5") if entry.get(key)}
+        if not hashes or any(hashlib.new(key, raw).hexdigest() != value for key, value in hashes.items()):
+            _fail(f"legacy file hash mismatch: {entry['path']}")
+
+    for entry in bindings:
         verify(entry)
     repo = Path(__file__).resolve().parents[2]
     for role in ("full", "core"):
@@ -918,17 +965,16 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
         "profile": {"name": record["schema"]["profile"], "digest_md5": record["schema"]["digest_md5"]},
         "instruction": {"render_version": replay.render_version, "sha256": request["sha256"], "spec": rendered}}
     # Current local completion checks cannot repair or call a provider.
-    replay.out_dir = path.parent
+    # Accounting helpers read metadata only. Validation uses the independently
+    # mapped output paths, which may live in different default-layout folders.
+    replay.out_dir = metadata_dir
     if api._unrecorded_reasoning(replay, record):
         _fail("unaccounted legacy reasoning usage")
     if api._unrecorded_abandoned(replay, record):
         _fail("unaccounted legacy abandoned usage")
-    validation = api.validate_outputs(replay)
+    validation = api.validate_outputs(api.ValidationInputs(outputs["full"], outputs["core"]))
     if validation:
         _fail(f"legacy outputs fail current validation: {validation}")
-    for role in ("full", "core", "report"):
-        if local(record["outputs"][role]["path"]) != getattr(replay, role + "_path"):
-            _fail("legacy output ownership mismatch")
     for name in before:
         item = root / name
         if "_api_usage_" in item.name and item.suffix == ".json":
@@ -958,7 +1004,9 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
     return {"already_complete": True, "legacy_unverifiable": True, "evidence_only": True,
             "campaign_eligible": False, "age": "pre-D41", "new_calls": 0,
             "accounting_completeness": "unknown", "observed_usage": usage,
-            "record_sha256": _sha(_bytes(path)), "tree_sha256": _sha(_canonical(before)),
+            "record_sha256": _sha(raw_record), "evidence_sha256": _sha(_canonical(before)),
+            "verified_files": before,
+            "verification_scope": "selected-project full/metadata artifacts and explicitly bound input files",
             "recorded_root": str(old), "evidence_root": str(root),
             "verification": "recorded identity, instruction, schema, files and observed accounting"}
 

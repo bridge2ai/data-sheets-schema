@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("python")
 parser.add_argument("stage", choices=("canary", "logging-canary", "collect", "shards", "notes-canary", "notes",
-                                     "repair-canary", "repairs", "d41"))
+                                     "repair-canary", "repairs", "d41", "focused"))
 parser.add_argument("--tag", default="merge-final")
 parser.add_argument("--canary-node", help="One explicit ordinary test node for an unchanged baseline")
 parser.add_argument("--only", action="append", choices=(
@@ -33,7 +33,7 @@ head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
 
 if args.stage in {"shards", "notes"}:
     subprocess.run(["git", "merge-base", "--is-ancestor", "50bc50af6", head], cwd=ROOT, check=True)
-if args.stage in {"shards", "notes", "repairs", "d41"}:
+if args.stage in {"shards", "notes", "repairs", "d41", "focused"}:
     prerequisite = ("notes-canary" if args.stage == "notes" else
                     "repair-canary" if args.stage == "repairs" else "canary")
     canary = json.loads((storage / f"{args.tag}-{prerequisite}.json").read_text())
@@ -52,6 +52,12 @@ elif args.stage == "repairs":
         "tests/test_d68_legacy_readonly.py::test_cli_refuses_legacy_and_stripped_runs_readonly",
         "tests/test_shared_output_ownership_entrypoints.py::test_legacy_public_boundary_refuses_residue_before_any_write",
         "tests/test_profiles.py::TestRoundFour::test_a_repair_round_sends_the_specs_digest"])]
+elif args.stage == "focused":
+    cases = [("focused", ["tests/test_d68_legacy_readonly.py", "tests/test_d70_record_age.py",
+        "tests/test_latch_journal.py", "tests/test_api_latch_guard.py",
+        "tests/test_usage_ledger.py::test_new_identity_in_a_shared_directory_starts_its_own_generation",
+        "tests/test_usage_ledger.py::test_output_aliases_share_the_physical_file_lock",
+        "tests/test_abandoned_journal.py::test_a_legacy_continuation_adopts_rows_without_a_generation_before_its_boundary"])]
 elif args.stage == "d41":
     cases = [("d41", [f"tests/{name}" for name in (
         "test_latch_journal.py", "test_api_latch_guard.py", "test_pr5212_d55_fixes.py",
@@ -109,7 +115,7 @@ for name, selected in cases:
         assert code == 0 and row["selected"] == 1
     if args.stage == "repairs":
         assert code == 0 and row["selected"] == 12
-    if args.stage in {"shards", "notes", "repairs", "d41"}:
+    if args.stage in {"shards", "notes", "repairs", "d41", "focused"}:
         assert not result["collection_errors"]
         assert len([r for r in result["reports"] if r["when"] == "teardown"]) == row["selected"]
 print(f"COMPLETE {destination}", flush=True)
