@@ -1170,7 +1170,7 @@ class TestRoundEight(_Clean):
             self.assertFalse(spec.manifest_used); self.assertIsNotNone(spec.manifest)   # selected, not consumed
             record = {"record_generated_at": "2026-09-13T12:00:00Z", "model": {"provider": "Anthropic"},
                       "schema": {"profile": spec.profile, "profile_basis": spec.profile_basis},
-                      "inputs": {"bundle_path": str(bundle), "source_manifest": {"path": None},
+                      "inputs": {"bundle_path": str(spec.bundle), "source_manifest": {"path": None},
                                  **({"chunks": {"path": str(spec.chunk_manifest)}} if spec.chunk_manifest else {})},
                       "prompts": {"request": {"sha256": hashlib.sha256(resolve_prompt(spec).encode()).hexdigest()}}}
             with tempfile.TemporaryDirectory() as d:
