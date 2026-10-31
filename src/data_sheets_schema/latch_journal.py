@@ -122,7 +122,7 @@ def refuse_legacy_execution(spec):
             if isinstance(data, dict) and "latch_journal" in data:
                 _fail("journal was deleted from a guarded ledger; found=missing journal (not a resume anchor)")
         if path.exists() or path.is_symlink() or _legacy_evidence(spec):
-            _fail(f"{record_age(_record(spec))}: journal-less run is inspection only; "
+            _fail(f"{record_age(_record(spec))}: artifacts have no journal for the selected run; inspection only; "
                   "relaunch with a new label; legacy recovery never spends")
 
 
@@ -457,8 +457,54 @@ def _legacy(spec, data, events):
     return mine
 
 
+def _owned_artifact_name(project, name, *, intermediate=False, include_locks=False):
+    """Runner artifact names, anchored after the exact project identifier.
+
+    Match the names emitted by usage_ledger, snapshot_store and the runner's
+    snapshot producers, including archives and numeric snapshot collisions.
+    A bare project prefix is insufficient: P_X is a distinct project from P.
+    """
+    prefix = re.escape(project) + "_"
+    metadata = (r"(?:d4d(?:_core)?\.yaml|reconciliation\.md|provenance\.yaml|"
+                r"api_progress\.json|latch_(?:journal\.jsonl|override\.json)|"
+                r"api_usage_[0-9a-f]{16}(?:\.previous-[0-9a-f]{32})?\.json|"
+                r"reasoning(?:\.previous-[0-9a-f]{32})?\.jsonl)")
+    index = r"snapshot_index(?:\.previous-[0-9a-f]{32})?\.json"
+    if include_locks and re.fullmatch(
+            r"\." + prefix + r"(?:d4d(?:_core)?\.yaml|reconciliation\.md|provenance\.yaml)_api_run\.lock", name):
+        return True
+    if re.fullmatch(prefix + (index if intermediate else metadata), name):
+        return True
+    # Atomic JSON writes use .<destination stem>.<temporary suffix>.tmp.
+    temporary = (r"snapshot_index" if intermediate else
+                 r"(?:api_usage_[0-9a-f]{16}|api_progress)")
+    if re.fullmatch(r"\." + prefix + temporary + r"\.[A-Za-z0-9_-]+\.tmp", name):
+        return True
+    if not intermediate:
+        return False
+    phase = (r"(?:full|core|audit|reconcile_full|reconcile_core|report|report_regate|"
+             r"report_after_repair|repair_full|repair_core|full_readdress|receipt_completion|"
+             r"removal_repair_full|typed_audit_worker|typed_audit_omission|typed_audit_integration)")
+    bodies = (
+        r"(?:full|core|reconcile_full|reconcile_core|coverage_receipt(?:_as_written)?|"
+        r"repair_(?:full|core)_r[0-9]+|removal_repair_full)(?:_[0-9]+)?\.yaml",
+        r"(?:audit|(?:audit|reconcile|report)_evidence|removal_repair_check|"
+        r"receipt_completion_(?:transcript|result|context|inputs|request|response)|"
+        r"typed_audit_(?:packet|assembly|[0-9]+_(?:request|context|response)))(?:_[0-9]+)?\.json",
+        r"(?:report|report_before_regate)(?:_[0-9]+)?\.md",
+        r"(?:" + phase + r"_(?:(?:rejected_)?response_[0-9a-f]{32}|"
+        r"unusable_attempt[0-9]+|incomplete_attempt[0-9]+_[0-9]+)|"
+        r"removal_repair_response)(?:_[0-9]+)?\.txt",
+    )
+    return any(re.fullmatch(prefix + pattern, name) for pattern in bodies)
+
+
 def _legacy_evidence(spec):
-    """Bounded known-artifact inspection includes ignored files by direct reads."""
+    """Inspect exact owned artifact names/identities, including ignored files.
+
+    Surviving artifacts establish residue, never its age. Prefix siblings do
+    not belong to this run; positively guarded foreign identities stay separate.
+    """
     from data_sheets_schema.snapshot_store import index_path
     import yaml
     events = _events(spec)
@@ -505,7 +551,10 @@ def _legacy_evidence(spec):
         # Partial/archived deliveries are residue too, even if progress,
         # provenance and the active ledger were all removed (P5).
         for folder in (spec.metadata_dir, spec.metadata_dir / "intermediate"):
-            for path in folder.glob(f"{spec.project}_*"):
+            for path in folder.iterdir() if folder.is_dir() else ():
+                if not _owned_artifact_name(spec.project, path.name,
+                                            intermediate=folder == spec.metadata_dir / "intermediate"):
+                    continue
                 if path == journal_path(spec):
                     continue  # _events/_mine already selected the guarded identity.
                 if path.name.startswith(f"{spec.project}_api_usage_") or path == override_path(spec):
@@ -904,7 +953,8 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
         _fail("missing completed intermediate bindings")
     for entry in intermediates:
         item = local(entry["path"])
-        if not item.is_relative_to(metadata_dir / "intermediate") or not item.name.startswith(project + "_"):
+        if (not item.is_relative_to(metadata_dir / "intermediate")
+                or not _owned_artifact_name(project, item.name, intermediate=True)):
             _fail("legacy intermediate ownership mismatch")
     bindings = [
         {"path": inputs["bundle_path"], "md5": inputs.get("bundle_md5"), "sha256": inputs.get("bundle_sha256")},
@@ -917,7 +967,8 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
         candidates = set(bound)
         for directory in {full_dir, metadata_dir}:
             for item in directory.rglob("*"):
-                if item.name.startswith((project + "_", "." + project + "_")) and (
+                if _owned_artifact_name(project, item.name,
+                        intermediate=item.parent == metadata_dir / "intermediate", include_locks=True) and (
                         not item.is_dir() or item.is_symlink()):
                     candidates.add(item)
         return {str(item.relative_to(root)): _sha(_bytes(safe(item))) for item in sorted(candidates)}

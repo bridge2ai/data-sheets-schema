@@ -2373,7 +2373,7 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
             before = whole_tree(Path(td))
             called = {"n": 0}
             with self.assertRaisesRegex(usage_ledger.UsageLedgerError,
-                                        "post-D41: journal-less run is inspection only"):
+                                        "post-D41: artifacts have no journal for the selected run; inspection only"):
                 execute(spec, client=self._no_api(called))
             self.assertEqual(called["n"], 0)
             self.assertEqual(whole_tree(Path(td)), before)
