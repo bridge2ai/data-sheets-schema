@@ -17,6 +17,7 @@ import yaml
 
 from data_sheets_schema.canary import OK, REGRESSED, UNMEASURABLE, duplicate_key_count, verdict
 from data_sheets_schema.duplicate_keys import describe, find_duplicate_keys
+from tests.backoff_sleep import BackoffSleeps
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -645,12 +646,14 @@ class TestReviewRound(unittest.TestCase):
                                       "source_caveats: a\nsource_caveats: b\n")
             spec.core_path.write_text("id: doi:10.1/x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n")
             usage = []
+            sleeps = BackoffSleeps()
             with mock.patch.object(api_runner, "_validator_lines", lambda *a, **k: ([], None)), \
                  mock.patch.object(api_runner, "CORE_DERIVED", False), \
                  mock.patch.object(api_runner, "_reasoning_path", lambda s: Path(tmp) / "r.jsonl"), \
                  mock.patch.object(api_runner, "_snapshot", lambda *a, **k: None), \
-                 mock.patch.object(api_runner.time, "sleep", lambda *_: None):
+                 mock.patch.object(api_runner.time, "sleep", sleeps):
                 log = _repair_invalid(spec, _Client(), {"name": "m", "temperature": None}, usage)
+            self.assertEqual(sleeps, [])
             self.assertEqual(len(prompts), 1, log)
             sent = str(prompts[0]["messages"])
             self.assertIn("duplicate mapping key", sent)

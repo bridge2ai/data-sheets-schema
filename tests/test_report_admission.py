@@ -19,6 +19,7 @@ from data_sheets_schema import api_runner as api, chunking, dollar_readout as dr
 from data_sheets_schema import receipt_completion as rc, snapshot_store, typed_audit_runtime as runtime
 from data_sheets_schema import usage_ledger as ledger
 from data_sheets_schema.resources import physical, resource_path
+from tests.backoff_sleep import BackoffSleeps
 import tests.test_shared_generation_runtime as sgr
 from tests.test_download.test_api_runner import _rate_limit_error
 from tests.test_evidence_generation_gate import specification
@@ -423,8 +424,8 @@ def test_an_admitted_refresh_after_repair_is_counted_and_sent(tmp_path, monkeypa
 def test_an_unavailable_counter_is_refused_without_dispatch_and_a_resume_recovers(tmp_path, monkeypatch):
     """A count error the dispatch would not retry is not retried either."""
     monkeypatch.setattr(api, 'MAX_ATTEMPTS', 3)
-    sleeps = []
-    monkeypatch.setattr(api, 'time', SimpleNamespace(**{**vars(api.time), 'sleep': sleeps.append}))
+    sleeps = BackoffSleeps()
+    monkeypatch.setattr(api.time, 'sleep', sleeps)
     spec = example(tmp_path)
     messages = Counted(spec, failures={'reconcile_full': [RuntimeError('route count unavailable')]})
     with pytest.raises(api.ContextNotAdmitted, match='reconcile_full endpoint token count unavailable'):
@@ -436,6 +437,7 @@ def test_an_unavailable_counter_is_refused_without_dispatch_and_a_resume_recover
     again = Counted(spec)
     assert api.execute(replace(spec), client=client_for(again))['validation_problems'] == []
     assert again.phases == ['reconcile_full', 'report']
+    assert sleeps == []
 
 
 def test_refusal_record_shape(tmp_path):
@@ -482,8 +484,8 @@ def test_an_unusable_count_is_refused(tmp_path, count):
 
 def test_a_transient_count_error_is_retried_as_the_dispatch_would_be(tmp_path, monkeypatch):
     monkeypatch.setattr(api, 'MAX_ATTEMPTS', 3)
-    sleeps = []
-    monkeypatch.setattr(api, 'time', SimpleNamespace(**{**vars(api.time), 'sleep': sleeps.append}))
+    sleeps = BackoffSleeps()
+    monkeypatch.setattr(api.time, 'sleep', sleeps)
     spec = example(tmp_path)
     resets = 'Limit resets at: 2026-01-01 00:00:00 UTC'   # already past: the shortest stated wait
     errors = [httpx.ConnectError('synthetic reset'), _rate_limit_error(resets)]
@@ -500,8 +502,8 @@ def test_a_transient_count_error_is_retried_as_the_dispatch_would_be(tmp_path, m
 
 def test_a_count_still_failing_after_max_attempts_is_refused(tmp_path, monkeypatch):
     monkeypatch.setattr(api, 'MAX_ATTEMPTS', 3)
-    sleeps, calls = [], []
-    monkeypatch.setattr(api, 'time', SimpleNamespace(**{**vars(api.time), 'sleep': sleeps.append}))
+    sleeps, calls = BackoffSleeps(), []
+    monkeypatch.setattr(api.time, 'sleep', sleeps)
     spec = example(tmp_path)
 
     def counter(**kwargs):
