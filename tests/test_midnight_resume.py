@@ -57,6 +57,22 @@ def test_automatic_date_is_restored_before_cached_instruction_or_portable_checks
         assert len(client.messages.calls) == 3 and len(result["usage"]) == 4
 
 
+def test_completed_midnight_resume_without_accounting_refuses_readonly(external, monkeypatch):
+    from tests.test_d68_legacy_readonly import tree
+    monkeypatch.setattr(api, "datetime", Clock)
+    Clock.day = 12
+    original = construct(external)
+    api.execute(original, client=FakeClient())
+    ledger.ledger_path(original).unlink()
+    before = tree(original.out_dir)
+    Clock.day = 13
+    client = FakeClient()
+    with pytest.raises(ledger.UsageLedgerError, match="ledger was deleted"):
+        api.execute(construct(external), client=client)
+    assert client.messages.calls == []
+    assert tree(original.out_dir) == before
+
+
 def test_explicit_changed_date_is_refused_without_spending_or_writing(external, monkeypatch):
     monkeypatch.setattr(api, "datetime", Clock)
     Clock.day = 12

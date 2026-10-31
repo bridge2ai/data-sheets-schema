@@ -3,6 +3,7 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
+from dataclasses import replace
 
 import pytest
 import yaml
@@ -77,11 +78,12 @@ def no_verifier_execution(monkeypatch):
 
 
 @pytest.mark.parametrize("layout", ["flat", "split"])
-def test_fresh_prefix_project_does_not_claim_sibling_artifacts(layout, tmp_path, monkeypatch):
+@pytest.mark.parametrize("projects", [("P", "P_X"), ("P", "P_reconcile"), ("VOICE", "VOICE_PEDIATRIC")])
+def test_fresh_prefix_project_does_not_claim_sibling_artifacts(layout, projects, tmp_path, monkeypatch):
     monkeypatch.setattr(api.RunSpec, "output_root", property(lambda self: tmp_path / "root"))
     kwargs = {"out_dir": tmp_path / "output"} if layout == "flat" else {}
-    sibling = spec(project="P_X", **kwargs)
-    selected = spec(project="P", **kwargs)
+    selected = spec(project=projects[0], **kwargs)
+    sibling = spec(project=projects[1], **kwargs)
     assert sibling.metadata_dir == selected.metadata_dir
     first, second = FakeClient(), FakeClient()
     api.execute(sibling, client=first)
@@ -114,8 +116,9 @@ def assert_only_owned_residue_refuses(layout, entry, resume, tmp_path, monkeypat
     monkeypatch.setattr(api.RunSpec, "output_root", property(lambda self: tmp_path / "root"))
     kwargs = {"out_dir": tmp_path / "output"} if layout == "flat" else {}
     sibling, selected = spec(project="P_X", **kwargs), spec(project="P", **kwargs)
+    ledger.prepare_usage(sibling, resume=True)
     sibling_path = artifact_path(sibling)
-    sibling_path.parent.mkdir(parents=True)
+    sibling_path.parent.mkdir(parents=True, exist_ok=True)
     sibling_path.write_text("sibling evidence\n")
     before = tree(tmp_path)
     journal.refuse_legacy_execution(selected)
@@ -145,7 +148,8 @@ def assert_only_owned_residue_refuses(layout, entry, resume, tmp_path, monkeypat
 def test_completed_verifier_does_not_claim_prefix_sibling(case, tmp_path, monkeypatch):
     root, old, selected = fixture(case, tmp_path)
     sibling = selected.project + "_X"
-    for name in (f"{sibling}_api_progress.json", f"{sibling}_latch_journal.jsonl",
+    ledger.prepare_usage(replace(selected, project=sibling), resume=True)
+    for name in (f"{sibling}_api_progress.json",
                  f"{sibling}_abandoned_attempts.jsonl",
                  f"{sibling}_coverage_receipt.yaml",
                  f"{sibling}_api_usage_0123456789abcdef.json",

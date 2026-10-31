@@ -1,0 +1,30 @@
+[
+  {
+    "file": "corpus-base.json",
+    "original_sha256": "cdef28670835cec228f73c3af7be71863fb68c9811f04dad68d8439d1bfad2c1",
+    "original_bytes": 176312,
+    "retained": "corpus-base.json",
+    "retained_bytes": 176312
+  },
+  {
+    "file": "corpus-packet.json",
+    "original_sha256": "66086850e40fce9e8523853fdd106ecf69cc98e4a0638d4a979c4d2637a99234",
+    "original_bytes": 178304,
+    "retained": "corpus-packet.json",
+    "retained_bytes": 178304
+  },
+  {
+    "file": "shard-plan.json",
+    "original_sha256": "a7c416ae6b962445e93c0c0a5236bdcab7178b9e5e7a339276cf6340ccc6d38e",
+    "original_bytes": 747270,
+    "retained": "shard-plan.json.gz",
+    "retained_bytes": 91423
+  },
+  {
+    "file": "validation.json",
+    "original_sha256": "1c8b6c3ee14e8632ac82a1328f5f6282a46a3be1e39ce11246499a02dcf7a057",
+    "original_bytes": 103762,
+    "retained": "validation.json",
+    "retained_bytes": 96455
+  }
+]

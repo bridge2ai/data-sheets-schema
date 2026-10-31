@@ -142,7 +142,7 @@ def test_missing_git_binary_uses_timestamp_fallback(tmp_path, monkeypatch):
     assert journal.record_age(record, repo_root=tmp_path) == "pre-D41"
 
 
-def test_constant_git_answers_and_full_sha_resolution_are_cached(tmp_path, monkeypatch):
+def test_git_availability_and_topology_are_revalidated(tmp_path, monkeypatch):
     root = repository_with_alternate_objects(tmp_path)
     actual = subprocess.run
     calls = []
@@ -155,6 +155,41 @@ def test_constant_git_answers_and_full_sha_resolution_are_cached(tmp_path, monke
     for commit in (PRE, PRE.upper(), PRE):
         assert journal.record_age({"repo": {"commit": commit}}, repo_root=root) == "pre-D41"
     for commit in (PRE, journal.D41_COMMIT):
-        assert calls.count(("rev-parse", "--verify", "--end-of-options", commit + "^{commit}")) == 1
-    assert calls.count(("rev-parse", "--is-shallow-repository")) == 1
+        assert calls.count(("rev-parse", "--verify", "--end-of-options", commit + "^{commit}")) == 3
+    assert calls.count(("rev-parse", "--is-shallow-repository")) == 3
     assert calls.count(("merge-base", "--is-ancestor", journal.D41_COMMIT, PRE)) == 3
+
+
+def test_missing_objects_are_rechecked_when_local_alternate_arrives(tmp_path):
+    root = repository_with_alternate_objects(tmp_path)
+    alternate = root / ".git/objects/info/alternates"
+    saved = alternate.read_bytes()
+    alternate.unlink()
+    record = {"repo": {"commit": journal.D41_COMMIT}}
+    assert journal.record_age(record, repo_root=root) == "age unestablished"
+    alternate.write_bytes(saved)
+    assert journal.record_age(record, repo_root=root) == "post-D41"
+
+
+def test_full_repository_can_become_shallow_in_the_same_process(tmp_path):
+    root = repository_with_alternate_objects(tmp_path)
+    post = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    assert journal.record_age({"repo": {"commit": PRE}}, repo_root=root) == "pre-D41"
+    (root / ".git/shallow").write_text(post + "\n")
+    assert journal.record_age({"repo": {"commit": post}}, repo_root=root) == "age unestablished"
+
+
+@pytest.mark.parametrize("consumer", [canary.baseline_for, canary.report_basis])
+def test_unknown_baseline_age_is_reported_without_changing_metrics(tmp_path, capsys, consumer):
+    import yaml
+    baseline = record_with(clean_integrity())
+    baseline.pop("model")
+    path = tmp_path / "claudecode_api_core/baseline-rep1/P_provenance.yaml"
+    path.parent.mkdir(parents=True)
+    path.write_text(yaml.safe_dump(baseline))
+    unknown = consumer("P", "baseline", "claudecode_api", tmp_path)
+    assert "baseline age unestablished (eligible)" in capsys.readouterr().err
+    baseline["repo"] = {"commit": PRE}
+    path.write_text(yaml.safe_dump(baseline))
+    assert consumer("P", "baseline", "claudecode_api", tmp_path) == unknown
+    assert "age unestablished" not in capsys.readouterr().err

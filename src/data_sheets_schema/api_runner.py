@@ -3456,6 +3456,8 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
     has already succeeded (#955). A usage persistence failure remains fatal:
     continuing could spend more while losing the accounting (#656).
     """
+    from .latch_journal import refuse_legacy_execution
+    refuse_legacy_execution(spec)
     try:
         token = _REWRITE_LOG.set(None)                       # a resolution, not a write
         try:
@@ -5430,8 +5432,8 @@ def _snapshot(spec: RunSpec, name: str, body: str, *, usage_id: str | None = Non
 def _intermediates_block(spec: RunSpec) -> list[dict[str, Any]] | None:
     """Every snapshot on disk for this run's project, pinned by hash.
 
-    Globbed at record-build time rather than accumulated in memory, so a
-    resumed invocation lists the earlier invocations' snapshots too.
+    A bound index remains authoritative. The historical fallback uses the
+    same fail-closed inventory as execution, narrowed to intermediate files.
     """
     from data_sheets_schema.snapshot_store import entries
     recorded = entries(spec)
@@ -5441,14 +5443,8 @@ def _intermediates_block(spec: RunSpec) -> list[dict[str, Any]] | None:
     if not d.is_dir():
         return None
     out = []
-    for p in sorted(d.glob(f"{spec.project}_*")):
-        # The remainder after the project name must be a phase token:
-        # VOICE and VOICE_PEDIATRIC share label directories, and a bare
-        # prefix glob would claim the other project's snapshots.
-        rest = p.name[len(spec.project) + 1:]
-        if not rest.startswith(("full", "core", "audit", "reconcile",
-                                "repair", "report", "coverage_receipt")):
-            continue
+    from .latch_journal import owned_artifacts
+    for p in owned_artifacts(spec, directories={d}):
         out.append({"path": str(p),
                     "sha256": hashlib.sha256(
                         p.read_bytes()).hexdigest()})
@@ -5469,6 +5465,8 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
     in the returned log; the caller re-validates afterwards, so a repair that
     made things worse is caught by the same gate that caught the original.
     """
+    from .latch_journal import refuse_legacy_execution
+    refuse_legacy_execution(spec)
     log: list[dict[str, Any]] = []
     for artifact, schema, cls in (("full", FULL_SCHEMA_PATH, "Dataset"),
                                   ("core", CORE_SCHEMA_PATH, "CoreDataset")):
@@ -5865,6 +5863,8 @@ def _admit_shared_context(spec: RunSpec, phase: str, attempt: int, client, kwarg
 
 
 def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, client, **kwargs):
+    from .latch_journal import refuse_legacy_execution
+    refuse_legacy_execution(spec)
     _require_surviving_accounting(spec)
     if spec.shared_generation_version:
         from .typed_audit_runtime import require_request
@@ -6928,13 +6928,13 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     if spec.native_source_attribution_version:
         raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
 
+    from .latch_journal import launch_record, refuse_legacy_execution
+    refuse_legacy_execution(spec)  # D68: refuse before even sidecar lock writes.
     if getattr(spec, 'shared_generation_version', 0):
         from .shared_generation import assert_current
         from .output_ownership import require_selected_resume_owner
         assert_current(spec)  # authority isolation precedes even sidecar lock writes
         require_selected_resume_owner(spec, resume=resume)
-    from .latch_journal import launch_record, refuse_legacy_execution
-    refuse_legacy_execution(spec)  # D68: refuse before even sidecar lock writes.
     with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256):
         if getattr(spec, 'shared_generation_version', 0):
             # Another sequential writer may have changed ownership while we waited.
@@ -7165,13 +7165,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         from .shared_generation import preflight as shared_preflight
         shared_preflight(spec, settings)
     if spec.shared_generation_version and not resume:
-        from . import usage_ledger as ledger
-        from .snapshot_store import index_path
-        if ledger.ledger_path(spec).exists() or any(path.exists() for path in
-                (spec.full_path, spec.core_path, spec.report_path, spec.provenance_path,
-                 _receipt_path(spec), _progress_path(spec), _reasoning_path(spec),
-                 index_path(spec.provenance_path.parent, spec.project))) or any(
-                     _intermediate_dir(spec).glob(f"{spec.project}_*")):
+        if latch_journal._legacy_evidence(spec):
             raise UsageLedgerError("shared generation cannot reuse spent outputs with no-resume; register a fresh run")
     client = client or _client()
     if spec.shared_generation_version:
@@ -7412,6 +7406,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                     "usage": existing.get("api_usage") or [],
                     "skipped": list(PHASES), "validation_problems": problems,
                     "checks": {"pair": pair_consistency(spec),
+                               "record_age": latch_journal.record_age(existing),
                                "runtime_integrity": runtime_integrity,
                                "validation": validation_block(spec, problems),
                                # A run this runner produced asked for the
@@ -8076,6 +8071,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             # a run with 11 pair errors and 19 ungrounded identifiers as a
             # success, which is how the v4 arm swept clean.
             "checks": {"pair": rec.data.get("pair_consistency"),
+                       "record_age": latch_journal.record_age(rec.data),
                        "runtime_integrity": rec.data["model"]["runtime_integrity"],
                        "validation": rec.data.get("validation"),
                        "report": rec.data.get("report_claims"),

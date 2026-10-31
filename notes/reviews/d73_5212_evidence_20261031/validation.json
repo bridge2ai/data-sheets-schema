@@ -2,14 +2,14 @@
   {
     "phase": "f1-before-canary",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-before-canary/d73-result.json",
+    "raw_report": "scratch-5212fix/f1-before-canary/d73-result.json",
     "raw_sha256": "8c8a55a37a4e88ee36010ca43c8556a1720892a4048469f49445450276f5ae88",
     "log_sha256": "147fff4db9be8c7f58086a5d21efcf6079c61d632e4fe856dd91c793f928e78e",
     "exit_code": 1,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -35,7 +35,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-before-canary"
+      "scratch-5212fix/f1-before-canary"
     ],
     "canary_node": null,
     "selected": 1,
@@ -61,14 +61,14 @@
   {
     "phase": "f1-before-remaining",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-before-remaining/d73-result.json",
+    "raw_report": "scratch-5212fix/f1-before-remaining/d73-result.json",
     "raw_sha256": "b801f25b1f8dc4a1c1a29f575d0612ea3958a19bb5f0c35f86e4cca6e68b7f35",
     "log_sha256": "6f860beba16e7c93eaafc73695e67b2f60957d1076c38d7f50d17a490d08c25e",
     "exit_code": 1,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -95,7 +95,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-before-remaining"
+      "scratch-5212fix/f1-before-remaining"
     ],
     "canary_node": null,
     "selected": 3,
@@ -135,14 +135,14 @@
   {
     "phase": "f1-after-canary",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-after-canary/d73-result.json",
+    "raw_report": "scratch-5212fix/f1-after-canary/d73-result.json",
     "raw_sha256": "15604d3b64d3a205fdd3cc1766435d5bb78b6a6f6ee7c6e71b7f395874067fce",
     "log_sha256": "f843a54fa8ef3c6ef724f6f2f4a8278f82db6be7c46f5116e6dfc7b4dad32996",
     "exit_code": 0,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -168,7 +168,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-after-canary"
+      "scratch-5212fix/f1-after-canary"
     ],
     "canary_node": null,
     "selected": 1,
@@ -188,14 +188,14 @@
   {
     "phase": "f1-after-regressions",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-after-regressions/d73-result.json",
+    "raw_report": "scratch-5212fix/f1-after-regressions/d73-result.json",
     "raw_sha256": "27a37d1f676ed5dc44dfe2d382cb6bdf8dc7dcbb75a033130fce35b592adcb9c",
     "log_sha256": "69d65c7b0c94c80be9bc99f2569de60096b410696e763dfed4964352477e9cbe",
     "exit_code": 0,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -222,7 +222,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-after-regressions"
+      "scratch-5212fix/f1-after-regressions"
     ],
     "canary_node": null,
     "selected": 214,
@@ -243,14 +243,14 @@
   {
     "phase": "d73-age-reporting",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/d73-age-reporting/d73-result.json",
+    "raw_report": "scratch-5212fix/d73-age-reporting/d73-result.json",
     "raw_sha256": "73aba7e937227b209cfb50b5a855c07756bb5ce0b41710808f6f48e2498f6617",
     "log_sha256": "b3a2ff2589f017c7cc63c3096ebf6a974216a2930157c48726569bd05a895445",
     "exit_code": 0,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -278,7 +278,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/d73-age-reporting"
+      "scratch-5212fix/d73-age-reporting"
     ],
     "canary_node": null,
     "selected": 17,
@@ -300,14 +300,14 @@
   {
     "phase": "age-binding-guards",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/age-binding-guards/d73-result.json",
+    "raw_report": "scratch-5212fix/age-binding-guards/d73-result.json",
     "raw_sha256": "c3dcbf2e877696d927151187b975b236f53df5f64d87a32c5e3b99ea47a1729a",
     "log_sha256": "6ca34ee336eb7520c66189f1b144eb5d89bbb0e53583c2b2223967afb6918aa0",
     "exit_code": 0,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -334,7 +334,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/age-binding-guards"
+      "scratch-5212fix/age-binding-guards"
     ],
     "canary_node": null,
     "selected": 98,
@@ -355,14 +355,14 @@
   {
     "phase": "nf3-stubs",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/nf3-stubs/d73-result.json",
+    "raw_report": "scratch-5212fix/nf3-stubs/d73-result.json",
     "raw_sha256": "1a3ef6462c59d576a2a0a8b82182d745ce8f3534427a9422503ead9c1ecf8018",
     "log_sha256": "75fbd8dececae13307ba190bd8fd89c7e403cda546009ef9c44458cb0e1b4881",
     "exit_code": 0,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -388,7 +388,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/nf3-stubs"
+      "scratch-5212fix/nf3-stubs"
     ],
     "canary_node": null,
     "selected": 18,
@@ -411,14 +411,14 @@
   {
     "phase": "focused",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/focused/d73-result.json",
+    "raw_report": "scratch-5212fix/focused/d73-result.json",
     "raw_sha256": "d233243e7d579c8b18f59bae37be91b6567c5d65fed2da0da3d9dfcaf762c132",
     "log_sha256": "0b500a64c602380b41819b6a9d3c880fee13c48db46c8928cabf829f7eef21ba",
     "exit_code": 0,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -448,7 +448,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/focused"
+      "scratch-5212fix/focused"
     ],
     "canary_node": null,
     "selected": 393,
@@ -472,14 +472,14 @@
   {
     "phase": "broad",
     "complete": false,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/broad/d73-result.json",
+    "raw_report": "scratch-5212fix/broad/d73-result.json",
     "raw_sha256": "77580509c74db6efeccb2f015a9debf609206226d60954948cd11bb2025bc552",
     "log_sha256": "055e028b6625f909657cfb101add893db42ba119a1dddb1f95a72f84865f6297",
     "exit_code": 2,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -536,7 +536,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/broad"
+      "scratch-5212fix/broad"
     ],
     "canary_node": null,
     "selected": 1296,
@@ -568,14 +568,14 @@
   {
     "phase": "abandoned-before",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/abandoned-before/d73-result.json",
+    "raw_report": "scratch-5212fix/abandoned-before/d73-result.json",
     "raw_sha256": "ed8f94188f71a31ab921f643b825ba2809e84d38d9a812834160c5ec0614637d",
     "log_sha256": "cabbd4a6b5642b318f608fc8a3fa203b5632466492ffd07b25c617b874c53df5",
     "exit_code": 1,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -601,7 +601,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/abandoned-before"
+      "scratch-5212fix/abandoned-before"
     ],
     "canary_node": null,
     "selected": 24,
@@ -788,14 +788,14 @@
   {
     "phase": "abandoned-after",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/abandoned-after/d73-result.json",
+    "raw_report": "scratch-5212fix/abandoned-after/d73-result.json",
     "raw_sha256": "5a32f0a36faf417afb5e6d4434ccef960e3ae59df8a85ad9202845fac6fb6379",
     "log_sha256": "345dd372a9300023c5831801ad426715759aa4cb048b7719db31229e8f4ef6d4",
     "exit_code": 0,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -824,7 +824,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/abandoned-after"
+      "scratch-5212fix/abandoned-after"
     ],
     "canary_node": null,
     "selected": 29,
@@ -845,14 +845,14 @@
   {
     "phase": "broad-final",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/broad-final/d73-result.json",
+    "raw_report": "scratch-5212fix/broad-final/d73-result.json",
     "raw_sha256": "3356b5c39bd8874a64fc852f248fb878c07647c7e5f19b2e5752fbb47cb5be94",
     "log_sha256": "5ae32e32dd99cc66453a733497b56848f74226b8cc7199a7941600504bf22402",
     "exit_code": 0,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -909,7 +909,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/broad-final"
+      "scratch-5212fix/broad-final"
     ],
     "canary_node": null,
     "selected": 1320,
@@ -981,14 +981,14 @@
   {
     "phase": "receipt-before",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/receipt-before/d73-result.json",
+    "raw_report": "scratch-5212fix/receipt-before/d73-result.json",
     "raw_sha256": "29a6a3c860f0864e21f589876080c48b1cb5db7b65e107cddd73ecb945eabbac",
     "log_sha256": "df7726141104d970d52b4750104596720ea4d2b426f5b168c27f816a00c2a0fb",
     "exit_code": 1,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -1014,7 +1014,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/receipt-before"
+      "scratch-5212fix/receipt-before"
     ],
     "canary_node": null,
     "selected": 1,
@@ -1041,14 +1041,14 @@
   {
     "phase": "receipt-after-canary",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/receipt-after-canary/d73-result.json",
+    "raw_report": "scratch-5212fix/receipt-after-canary/d73-result.json",
     "raw_sha256": "4e07505d732aa8988b4ff57ed3e92a1ff1f1e5d6ec6e2d2bd610f234549c8097",
     "log_sha256": "0eb779a7fdaf10f594c3816e82911751eecf3c855049f2db96b47f4ce71884ef",
     "exit_code": 0,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -1074,7 +1074,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/receipt-after-canary"
+      "scratch-5212fix/receipt-after-canary"
     ],
     "canary_node": null,
     "selected": 1,
@@ -1094,14 +1094,14 @@
   {
     "phase": "focused-final",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/focused-final/d73-result.json",
+    "raw_report": "scratch-5212fix/focused-final/d73-result.json",
     "raw_sha256": "d5adef52fa5d617eeb78bdb26f36a1084ac7dcd727d589c48bb7e335ce5e9854",
     "log_sha256": "7e95de502ecad2ab99721e6efd951c29529e88b3ac16accc2b138df2e26d9210",
     "exit_code": 0,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -1131,7 +1131,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/focused-final"
+      "scratch-5212fix/focused-final"
     ],
     "canary_node": null,
     "selected": 441,
@@ -1155,14 +1155,14 @@
   {
     "phase": "collect",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/collect/d73-result.json",
+    "raw_report": "scratch-5212fix/collect/d73-result.json",
     "raw_sha256": "4ef83aaff2176d963fb2a06be50e0cb7d14899a843fd320585ef743c12a097ba",
     "log_sha256": "ac184dfa42c978924486ac2732c8f6f010e059c4f0d17ebac2585556cc5a80f1",
     "exit_code": 0,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -1188,7 +1188,7 @@
       "--collect-only",
       "-q",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/collect"
+      "scratch-5212fix/collect"
     ],
     "canary_node": null,
     "selected": 20847,
@@ -1204,14 +1204,14 @@
   {
     "phase": "xdist-canary",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/xdist-canary/d73-result.json",
+    "raw_report": "scratch-5212fix/xdist-canary/d73-result.json",
     "raw_sha256": "8950e249ad4a0fd2bbc8f81c3e066404c1f1bd72b8fd1cfa89a19bfa012783a8",
     "log_sha256": "2601c94c9a2b91b1df7d962e34d7148e2bbc3b5d61c09c2f43e79233f660789c",
     "exit_code": 0,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "PYTEST_DISABLE_PLUGIN_AUTOLOAD"
@@ -1247,11 +1247,11 @@
       "--dist",
       "load",
       "--maxschedchunk=1",
-      "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/xdist-canary.xml",
+      "--junitxml=scratch-5212fix/xdist-canary.xml",
       "--d73-canary-node",
       "tests/test_d68_legacy_readonly.py::test_completed_legacy_verifier_is_readonly[i1]",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/xdist-canary",
+      "scratch-5212fix/xdist-canary",
       "-p",
       "scripts.adhoc.d73_pytest_canary_20261031"
     ],
@@ -1278,14 +1278,14 @@
   {
     "phase": "shard",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/d73-result.json",
+    "raw_report": "scratch-5212fix/shard/d73-result.json",
     "raw_sha256": "0d4dff09a793bb2562e6e61ca620dcdf0de2f9fd5a13b4df7328e6c82e141497",
     "log_sha256": "cb6a31b8af93ec118dd4ea5f43e83772cc3aadebbe2bf1a335168c323b3904e8",
     "exit_code": 1,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "PYTEST_DISABLE_PLUGIN_AUTOLOAD"
@@ -1321,9 +1321,9 @@
       "--dist",
       "load",
       "--maxschedchunk=1",
-      "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard.xml",
+      "--junitxml=scratch-5212fix/shard.xml",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard"
+      "scratch-5212fix/shard"
     ],
     "canary_node": null,
     "selected": 5632,
@@ -1339,7 +1339,7 @@
         "outcome": "skipped",
         "duration": 9.612500434741378e-05,
         "wasxfail": null,
-        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 50, 'Skipped: this runtime uses reprlib dataclass repr')"
+        "message": "('tests/test_cache_dependencies_dataclass_repr.py', 50, 'Skipped: this runtime uses reprlib dataclass repr')"
       },
       {
         "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_actual_nested_code_with_wrong_effective_name_is_refused",
@@ -1347,7 +1347,7 @@
         "outcome": "skipped",
         "duration": 8.695799624547362e-05,
         "wasxfail": null,
-        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 61, 'Skipped: this runtime uses reprlib dataclass repr')"
+        "message": "('tests/test_cache_dependencies_dataclass_repr.py', 61, 'Skipped: this runtime uses reprlib dataclass repr')"
       },
       {
         "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_counterfeit_decorator_cannot_authorize_its_own_nested_code",
@@ -1355,7 +1355,7 @@
         "outcome": "skipped",
         "duration": 7.991700840648264e-05,
         "wasxfail": null,
-        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 98, 'Skipped: this runtime uses reprlib dataclass repr')"
+        "message": "('tests/test_cache_dependencies_dataclass_repr.py', 98, 'Skipped: this runtime uses reprlib dataclass repr')"
       },
       {
         "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_effective_dataclass_globals_are_validated_before_and_after_bind[get_ident-before]",
@@ -1363,7 +1363,7 @@
         "outcome": "skipped",
         "duration": 7.212499622255564e-05,
         "wasxfail": null,
-        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 115, 'Skipped: this runtime uses reprlib dataclass repr')"
+        "message": "('tests/test_cache_dependencies_dataclass_repr.py', 115, 'Skipped: this runtime uses reprlib dataclass repr')"
       },
       {
         "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_effective_dataclass_globals_are_validated_before_and_after_bind[get_ident-after]",
@@ -1371,7 +1371,7 @@
         "outcome": "skipped",
         "duration": 7.574999472126365e-05,
         "wasxfail": null,
-        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 115, 'Skipped: this runtime uses reprlib dataclass repr')"
+        "message": "('tests/test_cache_dependencies_dataclass_repr.py', 115, 'Skipped: this runtime uses reprlib dataclass repr')"
       },
       {
         "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_effective_dataclass_globals_are_validated_before_and_after_bind[id-before]",
@@ -1379,7 +1379,7 @@
         "outcome": "skipped",
         "duration": 0.0001232089998666197,
         "wasxfail": null,
-        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 115, 'Skipped: this runtime uses reprlib dataclass repr')"
+        "message": "('tests/test_cache_dependencies_dataclass_repr.py', 115, 'Skipped: this runtime uses reprlib dataclass repr')"
       },
       {
         "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_effective_dataclass_globals_are_validated_before_and_after_bind[id-after]",
@@ -1387,7 +1387,7 @@
         "outcome": "skipped",
         "duration": 7.525000546593219e-05,
         "wasxfail": null,
-        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 115, 'Skipped: this runtime uses reprlib dataclass repr')"
+        "message": "('tests/test_cache_dependencies_dataclass_repr.py', 115, 'Skipped: this runtime uses reprlib dataclass repr')"
       },
       {
         "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_actual_code_with_foreign_global_dictionary_is_refused",
@@ -1395,7 +1395,7 @@
         "outcome": "skipped",
         "duration": 7.449999975506216e-05,
         "wasxfail": null,
-        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 136, 'Skipped: this runtime uses reprlib dataclass repr')"
+        "message": "('tests/test_cache_dependencies_dataclass_repr.py', 136, 'Skipped: this runtime uses reprlib dataclass repr')"
       },
       {
         "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_thread_proxy_is_refused_without_invoking_accessor",
@@ -1403,7 +1403,7 @@
         "outcome": "skipped",
         "duration": 7.787499635014683e-05,
         "wasxfail": null,
-        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 146, 'Skipped: this runtime uses reprlib dataclass repr')"
+        "message": "('tests/test_cache_dependencies_dataclass_repr.py', 146, 'Skipped: this runtime uses reprlib dataclass repr')"
       },
       {
         "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_effective_function_builtins_are_checked_not_module_metadata",
@@ -1411,7 +1411,7 @@
         "outcome": "skipped",
         "duration": 7.21669930499047e-05,
         "wasxfail": null,
-        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 159, 'Skipped: this runtime uses reprlib dataclass repr')"
+        "message": "('tests/test_cache_dependencies_dataclass_repr.py', 159, 'Skipped: this runtime uses reprlib dataclass repr')"
       },
       {
         "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_unavailable_stdlib_source_only_bypasses_cache",
@@ -1419,7 +1419,7 @@
         "outcome": "skipped",
         "duration": 7.058300252538174e-05,
         "wasxfail": null,
-        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 175, 'Skipped: this runtime uses reprlib dataclass repr')"
+        "message": "('tests/test_cache_dependencies_dataclass_repr.py', 175, 'Skipped: this runtime uses reprlib dataclass repr')"
       }
     ],
     "failed_phases": [
@@ -1429,7 +1429,7 @@
         "outcome": "failed",
         "duration": 0.46211524998943787,
         "wasxfail": null,
-        "message": "real_direct = (<module 'awake_direct_fixture' from '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-leg...n/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw1/test_real_legacy_launcher_keep0')))\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x146e6eac0>\noutcome = 'success'\n\n    @pytest.mark.parametrize(\"outcome\", [\"success\", \"nonzero\", \"signal\", \"old_review\"])\n    def test_real_legacy_launcher_keeps_guards_and_receipts(real_direct, monkeypatch, outcome):\n        fixture, legacy_launch = real_direct\n        output = legacy_launch.path.with_name(\"registration-awake.json\")\n        awake.prepare(legacy_launch.path, output)\n        review, word = fixture.bind(legacy_launch.tmp_path, output, \"awake-review.json\", \"awake-word.json\")\n        api = FakeAPI()\n        guard = awake.KeepAwake(api)\n        monkeypatch.setattr(awake, \"KeepAwake\", lambda: guard)\n        monkeypatch.setattr(awake, \"load_legacy\", lambda: fixture.launcher)\n        before = legacy_launch.path.read_bytes(), Path(legacy_launch.registration[\"generation\"][\"jobs\"][0][\"instruction\"]).read_bytes()\n        child = fixture.fake_child(write_outputs=legacy_launch.write_outputs, exit_code=int(outcome == \"nonzero\"))\n        def execute(*args, **kwargs):\n            assert len(api.active) == 3\n            result = child(*args, **kwargs)\n            if outcome == \"signal\":\n                signal.getsignal(signal.SIGTERM)(signal.SIGTERM, None)\n            return result\n        monkeypatch.setattr(fixture.launcher.native, \"execute_child\", execute)\n        args = SimpleNamespace(registration=output, review=legacy_launch.review if outcome == \"old_review\" else review,\n                               launch_word=word, job=fixture.JOB)\n        if outcome == \"old_review\":\n            with pytest.raises(fixture.BudgetStop, match=\"independent approval\"):\n                awake.launch(args)\n            assert not (output.parent / \"attempts\").exists()\n        else:\n>           assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE           AssertionError: assert 1 == 0\nE            +  where 1 = <function launch at 0x1202137e0>(namespace(registration=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw1/test_real_legacy_launcher_keep0/registration/registration-awake.json'), review=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw1/test_real_legacy_launcher_keep0/awake-review.json'), launch_word=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw1/test_real_legacy_launcher_keep0/awake-word.json'), job='CHORUS_direct_rep1'))\nE            +    where <function launch at 0x1202137e0> = awake.launch\n\ntests/test_direct_keep_awake.py:288: AssertionError"
+        "message": "real_direct = (<module 'awake_direct_fixture' from 'd4d-executions/codex-x-5212-leg...n/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw1/test_real_legacy_launcher_keep0')))\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x146e6eac0>\noutcome = 'success'\n\n    @pytest.mark.parametrize(\"outcome\", [\"success\", \"nonzero\", \"signal\", \"old_review\"])\n    def test_real_legacy_launcher_keeps_guards_and_receipts(real_direct, monkeypatch, outcome):\n        fixture, legacy_launch = real_direct\n        output = legacy_launch.path.with_name(\"registration-awake.json\")\n        awake.prepare(legacy_launch.path, output)\n        review, word = fixture.bind(legacy_launch.tmp_path, output, \"awake-review.json\", \"awake-word.json\")\n        api = FakeAPI()\n        guard = awake.KeepAwake(api)\n        monkeypatch.setattr(awake, \"KeepAwake\", lambda: guard)\n        monkeypatch.setattr(awake, \"load_legacy\", lambda: fixture.launcher)\n        before = legacy_launch.path.read_bytes(), Path(legacy_launch.registration[\"generation\"][\"jobs\"][0][\"instruction\"]).read_bytes()\n        child = fixture.fake_child(write_outputs=legacy_launch.write_outputs, exit_code=int(outcome == \"nonzero\"))\n        def execute(*args, **kwargs):\n            assert len(api.active) == 3\n            result = child(*args, **kwargs)\n            if outcome == \"signal\":\n                signal.getsignal(signal.SIGTERM)(signal.SIGTERM, None)\n            return result\n        monkeypatch.setattr(fixture.launcher.native, \"execute_child\", execute)\n        args = SimpleNamespace(registration=output, review=legacy_launch.review if outcome == \"old_review\" else review,\n                               launch_word=word, job=fixture.JOB)\n        if outcome == \"old_review\":\n            with pytest.raises(fixture.BudgetStop, match=\"independent approval\"):\n                awake.launch(args)\n            assert not (output.parent / \"attempts\").exists()\n        else:\n>           assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE           AssertionError: assert 1 == 0\nE            +  where 1 = <function launch at 0x1202137e0>(namespace(registration=PosixPath('scratch-5212fix/shard/popen-gw1/test_real_legacy_launcher_keep0/registration/registration-awake.json'), review=PosixPath('scratch-5212fix/shard/popen-gw1/test_real_legacy_launcher_keep0/awake-review.json'), launch_word=PosixPath('scratch-5212fix/shard/popen-gw1/test_real_legacy_launcher_keep0/awake-word.json'), job='CHORUS_direct_rep1'))\nE            +    where <function launch at 0x1202137e0> = awake.launch\n\ntests/test_direct_keep_awake.py:288: AssertionError"
       },
       {
         "nodeid": "tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[signal]",
@@ -1437,7 +1437,7 @@
         "outcome": "failed",
         "duration": 0.42885854199994355,
         "wasxfail": null,
-        "message": "real_direct = (<module 'awake_direct_fixture' from '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-leg...n/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw3/test_real_legacy_launcher_keep0')))\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x169831710>\noutcome = 'signal'\n\n    @pytest.mark.parametrize(\"outcome\", [\"success\", \"nonzero\", \"signal\", \"old_review\"])\n    def test_real_legacy_launcher_keeps_guards_and_receipts(real_direct, monkeypatch, outcome):\n        fixture, legacy_launch = real_direct\n        output = legacy_launch.path.with_name(\"registration-awake.json\")\n        awake.prepare(legacy_launch.path, output)\n        review, word = fixture.bind(legacy_launch.tmp_path, output, \"awake-review.json\", \"awake-word.json\")\n        api = FakeAPI()\n        guard = awake.KeepAwake(api)\n        monkeypatch.setattr(awake, \"KeepAwake\", lambda: guard)\n        monkeypatch.setattr(awake, \"load_legacy\", lambda: fixture.launcher)\n        before = legacy_launch.path.read_bytes(), Path(legacy_launch.registration[\"generation\"][\"jobs\"][0][\"instruction\"]).read_bytes()\n        child = fixture.fake_child(write_outputs=legacy_launch.write_outputs, exit_code=int(outcome == \"nonzero\"))\n        def execute(*args, **kwargs):\n            assert len(api.active) == 3\n            result = child(*args, **kwargs)\n            if outcome == \"signal\":\n                signal.getsignal(signal.SIGTERM)(signal.SIGTERM, None)\n            return result\n        monkeypatch.setattr(fixture.launcher.native, \"execute_child\", execute)\n        args = SimpleNamespace(registration=output, review=legacy_launch.review if outcome == \"old_review\" else review,\n                               launch_word=word, job=fixture.JOB)\n        if outcome == \"old_review\":\n            with pytest.raises(fixture.BudgetStop, match=\"independent approval\"):\n                awake.launch(args)\n            assert not (output.parent / \"attempts\").exists()\n        else:\n>           assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE           AssertionError: assert 1 == 143\nE            +  where 1 = <function launch at 0x122b0f7e0>(namespace(registration=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw3/test_real_legacy_launcher_keep0/registration/registration-awake.json'), review=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw3/test_real_legacy_launcher_keep0/awake-review.json'), launch_word=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw3/test_real_legacy_launcher_keep0/awake-word.json'), job='CHORUS_direct_rep1'))\nE            +    where <function launch at 0x122b0f7e0> = awake.launch\n\ntests/test_direct_keep_awake.py:288: AssertionError"
+        "message": "real_direct = (<module 'awake_direct_fixture' from 'd4d-executions/codex-x-5212-leg...n/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw3/test_real_legacy_launcher_keep0')))\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x169831710>\noutcome = 'signal'\n\n    @pytest.mark.parametrize(\"outcome\", [\"success\", \"nonzero\", \"signal\", \"old_review\"])\n    def test_real_legacy_launcher_keeps_guards_and_receipts(real_direct, monkeypatch, outcome):\n        fixture, legacy_launch = real_direct\n        output = legacy_launch.path.with_name(\"registration-awake.json\")\n        awake.prepare(legacy_launch.path, output)\n        review, word = fixture.bind(legacy_launch.tmp_path, output, \"awake-review.json\", \"awake-word.json\")\n        api = FakeAPI()\n        guard = awake.KeepAwake(api)\n        monkeypatch.setattr(awake, \"KeepAwake\", lambda: guard)\n        monkeypatch.setattr(awake, \"load_legacy\", lambda: fixture.launcher)\n        before = legacy_launch.path.read_bytes(), Path(legacy_launch.registration[\"generation\"][\"jobs\"][0][\"instruction\"]).read_bytes()\n        child = fixture.fake_child(write_outputs=legacy_launch.write_outputs, exit_code=int(outcome == \"nonzero\"))\n        def execute(*args, **kwargs):\n            assert len(api.active) == 3\n            result = child(*args, **kwargs)\n            if outcome == \"signal\":\n                signal.getsignal(signal.SIGTERM)(signal.SIGTERM, None)\n            return result\n        monkeypatch.setattr(fixture.launcher.native, \"execute_child\", execute)\n        args = SimpleNamespace(registration=output, review=legacy_launch.review if outcome == \"old_review\" else review,\n                               launch_word=word, job=fixture.JOB)\n        if outcome == \"old_review\":\n            with pytest.raises(fixture.BudgetStop, match=\"independent approval\"):\n                awake.launch(args)\n            assert not (output.parent / \"attempts\").exists()\n        else:\n>           assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE           AssertionError: assert 1 == 143\nE            +  where 1 = <function launch at 0x122b0f7e0>(namespace(registration=PosixPath('scratch-5212fix/shard/popen-gw3/test_real_legacy_launcher_keep0/registration/registration-awake.json'), review=PosixPath('scratch-5212fix/shard/popen-gw3/test_real_legacy_launcher_keep0/awake-review.json'), launch_word=PosixPath('scratch-5212fix/shard/popen-gw3/test_real_legacy_launcher_keep0/awake-word.json'), job='CHORUS_direct_rep1'))\nE            +    where <function launch at 0x122b0f7e0> = awake.launch\n\ntests/test_direct_keep_awake.py:288: AssertionError"
       },
       {
         "nodeid": "tests/test_evaluation/test_rubric20_hybrid_parity.py::TestTheDenominator::test_the_scorer_itself_refuses_a_drifted_table",
@@ -1445,7 +1445,7 @@
         "outcome": "failed",
         "duration": 0.003959333000238985,
         "wasxfail": null,
-        "message": "self = <tests.test_evaluation.test_rubric20_hybrid_parity.TestTheDenominator testMethod=test_the_scorer_itself_refuses_a_drifted_table>\n\n    def test_the_scorer_itself_refuses_a_drifted_table(self):\n        \"\"\"Not just the helper \u2014 the call site has to reach it.\n    \n        Asserted by scoring a real file, because the previous version of this\n        test asserted on the script's source text and would have passed against\n        a `derived_maximum()` that nothing called.\n        \"\"\"\n        module = _load()\n>       with tempfile.TemporaryDirectory(dir=REPO) as tmp:\n\ntests/test_evaluation/test_rubric20_hybrid_parity.py:111: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:887: in __init__\n    self.name = mkdtemp(suffix, prefix, dir)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nsuffix = '', prefix = 'tmp'\ndir = PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy')\n\n    def mkdtemp(suffix=None, prefix=None, dir=None):\n        \"\"\"User-callable function to create and return a unique temporary\n        directory.  The return value is the pathname of the directory.\n    \n        Arguments are as for mkstemp, except that the 'text' argument is\n        not accepted.\n    \n        The directory is readable, writable, and searchable only by the\n        creating user.\n    \n        Caller is responsible for deleting the directory when done with it.\n        \"\"\"\n    \n        prefix, suffix, dir, output_type = _sanitize_params(prefix, suffix, dir)\n    \n        names = _get_candidate_names()\n        if output_type is bytes:\n            names = map(_os.fsencode, names)\n    \n        for seq in range(TMP_MAX):\n            name = next(names)\n            file = _os.path.join(dir, prefix + name + suffix)\n            _sys.audit(\"tempfile.mkdtemp\", file)\n            try:\n>               _os.mkdir(file, 0o700)\nE               PermissionError: [Errno 1] Operation not permitted: '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tmpj0tc512e'\n\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:385: PermissionError"
+        "message": "self = <tests.test_evaluation.test_rubric20_hybrid_parity.TestTheDenominator testMethod=test_the_scorer_itself_refuses_a_drifted_table>\n\n    def test_the_scorer_itself_refuses_a_drifted_table(self):\n        \"\"\"Not just the helper \u2014 the call site has to reach it.\n    \n        Asserted by scoring a real file, because the previous version of this\n        test asserted on the script's source text and would have passed against\n        a `derived_maximum()` that nothing called.\n        \"\"\"\n        module = _load()\n>       with tempfile.TemporaryDirectory(dir=REPO) as tmp:\n\ntests/test_evaluation/test_rubric20_hybrid_parity.py:111: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:887: in __init__\n    self.name = mkdtemp(suffix, prefix, dir)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nsuffix = '', prefix = 'tmp'\ndir = PosixPath('d4d-executions/codex-x-5212-legacy')\n\n    def mkdtemp(suffix=None, prefix=None, dir=None):\n        \"\"\"User-callable function to create and return a unique temporary\n        directory.  The return value is the pathname of the directory.\n    \n        Arguments are as for mkstemp, except that the 'text' argument is\n        not accepted.\n    \n        The directory is readable, writable, and searchable only by the\n        creating user.\n    \n        Caller is responsible for deleting the directory when done with it.\n        \"\"\"\n    \n        prefix, suffix, dir, output_type = _sanitize_params(prefix, suffix, dir)\n    \n        names = _get_candidate_names()\n        if output_type is bytes:\n            names = map(_os.fsencode, names)\n    \n        for seq in range(TMP_MAX):\n            name = next(names)\n            file = _os.path.join(dir, prefix + name + suffix)\n            _sys.audit(\"tempfile.mkdtemp\", file)\n            try:\n>               _os.mkdir(file, 0o700)\nE               PermissionError: [Errno 1] Operation not permitted: 'tmpj0tc512e'\n\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:385: PermissionError"
       },
       {
         "nodeid": "tests/test_run_lock.py::TestAgainstARealProcess::test_it_becomes_stale_once_stopped",
@@ -1453,7 +1453,7 @@
         "outcome": "failed",
         "duration": 6.613809916001628,
         "wasxfail": null,
-        "message": "self = <tests.test_run_lock.TestAgainstARealProcess testMethod=test_it_becomes_stale_once_stopped>\n\n    def test_it_becomes_stale_once_stopped(self):\n        [lock] = run_lock.live(self.dir)\n        run_lock.stop(lock)\n        for _ in range(50):\n            if not lock.alive:\n                break\n            time.sleep(0.1)\n>       self.assertEqual(run_lock.live(self.dir), [])\nE       AssertionError: Lists differ: [Lock(path=PosixPath('/Users/marcin/Docume[151 chars]'t')] != []\nE       \nE       First list contains 1 additional elements.\nE       First extra element 0:\nE       Lock(path=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/temporary/tmp64a2xltn/real.json'), pid=70304, label_prefix='real', projects=['A'], started='t')\nE       \nE       + []\nE       - [Lock(path=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/temporary/tmp64a2xltn/real.json'),\nE       -       pid=70304,\nE       -       label_prefix='real',\nE       -       projects=['A'],\nE       -       started='t')]\n\ntests/test_run_lock.py:152: AssertionError"
+        "message": "self = <tests.test_run_lock.TestAgainstARealProcess testMethod=test_it_becomes_stale_once_stopped>\n\n    def test_it_becomes_stale_once_stopped(self):\n        [lock] = run_lock.live(self.dir)\n        run_lock.stop(lock)\n        for _ in range(50):\n            if not lock.alive:\n                break\n            time.sleep(0.1)\n>       self.assertEqual(run_lock.live(self.dir), [])\nE       AssertionError: Lists differ: [Lock(path=PosixPath('scratch-5212fix/[abbreviated traceback]'t')] != []\nE       \nE       First list contains 1 additional elements.\nE       First extra element 0:\nE       Lock(path=PosixPath('scratch-5212fix/temporary/tmp64a2xltn/real.json'), pid=70304, label_prefix='real', projects=['A'], started='t')\nE       \nE       + []\nE       - [Lock(path=PosixPath('scratch-5212fix/temporary/tmp64a2xltn/real.json'),\nE       -       pid=70304,\nE       -       label_prefix='real',\nE       -       projects=['A'],\nE       -       started='t')]\n\ntests/test_run_lock.py:152: AssertionError"
       },
       {
         "nodeid": "tests/test_run_lock.py::TestAgainstARealProcess::test_stop_actually_stops_it",
@@ -1627,14 +1627,14 @@
   {
     "phase": "base-write-canary",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/base-write-canary/d73-result.json",
+    "raw_report": "scratch-5212fix/base-write-canary/d73-result.json",
     "raw_sha256": "b4faac383f34042b29c03f58dc3c470f66ad030e9e44f7b89e0380de36de1734",
     "log_sha256": "4f33684bfe4a34441ec793949f6afb169ca987a1d1be90a9f6f707526de82fad",
     "exit_code": 1,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -1650,7 +1650,7 @@
         "PyYAML": "6.0.2"
       },
       "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
-      "tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/d73-base-d9",
+      "tree": "scratch-5212fix/d73-base-d9",
       "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
       "tracked_diff": "",
       "latch_journal_sha256": "625ac764fd0956fb96afe4c187119304f168d5767a4dcf9a97338830576b8d1c",
@@ -1661,7 +1661,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/base-write-canary"
+      "scratch-5212fix/base-write-canary"
     ],
     "canary_node": null,
     "selected": 1,
@@ -1677,7 +1677,7 @@
         "outcome": "failed",
         "duration": 0.004034540994325653,
         "wasxfail": null,
-        "message": "tests/test_evaluation/test_rubric20_hybrid_parity.py:111: in test_the_scorer_itself_refuses_a_drifted_table\n    with tempfile.TemporaryDirectory(dir=REPO) as tmp:\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:887: in __init__\n    self.name = mkdtemp(suffix, prefix, dir)\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:385: in mkdtemp\n    _os.mkdir(file, 0o700)\nE   PermissionError: [Errno 1] Operation not permitted: '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/d73-base-d9/tmpqzfqja71'"
+        "message": "tests/test_evaluation/test_rubric20_hybrid_parity.py:111: in test_the_scorer_itself_refuses_a_drifted_table\n    with tempfile.TemporaryDirectory(dir=REPO) as tmp:\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:887: in __init__\n    self.name = mkdtemp(suffix, prefix, dir)\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:385: in mkdtemp\n    _os.mkdir(file, 0o700)\nE   PermissionError: [Errno 1] Operation not permitted: 'scratch-5212fix/d73-base-d9/tmpqzfqja71'"
       }
     ],
     "passed_by_file": {},
@@ -1688,14 +1688,14 @@
   {
     "phase": "base-remaining",
     "complete": true,
-    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/base-remaining/d73-result.json",
+    "raw_report": "scratch-5212fix/base-remaining/d73-result.json",
     "raw_sha256": "b14bf78d9cfd24cd449209ee3440d59f2fe508a12245882bb60fcf7af389bd55",
     "log_sha256": "ae94947a305c97d9dc69b25e1f17032323f1abcedaabc502b6be559a8b0297ac",
     "exit_code": 1,
     "environment": {
       "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
-      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
-      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "executable": "repo/.venv/bin/python",
+      "site": "repo/.venv/lib/python3.13/site-packages",
       "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
       "removed_environment_names": [
         "CBORG_API_KEY",
@@ -1711,7 +1711,7 @@
         "PyYAML": "6.0.2"
       },
       "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
-      "tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/d73-base-d9",
+      "tree": "scratch-5212fix/d73-base-d9",
       "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
       "tracked_diff": "",
       "latch_journal_sha256": "625ac764fd0956fb96afe4c187119304f168d5767a4dcf9a97338830576b8d1c",
@@ -1725,7 +1725,7 @@
       "-q",
       "--tb=short",
       "--basetemp",
-      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/base-remaining"
+      "scratch-5212fix/base-remaining"
     ],
     "canary_node": null,
     "selected": 4,
@@ -1741,7 +1741,7 @@
         "outcome": "failed",
         "duration": 0.32746433300781064,
         "wasxfail": null,
-        "message": "tests/test_direct_keep_awake.py:288: in test_real_legacy_launcher_keeps_guards_and_receipts\n    assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE   AssertionError: assert 1 == 0\nE    +  where 1 = <function launch at 0x1029d71a0>(namespace(registration=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/base...-executions/scratch-5212fix/base-remaining/test_real_legacy_launcher_keep0/awake-word.json'), job='CHORUS_direct_rep1'))\nE    +    where <function launch at 0x1029d71a0> = awake.launch"
+        "message": "tests/test_direct_keep_awake.py:288: in test_real_legacy_launcher_keeps_guards_and_receipts\n    assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE   AssertionError: assert 1 == 0\nE    +  where 1 = <function launch at 0x1029d71a0>(namespace(registration=PosixPath('scratch-5212fix/base...-executions/scratch-5212fix/base-remaining/test_real_legacy_launcher_keep0/awake-word.json'), job='CHORUS_direct_rep1'))\nE    +    where <function launch at 0x1029d71a0> = awake.launch"
       },
       {
         "nodeid": "tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[signal]",
@@ -1749,7 +1749,7 @@
         "outcome": "failed",
         "duration": 0.32343604099878576,
         "wasxfail": null,
-        "message": "tests/test_direct_keep_awake.py:288: in test_real_legacy_launcher_keeps_guards_and_receipts\n    assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE   AssertionError: assert 1 == 143\nE    +  where 1 = <function launch at 0x1029d71a0>(namespace(registration=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/base...-executions/scratch-5212fix/base-remaining/test_real_legacy_launcher_keep1/awake-word.json'), job='CHORUS_direct_rep1'))\nE    +    where <function launch at 0x1029d71a0> = awake.launch"
+        "message": "tests/test_direct_keep_awake.py:288: in test_real_legacy_launcher_keeps_guards_and_receipts\n    assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE   AssertionError: assert 1 == 143\nE    +  where 1 = <function launch at 0x1029d71a0>(namespace(registration=PosixPath('scratch-5212fix/base...-executions/scratch-5212fix/base-remaining/test_real_legacy_launcher_keep1/awake-word.json'), job='CHORUS_direct_rep1'))\nE    +    where <function launch at 0x1029d71a0> = awake.launch"
       },
       {
         "nodeid": "tests/test_run_lock.py::TestAgainstARealProcess::test_it_becomes_stale_once_stopped",
@@ -1757,7 +1757,7 @@
         "outcome": "failed",
         "duration": 5.688401209001313,
         "wasxfail": null,
-        "message": "tests/test_run_lock.py:152: in test_it_becomes_stale_once_stopped\n    self.assertEqual(run_lock.live(self.dir), [])\nE   AssertionError: Lists differ: [Lock(path=PosixPath('/Users/marcin/Docume[151 chars]'t')] != []\nE   \nE   First list contains 1 additional elements.\nE   First extra element 0:\nE   Lock(path=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/temporary/tmp3lwyw7fx/real.json'), pid=70962, label_prefix='real', projects=['A'], started='t')\nE   \nE   + []\nE   - [Lock(path=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/temporary/tmp3lwyw7fx/real.json'),\nE   -       pid=70962,\nE   -       label_prefix='real',\nE   -       projects=['A'],\nE   -       started='t')]"
+        "message": "tests/test_run_lock.py:152: in test_it_becomes_stale_once_stopped\n    self.assertEqual(run_lock.live(self.dir), [])\nE   AssertionError: Lists differ: [Lock(path=PosixPath('scratch-5212fix/[abbreviated traceback]'t')] != []\nE   \nE   First list contains 1 additional elements.\nE   First extra element 0:\nE   Lock(path=PosixPath('scratch-5212fix/temporary/tmp3lwyw7fx/real.json'), pid=70962, label_prefix='real', projects=['A'], started='t')\nE   \nE   + []\nE   - [Lock(path=PosixPath('scratch-5212fix/temporary/tmp3lwyw7fx/real.json'),\nE   -       pid=70962,\nE   -       label_prefix='real',\nE   -       projects=['A'],\nE   -       started='t')]"
       },
       {
         "nodeid": "tests/test_run_lock.py::TestAgainstARealProcess::test_stop_actually_stops_it",

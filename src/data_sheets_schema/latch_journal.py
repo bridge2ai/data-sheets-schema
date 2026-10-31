@@ -10,7 +10,6 @@ import copy
 from contextlib import contextmanager
 from datetime import datetime
 import hashlib
-from functools import lru_cache
 import json
 import os
 from pathlib import Path
@@ -47,15 +46,14 @@ def _resolve_recorded_commit(commit, root):
     return None
 
 
-@lru_cache(maxsize=4096)
 def _resolve_full_commit(commit, root):
-    # Full object IDs are immutable. Short prefixes are resolved afresh because
-    # new local objects could make an abbreviation ambiguous.
+    # Object availability (including alternates and GIT_DIR) can change while
+    # this process lives. Resolve afresh; never cache absence as age evidence.
     return _resolve_recorded_commit(commit, root)
 
 
-@lru_cache(maxsize=128)
 def _age_repository_constants(root):
+    # Neither boundary availability nor shallow topology is a process constant.
     boundary = _resolve_full_commit(D41_COMMIT, root)
     shallow = _age_git(root, "rev-parse", "--is-shallow-repository")
     return boundary, shallow.stdout.strip() if shallow.returncode == 0 else None
@@ -150,9 +148,11 @@ def refuse_legacy_execution(spec):
                 data = {}
             if isinstance(data, dict) and "latch_journal" in data:
                 _fail("journal was deleted from a guarded ledger; found=missing journal (not a resume anchor)")
-        if path.exists() or path.is_symlink() or _legacy_evidence(spec):
+        residue = _legacy_evidence(spec)
+        if path.exists() or path.is_symlink() or residue:
             _fail(f"{record_age(_record(spec))}: artifacts have no journal for the selected run; inspection only; "
-                  "relaunch with a new label; legacy recovery never spends")
+                  "relaunch with a new label; legacy recovery never spends; files: "
+                  + ", ".join(sorted(set(residue) | ({str(path)} if path.exists() or path.is_symlink() else set()))))
 
 
 def _canonical(value) -> bytes:
@@ -202,7 +202,10 @@ def _bytes(path: Path) -> bytes:
 
 
 def _events(spec) -> list[dict]:
-    path = journal_path(spec)
+    return _read_events(journal_path(spec))
+
+
+def _read_events(path) -> list[dict]:
     if not path.exists() and not path.is_symlink():
         return []
     raw = _bytes(path)
@@ -485,116 +488,145 @@ def _legacy(spec, data, events):
     return mine
 
 
-def _owned_artifact_name(project, name, *, intermediate=False, include_locks=False):
-    """Runner artifact names, anchored after the exact project identifier.
+def owned_artifacts(spec, *, directories=None):
+    """All prefix candidates except positively attributed foreign artifacts.
 
-    Match the names emitted by usage_ledger, snapshot_store and the runner's
-    snapshot producers, including archives and numeric snapshot collisions.
-    A bare project prefix is insufficient: P_X is a distinct project from P.
+    No writer-name allowlist: unknown names, dot temporaries and symlinks are
+    candidates too. Only validated local journal histories establish guarded
+    identities. Attribution is per file; one foreign record cannot excuse an
+    unrelated orphan. Ambiguous files stay in the selected inventory.
+
+    The default scope is metadata, its immediate intermediate directory, and
+    every selected output parent. Consumers may narrow the returned scope
+    (e.g. provenance intermediates), but use the same attribution evidence.
     """
-    prefix = re.escape(project) + "_"
-    metadata = (r"(?:d4d(?:_core)?\.yaml|coverage_receipt\.yaml|reconciliation\.md|provenance\.yaml|"
-                r"api_progress\.json|abandoned_attempts\.jsonl|latch_(?:journal\.jsonl|override\.json)|"
-                r"api_usage_[0-9a-f]{16}(?:\.previous-[0-9a-f]{32})?\.json|"
-                r"reasoning(?:\.previous-[0-9a-f]{32})?\.jsonl)")
-    index = r"snapshot_index(?:\.previous-[0-9a-f]{32})?\.json"
-    if include_locks and re.fullmatch(
-            r"\." + prefix + r"(?:d4d(?:_core)?\.yaml|reconciliation\.md|provenance\.yaml)_api_run\.lock", name):
-        return True
-    if re.fullmatch(prefix + (index if intermediate else metadata), name):
-        return True
-    # Atomic JSON writes use .<destination stem>.<temporary suffix>.tmp.
-    temporary = (r"snapshot_index" if intermediate else
-                 r"(?:api_usage_[0-9a-f]{16}|api_progress)")
-    if re.fullmatch(r"\." + prefix + temporary + r"\.[A-Za-z0-9_-]+\.tmp", name):
-        return True
-    if not intermediate:
-        return False
-    phase = (r"(?:full|core|audit|reconcile_full|reconcile_core|report|report_regate|"
-             r"report_after_repair|repair_full|repair_core|full_readdress|receipt_completion|"
-             r"removal_repair_full|typed_audit_worker|typed_audit_omission|typed_audit_integration)")
-    bodies = (
-        r"(?:full|core|reconcile_full|reconcile_core|coverage_receipt(?:_as_written)?|"
-        r"repair_(?:full|core)_r[0-9]+|removal_repair_full)(?:_[0-9]+)?\.yaml",
-        r"(?:audit|(?:audit|reconcile|report)_evidence|removal_repair_check|"
-        r"receipt_completion_(?:transcript|result|context|inputs|request|response)|"
-        r"typed_audit_(?:packet|assembly|[0-9]+_(?:request|context|response)))(?:_[0-9]+)?\.json",
-        r"(?:report|report_before_regate)(?:_[0-9]+)?\.md",
-        r"(?:" + phase + r"_(?:(?:rejected_)?response_[0-9a-f]{32}|"
-        r"unusable_attempt[0-9]+|incomplete_attempt[0-9]+_[0-9]+)|"
-        r"removal_repair_response)(?:_[0-9]+)?\.txt",
-    )
-    return any(re.fullmatch(prefix + pattern, name) for pattern in bodies)
+    import yaml
+    folders = {spec.metadata_dir, spec.metadata_dir / "intermediate",
+               spec.full_path.parent, spec.core_path.parent, spec.report_path.parent,
+               spec.provenance_path.parent}
+    files = sorted({p for folder in folders if folder.is_dir() for p in folder.iterdir()
+                    if p.is_file() or p.is_symlink()})
+    selected = ledger.run_identity(spec)
+    keys = tuple(selected)
+
+    def identity(value):
+        if isinstance(value, dict) and all(isinstance(value.get(key), str) for key in keys):
+            return tuple(value[key] for key in keys)
+        return None
+
+    selected_id = identity(selected)
+    histories = {}
+    journal_owners = {}
+    for path in files:
+        if not path.name.endswith("_latch_journal.jsonl") or path.is_symlink():
+            continue
+        try:
+            events = _read_events(path)
+        except ledger.UsageLedgerError:
+            continue  # Invalid foreign history proves nothing; keep candidates.
+        owners = set()
+        for event in events:
+            owner = identity(event["identity"])
+            if owner is not None:
+                histories.setdefault(owner, []).append(event)
+                owners.add(owner)
+        journal_owners[path] = owners
+    guarded = {owner for owner, events in histories.items()
+               if any(e["kind"] == "generation" for e in events)
+               and not any(e["kind"] == "legacy_unverifiable" for e in events)}
+    scope = set(directories) if directories is not None else folders
+    candidates = [path for path in files if path.parent in scope and
+                  path.name.startswith((spec.project + "_", "." + spec.project + "_"))]
+    if not guarded:
+        return candidates  # Without guarded identities no exclusion is possible.
+
+    def owners_of(value):
+        if not isinstance(value, dict):
+            return set()
+        declared = {identity(value.get(key)) for key in ("identity", "run_identity", "run")}
+        declared.discard(None)
+        # Historical progress can carry a generation and label without the
+        # full identity. Both must match a guarded journal, not just a label.
+        if not declared and value.get("generation_id") and value.get("label"):
+            declared = {owner for owner, events in histories.items() if any(
+                e["generation_id"] == value["generation_id"]
+                and e["identity"].get("label") == value["label"] for e in events)}
+        return declared
+
+    records, declared = {}, {}
+    for path in files:
+        if path.is_symlink():
+            continue
+        try:
+            value = yaml.safe_load(_bytes(path))
+        except (ValueError, yaml.YAMLError, UnicodeError, ledger.UsageLedgerError):
+            continue
+        if isinstance(value, dict):
+            records[path] = value
+            declared[path] = owners_of(value)
+
+    def pins(value, seen=None):
+        seen = set() if seen is None else seen
+        if isinstance(value, (dict, list)):
+            if id(value) in seen:
+                return
+            seen.add(id(value))
+        if isinstance(value, dict):
+            if isinstance(value.get("path"), str) or isinstance(value.get("sha256"), str):
+                yield value
+            for child in value.values():
+                yield from pins(child, seen)
+        elif isinstance(value, list):
+            for child in value:
+                yield from pins(child, seen)
+
+    bindings = []
+    for owner in guarded:
+        bindings.extend((owner, p) for e in histories[owner] for p in pins(e["payload"]))
+    for path, value in records.items():
+        owners = declared[path]
+        if len(owners) == 1 and owners <= guarded and (
+                path.name.endswith(("_provenance.yaml", "_snapshot_index.json"))
+                or "_api_usage_" in path.name):
+            bindings.extend((next(iter(owners)), p) for p in pins(value))
+
+    found = []
+    for path in candidates:
+        owners = set(declared.get(path, ())) | journal_owners.get(path, set())
+        digest = None
+        for owner, pin in bindings:
+            bound_path = pin.get("path")
+            matches_path = isinstance(bound_path, str) and Path(bound_path).absolute() == path.absolute()
+            matches_hash = False
+            if isinstance(pin.get("sha256"), str) and not path.is_symlink():
+                if digest is None:
+                    digest = _sha(_bytes(path))
+                matches_hash = digest == pin["sha256"]
+            if matches_path or matches_hash:
+                owners.add(owner)
+        # A different project with guarded history supplies its namespace.
+        # Do not guess phase names: P_reconcile is an ordinary project too.
+        for owner in guarded:
+            project = dict(zip(keys, owner))["project"]
+            if project != spec.project and path.name.startswith((project + "_", "." + project + "_")):
+                owners.add(owner)
+        if owners and selected_id not in owners and owners <= guarded:
+            continue
+        found.append(path)
+    return found
 
 
 def _legacy_evidence(spec):
-    """Inspect exact owned artifact names/identities, including ignored files.
+    """Read all attributable or ambiguous residue, including unknown writers.
 
-    Surviving artifacts establish residue, never its age. Prefix siblings do
-    not belong to this run; positively guarded foreign identities stay separate.
+    Residue is not age evidence. Unattributable prefix siblings require a new
+    label too; only positive per-artifact guarded ownership permits exclusion.
     """
-    from data_sheets_schema.snapshot_store import index_path
-    import yaml
-    events = _events(spec)
-    def guarded_foreign(identity):
-        if not isinstance(identity, dict) or not ledger.identity_is_foreign(spec, identity):
-            return False
-        selected = {key: identity.get(key) for key in ledger.run_identity(spec)}
-        history = [event for event in events if event["identity"] == selected]
-        return (any(event["kind"] == "generation" for event in history)
-                and not any(event["kind"] == "legacy_unverifiable" for event in history))
-    candidates = [(spec.provenance_path, "run", "yaml"),
-                  (spec.metadata_dir / f"{spec.project}_api_progress.json", "run_identity", "json"),
-                  (index_path(spec.metadata_dir, spec.project), "run_identity", "json")]
-    found = []
-    foreign = False
-    for path, identity_key, encoding in candidates:
-        if not path.exists() and not path.is_symlink():
-            continue
-        raw = _bytes(path)
-        try:
-            value = yaml.safe_load(raw) if encoding == "yaml" else _json(raw)
-        except (ValueError, yaml.YAMLError):
-            value = None
-        identity = value.get(identity_key) if isinstance(value, dict) else None
-        foreign_label = (isinstance(value, dict) and value.get("label") is not None
-                         and value["label"] != spec.label)
-        # Older progress omits run_identity but can still positively bind a
-        # guarded foreign generation. A label alone cannot establish that.
-        if identity is None and foreign_label and value.get("generation_id"):
-            identities = [event["identity"] for event in events
-                          if event["generation_id"] == value["generation_id"]
-                          and event["identity"].get("label") == value["label"]]
-            if identities and all(guarded_foreign(item) for item in identities):
-                foreign = True
-                continue
-        if (ledger.identity_is_foreign(spec, identity) or foreign_label) and guarded_foreign(identity):
-            foreign = True
-            continue
-        found.append(str(path))
-    if not foreign:
-        for path in (spec.full_path, spec.core_path, spec.report_path):
-            if path.exists() or path.is_symlink():
-                found.append(str(path))
-        # Partial/archived deliveries are residue too, even if progress,
-        # provenance and the active ledger were all removed (P5).
-        for folder in (spec.metadata_dir, spec.metadata_dir / "intermediate"):
-            for path in folder.iterdir() if folder.is_dir() else ():
-                if not _owned_artifact_name(spec.project, path.name,
-                                            intermediate=folder == spec.metadata_dir / "intermediate"):
-                    continue
-                if path == journal_path(spec):
-                    continue  # _events/_mine already selected the guarded identity.
-                if path.name.startswith(f"{spec.project}_api_usage_") or path == override_path(spec):
-                    try:
-                        value = _json(_bytes(path))
-                    except (ValueError, ledger.UsageLedgerError):
-                        value = None
-                    if isinstance(value, dict) and guarded_foreign(value.get("identity")):
-                        continue
-                if path.is_file() or path.is_symlink():
-                    found.append(str(path))
-    return found
+    # A fresh execute call has already checked the complete inventory before
+    # acquiring locks. Its newly created, still-held lock inodes are current
+    # coordination writes, not historical residue. Inventory/verifier retain
+    # them; no existing, released, replaced or edited lock is exempted here.
+    return [str(path) for path in owned_artifacts(spec) if not ledger.is_new_held_lock(path)]
 
 
 def _recover_update(spec, data, events, mine):
@@ -984,10 +1016,15 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
     intermediates = record.get("intermediates") or []
     if not intermediates:
         _fail("missing completed intermediate bindings")
+    from types import SimpleNamespace
+    inventory_spec = SimpleNamespace(**{key: run[key] for key in ("project", "label", "method", "condition")},
+        metadata_dir=metadata_dir, full_path=outputs["full"], core_path=outputs["core"],
+        report_path=outputs["report"], provenance_path=path)
+    owned = set(owned_artifacts(inventory_spec))
     for entry in intermediates:
         item = local(entry["path"])
         if (not item.is_relative_to(metadata_dir / "intermediate")
-                or not _owned_artifact_name(project, item.name, intermediate=True)):
+                or item not in owned):
             _fail("legacy intermediate ownership mismatch")
     bindings = [
         {"path": inputs["bundle_path"], "md5": inputs.get("bundle_md5"), "sha256": inputs.get("bundle_sha256")},
@@ -997,13 +1034,7 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
     bound = {path, *(local(entry["path"]) for entry in bindings)}
 
     def inventory():
-        candidates = set(bound)
-        for directory in {full_dir, metadata_dir}:
-            for item in directory.rglob("*"):
-                if _owned_artifact_name(project, item.name,
-                        intermediate=item.parent == metadata_dir / "intermediate", include_locks=True) and (
-                        not item.is_dir() or item.is_symlink()):
-                    candidates.add(item)
+        candidates = bound | set(owned_artifacts(inventory_spec))
         return {str(item.relative_to(root)): _sha(_bytes(safe(item))) for item in sorted(candidates)}
 
     before = inventory()

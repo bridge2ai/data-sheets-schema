@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from contextvars import ContextVar
 import hashlib
 import json
 import os
@@ -15,6 +16,26 @@ import yaml
 
 class UsageLedgerError(OSError):
     """Past usage cannot be established; do not silently start more calls."""
+
+
+_NEW_HELD_LOCKS = ContextVar("new_held_output_locks", default=())
+
+
+def is_new_held_lock(path):
+    """Proof of this invocation's own empty lock creation, never old residue.
+
+    The complete artifact inventory still includes these files. Repeated
+    startup guards under exclusive_outputs must distinguish their own first
+    write from evidence that existed before lock acquisition. A replaced or
+    edited lock, a symlink, or a released lock never satisfies this proof.
+    """
+    try:
+        info = path.lstat()
+        return not path.is_symlink() and info.st_size == 0 and any(
+            path.absolute() == name and (info.st_dev, info.st_ino, info.st_mtime_ns) == pin
+            for name, pin in _NEW_HELD_LOCKS.get())
+    except OSError:
+        return False
 
 
 @contextmanager
@@ -37,9 +58,18 @@ def exclusive_outputs(paths):
     # metadata elsewhere. Lock the actual files, including resolved aliases,
     # in one order so partial overlap cannot bypass output ownership (#1298).
     held = []
+    token = _NEW_HELD_LOCKS.set(_NEW_HELD_LOCKS.get())
     try:
         for output, path in output_locks(paths):
             path.parent.mkdir(parents=True, exist_ok=True)
+            created = False
+            try:
+                descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            except FileExistsError:
+                pass
+            else:
+                os.close(descriptor)
+                created = True
             lock = FileLock(path, timeout=0)
             try:
                 lock.acquire()
@@ -47,8 +77,13 @@ def exclusive_outputs(paths):
                 raise UsageLedgerError(f"an API run is already active for {output}; "
                                        "retry after it finishes") from exc
             held.append(lock)
+            if created:
+                info = path.lstat()
+                _NEW_HELD_LOCKS.set((*_NEW_HELD_LOCKS.get(), (
+                    path.absolute(), (info.st_dev, info.st_ino, info.st_mtime_ns))))
         yield
     finally:
+        _NEW_HELD_LOCKS.reset(token)
         for lock in reversed(held):
             lock.release()
 

@@ -474,6 +474,8 @@ def require_request(spec, phase, kwargs):
 
 def run(spec, *, carry, client, settings, usage):
     """Real audit phase; scripted clients in tests use this same entry point."""
+    from .latch_journal import refuse_legacy_execution
+    refuse_legacy_execution(spec)
     from . import api_runner as api, reasoning
     captured = sg.preflight(spec, settings)
     reg = captured.document()

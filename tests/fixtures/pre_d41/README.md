@@ -82,3 +82,38 @@ The retired C7 `[True-False]` and C8 `[True]` parameters are both among the
 16 NF3-B / #5409 nodes. The complete node-by-node disposition, including
 the preserved parser checks and the two repaired `metadata_dir` stubs, is in
 `notes/reviews/d73_5212_review_followup_2026-10-31.md`.
+
+## Round 3: fail-closed ownership and restored controls
+
+Every regular file or symlink starting with `P_` or `.P_` is a candidate in
+metadata, its immediate `intermediate/`, and the selected output directories.
+There is no list of known writers. Only positive per-file attribution to a
+different guarded identity excludes a candidate. A guarded `P_X` or
+`VOICE_PEDIATRIC` can therefore share a label with `P` or `VOICE`, respectively.
+An unguarded or ambiguous `P_reconcile_full.yaml` is refused; that may be an
+ordinary `P_reconcile` run or P's reconcile snapshot. This false refusal is an
+accepted consequence: use a new label. Phase names never decide ownership.
+The sibling tests now initialize actual guarded history; arbitrary sibling
+filenames and an invalid journal no longer suffice to exclude evidence.
+
+The verifier uses the same inventory, including dot temporaries, within its
+unchanged **generic_v6 API** scope. Provenance's historical intermediate
+fallback narrows the inventory to `intermediate/`; its generation-bound index
+remains authoritative when present. Shared no-resume uses the full inventory.
+Execution residue checks additionally distinguish their own freshly created
+coordination locks: only exclusive creation followed by a currently held lock
+with the same path/inode/mtime and zero bytes qualifies. The complete inventory
+and verifier still include those locks. Pre-existing, released, edited or
+replaced locks are never excused by this startup scope distinction. A new
+identity sharing old unattributed sidecar locks may therefore require a new
+output directory, even when another identity's provenance is guarded.
+
+The completeness test drives plain, shared v1/v2, receipt completion,
+readdress, removal repair, typed audit, report regate and after-repair paths
+with synthetic replies. It discovers actual writer output, including atomic
+temporaries, then tests each artifact alone in both resume modes. Separate
+controls drive context admission/refusal/collisions and incomplete completion.
+The retired midnight `[completed=True, journal=False]` and reasoning
+`[portable=True]` cases now have explicit zero-call, unchanged-tree refusal
+replacements. A separate guarded index-publication interruption control
+preserves the original recovery coverage without permitting legacy recovery.

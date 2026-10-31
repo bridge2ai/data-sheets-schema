@@ -180,10 +180,13 @@ def checks_from_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def _require_eligible_baseline(record, path):
-    from .latch_journal import record_eligibility_problem
+    import sys
+    from .latch_journal import record_age, record_eligibility_problem
     problem = record_eligibility_problem(record)
     if problem:
         raise LookupError(f"baseline runtime integrity is ineligible: {path}: {problem}")
+    if record_age(record) == "age unestablished":
+        print(f"baseline age unestablished (eligible): {path}", file=sys.stderr)
 
 
 def offline_verdict(record: dict[str, Any], project: str, label_prefix: str,

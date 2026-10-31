@@ -37,6 +37,19 @@ def test_fresh_generation_archives_malformed_predecessor_reasoning(external, por
     assert archives[0].read_bytes() == predecessor
 
 
+def test_portable_reasoning_restart_without_accounting_refuses_readonly(external):
+    from tests.test_d68_legacy_readonly import tree
+    api.execute(external, client=FakeClient())
+    path = api._reasoning_path(external)
+    path.write_bytes(path.read_bytes() + b'{"unfinished":')
+    ledger.ledger_path(external).unlink()
+    before, client = tree(external.out_dir), FakeClient()
+    with pytest.raises(ledger.UsageLedgerError, match="ledger was deleted"):
+        api.execute(external, resume=False, client=client)
+    assert client.messages.calls == []
+    assert tree(external.out_dir) == before
+
+
 @pytest.mark.parametrize("failure", ["rename", "finalize"])
 def test_interrupted_archive_initialization_recovers_without_losing_bytes(external, monkeypatch, failure):
     api.execute(external, client=FakeClient())

@@ -1141,6 +1141,12 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     if found:
         raise click.ClickException(run_guard.message(found))
 
+    # D69: preflight the entire selection before even a coordination lock is
+    # created. execute repeats this read-only guard for each selected run.
+    from data_sheets_schema.latch_journal import refuse_legacy_execution
+    for selected in specs:
+        refuse_legacy_execution(selected)
+
     from data_sheets_schema import run_lock
     if roster:
         _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)

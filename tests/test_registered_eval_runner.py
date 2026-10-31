@@ -240,6 +240,27 @@ def test_d41_ineligible_record_refuses_before_rating_preparation(registration, t
                           "provenance_sha256": sha(path.read_bytes())})
 
 
+def test_prepare_rejects_post_d41_provenance_with_absent_integrity(registration, tmp_path):
+    from data_sheets_schema.latch_journal import D41_COMMIT
+    prior = yaml.safe_load(registration["provenance"].read_bytes())
+    prior["repo"] = {"commit": D41_COMMIT}
+    prior.pop("model", None)
+    path = tmp_path / "post-d41.yaml"
+    path.write_text(yaml.safe_dump(prior))
+    with pytest.raises(ValueError, match="post-D41: missing runtime_integrity block"):
+        runner.prepare(**{**registration, "provenance": path,
+                          "provenance_sha256": sha(path.read_bytes())})
+
+
+def test_dispatch_rechecks_age_when_local_evidence_changes(prepared, tmp_path, monkeypatch):
+    from data_sheets_schema import latch_journal
+    monkeypatch.setattr(latch_journal, "record_age", lambda *a, **k: "post-D41")
+    output = tmp_path / "never-created"
+    with pytest.raises(ValueError, match="post-D41: missing runtime_integrity block"):
+        runner.execute(prepared, output, plan_sha256=prepared.digest, environ={})
+    assert not output.exists()
+
+
 def rebind_record(registration, directory, raw):
     """Keep the real generation authority while pinning this selected output."""
     record = directory / "selected-record.yaml"
