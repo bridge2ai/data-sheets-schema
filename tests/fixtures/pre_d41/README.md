@@ -77,3 +77,8 @@ The D70-only fixture additions in `test_method_resolution.py` (two timestamps),
 and `test_registered_eval_runner.py` (one clean integrity block) are all
 reverted. These fixtures again exercise unknown age; they no longer need
 invented age/integrity evidence to reach their original assertions.
+
+The retired C7 `[True-False]` and C8 `[True]` parameters are both among the
+16 NF3-B / #5409 nodes. The complete node-by-node disposition, including
+the preserved parser checks and the two repaired `metadata_dir` stubs, is in
+`notes/reviews/d73_5212_review_followup_2026-10-31.md`.

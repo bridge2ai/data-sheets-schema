@@ -197,7 +197,10 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         client = anthropic.Anthropic(api_key="offline", base_url="http://probe.invalid", max_retries=0,
                                      http_client=httpx.Client(transport=httpx.MockTransport(handler)))
         settings = _model_settings("generic_v10")
-        spec = SimpleNamespace(shared_generation_version=0)
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        spec = SimpleNamespace(shared_generation_version=0,
+                               metadata_dir=Path(self.enterContext(TemporaryDirectory())))
         with patch.object(api_runner, "_require_surviving_accounting"), \
              patch.object(api_runner, "_begin_usage_call", return_value="u1"), \
              patch.object(api_runner, "_cancel_usage_call"), \
@@ -264,7 +267,10 @@ class TestTheRequestStatesThinking(unittest.TestCase):
             streamed_with.append(c)
             return real_retry(c, **kw)
         settings = _model_settings("generic_v10")
-        spec = SimpleNamespace(shared_generation_version=2)
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        spec = SimpleNamespace(shared_generation_version=2,
+                               metadata_dir=Path(self.enterContext(TemporaryDirectory())))
         limits = {"max_calls": 5, "aggregate_input_tokens": 10**9, "aggregate_output_tokens": 10**9,
                   "context_limit_tokens": 1_000_000, "context_limit_basis": "offline test"}
         with ExitStack() as stack:

@@ -18,6 +18,11 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[2]
 SCRATCH = ROOT.parent / "scratch-5212fix"
 args = sys.argv[1:]
+canary_node = None
+if "--d73-canary-node" in args:
+    position = args.index("--d73-canary-node")
+    canary_node = args[position + 1]
+    del args[position:position + 2]
 base = Path(args[args.index("--basetemp") + 1]).resolve()
 assert base.is_relative_to(SCRATCH) and base != SCRATCH
 assert not base.exists(), "preserve prior validation evidence"
@@ -57,6 +62,16 @@ class Observe:
     def __init__(self):
         self.reports, self.errors, self.selected, self.workers = [], [], [], {}
 
+    @pytest.hookimpl(wrapper=True, tryfirst=True)
+    def pytest_collection_modifyitems(self, config, items):
+        result = yield
+        if canary_node is not None:
+            selected = [item for item in items if item.nodeid == canary_node]
+            assert len(selected) == 1, "canary must belong to the real selected CI shard"
+            config.hook.pytest_deselected(items=[item for item in items if item not in selected])
+            items[:] = selected
+        return result
+
     def pytest_collection_finish(self, session):
         self.selected = [item.nodeid for item in session.items]
 
@@ -81,6 +96,7 @@ code = pytest.main([*args, "-p", "no:cacheprovider"], plugins=[observer])
 base.mkdir(exist_ok=True, parents=True)
 destination = base / "d73-result.json"
 destination.write_text(json.dumps({"exit_code": int(code), "command": args,
+    "canary_node": canary_node,
     "environment": environment, "selected": observer.selected, "reports": observer.reports,
     "collection_errors": observer.errors, "worker_collections": observer.workers}, indent=2) + "\n")
 assert destination.stat().st_size
