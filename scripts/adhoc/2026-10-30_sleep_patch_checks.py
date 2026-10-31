@@ -18,6 +18,9 @@ import traceback
 
 ROOT = Path(__file__).resolve().parents[2]
 RESULTS = ROOT / "test-results" / "sleep-patch"
+# Native permission fixtures require probes outside the source checkout. The
+# task explicitly places pytest basetemps under d4d-executions/.
+TEMPORARIES = ROOT.parent / "plans" / "codex_logs" / "sleep-patch-20261030"
 
 
 def child(args):
@@ -50,16 +53,33 @@ def main():
     parser.add_argument("label")
     parser.add_argument("--trace-waits", action="store_true")
     parser.add_argument("--child", action="store_true")
+    parser.add_argument("--baseline-ref", help="Temporarily measure this local ref in the same checkout")
     parser.add_argument("pytest_args", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     if args.pytest_args[:1] == ["--"]:
         args.pytest_args.pop(0)
     if args.child:
         return child(args)
+    if args.trace_waits and args.baseline_ref:
+        parser.error("baseline runs use pytest directly, without trace instrumentation")
+    original_branch = None
+    if args.baseline_ref:
+        subprocess.run(["git", "diff", "--quiet", "HEAD", "--"], cwd=ROOT, check=True)
+        original_branch = subprocess.check_output(
+            ["git", "symbolic-ref", "--short", "HEAD"], cwd=ROOT, text=True).strip()
+        subprocess.run(["git", "switch", "--detach", args.baseline_ref], cwd=ROOT, check=True)
+    try:
+        return measure(args)
+    finally:
+        if original_branch is not None:
+            subprocess.run(["git", "switch", original_branch], cwd=ROOT, check=True)
+
+
+def measure(args):
     output = RESULTS / args.label
     output.mkdir(parents=True, exist_ok=False)
-    temporary = output / "tmp"
-    temporary.mkdir()
+    temporary = TEMPORARIES / args.label / "tmp"
+    temporary.mkdir(parents=True, exist_ok=False)
     environment = {key: value for key, value in os.environ.items()
                    if not any(word in key.upper() for word in ("API_KEY", "AUTH_TOKEN", "ACCESS_TOKEN"))
                    and key not in ("PYTEST_ADDOPTS", "D4D_INSTALL_TESTS")}
@@ -69,14 +89,16 @@ def main():
                        GIT_NO_LAZY_FETCH="1", GIT_TERMINAL_PROMPT="0", GIT_ALLOW_PROTOCOL="file",
                        PIP_NO_INDEX="1", UV_OFFLINE="1")
     pytest_args = [*args.pytest_args, "-p", "no:cacheprovider", "--durations=0",
-                   f"--basetemp={output / 'basetemp'}", f"--junitxml={output / 'pytest.xml'}"]
+                   f"--basetemp={temporary.parent / 'basetemp'}", f"--junitxml={output / 'pytest.xml'}"]
     # Allow local process/socket tests while denying external network connections.
     profile = '(version 1)(allow default)(deny network-outbound)(allow network-outbound (remote ip "localhost:*"))'
-    command = ["/usr/bin/sandbox-exec", "-p", profile, sys.executable, str(Path(__file__).resolve()),
-               "--child"]
+    command = ["/usr/bin/sandbox-exec", "-p", profile, sys.executable]
     if args.trace_waits:
-        command.append("--trace-waits")
-    command.extend([args.label, "--", *pytest_args])
+        command.extend([str(Path(__file__).resolve()), "--child", "--trace-waits", args.label, "--", *pytest_args])
+    else:
+        # This also works when measuring main, where this branch's helper file
+        # is absent. The already-running parent retains its code in memory.
+        command.extend(["-m", "pytest", *pytest_args])
     packages = sorted(f"{d.metadata['Name']}=={d.version}" for d in metadata.distributions())
     (output / "packages.txt").write_text("\n".join(packages) + "\n")
     identity = {"python": sys.version, "executable": sys.executable,

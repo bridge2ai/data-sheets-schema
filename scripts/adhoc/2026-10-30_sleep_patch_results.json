@@ -1,0 +1,1051 @@
+{
+  "red_ci_run": 41092033720,
+  "measurements": {
+    "before-canary": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "fa304cd803396307263407592455be548d837bcd",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests/test_report_admission.py::test_an_unavailable_counter_is_refused_without_dispatch_and_a_resume_recovers",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/before-canary/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/before-canary/pytest.xml"
+      ],
+      "load_before": [
+        32.09326171875,
+        22.62353515625,
+        17.314453125
+      ],
+      "wall_seconds": 124.91671679200226,
+      "exit_code": 1,
+      "load_after": [
+        17.16455078125,
+        20.361328125,
+        17.16259765625
+      ],
+      "junit_sha256": "171e4f27535e7feb1f641810efc610fee35400d146a137ae0a73bd5c8ee22cc3",
+      "outcomes": {
+        "failed": 1
+      },
+      "cases": [
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unavailable_counter_is_refused_without_dispatch_and_a_resume_recovers",
+          "time": "119.368",
+          "outcome": "failed"
+        }
+      ],
+      "timeout_waits": {
+        "artifact_sha256": "50937ba047c4f41cf6e486e61e572d87fc11128ea9ad0709442a3574302a1487",
+        "calls": 10,
+        "call_chains": [
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7100",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/schema_sync.py",
+              "545",
+              "check"
+            ],
+            [
+              "data_sheets_schema/schema_sync.py",
+              "407",
+              "check_one"
+            ],
+            [
+              "data_sheets_schema/schema_sync.py",
+              "230",
+              "_regenerate"
+            ]
+          ],
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7100",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/schema_sync.py",
+              "545",
+              "check"
+            ],
+            [
+              "data_sheets_schema/schema_sync.py",
+              "418",
+              "check_one"
+            ],
+            [
+              "data_sheets_schema/schema_sync.py",
+              "311",
+              "_rebuilt_fingerprint"
+            ]
+          ],
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7516",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/receipt_completion.py",
+              "602",
+              "run"
+            ],
+            [
+              "data_sheets_schema/receipt_completion.py",
+              "215",
+              "_inputs"
+            ],
+            [
+              "data_sheets_schema/receipt_completion.py",
+              "173",
+              "_validate_record"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "4186",
+              "_validator_lines"
+            ]
+          ]
+        ]
+      }
+    },
+    "before-nine": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "fa304cd803396307263407592455be548d837bcd",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests/test_download/test_api_runner.py::TestValidatorRepairRefreshCheckpoint",
+        "tests/test_report_admission.py::test_a_refused_regate_keeps_the_report_and_the_run_publishes[over_window]",
+        "tests/test_report_admission.py::test_exactly_at_the_limit_is_admitted",
+        "-v",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/before-nine/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/before-nine/pytest.xml"
+      ],
+      "load_before": [
+        17.6484375,
+        20.3642578125,
+        17.201171875
+      ],
+      "wall_seconds": 2242.186667083006,
+      "exit_code": 0,
+      "load_after": [
+        13.5947265625,
+        17.57763671875,
+        20.03857421875
+      ],
+      "junit_sha256": "f3af443559ccacbf68ddfa4b078cbf69791994fd8c1d01ff065632429e200481",
+      "outcomes": {
+        "passed": 9
+      },
+      "cases": [
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_refused_refresh_preserves_the_repaired_artifact_progress",
+          "time": "191.747",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_interruption_before_refresh_does_not_restart_the_sealed_full",
+          "time": "281.892",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_missing_corrupt_or_stale_checkpoint_refuses_before_calls",
+          "time": "452.122",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_paid_refresh_interruption_refuses_duplicate_dispatch",
+          "time": "177.420",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[False]",
+          "time": "291.141",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[True]",
+          "time": "292.524",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_does_not_disable_later_invalid_run_repair",
+          "time": "225.946",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_refused_regate_keeps_the_report_and_the_run_publishes[over_window]",
+          "time": "189.952",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_exactly_at_the_limit_is_admitted",
+          "time": "131.608",
+          "outcome": "passed"
+        }
+      ]
+    },
+    "after-canary": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "223d4aabff062a40b7c22676b3d1a7679f5246f7",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests/test_report_admission.py::test_an_unavailable_counter_is_refused_without_dispatch_and_a_resume_recovers",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/after-canary/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/after-canary/pytest.xml"
+      ],
+      "load_before": [
+        14.091796875,
+        17.27001953125,
+        19.8271484375
+      ],
+      "wall_seconds": 208.8662811250033,
+      "exit_code": 0,
+      "load_after": [
+        9.869140625,
+        13.7373046875,
+        17.74658203125
+      ],
+      "junit_sha256": "7b85ee8bfe686d2f3da67c7ea1bb28cae9e2c07ad7b24c939b6b99bb94a005c3",
+      "outcomes": {
+        "passed": 1
+      },
+      "cases": [
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unavailable_counter_is_refused_without_dispatch_and_a_resume_recovers",
+          "time": "206.544",
+          "outcome": "passed"
+        }
+      ],
+      "timeout_waits": {
+        "artifact_sha256": "18ec20852bed3cfedfe62e58badbd430dfddff48a8bd5e204f9ce143faba2545",
+        "calls": 28,
+        "call_chains": [
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7100",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/schema_sync.py",
+              "545",
+              "check"
+            ],
+            [
+              "data_sheets_schema/schema_sync.py",
+              "407",
+              "check_one"
+            ],
+            [
+              "data_sheets_schema/schema_sync.py",
+              "230",
+              "_regenerate"
+            ]
+          ],
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7100",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/schema_sync.py",
+              "545",
+              "check"
+            ],
+            [
+              "data_sheets_schema/schema_sync.py",
+              "418",
+              "check_one"
+            ],
+            [
+              "data_sheets_schema/schema_sync.py",
+              "311",
+              "_rebuilt_fingerprint"
+            ]
+          ],
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7516",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/receipt_completion.py",
+              "602",
+              "run"
+            ],
+            [
+              "data_sheets_schema/receipt_completion.py",
+              "215",
+              "_inputs"
+            ],
+            [
+              "data_sheets_schema/receipt_completion.py",
+              "173",
+              "_validate_record"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "4186",
+              "_validator_lines"
+            ]
+          ],
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7625",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "1984",
+              "build_record"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "625",
+              "system_facts"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "383",
+              "_run"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "373",
+              "_run_result"
+            ]
+          ],
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7625",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "1984",
+              "build_record"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "626",
+              "system_facts"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "383",
+              "_run"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "373",
+              "_run_result"
+            ]
+          ],
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7625",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "2026",
+              "build_record"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "782",
+              "repo_facts"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "383",
+              "_run"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "373",
+              "_run_result"
+            ]
+          ],
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7625",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "2026",
+              "build_record"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "783",
+              "repo_facts"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "383",
+              "_run"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "373",
+              "_run_result"
+            ]
+          ],
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7625",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "2026",
+              "build_record"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "800",
+              "repo_facts"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "373",
+              "_run_result"
+            ]
+          ],
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7625",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "2026",
+              "build_record"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "832",
+              "repo_facts"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "383",
+              "_run"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "373",
+              "_run_result"
+            ]
+          ],
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7625",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "2026",
+              "build_record"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "833",
+              "repo_facts"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "383",
+              "_run"
+            ],
+            [
+              "data_sheets_schema/provenance.py",
+              "373",
+              "_run_result"
+            ]
+          ],
+          [
+            [
+              "data_sheets_schema/api_runner.py",
+              "6911",
+              "execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "7750",
+              "_execute"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "4253",
+              "validate_outputs"
+            ],
+            [
+              "data_sheets_schema/api_runner.py",
+              "4186",
+              "_validator_lines"
+            ]
+          ]
+        ]
+      }
+    },
+    "recorder-regressions": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "223d4aabff062a40b7c22676b3d1a7679f5246f7",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests/test_backoff_sleep.py",
+        "tests/test_report_admission.py::test_a_transient_count_error_is_retried_as_the_dispatch_would_be",
+        "tests/test_report_admission.py::test_a_count_still_failing_after_max_attempts_is_refused",
+        "tests/test_download/test_api_runner.py::TestResumeAndRetry::test_truncated_output_raises_rather_than_writing",
+        "tests/test_download/test_api_runner.py::TestResumeAndRetry::test_an_unusable_body_is_retried_not_fatal",
+        "tests/test_source_review.py::test_unusable_reviews_never_retry_or_resume",
+        "tests/test_duplicate_keys.py::TestReviewRound::test_the_repair_round_is_told_about_a_duplicate_and_checks_it_again",
+        "-v",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/recorder-regressions/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/recorder-regressions/pytest.xml"
+      ],
+      "load_before": [
+        10.052734375,
+        13.46826171875,
+        17.53271484375
+      ],
+      "wall_seconds": 37.57234812500246,
+      "exit_code": 0,
+      "load_after": [
+        11.08154296875,
+        13.3251953125,
+        17.31396484375
+      ],
+      "junit_sha256": "326f57841e93a066b8c1264bbc6ac73d6d3c65525a484fd240197fc3a1380999",
+      "outcomes": {
+        "passed": 16
+      },
+      "cases": [
+        {
+          "classname": "tests.test_backoff_sleep",
+          "name": "test_short_sleeps_delegate_but_backoffs_are_recorded",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_backoff_sleep",
+          "name": "test_timeout_wait_preserves_child_progress_without_recording_backoff",
+          "time": "0.147",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_transient_count_error_is_retried_as_the_dispatch_would_be",
+          "time": "4.450",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_count_still_failing_after_max_attempts_is_refused",
+          "time": "1.373",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_truncated_output_raises_rather_than_writing",
+          "time": "11.518",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_an_unusable_body_is_retried_not_fatal",
+          "time": "8.887",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[audit-malformed-2]",
+          "time": "5.253",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[audit-empty-2]",
+          "time": "0.168",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[audit-truncated-2]",
+          "time": "0.164",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report-empty-4]",
+          "time": "0.253",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report-truncated-4]",
+          "time": "0.227",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report_regate-empty-5]",
+          "time": "0.718",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report_regate-truncated-5]",
+          "time": "0.830",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report_after_repair-empty-6]",
+          "time": "0.819",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report_after_repair-truncated-6]",
+          "time": "0.870",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestReviewRound",
+          "name": "test_the_repair_round_is_told_about_a_duplicate_and_checks_it_again",
+          "time": "0.031",
+          "outcome": "passed"
+        }
+      ]
+    },
+    "after-nine": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "223d4aabff062a40b7c22676b3d1a7679f5246f7",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests/test_download/test_api_runner.py::TestValidatorRepairRefreshCheckpoint",
+        "tests/test_report_admission.py::test_a_refused_regate_keeps_the_report_and_the_run_publishes[over_window]",
+        "tests/test_report_admission.py::test_exactly_at_the_limit_is_admitted",
+        "-v",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/after-nine/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/after-nine/pytest.xml"
+      ],
+      "load_before": [
+        13.36181640625,
+        13.75634765625,
+        17.17236328125
+      ],
+      "wall_seconds": 2269.9374430829994,
+      "exit_code": 0,
+      "load_after": [
+        21.58837890625,
+        18.48583984375,
+        18.31787109375
+      ],
+      "junit_sha256": "c424688d443f16bddca8dd9ad8c1e8e3356d7dc0dff4c7b431722c628c986072",
+      "outcomes": {
+        "passed": 9
+      },
+      "cases": [
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_refused_refresh_preserves_the_repaired_artifact_progress",
+          "time": "153.509",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_interruption_before_refresh_does_not_restart_the_sealed_full",
+          "time": "244.095",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_missing_corrupt_or_stale_checkpoint_refuses_before_calls",
+          "time": "419.300",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_paid_refresh_interruption_refuses_duplicate_dispatch",
+          "time": "171.210",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[False]",
+          "time": "300.719",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[True]",
+          "time": "316.919",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_does_not_disable_later_invalid_run_repair",
+          "time": "255.350",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_refused_regate_keeps_the_report_and_the_run_publishes[over_window]",
+          "time": "227.523",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_exactly_at_the_limit_is_admitted",
+          "time": "164.503",
+          "outcome": "passed"
+        }
+      ]
+    },
+    "collection": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "223d4aabff062a40b7c22676b3d1a7679f5246f7",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests",
+        "--collect-only",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/collection/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/collection/pytest.xml"
+      ],
+      "load_before": [
+        21.58837890625,
+        18.48583984375,
+        18.31787109375
+      ],
+      "wall_seconds": 65.24984520800353,
+      "exit_code": 0,
+      "load_after": [
+        40.2783203125,
+        25.16357421875,
+        20.87109375
+      ],
+      "junit_sha256": "2f3f04740d21d4b98912781d5d801e74e11669426c5184198e70407ca8a2dc26",
+      "outcomes": {},
+      "cases": []
+    },
+    "ci-worker-canary": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "223d4aabff062a40b7c22676b3d1a7679f5246f7",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests/test_backoff_sleep.py::test_timeout_wait_preserves_child_progress_without_recording_backoff",
+        "-v",
+        "-n",
+        "logical",
+        "--maxprocesses=4",
+        "--dist",
+        "load",
+        "--maxschedchunk=1",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/ci-worker-canary/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/ci-worker-canary/pytest.xml"
+      ],
+      "load_before": [
+        28.52294921875,
+        23.97021484375,
+        20.61328125
+      ],
+      "wall_seconds": 1.548050500001409,
+      "exit_code": 0,
+      "load_after": [
+        27.03955078125,
+        23.73828125,
+        20.55078125
+      ],
+      "junit_sha256": "320d08e376f256522dea56d3b2fa91f14a9020a33cbf7ea789f84630e9825edc",
+      "outcomes": {
+        "passed": 1
+      },
+      "cases": [
+        {
+          "classname": "tests.test_backoff_sleep",
+          "name": "test_timeout_wait_preserves_child_progress_without_recording_backoff",
+          "time": "0.188",
+          "outcome": "passed"
+        }
+      ]
+    },
+    "timing-shard4": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "223d4aabff062a40b7c22676b3d1a7679f5246f7",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests",
+        "-v",
+        "-p",
+        "utils.pytest_shard",
+        "--ci-shard=4/6",
+        "--ci-shard-timings=utils/ci_test_durations.json",
+        "--ci-lane=ordinary",
+        "-n",
+        "logical",
+        "--maxprocesses=4",
+        "--dist",
+        "load",
+        "--maxschedchunk=1",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/timing-shard4/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/timing-shard4/pytest.xml"
+      ],
+      "load_before": [
+        19.1875,
+        22.111328125,
+        20.1142578125
+      ],
+      "ci_test_durations_sha256": "af1d4526d16ef2fb01c65e5377d4491af710faedebdaed093d89d8a53093cc22",
+      "wall_seconds": 140.95262820800417,
+      "exit_code": 2,
+      "load_after": [
+        39.20361328125,
+        27.57763671875,
+        22.50390625
+      ],
+      "junit_sha256": "74ecc02306af473fbb3171c70d893b69691fdbf185739359dd81002e49c038e3",
+      "outcomes": {
+        "passed": 63,
+        "failed": 12
+      },
+      "cases": []
+    }
+  },
+  "nine_case_comparison": [
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_refused_refresh_preserves_the_repaired_artifact_progress",
+      "before_seconds": 191.747,
+      "after_seconds": 153.509,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_interruption_before_refresh_does_not_restart_the_sealed_full",
+      "before_seconds": 281.892,
+      "after_seconds": 244.095,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_missing_corrupt_or_stale_checkpoint_refuses_before_calls",
+      "before_seconds": 452.122,
+      "after_seconds": 419.3,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_paid_refresh_interruption_refuses_duplicate_dispatch",
+      "before_seconds": 177.42,
+      "after_seconds": 171.21,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[False]",
+      "before_seconds": 291.141,
+      "after_seconds": 300.719,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[True]",
+      "before_seconds": 292.524,
+      "after_seconds": 316.919,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_accepted_refresh_does_not_disable_later_invalid_run_repair",
+      "before_seconds": 225.946,
+      "after_seconds": 255.35,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_a_refused_regate_keeps_the_report_and_the_run_publishes[over_window]",
+      "before_seconds": 189.952,
+      "after_seconds": 227.523,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_exactly_at_the_limit_is_admitted",
+      "before_seconds": 131.608,
+      "after_seconds": 164.503,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    }
+  ],
+  "ci_layout": {
+    "ci_test_durations_sha256": "af1d4526d16ef2fb01c65e5377d4491af710faedebdaed093d89d8a53093cc22",
+    "collected_cases": 20529,
+    "ordinary_cases": 20525,
+    "affected_files": {
+      "tests/test_backoff_sleep.py": {
+        "shard": 2,
+        "cases": 2
+      },
+      "tests/test_download/test_api_runner.py": {
+        "shard": 6,
+        "cases": 156
+      },
+      "tests/test_duplicate_keys.py": {
+        "shard": 5,
+        "cases": 36
+      },
+      "tests/test_report_admission.py": {
+        "shard": 4,
+        "cases": 22
+      },
+      "tests/test_source_review.py": {
+        "shard": 2,
+        "cases": 55
+      }
+    }
+  }
+}

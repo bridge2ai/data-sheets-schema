@@ -16,6 +16,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from utils.update_ci_shard_timings import build
+from utils.pytest_shard import balanced_files, partition_lanes, read_weights
 
 RESULTS = ROOT / "test-results" / "sleep-patch"
 AFFECTED = {
@@ -46,7 +47,7 @@ def main():
         measurement.update(junit_sha256=hashlib.sha256(xml.read_bytes()).hexdigest(),
                            outcomes=dict(Counter(case["outcome"] for case in recorded)),
                            cases=[case for case in recorded if any(
-                               case["classname"] == name or case["classname"].startswith(name + ".")
+                               case.get("classname", "") == name or case.get("classname", "").startswith(name + ".")
                                for name in AFFECTED)])
         waits = directory / "waits.json"
         if waits.exists():
@@ -72,6 +73,21 @@ def main():
         evidence["nine_case_comparison"] = comparison
         for row in comparison:
             print(f"{row['name']}: {row['before_seconds']:.3f}s -> {row['after_seconds']:.3f}s")
+    if "collection" in args.labels:
+        log = (RESULTS / "collection" / "pytest.log").read_text()
+        nodes = [line for line in log.splitlines() if re.match(r"^tests/.+\.py::", line)]
+        ordinary = partition_lanes(nodes)["ordinary"]
+        counts = Counter(node.split("::", 1)[0] for node in ordinary)
+        timing_path = ROOT / "utils" / "ci_test_durations.json"
+        assignments = balanced_files(counts, 6, read_weights(timing_path))
+        evidence["ci_layout"] = {
+            "ci_test_durations_sha256": hashlib.sha256(timing_path.read_bytes()).hexdigest(),
+            "collected_cases": len(nodes), "ordinary_cases": len(ordinary),
+            "affected_files": {name: {"shard": assignments[name], "cases": count}
+                               for name, count in sorted(counts.items())
+                               if name[:-3].replace("/", ".") in AFFECTED},
+        }
+        print(json.dumps(evidence["ci_layout"]))
     if args.refresh_from:
         if not args.files:
             parser.error("--refresh-from requires explicit --files")
