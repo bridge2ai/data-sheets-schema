@@ -540,11 +540,26 @@ def owned_artifacts(spec, *, directories=None):
     if not guarded:
         return candidates  # Without guarded identities no exclusion is possible.
 
+    unattributed = object()
+
     def owners_of(value):
         if not isinstance(value, dict):
             return set()
-        declared = {identity(value.get(key)) for key in ("identity", "run_identity", "run")}
-        declared.discard(None)
+        declared = set()
+        for key in ("identity", "run_identity", "run"):
+            if key not in value:
+                continue
+            candidate = value[key]
+            owner = identity(candidate)
+            if owner is not None:
+                declared.add(owner)
+            elif isinstance(candidate, dict):
+                fields = {k: v for k, v in candidate.items() if k in keys}
+                matches = {item for item in guarded | {selected_id} if fields and all(
+                    dict(zip(keys, item)).get(k) == v for k, v in fields.items())}
+                declared.update(matches if len(matches) == 1 else {unattributed})
+            else:
+                declared.add(unattributed)
         # Historical progress can carry a generation and label without the
         # full identity. Both must match a guarded journal, not just a label.
         if not declared and value.get("generation_id") and value.get("label"):
@@ -558,8 +573,18 @@ def owned_artifacts(spec, *, directories=None):
         if path.is_symlink():
             continue
         try:
-            value = yaml.safe_load(_bytes(path))
+            raw = _bytes(path)
+            value = yaml.safe_load(raw)
         except (ValueError, yaml.YAMLError, UnicodeError, ledger.UsageLedgerError):
+            try:
+                rows = [_json(line) for line in _bytes(path).splitlines()]
+            except (ValueError, UnicodeError, ledger.UsageLedgerError):
+                continue
+            owners = [owners_of(row) for row in rows]
+            if any(owners):
+                declared[path] = set().union(*owners)
+                if not all(owners):
+                    declared[path].add(unattributed)
             continue
         if isinstance(value, dict):
             records[path] = value

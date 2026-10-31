@@ -199,8 +199,11 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         settings = _model_settings("generic_v10")
         from pathlib import Path
         from tempfile import TemporaryDirectory
-        spec = SimpleNamespace(shared_generation_version=0,
-                               metadata_dir=Path(self.enterContext(TemporaryDirectory())))
+        directory = Path(self.enterContext(TemporaryDirectory()))
+        spec = SimpleNamespace(shared_generation_version=0, metadata_dir=directory,
+            project="P", label="wire", method="synthetic", condition="generic_v10",
+            full_path=directory / "P_d4d.yaml", core_path=directory / "P_d4d_core.yaml",
+            report_path=directory / "P_reconciliation.md", provenance_path=directory / "P_provenance.yaml")
         with patch.object(api_runner, "_require_surviving_accounting"), \
              patch.object(api_runner, "_begin_usage_call", return_value="u1"), \
              patch.object(api_runner, "_cancel_usage_call"), \
@@ -269,8 +272,11 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         settings = _model_settings("generic_v10")
         from pathlib import Path
         from tempfile import TemporaryDirectory
-        spec = SimpleNamespace(shared_generation_version=2,
-                               metadata_dir=Path(self.enterContext(TemporaryDirectory())))
+        directory = Path(self.enterContext(TemporaryDirectory()))
+        spec = SimpleNamespace(shared_generation_version=2, metadata_dir=directory,
+            project="P", label="wire", method="synthetic", condition="generic_v10",
+            full_path=directory / "P_d4d.yaml", core_path=directory / "P_d4d_core.yaml",
+            report_path=directory / "P_reconciliation.md", provenance_path=directory / "P_provenance.yaml")
         limits = {"max_calls": 5, "aggregate_input_tokens": 10**9, "aggregate_output_tokens": 10**9,
                   "context_limit_tokens": 1_000_000, "context_limit_basis": "offline test"}
         with ExitStack() as stack:

@@ -679,6 +679,11 @@ def test_new_identity_in_a_shared_directory_starts_its_own_generation(tmp_path, 
     old.full_path.write_text(body)
     old.core_path.write_text(body)
     old.report_path.write_text("# Report\n")
+    # Positive per-artifact ownership, not a foreign run field excusing every
+    # unrelated file in the directory (D69 round-three review finding 3).
+    prior["outputs"] = {str(path): {"path": str(path)}
+                        for path in (old.full_path, old.core_path, old.report_path)}
+    old.provenance_path.write_text(yaml.safe_dump(prior))
     api._record_incomplete_stream(old, "full", 1, "2026-09-11T00:00:00Z", {}, [])
     journal = api._abandoned_ledger(old).read_bytes()
     old_ledger = ledger.ledger_path(old).read_bytes()
