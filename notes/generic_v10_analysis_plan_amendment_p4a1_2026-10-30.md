@@ -1,6 +1,6 @@
 # generic_v10 analysis plan, P4a amendment 1: schema 3.1.0 under D66
 
-**Status: draft v2, written by claude (lead) on 2026-10-31.** It revises v1 (`7b7dc67a1`) for the 13 findings of the Claude review (`plans/reviews/p4a1_7b7dc67a1_claude_review_2026-10-30.md`) and the 5 of the Codex CLI pass (`plans/reviews/p4a1_7b7dc67a1_codex_review_2026-10-30.md`).
+**Status: draft v3, written by claude (lead) on 2026-10-31.** It revises v1 (`7b7dc67a1`) for the 13 findings of the Claude review (`plans/reviews/p4a1_7b7dc67a1_claude_review_2026-10-30.md`) and the 5 of the Codex CLI pass (`plans/reviews/p4a1_7b7dc67a1_codex_review_2026-10-30.md`).
 - **It is not binding until** a Claude reviewer and a Codex CLI pass re-review it (each finding filed), and the owner ratifies it by naming its sha256 and answering the yes/no list in §7.
 
 ## Authority
@@ -14,7 +14,7 @@
 
 ## 1. What changes in the plan's text
 1. **Line 922** ("Schema: 2.0.0 against 3.0.0, and the change in the digest's term source") now reads:
-   > "**Schema: 2.0.0 against 3.1.0** (D66), and the changes in the digest's term sources: `data_topic`'s GO, MeSH, EFO and NCIT (already in 3.0.0; absent in v8's code), and, from 3.1.0, `data_substrate`'s EDAM Data, EDAM Format and IANA media types, with the `EDAM` prefix declared (see amendment 1, §3)."
+   > "**Schema: 2.0.0 against 3.1.0** (D66), and the changes in the digest's term sources: `data_topic`'s GO, MeSH, EFO and NCIT (already rendered under 3.0.0's code; absent in v8's code), and, from 3.1.0, `data_substrate`'s EDAM Data, EDAM Format and IANA media types, with the `EDAM` prefix declared (see amendment 1, §3)."
 
    Its two sub-bullets are unchanged.
 2. **Line 1450** ("schema 2.0.0 and 3.0.0 records differ visibly") now reads:
@@ -34,9 +34,12 @@ No other plan text changes.
 - **The release identity bound by this amendment:** 3.1.0's full merged sha256 `9a821e6a08e8fe8c6b0e2fd1d4bef9e5d4ee3740722b81ab7620c315287bc8da` and core merged sha256 `2bb8827c45a4dac40e834064a65c95cfc13d258b129c3aa1b9cbccba9ef624db` (G1 round 2, `31a086e0f`). The binding is to these, not to a commit, because G1 lands on main by cherry-pick.
 
 **Where the change reaches a request.** These are rules, not one run's figures:
-- **The digest insertion** is record-independent: every request that carries the schema digest gains 135 bytes. That is `full`, its receipt completion, and the later phases.
+- **The digest insertion** is record-independent. After "`data_substrate` draws from" the digest gains exactly " a term from EDAM Data, EDAM Format, IANA media types (the source's own identifier, as an IRI or CURIE, when the documents supply one);", which is 135 bytes, in every request that carries the digest: `full`, its receipt completion, and the reconcile and report family. Typed-audit workers carry no digest.
 - **The description** appears wherever a request renders the schema context with `data_substrate` retained:
-  - on the shared-v1 route: the reconcile and report family, and the typed-audit omission's inner request, whenever the record has an Instance owner; and each worker assigned a `data_substrate` leaf;
+  - on the shared-v1 route:
+    - the reconcile and report family, and the omission's outer schema context, when the record has an Instance owner;
+    - the omission's inner typed request, always;
+    - each worker assigned a `data_substrate` leaf;
   - **on BC1's route (A21's condition, D58/D59): every typed-audit request,** because BC1's context keeps the full reachable descriptions whatever a worker is assigned (`bc1_context.py`).
 - **The schema catalog's** bytes and sha256 fields change, keeping their length, in every request that carries them. Identity pins move as described below.
 
@@ -58,10 +61,27 @@ No other plan text changes.
 | `repair_full`, `full_readdress` | — | not invoked in these carries |
 | core, `reconcile_core`, `repair_core` | — | deterministic, no model call |
 
-**On BC1's route, A21's actual condition:**
-- **What is expected:** the same kinds of change, the digest insertion, the description and the catalog fields, with the description present in **every** typed-audit request.
-- **Where it is measured:** the exact BC1-route table is captured on the composed A21 head at the registration review (plan step 3), holding the schema inputs otherwise fixed.
-- **The rule:** a change of any other kind found there is a deviation, needing a further amendment before the launch word.
+**On BC1's route, A21's actual condition.** This was measured offline (`plans/reviews/bc1_route_byte_proof_2026-10-31.md`; tools in `plans/reviews/bc1_route_byte_proof_tools_2026-10-31/`):
+- **Before:** BC1's integration packet `d00acf1e7` at schema 3.0.0 (full `eb543e15…`, core `09907cf8…`). **After:** the same, with exactly G1's schema-source changes, regenerated to 3.1.0 (full `9a821e6a…`, core `2bb8827c…`, matching the identity bound above).
+- **The carries:** the same 2026-10-22a CHORUS carries.
+- **The protected file:** the packet renders only with the reviewed `shared_generation.py` integration proposal. It was applied identically before and after, in a disposable scratch copy only.
+
+| Request (BC1 route) | Δ bytes |
+|---|---|
+| `full`, `full_receipt_completion` | +135 |
+| `reconcile_full`, `report` | +324 |
+| typed-audit omission, every worker, and every integration request (group and final, every cap and escape scenario) | **+624** each |
+
+**Per occurrence:**
+- the digest insertion: +135;
+- the `data_substrate` description: +189;
+- **the `d4d:termSources` annotation: +123 per catalog.** BC1's typed requests carry both the full and the core catalog with slot definitions intact; the shared-v1 route trims annotations;
+- the prefix declaration: 0;
+- the catalog pin and hash fields: 0 net.
+
+So each BC1 typed request adds 2×189 + 2×123 = 624.
+
+**At the registration review** (plan step 3), the composed A21 head is re-captured the same way, before (G1's schema commits reverted on a scratch copy) and after. Any change that does not split wholly into these kinds and sizes is a deviation, needing a further amendment before the launch word.
 
 **The registration identity** moves through the full and core schema pins, and through `request_code_sha256` for `api_runner.py` (the D67 `tuned` refusal), `profile_identity.py`, `provenance.py` and `profiles.py` (G1 N3 and F18).
 
@@ -76,12 +96,17 @@ No other plan text changes.
 
 **A21's acceptance rules are unchanged.** Under D64 item 30 (plan lines 1021–1024), comparing the pilot with v8's worst on these metrics is evidence, not a rejection gate.
 
-**The prefix tables now differ between the arms.** v8's code, 2.0.0 and 3.0.0 declare the same 38 prefixes; 3.1.0 adds `EDAM`. This qualifies plan lines 949 (Grounding) and 954 ("Form: current on both sides"). On the API arm, no request renders the prefix list, so the prefix changes only how records are measured.
+**The prefix tables now differ between the arms.** v8's code, 2.0.0 and 3.0.0 declare the same 38 prefixes; 3.1.0 adds `EDAM`. This qualifies plan lines 949 (Grounding) and 954 ("Form: current on both sides"). On the API arm, the prefix declaration itself is not rendered in any request; the 3.1.0 description names the `EDAM` and `mediatypes` prefixes to the model. The prefix also changes persisted identifier form, through the write-time rewrite below, and that form can enter later request carries, as well as changing measurement.
 
-**Three measurement effects:**
+**Four measurement effects.** A changed count in any of these is not improved grounding or term membership:
 - **The write-time normaliser** on the API path now compacts an EDAM IRI in a `uriorcurie` slot to a CURIE, so `http://edamontology.org/format_3752` becomes `EDAM:format_3752`. IANA media types became `mediatypes:` under every version. Each rewrite is logged in the record's `normalisation.identifier_form`.
 - **The undeclared-prefix counter** (`grounding.undeclared_prefixes`, which the canary reads) no longer counts `EDAM:` or `edam:`.
-- **The resolver-URL detector:** `http://edamontology.org/…` in a `uriorcurie` slot is now a `resolver_url_in_identifier_slot` finding (`grounding.declared_bases_of`). The API normaliser compacts it first, so the API arm reads 0. The native arm has no normaliser, so there it is a new finding (item 43).
+- **The resolver-URL detector:** `http://edamontology.org/…` in a `uriorcurie` slot is now a `resolver_url_in_identifier_slot` finding (`grounding.declared_bases_of`). On the API arm, the normaliser compacts the scalar and list spellings it supports before checking, so those EDAM URLs do not count. Forms it skips, such as a YAML block scalar (`api_runner.normalise_identifier_form`), survive and can still be findings. The native arm has no normaliser, so there an EDAM URL is a new finding (item 43). Observed counts are reported as observed, separately from this mechanism.
+- **Identifier classification** (`identifiers.classify`, used by the identifier audit, `d4d runs identifiers`):
+  - **What moves:** under 3.1.0, `EDAM:format_3752` is `CURIE_DECLARED`; under 2.0.0 and 3.0.0 it was `CURIE_UNDECLARED`, which counts as unresolvable. So the audit's offenders, its unresolvable total and share, and its per-slot counts change, across every identifier-ranged slot and not only `data_substrate`.
+  - **Case:** classification is case-sensitive, so lower-case `edam:` stays undeclared there. The canary's undeclared-prefix counter lowercases, and excludes both.
+  - **Which schema it reads:** `identifiers.audit` uses the schema it is given, by default the installed full schema. So a default current-schema audit of the corpus can reclassify historical records. The provenance-aware form and grounding checks recover the run's own schema (`run_schema.identifier_rules`) and report any fallback.
+  - **What it does not establish:** declaring a prefix establishes neither ontology membership nor source support.
 
 **The semantic broadening.** "Type" became "Type or format", so v10 may record a data format where v8 recorded a data type.
 
@@ -97,11 +122,12 @@ These are recorded so that the registration review can check them.
   - an unknown profile is refused;
   - a profile-less record reads as the historical study profile **when its recorded `repo.commit` does not descend from the profiles commit `e78e4bb56`**;
   - the date is a secondary signal, used only where no commit is recorded;
-  - with neither, the record is refused.
+  - with neither, the record is refused;
+  - reading by commit needs a local checkout, a resolvable object and unshallow history (main's CI fetches full history). A missing object is accepted only through a provenance witness at `e78e4bb56^` that records the same commit. Otherwise the record is refused, so this reading depends on the environment. A21's records carry `schema.profile`, so A21 is unaffected.
 
   So D64 item 14(d)'s new run of the historical v8 code reads as the study profile, as the v8 comparators do. The 286 committed records read as before.
 - **Rubric v5** (F8). **This amendment does not authorize v5.** v5 is outside line 1469 and item 41's options. Substituting it into any registered comparison would need its own reviewed and ratified prospective analysis amendment, before any governed confirmatory outcome, plus its evaluation registration and word. It is not an ordinary P4b choice. It is distinct from the receipts instrument v5, which is inactive.
-- **A dependency (G1 review N6):** BC1's source parser rejects the new term-source names. G2 fixes it before the A21 registration is rebuilt. If G2 slipped past the rebuild, the fix would be a post-freeze runner change under D35. A21 (bridge2ai) is unaffected either way.
+- **A dependency (G1 review N6):** BC1's source parser rejects the new term-source names. G2 fixes it before the A21 registration is rebuilt. If G2 slipped past the rebuild, the fix would be a post-freeze runner change under D35. A21 (bridge2ai) is unaffected either way. A neutral registration refused before G2 lands is an engineering refusal, not item 38's "admission refuses it".
 - **The `data_topic` prefix gap:** GO, MeSH, EFO and NCIT stay undeclared, so `MESH:` still counts as an undeclared prefix while `EDAM:` does not. Unless the owner answers (f) in §7 otherwise, this is deferred to the next condition and filed as an issue.
 
 ## 5. What does not change
@@ -122,7 +148,7 @@ These are recorded so that the registration review can check them.
 ## 7. For the owner: yes or no
 - **(a)** Schema 3.1.0 as the v10 condition's schema.
 - **(b)** Declaring the `EDAM` prefix (N7; beyond D66's text).
-- **(c)** The exact `data_substrate` description quoted in §2.
-- **(d)** The added confounds, and the supplementary reporting rule in §3.
+- **(c)** The exact `data_substrate` description, and the exact digest insertion, both quoted in §2.
+- **(d)** The added confounds, the four measurement effects (including the identifier audit's reclassification), and the supplementary reporting rule, all in §3.
 - **(e)** Accepting that the undeclared-prefix and resolver-URL rows read different prefix tables on the two arms. This is evidence-only for A21 under D64 item 30.
 - **(f)** Deferring the `data_topic` prefix gap to the next condition.
