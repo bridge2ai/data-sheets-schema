@@ -17,8 +17,9 @@ SHA = '1c4436b5ea689fcd674c848a722dd9a86495692ad83401682f3d805f49acb6d6'
 DRIVER = 'bc1-keep-first'
 ROOT = Path(__file__).resolve().parents[2]
 ATTRS = ROOT / 'scripts/adhoc/wave7_bc1_keep_first_20261029.attributes'
-LOG = Path('/private/tmp/d4d-wave7-bc1-merge-evidence-20261029/driver.jsonl')
+LOG = Path('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/wave7_resume_2026-10-30/bc1-main-merge/driver.jsonl')
 HEADS = {
+    '50bc50af678ae5216b3985c340fe1344da26c05e',
     'cd07f2a3738e146eeaa30ae86d35d3161eb3413b',
     '8b885ee68262474275316755c3fc55dc05517dcb',
     '90312e30e8d957e3b79510abe9ea768967983224',
