@@ -1,0 +1,5975 @@
+{
+  "ref": "d9b69d84d9a6936809681ae240bb8e767649ca11",
+  "d41_commit": "8ab03fda923d2c8caa9a2e65e558be73e92500e9",
+  "d41_committed_at": "2026-10-25T22:11:01-07:00",
+  "counts": {
+    "records": 348,
+    "age": {
+      "pre-D41": 347,
+      "post-D41": 1
+    },
+    "record_types": {
+      "d4d_generation_provenance": 344,
+      "d4d_derived_provenance": 4
+    },
+    "before": {
+      "canary": 348,
+      "evaluation": 348
+    },
+    "after": {
+      "canary": 348,
+      "evaluation": 348
+    },
+    "v8_records": 22,
+    "v8_changes": 0,
+    "scopes": {
+      "data": {
+        "records": 347,
+        "age": {
+          "pre-D41": 347
+        },
+        "before": {
+          "canary": 347,
+          "evaluation": 347
+        },
+        "after": {
+          "canary": 347,
+          "evaluation": 347
+        }
+      },
+      "notes": {
+        "records": 1,
+        "age": {
+          "post-D41": 1
+        },
+        "before": {
+          "canary": 1,
+          "evaluation": 1
+        },
+        "after": {
+          "canary": 1,
+          "evaluation": 1
+        }
+      }
+    }
+  },
+  "parse_errors": [],
+  "records": [
+    {
+      "path": "data/ATTIC/canary_retries/2026-08-31_claude-opus-5-api-generic-v7_rep1_CM4AI_attempt1/core/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-31_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/canary_retries/2026-08-31_claude-opus-5-api-generic-v7_rep1_CM4AI_attempt2/core/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-31_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/canary_retries/2026-08-31_claude-opus-5-api-generic-v7_rep1_CM4AI_attempt3/core/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-31_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/canary_retries/2026-09-01_claude-opus-5-api-generic-v7_rep1_AI_READI_attempt1/core/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/canary_retries/2026-09-01_claude-opus-5-api-generic-v7_rep1_AI_READI_attempt2/core/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/canary_retries/2026-09-01_claude-opus-5-api-generic-v7_rep1_AI_READI_attempt3/core/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-04-10_sonnet-4.6/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-04-10_sonnet-4.6",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-04-10_sonnet-4.6/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-04-10_sonnet-4.6",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-04-10_sonnet-4.6/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-04-10_sonnet-4.6",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-04-10_sonnet-4.6/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-04-10_sonnet-4.6",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.5-high-fast-r2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.5-high-fast-r2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.5-high-fast-r2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.5-high-fast-r2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.5-high-fast-r3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.5-high-fast-r3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.5-high-fast-r3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.5-high-fast-r3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.5-high-fast",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.5-high-fast",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.5-high-fast",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.5-high-fast",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.6-sol-ultra-fast/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.6-sol-ultra-fast",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.6-sol-ultra-fast/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.6-sol-ultra-fast",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.6-sol-ultra-fast/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.6-sol-ultra-fast",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-07-23_gpt-5.6-sol-ultra-fast/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-23_gpt-5.6-sol-ultra-fast",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1.superseded-dual-writer/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1.superseded-pre-stragglers/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-16_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-16_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-19_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22b_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28b_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28c_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28d_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep1",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep2",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/_wcrate/AI_READI/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep3",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-programme-deprimed_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-programme-deprimed_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-programme-deprimed_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-29_claude-opus-5-api-generic_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-29_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_canary_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_canary_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-generic-v2_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-generic-v2_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-generic-v2_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-generic-v2_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-generic-v2_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-generic-v2_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-generic-v2_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-generic-v2_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-generic-v2_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-generic-v2_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-generic-v2_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-generic-v2_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-02_claude-opus-5-bare_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-02_claude-opus-5-bare_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-02_claude-opus-5-bare_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-05_claude-opus-5-1m-generic-v3_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-05_claude-opus-5-1m-generic-v3_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-05_claude-opus-5-1m-generic-v3_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-05_claude-opus-5-1m-generic-v3_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-05_claude-opus-5-generic-v3_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-05_claude-opus-5-generic-v3_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_PEDIATRIC_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/VOICE_PEDIATRIC_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/VOICE_PEDIATRIC_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-07_claude-opus-5-claudecode-generic-v3_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-api-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_PEDIATRIC_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep2/VOICE_PEDIATRIC_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep3/VOICE_PEDIATRIC_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-11_claude-opus-5-claudecode-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic-v4_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-13_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-16_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-16_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-19_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22b_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-api-generic-v7_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28_claude-opus-5-claudecode-generic-v6_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28b_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28b_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28c_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-08-28d_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-01_claude-opus-5-api-generic-v7_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_core/gate_test/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "gate_test",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-programme-deprimed_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-programme-deprimed_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-programme-deprimed_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-programme-deprimed_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-programme-deprimed_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-denoised_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly-denoised_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-denoised_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly-denoised_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-denoised_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly-denoised_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly-deprimed_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly-deprimed_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly-deprimed_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly-deprimed_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly-deprimed_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly-deprimed_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly-deprimed_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly-deprimed_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly-deprimed_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-crateonly_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-27_claude-opus-5_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-27_claude-opus-5_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-27_claude-opus-5_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-27_claude-opus-5_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-deprimed_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-deprimed_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-deprimed_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-deprimed_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-generic_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-generic_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-generic_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-28_claude-opus-5-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep2",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep3",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_merged_core/2026-07-29_guarded-union/AI_READI_provenance.yaml",
+      "record_type": "d4d_derived_provenance",
+      "label": "2026-07-29_guarded-union",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_merged_core/2026-07-29_guarded-union/CHORUS_provenance.yaml",
+      "record_type": "d4d_derived_provenance",
+      "label": "2026-07-29_guarded-union",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_merged_core/2026-07-29_guarded-union/CM4AI_provenance.yaml",
+      "record_type": "d4d_derived_provenance",
+      "label": "2026-07-29_guarded-union",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_agent_merged_core/2026-07-29_guarded-union/VOICE_provenance.yaml",
+      "record_type": "d4d_derived_provenance",
+      "label": "2026-07-29_guarded-union",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04_claude-opus-5-api-generic-v8_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04_claude-opus-5-api-generic-v8_rep1",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04b_claude-opus-5-api-generic-v8_rep1",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04c_claude-opus-5-api-generic-v8_rep1",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04d_claude-opus-5-api-generic-v8_rep1",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04e_claude-opus-5-api-generic-v8_rep1",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep2",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep2",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep3",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep3",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep1",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep1",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep2",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep2",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep3",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep3",
+      "v8": true,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "2026-09-12_claude-opus-5-api-generic-v9_rep1",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/curated/AI_READI_curated_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/curated/CM4AI_curated_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "data/d4d_concatenated/curated/VOICE_curated_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "",
+      "v8": false,
+      "age": "pre-D41",
+      "before_age": "pre-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    },
+    {
+      "path": "notes/reviews/wave7_5212_a14_evidence_2026-10-29/canary_outputs/EXAMPLE_provenance.yaml",
+      "record_type": "d4d_generation_provenance",
+      "label": "scope-cli-synthetic_rep1",
+      "v8": false,
+      "age": "post-D41",
+      "before_age": "post-D41",
+      "before": {
+        "canary": true,
+        "evaluation": true
+      },
+      "after": {
+        "canary": true,
+        "evaluation": true
+      },
+      "reason": null
+    }
+  ]
+}

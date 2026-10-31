@@ -1,0 +1,1776 @@
+[
+  {
+    "phase": "f1-before-canary",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-before-canary/d73-result.json",
+    "raw_sha256": "8c8a55a37a4e88ee36010ca43c8556a1720892a4048469f49445450276f5ae88",
+    "log_sha256": "147fff4db9be8c7f58086a5d21efcf6079c61d632e4fe856dd91c793f928e78e",
+    "exit_code": 1,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "4cde66d2d9ddafba1403ebdc978c93236cc116bb",
+      "tracked_diff": " tests/test_d68_legacy_readonly.py | 33 +++++++++++++++++++++++++++++++++\n 1 file changed, 33 insertions(+)\n",
+      "latch_journal_sha256": "22a2b5cd0c73c3f7d4cf2790644cd1a267e82104d072afb5b0c3d7987f3ee827",
+      "regression_test_sha256": "fd39ae960ff1b0196d22a6e9b38077335d229a5deffc790d774c71f2a659fba0"
+    },
+    "command": [
+      "tests/test_d68_legacy_readonly.py::test_fresh_prefix_project_does_not_claim_sibling_artifacts[flat]",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-before-canary"
+    ],
+    "canary_node": null,
+    "selected": 1,
+    "selected_sha256": "25a57c2386d7a0b9b5be520a399cae4a74033eb91af587b7cb2903d2fed2ec8c",
+    "call_outcomes": {
+      "failed": 1
+    },
+    "skipped_phases": [],
+    "failed_phases": [
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_fresh_prefix_project_does_not_claim_sibling_artifacts[flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 28.018877167007304,
+        "message": "tests/test_d68_legacy_readonly.py:90: in test_fresh_prefix_project_does_not_claim_sibling_artifacts\n    result = api.execute(selected, client=second)\nsrc/data_sheets_schema/api_runner.py:6911: in execute\n    refuse_legacy_execution(spec)  # D68: refuse before even sidecar lock writes.\nsrc/data_sheets_schema/latch_journal.py:125: in refuse_legacy_execution\n    _fail(f\"{record_age(_record(spec))}: journal-less run is inspection only; \"\nsrc/data_sheets_schema/latch_journal.py:139: in _fail\n    raise ledger.UsageLedgerError(f\"latch journal: {message}\")\nE   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: age unestablished: journal-less run is inspection only; relaunch with a new label; legacy recovery never spends"
+      }
+    ],
+    "passed_by_file": {},
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "f1-before-remaining",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-before-remaining/d73-result.json",
+    "raw_sha256": "b801f25b1f8dc4a1c1a29f575d0612ea3958a19bb5f0c35f86e4cca6e68b7f35",
+    "log_sha256": "6f860beba16e7c93eaafc73695e67b2f60957d1076c38d7f50d17a490d08c25e",
+    "exit_code": 1,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "4cde66d2d9ddafba1403ebdc978c93236cc116bb",
+      "tracked_diff": " tests/test_d68_legacy_readonly.py | 33 +++++++++++++++++++++++++++++++++\n 1 file changed, 33 insertions(+)\n",
+      "latch_journal_sha256": "22a2b5cd0c73c3f7d4cf2790644cd1a267e82104d072afb5b0c3d7987f3ee827",
+      "regression_test_sha256": "fd39ae960ff1b0196d22a6e9b38077335d229a5deffc790d774c71f2a659fba0"
+    },
+    "command": [
+      "tests/test_d68_legacy_readonly.py::test_fresh_prefix_project_does_not_claim_sibling_artifacts[split]",
+      "tests/test_d68_legacy_readonly.py::test_completed_verifier_does_not_claim_prefix_sibling",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-before-remaining"
+    ],
+    "canary_node": null,
+    "selected": 3,
+    "selected_sha256": "2476857077805888c5d295f52049645870e3e2fb600be5c1997c458b5505d0fc",
+    "call_outcomes": {
+      "failed": 3
+    },
+    "skipped_phases": [],
+    "failed_phases": [
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_fresh_prefix_project_does_not_claim_sibling_artifacts[split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 28.233103833990754,
+        "message": "tests/test_d68_legacy_readonly.py:90: in test_fresh_prefix_project_does_not_claim_sibling_artifacts\n    result = api.execute(selected, client=second)\nsrc/data_sheets_schema/api_runner.py:6911: in execute\n    refuse_legacy_execution(spec)  # D68: refuse before even sidecar lock writes.\nsrc/data_sheets_schema/latch_journal.py:125: in refuse_legacy_execution\n    _fail(f\"{record_age(_record(spec))}: journal-less run is inspection only; \"\nsrc/data_sheets_schema/latch_journal.py:139: in _fail\n    raise ledger.UsageLedgerError(f\"latch journal: {message}\")\nE   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: age unestablished: journal-less run is inspection only; relaunch with a new label; legacy recovery never spends"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_completed_verifier_does_not_claim_prefix_sibling[i1]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.283607707999181,
+        "message": "tests/test_d68_legacy_readonly.py:105: in test_completed_verifier_does_not_claim_prefix_sibling\n    result = journal.verify_completed_legacy(selected.provenance_path,\nsrc/data_sheets_schema/latch_journal.py:929: in verify_completed_legacy\n    _fail(\"guarded history cannot enter legacy verification\")\nsrc/data_sheets_schema/latch_journal.py:139: in _fail\n    raise ledger.UsageLedgerError(f\"latch journal: {message}\")\nE   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: guarded history cannot enter legacy verification"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_completed_verifier_does_not_claim_prefix_sibling[split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.28422345900617074,
+        "message": "tests/test_d68_legacy_readonly.py:105: in test_completed_verifier_does_not_claim_prefix_sibling\n    result = journal.verify_completed_legacy(selected.provenance_path,\nsrc/data_sheets_schema/latch_journal.py:929: in verify_completed_legacy\n    _fail(\"guarded history cannot enter legacy verification\")\nsrc/data_sheets_schema/latch_journal.py:139: in _fail\n    raise ledger.UsageLedgerError(f\"latch journal: {message}\")\nE   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: guarded history cannot enter legacy verification"
+      }
+    ],
+    "passed_by_file": {},
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "f1-after-canary",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-after-canary/d73-result.json",
+    "raw_sha256": "15604d3b64d3a205fdd3cc1766435d5bb78b6a6f6ee7c6e71b7f395874067fce",
+    "log_sha256": "f843a54fa8ef3c6ef724f6f2f4a8278f82db6be7c46f5116e6dfc7b4dad32996",
+    "exit_code": 0,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "8004312c5e7d290d3aecbdb9fd258ef76376a904",
+      "tracked_diff": " src/data_sheets_schema/latch_journal.py | 61 ++++++++++++++++++++++++++++++---\n tests/test_download/test_api_runner.py  |  2 +-\n 2 files changed, 57 insertions(+), 6 deletions(-)\n",
+      "latch_journal_sha256": "b77a7571724c75877243c9916fa3f9d351428813bdd5a334f787c0b36d14e6b1",
+      "regression_test_sha256": "fd39ae960ff1b0196d22a6e9b38077335d229a5deffc790d774c71f2a659fba0"
+    },
+    "command": [
+      "tests/test_d68_legacy_readonly.py::test_fresh_prefix_project_does_not_claim_sibling_artifacts[flat]",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-after-canary"
+    ],
+    "canary_node": null,
+    "selected": 1,
+    "selected_sha256": "25a57c2386d7a0b9b5be520a399cae4a74033eb91af587b7cb2903d2fed2ec8c",
+    "call_outcomes": {
+      "passed": 1
+    },
+    "skipped_phases": [],
+    "failed_phases": [],
+    "passed_by_file": {
+      "tests/test_d68_legacy_readonly.py": 1
+    },
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "f1-after-regressions",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-after-regressions/d73-result.json",
+    "raw_sha256": "27a37d1f676ed5dc44dfe2d382cb6bdf8dc7dcbb75a033130fce35b592adcb9c",
+    "log_sha256": "69d65c7b0c94c80be9bc99f2569de60096b410696e763dfed4964352477e9cbe",
+    "exit_code": 0,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "8004312c5e7d290d3aecbdb9fd258ef76376a904",
+      "tracked_diff": " src/data_sheets_schema/latch_journal.py | 61 ++++++++++++++++++++++++++++++---\n tests/test_download/test_api_runner.py  |  2 +-\n 2 files changed, 57 insertions(+), 6 deletions(-)\n",
+      "latch_journal_sha256": "b77a7571724c75877243c9916fa3f9d351428813bdd5a334f787c0b36d14e6b1",
+      "regression_test_sha256": "fd39ae960ff1b0196d22a6e9b38077335d229a5deffc790d774c71f2a659fba0"
+    },
+    "command": [
+      "tests/test_d68_legacy_readonly.py",
+      "tests/test_download/test_api_runner.py::TestResumeUsesArtifactsNotOnlyProgress::test_journalless_current_outputs_without_accounting_are_not_clean_resumes",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/f1-after-regressions"
+    ],
+    "canary_node": null,
+    "selected": 214,
+    "selected_sha256": "77b2f6017d71bcd7091fda5c51f64080235a03c13cdf1b0219acc87086254f7b",
+    "call_outcomes": {
+      "passed": 214
+    },
+    "skipped_phases": [],
+    "failed_phases": [],
+    "passed_by_file": {
+      "tests/test_d68_legacy_readonly.py": 213,
+      "tests/test_download/test_api_runner.py": 1
+    },
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "d73-age-reporting",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/d73-age-reporting/d73-result.json",
+    "raw_sha256": "73aba7e937227b209cfb50b5a855c07756bb5ce0b41710808f6f48e2498f6617",
+    "log_sha256": "b3a2ff2589f017c7cc63c3096ebf6a974216a2930157c48726569bd05a895445",
+    "exit_code": 0,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "5a609dc57e2df61ebbc19f72dd025d31ced5a57a",
+      "tracked_diff": " src/data_sheets_schema/canary.py                   |  8 +++--\n .../evaluation/registered_eval_runner.py           |  8 +++--\n src/data_sheets_schema/latch_journal.py            | 10 ++++--\n tests/fixtures/pre_d41/README.md                   | 36 ++++++++++++++++++++--\n tests/test_api_latch_guard.py                      | 11 +++++--\n tests/test_d70_record_age.py                       |  5 +--\n tests/test_duplicate_keys.py                       |  1 -\n tests/test_method_resolution.py                    |  4 +--\n tests/test_registered_eval_runner.py               | 15 +++++++--\n tests/test_report_gate.py                          |  4 +--\n 10 files changed, 79 insertions(+), 23 deletions(-)\n",
+      "latch_journal_sha256": "681b0785a119561ba882f4497d588ed8538fd2bcfe5307c2ac8d93b081edc8f4",
+      "regression_test_sha256": "fd39ae960ff1b0196d22a6e9b38077335d229a5deffc790d774c71f2a659fba0"
+    },
+    "command": [
+      "tests/test_d70_record_age.py",
+      "tests/test_api_latch_guard.py::test_clean_or_legacy_integrity_does_not_fabricate_a_new_quality_measurement",
+      "tests/test_registered_eval_runner.py::test_unestablished_age_is_reported_without_changing_the_plan",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/d73-age-reporting"
+    ],
+    "canary_node": null,
+    "selected": 17,
+    "selected_sha256": "958836294dc9c589a3ea2593ee9bc2da14cf8ef3d1674bc06d1166c0b4140be5",
+    "call_outcomes": {
+      "passed": 17
+    },
+    "skipped_phases": [],
+    "failed_phases": [],
+    "passed_by_file": {
+      "tests/test_d70_record_age.py": 15,
+      "tests/test_api_latch_guard.py": 1,
+      "tests/test_registered_eval_runner.py": 1
+    },
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "age-binding-guards",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/age-binding-guards/d73-result.json",
+    "raw_sha256": "c3dcbf2e877696d927151187b975b236f53df5f64d87a32c5e3b99ea47a1729a",
+    "log_sha256": "6ca34ee336eb7520c66189f1b144eb5d89bbb0e53583c2b2223967afb6918aa0",
+    "exit_code": 0,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "f20aa036623afb79d5a8f8d8ffac361a2164eb4c",
+      "tracked_diff": " src/data_sheets_schema/latch_journal.py | 57 ++++++++++++++------\n tests/test_d70_record_age.py            | 95 +++++++++++++++++++++++++++++++--\n tests/test_latch_journal.py             | 32 +++++++++--\n 3 files changed, 160 insertions(+), 24 deletions(-)\n",
+      "latch_journal_sha256": "75b8da20094a8aff4535226d47e932ad0b9629635fbfb889e813812c8c634eee",
+      "regression_test_sha256": "fd39ae960ff1b0196d22a6e9b38077335d229a5deffc790d774c71f2a659fba0"
+    },
+    "command": [
+      "tests/test_d70_record_age.py",
+      "tests/test_latch_journal.py",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/age-binding-guards"
+    ],
+    "canary_node": null,
+    "selected": 98,
+    "selected_sha256": "f71e1887cf4740c64320dccaa6c2de902095735d37739f8086ac47971ede6640",
+    "call_outcomes": {
+      "passed": 98
+    },
+    "skipped_phases": [],
+    "failed_phases": [],
+    "passed_by_file": {
+      "tests/test_d70_record_age.py": 26,
+      "tests/test_latch_journal.py": 72
+    },
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "nf3-stubs",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/nf3-stubs/d73-result.json",
+    "raw_sha256": "1a3ef6462c59d576a2a0a8b82182d745ce8f3534427a9422503ead9c1ecf8018",
+    "log_sha256": "75fbd8dececae13307ba190bd8fd89c7e403cda546009ef9c44458cb0e1b4881",
+    "exit_code": 0,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "4c14fb5a7b2d4989c591e2a862fa373e581f48bd",
+      "tracked_diff": " .../reviews/d73_5212_review_followup_2026-10-31.md | 26 ++++++++++++++++++++++\n scripts/adhoc/run_d73_offline_20261031.py          | 16 +++++++++++++\n tests/fixtures/pre_d41/README.md                   |  5 +++++\n tests/test_thinking_request.py                     | 10 +++++++--\n 4 files changed, 55 insertions(+), 2 deletions(-)\n",
+      "latch_journal_sha256": "75b8da20094a8aff4535226d47e932ad0b9629635fbfb889e813812c8c634eee",
+      "regression_test_sha256": "fd39ae960ff1b0196d22a6e9b38077335d229a5deffc790d774c71f2a659fba0"
+    },
+    "command": [
+      "tests/test_thinking_request.py",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/nf3-stubs"
+    ],
+    "canary_node": null,
+    "selected": 18,
+    "selected_sha256": "bbfbc6dc201406dbd9b9bb2df30178d38db3043dd94e8d7f90df2df8caaf8a2a",
+    "call_outcomes": {
+      "passed": 18
+    },
+    "skipped_phases": [],
+    "failed_phases": [],
+    "passed_by_file": {
+      "tests/test_thinking_request.py": 18
+    },
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": [
+      "tests/test_thinking_request.py::TestTheRequestStatesThinking::test_the_runner_request_path_puts_the_display_on_the_wire",
+      "tests/test_thinking_request.py::TestTheRequestStatesThinking::test_the_shared_2_admission_path_puts_the_display_on_the_wire"
+    ]
+  },
+  {
+    "phase": "focused",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/focused/d73-result.json",
+    "raw_sha256": "d233243e7d579c8b18f59bae37be91b6567c5d65fed2da0da3d9dfcaf762c132",
+    "log_sha256": "0b500a64c602380b41819b6a9d3c880fee13c48db46c8928cabf829f7eef21ba",
+    "exit_code": 0,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "13d1d3ace36a370fb96c59c46bf64413d0fcf81b",
+      "tracked_diff": "",
+      "latch_journal_sha256": "75b8da20094a8aff4535226d47e932ad0b9629635fbfb889e813812c8c634eee",
+      "regression_test_sha256": "fd39ae960ff1b0196d22a6e9b38077335d229a5deffc790d774c71f2a659fba0"
+    },
+    "command": [
+      "tests/test_d68_legacy_readonly.py",
+      "tests/test_d70_record_age.py",
+      "tests/test_latch_journal.py",
+      "tests/test_api_latch_guard.py",
+      "tests/test_usage_ledger.py",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/focused"
+    ],
+    "canary_node": null,
+    "selected": 393,
+    "selected_sha256": "4a2a31f631c17795a8bd520811ad39b9fda237d6de351291e10c98eb4470102b",
+    "call_outcomes": {
+      "passed": 393
+    },
+    "skipped_phases": [],
+    "failed_phases": [],
+    "passed_by_file": {
+      "tests/test_d68_legacy_readonly.py": 213,
+      "tests/test_d70_record_age.py": 26,
+      "tests/test_latch_journal.py": 72,
+      "tests/test_api_latch_guard.py": 22,
+      "tests/test_usage_ledger.py": 60
+    },
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "broad",
+    "complete": false,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/broad/d73-result.json",
+    "raw_sha256": "77580509c74db6efeccb2f015a9debf609206226d60954948cd11bb2025bc552",
+    "log_sha256": "055e028b6625f909657cfb101add893db42ba119a1dddb1f95a72f84865f6297",
+    "exit_code": 2,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "439c7b73d9648450b2c64b481820cccdb625ee69",
+      "tracked_diff": "",
+      "latch_journal_sha256": "75b8da20094a8aff4535226d47e932ad0b9629635fbfb889e813812c8c634eee",
+      "regression_test_sha256": "fd39ae960ff1b0196d22a6e9b38077335d229a5deffc790d774c71f2a659fba0"
+    },
+    "command": [
+      "tests/test_abandoned_journal.py",
+      "tests/test_api_latch_guard.py",
+      "tests/test_canary_gate.py",
+      "tests/test_d41_request_parity.py",
+      "tests/test_d42_claude_d55.py",
+      "tests/test_d68_legacy_readonly.py",
+      "tests/test_d70_record_age.py",
+      "tests/test_download/test_api_runner.py",
+      "tests/test_duplicate_keys.py",
+      "tests/test_fresh_orphan_partial_generation.py",
+      "tests/test_generation_manifest_identity.py",
+      "tests/test_generation_recovery_review.py",
+      "tests/test_latch_journal.py",
+      "tests/test_method_resolution.py",
+      "tests/test_midnight_resume.py",
+      "tests/test_packaging_review_r7.py",
+      "tests/test_pr5212_d55_fixes.py",
+      "tests/test_pr5212_r3_fixes.py",
+      "tests/test_pr5212_r4_fixes.py",
+      "tests/test_profiles.py",
+      "tests/test_reasoning_generation_restart.py",
+      "tests/test_receipt_completion_runtime.py",
+      "tests/test_registered_eval_runner.py",
+      "tests/test_removal_repair.py",
+      "tests/test_report_gate.py",
+      "tests/test_resume_inputs.py",
+      "tests/test_resume_instrument_and_activation.py",
+      "tests/test_shared_generation_runtime.py",
+      "tests/test_shared_output_ownership_entrypoints.py",
+      "tests/test_snapshot_attempt_recovery.py",
+      "tests/test_thinking_request.py",
+      "tests/test_usage_ledger.py",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/broad"
+    ],
+    "canary_node": null,
+    "selected": 1296,
+    "selected_sha256": "6ee7c9b3f363d941a900ec12da74498b5d5cecae89790d823cbb27fa0e999126",
+    "call_outcomes": {
+      "passed": 89,
+      "failed": 1
+    },
+    "skipped_phases": [],
+    "failed_phases": [
+      {
+        "nodeid": "tests/test_abandoned_journal.py::test_a_legacy_continuation_adopts_rows_without_a_generation_before_its_boundary",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.01334099999803584,
+        "message": "tests/test_abandoned_journal.py:362: in test_a_legacy_continuation_adopts_rows_without_a_generation_before_its_boundary\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      }
+    ],
+    "passed_by_file": {
+      "tests/test_abandoned_journal.py": 30,
+      "tests/test_api_latch_guard.py": 22,
+      "tests/test_canary_gate.py": 35,
+      "tests/test_d41_request_parity.py": 2
+    },
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "abandoned-before",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/abandoned-before/d73-result.json",
+    "raw_sha256": "ed8f94188f71a31ab921f643b825ba2809e84d38d9a812834160c5ec0614637d",
+    "log_sha256": "cabbd4a6b5642b318f608fc8a3fa203b5632466492ffd07b25c617b874c53df5",
+    "exit_code": 1,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "439c7b73d9648450b2c64b481820cccdb625ee69",
+      "tracked_diff": " tests/test_d68_legacy_readonly.py | 35 +++++++++++++++++++++++++++++++++++\n 1 file changed, 35 insertions(+)\n",
+      "latch_journal_sha256": "75b8da20094a8aff4535226d47e932ad0b9629635fbfb889e813812c8c634eee",
+      "regression_test_sha256": "132e2156257123fd7224f5fc56bd2545f947ea2bd120c538939ce2e8eda8b2d9"
+    },
+    "command": [
+      "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/abandoned-before"
+    ],
+    "canary_node": null,
+    "selected": 24,
+    "selected_sha256": "2d1f8ce175a1e59fa8b3fb342538d79d878f08e5fa29e9d011c4dedbc59cea1b",
+    "call_outcomes": {
+      "failed": 24
+    },
+    "skipped_phases": [],
+    "failed_phases": [
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[True-execute-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 28.056429874995956,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[True-execute-split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 6.925709291012026,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[True-internal-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 6.63365991700266,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[True-internal-split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 6.861085584008833,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[True-prepare-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.013034375006100163,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[True-prepare-split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.013650124994455837,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[True-write-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.012403249987983145,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[True-write-split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.013143040996510535,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[True-spend-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.0034864589979406446,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[True-spend-split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.0042636669968487695,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[True-begin_call-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.026195208003628068,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[True-begin_call-split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.02291170800162945,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[False-execute-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 6.923466709005879,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[False-execute-split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 6.717092749997391,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[False-internal-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 6.6831639999873005,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[False-internal-split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 6.968209750004462,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[False-prepare-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.01337654200324323,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[False-prepare-split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.014592833002097905,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[False-write-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.012731791008263826,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[False-write-split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.01344779200735502,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[False-spend-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.003934958993340842,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[False-spend-split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.0044422920036595315,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[False-begin_call-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.022502209001686424,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      },
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends[False-begin_call-split]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.022901499993167818,
+        "message": "tests/test_d68_legacy_readonly.py:113: in test_abandoned_only_residue_is_owned_exactly_and_never_spends\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      }
+    ],
+    "passed_by_file": {},
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "abandoned-after",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/abandoned-after/d73-result.json",
+    "raw_sha256": "5a32f0a36faf417afb5e6d4434ccef960e3ae59df8a85ad9202845fac6fb6379",
+    "log_sha256": "345dd372a9300023c5831801ad426715759aa4cb048b7719db31229e8f4ef6d4",
+    "exit_code": 0,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "439c7b73d9648450b2c64b481820cccdb625ee69",
+      "tracked_diff": " .../reviews/d73_5212_review_followup_2026-10-31.md | 13 ++++++++\n src/data_sheets_schema/latch_journal.py            |  2 +-\n tests/test_d68_legacy_readonly.py                  | 36 ++++++++++++++++++++++\n 3 files changed, 50 insertions(+), 1 deletion(-)\n",
+      "latch_journal_sha256": "352e190dd621f84d6d36e746fcfb2b79313b342570b9470e45d30efab7cd4a22",
+      "regression_test_sha256": "140928c9a5c72e0ac7ac7a30cafae2ae12158fb1d5cfd02590d53f0e01fe1e19"
+    },
+    "command": [
+      "tests/test_d68_legacy_readonly.py::test_abandoned_only_residue_is_owned_exactly_and_never_spends",
+      "tests/test_abandoned_journal.py::test_a_legacy_continuation_adopts_rows_without_a_generation_before_its_boundary",
+      "tests/test_d68_legacy_readonly.py::test_fresh_prefix_project_does_not_claim_sibling_artifacts",
+      "tests/test_d68_legacy_readonly.py::test_completed_verifier_does_not_claim_prefix_sibling",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/abandoned-after"
+    ],
+    "canary_node": null,
+    "selected": 29,
+    "selected_sha256": "6e3d6e708b38a86ad5e9af47a67fa88bb216ee02bacc0189fc87ec3bfd8c543d",
+    "call_outcomes": {
+      "passed": 29
+    },
+    "skipped_phases": [],
+    "failed_phases": [],
+    "passed_by_file": {
+      "tests/test_d68_legacy_readonly.py": 28,
+      "tests/test_abandoned_journal.py": 1
+    },
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "broad-final",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/broad-final/d73-result.json",
+    "raw_sha256": "3356b5c39bd8874a64fc852f248fb878c07647c7e5f19b2e5752fbb47cb5be94",
+    "log_sha256": "5ae32e32dd99cc66453a733497b56848f74226b8cc7199a7941600504bf22402",
+    "exit_code": 0,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "a4230088fb162cf478441b06ddb2c027a28b46a9",
+      "tracked_diff": "",
+      "latch_journal_sha256": "352e190dd621f84d6d36e746fcfb2b79313b342570b9470e45d30efab7cd4a22",
+      "regression_test_sha256": "140928c9a5c72e0ac7ac7a30cafae2ae12158fb1d5cfd02590d53f0e01fe1e19"
+    },
+    "command": [
+      "tests/test_abandoned_journal.py",
+      "tests/test_api_latch_guard.py",
+      "tests/test_canary_gate.py",
+      "tests/test_d41_request_parity.py",
+      "tests/test_d42_claude_d55.py",
+      "tests/test_d68_legacy_readonly.py",
+      "tests/test_d70_record_age.py",
+      "tests/test_download/test_api_runner.py",
+      "tests/test_duplicate_keys.py",
+      "tests/test_fresh_orphan_partial_generation.py",
+      "tests/test_generation_manifest_identity.py",
+      "tests/test_generation_recovery_review.py",
+      "tests/test_latch_journal.py",
+      "tests/test_method_resolution.py",
+      "tests/test_midnight_resume.py",
+      "tests/test_packaging_review_r7.py",
+      "tests/test_pr5212_d55_fixes.py",
+      "tests/test_pr5212_r3_fixes.py",
+      "tests/test_pr5212_r4_fixes.py",
+      "tests/test_profiles.py",
+      "tests/test_reasoning_generation_restart.py",
+      "tests/test_receipt_completion_runtime.py",
+      "tests/test_registered_eval_runner.py",
+      "tests/test_removal_repair.py",
+      "tests/test_report_gate.py",
+      "tests/test_resume_inputs.py",
+      "tests/test_resume_instrument_and_activation.py",
+      "tests/test_shared_generation_runtime.py",
+      "tests/test_shared_output_ownership_entrypoints.py",
+      "tests/test_snapshot_attempt_recovery.py",
+      "tests/test_thinking_request.py",
+      "tests/test_usage_ledger.py",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/broad-final"
+    ],
+    "canary_node": null,
+    "selected": 1320,
+    "selected_sha256": "565376cc01826c2a19e270ad023ad19abe27da09d186235d246084291dc94873",
+    "call_outcomes": {
+      "passed": 1320
+    },
+    "skipped_phases": [],
+    "failed_phases": [],
+    "passed_by_file": {
+      "tests/test_abandoned_journal.py": 31,
+      "tests/test_api_latch_guard.py": 22,
+      "tests/test_canary_gate.py": 35,
+      "tests/test_d41_request_parity.py": 6,
+      "tests/test_d42_claude_d55.py": 23,
+      "tests/test_d68_legacy_readonly.py": 237,
+      "tests/test_d70_record_age.py": 26,
+      "tests/test_download/test_api_runner.py": 158,
+      "tests/test_duplicate_keys.py": 36,
+      "tests/test_fresh_orphan_partial_generation.py": 4,
+      "tests/test_generation_manifest_identity.py": 29,
+      "tests/test_generation_recovery_review.py": 21,
+      "tests/test_latch_journal.py": 72,
+      "tests/test_method_resolution.py": 23,
+      "tests/test_midnight_resume.py": 8,
+      "tests/test_packaging_review_r7.py": 10,
+      "tests/test_pr5212_d55_fixes.py": 29,
+      "tests/test_pr5212_r3_fixes.py": 5,
+      "tests/test_pr5212_r4_fixes.py": 5,
+      "tests/test_profiles.py": 90,
+      "tests/test_reasoning_generation_restart.py": 3,
+      "tests/test_receipt_completion_runtime.py": 85,
+      "tests/test_registered_eval_runner.py": 132,
+      "tests/test_removal_repair.py": 59,
+      "tests/test_report_gate.py": 40,
+      "tests/test_resume_inputs.py": 13,
+      "tests/test_resume_instrument_and_activation.py": 9,
+      "tests/test_shared_generation_runtime.py": 10,
+      "tests/test_shared_output_ownership_entrypoints.py": 19,
+      "tests/test_snapshot_attempt_recovery.py": 2,
+      "tests/test_thinking_request.py": 18,
+      "tests/test_usage_ledger.py": 60
+    },
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": [
+      "tests/test_download/test_api_runner.py::TestValidatorRepairRefreshCheckpoint::test_missing_corrupt_or_stale_checkpoint_refuses_before_calls",
+      "tests/test_download/test_api_runner.py::TestValidatorRepairRefreshCheckpoint::test_accepted_refresh_survives_interrupted_completion_checkpoint[False]",
+      "tests/test_download/test_api_runner.py::TestValidatorRepairRefreshCheckpoint::test_accepted_refresh_survives_interrupted_completion_checkpoint[True]",
+      "tests/test_duplicate_keys.py::TestReviewRound::test_the_repair_round_is_told_about_a_duplicate_and_checks_it_again",
+      "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_records_an_orphaned_partial_predecessor[missing]",
+      "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_records_an_orphaned_partial_predecessor[malformed]",
+      "tests/test_fresh_orphan_partial_generation.py::test_predecessor_binding_survives_interrupted_index_activation",
+      "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_does_not_accept_unrelated_archived_attempts",
+      "tests/test_generation_manifest_identity.py::test_changed_inputs_in_portable_record_are_refused_without_a_ledger",
+      "tests/test_generation_manifest_identity.py::test_legacy_progress_without_input_evidence_requires_explicit_restart",
+      "tests/test_generation_recovery_review.py::test_changed_input_restart_recovers_only_its_own_snapshots",
+      "tests/test_generation_recovery_review.py::test_explicit_restart_preserves_an_unreadable_snapshot_index[True]",
+      "tests/test_generation_recovery_review.py::test_explicit_restart_preserves_an_unreadable_snapshot_index[False]",
+      "tests/test_midnight_resume.py::test_automatic_date_is_restored_before_cached_instruction_or_portable_checks[False-True]",
+      "tests/test_midnight_resume.py::test_automatic_date_is_restored_before_cached_instruction_or_portable_checks[True-True]",
+      "tests/test_packaging_review_r7.py::test_readable_repair_gets_another_round_when_schema_findings_increase",
+      "tests/test_reasoning_generation_restart.py::test_fresh_generation_archives_malformed_predecessor_reasoning[False]",
+      "tests/test_resume_instrument_and_activation.py::test_portable_record_refuses_changed_instruction_without_a_ledger",
+      "tests/test_thinking_request.py::TestTheRequestStatesThinking::test_the_runner_request_path_puts_the_display_on_the_wire",
+      "tests/test_thinking_request.py::TestTheRequestStatesThinking::test_the_shared_2_admission_path_puts_the_display_on_the_wire"
+    ]
+  },
+  {
+    "phase": "receipt-before",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/receipt-before/d73-result.json",
+    "raw_sha256": "29a6a3c860f0864e21f589876080c48b1cb5db7b65e107cddd73ecb945eabbac",
+    "log_sha256": "df7726141104d970d52b4750104596720ea4d2b426f5b168c27f816a00c2a0fb",
+    "exit_code": 1,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "66092b3fc0597021d7a9bb1e867d591b1607a09a",
+      "tracked_diff": "",
+      "latch_journal_sha256": "352e190dd621f84d6d36e746fcfb2b79313b342570b9470e45d30efab7cd4a22",
+      "regression_test_sha256": "14339ce3dde943def3a821aa3723da3556cf97608e2b6083d367e4b0cfa7bbb5"
+    },
+    "command": [
+      "tests/test_d68_legacy_readonly.py::test_receipt_only_residue_is_owned_exactly_and_never_spends[False-execute-flat]",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/receipt-before"
+    ],
+    "canary_node": null,
+    "selected": 1,
+    "selected_sha256": "9ab807ec0fccf21857e0dd42dd4125ad32d8e12e4428be33056f79a9bb13a3b7",
+    "call_outcomes": {
+      "failed": 1
+    },
+    "skipped_phases": [],
+    "failed_phases": [
+      {
+        "nodeid": "tests/test_d68_legacy_readonly.py::test_receipt_only_residue_is_owned_exactly_and_never_spends[False-execute-flat]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 27.05244945800223,
+        "wasxfail": null,
+        "message": "tests/test_d68_legacy_readonly.py:108: in test_receipt_only_residue_is_owned_exactly_and_never_spends\n    assert_only_owned_residue_refuses(layout, entry, resume, tmp_path, monkeypatch,\ntests/test_d68_legacy_readonly.py:126: in assert_only_owned_residue_refuses\n    with pytest.raises(ledger.UsageLedgerError, match=\"inspection only|cannot become a clean resume\"):\nE   Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>"
+      }
+    ],
+    "passed_by_file": {},
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "receipt-after-canary",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/receipt-after-canary/d73-result.json",
+    "raw_sha256": "4e07505d732aa8988b4ff57ed3e92a1ff1f1e5d6ec6e2d2bd610f234549c8097",
+    "log_sha256": "0eb779a7fdaf10f594c3816e82911751eecf3c855049f2db96b47f4ce71884ef",
+    "exit_code": 0,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "cde827a46f9c977ab238970814eea1ccb5e408bf",
+      "tracked_diff": "",
+      "latch_journal_sha256": "620646d1036cb27237afdffaed554b112cc292d7aedf3387fedae14829f510e6",
+      "regression_test_sha256": "7bc0df566a7ea0c6c2255f0f801c644ac7580e70f8d9113f29fd71c3d82d74c4"
+    },
+    "command": [
+      "tests/test_d68_legacy_readonly.py::test_receipt_only_residue_is_owned_exactly_and_never_spends[False-execute-flat]",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/receipt-after-canary"
+    ],
+    "canary_node": null,
+    "selected": 1,
+    "selected_sha256": "9ab807ec0fccf21857e0dd42dd4125ad32d8e12e4428be33056f79a9bb13a3b7",
+    "call_outcomes": {
+      "passed": 1
+    },
+    "skipped_phases": [],
+    "failed_phases": [],
+    "passed_by_file": {
+      "tests/test_d68_legacy_readonly.py": 1
+    },
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "focused-final",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/focused-final/d73-result.json",
+    "raw_sha256": "d5adef52fa5d617eeb78bdb26f36a1084ac7dcd727d589c48bb7e335ce5e9854",
+    "log_sha256": "7e95de502ecad2ab99721e6efd951c29529e88b3ac16accc2b138df2e26d9210",
+    "exit_code": 0,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "cde827a46f9c977ab238970814eea1ccb5e408bf",
+      "tracked_diff": "",
+      "latch_journal_sha256": "620646d1036cb27237afdffaed554b112cc292d7aedf3387fedae14829f510e6",
+      "regression_test_sha256": "7bc0df566a7ea0c6c2255f0f801c644ac7580e70f8d9113f29fd71c3d82d74c4"
+    },
+    "command": [
+      "tests/test_d68_legacy_readonly.py",
+      "tests/test_d70_record_age.py",
+      "tests/test_latch_journal.py",
+      "tests/test_api_latch_guard.py",
+      "tests/test_usage_ledger.py",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/focused-final"
+    ],
+    "canary_node": null,
+    "selected": 441,
+    "selected_sha256": "3da5f9aed3336e86f4bdcfb05b087ed1e3d3b8aa1c6d5eb93e56bc51f29046dc",
+    "call_outcomes": {
+      "passed": 441
+    },
+    "skipped_phases": [],
+    "failed_phases": [],
+    "passed_by_file": {
+      "tests/test_d68_legacy_readonly.py": 261,
+      "tests/test_d70_record_age.py": 26,
+      "tests/test_latch_journal.py": 72,
+      "tests/test_api_latch_guard.py": 22,
+      "tests/test_usage_ledger.py": 60
+    },
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "collect",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/collect/d73-result.json",
+    "raw_sha256": "4ef83aaff2176d963fb2a06be50e0cb7d14899a843fd320585ef743c12a097ba",
+    "log_sha256": "ac184dfa42c978924486ac2732c8f6f010e059c4f0d17ebac2585556cc5a80f1",
+    "exit_code": 0,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "cde827a46f9c977ab238970814eea1ccb5e408bf",
+      "tracked_diff": "",
+      "latch_journal_sha256": "620646d1036cb27237afdffaed554b112cc292d7aedf3387fedae14829f510e6",
+      "regression_test_sha256": "7bc0df566a7ea0c6c2255f0f801c644ac7580e70f8d9113f29fd71c3d82d74c4"
+    },
+    "command": [
+      "tests",
+      "--collect-only",
+      "-q",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/collect"
+    ],
+    "canary_node": null,
+    "selected": 20847,
+    "selected_sha256": "39f82ad12b8b77e66ca38b43831e0cc50bb49465df14129a5c95f080e275dc1c",
+    "call_outcomes": {},
+    "skipped_phases": [],
+    "failed_phases": [],
+    "passed_by_file": {},
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "xdist-canary",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/xdist-canary/d73-result.json",
+    "raw_sha256": "8950e249ad4a0fd2bbc8f81c3e066404c1f1bd72b8fd1cfa89a19bfa012783a8",
+    "log_sha256": "2601c94c9a2b91b1df7d962e34d7148e2bbc3b5d61c09c2f43e79233f660789c",
+    "exit_code": 0,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "cde827a46f9c977ab238970814eea1ccb5e408bf",
+      "tracked_diff": "",
+      "latch_journal_sha256": "620646d1036cb27237afdffaed554b112cc292d7aedf3387fedae14829f510e6",
+      "regression_test_sha256": "7bc0df566a7ea0c6c2255f0f801c644ac7580e70f8d9113f29fd71c3d82d74c4"
+    },
+    "command": [
+      "tests",
+      "-v",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "utils.pytest_shard",
+      "--ci-shard=1/4",
+      "--ci-shard-timings=utils/ci_test_durations.json",
+      "--ci-lane=ordinary",
+      "--durations=25",
+      "-n",
+      "logical",
+      "--maxprocesses=4",
+      "--dist",
+      "load",
+      "--maxschedchunk=1",
+      "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/xdist-canary.xml",
+      "--d73-canary-node",
+      "tests/test_d68_legacy_readonly.py::test_completed_legacy_verifier_is_readonly[i1]",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/xdist-canary",
+      "-p",
+      "scripts.adhoc.d73_pytest_canary_20261031"
+    ],
+    "canary_node": "tests/test_d68_legacy_readonly.py::test_completed_legacy_verifier_is_readonly[i1]",
+    "selected": 1,
+    "selected_sha256": "5c54955728783b6686ee2c0d102a1d458d119668140a2d3d3bd47788a6ab3d1d",
+    "call_outcomes": {
+      "passed": 1
+    },
+    "skipped_phases": [],
+    "failed_phases": [],
+    "passed_by_file": {
+      "tests/test_d68_legacy_readonly.py": 1
+    },
+    "collection_errors": [],
+    "worker_collections": {
+      "gw0": 1,
+      "gw1": 1,
+      "gw3": 1,
+      "gw2": 1
+    },
+    "passing_nodes": []
+  },
+  {
+    "phase": "shard",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/d73-result.json",
+    "raw_sha256": "0d4dff09a793bb2562e6e61ca620dcdf0de2f9fd5a13b4df7328e6c82e141497",
+    "log_sha256": "cb6a31b8af93ec118dd4ea5f43e83772cc3aadebbe2bf1a335168c323b3904e8",
+    "exit_code": 1,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "head": "cde827a46f9c977ab238970814eea1ccb5e408bf",
+      "tracked_diff": "",
+      "latch_journal_sha256": "620646d1036cb27237afdffaed554b112cc292d7aedf3387fedae14829f510e6",
+      "regression_test_sha256": "7bc0df566a7ea0c6c2255f0f801c644ac7580e70f8d9113f29fd71c3d82d74c4"
+    },
+    "command": [
+      "tests",
+      "-v",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "utils.pytest_shard",
+      "--ci-shard=1/4",
+      "--ci-shard-timings=utils/ci_test_durations.json",
+      "--ci-lane=ordinary",
+      "--durations=25",
+      "-n",
+      "logical",
+      "--maxprocesses=4",
+      "--dist",
+      "load",
+      "--maxschedchunk=1",
+      "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard.xml",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard"
+    ],
+    "canary_node": null,
+    "selected": 5632,
+    "selected_sha256": "e53067725aff4ed08a4eaaf8fe56e9f788068db00cda795f37d70c10db769991",
+    "call_outcomes": {
+      "passed": 5616,
+      "failed": 5
+    },
+    "skipped_phases": [
+      {
+        "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_equal_but_distinct_wrapper_code_is_not_actual_nested_code",
+        "when": "setup",
+        "outcome": "skipped",
+        "duration": 9.612500434741378e-05,
+        "wasxfail": null,
+        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 50, 'Skipped: this runtime uses reprlib dataclass repr')"
+      },
+      {
+        "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_actual_nested_code_with_wrong_effective_name_is_refused",
+        "when": "setup",
+        "outcome": "skipped",
+        "duration": 8.695799624547362e-05,
+        "wasxfail": null,
+        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 61, 'Skipped: this runtime uses reprlib dataclass repr')"
+      },
+      {
+        "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_counterfeit_decorator_cannot_authorize_its_own_nested_code",
+        "when": "setup",
+        "outcome": "skipped",
+        "duration": 7.991700840648264e-05,
+        "wasxfail": null,
+        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 98, 'Skipped: this runtime uses reprlib dataclass repr')"
+      },
+      {
+        "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_effective_dataclass_globals_are_validated_before_and_after_bind[get_ident-before]",
+        "when": "setup",
+        "outcome": "skipped",
+        "duration": 7.212499622255564e-05,
+        "wasxfail": null,
+        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 115, 'Skipped: this runtime uses reprlib dataclass repr')"
+      },
+      {
+        "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_effective_dataclass_globals_are_validated_before_and_after_bind[get_ident-after]",
+        "when": "setup",
+        "outcome": "skipped",
+        "duration": 7.574999472126365e-05,
+        "wasxfail": null,
+        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 115, 'Skipped: this runtime uses reprlib dataclass repr')"
+      },
+      {
+        "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_effective_dataclass_globals_are_validated_before_and_after_bind[id-before]",
+        "when": "setup",
+        "outcome": "skipped",
+        "duration": 0.0001232089998666197,
+        "wasxfail": null,
+        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 115, 'Skipped: this runtime uses reprlib dataclass repr')"
+      },
+      {
+        "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_effective_dataclass_globals_are_validated_before_and_after_bind[id-after]",
+        "when": "setup",
+        "outcome": "skipped",
+        "duration": 7.525000546593219e-05,
+        "wasxfail": null,
+        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 115, 'Skipped: this runtime uses reprlib dataclass repr')"
+      },
+      {
+        "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_actual_code_with_foreign_global_dictionary_is_refused",
+        "when": "setup",
+        "outcome": "skipped",
+        "duration": 7.449999975506216e-05,
+        "wasxfail": null,
+        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 136, 'Skipped: this runtime uses reprlib dataclass repr')"
+      },
+      {
+        "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_thread_proxy_is_refused_without_invoking_accessor",
+        "when": "setup",
+        "outcome": "skipped",
+        "duration": 7.787499635014683e-05,
+        "wasxfail": null,
+        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 146, 'Skipped: this runtime uses reprlib dataclass repr')"
+      },
+      {
+        "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_effective_function_builtins_are_checked_not_module_metadata",
+        "when": "setup",
+        "outcome": "skipped",
+        "duration": 7.21669930499047e-05,
+        "wasxfail": null,
+        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 159, 'Skipped: this runtime uses reprlib dataclass repr')"
+      },
+      {
+        "nodeid": "tests/test_cache_dependencies_dataclass_repr.py::test_unavailable_stdlib_source_only_bypasses_cache",
+        "when": "setup",
+        "outcome": "skipped",
+        "duration": 7.058300252538174e-05,
+        "wasxfail": null,
+        "message": "('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/test_cache_dependencies_dataclass_repr.py', 175, 'Skipped: this runtime uses reprlib dataclass repr')"
+      }
+    ],
+    "failed_phases": [
+      {
+        "nodeid": "tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[success]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.46211524998943787,
+        "wasxfail": null,
+        "message": "real_direct = (<module 'awake_direct_fixture' from '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-leg...n/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw1/test_real_legacy_launcher_keep0')))\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x146e6eac0>\noutcome = 'success'\n\n    @pytest.mark.parametrize(\"outcome\", [\"success\", \"nonzero\", \"signal\", \"old_review\"])\n    def test_real_legacy_launcher_keeps_guards_and_receipts(real_direct, monkeypatch, outcome):\n        fixture, legacy_launch = real_direct\n        output = legacy_launch.path.with_name(\"registration-awake.json\")\n        awake.prepare(legacy_launch.path, output)\n        review, word = fixture.bind(legacy_launch.tmp_path, output, \"awake-review.json\", \"awake-word.json\")\n        api = FakeAPI()\n        guard = awake.KeepAwake(api)\n        monkeypatch.setattr(awake, \"KeepAwake\", lambda: guard)\n        monkeypatch.setattr(awake, \"load_legacy\", lambda: fixture.launcher)\n        before = legacy_launch.path.read_bytes(), Path(legacy_launch.registration[\"generation\"][\"jobs\"][0][\"instruction\"]).read_bytes()\n        child = fixture.fake_child(write_outputs=legacy_launch.write_outputs, exit_code=int(outcome == \"nonzero\"))\n        def execute(*args, **kwargs):\n            assert len(api.active) == 3\n            result = child(*args, **kwargs)\n            if outcome == \"signal\":\n                signal.getsignal(signal.SIGTERM)(signal.SIGTERM, None)\n            return result\n        monkeypatch.setattr(fixture.launcher.native, \"execute_child\", execute)\n        args = SimpleNamespace(registration=output, review=legacy_launch.review if outcome == \"old_review\" else review,\n                               launch_word=word, job=fixture.JOB)\n        if outcome == \"old_review\":\n            with pytest.raises(fixture.BudgetStop, match=\"independent approval\"):\n                awake.launch(args)\n            assert not (output.parent / \"attempts\").exists()\n        else:\n>           assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE           AssertionError: assert 1 == 0\nE            +  where 1 = <function launch at 0x1202137e0>(namespace(registration=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw1/test_real_legacy_launcher_keep0/registration/registration-awake.json'), review=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw1/test_real_legacy_launcher_keep0/awake-review.json'), launch_word=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw1/test_real_legacy_launcher_keep0/awake-word.json'), job='CHORUS_direct_rep1'))\nE            +    where <function launch at 0x1202137e0> = awake.launch\n\ntests/test_direct_keep_awake.py:288: AssertionError"
+      },
+      {
+        "nodeid": "tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[signal]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.42885854199994355,
+        "wasxfail": null,
+        "message": "real_direct = (<module 'awake_direct_fixture' from '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-leg...n/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw3/test_real_legacy_launcher_keep0')))\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x169831710>\noutcome = 'signal'\n\n    @pytest.mark.parametrize(\"outcome\", [\"success\", \"nonzero\", \"signal\", \"old_review\"])\n    def test_real_legacy_launcher_keeps_guards_and_receipts(real_direct, monkeypatch, outcome):\n        fixture, legacy_launch = real_direct\n        output = legacy_launch.path.with_name(\"registration-awake.json\")\n        awake.prepare(legacy_launch.path, output)\n        review, word = fixture.bind(legacy_launch.tmp_path, output, \"awake-review.json\", \"awake-word.json\")\n        api = FakeAPI()\n        guard = awake.KeepAwake(api)\n        monkeypatch.setattr(awake, \"KeepAwake\", lambda: guard)\n        monkeypatch.setattr(awake, \"load_legacy\", lambda: fixture.launcher)\n        before = legacy_launch.path.read_bytes(), Path(legacy_launch.registration[\"generation\"][\"jobs\"][0][\"instruction\"]).read_bytes()\n        child = fixture.fake_child(write_outputs=legacy_launch.write_outputs, exit_code=int(outcome == \"nonzero\"))\n        def execute(*args, **kwargs):\n            assert len(api.active) == 3\n            result = child(*args, **kwargs)\n            if outcome == \"signal\":\n                signal.getsignal(signal.SIGTERM)(signal.SIGTERM, None)\n            return result\n        monkeypatch.setattr(fixture.launcher.native, \"execute_child\", execute)\n        args = SimpleNamespace(registration=output, review=legacy_launch.review if outcome == \"old_review\" else review,\n                               launch_word=word, job=fixture.JOB)\n        if outcome == \"old_review\":\n            with pytest.raises(fixture.BudgetStop, match=\"independent approval\"):\n                awake.launch(args)\n            assert not (output.parent / \"attempts\").exists()\n        else:\n>           assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE           AssertionError: assert 1 == 143\nE            +  where 1 = <function launch at 0x122b0f7e0>(namespace(registration=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw3/test_real_legacy_launcher_keep0/registration/registration-awake.json'), review=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw3/test_real_legacy_launcher_keep0/awake-review.json'), launch_word=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/shard/popen-gw3/test_real_legacy_launcher_keep0/awake-word.json'), job='CHORUS_direct_rep1'))\nE            +    where <function launch at 0x122b0f7e0> = awake.launch\n\ntests/test_direct_keep_awake.py:288: AssertionError"
+      },
+      {
+        "nodeid": "tests/test_evaluation/test_rubric20_hybrid_parity.py::TestTheDenominator::test_the_scorer_itself_refuses_a_drifted_table",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.003959333000238985,
+        "wasxfail": null,
+        "message": "self = <tests.test_evaluation.test_rubric20_hybrid_parity.TestTheDenominator testMethod=test_the_scorer_itself_refuses_a_drifted_table>\n\n    def test_the_scorer_itself_refuses_a_drifted_table(self):\n        \"\"\"Not just the helper \u2014 the call site has to reach it.\n    \n        Asserted by scoring a real file, because the previous version of this\n        test asserted on the script's source text and would have passed against\n        a `derived_maximum()` that nothing called.\n        \"\"\"\n        module = _load()\n>       with tempfile.TemporaryDirectory(dir=REPO) as tmp:\n\ntests/test_evaluation/test_rubric20_hybrid_parity.py:111: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:887: in __init__\n    self.name = mkdtemp(suffix, prefix, dir)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nsuffix = '', prefix = 'tmp'\ndir = PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy')\n\n    def mkdtemp(suffix=None, prefix=None, dir=None):\n        \"\"\"User-callable function to create and return a unique temporary\n        directory.  The return value is the pathname of the directory.\n    \n        Arguments are as for mkstemp, except that the 'text' argument is\n        not accepted.\n    \n        The directory is readable, writable, and searchable only by the\n        creating user.\n    \n        Caller is responsible for deleting the directory when done with it.\n        \"\"\"\n    \n        prefix, suffix, dir, output_type = _sanitize_params(prefix, suffix, dir)\n    \n        names = _get_candidate_names()\n        if output_type is bytes:\n            names = map(_os.fsencode, names)\n    \n        for seq in range(TMP_MAX):\n            name = next(names)\n            file = _os.path.join(dir, prefix + name + suffix)\n            _sys.audit(\"tempfile.mkdtemp\", file)\n            try:\n>               _os.mkdir(file, 0o700)\nE               PermissionError: [Errno 1] Operation not permitted: '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tmpj0tc512e'\n\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:385: PermissionError"
+      },
+      {
+        "nodeid": "tests/test_run_lock.py::TestAgainstARealProcess::test_it_becomes_stale_once_stopped",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 6.613809916001628,
+        "wasxfail": null,
+        "message": "self = <tests.test_run_lock.TestAgainstARealProcess testMethod=test_it_becomes_stale_once_stopped>\n\n    def test_it_becomes_stale_once_stopped(self):\n        [lock] = run_lock.live(self.dir)\n        run_lock.stop(lock)\n        for _ in range(50):\n            if not lock.alive:\n                break\n            time.sleep(0.1)\n>       self.assertEqual(run_lock.live(self.dir), [])\nE       AssertionError: Lists differ: [Lock(path=PosixPath('/Users/marcin/Docume[151 chars]'t')] != []\nE       \nE       First list contains 1 additional elements.\nE       First extra element 0:\nE       Lock(path=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/temporary/tmp64a2xltn/real.json'), pid=70304, label_prefix='real', projects=['A'], started='t')\nE       \nE       + []\nE       - [Lock(path=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/temporary/tmp64a2xltn/real.json'),\nE       -       pid=70304,\nE       -       label_prefix='real',\nE       -       projects=['A'],\nE       -       started='t')]\n\ntests/test_run_lock.py:152: AssertionError"
+      },
+      {
+        "nodeid": "tests/test_run_lock.py::TestAgainstARealProcess::test_stop_actually_stops_it",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 7.264334499996039,
+        "wasxfail": null,
+        "message": "self = <tests.test_run_lock.TestAgainstARealProcess testMethod=test_stop_actually_stops_it>\n\n    def test_stop_actually_stops_it(self):\n        [lock] = run_lock.live(self.dir)\n        self.assertTrue(run_lock.stop(lock))\n        for _ in range(50):\n            if not lock.alive:\n                break\n            time.sleep(0.1)\n>       self.assertFalse(lock.alive, \"process survived SIGTERM\")\nE       AssertionError: True is not false : process survived SIGTERM\n\ntests/test_run_lock.py:143: AssertionError"
+      }
+    ],
+    "passed_by_file": {
+      "tests/test_shared_generation_runtime.py": 10,
+      "tests/test_midnight_resume.py": 8,
+      "tests/test_shared_output_ownership_entrypoints.py": 19,
+      "tests/test_fresh_orphan_partial_generation.py": 4,
+      "tests/test_absence_v3_recall.py": 39,
+      "tests/test_evaluation/test_support_execution_index_adversarial.py": 19,
+      "tests/test_shared_generation_capture.py": 10,
+      "tests/test_absence_lint.py": 46,
+      "tests/test_execute_returns_record_usage.py": 1,
+      "tests/test_evaluation/test_support_scalar_reference_pipeline.py": 22,
+      "tests/test_scope.py": 49,
+      "tests/test_schema_view.py": 6,
+      "tests/test_evaluation/test_semantic_evidence_v3.py": 43,
+      "tests/test_evaluation/test_trusted_context_and_class_review.py": 8,
+      "tests/test_evaluation/test_cross_family_panel_results_adversarial.py": 39,
+      "tests/test_source_heading_authority.py": 4,
+      "tests/test_cli/test_provenance_prompt.py": 18,
+      "tests/test_attainability_aggregation.py": 53,
+      "tests/test_cli/test_schema_cli.py": 6,
+      "tests/test_shared_generation_selection.py": 39,
+      "tests/test_attainability_figure.py": 49,
+      "tests/test_verdict_schema_pin.py": 11,
+      "tests/test_renderer_contract_captures.py": 8,
+      "tests/test_recorder_p1.py": 21,
+      "tests/test_manifest_corpus_review_r6.py": 6,
+      "tests/test_figure_publication.py": 30,
+      "tests/test_rocrate/test_provenance.py": 43,
+      "tests/test_reviewer_basis.py": 7,
+      "tests/test_generation_snapshot_ownership.py": 23,
+      "tests/test_api_header_instructions.py": 14,
+      "tests/test_schema_sync.py": 54,
+      "tests/test_removals.py": 186,
+      "tests/test_evaluation/test_rubric_association_adversarial.py": 26,
+      "tests/test_audit_recall_leak.py": 29,
+      "tests/test_source_heading_routing.py": 66,
+      "tests/test_v8_standards_explorer_publication.py": 4,
+      "tests/test_cli/test_rocrate_cli.py": 27,
+      "tests/test_canonical_resolver.py": 16,
+      "tests/test_evaluation/test_explicit_dataset_scope.py": 22,
+      "tests/test_legacy_validator_root.py": 15,
+      "tests/test_evaluation/test_cross_family_panel_results.py": 10,
+      "tests/test_pr5212_r3_fixes.py": 5,
+      "tests/test_receipt_rereceipt.py": 58,
+      "tests/test_presence_scoping.py": 9,
+      "tests/test_removals_person_schema.py": 11,
+      "tests/test_assistant_trusted_gate.py": 27,
+      "tests/test_recall_target_baseline.py": 79,
+      "tests/test_evaluation/test_support_scalar_references.py": 31,
+      "tests/test_form_defects.py": 77,
+      "tests/test_fairscape_integration/test_declared_evidence_outcomes.py": 26,
+      "tests/test_evaluation/test_support_targets.py": 47,
+      "tests/test_evaluation/test_summary_identity_schema.py": 2,
+      "tests/test_nested_ranges.py": 18,
+      "tests/test_related_dataset_diagnostics.py": 56,
+      "tests/test_rocrate/test_legacy_creators.py": 91,
+      "tests/test_evaluation/test_cross_family_panel.py": 26,
+      "tests/test_rocrate/test_runs.py": 87,
+      "tests/test_source_heading_runtime.py": 15,
+      "tests/test_evaluation/test_label_aware_scoring.py": 13,
+      "tests/test_canary_gate.py": 35,
+      "tests/test_identifier_form.py": 17,
+      "tests/test_awards.py": 9,
+      "tests/test_evaluation/test_related_datasets.py": 16,
+      "tests/test_direct_keep_awake.py": 24,
+      "tests/test_manifest_corpus_review_r11.py": 9,
+      "tests/test_status_context.py": 247,
+      "tests/test_evaluation/test_semantic_score_resolution.py": 12,
+      "tests/test_generic_v10_r9_enum_criteria.py": 29,
+      "tests/test_receipt_identifier_basis.py": 118,
+      "tests/test_cli/test_validate_cli.py": 32,
+      "tests/test_fairscape_integration/test_declared_projections.py": 26,
+      "tests/test_evaluation/test_support_plan.py": 59,
+      "tests/test_evaluation/test_evidence_score.py": 43,
+      "tests/test_rocrate/test_profile_root_policy.py": 72,
+      "tests/test_repo_relative_paths.py": 12,
+      "tests/test_schema_event_replay.py": 44,
+      "tests/test_reasoning_consumers_corrupt_entries.py": 45,
+      "tests/test_stream_evidence.py": 17,
+      "tests/test_rocrate/test_legacy_supplemental_report.py": 28,
+      "tests/test_native_full_schema_profile_evidence.py": 106,
+      "tests/test_download/test_generic_v2_prompt.py": 18,
+      "tests/test_api_launcher.py": 54,
+      "tests/test_api_batch_cost.py": 55,
+      "tests/test_evaluation/test_enumeration.py": 26,
+      "tests/test_evaluation/test_rubric20_hybrid_parity.py": 18,
+      "tests/test_extend_observed.py": 36,
+      "tests/test_evidence_phase_contract.py": 36,
+      "tests/test_native_full_schema_profile_runtime.py": 46,
+      "tests/test_chunking.py": 14,
+      "tests/test_native_trace_comparison_adversarial.py": 79,
+      "tests/test_snapshot_attestation.py": 5,
+      "tests/test_reference_rescore_cborg_validator_status.py": 17,
+      "tests/test_download/test_generic_v9_prompt.py": 22,
+      "tests/test_native_phase_scope_rendering.py": 4,
+      "tests/test_blind_review_pack.py": 88,
+      "tests/test_no_real_identifiers.py": 14,
+      "tests/test_audit_recall.py": 87,
+      "tests/test_native_full_schema_profile_boundaries.py": 132,
+      "tests/test_check_large_files.py": 14,
+      "tests/test_cli/test_render_prompt.py": 20,
+      "tests/test_wcrate_copies.py": 121,
+      "tests/test_prompt_render_alias.py": 6,
+      "tests/test_registered_eval_runner.py": 132,
+      "tests/test_imported_schema_snapshot.py": 10,
+      "tests/test_fairscape_integration/test_sssom_integration.py": 16,
+      "tests/test_measure_unhyphenated_line_splits.py": 30,
+      "tests/test_self_disclaimed.py": 418,
+      "tests/test_merge_destinations.py": 50,
+      "tests/test_cli/test_review_disposition.py": 4,
+      "tests/test_shared_output_ownership.py": 92,
+      "tests/test_unusable_snapshot.py": 18,
+      "tests/test_schema_snapshot_compatibility.py": 13,
+      "tests/test_evaluation_coverage.py": 6,
+      "tests/test_evaluation/test_rubric20_model_disclosure.py": 36,
+      "tests/test_run_lock.py": 13,
+      "tests/test_pin_granularity.py": 10,
+      "tests/test_audit_typed_format.py": 6,
+      "tests/test_d68_legacy_readonly.py": 261,
+      "tests/test_shared_line_join_replay.py": 12,
+      "tests/test_rubric10_element4_gate.py": 16,
+      "tests/test_phase_log.py": 10,
+      "tests/test_native_trace_comparison.py": 47,
+      "tests/test_recheck_validation_all.py": 19,
+      "tests/test_rocrate/test_legacy_root_identity_adversarial.py": 42,
+      "tests/test_report_claims_v7.py": 23,
+      "tests/test_evidence_anonymous_removals.py": 132,
+      "tests/test_rocrate/test_source_snapshot.py": 16,
+      "tests/test_native_execution_observation.py": 18,
+      "tests/test_rocrate/test_atomic_publication.py": 8,
+      "tests/test_fairscape_integration/test_forward_typed_projections.py": 290,
+      "tests/test_fairscape_integration/test_rocrate_merger.py": 18,
+      "tests/test_evaluation/test_rubric_pooling.py": 18,
+      "tests/test_fairscape_integration/test_mapping_loader.py": 15,
+      "tests/test_fairscape_integration/test_sssom_reader.py": 21,
+      "tests/test_fairscape_integration/test_d4d_builder.py": 37,
+      "tests/test_data.py": 1,
+      "tests/test_method_split.py": 2,
+      "tests/test_rocrate/test_parser.py": 18,
+      "tests/test_cache_dependencies_dataclass_repr.py": 5,
+      "tests/test_download/test_generic_v7_prompt.py": 14,
+      "tests/test_projects_registry.py": 5,
+      "tests/test_fairscape_integration/test_field_prioritizer.py": 14
+    },
+    "collection_errors": [],
+    "worker_collections": {
+      "gw1": 5632,
+      "gw0": 5632,
+      "gw2": 5632,
+      "gw3": 5632
+    },
+    "passing_nodes": [
+      "tests/test_midnight_resume.py::test_automatic_date_is_restored_before_cached_instruction_or_portable_checks[False-True]",
+      "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_records_an_orphaned_partial_predecessor[missing]",
+      "tests/test_fresh_orphan_partial_generation.py::test_predecessor_binding_survives_interrupted_index_activation",
+      "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_does_not_accept_unrelated_archived_attempts",
+      "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_records_an_orphaned_partial_predecessor[malformed]",
+      "tests/test_midnight_resume.py::test_automatic_date_is_restored_before_cached_instruction_or_portable_checks[True-True]"
+    ]
+  },
+  {
+    "phase": "base-write-canary",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/base-write-canary/d73-result.json",
+    "raw_sha256": "b4faac383f34042b29c03f58dc3c470f66ad030e9e44f7b89e0380de36de1734",
+    "log_sha256": "4f33684bfe4a34441ec793949f6afb169ca987a1d1be90a9f6f707526de82fad",
+    "exit_code": 1,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/d73-base-d9",
+      "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
+      "tracked_diff": "",
+      "latch_journal_sha256": "625ac764fd0956fb96afe4c187119304f168d5767a4dcf9a97338830576b8d1c",
+      "regression_test_sha256": null
+    },
+    "command": [
+      "tests/test_evaluation/test_rubric20_hybrid_parity.py::TestTheDenominator::test_the_scorer_itself_refuses_a_drifted_table",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/base-write-canary"
+    ],
+    "canary_node": null,
+    "selected": 1,
+    "selected_sha256": "6da4187a5669739e1205cee02019bd56fdbb519d4a2f28bbe4cbf5583f306e3f",
+    "call_outcomes": {
+      "failed": 1
+    },
+    "skipped_phases": [],
+    "failed_phases": [
+      {
+        "nodeid": "tests/test_evaluation/test_rubric20_hybrid_parity.py::TestTheDenominator::test_the_scorer_itself_refuses_a_drifted_table",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.004034540994325653,
+        "wasxfail": null,
+        "message": "tests/test_evaluation/test_rubric20_hybrid_parity.py:111: in test_the_scorer_itself_refuses_a_drifted_table\n    with tempfile.TemporaryDirectory(dir=REPO) as tmp:\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:887: in __init__\n    self.name = mkdtemp(suffix, prefix, dir)\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:385: in mkdtemp\n    _os.mkdir(file, 0o700)\nE   PermissionError: [Errno 1] Operation not permitted: '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/d73-base-d9/tmpqzfqja71'"
+      }
+    ],
+    "passed_by_file": {},
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  },
+  {
+    "phase": "base-remaining",
+    "complete": true,
+    "raw_report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/base-remaining/d73-result.json",
+    "raw_sha256": "b14bf78d9cfd24cd449209ee3440d59f2fe508a12245882bb60fcf7af389bd55",
+    "log_sha256": "ae94947a305c97d9dc69b25e1f17032323f1abcedaabc502b6be559a8b0297ac",
+    "exit_code": 1,
+    "environment": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+      "helper_sha256": "5c2fdfa20290b90ddd76acf1ad944c6fdc3a84bedd3f6a9b134d1e484b8dddba",
+      "removed_environment_names": [
+        "CBORG_API_KEY",
+        "KB_AUTH_TOKEN",
+        "OPENSCIENTIST_API_KEY"
+      ],
+      "site_and_pth_execution": false,
+      "dependencies": {
+        "pytest": "7.4.4",
+        "linkml": "1.9.3",
+        "linkml-runtime": "1.9.4",
+        "anthropic": "0.72.0",
+        "PyYAML": "6.0.2"
+      },
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/d73-base-d9",
+      "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
+      "tracked_diff": "",
+      "latch_journal_sha256": "625ac764fd0956fb96afe4c187119304f168d5767a4dcf9a97338830576b8d1c",
+      "regression_test_sha256": null
+    },
+    "command": [
+      "tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[success]",
+      "tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[signal]",
+      "tests/test_run_lock.py::TestAgainstARealProcess::test_it_becomes_stale_once_stopped",
+      "tests/test_run_lock.py::TestAgainstARealProcess::test_stop_actually_stops_it",
+      "-q",
+      "--tb=short",
+      "--basetemp",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/base-remaining"
+    ],
+    "canary_node": null,
+    "selected": 4,
+    "selected_sha256": "2616ffd262ded7e02a4754b3a34519371cbeb03b363e5a6bddb102bf6ab6b73a",
+    "call_outcomes": {
+      "failed": 4
+    },
+    "skipped_phases": [],
+    "failed_phases": [
+      {
+        "nodeid": "tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[success]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.32746433300781064,
+        "wasxfail": null,
+        "message": "tests/test_direct_keep_awake.py:288: in test_real_legacy_launcher_keeps_guards_and_receipts\n    assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE   AssertionError: assert 1 == 0\nE    +  where 1 = <function launch at 0x1029d71a0>(namespace(registration=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/base...-executions/scratch-5212fix/base-remaining/test_real_legacy_launcher_keep0/awake-word.json'), job='CHORUS_direct_rep1'))\nE    +    where <function launch at 0x1029d71a0> = awake.launch"
+      },
+      {
+        "nodeid": "tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[signal]",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 0.32343604099878576,
+        "wasxfail": null,
+        "message": "tests/test_direct_keep_awake.py:288: in test_real_legacy_launcher_keeps_guards_and_receipts\n    assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE   AssertionError: assert 1 == 143\nE    +  where 1 = <function launch at 0x1029d71a0>(namespace(registration=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/base...-executions/scratch-5212fix/base-remaining/test_real_legacy_launcher_keep1/awake-word.json'), job='CHORUS_direct_rep1'))\nE    +    where <function launch at 0x1029d71a0> = awake.launch"
+      },
+      {
+        "nodeid": "tests/test_run_lock.py::TestAgainstARealProcess::test_it_becomes_stale_once_stopped",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 5.688401209001313,
+        "wasxfail": null,
+        "message": "tests/test_run_lock.py:152: in test_it_becomes_stale_once_stopped\n    self.assertEqual(run_lock.live(self.dir), [])\nE   AssertionError: Lists differ: [Lock(path=PosixPath('/Users/marcin/Docume[151 chars]'t')] != []\nE   \nE   First list contains 1 additional elements.\nE   First extra element 0:\nE   Lock(path=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/temporary/tmp3lwyw7fx/real.json'), pid=70962, label_prefix='real', projects=['A'], started='t')\nE   \nE   + []\nE   - [Lock(path=PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5212fix/temporary/tmp3lwyw7fx/real.json'),\nE   -       pid=70962,\nE   -       label_prefix='real',\nE   -       projects=['A'],\nE   -       started='t')]"
+      },
+      {
+        "nodeid": "tests/test_run_lock.py::TestAgainstARealProcess::test_stop_actually_stops_it",
+        "when": "call",
+        "outcome": "failed",
+        "duration": 5.687914207999711,
+        "wasxfail": null,
+        "message": "tests/test_run_lock.py:143: in test_stop_actually_stops_it\n    self.assertFalse(lock.alive, \"process survived SIGTERM\")\nE   AssertionError: True is not false : process survived SIGTERM"
+      }
+    ],
+    "passed_by_file": {},
+    "collection_errors": [],
+    "worker_collections": {},
+    "passing_nodes": []
+  }
+]

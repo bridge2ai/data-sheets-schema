@@ -1,6 +1,7 @@
 # D73 follow-up to the 4cde66d2d implementation review
 
-Work is in progress; this is not a completed-validation report.
+The implementation and requested pre-merge validation are complete. The generated
+implementation report adds the pinned main merge outcome and any post-merge checks.
 
 ## Required PR merge strategy
 
@@ -24,10 +25,10 @@ that the ancestry cannot be established from its incomplete graph.
 - D73(c): all four additional accepted flips are disclosed individually in
   `tests/fixtures/pre_d41/README.md`.
 
-The stopped earlier gate is evidence of `4cde66d2d` only. The revised validation
-will use external basetemps, the requested broad set and one ordinary shard
-out of four with up to four xdist workers. Main will be merged only after those
-checks, with no hand resolution of production conflicts.
+The stopped earlier gate is evidence of its recorded older commits only. This
+follow-up uses external basetemps, the requested broad set and one ordinary shard
+out of four with four xdist workers. Main is merged last, with no hand resolution
+of production conflicts.
 
 ## Review findings 1–10
 
@@ -156,3 +157,72 @@ including both retired parameters. Paths are under `tests/`.
 | 14 | `test_resume_instrument_and_activation.py::test_portable_record_refuses_changed_instruction_without_a_ledger` | Retain d9b69d84d's independent parser success/exact instruction-drift checks and the public deleted-ledger journal refusal, with zero output changes. |
 | 15 | `test_thinking_request.py::TestTheRequestStatesThinking::test_the_runner_request_path_puts_the_display_on_the_wire` | Add a real temporary `metadata_dir` to the stub. Retain the explicitly mocked per-attempt latch check and assert it was called once; this unit tests actual SDK request construction on a mock transport. |
 | 16 | `test_thinking_request.py::TestTheRequestStatesThinking::test_the_shared_2_admission_path_puts_the_display_on_the_wire` | Add the same real temporary `metadata_dir`. Retain the latch invocation assertion and bounded-client wire assertions; no production guard bypass added. |
+
+## Validation evidence and limits
+
+- The completed broad run selected all modified Python test files plus the
+  requested broad files and full D41 suites: **1,320 passed**, zero failures or
+  collection errors, in 6,533.70 seconds. Its production/test source is
+  `a4230088f`. The later public-receipt pattern correction is separately covered
+  by the final focused run and the ordinary shard; the 1,320 result is not
+  relabeled as a full broad rerun of that correction.
+- The final focused run at `cde827a46` passed **441 tests** in 448.18 seconds:
+  D68 261, D70 26, latch journal 72, API latch guard 22, usage ledger 60.
+  This includes all 24 receipt-only refusals after the failing pre-fix control.
+- `pytest tests --collect-only -q` collected **20,847 tests**, with zero
+  collection errors, in 34.29 seconds.
+- The actual CI plugin and committed timing file assign the D68 test file to
+  **ordinary shard 1/4**, selecting **5,632 nodes**. The one-node canary passed
+  in 28.79 seconds after normal shard selection, with identical one-node
+  collections in all four workers. Its JSON, JUnit XML and unchanged 24,683-byte
+  fixture provenance were verified on disk before launching the shard.
+- The complete **ordinary shard 1/4** at `cde827a46` finished in 731.21 seconds:
+  **5,616 passed, 11 skipped, five failed**, with all four workers collecting
+  the same 5,632 nodes. All 261 D68 tests, all ten shared-generation runtime
+  cases and all 132 registered-evaluation runner tests passed on this final
+  production source. The 11 skips are the dataclass-representation tests whose
+  stated reason is that this Python runtime uses `reprlib` dataclass repr.
+
+### Every remaining local failure and its base evidence
+
+All five failures were freshly reproduced on an isolated, unchanged
+`d9b69d84d9a6936809681ae240bb8e767649ca11` worktree under `scratch-5212fix`,
+with the same read-only checkout policy and dependency environment. The base
+canary reproduced the checkout-write refusal first; the remaining four then
+reproduced serially in 16.52 seconds. The base tree, including `data/`, remained
+unchanged. The corresponding test files and direct-launcher/scorer/run-lock
+sources have no diff from d9. These are pre-existing failures in this restricted
+local environment, not new latch-journal regressions; the shard is not reported
+as green.
+
+| Node under `tests/` | Current and d9 result | Fresh base phase |
+|---|---|---|
+| `test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[success]` | Fake child attempts a checkout `data/` write; the controller records `PermissionError` and returns 1 instead of 0. Protected corpus writes remain blocked. | `base-remaining` |
+| `test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[signal]` | Same blocked write occurs before the synthetic signal; returns 1 instead of 143. | `base-remaining` |
+| `test_evaluation/test_rubric20_hybrid_parity.py::TestTheDenominator::test_the_scorer_itself_refuses_a_drifted_table` | `TemporaryDirectory(dir=REPO)` raises `PermissionError` at line 111 because the checkout is read-only. | `base-write-canary` |
+| `test_run_lock.py::TestAgainstARealProcess::test_it_becomes_stale_once_stopped` | The stopped child's lock still reads live after the test's five-second polling loop, failing the empty-list assertion at line 152. | `base-remaining` |
+| `test_run_lock.py::TestAgainstARealProcess::test_stop_actually_stops_it` | The same live-process check fails with `process survived SIGTERM` at line 143. This work did not establish a deeper platform/sandbox cause. | `base-remaining` |
+
+The retained `validation.json` includes every failed phase, exact base HEAD,
+command, raw-report path and hash. The base and current logs also retain the
+direct launcher's `PermissionError` receipts. No guard was relaxed, no protected
+write was allowed, and these five unrelated tests were not rewritten to make
+this local gate appear green. The two introduced artifact omissions discovered
+during this follow-up are separately recorded as NF-D73-1 and NF-D73-3 and fixed.
+
+The independent reviewer's overlapping broad log contained one
+`test_accepted_refresh_survives_interrupted_completion_checkpoint[False]`
+registration-hash failure while this checkout's source was being changed.
+Both `[False]` and `[True]` pass in the completed frozen-source broad run;
+their exact nodes are retained in the validation ledger. That older result
+is not a reproducible remaining failure in the completed gate.
+
+All new pytest phases use external basetemps under `scratch-5212fix`, with
+provider keys unset and an OS sandbox blocking external network and writes
+outside scratch. Local fake transports/loopback fixtures are allowed. No paid
+provider was called. The local environment is macOS/Python 3.13.12; the workflow
+uses Ubuntu/Python 3.12, so these are local CI-layout results, not a GitHub CI run.
+Only the requested one ordinary shard is run; the other three remain for CI.
+The old `.d68-validation/` gate and pre-existing ignored raw design evidence
+remain untouched. No protected file was edited by hand, and no module was added
+to `ROUTING_CODE`.
