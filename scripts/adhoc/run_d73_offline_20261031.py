@@ -22,7 +22,9 @@ canary_node = None
 if "--d73-canary-node" in args:
     position = args.index("--d73-canary-node")
     canary_node = args[position + 1]
-    del args[position:position + 2]
+    # Explicit -p plugins are imported in every xdist worker. An observer
+    # instance passed to pytest.main exists only in the controller process.
+    args.extend(["-p", "scripts.adhoc.d73_pytest_canary_20261031"])
 base = Path(args[args.index("--basetemp") + 1]).resolve()
 assert base.is_relative_to(SCRATCH) and base != SCRATCH
 assert not base.exists(), "preserve prior validation evidence"
@@ -61,16 +63,6 @@ import pytest
 class Observe:
     def __init__(self):
         self.reports, self.errors, self.selected, self.workers = [], [], [], {}
-
-    @pytest.hookimpl(wrapper=True, tryfirst=True)
-    def pytest_collection_modifyitems(self, config, items):
-        result = yield
-        if canary_node is not None:
-            selected = [item for item in items if item.nodeid == canary_node]
-            assert len(selected) == 1, "canary must belong to the real selected CI shard"
-            config.hook.pytest_deselected(items=[item for item in items if item not in selected])
-            items[:] = selected
-        return result
 
     def pytest_collection_finish(self, session):
         self.selected = [item.nodeid for item in session.items]
