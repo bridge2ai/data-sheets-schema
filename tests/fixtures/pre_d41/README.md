@@ -44,5 +44,36 @@ trees. Their source archive SHA-256 is
 `314ad171427e2a42244fe963874c1082137ea99228bc40d6f12809058a36de6a`.
 
 No recovery authorization or import is implemented (review item 5 is superseded
-by the owner's Option 3). Pre-D41 shared-v2 verification remains unaddressed and
-fails closed. Any rerun must use an ordinary new label/registration.
+by the owner's Option 3). Under D73(b), the verifier covers **generic_v6 API
+records with a structured request spec only**. Other API conditions, including
+v7/v8, and agentic records are unsupported. It does not currently verify the
+committed historical campaign records; the lead will file the scope extension.
+Any rerun must use an ordinary new label/registration.
+
+## D73 decisions and further accepted flips
+
+D73(a) makes `age unestablished` eligible and reported. Positive post-D41
+ancestry still makes a missing integrity block ineligible. Age is informational
+in canary results and registered-evaluation output, outside quality rows and
+the evaluation plan hash. The quality-measurement test now also asserts that unknown age is eligible and
+reported without adding a measurement.
+
+The owner accepted these four further D68/D69 flips in D73(c):
+
+- `test_foreign_flat_label_provenance_does_not_masquerade_as_current_history`:
+  a new label cannot overwrite unguarded flat-layout provenance; both guard
+  entry points refuse, preserving the evidence.
+- `test_a_legacy_continuation_adopts_rows_without_a_generation_before_its_boundary`:
+  legacy adoption is now refused in both preparation modes; old charges stay
+  readable and the tree is unchanged.
+- `test_legacy_public_boundary_is_unchanged`, renamed
+  `test_legacy_public_boundary_refuses_residue_before_any_write`: unowned partial
+  output is refused before locks or execution in both resume modes.
+- Explicit fresh restart over legacy residue is refused. The C1–C6 rows above
+  name each authentic replacement, including the earlier C5 diagnostic.
+
+The D70-only fixture additions in `test_method_resolution.py` (two timestamps),
+`test_report_gate.py` (two timestamps), `test_duplicate_keys.py` (one timestamp)
+and `test_registered_eval_runner.py` (one clean integrity block) are all
+reverted. These fixtures again exercise unknown age; they no longer need
+invented age/integrity evidence to reach their original assertions.

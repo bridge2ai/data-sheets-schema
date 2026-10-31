@@ -212,6 +212,8 @@ class PreparedEvaluation:
     system_prompt: bytes
     predecessor: str
     preamble: str
+    # Informational age is outside the immutable plan and its spending identity.
+    generation_record_age: str = "age unestablished"
 
     @property
     def digest(self) -> str:
@@ -428,10 +430,11 @@ def prepare(
         "generation_acceptance_verified": False,
         "authorities": [shared.file_pin(Path(path), raw) for path, raw in sorted(authorities.items())],
     }
+    from data_sheets_schema.latch_journal import record_age
     result = PreparedEvaluation(
         shared.canonical(manifest), tuple(sorted(authorities.items())), tuple(resources.items()),
         original, blinded, shared.canonical(normalized), resources[selected.definition_path],
-        effective_system, predecessor, preamble,
+        effective_system, predecessor, preamble, generation_record_age=record_age(prior),
     )
     result.assert_current()
     return result
@@ -629,7 +632,8 @@ def execute(
     prepared.assert_current()
     plan = prepared.document()
     summary = {"plan_sha256": prepared.digest, "plan": plan, "status": "dry-run",
-               "model_calls": 0, "scientific_review_verified": False}
+               "model_calls": 0, "scientific_review_verified": False,
+               "generation_record_age": prepared.generation_record_age}
     if dry_run:
         return summary
     if not isinstance(plan_sha256, str) or plan_sha256 != prepared.digest:

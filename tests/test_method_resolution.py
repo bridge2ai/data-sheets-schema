@@ -170,8 +170,7 @@ class TestBaselineAcrossTheFamily(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = _corpus(Path(tmp), {"claudecode_agent": ["2026-09-01_v7_rep1"], "claudecode_api": ["2026-09-04_v8_rep1"]})
             for d in root.glob("*_core/*/P_provenance.yaml"):
-                d.write_text(yaml.safe_dump({"record_generated_at": "2026-09-01T00:00:00Z",
-                                             "pair_consistency": {"ran": True, "errors": 0}}))
+                d.write_text(yaml.safe_dump({"pair_consistency": {"ran": True, "errors": 0}}))
             with self.assertRaises(LookupError):
                 canary.baseline_for("P", "2026-09-0", concat_dir=root)
             self.assertEqual(canary.baseline_for("P", "2026-09-01", concat_dir=root)["pair errors"], 0)
@@ -183,7 +182,6 @@ class TestBaselineAcrossTheFamily(unittest.TestCase):
                                           ("claudecode_api", "2026-05-06_v8_rep1", 3)):
                 d = root / f"{method}_core" / label; d.mkdir(parents=True)
                 (d / "P_provenance.yaml").write_text(yaml.safe_dump({
-                    "record_generated_at": "2026-05-05T00:00:00Z",
                     "pair_consistency": {"ran": True, "errors": errors}, "report_claims": {"checked": True, "findings": []},
                     "grounding": {"checked": True}, "form": {"checked": True}}))
             self.assertEqual(canary.baseline_for("P", "2026-05-05_v7", concat_dir=root)["pair errors"], 1)

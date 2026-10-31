@@ -69,10 +69,8 @@ def registration(tmp_path_factory):
     files[reg["registration_path"]] = Path(reg["registration_path"]).read_bytes()
     captured = shared._capture_bytes(files[reg["registration_path"]], reg, files)
     provenance = directory / "generation-provenance.yaml"
-    from tests.test_api_latch_guard import clean_integrity
     provenance.write_text(yaml.safe_dump({
         "record_type": "d4d_generation_provenance", "run": reg["run"],
-        "model": {"runtime_integrity": clean_integrity()},
         "shared_generation": {"authority": captured.identity()},
         "validation": {"artifacts": {"full": {
             "path": str(record), "md5": hashlib.md5(record.read_bytes()).hexdigest(),
@@ -176,6 +174,19 @@ def test_preparation_validates_real_registration_and_separate_context(prepared, 
     assert plan["scientific_review_verified"] is False
     assert plan["generation_acceptance_verified"] is False
     assert dict(prepared.authorities)[str(registration["record"])] == prepared.original
+
+
+def test_unestablished_age_is_reported_without_changing_the_plan(prepared, tmp_path):
+    assert prepared.generation_record_age == "age unestablished"
+    destination = tmp_path / "dry-run"
+    result = runner.execute(prepared, destination, dry_run=True)
+    assert result["generation_record_age"] == "age unestablished"
+    assert result["model_calls"] == 0 and not destination.exists()
+    historical = replace(prepared, generation_record_age="pre-D41")
+    assert historical.manifest == prepared.manifest and historical.digest == prepared.digest
+    prior = runner.execute(historical, destination, dry_run=True)
+    assert {k: v for k, v in result.items() if k != "generation_record_age"} == {
+        k: v for k, v in prior.items() if k != "generation_record_age"}
 
 
 @pytest.mark.parametrize("integrity", [None, {}, {

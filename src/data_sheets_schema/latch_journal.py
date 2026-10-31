@@ -85,7 +85,9 @@ def record_eligibility_problem(record):
     if isinstance(model, dict) and "runtime_integrity" in model:
         return eligibility_problem(model["runtime_integrity"])
     age = record_age(record)
-    return None if age == "pre-D41" else f"{age}: missing runtime_integrity block"
+    # D73(a): only positive post-D41 evidence gates a missing block. Unknown
+    # age remains eligible and is reported separately by each consumer.
+    return f"{age}: missing runtime_integrity block" if age == "post-D41" else None
 
 
 def _record(spec):
@@ -867,7 +869,11 @@ def provenance(spec):
 
 
 def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
-    """Read-only generic-v6 evidence verification, including relocated captures.
+    """Read-only verification of generic_v6 API records with a request spec.
+
+    Other API conditions (including v7/v8) and agentic records are unsupported.
+    D73(b) deliberately retains this narrow scope; it does not currently cover
+    the committed historical campaign records.
 
     The explicit root mapping changes only file lookup, never captured bytes or
     instruction substitutions. Inventory covers selected-project artifacts and

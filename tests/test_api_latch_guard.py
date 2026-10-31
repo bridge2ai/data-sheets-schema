@@ -363,12 +363,17 @@ def test_assisted_or_malformed_integrity_blocks_live_and_offline_canary_without_
 
 def test_clean_or_legacy_integrity_does_not_fabricate_a_new_quality_measurement():
     record = record_with(clean_integrity())
-    assert canary.verdict(canary.checks_from_record(record), {}, baseline_requested=False)["status"] == canary.OK
+    clean = canary.verdict(canary.checks_from_record(record), {}, baseline_requested=False)
+    assert clean["status"] == canary.OK
     record.pop("model")
     assert "runtime_integrity" not in canary.checks_from_record(record)
-    assert canary.verdict(canary.checks_from_record(record), {}, baseline_requested=False)["status"] != canary.OK
+    unknown = canary.verdict(canary.checks_from_record(record), {}, baseline_requested=False)
+    assert unknown["status"] == canary.OK and unknown["record_age"] == "age unestablished"
+    assert unknown["rows"] == clean["rows"]
     record["record_generated_at"] = "2026-09-12T12:00:00Z"
-    assert canary.verdict(canary.checks_from_record(record), {}, baseline_requested=False)["status"] == canary.OK
+    historical = canary.verdict(canary.checks_from_record(record), {}, baseline_requested=False)
+    assert historical["status"] == canary.OK and historical["record_age"] == "pre-D41"
+    assert historical["rows"] == clean["rows"]
 
 
 def test_assisted_record_cannot_supply_baseline_metrics(tmp_path):

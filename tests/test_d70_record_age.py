@@ -27,7 +27,7 @@ def test_age_and_consumers(commit, stamp, age):
     record.update(repo={"commit": commit}, record_generated_at=stamp)
     assert journal.record_age(record) == age
     problem = journal.record_eligibility_problem(record)
-    assert (problem is None) == (age == "pre-D41")
+    assert (problem is None) == (age != "post-D41")
     from data_sheets_schema.evaluation.registered_eval_runner import require_eligible_generation
     if problem:
         with pytest.raises(LookupError, match=age):
@@ -38,7 +38,8 @@ def test_age_and_consumers(commit, stamp, age):
         canary._require_eligible_baseline(record, "test")
         require_eligible_generation(record)
     result = canary.verdict(canary.checks_from_record(record), {}, baseline_requested=False)
-    assert (result["status"] == canary.OK) == (age == "pre-D41")
+    assert result["record_age"] == age
+    assert (result["status"] == canary.OK) == (age != "post-D41")
 
 
 def test_removed_assisted_block_does_not_restore_eligibility():

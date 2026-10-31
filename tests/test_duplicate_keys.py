@@ -670,7 +670,6 @@ class TestReviewRound(unittest.TestCase):
             base = Path(tmp) / "claudecode_agent_core" / "v7_rep1"
             base.mkdir(parents=True)
             (base / "P_provenance.yaml").write_text(yaml.safe_dump({
-                "record_generated_at": "2026-09-01T00:00:00Z",
                 "pair_consistency": {"ran": True, "errors": 0},
                 "report_claims": {"checked": True, "claims_checked": 2, "findings": []},
                 "grounding": {"ran": True, "distinct": {"absent": 0}, "findings": []},

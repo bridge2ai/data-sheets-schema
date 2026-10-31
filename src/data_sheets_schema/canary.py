@@ -169,13 +169,14 @@ def checks_from_record(record: dict[str, Any]) -> dict[str, Any]:
     model = record.get("model")
     integrity = ({"runtime_integrity": model["runtime_integrity"]}
                  if isinstance(model, dict) and "runtime_integrity" in model else {})
-    from .latch_journal import record_eligibility_problem
+    from .latch_journal import record_age, record_eligibility_problem
     problem = record_eligibility_problem(record)
     if problem:
         integrity["runtime_integrity_problem"] = problem
     return {"pair": record.get("pair_consistency"), "validation": record.get("validation"),
             "report": record.get("report_claims"), "grounding": record.get("grounding"),
-            "form": record.get("form"), "receipts": receipt, **integrity}
+            "form": record.get("form"), "receipts": receipt,
+            "record_age": record_age(record), **integrity}
 
 
 def _require_eligible_baseline(record, path):
@@ -569,4 +570,5 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
         status = OK
     return {"status": status, "rows": rows, "blind": blind,
             "unbaselined": unbaselined if baseline_requested else [],
-            "regressions": regressions}
+            "regressions": regressions,
+            **({"record_age": checks["record_age"]} if "record_age" in (checks or {}) else {})}
