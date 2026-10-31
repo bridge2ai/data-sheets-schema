@@ -361,7 +361,12 @@ class TestTheThreadingHolds(_Clean):
                         manifest=STUDY_MANIFEST, manifest_line=ARMS["crate_only"][3])
         self.assertEqual((crate.profile, crate.manifest_used), ("bridge2ai", False))
         line = next(l for l in resolve_prompt(crate).splitlines() if " provenance record --project " in l)
-        self.assertIn(f"--manifest {STUDY_MANIFEST}", line)
+        import shlex
+        command = shlex.split(line)
+        self.assertEqual(command.count("--manifest"), 1)
+        selected = command[command.index("--manifest") + 1]
+        self.assertNotEqual(selected, "none")
+        self.assertEqual(Path(selected).absolute(), STUDY_MANIFEST.absolute())
         self.assertNotIn("--manifest none", line)
         with tempfile.TemporaryDirectory() as d:
             ext = Path(d) / "clinic_preprocessed.txt"; ext.write_text("FILE: a\nhi\n", encoding="utf-8")
@@ -1347,7 +1352,7 @@ class TestRoundTen(_Clean):
                        runtime="Claude Code", provider="Anthropic", run_date="2026-09-13")
         record = {"record_generated_at": "2026-09-13T12:00:00Z", "model": {"provider": "Anthropic"},
                   "schema": {"profile": spec.profile, "profile_basis": spec.profile_basis},
-                  "inputs": {"bundle_path": str(bundle), "source_manifest": {"path": None},
+                  "inputs": {"bundle_path": str(spec.bundle), "source_manifest": {"path": None},
                              **({"chunks": {"path": str(spec.chunk_manifest)}} if spec.chunk_manifest else {})},
                   "prompts": {"request": {"sha256": hashlib.sha256(resolve_prompt(spec).encode()).hexdigest()}}}
         with tempfile.TemporaryDirectory() as d:

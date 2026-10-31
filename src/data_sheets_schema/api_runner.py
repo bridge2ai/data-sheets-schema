@@ -665,7 +665,9 @@ class RunSpec:
                 self.manifest = self.manifest.absolute()
             if self.chunk_manifest is not None:
                 self.chunk_manifest = Path(self.chunk_manifest).absolute()
-        else:
+        elif not self._replay_only:
+            # Replay preserves the recorded spelling, even when inputs moved
+            # or the caller now runs from the original corpus root (#5213).
             for _attr in ("bundle", "manifest", "chunk_manifest"):
                 _val = getattr(self, _attr)
                 if _val is not None and Path(_val).is_absolute():

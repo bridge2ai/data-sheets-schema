@@ -22,7 +22,8 @@ def registration_for(spec, *, condition='generic_v10'):
         for row in metadata['projects'][spec.project]['sources']:
             row['processed_file'] = 'protocol'
         spec.manifest.write_text(yaml.safe_dump(metadata))
-    directory = spec.bundle.parent
+    # Registration authority is absolute even when input paths are relative.
+    directory = Path(spec.bundle).absolute().parent
     context = directory / 'generation-context.json'
     context.write_bytes(sg.canonical({'format': 'omission_context_v1', 'root_class': 'Dataset',
         'scopes': [{'owner': '', 'referent': 'External Cohort', 'release': 'synthetic',

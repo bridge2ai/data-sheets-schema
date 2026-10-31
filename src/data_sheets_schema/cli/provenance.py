@@ -808,6 +808,28 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                    f"{label} --project {project}` before `d4d runs check`.")
 
 
+def _backfill_input_spellings(value: Path | None, owner: Path | None) -> tuple[Path | None, ...]:
+    """Bounded lexical candidates; only the complete original hash admits one.
+
+    An unknown owner is not inferred from cwd. Never resolve symlinks, erase
+    traversal components or search disk for a replacement. Original spellings
+    remain candidates, including explicit historical spellings containing '..'.
+    """
+    if value is None:
+        return (None,)
+    value = Path(value)
+    if owner is None or not owner.is_absolute() or ".." in owner.parts or ".." in value.parts:
+        return (value,)
+    if value.is_absolute():
+        try:
+            alternate = value.relative_to(owner)
+        except ValueError:
+            return (value,)
+    else:
+        alternate = owner / value
+    return (value,) if alternate == value else (value, alternate)
+
+
 @provenance.command("backfill-spec")
 @click.option("--project", required=True)
 @click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
@@ -956,9 +978,23 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
             # Current resources may be gone while older renderer hashes
             # still reproduce. Only this candidate becomes unavailable.
             pass
-    for delta, render_version, selected_chunks, selected_manifest, selected_profile, destinations, scoped_chunks in product(
-            (0, -1, 1, -2, 2), (8, 7, 6, 5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices,
-            destination_choices, (True, False)):
+    def candidates():
+        # Finish the entire original traversal before adding spelling alternatives.
+        # This preserves historical first-match ordering and profile decisions.
+        for alternate in (False, True):
+            for delta, version, selected_chunks, selected_manifest, selected_profile, selected_destinations, scoped in product(
+                    (0, -1, 1, -2, 2), (8, 7, 6, 5, 4, 3, 2, 1), chunk_choices,
+                    manifest_choices, profile_choices, destination_choices, (True, False)):
+                original = (Path(bundle), selected_chunks, selected_manifest)
+                spellings = (product(*(_backfill_input_spellings(value, owner) for value in original))
+                             if alternate else (original,))
+                for selected_bundle, candidate_chunks, candidate_manifest in spellings:
+                    if alternate and (selected_bundle, candidate_chunks, candidate_manifest) == original:
+                        continue
+                    yield (delta, version, selected_bundle, candidate_chunks, candidate_manifest,
+                           selected_profile, selected_destinations, scoped)
+
+    for delta, render_version, selected_bundle, selected_chunks, selected_manifest, selected_profile, destinations, scoped_chunks in candidates():
         if render_version == 1 and selected_profile and not schema_block.get("profile"):
             continue  # renderer 1 cannot prove a profile (#1678)
         if scoped_chunks and (render_version < 5 or runtime not in AGENTIC_RUNTIMES):
@@ -985,7 +1021,7 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
             environment["agentic_toolchain"] = current_toolchain
         spec = RunSpec.from_render_spec({
             **environment,
-            "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
+            "arm": _ARMS[arm][0], "bundle": str(selected_bundle), "condition": condition,
             "runtime": runtime, "provider": provider,
             "manifest": str(selected_manifest) if selected_manifest is not None else None,
             "manifest_line": arm_header if own_header else RunSpec.header_for_manifest(selected_manifest),
