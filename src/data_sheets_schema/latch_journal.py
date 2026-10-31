@@ -494,7 +494,7 @@ def _owned_artifact_name(project, name, *, intermediate=False, include_locks=Fal
     """
     prefix = re.escape(project) + "_"
     metadata = (r"(?:d4d(?:_core)?\.yaml|reconciliation\.md|provenance\.yaml|"
-                r"api_progress\.json|latch_(?:journal\.jsonl|override\.json)|"
+                r"api_progress\.json|abandoned_attempts\.jsonl|latch_(?:journal\.jsonl|override\.json)|"
                 r"api_usage_[0-9a-f]{16}(?:\.previous-[0-9a-f]{32})?\.json|"
                 r"reasoning(?:\.previous-[0-9a-f]{32})?\.jsonl)")
     index = r"snapshot_index(?:\.previous-[0-9a-f]{32})?\.json"

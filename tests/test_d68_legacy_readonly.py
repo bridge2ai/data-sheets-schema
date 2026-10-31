@@ -86,10 +86,45 @@ def test_fresh_prefix_project_does_not_claim_sibling_artifacts(layout, tmp_path,
     first, second = FakeClient(), FakeClient()
     api.execute(sibling, client=first)
     assert len(first.messages.calls) == 4
+    ledger.abandoned_journal_path(sibling).write_text("sibling abandoned evidence\n")
     sibling_files = {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()}
     result = api.execute(selected, client=second)
     assert len(second.messages.calls) == len(result["usage"]) == 4
     assert all(path.read_bytes() == raw for path, raw in sibling_files.items())
+
+
+@pytest.mark.parametrize("layout", ["flat", "split"])
+@pytest.mark.parametrize("entry", ["execute", "internal", "prepare", "write", "spend", "begin_call"])
+@pytest.mark.parametrize("resume", [True, False])
+def test_abandoned_only_residue_is_owned_exactly_and_never_spends(layout, entry, resume, tmp_path, monkeypatch):
+    monkeypatch.setattr(api.RunSpec, "output_root", property(lambda self: tmp_path / "root"))
+    kwargs = {"out_dir": tmp_path / "output"} if layout == "flat" else {}
+    sibling, selected = spec(project="P_X", **kwargs), spec(project="P", **kwargs)
+    sibling_path = ledger.abandoned_journal_path(sibling)
+    sibling_path.parent.mkdir(parents=True)
+    sibling_path.write_text("sibling abandoned evidence\n")
+    before = tree(tmp_path)
+    journal.refuse_legacy_execution(selected)
+    assert tree(tmp_path) == before
+    ledger.abandoned_journal_path(selected).write_text(json.dumps({
+        "phase": "full", "attempt": 1, "snapshot": "legacy-snapshot.txt", "output_tokens": 7}) + "\n")
+    before = tree(tmp_path)
+    client = FakeClient()
+    with pytest.raises(ledger.UsageLedgerError, match="inspection only|cannot become a clean resume"):
+        if entry == "execute":
+            api.execute(selected, resume=resume, client=client)
+        elif entry == "internal":
+            api._execute(selected, resume=resume, client=client)
+        elif entry == "prepare":
+            ledger.prepare_usage(selected, resume=resume)
+        elif entry == "write":
+            ledger._write(selected, ledger._empty(selected, accept_legacy=resume))
+        elif entry == "begin_call":
+            ledger.begin_call(selected, "report_regate", 1, "2026-10-31T00:00:00Z")
+        else:
+            journal.check(selected, spending=True)
+    assert client.messages.calls == []
+    assert tree(tmp_path) == before
 
 
 @pytest.mark.parametrize("case", ["i1", "split"])
@@ -97,6 +132,7 @@ def test_completed_verifier_does_not_claim_prefix_sibling(case, tmp_path, monkey
     root, old, selected = fixture(case, tmp_path)
     sibling = selected.project + "_X"
     for name in (f"{sibling}_api_progress.json", f"{sibling}_latch_journal.jsonl",
+                 f"{sibling}_abandoned_attempts.jsonl",
                  f"{sibling}_api_usage_0123456789abcdef.json",
                  f"intermediate/{sibling}_snapshot_index.json"):
         (selected.metadata_dir / name).write_text("unrelated sibling evidence")

@@ -31,6 +31,19 @@ checks, with no hand resolution of production conflicts.
 
 ## NF3-B / #5409: all 16 original failing nodes
 
+### Additional local finding NF-D73-1 (introduced, fixed)
+
+The first broad run at `439c7b73d` exposed an omission in the anchored
+ownership matcher: `usage_ledger.abandoned_journal_path()` emits
+`PROJECT_abandoned_attempts.jsonl`, which the new matcher did not recognize.
+The existing D69 adoption-refusal test failed with “DID NOT RAISE”. That run
+was intentionally stopped at 89 passes and one failure; it is partial evidence.
+All 24 new entry/layout/resume regressions failed before the correction.
+The exact anchored artifact name is now included, and both execution and
+verifier sibling controls include `P_X` abandoned evidence. No GitHub issue was
+filed because this task expressly forbids network and `gh`; this paragraph
+retains the finding for the lead's review/issue workflow.
+
 No production guard was weakened or reordered. The following dispositions
 include repairs already present at `4cde66d2d`; only the two `metadata_dir`
 stub additions are new in this follow-up. Each row names the original node,
