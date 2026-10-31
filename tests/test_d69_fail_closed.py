@@ -147,3 +147,60 @@ def test_only_new_still_held_empty_locks_are_current_startup_writes(tmp_path):
     with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
         journal.refuse_legacy_execution(selected)
     assert tree(tmp_path) == before
+
+
+def test_shared_no_resume_uses_per_artifact_sibling_attribution(tmp_path, monkeypatch):
+    from data_sheets_schema import shared_generation
+    sibling = spec(project="P_X", out_dir=tmp_path)
+    ledger.prepare_usage(sibling, resume=True)
+    api._snapshot(sibling, "P_X_future_writer.json", '{"captured": true}')
+    selected = spec(project="P", out_dir=tmp_path)
+    # Isolate the shared no-resume ownership boundary; the real registered v2
+    # controller and its writers are exercised in the completeness matrix.
+    selected.shared_generation_version = 2
+    monkeypatch.setattr(shared_generation, "preflight", lambda *a: None)
+
+    class ReachedClient(Exception):
+        pass
+
+    def reached():
+        raise ReachedClient
+
+    monkeypatch.setattr(api, "_client", reached)
+    before = tree(tmp_path)
+    with pytest.raises(ReachedClient):
+        api._execute(selected, resume=False, client=None)
+    assert tree(tmp_path) == before
+
+
+def test_historical_intermediate_inventory_uses_the_same_ownership_rule(tmp_path):
+    sibling = spec(project="P_X", out_dir=tmp_path)
+    ledger.prepare_usage(sibling, resume=True)
+    api._snapshot(sibling, "P_X_future_writer.json", '{"captured": true}')
+    selected = spec(project="P", out_dir=tmp_path)
+    path = tmp_path / "intermediate/P_future_writer.json"
+    path.write_text("unattributed partial output")
+    before = tree(tmp_path)
+    result = api._intermediates_block(selected)
+    assert [item["path"] for item in result] == [str(path)]
+    assert tree(tmp_path) == before
+
+
+@pytest.mark.parametrize("binding", ["path", "sha256", "md5", "identity"])
+def test_each_foreign_artifact_needs_its_own_positive_binding(tmp_path, binding):
+    selected = spec(project="P", out_dir=tmp_path, label="selected")
+    foreign = replace(selected, label="guarded")
+    ledger.prepare_usage(foreign, resume=True)
+    path = tmp_path / "P_future_writer.bin"
+    path.write_bytes(b"positively attributable foreign output")
+    record = {"run": ledger.run_identity(foreign)}
+    if binding == "identity":
+        path.write_text(json.dumps({"identity": ledger.run_identity(foreign)}))
+    else:
+        record["companion"] = {binding: str(path) if binding == "path" else
+                               hashlib.new(binding, path.read_bytes()).hexdigest()}
+    foreign.provenance_path.write_text(yaml.safe_dump(record))
+    assert journal._legacy_evidence(selected) == []
+    orphan = tmp_path / "P_other_future_writer.bin"
+    orphan.write_bytes(b"independent unowned artifact")
+    assert journal._legacy_evidence(selected) == [str(orphan)]

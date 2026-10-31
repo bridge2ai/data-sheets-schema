@@ -52,7 +52,7 @@ def _resolve_full_commit(commit, root):
     return _resolve_recorded_commit(commit, root)
 
 
-def _age_repository_constants(root):
+def _age_repository_state(root):
     # Neither boundary availability nor shallow topology is a process constant.
     boundary = _resolve_full_commit(D41_COMMIT, root)
     shallow = _age_git(root, "rev-parse", "--is-shallow-repository")
@@ -69,7 +69,7 @@ def _commit_age(commit, root):
                 else _resolve_recorded_commit(commit, root))
         if full is None:
             return None
-        boundary, shallow = _age_repository_constants(root)
+        boundary, shallow = _age_repository_state(root)
         if boundary is None:
             return None
         descendant = _age_git(root, "merge-base", "--is-ancestor", boundary, full)
@@ -137,6 +137,9 @@ def refuse_legacy_execution(spec):
         print(f'latch journal refused: {message} (not a resume anchor)', file=sys.stderr, flush=True)
         raise ledger.UsageLedgerError(message) from None
     own = _mine(spec, events)
+    path = ledger.ledger_path(spec)
+    if own and not path.exists() and not path.is_symlink():
+        _fail(f"usage ledger deleted while its generation journal survives: expected generation={own[-1]['generation_id']}; found=missing ledger: {path}")
     if any(event["kind"] == "legacy_unverifiable" for event in own):
         _fail("previously adopted legacy run is inspection only; legacy recovery never spends")
     if not own:
@@ -575,10 +578,10 @@ def owned_artifacts(spec, *, directories=None):
         try:
             raw = _bytes(path)
             value = yaml.safe_load(raw)
-        except (ValueError, yaml.YAMLError, UnicodeError, ledger.UsageLedgerError):
+        except (ValueError, yaml.YAMLError, UnicodeError, RecursionError, ledger.UsageLedgerError):
             try:
                 rows = [_json(line) for line in _bytes(path).splitlines()]
-            except (ValueError, UnicodeError, ledger.UsageLedgerError):
+            except (ValueError, UnicodeError, RecursionError, ledger.UsageLedgerError):
                 continue
             owners = [owners_of(row) for row in rows]
             if any(owners):
@@ -597,7 +600,8 @@ def owned_artifacts(spec, *, directories=None):
                 return
             seen.add(id(value))
         if isinstance(value, dict):
-            if isinstance(value.get("path"), str) or isinstance(value.get("sha256"), str):
+            if isinstance(value.get("path"), str) or any(
+                    isinstance(value.get(algorithm), str) for algorithm in ("sha256", "md5")):
                 yield value
             for child in value.values():
                 yield from pins(child, seen)
@@ -618,15 +622,17 @@ def owned_artifacts(spec, *, directories=None):
     found = []
     for path in candidates:
         owners = set(declared.get(path, ())) | journal_owners.get(path, set())
-        digest = None
+        digests = {}
         for owner, pin in bindings:
             bound_path = pin.get("path")
             matches_path = isinstance(bound_path, str) and Path(bound_path).absolute() == path.absolute()
             matches_hash = False
-            if isinstance(pin.get("sha256"), str) and not path.is_symlink():
-                if digest is None:
-                    digest = _sha(_bytes(path))
-                matches_hash = digest == pin["sha256"]
+            if not path.is_symlink():
+                for algorithm in ("sha256", "md5"):
+                    if isinstance(pin.get(algorithm), str):
+                        if algorithm not in digests:
+                            digests[algorithm] = hashlib.new(algorithm, _bytes(path)).hexdigest()
+                        matches_hash |= digests[algorithm] == pin[algorithm]
             if matches_path or matches_hash:
                 owners.add(owner)
         # A different project with guarded history supplies its namespace.
@@ -722,9 +728,11 @@ def _validated(spec, *, spending=False, allow_new=False, startup=False, mutation
     if not path.exists() and not path.is_symlink():
         if own:
             _fail(f"usage ledger deleted while its generation journal survives: expected generation={own[-1]['generation_id']}; found=missing ledger")
-        if _legacy_evidence(spec):
+        residue = _legacy_evidence(spec)
+        if residue:
             _fail("surviving historical outputs/progress have no usage ledger or latch history; "
-                  "relaunch with a new label; historical evidence cannot become a clean resume")
+                  "relaunch with a new label; historical evidence cannot become a clean resume; files: "
+                  + ", ".join(residue))
         return None, events, []
     # Strict decoding also rejects duplicate keys before the ordinary shape guard.
     try:

@@ -4,8 +4,10 @@ The set under test comes from files written by the real runner, never from
 the ownership implementation. Only endpoint replies/counts are synthetic.
 """
 from dataclasses import replace
+from copy import copy
 from pathlib import Path
 import os
+import json
 
 import pytest
 
@@ -19,13 +21,24 @@ from tests.test_source_heading_runtime_api import draft_files  # noqa: F401
 
 def assert_singletons_refuse(selected, artifacts, tmp_path):
     assert artifacts
+    (tmp_path / "artifact-census.json").write_text(json.dumps({
+        "files": sorted(artifacts), "singletons": len(artifacts),
+        "refusal_checks": 2 * len(artifacts)}, indent=2) + "\n")
     # Rebuild the output layout under a fresh isolated label directory while
     # retaining the same selected identity and input files.
     for ordinal, (relative, raw) in enumerate(sorted(artifacts.items())):
         for resume in (True, False):
             root = tmp_path / f"singleton-{ordinal}-{resume}"
             root.mkdir()
-            fresh = replace(selected, out_dir=root)
+            # Keep the actual run's pinned inputs; only relocate its output
+            # properties. Reconstructing registration for every singleton is
+            # unnecessary: the public read-only guard precedes registration
+            # checks and must refuse before either can mutate this tree.
+            fresh = copy(selected)
+            fresh.out_dir = root
+            assert fresh.metadata_dir == root
+            assert all(path.parent == root for path in
+                       (fresh.full_path, fresh.core_path, fresh.report_path))
             path = root / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(raw)
@@ -37,8 +50,8 @@ def assert_singletons_refuse(selected, artifacts, tmp_path):
             assert tree(root) == before, relative
 
 
-@pytest.mark.parametrize("controller", ["plain", "shared_v1", "shared_v2", "receipt_completion",
-    "readdress", "removal_repair", "typed_audit", "report_regate", "after_repair"])
+@pytest.mark.parametrize("controller", ["plain", "shared_v1_typed_audit_regate", "shared_v2",
+    "receipt_completion_readdress", "removal_repair_after_repair"])
 def test_every_emitted_artifact_alone_refuses(controller, external, tmp_path, draft_files, monkeypatch):
     from tests import test_shared_generation_runtime as shared
     from tests import test_shared_generation_selection as selection
@@ -49,17 +62,17 @@ def test_every_emitted_artifact_alone_refuses(controller, external, tmp_path, dr
     from data_sheets_schema import canary
     if controller == "plain":
         selected, client = external, FakeClient()
-    elif controller in ("shared_v1", "typed_audit", "report_regate"):
+    elif controller == "shared_v1_typed_audit_regate":
         base = specification(tmp_path)
         selected = selection.selected_spec(base, selection.registration_for(base))
-        client = shared.client(selected, bad_report=controller == "report_regate")
+        client = shared.client(selected, bad_report=True)
     elif controller == "shared_v2":
         selected = routing.selected_spec(tmp_path, draft_files)
         client = routing.client(selected)
-    elif controller in ("receipt_completion", "readdress"):
+    elif controller == "receipt_completion_readdress":
         selected = replace(external, condition="generic_v8", receipt_completion_version=1,
                            receipt_completion_registration=completion.registration())
-        client = completion.client(selected, bad_address=controller == "readdress")
+        client = completion.client(selected, mode="receipted", bad_address=True)
     else:
         selected = replace(external, condition="generic", removal_repair_version=1)
         client = FakeClient()
@@ -78,11 +91,15 @@ def test_every_emitted_artifact_alone_refuses(controller, external, tmp_path, dr
         result = api.execute(selected, client=client)
     assert client.messages.calls
     phases = {row["phase"] for row in result["usage"]}
-    expected = {"shared_v2": "typed_audit_integration", "typed_audit": "typed_audit_worker",
-        "receipt_completion": "full_receipt_completion", "readdress": "full_readdress",
-        "removal_repair": "removal_repair_full", "after_repair": "report_after_repair",
-        "report_regate": "report_regate"}.get(controller, "full")
-    assert expected in phases
+    expected = {
+        "plain": {"full", "audit", "reconcile_full", "report"},
+        "shared_v1_typed_audit_regate": {"full", "full_receipt_completion", "typed_audit_worker",
+            "typed_audit_omission", "typed_audit_integration", "reconcile_full", "report", "report_regate"},
+        "shared_v2": {"full", "typed_audit_integration", "reconcile_full", "report"},
+        "receipt_completion_readdress": {"full_receipt_completion", "full_readdress"},
+        "removal_repair_after_repair": {"removal_repair_full", "report_after_repair"},
+    }[controller]
+    assert expected <= phases
     # execute and offline writers expose the same non-gating age field.
     import yaml
     record = yaml.safe_load(selected.provenance_path.read_bytes())
@@ -92,6 +109,15 @@ def test_every_emitted_artifact_alone_refuses(controller, external, tmp_path, dr
     artifacts = {str(p.relative_to(selected.metadata_dir)): p.read_bytes()
                  for p in selected.metadata_dir.rglob("*") if p.is_file() and p not in removed}
     artifacts.update(temporaries)
+    if controller == "shared_v2":
+        assert selected.project + "_routing_completed.json" in artifacts
+        assert any(Path(name).name.startswith("." + selected.project + "_routing_completed.json")
+                   for name in temporaries)
+        assert any("_routing_request_" in name for name in artifacts)
+        assert any("_routing_response" in name for name in artifacts)
+    if controller == "receipt_completion_readdress":
+        assert any(Path(name).name.startswith("." + selected.project + "_coverage_receipt.")
+                   for name in temporaries)
     assert_singletons_refuse(selected, artifacts, tmp_path)
 
 

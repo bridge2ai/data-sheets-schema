@@ -44,7 +44,7 @@ def test_portable_reasoning_restart_without_accounting_refuses_readonly(external
     path.write_bytes(path.read_bytes() + b'{"unfinished":')
     ledger.ledger_path(external).unlink()
     before, client = tree(external.out_dir), FakeClient()
-    with pytest.raises(ledger.UsageLedgerError, match="ledger was deleted"):
+    with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
         api.execute(external, resume=False, client=client)
     assert client.messages.calls == []
     assert tree(external.out_dir) == before
