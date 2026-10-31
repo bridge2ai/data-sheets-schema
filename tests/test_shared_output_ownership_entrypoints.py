@@ -111,6 +111,7 @@ def no_execution(monkeypatch, *, forbid_locks=True):
 
 @pytest.mark.parametrize('state', ['foreign', 'unknown', 'own_no_resume'])
 def test_public_execute_refuses_existing_unowned_state_before_lock(registered, tmp_path, monkeypatch, state):
+    from tests.test_d68_legacy_readonly import tree as whole_tree
     base, reg = registered
     spec = selected_spec(base, reg)
     if state in ('foreign', 'own_no_resume'):
@@ -120,16 +121,19 @@ def test_public_execute_refuses_existing_unowned_state_before_lock(registered, t
     else:
         spec.full_path.parent.mkdir(parents=True)
         spec.full_path.write_text('id: https://example.org/synthetic-unowned\n')
-    before = tree(tmp_path)
+    before = whole_tree(tmp_path)
     authorities = {Path(path): raw for path, raw in sg.capture(spec).files}
     seen = no_execution(monkeypatch)
     expected = {'foreign': 'foreign or unknown ledger ownership',
-                'unknown': 'no usable live ownership',
+                'unknown': 'artifacts have no journal for the selected run; inspection only',
                 'own_no_resume': 'already spent; no-resume'}[state]
-    with pytest.raises(ValueError, match=expected):
+    # D69/D73(c): unknown partial output refuses at the complete residue guard,
+    # before registered shared ownership checks, lock acquisition or any write.
+    error = ledger.UsageLedgerError if state == 'unknown' else ValueError
+    with pytest.raises(error, match=expected):
         api.execute(spec, resume=state != 'own_no_resume')
     assert seen == []
-    assert tree(tmp_path) == before
+    assert whole_tree(tmp_path) == before
     assert {path: path.read_bytes() for path in authorities} == authorities
 
 

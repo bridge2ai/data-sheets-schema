@@ -114,7 +114,8 @@ lines += ["", "Phase counts overlap; they are not summed as unique tests. Raw re
     f"hashes and per-file counts: `{relative(destination)}`.", "",
     "The before-fix 26 failures are expected defect witnesses on c9567e3c3. Exploratory "
     "runs also found a batch-test mock target typo, three torn-journal fixtures lacking "
-    "per-file ownership, and an exact missing-ledger diagnostic mismatch. Those were "
+    "per-file ownership, an exact missing-ledger diagnostic mismatch, and a shared "
+    "unknown-output expectation superseded by the earlier D69 refusal. Those were "
     "corrected before final validation. The interrupted focused-c run is partial evidence only.", "",
     "Final-archive artifact censuses (separate runs can overlap):", ""]
 for census_row in artifact_censuses:

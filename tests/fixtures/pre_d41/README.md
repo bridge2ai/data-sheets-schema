@@ -117,3 +117,9 @@ The retired midnight `[completed=True, journal=False]` and reasoning
 `[portable=True]` cases now have explicit zero-call, unchanged-tree refusal
 replacements. A separate guarded index-publication interruption control
 preserves the original recovery coverage without permitting legacy recovery.
+
+`test_public_execute_refuses_existing_unowned_state_before_lock[unknown]`
+now expects the D69 inspection-only refusal before shared registration's
+older ownership diagnostic. It retains zero-call/zero-lock assertions and
+now checks the whole tree, including directory and file metadata. Foreign
+guarded-owner and already-spent shared-run diagnostics stay unchanged.
