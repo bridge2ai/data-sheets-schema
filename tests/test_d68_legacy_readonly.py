@@ -87,6 +87,7 @@ def test_fresh_prefix_project_does_not_claim_sibling_artifacts(layout, tmp_path,
     api.execute(sibling, client=first)
     assert len(first.messages.calls) == 4
     ledger.abandoned_journal_path(sibling).write_text("sibling abandoned evidence\n")
+    api._receipt_path(sibling).write_text("sibling receipt evidence\n")
     sibling_files = {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()}
     result = api.execute(selected, client=second)
     assert len(second.messages.calls) == len(result["usage"]) == 4
@@ -146,6 +147,7 @@ def test_completed_verifier_does_not_claim_prefix_sibling(case, tmp_path, monkey
     sibling = selected.project + "_X"
     for name in (f"{sibling}_api_progress.json", f"{sibling}_latch_journal.jsonl",
                  f"{sibling}_abandoned_attempts.jsonl",
+                 f"{sibling}_coverage_receipt.yaml",
                  f"{sibling}_api_usage_0123456789abcdef.json",
                  f"intermediate/{sibling}_snapshot_index.json"):
         (selected.metadata_dir / name).write_text("unrelated sibling evidence")

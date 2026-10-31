@@ -118,6 +118,21 @@ verifier sibling controls include `P_X` abandoned evidence. No GitHub issue was
 filed because this task expressly forbids network and `gh`; this paragraph
 retains the finding for the lead's review/issue workflow.
 
+### Additional local finding NF-D73-3 (introduced, fixed)
+
+The read-only producer audit found that the public
+`PROJECT_coverage_receipt.yaml` emitted by `api._receipt_path()` was recognized
+only under `intermediate/`, not in the metadata directory. The receipt-only
+`resume=False` execution control failed at `66092b3fc` with “DID NOT RAISE”,
+demonstrating that execution proceeded. The one-line anchored metadata pattern
+now includes that exact public name. The receipt matrix covers both layouts,
+both resume modes and all six guarded entry points, with sibling-only admission
+followed by own-artifact refusal, zero calls and whole-tree equality. Execution
+and verifier sibling tests also carry the sibling receipt. This restores an
+artifact recognized by the older broad glob without restoring prefix collisions.
+The earlier completed broad report is retained against `a4230088f`; final focused
+and CI-layout checks below cover this last correction. No online issue was filed.
+
 No production guard was weakened or reordered. The following dispositions
 include repairs already present at `4cde66d2d`; only the two `metadata_dir`
 stub additions are new in this follow-up. Each row names the original node,

@@ -493,7 +493,7 @@ def _owned_artifact_name(project, name, *, intermediate=False, include_locks=Fal
     A bare project prefix is insufficient: P_X is a distinct project from P.
     """
     prefix = re.escape(project) + "_"
-    metadata = (r"(?:d4d(?:_core)?\.yaml|reconciliation\.md|provenance\.yaml|"
+    metadata = (r"(?:d4d(?:_core)?\.yaml|coverage_receipt\.yaml|reconciliation\.md|provenance\.yaml|"
                 r"api_progress\.json|abandoned_attempts\.jsonl|latch_(?:journal\.jsonl|override\.json)|"
                 r"api_usage_[0-9a-f]{16}(?:\.previous-[0-9a-f]{32})?\.json|"
                 r"reasoning(?:\.previous-[0-9a-f]{32})?\.jsonl)")
