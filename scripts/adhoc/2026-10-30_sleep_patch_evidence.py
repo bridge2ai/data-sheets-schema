@@ -60,9 +60,13 @@ def main():
                     row["stack"])) for row in traces.values()}),
             }
         evidence["measurements"][label] = measurement
-    if {"before-nine", "after-nine"}.issubset(evidence["measurements"]):
-        before = evidence["measurements"]["before-nine"]
-        after = evidence["measurements"]["after-nine"]
+    comparisons = [("before-nine", "after-nine", "nine_case_comparison"),
+                   ("main-4c079-measurement", "followup-measurement", "main_comparison")]
+    for before_label, after_label, key in comparisons:
+        if not {before_label, after_label}.issubset(evidence["measurements"]):
+            continue
+        before = evidence["measurements"][before_label]
+        after = evidence["measurements"][after_label]
         index = {(row["classname"], row["name"]): row for row in after["cases"]}
         comparison = []
         for old in before["cases"]:
@@ -70,17 +74,20 @@ def main():
             comparison.append({"classname": old["classname"], "name": old["name"],
                                "before_seconds": float(old["time"]), "after_seconds": float(new["time"]),
                                "before_outcome": old["outcome"], "after_outcome": new["outcome"]})
-        evidence["nine_case_comparison"] = comparison
+        evidence[key] = comparison
         for row in comparison:
             print(f"{row['name']}: {row['before_seconds']:.3f}s -> {row['after_seconds']:.3f}s")
-    if "collection" in args.labels:
-        log = (RESULTS / "collection" / "pytest.log").read_text()
+    collections = [label for label in args.labels if label.endswith("collection")]
+    if collections:
+        collection_label = collections[-1]
+        log = (RESULTS / collection_label / "pytest.log").read_text()
         nodes = [line for line in log.splitlines() if re.match(r"^tests/.+\.py::", line)]
         ordinary = partition_lanes(nodes)["ordinary"]
         counts = Counter(node.split("::", 1)[0] for node in ordinary)
         timing_path = ROOT / "utils" / "ci_test_durations.json"
         assignments = balanced_files(counts, 6, read_weights(timing_path))
         evidence["ci_layout"] = {
+            "collection_label": collection_label,
             "ci_test_durations_sha256": hashlib.sha256(timing_path.read_bytes()).hexdigest(),
             "collected_cases": len(nodes), "ordinary_cases": len(ordinary),
             "affected_files": {name: {"shard": assignments[name], "cases": count}

@@ -945,6 +945,77 @@
         "failed": 12
       },
       "cases": []
+    },
+    "native-temp-canary": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "033cdf5853ea07bf8ec9c361f0022d8b77e82486",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests/test_native_receipt_origin_reporting.py::test_default_and_explicit_zero_preserve_registration_bytes[native_attribution]",
+        "-v",
+        "-n",
+        "logical",
+        "--maxprocesses=4",
+        "--dist",
+        "load",
+        "--maxschedchunk=1",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/codex_logs/sleep-patch-20261030/native-temp-canary/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/native-temp-canary/pytest.xml"
+      ],
+      "load_before": [
+        14.548828125,
+        21.06005859375,
+        20.9501953125
+      ],
+      "wall_seconds": 10.63446062499861,
+      "exit_code": 0,
+      "load_after": [
+        13.7685546875,
+        20.6787109375,
+        20.81591796875
+      ],
+      "junit_sha256": "8f320c4e7bf426f9a714811dd5f4c962c9cb5658e01049121281c46e999662d4",
+      "outcomes": {
+        "passed": 1
+      },
+      "cases": []
+    },
+    "followup-collection": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "033cdf5853ea07bf8ec9c361f0022d8b77e82486",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests",
+        "--collect-only",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/codex_logs/sleep-patch-20261030/followup-collection/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/followup-collection/pytest.xml"
+      ],
+      "load_before": [
+        13.255859375,
+        19.63232421875,
+        20.42236328125
+      ],
+      "wall_seconds": 10.536509124998702,
+      "exit_code": 0,
+      "load_after": [
+        14.00439453125,
+        19.5791015625,
+        20.3935546875
+      ],
+      "junit_sha256": "3acff38680066d5e9c337d575e71e2cf33a4bd44d38ecacf2799af431a7f351c",
+      "outcomes": {},
+      "cases": []
     }
   },
   "nine_case_comparison": [
@@ -1022,9 +1093,10 @@
     }
   ],
   "ci_layout": {
+    "collection_label": "followup-collection",
     "ci_test_durations_sha256": "af1d4526d16ef2fb01c65e5377d4491af710faedebdaed093d89d8a53093cc22",
-    "collected_cases": 20529,
-    "ordinary_cases": 20525,
+    "collected_cases": 20807,
+    "ordinary_cases": 20803,
     "affected_files": {
       "tests/test_backoff_sleep.py": {
         "shard": 2,
@@ -1039,7 +1111,7 @@
         "cases": 36
       },
       "tests/test_report_admission.py": {
-        "shard": 4,
+        "shard": 1,
         "cases": 22
       },
       "tests/test_source_review.py": {
