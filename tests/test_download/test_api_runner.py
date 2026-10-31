@@ -2347,11 +2347,12 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
             self.assertEqual(journal.read_bytes(), journal_before)
             self.assertEqual(spec.provenance_path.read_bytes(), record_before)
 
-    def test_legacy_completed_outputs_without_accounting_are_not_clean_resumes(self):
+    def test_journalless_current_outputs_without_accounting_are_not_clean_resumes(self):
         import tempfile
         from data_sheets_schema import latch_journal, usage_ledger
         from data_sheets_schema.api_runner import execute
         from data_sheets_schema.provenance import build_record
+        from tests.test_d68_legacy_readonly import tree as whole_tree
 
         with tempfile.TemporaryDirectory() as td:
             spec = self._spec(td)
@@ -2367,14 +2368,15 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
                                       "output_tokens": 200}]
             spec.provenance_path.parent.mkdir(parents=True, exist_ok=True)
             spec.provenance_path.write_text(yaml.safe_dump(rec.data))
-            before = {path: path.read_bytes() for path in
-                      (spec.full_path, spec.core_path, spec.report_path, spec.provenance_path)}
+            # build_record names the current commit: no journal does not make
+            # these newly written artifacts positively historical evidence.
+            before = whole_tree(Path(td))
             called = {"n": 0}
             with self.assertRaisesRegex(usage_ledger.UsageLedgerError,
-                                        "historical evidence cannot become a clean resume"):
+                                        "post-D41: journal-less run is inspection only"):
                 execute(spec, client=self._no_api(called))
             self.assertEqual(called["n"], 0)
-            self.assertEqual({path: path.read_bytes() for path in before}, before)
+            self.assertEqual(whole_tree(Path(td)), before)
             self.assertFalse(usage_ledger.ledger_path(spec).exists())
             self.assertFalse(latch_journal.journal_path(spec).exists())
 

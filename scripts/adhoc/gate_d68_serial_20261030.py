@@ -51,7 +51,8 @@ elif args.stage == "repairs":
     cases = [("repairs", [
         "tests/test_d68_legacy_readonly.py::test_cli_refuses_legacy_and_stripped_runs_readonly",
         "tests/test_shared_output_ownership_entrypoints.py::test_legacy_public_boundary_refuses_residue_before_any_write",
-        "tests/test_profiles.py::TestRoundFour::test_a_repair_round_sends_the_specs_digest"])]
+        "tests/test_profiles.py::TestRoundFour::test_a_repair_round_sends_the_specs_digest",
+        "tests/test_download/test_api_runner.py::TestResumeUsesArtifactsNotOnlyProgress::test_journalless_current_outputs_without_accounting_are_not_clean_resumes"])]
 elif args.stage == "focused":
     cases = [("focused", ["tests/test_d68_legacy_readonly.py", "tests/test_d70_record_age.py",
         "tests/test_latch_journal.py", "tests/test_api_latch_guard.py",
@@ -114,7 +115,7 @@ for name, selected in cases:
     if args.stage in {"canary", "notes-canary", "logging-canary", "repair-canary"}:
         assert code == 0 and row["selected"] == 1
     if args.stage == "repairs":
-        assert code == 0 and row["selected"] == 12
+        assert code == 0 and row["selected"] == 13
     if args.stage in {"shards", "notes", "repairs", "d41", "focused"}:
         assert not result["collection_errors"]
         assert len([r for r in result["reports"] if r["when"] == "teardown"]) == row["selected"]

@@ -62,7 +62,7 @@ evidence = ROOT / "notes/reviews/d41_legacy_impl_d68_d70_evidence_20261030"
 failures = json.loads((evidence / "failure-ledger.json").read_text())
 resolved = json.loads((evidence / "resolved-findings.json").read_text())
 assert all(row["also_failed_on_d9"] for row in failures)
-assert len(resolved) == 12 and {row["finding"] for row in resolved} == {"LR9", "LR10", "LR11", "LR12"}
+assert len(resolved) == 13 and {row["finding"] for row in resolved} == {"LR9", "LR10", "LR11", "LR12", "LR13"}
 assert all(row["resolution_verified"] for row in resolved)
 manifest = json.loads((evidence / "manifest.json").read_text())
 assert manifest and all(row["bytes"] > 0 for row in manifest.values())
@@ -85,7 +85,7 @@ lines = ["# D68–D70 implementation packet, 2026-10-30", "",
     f"Final packet head: `{head}`. Report generated {datetime.now(timezone.utc).isoformat()}.", "",
     "Implementation is complete. The serial CI selections and baseline controls have finished. "
     "The full gate remains red: every remaining failed test phase has retained d9 evidence; "
-    "the eleven introduced test-setup/assertion failures and the verifier layout regression "
+    "the twelve introduced test-setup/assertion failures and the verifier layout regression "
     "have explicit, passing replacements. "
     "This is offline validation on native macOS/Python 3.13.12, using CI's test selections, "
     "not an assertion that Linux/Python 3.12 CI ran.", "",
@@ -195,7 +195,7 @@ lines += ["", "All **22 committed v8 comparators are unchanged** in every census
     "All pytest basetemps are under this worktree within `d4d-executions`. Superseded "
     "or interrupted preliminary runs are excluded from final coverage. Launcher "
     "canaries persisted nonempty reports and passed before fanout. The repaired cases "
-    "had their own one-case canary on the nested scratch merge, followed by all twelve "
+    "had their own one-case canary on the nested scratch merge, followed by all thirteen "
     "cases. These are offline behavior/persistence checks, not live-provider evidence.", "",
     f"CI collection: **{coverage['expected']} tests, zero collection errors**. Exact "
     "selection and teardown multisets account for the complete six ordinary shards "
@@ -274,7 +274,12 @@ lines += ["", "All six ordinary shards, four routing lanes and supplemental note
     "files under its evidence root. An authentic f8 default-layout capture reproduces "
     "the old failure. Declared full/core paths now validate independently; inventory "
     "covers selected project artifacts and bound inputs. Split-layout, unrelated-project "
-    "and selected-file symlink regressions pass with whole-tree preservation.", "",
+    "and selected-file symlink regressions pass with whole-tree preservation.",
+    "- **LR13:** A synthetic current record without accounting expected the old "
+    "historical-recovery message. Its d9 assertion passes; the replacement test names "
+    "its actual post-D41 age, expects the earlier journal-less inspection-only refusal, "
+    "and strengthens preservation from four files to the whole temporary tree. It "
+    "retains zero calls and absent ledger/journal assertions and passes.", "",
     link("Original failed phases and verified replacements", evidence / "resolved-findings.json") + ".", "",
     "The specificity scan has 112 inherited findings: 111 occur in files unchanged "
     "from d9; the remaining finding is in `retain_d41_legacy_evidence_20261029.py`, "
