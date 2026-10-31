@@ -1702,6 +1702,9 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     def _rel_if_owned(p: Path | None) -> Path | None:
         if p is None or freeze_inputs or not Path(p).is_absolute():
             return p
+        # Lexical collapse before resolving symlinks can select different bytes.
+        if ".." in Path(p).parts:
+            return p
         try:
             lex = Path(os.path.abspath(p))
             rel = lex.relative_to(owner)

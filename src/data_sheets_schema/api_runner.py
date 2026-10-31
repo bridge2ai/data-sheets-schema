@@ -676,6 +676,10 @@ class RunSpec:
             for _attr in ("bundle", "manifest", "chunk_manifest"):
                 _val = getattr(self, _attr)
                 if _val is not None and Path(_val).is_absolute():
+                    # A symlink before parent traversal can change the input
+                    # selected by abspath; preserve the original spelling.
+                    if ".." in Path(_val).parts:
+                        continue
                     try:
                         _lex = Path(os.path.abspath(_val))
                         _rel = _lex.relative_to(self._corpus_root)
