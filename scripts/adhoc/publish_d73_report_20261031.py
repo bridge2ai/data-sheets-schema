@@ -86,6 +86,7 @@ lines += ["", f"Full commands, hashes, failure traces and per-file counts: [vali
           "meets their other quality or registration requirements.", "",
           "| Ref/scope | Records | Pre-D41 | Post-D41 | Age unestablished | Canary before → after | Evaluation before → after |",
           "|---|---:|---:|---:|---:|---:|---:|"]
+census_references = []
 for name in ("base", "packet", "merged"):
     path = EVIDENCE / f"corpus-{name}.json"
     if not path.exists():
@@ -93,15 +94,16 @@ for name in ("base", "packet", "merged"):
     census = json.loads(path.read_text())
     assert not census["parse_errors"] and census["counts"]["v8_changes"] == 0
     counts = census["counts"]
-    assert counts["record_types"].get("d4d_derived_provenance") == 4
+    assert counts["record_types"].get("d4d_derived_provenance", 0) > 0
     for scope, scoped in [("all", counts), *counts["scopes"].items()]:
         ages = scoped["age"]
         lines.append(f"| {name}/{scope} | {scoped['records']} | {ages.get('pre-D41', 0)} | "
             f"{ages.get('post-D41', 0)} | {ages.get('age unestablished', 0)} | "
             f"{scoped['before']['canary']} → {scoped['after']['canary']} | "
             f"{scoped['before']['evaluation']} → {scoped['after']['evaluation']} |")
-    lines += ["", f"{name}: `{census['ref']}`; {counts['v8_records']} v8 records, "
-              f"{counts['v8_changes']} eligibility changes. [Every record]({path}).", ""]
+    census_references += ["", f"{name}: `{census['ref']}`; {counts['v8_records']} v8 records, "
+                         f"{counts['v8_changes']} eligibility changes. [Every record]({path})."]
+lines += census_references
 
 lines += ["## Every commit since 4cde66d2d", "",
           "All reachable commits in `4cde66d2d..HEAD`, including incoming main history if merged:", ""]

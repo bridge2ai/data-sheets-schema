@@ -55,7 +55,7 @@ for phase in args.phases:
                 "legacy_progress_without_input", "changed_input_restart_recovers",
                 "explicit_restart_preserves", "automatic_date_is_restored", "readable_repair_gets",
                 "fresh_generation_archives", "portable_record_refuses_changed_instruction",
-                "puts_the_display_on_the_wire"))]})
+                "puts_the_display_on_the_wire", "accepted_refresh_survives"))]})
 if args.output:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(summaries, indent=2) + "\n")

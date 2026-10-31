@@ -81,7 +81,8 @@ class Observe:
     def pytest_runtest_logreport(self, report):
         self.reports.append({"nodeid": report.nodeid, "when": report.when,
             "outcome": report.outcome, "duration": report.duration,
-            **({"message": str(report.longrepr)} if report.failed else {})})
+            "wasxfail": getattr(report, "wasxfail", None),
+            **({"message": str(report.longrepr)} if report.failed or report.skipped else {})})
 
 observer = Observe()
 code = pytest.main([*args, "-p", "no:cacheprovider"], plugins=[observer])
