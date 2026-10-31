@@ -132,6 +132,12 @@ lines += ["", "Phase counts overlap; they are not summed as unique tests. Raw re
     "guarded P history was treating an unattributed P_X artifact as foreign to selected P_X. "
     "A broader namespace now proves nothing by itself; explicit per-artifact identity/path/hash "
     "attribution remains available. Both before-fix controls are retained as shorter-before.", "",
+    "The exploratory ordinary shard additionally exposed eight batch-cost nodes. "
+    "Three pending-call cases, inherited by a second class, now use real guarded ledger writes; "
+    "two unkeyed-row cost controls retain their exact accounting assertions on guarded generations. "
+    "The renamed zero-cost control states that scope. A new journal-less legacy-label case "
+    "requires refusal, no lock acquisition/dispatch and an unchanged tree. No guard is mocked. "
+    "The original full batch-cost file is retained as batch-base evidence on c9567e3c3.", "",
     "Final-archive artifact censuses (separate runs can overlap):", ""]
 for census_row in artifact_censuses:
     lines.append(f"- `{census_row['phase']}/{census_row['case']}`: "

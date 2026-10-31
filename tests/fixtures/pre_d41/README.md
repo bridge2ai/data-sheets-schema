@@ -144,3 +144,12 @@ complete inventory. Their changes retain the original downstream checks:
   cases retain direct physical-lock exclusion in both directions, then check
   that public execution refuses pre-existing sidecars without writes. Their
   meta-test stubs use the same expected refusal messages.
+
+The ordinary shard also exposed eight `test_api_batch_cost.py` nodes whose
+mocked executor bypassed the run guard while their setup left journal-less
+accounting. The three pending-call cases (also inherited by
+`ApiBatchSuccessGapsTest`) now use real guarded ledger writes. The two unkeyed
+row tests retain their exact cost assertions on a guarded generation displaying
+legacy-shaped rows; the zero-cost case is renamed to state that scope. A new
+journal-less legacy-label case instead requires refusal, no batch lock, no
+dispatch and an unchanged tree. No guard is mocked or relaxed.
