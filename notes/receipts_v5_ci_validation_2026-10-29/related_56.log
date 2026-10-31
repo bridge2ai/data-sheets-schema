@@ -1,0 +1,47 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 32 items
+
+tests/test_shared_generation_completed_replay.py::test_explicit_originals_outrank_live_index_without_writes[matching] PASSED [  3%]
+tests/test_shared_generation_completed_replay.py::test_explicit_originals_outrank_live_index_without_writes[missing_phase] PASSED [  6%]
+tests/test_shared_generation_completed_replay.py::test_explicit_originals_outrank_live_index_without_writes[missing_index] PASSED [  9%]
+tests/test_shared_generation_completed_replay.py::test_explicit_originals_outrank_live_index_without_writes[other_bytes] PASSED [ 12%]
+tests/test_shared_generation_completed_replay.py::test_explicit_incomplete_authority_never_uses_live_alternative[omitted] PASSED [ 15%]
+tests/test_shared_generation_completed_replay.py::test_explicit_incomplete_authority_never_uses_live_alternative[null] PASSED [ 18%]
+tests/test_shared_generation_completed_replay.py::test_explicit_incomplete_authority_never_uses_live_alternative[mapping] PASSED [ 21%]
+tests/test_shared_generation_completed_replay.py::test_explicit_incomplete_authority_never_uses_live_alternative[full] PASSED [ 25%]
+tests/test_shared_generation_completed_replay.py::test_explicit_incomplete_authority_never_uses_live_alternative[core] PASSED [ 28%]
+tests/test_shared_generation_completed_replay.py::test_explicit_incomplete_authority_never_uses_live_alternative[missing_file] PASSED [ 31%]
+tests/test_shared_generation_completed_replay.py::test_explicit_incomplete_authority_never_uses_live_alternative[wrong_hash] PASSED [ 34%]
+tests/test_shared_generation_completed_replay.py::test_complete_forwarding_uses_exact_portable_bytes_after_warm_live_cache[prepare] PASSED [ 37%]
+tests/test_shared_generation_completed_replay.py::test_complete_forwarding_uses_exact_portable_bytes_after_warm_live_cache[validate] PASSED [ 40%]
+tests/test_shared_generation_completed_replay.py::test_complete_forwarding_uses_exact_portable_bytes_after_warm_live_cache[rebuild] PASSED [ 43%]
+tests/test_shared_generation_completed_replay.py::test_complete_forwarding_uses_exact_portable_bytes_after_warm_live_cache[delivered] PASSED [ 46%]
+tests/test_shared_generation_completed_replay.py::test_complete_forwarding_uses_exact_portable_bytes_after_warm_live_cache[recover] PASSED [ 50%]
+tests/test_shared_generation_completed_replay.py::test_complete_forwarding_uses_exact_portable_bytes_after_warm_live_cache[complete] PASSED [ 53%]
+tests/test_shared_generation_completed_replay.py::test_identical_byte_relocation_preserves_packet_and_unadmitted_recovery PASSED [ 56%]
+tests/test_shared_generation_completed_replay.py::test_explicit_completed_guard_cannot_override_active_or_malformed_progress[completed0] PASSED [ 59%]
+tests/test_shared_generation_completed_replay.py::test_explicit_completed_guard_cannot_override_active_or_malformed_progress[full] PASSED [ 62%]
+tests/test_shared_generation_completed_replay.py::test_explicit_completed_guard_cannot_override_active_or_malformed_progress[None] PASSED [ 65%]
+tests/test_shared_generation_completed_replay.py::test_explicit_completed_guard_cannot_override_active_or_malformed_progress[completed3] PASSED [ 68%]
+tests/test_shared_generation_completed_replay.py::test_explicit_completed_guard_cannot_override_active_or_malformed_progress[False] PASSED [ 71%]
+tests/test_shared_generation_completed_replay.py::test_recognition_reuses_exact_raw_candidate_and_detects_later_byte_drift PASSED [ 75%]
+tests/test_shared_generation_completed_replay.py::test_recognition_preserves_default_nonmatching_states[missing] PASSED [ 78%]
+tests/test_shared_generation_completed_replay.py::test_recognition_preserves_default_nonmatching_states[malformed] PASSED [ 81%]
+tests/test_shared_generation_completed_replay.py::test_recognition_preserves_default_nonmatching_states[empty] PASSED [ 84%]
+tests/test_shared_generation_completed_replay.py::test_recognition_preserves_default_nonmatching_states[scalar] PASSED [ 87%]
+tests/test_shared_generation_completed_replay.py::test_recognition_preserves_default_nonmatching_states[foreign_run] PASSED [ 90%]
+tests/test_shared_generation_completed_replay.py::test_recognition_preserves_default_nonmatching_states[foreign_generation] PASSED [ 93%]
+tests/test_shared_generation_completed_replay.py::test_changed_recorded_inputs_refuse_during_recognition PASSED [ 96%]
+tests/test_shared_generation_completed_replay.py::test_legacy_yaml_exception_envelope_keeps_flags_without_accepting_record PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_56-xml-nelt5xh2/pytest.xml -
+======================== 32 passed, 1 warning in 9.02s =========================

@@ -1,0 +1,2 @@
+# Raw replay JSON remains local; committed ledgers retain its hashes.
+/raw/

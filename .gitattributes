@@ -4,3 +4,5 @@ data/_wcrate/** -text
 notes/d41_validation_2026-10-26/** -text -whitespace
 # Preserve the reviewed #5212/A14 diagnostic evidence byte-for-byte.
 notes/reviews/wave7_5212_a14_evidence_2026-10-29/** -text -whitespace
+# Preserve the exact git-show evidence, including indented blank message lines.
+notes/e3x_restack_evidence_2026-10-26/initial/source-dfef56718.txt -text -whitespace

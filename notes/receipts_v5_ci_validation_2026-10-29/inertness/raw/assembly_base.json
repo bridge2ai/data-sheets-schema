@@ -1,0 +1,19 @@
+{
+ "descriptor_v1": "83d13d6270c49b59a6dec631e77852f19c63aad2a2a3435b8e2bdfd4a41c9e19",
+ "descriptor_v2_routing_code": {
+  "generic_v10_source_heading_routing_v1": {
+   "src/data_sheets_schema/derive_core.py": "ea7fe9db9ede",
+   "src/data_sheets_schema/receipts.py": "658195581a9c",
+   "src/data_sheets_schema/report_claims.py": "2d005a3a371f"
+  },
+  "generic_v10_source_heading_span_v1": {
+   "src/data_sheets_schema/derive_core.py": "ea7fe9db9ede",
+   "src/data_sheets_schema/receipts.py": "658195581a9c",
+   "src/data_sheets_schema/report_claims.py": "2d005a3a371f"
+  }
+ },
+ "r24_rc1": "12e03e3911ff1cb16d2d69817fa55b121e36ff22bc20e64e1f468d052a5d89dc",
+ "r8_rc1": "e1da2a6015b0a75f917142d8bcd369e4b59e9d29f8b9114ad58c0c9ffc0d216b",
+ "routing_sg2_r27": "e4fe1bd474ee8d0600a60d869b2b644168979859f37443b4d52661560e9793d3",
+ "v10_sg1_r25": "9e59f3db581c168d397793848579c62a9462e8a2e4236101af05f48803baa90e"
+}

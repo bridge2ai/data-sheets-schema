@@ -1,0 +1,52 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 37 items
+
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_command_guidance_quotes_nothing PASSED [  2%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_audit_prompts_quote_nothing[default] PASSED [  5%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_audit_prompts_quote_nothing[context recovery] PASSED [  8%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_audit_prompts_quote_nothing[staged output] PASSED [ 10%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_audit_prompts_quote_nothing[staged output, context recovery] PASSED [ 13%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_audit_prompts_quote_nothing[drafts, persistent contract] PASSED [ 16%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_audit_prompts_quote_nothing[drafts, persistent contract, context recovery] PASSED [ 18%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_audit_prompts_quote_nothing[batch renderer 20] PASSED [ 21%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_audit_prompts_quote_nothing[batch renderer 23] PASSED [ 24%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_finalization_prompts_quote_nothing[False] PASSED [ 27%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_finalization_prompts_quote_nothing[True] PASSED [ 29%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_evaluation_instruction_quotes_nothing PASSED [ 32%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_integration_context_quotes_nothing[None] PASSED [ 35%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_integration_context_quotes_nothing[explicit_row_reads_v1] PASSED [ 37%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_integration_context_quotes_nothing[explicit_child_reads_v1] PASSED [ 40%]
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_direct_arm_prompts_quote_nothing PASSED [ 43%]
+tests/test_audit_recall_leak_rendered.py::test_a_proposal_that_echoes_held_out_text_is_found[path in a finding-None] PASSED [ 45%]
+tests/test_audit_recall_leak_rendered.py::test_a_proposal_that_echoes_held_out_text_is_found[path in a finding-explicit_row_reads_v1] PASSED [ 48%]
+tests/test_audit_recall_leak_rendered.py::test_a_proposal_that_echoes_held_out_text_is_found[path in a finding-explicit_child_reads_v1] PASSED [ 51%]
+tests/test_audit_recall_leak_rendered.py::test_a_proposal_that_echoes_held_out_text_is_found[observation in a finding-None] PASSED [ 54%]
+tests/test_audit_recall_leak_rendered.py::test_a_proposal_that_echoes_held_out_text_is_found[observation in a finding-explicit_row_reads_v1] PASSED [ 56%]
+tests/test_audit_recall_leak_rendered.py::test_a_proposal_that_echoes_held_out_text_is_found[observation in a finding-explicit_child_reads_v1] PASSED [ 59%]
+tests/test_audit_recall_leak_rendered.py::test_a_proposal_that_echoes_held_out_text_is_found[JSON-escaped observation in a finding-None] PASSED [ 62%]
+tests/test_audit_recall_leak_rendered.py::test_a_proposal_that_echoes_held_out_text_is_found[JSON-escaped observation in a finding-explicit_row_reads_v1] PASSED [ 64%]
+tests/test_audit_recall_leak_rendered.py::test_a_proposal_that_echoes_held_out_text_is_found[JSON-escaped observation in a finding-explicit_child_reads_v1] PASSED [ 67%]
+tests/test_audit_recall_leak_rendered.py::test_a_proposal_that_echoes_held_out_text_is_found[observation in a row judgment-None] PASSED [ 70%]
+tests/test_audit_recall_leak_rendered.py::test_a_proposal_that_echoes_held_out_text_is_found[observation in a row judgment-explicit_row_reads_v1] PASSED [ 72%]
+tests/test_audit_recall_leak_rendered.py::test_a_proposal_that_echoes_held_out_text_is_found[observation in a row judgment-explicit_child_reads_v1] PASSED [ 75%]
+tests/test_audit_recall_leak_rendered.py::test_an_observation_in_a_runtime_input_reaches_the_rendered_scan[command guidance] PASSED [ 78%]
+tests/test_audit_recall_leak_rendered.py::test_an_observation_in_a_runtime_input_reaches_the_rendered_scan[batch child system] PASSED [ 81%]
+tests/test_audit_recall_leak_rendered.py::test_an_observation_in_a_runtime_input_reaches_the_rendered_scan[finalization report context] PASSED [ 83%]
+tests/test_audit_recall_leak_rendered.py::test_an_observation_in_a_runtime_input_reaches_the_rendered_scan[evaluation instruction] PASSED [ 86%]
+tests/test_audit_recall_leak_rendered.py::test_an_observation_in_a_runtime_input_reaches_the_rendered_scan[direct system prompt] PASSED [ 89%]
+tests/test_audit_recall_leak_rendered.py::test_an_observation_the_instruction_embeds_json_escaped_is_found[quoted] PASSED [ 91%]
+tests/test_audit_recall_leak_rendered.py::test_an_observation_the_instruction_embeds_json_escaped_is_found[line-wrapped] PASSED [ 94%]
+tests/test_audit_recall_leak_rendered.py::test_a_sentence_split_across_json_frames_is_found PASSED [ 97%]
+tests/test_audit_recall_leak_rendered.py::test_json_nested_in_a_json_string_is_decoded_too PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_01-xml-km98qcfe/pytest.xml -
+======================== 37 passed, 1 warning in 16.44s ========================

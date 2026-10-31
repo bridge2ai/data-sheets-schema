@@ -1,0 +1,13 @@
+{
+  "arguments": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave5-5094-legacy-canary-20261028/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave5-5094-legacy-canary-20261028/pytest.xml",
+    "tests/test_wave5_5094_legacy_snapshots.py::test_committed_voice_ambiguity_is_unchecked_and_preserves_prior"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave5-5094-legacy-20261028"
+}

@@ -1,0 +1,41 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 26 items
+
+tests/test_direct_keep_awake.py::test_partial_acquisition_never_enters_body_and_releases_every_prior_assertion[1] PASSED [  3%]
+tests/test_direct_keep_awake.py::test_partial_acquisition_never_enters_body_and_releases_every_prior_assertion[2] PASSED [  7%]
+tests/test_direct_keep_awake.py::test_partial_acquisition_never_enters_body_and_releases_every_prior_assertion[3] PASSED [ 11%]
+tests/test_direct_keep_awake.py::test_assertions_cover_body_and_release_on_all_exits[None] PASSED [ 15%]
+tests/test_direct_keep_awake.py::test_assertions_cover_body_and_release_on_all_exits[error1] PASSED [ 19%]
+tests/test_direct_keep_awake.py::test_assertions_cover_body_and_release_on_all_exits[error2] PASSED [ 23%]
+tests/test_direct_keep_awake.py::test_unsupported_platform_loads_no_framework PASSED [ 26%]
+tests/test_direct_keep_awake.py::test_native_binding_checks_return_values_and_releases_cf_strings PASSED [ 30%]
+tests/test_direct_keep_awake.py::test_prepare_preserves_original_fields_bytes_and_exclusive_outputs PASSED [ 34%]
+tests/test_direct_keep_awake.py::test_changed_registration_or_spent_attempt_refuses_before_acquisition[policy] PASSED [ 38%]
+tests/test_direct_keep_awake.py::test_changed_registration_or_spent_attempt_refuses_before_acquisition[source] PASSED [ 42%]
+tests/test_direct_keep_awake.py::test_changed_registration_or_spent_attempt_refuses_before_acquisition[pin] PASSED [ 46%]
+tests/test_direct_keep_awake.py::test_changed_registration_or_spent_attempt_refuses_before_acquisition[instruction] PASSED [ 50%]
+tests/test_direct_keep_awake.py::test_changed_registration_or_spent_attempt_refuses_before_acquisition[consumed] PASSED [ 53%]
+tests/test_direct_keep_awake.py::test_wrapper_lifetime_receipts_signal_status_and_restoration[0] PASSED [ 57%]
+tests/test_direct_keep_awake.py::test_wrapper_lifetime_receipts_signal_status_and_restoration[1] PASSED [ 61%]
+tests/test_direct_keep_awake.py::test_wrapper_lifetime_receipts_signal_status_and_restoration[preflight] PASSED [ 65%]
+tests/test_direct_keep_awake.py::test_wrapper_lifetime_receipts_signal_status_and_restoration[SIGINT] PASSED [ 69%]
+tests/test_direct_keep_awake.py::test_wrapper_lifetime_receipts_signal_status_and_restoration[SIGTERM] PASSED [ 73%]
+tests/test_direct_keep_awake.py::test_wrapper_lifetime_receipts_signal_status_and_restoration[repeated] PASSED [ 76%]
+tests/test_direct_keep_awake.py::test_release_failure_is_recorded_and_fails_the_wrapper PASSED [ 80%]
+tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[success] PASSED [ 84%]
+tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[nonzero] PASSED [ 88%]
+tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[signal] PASSED [ 92%]
+tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[old_review] PASSED [ 96%]
+tests/test_direct_keep_awake.py::test_native_process_cleanup_finishes_before_assertions_release PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[success]
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_07-xml-1m2njpdm/pytest.xml -
+======================== 26 passed, 1 warning in 7.80s =========================

@@ -32,9 +32,11 @@ from data_sheets_schema.resources import resource_path
 from data_sheets_schema.semantic_instrument import select_semantic_instrument
 from data_sheets_schema.semantic_scope import validate_scope
 from data_sheets_schema.evaluation.validate import validate_evaluation
+from data_sheets_schema.evaluation.run_identity import same_run, blinding_identity, forbidden_blinding_identities
 
 CBORG_BASE_URL = "https://api.cborg.lbl.gov"
 FORMAT = "registered_semantic_evaluation_v1"
+RECEIPT_FORMAT = "registered_evaluation_receipt_v2"
 MAX_FILE_BYTES = shared.MAX_AUTHORITY_BYTES
 MAX_TRACE_BYTES = 32_000_000
 
@@ -118,6 +120,21 @@ def _read(path: Path, limit: int = MAX_FILE_BYTES) -> bytes:
     return raw
 
 
+def _atomic_evidence(path: Path, raw: bytes):
+    """Publish one durable evidence file without exposing truncated JSON."""
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with temporary.open("wb") as stream:
+        stream.write(raw)
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(temporary, path)
+    fd = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
 class _UniqueLoader(yaml.SafeLoader):
     # JSON-schema date fields are strings. Avoid YAML timestamp coercion while
     # preserving their source text (including leading zeroes).
@@ -163,7 +180,7 @@ def blind_record(raw: bytes, *, forbidden: tuple[str, ...] = ()) -> bytes:
         raise ValueError("a rating requires a Dataset mapping")
     value = {key: item for key, item in value.items() if key not in _ENVELOPE_KEYS}
     unwrap_document(value)
-    blinded = yaml.safe_dump(value, sort_keys=False, allow_unicode=True).encode()
+    blinded = yaml.safe_dump(value, sort_keys=True, allow_unicode=True).encode()
     text = blinded.decode()
     if any(identifier and identifier in text for identifier in forbidden):
         raise ValueError("run identity remains in scientific content; explicit blinding review required")
@@ -249,7 +266,7 @@ def prepare(
     max_cost_dollars="5", runtime: Path | None = None,
     runtime_sha256: str | None = None, runtime_version: str | None = None,
     record_sha256: str | None = None, registration_sha256: str | None = None,
-    provenance: Path, provenance_sha256: str, record_role: str = "full",
+    provenance: Path, provenance_sha256: str, comparison_arm: str, record_role: str = "full",
     effort: str = "high", canonical_model: str | None = None,
     context_window: int | None = None,
 ) -> PreparedEvaluation:
@@ -327,9 +344,7 @@ def prepare(
     from data_sheets_schema.provenance import recorded_hash, resolve_record_input
     if not isinstance(prior, dict) or prior.get("record_type") != "d4d_generation_provenance":
         raise ValueError("requires the generated record's provenance")
-    if not isinstance(prior.get("run"), dict) or {
-        key: prior["run"].get(key) for key in reg["run"]
-    } != reg["run"]:
+    if not same_run(prior.get("run"), reg["run"]):
         raise ValueError("record provenance identifies another registered run")
     require_eligible_generation(prior)
     if (not isinstance(prior.get("shared_generation"), dict)
@@ -351,8 +366,20 @@ def prepare(
         raise ValueError("an independent applicability context SHA256 is required")
     context_raw = take(context, context_sha256)
     normalized = normalize_context(_yaml(context_raw))
-    forbidden = (reg["run"]["label"], str(Path(record).absolute()), str(registration))
-    blinded = blind_record(original, forbidden=forbidden)
+    # The high-level gate lives in the pack module, which calls this module's
+    # low-level blind_record normalizer. Import lazily to keep that dependency
+    # non-recursive and bind both implementations before the gate runs.
+    from . import blind_review_pack as blind
+    pack_source = Path(__file__).with_name("blind_review_pack.py")
+    if Path(blind.__file__).resolve() != pack_source.resolve():
+        raise ValueError("blinding implementation has an unexpected source path")
+    take(Path(__file__))
+    take(pack_source)
+    blinding = blinding_identity(reg["run"], prior["run"], comparison_arm, blind.BLINDING_VERSION)
+    blinded = blind.blind_input(original, blind.Record(
+        comparison_arm, reg["run"]["project"], reg["run"]["label"],
+        Path(record).absolute(), _sha(original), input_arm=reg["run"]["arm"]),
+        forbidden=(str(registration), str(Path(provenance).absolute()), *forbidden_blinding_identities(blinding)))
     selected = select_semantic_instrument(rubric, instrument_version)
     resources = {}
     for rel in (selected.definition_path, selected.rubric_path,
@@ -380,10 +407,11 @@ def prepare(
     # Bind executable validator code too; no current scientific approval is
     # inferred from selecting these versioned instruments or captured bytes.
     for module in (
-        "evaluation/registered_eval_runner.py", "evaluation/validate.py",
+        "evaluation/registered_eval_runner.py", "evaluation/blind_review_pack.py", "evaluation/validate.py",
         "evaluation_context.py", "semantic_scope.py", "semantic_instrument.py",
         "semantic_evidence.py", "semantic_evidence_authority.py", "judge_contract.py",
         "agent_pin.py", "provenance.py", "latch_journal.py",
+        "evaluation/run_identity.py", "cli/api.py", "runs.py",
     ):
         take(Path(__file__).parents[1] / module)
     manifest = {
@@ -395,6 +423,7 @@ def prepare(
         "record_role": record_role,
         "generation_provenance": shared.file_pin(Path(provenance), provenance_raw),
         "record_registration_binding": "provenance authority and validation artifact identity checked",
+        "blinding": blinding,
         "blinded_input_sha256": _sha(blinded),
         "applicability_context": shared.file_pin(Path(context), context_raw),
         "context_sha256": context_digest(normalized),
@@ -507,10 +536,19 @@ def _reported_cost(events: list[dict]) -> Decimal:
     return Decimal(str(value))
 
 
+class EventTypeNotAllowed(ValueError):
+    """Retained stream contains an event outside the isolated-run allowlist."""
+
+
 def _accept(prepared: PreparedEvaluation, events: list[dict]) -> tuple[dict, Decimal]:
     """Authenticate route, completed result, challenge, identity and every score."""
     plan = prepared.document()
     runtime, instrument = plan["runtime"], plan["instrument"]
+    if any(not isinstance(event, dict) or not (
+        event.get("type") in {"assistant", "result"}
+        or (event.get("type") == "system" and event.get("subtype") in {"init", "status"})
+    ) for event in events):
+        raise EventTypeNotAllowed("event type is not allowed in an isolated no-tools run")
     init = [e for e in events if e.get("type") == "system" and e.get("subtype") == "init"]
     if len(init) != 1 or init[0].get("apiKeySource") != "ANTHROPIC_API_KEY":
         raise ValueError("runtime init must prove ANTHROPIC_API_KEY auth, never subscription")
@@ -688,7 +726,8 @@ def execute(
     lock_dir.mkdir(parents=True, exist_ok=True)
     receipt_path = (destination / "receipt.json").resolve()
     receipt = {
-        **summary, "status": "incomplete", "ratings": [], "attempts": [], "total_cost_usd": "0",
+        **summary, "format": RECEIPT_FORMAT,
+        "status": "incomplete", "ratings": [], "attempts": [], "total_cost_usd": "0",
         "unaccounted_reserved_usd": "0", "cost_accounting_complete": False, "runtime_attempts": 0,
         "model_calls": None, "max_overshoot_calls": 1,
         "prior_receipt": prior_receipt_resolved, "authorization_basis": authorization_basis,
@@ -697,19 +736,29 @@ def execute(
     per_attempt_cap = Decimal(plan["reserved_cost_dollars_per_attempt"])
 
     def _write_receipt_and_lock() -> None:
+        unaccounted = sum(a.get("estimated_cost_usd") is None for a in receipt["attempts"])
+        receipt["unaccounted_reserved_usd"] = str(per_attempt_cap * unaccounted) if unaccounted else "0"
+        for attempt in receipt["attempts"]:
+            folder = destination / f'rating-{attempt["rating"]:03d}'
+            attempt["files"] = sorted(p.name for p in folder.iterdir()) if folder.is_dir() else []
+            for name, field in (("transcript.jsonl", "transcript_sha256"), ("stderr.txt", "stderr_sha256")):
+                if attempt.get(field) is None:
+                    attempt[field] = _sha(_read(folder / name, MAX_TRACE_BYTES)) if (folder / name).is_file() else None
+            for rating in receipt["ratings"]:
+                if rating["rating"] == attempt["rating"]:
+                    rating.update({key: attempt[key] for key in ("files", "transcript_sha256", "stderr_sha256")})
         receipt_bytes = shared.canonical(receipt)
-        (destination / "receipt.json").write_bytes(receipt_bytes)
+        _atomic_evidence(destination / "receipt.json", receipt_bytes)
         lock_payload = shared.canonical({
             "plan_sha256": prepared.digest,
             "destination": str(destination),
             "receipt_path": str(receipt_path),
             "receipt_sha256": _sha(receipt_bytes),
+            "attempts": receipt["attempts"], "ratings": receipt["ratings"],
             "prior_receipt": prior_receipt_resolved,
             "authorization_basis": authorization_basis,
         })
-        tmp_lock = lock_dir / f".{prepared.digest}.{os.getpid()}.tmp"
-        tmp_lock.write_bytes(lock_payload)
-        os.replace(tmp_lock, lock_file)
+        _atomic_evidence(lock_file, lock_payload)
 
     owns_lock = False
     try:
@@ -719,6 +768,7 @@ def execute(
             "destination": str(destination),
             "receipt_path": str(receipt_path),
             "receipt_sha256": _sha(initial_receipt_bytes),
+            "attempts": [], "ratings": [],
             "prior_receipt": prior_receipt_resolved,
             "authorization_basis": authorization_basis,
         })
@@ -762,9 +812,10 @@ def execute(
         for index in range(1, plan["repeat_count"] + 1):
             prepared.assert_current()
             attempt = destination / f"rating-{index:03d}"
-            attempt.mkdir()
             attempt_receipt = {"rating": index, "status": "started", "estimated_cost_usd": None}
             receipt["attempts"].append(attempt_receipt)
+            _write_receipt_and_lock()
+            attempt.mkdir()
             # Random neutral basename; neither generation label nor repeat ID
             # appears in the evaluator's cwd, config, arguments or prompt.
             with tempfile.TemporaryDirectory(prefix="d4d-rating-") as directory:
@@ -790,6 +841,8 @@ def execute(
                                                stderr=stderr, timeout=900)
                 attempt_receipt["exit_code"] = completed.returncode
             raw = _read(attempt / "transcript.jsonl", MAX_TRACE_BYTES)
+            attempt_receipt["transcript_sha256"] = _sha(raw)
+            attempt_receipt["stderr_sha256"] = _sha(_read(attempt / "stderr.txt", MAX_TRACE_BYTES))
             events = [_json(line) for line in raw.splitlines() if line.strip()]
             if any(not isinstance(event, dict) for event in events):
                 raise ValueError("transcript events must be objects")
@@ -850,6 +903,7 @@ def main(argv=None) -> int:
     parser.add_argument("--context-sha256", required=True)
     parser.add_argument("--provenance", type=Path, required=True)
     parser.add_argument("--provenance-sha256", required=True)
+    parser.add_argument("--comparison-arm", required=True, help="Declared comparison identity to blind")
     parser.add_argument("--record-role", choices=("full", "core"), default="full")
     parser.add_argument("--registration-sha256")
     parser.add_argument("--record-sha256")

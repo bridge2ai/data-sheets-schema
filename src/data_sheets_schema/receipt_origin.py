@@ -417,6 +417,7 @@ from typing import Any
 import yaml
 
 INSTRUMENT = "receipt_origin v6 (#2933, #3047, #3369, #3693, #3781, #3782)"
+TOOL_INSTRUMENT = "receipt_origin v7 (v6 + typed tool evidence identity, #5225)"
 ORIGINS = ("contemporaneous", "phase1_correction", "phase3_backport")
 
 #: The native runtime's refusal to overwrite a file the session has not read
@@ -3439,13 +3440,26 @@ def _key(value: Any) -> str:
     return value if isinstance(value, str) else "\x00json:" + json.dumps(value, sort_keys=True, default=str)
 
 
-def _digest(key: str) -> str:
-    return _sha256(key.encode("utf-8"))
+EvidenceKey = str | tuple[str, str, str]
 
 
-def triples(text: str) -> list[tuple[str, str, str]] | None:
-    """(chunk, snippet, slot) for every pair `receipts.check` counts as a
-    snippet, in receipt order; None when the text is not a receipt."""
+def _digest(key: EvidenceKey) -> str:
+    # Retain historical snippet digests. Tool entries have a typed identity;
+    # a user-supplied snippet cannot impersonate one by copying a prefix.
+    if isinstance(key, str):
+        return _sha256(key.encode("utf-8"))
+    # 0xff cannot begin an encoded UTF-8 snippet, so digest domains differ too.
+    return _sha256(b"\xffreceipt-tool-v1\0" + json.dumps(
+        key, ensure_ascii=True, separators=(",", ":")).encode("utf-8"))
+
+
+def triples(text: str) -> list[tuple[str, EvidenceKey, str]] | None:
+    """(chunk, evidence, slot), preserving legacy snippet keys exactly.
+
+    Tool evidence uses a typed key binding the snippet and complete tool
+    payload (name, target, args, result). None means unreconstructable input.
+    This origin identity does not select the v5 receipt checker for Track N.
+    """
     try:
         data = yaml.safe_load(text)
     except yaml.YAMLError:
@@ -3460,7 +3474,20 @@ def triples(text: str) -> list[tuple[str, str, str]] | None:
         if entry.get("status") != "extracted" or not isinstance(pairs, list) or not all(
                 isinstance(p, dict) for p in pairs):
             continue
-        out.extend((entry["id"], _key(p.get("snippet")), _key(p.get("slot"))) for p in pairs)
+        for p in pairs:
+            evidence: EvidenceKey = _key(p.get("snippet"))
+            if "tool" in p:
+                if not isinstance(p["tool"], dict):
+                    return None
+                try:
+                    payload = json.dumps(p["tool"], sort_keys=True, ensure_ascii=True,
+                                         separators=(",", ":"), allow_nan=False)
+                    if json.loads(payload) != p["tool"]:
+                        return None  # no coercion of YAML-only keys/types into JSON
+                except (ValueError, TypeError, OverflowError):
+                    return None
+                evidence = ("receipt_tool_v1", evidence, payload)
+            out.append((entry["id"], evidence, _key(p.get("slot"))))
     return out
 
 
@@ -3482,8 +3509,8 @@ def _split(items: list[str], available: Counter) -> tuple[list[str], list[str]]:
     return matched, unmatched
 
 
-def classify(base: list[tuple[str, str, str]], core: list[tuple[str, str, str]],
-             final: list[tuple[str, str, str]]) -> dict[str, Any]:
+def classify(base: list[tuple[str, EvidenceKey, str]], core: list[tuple[str, EvidenceKey, str]],
+             final: list[tuple[str, EvidenceKey, str]]) -> dict[str, Any]:
     """Each final element's origin, by (chunk, snippet) multiset against the
     pre-draft and derive-time snapshots. An element whose triple is in the
     pre-draft snapshot is matched first; a contemporaneous element matched
@@ -4028,7 +4055,8 @@ def _origin_report(info, h, first, derived, reasons, receipt, full,
     edit_rows = [w for w in writes if w["tool"] != "Write"]
     listed = lambda rows: [{k: v for k, v in strip(w).items() if k != "created"} for w in rows]
     block: dict[str, Any] = {
-        "instrument": INSTRUMENT,
+        "instrument": (TOOL_INSTRUMENT if any(isinstance(evidence, tuple)
+                       for rows in snapshots.values() if rows for _, evidence, _ in rows) else INSTRUMENT),
         "status": "unknown" if reasons else "checked",
         "reasons": reasons,
         "transcripts": info,

@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-S",
+    "-B",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/scripts/adhoc/receipts_v5_ci_offline_20261029.py",
+    "--script",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/.claude/skills/d4d-generation-specificity-audit/scan.py",
+    "--",
+    "--root",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5",
+    "--report",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/notes/receipts_v5_ci_validation_2026-10-29/scan_head_resumed.md",
+    "--json",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/notes/receipts_v5_ci_validation_2026-10-29/scan_head_resumed.json"
+  ],
+  "load": [
+    14.017578125,
+    16.88037109375,
+    21.4072265625
+  ],
+  "receipts_sha256": "f68c875b4e3b972d4e03ad39322a077c6b64497ece5f1e71ac5bc08aa4e9c10a",
+  "returncode": 1,
+  "seconds": 51.042167958999926
+}

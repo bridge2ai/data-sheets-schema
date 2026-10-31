@@ -1,0 +1,28 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 19 items
+
+tests/test_backfill_checks.py::HeaderTest::test_a_record_with_extra_comments_keeps_them PASSED [  5%]
+tests/test_backfill_checks.py::HeaderTest::test_comments_are_split_off_and_survive_a_rewrite PASSED [ 10%]
+tests/test_backfill_checks.py::PathTest::test_declared_bundle PASSED     [ 15%]
+tests/test_backfill_checks.py::PathTest::test_the_full_record_is_not_beside_the_provenance_file PASSED [ 21%]
+tests/test_backfill_checks.py::ApplyTest::test_an_existing_block_is_left_alone PASSED [ 26%]
+tests/test_backfill_checks.py::ApplyTest::test_overwrite_replaces_it PASSED [ 31%]
+tests/test_backfill_checks.py::ApplyTest::test_writing_is_additive_and_keeps_the_header PASSED [ 36%]
+tests/test_backfill_checks.py::CorpusTest::test_a_backfilled_pair_verdict_pins_its_schema PASSED [ 42%]
+tests/test_backfill_checks.py::CorpusTest::test_a_backfilled_report_verdict_pins_what_it_read PASSED [ 47%]
+tests/test_backfill_checks.py::CorpusTest::test_backfilled_blocks_say_so PASSED [ 52%]
+tests/test_backfill_checks.py::CorpusTest::test_every_backfilled_report_block_in_the_corpus_pins_all_inputs PASSED [ 57%]
+tests/test_backfill_checks.py::CorpusTest::test_grounding_is_declined_for_a_drifted_bundle PASSED [ 63%]
+tests/test_backfill_checks.py::CorpusTest::test_historical_report_blocks_keep_their_registered_instrument PASSED [ 68%]
+tests/test_backfill_checks.py::CorpusTest::test_the_agentic_arm_is_clean_once_the_guard_is_applied PASSED [ 73%]
+tests/test_backfill_checks.py::CorpusTest::test_the_computation_itself_pins_all_inputs PASSED [ 78%]
+tests/test_backfill_checks.py::CorpusTest::test_the_v4_arm_still_diverges_with_the_guard PASSED [ 84%]
+tests/test_backfill_checks.py::RefusalTest::test_a_record_that_is_not_a_mapping_is_refused PASSED [ 89%]
+tests/test_backfill_checks.py::RefusalTest::test_an_all_comment_file_is_refused_rather_than_filled_in PASSED [ 94%]
+tests/test_backfill_checks.py::NeverEraseAMeasurement::test_an_unchecked_recomputation_does_not_overwrite_a_checked_block PASSED [100%]
+
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_02-xml-62ai4toz/pytest.xml -
+============================= 19 passed in 21.47s ==============================

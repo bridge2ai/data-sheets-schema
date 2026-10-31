@@ -1,0 +1,38 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 29 items
+
+tests/test_generic_v10_r9_enum_criteria.py::TestR9ConditionBoundaryAndParity::test_v8_and_v9_prompt_digests_unchanged PASSED [  3%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9ConditionBoundaryAndParity::test_v10_and_uniform_rules_v2_text_units_and_absences PASSED [  6%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9MutationMetaTests::test_mutation_swap_restricted_and_confidential_fails[generic_v10] PASSED [ 10%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9MutationMetaTests::test_mutation_swap_restricted_and_confidential_fails[uniform_rules_v2] PASSED [ 13%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9MutationMetaTests::test_mutation_swap_unrestricted_and_restricted_fails[generic_v10] PASSED [ 17%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9MutationMetaTests::test_mutation_swap_unrestricted_and_restricted_fails[uniform_rules_v2] PASSED [ 20%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9MutationMetaTests::test_mutation_replace_least_with_most_fails[generic_v10] PASSED [ 24%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9MutationMetaTests::test_mutation_replace_least_with_most_fails[uniform_rules_v2] PASSED [ 27%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9MutationMetaTests::test_mutation_swap_compliant_and_not_applicable_fails[generic_v10] PASSED [ 31%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9MutationMetaTests::test_mutation_swap_compliant_and_not_applicable_fails[uniform_rules_v2] PASSED [ 34%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9MutationMetaTests::test_mutation_delete_scope_sentence_fails[generic_v10] PASSED [ 37%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9MutationMetaTests::test_mutation_delete_scope_sentence_fails[uniform_rules_v2] PASSED [ 41%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[cc_guestbook_dataverse] PASSED [ 44%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[collection_irb_plus_registration_dua] PASSED [ 48%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[controlled_access_bare_name_only] PASSED [ 51%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[controlled_access_plus_registration_and_licence] PASSED [ 55%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[login_licence_subset_tier_inside_committee_superset] PASSED [ 58%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[open_sample_with_full_release_needing_registration] PASSED [ 62%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[open_companion_dataset_with_this_one_credentialed_plus_dua] PASSED [ 65%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[institutional_signoff_plus_dua_no_committee] PASSED [ 68%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[no_phi_plus_hipaa_safe_harbor] PASSED [ 72%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[deidentified_with_no_hipaa] PASSED [ 75%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[apply_hipaa_deidentification_rules_yes] PASSED [ 79%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[participant_app_no_login_required] PASSED [ 82%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[foreign_label_level3_or_hl7_2n_only] PASSED [ 86%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_canary_and_review_pack_expectation_fixture_schema_validity[whole_numbers_variable_passage] PASSED [ 89%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_all_14_expectation_fixtures_present PASSED [ 93%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_positive_fixture_access_criteria_populates_enum_with_fact_receipt PASSED [ 96%]
+tests/test_generic_v10_r9_enum_criteria.py::TestR9CanaryAndReviewPackExpectationFixtures::test_negative_fixture_external_classification_label_without_access_facts PASSED [100%]
+
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_19-xml-pbop338h/pytest.xml -
+============================== 29 passed in 1.03s ==============================

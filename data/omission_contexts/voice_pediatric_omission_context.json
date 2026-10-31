@@ -6,7 +6,7 @@
       "owner": "",
       "referent": "Bridge2AI-Voice Pediatric Dataset",
       "release": "https://doi.org/10.13026/mf9s-5r03",
-      "scope": "PhysioNet project-level DOI. Release 1.1.0 is 10.13026/h995-bt35."
+      "scope": "PhysioNet project-level DOI. Release 1.1.0 is 10.13026/h995-bt35.\n\nThe declared bundle also documents datasets that are NOT this one:\n- Bridge2AI-Voice dataset (adult) \u2014 https://doi.org/10.13026/37yb-1t42, https://doi.org/10.13026/8xbn-nq66, https://doi.org/10.13026/k81f-qr68, https://doi.org/10.13026/249v-w155\n  Why distinct: the adult cohort is a separate PhysioNet project under its own protocol; the pediatric bundle shares five of its six sources with it, so the overlap is in the evidence, not in the referent\n  Facts about it belong in `related_datasets`, never in this dataset's own slots."
     }
   ],
   "source_policy": {

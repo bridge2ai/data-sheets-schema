@@ -265,6 +265,11 @@ def contract(stage: str, *, version: int = 1) -> dict:
     rules = list(COMMON_RULES + (WORKER_RULES if stage == "worker" else INTEGRATION_RULES))
     if version == 2:
         rules += list(TYPED_RULES)
+        if stage == "worker":
+            # A plan that splits a list assigns its entries, not the field (A17).
+            rules[len(COMMON_RULES) + 2] = rules[len(COMMON_RULES) + 2].replace(
+                "Every removal's top-level owner belongs",
+                "Every removal's owning root (its top-level field, or its list entry when the plan splits that list) belongs")
         if stage == "integration":
             rules[len(COMMON_RULES)] = rules[len(COMMON_RULES)].replace(
                 "new_findings and summary.", "new_findings, summary and omission_dispositions.")

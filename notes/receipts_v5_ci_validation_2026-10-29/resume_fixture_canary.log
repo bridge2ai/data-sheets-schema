@@ -1,0 +1,35 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 1 item
+
+tests/test_audit_recall_leak_rendered.py::test_the_rendered_direct_arm_prompts_quote_nothing ERROR [100%]
+
+==================================== ERRORS ====================================
+_____ ERROR at setup of test_the_rendered_direct_arm_prompts_quote_nothing _____
+tests/test_audit_recall_leak_rendered.py:347: in direct_registration
+    path = direct_preparation.build(SimpleNamespace(
+notes/claudecode_direct/prepare_direct.py:194: in build
+    version = subprocess.check_output([str(executable), "--version"], text=True).strip()
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:472: in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:554: in run
+    with Popen(*popenargs, **kwargs) as process:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:1859: in _execute_child
+    sys.audit("subprocess.Popen", executable, args, cwd, env)
+scripts/adhoc/validate_receipts_v5_merge_20261029.py:19: in offline
+    raise RuntimeError("offline validation forbids live commands")
+E   RuntimeError: offline validation forbids live commands
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-resume_fixture_canary-xml-qeghvriq/pytest.xml -
+=========================== short test summary info ============================
+ERROR tests/test_audit_recall_leak_rendered.py::test_the_rendered_direct_arm_prompts_quote_nothing
+========================= 1 warning, 1 error in 2.19s ==========================

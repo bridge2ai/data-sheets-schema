@@ -1,0 +1,50 @@
+{
+  "changes": [
+    {
+      "after": "/private/tmp/d4d-wave5-d52-label-canary-20261028/cases/test_exported_unregulated_q9_l0/record.yaml",
+      "before": "/private/tmp/d4d-wave5-d52-label-baseline-20261028/cases/test_exported_unregulated_q9_l0/record.yaml",
+      "path": "/0/file_path"
+    },
+    {
+      "after": "aa917606353a0b078a0596025d0ce0f0de970886b717c280989ab6155198426a",
+      "before": "89befc75f70615dc42575ac947900714c20274d85cc73ea84d7ac9f46b96f1e3",
+      "path": "/0/instrument/inputs/runner"
+    },
+    {
+      "after": "b38117d96e73987f236d4d3d47da5b84a952401537f9a2ae4d2c44bf981fc064",
+      "before": "509586a464c296dd1135a36297c91e54ae570ec2f250253bebfb08eeb73a76e5",
+      "path": "/0/instrument/sha256"
+    },
+    {
+      "after": "Applicable-field coverage (3/3 fields populated; 4 regulated-access criteria excluded under D52)",
+      "before": "License + multi-jurisdiction compliance + confidentiality classification + governance contact (3/3 fields populated)",
+      "path": "/0/rubric20/questions/8/score_label"
+    },
+    {
+      "after": "Applicable-field coverage (3/3 fields populated; 4 regulated-access criteria excluded under D52)",
+      "before": "License + multi-jurisdiction compliance + confidentiality classification + governance contact (3/3 fields populated)",
+      "path": "/0/rubric20/questions/8/unit_scores/0/label"
+    },
+    {
+      "after": "2026-10-28T11:42:30.335699",
+      "before": "2026-10-28T11:41:49.276928",
+      "path": "/0/timestamp"
+    }
+  ],
+  "format": "d52_display_only_comparison_v1",
+  "helper_sha256": "885f5e07f3ea3881c3352c899501fff91e9313c1c776912879687e1eee65137c",
+  "inputs": [
+    {
+      "bytes": 43348,
+      "path": "/private/tmp/d4d-wave5-d52-label-baseline-20261028/cases/test_exported_unregulated_q9_l0/scores.json",
+      "sha256": "83c0f9918388f20f100618523b938c6f77593d72c538101c20b09f77d43367f1"
+    },
+    {
+      "bytes": 43306,
+      "path": "/private/tmp/d4d-wave5-d52-label-canary-20261028/cases/test_exported_unregulated_q9_l0/scores.json",
+      "sha256": "406030753a407d5af9a06d65cfc07d4cfc13acd8759253ec29b86e76d1ff0178"
+    }
+  ],
+  "numeric_scores_maxima_and_evidence_unchanged": true,
+  "scope": "one synthetic canary; no corpus rescore or scientific acceptance"
+}

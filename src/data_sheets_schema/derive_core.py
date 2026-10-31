@@ -145,20 +145,33 @@ def derive_core(full: Mapping[str, Any], pair_schema=None) -> dict[str, Any]:
     return {k: core[k] for k in order if k in core} | {k: v for k, v in core.items() if k not in order}
 
 
-def derivation_facts(full_path: Path, pair_schema=None) -> dict[str, Any]:
+def derivation_facts(full_path: Path | Mapping[str, Any], pair_schema=None, *,
+                     include_transformation_receipt: bool = False) -> dict[str, Any]:
     """What a provenance record says about a derived core (#694)."""
+    import json
     from data_sheets_schema.d4d_pair_consistency import load_pair_schema
     ps = pair_schema or load_pair_schema()
-    return {
+    if isinstance(full_path, Mapping):
+        raw_bytes = json.dumps(dict(full_path), sort_keys=True, default=str).encode("utf-8")
+        from_info = {"path": "<mapping>", "md5": hashlib.md5(raw_bytes).hexdigest()}
+        full_doc: Mapping[str, Any] = full_path
+    else:
+        from_info = {"path": str(full_path),
+                     "md5": hashlib.md5(full_path.read_bytes()).hexdigest()}
+        full_doc = yaml.safe_load(full_path.read_text(encoding="utf-8")) or {}
+    facts = {
         "derived": True,
         "rule": RULE,
-        "from": {"path": str(full_path),
-                 "md5": hashlib.md5(full_path.read_bytes()).hexdigest()},
+        "from": from_info,
         "identity_slots": len(ps.identity_slots),
         "projected_slots": list(ps.projected_slots),
         "distribution_slots": _distribution_slots(ps),
         "conditional": dict(CONDITIONAL),
     }
+    if include_transformation_receipt:
+        from data_sheets_schema.transformation_receipts import emit_transformation_receipt
+        facts["transformation_receipt"] = emit_transformation_receipt(full_doc, pair_schema=ps)
+    return facts
 
 
 def _header_lines(text: str) -> list[str]:
@@ -212,20 +225,25 @@ def _core_header(full_text: str, source_display: str, phase4_complete: bool = Fa
 
 
 def core_text(full_path: Path, pair_schema=None,
-              phase4_complete: bool = False) -> tuple[str, dict[str, Any]]:
+              phase4_complete: bool = False, *,
+              include_transformation_receipt: bool = False) -> tuple[str, dict[str, Any]]:
     """The derived core as text (header + YAML) and its derivation facts."""
     text = full_path.read_text(encoding="utf-8")
     full = yaml.safe_load(text) or {}
     core = derive_core(full, pair_schema)
     body = yaml.safe_dump(core, sort_keys=False, allow_unicode=True, width=88)
     header = "\n".join(core_header(text, full_path, phase4_complete))
-    return (header + "\n\n" if header else "") + body, derivation_facts(full_path, pair_schema)
+    return ((header + "\n\n" if header else "") + body,
+            derivation_facts(full_path, pair_schema,
+                             include_transformation_receipt=include_transformation_receipt))
 
 
 def write_core(full_path: Path, core_path: Path, pair_schema=None,
-               phase4_complete: bool = False) -> dict[str, Any]:
+               phase4_complete: bool = False, *,
+               include_transformation_receipt: bool = False) -> dict[str, Any]:
     """Derive and write the core beside its full record; return the facts."""
-    text, facts = core_text(full_path, pair_schema, phase4_complete)
+    text, facts = core_text(full_path, pair_schema, phase4_complete,
+                            include_transformation_receipt=include_transformation_receipt)
     core_path.parent.mkdir(parents=True, exist_ok=True)
     core_path.write_text(text, encoding="utf-8")
     return facts

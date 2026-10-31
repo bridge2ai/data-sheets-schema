@@ -308,10 +308,12 @@ def _open(packet, *, derivations=None):
     return raw, prepared
 
 
-def _omission_wire_prepared(packet, prepared):
-    """Derive one exact payload only after the packet's explicit selection is checked."""
-    if "omission_wire" not in packet:
+def _omission_wire_prepared(prepared, *, omission_wire=None):
+    """Apply the explicitly selected projection without changing the source payload."""
+    if omission_wire is None:
         return prepared
+    if type(omission_wire) is not str or omission_wire != SHARED_OMISSION_WIRE:
+        raise ValueError("unsupported omission wire selection")
     from .shared_generation import trim_omission_schema
     payload = json.loads(prepared.payload_json)
     payload["schema"] = trim_omission_schema(payload["schema"])
@@ -321,11 +323,20 @@ def _omission_wire_prepared(packet, prepared):
 def omission_wire_request(packet, *, derivations=None):
     """Export the captured omission wire; the public default remains unprojected."""
     _, prepared = _open(packet, derivations=derivations)
+    return _render_omission_wire_request(prepared, omission_wire=packet.get("omission_wire"))
+
+
+def _render_omission_wire_request(prepared, *, omission_wire=None):
+    """Shared byte formatter; public packet export still validates with ``_open``.
+
+    Sizing may format a historical estimate here, but cannot dispatch it as a
+    sealed packet. Both paths share projection, sealing and identity fields.
+    """
     # An explicit frozen constructor makes the method receiver statically known.
-    wire_prepared = omissions.Prepared(_omission_wire_prepared(packet, prepared).payload_json)
+    wire_prepared = omissions.Prepared(_omission_wire_prepared(prepared, omission_wire=omission_wire).payload_json)
     request = wire_prepared.request()
-    if "omission_wire" in packet:
-        request["packet_request_sha256"] = packet["omission_request"]["request_sha256"]
+    if omission_wire is not None:
+        request["packet_request_sha256"] = prepared.request()["request_sha256"]
     return request
 
 
@@ -434,7 +445,7 @@ def _index(packet, workers):
 def index(packet, workers, omission_response, *, derivations=None):
     """Bind workers and complete omission response; render the integration tail."""
     _, prepared = _open(packet, derivations=derivations)
-    prepared = _omission_wire_prepared(packet, prepared)
+    prepared = _omission_wire_prepared(prepared, omission_wire=packet.get("omission_wire"))
     report = prepared.check(omission_response, saved_request=prepared.request())
     if not report["protocol_complete"]:
         raise ValueError("omission response does not satisfy complete captured inventory")

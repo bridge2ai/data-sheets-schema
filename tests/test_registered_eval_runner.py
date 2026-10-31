@@ -27,6 +27,15 @@ def sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
+def test_low_level_blinding_sorts_mappings_without_changing_scientific_values():
+    first = b'id: example:record\nvalues: [null, false, 0, "005", {z: last, a: first}]\nnested: {z: 2, a: 1}\n'
+    reordered = b'nested: {a: 1, z: 2}\nvalues: [null, false, 0, "005", {a: first, z: last}]\nid: example:record\n'
+    assert runner.blind_record(first) == runner.blind_record(reordered)
+    assert yaml.safe_load(runner.blind_record(first)) == yaml.safe_load(first)
+    changed = reordered.replace(b"[null, false", b"[false, null")
+    assert runner.blind_record(changed) != runner.blind_record(first)
+
+
 @pytest.fixture(autouse=True)
 def no_provider(monkeypatch, tmp_path):
     monkeypatch.setattr(runner, "LOCK_DIR", tmp_path / ".registered_eval_locks")
@@ -69,13 +78,22 @@ def registration(tmp_path_factory):
     files[reg["registration_path"]] = Path(reg["registration_path"]).read_bytes()
     captured = shared._capture_bytes(files[reg["registration_path"]], reg, files)
     provenance = directory / "generation-provenance.yaml"
-    provenance.write_text(yaml.safe_dump({
-        "record_type": "d4d_generation_provenance", "run": reg["run"],
+    from data_sheets_schema.provenance import build_record
+    prior = build_record(base.project, base.method, base.label, mode="reconstructed",
+                         input_bundle=base.bundle, manifest=base.manifest,
+                         chunk_manifest=base.chunk_manifest, concat_dir=directory,
+                         outputs={"full": record}, condition="generic_v10")
+    prior.data.update({
         "shared_generation": {"authority": captured.identity()},
         "validation": {"artifacts": {"full": {
             "path": str(record), "md5": hashlib.md5(record.read_bytes()).hexdigest(),
         }}},
-    }))
+    })
+    # Reconstruct run identity without assigning this synthetic fixture a
+    # generation age from the test checkout; its age is deliberately unknown.
+    prior.data.pop("repo")
+    prior.data.pop("record_generated_at")
+    prior.write(provenance)
     return dict(
         registration=Path(reg["registration_path"]), record=record, context=context,
         context_sha256=sha(context.read_bytes()), rubric="rubric20", instrument_version="3.0",
@@ -83,12 +101,30 @@ def registration(tmp_path_factory):
         canonical_model="claude-opus-5", context_window=1_000_000,
         runtime_sha256=sha(runtime.read_bytes()), runtime_version="2.1.269", max_cost_dollars="5",
         provenance=provenance, provenance_sha256=sha(provenance.read_bytes()),
+        comparison_arm="v10",
     )
 
 
 @pytest.fixture(scope="module")
 def prepared(registration):
     return runner.prepare(**registration)
+
+
+def test_copied_registration_run_control(registration, tmp_path):
+    prior = yaml.safe_load(registration["provenance"].read_bytes())
+    prior["run"].update(json.loads(registration["registration"].read_bytes())["run"])
+    path = tmp_path / "copied-shape.yaml"
+    path.write_text(yaml.safe_dump(prior))
+    assert runner.prepare(**{**registration, "provenance": path,
+                              "provenance_sha256": sha(path.read_bytes())})
+
+
+@pytest.mark.parametrize("arm,method", [("unmapped", "claudecode_api"),
+                                       ("baseline", "unmapped"), ("crate_only", "claudecode_api")])
+def test_unmapped_or_inconsistent_arm_is_not_an_identity(arm, method):
+    from data_sheets_schema.evaluation.run_identity import same_run
+    run = {"arm": arm, "method": method, "project": "P", "label": "L"}
+    assert not same_run(run, run)
 
 
 def document_for(prepared):
@@ -202,6 +238,111 @@ def test_d41_ineligible_record_refuses_before_rating_preparation(registration, t
     with pytest.raises(ValueError, match="runtime integrity is ineligible"):
         runner.prepare(**{**registration, "provenance": path,
                           "provenance_sha256": sha(path.read_bytes())})
+
+
+def rebind_record(registration, directory, raw):
+    """Keep the real generation authority while pinning this selected output."""
+    record = directory / "selected-record.yaml"
+    record.write_bytes(raw)
+    prior = yaml.safe_load(registration["provenance"].read_bytes())
+    prior["validation"]["artifacts"]["full"] = {
+        "path": str(record), "md5": hashlib.md5(raw).hexdigest(),
+    }
+    provenance = directory / "selected-provenance.yaml"
+    provenance.write_text(yaml.safe_dump(prior))
+    return {**registration, "record": record, "record_sha256": sha(raw), "provenance": provenance,
+            "provenance_sha256": sha(provenance.read_bytes())}
+
+
+@pytest.mark.parametrize("wrapper", [False, True])
+def test_runner_uses_actual_registered_arm_and_same_public_gate(registration, tmp_path, wrapper):
+    from data_sheets_schema.evaluation import blind_review_pack as blind
+
+    run = json.loads(registration["registration"].read_bytes())["run"]
+    assert run["arm"] == "BASELINE (input documents only)"
+    scientific = {"id": "example:identity", "values": [None, False, "005"],
+                  "description": "Keep original scientific wording."}
+    with_metadata = {**scientific, "arm": run["arm"], "label": run["label"]}
+    raw = yaml.safe_dump({"Dataset": with_metadata} if wrapper else with_metadata).encode()
+    options = rebind_record(registration, tmp_path, raw)
+    selected = runner.prepare(**options)
+    identity = selected.document()["blinding"]
+    assert identity["arm"] == "v10" and identity["input_arm"] == run["arm"]
+    assert identity["condition"] == "generic_v10" and identity["method"] == run["method"]
+    record = blind.Record("v10", run["project"], run["label"], options["record"], sha(raw), input_arm=run["arm"])
+    assert selected.blinded == blind.blind_input(raw, record, forbidden=(
+        str(options["registration"]), str(options["provenance"])))
+    assert yaml.safe_load(selected.blinded) == ({"Dataset": scientific} if wrapper else scientific)
+    assert dict(selected.authorities)[str(Path(blind.__file__))] == Path(blind.__file__).read_bytes()
+
+
+@pytest.mark.parametrize("raw, reason", [
+    (b"arm: another-arm\nid: example:record\n", "ambiguous root arm"),
+    (b"Dataset:\n  id: example:record\n  arm: another-arm\n", "ambiguous root arm"),
+    (b"id: example:record\nresources:\n- arm: v10\n", "nested provenance"),
+    (b"id: example:record\nmodel: opaque-generator\n", "ambiguous root model"),
+    (b"id: example:record\ndescription: claude-opus-5\n", "model identifier"),
+    (b"# Model: opaque-generator\nid: example:record\ndescription: opaque-generator\n", "identity remains"),
+    (b"id: example:record\ndescription: opaque-generator\n# Model: opaque-generator\n", "identity remains"),
+])
+def test_runner_refuses_ambiguous_or_leaking_source_instead_of_guessing_arm(registration, tmp_path, raw, reason):
+    options = rebind_record(registration, tmp_path, raw)
+    with pytest.raises(ValueError, match=reason):
+        runner.prepare(**options)
+
+
+def test_runner_preserves_scientific_scalar_that_resembles_metadata_comment(registration, tmp_path):
+    raw = b'id: example:record\ndescription: |\n  # Model: source quotation\n  Literal scientific words.\n'
+    selected = runner.prepare(**rebind_record(registration, tmp_path, raw))
+    assert yaml.safe_load(selected.blinded) == yaml.safe_load(raw)
+
+
+@pytest.mark.parametrize("module", ["blind_review_pack.py", "registered_eval_runner.py"])
+def test_blinding_implementation_is_captured_before_gate_and_rechecked_during_prepare(registration, monkeypatch, module):
+    from data_sheets_schema.evaluation import blind_review_pack as blind
+
+    read, gate = runner._read, blind.blind_input
+    calls = []
+    changed = False
+    source = Path(runner.__file__).with_name(module)
+
+    def observed_read(path, *args, **kwargs):
+        raw = read(path, *args, **kwargs)
+        if path == source:
+            calls.append(changed)
+            if changed:
+                return raw + b"\n# simulated source mutation\n"
+        return raw
+
+    def mutate_after_gate(*args, **kwargs):
+        nonlocal changed
+        assert calls == [False], "source must be captured before the gate"
+        result = gate(*args, **kwargs)
+        changed = True
+        return result
+
+    monkeypatch.setattr(runner, "_read", observed_read)
+    monkeypatch.setattr(blind, "blind_input", mutate_after_gate)
+    with pytest.raises(ValueError, match="authority changed during preparation"):
+        runner.prepare(**registration)
+    assert calls == [False, True]
+
+
+@pytest.mark.parametrize("module", ["blind_review_pack.py", "registered_eval_runner.py"])
+def test_changed_blinding_implementation_refuses_before_mocked_dispatch(prepared, tmp_path, monkeypatch, module):
+    source = Path(runner.__file__).with_name(module)
+    read = runner._read
+
+    def changed(path, *args, **kwargs):
+        raw = read(path, *args, **kwargs)
+        return raw + b"\n# changed blinding source\n" if path == source else raw
+
+    monkeypatch.setattr(runner, "_read", changed)
+    monkeypatch.setattr(runner.subprocess, "run", lambda *args, **kwargs: pytest.fail("dispatch must not occur"))
+    output = tmp_path / "refused-output"
+    with pytest.raises(ValueError, match="prepared authority changed"):
+        runner.execute(prepared, output, plan_sha256=prepared.digest, environ={"CBORG_API_KEY": "synthetic"})
+    assert not output.exists()
 
 
 def test_blinding_removes_headers_without_dropping_scientific_content(prepared):

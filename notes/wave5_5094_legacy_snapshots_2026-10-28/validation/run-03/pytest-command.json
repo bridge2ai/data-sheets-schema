@@ -1,0 +1,17 @@
+{
+  "arguments": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave5-5094-legacy-targeted-20261028/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave5-5094-legacy-targeted-20261028/pytest.xml",
+    "tests/test_wave5_5094_legacy_snapshots.py",
+    "tests/test_report_audit_totals.py",
+    "tests/test_pr5094_round2.py",
+    "tests/test_backfill_checks.py",
+    "tests/test_snapshot_attestation.py"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave5-5094-legacy-20261028"
+}

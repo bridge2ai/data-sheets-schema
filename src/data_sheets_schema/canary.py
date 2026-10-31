@@ -287,8 +287,13 @@ def duplicate_key_count(validation: dict[str, Any] | None) -> int | None:
 
 def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
     """Defect counts read from a checked receipts block; each must be 0."""
+    from data_sheets_schema.receipts import RECEIPTS_V5_INSTRUMENT
     ch, sn = block.get("chunks") or {}, block.get("snippets") or {}
     total, reviewed = int(ch.get("total") or 0), int(ch.get("reviewed") or 0)
+    # Tool counts are meaningful only under the explicitly selected checker.
+    # A stray tools field must never relax a historical v3/v4 floor.
+    verified_tools = (int((block.get("tool_receipts") or {}).get("verified") or 0)
+                      if block.get("instrument") == RECEIPTS_V5_INSTRUMENT else 0)
     floors = {
         "chunks unreviewed": max(0, total - reviewed),
         "snippets unverified": int(sn.get("mismatched") or 0) + int(sn.get("unchecked") or 0),
@@ -305,7 +310,8 @@ def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
         # clean receipt; it is `checked: 0` wearing a pass (#684, DisMech #7252).
         # #893: vacuity is about ATTESTATION - a receipt whose snippets are
         # all below the floors has verified nothing (#684's lesson again).
-        "receipts vacuous": int(total > 0 and int(sn.get("verified") or 0) == 0),
+        "receipts vacuous": int(total > 0 and int(sn.get("verified") or 0) == 0
+                                and verified_tools <= 0),
         # Findings not already counted above: a mismatched snippet is one
         # defect, not two lines (#727).
         # Wrong-chunk attributions are reported, never gated (#763): the

@@ -4456,24 +4456,50 @@ def report_claims_block(spec: RunSpec, *, record: dict | None = None) -> dict[st
     return out
 
 
-def report_audit_totals_block(spec: RunSpec, carry: dict[str, str] | None = None) -> dict[str, Any]:
+def report_audit_totals_block(spec: RunSpec, carry: dict[str, str] | None = None,
+                             *, record: dict[str, Any] | None = None) -> dict[str, Any]:
     """Check written report's stated finding totals against structured audit (#4766)."""
     from data_sheets_schema.report_audit_totals import check_report_audit_totals
     audit_source = carry.get("Audit findings") if carry else None
     if audit_source is None:
-        intermediate_audit = _intermediate_dir(spec) / f"{spec.project}_audit.json"
-        if intermediate_audit.exists():
-            audit_source = intermediate_audit
+        from data_sheets_schema import snapshot_store
+        try:
+            indexed, snapshot = snapshot_store.read_latest(
+                spec.metadata_dir, spec.project, f"{spec.project}_audit.json", spec=spec,
+                record=record if record and ("run" in record or "intermediates" in record) else None)
+        except UsageLedgerError as exc:
+            # An ambiguous or unavailable snapshot is not a fresh measurement.
+            # Resume can retain its checked prior without guessing ownership.
+            out = check_report_audit_totals(spec.report_path, None)
+            out["reason"] = f"audit snapshot unavailable: {exc}"
+            return out
+        if snapshot is not None:
+            audit_source = snapshot[1].decode("utf-8")
+        elif not indexed:
+            # Legacy single-snapshot helpers have no byte attestation. With
+            # multiple snapshots, preserve a checked prior on resume rather than
+            # guessing which audit produced the report from filename order.
+            intermediate = _intermediate_dir(spec)
+            pattern = re.compile(re.escape(spec.project) + r"_audit(?:_[0-9]+)?\.json")
+            candidates = [p for p in intermediate.glob(f"{spec.project}_audit*.json")
+                          if pattern.fullmatch(p.name)]
+            if len(candidates) == 1:
+                audit_source = candidates[0]
     return check_report_audit_totals(spec.report_path, audit_source)
 
 
 def _current_report_audit_totals(spec: RunSpec, existing: dict[str, Any]) -> dict[str, Any]:
-    """Return existing `report_audit_totals` if at current `INSTRUMENT_VERSION`, else recompute."""
+    """Re-read available report/audit bytes without erasing an earlier measurement.
+
+    The instrument version identifies the reader, not the input bytes. A current
+    version alone cannot establish that a saved reading still describes the report.
+    """
     from data_sheets_schema.report_audit_totals import INSTRUMENT_VERSION
     prior = existing.get("report_audit_totals")
-    if isinstance(prior, dict) and (prior.get("instrument_version") or 0) >= INSTRUMENT_VERSION:
+    if (isinstance(prior, dict) and type(prior.get("instrument_version")) is int
+            and prior["instrument_version"] > INSTRUMENT_VERSION):
         return prior
-    fresh = report_audit_totals_block(spec)
+    fresh = report_audit_totals_block(spec, record=existing)
     if isinstance(prior, dict) and prior.get("checked") is True and not fresh.get("checked"):
         return prior
     return fresh

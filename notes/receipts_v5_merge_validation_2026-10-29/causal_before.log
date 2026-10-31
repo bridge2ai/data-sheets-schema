@@ -1,0 +1,296 @@
+FFFFFFFFF.FFF.FFF.FFFFFFFFFFFFF...FF.FF....FF.FF.FF.                     [100%]
+=================================== FAILURES ===================================
+________ test_n1_untrusted_selection_cannot_override_run[marker-legacy] ________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:27: in test_n1_untrusted_selection_cannot_override_run
+    assert block["instrument"] == rc.receipt_instrument(version)
+E   AssertionError: assert 'v5 (supports...counted apart' == 'v3 (#1053): ...counted apart'
+E     - v3 (#1053): an entry whose identity key the final list no longer carries anywhere (a minted id reconciliation stripped) is located as a keyless entry — by overlap, else by position for the same shape when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead of declared dropped; v2 (#1123): a fragment minted on an identifier the record carries for the dataset at its top level — its id in CURIE or resolver form, its doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier` counts them; v1...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+_____ test_n1_untrusted_selection_cannot_override_run[marker-registration] _____
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:27: in test_n1_untrusted_selection_cannot_override_run
+    assert block["instrument"] == rc.receipt_instrument(version)
+E   AssertionError: assert 'v5 (supports...counted apart' == 'v4 (#3314, #...counted apart'
+E     - v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics split by declared phase1/rereceipt/unknown origin, with recorded chunk-status reversals counted separately. Origin markers are accounting metadata, not proof of authorship or semantic support. v3 (#1053): an entry whose identity key the final list no longer carries anywhere (a minted id reconciliation stripped) is located as a keyless entry — by overlap, else by position for the same shape when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — inste...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+______ test_n1_untrusted_selection_cannot_override_run[marker-provenance] ______
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:27: in test_n1_untrusted_selection_cannot_override_run
+    assert block["instrument"] == rc.receipt_instrument(version)
+E   AssertionError: assert 'v5 (supports...counted apart' == 'v4 (#3314, #...counted apart'
+E     - v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics split by declared phase1/rereceipt/unknown origin, with recorded chunk-status reversals counted separately. Origin markers are accounting metadata, not proof of authorship or semantic support. v3 (#1053): an entry whose identity key the final list no longer carries anywhere (a minted id reconciliation stripped) is located as a keyless entry — by overlap, else by position for the same shape when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — inste...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+_____ test_n1_untrusted_selection_cannot_override_run[environment-legacy] ______
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:27: in test_n1_untrusted_selection_cannot_override_run
+    assert block["instrument"] == rc.receipt_instrument(version)
+E   AssertionError: assert 'v5 (supports...counted apart' == 'v3 (#1053): ...counted apart'
+E     - v3 (#1053): an entry whose identity key the final list no longer carries anywhere (a minted id reconciliation stripped) is located as a keyless entry — by overlap, else by position for the same shape when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead of declared dropped; v2 (#1123): a fragment minted on an identifier the record carries for the dataset at its top level — its id in CURIE or resolver form, its doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier` counts them; v1...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+__ test_n1_untrusted_selection_cannot_override_run[environment-registration] ___
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:27: in test_n1_untrusted_selection_cannot_override_run
+    assert block["instrument"] == rc.receipt_instrument(version)
+E   AssertionError: assert 'v5 (supports...counted apart' == 'v4 (#3314, #...counted apart'
+E     - v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics split by declared phase1/rereceipt/unknown origin, with recorded chunk-status reversals counted separately. Origin markers are accounting metadata, not proof of authorship or semantic support. v3 (#1053): an entry whose identity key the final list no longer carries anywhere (a minted id reconciliation stripped) is located as a keyless entry — by overlap, else by position for the same shape when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — inste...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+___ test_n1_untrusted_selection_cannot_override_run[environment-provenance] ____
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:27: in test_n1_untrusted_selection_cannot_override_run
+    assert block["instrument"] == rc.receipt_instrument(version)
+E   AssertionError: assert 'v5 (supports...counted apart' == 'v4 (#3314, #...counted apart'
+E     - v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics split by declared phase1/rereceipt/unknown origin, with recorded chunk-status reversals counted separately. Origin markers are accounting metadata, not proof of authorship or semantic support. v3 (#1053): an entry whose identity key the final list no longer carries anywhere (a minted id reconciliation stripped) is located as a keyless entry — by overlap, else by position for the same shape when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — inste...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+_________ test_n1_untrusted_selection_cannot_override_run[both-legacy] _________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:27: in test_n1_untrusted_selection_cannot_override_run
+    assert block["instrument"] == rc.receipt_instrument(version)
+E   AssertionError: assert 'v5 (supports...counted apart' == 'v3 (#1053): ...counted apart'
+E     - v3 (#1053): an entry whose identity key the final list no longer carries anywhere (a minted id reconciliation stripped) is located as a keyless entry — by overlap, else by position for the same shape when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead of declared dropped; v2 (#1123): a fragment minted on an identifier the record carries for the dataset at its top level — its id in CURIE or resolver form, its doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier` counts them; v1...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+______ test_n1_untrusted_selection_cannot_override_run[both-registration] ______
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:27: in test_n1_untrusted_selection_cannot_override_run
+    assert block["instrument"] == rc.receipt_instrument(version)
+E   AssertionError: assert 'v5 (supports...counted apart' == 'v4 (#3314, #...counted apart'
+E     - v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics split by declared phase1/rereceipt/unknown origin, with recorded chunk-status reversals counted separately. Origin markers are accounting metadata, not proof of authorship or semantic support. v3 (#1053): an entry whose identity key the final list no longer carries anywhere (a minted id reconciliation stripped) is located as a keyless entry — by overlap, else by position for the same shape when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — inste...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+_______ test_n1_untrusted_selection_cannot_override_run[both-provenance] _______
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:27: in test_n1_untrusted_selection_cannot_override_run
+    assert block["instrument"] == rc.receipt_instrument(version)
+E   AssertionError: assert 'v5 (supports...counted apart' == 'v4 (#3314, #...counted apart'
+E     - v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics split by declared phase1/rereceipt/unknown origin, with recorded chunk-status reversals counted separately. Origin markers are accounting metadata, not proof of authorship or semantic support. v3 (#1053): an entry whose identity key the final list no longer carries anywhere (a minted id reconciliation stripped) is located as a keyless entry — by overlap, else by position for the same shape when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — inste...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+_______________ test_n1_explicit_check_records_disagreement[3-4] _______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'int'> is not int or 3 != 4))
+E    +  where False = bool([])
+E    +  and   <class 'int'> = type(3)
+_______________ test_n1_explicit_check_records_disagreement[3-5] _______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'int'> is not int or 3 != 5))
+E    +  where False = bool([])
+E    +  and   <class 'int'> = type(3)
+_______________ test_n1_explicit_check_records_disagreement[4-3] _______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'int'> is not int or 4 != 3))
+E    +  where False = bool([])
+E    +  and   <class 'int'> = type(4)
+_______________ test_n1_explicit_check_records_disagreement[4-5] _______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'int'> is not int or 4 != 5))
+E    +  where False = bool([])
+E    +  and   <class 'int'> = type(4)
+______________ test_n1_explicit_check_records_disagreement[50-3] _______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'int'> is not int or 5 != 3))
+E    +  where False = bool([])
+E    +  and   <class 'int'> = type(5)
+______________ test_n1_explicit_check_records_disagreement[50-4] _______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'int'> is not int or 5 != 4))
+E    +  where False = bool([])
+E    +  and   <class 'int'> = type(5)
+______________ test_n1_explicit_check_records_disagreement[51-3] _______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'str'> is not int))
+E    +  where False = bool([])
+E    +  and   <class 'str'> = type('5')
+______________ test_n1_explicit_check_records_disagreement[51-4] _______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'str'> is not int))
+E    +  where False = bool([])
+E    +  and   <class 'str'> = type('5')
+______________ test_n1_explicit_check_records_disagreement[51-5] _______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'str'> is not int))
+E    +  where False = bool([])
+E    +  and   <class 'str'> = type('5')
+_____________ test_n1_explicit_check_records_disagreement[None-3] ______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'NoneType'> is not int))
+E    +  where False = bool([])
+E    +  and   <class 'NoneType'> = type(None)
+_____________ test_n1_explicit_check_records_disagreement[None-4] ______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'NoneType'> is not int))
+E    +  where False = bool([])
+E    +  and   <class 'NoneType'> = type(None)
+_____________ test_n1_explicit_check_records_disagreement[None-5] ______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'NoneType'> is not int))
+E    +  where False = bool([])
+E    +  and   <class 'NoneType'> = type(None)
+_____________ test_n1_explicit_check_records_disagreement[True-3] ______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'bool'> is not int))
+E    +  where False = bool([])
+E    +  and   <class 'bool'> = type(True)
+_____________ test_n1_explicit_check_records_disagreement[True-4] ______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'bool'> is not int))
+E    +  where False = bool([])
+E    +  and   <class 'bool'> = type(True)
+_____________ test_n1_explicit_check_records_disagreement[True-5] ______________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'bool'> is not int))
+E    +  where False = bool([])
+E    +  and   <class 'bool'> = type(True)
+____________ test_n1_explicit_check_records_disagreement[marker6-3] ____________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'list'> is not int))
+E    +  where False = bool([])
+E    +  and   <class 'list'> = type([5])
+____________ test_n1_explicit_check_records_disagreement[marker6-4] ____________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'list'> is not int))
+E    +  where False = bool([])
+E    +  and   <class 'list'> = type([5])
+____________ test_n1_explicit_check_records_disagreement[marker6-5] ____________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:43: in test_n1_explicit_check_records_disagreement
+    assert bool(mismatches) == (type(marker) is not int or marker != version)
+E   AssertionError: assert False == ((<class 'list'> is not int))
+E    +  where False = bool([])
+E    +  and   <class 'list'> = type([5])
+__________ test_n1_claim_shape_requires_explicit_caller_version[None] __________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py:54: in test_n1_claim_shape_requires_explicit_caller_version
+    assert ("supports" in item) == (version == 5)
+E   AssertionError: assert ('supports' in {'chunk': 'c001', 'snippet': 'A documented description', 'supports': 'REFUTE'}) == (None == 5)
+_________ test_n3_pathological_pattern_refuses_within_deadline[verify] _________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n3.py:37: in test_n3_pathological_pattern_refuses_within_deadline
+    result = subprocess.run([sys.executable, "-S", "-B", __file__, json.dumps(paths), mode],
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:556: in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:1222: in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:2155: in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:1269: in _check_timeout
+    raise TimeoutExpired(
+E   subprocess.TimeoutExpired: Command '['/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python', '-S', '-B', '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n3.py', '["/private/tmp/claude-501/receipts-v5-IDc5/t_562ca36b2/src", "/private/tmp/claude-501/receipts-v5-IDc5/t_562ca36b2", "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5", "/private/tmp/claude-501/receipts-v5-IDc5/t_562ca36b2/src", "/private/tmp/claude-501/receipts-v5-IDc5/t_562ca36b2", "/private/tmp/claude-501/receipts-v5-IDc5/t_562ca36b2/scripts", "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/scripts/adhoc", "/opt/homebrew/Caskroom/miniforge/base/lib/python313.zip", "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13", "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/lib-dynload", "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages"]', 'verify']' timed out after 4 seconds
+_________ test_n3_pathological_pattern_refuses_within_deadline[check] __________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n3.py:37: in test_n3_pathological_pattern_refuses_within_deadline
+    result = subprocess.run([sys.executable, "-S", "-B", __file__, json.dumps(paths), mode],
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:556: in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:1222: in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:2155: in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:1269: in _check_timeout
+    raise TimeoutExpired(
+E   subprocess.TimeoutExpired: Command '['/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python', '-S', '-B', '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n3.py', '["/private/tmp/claude-501/receipts-v5-IDc5/t_562ca36b2/src", "/private/tmp/claude-501/receipts-v5-IDc5/t_562ca36b2", "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5", "/private/tmp/claude-501/receipts-v5-IDc5/t_562ca36b2/src", "/private/tmp/claude-501/receipts-v5-IDc5/t_562ca36b2", "/private/tmp/claude-501/receipts-v5-IDc5/t_562ca36b2/scripts", "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/scripts/adhoc", "/opt/homebrew/Caskroom/miniforge/base/lib/python313.zip", "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13", "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/lib-dynload", "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages"]', 'check']' timed out after 4 seconds
+__________ test_n3_pattern_and_input_bounds_fail_closed[long-source] ___________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n3.py:56: in test_n3_pattern_and_input_bounds_fail_closed
+    assert not ok and reason and computed is None
+E   assert (not True)
+____________ test_n3_pattern_and_input_bounds_fail_closed[overflow] ____________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n3.py:55: in test_n3_pattern_and_input_bounds_fail_closed
+    ok, reason, computed = probe(pattern, text, "verify")
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n3.py:24: in probe
+    return rc.verify_tool_receipt(pair, "c001", {"c001": text}, manifest, full)
+src/data_sheets_schema/receipts.py:1460: in verify_tool_receipt
+    computed = len(re.findall(pattern, source_text))
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/re/__init__.py:278: in findall
+    return _compile(pattern, flags).findall(string)
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/re/__init__.py:350: in _compile
+    p = _compiler.compile(pattern, flags)
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/re/_compiler.py:748: in compile
+    p = _parser.parse(p, flags)
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/re/_parser.py:980: in parse
+    p = _parse_sub(source, state, flags & SRE_FLAG_VERBOSE, 0)
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/re/_parser.py:459: in _parse_sub
+    itemsappend(_parse(source, state, verbose, nested + 1,
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/re/_parser.py:670: in _parse
+    raise OverflowError("the repetition number is too large")
+E   OverflowError: the repetition number is too large
+_______ test_n4_nonstring_scalar_coverage_uses_selected_version[2026-3] ________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n4.py:16: in test_n4_nonstring_scalar_coverage_uses_selected_version
+    assert block["slots"]["with_receipt"] == (0 if version == 5 else 1)
+E   assert 0 == 1
+_______ test_n4_nonstring_scalar_coverage_uses_selected_version[2026-4] ________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n4.py:16: in test_n4_nonstring_scalar_coverage_uses_selected_version
+    assert block["slots"]["with_receipt"] == (0 if version == 5 else 1)
+E   assert 0 == 1
+______ test_n4_nonstring_scalar_coverage_uses_selected_version[2026.5-3] _______
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n4.py:16: in test_n4_nonstring_scalar_coverage_uses_selected_version
+    assert block["slots"]["with_receipt"] == (0 if version == 5 else 1)
+E   assert 0 == 1
+______ test_n4_nonstring_scalar_coverage_uses_selected_version[2026.5-4] _______
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n4.py:16: in test_n4_nonstring_scalar_coverage_uses_selected_version
+    assert block["slots"]["with_receipt"] == (0 if version == 5 else 1)
+E   assert 0 == 1
+_______ test_n4_nonstring_scalar_coverage_uses_selected_version[True-3] ________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n4.py:16: in test_n4_nonstring_scalar_coverage_uses_selected_version
+    assert block["slots"]["with_receipt"] == (0 if version == 5 else 1)
+E   assert 0 == 1
+_______ test_n4_nonstring_scalar_coverage_uses_selected_version[True-4] ________
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n4.py:16: in test_n4_nonstring_scalar_coverage_uses_selected_version
+    assert block["slots"]["with_receipt"] == (0 if version == 5 else 1)
+E   assert 0 == 1
+=============================== warnings summary ===============================
+../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/notes/receipts_v5_merge_validation_2026-10-29/causal_before.xml -
+=========================== short test summary info ============================
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_untrusted_selection_cannot_override_run[marker-legacy]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_untrusted_selection_cannot_override_run[marker-registration]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_untrusted_selection_cannot_override_run[marker-provenance]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_untrusted_selection_cannot_override_run[environment-legacy]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_untrusted_selection_cannot_override_run[environment-registration]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_untrusted_selection_cannot_override_run[environment-provenance]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_untrusted_selection_cannot_override_run[both-legacy]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_untrusted_selection_cannot_override_run[both-registration]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_untrusted_selection_cannot_override_run[both-provenance]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[3-4]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[3-5]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[4-3]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[4-5]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[50-3]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[50-4]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[51-3]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[51-4]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[51-5]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[None-3]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[None-4]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[None-5]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[True-3]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[True-4]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[True-5]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[marker6-3]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[marker6-4]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_explicit_check_records_disagreement[marker6-5]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n1.py::test_n1_claim_shape_requires_explicit_caller_version[None]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n3.py::test_n3_pathological_pattern_refuses_within_deadline[verify]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n3.py::test_n3_pathological_pattern_refuses_within_deadline[check]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n3.py::test_n3_pattern_and_input_bounds_fail_closed[long-source]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n3.py::test_n3_pattern_and_input_bounds_fail_closed[overflow]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n4.py::test_n4_nonstring_scalar_coverage_uses_selected_version[2026-3]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n4.py::test_n4_nonstring_scalar_coverage_uses_selected_version[2026-4]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n4.py::test_n4_nonstring_scalar_coverage_uses_selected_version[2026.5-3]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n4.py::test_n4_nonstring_scalar_coverage_uses_selected_version[2026.5-4]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n4.py::test_n4_nonstring_scalar_coverage_uses_selected_version[True-3]
+FAILED ../../../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_receipts_v5_merge_n4.py::test_n4_nonstring_scalar_coverage_uses_selected_version[True-4]
+38 failed, 14 passed, 1 warning in 14.62s

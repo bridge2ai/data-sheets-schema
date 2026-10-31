@@ -1,0 +1,17 @@
+{
+  "invalid_cases": [],
+  "origins_complete": true,
+  "passed": true,
+  "passes_by_module": {
+    "test_backfill_checks": 19,
+    "test_pr5094_round2": 44,
+    "test_report_audit_totals": 16,
+    "test_snapshot_attestation": 5,
+    "test_wave5_5094_legacy_snapshots": 16
+  },
+  "returncode": 0,
+  "scientific_acceptance": "not assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 59.77581562497653
+}

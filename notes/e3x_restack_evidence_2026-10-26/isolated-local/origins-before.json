@@ -1,0 +1,90 @@
+{
+  "data_sheets_schema": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema"
+  ],
+  "data_sheets_schema.agent_pin": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/agent_pin.py"
+  ],
+  "data_sheets_schema.corpus": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/corpus.py"
+  ],
+  "data_sheets_schema.cross_family_panel": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/cross_family_panel.py"
+  ],
+  "data_sheets_schema.cross_family_panel_analysis": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/cross_family_panel_analysis.py"
+  ],
+  "data_sheets_schema.cross_family_panel_results": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/cross_family_panel_results.py"
+  ],
+  "data_sheets_schema.duplicate_keys": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/duplicate_keys.py"
+  ],
+  "data_sheets_schema.evaluation": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation",
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation/__init__.py"
+  ],
+  "data_sheets_schema.evaluation.arm_comparison": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation/arm_comparison.py"
+  ],
+  "data_sheets_schema.evaluation.blind_review_pack": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation/blind_review_pack.py"
+  ],
+  "data_sheets_schema.evaluation.registered_eval_runner": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation/registered_eval_runner.py"
+  ],
+  "data_sheets_schema.evaluation.validate": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation/validate.py"
+  ],
+  "data_sheets_schema.evaluation_context": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation_context.py"
+  ],
+  "data_sheets_schema.evaluation_model": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evaluation_model.py"
+  ],
+  "data_sheets_schema.evidence_assertions": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evidence_assertions.py"
+  ],
+  "data_sheets_schema.evidence_score": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/evidence_score.py"
+  ],
+  "data_sheets_schema.judge_contract": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/judge_contract.py"
+  ],
+  "data_sheets_schema.nested_support_results": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/nested_support_results.py"
+  ],
+  "data_sheets_schema.profiles": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/profiles.py"
+  ],
+  "data_sheets_schema.reasoning": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/reasoning.py"
+  ],
+  "data_sheets_schema.registry": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/registry.py"
+  ],
+  "data_sheets_schema.resources": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/resources.py"
+  ],
+  "data_sheets_schema.schema_snapshot": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/schema_snapshot.py"
+  ],
+  "data_sheets_schema.semantic_instrument": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/semantic_instrument.py"
+  ],
+  "data_sheets_schema.semantic_scope": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/semantic_scope.py"
+  ],
+  "data_sheets_schema.shared_generation": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/shared_generation.py"
+  ],
+  "data_sheets_schema.support_judge": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/support_judge.py"
+  ],
+  "data_sheets_schema.support_plan": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/support_plan.py"
+  ],
+  "data_sheets_schema.support_targets": [
+    "/private/tmp/d4d-codex-e3x-restack-20261026/src/data_sheets_schema/support_targets.py"
+  ]
+}
