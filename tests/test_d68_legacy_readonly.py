@@ -97,16 +97,29 @@ def test_fresh_prefix_project_does_not_claim_sibling_artifacts(layout, tmp_path,
 @pytest.mark.parametrize("entry", ["execute", "internal", "prepare", "write", "spend", "begin_call"])
 @pytest.mark.parametrize("resume", [True, False])
 def test_abandoned_only_residue_is_owned_exactly_and_never_spends(layout, entry, resume, tmp_path, monkeypatch):
+    assert_only_owned_residue_refuses(layout, entry, resume, tmp_path, monkeypatch,
+                                     ledger.abandoned_journal_path)
+
+
+@pytest.mark.parametrize("layout", ["flat", "split"])
+@pytest.mark.parametrize("entry", ["execute", "internal", "prepare", "write", "spend", "begin_call"])
+@pytest.mark.parametrize("resume", [True, False])
+def test_receipt_only_residue_is_owned_exactly_and_never_spends(layout, entry, resume, tmp_path, monkeypatch):
+    assert_only_owned_residue_refuses(layout, entry, resume, tmp_path, monkeypatch,
+                                     api._receipt_path)
+
+
+def assert_only_owned_residue_refuses(layout, entry, resume, tmp_path, monkeypatch, artifact_path):
     monkeypatch.setattr(api.RunSpec, "output_root", property(lambda self: tmp_path / "root"))
     kwargs = {"out_dir": tmp_path / "output"} if layout == "flat" else {}
     sibling, selected = spec(project="P_X", **kwargs), spec(project="P", **kwargs)
-    sibling_path = ledger.abandoned_journal_path(sibling)
+    sibling_path = artifact_path(sibling)
     sibling_path.parent.mkdir(parents=True)
-    sibling_path.write_text("sibling abandoned evidence\n")
+    sibling_path.write_text("sibling evidence\n")
     before = tree(tmp_path)
     journal.refuse_legacy_execution(selected)
     assert tree(tmp_path) == before
-    ledger.abandoned_journal_path(selected).write_text(json.dumps({
+    artifact_path(selected).write_text(json.dumps({
         "phase": "full", "attempt": 1, "snapshot": "legacy-snapshot.txt", "output_tokens": 7}) + "\n")
     before = tree(tmp_path)
     client = FakeClient()

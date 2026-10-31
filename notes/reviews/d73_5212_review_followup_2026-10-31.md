@@ -29,6 +29,80 @@ will use external basetemps, the requested broad set and one ordinary shard
 out of four with up to four xdist workers. Main will be merged only after those
 checks, with no hand resolution of production conflicts.
 
+## Review findings 1–10
+
+1. **Sibling-prefix blocker:** both the pre-lock residue check and verifier
+   inventory now use anchored artifact patterns emitted by the runner,
+   accounting and snapshot producers. A `P_X` file is not evidence belonging
+   to `P`. Flat and split execution controls each complete four fake calls for
+   `P_X`, then four for fresh `P`, preserving the sibling's bytes. Both verifier
+   layouts ignore malformed sibling evidence and preserve the whole tree.
+   All four controls failed against unchanged `4cde66d2d` production code.
+2. **Verifier scope:** D73(b) retains generic_v6 API records with a structured
+   request specification only. Its docstring and fixture README state this;
+   it does not currently verify committed historical campaign records.
+   The lead owns the extension issue. This limitation does not alter campaign
+   eligibility or authorize execution from legacy evidence.
+3. **Unknown age:** D73(a) reverses the earlier brief. Unknown age is eligible
+   and reported in canary `record_age` and evaluation `generation_record_age`.
+   These fields add neither a quality measurement nor an evaluation plan/hash
+   component. Positive post-D41 ancestry still makes a missing integrity block
+   ineligible. Every D70-only fixture addition in `test_method_resolution`
+   (two timestamps), `test_report_gate` (two), `test_duplicate_keys` (one), and
+   `test_registered_eval_runner` (one clean block) was reverted.
+4. **Boundary ancestry:** the new full-repository test requires
+   `git merge-base --is-ancestor D41_COMMIT HEAD`; it skips a shallow repository
+   with an explicit incomplete-graph reason. The declared commit and date were
+   independently confirmed with
+   `git log --all --diff-filter=A --format='%H %cI' -- src/data_sheets_schema/latch_journal.py`.
+   The PR must preserve this boundary with a merge commit.
+5. **Immutable recorded commits:** only hexadecimal IDs of length 4–40 are
+   accepted, case-insensitively. The resolved full SHA must start with that
+   ID. Symbolic refs, expressions, invalid lengths and a hex-named ref pointing
+   elsewhere fall back to timestamp evidence. Uppercase and short IDs remain
+   covered.
+6. **Stable binding:** the hashed `legacy_unverifiable` payload contains only
+   `ledger_sha256` and `reason`; age is adjacent metadata. The regression binds
+   and acknowledges evidence with Git available, then removes Git and proves
+   the same binding and override still work without changing the tree.
+7. **Specific refusals:** restored `match=` assertions in both requested latch
+   tests: `inspection only|relaunch with a new label|cannot become a clean resume`.
+8. **Missing history/tools:** an isolated repository with object alternates
+   and a `.git/shallow` boundary proves that both objects resolve while negative
+   ancestry falls back to the timestamp. A missing Git binary separately
+   exercises the `OSError` fallback.
+9. **Cost and wording:** boundary resolution and shallow status are cached per
+   repository/process, and full-SHA resolution is cached. Short prefixes are
+   resolved afresh because newly available objects can make them ambiguous.
+   A subprocess-count test verifies the cache. The residue docstring now names
+   exact ownership/identity evidence; the refusal says artifacts have no
+   journal for the selected run and that inspection cannot spend.
+10. **Retired parameters:** both retired cases are among #5409's 16, as listed
+    below. Their authentic C7/C8 replacements and retained current-journal
+    damage controls are disclosed in the fixture README.
+
+The three originally requested test flips remain explicit: a missing-ledger
+historical account cannot become a fresh resume; acknowledging a legacy binding
+permits provenance inspection only, with identical ledger bytes and no journal;
+and the quality-measurement test now accepts and reports unknown age under D73
+without adding a measurement. D73(c)'s four further flips are individually
+disclosed in the README: foreign flat-layout evidence, legacy adoption,
+unowned public partial output, and C1–C6 explicit restart.
+
+## Census scope correction
+
+The original census counted generation provenance only. The reviewer counted
+four additional historical derived-union provenance records, so that denominator
+was incomplete (local reporting finding NF-D73-2). The retained census now scans
+all tracked YAML blobs, includes generation and derived provenance, and refuses
+to silently omit an unclassified `*_provenance.yaml`. No corpus file was edited.
+The base contains 348 records (347 pre-D41, one post-D41); this packet contains
+352 (351 pre-D41, one post-D41), including four new fixture records. Neither
+has unestablished age. Both contain the same 347 pre-D41 `data/` records and
+22 v8 records. Every before/after canary and evaluation integrity verdict agrees.
+These are integrity/age eligibility counts, not full quality or registration
+approval. No issue was filed online under the offline restriction.
+
 ## NF3-B / #5409: all 16 original failing nodes
 
 ### Additional local finding NF-D73-1 (introduced, fixed)
