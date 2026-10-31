@@ -270,23 +270,47 @@ def test_completed_run_cli_sizing_uses_exact_effective_receipt_and_check_revalid
         builder.SizingRecord.in_directory(completed_chorus, 'CHORUS', effective_receipt=True)
 
 
-@pytest.mark.parametrize('allowance,ceiling,message', [
-    (4000000, 1000000, 'over allowance'),
-    (4500000, 600000, 'over per-call room'),
+@pytest.mark.parametrize('limit,message', [
+    ('aggregate_input_tokens', 'over allowance'),
+    ('max_input_tokens_per_call', 'over per-call room'),
 ])
-def test_completed_run_cli_and_library_refuse_before_any_write(completed_chorus, tmp_path, allowance, ceiling, message):
+def test_completed_run_cli_and_library_refuse_before_any_write(completed_chorus, tmp_path, limit, message):
     output = tmp_path / 'refused'
-    args = ['-p', 'CHORUS', '-l', 'refused', '--partition', 'chorus',
-            '--bounded-carry-version', '1', '--aggregate-input-tokens', str(allowance),
-            '--max-input-tokens-per-call', str(ceiling),
-            '--sizing-record', f'CHORUS={completed_chorus}', '-o', str(output)]
-    result = CliRunner().invoke(builder.cli, args)
-    assert result.exit_code != 0 and message in result.output, result.output
+    registration_path = output / 'registration_chorus_refused.json'
+    limits = {'aggregate_input_tokens': 4500000, 'max_input_tokens_per_call': 1000000}
+    _, pending, sizing = builder.prepare_registration('CHORUS', 'refused', partition='chorus',
+        bounded_carry_version=1, audit_limits=limits, sizing_record=completed_chorus,
+        registration_path=registration_path)
+    assert pending and sizing is not None
+    assert not output.exists(), 'positive preparation must not write its pending outputs'
+    # Derive the actual gated boundary; advisory future scenarios do not gate.
+    boundary = (max(sizing['own_plan_scenarios'][name]['estimated_input_tokens']
+                    for name in reg.GATED_SCENARIOS) if limit == 'aggregate_input_tokens'
+                else max(row['estimated_input_tokens'] for row in sizing['rows'] if row['gated']))
+    assert type(boundary) is int and boundary > 1
+
+    def arguments():
+        return ['-p', 'CHORUS', '-l', 'refused', '--partition', 'chorus',
+                '--bounded-carry-version', '1', '--aggregate-input-tokens', str(limits['aggregate_input_tokens']),
+                '--max-input-tokens-per-call', str(limits['max_input_tokens_per_call']),
+                '--sizing-record', f'CHORUS={completed_chorus}', '-o', str(output)]
+
+    # An inclusive positive control rules out an always-refusing CLI. Limit
+    # changes affect admission, while wire identity hashes keep fixed length.
+    limits[limit] = boundary
+    accepted = CliRunner().invoke(builder.cli, arguments() + ['--dry-run'])
+    assert accepted.exit_code == 0, accepted.output
+    assert '[dry-run] Validated registrations and roster in memory' in accepted.output
     assert not output.exists()
-    with pytest.raises(ValueError, match=message):
+    limits[limit] = boundary - 1
+    result = CliRunner().invoke(builder.cli, arguments())
+    assert result.exit_code == 1 and message in result.output, result.output
+    assert f'{boundary:,}' in result.output, 'refusal must name the measured one-token boundary'
+    assert not output.exists()
+    with pytest.raises(ValueError, match=message) as refused:
         builder.build_registration('CHORUS', 'refused', partition='chorus', bounded_carry_version=1,
-            audit_limits={'aggregate_input_tokens': allowance, 'max_input_tokens_per_call': ceiling},
-            sizing_record=completed_chorus, registration_path=output / 'registration.json')
+            audit_limits=limits, sizing_record=completed_chorus, registration_path=registration_path)
+    assert f'{boundary:,}' in str(refused.value)
     assert not output.exists()
 
 
