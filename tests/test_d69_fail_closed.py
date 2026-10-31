@@ -108,7 +108,7 @@ def test_batch_preflights_every_selection_before_lock(tmp_path, monkeypatch):
         monkeypatch.setattr(command, name, lambda *a, **k: None)
     monkeypatch.setattr(command, "_plan_or_refuse", lambda *a: {
         "approx_total_input_tokens": 0, "model": {"name": "offline"}})
-    monkeypatch.setattr(command, "execute", lambda *a, **k: pytest.fail("batch dispatch"))
+    monkeypatch.setattr(api, "execute", lambda *a, **k: pytest.fail("batch dispatch"))
     monkeypatch.setattr(run_lock, "acquire", lambda *a, **k: pytest.fail("batch wrote lock"))
     before = tree(tmp_path)
     result = CliRunner().invoke(cli, ["api", "batch", "--projects", "P,Q", "--replicates", "1",
