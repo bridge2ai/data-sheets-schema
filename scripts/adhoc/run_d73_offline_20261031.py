@@ -15,9 +15,15 @@ import subprocess
 import sys
 import tempfile
 
-ROOT = Path(__file__).resolve().parents[2]
-SCRATCH = ROOT.parent / "scratch-5212fix"
+SCRIPT_ROOT = Path(__file__).resolve().parents[2]
+ROOT = SCRIPT_ROOT
+SCRATCH = SCRIPT_ROOT.parent / "scratch-5212fix"
 args = sys.argv[1:]
+if "--tree" in args:
+    position = args.index("--tree")
+    ROOT = Path(args[position + 1]).resolve()
+    assert ROOT.is_relative_to(SCRATCH), "alternate source must be an authorized scratch copy"
+    del args[position:position + 2]
 canary_node = None
 if "--d73-canary-node" in args:
     position = args.index("--d73-canary-node")
@@ -28,10 +34,11 @@ if "--d73-canary-node" in args:
 base = Path(args[args.index("--basetemp") + 1]).resolve()
 assert base.is_relative_to(SCRATCH) and base != SCRATCH
 assert not base.exists(), "preserve prior validation evidence"
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(SCRIPT_ROOT / "scripts/adhoc"))
 from d41_legacy_controls_20261029 import bootstrap
 
 environment = bootstrap(ROOT, SCRATCH)
+environment["tree"] = str(ROOT)
 tempfile.tempdir = str(SCRATCH / "temporary")
 os.environ.pop("PYTEST_DISABLE_PLUGIN_AUTOLOAD", None)
 venv = Path(sys.executable).parent.parent
@@ -42,11 +49,13 @@ assert git_binary
 environment["head"] = subprocess.check_output([git_binary, "rev-parse", "HEAD"], text=True).strip()
 environment["tracked_diff"] = subprocess.check_output([git_binary, "diff", "HEAD", "--stat"], text=True)
 environment["latch_journal_sha256"] = hashlib.sha256((ROOT / "src/data_sheets_schema/latch_journal.py").read_bytes()).hexdigest()
-environment["regression_test_sha256"] = hashlib.sha256((ROOT / "tests/test_d68_legacy_readonly.py").read_bytes()).hexdigest()
+regression_test = ROOT / "tests/test_d68_legacy_readonly.py"
+environment["regression_test_sha256"] = (hashlib.sha256(regression_test.read_bytes()).hexdigest()
+                                          if regression_test.is_file() else None)
 binary_dir = SCRATCH / "offline-bin"
 binary_dir.mkdir(exist_ok=True)
 wrapper = binary_dir / "git"
-wrapper.write_text((ROOT / "scripts/adhoc/d68_local_git_20261030.sh").read_text().replace(
+wrapper.write_text((SCRIPT_ROOT / "scripts/adhoc/d68_local_git_20261030.sh").read_text().replace(
     "__D68_GIT_BINARY__", shlex.quote(git_binary)))
 wrapper.chmod(0o700)
 os.environ["PATH"] = str(binary_dir) + os.pathsep + os.environ["PATH"]
