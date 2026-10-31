@@ -76,6 +76,39 @@ def no_verifier_execution(monkeypatch):
             monkeypatch.setattr(owner, name, forbidden)
 
 
+@pytest.mark.parametrize("layout", ["flat", "split"])
+def test_fresh_prefix_project_does_not_claim_sibling_artifacts(layout, tmp_path, monkeypatch):
+    monkeypatch.setattr(api.RunSpec, "output_root", property(lambda self: tmp_path / "root"))
+    kwargs = {"out_dir": tmp_path / "output"} if layout == "flat" else {}
+    sibling = spec(project="P_X", **kwargs)
+    selected = spec(project="P", **kwargs)
+    assert sibling.metadata_dir == selected.metadata_dir
+    first, second = FakeClient(), FakeClient()
+    api.execute(sibling, client=first)
+    assert len(first.messages.calls) == 4
+    sibling_files = {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()}
+    result = api.execute(selected, client=second)
+    assert len(second.messages.calls) == len(result["usage"]) == 4
+    assert all(path.read_bytes() == raw for path, raw in sibling_files.items())
+
+
+@pytest.mark.parametrize("case", ["i1", "split"])
+def test_completed_verifier_does_not_claim_prefix_sibling(case, tmp_path, monkeypatch):
+    root, old, selected = fixture(case, tmp_path)
+    sibling = selected.project + "_X"
+    for name in (f"{sibling}_api_progress.json", f"{sibling}_latch_journal.jsonl",
+                 f"{sibling}_api_usage_0123456789abcdef.json",
+                 f"intermediate/{sibling}_snapshot_index.json"):
+        (selected.metadata_dir / name).write_text("unrelated sibling evidence")
+    before = tree(root)
+    no_verifier_execution(monkeypatch)
+    result = journal.verify_completed_legacy(selected.provenance_path,
+                    evidence_root=root, recorded_root=old)
+    assert result["already_complete"] and result["new_calls"] == 0
+    assert not any(Path(name).name.startswith(sibling + "_") for name in result["verified_files"])
+    assert tree(root) == before
+
+
 @pytest.mark.parametrize("case", ["i1", "c7", "split"])
 def test_completed_legacy_verifier_is_readonly(case, tmp_path, monkeypatch):
     root, old, selected = fixture(case, tmp_path)
