@@ -42,22 +42,39 @@ def _digest(value: Any, size: int) -> str | None:
     return None
 
 
-def _path(root: Path, value: Any) -> Path | None:
-    if not isinstance(value, str) or not value:
+def _lexical_relative(root: Path, value: Any) -> Path | None:
+    """Preserve owned paths; relocate only a unique foreign preprocessed tail.
+
+    Live reads and historical lookup use the same lexical name. Count pairs
+    before normalization so traversal cannot hide an ambiguous foreign tail.
+    This record-only policy is local; other provenance resolvers have different
+    ownership context.
+    """
+    if not isinstance(value, str) or not value or "\x00" in value:
         return None
     try:
         raw = Path(value)
         lexical = Path(os.path.abspath(root / raw))
         try:
-            lexical.relative_to(root)
+            return lexical.relative_to(root)
         except ValueError:
-            from data_sheets_schema.provenance import _repo_preprocessed_tail
-            tail = _repo_preprocessed_tail(raw) if raw.is_absolute() else None
-            if tail is None:
+            pairs = [i for i in range(len(raw.parts) - 1)
+                     if raw.parts[i:i + 2] == ("data", "preprocessed")]
+            if not raw.is_absolute() or len(pairs) != 1:
                 return None
+            tail = Path(*raw.parts[pairs[0]:])
             lexical = Path(os.path.abspath(root / tail))
-            lexical.relative_to(root)
-        path = lexical.resolve()
+            return lexical.relative_to(root)
+    except (OSError, RuntimeError, ValueError):
+        return None
+
+
+def _path(root: Path, value: Any) -> Path | None:
+    rel = _lexical_relative(root, value)
+    if rel is None:
+        return None
+    try:
+        path = (root / rel).resolve()
         path.relative_to(root)
         return path
     except (OSError, RuntimeError, ValueError):
@@ -108,12 +125,19 @@ def bundle_drift(
     result = {
         "label": run.get("label"), "project": run.get("project"),
         "bundle_path": inputs.get("bundle_path"), "recorded_md5": pinned,
+        "recorded_md5_status": ("valid" if pinned is not None else
+                                "missing" if inputs.get("bundle_md5") is None else "malformed"),
         "disk_md5": None, "disk_status": "unknown", "disk_reason": None,
         "manifest_md5": None, "manifest_status": "unknown",
         "manifest_basis": None, "manifest_reason": None,
     }
     if bundle is None:
         result["disk_reason"] = "bundle path missing or outside selected checkout"
+        if isinstance(inputs.get("bundle_path"), str) and Path(inputs["bundle_path"]).is_absolute():
+            result["disk_reason"] += (
+                "; absolute-path resolution refused: foreign relocation requires exactly "
+                "one data/preprocessed pair and containment in the selected checkout; "
+                "unsupported or ambiguous relocation stays unknown")
     else:
         try:
             result["disk_md5"] = hashlib.md5(bundle.read_bytes()).hexdigest()
@@ -142,14 +166,12 @@ def bundle_drift(
         result["manifest_basis"] = "pinned manifest on disk"
     else:
         # Git names the recorded path, not the destination of today's symlink.
-        # _path already bounded live IO; normalize this lexical path separately.
-        cpath = Path(chunks["path"])
-        if cpath.is_absolute():
-            from data_sheets_schema.provenance import _repo_preprocessed_tail
-            tail = _repo_preprocessed_tail(cpath)
-            if tail is not None:
-                cpath = tail
-        relative = Path(os.path.abspath(root / cpath)).relative_to(root).as_posix()
+        # _path already bounded live IO; preserve the same lexical policy here.
+        rel_manifest = _lexical_relative(root, chunks["path"])
+        if rel_manifest is None:
+            result["manifest_reason"] = "recorded chunk-manifest path/hash missing or malformed"
+            return result
+        relative = rel_manifest.as_posix()
         try:
             found = ((recover(relative, md5=md5, sha256=sha) if recover is not None
                       else _recover(root, relative, md5=md5, sha256=sha)))
@@ -202,7 +224,52 @@ def compare_bundle_drift(
                 f"{row['project']}:{row['recorded_md5']}" for row in rows
                 if row["recorded_md5"] is not None)),
         }
+    identities = recorded_bundle_identity(comparisons)
+    for arm, block in comparisons.items():
+        block["recorded_bundles_by_project"] = {
+            project: {**summary["arms"][arm], "cross_arm_status": summary["status"]}
+            for project, summary in identities.items()
+        }
     return comparisons
+
+
+def recorded_bundle_identity(comparisons: Mapping[str, Any]) -> dict[str, Any]:
+    """Count every recorded pin, without selecting a representative replicate.
+
+    A shared identity requires at least two selected arms, complete project
+    evidence in every arm, and exactly one valid MD5 in each. These are
+    provenance declarations, independent of either byte-recovery comparison.
+    """
+    def project_name(row):
+        value = row.get("project")
+        return value if isinstance(value, str) and value else "(missing or malformed project)"
+
+    projects = sorted({project_name(row) for block in comparisons.values()
+                       for row in block["records"]})
+    result = {}
+    for project in projects:
+        arms = {}
+        for arm in sorted(comparisons):
+            rows = [row for row in comparisons[arm]["records"] if project_name(row) == project]
+            hashes = Counter(row["recorded_md5"] for row in rows if row["recorded_md5"] is not None)
+            missing = sum(row["recorded_md5_status"] == "missing" for row in rows)
+            malformed = sum(row["recorded_md5_status"] == "malformed" for row in rows)
+            arms[arm] = {
+                "record_count": len(rows), "md5_counts": dict(sorted(hashes.items())),
+                "missing_count": missing, "malformed_count": malformed,
+            }
+        if any(len(cell["md5_counts"]) > 1 for cell in arms.values()):
+            status = "heterogeneous_evidence"
+        elif (len(arms) < 2 or project == "(missing or malformed project)" or any(
+                not cell["record_count"] or cell["missing_count"] or cell["malformed_count"]
+                for cell in arms.values())):
+            status = "insufficient_evidence"
+        elif len({digest for cell in arms.values() for digest in cell["md5_counts"]}) > 1:
+            status = "different_recorded_identities"
+        else:
+            status = "unique_shared_recorded_identity"
+        result[project] = {"arms": arms, "status": status}
+    return result
 
 
 def render_bundle_drift(comparisons: Mapping[str, Any]) -> list[str]:
@@ -212,9 +279,37 @@ def render_bundle_drift(comparisons: Mapping[str, Any]) -> list[str]:
 
     lines = [
         "## Bundle identity by arm", "",
+        "The cross-arm table counts recorded bundle MD5 declarations, not today's files. "
+        "A unique shared declaration is not proof that historical bytes were recovered or "
+        "that experimental conditions were equivalent. Different source inputs can confound "
+        "a model or procedure contrast. No representative or majority replicate is selected.", "",
+    ]
+    arms = sorted(comparisons)
+    lines += ["| project | " + " | ".join(escaped(arm) for arm in arms) + " | cross-arm recorded identity |",
+              "|---|" + "---|" * len(arms) + "---|"]
+    for project, summary in recorded_bundle_identity(comparisons).items():
+        cells = []
+        for arm in arms:
+            cell = summary["arms"][arm]
+            versions = "; ".join(f"{digest} × {count}" for digest, count in cell["md5_counts"].items())
+            cells.append((versions + "; " if versions else "") +
+                         f"missing {cell['missing_count']}; malformed {cell['malformed_count']}; "
+                         f"records {cell['record_count']}")
+        lines.append("| " + " | ".join(escaped(value) for value in
+                     (project, *cells, summary["status"].replace("_", " "))) + " |")
+    lines += [
+        "", "A shared identity requires at least two selected arms, one recorded hash per "
+        "arm/project, and no missing or malformed pins or empty arm/project cells. Mixed "
+        "replicate hashes are heterogeneous evidence; incomplete comparisons remain insufficient.", "",
         "Each record is compared separately with today's bundle and the chunk manifest "
         "whose hashes it recorded. A source-ranking manifest is not a bundle-byte pin. "
-        "Unknown evidence is not a match; drift describes changed inputs, not generation quality.", "",
+        "Unknown evidence is not a match; drift describes changed inputs, not generation quality. "
+        "Absolute input paths inside the selected checkout keep their owned relative paths. "
+        "Foreign absolute paths with exactly one data/preprocessed pair support relocation "
+        "under the selected checkout, where disk bytes and the pinned manifest are checked. "
+        "Unsupported or ambiguous relocation (including repeated data/preprocessed pairs) "
+        "stays unknown. Lexical and resolved paths must remain inside the selected checkout; "
+        "external files are never read. Relocation alone does not establish bundle identity.", "",
         "| arm | records | disk: match / drift / unknown | pinned manifest: match / drift / unknown |",
         "|---|---:|---|---|",
     ]

@@ -1,0 +1,112 @@
+{
+  "invalid_junit_cases": [
+    {
+      "identity": [
+        "tests.test_d52_scoring",
+        "test_q9_approved_contacts_are_one_criterion[contacts0]"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_d52_scoring",
+        "test_alias_presence_extraction_and_raw_values_use_actual_source[data_governance.committee_contact-regulatory_restrictions.governance_committee_contact]"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_d52_scoring",
+        "test_alias_presence_extraction_and_raw_values_use_actual_source[regulatory_restrictions.governance_committee_contact-data_governance.committee_contact]"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_d52_scoring",
+        "test_alias_evidence_and_raw_values_deduplicate_exact_pointers"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_d52_scoring",
+        "test_frozen_rubric10_legacy_criterion_accepts_approved_nested_contact[data_governance.committee_contact]"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_d52_scoring",
+        "test_frozen_rubric10_legacy_criterion_accepts_approved_nested_contact[regulatory_restrictions.governance_committee_contact]"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_d52_scoring",
+        "test_collection_members_use_their_own_contacts_and_evidence[False]"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_d52_scoring",
+        "test_collection_members_use_their_own_contacts_and_evidence[True]"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_d52_scoring",
+        "test_only_explicit_false_excludes_exactly_four_q9_fields[context0-3-5]"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_d52_scoring",
+        "test_only_explicit_false_excludes_exactly_four_q9_fields[context1-3-5]"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_d52_scoring",
+        "test_scoring_change_has_distinct_source_and_instrument_identity"
+      ],
+      "tags": [
+        "failure"
+      ]
+    }
+  ],
+  "passed": false,
+  "passed_cases_by_module": {
+    "test_d52_scoring": 20
+  },
+  "returncode": 1,
+  "scientific_acceptance": "not_assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 2.8492934580135625
+}

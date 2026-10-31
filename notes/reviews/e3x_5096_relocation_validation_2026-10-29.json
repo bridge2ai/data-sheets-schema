@@ -1,0 +1,2734 @@
+{
+  "ci_partition": {
+    "collected_tests": 20760,
+    "collection_duplicate_nodeids": {
+      "tests/test_native_execution_permissions.py::test_noncanonical_or_numeric_budget_never_becomes_a_native_argument[00]": 2
+    },
+    "complete": true,
+    "distinct_nodeids": 20759,
+    "duplicate_nodeids": {
+      "tests/test_native_execution_permissions.py::test_noncanonical_or_numeric_budget_never_becomes_a_native_argument[00]": 2
+    },
+    "executed_cases": 20760,
+    "failed_lanes": [
+      "ci-ordinary-2",
+      "ci-ordinary-6"
+    ],
+    "junit_phase_entries": 20760,
+    "lanes": 10,
+    "missing_nodeids": {},
+    "unexpected_nodeids": {},
+    "unique_junit_names": 20759
+  },
+  "dependencies": {
+    "CFGraph": "0.2.1",
+    "Deprecated": "1.2.18",
+    "EditorConfig": "0.12.3",
+    "Jinja2": "3.1.6",
+    "Markdown": "3.5.1",
+    "MarkupSafe": "2.1.3",
+    "Pint": "0.25.2",
+    "PyJSG": "0.11.10",
+    "PyJWT": "2.10.1",
+    "PyShEx": "0.8.1",
+    "PyShExC": "0.9.1",
+    "PyYAML": "6.0.2",
+    "Pygments": "2.17.2",
+    "RapidFuzz": "3.14.3",
+    "SPARQLWrapper": "2.0.0",
+    "SQLAlchemy": "2.0.43",
+    "SQLAlchemy-Utils": "0.38.3",
+    "ShExJSG": "0.8.2",
+    "Sphinx": "8.2.3",
+    "airium": "0.2.7",
+    "alabaster": "1.0.0",
+    "annotated-types": "0.6.0",
+    "anthropic": "0.72.0",
+    "antlr4-python3-runtime": "4.9.3",
+    "anyio": "4.10.0",
+    "appdirs": "1.4.4",
+    "argcomplete": "3.6.3",
+    "arrow": "1.3.0",
+    "asteval": "0.9.33",
+    "async-lru": "2.0.5",
+    "asyncio-atexit": "1.0.1",
+    "attrs": "23.1.0",
+    "babel": "2.17.0",
+    "bcp47": "0.1.0",
+    "beautifulsoup4": "4.12.2",
+    "biopython": "1.86",
+    "bioregistry": "0.10.97",
+    "boto3": "1.40.64",
+    "botocore": "1.40.64",
+    "cachetools": "5.3.2",
+    "cattrs": "24.1.3",
+    "certifi": "2023.11.17",
+    "cffi": "2.0.0",
+    "chardet": "5.2.0",
+    "charset-normalizer": "3.3.2",
+    "class-resolver": "0.6.0",
+    "click": "8.1.7",
+    "click-log": "0.4.0",
+    "cohere": "5.20.0",
+    "colorama": "0.4.6",
+    "contourpy": "1.3.3",
+    "cryptography": "46.0.3",
+    "curies": "0.13.0",
+    "cycler": "0.12.1",
+    "daff": "1.3.46",
+    "data_sheets_schema": "0.1.0",
+    "deepdiff": "6.7.1",
+    "defusedxml": "0.7.1",
+    "deprecation": "2.1.0",
+    "distro": "1.9.0",
+    "docopt": "0.6.2",
+    "docstring_parser": "0.17.0",
+    "docutils": "0.21.2",
+    "et-xmlfile": "1.1.0",
+    "eutils": "0.6.0",
+    "eval_type_backport": "0.2.2",
+    "execnet": "2.1.2",
+    "fasta2a": "0.2.20",
+    "fastavro": "1.12.1",
+    "fastobo": "0.13.0",
+    "filelock": "3.20.0",
+    "flexcache": "0.3",
+    "flexparser": "0.4",
+    "fonttools": "4.63.0",
+    "fqdn": "1.5.1",
+    "fsspec": "2025.10.0",
+    "funowl": "0.2.3",
+    "ghp-import": "2.1.0",
+    "google": "3.0.0",
+    "google-api-core": "2.28.1",
+    "google-api-python-client": "2.109.0",
+    "google-auth": "2.42.1",
+    "google-auth-httplib2": "0.1.1",
+    "google-auth-oauthlib": "1.1.0",
+    "google-genai": "1.47.0",
+    "googleapis-common-protos": "1.71.0",
+    "graphviz": "0.20.1",
+    "griffe": "1.14.0",
+    "groq": "0.33.0",
+    "gspread": "5.12.2",
+    "gspread-formatting": "1.1.2",
+    "h11": "0.16.0",
+    "hbreader": "0.9.1",
+    "hf-xet": "1.2.0",
+    "httpcore": "1.0.9",
+    "httplib2": "0.22.0",
+    "httpx": "0.28.1",
+    "httpx-sse": "0.4.0",
+    "huggingface-hub": "1.0.1",
+    "idna": "3.6",
+    "ijson": "3.4.0",
+    "imagesize": "1.4.1",
+    "importlib-metadata": "7.0.0",
+    "inflect": "7.5.0",
+    "iniconfig": "2.0.0",
+    "invoke": "2.2.1",
+    "isodate": "0.7.2",
+    "isoduration": "20.11.0",
+    "jinjanator": "25.3.1",
+    "jinjanator-plugins": "25.1.0",
+    "jiter": "0.11.1",
+    "jmespath": "1.0.1",
+    "jsbeautifier": "1.14.11",
+    "json-flattener": "0.1.9",
+    "jsonasobj": "1.3.1",
+    "jsonasobj2": "1.0.4",
+    "jsonlines": "4.0.0",
+    "jsonpointer": "2.4",
+    "jsonschema": "4.25.1",
+    "jsonschema-specifications": "2023.11.2",
+    "kgcl-rdflib": "0.5.0",
+    "kgcl_schema": "0.6.9",
+    "kiwisolver": "1.5.0",
+    "lark": "1.2.2",
+    "linkml": "1.9.3",
+    "linkml-map": "0.3.8",
+    "linkml-renderer": "0.3.1",
+    "linkml-runtime": "1.9.4",
+    "linkml_reference_validator": "0.1.1",
+    "linkml_term_validator": "0.1.1",
+    "logfire-api": "4.14.2",
+    "lxml": "6.0.0",
+    "markdown-it-py": "4.0.0",
+    "matplotlib": "3.11.1",
+    "mcp": "1.20.0",
+    "mdurl": "0.1.2",
+    "mergedeep": "1.3.4",
+    "mistralai": "1.9.11",
+    "mkdocs": "1.5.3",
+    "mkdocs-material": "8.5.11",
+    "mkdocs-material-extensions": "1.3.1",
+    "mkdocs-mermaid2-plugin": "0.6.0",
+    "more-click": "0.1.2",
+    "more-itertools": "10.7.0",
+    "mypy_extensions": "1.1.0",
+    "ndex2": "3.11.0",
+    "nest-asyncio": "1.6.0",
+    "networkx": "3.5",
+    "num2words": "0.5.14",
+    "numpy": "1.26.4",
+    "oaklib": "0.6.23",
+    "oauthlib": "3.2.2",
+    "ols-client": "0.2.1",
+    "ontodev-cogs": "0.3.3",
+    "ontoportal-client": "0.0.4",
+    "openai": "2.6.1",
+    "openpyxl": "3.1.2",
+    "opentelemetry-api": "1.38.0",
+    "opentelemetry-exporter-otlp-proto-common": "1.38.0",
+    "opentelemetry-exporter-otlp-proto-http": "1.38.0",
+    "opentelemetry-instrumentation": "0.59b0",
+    "opentelemetry-instrumentation-httpx": "0.59b0",
+    "opentelemetry-instrumentation-requests": "0.59b0",
+    "opentelemetry-instrumentation-threading": "0.59b0",
+    "opentelemetry-instrumentation-urllib": "0.59b0",
+    "opentelemetry-proto": "1.38.0",
+    "opentelemetry-sdk": "1.38.0",
+    "opentelemetry-semantic-conventions": "0.59b0",
+    "opentelemetry-util-http": "0.59b0",
+    "ordered-set": "4.1.0",
+    "packaging": "23.2",
+    "pandas": "2.3.1",
+    "pandera": "0.26.0",
+    "parse": "1.20.0",
+    "pathspec": "0.11.2",
+    "pdfminer.six": "20221105",
+    "pillow": "12.3.0",
+    "pip": "25.0.1",
+    "platformdirs": "4.1.0",
+    "pluggy": "1.3.0",
+    "prefixcommons": "0.1.12",
+    "prefixmaps": "0.2.6",
+    "prompt_toolkit": "3.0.52",
+    "pronto": "2.7.0",
+    "proto-plus": "1.26.1",
+    "protobuf": "6.33.0",
+    "psutil": "5.9.8",
+    "pyasn1": "0.5.1",
+    "pyasn1-modules": "0.3.0",
+    "pycparser": "2.23",
+    "pydantic": "2.12.3",
+    "pydantic-ai": "0.2.20",
+    "pydantic-ai-slim": "0.2.20",
+    "pydantic-evals": "0.2.20",
+    "pydantic-graph": "0.2.20",
+    "pydantic-settings": "2.11.0",
+    "pydantic_core": "2.41.4",
+    "pydbml": "1.2.0",
+    "pymdown-extensions": "10.5",
+    "pyparsing": "3.1.1",
+    "pysolr": "3.10.0",
+    "pystow": "0.5.2",
+    "pytest": "7.4.4",
+    "pytest-logging": "2015.11.4",
+    "pytest-xdist": "3.8.0",
+    "python-dateutil": "2.8.2",
+    "python-docx": "1.2.0",
+    "python-dotenv": "1.2.1",
+    "python-multipart": "0.0.20",
+    "pytz": "2025.2",
+    "pyyaml_env_tag": "0.1",
+    "quantulum3": "0.9.2",
+    "ratelimit": "2.2.1",
+    "rdflib": "7.1.4",
+    "rdflib-jsonld": "0.6.1",
+    "rdflib-shim": "1.0.3",
+    "referencing": "0.31.1",
+    "requests": "2.32.5",
+    "requests-cache": "1.2.1",
+    "requests-oauthlib": "1.3.1",
+    "requests-toolbelt": "1.0.0",
+    "rfc3339-validator": "0.1.4",
+    "rfc3987": "1.3.8",
+    "rich": "14.2.0",
+    "roman-numerals-py": "3.1.0",
+    "rpds-py": "0.13.2",
+    "rsa": "4.9",
+    "ruamel.yaml": "0.18.16",
+    "ruamel.yaml.clib": "0.2.15",
+    "s3transfer": "0.14.0",
+    "schema_automator": "0.5.4rc1",
+    "schemasheets": "0.4.0",
+    "semsql": "0.4.0",
+    "setuptools": "69.0.2",
+    "shellingham": "1.5.4",
+    "six": "1.16.0",
+    "sniffio": "1.3.1",
+    "snowballstemmer": "3.0.1",
+    "soupsieve": "2.5",
+    "sparqlslurper": "0.5.1",
+    "sphinx-click": "6.0.0",
+    "sphinxcontrib-applehelp": "2.0.0",
+    "sphinxcontrib-devhelp": "2.0.0",
+    "sphinxcontrib-htmlhelp": "2.1.0",
+    "sphinxcontrib-jsmath": "1.0.1",
+    "sphinxcontrib-qthelp": "2.0.0",
+    "sphinxcontrib-serializinghtml": "2.0.0",
+    "sse-starlette": "3.0.3",
+    "sssom": "0.4.18",
+    "sssom-schema": "1.1.0a3",
+    "starlette": "0.49.1",
+    "strsimpy": "0.2.1",
+    "synapseclient": "4.9.0",
+    "tabulate": "0.9.0",
+    "tenacity": "9.1.2",
+    "termcolor": "2.4.0",
+    "tokenizers": "0.22.1",
+    "tomlkit": "0.13.3",
+    "tqdm": "4.67.1",
+    "typeguard": "4.2.0",
+    "typer": "0.20.0",
+    "typer-slim": "0.20.0",
+    "types-python-dateutil": "2.8.19.14",
+    "types-requests": "2.31.0.6",
+    "types-urllib3": "1.26.25.14",
+    "typing-inspect": "0.9.0",
+    "typing-inspection": "0.4.2",
+    "typing_extensions": "4.15.0",
+    "tzdata": "2025.2",
+    "ucumvert": "0.1.2",
+    "uri-template": "1.3.0",
+    "uritemplate": "4.1.1",
+    "url-normalize": "2.2.1",
+    "urllib3": "1.26.20",
+    "uvicorn": "0.38.0",
+    "validators": "0.35.0",
+    "watchdog": "3.0.0",
+    "wcwidth": "0.2.14",
+    "webcolors": "1.13",
+    "websockets": "15.0.1",
+    "wrapt": "1.16.0",
+    "zipp": "3.17.0"
+  },
+  "evidence_directory": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-e3x-fixes/tmp/e3x-relocation-validation-20261029",
+  "head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+  "interpreter": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+  "isolated_reruns": [
+    {
+      "exit": 0,
+      "label": "rerun-checkout-1",
+      "network_sandbox": true,
+      "node": "tests/test_preflight_resource_authority.py::test_positional_draft_context_worktree_selects_vocabulary",
+      "notes_controls": false,
+      "original_lane": "ci-ordinary-6"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-checkout-2",
+      "network_sandbox": true,
+      "node": "tests/test_preflight_resource_authority.py::test_copied_cli_selects_foreign_tree_from_another_checkout[--worktree=]",
+      "notes_controls": false,
+      "original_lane": "ci-ordinary-6"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-checkout-3",
+      "network_sandbox": true,
+      "node": "tests/test_preflight_resource_authority.py::test_copied_cli_selects_foreign_tree_from_another_checkout[-w]",
+      "notes_controls": false,
+      "original_lane": "ci-ordinary-6"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-process-1",
+      "network_sandbox": false,
+      "node": "tests/test_run_lock.py::TestAgainstARealProcess::test_it_becomes_stale_once_stopped",
+      "notes_controls": false,
+      "original_lane": "ci-ordinary-2"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-process-2",
+      "network_sandbox": false,
+      "node": "tests/test_run_lock.py::TestAgainstARealProcess::test_stop_actually_stops_it",
+      "notes_controls": false,
+      "original_lane": "ci-ordinary-2"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-1",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error[kernel-exit_0]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-2",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error[kernel-exit_3]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-3",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error[kernel-killed]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-4",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error[simulated-exit_0]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-5",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error[simulated-exit_3]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-6",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error[simulated-killed]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-7",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_a_refusal_before_the_reported_exit_is_excused_by_the_exit",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-8",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_is_not[member_lives_on]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-9",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_is_not[group_empties]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-10",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_is_not[an_unverified_member_answers]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-11",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_a_refusal_to_the_unreaped_leader_is_excused_only_once_the_group_is_gone[completed_run-clears]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-12",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_a_refusal_to_the_unreaped_leader_is_excused_only_once_the_group_is_gone[completed_run-stands]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-13",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_a_reap_by_a_concurrent_popen_waiter_is_latched_before_any_signal[before_cleanup]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-14",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_an_exit_status_never_published_is_not_a_success",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-15",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_the_exit_check_sees_an_exited_leader_without_reaping_it",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-16",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_a_stopped_leader_is_not_an_exited_one",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-17",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_no_signal_reaches_the_group_after_the_leader_is_reaped[kernel-completed]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-18",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_no_signal_reaches_the_group_after_the_leader_is_reaped[kernel-stopped]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-19",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_no_signal_reaches_the_group_after_the_leader_is_reaped[simulated-completed]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-20",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_no_signal_reaches_the_group_after_the_leader_is_reaped[simulated-stopped]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-21",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_a_member_left_behind_is_removed_by_the_group_sigkill",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-22",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_the_kill_step_excuses_a_refusal_only_once_the_group_is_gone[kernel-group_gone]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-23",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_the_kill_step_excuses_a_refusal_only_once_the_group_is_gone[kernel-refusal_stands]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-24",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_the_kill_step_excuses_a_refusal_only_once_the_group_is_gone[simulated-group_gone]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-25",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_the_kill_step_excuses_a_refusal_only_once_the_group_is_gone[simulated-refusal_stands]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-26",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_a_stop_after_the_child_exited_is_not_replaced_by_group_cleanup[kernel]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-native-27",
+      "network_sandbox": false,
+      "node": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py::test_a_stop_after_the_child_exited_is_not_replaced_by_group_cleanup[simulated]",
+      "notes_controls": true,
+      "original_lane": "ci-native"
+    },
+    {
+      "exit": 0,
+      "label": "rerun-audit-1",
+      "network_sandbox": true,
+      "node": "notes/matched_cborg_2026-09-13/audit_controls/test_history_control_lifecycle.py::test_execute_child_real_blocked_observer_stays_unclosed_and_cli_is_reaped",
+      "notes_controls": true,
+      "original_lane": "ci-audit"
+    }
+  ],
+  "ps_sandbox_diagnostic": [
+    {
+      "exit": 71,
+      "network_sandbox": true,
+      "stderr": "sandbox-exec: execvp() of '/bin/ps' failed: Operation not permitted\n",
+      "stdout": ""
+    },
+    {
+      "exit": 0,
+      "network_sandbox": false,
+      "stderr": "",
+      "stdout": "SNs \n"
+    }
+  ],
+  "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+  "results": {
+    "ci-audit": {
+      "artifacts": {
+        "ci-audit.exit": {
+          "bytes": 2,
+          "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+        },
+        "ci-audit.inputs": {
+          "bytes": 906,
+          "sha256": "618314aadc4f81c34104c880f4dae1e46352abcc929321f5e92e8f5f48ae58c6"
+        },
+        "ci-audit.log": {
+          "bytes": 474596,
+          "sha256": "3312b1bf7044341ebaa305ea11409d1667f5896c1855fabc292978318f03e53c"
+        },
+        "ci-audit.xml": {
+          "bytes": 540550,
+          "sha256": "dd10c00f039b1b70036421adecbc2290ca3922524465486e53d8a20274bbddd0"
+        }
+      },
+      "cases": 2168,
+      "duration_seconds": 511.743,
+      "exit": 1,
+      "failures": [
+        {
+          "class": "notes.matched_cborg_2026-09-13.audit_controls.test_history_control_lifecycle",
+          "message": "assert False\n +  where False = <bound method Event.is_set of <threading.Event at 0x1198916d0: unset>>()\n +    where <bound method Event.is_set of <threading.Event at 0x1198916d0: unset>> = <threading.Event at 0x1198916d0: unset>.is_set",
+          "name": "test_execute_child_real_blocked_observer_stays_unclosed_and_cli_is_reaped",
+          "outcome": "failure"
+        }
+      ],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 failed, 2167 passed, 1 warning in 511.78s (0:08:31)"
+      ],
+      "unique_cases": 2168
+    },
+    "ci-budget": {
+      "artifacts": {
+        "ci-budget.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "ci-budget.inputs": {
+          "bytes": 906,
+          "sha256": "e0d7e3924169afc2918fb178867f6a01f80e49b15f2e2f6dafa0e4bc96da1668"
+        },
+        "ci-budget.log": {
+          "bytes": 61267,
+          "sha256": "5831d71a79bbcb6e44b3231318e1ca9c4184c7e2bd8de588bde8dac1a22f09b0"
+        },
+        "ci-budget.xml": {
+          "bytes": 74025,
+          "sha256": "1ce6475d8ef886e696140e44c75be914f47b36918fb414744d1b2767fbca4062"
+        }
+      },
+      "cases": 408,
+      "duration_seconds": 12.567,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 12,
+      "summaries": [
+        "396 passed, 12 skipped, 1 warning in 12.57s"
+      ],
+      "unique_cases": 408
+    },
+    "ci-evaluation": {
+      "artifacts": {
+        "ci-evaluation.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "ci-evaluation.inputs": {
+          "bytes": 906,
+          "sha256": "2339dc2866c861c25b52a95ca2055b9886f3713a7a9edb88f442ad1849139d33"
+        },
+        "ci-evaluation.log": {
+          "bytes": 49510,
+          "sha256": "c9b232077f839b24e29bab38b744c800c150ef874c5e987e43aea52cc4a632c6"
+        },
+        "ci-evaluation.xml": {
+          "bytes": 56093,
+          "sha256": "867350cb98bcf398a89aa6f2167c71fa0126c4751a2fa55add8c5208ba456f4a"
+        }
+      },
+      "cases": 295,
+      "duration_seconds": 413.475,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "295 passed, 1 warning in 413.48s (0:06:53)"
+      ],
+      "unique_cases": 295
+    },
+    "ci-native": {
+      "artifacts": {
+        "ci-native.exit": {
+          "bytes": 2,
+          "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+        },
+        "ci-native.inputs": {
+          "bytes": 906,
+          "sha256": "4d4c09357d45fb50e89e8e5935bb8a071c6dc80c4ba0c575a46c98307dd0cf7c"
+        },
+        "ci-native.log": {
+          "bytes": 460242,
+          "sha256": "a8e3448dde5b26bff1db5220a2a7c07c602b5f7a087904d2154142503cf3126c"
+        },
+        "ci-native.xml": {
+          "bytes": 482797,
+          "sha256": "5f363f21352935302a0ff24c1fcb7053f7daa0da199a71d219575aad86628896"
+        }
+      },
+      "cases": 1001,
+      "duration_seconds": 684.468,
+      "exit": 1,
+      "failures": [
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error[kernel-exit_0]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error[kernel-exit_3]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error[kernel-killed]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error[simulated-exit_0]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error[simulated-exit_3]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error[simulated-killed]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_a_refusal_before_the_reported_exit_is_excused_by_the_exit",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_is_not[member_lives_on]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_is_not[group_empties]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_is_not[an_unverified_member_answers]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_a_refusal_to_the_unreaped_leader_is_excused_only_once_the_group_is_gone[completed_run-clears]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_a_refusal_to_the_unreaped_leader_is_excused_only_once_the_group_is_gone[completed_run-stands]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_a_reap_by_a_concurrent_popen_waiter_is_latched_before_any_signal[before_cleanup]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_an_exit_status_never_published_is_not_a_success",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_the_exit_check_sees_an_exited_leader_without_reaping_it",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_a_stopped_leader_is_not_an_exited_one",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "AssertionError: [(0, 3, None)]\nassert []",
+          "name": "test_no_signal_reaches_the_group_after_the_leader_is_reaped[kernel-completed]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_no_signal_reaches_the_group_after_the_leader_is_reaped[kernel-stopped]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_no_signal_reaches_the_group_after_the_leader_is_reaped[simulated-completed]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_no_signal_reaches_the_group_after_the_leader_is_reaped[simulated-stopped]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_a_member_left_behind_is_removed_by_the_group_sigkill",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "assert ([] == [<Signals.SIGKILL: 9>]\n  Right contains one more item: <Signals.SIGKILL: 9>\n  Full diff:\n  - [<Signals.SIGKILL: 9>]\n  + [])",
+          "name": "test_the_kill_step_excuses_a_refusal_only_once_the_group_is_gone[kernel-group_gone]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "AssertionError: None\nassert False\n +  where False = isinstance(None, PermissionError)",
+          "name": "test_the_kill_step_excuses_a_refusal_only_once_the_group_is_gone[kernel-refusal_stands]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "AssertionError: PermissionError(1, 'Operation not permitted')\nassert PermissionError(1, 'Operation not permitted') is None",
+          "name": "test_the_kill_step_excuses_a_refusal_only_once_the_group_is_gone[simulated-group_gone]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "assert ([] == [<Signals.SIGKILL: 9>]\n  Right contains one more item: <Signals.SIGKILL: 9>\n  Full diff:\n  - [<Signals.SIGKILL: 9>]\n  + [])",
+          "name": "test_the_kill_step_excuses_a_refusal_only_once_the_group_is_gone[simulated-refusal_stands]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_a_stop_after_the_child_exited_is_not_replaced_by_group_cleanup[kernel]",
+          "outcome": "failure"
+        },
+        {
+          "class": "notes.matched_cborg_2026-09-13.native_controls.test_native_launch",
+          "message": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+          "name": "test_a_stop_after_the_child_exited_is_not_replaced_by_group_cleanup[simulated]",
+          "outcome": "failure"
+        }
+      ],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "27 failed, 974 passed, 1 warning in 684.51s (0:11:24)"
+      ],
+      "unique_cases": 1001
+    },
+    "ci-ordinary-1": {
+      "artifacts": {
+        "ci-ordinary-1.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "ci-ordinary-1.inputs": {
+          "bytes": 911,
+          "sha256": "cc7bf90301b61a650eee7cc08ffab5f5e4067e52358a1369eddb9c23d574cd2c"
+        },
+        "ci-ordinary-1.log": {
+          "bytes": 302037,
+          "sha256": "7155038be3836cfab12aa1d5b46b31df9da5de1d6024f611eb38f01a02c2fed6"
+        },
+        "ci-ordinary-1.xml": {
+          "bytes": 358697,
+          "sha256": "a8fcc1af7069731ed04bb64879ba0e1bc8284f8b00a1a8e2111fd63611f60708"
+        }
+      },
+      "cases": 2306,
+      "duration_seconds": 2679.78,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 2,
+      "summaries": [
+        "2304 passed, 2 skipped, 18454 deselected, 1 warning in 2679.99s (0:44:39)"
+      ],
+      "unique_cases": 2306
+    },
+    "ci-ordinary-2": {
+      "artifacts": {
+        "ci-ordinary-2.exit": {
+          "bytes": 2,
+          "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+        },
+        "ci-ordinary-2.inputs": {
+          "bytes": 906,
+          "sha256": "c83917466c94640d2b271d8484cb42d14d3a23bb3e332949e418969ca32bf6cf"
+        },
+        "ci-ordinary-2.log": {
+          "bytes": 1189818,
+          "sha256": "208a9b1188aaaf03aa749a899c8b6c0e8a1c079e053a75fabc65cc4c82ce1ec2"
+        },
+        "ci-ordinary-2.xml": {
+          "bytes": 1294523,
+          "sha256": "2830947a2976f52b8b5318264bcb4c43fa4a190f95ee86477c9e50768a85bce1"
+        }
+      },
+      "cases": 3834,
+      "duration_seconds": 2785.307,
+      "exit": 1,
+      "failures": [
+        {
+          "class": "tests.test_run_lock.TestAgainstARealProcess",
+          "message": "AssertionError: Lists differ: [Lock(path=PosixPath('/var/folders/7w/ksxs[110 chars]'t')] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\nLock(path=PosixPath('/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/tmpj98jome2/real.json'), pid=57370, label_prefix='real', projects=['A'], started='t')\n\n+ []\n- [Lock(path=PosixPath('/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/tmpj98jome2/real.json'),\n-       pid=57370,\n-       label_prefix='real',\n-       projects=['A'],\n-       started='t')]",
+          "name": "test_it_becomes_stale_once_stopped",
+          "outcome": "failure"
+        },
+        {
+          "class": "tests.test_run_lock.TestAgainstARealProcess",
+          "message": "AssertionError: True is not false : process survived SIGTERM",
+          "name": "test_stop_actually_stops_it",
+          "outcome": "failure"
+        }
+      ],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 28,
+      "summaries": [
+        "2 failed, 3804 passed, 28 skipped, 16926 deselected, 2 warnings in 2785.48s (0:46:25)"
+      ],
+      "unique_cases": 3834
+    },
+    "ci-ordinary-3": {
+      "artifacts": {
+        "ci-ordinary-3.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "ci-ordinary-3.inputs": {
+          "bytes": 906,
+          "sha256": "7a2da50a7802424ae52a1010b47affc28342f57f914c429854107bb3d5c2ce45"
+        },
+        "ci-ordinary-3.log": {
+          "bytes": 418385,
+          "sha256": "148d641bde7887630f4e082d7ebf2dd854f57f1eceb357c295e7c2b02f47bd0b"
+        },
+        "ci-ordinary-3.xml": {
+          "bytes": 494984,
+          "sha256": "d38be7f37b1f6015f54086e59e58d9c79c452d3b6f8a86d3a6f784de9f641eca"
+        }
+      },
+      "cases": 3085,
+      "duration_seconds": 2270.863,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 2,
+      "summaries": [
+        "3083 passed, 2 skipped, 17675 deselected, 1 warning in 2271.11s (0:37:51)"
+      ],
+      "unique_cases": 3085
+    },
+    "ci-ordinary-4": {
+      "artifacts": {
+        "ci-ordinary-4.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "ci-ordinary-4.inputs": {
+          "bytes": 906,
+          "sha256": "6a790bb3d3efa4edcd501303eed0d61df257240166bab8883491b308f086a52f"
+        },
+        "ci-ordinary-4.log": {
+          "bytes": 572439,
+          "sha256": "79afa2b39c682a31ad33623a6b546aa8d816aa7c1f43340da305af38093461ae"
+        },
+        "ci-ordinary-4.xml": {
+          "bytes": 678995,
+          "sha256": "8de73412ede737d8e5975160fc4e7825ed362b7afdf74078d4d189888da3f5ca"
+        }
+      },
+      "cases": 4151,
+      "duration_seconds": 5311.306,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 14,
+      "summaries": [
+        "4137 passed, 14 skipped, 16609 deselected, 1 warning in 5311.48s (1:28:31)"
+      ],
+      "unique_cases": 4151
+    },
+    "ci-ordinary-5": {
+      "artifacts": {
+        "ci-ordinary-5.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "ci-ordinary-5.inputs": {
+          "bytes": 906,
+          "sha256": "fe01a55c6c0ddeb0a8be72721bc9485e4e10f9c0becd6f27dd9cef9292830e5a"
+        },
+        "ci-ordinary-5.log": {
+          "bytes": 439262,
+          "sha256": "f38281d7275aa5350f9978fbd9a60588ef7df8a0a8110c40e2c9c121c4ec0ca2"
+        },
+        "ci-ordinary-5.xml": {
+          "bytes": 517468,
+          "sha256": "612349f1da4f3f95d8aa55697065304f48cf137e02133a2214deb8162ca49119"
+        }
+      },
+      "cases": 3240,
+      "duration_seconds": 1998.415,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [
+        {
+          "class": "tests.test_native_execution_permissions",
+          "entries": 2,
+          "name": "test_noncanonical_or_numeric_budget_never_becomes_a_native_argument[00]"
+        }
+      ],
+      "skipped": 0,
+      "summaries": [
+        "3240 passed, 17520 deselected, 3 warnings in 1998.51s (0:33:18)"
+      ],
+      "unique_cases": 3239
+    },
+    "ci-ordinary-6": {
+      "artifacts": {
+        "ci-ordinary-6.exit": {
+          "bytes": 2,
+          "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+        },
+        "ci-ordinary-6.inputs": {
+          "bytes": 906,
+          "sha256": "0f5493b30096293165db3061ae4ff47d131df609ce94d8e75bce8d1dd2930727"
+        },
+        "ci-ordinary-6.log": {
+          "bytes": 588427,
+          "sha256": "90256d418ec391d2de64fa0c9a7b7e4ea9f5d9a84b07bd518b3ec05e5a34107f"
+        },
+        "ci-ordinary-6.xml": {
+          "bytes": 692565,
+          "sha256": "cd0575c42ac42cf05fd0a479a5ad870f325ca187e7f779914c1ff7217cc399f6"
+        }
+      },
+      "cases": 4140,
+      "duration_seconds": 2491.12,
+      "exit": 1,
+      "failures": [
+        {
+          "class": "tests.test_preflight_resource_authority",
+          "message": "failed on teardown with \"AssertionError: test changed the checkout outside pytest's scratch tree\nassert {'.claude': (...3499308), ...} == {'.claude': (...3499308), ...}\n  Omitting 12163 identical items, use -vv to show\n  Differing items:\n  {'tmp/e3x-relocation-validation-20261029/ci-ordinary-6.log': (33188, 250726, 1793348031947864887, 698786880)} != {'tmp/e3x-relocation-validation-20261029/ci-ordinary-6.log': (33188, 250713, 1793348031313972542, 698786880)}\n  Full diff:\n    {\n     '.claude': (16877, 224, 1793257239231865410, 693499305),\n     '.claude/agents': (16877, 576, 1793257239225592965, 693499306),...\n  \n  ...Full output truncated (46231 lines hidden), use '-vv' to show\"",
+          "name": "test_positional_draft_context_worktree_selects_vocabulary",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_preflight_resource_authority",
+          "message": "failed on teardown with \"AssertionError: test changed the checkout outside pytest's scratch tree\nassert {'.claude': (...3499308), ...} == {'.claude': (...3499308), ...}\n  Omitting 12163 identical items, use -vv to show\n  Differing items:\n  {'tmp/e3x-relocation-validation-20261029/ci-ordinary-6.log': (33188, 253270, 1793348078416484719, 698786880)} != {'tmp/e3x-relocation-validation-20261029/ci-ordinary-6.log': (33188, 253257, 1793348068440094686, 698786880)}\n  Full diff:\n    {\n     '.claude': (16877, 224, 1793257239231865410, 693499305),\n     '.claude/agents': (16877, 576, 1793257239225592965, 693499306),...\n  \n  ...Full output truncated (46231 lines hidden), use '-vv' to show\"",
+          "name": "test_copied_cli_selects_foreign_tree_from_another_checkout[--worktree=]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_preflight_resource_authority",
+          "message": "failed on teardown with \"AssertionError: test changed the checkout outside pytest's scratch tree\nassert {'.claude': (...3499308), ...} == {'.claude': (...3499308), ...}\n  Omitting 12163 identical items, use -vv to show\n  Differing items:\n  {'tmp/e3x-relocation-validation-20261029/ci-ordinary-6.log': (33188, 253520, 1793348088848845401, 698786880)} != {'tmp/e3x-relocation-validation-20261029/ci-ordinary-6.log': (33188, 253507, 1793348079376318051, 698786880)}\n  Full diff:\n    {\n     '.claude': (16877, 224, 1793257239231865410, 693499305),\n     '.claude/agents': (16877, 576, 1793257239225592965, 693499306),...\n  \n  ...Full output truncated (46231 lines hidden), use '-vv' to show\"",
+          "name": "test_copied_cli_selects_foreign_tree_from_another_checkout[-w]",
+          "outcome": "error"
+        }
+      ],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "4140 passed, 16620 deselected, 2 warnings, 3 errors in 2491.22s (0:41:31)"
+      ],
+      "unique_cases": 4140
+    },
+    "ci-routing-default-layout": {
+      "artifacts": {
+        "ci-routing-default-layout.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "ci-routing-default-layout.inputs": {
+          "bytes": 906,
+          "sha256": "23ffbb9732677107d7acabf7d035cdfe68a72f055b42be8f25ef6bf9d94e5ef2"
+        },
+        "ci-routing-default-layout.log": {
+          "bytes": 1957,
+          "sha256": "a769dea6b8230bcd7b2334867e0e00dd46fd7973d28f3de661c480ced3a99295"
+        },
+        "ci-routing-default-layout.xml": {
+          "bytes": 366,
+          "sha256": "11752f7b8293be836370805e9e26de419fe52c48bdaf5743cc06648c5e01bf04"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 569.773,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 20759 deselected, 1 warning in 569.87s (0:09:29)"
+      ],
+      "unique_cases": 1
+    },
+    "ci-routing-dispatch": {
+      "artifacts": {
+        "ci-routing-dispatch.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "ci-routing-dispatch.inputs": {
+          "bytes": 906,
+          "sha256": "fe3038a3f57b481f2fac3f0c91a2d407bd6f755b88a22f43963d840d1b3b1cc2"
+        },
+        "ci-routing-dispatch.log": {
+          "bytes": 2017,
+          "sha256": "922b18c0936ab3fd5fc1e9def1ea1c1b6e1492c2eff720521ea45342ca9536cd"
+        },
+        "ci-routing-dispatch.xml": {
+          "bytes": 384,
+          "sha256": "3a7250626dec42e883cc86349f9bffd66e1f92c36292aa3a569e944be4d5d3f6"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 530.1,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 20759 deselected, 1 warning in 530.16s (0:08:50)"
+      ],
+      "unique_cases": 1
+    },
+    "ci-routing-portable": {
+      "artifacts": {
+        "ci-routing-portable.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "ci-routing-portable.inputs": {
+          "bytes": 906,
+          "sha256": "9a7a037204bab12d8fd538ae5d9af12dc56b40a8d7d8e7230f4e49d93fcfa062"
+        },
+        "ci-routing-portable.log": {
+          "bytes": 2038,
+          "sha256": "c47c6679c5bc86ad811e6d784f48c83043e08bcf5d12d2289b02e67e694ce814"
+        },
+        "ci-routing-portable.xml": {
+          "bytes": 391,
+          "sha256": "2a11ec7f37977a6a174ed56bd379d98736c3f80f3cec9f35418ced2cf96eef57"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 1260.042,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 20759 deselected, 1 warning in 1260.10s (0:21:00)"
+      ],
+      "unique_cases": 1
+    },
+    "ci-routing-regate": {
+      "artifacts": {
+        "ci-routing-regate.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "ci-routing-regate.inputs": {
+          "bytes": 905,
+          "sha256": "b0665085d04a72a8abf950e840164636fc3c3d26f4d46f3958edcf16d394e2ab"
+        },
+        "ci-routing-regate.log": {
+          "bytes": 1937,
+          "sha256": "4b03adee2262b46cc75436e04d5053094c7025e449f11b1c69cb4eca6dca2e64"
+        },
+        "ci-routing-regate.xml": {
+          "bytes": 365,
+          "sha256": "d2fc7fe5413a9e61d84f382d1cd299b1bb085cbc53fd7dd90bd9820e5497c2a5"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 424.779,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 20759 deselected, 1 warning in 424.81s (0:07:04)"
+      ],
+      "unique_cases": 1
+    },
+    "collect-ci-tree": {
+      "artifacts": {
+        "collect-ci-tree.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "collect-ci-tree.inputs": {
+          "bytes": 911,
+          "sha256": "7e4507a8785bde692c1894af6a8e3491759c3eba4604236a27a43d7ac5355912"
+        },
+        "collect-ci-tree.log": {
+          "bytes": 3181110,
+          "sha256": "8d1b7a9576284d2932d638ab8cbd4560a7e442fa8ff879cdb9a1f40b024c1b83"
+        },
+        "collect-ci-tree.xml": {
+          "bytes": 226,
+          "sha256": "2b2a37ff58bf8653bcd395d8f90dca6190a4455df091c2918ee5990499c4b869"
+        }
+      },
+      "cases": 0,
+      "duration_seconds": 18.905,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "20760 tests collected in 18.93s"
+      ],
+      "unique_cases": 0
+    },
+    "collect-whole-tree": {
+      "artifacts": {
+        "collect-whole-tree.exit": {
+          "bytes": 2,
+          "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+        },
+        "collect-whole-tree.inputs": {
+          "bytes": 911,
+          "sha256": "32f9784b92c470578ae1d72f379183a4a3fd1efedf16b7080fd4d9983f4999c6"
+        },
+        "collect-whole-tree.log": {
+          "bytes": 3881623,
+          "sha256": "f7147b7b466cc7b1e94c91dc790a1ad0508ad44a01d2710ce50dcc5b5245858f"
+        },
+        "collect-whole-tree.xml": {
+          "bytes": 5580,
+          "sha256": "657deeec4c0f54b6f539eaaa304f2e5741713997d1e3ec0bcd513f9858e9b32c"
+        }
+      },
+      "cases": 3,
+      "duration_seconds": 24.577,
+      "exit": 2,
+      "failures": [
+        {
+          "class": "",
+          "message": "collection failure",
+          "name": "src.renderer.test_renderer",
+          "outcome": "error"
+        },
+        {
+          "class": "",
+          "message": "collection failure",
+          "name": "src.renderer.test_yaml_extraction",
+          "outcome": "error"
+        },
+        {
+          "class": "",
+          "message": "collection failure",
+          "name": "src.scripts_obsolete.download_module_test",
+          "outcome": "error"
+        }
+      ],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "24753 tests collected, 3 errors in 24.63s"
+      ],
+      "unique_cases": 3
+    },
+    "composition-5213": {
+      "artifacts": {
+        "composition-5213.exit": {
+          "bytes": 2,
+          "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+        },
+        "composition-5213.inputs": {
+          "bytes": 911,
+          "sha256": "277ddad23e2fe3657ffd8abc28def0213e5f60f4995a627ddaed7ed73dc74cab"
+        },
+        "composition-5213.log": {
+          "bytes": 37745,
+          "sha256": "b57dbb5b19af6e4cd10bca67612931b3533f00e99952b758f4ad37e7885b6628"
+        },
+        "composition-5213.xml": {
+          "bytes": 37103,
+          "sha256": "22e59ced34de4789f4b9d1ca577eb8c9f3470c9c2735c66919972d133eb65104"
+        }
+      },
+      "cases": 56,
+      "duration_seconds": 29.828,
+      "exit": 2,
+      "failures": [
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_checks_every_arm_project_and_replicate",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_recovers_pinned_manifest_not_current_replacement",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_unavailable_history_never_uses_changed_manifest[absent]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_unavailable_history_never_uses_changed_manifest[wrong_bytes]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_unavailable_history_never_uses_changed_manifest[git_unavailable]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_requires_every_manifest_hash",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_rejects_hash_pinned_duplicate_manifest_keys",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_history_lookup_uses_recorded_name_after_symlink_change",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_missing_pins_are_unknown_not_zero[inputs0]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_missing_pins_are_unknown_not_zero[inputs1]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_missing_pins_are_unknown_not_zero[inputs2]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_does_not_cache_current_disk_identity",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_rejects_manifest_for_another_bundle",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_does_not_read_paths_outside_selected_checkout",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_rejects_external_manifest_link_back_into_checkout",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_absolute_owned_manifest_keeps_its_exact_git_path[]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_absolute_owned_manifest_keeps_its_exact_git_path[archive-copy]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_foreign_tail_does_not_follow_an_escape_symlink",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_unowned_or_malformed_paths_remain_unknown[../outside.txt]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_unowned_or_malformed_paths_remain_unknown[/old/checkout/data/preprocessed/../../../../outside.txt]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_unowned_or_malformed_paths_remain_unknown[x\\x00y]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_report_retains_denominators_unknowns_and_record_labels",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_cli_reads_explicit_cohort_without_writing",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_cross_arm_recorded_identity_is_independent_of_current_disk_drift",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_cross_arm_different_recorded_bundles_can_each_match_their_manifest",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_cross_arm_identity_never_chooses_a_representative_or_fills_unknowns[mixed-heterogeneous_evidence]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_cross_arm_identity_never_chooses_a_representative_or_fills_unknowns[missing-insufficient_evidence]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_cross_arm_identity_never_chooses_a_representative_or_fills_unknowns[malformed-insufficient_evidence]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_cross_arm_identity_never_chooses_a_representative_or_fills_unknowns[empty-insufficient_evidence]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_cross_arm_identity_never_chooses_a_representative_or_fills_unknowns[one_arm-insufficient_evidence]",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_cross_arm_summaries_and_table_are_invariant_to_input_order",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_cross_arm_absolute_paths_are_bounded_and_unsupported_relocation_stays_unknown",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_ambiguous_foreign_manifest_is_refused_even_with_matching_local_candidates",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_owned_repeated_preprocessed_pairs_keep_exact_live_and_historical_paths",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_cross_arm_cli_json_and_markdown_expose_same_pins",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_check_detects_report_changes_without_overwriting_any_output",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_report_bundle_drift_uses_selected_cohort_in_stable_order",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_drift_survives_real_metrics_collection",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_invariants_survive_legitimate_revision_and_replicate_reordering",
+          "outcome": "error"
+        },
+        {
+          "class": "tests.test_arm_comparison",
+          "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/d4d-e3x-relocation-20261029/composition-5213-tmp'\"",
+          "name": "test_bundle_history_unavailable_remains_unknown",
+          "outcome": "error"
+        }
+      ],
+      "input_head": "c0840e7801a1b5229a427f589bbc8ac12a5463a9",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "15 passed, 1 warning, 40 errors in 29.86s"
+      ],
+      "unique_cases": 56
+    },
+    "composition-5213-verified": {
+      "artifacts": {
+        "composition-5213-verified.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "composition-5213-verified.inputs": {
+          "bytes": 911,
+          "sha256": "1d4fc3f9aa6ae44ab91287748994b9c4cc0f752d8c66cb6e75896a1ca2f4c10c"
+        },
+        "composition-5213-verified.log": {
+          "bytes": 11928,
+          "sha256": "7285229afe60f3e45058b97a3d62ceec7ee4a229290be70205577457db8c8120"
+        },
+        "composition-5213-verified.xml": {
+          "bytes": 13189,
+          "sha256": "d9039aa027c78430420896e981edd61a93ca5509ff48fc32c3a7de8a92b3e94a"
+        }
+      },
+      "cases": 92,
+      "duration_seconds": 171.653,
+      "exit": 0,
+      "failures": [],
+      "input_head": "c0840e7801a1b5229a427f589bbc8ac12a5463a9",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "92 passed, 1 warning in 171.68s (0:02:51)"
+      ],
+      "unique_cases": 92
+    },
+    "e3x-d52": {
+      "artifacts": {
+        "e3x-d52.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "e3x-d52.inputs": {
+          "bytes": 906,
+          "sha256": "b72c642e510acce3d5939fc546f418c9fb73393a13a25badaa7127b020a3e353"
+        },
+        "e3x-d52.log": {
+          "bytes": 87066,
+          "sha256": "368cdda36cae498dd3ae493a3fddc0318b51d5da58b898fd046e8533f3d7b2b2"
+        },
+        "e3x-d52.xml": {
+          "bytes": 104174,
+          "sha256": "91e62ff8de1f91764a200e5688b58c302f8cbdbd6e5534efa656a6fbcf1b81e9"
+        }
+      },
+      "cases": 687,
+      "duration_seconds": 489.597,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "687 passed, 13 warnings in 489.65s (0:08:09)"
+      ],
+      "unique_cases": 687
+    },
+    "reboot-canary": {
+      "artifacts": {
+        "reboot-canary.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "reboot-canary.inputs": {
+          "bytes": 911,
+          "sha256": "dadf29d7f5984c28f0920416cc82b8426ff3308247fd90898ba7a8618b020c0a"
+        },
+        "reboot-canary.log": {
+          "bytes": 261,
+          "sha256": "15462c58b6d440e3d6ee2c20c98f9deeb612b127b8e8c61c9bf44a4928eba315"
+        },
+        "reboot-canary.xml": {
+          "bytes": 388,
+          "sha256": "83e23cbe8bba67137f5d33637fdcf257beb2818adfdbcfe391b3f9638e52b5b3"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.127,
+      "exit": 0,
+      "failures": [],
+      "input_head": "c0840e7801a1b5229a427f589bbc8ac12a5463a9",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed in 0.16s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-audit-1": {
+      "artifacts": {
+        "rerun-audit-1.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-audit-1.inputs": {
+          "bytes": 1121,
+          "sha256": "f1d3fb5340ea648dd0cf99323f3213f990895f2b8ad39aabfc4640e8927ade0e"
+        },
+        "rerun-audit-1.log": {
+          "bytes": 861,
+          "sha256": "8a946eb419592c44a1cb3815ffe269dc281470cadfabfea22a6e7930143e9fae"
+        },
+        "rerun-audit-1.xml": {
+          "bytes": 430,
+          "sha256": "440d3a49d307f573b65db50c62dbd11e201b66845882fc22f243ad90f935376e"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 1.252,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 1.25s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-checkout-1": {
+      "artifacts": {
+        "rerun-checkout-1.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-checkout-1.inputs": {
+          "bytes": 1068,
+          "sha256": "684624f655979993878cca46f94f82f8de4394872ebdc5a25eaf1cacea503178"
+        },
+        "rerun-checkout-1.log": {
+          "bytes": 867,
+          "sha256": "3b184e0d3f73bbc292be15e385c359d75048d8eb0ccacaa4f011ab1f5b2049b8"
+        },
+        "rerun-checkout-1.xml": {
+          "bytes": 377,
+          "sha256": "f7d3a69229d333c85aefb8e6f15eebd9c7281a684135016e2d0cec2fe941b0c6"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 5.731,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 5.76s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-checkout-2": {
+      "artifacts": {
+        "rerun-checkout-2.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-checkout-2.inputs": {
+          "bytes": 1084,
+          "sha256": "384448c70d8c698bd384d1c2b3bbb365d2c7fd28f5a61dd495de091b8052acec"
+        },
+        "rerun-checkout-2.log": {
+          "bytes": 868,
+          "sha256": "e92fbf76f985eff2f74a49c84b92e1360383bac4499957f99af6f8c8ac33e17c"
+        },
+        "rerun-checkout-2.xml": {
+          "bytes": 393,
+          "sha256": "6a8b143d54f072b78d24228f6665826768d47e377f5562842a778d48b0a67168"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 12.769,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 12.80s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-checkout-3": {
+      "artifacts": {
+        "rerun-checkout-3.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-checkout-3.inputs": {
+          "bytes": 1075,
+          "sha256": "b1f1bc1533d1d3f1123bbb425177f87e3225afdd6d2575c09c782f5a7abf6401"
+        },
+        "rerun-checkout-3.log": {
+          "bytes": 868,
+          "sha256": "11009e3352958dd3ca1943437868bb86b1fb7587af4a44cd56f69a694eb4d956"
+        },
+        "rerun-checkout-3.xml": {
+          "bytes": 384,
+          "sha256": "62a65049d7b53386fca606a9d93f1d919390a3f25ec8b60ecbee7ae0a96a3da3"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 12.336,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 12.37s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-1": {
+      "artifacts": {
+        "rerun-native-1.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-1.inputs": {
+          "bytes": 1118,
+          "sha256": "cb37671805ad8bda16d2d744f11252622f9b05d6bd67539b93edb553c442c3af"
+        },
+        "rerun-native-1.log": {
+          "bytes": 863,
+          "sha256": "95a80cba8248f45c1908bd5d35624a49007cc880e8d0c8c9c7898225b8bc57cf"
+        },
+        "rerun-native-1.xml": {
+          "bytes": 425,
+          "sha256": "bd6ba9ce86dcff3bba5b5efe97bbabed3cfd2f9914f58be089bb2fff0de9b8e3"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.768,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.76s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-10": {
+      "artifacts": {
+        "rerun-native-10.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-10.inputs": {
+          "bytes": 1150,
+          "sha256": "db3162cb7b7016a95ccd9108b6b92de41e1519168febfdb75a0c8f3030da02de"
+        },
+        "rerun-native-10.log": {
+          "bytes": 865,
+          "sha256": "e6bad61c5870b109bdd6f53ce62c500bfc700b29b75161894011258c7c833a9d"
+        },
+        "rerun-native-10.xml": {
+          "bytes": 457,
+          "sha256": "d9b70e34e6f2039342ba89301f203e724cfbdc390dd4612b64c11d6532729b49"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.652,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.65s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-11": {
+      "artifacts": {
+        "rerun-native-11.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-11.inputs": {
+          "bytes": 1137,
+          "sha256": "0328f48956106332c74aec27da673085ffe22ec3ebc99c482a0c74820139df74"
+        },
+        "rerun-native-11.log": {
+          "bytes": 865,
+          "sha256": "725c19fb33baff4700a5f0521790fc2d1f2321ff03834b2715e3e6dd597152f3"
+        },
+        "rerun-native-11.xml": {
+          "bytes": 444,
+          "sha256": "84428000bd853e68d70a162cf2ed7f463a6972dc4a362dea08e4ff6862ce37c4"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.748,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.75s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-12": {
+      "artifacts": {
+        "rerun-native-12.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-12.inputs": {
+          "bytes": 1137,
+          "sha256": "83580f92b1f7e7b2f4de36a61800c2b838e4430c6ea6e11db82e92cdc02c7b8c"
+        },
+        "rerun-native-12.log": {
+          "bytes": 865,
+          "sha256": "7a1f12f9b5fe6eb9ce28e9820d7a5a4a4984cc9f0ceabf5408fbe0b54ad91093"
+        },
+        "rerun-native-12.xml": {
+          "bytes": 444,
+          "sha256": "7b9f2625fcd9459275b3a8d78ec1678af819f35f4b64e19bbc33cb7cb20f8489"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 2.664,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 2.66s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-13": {
+      "artifacts": {
+        "rerun-native-13.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-13.inputs": {
+          "bytes": 1124,
+          "sha256": "5a770a930ef89ba59730c616fbb79f1a0a7e915026cf805432bf69cfb0e54e26"
+        },
+        "rerun-native-13.log": {
+          "bytes": 865,
+          "sha256": "e3da7d2b87d88d7f46118dd24c3bc89d7c50d5ae0348af425c8a540c0e01f364"
+        },
+        "rerun-native-13.xml": {
+          "bytes": 431,
+          "sha256": "530653df3e12a89bd3c56f3e19832a6e0518163b342be36cf1e5f3efb87dc508"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 1.14,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 1.14s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-14": {
+      "artifacts": {
+        "rerun-native-14.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-14.inputs": {
+          "bytes": 1089,
+          "sha256": "5b94208eeb403721ee1090464a9cb72a8689402007024016a253bbbde3ddab43"
+        },
+        "rerun-native-14.log": {
+          "bytes": 865,
+          "sha256": "f52d44d48a4ff385b9cbbe4cd35effcd36560e9d058e0b203c8d1f5bf6f73759"
+        },
+        "rerun-native-14.xml": {
+          "bytes": 398,
+          "sha256": "b98542c65794db096e717ce29e97a5a3a73e27dc4fcdd66719cb54a6304abc36"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 4.626,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 4.62s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-15": {
+      "artifacts": {
+        "rerun-native-15.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-15.inputs": {
+          "bytes": 1097,
+          "sha256": "2e30481ffb9bc5db8fdff64bd154b47de502102100d67369707ba7c0f059d503"
+        },
+        "rerun-native-15.log": {
+          "bytes": 865,
+          "sha256": "c72dcf9c35ac44ffabee486f67353452245e34e93638bffac4c92a45277e7e2b"
+        },
+        "rerun-native-15.xml": {
+          "bytes": 406,
+          "sha256": "e8d682954d9255a03d9a309eacf48b903a4d0ba7724671efa0949783f00d3ff3"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.701,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.70s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-16": {
+      "artifacts": {
+        "rerun-native-16.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-16.inputs": {
+          "bytes": 1079,
+          "sha256": "20b47a1864a168ee6398158cc1aaed7af1b49c325edab69565b2cbdb858e3156"
+        },
+        "rerun-native-16.log": {
+          "bytes": 865,
+          "sha256": "a609880b455e1a03293d2c15304cbbc5935e9d3d0cf4a1960af5097a5d04ca38"
+        },
+        "rerun-native-16.xml": {
+          "bytes": 388,
+          "sha256": "39e488aebc1f6e15ecf029eda03862749201606e7ec0516608e551a62c399d37"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 2.512,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 2.51s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-17": {
+      "artifacts": {
+        "rerun-native-17.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-17.inputs": {
+          "bytes": 1116,
+          "sha256": "f8a72c26070f8b0b80c06579f5f5627089c6f33ac17feacfa4a608d2a72a80d1"
+        },
+        "rerun-native-17.log": {
+          "bytes": 865,
+          "sha256": "f0abc715086e8b215216649634459f663920d70bb483a17a20ed10c3623a2bd6"
+        },
+        "rerun-native-17.xml": {
+          "bytes": 423,
+          "sha256": "8121f6f0d66fd55312f6316858b30588dac555d5caed1ce4180db9cae6b018ec"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.759,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.76s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-18": {
+      "artifacts": {
+        "rerun-native-18.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-18.inputs": {
+          "bytes": 1114,
+          "sha256": "db6eed18c114ebcfd9e0efc2dfb23d850cd7651abe0ea52adfb01c0f1719a6f5"
+        },
+        "rerun-native-18.log": {
+          "bytes": 865,
+          "sha256": "fb1e4b11c8a217ee8021674bcc9fea7d52fb070900c42d2e0f530b949e6ec8b1"
+        },
+        "rerun-native-18.xml": {
+          "bytes": 421,
+          "sha256": "fe02b154261145cf7397ce6dbe4f67643f1d5d33cb550fef2c9fec7cf595563d"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 1.06,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 1.06s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-19": {
+      "artifacts": {
+        "rerun-native-19.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-19.inputs": {
+          "bytes": 1119,
+          "sha256": "7fcee24560f8336795e2df1e4245dfdb6b29784e21c39fdb0c24969b76f44ee5"
+        },
+        "rerun-native-19.log": {
+          "bytes": 865,
+          "sha256": "9c743891d87b0b76a3d2e0628b9e674ca0bdae81e4a3bb21ec8fe40e0925ff92"
+        },
+        "rerun-native-19.xml": {
+          "bytes": 426,
+          "sha256": "5837f86771dca213d8417a566220fb7f604aee722fc23c275c46623f0fe27fb5"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.734,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.73s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-2": {
+      "artifacts": {
+        "rerun-native-2.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-2.inputs": {
+          "bytes": 1118,
+          "sha256": "af44005ec7261cde02b47b6371bc1f6861a340d110caebf58c6a5d586f20388f"
+        },
+        "rerun-native-2.log": {
+          "bytes": 863,
+          "sha256": "4f0d5463f709c68642b1673dd80f9964953ac3d367d461c617fa935920b59920"
+        },
+        "rerun-native-2.xml": {
+          "bytes": 425,
+          "sha256": "eae6916004d9caf2033101d95939f2d3e46337f60a180c8054d7e70e71cc5f56"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.695,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.69s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-20": {
+      "artifacts": {
+        "rerun-native-20.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-20.inputs": {
+          "bytes": 1117,
+          "sha256": "ea088252fc553e81f57166b2d13eb9a298a648ee863ba6308bffa1e11823eeba"
+        },
+        "rerun-native-20.log": {
+          "bytes": 865,
+          "sha256": "1d1fb75dd1d84950717d3876340c4ee439e0f0b8344919f986ecf8e5e9611993"
+        },
+        "rerun-native-20.xml": {
+          "bytes": 424,
+          "sha256": "ad82738d04a64af98d83c1a04084354098001725d59e584a8d189129678593dd"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 1.081,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 1.08s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-21": {
+      "artifacts": {
+        "rerun-native-21.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-21.inputs": {
+          "bytes": 1094,
+          "sha256": "b909b78d426bde59199360ef3eddbfa7026d596d51af36659c32ebe4164ba95c"
+        },
+        "rerun-native-21.log": {
+          "bytes": 865,
+          "sha256": "151b7618bc408426cfb082f3d54500c6a753a5b44b965476f3b65e5eb6608fc9"
+        },
+        "rerun-native-21.xml": {
+          "bytes": 403,
+          "sha256": "22917c4247d868d00e6cc561c43e5d3b59167e4ca637f24569aa428c72c3a6af"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.814,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.81s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-22": {
+      "artifacts": {
+        "rerun-native-22.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-22.inputs": {
+          "bytes": 1122,
+          "sha256": "3ba50e3047856e335c0f7affdae09eddb6964314dbc2c25f1dabf876319d40df"
+        },
+        "rerun-native-22.log": {
+          "bytes": 865,
+          "sha256": "99639517467ddc25b5d0cb67c6bcc7921bb9483648f320f43506f159dbf5f17f"
+        },
+        "rerun-native-22.xml": {
+          "bytes": 429,
+          "sha256": "1ca32dc6c295c393341905d73a1c7ae7e279658ac7d39e4b5e7704acbf87bb75"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 2.692,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 2.69s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-23": {
+      "artifacts": {
+        "rerun-native-23.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-23.inputs": {
+          "bytes": 1126,
+          "sha256": "d9282b53e00933571c829179349ad087210ba6da232b4c374263ce159a5dbcc0"
+        },
+        "rerun-native-23.log": {
+          "bytes": 865,
+          "sha256": "0b358f62c3d37e2bf2aefce4177b28ff139b220aff7cc6bc01fba6fbc6e98358"
+        },
+        "rerun-native-23.xml": {
+          "bytes": 433,
+          "sha256": "117c796cca8ad73ce34641acc7888f298738d03271b74df9f6eced41a0b965d2"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 4.739,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 4.74s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-24": {
+      "artifacts": {
+        "rerun-native-24.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-24.inputs": {
+          "bytes": 1125,
+          "sha256": "f34c86d6fcf505b77ec0e102bb62c964745df615edc0a8440fcea8dd7d441eb0"
+        },
+        "rerun-native-24.log": {
+          "bytes": 865,
+          "sha256": "4bf26c8567aed0b50184354696cfe1bb7a0c3424316b83ce55a34ff5b3a2e819"
+        },
+        "rerun-native-24.xml": {
+          "bytes": 432,
+          "sha256": "defb0fedef522d8d936ca39f3c0c228a92ef4908c9e94de3a4e37f5d76cdcaf5"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 2.812,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 2.81s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-25": {
+      "artifacts": {
+        "rerun-native-25.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-25.inputs": {
+          "bytes": 1129,
+          "sha256": "27ff109f61dffc86a3eb59a1ac265d9372a5b79fcb740b02b0b009d1c8ac79eb"
+        },
+        "rerun-native-25.log": {
+          "bytes": 865,
+          "sha256": "c8b83f197e4d7b324ae20a491422b0f8e1856f681d6f8397b8c69dbb0d6b1f70"
+        },
+        "rerun-native-25.xml": {
+          "bytes": 436,
+          "sha256": "4e9be8be41cb42328f2c8e5bb00027a8ad3da46da4ae4eee04c86ede740ba494"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 4.787,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 4.78s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-26": {
+      "artifacts": {
+        "rerun-native-26.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-26.inputs": {
+          "bytes": 1114,
+          "sha256": "fbacce0cbc1334aee9f58fab8045b138d9c18053186d4cb09019a197b88611a6"
+        },
+        "rerun-native-26.log": {
+          "bytes": 865,
+          "sha256": "103931922c8217dfcd46519d2cc9a331d26fc04589edc18d51186e6063b68204"
+        },
+        "rerun-native-26.xml": {
+          "bytes": 421,
+          "sha256": "3892aab91e7a483dd9cdef6b286f00ea123f9e2d80e65bdd47b906dcc79c200a"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.816,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.81s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-27": {
+      "artifacts": {
+        "rerun-native-27.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-27.inputs": {
+          "bytes": 1117,
+          "sha256": "b27433792dca4c87d9693afc5c3aa5b09518cb647b5fab959db79cf1f9c7a350"
+        },
+        "rerun-native-27.log": {
+          "bytes": 865,
+          "sha256": "edc6da389027b5b5b9fd520cede29c8eb068f150f37d026da9cf614a1dfab1a5"
+        },
+        "rerun-native-27.xml": {
+          "bytes": 424,
+          "sha256": "002b7534103c116b26a19cb3102f89e64524027afe1e4000734222c8c524f8a1"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.905,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.90s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-3": {
+      "artifacts": {
+        "rerun-native-3.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-3.inputs": {
+          "bytes": 1118,
+          "sha256": "ee6ba924fc6015a49abfc310aebe029726162ade219a4d1e5e963dc5f6d6d29a"
+        },
+        "rerun-native-3.log": {
+          "bytes": 863,
+          "sha256": "3479a4c8ae5591717112f3a39ce3cacd1644b10211f00fb002973adfd646464d"
+        },
+        "rerun-native-3.xml": {
+          "bytes": 425,
+          "sha256": "030a4bfc0434abc42a7eae2544f55dc321e8c940cd28d8f39aa28d088b985226"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.686,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.68s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-4": {
+      "artifacts": {
+        "rerun-native-4.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-4.inputs": {
+          "bytes": 1121,
+          "sha256": "424d0a41e1af96dc8138966d706ac4cabad1a8002e91100477e1205eb02cbf31"
+        },
+        "rerun-native-4.log": {
+          "bytes": 863,
+          "sha256": "8f6cfe7a2df20153a3cf92615044b9d796753a62a2f8f561a58c848f1bd67ce9"
+        },
+        "rerun-native-4.xml": {
+          "bytes": 428,
+          "sha256": "c501202619ca25e6ac883201b3a98f21fd1177fccc8932995a77346b8044a987"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.78,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.78s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-5": {
+      "artifacts": {
+        "rerun-native-5.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-5.inputs": {
+          "bytes": 1121,
+          "sha256": "141ce8c76c0a042397e5e8ec395d882e8c333735655e322965c3bbb4b7ce067f"
+        },
+        "rerun-native-5.log": {
+          "bytes": 863,
+          "sha256": "a79c743dabf3ed8f5764fe2d8d4b80d54255fa18ae35af8d0b878c84e7a9fcad"
+        },
+        "rerun-native-5.xml": {
+          "bytes": 428,
+          "sha256": "83f7da02f13c741b42a97e778825ce0cb58fa296cfb6a58c748679866cabca35"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.855,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.85s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-6": {
+      "artifacts": {
+        "rerun-native-6.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-6.inputs": {
+          "bytes": 1121,
+          "sha256": "d88088675f78492eaccc9a559ec6a6ccf09357108ba473c0b6e21f5e7e7cea52"
+        },
+        "rerun-native-6.log": {
+          "bytes": 863,
+          "sha256": "0018b52e6d4313632f41bd07f76449365a58c945c42170b1f558bc880aaf3df6"
+        },
+        "rerun-native-6.xml": {
+          "bytes": 428,
+          "sha256": "639227251089cb38c7006a79964e0f6219de45dc148827a64937e7d7c82735d4"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.778,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.78s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-7": {
+      "artifacts": {
+        "rerun-native-7.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-7.inputs": {
+          "bytes": 1099,
+          "sha256": "1483c7f87730a91cb1e68f40f22424ac96ba0a952797f00b155a0b7201b440a7"
+        },
+        "rerun-native-7.log": {
+          "bytes": 863,
+          "sha256": "a89d71e7c053585601e38f9a1f94de77cf5dc78cb3bdee0a9d9f4ba5159925b8"
+        },
+        "rerun-native-7.xml": {
+          "bytes": 408,
+          "sha256": "5bcd01acb212a00791006e13e047199b05487616e3e85ae64eb5a96fbd0231ee"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.863,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.86s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-8": {
+      "artifacts": {
+        "rerun-native-8.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-8.inputs": {
+          "bytes": 1137,
+          "sha256": "581b7dca4947b211064e86a1bee0e90f267041fb601c9b2c32e00c3607116e29"
+        },
+        "rerun-native-8.log": {
+          "bytes": 863,
+          "sha256": "86addb8d0a1466f5f84b9eedfd3b029828f3d4fed5a44fdf31711cc85a119e74"
+        },
+        "rerun-native-8.xml": {
+          "bytes": 444,
+          "sha256": "3f90bba36a3334a4058964a11b91bac7c549d230f535644f0665230545491a7e"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 2.79,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 2.79s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-native-9": {
+      "artifacts": {
+        "rerun-native-9.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-native-9.inputs": {
+          "bytes": 1135,
+          "sha256": "113817403aad359008c2d674e7a7053fae77256edaa8e0b6b7a9193525d0eeda"
+        },
+        "rerun-native-9.log": {
+          "bytes": 863,
+          "sha256": "17a14a76c5c0fe0ef412f96f2227af83b7e67bc8898290f0351db202b8e2afae"
+        },
+        "rerun-native-9.xml": {
+          "bytes": 442,
+          "sha256": "acb297e244e5e1ff12f1fcc6cd96f0f5127d9bb3d3556107217c9c6b81c90005"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.776,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed, 1 warning in 0.77s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-process-1": {
+      "artifacts": {
+        "rerun-process-1.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-process-1.inputs": {
+          "bytes": 1050,
+          "sha256": "637354f5f115c45399c99095c43fd9de59a8088e1de202f1e3f92cbd92cfc634"
+        },
+        "rerun-process-1.log": {
+          "bytes": 208,
+          "sha256": "d6c2a79b6ec77bac4964201357b35ba0d5ef400abd80378961223af449ae210d"
+        },
+        "rerun-process-1.xml": {
+          "bytes": 358,
+          "sha256": "71b7295f3045ea5c4832638dff1428cd269362da20dc226be04a1db8ac6da6ea"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.085,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed in 0.11s"
+      ],
+      "unique_cases": 1
+    },
+    "rerun-process-2": {
+      "artifacts": {
+        "rerun-process-2.exit": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "rerun-process-2.inputs": {
+          "bytes": 1043,
+          "sha256": "cd1357b7af031d5e2224b2a23b0b3708eb03a371c9bf3d1d2f333cc3237722d6"
+        },
+        "rerun-process-2.log": {
+          "bytes": 208,
+          "sha256": "1684666bac3bafd947f35945647dc9c6f11ab7aa94dab371828c0514cb7456a7"
+        },
+        "rerun-process-2.xml": {
+          "bytes": 351,
+          "sha256": "5e04f4a05dce2351103d13471af1ae2142916ddae0290f3a72f962dd68389e69"
+        }
+      },
+      "cases": 1,
+      "duration_seconds": 0.048,
+      "exit": 0,
+      "failures": [],
+      "input_head": "219d96286e6e6e14f4c0df7cdffc19badbf84005",
+      "junit_name_collisions": [],
+      "skipped": 0,
+      "summaries": [
+        "1 passed in 0.08s"
+      ],
+      "unique_cases": 1
+    }
+  },
+  "supporting_artifacts": {
+    "5213-merge-conflicts.txt": {
+      "bytes": 954,
+      "sha256": "0b1d9410d39b92453f2ca91f93bbdf66f582c310819a12f46eaf960065648089"
+    },
+    "5213-resolved-tree.txt": {
+      "bytes": 41,
+      "sha256": "6bbf96ecf223f73a1d7048641249fecc31eee4d442b0282d4d404904253f0e77"
+    },
+    "environment-canary.json": {
+      "bytes": 272,
+      "sha256": "7a7b573efe73b471ed3689335acdf44d1781ec5de8ef481ceb7af5e81d085b76"
+    },
+    "environment-reruns.json": {
+      "bytes": 10070,
+      "sha256": "e183560e7fecb6ee5145afc84cac52bfa8b4532d3dc8df4fe7811f372512e876"
+    },
+    "main-merge-record.txt": {
+      "bytes": 469,
+      "sha256": "5886ffe9e0e51016344f258c9a25816b34b95ab109b5fe97b1de2ab7237c3e4b"
+    },
+    "original-analysis.md": {
+      "bytes": 11001,
+      "sha256": "1e99f60710d7a21dd4a529b78625331d552d0b0e03bd30797b38a2504947ae99"
+    },
+    "ps-sandbox-diagnostic.json": {
+      "bytes": 256,
+      "sha256": "2e7b31bf4855b9ae83e798172d87ff93b53c0d000f258b7480b6215df27ce478"
+    }
+  }
+}

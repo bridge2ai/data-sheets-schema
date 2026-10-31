@@ -424,7 +424,7 @@ def test_an_unavailable_counter_is_refused_without_dispatch_and_a_resume_recover
     """A count error the dispatch would not retry is not retried either."""
     monkeypatch.setattr(api, 'MAX_ATTEMPTS', 3)
     sleeps = []
-    monkeypatch.setattr(api.time, 'sleep', sleeps.append)
+    monkeypatch.setattr(api, 'time', SimpleNamespace(**{**vars(api.time), 'sleep': sleeps.append}))
     spec = example(tmp_path)
     messages = Counted(spec, failures={'reconcile_full': [RuntimeError('route count unavailable')]})
     with pytest.raises(api.ContextNotAdmitted, match='reconcile_full endpoint token count unavailable'):
@@ -483,7 +483,7 @@ def test_an_unusable_count_is_refused(tmp_path, count):
 def test_a_transient_count_error_is_retried_as_the_dispatch_would_be(tmp_path, monkeypatch):
     monkeypatch.setattr(api, 'MAX_ATTEMPTS', 3)
     sleeps = []
-    monkeypatch.setattr(api.time, 'sleep', sleeps.append)
+    monkeypatch.setattr(api, 'time', SimpleNamespace(**{**vars(api.time), 'sleep': sleeps.append}))
     spec = example(tmp_path)
     resets = 'Limit resets at: 2026-01-01 00:00:00 UTC'   # already past: the shortest stated wait
     errors = [httpx.ConnectError('synthetic reset'), _rate_limit_error(resets)]
@@ -501,7 +501,7 @@ def test_a_transient_count_error_is_retried_as_the_dispatch_would_be(tmp_path, m
 def test_a_count_still_failing_after_max_attempts_is_refused(tmp_path, monkeypatch):
     monkeypatch.setattr(api, 'MAX_ATTEMPTS', 3)
     sleeps, calls = [], []
-    monkeypatch.setattr(api.time, 'sleep', sleeps.append)
+    monkeypatch.setattr(api, 'time', SimpleNamespace(**{**vars(api.time), 'sleep': sleeps.append}))
     spec = example(tmp_path)
 
     def counter(**kwargs):
