@@ -639,7 +639,10 @@ def owned_artifacts(spec, *, directories=None):
         # Do not guess phase names: P_reconcile is an ordinary project too.
         for owner in guarded:
             project = dict(zip(keys, owner))["project"]
-            if project != spec.project and path.name.startswith((project + "_", "." + project + "_")):
+            # A broader P namespace cannot disambiguate a selected P_X file.
+            # Its own identity or an exact binding can still prove ownership.
+            if (project != spec.project and not spec.project.startswith(project + "_")
+                    and path.name.startswith((project + "_", "." + project + "_"))):
                 owners.add(owner)
         if owners and selected_id not in owners and owners <= guarded:
             continue

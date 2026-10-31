@@ -93,6 +93,9 @@ different guarded identity excludes a candidate. A guarded `P_X` or
 An unguarded or ambiguous `P_reconcile_full.yaml` is refused; that may be an
 ordinary `P_reconcile` run or P's reconcile snapshot. This false refusal is an
 accepted consequence: use a new label. Phase names never decide ownership.
+Likewise, guarded `P` history alone does not own an unattributed `P_X` file:
+that broader prefix is ambiguous for selected `P_X`. A per-file identity or
+path/hash binding can still establish foreign ownership.
 The sibling tests now initialize actual guarded history; arbitrary sibling
 filenames and an invalid journal no longer suffice to exclude evidence.
 

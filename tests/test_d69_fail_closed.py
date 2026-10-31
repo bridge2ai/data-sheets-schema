@@ -156,6 +156,19 @@ def test_only_new_still_held_empty_locks_are_current_startup_writes(tmp_path, di
     assert tree(tmp_path) == before
 
 
+@pytest.mark.parametrize("resume", [False, True])
+def test_guarded_shorter_prefix_does_not_own_an_unattributed_selected_artifact(tmp_path, resume):
+    sibling = spec(project="P", out_dir=tmp_path)
+    ledger.prepare_usage(sibling, resume=True)
+    selected = spec(project="P_X", out_dir=tmp_path)
+    orphan = tmp_path / "P_X_unknown_writer.json"
+    orphan.write_text('{"partial": true}')
+    before, client = tree(tmp_path), FakeClient()
+    with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
+        api.execute(selected, client=client, resume=resume)
+    assert client.messages.calls == [] and tree(tmp_path) == before
+
+
 def test_shared_no_resume_uses_per_artifact_sibling_attribution(tmp_path, monkeypatch):
     from data_sheets_schema import shared_generation
     sibling = spec(project="P_X", out_dir=tmp_path)

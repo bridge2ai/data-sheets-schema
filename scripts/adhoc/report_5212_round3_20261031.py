@@ -128,6 +128,10 @@ lines += ["", "Phase counts overlap; they are not summed as unique tests. Raw re
     "in broad-base for base evidence; the README discloses every change. "
     "A separate directory-alias regression fails before the canonical-path fix; edited/released locks "
     "remain residue. Raw phase results below distinguish exploratory failures from final results.", "",
+    "An additional inverse-prefix check exposed a false acceptance in both resume modes: "
+    "guarded P history was treating an unattributed P_X artifact as foreign to selected P_X. "
+    "A broader namespace now proves nothing by itself; explicit per-artifact identity/path/hash "
+    "attribution remains available. Both before-fix controls are retained as shorter-before.", "",
     "Final-archive artifact censuses (separate runs can overlap):", ""]
 for census_row in artifact_censuses:
     lines.append(f"- `{census_row['phase']}/{census_row['case']}`: "
