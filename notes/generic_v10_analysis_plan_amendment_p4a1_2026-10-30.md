@@ -1,6 +1,10 @@
 # generic_v10 analysis plan, P4a amendment 1: schema 3.1.0 under D66
 
-**Status: draft v3, written by claude (lead) on 2026-10-31.** It revises v1 (`7b7dc67a1`) for the 13 findings of the Claude review (`plans/reviews/p4a1_7b7dc67a1_claude_review_2026-10-30.md`) and the 5 of the Codex CLI pass (`plans/reviews/p4a1_7b7dc67a1_codex_review_2026-10-30.md`).
+**Status: draft v3.1, written by claude (lead) on 2026-10-31.**
+- **v1 → v2:** for the 13 findings of the Claude review (`plans/reviews/p4a1_7b7dc67a1_claude_review_2026-10-30.md`) and the 5 of the Codex CLI pass (`plans/reviews/p4a1_7b7dc67a1_codex_review_2026-10-30.md`).
+- **v2 → v3:** for the Claude re-review of v2 (N1–N9, sent by message and recorded in STATUS) and the Codex v2 pass (`plans/reviews/p4a1v2_0c702597d_codex_review_2026-10-31.md`).
+- **v3:** both narrow re-checks found it ratifiable as is (the Claude re-check by message; Codex at `plans/reviews/p4a1v3_38d9466c8_codex_recheck_2026-10-31.md`).
+- **v3.1:** applies the Claude re-check's four optional wording nits only.
 - **It is not binding until** a Claude reviewer and a Codex CLI pass re-review it (each finding filed), and the owner ratifies it by naming its sha256 and answering the yes/no list in §7.
 
 ## Authority
@@ -34,7 +38,7 @@ No other plan text changes.
 - **The release identity bound by this amendment:** 3.1.0's full merged sha256 `9a821e6a08e8fe8c6b0e2fd1d4bef9e5d4ee3740722b81ab7620c315287bc8da` and core merged sha256 `2bb8827c45a4dac40e834064a65c95cfc13d258b129c3aa1b9cbccba9ef624db` (G1 round 2, `31a086e0f`). The binding is to these, not to a commit, because G1 lands on main by cherry-pick.
 
 **Where the change reaches a request.** These are rules, not one run's figures:
-- **The digest insertion** is record-independent. After "`data_substrate` draws from" the digest gains exactly " a term from EDAM Data, EDAM Format, IANA media types (the source's own identifier, as an IRI or CURIE, when the documents supply one);", which is 135 bytes, in every request that carries the digest: `full`, its receipt completion, and the reconcile and report family. Typed-audit workers carry no digest.
+- **The digest insertion** is record-independent. After "`data_substrate` draws from" the digest gains exactly " a term from EDAM Data, EDAM Format, IANA media types (the source's own identifier, as an IRI or CURIE, when the documents supply one);", which is 135 bytes, in every request that carries the digest: `full`, its receipt completion, and the reconcile and report family. No typed-audit request (worker, omission or integration) carries the digest.
 - **The description** appears wherever a request renders the schema context with `data_substrate` retained:
   - on the shared-v1 route:
     - the reconcile and report family, and the omission's outer schema context, when the record has an Instance owner;
@@ -71,6 +75,8 @@ No other plan text changes.
 | `full`, `full_receipt_completion` | +135 |
 | `reconcile_full`, `report` | +324 |
 | typed-audit omission, every worker, and every integration request (group and final, every cap and escape scenario) | **+624** each |
+| `report_regate`, `report_after_repair` | +324 expected (the same renderer as `report`); re-captured at the registration review |
+| `repair_full`, `full_readdress` | covered by the registration review's re-capture |
 
 **Per occurrence:**
 - the digest insertion: +135;
@@ -79,7 +85,7 @@ No other plan text changes.
 - the prefix declaration: 0;
 - the catalog pin and hash fields: 0 net.
 
-So each BC1 typed request adds 2×189 + 2×123 = 624.
+So each BC1 typed request adds 2×189 + 2×123 = 624. The integration rows are offline sizing scenarios with placeholder future responses, and BC1's `reconcile_full` and `report` used the empty-future audit-carry scenario. The schema-only deltas depend on neither.
 
 **At the registration review** (plan step 3), the composed A21 head is re-captured the same way, before (G1's schema commits reverted on a scratch copy) and after. Any change that does not split wholly into these kinds and sizes is a deviation, needing a further amendment before the launch word.
 
