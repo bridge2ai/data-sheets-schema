@@ -97,8 +97,11 @@ def measure(args):
     environment = {key: value for key, value in os.environ.items()
                    if not any(word in key.upper() for word in ("API_KEY", "AUTH_TOKEN", "ACCESS_TOKEN"))
                    and key not in ("PYTEST_ADDOPTS", "D4D_INSTALL_TESTS")}
+    # Match CI's external bytecode prefix, including imports in subprocesses.
+    # Keeping it anywhere inside the checkout fails the notes write guards.
+    bytecode = TEMPORARIES / "pycache"
     environment.update(PYTHONPATH=os.pathsep.join(map(str, (ROOT / "src", ROOT, ROOT / "fairscape_models"))),
-                       PYTHONPYCACHEPREFIX=str(RESULTS / "pycache"), TMPDIR=str(temporary),
+                       PYTHONPYCACHEPREFIX=str(bytecode), TMPDIR=str(temporary),
                        MPLCONFIGDIR=str(RESULTS / "matplotlib"), XDG_CACHE_HOME=str(RESULTS / "cache"),
                        GIT_NO_LAZY_FETCH="1", GIT_TERMINAL_PROMPT="0", GIT_ALLOW_PROTOCOL="file",
                        PIP_NO_INDEX="1", UV_OFFLINE="1")
@@ -122,6 +125,7 @@ def measure(args):
                 "poetry_lock_sha256": hashlib.sha256((ROOT / "poetry.lock").read_bytes()).hexdigest(),
                 "packages_sha256": hashlib.sha256((output / "packages.txt").read_bytes()).hexdigest(),
                 "pytest_args": pytest_args, "load_before": os.getloadavg(),
+                "pycache_prefix": str(bytecode),
                 "wake_assertion": "caffeinate -is",
                 "elapsed_clock": time.get_clock_info("monotonic").implementation}
     for argument in pytest_args:

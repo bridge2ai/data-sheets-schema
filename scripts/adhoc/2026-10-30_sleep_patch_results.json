@@ -30,10 +30,20 @@
       ],
       "measurement_sha256": "82dcca3c2fbbe5ba90ddd918e0472d23b22203b1052b353c3a336d5330bc9430",
       "pytest_log_sha256": "d1ceff4f6d6a3ce57f4472e8daeb04b8e5c7acd9ba393e7ca53ee2748a7a0531",
+      "pytest_summary": "1 failed, 1 warning in 122.03s (0:02:02)",
       "junit_sha256": "171e4f27535e7feb1f641810efc610fee35400d146a137ae0a73bd5c8ee22cc3",
       "outcomes": {
         "failed": 1
       },
+      "failed_cases": [
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unavailable_counter_is_refused_without_dispatch_and_a_resume_recovers",
+          "time": "119.368",
+          "outcome": "failed"
+        }
+      ],
+      "skipped_cases": [],
       "cases": [
         {
           "classname": "tests.test_report_admission",
@@ -166,10 +176,13 @@
       ],
       "measurement_sha256": "ca1e62537b6a4effa3721131ac803af7ed5fa0e81c64b253eba4eacfdaefc359",
       "pytest_log_sha256": "0e48e629ed2ca8695d1d68728620c89c0a21edd14e2abb3b314bb00d3c7ec1ea",
+      "pytest_summary": "================= 9 passed, 13 warnings in 2235.14s (0:37:15) ==================",
       "junit_sha256": "f3af443559ccacbf68ddfa4b078cbf69791994fd8c1d01ff065632429e200481",
       "outcomes": {
         "passed": 9
       },
+      "failed_cases": [],
+      "skipped_cases": [],
       "cases": [
         {
           "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
@@ -256,10 +269,13 @@
       ],
       "measurement_sha256": "32a8d7d60b68c30d7e9ff183c53c36a38f4ac8b75ca995475ef2d3704bac3ad8",
       "pytest_log_sha256": "549775b8d9998fe9f470ea11707c1eecd9142898c6f79eeb6b2df08620f28e1b",
+      "pytest_summary": "1 passed, 13 warnings in 207.23s (0:03:27)",
       "junit_sha256": "7b85ee8bfe686d2f3da67c7ea1bb28cae9e2c07ad7b24c939b6b99bb94a005c3",
       "outcomes": {
         "passed": 1
       },
+      "failed_cases": [],
+      "skipped_cases": [],
       "cases": [
         {
           "classname": "tests.test_report_admission",
@@ -637,10 +653,13 @@
       ],
       "measurement_sha256": "5343ba227eed3fd15d53864a6cef39cd0f411a33d7d8a98b422e883ff6785760",
       "pytest_log_sha256": "8cbfa5eafb13be80c824d5aac4dd5dd778c0b29325f3a677d9e5e8c840855836",
+      "pytest_summary": "======================= 16 passed, 13 warnings in 36.39s =======================",
       "junit_sha256": "326f57841e93a066b8c1264bbc6ac73d6d3c65525a484fd240197fc3a1380999",
       "outcomes": {
         "passed": 16
       },
+      "failed_cases": [],
+      "skipped_cases": [],
       "cases": [
         {
           "classname": "tests.test_backoff_sleep",
@@ -771,10 +790,13 @@
       ],
       "measurement_sha256": "1e335d47448c03baa74499d9fdf09349d4448c2ea7bd33dc498ec639658cae57",
       "pytest_log_sha256": "2ca15fd1fd23034bc70ba6f95cf6fbf176ebdc26a9e154173b6100d2b72b5edf",
+      "pytest_summary": "================= 9 passed, 13 warnings in 2253.72s (0:37:33) ==================",
       "junit_sha256": "c424688d443f16bddca8dd9ad8c1e8e3356d7dc0dff4c7b431722c628c986072",
       "outcomes": {
         "passed": 9
       },
+      "failed_cases": [],
+      "skipped_cases": [],
       "cases": [
         {
           "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
@@ -862,8 +884,11 @@
       ],
       "measurement_sha256": "2a2128cf35aa846544bcf8fa7d5dd9be3190c68a4376a8bbfac108b7dff1226c",
       "pytest_log_sha256": "050591cc1c0402d18f388e47431a432f32c74aadc54346b643ee613753b30c76",
+      "pytest_summary": "20529 tests collected in 63.26s (0:01:03)",
       "junit_sha256": "2f3f04740d21d4b98912781d5d801e74e11669426c5184198e70407ca8a2dc26",
       "outcomes": {},
+      "failed_cases": [],
+      "skipped_cases": [],
       "cases": []
     },
     "ci-worker-canary": {
@@ -901,10 +926,13 @@
       ],
       "measurement_sha256": "985687ed86df9663df7a4bc317f80c06876792dd1def38c71012de5a595d65be",
       "pytest_log_sha256": "64198c0e1c6169c3d3d1d9f8ecb8f87b8cb0e018012bc6c83b99441e83b72bbc",
+      "pytest_summary": "============================== 1 passed in 0.97s ===============================",
       "junit_sha256": "320d08e376f256522dea56d3b2fa91f14a9020a33cbf7ea789f84630e9825edc",
       "outcomes": {
         "passed": 1
       },
+      "failed_cases": [],
+      "skipped_cases": [],
       "cases": [
         {
           "classname": "tests.test_backoff_sleep",
@@ -955,11 +983,87 @@
       ],
       "measurement_sha256": "f28c89772f4df0dbcf15cb7ba9114cb7e9d551d1c9c8796e40292a961c1fee84",
       "pytest_log_sha256": "970eb25337d139cf822808e69d6c21c283abeed9005925094e76416be04bde42",
+      "pytest_summary": "============ 59 passed, 4 warnings, 12 errors in 140.36s (0:02:20) =============",
       "junit_sha256": "74ecc02306af473fbb3171c70d893b69691fdbf185739359dd81002e49c038e3",
       "outcomes": {
         "passed": 63,
         "failed": 12
       },
+      "failed_cases": [
+        {
+          "classname": "tests.test_native_receipt_origin_reporting",
+          "name": "test_only_exact_integer_version_is_admitted[native_attribution-True]",
+          "time": "3.229",
+          "outcome": "failed"
+        },
+        {
+          "classname": "tests.test_native_receipt_origin_reporting",
+          "name": "test_only_exact_integer_version_is_admitted[native_attribution-None]",
+          "time": "0.001",
+          "outcome": "failed"
+        },
+        {
+          "classname": "tests.test_native_receipt_origin_reporting",
+          "name": "test_only_exact_integer_version_is_admitted[native_attribution-1.0]",
+          "time": "0.000",
+          "outcome": "failed"
+        },
+        {
+          "classname": "tests.test_native_receipt_origin_reporting",
+          "name": "test_only_exact_integer_version_is_admitted[native_attribution--1]",
+          "time": "0.001",
+          "outcome": "failed"
+        },
+        {
+          "classname": "tests.test_native_receipt_origin_reporting",
+          "name": "test_only_exact_integer_version_is_admitted[native_attribution-2]",
+          "time": "0.001",
+          "outcome": "failed"
+        },
+        {
+          "classname": "tests.test_native_receipt_origin_reporting",
+          "name": "test_only_exact_integer_version_is_admitted[native_attribution-selector8]",
+          "time": "0.001",
+          "outcome": "failed"
+        },
+        {
+          "classname": "tests.test_native_receipt_origin_reporting",
+          "name": "test_default_and_explicit_zero_preserve_registration_bytes[native_attribution]",
+          "time": "3.164",
+          "outcome": "failed"
+        },
+        {
+          "classname": "tests.test_native_receipt_origin_reporting",
+          "name": "test_only_exact_integer_version_is_admitted[native_attribution-selector9]",
+          "time": "0.002",
+          "outcome": "failed"
+        },
+        {
+          "classname": "tests.test_native_receipt_origin_reporting",
+          "name": "test_only_exact_integer_version_is_admitted[native_attribution-1]",
+          "time": "0.000",
+          "outcome": "failed"
+        },
+        {
+          "classname": "tests.test_native_receipt_origin_reporting",
+          "name": "test_registration_derives_paths_and_refuses_forged_declarations[native_attribution]",
+          "time": "0.000",
+          "outcome": "failed"
+        },
+        {
+          "classname": "tests.test_native_receipt_origin_reporting",
+          "name": "test_only_exact_integer_version_is_admitted[native_attribution-False]",
+          "time": "2.959",
+          "outcome": "failed"
+        },
+        {
+          "classname": "tests.test_native_receipt_origin_reporting",
+          "name": "test_only_exact_integer_version_is_admitted[native_attribution-0]",
+          "time": "0.000",
+          "outcome": "failed"
+        }
+      ],
+      "skipped_cases": [],
       "cases": []
     },
     "native-temp-canary": {
@@ -997,10 +1101,13 @@
       ],
       "measurement_sha256": "e0b42e258204c70bd93767a8a903d51c522e5ae53a9dde461ac51f4e7155fbdc",
       "pytest_log_sha256": "9643279394943c6b4ff17f7c9bfcc501d0f24cff01796c74b2f62feb223ae607",
+      "pytest_summary": "======================== 1 passed, 4 warnings in 9.86s =========================",
       "junit_sha256": "8f320c4e7bf426f9a714811dd5f4c962c9cb5658e01049121281c46e999662d4",
       "outcomes": {
         "passed": 1
       },
+      "failed_cases": [],
+      "skipped_cases": [],
       "cases": []
     },
     "followup-collection": {
@@ -1033,8 +1140,11 @@
       ],
       "measurement_sha256": "cb5009bdc6a1d1f1fedb7f6cb7d94e9af19e1f3b1adf0ec9bf615e71106aaf37",
       "pytest_log_sha256": "7954a5eabdf9de56af3a98ededda91105f085903089f9d4e9cd65e9db568dbd9",
+      "pytest_summary": "20807 tests collected in 8.83s",
       "junit_sha256": "3acff38680066d5e9c337d575e71e2cf33a4bd44d38ecacf2799af431a7f351c",
       "outcomes": {},
+      "failed_cases": [],
+      "skipped_cases": [],
       "cases": []
     },
     "main-checkout-canary": {
@@ -1066,10 +1176,13 @@
       ],
       "measurement_sha256": "8176844d76c9501d0daa414dc91b9a676ffbdd8f10ff3c968fd831540d6075b4",
       "pytest_log_sha256": "6fd9c399a77714c86cbc538bbeeb3c367c74d8067797e6c153544d8360f5a100",
+      "pytest_summary": "========================= 1 passed, 1 warning in 6.00s =========================",
       "junit_sha256": "21b911fc872182516f3e12edd6b9d327132efcacc3e207f356154b13b1f7d3ad",
       "outcomes": {
         "passed": 1
       },
+      "failed_cases": [],
+      "skipped_cases": [],
       "cases": [
         {
           "classname": "tests.test_report_admission",
@@ -1109,10 +1222,13 @@
       ],
       "measurement_sha256": "076b54cee41c1d7389406c39f037138a6c96fcd03d9e2ed518d4ae0d7c6739fb",
       "pytest_log_sha256": "5d9d88fd0962f317a89249d0743b5f6ffdcade3974e62ff246725fb38e3e2ee1",
+      "pytest_summary": "================= 29 passed, 13 warnings in 4113.11s (1:08:33) =================",
       "junit_sha256": "b1281f0dd78de9badbb782b516bb4fd57387814fe4a4c75cdeaea6127e92d0e3",
       "outcomes": {
         "passed": 29
       },
+      "failed_cases": [],
+      "skipped_cases": [],
       "cases": [
         {
           "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
@@ -1320,10 +1436,13 @@
       ],
       "measurement_sha256": "73deea801ea73a7dcb0d622b90d8ae7bb10f404a167ff1acbdddad1a865f9817",
       "pytest_log_sha256": "66aaf8e93c736f374575c265a6265595f115b89d2723214bc5ff9fb7538ce285",
+      "pytest_summary": "================= 29 passed, 13 warnings in 6714.08s (1:51:54) =================",
       "junit_sha256": "7b1fd590737ff4b00f0c9246400ec98a0c312e0f364b1d8fbdc87b00a2f5f598",
       "outcomes": {
         "passed": 29
       },
+      "failed_cases": [],
+      "skipped_cases": [],
       "cases": [
         {
           "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
@@ -1500,6 +1619,1537 @@
           "outcome": "passed"
         }
       ]
+    },
+    "awake-worker-canary": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "7805a794aab3499d09f9b487e60b95ba04256871",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests/test_backoff_sleep.py::test_timeout_wait_preserves_child_progress_without_recording_backoff",
+        "-v",
+        "-n",
+        "logical",
+        "--maxprocesses=4",
+        "--dist",
+        "load",
+        "--maxschedchunk=1",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/codex_logs/sleep-patch-20261030/awake-worker-canary/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/awake-worker-canary/pytest.xml"
+      ],
+      "load_before": [
+        25.095703125,
+        32.54345703125,
+        56.181640625
+      ],
+      "wake_assertion": "caffeinate -is",
+      "elapsed_clock": "mach_absolute_time()",
+      "wall_seconds": 1.8279611660109367,
+      "clock_wall_seconds": 1.8279547691345215,
+      "started_utc": "2026-10-31T03:39:45Z",
+      "finished_utc": "2026-10-31T03:39:47Z",
+      "exit_code": 0,
+      "load_after": [
+        25.095703125,
+        32.54345703125,
+        56.181640625
+      ],
+      "measurement_sha256": "342c8976813d171874a0c14a71c5aab62a494fe5b407eaa609a4b820fa7f3713",
+      "pytest_log_sha256": "d8d97925cb84ff6b0f72a24915dd6b09ceace7ade2e1872848e4d371312d4532",
+      "pytest_summary": "============================== 1 passed in 1.11s ===============================",
+      "junit_sha256": "9b63a2b216aa0e0aa595819eabde5b553250252d325dbabe8597f12f878b9421",
+      "outcomes": {
+        "passed": 1
+      },
+      "failed_cases": [],
+      "skipped_cases": [],
+      "cases": [
+        {
+          "classname": "tests.test_backoff_sleep",
+          "name": "test_timeout_wait_preserves_child_progress_without_recording_backoff",
+          "time": "0.186",
+          "outcome": "passed"
+        }
+      ]
+    },
+    "followup-recorder-regressions": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "7805a794aab3499d09f9b487e60b95ba04256871",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests/test_backoff_sleep.py",
+        "tests/test_report_admission.py::test_a_transient_count_error_is_retried_as_the_dispatch_would_be",
+        "tests/test_report_admission.py::test_a_count_still_failing_after_max_attempts_is_refused",
+        "tests/test_download/test_api_runner.py::TestResumeAndRetry::test_truncated_output_raises_rather_than_writing",
+        "tests/test_download/test_api_runner.py::TestResumeAndRetry::test_an_unusable_body_is_retried_not_fatal",
+        "tests/test_source_review.py::test_unusable_reviews_never_retry_or_resume",
+        "tests/test_duplicate_keys.py::TestReviewRound::test_the_repair_round_is_told_about_a_duplicate_and_checks_it_again",
+        "-v",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/codex_logs/sleep-patch-20261030/followup-recorder-regressions/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/followup-recorder-regressions/pytest.xml"
+      ],
+      "load_before": [
+        23.29541015625,
+        31.76806640625,
+        55.49072265625
+      ],
+      "wake_assertion": "caffeinate -is",
+      "elapsed_clock": "mach_absolute_time()",
+      "wall_seconds": 38.120021042006556,
+      "clock_wall_seconds": 38.1198570728302,
+      "started_utc": "2026-10-31T03:39:58Z",
+      "finished_utc": "2026-10-31T03:40:36Z",
+      "exit_code": 0,
+      "load_after": [
+        21.04443359375,
+        30.31103515625,
+        54.00537109375
+      ],
+      "measurement_sha256": "6b08399234c2ab7854e24614006e54f37218605299def6f23ebf142a6f87cc43",
+      "pytest_log_sha256": "b758a4d98ab818cf1b7cac6483afe19b328e38affabf639329fba96a2045eabe",
+      "pytest_summary": "======================= 16 passed, 13 warnings in 36.91s =======================",
+      "junit_sha256": "d4f87973e6fd562e57e646f93082a3419ac66e86126667ed880017b7af45f43a",
+      "outcomes": {
+        "passed": 16
+      },
+      "failed_cases": [],
+      "skipped_cases": [],
+      "cases": [
+        {
+          "classname": "tests.test_backoff_sleep",
+          "name": "test_short_sleeps_delegate_but_backoffs_are_recorded",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_backoff_sleep",
+          "name": "test_timeout_wait_preserves_child_progress_without_recording_backoff",
+          "time": "0.186",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_transient_count_error_is_retried_as_the_dispatch_would_be",
+          "time": "4.884",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_count_still_failing_after_max_attempts_is_refused",
+          "time": "1.376",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_truncated_output_raises_rather_than_writing",
+          "time": "11.613",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_an_unusable_body_is_retried_not_fatal",
+          "time": "8.473",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[audit-malformed-2]",
+          "time": "5.393",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[audit-empty-2]",
+          "time": "0.166",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[audit-truncated-2]",
+          "time": "0.160",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report-empty-4]",
+          "time": "0.240",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report-truncated-4]",
+          "time": "0.247",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report_regate-empty-5]",
+          "time": "0.814",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report_regate-truncated-5]",
+          "time": "0.997",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report_after_repair-empty-6]",
+          "time": "0.773",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report_after_repair-truncated-6]",
+          "time": "0.739",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestReviewRound",
+          "name": "test_the_repair_round_is_told_about_a_duplicate_and_checks_it_again",
+          "time": "0.026",
+          "outcome": "passed"
+        }
+      ]
+    },
+    "final-collection": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "7805a794aab3499d09f9b487e60b95ba04256871",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests",
+        "--collect-only",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/codex_logs/sleep-patch-20261030/final-collection/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/final-collection/pytest.xml"
+      ],
+      "load_before": [
+        19.0048828125,
+        29.41162109375,
+        53.27001953125
+      ],
+      "wake_assertion": "caffeinate -is",
+      "elapsed_clock": "mach_absolute_time()",
+      "wall_seconds": 7.894233125000028,
+      "clock_wall_seconds": 7.894201278686523,
+      "started_utc": "2026-10-31T03:40:52Z",
+      "finished_utc": "2026-10-31T03:41:00Z",
+      "exit_code": 0,
+      "load_after": [
+        17.08544921875,
+        28.6572265625,
+        52.72314453125
+      ],
+      "measurement_sha256": "7ed3640d9b060cacf6e5a8f6f5745aa1e55736f881fa2e25d7c6427ef0650a0a",
+      "pytest_log_sha256": "5d59db8ebae733534fdb20a59702dce1d49de5c6c4897ab44dd3a94da3707204",
+      "pytest_summary": "20807 tests collected in 6.40s",
+      "junit_sha256": "56b64233951bd0b8e5a763102ca169d29273b6a13634fd1b09ea7981dcbfc7f1",
+      "outcomes": {},
+      "failed_cases": [],
+      "skipped_cases": [],
+      "cases": []
+    },
+    "followup-shard5": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "7805a794aab3499d09f9b487e60b95ba04256871",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests",
+        "-v",
+        "-p",
+        "utils.pytest_shard",
+        "--ci-shard=5/6",
+        "--ci-shard-timings=utils/ci_test_durations.json",
+        "--ci-lane=ordinary",
+        "-n",
+        "logical",
+        "--maxprocesses=4",
+        "--dist",
+        "load",
+        "--maxschedchunk=1",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/codex_logs/sleep-patch-20261030/followup-shard5/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/followup-shard5/pytest.xml"
+      ],
+      "load_before": [
+        17.078125,
+        28.46337890625,
+        52.513671875
+      ],
+      "wake_assertion": "caffeinate -is",
+      "elapsed_clock": "mach_absolute_time()",
+      "ci_test_durations_sha256": "af1d4526d16ef2fb01c65e5377d4491af710faedebdaed093d89d8a53093cc22",
+      "wall_seconds": 751.8819548330066,
+      "clock_wall_seconds": 751.8779098987579,
+      "started_utc": "2026-10-31T03:41:07Z",
+      "finished_utc": "2026-10-31T03:53:39Z",
+      "exit_code": 0,
+      "load_after": [
+        23.998046875,
+        31.078125,
+        40.75537109375
+      ],
+      "measurement_sha256": "4db2033d29586ef4452e21922c66abcac5d23c9d8bea890dd52a85ca9ddbd012",
+      "pytest_log_sha256": "c03c0c6117cd905bf500994cb5ed22152fe8138b1453cec4f84847c0a09f60fa",
+      "pytest_summary": "=========== 3339 passed, 1 skipped, 6 warnings in 751.35s (0:12:31) ============",
+      "junit_sha256": "232f633ea53b56a9418d1a0e86733fd338d1176bfdb4640781b9015a5b0673d1",
+      "outcomes": {
+        "passed": 3339,
+        "skipped": 1
+      },
+      "failed_cases": [],
+      "skipped_cases": [
+        {
+          "classname": "tests.test_download.test_audit_bundles.TestTheAuditOverTheRealCorpus",
+          "name": "test_the_crate_bundle_is_reported_when_the_document_bundle_moves",
+          "time": "0.001",
+          "outcome": "skipped",
+          "skip_reason": "crate inputs are gitignored and absent here (#453)"
+        }
+      ],
+      "cases": [
+        {
+          "classname": "tests.test_duplicate_keys.TestDetection",
+          "name": "test_a_clean_record_and_unparsable_text_yield_nothing",
+          "time": "0.003",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestDetection",
+          "name": "test_top_level_and_nested_duplicates_are_found_with_lines",
+          "time": "0.006",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheLoader",
+          "name": "test_libyaml_and_the_pure_python_loader_give_the_same_findings",
+          "time": "0.009",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheLoader",
+          "name": "test_strict_raises_what_the_default_reports_as_nothing",
+          "time": "0.049",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheLoader",
+          "name": "test_the_default_is_the_pure_python_safe_loader",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheLoader",
+          "name": "test_the_given_loader_composes_the_tree",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestUnencodableText",
+          "name": "test_a_lone_surrogate_is_nothing_by_default_and_a_reader_error_under_strict",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestUnencodableText",
+          "name": "test_an_answer_matches_the_load_only_where_the_loader_scans",
+          "time": "0.003",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestUnencodableText",
+          "name": "test_both_loaders_raise_the_same_reader_error",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestUnencodableText",
+          "name": "test_code_points_at_every_reader_boundary_are_accepted_or_rejected_alike",
+          "time": "0.190",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestUnencodableText",
+          "name": "test_libyaml_accepts_a_line_start_mark_the_default_refuses",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestUnencodableText",
+          "name": "test_one_line_start_mark_gives_different_structures",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestUnencodableText",
+          "name": "test_the_depth_guard_does_not_raise_on_an_unencodable_text",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestUnencodableText",
+          "name": "test_the_scanners_differ_on_a_tab_in_a_plain_scalar",
+          "time": "0.002",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestUnencodableText",
+          "name": "test_the_scanners_differ_the_other_way_on_a_byte_order_mark",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestUnencodableText",
+          "name": "test_two_leading_byte_order_marks_give_different_keys",
+          "time": "0.002",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheLibyamlDepthGuard",
+          "name": "test_a_leading_byte_order_mark_is_refused_at_the_limit_like_any_other_text",
+          "time": "0.002",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheLibyamlDepthGuard",
+          "name": "test_a_scan_of_a_tree_nested_fifty_thousand_deep_raises_and_does_not_crash",
+          "time": "0.123",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheLibyamlDepthGuard",
+          "name": "test_every_libyaml_scan_parses_its_text_for_depth_first",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheLibyamlDepthGuard",
+          "name": "test_the_default_loader_never_consults_the_guard",
+          "time": "0.002",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheLibyamlDepthGuard",
+          "name": "test_the_guard_counts_the_depth_the_composer_reaches",
+          "time": "0.016",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheLibyamlDepthGuard",
+          "name": "test_the_guard_refuses_one_level_past_the_limit_and_scans_at_it",
+          "time": "0.003",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheLibyamlDepthGuard",
+          "name": "test_without_libyaml_the_fallback_raises_cleanly_on_the_same_texts",
+          "time": "2.393",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestDetection",
+          "name": "test_the_loader_would_have_kept_the_last",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheGate",
+          "name": "test_a_record_with_duplicate_keys_regresses_against_a_floor_of_zero",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheGate",
+          "name": "test_an_unreadable_artifact_is_not_a_measured_zero",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestValidateOutputs",
+          "name": "test_a_duplicate_key_is_a_validation_problem_and_is_recorded",
+          "time": "0.007",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheCorpus",
+          "name": "test_no_committed_record_hides_a_duplicate_key",
+          "time": "30.152",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestTheGate",
+          "name": "test_a_measured_zero_is_a_row_and_an_unmeasured_block_is_none",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestReviewRound",
+          "name": "test_keys_collide_as_the_loader_constructs_them",
+          "time": "0.002",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestReviewRound",
+          "name": "test_one_finding_per_extra_occurrence_so_a_partial_merge_is_progress",
+          "time": "0.002",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestReviewRound",
+          "name": "test_the_method_base_strips_a_core_suffix",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestReviewRound",
+          "name": "test_the_offline_verdict_reads_the_record_and_keeps_the_prior_block",
+          "time": "0.007",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestReviewRound",
+          "name": "test_the_repair_round_is_told_about_a_duplicate_and_checks_it_again",
+          "time": "0.032",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestReviewRound",
+          "name": "test_unscannable_text_claims_nothing",
+          "time": "0.105",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_duplicate_keys.TestReviewRound",
+          "name": "test_aliases_and_cycles_are_walked_once",
+          "time": "0.001",
+          "outcome": "passed"
+        }
+      ]
+    },
+    "followup-shard6": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "7805a794aab3499d09f9b487e60b95ba04256871",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests",
+        "-v",
+        "-p",
+        "utils.pytest_shard",
+        "--ci-shard=6/6",
+        "--ci-shard-timings=utils/ci_test_durations.json",
+        "--ci-lane=ordinary",
+        "-n",
+        "logical",
+        "--maxprocesses=4",
+        "--dist",
+        "load",
+        "--maxschedchunk=1",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/codex_logs/sleep-patch-20261030/followup-shard6/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/followup-shard6/pytest.xml"
+      ],
+      "load_before": [
+        57.3310546875,
+        38.79248046875,
+        43.04150390625
+      ],
+      "wake_assertion": "caffeinate -is",
+      "elapsed_clock": "mach_absolute_time()",
+      "ci_test_durations_sha256": "af1d4526d16ef2fb01c65e5377d4491af710faedebdaed093d89d8a53093cc22",
+      "wall_seconds": 2275.1739445830026,
+      "clock_wall_seconds": 2275.2518389225006,
+      "started_utc": "2026-10-31T03:54:29Z",
+      "finished_utc": "2026-10-31T04:32:24Z",
+      "exit_code": 1,
+      "load_after": [
+        16.31298828125,
+        13.63623046875,
+        16.95654296875
+      ],
+      "measurement_sha256": "65ea8a442f0f5f3472d6b093ad02501755a40bd65639101c0770003fc67157e3",
+      "pytest_log_sha256": "8e5e292ae1203481889e844866d1728c70dacc8d123881fc33a6dc89ca73e950",
+      "pytest_summary": "=========== 2 failed, 3802 passed, 4 warnings in 2274.59s (0:37:54) ============",
+      "junit_sha256": "e231b6de78716edfea75444b39c11471834fea682789fe6ecd438a5fe18c020f",
+      "outcomes": {
+        "passed": 3802,
+        "failed": 2
+      },
+      "failed_cases": [
+        {
+          "classname": "tests.test_notes_write_guard",
+          "name": "test_bytecode_for_a_notes_tool_is_written_outside_the_checkout",
+          "time": "0.001",
+          "outcome": "failed"
+        },
+        {
+          "classname": "tests.test_notes_write_guard",
+          "name": "test_a_subprocess_inherits_the_bytecode_prefix",
+          "time": "0.173",
+          "outcome": "failed"
+        }
+      ],
+      "skipped_cases": [],
+      "cases": [
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_refused_refresh_preserves_the_repaired_artifact_progress",
+          "time": "175.986",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_missing_corrupt_or_stale_checkpoint_refuses_before_calls",
+          "time": "534.091",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[False]",
+          "time": "354.781",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_does_not_disable_later_invalid_run_repair",
+          "time": "321.854",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_interruption_before_refresh_does_not_restart_the_sealed_full",
+          "time": "337.580",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestSchemaDigest",
+          "name": "test_core_class_resolves_to_the_core_schema",
+          "time": "0.005",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestSchemaDigest",
+          "name": "test_digest_is_far_smaller_than_the_schema",
+          "time": "0.059",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestSchemaDigest",
+          "name": "test_fingerprint_is_stable_and_content_sensitive",
+          "time": "0.012",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestSchemaDigest",
+          "name": "test_the_registry_vocabulary_names_are_structure_not_facts",
+          "time": "0.003",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestSchemaDigest",
+          "name": "test_unknown_class_is_an_error_not_a_guess",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPromptResolution",
+          "name": "test_generic_prompt_differs_between_projects_only_mechanically",
+          "time": "0.058",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPromptResolution",
+          "name": "test_header_states_the_real_runtime_not_a_hardcoded_one",
+          "time": "0.009",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPromptResolution",
+          "name": "test_no_placeholders_survive",
+          "time": "0.008",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPromptResolution",
+          "name": "test_prompt_files_reflect_the_condition",
+          "time": "0.006",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPromptResolution",
+          "name": "test_tuned_adds_the_component_block_and_nothing_else",
+          "time": "0.023",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPromptResolution",
+          "name": "test_tuned_declares_its_components_in_the_header",
+          "time": "0.011",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPhaseAssembly",
+          "name": "test_audit_and_reconcile_demand_schema_shape_conformance",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPhaseAssembly",
+          "name": "test_carry_forward_is_included_when_supplied",
+          "time": "0.083",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPhaseAssembly",
+          "name": "test_carry_instructions_say_above_not_below",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPhaseAssembly",
+          "name": "test_core_phase_uses_the_core_class_digest",
+          "time": "0.125",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPhaseAssembly",
+          "name": "test_every_phase_caches_the_bundle_digest_and_ranking",
+          "time": "0.539",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPhaseAssembly",
+          "name": "test_instruction_is_the_last_part_so_carry_never_trails",
+          "time": "0.297",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPhaseAssembly",
+          "name": "test_missing_or_malformed_audit_is_not_reported_as_zero",
+          "time": "0.854",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPhaseAssembly",
+          "name": "test_other_phases_use_the_full_class_digest",
+          "time": "0.454",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPhaseAssembly",
+          "name": "test_report_counts_entries_instead_of_the_audits_wrong_summary",
+          "time": "0.211",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPhaseAssembly",
+          "name": "test_system_prompt_states_the_evidence_boundary",
+          "time": "0.085",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPhaseAssembly",
+          "name": "test_unknown_phase_rejected",
+          "time": "0.009",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPlan",
+          "name": "test_plan_does_not_cost_the_derived_phases",
+          "time": "0.337",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPlan",
+          "name": "test_plan_needs_no_api_key",
+          "time": "0.362",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPlan",
+          "name": "test_plan_output_paths_follow_the_run_layout",
+          "time": "0.342",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPlan",
+          "name": "test_plan_reports_the_shared_config_model",
+          "time": "0.335",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestPlan",
+          "name": "test_token_estimate_scales_with_the_bundle",
+          "time": "0.712",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_a_block_scalar_ends_at_a_dedent",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_a_correct_but_unquoted_value_is_quoted",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_a_date_in_a_datetime_slot_is_widened",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_a_datetime_in_a_date_slot_is_narrowed",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_a_naive_datetime_gains_a_zone",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_an_explicit_offset_is_kept_not_rewritten",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_folded_scalars_are_also_protected",
+          "time": "0.002",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_indentation_and_list_markers_survive",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_line_endings_and_indent_styles_survive",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_nested_records_keep_their_structure",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_normalisation_is_idempotent",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_prose_in_a_block_scalar_is_never_rewritten",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_the_header_comment_block_survives",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTemporalValuesAreNormalisedOnWrite",
+          "name": "test_values_it_cannot_read_are_left_alone",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestGeneratedDateIsTheRunDate",
+          "name": "test_v1_file_bytes_are_untouched",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestGeneratedDateIsTheRunDate",
+          "name": "test_v1_hardcoded_date_is_normalised_not_emitted",
+          "time": "0.019",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestGeneratedDateIsTheRunDate",
+          "name": "test_v2_no_longer_leaks_a_literal_placeholder",
+          "time": "0.014",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTheRunDateIsFrozenPerRun",
+          "name": "test_assembly_digest_moves_when_an_instruction_moves",
+          "time": "0.002",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTheRunDateIsFrozenPerRun",
+          "name": "test_every_phase_of_a_run_sees_the_same_date",
+          "time": "0.011",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTheRunDateIsFrozenPerRun",
+          "name": "test_the_date_can_be_pinned_explicitly",
+          "time": "0.008",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTheRunDateIsFrozenPerRun",
+          "name": "test_the_default_is_today_in_utc",
+          "time": "0.003",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTheRunDateIsFrozenPerRun",
+          "name": "test_the_recorded_digest_matches_the_text_actually_sent",
+          "time": "0.008",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResolvedPromptIsHashed",
+          "name": "test_substitution_changes_the_resolved_hash",
+          "time": "0.016",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResolvedPromptIsHashed",
+          "name": "test_the_digest_states_its_algorithm_and_size",
+          "time": "0.009",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResolvedPromptIsHashed",
+          "name": "test_the_same_request_hashes_the_same",
+          "time": "0.018",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExecuteOffline",
+          "name": "test_all_phase_budgets_respect_the_selected_route",
+          "time": "0.160",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExecuteOffline",
+          "name": "test_every_phase_sends_the_cached_prefix",
+          "time": "12.285",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[True]",
+          "time": "284.810",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExecuteOffline",
+          "name": "test_execute_writes_every_artifact",
+          "time": "5.615",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExecuteOffline",
+          "name": "test_progress_file_is_removed_on_success",
+          "time": "6.596",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExecuteOffline",
+          "name": "test_provenance_record_is_live_and_names_the_prompt",
+          "time": "5.880",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorDrivenRepair",
+          "name": "test_a_resumed_model_written_core_is_not_stamped_derived",
+          "time": "7.461",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorDrivenRepair",
+          "name": "test_build_repair_puts_instruction_last_and_omits_bundle",
+          "time": "0.006",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorDrivenRepair",
+          "name": "test_execute_records_no_repair_when_records_validate",
+          "time": "6.231",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorDrivenRepair",
+          "name": "test_execute_repairs_through_the_real_call_path",
+          "time": "1.927",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorDrivenRepair",
+          "name": "test_execute_snapshots_every_intermediate",
+          "time": "6.232",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorDrivenRepair",
+          "name": "test_intermediates_do_not_claim_a_prefix_sibling_project",
+          "time": "0.005",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorDrivenRepair",
+          "name": "test_repair_rewrites_the_failing_artifact_and_stops_when_clean",
+          "time": "0.048",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorDrivenRepair",
+          "name": "test_repair_stops_when_an_applied_round_makes_no_progress",
+          "time": "0.056",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorDrivenRepair",
+          "name": "test_repair_usage_uses_the_model_passed_to_the_request",
+          "time": "0.044",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorDrivenRepair",
+          "name": "test_resume_of_a_completed_run_keeps_the_prior_accounting",
+          "time": "9.278",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorDrivenRepair",
+          "name": "test_snapshot_never_overwrites_a_colliding_name",
+          "time": "0.005",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorDrivenRepair",
+          "name": "test_unusable_repair_leaves_the_record_untouched",
+          "time": "0.073",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_a_non_rate_limit_error_is_not_treated_as_one",
+          "time": "0.003",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_a_rate_limit_pause_is_capped",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_a_rate_limit_waits_for_the_stated_reset",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_a_rate_limit_without_a_reset_time_still_pauses",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_an_unusable_body_is_retried_not_fatal",
+          "time": "5.839",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_auth_errors_are_not_retried",
+          "time": "0.002",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_corrupt_progress_file_is_ignored_not_fatal",
+          "time": "5.434",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_failure_midway_keeps_completed_artifacts",
+          "time": "0.455",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_resume_false_redoes_everything",
+          "time": "10.645",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_resume_skips_completed_phases",
+          "time": "5.757",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_transient_errors_are_retried",
+          "time": "0.002",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeAndRetry",
+          "name": "test_truncated_output_raises_rather_than_writing",
+          "time": "0.221",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestMetadataPlacementIsUnified",
+          "name": "test_assistant_config_declares_the_aligned_name",
+          "time": "0.006",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestMetadataPlacementIsUnified",
+          "name": "test_filename_is_identical_across_layouts",
+          "time": "0.005",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestMetadataPlacementIsUnified",
+          "name": "test_old_assistant_filename_is_gone",
+          "time": "0.005",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestMetadataPlacementIsUnified",
+          "name": "test_progress_shares_the_metadata_directory",
+          "time": "0.005",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestMetadataPlacementIsUnified",
+          "name": "test_provenance_sits_with_the_report_in_assistant_layout",
+          "time": "0.003",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestMetadataPlacementIsUnified",
+          "name": "test_provenance_sits_with_the_report_in_study_layout",
+          "time": "0.003",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestOutputValidation",
+          "name": "test_digest_states_required_keys_of_object_ranges",
+          "time": "0.009",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestOutputValidation",
+          "name": "test_missing_artifact_is_reported_as_a_problem",
+          "time": "0.005",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestOutputValidation",
+          "name": "test_reconcile_core_is_shown_the_core_schema",
+          "time": "0.068",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTransportErrorsAreRetried",
+          "name": "test_a_bad_request_is_not_retried",
+          "time": "0.004",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTransportErrorsAreRetried",
+          "name": "test_a_hung_call_is_abandoned_and_retried_not_waited_on",
+          "time": "0.307",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTransportErrorsAreRetried",
+          "name": "test_a_late_abandoned_worker_cannot_poison_the_live_attempt",
+          "time": "1.311",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTransportErrorsAreRetried",
+          "name": "test_a_persistent_transport_error_still_gives_up",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTransportErrorsAreRetried",
+          "name": "test_read_timeout_is_retried",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestTransportErrorsAreRetried",
+          "name": "test_remote_protocol_error_is_retried",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestMidStreamErrorClassification",
+          "name": "test_client_errors_stay_non_transient",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestMidStreamErrorClassification",
+          "name": "test_message_text_is_the_fallback",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestMidStreamErrorClassification",
+          "name": "test_overloaded_error_flat_in_body_is_transient",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestMidStreamErrorClassification",
+          "name": "test_overloaded_error_nested_in_body_is_transient",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestMidStreamErrorClassification",
+          "name": "test_overloaded_stream_error_is_actually_retried",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestErrorBodyIsAuthoritative",
+          "name": "test_a_declared_400_is_not_retried_end_to_end",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestErrorBodyIsAuthoritative",
+          "name": "test_bare_error_envelope_falls_through_to_text",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestErrorBodyIsAuthoritative",
+          "name": "test_declared_transient_type_still_retries",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestErrorBodyIsAuthoritative",
+          "name": "test_text_cannot_promote_a_declared_client_error",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestErrorBodyIsAuthoritative",
+          "name": "test_text_fallback_survives_for_bodyless_errors",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_a_bad_audit_example_does_not_hide_a_later_valid_audit",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_a_bare_scalar_is_not_a_record",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_a_core_response_may_not_use_full_only_slots",
+          "time": "0.842",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_a_fenced_record_is_extracted",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_a_record_followed_by_a_small_example_keeps_the_record",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_a_record_must_carry_the_root_identifier",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_a_refusal_naming_real_slots_is_refused",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_a_report_containing_a_fenced_example_is_not_truncated",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_a_well_formed_audit_is_accepted",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_an_audit_must_carry_usable_findings",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_an_audit_must_match_the_audit_contract",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_an_audit_with_no_findings_is_still_an_audit",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_an_empty_report_is_refused",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_an_unfenced_record_is_accepted",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_markdown_reports_are_prose_by_design",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_narration_before_a_fence_is_discarded",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_narration_beside_a_real_slot_is_refused",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_narration_followed_by_a_real_record_keeps_the_record",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_narration_with_a_colon_is_still_refused",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_parseable_audit_with_object_summary_is_rejected_with_the_actual_shape_problem",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_prose_raises_from_extract",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_the_audit_ceiling_has_real_headroom",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_two_candidate_records_are_ambiguous_not_last_wins",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionRefusesProse",
+          "name": "test_uppercase_fence_labels_are_recognised",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestARejectedPhaseWritesNothing",
+          "name": "test_prose_in_phase_one_leaves_no_record_and_no_progress",
+          "time": "30.197",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionToleratesFenceArtifacts",
+          "name": "test_a_stray_language_marker_is_stripped",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionToleratesFenceArtifacts",
+          "name": "test_an_unclosed_fence_is_accepted",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExtractionToleratesFenceArtifacts",
+          "name": "test_tolerance_does_not_admit_prose",
+          "time": "0.002",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeUsesArtifactsNotOnlyProgress",
+          "name": "test_a_completed_run_reruns_nothing",
+          "time": "5.397",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeUsesArtifactsNotOnlyProgress",
+          "name": "test_a_corrupt_artifact_is_not_resumed_on_top_of",
+          "time": "0.133",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeUsesArtifactsNotOnlyProgress",
+          "name": "test_a_flat_out_dir_does_not_let_a_new_label_claim_old_outputs",
+          "time": "0.977",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeUsesArtifactsNotOnlyProgress",
+          "name": "test_a_partial_run_is_not_inferred_from_artifacts",
+          "time": "0.108",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeUsesArtifactsNotOnlyProgress",
+          "name": "test_a_resumed_run_reports_real_validation_problems",
+          "time": "5.373",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeUsesArtifactsNotOnlyProgress",
+          "name": "test_artifacts_without_provenance_are_not_adopted",
+          "time": "0.119",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeUsesArtifactsNotOnlyProgress",
+          "name": "test_resume_will_not_report_a_non_conforming_record_as_complete",
+          "time": "5.144",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestResumeUsesArtifactsNotOnlyProgress",
+          "name": "test_resuming_a_completed_run_preserves_its_provenance",
+          "time": "5.234",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestReceiptCondition",
+          "name": "test_a_stale_or_missing_manifest_refuses_before_a_token_is_spent",
+          "time": "0.016",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestReceiptCondition",
+          "name": "test_markers_and_instruction_only_under_the_receipt_condition",
+          "time": "0.284",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestReceiptCondition",
+          "name": "test_the_assembly_digest_covers_the_receipt_instruction",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestReceiptCondition",
+          "name": "test_the_full_phase_budget_is_raised_only_under_a_receipt_condition",
+          "time": "0.106",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestReceiptCondition",
+          "name": "test_the_response_is_split_into_record_and_receipt",
+          "time": "0.002",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestSchemaDigest",
+          "name": "test_digest_carries_no_dataset_facts",
+          "time": "0.006",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_paid_refresh_interruption_refuses_duplicate_dispatch",
+          "time": "193.551",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestExecuteOffline",
+          "name": "test_prefixed_route_caps_match_the_request_usage_and_provenance",
+          "time": "11.180",
+          "outcome": "passed"
+        }
+      ]
     }
   },
   "diagnosis": {
@@ -1525,7 +3175,8 @@
     "followup_base": "4c07980399d47d77b64c9f2bff7a50bfc5cc6ddf",
     "merge_resolution": "Use BackoffSleeps consistently at all seven global patch sites in four test files.",
     "timing_limit": "The nine highlighted cases do not install these sleep patches. Serial differences do not establish a patch-induced speedup or test the CI contention hypothesis.",
-    "ci_weights": "Unchanged: no reliable material timing change attributable to this follow-up; local host load and a sleep interruption prevent a CI-weight refresh from these measurements."
+    "ci_weights": "Unchanged: no reliable material timing change attributable to this follow-up; local host load and a sleep interruption prevent a CI-weight refresh from these measurements.",
+    "launcher_corrections": "Native fixtures require test temporaries outside source authority. The first complete shard 6 also found two bytecode-location guard failures: CI requires PYTHONPYCACHEPREFIX outside the checkout. Both temporary files and generated bytecode now use the task's external d4d-executions temporary area; test bodies and production code are unchanged by these launcher corrections."
   },
   "nine_case_comparison": [
     {
@@ -1873,7 +3524,7 @@
     "interpretation": "Host sleep interrupted the wire-equivalence case. All seven checkpoint cases had passed by the 19:13:18 process observation; both highlighted report cases ran after the 20:04:28 wake. The nine-case comparison excludes the interrupted case. The original runner's wall_seconds used time.monotonic and excludes deep sleep on this host; pytest's overall summary includes it. Future runs use caffeinate and record both clocks."
   },
   "ci_layout": {
-    "collection_label": "followup-collection",
+    "collection_label": "final-collection",
     "ci_test_durations_sha256": "af1d4526d16ef2fb01c65e5377d4491af710faedebdaed093d89d8a53093cc22",
     "collected_cases": 20807,
     "ordinary_cases": 20803,
@@ -1899,5 +3550,6 @@
         "cases": 55
       }
     }
-  }
+  },
+  "acceptance": {}
 }
