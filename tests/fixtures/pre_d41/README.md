@@ -102,7 +102,8 @@ fallback narrows the inventory to `intermediate/`; its generation-bound index
 remains authoritative when present. Shared no-resume uses the full inventory.
 Execution residue checks additionally distinguish their own freshly created
 coordination locks: only exclusive creation followed by a currently held lock
-with the same path/inode/mtime and zero bytes qualifies. The complete inventory
+with the same canonical path/inode/mtime and zero bytes qualifies. Directory
+aliases resolve to that canonical path; a symlink lock file still refuses. The complete inventory
 and verifier still include those locks. Pre-existing, released, edited or
 replaced locks are never excused by this startup scope distinction. A new
 identity sharing old unattributed sidecar locks may therefore require a new
@@ -123,3 +124,20 @@ now expects the D69 inspection-only refusal before shared registration's
 older ownership diagnostic. It retains zero-call/zero-lock assertions and
 now checks the whole tree, including directory and file metadata. Foreign
 guarded-owner and already-spent shared-run diagnostics stay unchanged.
+
+The broad validation found ten more fixture/expectation interactions with the
+complete inventory. Their changes retain the original downstream checks:
+
+- The intermediate-prefix sibling fixture now has a guarded journal before
+  its snapshots appear; the flat-label completed fixture binds its report as
+  well as its full/core outputs.
+- The D55 fresh-launch stub initializes accounting while its new locks are
+  held, as the real executor does, instead of leaving only released locks.
+- The three predecessor-activation cases and the post-publication activation
+  case bind their completed predecessor's four lock paths explicitly. Their
+  interruption, damage and recovery assertions remain intact.
+- The concurrency test expects the earlier inspection-only refusal for an
+  unattributed foreign label and checks the whole tree. The two split/flat
+  cases retain direct physical-lock exclusion in both directions, then check
+  that public execution refuses pre-existing sidecars without writes. Their
+  meta-test stubs use the same expected refusal messages.

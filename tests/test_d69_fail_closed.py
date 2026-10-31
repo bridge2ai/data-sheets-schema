@@ -132,8 +132,15 @@ def test_unattributed_prefix_sibling_is_residue(tmp_path, symlink):
     assert tree(tmp_path) == before
 
 
-def test_only_new_still_held_empty_locks_are_current_startup_writes(tmp_path):
-    selected = spec(project="P", out_dir=tmp_path)
+@pytest.mark.parametrize("directory_alias", [False, True])
+def test_only_new_still_held_empty_locks_are_current_startup_writes(tmp_path, directory_alias):
+    out = tmp_path
+    if directory_alias:
+        actual = tmp_path / "actual"
+        actual.mkdir()
+        out = tmp_path / "selected"
+        out.symlink_to(actual, target_is_directory=True)
+    selected = spec(project="P", out_dir=out)
     journal.refuse_legacy_execution(selected)
     with ledger.exclusive_run(selected):
         files = journal.owned_artifacts(selected)

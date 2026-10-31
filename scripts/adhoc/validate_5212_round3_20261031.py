@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SCRATCH = ROOT.parent / "scratch-5212fix"
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("tree")
-parser.add_argument("phase", choices=["canary", "focused", "broad", "collect", "shard", "xdist-canary"])
+parser.add_argument("phase", choices=["canary", "regressions", "focused", "broad", "collect", "shard", "xdist-canary"])
 parser.add_argument("name")
 parser.add_argument("--collection")
 args = parser.parse_args()
@@ -44,6 +44,20 @@ for before, after in (("c9567e3c3", head), ("f5e78ff02", "867e5bb04")):
 changed = [p for p in changed if p.endswith(".py") and (tree / p).is_file()]
 if args.phase == "canary":
     selected = ["tests/test_d68_legacy_readonly.py::test_fresh_prefix_project_does_not_claim_sibling_artifacts[projects0-flat]"]
+elif args.phase == "regressions":
+    selected = ["tests/test_d69_fail_closed.py", "tests/test_resume_instrument_and_activation.py",
+        "tests/test_download/test_api_runner.py::TestValidatorDrivenRepair::test_intermediates_do_not_claim_a_prefix_sibling_project",
+        "tests/test_download/test_api_runner.py::TestResumeUsesArtifactsNotOnlyProgress::test_a_flat_out_dir_does_not_let_a_new_label_claim_old_outputs",
+        "tests/test_pr5212_d55_fixes.py::test_resume_accepts_recorded_head_and_fresh_launch_needs_none",
+        *["tests/test_usage_ledger.py::" + name for name in (
+            "test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels",
+            "test_split_and_flat_layouts_cannot_overlap_in_either_direction",
+            "test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails",
+            "test_the_concurrency_test_reports_a_first_run_that_fails_early",
+            "test_the_concurrency_test_fails_a_first_run_that_hangs",
+            "test_the_concurrency_test_reports_a_first_run_that_fails_after_polling_began",
+            "test_the_concurrency_test_reports_a_first_run_that_fails_after_release",
+            "test_the_concurrency_test_reports_a_first_run_that_ends_without_the_boundary")]]
 elif args.phase == "focused":
     selected = sorted(set(FOCUSED + [p for p in changed if p not in BROAD]))
 elif args.phase == "broad":

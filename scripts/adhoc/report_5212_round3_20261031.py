@@ -97,8 +97,9 @@ lines = [f"# D68–D70 / D73 round-three implementation: `{head}`", "",
     "| Claude D | The old shard plan is gzip-compressed; validation paths are normalized. Original evidence bytes and hashes remain in scratch. New full plans/logs/reports remain outside Git. |", "",
     "The verifier remains explicitly limited to generic_v6 API records with a structured request spec (D73(b)). "
     "There is no recovery spending, adoption authorization, project-specific branch or new ROUTING_CODE module.", "",
+    "#5212 must land as a merge commit so the declared D41 boundary remains an ancestor of the landing commit.", "",
     "The complete inventory includes coordination locks. Execution's repeated startup checks recognize only empty locks "
-    "exclusively created and currently held by that invocation, with matching path/inode/mtime. "
+    "exclusively created and currently held by that invocation, with matching canonical path/inode/mtime. "
     "Pre-existing, released, changed or replaced locks remain residue; verifier inventory has no lock exemption. "
     "A new identity can require a new output directory when old sidecars have no positive owner binding.", "",
     "Fixture changes preserve their original downstream assertions: foreign-output and torn-abandoned-journal fixtures "
@@ -117,6 +118,16 @@ lines += ["", "Phase counts overlap; they are not summed as unique tests. Raw re
     "per-file ownership, an exact missing-ledger diagnostic mismatch, and a shared "
     "unknown-output expectation superseded by the earlier D69 refusal. Those were "
     "corrected before final validation. The interrupted focused-c run is partial evidence only.", "",
+    "The exploratory broad run found ten additional interactions introduced by the complete inventory. "
+    "The intermediate-sibling fixture now initializes guarded foreign history; the flat-label fixture "
+    "binds its report; the D55 launch stub initializes accounting while its new locks are held. "
+    "The three predecessor-activation parameters and the publication/acknowledgement case bind their "
+    "predecessor's lock paths, preserving all recovery assertions. The concurrency case expects "
+    "inspection-only for an unbound foreign label; both split/flat cases preserve direct physical-lock "
+    "exclusion and add unchanged-tree public refusals. Their original nodes are rerun on c9567e3c3 "
+    "in broad-base for base evidence; the README discloses every change. "
+    "A separate directory-alias regression fails before the canonical-path fix; edited/released locks "
+    "remain residue. Raw phase results below distinguish exploratory failures from final results.", "",
     "Final-archive artifact censuses (separate runs can overlap):", ""]
 for census_row in artifact_censuses:
     lines.append(f"- `{census_row['phase']}/{census_row['case']}`: "

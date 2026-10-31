@@ -1283,8 +1283,13 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         self.assertEqual(second.name, "CHORUS_repair_full_r1_2.yaml")
 
     def test_intermediates_do_not_claim_a_prefix_sibling_project(self):
+        from dataclasses import replace
+        from data_sheets_schema import usage_ledger
         s = spec(out_dir=self.out)
         self.out.mkdir(parents=True, exist_ok=True)
+        # A sibling prefix alone is ambiguous. Establish its guarded identity
+        # before either snapshot is written, as the real runner does.
+        usage_ledger.prepare_usage(replace(s, project="CHORUS_EXTENDED"), resume=False)
         self.api._snapshot(s, "CHORUS_full.yaml", "id: x\n")
         self.api._snapshot(s, "CHORUS_EXTENDED_full.yaml", "id: y\n")
         block = self.api._intermediates_block(s)
@@ -2494,6 +2499,11 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
             old = self._spec(td)
             self._complete_run(old)
             from data_sheets_schema import usage_ledger
+            # This synthetic completed record bound full/core only. The report
+            # also needs positive ownership before a different label can start.
+            record = yaml.safe_load(old.provenance_path.read_text())
+            record["validation"]["artifacts"]["report"] = {"path": str(old.report_path)}
+            old.provenance_path.write_text(yaml.safe_dump(record))
             old_account = usage_ledger.ledger_path(old)
             old_account_before = old_account.read_bytes()
             old_record_before = old.provenance_path.read_bytes()

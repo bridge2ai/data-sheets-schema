@@ -8,12 +8,14 @@ a small preparation manifest. Never fetches or alters the source checkout.
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import tarfile
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRATCH = ROOT.parent / "scratch-5212fix"
+os.environ.update(GIT_NO_LAZY_FETCH="1", GIT_NO_REPLACE_OBJECTS="1")
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("ref")
 parser.add_argument("name")

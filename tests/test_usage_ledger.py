@@ -299,8 +299,15 @@ def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_pat
         for contender, resume in ((s, True), (s, False),
                                   (replace(s, label="another_rep1"), True)):
             client = FakeClient()
-            with pytest.raises(ledger.UsageLedgerError, match="already active"):
+            # Another label cannot attribute the active run's empty sidecars.
+            # D69 therefore refuses it before trying the physical lock.
+            message = "already active" if contender.label == s.label else "inspection only"
+            from tests.test_d68_legacy_readonly import tree
+            before_tree = tree(tmp_path) if contender.label != s.label else None
+            with pytest.raises(ledger.UsageLedgerError, match=message):
                 api.execute(contender, resume=resume, client=client)
+            if before_tree is not None:
+                assert tree(tmp_path) == before_tree
             assert client.messages.calls == []
             assert ledger.ledger_path(s).read_bytes() == before
         assert not ledger.ledger_path(replace(s, label="another_rep1")).exists()
@@ -347,12 +354,25 @@ def test_split_and_flat_layouts_cannot_overlap_in_either_direction(tmp_path, mon
     flat = replace(split, out_dir=directory)
     assert (split.full_path == flat.full_path if shared_directory == "full"
             else split.core_path == flat.core_path)
+    # Pre-existing unbound sidecars are residue; current-lock proof must not
+    # excuse them. Physical lock exclusion is exercised separately below.
+    for selected in (split, flat):
+        with ledger.exclusive_run(selected):
+            pass
     for owner, contender in ((split, flat), (flat, split)):
         with ledger.exclusive_run(owner):
-            client = FakeClient()
+            # Test physical exclusion directly, including the second iteration
+            # when old unbound sidecars make the public guard refuse earlier.
             with pytest.raises(ledger.UsageLedgerError, match="already active"):
+                with ledger.exclusive_run(contender):
+                    pytest.fail("overlapping output lock was acquired")
+            client = FakeClient()
+            from tests.test_d68_legacy_readonly import tree
+            before = tree(tmp_path)
+            with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
                 api.execute(contender, client=client)
             assert client.messages.calls == []
+            assert tree(tmp_path) == before
             assert not ledger.ledger_path(contender).exists()
         # Failed acquisition must release files taken before the overlap.
         with ledger.exclusive_run(contender):
@@ -1101,7 +1121,8 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_p
 
     def execute(run, **kwargs):
         if threading.current_thread() is threading.main_thread():
-            raise ledger.UsageLedgerError("already active")     # every contender is refused
+            message = "inspection only" if run.label == "another_rep1" else "already active"
+            raise ledger.UsageLedgerError(message)     # every contender is refused
         api._begin_usage_call(run)                  # the patched boundary: sets entered, waits
         if late == "raises":
             raise marker

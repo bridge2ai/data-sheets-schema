@@ -10,6 +10,16 @@ from tests.test_download.test_api_runner import FakeClient
 from tests.test_generation_manifest_identity import external, offline, snapshot  # noqa: F401
 
 
+def bind_coordination_files(selected):
+    """Attest the completed fixture's locks before switching its flat label."""
+    paths = [path for _, path in ledger.output_locks((selected.full_path,
+        selected.core_path, selected.report_path, selected.provenance_path))]
+    assert all(path.is_file() and path.read_bytes() == b"" for path in paths)
+    record = yaml.safe_load(selected.provenance_path.read_text())
+    record["coordination_artifacts"] = [{"path": str(path)} for path in paths]
+    selected.provenance_path.write_text(yaml.safe_dump(record))
+
+
 @pytest.mark.parametrize("completed", [False, True])
 @pytest.mark.parametrize("change", ["renderer", "instruction"])
 def test_resume_refuses_a_changed_instrument_before_spending_or_writing(external, monkeypatch, completed, change):
@@ -66,6 +76,7 @@ def test_portable_record_refuses_changed_instruction_without_a_ledger(external):
 @pytest.mark.parametrize("damage", [None, "changed", "removed"])
 def test_label_switch_recovers_only_the_recorded_predecessor(external, monkeypatch, damage):
     api.execute(external, client=FakeClient())
+    bind_coordination_files(external)
     index = snapshot_store.index_path(external.metadata_dir, external.project)
     original = index.read_bytes()
     old_generation = ledger.generation_id(external)
@@ -103,6 +114,7 @@ def test_label_switch_recovers_only_the_recorded_predecessor(external, monkeypat
 
 def test_activation_recovers_after_index_publication_before_ledger_ack(external, monkeypatch):
     api.execute(external, client=FakeClient())
+    bind_coordination_files(external)
     new = replace(external, label="another-label")
     write = ledger._write
     with monkeypatch.context() as failing:

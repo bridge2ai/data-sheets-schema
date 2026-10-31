@@ -32,7 +32,7 @@ def is_new_held_lock(path):
     try:
         info = path.lstat()
         return not path.is_symlink() and info.st_size == 0 and any(
-            path.absolute() == name and (info.st_dev, info.st_ino, info.st_mtime_ns) == pin
+            path.resolve() == name and (info.st_dev, info.st_ino, info.st_mtime_ns) == pin
             for name, pin in _NEW_HELD_LOCKS.get())
     except OSError:
         return False

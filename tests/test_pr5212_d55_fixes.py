@@ -264,7 +264,12 @@ def test_resume_needs_external_head_before_recovery_or_dispatch(tmp_path, monkey
 def test_resume_accepts_recorded_head_and_fresh_launch_needs_none(tmp_path, monkeypatch, capsys):
     from tests.test_download.test_api_runner import spec
     selected = spec(out_dir=tmp_path)
-    monkeypatch.setattr(api, '_execute', lambda *a, **kw: {'accepted': True})
+    def accepted(run, *, resume, client):
+        # Like the real executor, initialize accounting while its new locks
+        # are held. A stub leaving only released locks is now refused by D69.
+        ledger.prepare_usage(run, resume=resume)
+        return {'accepted': True}
+    monkeypatch.setattr(api, '_execute', accepted)
     assert api.execute(selected)['accepted']
     ledger.prepare_usage(selected, resume=False)
     head = raw_events(selected)[-1]['sha256']

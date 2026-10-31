@@ -2,7 +2,8 @@
 """D73/#5212 review fixes: offline pytest with external basetemps, 2026-10-31.
 
 Inputs: pytest arguments and --basetemp under the owner's scratch-5212fix.
-Outputs: a phase/collection/environment report in that basetemp. Supports the
+Outputs: a phase/collection/environment report in that basetemp and a sibling
+JSONL of failures as they occur. Supports the
 requested xdist shard; all workers inherit the OS network/write sandbox.
 """
 import hashlib
@@ -34,11 +35,15 @@ if "--d73-canary-node" in args:
 base = Path(args[args.index("--basetemp") + 1]).resolve()
 assert base.is_relative_to(SCRATCH) and base != SCRATCH
 assert not base.exists(), "preserve prior validation evidence"
+live_failures = base.with_name(base.name + "-live-failures.jsonl")
+assert not live_failures.exists(), "preserve prior live failure evidence"
+live_failures.parent.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(SCRIPT_ROOT / "scripts/adhoc"))
 from d41_legacy_controls_20261029 import bootstrap
 
 environment = bootstrap(ROOT, SCRATCH)
 environment["tree"] = str(ROOT)
+environment["validation_launcher_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 tempfile.tempdir = str(SCRATCH / "temporary")
 os.environ.pop("PYTEST_DISABLE_PLUGIN_AUTOLOAD", None)
 venv = Path(sys.executable).parent.parent
@@ -88,10 +93,17 @@ class Observe:
             self.errors.append({"nodeid": report.nodeid, "message": str(report.longrepr)})
 
     def pytest_runtest_logreport(self, report):
-        self.reports.append({"nodeid": report.nodeid, "when": report.when,
+        result = {"nodeid": report.nodeid, "when": report.when,
             "outcome": report.outcome, "duration": report.duration,
             "wasxfail": getattr(report, "wasxfail", None),
-            **({"message": str(report.longrepr)} if report.failed or report.skipped else {})})
+            **({"message": str(report.longrepr)} if report.failed or report.skipped else {})}
+        self.reports.append(result)
+        if report.failed:
+            # Keep failures inspectable during long serial runs without
+            # interrupting them. This sidecar is outside pytest's basetemp,
+            # which pytest may initialize only after the first test finishes.
+            with live_failures.open("a") as stream:
+                stream.write(json.dumps({"head": environment["head"], **result}) + "\n")
 
 observer = Observe()
 code = pytest.main([*args, "-p", "no:cacheprovider"], plugins=[observer])
