@@ -273,15 +273,17 @@ def request_payload(req, settings, reg) -> dict:
     return payload
 
 
-def _context_check(value, payload, reg) -> None:
+def _context_check(value, payload, reg, *, label='receipt completion') -> None:
     from data_sheets_schema.usage_ledger import UsageLedgerError
     count = value.get('input_tokens') if isinstance(value, dict) else None
     if (type(count) is not int or count < 0 or value.get('request_sha256') != sha(canonical(payload))
             or value.get('method') != 'endpoint messages.count_tokens'
             or value.get('context_limit_tokens') != reg['context_limit_tokens']
-            or value.get('context_limit_basis') != reg['context_limit_basis']
-            or count + payload['max_tokens'] > reg['context_limit_tokens']):
-        raise UsageLedgerError('receipt completion context count unavailable, unbound, or exceeds registered window')
+            or value.get('context_limit_basis') != reg['context_limit_basis']):
+        raise UsageLedgerError(f'{label} context count unavailable or unbound')
+    if count + payload['max_tokens'] > reg['context_limit_tokens']:
+        raise UsageLedgerError(f"{label} context count exceeds the registered window: {count:,} input tokens "
+                               f"+ max_tokens {payload['max_tokens']:,} > {reg['context_limit_tokens']:,}")
 
 
 def _single_attempt_client(client):
@@ -334,8 +336,8 @@ def _reasoning_entry(spec, row, resp, model, *, phase=PHASE):
             'model': model, 'attempt': 1, **api._reasoning_usage(spec, row), **value}
 
 
-def _count_context(client, payload, reg) -> dict:
-    """Endpoint-reported count against a caller-asserted window; no generation."""
+def _measure_context(client, payload, reg, *, label='receipt completion') -> dict:
+    """The endpoint's count bound to its request and window, before any verdict."""
     from data_sheets_schema.usage_ledger import UsageLedgerError
     kwargs = {k: copy.deepcopy(payload[k]) for k in ('model', 'system', 'messages', 'thinking') if k in payload}
     if 'output_config' in payload:
@@ -347,11 +349,16 @@ def _count_context(client, payload, reg) -> dict:
         response = counter(**kwargs)
         count = response.get('input_tokens') if isinstance(response, dict) else getattr(response, 'input_tokens', None)
     except Exception as exc:
-        raise UsageLedgerError(f'receipt completion endpoint token count unavailable: {exc}') from exc
-    value = {'input_tokens': count, 'method': 'endpoint messages.count_tokens',
-             'request_sha256': sha(canonical(payload)), 'context_limit_tokens': reg['context_limit_tokens'],
-             'context_limit_basis': reg['context_limit_basis'], 'capacity_authority': 'caller assertion'}
-    _context_check(value, payload, reg)
+        raise UsageLedgerError(f'{label} endpoint token count unavailable: {exc}') from exc
+    return {'input_tokens': count, 'method': 'endpoint messages.count_tokens',
+            'request_sha256': sha(canonical(payload)), 'context_limit_tokens': reg['context_limit_tokens'],
+            'context_limit_basis': reg['context_limit_basis'], 'capacity_authority': 'caller assertion'}
+
+
+def _count_context(client, payload, reg, *, label='receipt completion') -> dict:
+    """Endpoint-reported count against a caller-asserted window; no generation."""
+    value = _measure_context(client, payload, reg, label=label)
+    _context_check(value, payload, reg, label=label)
     return value
 
 

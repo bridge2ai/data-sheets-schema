@@ -1500,6 +1500,12 @@ ARM_PROCEDURE_FIELDS = (
     # the runtime's cap) and reads `None`, which `arm_confounds` skips
     # like an absent reviewer.
     ("full max_tokens", ("model", "max_tokens_by_phase", "full")),
+    # The output caps of the `reconcile_full` and `report` phases (#5156):
+    # shared_generation_version=1 runs both at 128k while legacy API runs ran
+    # reconcile_full at 64k and report at 32k; read from `api_usage` rows first
+    # (else `model.max_tokens_by_phase`) so `arm_confounds` surfaces the delta.
+    ("reconcile_full max_tokens", ("model", "max_tokens_by_phase", "reconcile_full")),
+    ("report max_tokens", ("model", "max_tokens_by_phase", "report")),
 )
 
 
@@ -1650,9 +1656,10 @@ def arm_facts(label_prefix: str, method: str | None = None,
                 value = (condition_from_prompt_paths(f.get("path", "") if isinstance(f, dict) else str(f)
                                                      for f in files)
                          or condition_from_label(path.parts[-2]))
-            if field == ("model", "max_tokens_by_phase", "full"):
+            if len(field) == 3 and field[:2] == ("model", "max_tokens_by_phase"):
+                phase_name = field[2]
                 caps = {r.get("max_tokens") for r in (rec.get("api_usage") or [])
-                        if isinstance(r, dict) and r.get("phase") == "full" and r.get("max_tokens")}
+                        if isinstance(r, dict) and r.get("phase") == phase_name and r.get("max_tokens")}
                 if caps:
                     # A record whose own rows disagree is non-constant and
                     # says so; the block is read only where no row exists.
@@ -2702,7 +2709,16 @@ def _write_archive_note(root: Path, moved: list[tuple[Path, Path]],
     """
     from datetime import date
 
-    dirs = sorted({dest.parent for _, dest in moved})
+    def _run_dir(dest: Path) -> Path:
+        try:
+            parts = dest.relative_to(root).parts
+            if len(parts) >= 2:
+                return root / parts[0] / parts[1]
+        except ValueError:
+            pass
+        return dest.parent
+
+    dirs = sorted({_run_dir(dest) for _, dest in moved})
     heading = (f"{len(moved)} file(s) in {len(dirs)} run "
                f"director{'y' if len(dirs) == 1 else 'ies'}")
     section = [f"\n## Archived {date.today().isoformat()} — {heading}\n",

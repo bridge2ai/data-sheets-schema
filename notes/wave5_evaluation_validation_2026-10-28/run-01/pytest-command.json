@@ -1,0 +1,21 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave5-evaluation-validation-20261028/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave5-evaluation-validation-20261028/pytest.xml",
+    "tests/test_arm_comparison.py",
+    "tests/test_blind_review_pack.py",
+    "tests/test_registered_eval_runner.py",
+    "tests/test_audit_evaluation_comparability.py",
+    "tests/test_d52_scoring.py",
+    "tests/test_evaluation/test_evaluate_d4d.py",
+    "tests/test_evaluation/test_rubric20_scoring.py",
+    "tests/test_evaluation/test_general_context.py",
+    "tests/test_evaluation/test_explicit_dataset_scope.py"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave5-evaluation-20261028"
+}

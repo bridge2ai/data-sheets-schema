@@ -1,0 +1,13 @@
+{
+  "cwd": "/private/tmp/d4d-codex-e3x-restack-20261026",
+  "pytest_args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-e3x-restack-evidence-20261026/isolated-corpus-2e74ad0ac/cases",
+    "--junitxml",
+    "/private/tmp/d4d-e3x-restack-evidence-20261026/isolated-corpus-2e74ad0ac/pytest.xml",
+    "tests/test_arm_comparison.py::test_committed_comparison_matches_current_records"
+  ]
+}

@@ -140,9 +140,14 @@ def test_limits_are_positive_exact_integers(key, value):
         batches.make_plan('name: value', **{key: value})
 
 
-def test_indivisible_lists_bytes_and_worker_count_fail_instead_of_truncate():
+def test_indivisible_entries_bytes_and_worker_count_fail_instead_of_truncate():
+    # An oversized list is planned entry by entry (A17); no entry, and nothing else, is divided.
+    plan = batches.make_plan('terms: [one, two, three]', max_paths=2)
+    assert [w["paths"] for w in plan["workers"]] == [["/terms/0", "/terms/1"], ["/terms/2"]]
+    with pytest.raises(batches.AuditBatchError, match="indivisible_list_entry_bound"):
+        batches.make_plan('terms: [[one, two, three]]', max_paths=2)
     with pytest.raises(batches.AuditBatchError, match="indivisible_field_bound"):
-        batches.make_plan('terms: [one, two, three]', max_paths=2)
+        batches.make_plan('terms: {a: one, b: two, c: three}', max_paths=2)
     with pytest.raises(batches.AuditBatchError, match="indivisible_field_bound"):
         batches.make_plan('name: ' + 'x' * 500, max_inventory_bytes=100)
     with pytest.raises(batches.AuditBatchError, match="worker_count_bound"):

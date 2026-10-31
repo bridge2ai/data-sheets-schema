@@ -548,6 +548,14 @@ files:
       recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
       retroactively.'
     sha256: 41dd2fd7e970abb0c54419b067d36bd77fdf1360dc17888ccb09f79f0d4f32c0
+  src/download/prompts/evidence_protocol_v7.md:
+    bytes: 33464
+    pinned_at_commit: 128b3f4e41d36579cf6ee47838040083b49eceab
+    pinned_blob_path: src/download/prompts/evidence_protocol_v7.md
+    pinned_on: '2026-10-26'
+    reason: Bind evidence_protocol_v7.md in shared_generation_v1 ASSET_HASHES and canonical_hashes.yaml
+      (A14 R2 F1).
+    sha256: 72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6
   src/download/prompts/native_source_attribution_v1.md:
     body_sha256: 88bd24829813e0970b1a95ee85f9e86495b8898ff4c7efc39042abf21e63932a
     bytes: 2047

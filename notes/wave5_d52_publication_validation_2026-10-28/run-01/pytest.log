@@ -1,0 +1,30 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_exported_unregulated_q9_labels_describe_only_retained_criteria ______
+
+tmp_path = PosixPath('/private/tmp/d4d-wave5-d52-label-baseline-20261028/cases/test_exported_unregulated_q9_l0')
+
+    def test_exported_unregulated_q9_labels_describe_only_retained_criteria(tmp_path):
+        ev = evaluator({"regulated_access": False})
+        data = record()
+        data["regulatory_restrictions"] = {"description": "Synthetic unregulated dataset"}
+        source = tmp_path / "record.yaml"
+        source.write_text(yaml.safe_dump(data), encoding="utf-8")
+        result = ev.evaluate_d4d_file(source, "EXAMPLE", "manual")
+        target = tmp_path / "scores.json"
+        ev.export_scores_json([result], target)
+        exported = json.loads(target.read_text(encoding="utf-8"))[0]
+        question = next(q for q in exported["rubric20"]["questions"] if q["id"] == 9)
+        assert question["score"] == question["max_score"] == 5
+        assert exported["rubric20"]["fixed_max"] == 88
+        assert "3/3 fields populated" in question["score_label"]
+>       assert "4 regulated-access criteria excluded under D52" in question["score_label"]
+E       AssertionError
+
+tests/test_d52_publication_labels.py:29: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Detailed scores exported to /private/tmp/d4d-wave5-d52-label-baseline-20261028/cases/test_exported_unregulated_q9_l0/scores.json
+- generated xml file: /private/tmp/d4d-wave5-d52-label-baseline-20261028/pytest.xml -
+=========================== short test summary info ============================
+FAILED tests/test_d52_publication_labels.py::test_exported_unregulated_q9_labels_describe_only_retained_criteria
+1 failed in 0.10s

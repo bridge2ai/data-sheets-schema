@@ -1,0 +1,36 @@
+{
+  "invalid_junit_cases": [],
+  "passed": true,
+  "passed_cases_by_module": {
+    "test_audit_batches": 95,
+    "test_audit_batches_split": 42,
+    "test_audit_batches_v2": 28,
+    "test_audit_typed_format": 7,
+    "test_build_api_registrations": 34,
+    "test_build_draft_contexts": 9,
+    "test_preflight_resource_authority": 31,
+    "test_registration_input_sizing": 16,
+    "test_wave4_5095_review": 5,
+    "test_wave4_a17_a13_integration": 3
+  },
+  "returncode": 0,
+  "scientific_acceptance": "not_assessed",
+  "skipped": [
+    {
+      "identity": [
+        "tests.test_registration_input_sizing",
+        "test_rendering_reproduces_the_chorus_v10_wire"
+      ],
+      "reason": "set D4D_CHORUS_V10_TYPED_RUN to the 2026-10-22a intermediate directory"
+    },
+    {
+      "identity": [
+        "tests.test_audit_batches_split",
+        "test_chorus_v10_saved_run_differs_only_by_the_reworded_worker_sentence"
+      ],
+      "reason": "set D4D_CHORUS_V10_TYPED_RUN to the 2026-10-22a intermediate directory"
+    }
+  ],
+  "source_unchanged": true,
+  "wall_seconds": 151.50641354097752
+}

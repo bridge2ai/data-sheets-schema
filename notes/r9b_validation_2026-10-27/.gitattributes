@@ -1,0 +1,3 @@
+# Preserve raw pytest evidence, including traceback whitespace, byte for byte.
+*.log -text -whitespace
+*.xml -text -whitespace
