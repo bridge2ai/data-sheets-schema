@@ -28,6 +28,8 @@
         20.361328125,
         17.16259765625
       ],
+      "measurement_sha256": "82dcca3c2fbbe5ba90ddd918e0472d23b22203b1052b353c3a336d5330bc9430",
+      "pytest_log_sha256": "d1ceff4f6d6a3ce57f4472e8daeb04b8e5c7acd9ba393e7ca53ee2748a7a0531",
       "junit_sha256": "171e4f27535e7feb1f641810efc610fee35400d146a137ae0a73bd5c8ee22cc3",
       "outcomes": {
         "failed": 1
@@ -162,6 +164,8 @@
         17.57763671875,
         20.03857421875
       ],
+      "measurement_sha256": "ca1e62537b6a4effa3721131ac803af7ed5fa0e81c64b253eba4eacfdaefc359",
+      "pytest_log_sha256": "0e48e629ed2ca8695d1d68728620c89c0a21edd14e2abb3b314bb00d3c7ec1ea",
       "junit_sha256": "f3af443559ccacbf68ddfa4b078cbf69791994fd8c1d01ff065632429e200481",
       "outcomes": {
         "passed": 9
@@ -250,6 +254,8 @@
         13.7373046875,
         17.74658203125
       ],
+      "measurement_sha256": "32a8d7d60b68c30d7e9ff183c53c36a38f4ac8b75ca995475ef2d3704bac3ad8",
+      "pytest_log_sha256": "549775b8d9998fe9f470ea11707c1eecd9142898c6f79eeb6b2df08620f28e1b",
       "junit_sha256": "7b85ee8bfe686d2f3da67c7ea1bb28cae9e2c07ad7b24c939b6b99bb94a005c3",
       "outcomes": {
         "passed": 1
@@ -629,6 +635,8 @@
         13.3251953125,
         17.31396484375
       ],
+      "measurement_sha256": "5343ba227eed3fd15d53864a6cef39cd0f411a33d7d8a98b422e883ff6785760",
+      "pytest_log_sha256": "8cbfa5eafb13be80c824d5aac4dd5dd778c0b29325f3a677d9e5e8c840855836",
       "junit_sha256": "326f57841e93a066b8c1264bbc6ac73d6d3c65525a484fd240197fc3a1380999",
       "outcomes": {
         "passed": 16
@@ -761,6 +769,8 @@
         18.48583984375,
         18.31787109375
       ],
+      "measurement_sha256": "1e335d47448c03baa74499d9fdf09349d4448c2ea7bd33dc498ec639658cae57",
+      "pytest_log_sha256": "2ca15fd1fd23034bc70ba6f95cf6fbf176ebdc26a9e154173b6100d2b72b5edf",
       "junit_sha256": "c424688d443f16bddca8dd9ad8c1e8e3356d7dc0dff4c7b431722c628c986072",
       "outcomes": {
         "passed": 9
@@ -850,6 +860,8 @@
         25.16357421875,
         20.87109375
       ],
+      "measurement_sha256": "2a2128cf35aa846544bcf8fa7d5dd9be3190c68a4376a8bbfac108b7dff1226c",
+      "pytest_log_sha256": "050591cc1c0402d18f388e47431a432f32c74aadc54346b643ee613753b30c76",
       "junit_sha256": "2f3f04740d21d4b98912781d5d801e74e11669426c5184198e70407ca8a2dc26",
       "outcomes": {},
       "cases": []
@@ -887,6 +899,8 @@
         23.73828125,
         20.55078125
       ],
+      "measurement_sha256": "985687ed86df9663df7a4bc317f80c06876792dd1def38c71012de5a595d65be",
+      "pytest_log_sha256": "64198c0e1c6169c3d3d1d9f8ecb8f87b8cb0e018012bc6c83b99441e83b72bbc",
       "junit_sha256": "320d08e376f256522dea56d3b2fa91f14a9020a33cbf7ea789f84630e9825edc",
       "outcomes": {
         "passed": 1
@@ -939,6 +953,8 @@
         27.57763671875,
         22.50390625
       ],
+      "measurement_sha256": "f28c89772f4df0dbcf15cb7ba9114cb7e9d551d1c9c8796e40292a961c1fee84",
+      "pytest_log_sha256": "970eb25337d139cf822808e69d6c21c283abeed9005925094e76416be04bde42",
       "junit_sha256": "74ecc02306af473fbb3171c70d893b69691fdbf185739359dd81002e49c038e3",
       "outcomes": {
         "passed": 63,
@@ -979,6 +995,8 @@
         20.6787109375,
         20.81591796875
       ],
+      "measurement_sha256": "e0b42e258204c70bd93767a8a903d51c522e5ae53a9dde461ac51f4e7155fbdc",
+      "pytest_log_sha256": "9643279394943c6b4ff17f7c9bfcc501d0f24cff01796c74b2f62feb223ae607",
       "junit_sha256": "8f320c4e7bf426f9a714811dd5f4c962c9cb5658e01049121281c46e999662d4",
       "outcomes": {
         "passed": 1
@@ -1013,10 +1031,501 @@
         19.5791015625,
         20.3935546875
       ],
+      "measurement_sha256": "cb5009bdc6a1d1f1fedb7f6cb7d94e9af19e1f3b1adf0ec9bf615e71106aaf37",
+      "pytest_log_sha256": "7954a5eabdf9de56af3a98ededda91105f085903089f9d4e9cd65e9db568dbd9",
       "junit_sha256": "3acff38680066d5e9c337d575e71e2cf33a4bd44d38ecacf2799af431a7f351c",
       "outcomes": {},
       "cases": []
+    },
+    "main-checkout-canary": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "4c07980399d47d77b64c9f2bff7a50bfc5cc6ddf",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests/test_report_admission.py::test_a_transient_count_error_is_retried_as_the_dispatch_would_be",
+        "-v",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/codex_logs/sleep-patch-20261030/main-checkout-canary/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/main-checkout-canary/pytest.xml"
+      ],
+      "load_before": [
+        16.306640625,
+        19.41845703125,
+        20.291015625
+      ],
+      "wall_seconds": 6.782445415999973,
+      "exit_code": 0,
+      "load_after": [
+        16.68212890625,
+        19.4443359375,
+        20.294921875
+      ],
+      "measurement_sha256": "8176844d76c9501d0daa414dc91b9a676ffbdd8f10ff3c968fd831540d6075b4",
+      "pytest_log_sha256": "6fd9c399a77714c86cbc538bbeeb3c367c74d8067797e6c153544d8360f5a100",
+      "junit_sha256": "21b911fc872182516f3e12edd6b9d327132efcacc3e207f356154b13b1f7d3ad",
+      "outcomes": {
+        "passed": 1
+      },
+      "cases": [
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_transient_count_error_is_retried_as_the_dispatch_would_be",
+          "time": "5.250",
+          "outcome": "passed"
+        }
+      ]
+    },
+    "main-4c079-measurement": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "4c07980399d47d77b64c9f2bff7a50bfc5cc6ddf",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests/test_download/test_api_runner.py::TestValidatorRepairRefreshCheckpoint",
+        "tests/test_report_admission.py",
+        "-v",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/codex_logs/sleep-patch-20261030/main-4c079-measurement/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/main-4c079-measurement/pytest.xml"
+      ],
+      "load_before": [
+        15.734375,
+        19.1494140625,
+        20.18017578125
+      ],
+      "wall_seconds": 4129.3807237500005,
+      "exit_code": 0,
+      "load_after": [
+        30.6611328125,
+        34.92626953125,
+        33.69921875
+      ],
+      "measurement_sha256": "076b54cee41c1d7389406c39f037138a6c96fcd03d9e2ed518d4ae0d7c6739fb",
+      "pytest_log_sha256": "5d9d88fd0962f317a89249d0743b5f6ffdcade3974e62ff246725fb38e3e2ee1",
+      "junit_sha256": "b1281f0dd78de9badbb782b516bb4fd57387814fe4a4c75cdeaea6127e92d0e3",
+      "outcomes": {
+        "passed": 29
+      },
+      "cases": [
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_refused_refresh_preserves_the_repaired_artifact_progress",
+          "time": "167.995",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_interruption_before_refresh_does_not_restart_the_sealed_full",
+          "time": "307.103",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_missing_corrupt_or_stale_checkpoint_refuses_before_calls",
+          "time": "457.468",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_paid_refresh_interruption_refuses_duplicate_dispatch",
+          "time": "200.465",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[False]",
+          "time": "282.620",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[True]",
+          "time": "292.134",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_does_not_disable_later_invalid_run_repair",
+          "time": "227.526",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_every_phase_sent_at_a_raised_cap_is_admitted",
+          "time": "0.001",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_chorus_wire_is_byte_identical_without_admission_and_is_what_was_counted",
+          "time": "358.582",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_fitting_request_is_admitted_and_its_count_is_kept",
+          "time": "180.280",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_exactly_at_the_limit_is_admitted",
+          "time": "148.294",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_over_by_one_refuses_the_report_before_dispatch_and_is_not_retried",
+          "time": "163.308",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_refused_regate_keeps_the_report_and_the_run_publishes[over_window]",
+          "time": "190.717",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_refused_regate_keeps_the_report_and_the_run_publishes[count_unavailable]",
+          "time": "188.296",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_refused_regate_is_recorded_before_the_evidence_refusal",
+          "time": "164.330",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_refused_refresh_after_repair_is_latched_under_its_own_cause[full]",
+          "time": "146.886",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_refused_refresh_after_repair_is_latched_under_its_own_cause[core]",
+          "time": "147.092",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_admitted_refresh_after_repair_is_counted_and_sent",
+          "time": "163.030",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unavailable_counter_is_refused_without_dispatch_and_a_resume_recovers",
+          "time": "198.433",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_refusal_record_shape",
+          "time": "73.492",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_typed_stage_refusal_names_its_stage_and_numbers",
+          "time": "40.457",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unusable_count_is_refused[None]",
+          "time": "4.393",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unusable_count_is_refused[-1]",
+          "time": "1.022",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unusable_count_is_refused[True]",
+          "time": "1.034",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unusable_count_is_refused[5]",
+          "time": "0.931",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unusable_count_is_refused[1.5]",
+          "time": "4.494",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_transient_count_error_is_retried_as_the_dispatch_would_be",
+          "time": "0.986",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_count_still_failing_after_max_attempts_is_refused",
+          "time": "0.983",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_the_count_retries_what_the_dispatch_retries",
+          "time": "0.001",
+          "outcome": "passed"
+        }
+      ]
+    },
+    "followup-measurement": {
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "commit": "23b9eccd46790b299a4bf96b905c28b781c3878d",
+      "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "packages_sha256": "ad4ca790a552b2dd33165b065982f0278f8b21591d90febda7ce073f3628433c",
+      "pytest_args": [
+        "tests/test_download/test_api_runner.py::TestValidatorRepairRefreshCheckpoint",
+        "tests/test_report_admission.py",
+        "-v",
+        "-p",
+        "no:cacheprovider",
+        "--durations=0",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/codex_logs/sleep-patch-20261030/followup-measurement/basetemp",
+        "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-main-sleepfix/test-results/sleep-patch/followup-measurement/pytest.xml"
+      ],
+      "load_before": [
+        27.46240234375,
+        33.72607421875,
+        33.30419921875
+      ],
+      "wall_seconds": 4039.2790040420005,
+      "exit_code": 0,
+      "load_after": [
+        17.306640625,
+        34.759765625,
+        59.83837890625
+      ],
+      "measurement_sha256": "73deea801ea73a7dcb0d622b90d8ae7bb10f404a167ff1acbdddad1a865f9817",
+      "pytest_log_sha256": "66aaf8e93c736f374575c265a6265595f115b89d2723214bc5ff9fb7538ce285",
+      "junit_sha256": "7b1fd590737ff4b00f0c9246400ec98a0c312e0f364b1d8fbdc87b00a2f5f598",
+      "outcomes": {
+        "passed": 29
+      },
+      "cases": [
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_refused_refresh_preserves_the_repaired_artifact_progress",
+          "time": "147.013",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_interruption_before_refresh_does_not_restart_the_sealed_full",
+          "time": "225.543",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_missing_corrupt_or_stale_checkpoint_refuses_before_calls",
+          "time": "372.840",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_paid_refresh_interruption_refuses_duplicate_dispatch",
+          "time": "153.934",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[False]",
+          "time": "219.689",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[True]",
+          "time": "236.970",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+          "name": "test_accepted_refresh_does_not_disable_later_invalid_run_repair",
+          "time": "201.721",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_every_phase_sent_at_a_raised_cap_is_admitted",
+          "time": "0.000",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_chorus_wire_is_byte_identical_without_admission_and_is_what_was_counted",
+          "time": "282.377",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_fitting_request_is_admitted_and_its_count_is_kept",
+          "time": "124.975",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_exactly_at_the_limit_is_admitted",
+          "time": "134.216",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_over_by_one_refuses_the_report_before_dispatch_and_is_not_retried",
+          "time": "162.599",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_refused_regate_keeps_the_report_and_the_run_publishes[over_window]",
+          "time": "191.654",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_refused_regate_keeps_the_report_and_the_run_publishes[count_unavailable]",
+          "time": "345.374",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_refused_regate_is_recorded_before_the_evidence_refusal",
+          "time": "333.804",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_refused_refresh_after_repair_is_latched_under_its_own_cause[full]",
+          "time": "150.489",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_refused_refresh_after_repair_is_latched_under_its_own_cause[core]",
+          "time": "228.777",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_admitted_refresh_after_repair_is_counted_and_sent",
+          "time": "159.618",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unavailable_counter_is_refused_without_dispatch_and_a_resume_recovers",
+          "time": "200.622",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_refusal_record_shape",
+          "time": "75.195",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_typed_stage_refusal_names_its_stage_and_numbers",
+          "time": "47.064",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unusable_count_is_refused[None]",
+          "time": "5.975",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unusable_count_is_refused[-1]",
+          "time": "1.389",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unusable_count_is_refused[True]",
+          "time": "1.502",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unusable_count_is_refused[5]",
+          "time": "1.438",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_an_unusable_count_is_refused[1.5]",
+          "time": "6.999",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_transient_count_error_is_retried_as_the_dispatch_would_be",
+          "time": "1.357",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_a_count_still_failing_after_max_attempts_is_refused",
+          "time": "1.318",
+          "outcome": "passed"
+        },
+        {
+          "classname": "tests.test_report_admission",
+          "name": "test_the_count_retries_what_the_dispatch_retries",
+          "time": "0.001",
+          "outcome": "passed"
+        }
+      ]
     }
+  },
+  "diagnosis": {
+    "failure": "The shared time-module patch recorded CPython subprocess timeout polls capped at 0.05 seconds.",
+    "traced_failure_waits": [
+      {
+        "call": "schema_sync._regenerate",
+        "timeout_seconds": 600,
+        "origin": "8e20a2a70 (#582): execute's schema-sync gate"
+      },
+      {
+        "call": "schema_sync._rebuilt_fingerprint",
+        "timeout_seconds": 600,
+        "origin": "edf6fc36fe (#946), merged by 047b3fb3d (#1257)"
+      },
+      {
+        "call": "api_runner._validator_lines via receipt_completion._validate_record",
+        "timeout_seconds": 180,
+        "origin": "15e8fa88cd (#4266), merged by ec167370d (#4281); validator subprocess existed at 041a368e7d (#361)"
+      }
+    ],
+    "failing_patch_origin": "0674193f6, merged by fa304cd80 (#5210); the traced subprocess paths predate it.",
+    "followup_base": "4c07980399d47d77b64c9f2bff7a50bfc5cc6ddf",
+    "merge_resolution": "Use BackoffSleeps consistently at all seven global patch sites in four test files.",
+    "timing_limit": "The nine highlighted cases do not install these sleep patches. Serial differences do not establish a patch-induced speedup or test the CI contention hypothesis.",
+    "ci_weights": "Unchanged: no reliable material timing change attributable to this follow-up; local host load and a sleep interruption prevent a CI-weight refresh from these measurements."
   },
   "nine_case_comparison": [
     {
@@ -1092,6 +1601,277 @@
       "after_outcome": "passed"
     }
   ],
+  "main_comparison": [
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_refused_refresh_preserves_the_repaired_artifact_progress",
+      "before_seconds": 167.995,
+      "after_seconds": 147.013,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_interruption_before_refresh_does_not_restart_the_sealed_full",
+      "before_seconds": 307.103,
+      "after_seconds": 225.543,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_missing_corrupt_or_stale_checkpoint_refuses_before_calls",
+      "before_seconds": 457.468,
+      "after_seconds": 372.84,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_paid_refresh_interruption_refuses_duplicate_dispatch",
+      "before_seconds": 200.465,
+      "after_seconds": 153.934,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[False]",
+      "before_seconds": 282.62,
+      "after_seconds": 219.689,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_accepted_refresh_survives_interrupted_completion_checkpoint[True]",
+      "before_seconds": 292.134,
+      "after_seconds": 236.97,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint",
+      "name": "test_accepted_refresh_does_not_disable_later_invalid_run_repair",
+      "before_seconds": 227.526,
+      "after_seconds": 201.721,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_every_phase_sent_at_a_raised_cap_is_admitted",
+      "before_seconds": 0.001,
+      "after_seconds": 0.0,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_chorus_wire_is_byte_identical_without_admission_and_is_what_was_counted",
+      "before_seconds": 358.582,
+      "after_seconds": 282.377,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_a_fitting_request_is_admitted_and_its_count_is_kept",
+      "before_seconds": 180.28,
+      "after_seconds": 124.975,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_exactly_at_the_limit_is_admitted",
+      "before_seconds": 148.294,
+      "after_seconds": 134.216,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_over_by_one_refuses_the_report_before_dispatch_and_is_not_retried",
+      "before_seconds": 163.308,
+      "after_seconds": 162.599,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_a_refused_regate_keeps_the_report_and_the_run_publishes[over_window]",
+      "before_seconds": 190.717,
+      "after_seconds": 191.654,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_a_refused_regate_keeps_the_report_and_the_run_publishes[count_unavailable]",
+      "before_seconds": 188.296,
+      "after_seconds": 345.374,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_a_refused_regate_is_recorded_before_the_evidence_refusal",
+      "before_seconds": 164.33,
+      "after_seconds": 333.804,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_a_refused_refresh_after_repair_is_latched_under_its_own_cause[full]",
+      "before_seconds": 146.886,
+      "after_seconds": 150.489,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_a_refused_refresh_after_repair_is_latched_under_its_own_cause[core]",
+      "before_seconds": 147.092,
+      "after_seconds": 228.777,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_an_admitted_refresh_after_repair_is_counted_and_sent",
+      "before_seconds": 163.03,
+      "after_seconds": 159.618,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_an_unavailable_counter_is_refused_without_dispatch_and_a_resume_recovers",
+      "before_seconds": 198.433,
+      "after_seconds": 200.622,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_refusal_record_shape",
+      "before_seconds": 73.492,
+      "after_seconds": 75.195,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_a_typed_stage_refusal_names_its_stage_and_numbers",
+      "before_seconds": 40.457,
+      "after_seconds": 47.064,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_an_unusable_count_is_refused[None]",
+      "before_seconds": 4.393,
+      "after_seconds": 5.975,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_an_unusable_count_is_refused[-1]",
+      "before_seconds": 1.022,
+      "after_seconds": 1.389,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_an_unusable_count_is_refused[True]",
+      "before_seconds": 1.034,
+      "after_seconds": 1.502,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_an_unusable_count_is_refused[5]",
+      "before_seconds": 0.931,
+      "after_seconds": 1.438,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_an_unusable_count_is_refused[1.5]",
+      "before_seconds": 4.494,
+      "after_seconds": 6.999,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_a_transient_count_error_is_retried_as_the_dispatch_would_be",
+      "before_seconds": 0.986,
+      "after_seconds": 1.357,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_a_count_still_failing_after_max_attempts_is_refused",
+      "before_seconds": 0.983,
+      "after_seconds": 1.318,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    },
+    {
+      "classname": "tests.test_report_admission",
+      "name": "test_the_count_retries_what_the_dispatch_retries",
+      "before_seconds": 0.001,
+      "after_seconds": 0.001,
+      "before_outcome": "passed",
+      "after_outcome": "passed"
+    }
+  ],
+  "main_comparison_totals": {
+    "previously_slow_nine": {
+      "cases": 9,
+      "before_seconds": 2274.322,
+      "after_seconds": 1883.58
+    },
+    "validator_checkpoint": {
+      "cases": 7,
+      "before_seconds": 1935.311,
+      "after_seconds": 1557.71
+    },
+    "previously_slow_report_cases": {
+      "cases": 2,
+      "before_seconds": 339.011,
+      "after_seconds": 325.87
+    }
+  },
+  "host_power_history": {
+    "command": [
+      "/usr/bin/pmset",
+      "-g",
+      "log"
+    ],
+    "artifact_sha256": "9c61dacfc3bb00a15c802923bad912a0549e1a1b64169f50e2eb37412365b761",
+    "followup_sleep_events": [
+      "2026-10-30 19:16:32 -0700 Sleep               \tEntering Sleep state due to 'Idle Sleep':TCPKeepAlive=active Using AC (Charge:100%) 3 secs    ",
+      "2026-10-30 19:16:35 -0700 DarkWake            \tDarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using AC (Charge:100%) 45 secs   ",
+      "2026-10-30 19:17:20 -0700 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:100%) 934 secs  ",
+      "2026-10-30 19:32:54 -0700 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMISw3IRQ nub-spmi0.0x02 rtc/Maintenance Using AC (Charge:100%) 51 secs   ",
+      "2026-10-30 19:33:45 -0700 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:100%) 919 secs  ",
+      "2026-10-30 19:49:04 -0700 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMISw3IRQ nub-spmi0.0x02 rtc/Maintenance Using AC (Charge:100%) 63 secs   ",
+      "2026-10-30 19:50:07 -0700 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:100%) 852 secs  ",
+      "2026-10-30 20:04:19 -0700 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to ATC0.USBWakeup/ Using AC (Charge:100%) 9 secs    ",
+      "2026-10-30 20:04:28 -0700 Wake                \tDarkWake to FullWake from Deep Idle [CDNVA] : due to UserActivity Assertion Using AC (Charge:100%)           "
+    ],
+    "interpretation": "Host sleep interrupted the wire-equivalence case. All seven checkpoint cases had passed by the 19:13:18 process observation; both highlighted report cases ran after the 20:04:28 wake. The nine-case comparison excludes the interrupted case. The original runner's wall_seconds used time.monotonic and excludes deep sleep on this host; pytest's overall summary includes it. Future runs use caffeinate and record both clocks."
+  },
   "ci_layout": {
     "collection_label": "followup-collection",
     "ci_test_durations_sha256": "af1d4526d16ef2fb01c65e5377d4491af710faedebdaed093d89d8a53093cc22",

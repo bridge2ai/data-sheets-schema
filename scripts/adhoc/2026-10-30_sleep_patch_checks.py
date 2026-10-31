@@ -54,10 +54,24 @@ def main():
     parser.add_argument("--trace-waits", action="store_true")
     parser.add_argument("--child", action="store_true")
     parser.add_argument("--baseline-ref", help="Temporarily measure this local ref in the same checkout")
+    parser.add_argument("--power-history-date", help="Save this day's macOS sleep/wake events instead of running pytest")
     parser.add_argument("pytest_args", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     if args.pytest_args[:1] == ["--"]:
         args.pytest_args.pop(0)
+    if args.power_history_date:
+        if args.pytest_args or args.baseline_ref or args.trace_waits or args.child:
+            parser.error("power-history capture cannot be combined with a test run")
+        output = RESULTS / args.label
+        output.mkdir(parents=True, exist_ok=False)
+        history = subprocess.check_output(["/usr/bin/pmset", "-g", "log"], text=True)
+        events = [line for line in history.splitlines()
+                  if line.startswith(args.power_history_date + " ")
+                  and any(kind in line for kind in ("Entering Sleep", "Wake from", "DarkWake from"))]
+        path = output / "sleep-events.log"
+        path.write_text("\n".join(events) + "\n")
+        print(f"Saved {len(events)} sleep/wake events to {path}")
+        return 0
     if args.child:
         return child(args)
     if args.trace_waits and args.baseline_ref:
@@ -92,7 +106,9 @@ def measure(args):
                    f"--basetemp={temporary.parent / 'basetemp'}", f"--junitxml={output / 'pytest.xml'}"]
     # Allow local process/socket tests while denying external network connections.
     profile = '(version 1)(allow default)(deny network-outbound)(allow network-outbound (remote ip "localhost:*"))'
-    command = ["/usr/bin/sandbox-exec", "-p", profile, sys.executable]
+    # Keep the Mac awake only for this subprocess. An idle-sleep interruption
+    # affected the follow-up comparison's wall clock, so record both clocks too.
+    command = ["/usr/bin/caffeinate", "-is", "/usr/bin/sandbox-exec", "-p", profile, sys.executable]
     if args.trace_waits:
         command.extend([str(Path(__file__).resolve()), "--child", "--trace-waits", args.label, "--", *pytest_args])
     else:
@@ -105,20 +121,28 @@ def measure(args):
                 "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                 "poetry_lock_sha256": hashlib.sha256((ROOT / "poetry.lock").read_bytes()).hexdigest(),
                 "packages_sha256": hashlib.sha256((output / "packages.txt").read_bytes()).hexdigest(),
-                "pytest_args": pytest_args, "load_before": os.getloadavg()}
+                "pytest_args": pytest_args, "load_before": os.getloadavg(),
+                "wake_assertion": "caffeinate -is",
+                "elapsed_clock": time.get_clock_info("monotonic").implementation}
     for argument in pytest_args:
         if argument.startswith("--ci-shard-timings="):
             raw = (ROOT / argument.split("=", 1)[1]).read_bytes()
             (output / "ci_test_durations.input.json").write_bytes(raw)
             identity["ci_test_durations_sha256"] = hashlib.sha256(raw).hexdigest()
     print(f"Starting {args.label}; output: {output}", flush=True)
+    started_clock = time.time()
     started = time.monotonic()
     with (output / "pytest.log").open("w") as log:
         result = subprocess.run(command, cwd=ROOT, env=environment, stdout=log, stderr=subprocess.STDOUT)
-    identity.update(wall_seconds=time.monotonic() - started, exit_code=result.returncode,
+    elapsed = time.monotonic() - started
+    finished_clock = time.time()
+    identity.update(wall_seconds=elapsed, clock_wall_seconds=finished_clock - started_clock,
+                    started_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started_clock)),
+                    finished_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(finished_clock)),
+                    exit_code=result.returncode,
                     load_after=os.getloadavg())
     (output / "measurement.json").write_text(json.dumps(identity, indent=2) + "\n")
-    print(json.dumps({key: identity[key] for key in ("wall_seconds", "exit_code")}), flush=True)
+    print(json.dumps({key: identity[key] for key in ("wall_seconds", "clock_wall_seconds", "exit_code")}), flush=True)
     return result.returncode
 
 

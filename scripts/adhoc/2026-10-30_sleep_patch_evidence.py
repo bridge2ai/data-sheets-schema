@@ -38,13 +38,31 @@ def main():
     parser.add_argument("--refresh-from", help="Label with a successful full-file or ordinary-shard run")
     parser.add_argument("--files", nargs="*", default=[])
     args = parser.parse_args()
-    evidence = {"red_ci_run": 41092033720, "measurements": {}}
+    evidence = {"red_ci_run": 41092033720, "measurements": {}, "diagnosis": {
+        "failure": "The shared time-module patch recorded CPython subprocess timeout polls capped at 0.05 seconds.",
+        "traced_failure_waits": [
+            {"call": "schema_sync._regenerate", "timeout_seconds": 600,
+             "origin": "8e20a2a70 (#582): execute's schema-sync gate"},
+            {"call": "schema_sync._rebuilt_fingerprint", "timeout_seconds": 600,
+             "origin": "edf6fc36fe (#946), merged by 047b3fb3d (#1257)"},
+            {"call": "api_runner._validator_lines via receipt_completion._validate_record", "timeout_seconds": 180,
+             "origin": "15e8fa88cd (#4266), merged by ec167370d (#4281); validator subprocess existed at 041a368e7d (#361)"},
+        ],
+        "failing_patch_origin": "0674193f6, merged by fa304cd80 (#5210); the traced subprocess paths predate it.",
+        "followup_base": "4c07980399d47d77b64c9f2bff7a50bfc5cc6ddf",
+        "merge_resolution": "Use BackoffSleeps consistently at all seven global patch sites in four test files.",
+        "timing_limit": "The nine highlighted cases do not install these sleep patches. Serial differences do not establish a patch-induced speedup or test the CI contention hypothesis.",
+        "ci_weights": "Unchanged: no reliable material timing change attributable to this follow-up; local host load and a sleep interruption prevent a CI-weight refresh from these measurements.",
+    }}
     for label in args.labels:
         directory = RESULTS / label
-        measurement = json.loads((directory / "measurement.json").read_text())
+        measurement_bytes = (directory / "measurement.json").read_bytes()
+        measurement = json.loads(measurement_bytes)
         xml = directory / "pytest.xml"
         recorded = cases(xml)
-        measurement.update(junit_sha256=hashlib.sha256(xml.read_bytes()).hexdigest(),
+        measurement.update(measurement_sha256=hashlib.sha256(measurement_bytes).hexdigest(),
+                           pytest_log_sha256=hashlib.sha256((directory / "pytest.log").read_bytes()).hexdigest(),
+                           junit_sha256=hashlib.sha256(xml.read_bytes()).hexdigest(),
                            outcomes=dict(Counter(case["outcome"] for case in recorded)),
                            cases=[case for case in recorded if any(
                                case.get("classname", "") == name or case.get("classname", "").startswith(name + ".")
@@ -68,6 +86,8 @@ def main():
         before = evidence["measurements"][before_label]
         after = evidence["measurements"][after_label]
         index = {(row["classname"], row["name"]): row for row in after["cases"]}
+        assert len(index) == len(after["cases"]), "comparison requires unique case labels"
+        assert set(index) == {(row["classname"], row["name"]) for row in before["cases"]}
         comparison = []
         for old in before["cases"]:
             new = index[(old["classname"], old["name"])]
@@ -77,6 +97,38 @@ def main():
         evidence[key] = comparison
         for row in comparison:
             print(f"{row['name']}: {row['before_seconds']:.3f}s -> {row['after_seconds']:.3f}s")
+        if key == "main_comparison":
+            report_names = {
+                "test_a_refused_regate_keeps_the_report_and_the_run_publishes[over_window]",
+                "test_exactly_at_the_limit_is_admitted",
+            }
+            nine = {(row["classname"], row["name"]) for row in comparison
+                    if row["classname"].endswith(".TestValidatorRepairRefreshCheckpoint")
+                    or (row["classname"] == "tests.test_report_admission" and row["name"] in report_names)}
+            assert len(nine) == 9
+            groups = {
+                "previously_slow_nine": [row for row in comparison if (row["classname"], row["name"]) in nine],
+                "validator_checkpoint": [row for row in comparison if row["classname"].endswith(".TestValidatorRepairRefreshCheckpoint")],
+                "previously_slow_report_cases": [row for row in comparison
+                    if row["classname"] == "tests.test_report_admission" and (row["classname"], row["name"]) in nine],
+            }
+            assert [len(rows) for rows in groups.values()] == [9, 7, 2]
+            evidence["main_comparison_totals"] = {
+                name: {"cases": len(rows),
+                       "before_seconds": round(sum(row["before_seconds"] for row in rows), 3),
+                       "after_seconds": round(sum(row["after_seconds"] for row in rows), 3)}
+                for name, rows in groups.items()}
+            print(json.dumps(evidence["main_comparison_totals"]))
+    power_path = RESULTS / "power-history" / "sleep-events.log"
+    if power_path.exists():
+        raw = power_path.read_bytes()
+        evidence["host_power_history"] = {
+            "command": ["/usr/bin/pmset", "-g", "log"],
+            "artifact_sha256": hashlib.sha256(raw).hexdigest(),
+            "followup_sleep_events": [line for line in raw.decode().splitlines()
+                if "2026-10-30 19:16:32" <= line[:19] <= "2026-10-30 20:04:28"],
+            "interpretation": "Host sleep interrupted the wire-equivalence case. All seven checkpoint cases had passed by the 19:13:18 process observation; both highlighted report cases ran after the 20:04:28 wake. The nine-case comparison excludes the interrupted case. The original runner's wall_seconds used time.monotonic and excludes deep sleep on this host; pytest's overall summary includes it. Future runs use caffeinate and record both clocks.",
+        }
     collections = [label for label in args.labels if label.endswith("collection")]
     if collections:
         collection_label = collections[-1]
@@ -120,6 +172,7 @@ def main():
         original.setdefault("local_updates", []).append(origin)
         timing_path.write_text(json.dumps(original, indent=2) + "\n")
         evidence["timing_update"] = origin
+        evidence["diagnosis"]["ci_weights"] = "Targeted local refresh using utils.update_ci_shard_timings.build; see timing_update for its provenance."
     args.output.write_text(json.dumps(evidence, indent=2) + "\n")
     print(f"Wrote {args.output}")
 
