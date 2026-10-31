@@ -269,13 +269,80 @@ def active_profile(manifest: Path | str | None | Any = "default") -> Profile:
     return select_profile(manifest).profile
 
 
+# First profile-aware code (#628/#1302); execution dates do not date the code.
+PROFILES_INTRODUCED_COMMIT = 'e78e4bb5699af0ecaca28cdc5c328e5c908ae959'
+
+
+def _commit_has_profiles(commit: Any) -> bool:
+    """Resolve recorded code locally; unavailable/truncated ancestry refuses.
+
+    Never fetch missing objects, use a moving ref as evidence, or interpret a
+    failed Git command as proof that code predates profiles (P4a finding 5).
+    """
+    import re
+    import subprocess
+
+    if not isinstance(commit, str) or not re.fullmatch(r'[0-9a-fA-F]{7,40}', commit):
+        raise ValueError('profile absent: repo.commit must be a commit hash')
+    if _CHECKOUT_ROOT is None:
+        raise ValueError('profile absent: repo.commit ancestry requires a local checkout')
+    env = {**os.environ, 'GIT_NO_LAZY_FETCH': '1', 'GIT_NO_REPLACE_OBJECTS': '1'}
+
+    def git(*args):
+        try:
+            return subprocess.run(['git', *args], cwd=_CHECKOUT_ROOT, env=env,
+                                  capture_output=True, text=True, check=False)
+        except OSError as exc:
+            raise ValueError('profile absent: repo.commit ancestry is unavailable') from exc
+
+    resolved = git('rev-parse', '--verify', f'{commit}^{{commit}}')
+    if resolved.returncode:
+        # Squashed/deleted historical branch tips may no longer be objects.
+        # A provenance record already committed before profiles were introduced
+        # is positive evidence that its exact code identity predates profiles.
+        # Inspect that immutable tree, never today's corpus or the record date.
+        witnesses = git('grep', '-l', '-F', commit,
+                        PROFILES_INTRODUCED_COMMIT + '^', '--', 'data/*provenance.yaml')
+        if witnesses.returncode == 0:
+            import yaml
+            for witness in witnesses.stdout.splitlines():
+                blob = git('show', witness)
+                if blob.returncode:
+                    continue
+                try:
+                    prior = yaml.safe_load(blob.stdout)
+                except yaml.YAMLError:
+                    continue
+                if (isinstance(prior, dict)
+                        and prior.get('record_type') in ('d4d_generation_provenance',
+                                                        'd4d_derived_provenance')
+                        and isinstance(prior.get('repo'), dict)
+                        and prior['repo'].get('commit') == commit
+                        and isinstance(prior.get('schema', {}), dict)
+                        and prior.get('schema', {}).get('profile') is None):
+                    return False
+        raise ValueError('profile absent: repo.commit cannot be resolved locally')
+    ancestry = git('merge-base', '--is-ancestor', PROFILES_INTRODUCED_COMMIT,
+                   resolved.stdout.strip())
+    if ancestry.returncode == 0:
+        return True
+    if ancestry.returncode != 1:
+        raise ValueError('profile absent: repo.commit ancestry is unavailable')
+    shallow = git('rev-parse', '--is-shallow-repository')
+    if shallow.returncode or shallow.stdout.strip() != 'false':
+        raise ValueError('profile absent: incomplete repo.commit ancestry cannot prove historical code')
+    return False
+
+
 def for_record(record: dict[str, Any] | None) -> Profile:
     """Read a declared profile; unknown names refuse (F18).
 
-    Only a record dated before profiles were introduced (2026-09-13,
-    e78e4bb5699af0ecaca28cdc5c328e5c908ae959) inherits the historical study
-    profile, with a warning stating that basis. Missing/unproven dates refuse;
-    contemporary profile-less records are neutral, independent of environment.
+    A recorded repo.commit that does not descend from the profile introduction
+    (or is witnessed in provenance committed before it) inherits the historical
+    study profile, even when executed today. Only when
+    no commit is recorded does the pre-2026-09-13 date fallback apply. Missing
+    or unprovable evidence refuses; profile-aware code is neutral in the absence
+    of a declaration, independent of environment.
     """
     schema = (record or {}).get("schema") if isinstance(record, dict) else None
     if not isinstance(schema, dict):
@@ -283,16 +350,22 @@ def for_record(record: dict[str, Any] | None) -> Profile:
     name = schema.get("profile")
     if name is not None:
         return profile_named(str(name))
+    repo = record.get('repo') if isinstance(record, dict) else None
+    commit = repo.get('commit') if isinstance(repo, dict) else None
     from datetime import date, datetime
     raw_date = record.get('record_generated_at') if isinstance(record, dict) else None
     try:
         recorded_date = datetime.fromisoformat(str(raw_date)).date()
     except (TypeError, ValueError):
         recorded_date = None
-    if recorded_date is None:
+    if commit is not None:
+        historical = not _commit_has_profiles(commit)
+    elif recorded_date is None:
         raise ValueError('profile absent: a valid record_generated_at is required '
                          'to distinguish historical from contemporary records')
-    if recorded_date is not None and recorded_date < date(2026, 9, 13):
+    else:
+        historical = recorded_date < date(2026, 9, 13)
+    if historical:
         import warnings
         warnings.warn('profile absent: record predates profiles (2026-09-13); '
                       'read as historical bridge2ai', RuntimeWarning, stacklevel=2)
