@@ -189,7 +189,13 @@ class CorpusTest(unittest.TestCase):
         A newer checker must not silently replace that set or mix readings
         in its aggregate. New measurements belong beside these originals.
         """
-        from data_sheets_schema.report_claims import RECORD_COLUMN_VALUES, REPORT_CLAIMS_INSTRUMENT_V7
+        import json
+        from data_sheets_schema.report_claims import (
+            RECORD_COLUMN_VALUES, REPORT_CLAIMS_INSTRUMENT, REPORT_CLAIMS_INSTRUMENT_V7,
+        )
+        manifest = json.loads((Path(__file__).resolve().parent / "data/report_claims_origins.json").read_text())
+        v7_origins = manifest["origins"]
+        v8_origins = manifest.get("v8_origins") or {}
         off = []
         seen = 0
         for p in sorted(self.BASE.rglob("*_provenance.yaml")):
@@ -198,8 +204,11 @@ class CorpusTest(unittest.TestCase):
             if not block.get("checked"):
                 continue
             seen += 1
+            expected = (REPORT_CLAIMS_INSTRUMENT if str(p) in v8_origins
+                        else REPORT_CLAIMS_INSTRUMENT_V7 if str(p) in v7_origins
+                        else None)
             rows = block.get("rows_by_record")
-            if block.get("instrument") != REPORT_CLAIMS_INSTRUMENT_V7:
+            if expected is None or block.get("instrument") != expected:
                 off.append(f"{p}: instrument {str(block.get('instrument'))[:40]!r}")
             elif not isinstance(rows, dict) or tuple(rows) != RECORD_COLUMN_VALUES:
                 off.append(f"{p}: rows_by_record keys {list(rows) if isinstance(rows, dict) else rows}")

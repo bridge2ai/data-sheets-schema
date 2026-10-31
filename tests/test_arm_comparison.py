@@ -949,3 +949,80 @@ def test_live_reference_worst_is_distinguished_from_stored_canary_thresholds(tmp
     assert "this live recompute does not change their thresholds" in text
     assert "the value the canary gate holds runs against" not in text
     assert "the canary-gate baseline)" not in text
+
+
+def test_arm_comparison_resolves_historical_worktree_preprocessed_paths(tmp_path: Path) -> None:
+    """Historical provenance records with worktree-prefixed paths resolve under active root (#5115 N6)."""
+    import yaml
+    from data_sheets_schema.evaluation import arm_comparison
+
+    bundle_rel = Path("data/preprocessed/individual/AI_READI/AI_READI_preprocessed.txt")
+    chunks_rel = Path("data/preprocessed/individual/AI_READI/AI_READI_preprocessed.chunks.yaml")
+    manifest_rel = Path("data/preprocessed/source_manifest.yaml")
+
+    bundle_file = tmp_path / bundle_rel
+    chunks_file = tmp_path / chunks_rel
+    manifest_file = tmp_path / manifest_rel
+    bundle_file.parent.mkdir(parents=True, exist_ok=True)
+    manifest_file.parent.mkdir(parents=True, exist_ok=True)
+
+    bundle_bytes = b"=== FILE: README.md ===\nHello AI_READI\n"
+    bundle_file.write_bytes(bundle_bytes)
+    bundle_md5 = hashlib.md5(bundle_bytes).hexdigest()
+
+    chunks_doc = {
+        "schema_version": "1.0",
+        "bundle": bundle_rel.as_posix(),
+        "bundle_md5": bundle_md5,
+        "chunks": [
+            {
+                "id": "c001",
+                "source_file": "README.md",
+                "md5": bundle_md5,
+            }
+        ],
+    }
+    chunks_bytes = yaml.safe_dump(chunks_doc).encode("utf-8")
+    chunks_file.write_bytes(chunks_bytes)
+
+    manifest_bytes = b"project: AI_READI\nsources: []\n"
+    manifest_file.write_bytes(manifest_bytes)
+
+    old_wt = Path("/Users/nonexistent/d4d-executions/launch-base")
+    record = {
+        "run": {"project": "AI_READI", "label": "claudecode_opus46_generic_r1"},
+        "inputs": {
+            "bundle_path": str(old_wt / bundle_rel),
+            "bundle_md5": bundle_md5,
+            "chunks": {
+                "path": str(old_wt / chunks_rel),
+                "md5": hashlib.md5(chunks_bytes).hexdigest(),
+                "sha256": hashlib.sha256(chunks_bytes).hexdigest(),
+            },
+            "source_manifest": {
+                "path": str(old_wt / manifest_rel),
+                "md5": hashlib.md5(manifest_bytes).hexdigest(),
+            },
+        },
+    }
+
+    resolved = arm_comparison._path(tmp_path, str(old_wt / bundle_rel))
+    assert resolved == bundle_file.resolve()
+    assert arm_comparison._path(tmp_path, str(old_wt / "secret/other.txt")) is None
+
+    drift = arm_comparison.bundle_drift(record, tmp_path)
+    assert drift["disk_status"] == "match"
+    assert drift["manifest_status"] == "match"
+    assert drift["manifest_basis"] == "pinned manifest on disk"
+
+    chunks_file.write_bytes(b"modified on disk\n")
+    recovered_paths: list[str] = []
+
+    def _fake_recover(rel_path: str, *, md5: str | None = None, sha256: str | None = None):
+        recovered_paths.append(rel_path)
+        return (chunks_bytes, "deadbeef" * 5)
+
+    drift_recovered = arm_comparison.bundle_drift(record, tmp_path, recover=_fake_recover)
+    assert drift_recovered["manifest_status"] == "match"
+    assert drift_recovered["manifest_basis"] == "pinned manifest recovered from history"
+    assert recovered_paths == [chunks_rel.as_posix()]

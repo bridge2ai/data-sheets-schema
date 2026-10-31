@@ -1,0 +1,21 @@
+{
+  "attributes": {
+    "effective": {
+      "eol": "unspecified",
+      "filter": "unspecified",
+      "merge": "bc1-keep-first",
+      "text": "unspecified",
+      "working-tree-encoding": "unspecified"
+    },
+    "tracked_ancestor_attributes": {}
+  },
+  "attributes_sha256": "9dc2def3f37f3da241330d135469a7828156481e09c0583a8649ff0a313cc328",
+  "conflicts": {},
+  "head": "0ae41de38246b19217d0683298b3d8010366d233",
+  "helper_sha256": "61086a7efebaabe0200a814267d5e1328e03bee12a88014ee860a24a9b1fdc25",
+  "merge_head": "50bc50af678ae5216b3985c340fe1344da26c05e",
+  "protected_blob": "91105618cd25e33962b1c2d30f20b37101530bb2",
+  "protected_mode": "100644",
+  "protected_sha256": "1c4436b5ea689fcd674c848a722dd9a86495692ad83401682f3d805f49acb6d6",
+  "scope": "protected postcheck and verbatim ordinary conflict evidence"
+}

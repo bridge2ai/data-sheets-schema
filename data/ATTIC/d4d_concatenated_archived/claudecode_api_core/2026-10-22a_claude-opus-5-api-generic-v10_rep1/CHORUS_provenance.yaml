@@ -1,0 +1,2094 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-10-22T21:12:31+00:00'
+run:
+  label: 2026-10-22a_claude-opus-5-api-generic-v10_rep1
+  project: CHORUS
+  method: claudecode_api
+  arm: baseline
+  replicate: 1
+  condition: generic_v10
+  condition_basis: stated by the runner
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  prior_generation_ids: []
+model:
+  generation_method: schema-grounded API, four model phases with the core derived
+    from the full record (#694)
+  agent_runtime: Claude API (direct)
+  provider: LBL CBORG (proxy to Anthropic)
+  base_url: https://api.cborg.lbl.gov
+  model: claude-opus-5
+  max_tokens_by_phase:
+    full: 128000
+    reconcile_full: 96000
+    repair_full: 96000
+    audit: 96000
+    report: 96000
+    full_readdress: 8000
+    full_receipt_completion: 4000
+    report_regate: 96000
+  context:
+    peak_request_tokens: 316993
+    peak_phase: typed_audit_integration
+    peak_basis: 'observed: input + cache_read + cache_write of the largest request'
+    limit_tokens: null
+    limit_basis: not stated by the route and not returned by the provider; headroom
+      cannot be computed from this record
+  thinking_requested:
+    type: adaptive
+    display: summarized
+  thinking_basis: 'set on every generation-phase request (full, audit, reconcile,
+    report, repair, regate, readdress); on this model family adaptive thinking is
+    also the default when the parameter is omitted, so the request states the regime
+    rather than changing it, and a phase returning no thinking block is a legal adaptive
+    outcome, not a deviation. The judging paths (merge, agreement, evidence_score,
+    form_defects) send no parameter and are not covered by this line. The request
+    also sets display: summarized, which is not the omitted-parameter default; this
+    condition declares it (#5043)'
+  temperature: null
+  temperature_basis: not applicable to this model
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/agents/d4d-provenance-guard-v2.md
+    sha256: 10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085
+    bytes: 6912
+    exists: true
+  - path: .claude/commands/d4d-agent-v2.md
+    sha256: dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299
+    bytes: 12698
+    exists: true
+  - path: .claude/commands/d4d-full-core-v2.md
+    sha256: 2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124
+    bytes: 58267
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules-v2.md
+    sha256: 5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129
+    bytes: 27544
+    exists: true
+  - path: src/download/prompts/api_playbook_v2.md
+    sha256: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
+    bytes: 4492
+    exists: true
+  - path: src/download/prompts/d4d_generic_arm_prompt_v10.md
+    sha256: 7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb
+    bytes: 30186
+    exists: true
+  - path: src/download/prompts/receipt_completion_runtime_v2.md
+    sha256: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+    bytes: 3158
+    exists: true
+  - path: src/download/prompts/shared_generation_v1.md
+    sha256: 34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450
+    bytes: 3569
+    exists: true
+  request:
+    sha256: 28b8805d17092b5b5a7b34b3ff93f7a83fe753cac1e5cbdb53ce8bb9c76badd3
+    bytes: 85348
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      api_playbook_version: 2
+      api_playbook_sha256: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
+      receipt_completion_version: 2
+      receipt_completion_policy_sha256: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+      receipt_completion_registration:
+        sha256: 7ad04a03e1cb5fa1f7a7e6d284e8831a96759267360b8685e79bab4a2528415a
+        raw_json: '{"condition":"generic_v10","context_limit_basis":"Route context
+          window 1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"generic-v10-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"}'
+      shared_generation_version: 1
+      shared_generation_registration:
+        sha256: 6148925b835b6dea33e781b2cb7cd156c60e9e66f62f1ae2ad4a835a6c4888e5
+        raw_json: '{"audit_limits":{"aggregate_input_tokens":4000000,"aggregate_output_tokens":320000,"context_limit_basis":"Route
+          context window 1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"integration_output_tokens":32000,"max_calls":18,"max_input_tokens_per_call":1000000,"max_inventory_bytes":12288,"max_paths":80,"max_request_bytes":32000000,"max_workers":4,"omission_output_tokens":32000,"worker_output_tokens":64000},"audit_transport":{"malformed_response_retries":0,"sdk_max_retries":0,"transport_attempts":1},"format":"shared_generation_registration_v1","inputs":{"bundle":{"bytes":35920,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt","sha256":"27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c"},"chunk_manifest":{"bytes":1945,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml","sha256":"ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a"},"context":{"bytes":6476,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json","sha256":"ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"},"core_schema":{"root":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sources":[{"bytes":1299200,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sha256":"09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"}]},"full_schema":{"root":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sources":[{"bytes":1442513,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sha256":"eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"}]},"profile":{"basis":"manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81","name":"bridge2ai","vocabulary":{"bytes":6115,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml","sha256":"e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"}},"project":"CHORUS","source_manifest":{"bytes":40612,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml","sha256":"0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"}},"receipt":{"condition":"generic_v10","context_limit_basis":"Route
+          context window 1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"generic-v10-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"},"registration_id":"generic-v10-chorus-2026-10-22a_claude-opus-5-api-generic-v10_rep1","registration_path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/registration_chorus_2026-10-22a_claude-opus-5-api-generic-v10_rep1.json","run":{"arm":"BASELINE
+          (input documents only)","label":"2026-10-22a_claude-opus-5-api-generic-v10_rep1","method":"claudecode_api","project":"CHORUS"},"runtime":{"base_url":"https://api.cborg.lbl.gov","config":{"bytes":6250,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/.github/workflows/d4d_assistant_deterministic.config","sha256":"0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"},"effort":null,"model":"claude-opus-5","provider":"LBL
+          CBORG (proxy to Anthropic)","temperature":null,"thinking":{"display":"summarized","type":"adaptive"}},"selection":{"api_playbook_version":2,"assets":{".claude/agents/d4d-provenance-guard-v2.md":"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",".claude/commands/d4d-agent-v2.md":"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",".claude/commands/d4d-full-core-v2.md":"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",".claude/commands/d4d-uniform-rules-v2.md":"5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129","src/download/prompts/api_playbook_v2.md":"5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719","src/download/prompts/d4d_generic_arm_prompt_v10.md":"7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb","src/download/prompts/receipt_completion_runtime_v2.md":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c","src/download/prompts/shared_generation_v1.md":"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"},"condition":"generic_v10","protocol":"shared_generation_v1","receipt_completion_version":2,"renderer":25,"runtime":"Claude
+          API (direct)","typed_protocol":"typed_audit_protocol_v1","version":1}}'
+      shared_generation_assets:
+        .claude/agents/d4d-provenance-guard-v2.md: 10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085
+        .claude/commands/d4d-agent-v2.md: dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299
+        .claude/commands/d4d-full-core-v2.md: 2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124
+        .claude/commands/d4d-uniform-rules-v2.md: 5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129
+        src/download/prompts/api_playbook_v2.md: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
+        src/download/prompts/d4d_generic_arm_prompt_v10.md: 7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb
+        src/download/prompts/receipt_completion_runtime_v2.md: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+        src/download/prompts/shared_generation_v1.md: 34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450
+      api_header_values:
+        Temperature: not sent (claude-opus-5 rejects the parameter; the config's value
+          did not reach the request)
+        Model: claude-opus-5
+        Reasoning effort: not set by the request (the provider's own choice; not recorded
+          as a value)
+      render_version: 25
+      chunk_manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml
+      condition: generic_v10
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml'
+      run_date: '2026-10-22'
+      manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml
+      profile: bridge2ai
+      profile_basis: manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81
+      runtime: Claude API (direct)
+      provider: LBL CBORG (proxy to Anthropic)
+      bundle: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt
+  resolved:
+    sha256: 28b8805d17092b5b5a7b34b3ff93f7a83fe753cac1e5cbdb53ce8bb9c76badd3
+    bytes: 85348
+  assembly:
+    sha256: 7cd78e16f4706bdee5045fa6d381e82e5f6d7d0b2bb048be0befe240eb5ec3b5
+    layout: 'schema digest, input bundle, source ranking, declared naming, declared
+      scope (#932), arm prompt, carried artifacts, computed audit counts and core
+      inventory for reports, phase instruction; audit counts come from the structured
+      entries, never their prose summary (#1802); core derived from the full record,
+      not generated (#694); audit and reconcile_full address the full record only,
+      the core being its projection (#705); under a receipt condition the bundle carries
+      [cNNN] chunk markers and the full phase instruction asks for the coverage receipt
+      after the record (#710); a receipt entry whose slot is not a path in the record
+      just written gets one follow-up turn — the full-phase exchange replayed as an
+      assistant turn, then the unresolved entries with their chunk and ordinal and
+      the re-addressing instruction — whose answer moves the entry only to a resolving
+      path or drops it (#952); the report phase ends with a dispositions table, checked
+      against the records before the run completes, and a report with contradictory
+      claims, unrecorded changes or a missing dispositions table is regenerated once
+      with the discrepancies named (#929, #1181); the report phase carries the core
+      class''s top-level slot inventory before its instruction, so the model can see
+      which slots the core declares — the gate still judges presence in the two records,
+      and the inventory decides only whether a finding carries the ''core class declares
+      no such slot'' cause (#998); hash-bound source-review inventory before audit/report
+      instruction: # Required source-review inventory
+
+
+      ; shared_generation_v1: common contracts once; typed workers + source-first
+      omission + integration; checked exact audit carry; bound terminal reconstruction'
+  context_blocks:
+    source_ranking:
+      sent: true
+      bytes: 658
+    declared_naming:
+      sent: true
+      bytes: 506
+    declared_scope:
+      sent: true
+      bytes: 390
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: 669d3f53725a62ecca20f1a95518b4878280ac278d91e626b762d1cb1bfe7cc1
+    bytes: 57830
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: acfbda817247ace3b2b5c2cc947a0dec678cdd53422dc0f234ed55352500dbb4
+    bytes: 12553
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: a5b4940b4acd4d4d359ff243aaa6f55209f71285993b49d398616e196a9092f2
+    bytes: 6909
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules.md
+    sha256: 851c0911da08bf0747c55a5f84e4578b192bd87616677773f6b58a4771b37b73
+    bytes: 24252
+    exists: true
+  consumed: false
+  consumed_basis: this runtime renders a condition prompt and sends nothing else,
+    so these were not read; they are hashed so an unchanged hash shows that (#545)
+phase_log: null
+schema:
+  declared_version: 3.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  core_declared_version: 3.0.0
+  core_declared_in: src/data_sheets_schema/schema/data_sheets_schema_core.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+  merged_schema_carries_version: true
+  digest_md5: 6be1582236d9320bac6040b9a8b92da9
+  profile: bridge2ai
+  profile_basis: manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: 77b94e457d211b040d54b0e2b7e746485856f49c
+  commit_short: 77b94e457
+  branch: HEAD
+  resource_root: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base
+  resource_kind: checkout
+  dirty: true
+  dirty_file_count: 5
+  dirty_paths:
+  - data/d4d_concatenated/claudecode_api/2026-10-20a_claude-opus-5-api-generic-v10_rep1/
+  - data/d4d_concatenated/claudecode_api/2026-10-22a_claude-opus-5-api-generic-v10_rep1/
+  - data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/
+  - data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/
+  - poetry.toml
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt
+  chunks:
+    path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml
+    sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
+    bundle_name: CHORUS_preprocessed.txt
+    rule:
+      version: 2
+      unit: source-document
+      boundary: 'FILE: line followed by PATH: or ROLE:'
+      preamble: own-chunk
+      split: line-window
+      max_lines: 400
+      max_bytes: 48000
+    chunk_count: 8
+  receipt_expected: true
+  bundle_md5: 9b2ef4b65d67957f79362266cab0bc7a
+  bundle_bytes: 35920
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml
+    md5: 0dede8dde4bc7ab17ff683a0a127da06
+  dispositions_expected: true
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_api/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d.yaml
+    bytes: 25700
+    slots: 36
+  core:
+    path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d_core.yaml
+    bytes: 25073
+    slots: 35
+  report:
+    path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_reconciliation.md
+    bytes: 152404
+    slots: null
+companions:
+  reasoning_log:
+    path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_reasoning.jsonl
+    present: true
+    md5: 006de8eaf76f7ee6b2aac6af33b47f90
+    note: one JSON line per phase; absent for a runtime that cannot report its own
+      token accounting (#400)
+  telemetry_report:
+    path: data/run_telemetry/2026-10-22a_claude-opus-5-api-generic-v10.yaml
+    present: false
+    note: derived from records like this one, per label rather than per run; `d4d
+      runs telemetry` writes it
+  prompt_registry:
+    path: src/download/prompts/canonical_hashes.yaml
+    present: true
+    md5: fcabb9e9746b37a7c05ee0b6417e53cc
+    note: the pins the recorded prompt hashes were judged against
+  digest_inventory:
+    path: src/data_sheets_schema/schema/digest_inventory.yaml
+    present: true
+    md5: 59eb49602f449dd74eecce6df72d12ca
+    note: digest to slot inventory, which decides whether a slot predates a pair
+unrecoverable: null
+unverified:
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''claude-opus-5''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+- field: model.temperature
+  value: null
+  reason: 'claude-opus-5 rejects `temperature` (400: deprecated for this model), so
+    the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config is not
+    sent and does not apply. Sampling for this model family is selected by model-name
+    suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). claude-opus-5 rejects `temperature` (400: deprecated
+  for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
+- 'Resumed run; phases skipped as already present: full, core.'
+receipt_completion:
+  added_pairs:
+  - chunk: c006
+    origin: rereceipt
+    slot: instances[0].instance_type
+    snippet: 50,000 Patient admissions from ICU, PICU, and NICU
+  - chunk: c006
+    origin: rereceipt
+    slot: instances[1].instance_type
+    snippet: 1.6 Billion Rows of EHR OMOP data
+  - chunk: c006
+    origin: rereceipt
+    slot: instances[2].instance_type
+    snippet: 7,642 Admissions with Radiology Data
+  - chunk: c003
+    origin: rereceipt
+    slot: existing_uses[0].examples
+    snippet: Datasets are being used for training activities and publications
+  - chunk: c003
+    origin: rereceipt
+    slot: existing_uses[1].examples
+    snippet: Datasets are being used for training activities and publications
+  - chunk: c003
+    origin: rereceipt
+    slot: existing_uses[2].examples
+    snippet: expands access to Bridge2AI CHoRUS data through engagement, AI training,
+      and mentorship
+  - chunk: c002
+    origin: rereceipt
+    slot: intended_uses[0].examples
+    snippet: build machine-learning (ML) and artificial intelligence (AI)-derived
+      models to improve the care and outcomes of patients requiring critical care
+  - chunk: c002
+    origin: rereceipt
+    slot: intended_uses[0].usage_notes
+    snippet: will develop the necessary network, tools, standards, data, and education
+      to build machine-learning (ML) and artificial intelligence (AI)-derived models
+  - chunk: c002
+    origin: rereceipt
+    slot: intended_uses[1].examples
+    snippet: The dataset will also provision a holdout test set, accessible for model
+      external validation to aid marketplace adoption of AI-developed models for implementation
+      in acute and critical care.
+  - chunk: c002
+    origin: rereceipt
+    slot: intended_uses[1].usage_notes
+    snippet: The dataset will also provision a holdout test set
+  - chunk: c007
+    origin: rereceipt
+    slot: external_resources[0].external_resources
+    snippet: The CHoRUS GitHub organization houses active repositories that provide
+  - chunk: c007
+    origin: rereceipt
+    slot: external_resources[1].external_resources
+    snippet: 'Website: www.bridge2ai.org/chorus'
+  after:
+    checked: true
+    chunks:
+      by_status:
+        duplicate_of: 0
+        extracted: 6
+        nothing_relevant: 2
+        redundant_with: 0
+      reviewed: 8
+      total: 8
+      unreviewed: []
+    findings: []
+    findings_gated: 0
+    findings_truncated: null
+    instrument: 'v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics
+      split by declared phase1/rereceipt/unknown origin, with recorded chunk-status
+      reversals counted separately. Origin markers are accounting metadata, not proof
+      of authorship or semantic support. v3 (#1053): an entry whose identity key the
+      final list no longer carries anywhere (a minted id reconciliation stripped)
+      is located as a keyless entry — by overlap, else by position for the same shape
+      when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`)
+      — instead of declared dropped; v2 (#1123): a fragment minted on an identifier
+      the record carries for the dataset at its top level — its id in CURIE or resolver
+      form, its doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+      counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+      commentary and own-id fragments exempt, unattesting snippets counted apart'
+    non_checks:
+    - that a chunk marked nothing_relevant truly held nothing for the record — a judgement;
+      sample by chunk id in review
+    - that a verified snippet supports the value it is attached to — a snippet can
+      be real and irrelevant; sample by slot path in review
+    rereceipt:
+      status_reversal_count: 0
+      status_reversals: []
+      unusable_prior_chunks: []
+      unusable_prior_count: 0
+    slots:
+      added_after_receipt: 0
+      addressing_slips: []
+      addressing_slips_count: 0
+      exempt: 15
+      exempt_on_carried_identifier: 0
+      index_reused_by_another_entry: []
+      index_reused_by_another_entry_count: 0
+      located_after_key_stripped: []
+      located_after_key_stripped_count: 0
+      never_receipted: 0
+      path_not_in_snapshot: []
+      path_not_in_snapshot_count: 0
+      path_off_by_one: []
+      path_off_by_one_count: 0
+      populated: 79
+      receipt_paths: 76
+      receiptable: 64
+      receipts_to_removed_values: 0
+      remapped_by_identity: []
+      remapped_by_identity_count: 0
+      reshaped_by_reconcile: []
+      unresolved: []
+      value_changed_after_receipt: []
+      value_changed_after_receipt_count: 0
+      with_receipt: 64
+      without_receipt: []
+      without_receipt_truncated: null
+    snippets:
+      adjacent: 0
+      artifact_elided: 0
+      by_origin:
+        phase1:
+          entry_single_leaf: 1
+          no_value_overlap: 4
+          total: 121
+          unattesting: 0
+        rereceipt:
+          entry_single_leaf: 0
+          no_value_overlap: 0
+          total: 12
+          unattesting: 0
+        unknown:
+          entry_single_leaf: 0
+          no_value_overlap: 0
+          total: 0
+          unattesting: 0
+      elsewhere: 0
+      entry_single_leaf: 1
+      entry_single_leaf_sample:
+      - chunk: c003
+        leaves: 3
+        overlapping: 1
+        slot: instances[3]
+      linewrap_joined: 0
+      mismatched: 0
+      no_value_overlap: 4
+      no_value_overlap_sample:
+      - chunk: c003
+        slot: regulatory_restrictions.confidentiality_level
+        snippet: Controlled access
+      - chunk: c003
+        slot: instances[3].data_substrate
+        snippet: Imaging – currently 1000 images available
+      - chunk: c006
+        slot: instances[1].data_topic
+        snippet: 1.6 Billion Rows of EHR OMOP data
+      - chunk: c006
+        slot: funders[0].grantor
+        snippet: This project is funded by the NIH under award number OT2OD03
+      spans_boundary: 0
+      split_at_linebreaks: 0
+      total: 133
+      unattesting: 0
+      unattesting_sample: []
+      unchecked: 0
+      verified: 133
+    summary: chunks 8/8 reviewed · snippets 133/133 verified (4 bearing on no token
+      of their value) (1 entry receipt(s) overlapping one leaf) · slots 64/64 with
+      a receipt (15 exempt)
+  before:
+    checked: true
+    chunks:
+      by_status:
+        duplicate_of: 0
+        extracted: 6
+        nothing_relevant: 2
+        redundant_with: 0
+      reviewed: 8
+      total: 8
+      unreviewed: []
+    findings: []
+    findings_gated: 0
+    findings_truncated: null
+    instrument: 'v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics
+      split by declared phase1/rereceipt/unknown origin, with recorded chunk-status
+      reversals counted separately. Origin markers are accounting metadata, not proof
+      of authorship or semantic support. v3 (#1053): an entry whose identity key the
+      final list no longer carries anywhere (a minted id reconciliation stripped)
+      is located as a keyless entry — by overlap, else by position for the same shape
+      when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`)
+      — instead of declared dropped; v2 (#1123): a fragment minted on an identifier
+      the record carries for the dataset at its top level — its id in CURIE or resolver
+      form, its doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+      counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+      commentary and own-id fragments exempt, unattesting snippets counted apart'
+    non_checks:
+    - that a chunk marked nothing_relevant truly held nothing for the record — a judgement;
+      sample by chunk id in review
+    - that a verified snippet supports the value it is attached to — a snippet can
+      be real and irrelevant; sample by slot path in review
+    rereceipt:
+      status_reversal_count: 0
+      status_reversals: []
+      unusable_prior_chunks: []
+      unusable_prior_count: 0
+    slots:
+      added_after_receipt: 0
+      addressing_slips: []
+      addressing_slips_count: 0
+      exempt: 15
+      exempt_on_carried_identifier: 0
+      index_reused_by_another_entry: []
+      index_reused_by_another_entry_count: 0
+      located_after_key_stripped: []
+      located_after_key_stripped_count: 0
+      never_receipted: 12
+      path_not_in_snapshot: []
+      path_not_in_snapshot_count: 0
+      path_off_by_one: []
+      path_off_by_one_count: 0
+      populated: 79
+      receipt_paths: 64
+      receiptable: 64
+      receipts_to_removed_values: 0
+      remapped_by_identity: []
+      remapped_by_identity_count: 0
+      reshaped_by_reconcile: []
+      unresolved: []
+      value_changed_after_receipt: []
+      value_changed_after_receipt_count: 0
+      with_receipt: 52
+      without_receipt:
+      - instances[0].instance_type
+      - instances[1].instance_type
+      - instances[2].instance_type
+      - existing_uses[0].examples
+      - existing_uses[1].examples
+      - existing_uses[2].examples
+      - intended_uses[0].examples
+      - intended_uses[0].usage_notes
+      - intended_uses[1].examples
+      - intended_uses[1].usage_notes
+      - external_resources[0].external_resources
+      - external_resources[1].external_resources
+      without_receipt_truncated: null
+    snippets:
+      adjacent: 0
+      artifact_elided: 0
+      by_origin:
+        phase1:
+          entry_single_leaf: 1
+          no_value_overlap: 4
+          total: 121
+          unattesting: 0
+        rereceipt:
+          entry_single_leaf: 0
+          no_value_overlap: 0
+          total: 0
+          unattesting: 0
+        unknown:
+          entry_single_leaf: 0
+          no_value_overlap: 0
+          total: 0
+          unattesting: 0
+      elsewhere: 0
+      entry_single_leaf: 1
+      entry_single_leaf_sample:
+      - chunk: c003
+        leaves: 3
+        overlapping: 1
+        slot: instances[3]
+      linewrap_joined: 0
+      mismatched: 0
+      no_value_overlap: 4
+      no_value_overlap_sample:
+      - chunk: c003
+        slot: regulatory_restrictions.confidentiality_level
+        snippet: Controlled access
+      - chunk: c003
+        slot: instances[3].data_substrate
+        snippet: Imaging – currently 1000 images available
+      - chunk: c006
+        slot: instances[1].data_topic
+        snippet: 1.6 Billion Rows of EHR OMOP data
+      - chunk: c006
+        slot: funders[0].grantor
+        snippet: This project is funded by the NIH under award number OT2OD03
+      spans_boundary: 0
+      split_at_linebreaks: 0
+      total: 121
+      unattesting: 0
+      unattesting_sample: []
+      unchecked: 0
+      verified: 121
+    summary: chunks 8/8 reviewed · snippets 121/121 verified (4 bearing on no token
+      of their value) (1 entry receipt(s) overlapping one leaf) · slots 52/64 with
+      a receipt (12 never receipted, 0 added after the receipt) (15 exempt)
+  counts:
+    accepted: 12
+    already_present: 0
+    answers_received: 12
+    never_receipted_after: 0
+    never_receipted_before: 12
+    receipts_added: 12
+    rejected_answers: 0
+    rejected_paths: 0
+    requested: 12
+    status_reversals_added: 0
+    unanswered: 0
+    unsupported: 0
+  input_identity:
+    bundle:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt
+      sha256: 27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c
+    chunks:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml
+      sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
+    instruction:
+      render_version: 25
+      sha256: 28b8805d17092b5b5a7b34b3ff93f7a83fe753cac1e5cbdb53ce8bb9c76badd3
+      spec:
+        api_header_values:
+          Model: claude-opus-5
+          Reasoning effort: not set by the request (the provider's own choice; not
+            recorded as a value)
+          Temperature: not sent (claude-opus-5 rejects the parameter; the config's
+            value did not reach the request)
+        api_playbook_sha256: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
+        api_playbook_version: 2
+        arm: BASELINE (input documents only)
+        bundle: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt
+        chunk_manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml
+        condition: generic_v10
+        manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml
+        manifest_line: '# Source manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml'
+        profile: bridge2ai
+        provider: LBL CBORG (proxy to Anthropic)
+        receipt_completion_policy_sha256: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+        receipt_completion_registration:
+          raw_json: '{"condition":"generic_v10","context_limit_basis":"Route context
+            window 1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"generic-v10-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"}'
+          sha256: 7ad04a03e1cb5fa1f7a7e6d284e8831a96759267360b8685e79bab4a2528415a
+        receipt_completion_version: 2
+        render_version: 25
+        run_date: '2026-10-22'
+        runtime: Claude API (direct)
+        shared_generation_assets:
+          .claude/agents/d4d-provenance-guard-v2.md: 10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085
+          .claude/commands/d4d-agent-v2.md: dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299
+          .claude/commands/d4d-full-core-v2.md: 2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124
+          .claude/commands/d4d-uniform-rules-v2.md: 5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129
+          src/download/prompts/api_playbook_v2.md: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
+          src/download/prompts/d4d_generic_arm_prompt_v10.md: 7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb
+          src/download/prompts/receipt_completion_runtime_v2.md: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+          src/download/prompts/shared_generation_v1.md: 34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450
+        shared_generation_registration:
+          raw_json: '{"audit_limits":{"aggregate_input_tokens":4000000,"aggregate_output_tokens":320000,"context_limit_basis":"Route
+            context window 1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"integration_output_tokens":32000,"max_calls":18,"max_input_tokens_per_call":1000000,"max_inventory_bytes":12288,"max_paths":80,"max_request_bytes":32000000,"max_workers":4,"omission_output_tokens":32000,"worker_output_tokens":64000},"audit_transport":{"malformed_response_retries":0,"sdk_max_retries":0,"transport_attempts":1},"format":"shared_generation_registration_v1","inputs":{"bundle":{"bytes":35920,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt","sha256":"27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c"},"chunk_manifest":{"bytes":1945,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml","sha256":"ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a"},"context":{"bytes":6476,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json","sha256":"ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"},"core_schema":{"root":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sources":[{"bytes":1299200,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sha256":"09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"}]},"full_schema":{"root":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sources":[{"bytes":1442513,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sha256":"eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"}]},"profile":{"basis":"manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81","name":"bridge2ai","vocabulary":{"bytes":6115,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml","sha256":"e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"}},"project":"CHORUS","source_manifest":{"bytes":40612,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml","sha256":"0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"}},"receipt":{"condition":"generic_v10","context_limit_basis":"Route
+            context window 1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"generic-v10-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"},"registration_id":"generic-v10-chorus-2026-10-22a_claude-opus-5-api-generic-v10_rep1","registration_path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/registration_chorus_2026-10-22a_claude-opus-5-api-generic-v10_rep1.json","run":{"arm":"BASELINE
+            (input documents only)","label":"2026-10-22a_claude-opus-5-api-generic-v10_rep1","method":"claudecode_api","project":"CHORUS"},"runtime":{"base_url":"https://api.cborg.lbl.gov","config":{"bytes":6250,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/.github/workflows/d4d_assistant_deterministic.config","sha256":"0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"},"effort":null,"model":"claude-opus-5","provider":"LBL
+            CBORG (proxy to Anthropic)","temperature":null,"thinking":{"display":"summarized","type":"adaptive"}},"selection":{"api_playbook_version":2,"assets":{".claude/agents/d4d-provenance-guard-v2.md":"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",".claude/commands/d4d-agent-v2.md":"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",".claude/commands/d4d-full-core-v2.md":"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",".claude/commands/d4d-uniform-rules-v2.md":"5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129","src/download/prompts/api_playbook_v2.md":"5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719","src/download/prompts/d4d_generic_arm_prompt_v10.md":"7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb","src/download/prompts/receipt_completion_runtime_v2.md":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c","src/download/prompts/shared_generation_v1.md":"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"},"condition":"generic_v10","protocol":"shared_generation_v1","receipt_completion_version":2,"renderer":25,"runtime":"Claude
+            API (direct)","typed_protocol":"typed_audit_protocol_v1","version":1}}'
+          sha256: 6148925b835b6dea33e781b2cb7cd156c60e9e66f62f1ae2ad4a835a6c4888e5
+        shared_generation_version: 1
+    profile:
+      digest_md5: 6be1582236d9320bac6040b9a8b92da9
+      name: bridge2ai
+    receipt_completion_schema:
+      sources:
+      - name: data-sheets-schema
+        path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+        sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+    shared_generation:
+      files:
+      - bytes: 6476
+        path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json
+        sha256: ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0
+      - bytes: 5177
+        path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/registration_chorus_2026-10-22a_claude-opus-5-api-generic-v10_rep1.json
+        sha256: 6148925b835b6dea33e781b2cb7cd156c60e9e66f62f1ae2ad4a835a6c4888e5
+      - bytes: 6250
+        path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/.github/workflows/d4d_assistant_deterministic.config
+        sha256: 0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91
+      - bytes: 1945
+        path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml
+        sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
+      - bytes: 35920
+        path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt
+        sha256: 27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c
+      - bytes: 40612
+        path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml
+        sha256: 0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528
+      - bytes: 6115
+        path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml
+        sha256: e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914
+      - bytes: 1442513
+        path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+        sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+      - bytes: 1299200
+        path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+        sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+      registration:
+        raw_json: '{"audit_limits":{"aggregate_input_tokens":4000000,"aggregate_output_tokens":320000,"context_limit_basis":"Route
+          context window 1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"integration_output_tokens":32000,"max_calls":18,"max_input_tokens_per_call":1000000,"max_inventory_bytes":12288,"max_paths":80,"max_request_bytes":32000000,"max_workers":4,"omission_output_tokens":32000,"worker_output_tokens":64000},"audit_transport":{"malformed_response_retries":0,"sdk_max_retries":0,"transport_attempts":1},"format":"shared_generation_registration_v1","inputs":{"bundle":{"bytes":35920,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt","sha256":"27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c"},"chunk_manifest":{"bytes":1945,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml","sha256":"ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a"},"context":{"bytes":6476,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json","sha256":"ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"},"core_schema":{"root":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sources":[{"bytes":1299200,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sha256":"09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"}]},"full_schema":{"root":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sources":[{"bytes":1442513,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sha256":"eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"}]},"profile":{"basis":"manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81","name":"bridge2ai","vocabulary":{"bytes":6115,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml","sha256":"e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"}},"project":"CHORUS","source_manifest":{"bytes":40612,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml","sha256":"0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"}},"receipt":{"condition":"generic_v10","context_limit_basis":"Route
+          context window 1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"generic-v10-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"},"registration_id":"generic-v10-chorus-2026-10-22a_claude-opus-5-api-generic-v10_rep1","registration_path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/registration_chorus_2026-10-22a_claude-opus-5-api-generic-v10_rep1.json","run":{"arm":"BASELINE
+          (input documents only)","label":"2026-10-22a_claude-opus-5-api-generic-v10_rep1","method":"claudecode_api","project":"CHORUS"},"runtime":{"base_url":"https://api.cborg.lbl.gov","config":{"bytes":6250,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/.github/workflows/d4d_assistant_deterministic.config","sha256":"0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"},"effort":null,"model":"claude-opus-5","provider":"LBL
+          CBORG (proxy to Anthropic)","temperature":null,"thinking":{"display":"summarized","type":"adaptive"}},"selection":{"api_playbook_version":2,"assets":{".claude/agents/d4d-provenance-guard-v2.md":"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",".claude/commands/d4d-agent-v2.md":"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",".claude/commands/d4d-full-core-v2.md":"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",".claude/commands/d4d-uniform-rules-v2.md":"5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129","src/download/prompts/api_playbook_v2.md":"5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719","src/download/prompts/d4d_generic_arm_prompt_v10.md":"7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb","src/download/prompts/receipt_completion_runtime_v2.md":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c","src/download/prompts/shared_generation_v1.md":"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"},"condition":"generic_v10","protocol":"shared_generation_v1","receipt_completion_version":2,"renderer":25,"runtime":"Claude
+          API (direct)","typed_protocol":"typed_audit_protocol_v1","version":1}}'
+        sha256: 6148925b835b6dea33e781b2cb7cd156c60e9e66f62f1ae2ad4a835a6c4888e5
+    source_manifest:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml
+      sha256: 0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528
+  policy:
+    audit_header: '# Receipt completion candidates for independent audit
+
+
+      '
+    path: src/download/prompts/receipt_completion_runtime_v2.md
+    phase: full_receipt_completion
+    receipt_instrument: 'v4 (#3314, #3315): v3 coverage and gates unchanged; snippet
+      diagnostics split by declared phase1/rereceipt/unknown origin, with recorded
+      chunk-status reversals counted separately. Origin markers are accounting metadata,
+      not proof of authorship or semantic support. v3 (#1053): an entry whose identity
+      key the final list no longer carries anywhere (a minted id reconciliation stripped)
+      is located as a keyless entry — by overlap, else by position for the same shape
+      when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`)
+      — instead of declared dropped; v2 (#1123): a fragment minted on an identifier
+      the record carries for the dataset at its top level — its id in CURIE or resolver
+      form, its doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+      counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+      commentary and own-id fragments exempt, unattesting snippets counted apart'
+    receipt_instrument_version: 4
+    sdk_max_retries: 0
+    sha256: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+    transport_attempts: 1
+    version: 2
+  receipt_after_sha256: 5829b77841b837f5d30b12e55db6b1e22bb701d7fe71036d7225a7a2db3693db
+  receipt_yaml: "bundle_md5: 9b2ef4b65d67957f79362266cab0bc7a\nchunks:\n- id: c001\n\
+    \  status: nothing_relevant\n  reason: Concatenation header and table of contents\
+    \ listing input directory, file count and file names only; no dataset facts.\n\
+    - id: c002\n  status: extracted\n  extracted:\n  - slot: funders[0].grants[0].grant_number\n\
+    \    snippet: 'Core project number: OT2OD032701'\n  - slot: funders[0].grants[0].notes\n\
+    \    snippet: 'Project number: 1OT2OD032701-01'\n  - slot: funders[0].grants[0].notes\n\
+    \    snippet: 'Application ID: 10472824'\n  - slot: funders[0].grants[0].notes\n\
+    \    snippet: 'Award amount: 5880300'\n  - slot: funders[0].notes\n    snippet:\
+    \ As part of the NIH Common Fund’s Bridge2AI program\n  - slot: creators[0].principal_investigator.name\n\
+    \    snippet: 'Principal investigator: ROSENTHAL, ERIC S.'\n  - slot: creators[0].affiliations[0].name\n\
+    \    snippet: 'Organization: MASSACHUSETTS GENERAL HOSPITAL'\n  - slot: creators[0].source_caveats\n\
+    \    snippet: 'Principal investigator: ROSENTHAL, ERIC S.'\n  - slot: purposes[0].response\n\
+    \    snippet: The project’s overarching goal is to develop a publicly available,\
+    \ AI-ready critical care dataset, while ensuring the methods promote privacy,\
+    \ accountability, and clinical benefit, while promoting a new generation of AI\
+    \ clinicians and scientists.\n  - slot: tasks[0].response\n    snippet: aimed\
+    \ at characterizing acute and critical care illness\n  - slot: tasks[1].response\n\
+    \    snippet: predicting complications, and measuring treatment response among\
+    \ patients with acute or critical illness\n  - slot: tasks[2].response\n    snippet:\
+    \ measuring treatment response among patients with acute or critical illness\n\
+    \  - slot: addressing_gaps[0].response\n    snippet: There is an urgent need for\
+    \ infrastructure to support artificial intelligence and machine learning (AI/ML)\
+    \ in critical care. Developing high-resolution multi-center data sets is a critical\
+    \ first step towards actionable and trustworthy AI.\n  - slot: splits[0].split_details\n\
+    \    snippet: The dataset will also provision a holdout test set, accessible for\
+    \ model external validation to aid marketplace adoption of AI-developed models\
+    \ for implementation in acute and critical care.\n  - slot: splits[0].split_details\n\
+    \    snippet: sequestering holdout datasets for external validation\n  - slot:\
+    \ sampling_strategies[0].strategies\n    snippet: establish a legal framework\
+    \ for collecting data at scale, sampling to ensure comprehensive sets of patient\
+    \ conditions and clinical treatment strategies\n  - slot: preprocessing_strategies[0].preprocessing_details\n\
+    \    snippet: standardize data to the OMOP Common Data Model\n  - slot: preprocessing_strategies[2].preprocessing_details\n\
+    \    snippet: transform data using approaches that limit re-identification\n \
+    \ - slot: labeling_strategies[0].labeling_details\n    snippet: develop capabilities\
+    \ across a multi-center network to acquire, standardize, tokenize, store, visualize,\
+    \ and label data\n  - slot: is_deidentified.deidentification_details\n    snippet:\
+    \ transform data using approaches that limit re-identification\n  - slot: intended_uses[0].examples[0]\n\
+    \    snippet: build machine-learning (ML) and artificial intelligence (AI)-derived\
+    \ models to improve the care and outcomes of patients requiring critical care\n\
+    \  - slot: intended_uses[1].examples[0]\n    snippet: accessible for model external\
+    \ validation to aid marketplace adoption of AI-developed models for implementation\
+    \ in acute and critical care\n  - slot: conforms_to\n    snippet: standardize\
+    \ data to the OMOP Common Data Model\n  - slot: was_derived_from\n    snippet:\
+    \ structured electronic health record data, tokenized unstructured electronic\
+    \ health record data, telemetry and EEG waveforms, imaging, and social determinants\
+    \ of health\n  - slot: keywords\n    snippet: Artificial Intelligence;Biomedical\
+    \ Research;Bridge to Artificial Intelligence;Clinical;Collaborations;Communities;Critical\
+    \ Care;Critical Illness\n  - slot: keywords\n    snippet: Electroencephalography;Electronic\
+    \ Health Record;Engineering;Ensure;Ethics\n  - slot: keywords\n    snippet: Standardization;Telemetry;Testing;United\
+    \ States National Institutes of Health;Validation;Workforce Development;acute\
+    \ care;care delivery;care outcomes;data acquisition;data modeling;data standards\n\
+    \  - slot: notes\n    snippet: 'Bridge2AI: Patient-Focused Collaborative Hospital\
+    \ Repository Uniting Standards (CHoRUS) for Equitable AI'\n  - slot: notes\n \
+    \   snippet: 'Project start: 2022-09-01T00:00:00'\n  - slot: notes\n    snippet:\
+    \ 'Project end: 2026-11-30T00:00:00'\n  - slot: source_caveats\n    snippet: 'Application\
+    \ ID: 10472824'\n  - slot: intended_uses[0].examples\n    snippet: build machine-learning\
+    \ (ML) and artificial intelligence (AI)-derived models to improve the care and\
+    \ outcomes of patients requiring critical care\n    origin: rereceipt\n  - slot:\
+    \ intended_uses[0].usage_notes\n    snippet: will develop the necessary network,\
+    \ tools, standards, data, and education to build machine-learning (ML) and artificial\
+    \ intelligence (AI)-derived models\n    origin: rereceipt\n  - slot: intended_uses[1].examples\n\
+    \    snippet: The dataset will also provision a holdout test set, accessible for\
+    \ model external validation to aid marketplace adoption of AI-developed models\
+    \ for implementation in acute and critical care.\n    origin: rereceipt\n  - slot:\
+    \ intended_uses[1].usage_notes\n    snippet: The dataset will also provision a\
+    \ holdout test set\n    origin: rereceipt\n- id: c003\n  status: extracted\n \
+    \ extracted:\n  - slot: name\n    snippet: CHoRUS Dataset\n  - slot: description\n\
+    \    snippet: Retrospective data collection\n  - slot: description\n    snippet:\
+    \ As of August 2025, covers 14 different hospitals with over 45K unique admissions\n\
+    \  - slot: description\n    snippet: Multicenter\n  - slot: description\n    snippet:\
+    \ 'OMOP and telemetry in enclave except: Clinical notes – stored locally except\
+    \ tokens'\n  - slot: description\n    snippet: EEG – extraction in process at\
+    \ this point\n  - slot: acquisition_methods[0].acquisition_details\n    snippet:\
+    \ Retrospective data collection\n  - slot: regulatory_restrictions.confidentiality_level\n\
+    \    snippet: Controlled access\n  - slot: regulatory_restrictions.notes\n   \
+    \ snippet: Controlled access\n  - slot: instances[3]\n    snippet: Imaging – currently\
+    \ 1000 images available with de-id in process for larger cohort\n  - slot: instances[3].data_substrate\n\
+    \    snippet: Imaging – currently 1000 images available\n  - slot: is_deidentified.deidentification_details\n\
+    \    snippet: Imaging – currently 1000 images available with de-id in process\
+    \ for larger cohort\n  - slot: updates.update_details\n    snippet: EEG – extraction\
+    \ in process at this point\n  - slot: sensitive_elements[0].sensitivity_details\n\
+    \    snippet: Clinical notes – stored locally except tokens\n  - slot: existing_uses[0].examples[0]\n\
+    \    snippet: Datasets are being used for training activities and publications\n\
+    \  - slot: existing_uses[1].examples[0]\n    snippet: Datasets are being used\
+    \ for training activities and publications\n  - slot: existing_uses[2].examples[0]\n\
+    \    snippet: expands access to Bridge2AI CHoRUS data through engagement, AI training,\
+    \ and mentorship\n  - slot: existing_uses[2].examples[0]\n    snippet: to  big\
+    \  data  analysis  and  conduct\n  - slot: conforms_to\n    snippet: Demographics\
+    \ OMOP\n  - slot: conforms_to\n    snippet: Clinical notes (extracted and tokenized\
+    \ using OHNLP toolkit)\n  - slot: conforms_to\n    snippet: Imaging (from PACS)\
+    \ DICOM\n  - slot: conforms_to\n    snippet: Waveform telemetry (bedside monitors,\
+    \ gateway/middleware) WFDB\n  - slot: conforms_to\n    snippet: Waveform EEG (hospital\
+    \ database) EDF+ and Persyst\n  - slot: conforms_to_standard\n    snippet: Demographics\
+    \ OMOP\n  - slot: conforms_to_standard\n    snippet: Imaging (from PACS) DICOM\n\
+    \  - slot: conforms_to_standard\n    snippet: Waveform telemetry (bedside monitors,\
+    \ gateway/middleware) WFDB\n  - slot: collection_mechanisms[0].mechanism_details\n\
+    \    snippet: Imaging (from PACS)\n  - slot: collection_mechanisms[1].mechanism_details\n\
+    \    snippet: Waveform telemetry (bedside monitors, gateway/middleware)\n  - slot:\
+    \ collection_mechanisms[2].mechanism_details\n    snippet: Waveform EEG (hospital\
+    \ database)\n  - slot: collection_mechanisms[3].mechanism_details\n    snippet:\
+    \ Medication administration (dosing time-stamped upon each infusion change or\
+    \ dose administration)\n  - slot: collection_mechanisms[4].mechanism_details\n\
+    \    snippet: Procedures (documentation by providers)\n  - slot: collection_mechanisms[5].mechanism_details\n\
+    \    snippet: Diagnoses (documentation by providers)\n  - slot: collection_mechanisms[6].mechanism_details\n\
+    \    snippet: Nursing flowsheets (high-frequency documentation)\n  - slot: preprocessing_strategies[1].preprocessing_details\n\
+    \    snippet: Clinical notes (extracted and tokenized using OHNLP toolkit)\n \
+    \ - slot: was_derived_from\n    snippet: Imaging (from PACS) DICOM\n  - slot:\
+    \ data_governance.access_review_process\n    snippet: Participants will ﬁll out\
+    \ a registration form with name, email, and institution\n  - slot: data_governance.access_review_process\n\
+    \    snippet: Once access is granted and compute is provisioned, an email will\
+    \ be sent\n  - slot: license_and_use_terms.license_terms\n    snippet: All participants\
+    \ must sign a licensing agreement included in the registration form before gaining\n\
+    \  - slot: notes\n    snippet: Bridge2AI CHoRUS Leadership Team\n  - slot: notes\n\
+    \    snippet: Eric Rosenthal Massachusetts General Hospital Azra Bihorac University\
+    \ of Florida\n  - slot: notes\n    snippet: Xiaoqian Jiang UTHealth Houston Yulia\
+    \ Strekalova University of Florida\n  - slot: notes\n    snippet: Parisa Rashidi\
+    \ University of Florida Manlik Kwong Tufts University\n  - slot: source_caveats\n\
+    \    snippet: As of August 2025, covers 14 different hospitals with over 45K unique\
+    \ admissions\n  - slot: source_caveats\n    snippet: Demographics OMOP\n  - slot:\
+    \ existing_uses[0].examples\n    snippet: Datasets are being used for training\
+    \ activities and publications\n    origin: rereceipt\n  - slot: existing_uses[1].examples\n\
+    \    snippet: Datasets are being used for training activities and publications\n\
+    \    origin: rereceipt\n  - slot: existing_uses[2].examples\n    snippet: expands\
+    \ access to Bridge2AI CHoRUS data through engagement, AI training, and mentorship\n\
+    \    origin: rereceipt\n- id: c004\n  status: extracted\n  extracted:\n  - slot:\
+    \ license_and_use_terms.license_terms\n    snippet: access to the dataset\n  -\
+    \ slot: license_and_use_terms.license_terms\n    snippet: '*This requirement is\
+    \ not a barrier to acceptance into the program.'\n- id: c005\n  status: extracted\n\
+    \  extracted:\n  - slot: data_governance.access_review_process\n    snippet: In\
+    \ order to gain access to the dataset, you will need to have a “.edu” email address.\n\
+    \  - slot: data_governance.access_review_process\n    snippet: Program administrators\
+    \ will assist with this access if needed.\n- id: c006\n  status: extracted\n \
+    \ extracted:\n  - slot: id\n    snippet: 'Source URL: https://chorus4ai.org/'\n\
+    \  - slot: page\n    snippet: 'Source URL: https://chorus4ai.org/'\n  - slot:\
+    \ description\n    snippet: The CHoRUS project is one data generation project\
+    \ of four in the National Institute of Health (NIH) funded Bridge2AI consortium.\n\
+    \  - slot: description\n    snippet: The CHoRUS project is the collection of multi-modal\
+    \ data across 14 different hospitals.\n  - slot: description\n    snippet: 60+\
+    \ CHoRUS consortium members across 20 different institutions\n  - slot: description\n\
+    \    snippet: The CHoRUS consortium evaluates community perspectives on clinical\
+    \ care AI to find ways to increase trustworthiness of provenance and privacy in\
+    \ AI.\n  - slot: description\n    snippet: dedicated to training engineers, data\
+    \ scientists, and clinicians\n  - slot: instances[0].counts\n    snippet: 50,000\
+    \ Patient admissions from ICU, PICU, and NICU\n  - slot: instances[1].counts\n\
+    \    snippet: 1.6 Billion Rows of EHR OMOP data\n  - slot: instances[1].data_topic\n\
+    \    snippet: 1.6 Billion Rows of EHR OMOP data\n  - slot: instances[2].counts\n\
+    \    snippet: 7,642 Admissions with Radiology Data\n  - slot: description\n  \
+    \  snippet: 23 Tb Waveform data\n  - slot: subpopulations[0].identification\n\
+    \    snippet: Patient admissions from ICU, PICU, and NICU\n  - slot: subpopulations[1].identification\n\
+    \    snippet: Patient admissions from ICU, PICU, and NICU\n  - slot: subpopulations[2].identification\n\
+    \    snippet: Patient admissions from ICU, PICU, and NICU\n  - slot: updates.update_details\n\
+    \    snippet: Anticipated Final Dataset 100,000 Patient admissions\n  - slot:\
+    \ updates.update_details\n    snippet: 9 Different data modalities\n  - slot:\
+    \ updates.update_details\n    snippet: 14 Data contributing hospitals\n  - slot:\
+    \ funders[0].grantor\n    snippet: This project is funded by the NIH under award\
+    \ number OT2OD032701.\n  - slot: funders[0].grants[0].grant_number\n    snippet:\
+    \ This project is funded by the NIH under award number OT2OD032701.\n  - slot:\
+    \ purposes[1].response\n    snippet: The goal is to work with projects to create\
+    \ ethically sourced datasets and tools around Artificial Intelligence and to create\
+    \ best practices for AI in health.\n  - slot: conforms_to\n    snippet: 1.6 Billion\
+    \ Rows of EHR OMOP data\n  - slot: conforms_to_standard\n    snippet: 1.6 Billion\
+    \ Rows of EHR OMOP data\n  - slot: notes\n    snippet: Ciera McCrary, MGH, Program\
+    \ Manager\n  - slot: notes\n    snippet: This repoitory is under review for potential\
+    \ modification in compliance with Administration directives.\n  - slot: source_caveats\n\
+    \    snippet: cmccrary@mgh.havard.edu\n  - slot: source_caveats\n    snippet:\
+    \ Current Released Dataset\n  - slot: instances[0].instance_type\n    snippet:\
+    \ 50,000 Patient admissions from ICU, PICU, and NICU\n    origin: rereceipt\n\
+    \  - slot: instances[1].instance_type\n    snippet: 1.6 Billion Rows of EHR OMOP\
+    \ data\n    origin: rereceipt\n  - slot: instances[2].instance_type\n    snippet:\
+    \ 7,642 Admissions with Radiology Data\n    origin: rereceipt\n- id: c007\n  status:\
+    \ extracted\n  extracted:\n  - slot: description\n    snippet: This collaboration\
+    \ spans 20 academic centers, of which 14 will contribute as Data Acquisition centers.\n\
+    \  - slot: purposes[2].response\n    snippet: The goal of the CHoRUS Network is\
+    \ to develop the most diverse, high-resolution, ethically sourced, AI-ready data\
+    \ set to answer the grand challenge of improving recovery from acute illness.\n\
+    \  - slot: sampling_strategies[1].strategies\n    snippet: Federated access will\
+    \ enable sampling methods to ensure a balanced and diverse cohort.\n  - slot:\
+    \ labeling_strategies[0].labeling_details\n    snippet: A visualization and annotation\
+    \ environment will label data with targets important for prediction.\n  - slot:\
+    \ data_governance.access_review_process\n    snippet: 'Request access: dbold@emory.edu\
+    \ or jared.houghtaling@tuftsmedicine.org'\n  - slot: external_resources[0].external_resources[0]\n\
+    \    snippet: The CHoRUS GitHub organization houses active repositories that provide\n\
+    \  - slot: external_resources[0].external_resources[0]\n    snippet: Software\
+    \ and tooling to interact with and extract insight from clinical data in diverse\
+    \ formats\n  - slot: external_resources[0].external_resources[0]\n    snippet:\
+    \ Standard operating protocols (SOPs) to instruct data contributing sites about\
+    \ best practices for curating and delivering interoperable datasets\n  - slot:\
+    \ external_resources[1].external_resources[0]\n    snippet: 'Website: www.bridge2ai.org/chorus'\n\
+    \  - slot: extension_mechanism.contribution_url\n    snippet: https://github.com/chorus-ai#table-of-contents\n\
+    \  - slot: extension_mechanism.extension_details\n    snippet: The starting reference\
+    \ for data managers at data contributing sites is the Chorus_SOP page.\n  - slot:\
+    \ extension_mechanism.extension_details\n    snippet: an interactive workflow\
+    \ diagram describing the step-by-step process for extracting and contributing\
+    \ clinical data to CHoRUS, with dynamic links to various SOP documents\n  - slot:\
+    \ extension_mechanism.extension_details\n    snippet: 'If you run into any issues\
+    \ in the creation or submission of your data extract, please feel free to post\
+    \ them in the relevant context-specific discussion location:'\n  - slot: extension_mechanism.extension_details\n\
+    \    snippet: We have established a chorus-mapping repository with documentation\
+    \ and pooled tabular mappings along with an associated clinical validation SOP\
+    \ for contributing to mapping efforts.\n  - slot: source_caveats\n    snippet:\
+    \ This project is licensed under the MIT License.\n  - slot: external_resources[0].external_resources\n\
+    \    snippet: The CHoRUS GitHub organization houses active repositories that provide\n\
+    \    origin: rereceipt\n  - slot: external_resources[1].external_resources\n \
+    \   snippet: 'Website: www.bridge2ai.org/chorus'\n    origin: rereceipt\n- id:\
+    \ c008\n  status: nothing_relevant\n  reason: Continuation of the GitHub repository\
+    \ listing (individual repository rows, update times, language statistics and page\
+    \ footer); no dataset facts used in the record.\n"
+  registration:
+    raw_json: '{"condition":"generic_v10","context_limit_basis":"Route context window
+      1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"generic-v10-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"}'
+    sha256: 7ad04a03e1cb5fa1f7a7e6d284e8831a96759267360b8685e79bab4a2528415a
+  rejected_paths: []
+  rejections: []
+  requested_paths:
+  - instances[0].instance_type
+  - instances[1].instance_type
+  - instances[2].instance_type
+  - existing_uses[0].examples
+  - existing_uses[1].examples
+  - existing_uses[2].examples
+  - intended_uses[0].examples
+  - intended_uses[0].usage_notes
+  - intended_uses[1].examples
+  - intended_uses[1].usage_notes
+  - external_resources[0].external_resources
+  - external_resources[1].external_resources
+  schema_validation: captured schema and dependency closure validated before admission
+  semantic_support: not mechanically established
+  state: answers_complete
+  still_uncovered_paths: []
+  unanswered_paths: []
+  unsupported_audit_candidates: []
+  journal:
+    state: complete
+    inputs:
+      path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_inputs.json
+      sha256: c6e95136fb168adefa296e06cfeac55e9057d1fc96dedad011db405231280fec
+    request:
+      path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_request.json
+      sha256: 086dd23c1f4914195574f3e3dc4be8ec9a603b8c84d60e565cfd3c07aedc6249
+    context:
+      path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_context.json
+      sha256: a77aa20a0d4c89baab6a6d61a858461385247d531020cc275cebb42ef88347a2
+    requested_paths:
+    - instances[0].instance_type
+    - instances[1].instance_type
+    - instances[2].instance_type
+    - existing_uses[0].examples
+    - existing_uses[1].examples
+    - existing_uses[2].examples
+    - intended_uses[0].examples
+    - intended_uses[0].usage_notes
+    - intended_uses[1].examples
+    - intended_uses[1].usage_notes
+    - external_resources[0].external_resources
+    - external_resources[1].external_resources
+    usage_id: f5b2622933e44744be3cc809fc30669d
+    response:
+      path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_response.json
+      sha256: e8a5fc5fc5423c1c47b0925110c4a097c4865df0e5bb600b7e3d8e9d534587d3
+    result:
+      path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_result.json
+      sha256: 8af2506eb6fb2ddc28a7353b397fe613dee20a59e5d50c37fe6805dc419a8a98
+  response_sha256: e8a5fc5fc5423c1c47b0925110c4a097c4865df0e5bb600b7e3d8e9d534587d3
+api_usage:
+- usage_id: 2494777897ee4d79ac96e70dde7bb1e7
+  phase: full
+  attempt: 1
+  started_at: '2026-10-22T14:28:22+00:00'
+  seconds: 463.702
+  input_tokens: 41316
+  output_tokens: 43046
+  thinking_tokens: 30255
+  cache_read: 0
+  cache_write: 32869
+  max_tokens: 128000
+  stop_reason: end_turn
+- usage_id: f5b2622933e44744be3cc809fc30669d
+  phase: full_receipt_completion
+  attempt: 1
+  started_at: '2026-10-22T14:36:15+00:00'
+  seconds: 21.368
+  input_tokens: 70209
+  output_tokens: 2024
+  thinking_tokens: 1260
+  cache_read: 0
+  cache_write: 32869
+  max_tokens: 4000
+  stop_reason: end_turn
+- usage_id: 3cff194dce1843749e4c376a369d2624
+  phase: typed_audit_worker
+  attempt: 1
+  started_at: '2026-10-22T14:36:48+00:00'
+  seconds: 515.309
+  max_tokens: 64000
+  input_tokens: 2
+  output_tokens: 50130
+  cache_read: 0
+  cache_write: 138936
+  thinking_tokens: 32231
+  stop_reason: end_turn
+- usage_id: c93d399370e54bf784c934c89762395c
+  phase: typed_audit_worker
+  attempt: 1
+  started_at: '2026-10-22T14:45:27+00:00'
+  seconds: 436.318
+  max_tokens: 64000
+  input_tokens: 2
+  output_tokens: 43348
+  cache_read: 0
+  cache_write: 139078
+  thinking_tokens: 22218
+  stop_reason: end_turn
+- usage_id: a5cc763e58ff48b08df90e5ebe4c4f80
+  phase: typed_audit_worker
+  attempt: 1
+  started_at: '2026-10-22T14:52:47+00:00'
+  seconds: 153.741
+  max_tokens: 64000
+  input_tokens: 2
+  output_tokens: 14032
+  cache_read: 0
+  cache_write: 138360
+  thinking_tokens: 9601
+  stop_reason: end_turn
+- usage_id: db0edf8cc0ff456ab65e1d9cceda8f63
+  phase: typed_audit_omission
+  attempt: 1
+  started_at: '2026-10-22T14:55:26+00:00'
+  seconds: 269.549
+  max_tokens: 32000
+  input_tokens: 2
+  output_tokens: 23997
+  cache_read: 0
+  cache_write: 98604
+  thinking_tokens: 14264
+  stop_reason: end_turn
+- usage_id: 1fcc7eab500a45d1b7754fa25488790f
+  phase: typed_audit_integration
+  attempt: 1
+  started_at: '2026-10-22T20:51:39+00:00'
+  seconds: 264.124
+  max_tokens: 32000
+  input_tokens: 2
+  output_tokens: 23347
+  cache_read: 0
+  cache_write: 316991
+  thinking_tokens: 14359
+  stop_reason: end_turn
+- usage_id: f53bc1c53a0f4087ad71851f99ec91fa
+  phase: reconcile_full
+  attempt: 1
+  started_at: '2026-10-22T20:56:36+00:00'
+  seconds: 146.247
+  input_tokens: 115475
+  output_tokens: 13508
+  thinking_tokens: 4429
+  cache_read: 0
+  cache_write: 32869
+  max_tokens: 96000
+  stop_reason: end_turn
+- source_review_admission:
+    state: accepted
+    response_sha256: 91220fd54a0a43e48937740aed4bfdfdafed35372cfe88719e227e61281064d0
+  usage_id: 69389d7899fb4705b76edab1559b5dbc
+  phase: report
+  attempt: 1
+  started_at: '2026-10-22T20:59:20+00:00'
+  seconds: 789.381
+  input_tokens: 156644
+  output_tokens: 83367
+  thinking_tokens: 23153
+  cache_read: 32869
+  cache_write: 0
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: typed_audit_integration
+  attempt: 1
+  transport_attempt: 1
+  usage_id: c839eda0a3c446e3bc960a2af75798b7
+  run_identity:
+    project: CHORUS
+    label: 2026-10-22a_claude-opus-5-api-generic-v10_rep1
+    method: claudecode_api
+    condition: generic_v10
+  ladder_attempt: 1
+  started_at: '2026-10-22T15:00:02+00:00'
+  seconds: 631.1
+  outcome: 'transport error: ReadTimeout (#1017)'
+  max_tokens: 32000
+  events: 286
+  content_chars: 0
+  content_sha256: null
+  input_tokens: 2
+  output_tokens: 7
+  cache_read: 0
+  cache_write: 316991
+  snapshot: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_integration_incomplete_attempt1_1.txt
+  stream_trace:
+    version: 1
+    observation: sdk_events_not_wire_sse
+    iterable: true
+    http_status: 200
+    correlation_headers:
+      x-litellm-call-id: 7ba2d682-ec37-4aec-a809-cc1c8e35343c
+      cf-ray: a4e95e8fdc961d41-SJC
+    headers_seconds: 10.078
+    events: 286
+    event_counts:
+      message_start: 1
+      content_block_start: 1
+      content_block_delta: 142
+      thinking: 142
+    content_block_counts:
+      thinking: 1
+    recent_events:
+    - type: content_block_delta
+      seconds: 30.678
+    - type: thinking
+      seconds: 30.678
+    - type: content_block_delta
+      seconds: 30.678
+    - type: thinking
+      seconds: 30.678
+    - type: content_block_delta
+      seconds: 30.678
+    - type: thinking
+      seconds: 30.678
+    - type: content_block_delta
+      seconds: 30.678
+    - type: thinking
+      seconds: 30.678
+    - type: content_block_delta
+      seconds: 30.679
+    - type: thinking
+      seconds: 30.679
+    - type: content_block_delta
+      seconds: 30.679
+    - type: thinking
+      seconds: 30.679
+    - type: content_block_delta
+      seconds: 30.679
+    - type: thinking
+      seconds: 30.679
+    - type: content_block_delta
+      seconds: 31.068
+    - type: thinking
+      seconds: 31.068
+    earlier_events: 270
+    first_event_seconds: 10.078
+    last_event_seconds: 31.068
+    message_start_seen: true
+    message_delta_seen: false
+    message_stop_seen: false
+    stop_reason: null
+    exception_type: ReadTimeout
+    provider_error_type: null
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+phases_skipped:
+- full
+- core
+repair: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_api/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d.yaml
+      md5: dc85a5c57621925ceffca49133c5da3b
+    core:
+      path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d_core.yaml
+      md5: f757c9049ac9e3403be66ad03905b701
+  schema:
+    full_sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+    core_sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+  duplicate_keys:
+    full: []
+    core: []
+  recorded_by: api_runner.execute
+core_derivation:
+  derived: true
+  rule: shared slots copied from the full record; resources projected by id with full-only
+    nested slots dropped; distributions built from file_collections (one per collection
+    over the shared slots, total_bytes as bytes) and from each collection's File entries
+    (one per file over the slots CoreDistribution and File share); dialect from the
+    File entries when they agree on one value, else absent
+  from:
+    path: data/d4d_concatenated/claudecode_api/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d.yaml
+    md5: dc85a5c57621925ceffca49133c5da3b
+  identity_slots: 79
+  projected_slots:
+  - resources
+  distribution_slots:
+    collection:
+    - compression
+    - conforms_to
+    - conforms_to_standard
+    - description
+    - id
+    - name
+    - notes
+    - path
+    - source_caveats
+    file:
+    - bytes
+    - compression
+    - conforms_to
+    - conforms_to_standard
+    - description
+    - encoding
+    - format
+    - hash
+    - id
+    - md5
+    - media_type
+    - name
+    - notes
+    - path
+    - sha256
+    - source_caveats
+  conditional:
+    dialect: derived only when every File-level dialect in the full record agrees
+      on one value
+  phase: reconcile_core
+pair_consistency:
+  ran: true
+  consistent: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_api/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d.yaml
+      md5: dc85a5c57621925ceffca49133c5da3b
+    core:
+      path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d_core.yaml
+      md5: f757c9049ac9e3403be66ad03905b701
+  errors: 0
+  warnings: 0
+  identity_slots: 79
+  schema_moved: false
+  findings: []
+  findings_truncated: null
+normalisation:
+  identifier_form: {}
+  mailto_ids: {}
+  mailto_ids_skipped: []
+  mailto_ids_skipped_count: 0
+  occurrences: 0
+  distinct_values: 0
+  british_spellings: {}
+  british_occurrences: 0
+  british_rewrites: []
+  british_distinct: []
+  british_skipped: []
+  british_skipped_count: 0
+  british_normaliser: 'v2 (#1006): one rule per BRITISH_PATTERNS v4 entry; v1 (#1002)
+    mirrored v3; double-quoted spans, identifier-shaped tokens, title-case runs, genus
+    names and verbatim slots left as written'
+report_gate:
+  checked: true
+  claims_checked_before: 19
+  findings_before: 0
+  rows_by_record_before:
+    full: 0
+    core: 0
+    both: 18
+    either: 0
+    no_record_column: 0
+    invalid: 0
+  regenerated: false
+  regeneration_attempted: false
+  evidence_assertions_before:
+    instrument: evidence_assertions v7 / source_review v2 (#2192)
+    checked: true
+    assertions_checked: 56
+    findings: []
+    source_review_original:
+      instrument: source_review v2 (#2169)
+      artifact: original_full
+      sha256: 440ea561b0a26e73b82d12e0093ad1a4ba8288abb3aa8a3c82ed8a2e3dbab0d7
+      values_required: 98
+      values_reviewed: 98
+      claims_checked: 142
+      findings: []
+      scope: Coverage and declared evidence/scope consistency only; semantic classifications
+        and entailment require independent review.
+    source_review_final:
+      instrument: source_review v2 (#2169)
+      artifact: final_full
+      sha256: b1716e8235d9dbb389504e07cd70ee0c94247154e287ce4adae6ba7ac728bc08
+      values_required: 110
+      values_reviewed: 110
+      claims_checked: 186
+      findings: []
+      scope: Coverage and declared evidence/scope consistency only; semantic classifications
+        and entailment require independent review.
+    artifact_sha256:
+      bundle: 27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c
+      chunk_manifest: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
+      source_manifest: 0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528
+      report: 91220fd54a0a43e48937740aed4bfdfdafed35372cfe88719e227e61281064d0
+      audit: 4ff9ee8ae37c095e187aeb465d7cacf896e5c87484c84c527713f61b203b9137
+      original_full: 440ea561b0a26e73b82d12e0093ad1a4ba8288abb3aa8a3c82ed8a2e3dbab0d7
+      original_core: 473d3b94296f1cb2aec491b1bba77c64aced2f4803e8361b96b520e7f50e6f38
+      final_full: b1716e8235d9dbb389504e07cd70ee0c94247154e287ce4adae6ba7ac728bc08
+      final_core: 97750af2b94cb5958674e63f007cebff529de74121dda48325b46544af1a8927
+    scope: Declared evidence only; semantic support and omitted claims require independent
+      review.
+  findings_include_evidence_assertions: true
+  report_audit_totals_before:
+    checked: true
+    instrument_version: 1
+    reason: null
+    stated_total: null
+    stated_totals: []
+    stated_by_severity:
+      medium: 6
+      low: 6
+      high: 0
+    computed_total: 12
+    computed_by_severity:
+      low: 6
+      medium: 6
+    mismatches: []
+    findings: []
+    status: no_total_stated
+  evidence_assertions_final:
+    instrument: evidence_assertions v7 / source_review v2 (#2192)
+    checked: true
+    assertions_checked: 56
+    findings: []
+    source_review_original:
+      instrument: source_review v2 (#2169)
+      artifact: original_full
+      sha256: 440ea561b0a26e73b82d12e0093ad1a4ba8288abb3aa8a3c82ed8a2e3dbab0d7
+      values_required: 98
+      values_reviewed: 98
+      claims_checked: 142
+      findings: []
+      scope: Coverage and declared evidence/scope consistency only; semantic classifications
+        and entailment require independent review.
+    source_review_final:
+      instrument: source_review v2 (#2169)
+      artifact: final_full
+      sha256: b1716e8235d9dbb389504e07cd70ee0c94247154e287ce4adae6ba7ac728bc08
+      values_required: 110
+      values_reviewed: 110
+      claims_checked: 186
+      findings: []
+      scope: Coverage and declared evidence/scope consistency only; semantic classifications
+        and entailment require independent review.
+    artifact_sha256:
+      bundle: 27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c
+      chunk_manifest: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
+      source_manifest: 0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528
+      report: 91220fd54a0a43e48937740aed4bfdfdafed35372cfe88719e227e61281064d0
+      audit: 4ff9ee8ae37c095e187aeb465d7cacf896e5c87484c84c527713f61b203b9137
+      original_full: 440ea561b0a26e73b82d12e0093ad1a4ba8288abb3aa8a3c82ed8a2e3dbab0d7
+      original_core: 473d3b94296f1cb2aec491b1bba77c64aced2f4803e8361b96b520e7f50e6f38
+      final_full: b1716e8235d9dbb389504e07cd70ee0c94247154e287ce4adae6ba7ac728bc08
+      final_core: 97750af2b94cb5958674e63f007cebff529de74121dda48325b46544af1a8927
+    scope: Declared evidence only; semantic support and omitted claims require independent
+      review.
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 19
+  claims_unnamed: 0
+  disposition_rows: 18
+  rows_by_record:
+    full: 0
+    core: 0
+    both: 18
+    either: 0
+    no_record_column: 0
+    invalid: 0
+  claims_core_cannot_hold: 0
+  snapshot_checked: true
+  snapshot_basis: 'dispositions table expected: unrecorded removals are findings'
+  prose_retention_claims: 1
+  removals_unrecorded: []
+  removals_unrecorded_count: 0
+  instrument: 'v8 (#1808): an explicitly full/both top-level removal is false when
+    the key is absent from both the pinned original full snapshot and final full record;
+    no prior-core or nested-entry identity is inferred; v7 (#1089, #1194, #1196):
+    attributed schema claims, exact nested paths and record scopes, table positions,
+    mixed list counts and removal suppression are distinguished; phase-1 snapshot
+    bytes are pinned; v6 (#994): a `both` row''s path is judged step by step against
+    the core class''s declared ranges rather than at its root alone, a `[*]` wildcard
+    is a step''s subscript rather than a step of its own, and `claims_core_cannot_hold`
+    counts only a path the core cannot hold: one that descends through a scalar violates
+    the core schema''s declared range, carries its own cause and is excluded from
+    that count; v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
+    snapshot carried that the final full record does not, with no `removed` row or
+    removal sentence naming it, is `removal_not_recorded`; a prose retention claim
+    (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
+    read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions
+    rows by their record column — `full`, `core`, `both`, `either` for an empty cell,
+    `no_record_column` for a table with no such column, `invalid` for anything else
+    — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full`
+    row resolves against the full record only), is countable from the block; v3 (#1022,
+    #1046): a schema claim that names its own scope — the core schema, the full schema,
+    a class — is resolved against that scope only, not against every class; v2 (#990):
+    a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+    counts them'
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_reconciliation.md
+      md5: dadc7e691686d29dac37b708c6497403
+    full:
+      path: data/d4d_concatenated/claudecode_api/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d.yaml
+      md5: dc85a5c57621925ceffca49133c5da3b
+    core:
+      path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d_core.yaml
+      md5: f757c9049ac9e3403be66ad03905b701
+    phase1_snapshot:
+      path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_full.yaml
+      sha256: 440ea561b0a26e73b82d12e0093ad1a4ba8288abb3aa8a3c82ed8a2e3dbab0d7
+      state: usable
+  schema:
+    full_sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+    core_sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+  dispositions_expected: true
+report_audit_totals:
+  checked: true
+  instrument_version: 1
+  reason: null
+  stated_total: null
+  stated_totals: []
+  stated_by_severity:
+    medium: 6
+    low: 6
+    high: 0
+  computed_total: 12
+  computed_by_severity:
+    low: 6
+    medium: 6
+  mismatches: []
+  findings: []
+  status: no_total_stated
+grounding:
+  checked: true
+  instrument: 'v1 (#4090): external identifiers with ARKs, resolver-URL findings,
+    run-schema basis'
+  counts:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt
+      md5: 9b2ef4b65d67957f79362266cab0bc7a
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_api/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d.yaml
+  - data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
+  british_instrument: 'v4 (#1006; v3 #836/#859)'
+  british_spellings: 0
+  organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
+receipts:
+  expected: true
+  non_checks:
+  - that a chunk marked nothing_relevant truly held nothing for the record — a judgement;
+    sample by chunk id in review
+  - that a verified snippet supports the value it is attached to — a snippet can be
+    real and irrelevant; sample by slot path in review
+  receipt_completion_policy:
+    registration:
+      sha256: 7ad04a03e1cb5fa1f7a7e6d284e8831a96759267360b8685e79bab4a2528415a
+      raw_json: '{"condition":"generic_v10","context_limit_basis":"Route context window
+        1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"generic-v10-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"}'
+    runtime_policy_sha256: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+  identity_rules:
+    instrument: receipt-identity-rules-v1
+    schema_basis:
+      source: the run's schema, on disk
+      path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+      sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+    declared_bases_sha256: 69e787d99f4c94adc826383fde859f4f19801bb929db9f599450cdd8f4033438
+    bases_sha256: 85a1aaa8600f345d0133426da2895492ba6f7fb4d267ba3e66f26af6b8320ad5
+    bases:
+    - - https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#
+      - d4dpreprocessing
+    - - https://w3id.org/bridge2ai/data-sheets-schema/data-governance#
+      - d4ddatagovernance
+    - - https://w3id.org/bridge2ai/data-sheets-schema/distribution#
+      - d4ddistribution
+    - - https://w3id.org/bridge2ai/standards-datasubstrate-schema/
+      - B2AI_SUBSTRATE
+    - - https://w3id.org/bridge2ai/data-sheets-schema/composition#
+      - d4dcomposition
+    - - https://w3id.org/bridge2ai/data-sheets-schema/maintenance#
+      - d4dmaintenance
+    - - https://w3id.org/bridge2ai/standards-organization-schema/
+      - B2AI_ORG
+    - - https://w3id.org/bridge2ai/data-sheets-schema/motivation#
+      - d4dmotivation
+    - - https://w3id.org/bridge2ai/data-sheets-schema/variables#
+      - d4dvariables
+    - - https://w3id.org/bridge2ai/standards-datatopic-schema/
+      - B2AI_TOPIC
+    - - https://w3id.org/bridge2ai/data-sheets-schema/ethics#
+      - d4dethics
+    - - https://w3id.org/bridge2ai/standards-dataset-schema/
+      - B2AI_DATA
+    - - https://w3id.org/bridge2ai/data-sheets-schema/human#
+      - d4dhuman
+    - - https://w3id.org/bridge2ai/b2ai-standards-registry/
+      - B2AI_STANDARD
+    - - https://w3id.org/bridge2ai/data-sheets-schema/uses#
+      - d4duses
+    - - https://w3id.org/bridge2ai/data-sheets-schema/
+      - d4d
+    - - https://w3id.org/bridge2ai/data-sheets-schema/
+      - data_sheets_schema
+    - - https://www.iana.org/assignments/media-types/
+      - mediatypes
+    - - http://www.w3.org/2004/02/skos/core#
+      - skos
+    - - http://mlcommons.org/croissant/rai/
+      - rai
+    - - http://purl.obolibrary.org/obo/duo_
+      - DUO
+    - - http://www.w3.org/2001/xmlschema#
+      - xsd
+    - - https://w3id.org/biolink/vocab/
+      - biolink
+    - - http://qudt.org/schema/qudt/
+      - qudt
+    - - http://www.w3.org/ns/dcat#
+      - dcat
+    - - http://www.w3.org/ns/prov#
+      - prov
+    - - http://www.w3.org/ns/shex#
+      - shex
+    - - http://spdx.org/rdf/terms#
+      - spdx
+    - - http://purl.org/dc/terms/
+      - dcterms
+    - - https://w3id.org/linkml/
+      - linkml
+    - - https://w3id.org/shacl/
+      - sh
+    - - https://w3id.org/aio/
+      - AIO
+    - - https://example.org/
+      - example
+    - - http://schema.org/
+      - schema
+    - - https://orcid.org/
+      - ORCID
+    - - https://ror.org/
+      - ROR
+    - - https://doi.org/
+      - doi
+    boundary_rule: delimiter-terminated resolver bases; ordered first match
+  checked: true
+  instrument: 'v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics
+    split by declared phase1/rereceipt/unknown origin, with recorded chunk-status
+    reversals counted separately. Origin markers are accounting metadata, not proof
+    of authorship or semantic support. v3 (#1053): an entry whose identity key the
+    final list no longer carries anywhere (a minted id reconciliation stripped) is
+    located as a keyless entry — by overlap, else by position for the same shape when
+    the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`)
+    — instead of declared dropped; v2 (#1123): a fragment minted on an identifier
+    the record carries for the dataset at its top level — its id in CURIE or resolver
+    form, its doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
+  rereceipt:
+    status_reversal_count: 0
+    status_reversals: []
+    unusable_prior_count: 0
+    unusable_prior_chunks: []
+  chunks:
+    total: 8
+    reviewed: 8
+    unreviewed: []
+    by_status:
+      extracted: 6
+      redundant_with: 0
+      nothing_relevant: 2
+      duplicate_of: 0
+  snippets:
+    total: 133
+    verified: 133
+    linewrap_joined: 0
+    adjacent: 0
+    elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
+    mismatched: 0
+    unchecked: 0
+    no_value_overlap: 4
+    no_value_overlap_sample:
+    - chunk: c003
+      slot: regulatory_restrictions.confidentiality_level
+      snippet: Controlled access
+    - chunk: c003
+      slot: instances[3].data_substrate
+      snippet: Imaging – currently 1000 images available
+    - chunk: c006
+      slot: instances[1].data_topic
+      snippet: 1.6 Billion Rows of EHR OMOP data
+    - chunk: c006
+      slot: funders[0].grantor
+      snippet: This project is funded by the NIH under award number OT2OD03
+    entry_single_leaf: 1
+    entry_single_leaf_sample:
+    - chunk: c003
+      slot: instances[3]
+      leaves: 3
+      overlapping: 1
+    by_origin:
+      phase1:
+        total: 121
+        no_value_overlap: 4
+        entry_single_leaf: 1
+        unattesting: 0
+      rereceipt:
+        total: 12
+        no_value_overlap: 0
+        entry_single_leaf: 0
+        unattesting: 0
+      unknown:
+        total: 0
+        no_value_overlap: 0
+        entry_single_leaf: 0
+        unattesting: 0
+  slots:
+    populated: 90
+    exempt: 15
+    exempt_on_carried_identifier: 0
+    receiptable: 75
+    with_receipt: 64
+    without_receipt:
+    - purposes[3].response
+    - preprocessing_strategies[3].preprocessing_details
+    - ethical_reviews[0].review_details
+    - intended_uses[2].examples
+    - intended_uses[2].usage_notes
+    - intended_uses[3].examples
+    - intended_uses[3].usage_notes
+    - external_resources[2].external_resources
+    - external_resources[3].external_resources
+    - external_resources[4].external_resources
+    - external_resources[5].external_resources
+    without_receipt_truncated: null
+    never_receipted: 0
+    added_after_receipt: 11
+    receipt_paths: 76
+    unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt:
+    - path: conforms_to
+      resolved_path: conforms_to
+    - path: description
+      resolved_path: description
+    - path: extension_mechanism.extension_details
+      resolved_path: extension_mechanism.extension_details
+    - path: notes
+      resolved_path: notes
+    - path: source_caveats
+      resolved_path: source_caveats
+    value_changed_after_receipt_count: 5
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    located_after_key_stripped: []
+    located_after_key_stripped_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
+    reshaped_by_reconcile: []
+    receipts_to_removed_values: 0
+  findings: []
+  findings_truncated: null
+  findings_gated: 0
+  summary: chunks 8/8 reviewed · snippets 133/133 verified (4 bearing on no token
+    of their value) (1 entry receipt(s) overlapping one leaf) · slots 64/75 with a
+    receipt (0 never receipted, 11 added after the receipt) (15 exempt) · 5 value(s)
+    changed after the receipt
+  coverage_floor:
+    with_receipt: 64
+    receiptable: 75
+    floor:
+      mode: diagnostic_pilot
+      state: pending
+    passed: false
+    registration_sha256: 7ad04a03e1cb5fa1f7a7e6d284e8831a96759267360b8685e79bab4a2528415a
+    state: pending
+    reason: diagnostic pilot; coverage floor not registered
+  artifacts:
+    receipt:
+      path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_coverage_receipt.yaml
+      sha256: 5829b77841b837f5d30b12e55db6b1e22bb701d7fe71036d7225a7a2db3693db
+    manifest:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml
+      sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
+  bundle_basis:
+    source: bundle on disk
+    path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt
+intermediates:
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_transcript.json
+  sha256: 6dd98862f2a7e243eb75f31b4d138fb04f2f256cea927d5424f3c60a7e569a30
+  phase: CHORUS_receipt_completion_transcript.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: 2494777897ee4d79ac96e70dde7bb1e7
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_full_response_2494777897ee4d79ac96e70dde7bb1e7.txt
+  sha256: b6d6d289341fa269e114b742b046a5f6d107ccb6a1d12a46906c46ff60573b63
+  phase: CHORUS_full_response_2494777897ee4d79ac96e70dde7bb1e7.txt
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: 2494777897ee4d79ac96e70dde7bb1e7
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_coverage_receipt.yaml
+  sha256: ac845cf579c9ab64b8039fb170096d62f93fdad067ceb7b8f2c311bdcda68068
+  phase: CHORUS_coverage_receipt.yaml
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_full.yaml
+  sha256: 440ea561b0a26e73b82d12e0093ad1a4ba8288abb3aa8a3c82ed8a2e3dbab0d7
+  phase: CHORUS_full.yaml
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: 2494777897ee4d79ac96e70dde7bb1e7
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_context.json
+  sha256: a77aa20a0d4c89baab6a6d61a858461385247d531020cc275cebb42ef88347a2
+  phase: CHORUS_receipt_completion_context.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_inputs.json
+  sha256: c6e95136fb168adefa296e06cfeac55e9057d1fc96dedad011db405231280fec
+  phase: CHORUS_receipt_completion_inputs.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_request.json
+  sha256: 086dd23c1f4914195574f3e3dc4be8ec9a603b8c84d60e565cfd3c07aedc6249
+  phase: CHORUS_receipt_completion_request.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_response.json
+  sha256: e8a5fc5fc5423c1c47b0925110c4a097c4865df0e5bb600b7e3d8e9d534587d3
+  phase: CHORUS_receipt_completion_response.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: f5b2622933e44744be3cc809fc30669d
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_result.json
+  sha256: 8af2506eb6fb2ddc28a7353b397fe613dee20a59e5d50c37fe6805dc419a8a98
+  phase: CHORUS_receipt_completion_result.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: f5b2622933e44744be3cc809fc30669d
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_core.yaml
+  sha256: 473d3b94296f1cb2aec491b1bba77c64aced2f4803e8361b96b520e7f50e6f38
+  phase: CHORUS_core.yaml
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_packet.json
+  sha256: ec3f9c18cd6ba96c891bb8c38dc414deebe351dd10e971dac7f1d12eea8e6237
+  phase: CHORUS_typed_audit_packet.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_0_request.json
+  sha256: e7052999c25577c9bec8d75a088428c57195ab3e4646c66e2a4260de53cf3e9d
+  phase: CHORUS_typed_audit_0_request.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_0_context.json
+  sha256: 956e454b7a349fe5dd89dfa14a3f648a223459bd4cb7b92db1e49cfa27b3dcd8
+  phase: CHORUS_typed_audit_0_context.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_0_response.json
+  sha256: 15e94b4249b4c6b8548e4fb37f5b428aad108e6e12b61465a8aac68fe203ee31
+  phase: CHORUS_typed_audit_0_response.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: 3cff194dce1843749e4c376a369d2624
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_1_request.json
+  sha256: 07ddd6e82211069252c287475a26a8ecf4a188e5a70a34f3e9bcf6f337b2730c
+  phase: CHORUS_typed_audit_1_request.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_1_context.json
+  sha256: c8268c356c532ce0fc26c474b388cc54f2d6fb4b90b4b51ff63b3ecd51657b48
+  phase: CHORUS_typed_audit_1_context.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_1_response.json
+  sha256: 3564d253c59c6b4fc1e7a521387a9456e6ecfbbb33667abd27a865d8dd797626
+  phase: CHORUS_typed_audit_1_response.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: c93d399370e54bf784c934c89762395c
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_2_request.json
+  sha256: 2bf270dd1d9844e60a54aa16a720bbccb86f6a9d181fff4bb69dcdae8419258c
+  phase: CHORUS_typed_audit_2_request.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_2_context.json
+  sha256: 8d2d1e1a020d03eac6953164e8650214b91abe3b7ededc81888fa6c575592ff1
+  phase: CHORUS_typed_audit_2_context.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_2_response.json
+  sha256: f65af6cb9bcef75b410637dca03fa173e3ce8e4e0e60030ba4049bbb944b0703
+  phase: CHORUS_typed_audit_2_response.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: a5cc763e58ff48b08df90e5ebe4c4f80
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_3_request.json
+  sha256: 3ed065e7b52374709127f21219884b4b18e41fc3316251a1c5d0b6fa12e3b1d1
+  phase: CHORUS_typed_audit_3_request.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_3_context.json
+  sha256: 8367e88b59797d72a51e3ae010f868ca5af3992ee55d1b3b1c5ff59ba921283c
+  phase: CHORUS_typed_audit_3_context.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_3_response.json
+  sha256: 1fc54913e1d61d12f7ab117799962b8a5021266e985665f77fae57bdcf5bc974
+  phase: CHORUS_typed_audit_3_response.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: db0edf8cc0ff456ab65e1d9cceda8f63
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_4_request.json
+  sha256: b9be2adbeb7558ef68b7737d364e08ed274e1f6d10018b6e9b9733aa2eb87789
+  phase: CHORUS_typed_audit_4_request.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_4_context.json
+  sha256: 15971c9e24453b85a85a1cd357b1ff63fefd485c14769af04068430670eecf63
+  phase: CHORUS_typed_audit_4_context.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_integration_incomplete_attempt1_1.txt
+  sha256: 1e9aff434bfd170c4fdb17f42dfd8ea6058e98e43c5e31869974f0da319d2df1
+  phase: CHORUS_typed_audit_integration_incomplete_attempt1_1.txt
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_4_response.json
+  sha256: d9bb0308fbd57a1200c5d25b82501bec1818ff6ab864c2d3a874914feb25a3d5
+  phase: CHORUS_typed_audit_4_response.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: 1fcc7eab500a45d1b7754fa25488790f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_assembly.json
+  sha256: 2af5b5ba06b16e80b564049ec6a38da9d1a9a2028501b6a0e5def8dfba736656
+  phase: CHORUS_typed_audit_assembly.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_audit.json
+  sha256: 4ff9ee8ae37c095e187aeb465d7cacf896e5c87484c84c527713f61b203b9137
+  phase: CHORUS_audit.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: 1fcc7eab500a45d1b7754fa25488790f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_audit_evidence.json
+  sha256: 49f4af2a62ff2bd7ab62e1ec40a3ef42a1938299ad22cb2c2319b5f36dd2ce44
+  phase: CHORUS_audit_evidence.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_full.yaml
+  sha256: b1716e8235d9dbb389504e07cd70ee0c94247154e287ce4adae6ba7ac728bc08
+  phase: CHORUS_reconcile_full.yaml
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: f53bc1c53a0f4087ad71851f99ec91fa
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_evidence.json
+  sha256: 1b5e38e0a1c4b78822045e0fb43ea47620d173f7dfef76cc72cfea689873ceb4
+  phase: CHORUS_reconcile_evidence.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_core.yaml
+  sha256: 97750af2b94cb5958674e63f007cebff529de74121dda48325b46544af1a8927
+  phase: CHORUS_reconcile_core.yaml
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_report.md
+  sha256: 91220fd54a0a43e48937740aed4bfdfdafed35372cfe88719e227e61281064d0
+  phase: CHORUS_report.md
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  usage_id: 69389d7899fb4705b76edab1559b5dbc
+- path: data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_report_evidence.json
+  sha256: f656cd708b6adaa7f705ae36063e1eee83a0272a549da620c58f967d642031d2
+  phase: CHORUS_report_evidence.json
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+shared_generation:
+  protocol: shared_generation_v1
+  generation_id: 77aec593797d45d9a83cd474a70cff0f
+  assembly_sha256: 23d37b4ba500d5f30be82dfabd80de332c02ae99edee1ab2f37d5fee08219a40
+  audit_sha256: 4ff9ee8ae37c095e187aeb465d7cacf896e5c87484c84c527713f61b203b9137
+  acceptance:
+    kind: typed_audit_acceptance_v1
+    protocol:
+      batch_version: 2
+      evidence_protocol: 7
+      grammar_version: 2
+      omission_inventory_version: 1
+      output_format_version: 2
+      protocol: typed_audit_protocol_v1
+    packet_sha256: 74e0bbef9a82f9e7eee336dd426e4744ade852ce4560b1a718a92a664b4ee2f1
+    passed: true
+    acceptance_scope: captured identity, declaration coverage and literal source-evidence
+      checks
+    scientific_support: unverified
+    novelty: unverified
+    exhaustive_recall: unverified
+    finding_counts:
+      absence_or_self_narration: 0
+      attribution: 0
+      date_scope: 1
+      identifier_count: 0
+      omission: 11
+      other: 0
+      quotation_fidelity: 0
+      role_placement: 0
+      status_scope: 0
+      untyped: 0
+    omission_counts:
+      expected_chunks: 8
+      declared_unique_chunks: 8
+      declared_omission_chunks: 7
+      declared_candidates: 25
+      prior_negative_chunks: 2
+      retained: 21
+      dropped: 4
+    source_review:
+      instrument: source_review v2 (#2169)
+      artifact: original_full
+      sha256: 440ea561b0a26e73b82d12e0093ad1a4ba8288abb3aa8a3c82ed8a2e3dbab0d7
+      values_required: 98
+      values_reviewed: 98
+      claims_checked: 142
+      scope: Coverage and declared evidence/scope consistency only; semantic classifications
+        and entailment require independent review.
+    revised_rows: 1
+    assertions_checked: 35
+    problem_count: 0
+    problems: []
+    problems_truncated: false
+    limitations:
+    - Scientific support, applicability, novelty and exhaustive recall are unverified.
+    - Acceptance covers captured identities, declared coverage and literal source-evidence
+      checks only.
+    - This offline packet does not register or execute a live audit or repair records.
+    - Input limits include the existing 4000000-byte original and 2097152-byte audit
+      response bounds.
+    assembly_sha256: 23d37b4ba500d5f30be82dfabd80de332c02ae99edee1ab2f37d5fee08219a40
+    independently_reconstructed: true
+  authority:
+    registration:
+      sha256: 6148925b835b6dea33e781b2cb7cd156c60e9e66f62f1ae2ad4a835a6c4888e5
+      raw_json: '{"audit_limits":{"aggregate_input_tokens":4000000,"aggregate_output_tokens":320000,"context_limit_basis":"Route
+        context window 1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"integration_output_tokens":32000,"max_calls":18,"max_input_tokens_per_call":1000000,"max_inventory_bytes":12288,"max_paths":80,"max_request_bytes":32000000,"max_workers":4,"omission_output_tokens":32000,"worker_output_tokens":64000},"audit_transport":{"malformed_response_retries":0,"sdk_max_retries":0,"transport_attempts":1},"format":"shared_generation_registration_v1","inputs":{"bundle":{"bytes":35920,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt","sha256":"27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c"},"chunk_manifest":{"bytes":1945,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml","sha256":"ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a"},"context":{"bytes":6476,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json","sha256":"ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"},"core_schema":{"root":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sources":[{"bytes":1299200,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sha256":"09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"}]},"full_schema":{"root":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sources":[{"bytes":1442513,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sha256":"eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"}]},"profile":{"basis":"manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81","name":"bridge2ai","vocabulary":{"bytes":6115,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml","sha256":"e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"}},"project":"CHORUS","source_manifest":{"bytes":40612,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml","sha256":"0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"}},"receipt":{"condition":"generic_v10","context_limit_basis":"Route
+        context window 1,000,000 tokens; sized for largest bundle","context_limit_tokens":1000000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"generic-v10-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"},"registration_id":"generic-v10-chorus-2026-10-22a_claude-opus-5-api-generic-v10_rep1","registration_path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/registration_chorus_2026-10-22a_claude-opus-5-api-generic-v10_rep1.json","run":{"arm":"BASELINE
+        (input documents only)","label":"2026-10-22a_claude-opus-5-api-generic-v10_rep1","method":"claudecode_api","project":"CHORUS"},"runtime":{"base_url":"https://api.cborg.lbl.gov","config":{"bytes":6250,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/.github/workflows/d4d_assistant_deterministic.config","sha256":"0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"},"effort":null,"model":"claude-opus-5","provider":"LBL
+        CBORG (proxy to Anthropic)","temperature":null,"thinking":{"display":"summarized","type":"adaptive"}},"selection":{"api_playbook_version":2,"assets":{".claude/agents/d4d-provenance-guard-v2.md":"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",".claude/commands/d4d-agent-v2.md":"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",".claude/commands/d4d-full-core-v2.md":"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",".claude/commands/d4d-uniform-rules-v2.md":"5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129","src/download/prompts/api_playbook_v2.md":"5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719","src/download/prompts/d4d_generic_arm_prompt_v10.md":"7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb","src/download/prompts/receipt_completion_runtime_v2.md":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c","src/download/prompts/shared_generation_v1.md":"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"},"condition":"generic_v10","protocol":"shared_generation_v1","receipt_completion_version":2,"renderer":25,"runtime":"Claude
+        API (direct)","typed_protocol":"typed_audit_protocol_v1","version":1}}'
+    files:
+    - path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json
+      sha256: ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0
+      bytes: 6476
+    - path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/registration_chorus_2026-10-22a_claude-opus-5-api-generic-v10_rep1.json
+      sha256: 6148925b835b6dea33e781b2cb7cd156c60e9e66f62f1ae2ad4a835a6c4888e5
+      bytes: 5177
+    - path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/.github/workflows/d4d_assistant_deterministic.config
+      sha256: 0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91
+      bytes: 6250
+    - path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml
+      sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
+      bytes: 1945
+    - path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt
+      sha256: 27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c
+      bytes: 35920
+    - path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml
+      sha256: 0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528
+      bytes: 40612
+    - path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml
+      sha256: e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914
+      bytes: 6115
+    - path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+      sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+      bytes: 1442513
+    - path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+      sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+      bytes: 1299200
+  scientific_support: unverified evaluator declarations
+canary:
+  status: unmeasurable
+  rows:
+  - metric: pair errors
+    run: 0
+    baseline_worst: 0
+  - metric: report findings
+    run: 0
+    baseline_worst: 2
+  - metric: ungrounded identifiers
+    run: 0
+    baseline_worst: 0
+  - metric: resolver URLs in identifier slots
+    run: 0
+    baseline_worst: 0
+  - metric: organisational fragments
+    run: 0
+    baseline_worst: 0
+  - metric: undeclared prefixes
+    run: 0
+    baseline_worst: 0
+  - metric: British spellings
+    run: 0
+    baseline_worst: 0
+  - metric: chunks unreviewed
+    run: 0
+    baseline_worst: 0
+  - metric: snippets unverified
+    run: 0
+    baseline_worst: 0
+  - metric: addressing slips over tolerance
+    run: 0
+    baseline_worst: 0
+  - metric: receipts vacuous
+    run: 0
+    baseline_worst: 0
+  - metric: receipt findings
+    run: 0
+    baseline_worst: 0
+  - metric: registered receipt coverage
+    run: null
+    baseline_worst: 0
+    coverage:
+      with_receipt: 64
+      receiptable: 75
+      floor:
+        mode: diagnostic_pilot
+        state: pending
+      passed: false
+      registration_sha256: 7ad04a03e1cb5fa1f7a7e6d284e8831a96759267360b8685e79bab4a2528415a
+      state: pending
+      reason: diagnostic pilot; coverage floor not registered
+    note: diagnostic pilot; coverage floor not registered
+  - metric: duplicate keys
+    run: 0
+    baseline_worst: 0
+  blind:
+  - registered receipt coverage
+  unbaselined: []
+  regressions: []
+  basis: 'verdict from this record''s own check blocks against the per-project worst
+    of ''2026-09-04f_claude-opus-5-api-generic-v8'' with the gate''s functions, including
+    the #684 report basis ({''measured'': 3, ''vacuous'': 0, ''unchecked'': 0})'
+  recorded_at: '2026-10-22T21:12:55+00:00'
+  recorded_by: d4d api batch
