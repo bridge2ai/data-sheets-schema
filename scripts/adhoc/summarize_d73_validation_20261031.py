@@ -16,6 +16,7 @@ SCRATCH = ROOT.parent / "scratch-5212fix"
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("phases", nargs="+")
 parser.add_argument("--output", type=Path)
+parser.add_argument("--failures", action="store_true", help="also print full failure traces")
 args = parser.parse_args()
 
 def sha(raw):
@@ -34,7 +35,10 @@ for phase in args.phases:
     workers = report.get("worker_collections", {})
     assert all(ids == report["selected"] for ids in workers.values())
     log = SCRATCH / (phase + ".log")
-    summaries.append({"phase": phase, "complete": True, "raw_report": str(path),
+    ended = {item["nodeid"] for item in phases if item["when"] == "teardown"}
+    complete = (report["exit_code"] in (0, 1) and not report["collection_errors"] and
+                ("--collect-only" in report["command"] or ended == set(report["selected"])))
+    summaries.append({"phase": phase, "complete": complete, "raw_report": str(path),
         "raw_sha256": sha(raw), "log_sha256": sha(log.read_bytes()) if log.is_file() else None,
         "exit_code": report["exit_code"], "environment": report["environment"],
         "command": report["command"], "canary_node": report.get("canary_node"),
@@ -59,5 +63,6 @@ if args.output:
 for row in summaries:
     print(json.dumps({key: row[key] for key in ("phase", "complete", "exit_code", "selected",
         "call_outcomes", "worker_collections") if key in row}))
-    for failure in row.get("failed_phases", []):
-        print(json.dumps(failure))
+    if args.failures:
+        for failure in row.get("failed_phases", []):
+            print(json.dumps(failure))
