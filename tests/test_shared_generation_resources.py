@@ -313,9 +313,7 @@ def test_missing_optional_observations_and_disjoint_inputs_still_admit(registere
 
 
 def test_legacy_execute_does_not_discover_selected_resources(external, monkeypatch):
-    from contextlib import nullcontext
     monkeypatch.setattr(closure, 'resource_paths', lambda *a: pytest.fail('legacy resource discovery'))
-    monkeypatch.setattr(api, '_exclusive_run', lambda spec: nullcontext())
     monkeypatch.setattr(api, '_restore_resume_date', lambda *a, **k: None)
     marker = object()
     monkeypatch.setattr(api, '_execute', lambda *a, **k: marker)

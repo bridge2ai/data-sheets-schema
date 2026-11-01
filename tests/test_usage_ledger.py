@@ -299,15 +299,21 @@ def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_pat
         for contender, resume in ((s, True), (s, False),
                                   (replace(s, label="another_rep1"), True)):
             client = FakeClient()
-            # Another label cannot attribute the active run's empty sidecars.
-            # D69 therefore refuses it before trying the physical lock.
-            message = "already active" if contender.label == s.label else "inspection only"
+            # The production launch binds its sidecars, so every contender
+            # reaches the physical lock and must still be excluded.
             from tests.test_d68_legacy_readonly import tree
-            before_tree = tree(tmp_path) if contender.label != s.label else None
-            with pytest.raises(ledger.UsageLedgerError, match=message):
+            before_tree = tree(tmp_path)
+            with pytest.raises(ledger.UsageLedgerError, match="already active"):
                 api.execute(contender, resume=resume, client=client)
-            if before_tree is not None:
-                assert tree(tmp_path) == before_tree
+            after_tree = tree(tmp_path)
+            for _, lock in ledger.output_locks((s.full_path, s.core_path, s.report_path, s.provenance_path)):
+                name = str(lock.relative_to(tmp_path))
+                if name in before_tree:
+                    # FileLock can refresh an existing sidecar's mtime while
+                    # trying acquisition. Mode, size, inode and bytes must stay.
+                    assert after_tree[name][:2] + after_tree[name][3:] == before_tree[name][:2] + before_tree[name][3:]
+                    after_tree[name] = before_tree[name]
+            assert after_tree == before_tree
             assert client.messages.calls == []
             assert ledger.ledger_path(s).read_bytes() == before
         assert not ledger.ledger_path(replace(s, label="another_rep1")).exists()
@@ -1121,8 +1127,7 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_p
 
     def execute(run, **kwargs):
         if threading.current_thread() is threading.main_thread():
-            message = "inspection only" if run.label == "another_rep1" else "already active"
-            raise ledger.UsageLedgerError(message)     # every contender is refused
+            raise ledger.UsageLedgerError("already active")  # every contender is refused
         api._begin_usage_call(run)                  # the patched boundary: sets entered, waits
         if late == "raises":
             raise marker

@@ -148,6 +148,11 @@ The intermediate-prefix control now passes the sibling's spec to the snapshot
 writer. D57 executor stubs provide fake startup clients; the SIGTERM control
 requires the printed launch head, proves it is stale after interrupted later
 events, and still requires explicit reconciliation before a new anchor.
+The no-resource-discovery control retains the real output locks so the launch
+can bind them. Concurrent foreign-label contenders now reach those positively
+owned locks and receive `already active`; the test retains zero-call and full
+run-tree preservation checks, allowing only FileLock's existing sidecar-mtime
+refresh while requiring each sidecar's mode, size, inode and bytes to survive.
 
 Baseline age remains informational on stderr only for `baseline_for` and
 `report_basis`. Their returned metric/count mappings are unchanged. Persisting
