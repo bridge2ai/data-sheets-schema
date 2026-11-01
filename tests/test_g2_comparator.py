@@ -6,6 +6,7 @@ import json
 import pytest
 
 from scripts.adhoc import g2_bc1_evidence_20261101 as proof
+from data_sheets_schema import bc1_context as bc
 
 
 def raw(value):
@@ -25,12 +26,20 @@ def captures(tmp_path):
                                              "src/data_sheets_schema/bc1_registration.py")}
         registration = raw({"bounded_carry": {"contract": {"code": code}}})
         (folder / "registration.json").write_bytes(registration)
-        inner = {"request_sha256": digit * 64, "payload": {"packet_sha256": digit * 64}}
-        binding = {"registration_sha256": sha(registration), "packet_sha256": digit * 64,
+        packet = {"selection": {"bounded_carry": {"contract": {"code": code}}}}
+        packet["sha256"] = sha(raw(packet))
+        host = {"payload": {"packet_sha256": packet["sha256"], "worker_id": "worker_0001",
+            "shared_context": {"schema": {"classes": {}}, "bundle": "unchanged"},
+            "dictionary": {"sha256": "c" * 64}}}
+        host["request_sha256"] = sha(raw(host["payload"]))
+        schema = bc.SCHEMA_HEADER + raw({"catalog": {"classes": {}}}).decode()
+        inner = bc.model_request(host, schema)
+        binding = {"registration_sha256": sha(registration), "packet_sha256": packet["sha256"],
                    "inner_request_sha256": sha(raw(inner))}
         content = [{"text": "unchanged"} for _ in range(5)] + [
             {"text": "# Registered audit request identity\n\n" + raw(binding).decode()},
             {"text": "# Exact typed stage request\n\n" + raw(inner).decode()}]
+        content[3]["text"] = schema
         payload = raw({"messages": [{"content": content}]})
         (folder / "worker.json").write_bytes(payload)
         capture = {"errors": {}, "payloads": {"typed_audit_worker:w1": {
@@ -38,6 +47,11 @@ def captures(tmp_path):
             "registration_sha256": sha(registration), "source_pins": {str(tmp_path / key): {"sha256": value}
                 for key, value in code.items()}, "audit_limits": {}, "calibration": {}, "python": "fixture",
             "packages": {}, "sizing_totals": {"calls": 1}}
+        for key, value in (("host_packet", packet), ("host_request", host)):
+            path = folder / (key + ".json")
+            path.write_bytes(raw(value))
+            capture["payloads"]["typed_audit_worker:w1"][key] = {
+                "path": str(path.relative_to(tmp_path)), "sha256": sha(raw(value)), "bytes": len(raw(value))}
         (folder / "capture.json").write_bytes(raw(capture))
     return tmp_path
 
@@ -88,18 +102,18 @@ def test_captured_host_objects_are_rehashed(captures, damage, omission):
         folder = captures / ".bc1-byte-evidence" / side
         metadata = json.loads((folder / "capture.json").read_bytes())
         payload = json.loads((folder / "worker.json").read_bytes())
-        packet = {"registration_sha256": metadata["registration_sha256"]}
-        packet["sha256"] = sha(raw(packet))
-        inner = {"payload": {"packet_sha256": packet["sha256"]}}
+        packet = json.loads((folder / "host_packet.json").read_bytes())
+        inner = json.loads((folder / "host_request.json").read_bytes())
         if omission:
             # The omission request hashes its payload but carries no packet pin.
-            inner = {"payload": {"record": "unchanged"}}
+            inner = {"payload": {"record": "unchanged", "schema": {"classes": {}}}}
         inner["request_sha256"] = sha(raw(inner["payload"]))
-        binding = {"registration_sha256": metadata["registration_sha256"], "packet_sha256": packet["sha256"],
-                   "inner_request_sha256": sha(raw(inner))}
         content = payload["messages"][0]["content"]
+        projected = bc.model_request(inner, content[3]["text"])
+        binding = {"registration_sha256": metadata["registration_sha256"], "packet_sha256": packet["sha256"],
+                   "inner_request_sha256": sha(raw(projected))}
         content[5]["text"] = "# Registered audit request identity\n\n" + raw(binding).decode()
-        content[6]["text"] = "# Exact typed stage request\n\n" + raw(inner).decode()
+        content[6]["text"] = "# Exact typed stage request\n\n" + raw(projected).decode()
         if side == "after" and damage:
             (packet if damage == "host_packet" else inner)["tampered"] = True
             if damage == "host_request":
@@ -115,3 +129,39 @@ def test_captured_host_objects_are_rehashed(captures, damage, omission):
         info.update(sha256=sha(data), bytes=len(data))
         (folder / "capture.json").write_bytes(raw(metadata))
     assert accepted(captures) == (damage is None)
+
+
+@pytest.mark.parametrize("damage", ["different_worker", "edited_host", "edited_packet"])
+def test_consistently_rehashed_host_must_match_wire_and_base(captures, damage):
+    assert accepted(captures)
+    folder = captures / ".bc1-byte-evidence/after"
+    metadata = json.loads((folder / "capture.json").read_bytes())
+    payload = json.loads((folder / "worker.json").read_bytes())
+    content = payload["messages"][0]["content"]
+    packet = json.loads((folder / "host_packet.json").read_bytes())
+    host = json.loads((folder / "host_request.json").read_bytes())
+    inner = json.loads(content[6]["text"].split("\n\n", 1)[1])
+    binding = json.loads(content[5]["text"].split("\n\n", 1)[1])
+    if damage == "different_worker":
+        host["payload"]["worker_id"] = "worker_9999"
+    elif damage == "edited_host":
+        host["payload"]["untransmitted_field"] = "only in host request"
+    else:
+        packet["untransmitted_field"] = "only in host packet"
+        packet["sha256"] = sha(raw({key: value for key, value in packet.items() if key != "sha256"}))
+        host["payload"]["packet_sha256"] = inner["payload"]["packet_sha256"] = packet["sha256"]
+        binding["packet_sha256"] = packet["sha256"]
+    host["request_sha256"] = sha(raw(host["payload"]))
+    inner["request_sha256"] = host["request_sha256"]
+    binding["inner_request_sha256"] = sha(raw(inner))
+    content[5]["text"] = "# Registered audit request identity\n\n" + raw(binding).decode()
+    content[6]["text"] = "# Exact typed stage request\n\n" + raw(inner).decode()
+    info = metadata["payloads"]["typed_audit_worker:w1"]
+    for key, value in (("host_packet", packet), ("host_request", host)):
+        (folder / (key + ".json")).write_bytes(raw(value))
+        info[key].update(bytes=len(raw(value)), sha256=sha(raw(value)))
+    assert len(raw(payload)) == (folder / "worker.json").stat().st_size
+    (folder / "worker.json").write_bytes(raw(payload))
+    info.update(bytes=len(raw(payload)), sha256=sha(raw(payload)))
+    (folder / "capture.json").write_bytes(raw(metadata))
+    assert not accepted(captures)

@@ -48,20 +48,50 @@ def save(config, doc):
     config.write_text(yaml.safe_dump(doc))
 
 
+def calibration_case(sizing_fixture, tmp_path, monkeypatch, project):
+    """A real, explicitly sized bundle; config authority is an explicit worktree."""
+    registration, files, inputs = sizing_fixture
+    root = tmp_path / "calibration-root"
+    (root / "config").mkdir(parents=True)
+    (root / "src").symlink_to(builder.ROOT / "src", target_is_directory=True)
+    (root / "pyproject.toml").write_bytes((builder.ROOT / "pyproject.toml").read_bytes())
+    config = root / "config/audit_partitions.yaml"
+    save(config, {"projects": {}})
+    monkeypatch.setattr(builder.api, "FULL_SCHEMA_PATH", inputs["schema_path"])
+    monkeypatch.setattr(builder.api, "CORE_SCHEMA_PATH", inputs["schema_path"])
+    manifest = Path(registration["inputs"]["source_manifest"]["path"])
+    save(manifest, {"profile": "neutral", "projects": {project: {"sources": [
+        {"id": "source", "processed_file": "source.txt", "source_type": "documentation"}]}}})
+    for key in ("full", "core"):
+        path = getattr(files, key)
+        path.write_bytes(path.read_bytes().replace(b"KIDS_FIRST", project.encode()).replace(
+            b"# Arm: de novo", ("# Arm: " + builder.ARMS["baseline"][0]).encode()))
+    limits = {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 4,
+              "aggregate_input_tokens": 4000000}
+    options = dict(source_manifest_path=manifest, worktree=root, audit_limits=limits,
+        bundle_path=registration["inputs"]["bundle"]["path"],
+        chunk_manifest_path=registration["inputs"]["chunk_manifest"]["path"],
+        context_path=registration["inputs"]["context"]["path"], profile_name="neutral",
+        registration_path=tmp_path / "calibration.json")
+    reg, _, sized = builder.prepare_registration(project, "calibration", **options,
+        sizing_record=builder.SizingRecord(files.full, files.core, files.receipt))
+    entry = {"name": "fixture", "arms": ["baseline"], "limits": limits,
+        "source_manifest_sha256": pin(manifest)["sha256"],
+        "sizing_record": {key: pin(getattr(files, key)) for key in ("full", "core", "receipt")}}
+    def covered(value, **overrides):
+        save(config, {"projects": {project: {"audit_partition": value}}})
+        return builder.profile_covered(project, "baseline", {**reg["audit_limits"], **value["limits"], **overrides},
+            source_manifest=manifest, root_dir=root, registration=reg)
+    assert sized["aggregate_input_tokens"] < limits["aggregate_input_tokens"]
+    assert covered(entry)
+    return entry, covered, options, reg, files
+
+
 @pytest.mark.parametrize("project", ["CHORUS", "SYNTHETIC"])
 @pytest.mark.parametrize("damage", ["missing_manifest_pin", "foreign_manifest", "full", "core", "receipt", "low_allowance"])
-def test_calibration_must_be_earned(declaration, tmp_path, project, damage):
-    root, manifest, config, doc = declaration
-    row = doc["projects"].pop("CHORUS")
-    doc["projects"][project] = row
-    profile = row["audit_partition"]
-    if project != "CHORUS":
-        manifest.write_text(yaml.safe_dump({"projects": {project: {"sources": []}}}))
-        for key in ("full", "core"):
-            path = tmp_path / (key + ".yaml")
-            path.write_bytes(Path(profile["sizing_record"][key]["path"]).read_bytes().replace(b"CHORUS", project.encode()))
-            profile["sizing_record"][key] = pin(path)
-    profile["source_manifest_sha256"] = pin(manifest)["sha256"]
+def test_calibration_must_be_earned(sizing_fixture, tmp_path, monkeypatch, project, damage):
+    profile, covered, _, _, _ = calibration_case(sizing_fixture, tmp_path, monkeypatch, project)
+    profile = deepcopy(profile)
     if damage == "missing_manifest_pin":
         del profile["source_manifest_sha256"]
     elif damage == "foreign_manifest":
@@ -73,37 +103,58 @@ def test_calibration_must_be_earned(declaration, tmp_path, project, damage):
         profile["sizing_record"][damage] = pin(path)
     else:
         profile["limits"]["aggregate_input_tokens"] = 1000
-    save(config, doc)
-    limits = builder.resolve_audit_limits(project, "chorus", source_manifest=manifest)
-    assert not builder.profile_covered(project, "baseline", limits, source_manifest=manifest)
+    assert not covered(profile)
 
 
 @pytest.mark.parametrize("project", ["CHORUS", "SYNTHETIC"])
-def test_real_1000_token_preparation_requires_sizing(declaration, tmp_path, project):
-    root, manifest, config, doc = declaration
-    row = doc["projects"]["CHORUS"]["audit_partition"]
-    if project != "CHORUS":
-        doc["projects"][project] = doc["projects"].pop("CHORUS")
-        manifest_data = yaml.safe_load(manifest.read_bytes())
-        manifest_data["projects"][project] = manifest_data["projects"].pop("CHORUS")
-        save(manifest, manifest_data)
-        for key in ("full", "core"):
-            path = tmp_path / (key + ".yaml")
-            path.write_bytes(Path(row["sizing_record"][key]["path"]).read_bytes().replace(b"CHORUS", project.encode()))
-            row["sizing_record"][key] = pin(path)
-    row["limits"]["aggregate_input_tokens"] = 1000
-    save(config, doc)
-    source = Path(builder.__file__).resolve().parents[1]
-    from data_sheets_schema.registry import load_registry
-    from data_sheets_schema.chunking import manifest_for
-    bundle = load_registry(source / "data/preprocessed/source_manifest.yaml").bundle("CHORUS").resolve()
+def test_real_1000_token_preparation_requires_sizing(sizing_fixture, tmp_path, monkeypatch, project):
+    entry, covered, options, _, _ = calibration_case(sizing_fixture, tmp_path, monkeypatch, project)
+    assert builder.prepare_registration(project, "positive", **options, sizing_record=None)[2] is None
+    entry["limits"]["aggregate_input_tokens"] = 1000
+    covered(entry)  # Persist the one changed allowance; the manifest pin stays valid.
     with pytest.raises(ValueError, match="needs a sizing record"):
-        builder.prepare_registration(project, "round2-low", source_manifest_path=manifest,
-            partition="chorus", bundle_path=bundle,
-            chunk_manifest_path=manifest_for(bundle, source_manifest=source / "data/preprocessed/source_manifest.yaml"),
-            context_path=source / "data/omission_contexts/chorus_omission_context.json",
-            profile_name="bridge2ai", sizing_record=None, registration_path=tmp_path / "registration.json")
-    assert not (tmp_path / "registration.json").exists()
+        builder.prepare_registration(project, "round2-low", **options, sizing_record=None)
+    assert not options["registration_path"].exists()
+
+
+@pytest.mark.parametrize("project", ["CHORUS", "SYNTHETIC"])
+@pytest.mark.parametrize("damage", ["bundle_md5", "chunk_id", "both"])
+def test_foreign_receipt_cannot_earn_coverage(sizing_fixture, tmp_path, monkeypatch, project, damage):
+    entry, covered, options, _, files = calibration_case(sizing_fixture, tmp_path, monkeypatch, project)
+    assert builder.prepare_registration(project, "positive", **options)[2] is None
+    receipt = yaml.safe_load(files.receipt.read_bytes())
+    if damage in {"bundle_md5", "both"}:
+        receipt["bundle_md5"] = "0" * 32
+    if damage in {"chunk_id", "both"}:
+        receipt["chunks"][0]["id"] = "unrelated-bundle-chunk"
+    save(files.receipt, receipt)
+    entry["sizing_record"]["receipt"] = pin(files.receipt)
+    assert not covered(entry)
+    with pytest.raises(ValueError, match="needs a sizing record"):
+        builder.prepare_registration(project, "foreign", **options)
+    # Explicit historical sizing keeps its permissive byte-estimation contract.
+    assert builder.prepare_registration(project, "explicit", **options,
+        sizing_record=builder.SizingRecord(files.full, files.core, files.receipt))[2]
+
+
+@pytest.mark.parametrize("project", ["CHORUS", "SYNTHETIC"])
+def test_declared_historical_bundle_is_verified(sizing_fixture, tmp_path, monkeypatch, project):
+    from data_sheets_schema.chunking import manifest_from_bytes
+    entry, covered, _, _, files = calibration_case(sizing_fixture, tmp_path, monkeypatch, project)
+    bundle = tmp_path / "historical.txt"
+    bundle.write_bytes(b"FILE: historical.txt\nPATH: historical.txt\nAn older source.\n")
+    chunks = tmp_path / "historical-chunks.yaml"
+    mapping = manifest_from_bytes(bundle.read_bytes(), bundle.name)
+    save(chunks, mapping)
+    save(files.receipt, {"bundle_md5": mapping["bundle_md5"], "chunks": [
+        {"id": item["id"], "status": "nothing_relevant"} for item in mapping["chunks"]]})
+    entry["sizing_record"]["receipt"] = pin(files.receipt)
+    assert not covered(entry)
+    entry["calibration_bundle"] = {"bundle": pin(bundle), "chunk_manifest": pin(chunks)}
+    assert covered(entry)
+    bundle.write_bytes(bundle.read_bytes() + b"changed\n")
+    with pytest.raises(ValueError, match="pin changed"):
+        covered(entry)
 
 
 def test_conflicting_authorities_name_both_files_and_project(declaration):

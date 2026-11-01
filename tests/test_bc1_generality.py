@@ -83,7 +83,13 @@ def test_sizing_refuses_undeclared_project_and_changed_manifest_pin(sizing_fixtu
         sizing.size_inputs(registration, **options)
 
 
-def test_partition_declaration_controls_choices_and_calibration_exemption(sizing_fixture):
+def test_partition_declaration_controls_choices_and_calibration_exemption(sizing_fixture, tmp_path, monkeypatch):
+    from tests.test_g2_round2 import calibration_case
+    entry, covered, _, _, _ = calibration_case(sizing_fixture, tmp_path, monkeypatch, "SYNTHETIC")
+    defaults = builder.resolve_audit_limits("SYNTHETIC", overrides=entry["limits"])
+    for key in builder.ADMISSION_CEILING_KEYS:
+        assert covered(entry), key
+        assert not covered(entry, **{key: defaults[key] - 1}), key
     registration, files, inputs, manifest = synthetic(sizing_fixture)
     declaration = {"name": "synthetic-partition", "arms": ["baseline"],
         "limits": {"max_paths": 80, "max_inventory_bytes": 12288,
@@ -99,8 +105,6 @@ def test_partition_declaration_controls_choices_and_calibration_exemption(sizing
     # Bounds remain usable, but an unpinned declaration cannot waive sizing.
     assert not builder.profile_covered("SYNTHETIC", "baseline", limits, **options)
     assert not builder.profile_covered("SYNTHETIC", "de_novo", limits, **options)
-    for key in builder.ADMISSION_CEILING_KEYS:
-        assert not builder.profile_covered("SYNTHETIC", "baseline", {**limits, key: limits[key] - 1}, **options)
     for project, partition, arm in [("OTHER", "synthetic-partition", "baseline"),
                                      ("SYNTHETIC", "undeclared", "baseline"),
                                      ("SYNTHETIC", "synthetic-partition", "de_novo")]:
