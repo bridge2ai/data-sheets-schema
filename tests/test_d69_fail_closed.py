@@ -126,7 +126,7 @@ def test_unattributed_prefix_sibling_is_residue(tmp_path, symlink):
     else:
         path.write_text("unattributed sibling or reconcile artifact")
     before = tree(tmp_path)
-    with pytest.raises(ledger.UsageLedgerError, match="new label") as caught:
+    with pytest.raises(ledger.UsageLedgerError, match="new output directory") as caught:
         journal.refuse_legacy_execution(selected)
     assert path.name in str(caught.value)
     assert tree(tmp_path) == before

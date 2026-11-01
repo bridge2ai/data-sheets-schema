@@ -139,6 +139,11 @@ controls retain byte-boundary behavior for intact foreign production rows.
 A manually torn foreign suffix has no production ownership record: those
 three variants now pin the pre-write refusal and retain applicable parser
 checks, without inventing `companions.abandoned` provenance.
+The receipt/abandonment singleton controls now test both selected and sibling
+spellings as unbound residue at all six entrypoints. Their positive prelude
+contains only the guarded sibling's actual accounting records. The completed
+verifier's prefix-sibling control runs the real writer instead of fabricating
+unbound progress, receipt, ledger and index files.
 
 Baseline age remains informational on stderr only for `baseline_for` and
 `report_basis`. Their returned metric/count mappings are unchanged. Persisting

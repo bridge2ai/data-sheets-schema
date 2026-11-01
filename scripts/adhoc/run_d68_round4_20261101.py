@@ -66,8 +66,13 @@ class Observer:
             self.errors.append({'nodeid': report.nodeid, 'message': str(report.longrepr)})
 
     def pytest_runtest_logreport(self, report):
-        self.reports.append({'nodeid': report.nodeid, 'when': report.when, 'outcome': report.outcome,
-                             **({'message': str(report.longrepr)} if report.failed or report.skipped else {})})
+        row = {'nodeid': report.nodeid, 'when': report.when, 'outcome': report.outcome,
+               **({'message': str(report.longrepr)} if report.failed or report.skipped else {})}
+        self.reports.append(row)
+        if report.failed:
+            # Preserve diagnostics during a long shard, including interruption.
+            with base.with_suffix('.failures.jsonl').open('a') as stream:
+                stream.write(json.dumps(row) + '\n')
 
 observer = Observer()
 code = pytest.main([*args, '--basetemp', str(base), '-p', 'no:cacheprovider'], plugins=[observer])

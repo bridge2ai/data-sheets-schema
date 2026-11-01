@@ -97,35 +97,38 @@ def test_fresh_prefix_project_does_not_claim_sibling_artifacts(layout, projects,
 @pytest.mark.parametrize("layout", ["flat", "split"])
 @pytest.mark.parametrize("entry", ["execute", "internal", "prepare", "write", "spend", "begin_call"])
 @pytest.mark.parametrize("resume", [True, False])
-def test_abandoned_only_residue_is_owned_exactly_and_never_spends(layout, entry, resume, tmp_path, monkeypatch):
-    assert_only_owned_residue_refuses(layout, entry, resume, tmp_path, monkeypatch,
+@pytest.mark.parametrize("residue_owner", ["selected", "sibling"])
+def test_abandoned_only_residue_is_owned_exactly_and_never_spends(layout, entry, resume, residue_owner, tmp_path, monkeypatch):
+    assert_only_owned_residue_refuses(layout, entry, resume, residue_owner, tmp_path, monkeypatch,
                                      ledger.abandoned_journal_path)
 
 
 @pytest.mark.parametrize("layout", ["flat", "split"])
 @pytest.mark.parametrize("entry", ["execute", "internal", "prepare", "write", "spend", "begin_call"])
 @pytest.mark.parametrize("resume", [True, False])
-def test_receipt_only_residue_is_owned_exactly_and_never_spends(layout, entry, resume, tmp_path, monkeypatch):
-    assert_only_owned_residue_refuses(layout, entry, resume, tmp_path, monkeypatch,
+@pytest.mark.parametrize("residue_owner", ["selected", "sibling"])
+def test_receipt_only_residue_is_owned_exactly_and_never_spends(layout, entry, resume, residue_owner, tmp_path, monkeypatch):
+    assert_only_owned_residue_refuses(layout, entry, resume, residue_owner, tmp_path, monkeypatch,
                                      api._receipt_path)
 
 
-def assert_only_owned_residue_refuses(layout, entry, resume, tmp_path, monkeypatch, artifact_path):
+def assert_only_owned_residue_refuses(layout, entry, resume, residue_owner, tmp_path, monkeypatch, artifact_path):
     monkeypatch.setattr(api.RunSpec, "output_root", property(lambda self: tmp_path / "root"))
     kwargs = {"out_dir": tmp_path / "output"} if layout == "flat" else {}
     sibling, selected = spec(project="P_X", **kwargs), spec(project="P", **kwargs)
     ledger.prepare_usage(sibling, resume=True)
-    sibling_path = artifact_path(sibling)
-    sibling_path.parent.mkdir(parents=True, exist_ok=True)
-    sibling_path.write_text("sibling evidence\n")
     before = tree(tmp_path)
     journal.refuse_legacy_execution(selected)
     assert tree(tmp_path) == before
-    artifact_path(selected).write_text(json.dumps({
+    # Neither spelling is an output of the guarded sibling's accounting.
+    # A name prefix must not turn manually added receipt/abandonment residue
+    # into positively owned evidence.
+    residue = artifact_path(selected if residue_owner == "selected" else sibling)
+    residue.write_text(json.dumps({
         "phase": "full", "attempt": 1, "snapshot": "legacy-snapshot.txt", "output_tokens": 7}) + "\n")
     before = tree(tmp_path)
     client = FakeClient()
-    with pytest.raises(ledger.UsageLedgerError, match="inspection only|cannot become a clean resume"):
+    with pytest.raises(ledger.UsageLedgerError, match="inspection only|cannot become a clean resume") as caught:
         if entry == "execute":
             api.execute(selected, resume=resume, client=client)
         elif entry == "internal":
@@ -138,6 +141,7 @@ def assert_only_owned_residue_refuses(layout, entry, resume, tmp_path, monkeypat
             ledger.begin_call(selected, "report_regate", 1, "2026-10-31T00:00:00Z")
         else:
             journal.check(selected, spending=True)
+    assert str(residue) in str(caught.value)
     assert client.messages.calls == []
     assert tree(tmp_path) == before
 
@@ -146,13 +150,9 @@ def assert_only_owned_residue_refuses(layout, entry, resume, tmp_path, monkeypat
 def test_completed_verifier_does_not_claim_prefix_sibling(case, tmp_path, monkeypatch):
     root, old, selected = fixture(case, tmp_path)
     sibling = selected.project + "_X"
-    ledger.prepare_usage(replace(selected, project=sibling), resume=True)
-    for name in (f"{sibling}_api_progress.json",
-                 f"{sibling}_abandoned_attempts.jsonl",
-                 f"{sibling}_coverage_receipt.yaml",
-                 f"{sibling}_api_usage_0123456789abcdef.json",
-                 f"intermediate/{sibling}_snapshot_index.json"):
-        (selected.metadata_dir / name).write_text("unrelated sibling evidence")
+    client = FakeClient()
+    api.execute(replace(selected, project=sibling), client=client)
+    assert len(client.messages.calls) == 4
     before = tree(root)
     no_verifier_execution(monkeypatch)
     result = journal.verify_completed_legacy(selected.provenance_path,
