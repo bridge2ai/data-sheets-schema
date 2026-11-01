@@ -66,7 +66,12 @@ def main():
     # final execution replaces the earlier execution at the preceding head.
     for name in ("green-regressions", "narrow", "final-regressions"):
         if (args.scratch / name / "result.json").exists():
-            final.update(nodes(args.scratch / name))
+            current = nodes(args.scratch / name)
+            # Each unit names complete files. Replacing their node sets also
+            # handles renamed parametrizations without counting obsolete IDs.
+            files = {node.split("::")[0] for node in current}
+            final = {node: outcome for node, outcome in final.items() if node.split("::")[0] not in files}
+            final.update(current)
     red = nodes(args.scratch / "red-final")
     matrix = {node: {"before": status, "after": final.get(node, "NOT_RUN")}
               for node, status in sorted(red.items())}
