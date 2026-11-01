@@ -55,6 +55,15 @@ def save(name, payload, **metadata):
                              'sha256': sg.sha(raw), **metadata}
     print(name, len(raw), sg.sha(raw), flush=True)
 
+last_host = None
+
+def host_pin(value):
+    raw = sg.canonical(value)
+    path = OUT / ('host-' + sg.sha(raw) + '.json')
+    path.write_bytes(raw)
+    assert path.read_bytes() == raw
+    return {'path': str(path.relative_to(ROOT)), 'bytes': len(raw), 'sha256': sg.sha(raw)}
+
 def sink(row, raw):
     stage = row['stage']
     name = stage['phase']
@@ -64,12 +73,19 @@ def sink(row, raw):
     if row['scenario'] != 'captured_record':
         name += ':' + row['scenario']
     save(name, json.loads(raw), stage=stage, scenario=row['scenario'],
-         future_placeholders=row['future_placeholders'])
+         future_placeholders=row['future_placeholders'],
+         host_packet=host_pin(last_host['packet']), host_request=host_pin(last_host['inner']))
 
 def main():
     # An observer records the exact production renderings already required by
     # registration sizing; it changes neither inputs, results nor acceptance.
     original_size = sizing.size_inputs
+    original_render = runtime.render_request
+    def observed_render(**kwargs):
+        global last_host
+        result = original_render(**kwargs)
+        last_host = kwargs
+        return result
     def observed(*args, **kwargs):
         return original_size(*args, **kwargs, payload_sink=sink)
     files = builder.SizingRecord.in_directory(ARCHIVE, 'CHORUS', effective_receipt=True)
@@ -79,7 +95,7 @@ def main():
         reg = json.loads((OUT / 'registration.json').read_bytes())
         sized = json.loads((OUT / 'sizing.json').read_bytes())
     else:
-        with patch.object(sizing, 'size_inputs', observed):
+        with patch.object(sizing, 'size_inputs', observed), patch.object(runtime, 'render_request', observed_render):
             reg, outputs, sized = builder.prepare_registration('CHORUS',
                 '2026-10-31_bc1-byte-proof', registration_path=FIXTURE / 'registration.json',
                 partition='chorus', bounded_carry_version=1, bc1_fan_in=2,

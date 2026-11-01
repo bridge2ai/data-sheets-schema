@@ -30,10 +30,10 @@ def synthetic(sizing_fixture):
 
 def test_declared_synthetic_project_sizes_registers_and_all_uses_selected_manifest(sizing_fixture, monkeypatch, tmp_path):
     registration, files, inputs, manifest = synthetic(sizing_fixture)
-    # A fixture schema with G1's labels: no production schema or protected file edits.
+    # A declared synthetic prefix: G1's display labels now refuse before billing.
     schema = yaml.safe_load(inputs["schema_path"].read_bytes())
     schema["classes"]["Instance"]["attributes"]["data_substrate"]["annotations"] = {
-        "d4d:termSources": "EDAM Data, EDAM Format, IANA media types"}
+        "d4d:termSources": "SYNTHETIC"}
     inputs["schema_path"].write_text(yaml.safe_dump(schema))
     monkeypatch.setattr(builder.api, "FULL_SCHEMA_PATH", inputs["schema_path"])
     monkeypatch.setattr(builder.api, "CORE_SCHEMA_PATH", inputs["schema_path"])
@@ -53,7 +53,7 @@ def test_declared_synthetic_project_sizes_registers_and_all_uses_selected_manife
     policy = bc1_context.derive_term_policy(selection=actual, context_raw=inputs["context"],
         schema_snapshot=capture_schema(inputs["schema_path"], strict=True))
     assert policy["external_terms"]["Instance"]["data_substrate"]["sources"] == [
-        "EDAM Data", "EDAM Format", "IANA media types"]
+        "SYNTHETIC"]
     assert outputs and not (tmp_path / "registration.json").exists()
     with pytest.raises(ValueError, match=f"UNDECLARED.*{manifest}"):
         builder.prepare_registration("UNDECLARED", "synthetic", **options)
@@ -96,7 +96,8 @@ def test_partition_declaration_controls_choices_and_calibration_exemption(sizing
     save(declaration)
     options = dict(source_manifest=manifest)
     limits = builder.resolve_audit_limits("SYNTHETIC", "synthetic-partition", **options)
-    assert builder.profile_covered("SYNTHETIC", "baseline", limits, **options)
+    # Bounds remain usable, but an unpinned declaration cannot waive sizing.
+    assert not builder.profile_covered("SYNTHETIC", "baseline", limits, **options)
     assert not builder.profile_covered("SYNTHETIC", "de_novo", limits, **options)
     for key in builder.ADMISSION_CEILING_KEYS:
         assert not builder.profile_covered("SYNTHETIC", "baseline", {**limits, key: limits[key] - 1}, **options)

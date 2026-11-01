@@ -173,13 +173,19 @@ def test_domain_inverse_is_the_only_catalog_content_removed():
 
 
 @pytest.mark.parametrize("name", ["bridge2ai", "synthetic-pinned-profile"])
-def test_pinned_profile_requires_its_declared_vocabulary_and_does_not_use_neutral_policy(fixture, name):
+def test_pinned_profile_requires_its_declared_vocabulary_and_does_not_use_neutral_policy(fixture, name, monkeypatch, tmp_path):
+    from data_sheets_schema import profiles
+    if name not in profiles.PROFILES:
+        monkeypatch.setitem(profiles.PROFILES, name, profiles.Profile(name, vocabulary_pin=tmp_path / "vocabulary.yaml"))
     selection, inputs = fixture
     selection["inputs"]["profile"]["name"] = name
+    with pytest.raises(ValueError, match="vocabulary pin"):
+        policy(fixture)
     selection["inputs"]["profile"]["vocabulary"] = {}
     with pytest.raises(ValueError, match="vocabulary pin"):
         policy(fixture)
-    selection["inputs"]["profile"]["vocabulary"] = {"sha256": "a" * 64}
+    selection["inputs"]["profile"]["vocabulary"] = {
+        "path": str(profiles.profile_named(name).pin_path.absolute()), "sha256": "a" * 64}
     with pytest.raises(ValueError, match="missing a declared"):
         policy(fixture)
     context = json.loads(inputs["context"])
@@ -190,7 +196,9 @@ def test_pinned_profile_requires_its_declared_vocabulary_and_does_not_use_neutra
 
 
 @pytest.mark.parametrize("name", ["neutral", "synthetic-unpinned-profile"])
-def test_unpinned_profile_uses_neutral_checks_independent_of_name(fixture, name):
+def test_unpinned_profile_uses_neutral_checks_independent_of_name(fixture, name, monkeypatch):
+    from data_sheets_schema import profiles
+    monkeypatch.setitem(profiles.PROFILES, name, profiles.Profile(name))
     selection, inputs = fixture
     selection["inputs"]["profile"]["name"] = name
     derived = policy(fixture)
@@ -218,10 +226,10 @@ def test_source_labels_with_spaces_in_captured_schema(fixture, annotation):
     inputs["schema_path"].write_text(yaml.safe_dump(schema))
     inputs["schema_snapshot"] = capture_schema(inputs["schema_path"], strict=True)
     selection["inputs"]["full_schema"] = bc._schema_pin(inputs["schema_snapshot"])
-    derived = policy(fixture)
-    assert bc.permits_unbound_slot(derived, "Instance", "data_substrate")
-    assert all(label.strip() == label and label for label in derived["external_terms"]["Instance"]["data_substrate"]["sources"])
-    assert bc._sources(om._schema(inputs["schema_path"], schema_snapshot=inputs["schema_snapshot"])) == derived["external_terms"]
+    sources = bc._sources(om._schema(inputs["schema_path"], schema_snapshot=inputs["schema_snapshot"]))
+    assert all(label.strip() == label and label for label in sources["Instance"]["data_substrate"]["sources"])
+    with pytest.raises(ValueError, match="no accepted identifier form"):
+        policy(fixture)
 
 
 @pytest.mark.parametrize("annotation", ["", "A,,B", "A;", "A, ;B", "A\x00B", "A\x7fB", "A\x85B", "A\nB", "A\tB"])

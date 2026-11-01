@@ -79,3 +79,35 @@ def test_tampered_evidence_is_not_accepted(captures, damage):
     metadata["payloads"]["typed_audit_worker:w1"].update(bytes=len(changed), sha256=sha(changed))
     (folder / "capture.json").write_bytes(raw(metadata))
     assert not accepted(captures)
+
+
+@pytest.mark.parametrize("damage", [None, "host_packet", "host_request"])
+def test_captured_host_objects_are_rehashed(captures, damage):
+    for side in ("before", "after"):
+        folder = captures / ".bc1-byte-evidence" / side
+        metadata = json.loads((folder / "capture.json").read_bytes())
+        payload = json.loads((folder / "worker.json").read_bytes())
+        packet = {"registration_sha256": metadata["registration_sha256"]}
+        packet["sha256"] = sha(raw(packet))
+        inner = {"payload": {"packet_sha256": packet["sha256"]}}
+        inner["request_sha256"] = sha(raw(inner["payload"]))
+        binding = {"registration_sha256": metadata["registration_sha256"], "packet_sha256": packet["sha256"],
+                   "inner_request_sha256": sha(raw(inner))}
+        content = payload["messages"][0]["content"]
+        content[5]["text"] = "# Registered audit request identity\n\n" + raw(binding).decode()
+        content[6]["text"] = "# Exact typed stage request\n\n" + raw(inner).decode()
+        if side == "after" and damage:
+            (packet if damage == "host_packet" else inner)["tampered"] = True
+            if damage == "host_request":
+                inner["payload"]["tampered"] = True
+        info = metadata["payloads"]["typed_audit_worker:w1"]
+        for key, value in [("host_packet", packet), ("host_request", inner)]:
+            path = folder / (key + ".json")
+            data = raw(value)
+            path.write_bytes(data)
+            info[key] = {"path": str(path.relative_to(captures)), "sha256": sha(data), "bytes": len(data)}
+        data = raw(payload)
+        (folder / "worker.json").write_bytes(data)
+        info.update(sha256=sha(data), bytes=len(data))
+        (folder / "capture.json").write_bytes(raw(metadata))
+    assert accepted(captures) == (damage is None)

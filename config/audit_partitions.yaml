@@ -15,6 +15,7 @@ projects:
       # about 1.92M at worst. Its expected integration call fits the window;
       # the worst case, every response at its cap, does not and is warned.
       arms: [baseline]
+      source_manifest_sha256: b28c300596cc9be964e93f1a21609f24a8b53d55302abc5fb45a29681e55cea8
       limits:
         max_paths: 80
         max_inventory_bytes: 12288

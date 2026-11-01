@@ -35,6 +35,7 @@ import inspect
 import json
 import math
 import os
+import re
 import sys
 import threading
 import types
@@ -182,49 +183,84 @@ DEFAULT_AUDIT_LIMITS: dict[str, Any] = {
 # own (`--project-limits`).
 PARTITION_KEYS = ("max_paths", "max_inventory_bytes", "max_workers")
 
-def partition_profiles(source_manifest: Path | None = None) -> dict[str, dict[str, Any]]:
-    """Read per-project declarations, with the selected manifest authoritative.
+def partition_profiles(source_manifest: Path | None = None, *, root_dir: Path | None = None) -> dict[str, dict[str, Any]]:
+    """Read one unambiguous declaration per selected project and partition.
 
     The separate default file preserves historical manifest/bundle identities.
     A manifest may instead declare projects.<P>.audit_partition. Calibration is
-    inherited only with the declaration's intact, pinned full/core/receipt.
+    earned separately by parsing and sizing its pinned full/core/receipt.
     """
     from data_sheets_schema.schema_cache import load_yaml
-    registry = load_registry(source_manifest or default_manifest_path())
-    declared = load_yaml(resource_path("config/audit_partitions.yaml"))
+    root = Path(root_dir or ROOT).resolve()
+    manifest = Path(source_manifest) if source_manifest is not None else root / "data/preprocessed/source_manifest.yaml"
+    try:
+        registry = load_registry(manifest)
+    except click.ClickException as exc:
+        raise ValueError(str(exc)) from exc
+    if not isinstance(registry.data.get("projects", {}), dict):
+        raise ValueError(f"invalid projects mapping in source manifest {manifest}")
+    config = root / "config/audit_partitions.yaml"
+    try:
+        declared = load_yaml(config)
+    except (OSError, yaml.YAMLError, UnicodeError) as exc:
+        raise ValueError(f"cannot read audit partition declarations {config}: {exc}") from exc
+    if (not isinstance(declared, dict) or set(declared) != {"projects"}
+            or not isinstance(declared["projects"], dict)):
+        raise ValueError(f"invalid audit partition projects mapping in {config}")
+    for project, row in declared["projects"].items():
+        if not isinstance(project, str) or not isinstance(row, dict):
+            raise ValueError(f"{project}: invalid audit partition entry in {config}")
     profiles = {}
     for project in registry.projects():
         entry = registry.entry(project)
         inline = isinstance(entry, dict) and "audit_partition" in entry
-        row = entry if inline else declared["projects"].get(project, {})
+        external = declared["projects"].get(project, {})
+        if inline and "audit_partition" in external and entry["audit_partition"] != external["audit_partition"]:
+            raise ValueError(f"{project}: conflicting audit_partition declarations in {registry.path} and {config}")
+        row = entry if inline else external
+        origin = registry.path if inline else config
         if "audit_partition" not in row:
             continue
         profile = copy.deepcopy(row["audit_partition"])
-        if (not isinstance(profile, dict) or set(profile) != {"name", "arms", "limits", "sizing_record"}
+        if (not isinstance(profile, dict)
+                or set(profile) - {"source_manifest_sha256"} != {"name", "arms", "limits", "sizing_record"}
                 or not isinstance(profile["name"], str) or not profile["name"].strip()
                 or not isinstance(profile["arms"], list) or not profile["arms"]
-                or any(arm not in ARMS for arm in profile["arms"])
+                or any(not isinstance(arm, str) or arm not in ARMS for arm in profile["arms"])
                 or not isinstance(profile["limits"], dict)
                 or set(profile["limits"]) != {*PARTITION_KEYS, "aggregate_input_tokens"}
                 or any(type(value) is not int or value <= 0 for value in profile["limits"].values())
                 or not isinstance(profile["sizing_record"], dict)
                 or set(profile["sizing_record"]) != {"full", "core", "receipt"}):
-            raise ValueError(f"{project}: invalid audit_partition declaration in {registry.path}")
+            raise ValueError(f"{project}: invalid audit_partition declaration in {origin}")
+        manifest_sha = profile.get("source_manifest_sha256")
+        if manifest_sha is not None and (not isinstance(manifest_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", manifest_sha)):
+            raise ValueError(f"{project}: invalid source_manifest_sha256 in {origin}")
         for key, pin in profile["sizing_record"].items():
-            if not isinstance(pin, dict) or set(pin) != {"path", "sha256", "bytes"}:
-                raise ValueError(f"{project}: audit partition requires a pinned sizing record ({key})")
-            path = registry.anchored(Path(pin["path"])) if inline else resource_path(pin["path"])
-            raw = path.read_bytes()
+            if (not isinstance(pin, dict) or set(pin) != {"path", "sha256", "bytes"}
+                    or not isinstance(pin["path"], str) or not pin["path"]
+                    or not isinstance(pin["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", pin["sha256"])
+                    or type(pin["bytes"]) is not int or pin["bytes"] <= 0):
+                raise ValueError(f"{project}: audit partition in {origin} requires a pinned sizing record ({key})")
+            path = (registry.anchored(Path(pin["path"])) if inline else root / pin["path"]).resolve()
+            try:
+                raw = path.read_bytes()
+            except OSError as exc:
+                raise ValueError(f"{project}: cannot read audit partition pin {path} from {origin}: {exc}") from exc
             if hashlib.sha256(raw).hexdigest() != pin["sha256"] or len(raw) != pin["bytes"]:
-                raise ValueError(f"{project}: audit partition sizing record pin changed: {path}")
+                raise ValueError(f"{project}: audit partition sizing record pin changed: {path} (in {origin})")
             if key in ("full", "core"):
                 from data_sheets_schema.bc1_registration import _own_record
-                if any(not _own_record(project, ARMS[arm][0], raw, core=key == "core")
-                       for arm in profile["arms"]):
-                    raise ValueError(f"{project}: audit partition sizing record is not its own project/arm: {path}")
+                try:
+                    own = all(_own_record(project, ARMS[arm][0], raw, core=key == "core") for arm in profile["arms"])
+                except UnicodeError:
+                    own = False
+                if not own:
+                    raise ValueError(f"{project}: audit partition sizing record is not its own project/arm: {path} (in {origin})")
+            pin["path"] = str(path)
         name = profile.pop("name")
         if name in profiles:
-            raise ValueError(f"duplicate audit partition name {name!r} in {registry.path}")
+            raise ValueError(f"{project}: duplicate audit partition name {name!r} in {origin}")
         profiles[name] = {**profile, "projects": [project]}
     return profiles
 
@@ -266,6 +302,7 @@ def resolve_audit_limits(
     bounded_carry_version: int = 0,
     bc1_fan_in: int = 2,
     source_manifest: Path | None = None,
+    root_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Defaults, then a named partition profile, then explicit overrides.
 
@@ -282,7 +319,7 @@ def resolve_audit_limits(
     if bounded_carry_version == 1:
         limits["integration_output_tokens"] = 64_000
     if partition is not None:
-        profiles = partition_profiles(source_manifest)
+        profiles = partition_profiles(source_manifest, root_dir=root_dir)
         if partition not in profiles:
             raise ValueError(f"unknown partition profile {partition!r}; known: {sorted(profiles)}")
         profile = profiles[partition]
@@ -334,29 +371,89 @@ def resolve_audit_limits(
     return limits
 
 
-def profile_sized(partition: str | None, limits: dict[str, Any], *, source_manifest: Path | None = None) -> bool:
-    """Keep calibrated bounds/caps, with no smaller allowance or admission ceiling."""
-    if partition is None:
-        return False
-    profiles = partition_profiles(source_manifest)
-    if partition not in profiles:
-        return False
-    expected = {**DEFAULT_AUDIT_LIMITS, **profiles[partition]["limits"]}
+def _profile_limits_cover(profile: dict, limits: dict) -> bool:
+    expected = {**DEFAULT_AUDIT_LIMITS, **profile["limits"]}
     return (all(limits[key] == expected[key] for key in SIZING_KEYS if key != "aggregate_input_tokens")
             and limits["aggregate_input_tokens"] >= expected["aggregate_input_tokens"]
             and all(limits[key] >= expected[key] for key in ADMISSION_CEILING_KEYS))
 
 
-def profile_covered(project: str, arm: str | None, limits: dict[str, Any], *, source_manifest: Path | None = None) -> bool:
-    """A profile validated for this project and arm covers these limits, named or not.
+def _calibration_covered(profile: dict, project: str, arm: str, *, source_manifest: Path | None,
+                         root_dir: Path | None, registration: dict | None) -> bool:
+    """Earn coverage with the gate's offline estimator, never a declaration alone.
 
-    A registration does not record how its limits were chosen. Equal partition
-    bounds and output caps may inherit calibration only when aggregate input
-    and every per-call admission ceiling are at least as permissive.
+    Historical records need not validate against today's schema. They must be
+    parseable records of the declared project/arm and a structured coverage
+    receipt. The existing estimator retains its historical owner allowance.
     """
+    from data_sheets_schema import audit_omissions as omissions, receipts
+    root = Path(root_dir or ROOT).resolve()
+    manifest = Path(source_manifest) if source_manifest is not None else root / "data/preprocessed/source_manifest.yaml"
+    try:
+        manifest_sha = hashlib.sha256(manifest.read_bytes()).hexdigest()
+        if profile.get("source_manifest_sha256") != manifest_sha:
+            return False
+        files = SizingRecord(**{key: Path(pin["path"]) for key, pin in profile["sizing_record"].items()})
+        for key in ("full", "core"):
+            if not omissions._mapping(getattr(files, key).read_bytes(), f"calibration {key}"):
+                return False
+        receipt = receipts.load_receipt(files.receipt)
+        entries, findings = receipts._receipt_entries(receipt)
+        md5 = receipt.get("bundle_md5")
+        if (not isinstance(md5, str) or not re.fullmatch(r"[0-9a-f]{32}", md5)
+                or findings or not entries or len({entry["id"] for entry in entries}) != len(entries)
+                or any(not entry["id"] or entry.get("status") not in receipts.STATUSES for entry in entries)):
+            return False
+        expected = resolve_audit_limits(project, overrides=profile["limits"], arm=arm)
+        if registration is None:
+            # Explicit sizing avoids recursion through profile_covered. This is
+            # preparation only: it neither writes nor uses a token endpoint.
+            _, _, sizing = prepare_registration(project, "partition-calibration", arm=arm,
+                source_manifest_path=manifest, audit_limits=expected, sizing_record=files,
+                registration_path=root / "partition-calibration.json",
+                worktree=root if root != ROOT else None)
+        else:
+            if (registration["run"]["project"] != project or registration["run"]["arm"] != ARMS[arm][0]
+                    or registration["inputs"].get("source_manifest") != sg.file_pin(manifest)):
+                return False
+            inputs = registration["inputs"]
+            # A checker must not grant coverage to stale captured input pins.
+            for key in ("bundle", "chunk_manifest", "context"):
+                if sg.file_pin(Path(inputs[key]["path"])) != inputs[key]:
+                    return False
+            snapshot = capture_schema(Path(inputs["full_schema"]["root"]), strict=True)
+            if sg.schema_pin(snapshot) != inputs["full_schema"]:
+                return False
+            sizing = size_typed_audit_input(project, expected, registration, sizing_record=files,
+                context=Path(inputs["context"]["path"]).read_bytes(), schema_snapshot=snapshot)
+        return (sizing["aggregate_input_tokens"] <= expected["aggregate_input_tokens"]
+                and all(sizing[f"{stage}_input_tokens"] <= room
+                        for stage, room in _admissible_input_tokens(expected).items()))
+    except (OSError, ValueError, yaml.YAMLError):
+        return False
+
+
+def profile_sized(partition: str | None, limits: dict[str, Any], *, source_manifest: Path | None = None,
+                  root_dir: Path | None = None, registration: dict | None = None) -> bool:
+    """Keep earned calibration, bounds/caps, allowances and admission ceilings."""
+    if partition is None:
+        return False
+    profiles = partition_profiles(source_manifest, root_dir=root_dir)
+    if partition not in profiles or not _profile_limits_cover(profiles[partition], limits):
+        return False
+    profile = profiles[partition]
+    return all(_calibration_covered(profile, profile["projects"][0], arm,
+        source_manifest=source_manifest, root_dir=root_dir, registration=registration) for arm in profile["arms"])
+
+
+def profile_covered(project: str, arm: str | None, limits: dict[str, Any], *, source_manifest: Path | None = None,
+                    root_dir: Path | None = None, registration: dict | None = None) -> bool:
+    """Only verified calibration for this project, arm and manifest grants coverage."""
     return any(project in profile["projects"] and arm in profile["arms"]
-               and profile_sized(name, limits, source_manifest=source_manifest)
-               for name, profile in partition_profiles(source_manifest).items())
+               and _profile_limits_cover(profile, limits)
+               and _calibration_covered(profile, project, arm, source_manifest=source_manifest,
+                                        root_dir=root_dir, registration=registration)
+               for profile in partition_profiles(source_manifest, root_dir=root_dir).values())
 
 
 # Typed-audit input sizing (#5155), calibrated on CHORUS 2026-10-22a.
@@ -463,7 +560,7 @@ def _admissible_input_tokens(limits: dict[str, Any]) -> dict[str, int]:
             for stage in SIZING_STAGES}
 
 
-def check_registration_sizing(registration_path: Path | str, raw: bytes) -> dict[str, Any] | None:
+def check_registration_sizing(registration_path: Path | str, raw: bytes, *, root_dir: Path | None = None) -> dict[str, Any] | None:
     """The sizing record beside a registration, checked against its bytes.
 
     Returns None when a partition profile covers the registration's limits.
@@ -487,7 +584,7 @@ def check_registration_sizing(registration_path: Path | str, raw: bytes) -> dict
     arm = next((key for key, value in ARMS.items() if value[0] == reg["run"]["arm"]), None)
     manifest = reg["inputs"].get("source_manifest")
     covered = bool(manifest) and profile_covered(reg["run"]["project"], arm, limits,
-                                               source_manifest=Path(manifest["path"]))
+        source_manifest=Path(manifest["path"]), root_dir=root_dir, registration=reg)
     path = sizing_path(registration_path)
     if not path.is_file():
         if covered:
@@ -991,7 +1088,7 @@ def prepare_registration(
         raise ValueError(f"BC1 project {project!r} is not declared in source manifest {sm_resolved!s}")
     active_audit_limits = resolve_audit_limits(project, partition, audit_limits, arm=arm,
         bounded_carry_version=bounded_carry_version, bc1_fan_in=bc1_fan_in,
-        source_manifest=sm_resolved)
+        source_manifest=sm_resolved, root_dir=root_dir)
 
     # Resolve bundle
     if bundle_path is not None:
@@ -1187,7 +1284,8 @@ def prepare_registration(
         sizing = bc1_registration.size_inputs(reg, sizing_record=sizing_record,
             context_raw=context_raw, schema_snapshot=full_schema)
         bc1_registration.check_sizing_record(reg, sizing)
-    elif sizing_record is not None or not profile_covered(project, arm, active_audit_limits, source_manifest=sm_resolved):
+    elif sizing_record is not None or not profile_covered(project, arm, active_audit_limits,
+            source_manifest=sm_resolved, root_dir=root_dir, registration=reg):
         if sizing_record is None:
             raise ValueError(
                 f"{project}: an audit-limit combination no partition profile covers needs a sizing record (#5155, #5211); "
@@ -1711,7 +1809,12 @@ def cli(
     """
     target_projects: list[str] = []
     if all_projects:
-        target_projects = load_registry(source_manifest or default_manifest_path()).projects()
+        selected_registry = load_registry(source_manifest or default_manifest_path())
+        target_projects = selected_registry.projects()
+        if not target_projects:
+            exists = selected_registry.path is not None and selected_registry.path.exists()
+            raise click.UsageError(f"--all source manifest {selected_registry.path} declares no projects "
+                                   f"({'exists' if exists else 'missing'})")
     elif projects:
         for p in projects:
             for item in p.split(","):
@@ -1781,7 +1884,7 @@ def cli(
                 except (FileNotFoundError, ValueError) as exc:
                     raise click.ClickException(f"Input pin verification failed for {reg_file.name}: {exc}") from exc
                 try:
-                    sized = check_registration_sizing(reg_file, raw)
+                    sized = check_registration_sizing(reg_file, raw, root_dir=worktree)
                 except ValueError as exc:
                     raise click.ClickException(str(exc)) from exc
                 verified[(proj, lbl)] = (reg_file, hashlib.sha256(raw).hexdigest())
@@ -1830,7 +1933,7 @@ def cli(
         try:
             resolve_audit_limits(proj, part, overrides or None, arm=arm,
                                  bounded_carry_version=bounded_carry_version, bc1_fan_in=bc1_fan_in,
-                                 source_manifest=source_manifest)
+                                 source_manifest=source_manifest, root_dir=worktree)
         except ValueError as exc:
             raise click.UsageError(f"{proj}: {exc}") from exc
 

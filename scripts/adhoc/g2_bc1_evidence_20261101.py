@@ -133,18 +133,70 @@ def compare(root, *, identity_pin_ruling=False):
     assert before['payloads'].keys() == after['payloads'].keys()
     assert before['audit_limits'] == after['audit_limits'] and before['calibration'] == after['calibration']
     assert before['python'] == after['python'] and before['packages'] == after['packages']
+    bindings = []
+    for side, capture in (('before', before), ('after', after)):
+        registration_raw = (evidence / side / 'registration.json').read_bytes()
+        assert capture['registration_sha256'] == sha(registration_raw), (side, 'registration metadata')
+        packet_digests = set()
+        for name, metadata in capture['payloads'].items():
+            if not name.startswith('typed_audit_'):
+                continue
+            payload = json.loads((root / metadata['path']).read_bytes())
+            content = payload['messages'][0]['content']
+            def embedded(index):
+                text = content[index]['text']
+                raw = text[text.index('{'):].encode()
+                obj = json.loads(raw)
+                assert ns['canon'](obj) == raw
+                return obj, raw
+            binding, _ = embedded(5)
+            inner, inner_raw = embedded(6)
+            assert binding['registration_sha256'] == sha(registration_raw), (side, name, 'registration binding')
+            assert binding['inner_request_sha256'] == sha(inner_raw), (side, name, 'inner request binding')
+            packet_digests.add(binding['packet_sha256'])
+            if 'packet_sha256' in inner['payload']:
+                assert inner['payload']['packet_sha256'] == binding['packet_sha256'], (side, name, 'packet binding')
+            verified = ['registration bytes', 'content/6 inner request bytes']
+            unavailable = []
+            def captured_object(key):
+                pin = metadata[key]
+                raw = (root / pin['path']).read_bytes()
+                assert sha(raw) == pin['sha256'] and len(raw) == pin['bytes'], (side, name, key)
+                return json.loads(raw)
+            if 'host_packet' in metadata:
+                packet = captured_object('host_packet')
+                assert packet['sha256'] == sha(ns['canon']({k: v for k, v in packet.items() if k != 'sha256'}))
+                assert binding['packet_sha256'] == packet['sha256'], (side, name, 'captured packet')
+                verified.append('captured packet seal')
+            else:
+                unavailable.append('packet seal: complete host packet not captured')
+            if 'request_sha256' in inner:
+                if 'host_request' in metadata:
+                    request = captured_object('host_request')
+                    assert request['request_sha256'] == sha(ns['canon'](request['payload']))
+                    assert inner['request_sha256'] == request['request_sha256'], (side, name, 'captured request')
+                    assert request['payload']['packet_sha256'] == binding['packet_sha256']
+                    verified.append('captured host request payload hash')
+                else:
+                    unavailable.append('request_sha256: complete host request not captured; content/6 is its projection')
+            else:
+                verified.append('no host request_sha256 field (omission request)')
+            bindings.append({'side': side, 'name': name, 'verified': verified, 'unverified': unavailable})
+        assert len(packet_digests) <= 1, (side, 'multiple packet bindings in one capture')
     rows = []
     for name, bp in before['payloads'].items():
         ap = after['payloads'][name]
         a, b = [(root / p['path']).read_bytes() for p in (bp, ap)]
         assert sha(a) == bp['sha256'] and sha(b) == ap['sha256']
+        assert len(a) == bp['bytes'] and len(b) == ap['bytes']
         expanded = [ns['expand'](json.loads(raw)) for raw in (a, b)]
         assert all(ns['canon'](ns['collapse'](v)) == raw for v, raw in zip(expanded, (a, b)))
         leaves = ns['differences'](*expanded)
         assert sum(leaf['delta'] for leaf in leaves) == len(b) - len(a)
         rows.append({'name': name, 'before_sha256': sha(a), 'after_sha256': sha(b),
             'before_bytes': len(a), 'after_bytes': len(b), 'identical': a == b, 'differences': leaves})
-    accepted = all(r['identical'] for r in rows)
+    sizing_totals_equal = before['sizing_totals'] == after['sizing_totals']
+    accepted = all(r['identical'] for r in rows) and sizing_totals_equal
     ruling = None
     if identity_pin_ruling:
         allowed = {
@@ -168,7 +220,7 @@ def compare(root, *, identity_pin_ruling=False):
         registration_delta = ns['differences'](reg_before, reg_after)
         assert {leaf['path'] for leaf in registration_delta} == {
             'payload/bounded_carry/contract/code/' + name for name in changed_code}
-        accepted = all(row['before_bytes'] == row['after_bytes'] and all(
+        accepted = sizing_totals_equal and all(row['before_bytes'] == row['after_bytes'] and all(
             leaf['path'] in allowed and leaf['kind'] == 'pins' and leaf['delta'] == 0
             and isinstance(leaf['before'], str) and isinstance(leaf['after'], str)
             and re.fullmatch('[0-9a-f]{64}', leaf['before'])
@@ -179,9 +231,10 @@ def compare(root, *, identity_pin_ruling=False):
                              for name in sorted(changed_code)},
             'allowed_paths': sorted(allowed), 'registration_delta': registration_delta}
     save(evidence / 'g2-exact-comparison.json', {'rows': rows, 'identical': all(r['identical'] for r in rows),
+        'accepted': accepted, 'binding_checks': bindings,
         'identity_pin_ruling': ruling,
         'audit_limits_before': before['audit_limits'], 'audit_limits_after': after['audit_limits'],
-        'sizing_totals_equal': before['sizing_totals'] == after['sizing_totals'],
+        'sizing_totals_equal': sizing_totals_equal,
         'registration_before_sha256': before['registration_sha256'],
         'registration_after_sha256': after['registration_sha256'],
         'comparison_source_sha256': sha(source.read_bytes())})

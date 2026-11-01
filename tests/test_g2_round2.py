@@ -267,15 +267,20 @@ def test_unmocked_all_dry_run_builds_two_synthetic_projects(sizing_fixture, tmp_
     monkeypatch.setattr(builder.api, "CORE_SCHEMA_PATH", inputs["schema_path"])
     manifest = tmp_path / "two-projects.yaml"
     manifest.write_text(yaml.safe_dump({"profile": "neutral", "projects": {
-        project: {"sources": [{"id": "source", "processed_file": "source.txt", "source_type": "documentation"}]}
+        project: {"bundle": registration["inputs"]["bundle"]["path"],
+                  "sources": [{"id": "source", "processed_file": "source.txt", "source_type": "documentation"}]}
         for project in ("SYNTHETIC_ONE", "SYNTHETIC_TWO")}}))
     output = tmp_path / "dry-output"
     args = ["--all", "--source-manifest", str(manifest), "--label", "round2", "--dry-run",
         "--output-dir", str(output), "--profile", "neutral", "--max-paths", "80",
         "--max-inventory-bytes", "12288", "--max-workers", "4", "--aggregate-input-tokens", "4000000"]
-    for option, key in [("--bundle", "bundle"), ("--chunk-manifest", "chunk_manifest"), ("--context-file", "context")]:
-        args += [option, registration["inputs"][key]["path"]]
+    args += ["--context-dir", str(tmp_path)]
+    from data_sheets_schema.chunking import manifest_for
+    chunk_path = manifest_for(Path(registration["inputs"]["bundle"]["path"]), source_manifest=manifest)
+    chunk_path.parent.mkdir(parents=True, exist_ok=True)
+    chunk_path.write_bytes(inputs["manifest"])
     for project in ("SYNTHETIC_ONE", "SYNTHETIC_TWO"):
+        (tmp_path / f"{project.lower()}_omission_context.json").write_bytes(inputs["context"])
         directory = tmp_path / project
         directory.mkdir()
         for key, suffix in [("full", "full"), ("core", "core"), ("receipt", "coverage_receipt")]:

@@ -8,6 +8,7 @@ from __future__ import annotations
 from copy import deepcopy
 import hashlib
 import json
+from pathlib import Path
 import re
 import unicodedata
 from typing import Any
@@ -57,11 +58,13 @@ def _sources(catalog: dict) -> dict:
                 if not isinstance(annotation, str) or not annotation.strip():
                     raise ValueError("BC1 term-source annotation requires explicit source names")
                 # schema_digest.term_sources_of preserves the declared display
-                # text (it does not tokenize it). Keep the existing list grammar,
-                # allowing labels such as "EDAM Data" without inventing CURIEs.
-                if any(unicodedata.category(c) == "Cc" for c in annotation):
+                # text (it does not tokenize it). Only comma/semicolon delimit
+                # labels; an Oxford-list conjunction belongs to the last item.
+                if any(unicodedata.category(c) in {"Cc", "Cf", "Zl", "Zp"} for c in annotation):
                     raise ValueError("BC1 term-source annotation has unsupported source syntax")
-                names = [v.strip() for v in re.split(r",|;|\s+and\s+", annotation)]
+                names = [v.strip() for v in re.split(r",|;", annotation)]
+                if len(names) > 1 and names[-1].startswith("and "):
+                    names[-1] = names[-1][4:].strip()
                 if any(not v for v in names):
                     raise ValueError("BC1 term-source annotation has unsupported source syntax")
                 basis = "schema_annotation"
@@ -82,6 +85,7 @@ def _schema_pin(snapshot) -> dict:
 def derive_term_policy(*, selection: dict, context_raw: bytes, schema_snapshot) -> dict | None:
     """Derive only from the complete captured registration and captured bytes."""
     from . import audit_omissions as om
+    from .profiles import profile_named
     if (type(selection) is not dict or type(selection.get("bounded_carry")) is not dict
             or type(selection["bounded_carry"].get("version")) is not int
             or selection["bounded_carry"]["version"] != 1):
@@ -92,6 +96,13 @@ def derive_term_policy(*, selection: dict, context_raw: bytes, schema_snapshot) 
             or not isinstance(profile["name"], str) or not profile["name"].strip()
             or not isinstance(profile["basis"], str) or not profile["basis"].strip()):
         raise ValueError("BC1 requires the explicit captured profile authority")
+    declared_pin = profile_named(profile["name"]).pin_path
+    vocabulary = profile["vocabulary"]
+    if ((declared_pin is None) != (vocabulary is None)
+            or (vocabulary is not None and (not isinstance(vocabulary, dict)
+                or vocabulary.get("path") != str(Path(declared_pin).absolute())
+                or not vocabulary.get("sha256")))):
+        raise ValueError(f"BC1 profile {profile['name']!r} vocabulary pin differs from its declared profile")
     pin = inputs.get("context", {})
     if pin.get("sha256") != _sha(context_raw) or pin.get("bytes") != len(context_raw):
         raise ValueError("BC1 omission context differs from its registered byte pin")
@@ -111,11 +122,13 @@ def derive_term_policy(*, selection: dict, context_raw: bytes, schema_snapshot) 
         return None
     if context["vocabulary"] != {}:
         raise ValueError("BC1 neutral context may not inject an undeclared vocabulary")
+    sources = _sources(catalog)
+    _require_identifier_forms(sources)
     policy = {"format": FORMAT, "profile": profile,
               "context_sha256": _sha(context_raw),
               "context_canonical_sha256": _sha(_canonical(context)),
               "schema_catalog_sha256": _sha(_canonical(catalog)),
-              "schema_sources": catalog["sources"], "external_terms": _sources(catalog),
+              "schema_sources": catalog["sources"], "external_terms": sources,
               "contract": contract_identity()}
     validate_term_policy(policy, catalog=catalog, context=context)
     return policy
@@ -142,6 +155,21 @@ def validate_term_policy(policy: dict, *, catalog: dict, context: dict) -> None:
             or policy["external_terms"] != _sources(catalog)
             or policy["contract"] != contract_identity()):
         raise ValueError("BC1 term policy differs from its captured schema/context derivation")
+    _require_identifier_forms(policy["external_terms"])
+
+
+def _curie_prefixes(source: str) -> tuple[str, ...]:
+    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9._-]*", source):
+        return ()
+    return (source, "MESH") if source == "MeSH" else (source,)
+
+
+def _require_identifier_forms(terms: dict) -> None:
+    for slots in terms.values():
+        for declaration in slots.values():
+            for source in declaration["sources"]:
+                if not _curie_prefixes(source) and not _IRI.get(source):
+                    raise ValueError(f"BC1 term source {source!r} has no accepted identifier form")
 
 
 def permits_unbound_slot(policy: dict, cls: str, field: str) -> bool:
@@ -156,7 +184,7 @@ def validate_term_value(value: Any, *, policy: dict, cls: str, field: str) -> No
         raise ValueError("BC1 controlled term requires a declared external source identifier")
     sources = policy["external_terms"].get(cls, {}).get(field, {}).get("sources", [])
     for source in sources:
-        prefixes = (source, "MESH") if source == "MeSH" else (source,)
+        prefixes = _curie_prefixes(source)
         if any(value.startswith(prefix + ":") and len(value) > len(prefix) + 1 for prefix in prefixes):
             return
         if any(value.startswith(prefix) and len(value) > len(prefix) for prefix in _IRI.get(source, ())):
