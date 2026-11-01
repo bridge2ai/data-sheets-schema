@@ -16,6 +16,7 @@ from click.testing import CliRunner
 import pytest
 
 from data_sheets_schema import api_runner as api, run_lock, shared_generation as sg, usage_ledger as ledger
+from data_sheets_schema import latch_journal
 from data_sheets_schema.cli import cli
 from tests.test_generation_manifest_identity import external
 from tests.test_shared_generation_cli import registered, roster, batch, stub_plan, module
@@ -99,14 +100,14 @@ def no_execution(monkeypatch, *, forbid_locks=True):
     monkeypatch.setattr(api, '_save_progress', forbidden)
     monkeypatch.setattr(api, '_snapshot', forbidden)
     monkeypatch.setattr(api, '_execute', forbidden)
-    monkeypatch.setattr(FileLock, 'acquire', forbidden)
     monkeypatch.setattr(run_lock, 'acquire', forbidden)
     monkeypatch.setattr(run_lock, 'release', forbidden)
     monkeypatch.setattr(module, '_write_verdict', forbidden)
     if forbid_locks:
+        monkeypatch.setattr(FileLock, 'acquire', forbidden)
         monkeypatch.setattr(api, '_exclusive_run', forbidden)
-    # The inside-lock test exempts only its explicit no-real-lock simulation;
-    # all real FileLock, transport and run-publication paths remain trapped.
+    # The inside-lock test uses real physical exclusion; transport and
+    # run-publication paths remain trapped in both modes.
     return seen
 
 
@@ -145,17 +146,21 @@ def test_public_execute_rechecks_owner_inside_lock_before_date_restore(registere
     base, reg = registered
     spec = selected_spec(base, reg)
     live_account(spec)
+    with ledger.exclusive_run(spec):
+        latch_journal.start_launch(spec)
     calls = []
     observed = {}
+    exclusive = api._exclusive_run
     @contextmanager
     def acquire(current):
-        calls.append('acquired')
-        inject_foreign_account(current, label='changed-during-lock-admission')
-        observed.update(tree(tmp_path))
-        try:
-            yield
-        finally:
-            calls.append('released')
+        with exclusive(current):
+            calls.append('acquired')
+            inject_foreign_account(current, label='changed-during-lock-admission')
+            observed.update(tree(tmp_path))
+            try:
+                yield
+            finally:
+                calls.append('released')
     monkeypatch.setattr(api, '_exclusive_run', acquire)
     monkeypatch.setattr(api, '_restore_resume_date', lambda *a: pytest.fail('foreign owner reached date restoration'))
     seen = no_execution(monkeypatch, forbid_locks=False)
@@ -171,6 +176,8 @@ def test_matching_owner_preserves_actual_automatic_date_recovery(registered, tmp
     spec = replace(selected_spec(base, reg), run_date=api.AUTO)
     assert spec._automatic_run_date == spec.run_date
     live_account(spec, run_date='2001-02-03')
+    with ledger.exclusive_run(spec):
+        latch_journal.start_launch(spec)
     spec.__dict__['instruction'] = 'cached current-day instruction must be discarded'
     before = tree(tmp_path)
     authorities = selected_authorities(spec)

@@ -163,7 +163,12 @@ def test_intent_persistence_failure_prevents_the_paid_call(tmp_path, monkeypatch
 @pytest.mark.parametrize("phase", ["full", "repair_full", "report_after_repair", "full_readdress"])
 def test_response_persistence_failure_blocks_the_next_invocation(tmp_path, monkeypatch, phase):
     s = spec(out_dir=tmp_path)
-    ledger.prepare_usage(s, resume=False)
+    # These private phases run after public startup in production. Establish
+    # that real launch before injecting a response/checkpoint storage failure.
+    from data_sheets_schema.latch_journal import start_launch
+    with ledger.exclusive_run(s):
+        start_launch(s)
+        ledger.prepare_usage(s, resume=False)
     body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
     s.full_path.write_text(body)
     s.core_path.write_text(body)
@@ -707,7 +712,8 @@ def test_new_identity_in_a_shared_directory_starts_its_own_generation(tmp_path, 
     old.report_path.write_text("# Report\n")
     # Positive per-artifact ownership, not a foreign run field excusing every
     # unrelated file in the directory (D69 round-three review finding 3).
-    prior["outputs"] = {str(path): {"path": str(path)}
+    from data_sheets_schema.provenance import _hashed_artifact
+    prior["outputs"] = {str(path): _hashed_artifact(path)
                         for path in (old.full_path, old.core_path, old.report_path)}
     old.provenance_path.write_text(yaml.safe_dump(prior))
     api._record_incomplete_stream(old, "full", 1, "2026-09-11T00:00:00Z", {}, [])
