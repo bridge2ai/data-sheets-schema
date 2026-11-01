@@ -22,7 +22,8 @@ from tests.test_manifest_corpus_root import project_tree  # noqa: F401
 
 @pytest.mark.parametrize("record_cwd", ["nested", "root"])
 @pytest.mark.parametrize("explicit_date", [False, True])
-def test_record_with_condition_after_render_in_subdirectory(project_tree, monkeypatch, record_cwd, explicit_date):
+@pytest.mark.parametrize("explicit_chunk", [False, True])
+def test_record_with_condition_after_render_in_subdirectory(project_tree, monkeypatch, record_cwd, explicit_date, explicit_chunk):
     root, manifest, bundle = project_tree
     monkeypatch.chdir(root)
     chunks, _ = chunking.write_manifest_for(bundle)
@@ -31,7 +32,7 @@ def test_record_with_condition_after_render_in_subdirectory(project_tree, monkey
     nested.mkdir()
     monkeypatch.chdir(nested)
     spec = _spec("CLINICAL_X", "baseline", "external_run", "generic_v9", bundle=bundle,
-        manifest=manifest, runtime="Claude Code", provider="offline", chunk_manifest=chunks)
+        manifest=manifest, runtime="Claude Code", provider="offline", chunk_manifest=chunks if explicit_chunk else None)
     instruction = spec.instruction
     print("rendered spellings:", spec.bundle, spec.manifest, spec.chunk_manifest)
     prompt = root / "instruction.txt"
@@ -46,7 +47,8 @@ def test_record_with_condition_after_render_in_subdirectory(project_tree, monkey
     monkeypatch.chdir(root if record_cwd == "root" else nested)
     result = CliRunner().invoke(cli, ["provenance", "record", "--manifest", str(manifest),
         "--project", spec.project, "--method", spec.method, "--label", spec.label,
-        "--input-bundle", str(bundle), "--chunk-manifest", str(chunks),
+        "--input-bundle", str(bundle),
+        *(["--chunk-manifest", str(chunks)] if explicit_chunk else []),
         "--condition", spec.condition, "--runtime", spec.runtime, "--provider", "offline",
         "--prompt-text", str(prompt),
         *[arg for path in spec.prompt_files for arg in ("--prompt", str(resource_path(path)))],
