@@ -120,6 +120,7 @@ def test_copied_dependency_refuses_before_any_lock_or_writer(registered, tmp_pat
     spec = selected_spec(base, reg)
     assert authority.resolve() in {path.resolve() for path in closure.resource_paths((spec,))}
     if entry == 'public':
+        usage_ledger.prepare_usage(spec, resume=False)
         destination = usage_ledger.output_locks((spec.full_path,))[0][1]
     else:
         roster_path, _ = roster(base, reg, count=1)
@@ -194,6 +195,7 @@ def test_both_record_import_roots_refuse_before_actual_entrypoint_writes(registe
     spec = selected_spec(base, reg)
     authority = logical_import if side == 'logical' else target_import
     if entry == 'public':
+        usage_ledger.prepare_usage(spec, resume=False)
         destination = usage_ledger.output_locks((spec.full_path,))[0][1]
     else:
         roster_path, _ = roster(base, reg, count=1)

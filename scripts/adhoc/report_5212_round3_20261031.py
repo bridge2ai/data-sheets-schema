@@ -56,6 +56,8 @@ for name in args.phases:
     phases.append({"name": name, "head": result["environment"]["head"], "final": final,
         "exit_code": result["exit_code"], "selected": len(result["selected"]),
         "call_outcomes": dict(counts), "skipped": len(skips),
+        "skipped_nodes": [{"nodeid": row["nodeid"], "message": relative(row.get("message", ""))}
+                          for row in skips],
         "collection_errors": result["collection_errors"],
         "failures": [{**r, "message": relative(r.get("message", ""))} for r in failures],
         "command": [relative(s) for s in result["command"]],
@@ -90,7 +92,8 @@ lines = [f"# D68–D70 / D73 round-three implementation: `{head}`", "",
       for row in integration_merges],
     "All validation below uses complete pinned git archives with isolated HEAD/index metadata and local object alternates. "
     "The pinned FAIRSCAPE submodule is restored from local Git. Provider keys are removed; the OS sandbox blocks external network. "
-    "Tests run serially except the single requested ordinary xdist shard and its one-node canary. "
+    "Test phases run serially; ordinary-shard phases use four xdist workers after a one-node canary. "
+    "Each pinned head's D68 shard is selected using the actual CI plugin and timing file. "
     "The local platform is macOS/Python 3.13.12, not GitHub's Ubuntu/Python 3.12.", "",
     "Commits since the reviewed merge:", "", *[f"- `{item}`" for item in summary["commits"]], "",
     "| Finding | Disposition |", "|---|---|",
@@ -151,6 +154,18 @@ lines += ["", "Phase counts overlap; they are not summed as unique tests. Raw re
     "The renamed zero-cost control states that scope. A new journal-less legacy-label case "
     "requires refusal, no lock acquisition/dispatch and an unchanged tree. No guard is mocked. "
     "The original full batch-cost file is retained as batch-base evidence on c9567e3c3.", "",
+    "The main merge changed the CI assignment of the D68 file from shard 4/4 to 3/4. "
+    "That newly selected shard exposed fifteen further fixture interactions: one selected "
+    "shape-repair control, twelve public copied-resource alias parameters and two public "
+    "schema-import-root alias parameters. They now initialize real guarded accounting before "
+    "creating the output or hardlink. All original request-scope, alias-refusal, trapped-writer "
+    "and byte-preservation assertions remain. The failures-base phase reruns their original "
+    "nodes, together with the eight publication failures, on c9567e3c3.", "",
+    "Publication-fixture tests attempt git push to a local bare repository. The required "
+    "offline Git wrapper refuses that command with exit status 125 before Git executes it. "
+    "Those eight tests are left unchanged, and the restriction is not relaxed. They remain "
+    "unverified under this invocation's explicit no-remote-Git-command rule; their reviewed-base "
+    "failures are retained separately from the guarded-fixture regressions.", "",
     "Final-archive artifact censuses (separate runs can overlap):", ""]
 for census_row in artifact_censuses:
     lines.append(f"- `{census_row['phase']}/{census_row['case']}`: "
@@ -168,10 +183,23 @@ for label in ("before", "after"):
 lines += ["- Round-three per-record eligibility changes: 0. V8 comparator changes: 0.", "",
     "Remaining failures in final-commit phases:", ""]
 remaining = [r for p in phases if p["final"] for r in p["failures"]]
-lines += [f"- `{r['nodeid']}` ({r['when']}): {r['message']}" for r in remaining] or ["None."]
+for row in remaining:
+    baselines = [phase["name"] for phase in phases if not phase["final"]
+        and phase["head"].startswith("c9567e3c3")
+        and any(failure["nodeid"] == row["nodeid"] for failure in phase["failures"])]
+    lines.append(f"- `{row['nodeid']}` ({row['when']}): {row['message']} "
+                 f"Reviewed-base failure evidence: {', '.join(baselines) or 'none'}.")
+if not remaining:
+    lines.append("None.")
+skipped_groups = Counter((row["nodeid"].split("::", 1)[0], row["message"])
+    for phase in phases if phase["final"] for row in phase["skipped_nodes"])
+if skipped_groups:
+    lines += ["", "Skipped final-commit cases (phase counts may overlap):", ""]
+    lines += [f"- {count} in `{path}`: {reason}" for (path, reason), count in skipped_groups.items()]
 lines += ["", "No protected source pins, shared_generation.py, live data/ runs, ATTIC or STATUS were edited. "
-    "No provider, network, remote Git, push or gh operation was used. "
-    "Only one ordinary shard of four was requested; the other shards and the actual CI platform remain unverified locally.", ""]
+    "No provider, external network, actual remote Git, actual push or gh operation was used. "
+    "Only the ordinary shard containing the D68 file is run for the final commit; other "
+    "final-commit shards and the actual CI platform remain unverified locally.", ""]
 if REPORT.exists():
     prior = REPORT.read_bytes()
     backup = SCRATCH / ("report-before-round3-" + hashlib.sha256(prior).hexdigest()[:12] + ".md")

@@ -153,3 +153,14 @@ row tests retain their exact cost assertions on a guarded generation displaying
 legacy-shaped rows; the zero-cost case is renamed to state that scope. A new
 journal-less legacy-label case instead requires refusal, no batch lock, no
 dispatch and an unchanged tree. No guard is mocked or relaxed.
+
+After main's test additions changed the shard assignment, the ordinary shard
+holding this file exposed fifteen further fixture interactions. The selected
+shape-repair control in `test_shared_generation_scope_context.py` initializes
+guarded accounting before writing its full-record fixture. In
+`test_shared_generation_resources.py`, the twelve public copied-resource
+parameters and two public imported-schema-root parameters initialize guarded
+accounting before creating their authority/lock hardlinks. Their exact repair
+request, alias-refusal, trapped-writer and unchanged-byte assertions remain.
+This setup exercises those downstream guards without bypassing D69's earlier
+refusal of unguarded output or lock residue.

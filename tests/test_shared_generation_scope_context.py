@@ -105,6 +105,7 @@ def test_real_regate_helper_preserves_scope_and_selected_report_instruction(sele
 
 
 def test_selected_shape_repair_adds_only_scope_metadata(selected, monkeypatch):
+    ledger.prepare_usage(selected, resume=False)
     selected.full_path.parent.mkdir(parents=True, exist_ok=True)
     selected.full_path.write_text(RECORD)
     errors = ['synthetic shape finding']
