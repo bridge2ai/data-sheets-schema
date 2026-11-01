@@ -1624,9 +1624,9 @@ def registered_input_paths(selection: dict[str, Any] | None) -> bool:
     shared = selection.get("shared_generation_version")
     native = selection.get("native_source_attribution_version")
     return (selection.get("registered_input_paths") is True
-            or (type(shared) is int and shared in (1, 2)
+            or (type(shared) is int and shared != 0
              and selection.get("shared_generation_registration") is not None)
-            or (type(native) is int and native == 1))
+            or (type(native) is int and native != 0))
 
 
 def build_record(project: str, method: str, label: str, *, mode: str,

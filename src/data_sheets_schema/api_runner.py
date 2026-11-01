@@ -585,6 +585,8 @@ class RunSpec:
     # shared generation/native attribution. A spelling contract only; it
     # grants no execution authority and changes none of their identity gates.
     registered_input_paths: bool = False
+    _registered_input_spellings: tuple[tuple[str, str | None], ...] | None = field(
+        default=None, init=False, repr=False)
     _shared_generation_capture: Any = field(default=None, init=False, repr=False)
     _replay_only: bool = field(default=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
@@ -741,6 +743,13 @@ class RunSpec:
             parse_registration(self.shared_generation_registration.encode("utf-8"))
             if not self._replay_only:
                 capture(self)
+        if not self._replay_only and provenance.registered_input_paths(vars(self)):
+            # Keep the validated literal substitutions independent of later
+            # mutations to either the input fields or the binding selectors.
+            # This private execution anchor is never part of a render spec.
+            self._registered_input_spellings = tuple(
+                (name, None if getattr(self, name) is None else str(getattr(self, name)))
+                for name in ("bundle", "manifest", "chunk_manifest"))
 
     def _select_profile(self) -> None:
         from data_sheets_schema.profiles import select_profile
@@ -3003,12 +3012,31 @@ def _carry_sizes(spec: RunSpec) -> tuple[dict[str, int], str]:
                    f"records for this project ({source})")
 
 
+def _require_registered_input_spellings(spec: RunSpec) -> None:
+    """Refuse changed bound inputs without normalizing or re-rendering them."""
+    if spec._replay_only:
+        return  # Historical inspection retains its literal recorded substitutions.
+    bound = spec._registered_input_spellings
+    if bound is None:
+        if provenance.registered_input_paths(vars(spec)):
+            raise ValueError("registered inputs have no construction binding; "
+                             "construct a new validated RunSpec")
+        return
+    changed = [name for name, original in bound
+               if (None if getattr(spec, name) is None else str(getattr(spec, name))) != original]
+    if changed:
+        raise ValueError("registered input spelling changed after construction: "
+                         + ", ".join(changed) + "; construct a new validated RunSpec")
+
+
 def plan(spec: RunSpec) -> dict[str, Any]:
     """Render every phase without calling the API.
 
     Lets the whole assembly — prompt resolution, caching layout, token cost — be
     inspected and tested without a key or a charge.
     """
+    # Public batch planning precedes even its control-lock filesystem writes.
+    _require_registered_input_spellings(spec)
     settings = _model_settings(spec.condition)
     spec.bind_api_header_values(settings)
     if spec.shared_generation_version:
@@ -6926,6 +6954,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     """
     if spec._replay_only:
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
+    _require_registered_input_spellings(spec)
     if dry_run:
         return plan(spec)
     if spec.render_version in (24,):  # membership is also derived by the execution-policy audit

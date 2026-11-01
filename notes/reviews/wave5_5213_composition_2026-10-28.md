@@ -11,12 +11,23 @@ whose blobs are identical to the corresponding main blobs:
 module with three packet-only tests appended, and adds the composition helper.
 This imports reviewed upstream behavior; it is not merely conflict-marker removal.
 
-The merge message also overcounts the superseded helper pins. **Only one
-manifest**, `notes/reviews/wave5_5213_validation_2026-10-28/manifest.json`,
+In `87dd26182603614a16b4832ea58faf63b6f10fc2`'s own tree, only one
+manifest, `notes/reviews/wave5_5213_validation_2026-10-28/manifest.json`,
 pins helper blob `f9b2e3bd66563ef58989f0b395f35e20bdd1dcf7`. The three
 manifests inherited from main pin retained helper blob
-`09c84644d1a372e36a2dacaf3b001117cb220e06`. Historical evidence and commit
-messages are preserved; this dated correction supersedes the inaccurate count.
+`09c84644d1a372e36a2dacaf3b001117cb220e06`.
+
+Main `14a527b7a`, merged at `c02a2b1eb`, later adds three more manifests
+pinning `f9b2e3bd`:
+
+- `notes/wave5_5211_validation_2026-10-28/manifest.json`
+- `notes/wave5_d52_publication_validation_2026-10-28/manifest.json`
+- `notes/wave5_evaluation_validation_2026-10-28/manifest.json`
+
+At source `0460a69d8982b8acea8e0c370439cfe65495586e`,
+four manifests pin `f9b2e3bd` and three pin `09c84644`. The earlier
+one-manifest count describes 87dd's tree, not every later descendant.
+Historical evidence and commit messages remain unchanged.
 
 The earlier results below apply to their original frozen composition, not to
 the later D76 fixes or their validation.

@@ -663,10 +663,10 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             current = _make_run_spec(candidate_date)
             yield current
             current_literal = current.render_spec()
-            # Recording may happen at the corpus root after rendering in a
-            # subdirectory. Keep the current CLI spelling first, then replay
-            # the supplied input spelling. Only the complete instruction SHA
-            # can admit this alternative; no input bytes or hashes are changed.
+            # Recording and rendering may run on either side of the corpus
+            # root/subdirectory boundary. Keep the current CLI spelling first,
+            # then the supplied inputs and their bounded owner counterparts.
+            # Only the complete instruction SHA can admit an alternative.
             literal = dict(current_literal)
             literal.update(
                 bundle=str(bundle) if bundle is not None else None,
@@ -674,30 +674,34 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             )
             if chunk_manifest is not None:
                 literal["chunk_manifest"] = str(chunk_manifest)
-            if _ARMS[arm][3] == RunSpec.__dataclass_fields__["manifest_line"].default:
-                literal["manifest_line"] = RunSpec.header_for_manifest(selected_manifest)
             discovered = literal.get("chunk_manifest")
-            # With discovery, the nested renderer froze an absolute chunk
-            # locator too. Try only its one known-owner lexical counterpart,
-            # never a filesystem search; both candidates remain SHA-gated.
-            chunk_spellings = (_backfill_input_spellings(
+            bundle_spellings = _backfill_input_spellings(
+                Path(bundle) if bundle is not None else None, current._corpus_root)
+            manifest_spellings = _backfill_input_spellings(selected_manifest, current._corpus_root)
+            # Explicit and discovered chunk locators need the same bounded
+            # counterpart. Never search for another file or resolve symlinks.
+            chunk_spellings = _backfill_input_spellings(
                 Path(discovered) if discovered is not None else None, current._corpus_root)
-                if chunk_manifest is None else (Path(chunk_manifest),))
             # The nested renderer also froze absolute output destinations.
             # Change their spelling together, only within the known owner;
             # every complete instruction still has to match the supplied SHA.
             destination_choices = _record_artifact_spellings(
                 literal.get("agentic_artifact_paths"), current._corpus_root)
             seen = [current_literal]
-            for candidate_chunk in chunk_spellings:
-                for destinations in destination_choices:
-                    candidate = {**literal, "chunk_manifest": str(candidate_chunk)
-                                 if candidate_chunk is not None else None}
-                    if destinations is not None:
-                        candidate["agentic_artifact_paths"] = destinations
-                    if candidate not in seen:
-                        seen.append(candidate)
-                        yield RunSpec.from_render_spec(candidate, project=project, method=method, label=label)
+            from itertools import product
+            for candidate_bundle, candidate_manifest, candidate_chunk, destinations in product(
+                    bundle_spellings, manifest_spellings, chunk_spellings, destination_choices):
+                candidate = {**literal,
+                             "bundle": str(candidate_bundle) if candidate_bundle is not None else None,
+                             "manifest": str(candidate_manifest) if candidate_manifest is not None else None,
+                             "chunk_manifest": str(candidate_chunk) if candidate_chunk is not None else None}
+                if _ARMS[arm][3] == RunSpec.__dataclass_fields__["manifest_line"].default:
+                    candidate["manifest_line"] = RunSpec.header_for_manifest(candidate_manifest)
+                if destinations is not None:
+                    candidate["agentic_artifact_paths"] = destinations
+                if candidate not in seen:
+                    seen.append(candidate)
+                    yield RunSpec.from_render_spec(candidate, project=project, method=method, label=label)
 
         target_sha = (hashlib.sha256(supplied_text.encode("utf-8")).hexdigest()
                       if supplied_text is not None else None)
@@ -882,9 +886,10 @@ def _record_artifact_spellings(
 def _backfill_input_spellings(value: Path | None, owner: Path | None) -> tuple[Path | None, ...]:
     """Bounded lexical candidates; only the complete original hash admits one.
 
-    An unknown owner is not inferred from cwd. Never resolve symlinks, erase
-    traversal components or search disk for a replacement. Original spellings
-    remain candidates, including explicit historical spellings containing '..'.
+    The caller supplies the owner; this helper never infers one. The recorder's
+    RunSpec may use cwd as that owner when no manifest selects a corpus. Never
+    resolve symlinks, erase traversal components or search disk for a replacement.
+    Original spellings remain candidates, including historical '..' spellings.
     """
     if value is None:
         return (None,)
