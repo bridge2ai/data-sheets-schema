@@ -28,7 +28,35 @@ def main():
     parser.add_argument("scratch", type=Path)
     parser.add_argument("byte_root", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--verify-capture", choices=("before", "after"))
     args = parser.parse_args()
+    if args.verify_capture:
+        side = args.verify_capture
+        capture_path = args.byte_root / ".bc1-byte-evidence" / side / "capture.json"
+        capture = read(capture_path)
+        assert not capture["errors"] and len(capture["payloads"]) == 20
+        pins = []
+        for pin in capture["payloads"].values():
+            pins.append(pin)
+            for key in ("host_packet", "host_request"):
+                if key in pin:
+                    pins.append(pin[key])
+        for pin in pins:
+            raw = (args.byte_root / pin["path"]).read_bytes()
+            assert raw and len(raw) == pin["bytes"] and hashlib.sha256(raw).hexdigest() == pin["sha256"]
+        registration = capture_path.with_name("registration.json").read_bytes()
+        assert capture["registration_sha256"] == hashlib.sha256(registration).hexdigest()
+        if side == "before":
+            previous = read(args.scratch / "byte-proof-round1-retained/.bc1-byte-evidence/before/capture.json")
+            assert previous["payloads"].keys() == capture["payloads"].keys()
+            assert all(previous["payloads"][name]["sha256"] == pin["sha256"] for name, pin in capture["payloads"].items())
+        value = {"condition": side, "payloads": 20, "checked_pins": len(pins),
+                 "reproduces_round1_base": side == "before", "registration_sha256": capture["registration_sha256"],
+                 "capture_sha256": hashlib.sha256(capture_path.read_bytes()).hexdigest()}
+        args.output.write_text(json.dumps(value, indent=2) + "\n")
+        assert read(args.output) == value
+        print(json.dumps(value))
+        return
     units = {}
     for result in sorted(args.scratch.glob("*/result.json")):
         units[result.parent.name] = {**read(result), "path": str(result),
