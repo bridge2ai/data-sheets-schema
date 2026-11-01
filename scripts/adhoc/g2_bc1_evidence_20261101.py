@@ -114,15 +114,47 @@ def compare(root):
         rows.append({'name': name, 'before_sha256': sha(a), 'after_sha256': sha(b),
             'before_bytes': len(a), 'after_bytes': len(b), 'identical': a == b, 'differences': leaves})
     save(evidence / 'g2-exact-comparison.json', {'rows': rows, 'identical': all(r['identical'] for r in rows),
+        'audit_limits_before': before['audit_limits'], 'audit_limits_after': after['audit_limits'],
+        'sizing_totals_equal': before['sizing_totals'] == after['sizing_totals'],
+        'registration_before_sha256': before['registration_sha256'],
+        'registration_after_sha256': after['registration_sha256'],
         'comparison_source_sha256': sha(source.read_bytes())})
     for row in rows:
         print(row['name'], row['identical'], row['before_sha256'], row['after_sha256'], flush=True)
     return 0 if all(r['identical'] for r in rows) else 1
 
 
+def summary(root):
+    import collections
+    import xml.etree.ElementTree as ET
+    document = json.loads((root / 'byte-proof/.bc1-byte-evidence/g2-exact-comparison.json').read_bytes())
+    rows = document['rows']
+    print('Payloads:', len(rows), 'identical:', sum(row['identical'] for row in rows))
+    for row in rows:
+        print(row['name'], row['before_bytes'], row['after_bytes'],
+              collections.Counter(leaf['kind'] for leaf in row['differences']))
+        if row['differences']:
+            print('  leaves:', [leaf['path'] for leaf in row['differences']])
+    print('Audit limits:', document['audit_limits_before'])
+    print('Sizing totals identical:', document['sizing_totals_equal'])
+    for xml in sorted(root.glob('*.xml')):
+        tree = ET.parse(xml)
+        print(xml.name, [suite.attrib for suite in tree.iter('testsuite')])
+    for module, variable in [('shared_generation.py', 'ROUTING_CODE'), ('bc1_selection.py', 'EXTRA_CODE')]:
+        tree = ast.parse(git('show', BASE + ':src/data_sheets_schema/' + module))
+        value = next(node.value for node in tree.body if isinstance(node, ast.Assign)
+            and any(isinstance(t, ast.Name) and t.id == variable for t in node.targets))
+        changed = []
+        for path in ast.literal_eval(value):
+            old, new = git('show', BASE + ':' + path), (ROOT / path).read_bytes()
+            if old != new:
+                changed.append({'path': path, 'before': sha(old), 'after': sha(new)})
+        print(variable, changed)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=['archive', 'proposal', 'compare'])
+    parser.add_argument('action', choices=['archive', 'proposal', 'compare', 'summary'])
     parser.add_argument('path', type=Path)
     parser.add_argument('--ref', default='HEAD')
     parser.add_argument('--refresh', action='store_true')
@@ -131,5 +163,7 @@ if __name__ == '__main__':
         archive(args.ref, args.path.resolve(), refresh=args.refresh)
     elif args.action == 'proposal':
         proposal(args.path)
-    else:
+    elif args.action == 'compare':
         raise SystemExit(compare(args.path))
+    else:
+        summary(args.path)
