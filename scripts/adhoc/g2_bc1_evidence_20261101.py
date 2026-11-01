@@ -85,6 +85,36 @@ def proposal(output):
     print(output, sha(patch), sha(candidate), flush=True)
 
 
+def metadata(dest):
+    """Give an existing scratch archive exact, detached local Git history.
+
+    Some ordinary-lane tests read the planning commit. No checkout, source
+    mutation, branch update, remote, or copy of live worktree contents occurs.
+    """
+    dest = dest.resolve()
+    assert dest.is_relative_to(ROOT.parent / 'scratch-g2')
+    marker = json.loads((dest / '.g2-archive.json').read_bytes())
+    commit = marker['commit']
+    assert git('rev-parse', commit).decode().strip() == commit
+    assert not (dest / '.git').exists(), 'metadata already exists'
+    subprocess.run(['git', 'init', '--quiet', str(dest)], env=ENV, check=True)
+    common = Path(git('rev-parse', '--git-common-dir').decode().strip())
+    objects = (ROOT / common / 'objects').resolve()
+    assert objects.is_dir()
+    (dest / '.git/objects/info/alternates').write_text(str(objects) + '\n')
+    subprocess.run(['git', '-C', str(dest), 'update-ref', '--no-deref', 'HEAD', commit],
+                   env=ENV, check=True)
+    subprocess.run(['git', '-C', str(dest), 'read-tree', commit], env=ENV, check=True)
+    actual = subprocess.check_output(['git', '-C', str(dest), 'rev-parse', 'HEAD'], env=ENV)
+    assert actual.decode().strip() == commit
+    symbolic = subprocess.run(['git', '-C', str(dest), 'symbolic-ref', '-q', 'HEAD'],
+                              env=ENV, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    assert symbolic.returncode == 1, 'scratch HEAD must be detached'
+    save(dest / '.g2-git-metadata.json', {'commit': commit, 'local_objects': str(objects),
+        'detached': True, 'working_files_written': False})
+    print(commit, 'detached local metadata', dest, flush=True)
+
+
 def compare(root, *, identity_pin_ruling=False):
     # Reuse the reviewed lossless expansion and exhaustive leaf comparison.
     # Its P4a-specific schema-change assertions/report are not a G2 byte proof.
@@ -190,7 +220,7 @@ def summary(root):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=['archive', 'proposal', 'compare', 'summary'])
+    parser.add_argument('action', choices=['archive', 'metadata', 'proposal', 'compare', 'summary'])
     parser.add_argument('path', type=Path)
     parser.add_argument('--ref', default='HEAD')
     parser.add_argument('--refresh', action='store_true')
@@ -198,6 +228,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.action == 'archive':
         archive(args.ref, args.path.resolve(), refresh=args.refresh)
+    elif args.action == 'metadata':
+        metadata(args.path)
     elif args.action == 'proposal':
         proposal(args.path)
     elif args.action == 'compare':
