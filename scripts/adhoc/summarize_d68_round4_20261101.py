@@ -27,6 +27,8 @@ for argument in sys.argv[1:]:
     writers = [json.loads(p.read_text()) for p in path.with_suffix('').rglob('writer-census.json')]
     results[path.stem] = {'exit_code': data['exit_code'], 'selected': len(data['selected']),
         'counts': dict(counts), 'collection_errors': data['collection_errors'],
+        'unfinished': sorted(set(data['selected']) - {row['nodeid'] for row in data['reports']
+            if row['when'] == 'call' or row['outcome'] != 'passed'}),
         'failures': failed, 'skips': skipped,
         'artifact_census_nodes': len(census), 'artifacts': sum(c['singletons'] for c in census),
         'refusal_checks': sum(c['refusal_checks'] for c in census),
