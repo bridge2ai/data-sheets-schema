@@ -92,6 +92,12 @@ class OfflinePopen(_Popen):
                 # Native controls intentionally whitelist the child environment.
                 # Carry the root's sanitization fact without modifying their dict.
                 kwargs['env'] = dict(kwargs['env'], G1_PROVIDER_KEYS_CLEARED='1')
+        # Nested pytest controls deliberately exercise child failures and their
+        # own collections. Only the outer session owns the acceptance ledgers.
+        child_env = dict(kwargs.get('env') if kwargs.get('env') is not None else os.environ)
+        for key in ('G1_TEST_FAILURES_PATH', 'G2_COLLECTED_PATH', 'G2_TEST_EVENTS_PATH'):
+            child_env.pop(key, None)
+        kwargs['env'] = child_env
         super().__init__(args, *positional, **kwargs)
 
 
