@@ -119,6 +119,14 @@ elif target in ('-V', '-VV', '--version'):
     raise SystemExit(subprocess.call([_python, '-S', target, *args]))
 elif target == 'pytest':
     import pytest
+    import json
+    # Evidence is outside the system under test. Bind its I/O and destinations
+    # before tests replace builtins.open or the environment to forbid product
+    # access; otherwise a passing no-I/O control can abort pytest's reporting.
+    evidence_open = open
+    evidence_dumps = json.dumps
+    evidence_paths = {key: os.environ.get(key) for key in
+                      ('G2_COLLECTED_PATH', 'G2_TEST_EVENTS_PATH', 'G1_TEST_FAILURES_PATH')}
     if any(a == '-n' or a.startswith('--numprocesses') for a in args) and 'xdist.plugin' not in args:
         # Autoload stays disabled; explicitly load the plugin only when a
         # nested CI-partition coverage test requests workers. Top-level runs
@@ -127,23 +135,20 @@ elif target == 'pytest':
 
     class ImmediateFailures:
         def pytest_collection_finish(self, session):
-            if os.environ.get('G2_COLLECTED_PATH'):
-                import json
-                Path(os.environ['G2_COLLECTED_PATH']).write_text(json.dumps(
-                    [item.nodeid for item in session.items], indent=2) + '\n')
+            if evidence_paths['G2_COLLECTED_PATH']:
+                with evidence_open(evidence_paths['G2_COLLECTED_PATH'], 'w') as output:
+                    output.write(evidence_dumps([item.nodeid for item in session.items], indent=2) + '\n')
 
         def pytest_runtest_logreport(self, report):
-            if os.environ.get('G2_TEST_EVENTS_PATH'):
-                import json
-                with open(os.environ['G2_TEST_EVENTS_PATH'], 'a') as output:
-                    output.write(json.dumps({'nodeid': report.nodeid, 'when': report.when,
+            if evidence_paths['G2_TEST_EVENTS_PATH']:
+                with evidence_open(evidence_paths['G2_TEST_EVENTS_PATH'], 'a') as output:
+                    output.write(evidence_dumps({'nodeid': report.nodeid, 'when': report.when,
                         'outcome': report.outcome, 'seconds': report.duration}) + '\n')
             if report.failed:
                 print('\nG1 immediate failure:', report.nodeid, '\n', report.longreprtext, flush=True)
-                if os.environ.get('G1_TEST_FAILURES_PATH'):
-                    import json
-                    with open(os.environ['G1_TEST_FAILURES_PATH'], 'a') as output:
-                        output.write(json.dumps({'nodeid': report.nodeid, 'when': report.when,
+                if evidence_paths['G1_TEST_FAILURES_PATH']:
+                    with evidence_open(evidence_paths['G1_TEST_FAILURES_PATH'], 'a') as output:
+                        output.write(evidence_dumps({'nodeid': report.nodeid, 'when': report.when,
                                                  'longrepr': report.longreprtext}) + '\n')
 
     raise SystemExit(pytest.main(args, plugins=[ImmediateFailures()]))

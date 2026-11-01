@@ -151,10 +151,11 @@ def ledger(root, output):
             failed_nodes.setdefault(row['nodeid'], []).append({'unit': unit.name,
                 'when': row['when'], 'signature': errors[-1] if errors else row['longrepr'].splitlines()[-1],
                 'trace_sha256': hashlib.sha256(row['longrepr'].encode()).hexdigest()})
+        xml = unit / 'junit.xml'
         skipped = [{'class': node.get('classname'), 'name': node.get('name'),
                     'reason': node.find('skipped').get('message')}
-                   for node in ET.parse(unit / 'junit.xml').iter('testcase')
-                   if node.find('skipped') is not None]
+                   for node in ET.parse(xml).iter('testcase')
+                   if node.find('skipped') is not None] if xml.exists() else []
         changes = subprocess.check_output(['git', 'diff', '--name-only',
             result['identity']['commit'], final_head], cwd=repo).decode().splitlines()
         hashes = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
@@ -163,11 +164,16 @@ def ledger(root, output):
         units[unit.name] = {'result': result, 'collected_count': len(nodes),
             'call_outcomes': dict(Counter(row['outcome'] for row in events if row['when'] == 'call')),
             'failed_reports': len(failures), 'skips': skipped, 'files_sha256': hashes,
+            'junit_present': xml.exists(),
+            'nodes_without_teardown': sorted(set(nodes) - {
+                row['nodeid'] for row in events if row['when'] == 'teardown'}),
             'changes_from_tested_commit_to_final': changes}
     assignment = json.loads((root / 'shard-assignment.json').read_bytes())
-    actual = json.loads((root / 'ordinary-shard/collected.json').read_bytes())
+    actual = json.loads((root / 'ordinary-shard-final/collected.json').read_bytes())
     assert set(actual) == set(assignment['selected_nodes'])
     assert any(node.startswith('tests/test_build_api_registrations.py::') for node in actual)
+    assert units['ordinary-shard-final']['junit_present']
+    assert not units['ordinary-shard-final']['nodes_without_teardown']
     outcomes = {}
     for name in units:
         path = root / name / 'events.jsonl'
