@@ -14,10 +14,12 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def complete_passing(reports):
-    """A success is exactly three passing phases, never a partial/duplicate observation."""
-    return len(reports) == 3 and Counter((r['when'], r['outcome'], r.get('xfail')) for r in reports) == Counter({
-        ('setup', 'passed', None): 1, ('call', 'passed', None): 1, ('teardown', 'passed', None): 1})
+def complete_passing(reports, occurrences=1):
+    """Require three passing phases for every selected occurrence, including duplicate IDs."""
+    return occurrences > 0 and len(reports) == 3 * occurrences and Counter(
+        (r['when'], r['outcome'], r.get('xfail')) for r in reports) == Counter({
+        ('setup', 'passed', None): occurrences, ('call', 'passed', None): occurrences,
+        ('teardown', 'passed', None): occurrences})
 
 
 def main():
@@ -39,15 +41,28 @@ def main():
         plan = json.loads((directory / 'plan.json').read_text())
         outcome = json.loads((directory / 'outcome.json').read_text())
         nodes = json.loads((directory / 'nodes.json').read_text())
+        denial_paths = list(directory.glob('guard-denials-*.jsonl'))
+        validity_fields = ('passed', 'node_accounting_complete', 'source_unchanged',
+                           'hygiene_passed', 'origins_verified', 'helpers_unchanged',
+                           'targets_unchanged', 'sandbox_loaded', 'all_worker_collections_identical')
+        valid_run = all(outcome.get(name) is True for name in validity_fields) and not denial_paths
+        valid_collection = (outcome.get('collection_passed') is True and
+            all(outcome.get(name) is True for name in validity_fields[2:]) and not denial_paths)
         by_node = defaultdict(list)
         for report in nodes['reports']:
             by_node[report['nodeid']].append(report)
         failing = []
-        for node, reports in by_node.items():
+        selected_counts = Counter(nodes['selected'])
+        # Collection proves availability only, never executed historical coverage.
+        execution_nodes = set(selected_counts) | set(by_node) if not plan.get('collect_only') else set()
+        for node in sorted(execution_nodes):
+            reports = by_node[node]
+            occurrences = selected_counts[node]
             observations[node].append({'run': str(directory), 'head': plan['head'],
-                'reports': reports, 'complete_pass': complete_passing(reports)})
-            if not complete_passing(reports):
-                failing.append({'nodeid': node, 'reports': reports})
+                'selected_occurrences': occurrences, 'reports': reports,
+                'complete_pass': complete_passing(reports, occurrences), 'valid_run': valid_run})
+            if not complete_passing(reports, occurrences):
+                failing.append({'nodeid': node, 'selected_occurrences': occurrences, 'reports': reports})
         messages = []
         xml = directory / 'pytest.xml'
         if xml.is_file():
@@ -64,6 +79,7 @@ def main():
         denials = {str(path.relative_to(directory)): {'sha256': digest(path), 'lines': path.read_text().splitlines()}
                    for path in directory.glob('guard-denials-*.jsonl')}
         row = {'run': str(directory), 'head': plan['head'], 'outcome': outcome,
+               'valid_run': valid_run, 'valid_collection': valid_collection,
                'nonpassing_nodes': failing, 'xml_findings': messages, 'artifacts': artifacts,
                'guard_denials': denials}
         rows.append(row)
@@ -71,7 +87,7 @@ def main():
             ci_rows.append((row, nodes))
     accepted_rows = [row for row in rows if row['head'] == args.accepted_head] if args.accepted_head else []
     accepted_runs_pass = bool(accepted_rows) and all(
-        (row['outcome'].get('passed') or row['outcome'].get('collection_passed')) and not row['guard_denials']
+        row['valid_run'] or row['valid_collection']
         for row in accepted_rows)
     result = {'runs': rows, 'accepted_head': args.accepted_head,
         'accepted_runs_pass': accepted_runs_pass if args.accepted_head else None,
@@ -86,7 +102,7 @@ def main():
         historical = []
         for node in targets:
             eligible = [item for item in observations[node] if item['head'] == args.accepted_head]
-            passed = bool(eligible) and all(item['complete_pass'] for item in eligible)
+            passed = bool(eligible) and all(item['complete_pass'] and item['valid_run'] for item in eligible)
             historical.append({'nodeid': node, 'eligible_observations': eligible,
                 'other_head_observations': [item for item in observations[node] if item['head'] != args.accepted_head],
                 'passed': passed})

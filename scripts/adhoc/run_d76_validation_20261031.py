@@ -221,7 +221,16 @@ def run(options):
     helpers_same = all(common.sha(path.read_bytes()) == helpers[str(path)] for path in helper_paths)
     targets_same = all(common.sha(Path(path).read_bytes()) == digest for path, digest in target_hashes.items())
     sandbox_loaded = (options.output / 'bootstrap.json').is_file() and common.sha(policy.read_bytes()) == PROFILE_SHA
-    invariant = before == after and hygiene == hygiene_after and origins_ok and helpers_same and targets_same and sandbox_loaded and same_collection
+    # A test may catch an audit exception and pass. That still attempted an
+    # operation outside this offline contract, and cannot establish acceptance.
+    denials = {path.name: {'sha256': common.sha(path.read_bytes()),
+                          'events': path.read_text().splitlines()}
+               for path in options.output.glob('guard-denials-*.jsonl')}
+    denial_count = sum(len(value['events']) for value in denials.values())
+    common.save(options.output / 'guard-denials.json', {'files': denials, 'event_count': denial_count,
+        'zero_denials': not denials, 'classified_exception_policy': 'none; any denial artifact refuses acceptance'})
+    invariant = (before == after and hygiene == hygiene_after and origins_ok and helpers_same and
+                 targets_same and sandbox_loaded and same_collection and not denials)
     collection_complete = options.collect_only and bool(selected) and not reports and not cases and not collection_errors and invariant
     result = {'returncode': code, 'counts': counts, 'collected_occurrences': len(collected),
         'selected_occurrences': len(selected), 'selected_unique': len(set(selected)),
@@ -230,6 +239,7 @@ def run(options):
         'source_unchanged': before == after, 'hygiene_passed': hygiene == hygiene_after,
         'origins_verified': origins_ok, 'helpers_unchanged': helpers_same, 'targets_unchanged': targets_same,
         'sandbox_loaded': sandbox_loaded, 'wall_seconds': time.monotonic() - started,
+        'guard_denial_count': denial_count, 'zero_guard_denials': not denials,
         'collection_complete': collection_complete, 'collection_passed': code == 0 and collection_complete,
         'passed': not options.collect_only and code == 0 and complete and invariant and not collection_errors,
         'expected_failures_not_interpreted': True, 'scientific_acceptance': 'not_assessed'}

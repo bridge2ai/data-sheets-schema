@@ -36,6 +36,9 @@ def main():
     heavy = ['tests/test_shared_generation_runtime.py', 'tests/test_report_admission.py',
              'tests/test_download/test_api_runner.py', 'tests/test_source_heading_runtime_api.py']
     extra = ['tests/test_source_heading_output_layout.py', 'tests/test_native_attempt_supervisor.py']
+    closure = ['tests/test_native_attribution_controller.py', 'tests/test_native_execution.py',
+               'tests/test_native_registered_provenance.py', 'tests/test_claudecode_direct_arm.py',
+               'notes/claudecode_direct/test_direct_arm.py']
     light = set(json.loads(args.review_files.read_text()))
     for pattern in ('test_shared_generation*.py', 'test_provenance*.py', 'test_wave7_5213_*.py'):
         light.update(str(path.relative_to(root)) for path in (root / 'tests').glob(pattern))
@@ -52,7 +55,7 @@ def main():
         raise ValueError('expected exactly 107 unique historical node IDs')
     probes = sorted(str(path) for path in (args.probes / 'claude-probes-20261031').glob('test_probe_*.py'))
     probes.append(str(args.probes / 'test_5213_adversarial.py'))
-    lists = {'light': sorted(light), 'heavy': heavy, 'extra': extra, 'historical107': nodes,
+    lists = {'light': sorted(light), 'heavy': heavy, 'extra': extra, 'closure': closure, 'historical107': nodes,
              'new': new, 'reviewer-probes': probes}
     for name, targets in lists.items():
         for value in targets:
