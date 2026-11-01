@@ -2333,6 +2333,10 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
             # A completed generation has finished snapshot activation. Keep
             # the exact-byte restoration assertion against that settled state.
             snapshot_store.finish_activation(spec)
+            # Settle current coordination too. Older generation-only fixtures
+            # legitimately gain a launch event at their next execution.
+            with usage_ledger.exclusive_run(spec):
+                latch_journal.start_launch(spec)
             account = usage_ledger.ledger_path(spec)
             account_before = account.read_bytes()
             journal = latch_journal.journal_path(spec)
@@ -2497,6 +2501,7 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
         would write, and inferring completion from them would restamp another
         run's outputs as its own.
         """
+        import hashlib
         import tempfile
         from data_sheets_schema.api_runner import RunSpec, execute
 
@@ -2507,7 +2512,9 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
             # This synthetic completed record bound full/core only. The report
             # also needs positive ownership before a different label can start.
             record = yaml.safe_load(old.provenance_path.read_text())
-            record["validation"]["artifacts"]["report"] = {"path": str(old.report_path)}
+            record["validation"]["artifacts"]["report"] = {
+                "path": str(old.report_path),
+                "sha256": hashlib.sha256(old.report_path.read_bytes()).hexdigest()}
             old.provenance_path.write_text(yaml.safe_dump(record))
             old_account = usage_ledger.ledger_path(old)
             old_account_before = old_account.read_bytes()
