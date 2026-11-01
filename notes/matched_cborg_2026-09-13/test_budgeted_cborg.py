@@ -142,10 +142,12 @@ def test_refusal_survives_swallowed_exception_and_new_transport(tmp_path):
 
 def test_real_repair_catch_cannot_allow_a_cheaper_report(tmp_path, monkeypatch):
     from data_sheets_schema import api_runner as api
+    from data_sheets_schema.usage_ledger import prepare_usage
     from tests.test_download.test_api_runner import spec
     bundle = tmp_path / "bundle.txt"
     bundle.write_text("Synthetic input\n")
     run = spec(project="EXTERNAL", bundle=bundle, manifest=None, profile="neutral", out_dir=tmp_path)
+    prepare_usage(run, resume=False)
     body = "id: x\nname: n\ntitle: T\ndescription: d\n"
     run.full_path.write_text(body)
     provider, capped, ledger = client(tmp_path, cap=0.1)

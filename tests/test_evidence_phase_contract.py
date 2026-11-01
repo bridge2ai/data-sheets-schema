@@ -152,3 +152,7 @@ def test_actual_report_recheck_keeps_evidence_contract_and_records_v10_identity(
     record = yaml.safe_load(spec.provenance_path.read_text())
     assert record["prompts"]["assembly"] == api.assembly_digest(10)
     assert record["report_gate"]["evidence_assertions_after"]["findings"] == []
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

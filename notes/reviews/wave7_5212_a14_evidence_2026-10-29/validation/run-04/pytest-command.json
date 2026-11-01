@@ -1,0 +1,13 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave7-a14-parent-omission-20261029/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave7-a14-parent-omission-20261029/pytest.xml",
+    "tests/test_typed_audit_omission_wire.py"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave7-a14-parent-20261029"
+}

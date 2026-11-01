@@ -1,0 +1,12 @@
+; Purpose: offline validation, allowing writes only to authorized runtime/evidence.
+; Inputs: LOCAL_ROOT (TMPDIR scratch), EVIDENCE_ROOT (retained raw evidence).
+; Ref #5212 design evidence; 2026-10-29; network rules from Wave7 reviewed profile.
+(version 1)
+(allow default)
+(deny network*)
+(allow network-bind network-inbound (local ip "localhost:*"))
+(allow network-outbound (remote ip "localhost:*"))
+(allow network-bind network-inbound network-outbound (subpath (param "LOCAL_ROOT")))
+(deny file-write*)
+(allow file-write* (subpath (param "LOCAL_ROOT")) (subpath (param "EVIDENCE_ROOT")))
+(allow file-write-data (literal "/dev/null") (literal "/dev/tty"))

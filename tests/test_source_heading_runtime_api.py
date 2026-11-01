@@ -470,6 +470,9 @@ def test_selected_form_captures_actual_default_instrument_per_invocation(tmp_pat
     spec = selected_spec(tmp_path, draft_files, source_naming={'canonical_label': 'Other Project', 'variants': ['Different Programme']})
     spec.bind_api_header_values(api._model_settings(spec.condition))
     authority = sg.capture(spec)
+    # This fixture creates new records; initialize accounting before those
+    # outputs exist instead of presenting them as unaccounted historical work.
+    ledger.prepare_usage(spec, resume=False)
     spec.full_path.parent.mkdir(parents=True, exist_ok=True)
     spec.full_path.write_text('description: Sample Programme\n')
     spec.core_path.write_text('description: Sample Programme\n')
@@ -643,3 +646,7 @@ def test_selected_registration_binds_live_historical_validation(tmp_path, draft_
     expected['stage_contracts']['request_code_sha256'][name] = sg.sha(copy.read_bytes())
     assert expected != legacy
     assert sg.descriptor(version=1) == expected
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

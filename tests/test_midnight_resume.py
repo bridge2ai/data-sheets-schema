@@ -27,7 +27,7 @@ def construct(original, **changes):
                        out_dir=original.out_dir, **changes)
 
 
-@pytest.mark.parametrize("completed,journal", [(False, True), (True, True), (True, False)])
+@pytest.mark.parametrize("completed,journal", [(False, True), (True, True)])
 def test_automatic_date_is_restored_before_cached_instruction_or_portable_checks(external, monkeypatch, completed, journal):
     monkeypatch.setattr(api, "datetime", Clock)
     Clock.day = 12
@@ -57,6 +57,22 @@ def test_automatic_date_is_restored_before_cached_instruction_or_portable_checks
         assert len(client.messages.calls) == 3 and len(result["usage"]) == 4
 
 
+def test_completed_midnight_resume_without_accounting_refuses_readonly(external, monkeypatch):
+    from tests.test_d68_legacy_readonly import tree
+    monkeypatch.setattr(api, "datetime", Clock)
+    Clock.day = 12
+    original = construct(external)
+    api.execute(original, client=FakeClient())
+    ledger.ledger_path(original).unlink()
+    before = tree(original.out_dir)
+    Clock.day = 13
+    client = FakeClient()
+    with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
+        api.execute(construct(external), client=client)
+    assert client.messages.calls == []
+    assert tree(original.out_dir) == before
+
+
 def test_explicit_changed_date_is_refused_without_spending_or_writing(external, monkeypatch):
     monkeypatch.setattr(api, "datetime", Clock)
     Clock.day = 12
@@ -75,7 +91,8 @@ def test_new_generation_does_not_inherit_a_predecessors_date(external, monkeypat
     Clock.day = 12
     api.execute(construct(external), client=FakeClient())
     Clock.day = 13
-    seed = replace(external, label="another-label") if mode == "foreign" else external
+    seed = (replace(external, label="another-label")
+            if mode == "foreign" else external)
     current = construct(seed)
     client = FakeClient()
     api.execute(current, resume=mode != "fresh", client=client)
@@ -125,3 +142,7 @@ def test_batch_reconstructs_an_automatic_date_and_resumes_next_day(external, mon
     second = CliRunner().invoke(cli, args)
     assert second.exit_code == 0, second.output
     assert len(client.messages.calls) == (0 if completed else 3)
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

@@ -1,0 +1,400 @@
+{
+  "helper": {
+    "bytes": 5150,
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/claude-guard/scripts/adhoc/d41_archive_validation_20261026.py",
+    "sha256": "69f8887576f73c9f884c9f6ecb6d666769508fd78cc426731401cfec49373926"
+  },
+  "parity_scope": "Exact generic_v10/shared-v1 CHORUS request construction with explicitly selected bridge2ai profile and real SDK serialization; synthetic records/replies, no run admission or acceptance claim.",
+  "retained": {
+    "parity/baseline.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/baseline.log"
+    },
+    "parity/baseline/capture.json": {
+      "bytes": 111247,
+      "sha256": "0c1f4b8fc828d813462158114432dee381c4f4e00f084fb25fc779c26dba790d",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/baseline/capture.json"
+    },
+    "parity/baseline/full.http.json": {
+      "bytes": 208026,
+      "sha256": "8b23b999e7f478326320a3b0b79e753161bdc676a095ac02ebd3b4723bf783bf",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/baseline/full.http.json"
+    },
+    "parity/baseline/full_receipt_completion.http.json": {
+      "bytes": 215552,
+      "sha256": "d36a7daf2f5cf99c34d6464319e5f979865016652d5856e5a945c2c48df33dfe",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/baseline/full_receipt_completion.http.json"
+    },
+    "parity/baseline/reconcile_full.http.json": {
+      "bytes": 209435,
+      "sha256": "0463f6a4fef5f0f4bbc2609e3118b30d8d4bf253825c22920dc0e1af1d98db55",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/baseline/reconcile_full.http.json"
+    },
+    "parity/baseline/registration.json": {
+      "bytes": 5076,
+      "sha256": "00c75518262d9ec6119778950035844b08af93440667b1cb9fdcc66c0084535a",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/baseline/registration.json"
+    },
+    "parity/baseline/report.http.json": {
+      "bytes": 211989,
+      "sha256": "3c9726c786b27812750fcf7b50cd641e17a51c1233f66c2db26e51f1bfc8aaff",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/baseline/report.http.json"
+    },
+    "parity/baseline/report_regate.http.json": {
+      "bytes": 210332,
+      "sha256": "10309b5fd75cb8eaac182c03bf9a80b29ef1cd5937f706be9f44da8522cbba08",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/baseline/report_regate.http.json"
+    },
+    "parity/baseline/typed_audit_integration.http.json": {
+      "bytes": 200938,
+      "sha256": "19ea586fe14f5d8fd745b4b9f968fd8b48c0882d7fb03027a884b6b867c65c6f",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/baseline/typed_audit_integration.http.json"
+    },
+    "parity/baseline/typed_audit_omission.http.json": {
+      "bytes": 136106,
+      "sha256": "547cd16eeae2236fc369b1b23e4acf326e3804192c944a6a048cf841a506bc8b",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/baseline/typed_audit_omission.http.json"
+    },
+    "parity/baseline/typed_audit_worker-worker_0001.http.json": {
+      "bytes": 183719,
+      "sha256": "f0a37767dc2475d1ae1edf39fd036f26deb386fc5539511b957a5d1aac28de50",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/baseline/typed_audit_worker-worker_0001.http.json"
+    },
+    "parity/candidate.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/candidate.log"
+    },
+    "parity/candidate/capture.json": {
+      "bytes": 80850,
+      "sha256": "9c14f41b288cfdd9f222701c08d21a4ccdaaeb795b93ce31db3a8264c1e7419c",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/candidate/capture.json"
+    },
+    "parity/candidate/full.http.json": {
+      "bytes": 208026,
+      "sha256": "8b23b999e7f478326320a3b0b79e753161bdc676a095ac02ebd3b4723bf783bf",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/candidate/full.http.json"
+    },
+    "parity/candidate/full_receipt_completion.http.json": {
+      "bytes": 215552,
+      "sha256": "d36a7daf2f5cf99c34d6464319e5f979865016652d5856e5a945c2c48df33dfe",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/candidate/full_receipt_completion.http.json"
+    },
+    "parity/candidate/reconcile_full.http.json": {
+      "bytes": 209435,
+      "sha256": "0463f6a4fef5f0f4bbc2609e3118b30d8d4bf253825c22920dc0e1af1d98db55",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/candidate/reconcile_full.http.json"
+    },
+    "parity/candidate/registration.json": {
+      "bytes": 5076,
+      "sha256": "00c75518262d9ec6119778950035844b08af93440667b1cb9fdcc66c0084535a",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/candidate/registration.json"
+    },
+    "parity/candidate/report.http.json": {
+      "bytes": 211989,
+      "sha256": "3c9726c786b27812750fcf7b50cd641e17a51c1233f66c2db26e51f1bfc8aaff",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/candidate/report.http.json"
+    },
+    "parity/candidate/report_regate.http.json": {
+      "bytes": 210332,
+      "sha256": "10309b5fd75cb8eaac182c03bf9a80b29ef1cd5937f706be9f44da8522cbba08",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/candidate/report_regate.http.json"
+    },
+    "parity/candidate/typed_audit_integration.http.json": {
+      "bytes": 200938,
+      "sha256": "19ea586fe14f5d8fd745b4b9f968fd8b48c0882d7fb03027a884b6b867c65c6f",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/candidate/typed_audit_integration.http.json"
+    },
+    "parity/candidate/typed_audit_omission.http.json": {
+      "bytes": 136106,
+      "sha256": "547cd16eeae2236fc369b1b23e4acf326e3804192c944a6a048cf841a506bc8b",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/candidate/typed_audit_omission.http.json"
+    },
+    "parity/candidate/typed_audit_worker-worker_0001.http.json": {
+      "bytes": 183719,
+      "sha256": "f0a37767dc2475d1ae1edf39fd036f26deb386fc5539511b957a5d1aac28de50",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/candidate/typed_audit_worker-worker_0001.http.json"
+    },
+    "parity/summary.json": {
+      "bytes": 80632,
+      "sha256": "435057a2cdf7243617a23f5881ebdd759e56253cebabecf276ceaec98928d61d",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026/test_chorus_shared_v1_exact_ba0/parity/summary.json"
+    },
+    "tests/core-parity.log": {
+      "bytes": 3665,
+      "sha256": "057cec2207715435ecc62671ae0ce8d7e9ca3e9b444daec3fc7918aaff590032",
+      "source": "/private/tmp/d4d-h3-core-parity-20261026.log"
+    },
+    "tests/core-parity.xml": {
+      "bytes": 31928,
+      "sha256": "fe50c13e603917f87189ea866f2a111f335712a18bb2d669a5c42ac898217f06",
+      "source": "/private/tmp/d4d-h3-core-parity-20261026.xml"
+    },
+    "tests/delivery-gates.log": {
+      "bytes": 2797,
+      "sha256": "e139e13acbfa906671e0334d45bf44323d56e74048c9231cdcca00a1144556df",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026.log"
+    },
+    "tests/delivery-gates.xml": {
+      "bytes": 52454,
+      "sha256": "1dc779102039d249aee1006ad37dd1bc714ebe06e78277e1e0ab24de2f0f3297",
+      "source": "/private/tmp/d4d-h3-delivery-gates-20261026.xml"
+    },
+    "tests/final-gates.log": {
+      "bytes": 2382,
+      "sha256": "9850e72c2dd04ffc689b1eb3d48015556653deb2b2e095a7f9373f37080dde58",
+      "source": "/private/tmp/d4d-h3-final-gates-20261026.log"
+    },
+    "tests/final-gates.xml": {
+      "bytes": 37512,
+      "sha256": "9b5dcc2b8a8fcee176ec4392e575f7872402431e56bcf996377835828d549449",
+      "source": "/private/tmp/d4d-h3-final-gates-20261026.xml"
+    },
+    "tests/focused.log": {
+      "bytes": 12207,
+      "sha256": "66063ed8133dba1ed0b36afa56d268a65fa4112b6cf807d6b80d2d45213196e5",
+      "source": "/private/tmp/d4d-h3-focused-20261026.log"
+    },
+    "tests/focused.xml": {
+      "bytes": 22963,
+      "sha256": "a94e0e878d5059613b19c06b1fb921fe100b0ab1804a3e53d30a20f832bb219d",
+      "source": "/private/tmp/d4d-h3-focused-20261026.xml"
+    },
+    "tests/parity-fixed.log": {
+      "bytes": 847,
+      "sha256": "e9d0205c9444c5b468d9a62c30555f9f6e26f39937e5a31a592d3a52f5410982",
+      "source": "/private/tmp/d4d-h3-parity-fixed-20261026.log"
+    },
+    "tests/parity-fixed.xml": {
+      "bytes": 748,
+      "sha256": "5ca5f853c4101d6775b7ad75d584f2c7ce63ac17a0dff46dec4a104d77a77296",
+      "source": "/private/tmp/d4d-h3-parity-fixed-20261026.xml"
+    },
+    "tests/regressions-fixed.log": {
+      "bytes": 12536,
+      "sha256": "243e686e28c83a8f8106b67015a3a7bad33f4f8c5c82825fba01e5dfc5ca30d5",
+      "source": "/private/tmp/d4d-h3-regressions-fixed-20261026.log"
+    },
+    "tests/regressions-fixed.xml": {
+      "bytes": 60769,
+      "sha256": "2603d04a90d56257f747cd50f57b6d84122ea5d3c271f93483b8544fdb12f11f",
+      "source": "/private/tmp/d4d-h3-regressions-fixed-20261026.xml"
+    },
+    "tests/regressions.log": {
+      "bytes": 50854,
+      "sha256": "03b10cd490bfdb4bb4e3c3996908f4cd56a15bd47c8b9be8c758db6cce72bbcc",
+      "source": "/private/tmp/d4d-h3-regressions-20261026.log"
+    },
+    "tests/regressions.xml": {
+      "bytes": 57372,
+      "sha256": "d3bc8b20bd161a7bdff7065dd43386524eff2ca0a05593194420f5f35260a55e",
+      "source": "/private/tmp/d4d-h3-regressions-20261026.xml"
+    },
+    "tests/unusable-final.log": {
+      "bytes": 837,
+      "sha256": "6057e4a49a7c1f2f2350c3c2736e877dab553e700f533e41a3b45011eb099bad",
+      "source": "/private/tmp/d4d-h3-unusable-final-20261026.log"
+    },
+    "tests/unusable-final.xml": {
+      "bytes": 2929,
+      "sha256": "ae27438598fc38f188c45f9f3a17b15446a098ffea5a862d84e971f9a0ca4815",
+      "source": "/private/tmp/d4d-h3-unusable-final-20261026.xml"
+    }
+  },
+  "runs": {
+    "core-parity": {
+      "inputs": {
+        "/private/tmp/d4d-h3-core-parity-20261026.log": {
+          "bytes": 3665,
+          "sha256": "057cec2207715435ecc62671ae0ce8d7e9ca3e9b444daec3fc7918aaff590032"
+        },
+        "/private/tmp/d4d-h3-core-parity-20261026.xml": {
+          "bytes": 31928,
+          "sha256": "fe50c13e603917f87189ea866f2a111f335712a18bb2d669a5c42ac898217f06"
+        }
+      },
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "1",
+          "hostname": "marcins-MacBook-Pro.local",
+          "name": "pytest",
+          "skipped": "0",
+          "tests": "202",
+          "time": "120.696",
+          "timestamp": "2026-10-25T21:06:23.487904"
+        }
+      ]
+    },
+    "delivery-gates": {
+      "inputs": {
+        "/private/tmp/d4d-h3-delivery-gates-20261026.log": {
+          "bytes": 2797,
+          "sha256": "e139e13acbfa906671e0334d45bf44323d56e74048c9231cdcca00a1144556df"
+        },
+        "/private/tmp/d4d-h3-delivery-gates-20261026.xml": {
+          "bytes": 52454,
+          "sha256": "1dc779102039d249aee1006ad37dd1bc714ebe06e78277e1e0ab24de2f0f3297"
+        }
+      },
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "1",
+          "hostname": "marcins-MacBook-Pro.local",
+          "name": "pytest",
+          "skipped": "0",
+          "tests": "350",
+          "time": "266.467",
+          "timestamp": "2026-10-25T22:04:16.537354"
+        }
+      ]
+    },
+    "final-gates": {
+      "inputs": {
+        "/private/tmp/d4d-h3-final-gates-20261026.log": {
+          "bytes": 2382,
+          "sha256": "9850e72c2dd04ffc689b1eb3d48015556653deb2b2e095a7f9373f37080dde58"
+        },
+        "/private/tmp/d4d-h3-final-gates-20261026.xml": {
+          "bytes": 37512,
+          "sha256": "9b5dcc2b8a8fcee176ec4392e575f7872402431e56bcf996377835828d549449"
+        }
+      },
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "1",
+          "hostname": "marcins-MacBook-Pro.local",
+          "name": "pytest",
+          "skipped": "0",
+          "tests": "246",
+          "time": "574.023",
+          "timestamp": "2026-10-25T21:50:08.313514"
+        }
+      ]
+    },
+    "focused": {
+      "inputs": {
+        "/private/tmp/d4d-h3-focused-20261026.log": {
+          "bytes": 12207,
+          "sha256": "66063ed8133dba1ed0b36afa56d268a65fa4112b6cf807d6b80d2d45213196e5"
+        },
+        "/private/tmp/d4d-h3-focused-20261026.xml": {
+          "bytes": 22963,
+          "sha256": "a94e0e878d5059613b19c06b1fb921fe100b0ab1804a3e53d30a20f832bb219d"
+        }
+      },
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "1",
+          "hostname": "marcins-MacBook-Pro.local",
+          "name": "pytest",
+          "skipped": "0",
+          "tests": "75",
+          "time": "10.155",
+          "timestamp": "2026-10-25T21:04:56.368319"
+        }
+      ]
+    },
+    "parity-fixed": {
+      "inputs": {
+        "/private/tmp/d4d-h3-parity-fixed-20261026.log": {
+          "bytes": 847,
+          "sha256": "e9d0205c9444c5b468d9a62c30555f9f6e26f39937e5a31a592d3a52f5410982"
+        },
+        "/private/tmp/d4d-h3-parity-fixed-20261026.xml": {
+          "bytes": 748,
+          "sha256": "5ca5f853c4101d6775b7ad75d584f2c7ce63ac17a0dff46dec4a104d77a77296"
+        }
+      },
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "marcins-MacBook-Pro.local",
+          "name": "pytest",
+          "skipped": "0",
+          "tests": "4",
+          "time": "94.785",
+          "timestamp": "2026-10-25T21:16:44.873835"
+        }
+      ]
+    },
+    "regressions": {
+      "inputs": {
+        "/private/tmp/d4d-h3-regressions-20261026.log": {
+          "bytes": 50854,
+          "sha256": "03b10cd490bfdb4bb4e3c3996908f4cd56a15bd47c8b9be8c758db6cce72bbcc"
+        },
+        "/private/tmp/d4d-h3-regressions-20261026.xml": {
+          "bytes": 57372,
+          "sha256": "d3bc8b20bd161a7bdff7065dd43386524eff2ca0a05593194420f5f35260a55e"
+        }
+      },
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "12",
+          "hostname": "marcins-MacBook-Pro.local",
+          "name": "pytest",
+          "skipped": "0",
+          "tests": "50",
+          "time": "237.584",
+          "timestamp": "2026-10-25T21:11:55.685889"
+        }
+      ]
+    },
+    "regressions-fixed": {
+      "inputs": {
+        "/private/tmp/d4d-h3-regressions-fixed-20261026.log": {
+          "bytes": 12536,
+          "sha256": "243e686e28c83a8f8106b67015a3a7bad33f4f8c5c82825fba01e5dfc5ca30d5"
+        },
+        "/private/tmp/d4d-h3-regressions-fixed-20261026.xml": {
+          "bytes": 60769,
+          "sha256": "2603d04a90d56257f747cd50f57b6d84122ea5d3c271f93483b8544fdb12f11f"
+        }
+      },
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "8",
+          "hostname": "marcins-MacBook-Pro.local",
+          "name": "pytest",
+          "skipped": "0",
+          "tests": "340",
+          "time": "1563.828",
+          "timestamp": "2026-10-25T21:18:44.537079"
+        }
+      ]
+    },
+    "unusable-final": {
+      "inputs": {
+        "/private/tmp/d4d-h3-unusable-final-20261026.log": {
+          "bytes": 837,
+          "sha256": "6057e4a49a7c1f2f2350c3c2736e877dab553e700f533e41a3b45011eb099bad"
+        },
+        "/private/tmp/d4d-h3-unusable-final-20261026.xml": {
+          "bytes": 2929,
+          "sha256": "ae27438598fc38f188c45f9f3a17b15446a098ffea5a862d84e971f9a0ca4815"
+        }
+      },
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "hostname": "marcins-MacBook-Pro.local",
+          "name": "pytest",
+          "skipped": "0",
+          "tests": "18",
+          "time": "3.357",
+          "timestamp": "2026-10-25T22:09:38.384194"
+        }
+      ]
+    }
+  },
+  "scope": "Retained offline software evidence; no scientific or launch acceptance"
+}

@@ -1,0 +1,275 @@
+........................................................................ [ 13%]
+........................................................................ [ 26%]
+.................................................................FF..... [ 39%]
+........................................................................ [ 52%]
+........................................................................ [ 65%]
+.................................................F...................... [ 78%]
+...............F........................................................ [ 91%]
+................................................                         [100%]
+=================================== FAILURES ===================================
+_____________ test_chorus_shared_v1_exact_baseline_sdk_bytes[push] _____________
+
+tmp_path = PosixPath('/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_chorus_shared_v1_exact_ba0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x34254fa10>
+event = 'push'
+
+    @pytest.mark.parametrize('event', ['push', 'pull_request'])
+    def test_chorus_shared_v1_exact_baseline_sdk_bytes(tmp_path, monkeypatch, event):
+        monkeypatch.setenv('GITHUB_EVENT_NAME', event)
+        monkeypatch.setenv('D41_PARITY_TARGET', 'deleted/nonexistent-branch')
+        # The helper runs from source even with no git executable/history available.
+        monkeypatch.setenv('PATH', str(tmp_path))
+>       result = parity.compare(ROOT, tmp_path / 'parity')
+
+tests/test_d41_request_parity.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/private/tmp/d4d-codex-wave7-5212-a14-20261029')
+workdir = PosixPath('/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_chorus_shared_v1_exact_ba0/parity')
+
+    def compare(root, workdir):
+        root, workdir = root.resolve(), workdir.resolve()
+        workdir.mkdir(parents=True, exist_ok=False)
+        baseline = {'scope': PACKAGE, 'counterfactual': 'same tree, before_attempt callback omitted'}
+        fixture = workdir / 'common-fixture'
+        fixture.mkdir()
+        helper_before = pin(__file__)
+        production_before = {str(p.relative_to(root)): pin(p) for p in (root / PACKAGE).rglob('*.py')}
+        captures = {}
+        for mode in ('baseline', 'candidate'):
+            code_root = root
+            out = workdir / mode
+            env = {**os.environ, 'PYTHONDONTWRITEBYTECODE': '1',
+                   'PYTHONPATH': str(code_root / 'src') + os.pathsep + str(root)}
+            command = [sys.executable, str(Path(__file__).resolve()), '--capture', mode, '--root', str(root),
+                       '--code-root', str(code_root), '--fixture', str(fixture), '--out', str(out)]
+            completed = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True, timeout=300)
+            save(workdir / (mode + '.log'), (completed.stdout + completed.stderr).encode())
+            if completed.returncode:
+>               raise RuntimeError(f'{mode} capture failed; see {workdir / (mode + ".log")}')
+E               RuntimeError: baseline capture failed; see /private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_chorus_shared_v1_exact_ba0/parity/baseline.log
+
+scripts/adhoc/d41_request_parity_20261026.py:372: RuntimeError
+_________ test_chorus_shared_v1_exact_baseline_sdk_bytes[pull_request] _________
+
+tmp_path = PosixPath('/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_chorus_shared_v1_exact_ba1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x35373ac10>
+event = 'pull_request'
+
+    @pytest.mark.parametrize('event', ['push', 'pull_request'])
+    def test_chorus_shared_v1_exact_baseline_sdk_bytes(tmp_path, monkeypatch, event):
+        monkeypatch.setenv('GITHUB_EVENT_NAME', event)
+        monkeypatch.setenv('D41_PARITY_TARGET', 'deleted/nonexistent-branch')
+        # The helper runs from source even with no git executable/history available.
+        monkeypatch.setenv('PATH', str(tmp_path))
+>       result = parity.compare(ROOT, tmp_path / 'parity')
+
+tests/test_d41_request_parity.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/private/tmp/d4d-codex-wave7-5212-a14-20261029')
+workdir = PosixPath('/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_chorus_shared_v1_exact_ba1/parity')
+
+    def compare(root, workdir):
+        root, workdir = root.resolve(), workdir.resolve()
+        workdir.mkdir(parents=True, exist_ok=False)
+        baseline = {'scope': PACKAGE, 'counterfactual': 'same tree, before_attempt callback omitted'}
+        fixture = workdir / 'common-fixture'
+        fixture.mkdir()
+        helper_before = pin(__file__)
+        production_before = {str(p.relative_to(root)): pin(p) for p in (root / PACKAGE).rglob('*.py')}
+        captures = {}
+        for mode in ('baseline', 'candidate'):
+            code_root = root
+            out = workdir / mode
+            env = {**os.environ, 'PYTHONDONTWRITEBYTECODE': '1',
+                   'PYTHONPATH': str(code_root / 'src') + os.pathsep + str(root)}
+            command = [sys.executable, str(Path(__file__).resolve()), '--capture', mode, '--root', str(root),
+                       '--code-root', str(code_root), '--fixture', str(fixture), '--out', str(out)]
+            completed = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True, timeout=300)
+            save(workdir / (mode + '.log'), (completed.stdout + completed.stderr).encode())
+            if completed.returncode:
+>               raise RuntimeError(f'{mode} capture failed; see {workdir / (mode + ".log")}')
+E               RuntimeError: baseline capture failed; see /private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_chorus_shared_v1_exact_ba1/parity/baseline.log
+
+scripts/adhoc/d41_request_parity_20261026.py:372: RuntimeError
+____________ test_real_complete_api_pipeline_and_completed_recheck _____________
+
+selected = RunSpec(project='EXAMPLE', arm='baseline', method='claudecode_api', bundle=PosixPath('/private/tmp/d4d-wave7-5212-a14-...c9129755ac184578022f3b1cf5fe23d4ee2b4848314ee48e45096dce26"},"typed_protocol":"typed_audit_protocol_v1","version":1}}')
+
+    def test_real_complete_api_pipeline_and_completed_recheck(selected):
+        c = client(selected)
+        result = api.execute(selected, client=c)
+        assert result['validation_problems'] == []
+        phases = ['full', rc.PHASE, runtime.WORKER_PHASE, runtime.OMISSION_PHASE,
+                  runtime.INTEGRATION_PHASE, 'reconcile_full', 'report']
+        assert c.messages.phases == phases
+        assert [r['phase'] for r in result['usage']] == phases
+        state = runtime._state(selected)
+        assert state['state'] == 'accepted'
+        assembly = rc._load(state['assembly'])
+        checked = typed.check(assembly, derivations=typed.DerivationCache())
+        assert checked['passed'] and checked['independently_reconstructed']
+        audit = typed._unblob(assembly['audit']).decode()
+        reconcile = c.messages.calls[phases.index('reconcile_full')]
+        assert {'type': 'text', 'text': api.CARRY_LABEL.format(name='Audit findings') + audit} in reconcile['messages'][0]['content']
+        for call in c.messages.calls[2:5]:
+            assert {'type': 'text', 'text': rc.audit_carry(selected)} in call['messages'][0]['content']
+        record = yaml.safe_load(selected.provenance_path.read_bytes())
+        assert record['shared_generation']['assembly_sha256'] == assembly['sha256']
+        assert record['receipt_completion']['counts']['unsupported'] > 0
+        assert record['shared_generation']['scientific_support'] == 'unverified evaluator declarations'
+        from data_sheets_schema import snapshot_store
+        index = json.loads(snapshot_store.index_path(selected.provenance_path.parent, selected.project).read_bytes())
+        audit_snapshot = next(row for row in index['snapshots'] if row['name'] == f'{selected.project}_audit.json')
+        integration_id = next(row['usage_id'] for row in result['usage'] if row['phase'] == runtime.INTEGRATION_PHASE)
+        assert audit_snapshot['usage_id'] == integration_id
+        before = files(selected)
+        again = client(selected)
+        repeated = api.execute(replace(selected), client=again)
+        assert repeated['already_complete'] and not again.messages.calls
+        assert before == files(selected)
+        assert_completed_mutations_refuse_without_calls(selected)
+        assert_snapshot_attribution_checks_without_calls(selected)
+        from tests.test_shared_generation_completed_replay import assert_completed_replay_authority
+>       assert_completed_replay_authority(selected)
+
+tests/test_shared_generation_runtime.py:175: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_shared_generation_completed_replay.py:281: in assert_completed_replay_authority
+    result = api.execute(replace(spec), resume=True, client=client)
+tests/conftest.py:59: in monitored_execute
+    return execute(spec, **kwargs)
+src/data_sheets_schema/api_runner.py:6911: in execute
+    with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256):
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/contextlib.py:141: in __enter__
+    return next(self.gen)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = RunSpec(project='EXAMPLE', arm='baseline', method='claudecode_api', bundle=PosixPath('/private/tmp/d4d-wave7-5212-a14-...c9129755ac184578022f3b1cf5fe23d4ee2b4848314ee48e45096dce26"},"typed_protocol":"typed_audit_protocol_v1","version":1}}')
+expected = '23cd30db86732952388063ebc3860655b87887536a09565edaa64949651b54bc'
+
+    @contextmanager
+    def launch_record(spec, expected):
+        """D57: print externally retainable heads, requiring the prior launch head.
+    
+        This never derives the caller's expectation from the mutable run directory.
+        The journal remains locally hashed, not cryptographically authenticated.
+        """
+        def display(boundary):
+            try:
+                head = head_sha256(spec)
+            except ledger.UsageLedgerError:
+                head = 'invalid'
+                boundary = 'unverified (not a resume anchor)'
+            print(f'latch journal {boundary}: project={spec.project} label={spec.label} '
+                  f'head_sha256={head or "none"} path={journal_path(spec)}', file=sys.stderr, flush=True)
+        try:
+            found = head_sha256(spec)
+            if expected is not None and (not isinstance(expected, str) or not _HEX.fullmatch(expected)):
+                _fail(f'resume journal head: expected=64 lowercase hexadecimal digits; found={expected!r}')
+            if found != expected:
+                _fail(f'resume journal head: expected={expected or "required from prior launch/monitor record"}; found={found or "missing"}')
+        except ledger.UsageLedgerError as exc:
+            # No refused diagnostic is a source of anchors, including malformed
+            # expectations and hashes embedded in broken-chain errors. Redact the
+            # exception too, and suppress its unsafe context in CLI/log tracebacks.
+            def redact(message):
+                return re.sub(r'[0-9a-fA-F]{64,}',
+                              lambda match: match[0][:8] + '…(unverified, not a resume anchor)', message)
+            message = redact(str(exc))
+            print(redact(f'latch journal refused: project={spec.project} label={spec.label} '
+                         f'{message} (not a resume anchor)'), file=sys.stderr, flush=True)
+>           raise ledger.UsageLedgerError(message) from None
+E           data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: resume journal head: expected=23cd30db…(unverified, not a resume anchor); found=af348245…(unverified, not a resume anchor)
+
+src/data_sheets_schema/latch_journal.py:676: UsageLedgerError
+----------------------------- Captured stderr call -----------------------------
+latch journal start: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 head_sha256=none path=/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_real_complete_api_pipelin0/output/EXAMPLE_latch_journal.jsonl
+latch journal stop: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 head_sha256=af348245a013da1cf88c28ffb7cd507ba3b2c45d4afbae9793c007e7888a6dbb path=/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_real_complete_api_pipelin0/output/EXAMPLE_latch_journal.jsonl
+latch journal start: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 head_sha256=af348245a013da1cf88c28ffb7cd507ba3b2c45d4afbae9793c007e7888a6dbb path=/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_real_complete_api_pipelin0/output/EXAMPLE_latch_journal.jsonl
+latch journal stop: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 head_sha256=af348245a013da1cf88c28ffb7cd507ba3b2c45d4afbae9793c007e7888a6dbb path=/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_real_complete_api_pipelin0/output/EXAMPLE_latch_journal.jsonl
+latch journal start: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 head_sha256=af348245a013da1cf88c28ffb7cd507ba3b2c45d4afbae9793c007e7888a6dbb path=/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_real_complete_api_pipelin0/output/EXAMPLE_latch_journal.jsonl
+latch journal stop: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 head_sha256=af348245a013da1cf88c28ffb7cd507ba3b2c45d4afbae9793c007e7888a6dbb path=/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_real_complete_api_pipelin0/output/EXAMPLE_latch_journal.jsonl
+latch journal start: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 head_sha256=f24801279f213c3a997384485d3073e5ba2a75b2c6361b5fe0d469a50b3919be path=/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_real_complete_api_pipelin0/output/EXAMPLE_latch_journal.jsonl
+latch journal stop: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 head_sha256=f24801279f213c3a997384485d3073e5ba2a75b2c6361b5fe0d469a50b3919be path=/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_real_complete_api_pipelin0/output/EXAMPLE_latch_journal.jsonl
+latch journal start: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 head_sha256=23cd30db86732952388063ebc3860655b87887536a09565edaa64949651b54bc path=/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_real_complete_api_pipelin0/output/EXAMPLE_latch_journal.jsonl
+latch journal stop: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 head_sha256=23cd30db86732952388063ebc3860655b87887536a09565edaa64949651b54bc path=/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_real_complete_api_pipelin0/output/EXAMPLE_latch_journal.jsonl
+latch journal refused: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 latch journal: resume journal head: expected=23cd30db…(unverified, not a resume anchor); found=af348245…(unverified, not a resume anchor) (not a resume anchor)
+latch journal refused: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 latch journal: resume journal head: expected=23cd30db…(unverified, not a resume anchor); found=af348245…(unverified, not a resume anchor) (not a resume anchor)
+latch journal refused: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 latch journal: resume journal head: expected=23cd30db…(unverified, not a resume anchor); found=af348245…(unverified, not a resume anchor) (not a resume anchor)
+latch journal refused: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 latch journal: resume journal head: expected=23cd30db…(unverified, not a resume anchor); found=af348245…(unverified, not a resume anchor) (not a resume anchor)
+latch journal refused: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 latch journal: resume journal head: expected=23cd30db…(unverified, not a resume anchor); found=af348245…(unverified, not a resume anchor) (not a resume anchor)
+latch journal refused: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 latch journal: resume journal head: expected=23cd30db…(unverified, not a resume anchor); found=af348245…(unverified, not a resume anchor) (not a resume anchor)
+latch journal refused: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 latch journal: resume journal head: expected=23cd30db…(unverified, not a resume anchor); found=af348245…(unverified, not a resume anchor) (not a resume anchor)
+latch journal refused: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 latch journal: resume journal head: expected=23cd30db…(unverified, not a resume anchor); found=af348245…(unverified, not a resume anchor) (not a resume anchor)
+latch journal refused: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 latch journal: resume journal head: expected=23cd30db…(unverified, not a resume anchor); found=af348245…(unverified, not a resume anchor) (not a resume anchor)
+latch journal refused: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 latch journal: resume journal head: expected=23cd30db…(unverified, not a resume anchor); found=af348245…(unverified, not a resume anchor) (not a resume anchor)
+latch journal refused: project=EXAMPLE label=2026-09-15_evidence-canary_rep1 latch journal: resume journal head: expected=23cd30db…(unverified, not a resume anchor); found=af348245…(unverified, not a resume anchor) (not a resume anchor)
+_____ test_selected_form_captures_actual_default_instrument_per_invocation _____
+
+tmp_path = PosixPath('/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_selected_form_captures_ac0')
+draft_files = {'base.txt': b'', 'catalog.json': b'{"authority_warnings":["unsettled TTL/schema disagreement on conforms_to: the TTL ...HBsYW5uZWQuIn1dfQ==","bytes":211,"sha256":"5c574327536ae34ad2a92ed23c2e6a2b9a445c199a81c539b3770a5cc77304fc"}}\n', ...}
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x395fe7ee0>
+
+    def test_selected_form_captures_actual_default_instrument_per_invocation(tmp_path, draft_files, monkeypatch):
+        import os
+        from data_sheets_schema import grounding, identifiers
+        from data_sheets_schema.run_schema import IdentifierRules
+        from data_sheets_schema import source_heading_completed as complete
+        spec = selected_spec(tmp_path, draft_files, source_naming={'canonical_label': 'Other Project', 'variants': ['Different Programme']})
+        spec.bind_api_header_values(api._model_settings(spec.condition))
+        authority = sg.capture(spec)
+        spec.full_path.parent.mkdir(parents=True, exist_ok=True)
+        spec.full_path.write_text('description: Sample Programme\n')
+        spec.core_path.write_text('description: Sample Programme\n')
+        cwd = tmp_path/'caller'; default = cwd/'data/preprocessed/source_manifest.yaml'
+        default.parent.mkdir(parents=True)
+        default.write_bytes(b'naming:\r\n  EXAMPLE:\r\n    canonical_label: Sample Project\r\n    variants: [Sample Programme]\r\n')
+        monkeypatch.chdir(cwd)
+        # The actual selected producer calls the same form worker and stores the
+        # bytes it read during that call, not those found later by the exporter.
+        expected = grounding.form_facts(spec.full_path, spec.core_path)
+        original_full = spec.full_path.read_bytes()
+        original_core = spec.core_path.read_bytes()
+        read_naming = grounding._capture_declared_naming
+        def mutate_after_first_pass():
+            observed = read_naming()
+            spec.full_path.write_bytes(original_full + b'# changed with the same counts\n')
+            return observed
+        with monkeypatch.context() as m:
+            m.setattr(grounding, '_capture_declared_naming', mutate_after_first_pass)
+>           first = complete.measure_form(spec)
+
+/private/tmp/d4d-codex-wave7-5212-a14-20261029/tests/test_source_heading_runtime_api.py:492: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/source_heading_completed.py:238: in measure_form
+    ledger._write(spec, data)
+/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/usage_ledger.py:685: in _write
+    latch_journal.before_ledger_write(spec, data)
+/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/latch_journal.py:557: in before_ledger_write
+    previous, events, mine = _validated(spec, allow_new=explicit_fresh)
+/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/latch_journal.py:472: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+
+/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/latch_journal.py:38: UsageLedgerError
+=============================== warnings summary ===============================
+tests/test_pr5212_r4_fixes.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /private/tmp/d4d-wave7-5212-a14-full-20261029/pytest.xml -
+=========================== short test summary info ============================
+FAILED tests/test_d41_request_parity.py::test_chorus_shared_v1_exact_baseline_sdk_bytes[push]
+FAILED tests/test_d41_request_parity.py::test_chorus_shared_v1_exact_baseline_sdk_bytes[pull_request]
+FAILED tests/test_shared_generation_runtime.py::test_real_complete_api_pipeline_and_completed_recheck
+FAILED tests/test_source_heading_runtime_api.py::test_selected_form_captures_actual_default_instrument_per_invocation
+4 failed, 548 passed, 12 warnings in 6830.20s (1:53:50)

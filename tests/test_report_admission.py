@@ -15,6 +15,8 @@ import httpx
 import pytest
 import yaml
 
+pytestmark = pytest.mark.usefixtures('journal_launch_monitor')
+
 from data_sheets_schema import api_runner as api, chunking, dollar_readout as dr
 from data_sheets_schema import receipt_completion as rc, snapshot_store, typed_audit_runtime as runtime
 from data_sheets_schema import usage_ledger as ledger

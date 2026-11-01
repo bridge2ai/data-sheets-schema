@@ -1,0 +1,18 @@
+{
+  "cohort source.txt": {
+    "bytes": 684,
+    "sha256": "c515c576780da4235fa23c2596b7fa13ea0e2751256ef8c434e37e00ab438f5e"
+  },
+  "cohort source_chunks.yaml": {
+    "bytes": 528,
+    "sha256": "01817276d6ee6297b96da7c6996a434a5a83ab2656b11bf391c2c6f6191ff30f"
+  },
+  "outputs/intermediate/EXTERNAL_snapshot_index.json": {
+    "bytes": 29,
+    "sha256": "3ddb7e81f539283e776690b2fa366fff81b5355e2fa9d7fe5341f9aaafd670e1"
+  },
+  "source manifest.yaml": {
+    "bytes": 323,
+    "sha256": "0a7fca94911b3380f28f48723a1fdb467ee68a0b0fd113d2650d215e72e9e37e"
+  }
+}

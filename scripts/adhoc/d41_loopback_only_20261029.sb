@@ -1,0 +1,10 @@
+; Purpose: deny non-loopback socket networking in the test process and descendants.
+; Inputs: LOCAL_ROOT, physical fresh evidence directory for Unix fixture sockets.
+; Refs Wave 7 strict offline test driver, PRs #5094-#5213; 2026-10-29.
+; Local syntax references: com.apple.CommCenter.sb and application.sb.
+(version 1)
+(allow default)
+(deny network*)
+(allow network-bind network-inbound (local ip "localhost:*"))
+(allow network-outbound (remote ip "localhost:*"))
+(allow network-bind network-inbound network-outbound (subpath (param "LOCAL_ROOT")))

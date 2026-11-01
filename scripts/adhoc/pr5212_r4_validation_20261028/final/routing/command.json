@@ -1,0 +1,16 @@
+[
+  "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+  "-m",
+  "pytest",
+  "-q",
+  "-p",
+  "no:cacheprovider",
+  "-o",
+  "addopts=",
+  "--basetemp=/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt",
+  "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/scripts/adhoc/pr5212_r4_validation_20261028/final/routing/results.xml",
+  "tests/test_source_heading_runtime_api.py::test_actual_sent_routing_counts_usage_and_completed_zero_calls",
+  "tests/test_source_heading_runtime_api.py::test_actual_completed_capture_is_portable_and_refuses_changed_bytes",
+  "tests/test_source_heading_runtime_api.py::test_actual_regated_report_captured_lineage",
+  "tests/test_source_heading_runtime_api.py::test_actual_default_layout_completed_capture"
+]

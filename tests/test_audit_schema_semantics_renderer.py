@@ -140,3 +140,7 @@ def test_new_sent_text_surfaces_are_inventory_visible():
     surfaces = api.sent_text_surfaces()
     assert surfaces['schema_semantics_header_v19'] == api.SCHEMA_SEMANTICS_HEADER_V19
     assert surfaces['schema_semantics_contract_v19'] == api.SCHEMA_SEMANTICS_CONTRACT_V19
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

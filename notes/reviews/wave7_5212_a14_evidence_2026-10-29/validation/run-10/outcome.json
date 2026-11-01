@@ -1,0 +1,16 @@
+{
+  "invalid_junit_cases": [],
+  "passed": true,
+  "passed_cases_by_module": {
+    "test_d41_request_parity": 6,
+    "test_pr5212_r3_fixes": 5,
+    "test_pr5212_r4_fixes": 5,
+    "test_shared_generation_completed_replay": 32
+  },
+  "returncode": 0,
+  "scientific_acceptance": "not_assessed",
+  "selection_complete": true,
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 315.85968758299714
+}

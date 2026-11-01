@@ -1,0 +1,1827 @@
+{
+  "archive": {
+    "bytes": 4114924,
+    "decompressed_bytes_verified": true,
+    "files": 1269,
+    "path": "authentic_controls.tar.gz",
+    "sha256": "314ad171427e2a42244fe963874c1082137ea99228bc40d6f12809058a36de6a"
+  },
+  "external_environment_reports_copied_verbatim": [
+    {
+      "bytes": 84,
+      "path": "poetry-environment-canary/collected.json",
+      "sha256": "d4992eb77b68433a10743459e51a0b4fb96ec82b89fc405e1c57563884a0be16"
+    },
+    {
+      "bytes": 355,
+      "path": "poetry-environment-canary/pytest.xml",
+      "sha256": "371a16b358aa4c28a00bfa4976e66c97c750b0e6a6a1b32550bffda3c63be6bb"
+    },
+    {
+      "bytes": 455,
+      "path": "poetry-environment-canary/reports.jsonl",
+      "sha256": "7aca817499b1839742f2b5892b4f9f79162e3476d11acb8699a5311d7f1abf09"
+    },
+    {
+      "bytes": 2866,
+      "path": "poetry-environment-canary/result.json",
+      "sha256": "95a98ed5a23109001917a5c93a4240a2fd50cfa3f3e297af97696e1891dc2a43"
+    },
+    {
+      "bytes": 265,
+      "path": "poetry-environment-canary.log",
+      "sha256": "9e40988fdc1f2fd1c6b51b59ef1e5c68b5ba4cf110496a2be51fee76dc15ddae"
+    },
+    {
+      "bytes": 1461,
+      "path": "poetry-environment-control/collected.json",
+      "sha256": "577c448c08399d45872eaa0df5c70f6322cf4be7f4dbe533cfe8bf7ac943aa4b"
+    },
+    {
+      "bytes": 2767,
+      "path": "poetry-environment-control/pytest.xml",
+      "sha256": "07c3bb8133479cabd3af8ea24390818fb4204ef2b2d0c045f39e71b66d1d34a0"
+    },
+    {
+      "bytes": 7023,
+      "path": "poetry-environment-control/reports.jsonl",
+      "sha256": "1541a53266b07cafc80ebbeaf281269474570b84a99aaf2cec5cc191cab043ff"
+    },
+    {
+      "bytes": 12303,
+      "path": "poetry-environment-control/result.json",
+      "sha256": "fdf1cc0e78fea8a4b3f5d3629a9189a49eaecfb0f22cdeca1673b2722052f6cd"
+    },
+    {
+      "bytes": 289,
+      "path": "poetry-environment-control.log",
+      "sha256": "f55960518cd2187d3aecc58b5ebf1aef467d9754b4d5ede67c0b3492e51f633a"
+    },
+    {
+      "bytes": 105,
+      "path": "checkout-environment-canary/collected.json",
+      "sha256": "9616a8996adf832c473ba9e978dfa10fe67c2693f415671a42d3ec8ce595ccca"
+    },
+    {
+      "bytes": 377,
+      "path": "checkout-environment-canary/pytest.xml",
+      "sha256": "c3cd49c2328e824b94d9c1b00da36f2ebe1d21b088d9e88f1ac9042ab6c3cdd2"
+    },
+    {
+      "bytes": 518,
+      "path": "checkout-environment-canary/reports.jsonl",
+      "sha256": "84ce2d92ae565820c62cb019a5c15638a022112c329aeb04cb502e64f14f43a1"
+    },
+    {
+      "bytes": 2548,
+      "path": "checkout-environment-canary/result.json",
+      "sha256": "fee2eedbb4cd2569a3e373ce5d2c8af90c8df6bade0fc0754675f5887d10d4f0"
+    },
+    {
+      "bytes": 924,
+      "path": "checkout-environment-canary.log",
+      "sha256": "df40caf2358e2e40e69261cd1e47be9191ed7c912e7cc091bf49a211b5156403"
+    },
+    {
+      "bytes": 4058,
+      "path": "checkout-environment-control/collected.json",
+      "sha256": "4360759a9d1105b9a226ca33342ae5171caf2fbaa5b5531ab7b4ebd61d9d3e61"
+    },
+    {
+      "bytes": 5690,
+      "path": "checkout-environment-control/pytest.xml",
+      "sha256": "5e34aab068b51d6ca986ce19b543c1630aa73213b61936e43db5f3f591efdb0f"
+    },
+    {
+      "bytes": 19685,
+      "path": "checkout-environment-control/reports.jsonl",
+      "sha256": "9c1c474199c6f634338a800d255f6d47f5ac7ad99d6fde7366e3d688cc7f4786"
+    },
+    {
+      "bytes": 29535,
+      "path": "checkout-environment-control/result.json",
+      "sha256": "ac0b76e6186c4573cf770cb7ec1b3140d7513f3868dab561f6b600eae2c2c19b"
+    },
+    {
+      "bytes": 927,
+      "path": "checkout-environment-control.log",
+      "sha256": "dec6d750b3f30cae1c26531404b3ed825cab0bb46324f7c01efbe74d1d7be835"
+    }
+  ],
+  "generations": [
+    {
+      "case": "c1",
+      "derived": false,
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "head": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+      "imported_sources_verified_against_git": 86,
+      "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_does_not_accept_unrelated_archived_attempts"
+    },
+    {
+      "case": "c2",
+      "derived": false,
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "head": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+      "imported_sources_verified_against_git": 95,
+      "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_records_an_orphaned_partial_predecessor[malformed]"
+    },
+    {
+      "case": "c3",
+      "derived": false,
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "head": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+      "imported_sources_verified_against_git": 95,
+      "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_records_an_orphaned_partial_predecessor[missing]"
+    },
+    {
+      "case": "c4",
+      "derived": false,
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "head": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+      "imported_sources_verified_against_git": 95,
+      "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_predecessor_binding_survives_interrupted_index_activation"
+    },
+    {
+      "case": "c5",
+      "derived": false,
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "head": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+      "imported_sources_verified_against_git": 78,
+      "nodeid": "tests/test_generation_manifest_identity.py::test_legacy_progress_without_input_evidence_requires_explicit_restart"
+    },
+    {
+      "case": "c5-derived",
+      "derived": true,
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "head": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+      "imported_sources_verified_against_git": 93,
+      "nodeid": "tests/test_generation_manifest_identity.py::test_legacy_progress_without_input_evidence_requires_explicit_restart"
+    },
+    {
+      "case": "c6",
+      "derived": false,
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "head": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+      "imported_sources_verified_against_git": 95,
+      "nodeid": "tests/test_generation_recovery_review.py::test_explicit_restart_preserves_an_unreadable_snapshot_index"
+    },
+    {
+      "case": "c6-derived",
+      "derived": true,
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "head": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+      "imported_sources_verified_against_git": 93,
+      "nodeid": "tests/test_generation_recovery_review.py::test_explicit_restart_preserves_an_unreadable_snapshot_index"
+    },
+    {
+      "case": "c7",
+      "derived": false,
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "head": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+      "imported_sources_verified_against_git": 95,
+      "nodeid": "tests/test_midnight_resume.py::test_automatic_date_is_restored_before_cached_instruction_or_portable_checks[True-False]"
+    },
+    {
+      "case": "c8",
+      "derived": false,
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "head": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+      "imported_sources_verified_against_git": 95,
+      "nodeid": "tests/test_reasoning_generation_restart.py::test_fresh_generation_archives_malformed_predecessor_reasoning[True]"
+    }
+  ],
+  "helper_hashes": {
+    "scripts/adhoc/d41_environment_controls_20261029.py": "f76cd8ac4c34a317b824c01bb59f5588ea527d5b1348925a427d0ae32bf0bd94",
+    "scripts/adhoc/d41_legacy_controls_20261029.py": "0d2ecd8147cbe55f364e3bb6f0d35dd18f65ed71bd00a322a13b9d882bbd826f",
+    "scripts/adhoc/d41_legacy_controls_20261029_v1.py": "51172a3f15236e53386f4cceefdb6e44ddfb76246eee9da80df314548fbdc856",
+    "scripts/adhoc/d41_loopback_only_20261029.sb": "3b819cf36924cb66296dc532b6e8f0e589e21100a45fd965bba9c2052a39cb6e",
+    "scripts/adhoc/d41_validation_offline_20261029.sb": "9a57afc3ca40f6275cfdb318bc46c94fe7bdf9c991e2e1e66de71965b40acdb5",
+    "scripts/adhoc/retain_d41_legacy_evidence_20261029.py": "d47a7d8cd4501baf13155ac8e002d28f47ae89d759ac0d32891daa7384172935",
+    "scripts/adhoc/run_d41_environment_serial_20261029.sh": "3f19002d3bf67288664e9e967f9d178fb13fe02e62c12e57219e946b34ca3481",
+    "scripts/adhoc/run_d41_environment_serial_20261029_v1.sh": "f2e5652604b071bd3b12f604e47984c4bf9b994c4754faef9e8732e7bb00fdc9",
+    "scripts/adhoc/run_d41_legacy_serial_20261029.sh": "ea7a52a0a3ef8509a0bf3b1560cdef8a16441059856d243a78c04217db4838c1",
+    "scripts/adhoc/run_d41_validation_serial_20261029.sh": "13254a4f3b61b898bab61086127f1a3acdc3e5de2c09f914b077102fd417ad6d",
+    "scripts/adhoc/status_d41_validation_20261029.py": "eab250e1463dc15e7e456d40447f4904fba3e18eca3a4f05159810bdb9e31353"
+  },
+  "results": [
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "fake_dispatches": 0,
+        "message": "generation snapshot evidence includes an unaccounted attempt; restore its usage ledger before resuming",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "base_trace": [
+        {
+          "file": "api_runner.py",
+          "function": "execute",
+          "line": 6917
+        },
+        {
+          "file": "api_runner.py",
+          "function": "_execute",
+          "line": 7586
+        },
+        {
+          "file": "api_runner.py",
+          "function": "_generate_phase",
+          "line": 6764
+        },
+        {
+          "file": "api_runner.py",
+          "function": "_call_with_usage",
+          "line": 5842
+        },
+        {
+          "file": "api_runner.py",
+          "function": "_require_surviving_accounting",
+          "line": 6720
+        },
+        {
+          "file": "snapshot_store.py",
+          "function": "require_accounted",
+          "line": 402
+        }
+      ],
+      "call": 2,
+      "capture_manifest_sha256": "677fcd5c1a79596a801dce1de5d21c6bbf57cbdc4dab5c9e94920b846d2529da",
+      "captured_bytes": 12779,
+      "captured_file_count": 15,
+      "case": "c1",
+      "changed_files": 6,
+      "classification": "A",
+      "imported_sources_verified_against_git": 30,
+      "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_does_not_accept_unrelated_archived_attempts",
+      "original_bytes_not_in_resulting_run": [],
+      "pre_d41": {
+        "fake_dispatches": 0,
+        "message": "generation snapshot evidence includes an unaccounted attempt; restore its usage ledger before resuming",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "raw_result": "replays/c1/call-2/result.json",
+      "semantic_side_effects": {
+        "unrelated_generation_not_admitted": true
+      },
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "fake_dispatches": 0,
+        "message": "latch journal: invalid usage ledger: Expecting value: line 1 column 1 (char 0)",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "base_trace": [
+        {
+          "file": "latch_journal.py",
+          "function": "_validated",
+          "line": 477
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_json",
+          "line": 61
+        },
+        {
+          "file": "api_runner.py",
+          "function": "execute",
+          "line": 6917
+        },
+        {
+          "file": "api_runner.py",
+          "function": "_execute",
+          "line": 7094
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "check",
+          "line": 635
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_validated",
+          "line": 479
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_fail",
+          "line": 38
+        }
+      ],
+      "call": 2,
+      "capture_manifest_sha256": "30546ef1880d3a12b1d4a10eb2072b63fc466c1521b8b08075af170a486757a2",
+      "captured_bytes": 9865,
+      "captured_file_count": 15,
+      "case": "c2",
+      "changed_files": 0,
+      "classification": "A",
+      "imported_sources_verified_against_git": 26,
+      "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_records_an_orphaned_partial_predecessor[malformed]",
+      "original_bytes_not_in_resulting_run": [],
+      "pre_d41": {
+        "already_complete": false,
+        "fake_dispatches": 4,
+        "run_date": "2026-10-30",
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "raw_result": "replays/c2/call-2/result.json",
+      "semantic_side_effects": {},
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "already_complete": false,
+        "fake_dispatches": 4,
+        "run_date": "2026-10-30",
+        "skipped": [],
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "base_trace": [],
+      "call": 2,
+      "capture_manifest_sha256": "7953e74e7afb67320034a4327aa4708de95b480fd111a8577d630f5c23fe8007",
+      "captured_bytes": 9857,
+      "captured_file_count": 14,
+      "case": "c3",
+      "changed_files": 17,
+      "classification": "B",
+      "imported_sources_verified_against_git": 46,
+      "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_records_an_orphaned_partial_predecessor[missing]",
+      "original_bytes_not_in_resulting_run": [
+        "outputs/EXTERNAL_api_progress.json"
+      ],
+      "pre_d41": {
+        "already_complete": false,
+        "fake_dispatches": 4,
+        "run_date": "2026-10-30",
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "raw_result": "replays/c3/call-2/result.json",
+      "semantic_side_effects": {
+        "active_reasoning_generation_isolated": true,
+        "current_index_matches_generation": true,
+        "exact_old_index_archived": true,
+        "exact_old_reasoning_archived": true,
+        "exact_predecessor_id_retained": true
+      },
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "fake_dispatches": 0,
+        "message": "injected index publication failure",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "OSError"
+      },
+      "base_trace": [
+        {
+          "file": "api_runner.py",
+          "function": "execute",
+          "line": 6917
+        },
+        {
+          "file": "api_runner.py",
+          "function": "_execute",
+          "line": 7430
+        },
+        {
+          "file": "snapshot_store.py",
+          "function": "activate",
+          "line": 171
+        },
+        {
+          "file": "snapshot_store.py",
+          "function": "finish_activation",
+          "line": 126
+        }
+      ],
+      "call": 2,
+      "capture_manifest_sha256": "7ad9011a6d983b8da3bd679dedb1f73ba1c5a53fc4eb4eeb5b16ee4293542619",
+      "captured_bytes": 9857,
+      "captured_file_count": 14,
+      "case": "c4",
+      "changed_files": 5,
+      "classification": "B",
+      "imported_sources_verified_against_git": 27,
+      "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_predecessor_binding_survives_interrupted_index_activation",
+      "original_bytes_not_in_resulting_run": [],
+      "pre_d41": {
+        "fake_dispatches": 0,
+        "message": "injected index publication failure",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "OSError"
+      },
+      "raw_result": "replays/c4/call-2/result.json",
+      "semantic_side_effects": {},
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "fake_dispatches": 0,
+        "message": "latch journal: unacknowledged discrepancy; required event_sha256s=9a31dcf895b259055c364ffb8c2d38f6d93a46905b18e6ffdf521349bb321e87",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "base_trace": [
+        {
+          "file": "api_runner.py",
+          "function": "execute",
+          "line": 6917
+        },
+        {
+          "file": "api_runner.py",
+          "function": "_execute",
+          "line": 7094
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "check",
+          "line": 635
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_validated",
+          "line": 484
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_legacy",
+          "line": 352
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_override",
+          "line": 285
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_fail",
+          "line": 38
+        }
+      ],
+      "call": 3,
+      "capture_manifest_sha256": "4b6d8ab692b5c5247e63175cd17b97782913e420797a41dfb41fdc4ca924d1bd",
+      "captured_bytes": 16491,
+      "captured_file_count": 16,
+      "case": "c4",
+      "changed_files": 0,
+      "classification": "B",
+      "imported_sources_verified_against_git": 26,
+      "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_predecessor_binding_survives_interrupted_index_activation",
+      "original_bytes_not_in_resulting_run": [],
+      "pre_d41": {
+        "already_complete": false,
+        "fake_dispatches": 4,
+        "run_date": "2026-10-30",
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "raw_result": "replays/c4/call-3/result.json",
+      "semantic_side_effects": {},
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "fake_dispatches": 0,
+        "message": "latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "base_trace": [
+        {
+          "file": "api_runner.py",
+          "function": "execute",
+          "line": 6917
+        },
+        {
+          "file": "api_runner.py",
+          "function": "_execute",
+          "line": 7094
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "check",
+          "line": 635
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_validated",
+          "line": 472
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_fail",
+          "line": 38
+        }
+      ],
+      "call": 1,
+      "capture_manifest_sha256": "a255b25a6ce10d3a32ab07969f2b01fe34449d48e3ba2bd1dada899914bf7cf5",
+      "captured_bytes": 1588,
+      "captured_file_count": 4,
+      "case": "c5",
+      "changed_files": 4,
+      "classification": "B",
+      "imported_sources_verified_against_git": 26,
+      "nodeid": "tests/test_generation_manifest_identity.py::test_legacy_progress_without_input_evidence_requires_explicit_restart",
+      "original_bytes_not_in_resulting_run": [],
+      "pre_d41": {
+        "fake_dispatches": 0,
+        "message": "saved phases have no recorded generation input identity; restore their input evidence or use --no-resume for an explicit new generation",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "raw_result": "replays/c5/call-1/result.json",
+      "semantic_side_effects": {},
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "fake_dispatches": 0,
+        "message": "latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "base_trace": [
+        {
+          "file": "api_runner.py",
+          "function": "execute",
+          "line": 6917
+        },
+        {
+          "file": "api_runner.py",
+          "function": "_execute",
+          "line": 7094
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "check",
+          "line": 635
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_validated",
+          "line": 472
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_fail",
+          "line": 38
+        }
+      ],
+      "call": 2,
+      "capture_manifest_sha256": "7dc00b80807b3b05a6c6be4c7be194307edc0f0e38789dd8df7a28984348f04f",
+      "captured_bytes": 6137,
+      "captured_file_count": 14,
+      "case": "c5-derived",
+      "changed_files": 0,
+      "classification": "B",
+      "imported_sources_verified_against_git": 26,
+      "nodeid": "tests/test_generation_manifest_identity.py::test_legacy_progress_without_input_evidence_requires_explicit_restart",
+      "original_bytes_not_in_resulting_run": [],
+      "pre_d41": {
+        "fake_dispatches": 0,
+        "message": "saved phases have no recorded generation input identity; restore their input evidence or use --no-resume for an explicit new generation",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "raw_result": "replays/c5-derived/call-2/result.json",
+      "semantic_side_effects": {},
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "already_complete": false,
+        "fake_dispatches": 4,
+        "run_date": "2026-10-30",
+        "skipped": [],
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "base_trace": [],
+      "call": 3,
+      "capture_manifest_sha256": "7dc00b80807b3b05a6c6be4c7be194307edc0f0e38789dd8df7a28984348f04f",
+      "captured_bytes": 6137,
+      "captured_file_count": 14,
+      "case": "c5-derived",
+      "changed_files": 17,
+      "classification": "B",
+      "imported_sources_verified_against_git": 46,
+      "nodeid": "tests/test_generation_manifest_identity.py::test_legacy_progress_without_input_evidence_requires_explicit_restart",
+      "original_bytes_not_in_resulting_run": [
+        "outputs/EXTERNAL_api_progress.json"
+      ],
+      "pre_d41": {
+        "already_complete": false,
+        "fake_dispatches": 4,
+        "run_date": "2026-10-30",
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "raw_result": "replays/c5-derived/call-3/result.json",
+      "semantic_side_effects": {
+        "active_reasoning_generation_isolated": true,
+        "current_index_matches_generation": true,
+        "exact_old_index_archived": true,
+        "exact_old_reasoning_archived": true,
+        "exact_predecessor_id_retained": true
+      },
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "fake_dispatches": 0,
+        "message": "latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "base_trace": [
+        {
+          "file": "api_runner.py",
+          "function": "execute",
+          "line": 6917
+        },
+        {
+          "file": "api_runner.py",
+          "function": "_execute",
+          "line": 7094
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "check",
+          "line": 635
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_validated",
+          "line": 472
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_fail",
+          "line": 38
+        }
+      ],
+      "call": 1,
+      "capture_manifest_sha256": "263267569747bc537fc9327dff7b56616e60d1f801835adb3f0cc8219c52b18e",
+      "captured_bytes": 1564,
+      "captured_file_count": 4,
+      "case": "c6",
+      "changed_files": 4,
+      "classification": "A",
+      "imported_sources_verified_against_git": 26,
+      "nodeid": "tests/test_generation_recovery_review.py::test_explicit_restart_preserves_an_unreadable_snapshot_index",
+      "original_bytes_not_in_resulting_run": [],
+      "pre_d41": {
+        "fake_dispatches": 0,
+        "message": "cannot recover generation snapshots from /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/pytest/c6/test_explicit_restart_preserve0/outputs/intermediate/EXTERNAL_snapshot_index.json: Expecting value: line 1 column 1 (char 0)",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "raw_result": "replays/c6/call-1/result.json",
+      "semantic_side_effects": {},
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "already_complete": false,
+        "fake_dispatches": 4,
+        "run_date": "2026-10-30",
+        "skipped": [],
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "base_trace": [],
+      "call": 2,
+      "capture_manifest_sha256": "9c615b21c065ed4006dded12ed7974f5b0f5913c3127f4fbe26fcd1e557a9c1f",
+      "captured_bytes": 1564,
+      "captured_file_count": 8,
+      "case": "c6",
+      "changed_files": 15,
+      "classification": "A",
+      "imported_sources_verified_against_git": 46,
+      "nodeid": "tests/test_generation_recovery_review.py::test_explicit_restart_preserves_an_unreadable_snapshot_index",
+      "original_bytes_not_in_resulting_run": [],
+      "pre_d41": {
+        "already_complete": false,
+        "fake_dispatches": 4,
+        "run_date": "2026-10-30",
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "raw_result": "replays/c6/call-2/result.json",
+      "semantic_side_effects": {
+        "active_reasoning_generation_isolated": true,
+        "current_index_matches_generation": true,
+        "exact_old_index_archived": true
+      },
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "fake_dispatches": 0,
+        "message": "latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "base_trace": [
+        {
+          "file": "api_runner.py",
+          "function": "execute",
+          "line": 6917
+        },
+        {
+          "file": "api_runner.py",
+          "function": "_execute",
+          "line": 7094
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "check",
+          "line": 635
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_validated",
+          "line": 472
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_fail",
+          "line": 38
+        }
+      ],
+      "call": 2,
+      "capture_manifest_sha256": "86fa57649b2624542509ed7bd23b464c20f3c64d744de011fe40320ed4e23f22",
+      "captured_bytes": 1619,
+      "captured_file_count": 4,
+      "case": "c6-derived",
+      "changed_files": 4,
+      "classification": "A",
+      "imported_sources_verified_against_git": 26,
+      "nodeid": "tests/test_generation_recovery_review.py::test_explicit_restart_preserves_an_unreadable_snapshot_index",
+      "original_bytes_not_in_resulting_run": [],
+      "pre_d41": {
+        "fake_dispatches": 0,
+        "message": "cannot recover generation snapshots from /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/pytest/c6-derived/fixture/outputs/intermediate/EXTERNAL_snapshot_index.json: Unterminated string starting at: line 5 column 5 (char 97)",
+        "run_date": "2026-10-30",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "raw_result": "replays/c6-derived/call-2/result.json",
+      "semantic_side_effects": {},
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "already_complete": false,
+        "fake_dispatches": 4,
+        "run_date": "2026-10-30",
+        "skipped": [],
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "base_trace": [],
+      "call": 3,
+      "capture_manifest_sha256": "77a3463e154240545ff23d24efecba6d05ed01058c2c5ad2c132910bea6526a4",
+      "captured_bytes": 1619,
+      "captured_file_count": 8,
+      "case": "c6-derived",
+      "changed_files": 15,
+      "classification": "A",
+      "imported_sources_verified_against_git": 46,
+      "nodeid": "tests/test_generation_recovery_review.py::test_explicit_restart_preserves_an_unreadable_snapshot_index",
+      "original_bytes_not_in_resulting_run": [],
+      "pre_d41": {
+        "already_complete": false,
+        "fake_dispatches": 4,
+        "run_date": "2026-10-30",
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "raw_result": "replays/c6-derived/call-3/result.json",
+      "semantic_side_effects": {
+        "active_reasoning_generation_isolated": true,
+        "current_index_matches_generation": true,
+        "exact_old_index_archived": true
+      },
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "fake_dispatches": 0,
+        "message": "latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume",
+        "run_date": "2026-09-12",
+        "status": "raised",
+        "type": "UsageLedgerError"
+      },
+      "base_trace": [
+        {
+          "file": "api_runner.py",
+          "function": "execute",
+          "line": 6917
+        },
+        {
+          "file": "api_runner.py",
+          "function": "_execute",
+          "line": 7094
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "check",
+          "line": 635
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_validated",
+          "line": 472
+        },
+        {
+          "file": "latch_journal.py",
+          "function": "_fail",
+          "line": 38
+        }
+      ],
+      "call": 2,
+      "capture_manifest_sha256": "84458c696a16b5f34437290307e21b62c5abce2ba523de1831cd5a692c623d68",
+      "captured_bytes": 34494,
+      "captured_file_count": 19,
+      "case": "c7",
+      "changed_files": 0,
+      "classification": "C",
+      "imported_sources_verified_against_git": 26,
+      "nodeid": "tests/test_midnight_resume.py::test_automatic_date_is_restored_before_cached_instruction_or_portable_checks[True-False]",
+      "original_bytes_not_in_resulting_run": [],
+      "pre_d41": {
+        "already_complete": true,
+        "fake_dispatches": 0,
+        "run_date": "2026-09-12",
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "raw_result": "replays/c7/call-2/result.json",
+      "semantic_side_effects": {},
+      "transplant_exact": true
+    },
+    {
+      "all_original_bytes_retained_in_capture": true,
+      "base_5212": {
+        "already_complete": false,
+        "fake_dispatches": 4,
+        "run_date": "2026-10-30",
+        "skipped": [],
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "base_trace": [],
+      "call": 2,
+      "capture_manifest_sha256": "6c718fe65772b4f6a4ca6baec10cd13d05a671b4aa7d4d4b3072a2fa7c275663",
+      "captured_bytes": 34509,
+      "captured_file_count": 19,
+      "case": "c8",
+      "changed_files": 13,
+      "classification": "A",
+      "imported_sources_verified_against_git": 46,
+      "nodeid": "tests/test_reasoning_generation_restart.py::test_fresh_generation_archives_malformed_predecessor_reasoning[True]",
+      "original_bytes_not_in_resulting_run": [
+        "outputs/EXTERNAL_provenance.yaml"
+      ],
+      "pre_d41": {
+        "already_complete": false,
+        "fake_dispatches": 4,
+        "run_date": "2026-10-30",
+        "status": "returned",
+        "usage_rows": 4,
+        "validation_problems": []
+      },
+      "raw_result": "replays/c8/call-2/result.json",
+      "semantic_side_effects": {
+        "active_reasoning_generation_isolated": true,
+        "current_index_matches_generation": true,
+        "exact_old_index_archived": true,
+        "exact_old_reasoning_archived": true,
+        "exact_predecessor_id_retained": true
+      },
+      "transplant_exact": true
+    }
+  ],
+  "runtime_diagnostics": [
+    {
+      "bytes": 2741,
+      "retained": "validation-diagnostics/test_real_legacy_launcher_keep0/controller_traceback.txt",
+      "sha256": "400f6b15e99ea3184dd3fa23f634c0bb81989506702d8052deebc2c491217f4f",
+      "source": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/ci/tmp/test_real_legacy_launcher_keep0/registration/attempts/CHORUS_direct_rep1/controller_traceback.txt"
+    },
+    {
+      "bytes": 4011,
+      "retained": "validation-diagnostics/test_real_legacy_launcher_keep0/result.json",
+      "sha256": "705860d75a9d1edbaff8156036280725a1992db98e8e2a5c113826cb7990d595",
+      "source": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/ci/tmp/test_real_legacy_launcher_keep0/registration/attempts/CHORUS_direct_rep1/result.json"
+    },
+    {
+      "bytes": 2741,
+      "retained": "validation-diagnostics/test_real_legacy_launcher_keep2/controller_traceback.txt",
+      "sha256": "ac3c340572fe34248efa24192f294dba60fbf7793327a24b486c960d2703d87b",
+      "source": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/ci/tmp/test_real_legacy_launcher_keep2/registration/attempts/CHORUS_direct_rep1/controller_traceback.txt"
+    },
+    {
+      "bytes": 4011,
+      "retained": "validation-diagnostics/test_real_legacy_launcher_keep2/result.json",
+      "sha256": "998a0ed771ad739593318f85cc0713bd6256d55ae4b7efc05426f800b8617015",
+      "source": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/ci/tmp/test_real_legacy_launcher_keep2/registration/attempts/CHORUS_direct_rep1/result.json"
+    }
+  ],
+  "superseded_environment_validation": {
+    "canary_passed": true,
+    "control_tests_started": false,
+    "executed_launcher": "scripts/adhoc/run_d41_environment_serial_20261029_v1.sh",
+    "path": "environment-launcher-v1",
+    "reason": "Bash empty-array expansion under set -u; corrected launcher re-canaries in fresh directories"
+  },
+  "superseded_validation": {
+    "completed": 1322,
+    "counted_as_final_gate": false,
+    "path": "ci-observer-error",
+    "reason": "observer Path.open conflicts with test filesystem prohibition"
+  },
+  "validation": {
+    "checkout-environment-canary": {
+      "all_selected_occurrences_completed": true,
+      "ci_partition": {},
+      "collected": 1,
+      "collection_errors": 0,
+      "command": [
+        "tests/test_preflight_resource_authority.py::test_positional_draft_context_worktree_selects_vocabulary",
+        "-q",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/environment-v2-runtime/checkout-environment-canary/tmp",
+        "--junitxml",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/environment-v2-reports/checkout-environment-canary/pytest.xml"
+      ],
+      "environment": {
+        "dependencies": {
+          "PyYAML": "6.0.2",
+          "anthropic": "0.72.0",
+          "linkml": "1.9.3",
+          "linkml-runtime": "1.9.4",
+          "pytest": "7.4.4"
+        },
+        "environment_control_sha256": "f76cd8ac4c34a317b824c01bb59f5588ea527d5b1348925a427d0ae32bf0bd94",
+        "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "helper_sha256": "0d2ecd8147cbe55f364e3bb6f0d35dd18f65ed71bd00a322a13b9d882bbd826f",
+        "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+        "removed_environment_names": [
+          "CBORG_API_KEY",
+          "KB_AUTH_TOKEN",
+          "OPENSCIENTIST_API_KEY"
+        ],
+        "reports_outside_checkout": true,
+        "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+        "site_and_pth_execution": false
+      },
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029.py",
+      "exit_code": 0,
+      "failure_reports": [],
+      "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
+      "junit": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 1
+      },
+      "outcomes": {
+        "passed": 1
+      },
+      "skip_reasons": {}
+    },
+    "checkout-environment-control": {
+      "all_selected_occurrences_completed": true,
+      "ci_partition": {},
+      "collected": 37,
+      "collection_errors": 0,
+      "command": [
+        "tests/test_preflight_resource_authority.py",
+        "-q",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/environment-v2-runtime/checkout-environment-control/tmp",
+        "--junitxml",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/environment-v2-reports/checkout-environment-control/pytest.xml"
+      ],
+      "environment": {
+        "dependencies": {
+          "PyYAML": "6.0.2",
+          "anthropic": "0.72.0",
+          "linkml": "1.9.3",
+          "linkml-runtime": "1.9.4",
+          "pytest": "7.4.4"
+        },
+        "environment_control_sha256": "f76cd8ac4c34a317b824c01bb59f5588ea527d5b1348925a427d0ae32bf0bd94",
+        "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "helper_sha256": "0d2ecd8147cbe55f364e3bb6f0d35dd18f65ed71bd00a322a13b9d882bbd826f",
+        "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+        "removed_environment_names": [
+          "CBORG_API_KEY",
+          "KB_AUTH_TOKEN",
+          "OPENSCIENTIST_API_KEY"
+        ],
+        "reports_outside_checkout": true,
+        "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+        "site_and_pth_execution": false
+      },
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029.py",
+      "exit_code": 0,
+      "failure_reports": [],
+      "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
+      "junit": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 37
+      },
+      "outcomes": {
+        "passed": 37
+      },
+      "skip_reasons": {}
+    },
+    "ci": {
+      "all_selected_occurrences_completed": true,
+      "ci_partition": {
+        "4": {
+          "dedicated": {
+            "routing-default-layout": [
+              "tests/test_source_heading_runtime_api.py::test_actual_default_layout_completed_capture"
+            ],
+            "routing-dispatch": [
+              "tests/test_source_heading_runtime_api.py::test_actual_sent_routing_counts_usage_and_completed_zero_calls"
+            ],
+            "routing-portable": [
+              "tests/test_source_heading_runtime_api.py::test_actual_completed_capture_is_portable_and_refuses_changed_bytes"
+            ],
+            "routing-regate": [
+              "tests/test_source_heading_runtime_api.py::test_actual_regated_report_captured_lineage"
+            ]
+          },
+          "exact_union": true,
+          "ordinary_counts": {
+            "1": 4873,
+            "2": 5477,
+            "3": 4730,
+            "4": 5473
+          }
+        },
+        "6": {
+          "dedicated": {
+            "routing-default-layout": [
+              "tests/test_source_heading_runtime_api.py::test_actual_default_layout_completed_capture"
+            ],
+            "routing-dispatch": [
+              "tests/test_source_heading_runtime_api.py::test_actual_sent_routing_counts_usage_and_completed_zero_calls"
+            ],
+            "routing-portable": [
+              "tests/test_source_heading_runtime_api.py::test_actual_completed_capture_is_portable_and_refuses_changed_bytes"
+            ],
+            "routing-regate": [
+              "tests/test_source_heading_runtime_api.py::test_actual_regated_report_captured_lineage"
+            ]
+          },
+          "exact_union": true,
+          "ordinary_counts": {
+            "1": 2577,
+            "2": 3444,
+            "3": 3299,
+            "4": 4232,
+            "5": 3209,
+            "6": 3792
+          }
+        }
+      },
+      "collected": 20557,
+      "collection_errors": 0,
+      "command": [
+        "tests",
+        "-q",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/ci/tmp",
+        "--junitxml",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci/pytest.xml"
+      ],
+      "dedicated_cases": {
+        "routing-default-layout": {
+          "all_phases_passed_without_xfail": true,
+          "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_default_layout_completed_capture",
+          "reports": [
+            {
+              "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_default_layout_completed_capture",
+              "outcome": "passed",
+              "wasxfail": null,
+              "when": "setup"
+            },
+            {
+              "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_default_layout_completed_capture",
+              "outcome": "passed",
+              "wasxfail": null,
+              "when": "call"
+            },
+            {
+              "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_default_layout_completed_capture",
+              "outcome": "passed",
+              "wasxfail": null,
+              "when": "teardown"
+            }
+          ]
+        },
+        "routing-dispatch": {
+          "all_phases_passed_without_xfail": true,
+          "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_sent_routing_counts_usage_and_completed_zero_calls",
+          "reports": [
+            {
+              "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_sent_routing_counts_usage_and_completed_zero_calls",
+              "outcome": "passed",
+              "wasxfail": null,
+              "when": "setup"
+            },
+            {
+              "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_sent_routing_counts_usage_and_completed_zero_calls",
+              "outcome": "passed",
+              "wasxfail": null,
+              "when": "call"
+            },
+            {
+              "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_sent_routing_counts_usage_and_completed_zero_calls",
+              "outcome": "passed",
+              "wasxfail": null,
+              "when": "teardown"
+            }
+          ]
+        },
+        "routing-portable": {
+          "all_phases_passed_without_xfail": true,
+          "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_completed_capture_is_portable_and_refuses_changed_bytes",
+          "reports": [
+            {
+              "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_completed_capture_is_portable_and_refuses_changed_bytes",
+              "outcome": "passed",
+              "wasxfail": null,
+              "when": "setup"
+            },
+            {
+              "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_completed_capture_is_portable_and_refuses_changed_bytes",
+              "outcome": "passed",
+              "wasxfail": null,
+              "when": "call"
+            },
+            {
+              "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_completed_capture_is_portable_and_refuses_changed_bytes",
+              "outcome": "passed",
+              "wasxfail": null,
+              "when": "teardown"
+            }
+          ]
+        },
+        "routing-regate": {
+          "all_phases_passed_without_xfail": true,
+          "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_regated_report_captured_lineage",
+          "reports": [
+            {
+              "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_regated_report_captured_lineage",
+              "outcome": "passed",
+              "wasxfail": null,
+              "when": "setup"
+            },
+            {
+              "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_regated_report_captured_lineage",
+              "outcome": "passed",
+              "wasxfail": null,
+              "when": "call"
+            },
+            {
+              "nodeid": "tests/test_source_heading_runtime_api.py::test_actual_regated_report_captured_lineage",
+              "outcome": "passed",
+              "wasxfail": null,
+              "when": "teardown"
+            }
+          ]
+        }
+      },
+      "environment": {
+        "dependencies": {
+          "PyYAML": "6.0.2",
+          "anthropic": "0.72.0",
+          "linkml": "1.9.3",
+          "linkml-runtime": "1.9.4",
+          "pytest": "7.4.4"
+        },
+        "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "helper_sha256": "0d2ecd8147cbe55f364e3bb6f0d35dd18f65ed71bd00a322a13b9d882bbd826f",
+        "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+        "removed_environment_names": [
+          "CBORG_API_KEY",
+          "KB_AUTH_TOKEN",
+          "OPENSCIENTIST_API_KEY"
+        ],
+        "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+        "site_and_pth_execution": false
+      },
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029.py",
+      "exit_code": 1,
+      "failure_reports": [
+        {
+          "message": "tests/test_d4d_full_schema.py:54: in setUpClass\n    subprocess.run(\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:577: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['poetry', 'run', 'gen-linkml', '-o', '/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/temporary/tmpzunu2fcv/data_sheets_schema_all.yaml', '-f', 'yaml', '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/../src/data_sheets_schema/schema/data_sheets_schema.yaml']' returned non-zero exit status 2.\n\nThe above exception was the direct cause of the following exception:\ntests/test_d4d_full_schema.py:60: in setUpClass\n    raise AssertionError(\nE   AssertionError: the merged schema could not be generated: --copies] [--no-download | --download]\nE                     [--extra-search-dir d [d ...]] [--pip version] [--setuptools version] [--wheel version] [--no-pip] [--no-setuptools] [--no-wheel] [--no-periodic-update] [--symlink-app-data] [--prompt prompt] [-h]\nE                     dest\nE   virtualenv: error: argument dest: the destination . is not write-able at /Users/marcin/Library/Caches/pypoetry/virtualenvs",
+          "nodeid": "tests/test_d4d_full_schema.py::TestD4DFullSchema::test_d4d_full_schema_generated",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "setup"
+        },
+        {
+          "message": "tests/test_d4d_full_schema.py:54: in setUpClass\n    subprocess.run(\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:577: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['poetry', 'run', 'gen-linkml', '-o', '/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/temporary/tmpzunu2fcv/data_sheets_schema_all.yaml', '-f', 'yaml', '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/../src/data_sheets_schema/schema/data_sheets_schema.yaml']' returned non-zero exit status 2.\n\nThe above exception was the direct cause of the following exception:\ntests/test_d4d_full_schema.py:60: in setUpClass\n    raise AssertionError(\nE   AssertionError: the merged schema could not be generated: --copies] [--no-download | --download]\nE                     [--extra-search-dir d [d ...]] [--pip version] [--setuptools version] [--wheel version] [--no-pip] [--no-setuptools] [--no-wheel] [--no-periodic-update] [--symlink-app-data] [--prompt prompt] [-h]\nE                     dest\nE   virtualenv: error: argument dest: the destination . is not write-able at /Users/marcin/Library/Caches/pypoetry/virtualenvs",
+          "nodeid": "tests/test_d4d_full_schema.py::TestD4DFullSchema::test_d4d_full_schema_has_no_imports",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "setup"
+        },
+        {
+          "message": "tests/test_d4d_full_schema.py:54: in setUpClass\n    subprocess.run(\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:577: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['poetry', 'run', 'gen-linkml', '-o', '/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/temporary/tmpzunu2fcv/data_sheets_schema_all.yaml', '-f', 'yaml', '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/../src/data_sheets_schema/schema/data_sheets_schema.yaml']' returned non-zero exit status 2.\n\nThe above exception was the direct cause of the following exception:\ntests/test_d4d_full_schema.py:60: in setUpClass\n    raise AssertionError(\nE   AssertionError: the merged schema could not be generated: --copies] [--no-download | --download]\nE                     [--extra-search-dir d [d ...]] [--pip version] [--setuptools version] [--wheel version] [--no-pip] [--no-setuptools] [--no-wheel] [--no-periodic-update] [--symlink-app-data] [--prompt prompt] [-h]\nE                     dest\nE   virtualenv: error: argument dest: the destination . is not write-able at /Users/marcin/Library/Caches/pypoetry/virtualenvs",
+          "nodeid": "tests/test_d4d_full_schema.py::TestD4DFullSchema::test_d4d_full_schema_prefixes_include_expected",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "setup"
+        },
+        {
+          "message": "tests/test_d4d_full_schema.py:54: in setUpClass\n    subprocess.run(\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:577: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['poetry', 'run', 'gen-linkml', '-o', '/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/temporary/tmpzunu2fcv/data_sheets_schema_all.yaml', '-f', 'yaml', '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/../src/data_sheets_schema/schema/data_sheets_schema.yaml']' returned non-zero exit status 2.\n\nThe above exception was the direct cause of the following exception:\ntests/test_d4d_full_schema.py:60: in setUpClass\n    raise AssertionError(\nE   AssertionError: the merged schema could not be generated: --copies] [--no-download | --download]\nE                     [--extra-search-dir d [d ...]] [--pip version] [--setuptools version] [--wheel version] [--no-pip] [--no-setuptools] [--no-wheel] [--no-periodic-update] [--symlink-app-data] [--prompt prompt] [-h]\nE                     dest\nE   virtualenv: error: argument dest: the destination . is not write-able at /Users/marcin/Library/Caches/pypoetry/virtualenvs",
+          "nodeid": "tests/test_d4d_full_schema.py::TestD4DFullSchema::test_d4d_full_schema_validates_test_cases",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "setup"
+        },
+        {
+          "message": "tests/test_d4d_full_schema.py:54: in setUpClass\n    subprocess.run(\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:577: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['poetry', 'run', 'gen-linkml', '-o', '/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/temporary/tmpzunu2fcv/data_sheets_schema_all.yaml', '-f', 'yaml', '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/../src/data_sheets_schema/schema/data_sheets_schema.yaml']' returned non-zero exit status 2.\n\nThe above exception was the direct cause of the following exception:\ntests/test_d4d_full_schema.py:60: in setUpClass\n    raise AssertionError(\nE   AssertionError: the merged schema could not be generated: --copies] [--no-download | --download]\nE                     [--extra-search-dir d [d ...]] [--pip version] [--setuptools version] [--wheel version] [--no-pip] [--no-setuptools] [--no-wheel] [--no-periodic-update] [--symlink-app-data] [--prompt prompt] [-h]\nE                     dest\nE   virtualenv: error: argument dest: the destination . is not write-able at /Users/marcin/Library/Caches/pypoetry/virtualenvs",
+          "nodeid": "tests/test_d4d_full_schema.py::TestD4DFullSchema::test_d4d_root_exists",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "setup"
+        },
+        {
+          "message": "tests/test_direct_keep_awake.py:288: in test_real_legacy_launcher_keeps_guards_and_receipts\n    assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE   AssertionError: assert 1 == 0\nE    +  where 1 = <function launch at 0x122422980>(namespace(registration=PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/v...legacy-resumed.NmvBBy/validation-v2/ci/tmp/test_real_legacy_launcher_keep0/awake-word.json'), job='CHORUS_direct_rep1'))\nE    +    where <function launch at 0x122422980> = awake.launch",
+          "nodeid": "tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[success]",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_direct_keep_awake.py:288: in test_real_legacy_launcher_keeps_guards_and_receipts\n    assert awake.launch(args) == {\"success\": 0, \"nonzero\": 1, \"signal\": 143}[outcome]\nE   AssertionError: assert 1 == 143\nE    +  where 1 = <function launch at 0x122422980>(namespace(registration=PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/v...legacy-resumed.NmvBBy/validation-v2/ci/tmp/test_real_legacy_launcher_keep2/awake-word.json'), job='CHORUS_direct_rep1'))\nE    +    where <function launch at 0x122422980> = awake.launch",
+          "nodeid": "tests/test_direct_keep_awake.py::test_real_legacy_launcher_keeps_guards_and_receipts[signal]",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_fresh_orphan_partial_generation.py:23: in test_fresh_restart_records_an_orphaned_partial_predecessor\n    fresh = api.execute(external, resume=False, client=fresh_client)\ntests/conftest.py:59: in monitored_execute\n    return execute(spec, **kwargs)\nsrc/data_sheets_schema/api_runner.py:6917: in execute\n    result = _execute(spec, resume=resume, client=client)\nsrc/data_sheets_schema/api_runner.py:7094: in _execute\n    latch_journal.check(spec, spending=resume, startup=True)\nsrc/data_sheets_schema/latch_journal.py:635: in check\n    _, events, mine = _validated(spec, spending=spending and not startup,\nsrc/data_sheets_schema/latch_journal.py:470: in _validated\n    _fail(f\"usage ledger deleted while its generation journal survives: expected generation={own[-1]['generation_id']}; found=missing ledger\")\nsrc/data_sheets_schema/latch_journal.py:38: in _fail\n    raise ledger.UsageLedgerError(f\"latch journal: {message}\")\nE   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: usage ledger deleted while its generation journal survives: expected generation=e2bfde0045b74f3cbd18d801548ee1f2; found=missing ledger",
+          "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_records_an_orphaned_partial_predecessor[missing]",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "src/data_sheets_schema/latch_journal.py:477: in _validated\n    data = ledger._validate_data(spec, _json(_bytes(path)), path)\nsrc/data_sheets_schema/latch_journal.py:61: in _json\n    return json.loads(raw, object_pairs_hook=_pairs, parse_constant=invalid)\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/json/__init__.py:365: in loads\n    return cls(**kw).decode(s)\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/json/decoder.py:345: in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/json/decoder.py:363: in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\nE   json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_fresh_orphan_partial_generation.py:23: in test_fresh_restart_records_an_orphaned_partial_predecessor\n    fresh = api.execute(external, resume=False, client=fresh_client)\ntests/conftest.py:59: in monitored_execute\n    return execute(spec, **kwargs)\nsrc/data_sheets_schema/api_runner.py:6917: in execute\n    result = _execute(spec, resume=resume, client=client)\nsrc/data_sheets_schema/api_runner.py:7094: in _execute\n    latch_journal.check(spec, spending=resume, startup=True)\nsrc/data_sheets_schema/latch_journal.py:635: in check\n    _, events, mine = _validated(spec, spending=spending and not startup,\nsrc/data_sheets_schema/latch_journal.py:479: in _validated\n    _fail(f\"invalid usage ledger: {exc}\")\nsrc/data_sheets_schema/latch_journal.py:38: in _fail\n    raise ledger.UsageLedgerError(f\"latch journal: {message}\")\nE   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: invalid usage ledger: Expecting value: line 1 column 1 (char 0)",
+          "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_records_an_orphaned_partial_predecessor[malformed]",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_fresh_orphan_partial_generation.py:50: in test_predecessor_binding_survives_interrupted_index_activation\n    api.execute(external, resume=False, client=client)\ntests/conftest.py:59: in monitored_execute\n    return execute(spec, **kwargs)\nsrc/data_sheets_schema/api_runner.py:6917: in execute\n    result = _execute(spec, resume=resume, client=client)\nsrc/data_sheets_schema/api_runner.py:7094: in _execute\n    latch_journal.check(spec, spending=resume, startup=True)\nsrc/data_sheets_schema/latch_journal.py:635: in check\n    _, events, mine = _validated(spec, spending=spending and not startup,\nsrc/data_sheets_schema/latch_journal.py:470: in _validated\n    _fail(f\"usage ledger deleted while its generation journal survives: expected generation={own[-1]['generation_id']}; found=missing ledger\")\nsrc/data_sheets_schema/latch_journal.py:38: in _fail\n    raise ledger.UsageLedgerError(f\"latch journal: {message}\")\nE   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: usage ledger deleted while its generation journal survives: expected generation=40b1b20dcc514cc1aa67fabcfc70bc57; found=missing ledger\n\nDuring handling of the above exception, another exception occurred:\ntests/test_fresh_orphan_partial_generation.py:49: in test_predecessor_binding_survives_interrupted_index_activation\n    with pytest.raises(OSError, match=\"index publication\"):\nE   AssertionError: Regex pattern did not match.\nE    Regex: 'index publication'\nE    Input: 'latch journal: usage ledger deleted while its generation journal survives: expected generation=40b1b20dcc514cc1aa67fabcfc70bc57; found=missing ledger'",
+          "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_predecessor_binding_survives_interrupted_index_activation",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_fresh_orphan_partial_generation.py:74: in test_fresh_restart_does_not_accept_unrelated_archived_attempts\n    api.execute(external, resume=False, client=client)\ntests/conftest.py:59: in monitored_execute\n    return execute(spec, **kwargs)\nsrc/data_sheets_schema/api_runner.py:6917: in execute\n    result = _execute(spec, resume=resume, client=client)\nsrc/data_sheets_schema/api_runner.py:7094: in _execute\n    latch_journal.check(spec, spending=resume, startup=True)\nsrc/data_sheets_schema/latch_journal.py:635: in check\n    _, events, mine = _validated(spec, spending=spending and not startup,\nsrc/data_sheets_schema/latch_journal.py:470: in _validated\n    _fail(f\"usage ledger deleted while its generation journal survives: expected generation={own[-1]['generation_id']}; found=missing ledger\")\nsrc/data_sheets_schema/latch_journal.py:38: in _fail\n    raise ledger.UsageLedgerError(f\"latch journal: {message}\")\nE   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: usage ledger deleted while its generation journal survives: expected generation=897be36904fd44c3939b6c6a7e1b7778; found=missing ledger\n\nDuring handling of the above exception, another exception occurred:\ntests/test_fresh_orphan_partial_generation.py:73: in test_fresh_restart_does_not_accept_unrelated_archived_attempts\n    with pytest.raises(ledger.UsageLedgerError, match=\"unaccounted attempt\"):\nE   AssertionError: Regex pattern did not match.\nE    Regex: 'unaccounted attempt'\nE    Input: 'latch journal: usage ledger deleted while its generation journal survives: expected generation=897be36904fd44c3939b6c6a7e1b7778; found=missing ledger'",
+          "nodeid": "tests/test_fresh_orphan_partial_generation.py::test_fresh_restart_does_not_accept_unrelated_archived_attempts",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_generation_manifest_identity.py:253: in test_legacy_progress_without_input_evidence_requires_explicit_restart\n    api.execute(external, client=client)\ntests/conftest.py:59: in monitored_execute\n    return execute(spec, **kwargs)\nsrc/data_sheets_schema/api_runner.py:6917: in execute\n    result = _execute(spec, resume=resume, client=client)\nsrc/data_sheets_schema/api_runner.py:7094: in _execute\n    latch_journal.check(spec, spending=resume, startup=True)\nsrc/data_sheets_schema/latch_journal.py:635: in check\n    _, events, mine = _validated(spec, spending=spending and not startup,\nsrc/data_sheets_schema/latch_journal.py:472: in _validated\n    _fail(\"surviving historical outputs/progress have no usage ledger or latch history; \"\nsrc/data_sheets_schema/latch_journal.py:38: in _fail\n    raise ledger.UsageLedgerError(f\"latch journal: {message}\")\nE   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume\n\nDuring handling of the above exception, another exception occurred:\ntests/test_generation_manifest_identity.py:252: in test_legacy_progress_without_input_evidence_requires_explicit_restart\n    with pytest.raises(ledger.UsageLedgerError, match=\"no recorded generation input identity\"):\nE   AssertionError: Regex pattern did not match.\nE    Regex: 'no recorded generation input identity'\nE    Input: 'latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'",
+          "nodeid": "tests/test_generation_manifest_identity.py::test_legacy_progress_without_input_evidence_requires_explicit_restart",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_generation_recovery_review.py:196: in test_explicit_restart_preserves_an_unreadable_snapshot_index\n    api.execute(external, client=refused)\ntests/conftest.py:59: in monitored_execute\n    return execute(spec, **kwargs)\nsrc/data_sheets_schema/api_runner.py:6917: in execute\n    result = _execute(spec, resume=resume, client=client)\nsrc/data_sheets_schema/api_runner.py:7094: in _execute\n    latch_journal.check(spec, spending=resume, startup=True)\nsrc/data_sheets_schema/latch_journal.py:635: in check\n    _, events, mine = _validated(spec, spending=spending and not startup,\nsrc/data_sheets_schema/latch_journal.py:472: in _validated\n    _fail(\"surviving historical outputs/progress have no usage ledger or latch history; \"\nsrc/data_sheets_schema/latch_journal.py:38: in _fail\n    raise ledger.UsageLedgerError(f\"latch journal: {message}\")\nE   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume\n\nDuring handling of the above exception, another exception occurred:\ntests/test_generation_recovery_review.py:195: in test_explicit_restart_preserves_an_unreadable_snapshot_index\n    with pytest.raises(ledger.UsageLedgerError, match=\"cannot recover generation snapshots\"):\nE   AssertionError: Regex pattern did not match.\nE    Regex: 'cannot recover generation snapshots'\nE    Input: 'latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'",
+          "nodeid": "tests/test_generation_recovery_review.py::test_explicit_restart_preserves_an_unreadable_snapshot_index",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_midnight_resume.py:49: in test_automatic_date_is_restored_before_cached_instruction_or_portable_checks\n    result = api.execute(resumed, client=client)\ntests/conftest.py:59: in monitored_execute\n    return execute(spec, **kwargs)\nsrc/data_sheets_schema/api_runner.py:6917: in execute\n    result = _execute(spec, resume=resume, client=client)\nsrc/data_sheets_schema/api_runner.py:7094: in _execute\n    latch_journal.check(spec, spending=resume, startup=True)\nsrc/data_sheets_schema/latch_journal.py:635: in check\n    _, events, mine = _validated(spec, spending=spending and not startup,\nsrc/data_sheets_schema/latch_journal.py:470: in _validated\n    _fail(f\"usage ledger deleted while its generation journal survives: expected generation={own[-1]['generation_id']}; found=missing ledger\")\nsrc/data_sheets_schema/latch_journal.py:38: in _fail\n    raise ledger.UsageLedgerError(f\"latch journal: {message}\")\nE   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: usage ledger deleted while its generation journal survives: expected generation=33a28ef444074872a4f3caca10d9ce9f; found=missing ledger",
+          "nodeid": "tests/test_midnight_resume.py::test_automatic_date_is_restored_before_cached_instruction_or_portable_checks[True-False]",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_preflight_resource_authority.py:51: in checkout_unchanged\n    assert snapshot() == before, \"test changed the checkout outside pytest's scratch tree\"\nE   AssertionError: test changed the checkout outside pytest's scratch tree\nE   assert {'.claude': (...6234228), ...} == {'.claude': (...6234228), ...}\nE     Omitting 14026 identical items, use -vv to show\nE     Differing items:\nE     {'notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci.log': (33188, 8146, 1793345844750594146, 696674234)} != {'notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci.log': (33188, 8145, 1793345843881967869, 696674234)}\nE     {'notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci/reports.jsonl': (33188, 4056709, 1793345844750643021, 696674239)} != {'notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci/reports.jsonl': (33188, 4056366, 1793345843882196705, 696674239)}\nE     Use -v to get more diff",
+          "nodeid": "tests/test_preflight_resource_authority.py::test_positional_draft_context_worktree_selects_vocabulary",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "teardown"
+        },
+        {
+          "message": "tests/test_preflight_resource_authority.py:51: in checkout_unchanged\n    assert snapshot() == before, \"test changed the checkout outside pytest's scratch tree\"\nE   AssertionError: test changed the checkout outside pytest's scratch tree\nE   assert {'.claude': (...6234228), ...} == {'.claude': (...6234228), ...}\nE     Omitting 14026 identical items, use -vv to show\nE     Differing items:\nE     {'notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci.log': (33188, 8175, 1793345904582089010, 696674234)} != {'notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci.log': (33188, 8174, 1793345893793292775, 696674234)}\nE     {'notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci/reports.jsonl': (33188, 4068325, 1793345904582237471, 696674239)} != {'notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci/reports.jsonl': (33188, 4067954, 1793345893793487945, 696674239)}\nE     Use -v to get more diff",
+          "nodeid": "tests/test_preflight_resource_authority.py::test_copied_cli_selects_foreign_tree_from_another_checkout[--worktree=]",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "teardown"
+        },
+        {
+          "message": "tests/test_preflight_resource_authority.py:51: in checkout_unchanged\n    assert snapshot() == before, \"test changed the checkout outside pytest's scratch tree\"\nE   AssertionError: test changed the checkout outside pytest's scratch tree\nE   assert {'.claude': (...6234228), ...} == {'.claude': (...6234228), ...}\nE     Omitting 14026 identical items, use -vv to show\nE     Differing items:\nE     {'notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci.log': (33188, 8177, 1793345915588834357, 696674234)} != {'notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci.log': (33188, 8176, 1793345905299726560, 696674234)}\nE     {'notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci/reports.jsonl': (33188, 4069810, 1793345915588965609, 696674239)} != {'notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci/reports.jsonl': (33188, 4069457, 1793345905299920272, 696674239)}\nE     Use -v to get more diff",
+          "nodeid": "tests/test_preflight_resource_authority.py::test_copied_cli_selects_foreign_tree_from_another_checkout[-w]",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "teardown"
+        },
+        {
+          "message": "tests/test_reasoning_generation_restart.py:21: in test_fresh_generation_archives_malformed_predecessor_reasoning\n    fresh = api.execute(external, resume=False, client=FakeClient())\ntests/conftest.py:59: in monitored_execute\n    return execute(spec, **kwargs)\nsrc/data_sheets_schema/api_runner.py:6917: in execute\n    result = _execute(spec, resume=resume, client=client)\nsrc/data_sheets_schema/api_runner.py:7094: in _execute\n    latch_journal.check(spec, spending=resume, startup=True)\nsrc/data_sheets_schema/latch_journal.py:635: in check\n    _, events, mine = _validated(spec, spending=spending and not startup,\nsrc/data_sheets_schema/latch_journal.py:470: in _validated\n    _fail(f\"usage ledger deleted while its generation journal survives: expected generation={own[-1]['generation_id']}; found=missing ledger\")\nsrc/data_sheets_schema/latch_journal.py:38: in _fail\n    raise ledger.UsageLedgerError(f\"latch journal: {message}\")\nE   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: usage ledger deleted while its generation journal survives: expected generation=675664211a484be583bc88bcd80b7164; found=missing ledger",
+          "nodeid": "tests/test_reasoning_generation_restart.py::test_fresh_generation_archives_malformed_predecessor_reasoning[True]",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_review_pack_schema_refresh.py:31: in test_imported_identifier_change_refreshes_a_warm_review_pack\n    regenerate()\ntests/test_review_pack_schema_refresh.py:27: in regenerate\n    subprocess.run([\"poetry\", \"run\", \"gen-linkml\", \"-f\", \"yaml\", \"-o\", str(merged),\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:577: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['poetry', 'run', 'gen-linkml', '-f', 'yaml', '-o', '/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/ci/tmp/test_imported_identifier_chang0/data_sheets_schema_all.yaml', '/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/ci/tmp/test_imported_identifier_chang0/data_sheets_schema.yaml']' returned non-zero exit status 2.",
+          "nodeid": "tests/test_review_pack_schema_refresh.py::test_imported_identifier_change_refreshes_a_warm_review_pack",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_run_lock.py:152: in test_it_becomes_stale_once_stopped\n    self.assertEqual(run_lock.live(self.dir), [])\nE   AssertionError: Lists differ: [Lock(path=PosixPath('/private/var/folders[167 chars]'t')] != []\nE   \nE   First list contains 1 additional elements.\nE   First extra element 0:\nE   Lock(path=PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/temporary/tmpj8d3r_qu/real.json'), pid=7066, label_prefix='real', projects=['A'], started='t')\nE   \nE   + []\nE   - [Lock(path=PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/temporary/tmpj8d3r_qu/real.json'),\nE   -       pid=7066,\nE   -       label_prefix='real',\nE   -       projects=['A'],\nE   -       started='t')]",
+          "nodeid": "tests/test_run_lock.py::TestAgainstARealProcess::test_it_becomes_stale_once_stopped",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_run_lock.py:143: in test_stop_actually_stops_it\n    self.assertFalse(lock.alive, \"process survived SIGTERM\")\nE   AssertionError: True is not false : process survived SIGTERM",
+          "nodeid": "tests/test_run_lock.py::TestAgainstARealProcess::test_stop_actually_stops_it",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_evaluation/test_rubric20_hybrid_parity.py:111: in test_the_scorer_itself_refuses_a_drifted_table\n    with tempfile.TemporaryDirectory(dir=REPO) as tmp:\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:887: in __init__\n    self.name = mkdtemp(suffix, prefix, dir)\n/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/tempfile.py:385: in mkdtemp\n    _os.mkdir(file, 0o700)\nE   PermissionError: [Errno 1] Operation not permitted: '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tmpwydn0qwd'",
+          "nodeid": "tests/test_evaluation/test_rubric20_hybrid_parity.py::TestTheDenominator::test_the_scorer_itself_refuses_a_drifted_table",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_schema/test_datacite_relationships.py:157: in test_newly_added_relations_validate\n    self.assertTrue(self._validate(value))\nE   AssertionError: False is not true",
+          "nodeid": "tests/test_schema/test_datacite_relationships.py::TestTheValuesThatFailedNowValidate::test_newly_added_relations_validate",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_schema/test_datacite_relationships.py:152: in test_the_previously_failing_relations_validate\n    self.assertTrue(self._validate(value))\nE   AssertionError: False is not true",
+          "nodeid": "tests/test_schema/test_datacite_relationships.py::TestTheValuesThatFailedNowValidate::test_the_previously_failing_relations_validate",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_schema/test_filecollection_resources.py:44: in test_a_collection_may_list_its_files\n    self.assertEqual(r.returncode, 0, (r.stdout + r.stderr)[:400])\nE   AssertionError: 2 != 0 : Creating virtualenv data-sheets-schema-8nJ3LMZW-py3.13 in /Users/marcin/Library/Caches/pypoetry/virtualenvs\nE   usage: virtualenv [--version] [--with-traceback] [-v | -q] [--read-only-app-data] [--app-data APP_DATA] [--reset-app-data] [--upgrade-embed-wheels] [--discovery {builtin}] [-p py] [--try-first-with py_exe]\nE                     [--creator {builtin,cpython3-posix,venv}] [--seeder {app-data,pip}]",
+          "nodeid": "tests/test_schema/test_filecollection_resources.py::TestTheSlotCanActuallyBePopulated::test_a_collection_may_list_its_files",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_schema/test_filecollection_resources.py:57: in test_a_collection_with_no_resources_is_still_fine\n    self.assertEqual(_validate(HEAD).returncode, 0)\nE   AssertionError: 2 != 0",
+          "nodeid": "tests/test_schema/test_filecollection_resources.py::TestTheSlotCanActuallyBePopulated::test_a_collection_with_no_resources_is_still_fine",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        },
+        {
+          "message": "tests/test_schema/test_filecollection_resources.py:52: in test_several_files_are_fine\n    self.assertEqual(r.returncode, 0, (r.stdout + r.stderr)[:400])\nE   AssertionError: 2 != 0 : Creating virtualenv data-sheets-schema-8nJ3LMZW-py3.13 in /Users/marcin/Library/Caches/pypoetry/virtualenvs\nE   usage: virtualenv [--version] [--with-traceback] [-v | -q] [--read-only-app-data] [--app-data APP_DATA] [--reset-app-data] [--upgrade-embed-wheels] [--discovery {builtin}] [-p py] [--try-first-with py_exe]\nE                     [--creator {builtin,cpython3-posix,venv}] [--seeder {app-data,pip}]",
+          "nodeid": "tests/test_schema/test_filecollection_resources.py::TestTheSlotCanActuallyBePopulated::test_several_files_are_fine",
+          "outcome": "failed",
+          "wasxfail": null,
+          "when": "call"
+        }
+      ],
+      "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
+      "junit": {
+        "errors": 8,
+        "failures": 19,
+        "skipped": 45,
+        "tests": 20560
+      },
+      "outcomes": {
+        "failed": 19,
+        "passed": 20488,
+        "skipped": 34
+      },
+      "skip_reasons": {
+        "SSSOM files are manually curated in data/semantic_exchange/": 1,
+        "a terminal result and the attempt deadline are the native runtime's": 19,
+        "crate inputs are gitignored and absent here (#453)": 1,
+        "linkml-map not available": 1,
+        "no canonical record on disk": 1,
+        "no symlinked .venv to walk through": 1,
+        "run not present": 1,
+        "set D4D_INSTALL_TESTS=1 to build the wheel and install it into a fresh venv (minutes, network)": 9,
+        "this runtime uses reprlib dataclass repr": 11
+      }
+    },
+    "ci-canary": {
+      "all_selected_occurrences_completed": true,
+      "ci_partition": {},
+      "collected": 1,
+      "collection_errors": 0,
+      "command": [
+        "tests/test_ci_sharding.py::test_one_long_case_starts_before_a_file_with_many_short_cases",
+        "-q",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/ci-canary/tmp",
+        "--junitxml",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci-canary/pytest.xml"
+      ],
+      "environment": {
+        "dependencies": {
+          "PyYAML": "6.0.2",
+          "anthropic": "0.72.0",
+          "linkml": "1.9.3",
+          "linkml-runtime": "1.9.4",
+          "pytest": "7.4.4"
+        },
+        "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "helper_sha256": "51172a3f15236e53386f4cceefdb6e44ddfb76246eee9da80df314548fbdc856",
+        "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+        "removed_environment_names": [
+          "CBORG_API_KEY",
+          "KB_AUTH_TOKEN",
+          "OPENSCIENTIST_API_KEY"
+        ],
+        "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+        "site_and_pth_execution": false
+      },
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "exit_code": 0,
+      "failure_reports": [],
+      "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
+      "junit": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 1
+      },
+      "outcomes": {
+        "passed": 1
+      },
+      "skip_reasons": {}
+    },
+    "ci-observer-canary": {
+      "all_selected_occurrences_completed": true,
+      "ci_partition": {},
+      "collected": 1,
+      "collection_errors": 0,
+      "command": [
+        "tests/test_audit_batch_context.py::test_worker_recovery_ranges_do_not_access_filesystem_and_keep_exact_locator",
+        "-q",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/validation-v2/ci-observer-canary/tmp",
+        "--junitxml",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/notes/reviews/d41_legacy_recovery_evidence_20261029/raw/ci-observer-canary/pytest.xml"
+      ],
+      "environment": {
+        "dependencies": {
+          "PyYAML": "6.0.2",
+          "anthropic": "0.72.0",
+          "linkml": "1.9.3",
+          "linkml-runtime": "1.9.4",
+          "pytest": "7.4.4"
+        },
+        "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "helper_sha256": "0d2ecd8147cbe55f364e3bb6f0d35dd18f65ed71bd00a322a13b9d882bbd826f",
+        "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+        "removed_environment_names": [
+          "CBORG_API_KEY",
+          "KB_AUTH_TOKEN",
+          "OPENSCIENTIST_API_KEY"
+        ],
+        "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+        "site_and_pth_execution": false
+      },
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029.py",
+      "exit_code": 0,
+      "failure_reports": [],
+      "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
+      "junit": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 1
+      },
+      "outcomes": {
+        "passed": 1
+      },
+      "skip_reasons": {}
+    },
+    "collect": {
+      "all_selected_occurrences_completed": false,
+      "ci_partition": {},
+      "collected": 24044,
+      "collection_errors": 17,
+      "command": [
+        "--collect-only",
+        "-q",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/collect/tmp",
+        "--junitxml",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/notes/reviews/d41_legacy_recovery_evidence_20261029/raw/collect/pytest.xml"
+      ],
+      "environment": {
+        "dependencies": {
+          "PyYAML": "6.0.2",
+          "anthropic": "0.72.0",
+          "linkml": "1.9.3",
+          "linkml-runtime": "1.9.4",
+          "pytest": "7.4.4"
+        },
+        "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "helper_sha256": "51172a3f15236e53386f4cceefdb6e44ddfb76246eee9da80df314548fbdc856",
+        "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+        "removed_environment_names": [
+          "CBORG_API_KEY",
+          "KB_AUTH_TOKEN",
+          "OPENSCIENTIST_API_KEY"
+        ],
+        "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+        "site_and_pth_execution": false
+      },
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "exit_code": 2,
+      "failure_reports": [],
+      "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
+      "junit": {
+        "errors": 17,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 17
+      },
+      "outcomes": {},
+      "skip_reasons": {}
+    },
+    "poetry-environment-canary": {
+      "all_selected_occurrences_completed": true,
+      "ci_partition": {},
+      "collected": 1,
+      "collection_errors": 0,
+      "command": [
+        "tests/test_d4d_full_schema.py::TestD4DFullSchema::test_d4d_full_schema_generated",
+        "-q",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/environment-v2-runtime/poetry-environment-canary/tmp",
+        "--junitxml",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/environment-v2-reports/poetry-environment-canary/pytest.xml"
+      ],
+      "environment": {
+        "dependencies": {
+          "PyYAML": "6.0.2",
+          "anthropic": "0.72.0",
+          "linkml": "1.9.3",
+          "linkml-runtime": "1.9.4",
+          "pytest": "7.4.4"
+        },
+        "environment_control_sha256": "f76cd8ac4c34a317b824c01bb59f5588ea527d5b1348925a427d0ae32bf0bd94",
+        "environment_overrides": {
+          "POETRY_CACHE_DIR": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/environment-v2-runtime/poetry-cache",
+          "POETRY_VIRTUALENVS_CREATE": "false",
+          "VIRTUAL_ENV": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv"
+        },
+        "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "helper_sha256": "0d2ecd8147cbe55f364e3bb6f0d35dd18f65ed71bd00a322a13b9d882bbd826f",
+        "path_prefix": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin",
+        "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+        "removed_environment_names": [
+          "CBORG_API_KEY",
+          "KB_AUTH_TOKEN",
+          "OPENSCIENTIST_API_KEY"
+        ],
+        "reports_outside_checkout": true,
+        "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+        "site_and_pth_execution": false
+      },
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029.py",
+      "exit_code": 0,
+      "failure_reports": [],
+      "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
+      "junit": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 1
+      },
+      "outcomes": {
+        "passed": 1
+      },
+      "skip_reasons": {}
+    },
+    "poetry-environment-control": {
+      "all_selected_occurrences_completed": true,
+      "ci_partition": {},
+      "collected": 13,
+      "collection_errors": 0,
+      "command": [
+        "tests/test_d4d_full_schema.py",
+        "tests/test_review_pack_schema_refresh.py",
+        "tests/test_schema/test_datacite_relationships.py::TestTheValuesThatFailedNowValidate",
+        "tests/test_schema/test_filecollection_resources.py::TestTheSlotCanActuallyBePopulated",
+        "-q",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/environment-v2-runtime/poetry-environment-control/tmp",
+        "--junitxml",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/environment-v2-reports/poetry-environment-control/pytest.xml"
+      ],
+      "environment": {
+        "dependencies": {
+          "PyYAML": "6.0.2",
+          "anthropic": "0.72.0",
+          "linkml": "1.9.3",
+          "linkml-runtime": "1.9.4",
+          "pytest": "7.4.4"
+        },
+        "environment_control_sha256": "f76cd8ac4c34a317b824c01bb59f5588ea527d5b1348925a427d0ae32bf0bd94",
+        "environment_overrides": {
+          "POETRY_CACHE_DIR": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/environment-v2-runtime/poetry-cache",
+          "POETRY_VIRTUALENVS_CREATE": "false",
+          "VIRTUAL_ENV": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv"
+        },
+        "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "helper_sha256": "0d2ecd8147cbe55f364e3bb6f0d35dd18f65ed71bd00a322a13b9d882bbd826f",
+        "path_prefix": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin",
+        "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+        "removed_environment_names": [
+          "CBORG_API_KEY",
+          "KB_AUTH_TOKEN",
+          "OPENSCIENTIST_API_KEY"
+        ],
+        "reports_outside_checkout": true,
+        "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+        "site_and_pth_execution": false
+      },
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029.py",
+      "exit_code": 0,
+      "failure_reports": [],
+      "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
+      "junit": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 1,
+        "tests": 13
+      },
+      "outcomes": {
+        "passed": 12,
+        "skipped": 1
+      },
+      "skip_reasons": {
+        "Test case D4D_-_AI-READI_FAIRHub_v3_data.yaml not found at /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/tests/../data/sheets/html_output/D4D_-_AI-READI_FAIRHub_v3_data.yaml": 1
+      }
+    },
+    "suites": {
+      "all_selected_occurrences_completed": true,
+      "ci_partition": {},
+      "collected": 161,
+      "collection_errors": 0,
+      "command": [
+        "tests/test_latch_journal.py",
+        "tests/test_api_latch_guard.py",
+        "tests/test_pr5212_d55_fixes.py",
+        "tests/test_d42_claude_d55.py",
+        "tests/test_pr5212_r3_fixes.py",
+        "tests/test_pr5212_r4_fixes.py",
+        "tests/test_d41_request_parity.py",
+        "-q",
+        "--tb=short",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/suites/tmp",
+        "--junitxml",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/notes/reviews/d41_legacy_recovery_evidence_20261029/raw/suites/pytest.xml"
+      ],
+      "environment": {
+        "dependencies": {
+          "PyYAML": "6.0.2",
+          "anthropic": "0.72.0",
+          "linkml": "1.9.3",
+          "linkml-runtime": "1.9.4",
+          "pytest": "7.4.4"
+        },
+        "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "helper_sha256": "51172a3f15236e53386f4cceefdb6e44ddfb76246eee9da80df314548fbdc856",
+        "poetry_lock_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+        "removed_environment_names": [
+          "CBORG_API_KEY",
+          "KB_AUTH_TOKEN",
+          "OPENSCIENTIST_API_KEY"
+        ],
+        "site": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+        "site_and_pth_execution": false
+      },
+      "executed_helper": "scripts/adhoc/d41_legacy_controls_20261029_v1.py",
+      "exit_code": 0,
+      "failure_reports": [],
+      "head": "d9b69d84d9a6936809681ae240bb8e767649ca11",
+      "junit": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 161
+      },
+      "outcomes": {
+        "passed": 161
+      },
+      "skip_reasons": {}
+    }
+  }
+}

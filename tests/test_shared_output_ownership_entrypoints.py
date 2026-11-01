@@ -6,14 +6,17 @@ The full genuine eight-wire resume proof is a separate final integration check.
 from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import replace
+import json
 import os
 from pathlib import Path
 import socket
+from types import SimpleNamespace
 
 from click.testing import CliRunner
 import pytest
 
 from data_sheets_schema import api_runner as api, run_lock, shared_generation as sg, usage_ledger as ledger
+from data_sheets_schema import latch_journal
 from data_sheets_schema.cli import cli
 from tests.test_generation_manifest_identity import external
 from tests.test_shared_generation_cli import registered, roster, batch, stub_plan, module
@@ -39,6 +42,16 @@ def live_account(spec, *, label=None, run_date=None):
         data['input_identity'] = {'instruction': {'spec': {'run_date': run_date}}}
     ledger._write(spec, data)
     return data
+
+
+def inject_foreign_account(spec, *, label):
+    """Adversarial external-writer setup, not a legitimate guarded ledger write."""
+    path = ledger.ledger_path(spec)
+    data = json.loads(path.read_text())
+    data['identity']['label'] = label
+    # Preserve the real generation, checkpoint, journal and observed head;
+    # change only the persisted owner's label before the public guard runs.
+    path.write_text(json.dumps(data, ensure_ascii=True, indent=2) + '\n')
 
 
 def tree(root):
@@ -87,36 +100,45 @@ def no_execution(monkeypatch, *, forbid_locks=True):
     monkeypatch.setattr(api, '_save_progress', forbidden)
     monkeypatch.setattr(api, '_snapshot', forbidden)
     monkeypatch.setattr(api, '_execute', forbidden)
-    monkeypatch.setattr(FileLock, 'acquire', forbidden)
     monkeypatch.setattr(run_lock, 'acquire', forbidden)
     monkeypatch.setattr(run_lock, 'release', forbidden)
     monkeypatch.setattr(module, '_write_verdict', forbidden)
     if forbid_locks:
+        monkeypatch.setattr(FileLock, 'acquire', forbidden)
         monkeypatch.setattr(api, '_exclusive_run', forbidden)
-    # The inside-lock test exempts only its explicit no-real-lock simulation;
-    # all real FileLock, transport and run-publication paths remain trapped.
+    # The inside-lock test uses real physical exclusion; transport and
+    # run-publication paths remain trapped in both modes.
     return seen
 
 
 @pytest.mark.parametrize('state', ['foreign', 'unknown', 'own_no_resume'])
 def test_public_execute_refuses_existing_unowned_state_before_lock(registered, tmp_path, monkeypatch, state):
+    from tests.test_d68_legacy_readonly import tree as whole_tree
     base, reg = registered
     spec = selected_spec(base, reg)
     if state in ('foreign', 'own_no_resume'):
-        live_account(spec, label='foreign-run' if state == 'foreign' else None)
+        live_account(spec)
+        if state == 'foreign':
+            inject_foreign_account(spec, label='foreign-run')
     else:
         spec.full_path.parent.mkdir(parents=True)
         spec.full_path.write_text('id: https://example.org/synthetic-unowned\n')
-    before = tree(tmp_path)
+    before = whole_tree(tmp_path)
     authorities = {Path(path): raw for path, raw in sg.capture(spec).files}
     seen = no_execution(monkeypatch)
     expected = {'foreign': 'foreign or unknown ledger ownership',
-                'unknown': 'no usable live ownership',
+                'unknown': 'artifacts have no journal for the selected run; inspection only',
                 'own_no_resume': 'already spent; no-resume'}[state]
-    with pytest.raises(ValueError, match=expected):
+    # D69/D73(c): unknown partial output refuses at the complete residue guard,
+    # before registered shared ownership checks, lock acquisition or any write.
+    error = ledger.UsageLedgerError if state == 'unknown' else ValueError
+    with pytest.raises(error, match=expected) as caught:
         api.execute(spec, resume=state != 'own_no_resume')
+    if state == 'own_no_resume':
+        assert 'files: ' in str(caught.value) and ledger.ledger_path(spec).name in str(caught.value)
+        assert 'use a new output directory' in str(caught.value)
     assert seen == []
-    assert tree(tmp_path) == before
+    assert whole_tree(tmp_path) == before
     assert {path: path.read_bytes() for path in authorities} == authorities
 
 
@@ -124,22 +146,26 @@ def test_public_execute_rechecks_owner_inside_lock_before_date_restore(registere
     base, reg = registered
     spec = selected_spec(base, reg)
     live_account(spec)
+    with ledger.exclusive_run(spec):
+        latch_journal.start_launch(spec)
     calls = []
     observed = {}
+    exclusive = api._exclusive_run
     @contextmanager
     def acquire(current):
-        calls.append('acquired')
-        live_account(current, label='changed-during-lock-admission')
-        observed.update(tree(tmp_path))
-        try:
-            yield
-        finally:
-            calls.append('released')
+        with exclusive(current):
+            calls.append('acquired')
+            inject_foreign_account(current, label='changed-during-lock-admission')
+            observed.update(tree(tmp_path))
+            try:
+                yield
+            finally:
+                calls.append('released')
     monkeypatch.setattr(api, '_exclusive_run', acquire)
     monkeypatch.setattr(api, '_restore_resume_date', lambda *a: pytest.fail('foreign owner reached date restoration'))
     seen = no_execution(monkeypatch, forbid_locks=False)
     with pytest.raises(ValueError, match='foreign or unknown ledger ownership'):
-        api.execute(spec)
+        api.execute(spec, client=SimpleNamespace(base_url=reg['runtime']['base_url']))
     assert calls == ['acquired', 'released'] and seen == []
     assert tree(tmp_path) == observed
 
@@ -150,6 +176,8 @@ def test_matching_owner_preserves_actual_automatic_date_recovery(registered, tmp
     spec = replace(selected_spec(base, reg), run_date=api.AUTO)
     assert spec._automatic_run_date == spec.run_date
     live_account(spec, run_date='2001-02-03')
+    with ledger.exclusive_run(spec):
+        latch_journal.start_launch(spec)
     spec.__dict__['instruction'] = 'cached current-day instruction must be discarded'
     before = tree(tmp_path)
     authorities = selected_authorities(spec)
@@ -159,23 +187,25 @@ def test_matching_owner_preserves_actual_automatic_date_recovery(registered, tmp
         return {'boundary': 'reached after real owner checks and actual lock/date recovery'}
     monkeypatch.setattr(api, '_execute', execute)
     monkeypatch.setattr(api, '_client', lambda: pytest.fail('provider client forbidden'))
-    result = api.execute(spec)
+    result = api.execute(spec, client=SimpleNamespace(base_url=reg['runtime']['base_url']))
     assert observed == [('2001-02-03', True, False)]
     assert result['boundary'].startswith('reached')
     assert_preserved(before)
     assert {p: p.read_bytes() for p in authorities} == authorities
 
 
-def test_legacy_public_boundary_is_unchanged(external, tmp_path, monkeypatch):
+@pytest.mark.parametrize('resume', [True, False])
+def test_legacy_public_boundary_refuses_residue_before_any_write(external, tmp_path, monkeypatch, resume):
+    from tests.test_d68_legacy_readonly import tree as whole_tree
     spec = external
     spec.full_path.parent.mkdir(parents=True)
     spec.full_path.write_text('legacy partial bytes without selected ownership\n')
-    before = tree(tmp_path)
-    seen = []
-    monkeypatch.setattr(api, '_execute', lambda current, **kw: seen.append(current) or {'legacy': True})
-    assert api.execute(spec) == {'legacy': True}
-    assert seen == [spec]
-    assert_preserved(before)
+    before = whole_tree(tmp_path)
+    seen = no_execution(monkeypatch)
+    with pytest.raises(ledger.UsageLedgerError, match='inspection only'):
+        api.execute(spec, resume=resume)
+    assert seen == []
+    assert whole_tree(tmp_path) == before
 
 
 def alias_pair(specs):
@@ -433,3 +463,7 @@ def test_actual_batch_refuses_inventory_alias_to_control(registered, tmp_path, m
     assert seen == {'lock': [], 'execute': []} and control.samefile(inventory)
     assert tree(tmp_path) == before
     assert {p: p.read_bytes() for p in authorities} == authorities
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

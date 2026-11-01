@@ -1,0 +1,70 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_interrupted_intent_requires_exact_acknowledgement_and_can_continue ____
+
+tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_intent_requir0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1119fbce0>
+
+    def test_interrupted_intent_requires_exact_acknowledgement_and_can_continue(tmp_path, monkeypatch):
+        selected = start(tmp_path)
+        original = ledger._write_unlatched
+        def interrupt_intent(spec, data):
+            if data.get('pending_call'):
+                raise KeyboardInterrupt()
+            return original(spec, data)
+        with monkeypatch.context() as m:
+            m.setattr(ledger, '_write_unlatched', interrupt_intent)
+            with pytest.raises(KeyboardInterrupt):
+                ledger.begin_call(selected, 'audit', 1, '2026-10-28T07:02:00Z')
+        suffix = raw_events(selected)[-1]
+        with pytest.raises(ledger.UsageLedgerError, match='required event_sha256s='):
+>           journal.check(selected)
+
+tests/test_pr5212_d55_fixes.py:131: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<db88ca68c latch_journal>:518: in check
+    ???
+<db88ca68c latch_journal>:408: in _validated
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'ledger checkpoint does not match journal head (deletion, truncation or interrupted update)'
+
+>   ???
+E   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)
+
+<db88ca68c latch_journal>:35: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_intent_requir0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1119fbce0>
+
+    def test_interrupted_intent_requires_exact_acknowledgement_and_can_continue(tmp_path, monkeypatch):
+        selected = start(tmp_path)
+        original = ledger._write_unlatched
+        def interrupt_intent(spec, data):
+            if data.get('pending_call'):
+                raise KeyboardInterrupt()
+            return original(spec, data)
+        with monkeypatch.context() as m:
+            m.setattr(ledger, '_write_unlatched', interrupt_intent)
+            with pytest.raises(KeyboardInterrupt):
+                ledger.begin_call(selected, 'audit', 1, '2026-10-28T07:02:00Z')
+        suffix = raw_events(selected)[-1]
+>       with pytest.raises(ledger.UsageLedgerError, match='required event_sha256s='):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'required event_sha256s='
+E        Input: 'latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)'
+
+tests/test_pr5212_d55_fixes.py:130: AssertionError
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+------ generated xml file: /private/tmp/codex-5212-evidence/f4-before.xml ------
+=========================== short test summary info ============================
+FAILED tests/test_pr5212_d55_fixes.py::test_interrupted_intent_requires_exact_acknowledgement_and_can_continue
+1 failed, 1 warning in 2.70s

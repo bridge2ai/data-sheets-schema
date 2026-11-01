@@ -641,3 +641,7 @@ def test_failed_publication_lifecycle_gates_cannot_skip_canonical_readback(case,
     final_path.write_bytes(draft._encoded(result))
     marker_path.write_bytes(draft._encoded(marker))
     assert execute.read_final(case['raw'])==result
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

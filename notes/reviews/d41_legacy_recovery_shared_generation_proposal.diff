@@ -1,0 +1,15 @@
+# Proposal only, #5212 legacy recovery design, 2026-10-29.
+# Apply only after owner approval and creation/review of legacy_recovery.py.
+# No protected source was edited in this session. Both design options need
+# the new authority-bearing module included in the registered code identity.
+diff --git a/src/data_sheets_schema/shared_generation.py b/src/data_sheets_schema/shared_generation.py
+--- a/src/data_sheets_schema/shared_generation.py
++++ b/src/data_sheets_schema/shared_generation.py
+@@ -51,6 +51,7 @@ ROUTING_CODE = ("src/data_sheets_schema/source_heading_runtime.py",
+                 "src/data_sheets_schema/profiles.py",
+                 "src/data_sheets_schema/usage_ledger.py",
+                 "src/data_sheets_schema/latch_journal.py",
++                "src/data_sheets_schema/legacy_recovery.py",
+                 "src/data_sheets_schema/receipt_completion.py",
+                 "src/data_sheets_schema/receipt_completion_policy.py",
+                 "src/data_sheets_schema/typed_audit_runtime.py",

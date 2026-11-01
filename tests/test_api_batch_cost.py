@@ -535,36 +535,38 @@ class ApiBatchTotalsWithoutCapTest(ApiBatchCostAccountingTest):
 
 
 class ApiBatchRealBilledRowsTest(ApiBatchCostAccountingTest):
-    """The batch over the real `_billed_rows`, ledger file stubbed per run
+    """The batch over real `_billed_rows` and guarded per-run accounting
     (#5073 F1, F2): what is pending before the run, and how a raise names
     what it could not count."""
 
     def _invoke_real(self, mock_exec, ledgers, extra=(), reps="1"):
-        import json
         import tempfile
         from pathlib import Path
+        from data_sheets_schema import usage_ledger
+        from data_sheets_schema.api_runner import RunSpec
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         root = Path(tmp.name)
 
-        def path(spec):
-            return root / f"{spec.label}.json"
-
         def write(spec, data):
-            path(spec).write_text(json.dumps(data), encoding="utf-8")
+            account = usage_ledger._read(spec)
+            account.pop("pending_call", None)
+            account.update(data)
+            usage_ledger._write(spec, account)
 
         def execute(spec):
             return mock_exec(spec, lambda data: write(spec, data))
 
         def setup(spec):
+            spec.out_dir = root / spec.label
+            usage_ledger.prepare_usage(spec, resume=True)
             if spec.label in ledgers:
                 write(spec, ledgers[spec.label])
         plan = ApiBatchCostStopTest()._dummy_plan
         with patch("data_sheets_schema.cli.api._require_bundle", return_value=None), \
              patch("data_sheets_schema.cli.api._plan_or_refuse",
                    side_effect=lambda spec: (setup(spec), plan(spec))[1]), \
-             patch("data_sheets_schema.usage_ledger.ledger_path", side_effect=path), \
-             patch("data_sheets_schema.usage_ledger._read", side_effect=lambda spec: json.loads(path(spec).read_text())), \
+             patch.object(RunSpec, "input_identity", return_value={}), \
              patch("data_sheets_schema.api_runner._abandoned_rows", return_value=[]), \
              patch("data_sheets_schema.api_runner.execute", side_effect=execute):
             return CliRunner(mix_stderr=False).invoke(cli, [
@@ -669,36 +671,49 @@ LEGACY_ROW = {"phase": "full", "attempt": 1, "started_at": "2026-09-04T01:25:10+
 class ApiBatchLegacyRowsTest(unittest.TestCase):
     """#5085 L1: rows with no usage id, as records written before ids carry
     them, are matched against the pre-run record by canonical text: a
-    re-invoked completed legacy label adds $0, and only a row that matches
-    nothing is counted, with a warning that the count may be over."""
+    guarded record displaying those rows adds $0, and only a row that matches
+    nothing is counted, with a warning that the count may be over. A genuinely
+    journal-less legacy label is refused before this accounting boundary."""
 
     def setUp(self):
         _isolate_run_lock(self)
 
-    def _invoke(self, recorded, returned):
+    def _invoke(self, recorded, returned, *, guarded=True):
         import tempfile
         from pathlib import Path
         from unittest.mock import PropertyMock
         import yaml
+        from data_sheets_schema import usage_ledger
         from data_sheets_schema.api_runner import RunSpec
+        from tests.test_d68_legacy_readonly import tree
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
+        self.fixture_root = Path(tmp.name)
         record = Path(tmp.name) / "AI_READI_provenance.yaml"
-        record.write_text(yaml.safe_dump({"api_usage": recorded}), encoding="utf-8")
+
+        def plan(spec):
+            spec.out_dir = self.fixture_root
+            if guarded:
+                usage_ledger.prepare_usage(spec, resume=True)
+            record.write_text(yaml.safe_dump({"api_usage": recorded}), encoding="utf-8")
+            self.fixture_before = tree(self.fixture_root)
+            return ApiBatchCostStopTest()._dummy_plan(spec)
 
         def finished(spec):
             return {**ApiBatchCostStopTest()._make_mock_execute(1.0)(spec), "usage": returned,
                     "skipped": ["full", "core"]}
+        self.mock_execute = MagicMock(side_effect=finished)
         with patch("data_sheets_schema.cli.api._require_bundle", return_value=None), \
-             patch("data_sheets_schema.cli.api._plan_or_refuse", side_effect=ApiBatchCostStopTest()._dummy_plan), \
+             patch("data_sheets_schema.cli.api._plan_or_refuse", side_effect=plan), \
+             patch.object(RunSpec, "input_identity", return_value={}), \
              patch.object(RunSpec, "provenance_path", new_callable=PropertyMock, return_value=record), \
-             patch("data_sheets_schema.api_runner.execute", MagicMock(side_effect=finished)):
+             patch("data_sheets_schema.api_runner.execute", self.mock_execute):
             return CliRunner(mix_stderr=False).invoke(cli, [
                 "api", "batch", "--projects", "AI_READI", "--replicates", "1", "--arm", "baseline",
                 "--condition", "generic", "--label-prefix", "2026-10-17_claude-opus-5-api-generic-testcost9",
                 "--allow-condition-mismatch", "--yes", "--no-branch-guard", "--no-canary-gate"])
 
-    def test_a_reinvoked_completed_legacy_label_adds_nothing(self):
+    def test_a_guarded_record_with_legacy_shaped_rows_adds_nothing(self):
         recorded = [LEGACY_ROW, {**LEGACY_ROW, "phase": "audit"}, dict(LEGACY_ROW)]   # a repeated row too
         result = self._invoke(recorded, [dict(r) for r in recorded])
         self.assertEqual(result.exit_code, 0, result.output + result.stderr)
@@ -712,6 +727,17 @@ class ApiBatchLegacyRowsTest(unittest.TestCase):
         self.assertIn("1 returned usage row(s) carry no usage id and match no row recorded before this run",
                       result.stderr)
         self.assertIn("the cost is overcounted", result.stderr)
+
+    def test_a_journalless_legacy_label_refuses_before_lock_or_dispatch(self):
+        from data_sheets_schema import usage_ledger
+        from tests.test_d68_legacy_readonly import tree
+        with patch("data_sheets_schema.run_lock.acquire") as acquire:
+            result = self._invoke([LEGACY_ROW], [LEGACY_ROW], guarded=False)
+        self.assertIsInstance(result.exception, usage_ledger.UsageLedgerError)
+        self.assertIn("inspection only", str(result.exception))
+        acquire.assert_not_called()
+        self.mock_execute.assert_not_called()
+        self.assertEqual(tree(self.fixture_root), self.fixture_before)
 
 
 class ApiBatchPricingTest(unittest.TestCase):

@@ -247,7 +247,15 @@ def remember_response(spec, phase, usage_id, response):
         'usage': {k: receipts._counter_evidence(v) for k, v in observed.items()}}
     if len(sg.canonical(value)) > MAX_BYTES:
         raise ledger.UsageLedgerError('routing response evidence exceeds bound')
-    row['response'] = receipts._save(spec, 'routing_response.json', value, usage_id=usage_id)
+    saved = receipts._save(spec, 'routing_response.json', value, usage_id=usage_id)
+    # The usage-bound save durably adds guard-owned snapshot/checkpoint fields.
+    # Re-read rather than replace that update with the pre-save account.
+    data = ledger._read(spec)
+    state, checked = _recheck(spec, data, allow_response_capture=True)
+    row = state['rows'][-1]
+    if row['usage_id'] != usage_id or row['response'] is not None:
+        raise ledger.UsageLedgerError('routing response cannot replace another delivery')
+    row['response'] = saved
     ledger._write(spec, data)
 
 

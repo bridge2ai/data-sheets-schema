@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="131" time="54.115" timestamp="2026-10-28T17:29:45.154552" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_latch_journal" name="test_saved_response_is_bound_to_usage_name_path_index_and_actual_bytes" time="3.446" /><testcase classname="tests.test_latch_journal" name="test_transcript_selector_advances_without_rewriting_prior_exchanges" time="0.043" /><testcase classname="tests.test_latch_journal" name="test_transcript_selector_cannot_move_past_a_seal_or_intent[previous-receipt_completion]" time="0.051" /><testcase classname="tests.test_latch_journal" name="test_transcript_selector_cannot_move_past_a_seal_or_intent[previous-receipt_completion_full]" time="0.029" /><testcase classname="tests.test_latch_journal" name="test_transcript_selector_cannot_move_past_a_seal_or_intent[proposed-receipt_completion]" time="0.024" /><testcase classname="tests.test_latch_journal" name="test_transcript_selector_cannot_move_past_a_seal_or_intent[proposed-receipt_completion_full]" time="0.023" /><testcase classname="tests.test_latch_journal" name="test_transcript_selector_requires_a_previously_journaled_exchange[missing]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_transcript_selector_requires_a_previously_journaled_exchange[same-write]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_transcript_selector_requires_a_previously_journaled_exchange[wrong-name]" time="0.019" /><testcase classname="tests.test_latch_journal" name="test_removing_full_seal_cannot_restore_a_consumed_boundary" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_saved_response_rewriting_is_refused_even_if_mutable_pins_agree[bytes]" time="0.017" /><testcase classname="tests.test_latch_journal" name="test_saved_response_rewriting_is_refused_even_if_mutable_pins_agree[index]" time="0.017" /><testcase classname="tests.test_latch_journal" name="test_saved_response_rewriting_is_refused_even_if_mutable_pins_agree[ledger-pin]" time="0.018" /><testcase classname="tests.test_latch_journal" name="test_saved_response_rewriting_is_refused_even_if_mutable_pins_agree[all-three]" time="0.017" /><testcase classname="tests.test_latch_journal" name="test_saved_response_rewriting_is_refused_even_if_mutable_pins_agree[delete-file]" time="0.019" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[state-typed_audit]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[state-receipt_completion]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[failure-type-typed_audit]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[failure-type-receipt_completion]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[delete-typed_audit]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[delete-receipt_completion]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[stage-admission-typed_audit]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[stage-admission-receipt_completion]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_terminal_override_is_refused_without_recording_assistance" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_pending_admission_can_be_accepted_only_by_a_validated_writer" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_manual_pending_to_accepted_cannot_bypass_source_review" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_deleted_evidence_refusal_remains_terminal" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_report_rejections_are_nonterminal_and_preserve_one_regate_allowance" time="0.024" /><testcase classname="tests.test_latch_journal" name="test_chain_and_checkpoint_corruption_refuse_continuation[delete]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_chain_and_checkpoint_corruption_refuse_continuation[truncate]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_chain_and_checkpoint_corruption_refuse_continuation[payload]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_chain_and_checkpoint_corruption_refuse_continuation[checkpoint]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_chain_and_checkpoint_corruption_refuse_continuation[ledger-delete]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_chain_and_checkpoint_corruption_refuse_continuation[duplicate-key]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_exact_override_is_durable_and_does_not_cover_a_later_mutation" time="0.024" /><testcase classname="tests.test_latch_journal" name="test_existing_override_file_cannot_acknowledge_new_bytes_of_same_event" time="0.020" /><testcase classname="tests.test_latch_journal" name="test_override_is_exact_and_attributable[wrong-line]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_override_is_exact_and_attributable[extra-line]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_override_is_exact_and_attributable[wrong-generation]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_override_is_exact_and_attributable[no-timezone]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_override_is_exact_and_attributable[empty-owner]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_legacy_account_requires_explicit_unverifiable_baseline" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_journal_separates_flat_identities_and_retains_explicit_generation_history" time="0.027" /><testcase classname="tests.test_latch_journal" name="test_snapshot_index_write_crash_keeps_delivery_latched_and_refuses_restart" time="0.017" /><testcase classname="tests.test_latch_journal" name="test_recovery_roster_includes_journal_and_dangling_override_sidecar" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[verified-1]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[verified-False]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[assisted-True]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[assisted-0]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[evidence_only-True]" time="0.015" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[evidence_only-0]" time="0.015" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[overrides-None]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[authentication-authenticated]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_complete_journal_pins[path-]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_complete_journal_pins[sha256-invalid]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_complete_journal_pins[head_sha256-None]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_complete_journal_pins[line_count-True]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_complete_journal_pins[line_count-0]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_every_controller_failure_type_is_latched_without_freezing_siblings[scalar]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_every_controller_failure_type_is_latched_without_freezing_siblings[nested]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_every_controller_failure_type_is_latched_without_freezing_siblings[list-nested]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_spent_transport_regate_allowance_cannot_be_refunded[false]" time="0.020" /><testcase classname="tests.test_latch_journal" name="test_spent_transport_regate_allowance_cannot_be_refunded[deleted]" time="0.020" /><testcase classname="tests.test_latch_journal" name="test_pending_call_cannot_be_erased_then_blessed_by_an_ordinary_write" time="0.022" /><testcase classname="tests.test_latch_journal" name="test_prepared_controller_cannot_replace_unresolved_admitted_state" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_missing_ledger_legacy_history_never_becomes_a_clean_resume[provenance]" time="0.016" /><testcase classname="tests.test_latch_journal" name="test_missing_ledger_legacy_history_never_becomes_a_clean_resume[progress]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_missing_ledger_legacy_history_never_becomes_a_clean_resume[snapshot-index]" time="0.015" /><testcase classname="tests.test_latch_journal" name="test_missing_ledger_legacy_history_never_becomes_a_clean_resume[unowned-output]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_foreign_flat_label_provenance_does_not_masquerade_as_current_history" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_discrepancy_error_names_key_expected_and_found_without_large_payload" time="0.013" /><testcase classname="tests.test_api_latch_guard" name="test_retry_rechecks_edited_history_before_second_physical_dispatch" time="0.015" /><testcase classname="tests.test_api_latch_guard" name="test_permitted_transport_retry_and_wire_are_unchanged" time="0.014" /><testcase classname="tests.test_api_latch_guard" name="test_repair_raw_delivery_and_applied_snapshot_share_actual_usage_id" time="3.788" /><testcase classname="tests.test_api_latch_guard" name="test_rejected_repair_keeps_raw_delivery_before_reasoning_or_parsing[truncated]" time="0.035" /><testcase classname="tests.test_api_latch_guard" name="test_rejected_repair_keeps_raw_delivery_before_reasoning_or_parsing[unusable]" time="0.030" /><testcase classname="tests.test_api_latch_guard" name="test_rejected_repair_keeps_raw_delivery_before_reasoning_or_parsing[reasoning]" time="0.030" /><testcase classname="tests.test_api_latch_guard" name="test_edited_repair_delivery_refuses_dispatch_even_with_rewritten_mutable_pins[False]" time="0.037" /><testcase classname="tests.test_api_latch_guard" name="test_edited_repair_delivery_refuses_dispatch_even_with_rewritten_mutable_pins[True]" time="0.041" /><testcase classname="tests.test_api_latch_guard" name="test_partial_delivery_has_one_abandoned_id_and_only_intact_retry_dispatches[False]" time="0.029" /><testcase classname="tests.test_api_latch_guard" name="test_partial_delivery_has_one_abandoned_id_and_only_intact_retry_dispatches[True]" time="0.028" /><testcase classname="tests.test_api_latch_guard" name="test_unfinished_run_resumes_only_with_intact_partial_delivery_accounting[None]" time="0.063" /><testcase classname="tests.test_api_latch_guard" name="test_unfinished_run_resumes_only_with_intact_partial_delivery_accounting[journal_deleted]" time="0.033" /><testcase classname="tests.test_api_latch_guard" name="test_unfinished_run_resumes_only_with_intact_partial_delivery_accounting[journal_usage_id_changed]" time="0.032" /><testcase classname="tests.test_api_latch_guard" name="test_unfinished_run_resumes_only_with_intact_partial_delivery_accounting[partial_edited]" time="0.025" /><testcase classname="tests.test_api_latch_guard" name="test_startup_refuses_before_schema_or_recovery" time="0.004" /><testcase classname="tests.test_api_latch_guard" name="test_report_rejections_survive_worse_regeneration_without_refunding_it" time="0.030" /><testcase classname="tests.test_api_latch_guard" name="test_assisted_or_malformed_integrity_blocks_live_and_offline_canary_without_changing_quality[change0]" time="0.000" /><testcase classname="tests.test_api_latch_guard" name="test_assisted_or_malformed_integrity_blocks_live_and_offline_canary_without_changing_quality[change1]" time="0.000" /><testcase classname="tests.test_api_latch_guard" name="test_assisted_or_malformed_integrity_blocks_live_and_offline_canary_without_changing_quality[change2]" time="0.000" /><testcase classname="tests.test_api_latch_guard" name="test_assisted_or_malformed_integrity_blocks_live_and_offline_canary_without_changing_quality[change3]" time="0.000" /><testcase classname="tests.test_api_latch_guard" name="test_clean_or_legacy_integrity_does_not_fabricate_a_new_quality_measurement" time="0.000" /><testcase classname="tests.test_api_latch_guard" name="test_assisted_record_cannot_supply_baseline_metrics" time="0.005" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_cli_passes_expected_head_to_runner" time="0.016" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_batch_cli_requires_unique_launch_heads" time="0.004" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_interrupted_recovery_never_blesses_control_or_nonmatching_prefix[terminal]" time="0.013" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_interrupted_recovery_never_blesses_control_or_nonmatching_prefix[allowance]" time="0.013" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_interrupted_recovery_never_blesses_control_or_nonmatching_prefix[controller]" time="0.013" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_interrupted_recovery_never_blesses_control_or_nonmatching_prefix[prefix-edited]" time="0.014" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_interrupted_recovery_never_blesses_control_or_nonmatching_prefix[foreign-suffix]" time="0.014" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_guard_owns_fields_across_a_stale_writer[missing]" time="0.022" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_guard_owns_fields_across_a_stale_writer[prefix]" time="0.022" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_guard_owned_conflicting_value_is_refused[latch_snapshots]" time="0.018" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_guard_owned_conflicting_value_is_refused[latch_journal]" time="0.018" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_guard_owned_conflicting_value_is_refused[latch_overrides]" time="0.018" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_interrupted_intent_requires_exact_acknowledgement_and_can_continue" time="0.024" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_ineffective_override_is_refused_without_assistance[terminal]" time="0.014" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_ineffective_override_is_refused_without_assistance[control]" time="0.014" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_ineffective_override_is_refused_without_assistance[allowance]" time="0.013" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_pre_d56_ineffective_acknowledgement_cannot_bypass_startup[terminal]" time="0.015" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_pre_d56_ineffective_acknowledgement_cannot_bypass_startup[control]" time="0.014" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_validator_refresh_cannot_be_rewound[delete]" time="0.016" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_validator_refresh_cannot_be_rewound[pending]" time="0.015" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_validator_refresh_cannot_be_rewound[in_flight]" time="0.016" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_validator_refresh_new_checkpoint_is_allowed_but_same_one_cannot_repeat" time="0.015" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_structural_refusal_names_expected_and_found[delete]" time="0.013" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_structural_refusal_names_expected_and_found[truncate]" time="0.013" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_structural_refusal_names_expected_and_found[payload]" time="0.012" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_structural_refusal_names_expected_and_found[checkpoint]" time="0.012" /><testcase classname="tests.test_pr5212_d55_fixes" name="test_resume_needs_external_head_before_recovery_or_dispatch[None]" time="0.013"><failure message="AssertionError: assert '032803575d87be5ff256df542bf6879126e6e939e919cc6d5a9f3288df0ab33e' in 'latch journal refused: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 latch journal: resume journal h...ed=required from prior launch/monitor record; found=03280357…(unverified, not a resume anchor) (not a resume anchor)\n'">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_resume_needs_external_hea0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x11236cde0&gt;
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x111f8aa50&gt;, expected = None
+
+    @pytest.mark.parametrize('expected', [None, 'f' * 64])
+    def test_resume_needs_external_head_before_recovery_or_dispatch(tmp_path, monkeypatch, capsys, expected):
+        selected = start(tmp_path)
+        monkeypatch.setattr(api, '_execute', lambda *a, **kw: pytest.fail('recovery/dispatch reached'))
+        with pytest.raises(ledger.UsageLedgerError, match='expected.*found'):
+            api.execute(selected, client=SimpleNamespace(), expect_journal_head_sha256=expected)
+        output = capsys.readouterr().err
+        assert 'latch journal refused:' in output and 'not a resume anchor' in output
+        assert 'latch journal start:' not in output and 'latch journal stop:' not in output
+&gt;       assert raw_events(selected)[-1]['sha256'] in output
+E       AssertionError: assert '032803575d87be5ff256df542bf6879126e6e939e919cc6d5a9f3288df0ab33e' in 'latch journal refused: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 latch journal: resume journal h...ed=required from prior launch/monitor record; found=03280357…(unverified, not a resume anchor) (not a resume anchor)\n'
+
+tests/test_pr5212_d55_fixes.py:259: AssertionError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_resume_needs_external_head_before_recovery_or_dispatch[ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff]" time="0.014"><failure message="AssertionError: assert '5ca70ac286b62944e3f675d3596857d93181ac13e4b630e50e31e34ff9a70598' in 'latch journal refused: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 latch journal: resume journal h...d=ffffffff…(unverified, not a resume anchor); found=5ca70ac2…(unverified, not a resume anchor) (not a resume anchor)\n'">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_resume_needs_external_hea1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1123f2f90&gt;
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x114120050&gt;
+expected = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+
+    @pytest.mark.parametrize('expected', [None, 'f' * 64])
+    def test_resume_needs_external_head_before_recovery_or_dispatch(tmp_path, monkeypatch, capsys, expected):
+        selected = start(tmp_path)
+        monkeypatch.setattr(api, '_execute', lambda *a, **kw: pytest.fail('recovery/dispatch reached'))
+        with pytest.raises(ledger.UsageLedgerError, match='expected.*found'):
+            api.execute(selected, client=SimpleNamespace(), expect_journal_head_sha256=expected)
+        output = capsys.readouterr().err
+        assert 'latch journal refused:' in output and 'not a resume anchor' in output
+        assert 'latch journal start:' not in output and 'latch journal stop:' not in output
+&gt;       assert raw_events(selected)[-1]['sha256'] in output
+E       AssertionError: assert '5ca70ac286b62944e3f675d3596857d93181ac13e4b630e50e31e34ff9a70598' in 'latch journal refused: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 latch journal: resume journal h...d=ffffffff…(unverified, not a resume anchor); found=5ca70ac2…(unverified, not a resume anchor) (not a resume anchor)\n'
+
+tests/test_pr5212_d55_fixes.py:259: AssertionError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_resume_accepts_recorded_head_and_fresh_launch_needs_none" time="0.015" /><testcase classname="tests.test_pr5212_r3_fixes" name="test_refused_forgery_cannot_supply_the_next_monitored_resume_head" time="0.015" /><testcase classname="tests.test_pr5212_r3_fixes" name="test_sigterm_requires_reconciliation_before_a_new_launch_anchor" time="2.901" /><testcase classname="tests.test_pr5212_r3_fixes" name="test_batch_checks_registration_hash_and_journal_head_together[None]" time="0.043" /><testcase classname="tests.test_pr5212_r3_fixes" name="test_batch_checks_registration_hash_and_journal_head_together[registration]" time="0.032" /><testcase classname="tests.test_pr5212_r3_fixes" name="test_batch_checks_registration_hash_and_journal_head_together[journal]" time="0.042" /><testcase classname="tests.test_pr5212_r4_fixes" name="test_cli_refusal_redacts_heads_in_output_exception_and_logs[mismatch]" time="0.016"><failure message="ValueError: stderr not separately captured">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_cli_refusal_redacts_heads0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x11236cad0&gt;
+caplog = &lt;_pytest.logging.LogCaptureFixture object at 0x1141216d0&gt;
+damage = 'mismatch'
+
+    @pytest.mark.parametrize('damage', ['mismatch', 'missing', 'malformed', 'broken-chain'])
+    def test_cli_refusal_redacts_heads_in_output_exception_and_logs(tmp_path, monkeypatch, caplog, damage):
+        run = start(tmp_path)
+        found = raw_events(run)[-1]['sha256']
+        expected = {'mismatch': 'f' * 64, 'missing': None,
+                    'malformed': found + 'x', 'broken-chain': found}[damage]
+        if damage == 'broken-chain':
+            events = raw_events(run)
+            events[-1]['version'] = 2
+            journal.journal_path(run).write_bytes(b''.join(journal._canonical(e) + b'\n' for e in events))
+        monkeypatch.setattr(command, '_spec', lambda *a, **k: run)
+        for name in ('_require_bundle', '_require_canonical_prompts', '_refuse_condition_mismatch'):
+            monkeypatch.setattr(command, name, lambda *a, **k: None)
+        monkeypatch.setattr(command, '_plan_or_refuse', lambda *a: {
+            'approx_total_input_tokens': 0, 'model': {'name': 'offline'}})
+        monkeypatch.setattr(api, '_execute', lambda *a, **k: pytest.fail('refused CLI reached execution'))
+        args = ['api', 'run', '--project', run.project, '--label', run.label, '--yes']
+        if expected is not None:
+            args += ['--expect-journal-head-sha256', expected]
+        result = CliRunner().invoke(cli, args)
+&gt;       output = '\n'.join((result.stdout, result.stderr, str(result.exception), caplog.text,
+                            ''.join(traceback.format_exception(*result.exc_info))))
+
+tests/test_pr5212_r4_fixes.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Result UsageLedgerError('latch journal: resume journal head: expected=ffffffff…(unverified, not a resume anchor); found=be23f6ab…(unverified, not a resume anchor)')&gt;
+
+    @property
+    def stderr(self) -&gt; str:
+        """The standard error as unicode string."""
+        if self.stderr_bytes is None:
+&gt;           raise ValueError("stderr not separately captured")
+E           ValueError: stderr not separately captured
+
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/click/testing.py:149: ValueError</failure></testcase><testcase classname="tests.test_pr5212_r4_fixes" name="test_cli_refusal_redacts_heads_in_output_exception_and_logs[missing]" time="0.014"><failure message="ValueError: stderr not separately captured">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_cli_refusal_redacts_heads1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x112322970&gt;
+caplog = &lt;_pytest.logging.LogCaptureFixture object at 0x114122710&gt;
+damage = 'missing'
+
+    @pytest.mark.parametrize('damage', ['mismatch', 'missing', 'malformed', 'broken-chain'])
+    def test_cli_refusal_redacts_heads_in_output_exception_and_logs(tmp_path, monkeypatch, caplog, damage):
+        run = start(tmp_path)
+        found = raw_events(run)[-1]['sha256']
+        expected = {'mismatch': 'f' * 64, 'missing': None,
+                    'malformed': found + 'x', 'broken-chain': found}[damage]
+        if damage == 'broken-chain':
+            events = raw_events(run)
+            events[-1]['version'] = 2
+            journal.journal_path(run).write_bytes(b''.join(journal._canonical(e) + b'\n' for e in events))
+        monkeypatch.setattr(command, '_spec', lambda *a, **k: run)
+        for name in ('_require_bundle', '_require_canonical_prompts', '_refuse_condition_mismatch'):
+            monkeypatch.setattr(command, name, lambda *a, **k: None)
+        monkeypatch.setattr(command, '_plan_or_refuse', lambda *a: {
+            'approx_total_input_tokens': 0, 'model': {'name': 'offline'}})
+        monkeypatch.setattr(api, '_execute', lambda *a, **k: pytest.fail('refused CLI reached execution'))
+        args = ['api', 'run', '--project', run.project, '--label', run.label, '--yes']
+        if expected is not None:
+            args += ['--expect-journal-head-sha256', expected]
+        result = CliRunner().invoke(cli, args)
+&gt;       output = '\n'.join((result.stdout, result.stderr, str(result.exception), caplog.text,
+                            ''.join(traceback.format_exception(*result.exc_info))))
+
+tests/test_pr5212_r4_fixes.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Result UsageLedgerError('latch journal: resume journal head: expected=required from prior launch/monitor record; found=7722d008…(unverified, not a resume anchor)')&gt;
+
+    @property
+    def stderr(self) -&gt; str:
+        """The standard error as unicode string."""
+        if self.stderr_bytes is None:
+&gt;           raise ValueError("stderr not separately captured")
+E           ValueError: stderr not separately captured
+
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/click/testing.py:149: ValueError</failure></testcase><testcase classname="tests.test_pr5212_r4_fixes" name="test_cli_refusal_redacts_heads_in_output_exception_and_logs[malformed]" time="0.014"><failure message="ValueError: stderr not separately captured">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_cli_refusal_redacts_heads2')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1132caac0&gt;
+caplog = &lt;_pytest.logging.LogCaptureFixture object at 0x1178bc2b0&gt;
+damage = 'malformed'
+
+    @pytest.mark.parametrize('damage', ['mismatch', 'missing', 'malformed', 'broken-chain'])
+    def test_cli_refusal_redacts_heads_in_output_exception_and_logs(tmp_path, monkeypatch, caplog, damage):
+        run = start(tmp_path)
+        found = raw_events(run)[-1]['sha256']
+        expected = {'mismatch': 'f' * 64, 'missing': None,
+                    'malformed': found + 'x', 'broken-chain': found}[damage]
+        if damage == 'broken-chain':
+            events = raw_events(run)
+            events[-1]['version'] = 2
+            journal.journal_path(run).write_bytes(b''.join(journal._canonical(e) + b'\n' for e in events))
+        monkeypatch.setattr(command, '_spec', lambda *a, **k: run)
+        for name in ('_require_bundle', '_require_canonical_prompts', '_refuse_condition_mismatch'):
+            monkeypatch.setattr(command, name, lambda *a, **k: None)
+        monkeypatch.setattr(command, '_plan_or_refuse', lambda *a: {
+            'approx_total_input_tokens': 0, 'model': {'name': 'offline'}})
+        monkeypatch.setattr(api, '_execute', lambda *a, **k: pytest.fail('refused CLI reached execution'))
+        args = ['api', 'run', '--project', run.project, '--label', run.label, '--yes']
+        if expected is not None:
+            args += ['--expect-journal-head-sha256', expected]
+        result = CliRunner().invoke(cli, args)
+&gt;       output = '\n'.join((result.stdout, result.stderr, str(result.exception), caplog.text,
+                            ''.join(traceback.format_exception(*result.exc_info))))
+
+tests/test_pr5212_r4_fixes.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Result UsageLedgerError("latch journal: resume journal head: expected=64 lowercase hexadecimal digits; found='90dac27f…(unverified, not a resume anchor)x'")&gt;
+
+    @property
+    def stderr(self) -&gt; str:
+        """The standard error as unicode string."""
+        if self.stderr_bytes is None:
+&gt;           raise ValueError("stderr not separately captured")
+E           ValueError: stderr not separately captured
+
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/click/testing.py:149: ValueError</failure></testcase><testcase classname="tests.test_pr5212_r4_fixes" name="test_cli_refusal_redacts_heads_in_output_exception_and_logs[broken-chain]" time="0.020"><failure message="ValueError: stderr not separately captured">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_cli_refusal_redacts_heads3')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1132cbcb0&gt;
+caplog = &lt;_pytest.logging.LogCaptureFixture object at 0x1178bd220&gt;
+damage = 'broken-chain'
+
+    @pytest.mark.parametrize('damage', ['mismatch', 'missing', 'malformed', 'broken-chain'])
+    def test_cli_refusal_redacts_heads_in_output_exception_and_logs(tmp_path, monkeypatch, caplog, damage):
+        run = start(tmp_path)
+        found = raw_events(run)[-1]['sha256']
+        expected = {'mismatch': 'f' * 64, 'missing': None,
+                    'malformed': found + 'x', 'broken-chain': found}[damage]
+        if damage == 'broken-chain':
+            events = raw_events(run)
+            events[-1]['version'] = 2
+            journal.journal_path(run).write_bytes(b''.join(journal._canonical(e) + b'\n' for e in events))
+        monkeypatch.setattr(command, '_spec', lambda *a, **k: run)
+        for name in ('_require_bundle', '_require_canonical_prompts', '_refuse_condition_mismatch'):
+            monkeypatch.setattr(command, name, lambda *a, **k: None)
+        monkeypatch.setattr(command, '_plan_or_refuse', lambda *a: {
+            'approx_total_input_tokens': 0, 'model': {'name': 'offline'}})
+        monkeypatch.setattr(api, '_execute', lambda *a, **k: pytest.fail('refused CLI reached execution'))
+        args = ['api', 'run', '--project', run.project, '--label', run.label, '--yes']
+        if expected is not None:
+            args += ['--expect-journal-head-sha256', expected]
+        result = CliRunner().invoke(cli, args)
+&gt;       output = '\n'.join((result.stdout, result.stderr, str(result.exception), caplog.text,
+                            ''.join(traceback.format_exception(*result.exc_info))))
+
+tests/test_pr5212_r4_fixes.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Result UsageLedgerError('latch journal: broken chain: expected=valid hash-chained event; found=invalid event at line ...256=39ec4f7c…(unverified, not a resume anchor), sha256=a04e7abf…(unverified, not a resume anchor), line=2, version=2')&gt;
+
+    @property
+    def stderr(self) -&gt; str:
+        """The standard error as unicode string."""
+        if self.stderr_bytes is None:
+&gt;           raise ValueError("stderr not separately captured")
+E           ValueError: stderr not separately captured
+
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/click/testing.py:149: ValueError</failure></testcase><testcase time="1.396" /></testsuite></testsuites>

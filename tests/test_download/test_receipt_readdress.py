@@ -271,3 +271,8 @@ class TestTheAssemblyDigestCoversIt(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+import pytest
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

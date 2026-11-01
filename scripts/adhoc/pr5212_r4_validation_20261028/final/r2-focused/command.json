@@ -1,0 +1,14 @@
+[
+  "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+  "-m",
+  "pytest",
+  "-q",
+  "-p",
+  "no:cacheprovider",
+  "-o",
+  "addopts=",
+  "--basetemp=/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt",
+  "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/scripts/adhoc/pr5212_r4_validation_20261028/final/r2-focused/results.xml",
+  "tests/test_pr5212_d55_fixes.py::test_resume_needs_external_head_before_recovery_or_dispatch",
+  "tests/test_pr5212_r4_fixes.py::test_cli_refusal_redacts_heads_in_output_exception_and_logs"
+]

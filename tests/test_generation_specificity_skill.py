@@ -7835,3 +7835,8 @@ class TestOfflineDraftSurface(unittest.TestCase):
             {'generic_v10_source_heading_routing_v1', 'generic_v10_source_heading_span_v1'})
         hits, _ = _plant(rel, 'POLICY_PROBE = "Always describe CM4AI."')
         self.assertTrue(any(h['violation'] and 'offline_draft' in h['gates_in'] for h in hits))
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+import pytest
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

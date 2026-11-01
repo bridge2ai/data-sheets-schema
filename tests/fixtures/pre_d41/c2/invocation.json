@@ -1,0 +1,84 @@
+{
+  "call": 2,
+  "resume": false,
+  "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/c2/test_fresh_restart_records_an_0",
+  "spec": {
+    "automatic_run_date": "2026-10-30",
+    "dict_keys": [
+      "_api_header_values",
+      "_automatic_run_date",
+      "_chunk_check_uses_manifest",
+      "_corpus_root",
+      "_replay_only",
+      "api_playbook_version",
+      "arm",
+      "bundle",
+      "chunk_manifest",
+      "condition",
+      "condition_mismatch_allowed",
+      "condition_stated",
+      "instruction",
+      "label",
+      "manifest",
+      "manifest_line",
+      "method",
+      "native_source_attribution_max_checks",
+      "native_source_attribution_version",
+      "out_dir",
+      "profile",
+      "profile_basis",
+      "project",
+      "prompt_text_env",
+      "provider",
+      "reasoning_effort",
+      "receipt_completion_registration",
+      "receipt_completion_version",
+      "removal_repair_version",
+      "render_version",
+      "run_date",
+      "runtime",
+      "shared_generation_registration",
+      "shared_generation_version"
+    ],
+    "instruction_cached": true,
+    "kwargs": {
+      "_replay_only": false,
+      "api_playbook_version": 0,
+      "arm": "BASELINE (input documents only)",
+      "bundle": {
+        "__path__": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/c2/test_fresh_restart_records_an_0/cohort source.txt"
+      },
+      "chunk_manifest": {
+        "__path__": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/c2/test_fresh_restart_records_an_0/cohort source_chunks.yaml"
+      },
+      "condition": "generic_v6",
+      "condition_mismatch_allowed": false,
+      "condition_stated": true,
+      "label": "synthetic",
+      "manifest": {
+        "__path__": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/c2/test_fresh_restart_records_an_0/source manifest.yaml"
+      },
+      "manifest_line": "# Source manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/c2/test_fresh_restart_records_an_0/source manifest.yaml",
+      "method": "custom",
+      "native_source_attribution_max_checks": null,
+      "native_source_attribution_version": 0,
+      "out_dir": {
+        "__path__": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/c2/test_fresh_restart_records_an_0/outputs"
+      },
+      "profile": "neutral",
+      "profile_basis": "manifest:/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/c2/test_fresh_restart_records_an_0/source manifest.yaml@b04feab4f2b5 (undeclared)",
+      "project": "EXTERNAL",
+      "prompt_text_env": false,
+      "provider": null,
+      "reasoning_effort": null,
+      "receipt_completion_registration": null,
+      "receipt_completion_version": 0,
+      "removal_repair_version": 0,
+      "render_version": 8,
+      "run_date": "2026-10-30",
+      "runtime": "Claude API (direct)",
+      "shared_generation_registration": null,
+      "shared_generation_version": 0
+    }
+  }
+}

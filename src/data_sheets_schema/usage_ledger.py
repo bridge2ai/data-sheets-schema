@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from contextvars import ContextVar
 import hashlib
 import json
 import os
@@ -15,6 +16,27 @@ import yaml
 
 class UsageLedgerError(OSError):
     """Past usage cannot be established; do not silently start more calls."""
+
+
+_NEW_HELD_LOCKS = ContextVar("new_held_output_locks", default=())
+_LAUNCH_RECOVERY = ContextVar("output_launch_recovery", default=None)
+
+
+def is_new_held_lock(path):
+    """Proof of this invocation's own empty lock creation, never old residue.
+
+    The complete artifact inventory still includes these files. Repeated
+    startup guards under exclusive_outputs must distinguish their own first
+    write from evidence that existed before lock acquisition. A replaced or
+    edited lock, a symlink, or a released lock never satisfies this proof.
+    """
+    try:
+        info = path.lstat()
+        return not path.is_symlink() and info.st_size == 0 and any(
+            path.resolve() == name and (info.st_dev, info.st_ino, info.st_mtime_ns) == pin
+            for name, pin in _NEW_HELD_LOCKS.get())
+    except OSError:
+        return False
 
 
 @contextmanager
@@ -37,18 +59,61 @@ def exclusive_outputs(paths):
     # metadata elsewhere. Lock the actual files, including resolved aliases,
     # in one order so partial overlap cannot bypass output ownership (#1298).
     held = []
+    created_paths = set()
+    pairs = output_locks(paths)
+    token = _NEW_HELD_LOCKS.set(_NEW_HELD_LOCKS.get())
+
+    def acquire(output, path):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        created = False
+        try:
+            descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        except FileExistsError:
+            pass
+        else:
+            created_paths.add(path)
+            os.close(descriptor)
+            created = True
+        lock = FileLock(path, timeout=0)
+        held.append(lock)  # Retain even an acquire that raises after locking.
+        try:
+            lock.acquire()
+        except Timeout as exc:
+            raise UsageLedgerError(f"an API run is already active for {output}; "
+                                   "retry after it finishes") from exc
+        if created:
+            info = path.lstat()
+            _NEW_HELD_LOCKS.set((*_NEW_HELD_LOCKS.get(), (
+                path.absolute(), (info.st_dev, info.st_ino, info.st_mtime_ns))))
+
     try:
-        for output, path in output_locks(paths):
-            path.parent.mkdir(parents=True, exist_ok=True)
-            lock = FileLock(path, timeout=0)
-            try:
-                lock.acquire()
-            except Timeout as exc:
-                raise UsageLedgerError(f"an API run is already active for {output}; "
-                                       "retry after it finishes") from exc
-            held.append(lock)
+        # Probe all pre-existing inodes before introducing a new sidecar. In
+        # particular, partial overlap must not strand a contender's unique lock.
+        ordered = sorted(pairs, key=lambda item: not (item[1].exists() or item[1].is_symlink()))
+        try:
+            for output, path in ordered:
+                acquire(output, path)
+        except Exception as exc:
+            recovery = _LAUNCH_RECOVERY.get()
+            if created_paths and recovery is not None and recovery[0] == pairs:
+                try:
+                    # One bounded recovery attempt, still holding every acquired
+                    # inode. Never unlink or replace any coordination sidecar.
+                    locked = {Path(lock.lock_file) for lock in held if lock.is_locked}
+                    for output, path in ordered:
+                        if path not in locked:
+                            acquire(output, path)
+                    recovery[1]()
+                    exc._d4d_resume_head = recovery[2]()
+                except Exception as failed_recovery:
+                    exc._d4d_unbound_launch = True
+                    if hasattr(exc, 'add_note'):
+                        exc.add_note('Launch ownership could not be durably established: '
+                                     + str(failed_recovery))
+            raise
         yield
     finally:
+        _NEW_HELD_LOCKS.reset(token)
         for lock in reversed(held):
             lock.release()
 
@@ -63,6 +128,10 @@ def recovery_files(directory: Path, project: str) -> list[Path]:
     """API journals that generic provenance reconstruction cannot replace."""
     progress = directory / f"{project}_api_progress.json"
     found = [progress] if progress.exists() or progress.is_symlink() else []
+    for suffix in ("latch_journal.jsonl", "latch_override.json"):
+        path = directory / f"{project}_{suffix}"
+        if path.exists() or path.is_symlink():
+            found.append(path)
     if directory.is_dir():
         pattern = re.compile(re.escape(project) + r"_api_usage_[0-9a-f]{16}\.json")
         found.extend(path for path in directory.iterdir() if pattern.fullmatch(path.name))
@@ -310,6 +379,8 @@ def require_resolved(spec) -> None:
 
 def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     """Commit intent before a request so response persistence can fail safely."""
+    from data_sheets_schema import latch_journal
+    latch_journal.check(spec)
     require_resolved(spec)
     require_source_review_admission(spec)
     data = _read(spec)
@@ -515,6 +586,24 @@ def record_evidence_refusal(spec, stage: str, reading: dict) -> None:
         _write(spec, data)
 
 
+def record_report_rejection(spec, stage: str, report_sha256: str, reading: dict,
+                            usage_id: str | None = None, reason: str | None = None) -> None:
+    """Retain every report rejection without consuming or expanding regate allowance."""
+    if not re.fullmatch(r"[a-f0-9]{64}", str(report_sha256)):
+        raise UsageLedgerError("report rejection requires the exact rejected report hash")
+    if not ledger_path(spec).exists():
+        raise UsageLedgerError("cannot record report rejection without the generation ledger")
+    data = _read(spec)
+    rejection = {"rejection_id": uuid.uuid4().hex, "stage": stage,
+                 "report_sha256": report_sha256, "reading": reading}
+    if usage_id is not None:
+        rejection["usage_id"] = usage_id
+    if reason is not None:
+        rejection["reason"] = reason
+    data.setdefault("report_rejections", []).append(rejection)
+    _write(spec, data)
+
+
 def require_source_review_admission(spec) -> None:
     """A delivered review interrupted before acceptance cannot authorize another call."""
     for row in _read(spec)["rows"]:
@@ -539,6 +628,8 @@ def cancel_call(spec, identifier: str) -> None:
 
 def prepare_usage(spec, *, resume: bool) -> str:
     """Establish the generation boundary before any call can be made (#1291)."""
+    from data_sheets_schema.latch_journal import refuse_legacy_execution
+    refuse_legacy_execution(spec)  # D68/D69: before archival or activation writes.
     if getattr(spec, "_replay_only", False):
         # A replay spec carries no instrument; it must not open or continue
         # a generation (#1568).
@@ -657,6 +748,13 @@ def persist_usage(spec, row: dict) -> None:
 
 
 def _write(spec, data: dict) -> None:
+    from data_sheets_schema import latch_journal
+    latch_journal.before_ledger_write(spec, data)
+    _write_unlatched(spec, data)
+
+
+def _write_unlatched(spec, data: dict) -> None:
+    """Atomic storage primitive, also used to persist journal acknowledgements."""
     path = ledger_path(spec)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = None

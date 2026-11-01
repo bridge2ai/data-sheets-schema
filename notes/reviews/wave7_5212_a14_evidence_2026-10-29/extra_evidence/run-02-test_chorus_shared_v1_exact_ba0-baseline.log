@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "/private/tmp/d4d-codex-wave7-5212-a14-20261029/scripts/adhoc/d41_request_parity_20261026.py", line 426, in <module>
+    main()
+    ~~~~^^
+  File "/private/tmp/d4d-codex-wave7-5212-a14-20261029/scripts/adhoc/d41_request_parity_20261026.py", line 419, in main
+    capture(args.root, args.code_root, args.fixture, args.out, args.capture)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/d4d-codex-wave7-5212-a14-20261029/scripts/adhoc/d41_request_parity_20261026.py", line 319, in capture
+    requests, worker_checks = _requests(spec, reg, settings)
+                              ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/d4d-codex-wave7-5212-a14-20261029/scripts/adhoc/d41_request_parity_20261026.py", line 227, in _requests
+    req, payload, _ = runtime._build_request_bytes(spec, capture, packet, stage,
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        workers=workers, omission=omission, settings=settings,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        generation=GENERATION, receipt_carry=rc.AUDIT_HEADER + 'Synthetic parity fixture; no accepted completion claimed.')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/typed_audit_runtime.py", line 141, in _build_request_bytes
+    inner = _inner(spec, packet, stage, workers, omission)
+  File "/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/typed_audit_runtime.py", line 117, in _inner
+    return sg.memo(spec, 'typed_inner', key, lambda: _derive_inner(spec, packet, stage, workers, omission))
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/shared_generation.py", line 902, in memo
+    result = build()
+  File "/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/typed_audit_runtime.py", line 117, in <lambda>
+    return sg.memo(spec, 'typed_inner', key, lambda: _derive_inner(spec, packet, stage, workers, omission))
+                                                     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/typed_audit_runtime.py", line 126, in _derive_inner
+    return typed.index(packet, workers, omission, derivations=_derivations(spec))
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/typed_audit.py", line 440, in index
+    raise ValueError("omission response does not satisfy complete captured inventory")
+ValueError: omission response does not satisfy complete captured inventory

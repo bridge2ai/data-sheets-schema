@@ -3,6 +3,7 @@ from dataclasses import replace
 import json
 
 import pytest
+import yaml
 
 from data_sheets_schema import api_runner as api, snapshot_store, usage_ledger as ledger
 from tests.test_download.test_api_runner import FakeClient
@@ -35,13 +36,30 @@ def test_resume_refuses_a_changed_instrument_before_spending_or_writing(external
 
 
 def test_portable_record_refuses_changed_instruction_without_a_ledger(external):
-    api.execute(replace(external, render_version=2), client=FakeClient())
+    original = replace(external, render_version=2)
+    api.execute(original, client=FakeClient())
+    account = json.loads(ledger.ledger_path(original).read_text())
+    record = yaml.safe_load(original.provenance_path.read_text())
     ledger.ledger_path(external).unlink()
     before = snapshot(external.out_dir)
+    changed = replace(original, render_version=3)
+    # This parser-only positive is not completed-run acceptance. It preserves
+    # the renderer binding check independently of the earlier public guard.
+    assert api._require_recorded_inputs(original, record) is None
+    with pytest.raises(ledger.UsageLedgerError) as binding:
+        api._require_recorded_inputs(changed, record)
+    assert str(binding.value) == (
+        "generation instruction identity changed; restore the recorded renderer "
+        "and instruction or use --no-resume for an explicit new generation")
+    assert snapshot(external.out_dir) == before
     client = FakeClient()
-    with pytest.raises(ledger.UsageLedgerError, match="instruction identity changed"):
-        api.execute(replace(external, render_version=3), client=client)
+    with pytest.raises(ledger.UsageLedgerError) as guarded:
+        api.execute(changed, client=client)
+    assert str(guarded.value) == (
+        "latch journal: usage ledger deleted while its generation journal survives: "
+        f"expected generation={account['generation_id']}; found=missing ledger")
     assert client.messages.calls == []
+    assert not ledger.ledger_path(external).exists()
     assert snapshot(external.out_dir) == before
 
 
@@ -98,3 +116,7 @@ def test_activation_recovers_after_index_publication_before_ledger_ack(external,
     client = FakeClient()
     result = api.execute(new, client=client)
     assert len(result["usage"]) == len(client.messages.calls) == 4
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

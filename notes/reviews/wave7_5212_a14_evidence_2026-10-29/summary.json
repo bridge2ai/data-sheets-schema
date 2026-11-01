@@ -1,0 +1,719 @@
+{
+  "copied_evidence": [
+    {
+      "bytes": 1683,
+      "copy": "extra_evidence/run-01-protected-union.json",
+      "original": "/private/tmp/d4d-wave7-5212-a14-canary-20261029/protected-union.json",
+      "sha256": "cecf70572b0555e543d3e7d0ac51096046e8c30dc629666208db5f82547ee1b3"
+    },
+    {
+      "bytes": 1683,
+      "copy": "extra_evidence/run-02-protected-union.json",
+      "original": "/private/tmp/d4d-wave7-5212-a14-full-20261029/protected-union.json",
+      "sha256": "cecf70572b0555e543d3e7d0ac51096046e8c30dc629666208db5f82547ee1b3"
+    },
+    {
+      "bytes": 2946,
+      "copy": "extra_evidence/run-02-test_chorus_shared_v1_exact_ba0-baseline.log",
+      "original": "/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_chorus_shared_v1_exact_ba0/parity/baseline.log",
+      "sha256": "573bbcc5d82251568c1a9a81620cbf1c4d6975cff539dedef6e8f9ac350ee29c"
+    },
+    {
+      "bytes": 2946,
+      "copy": "extra_evidence/run-02-test_chorus_shared_v1_exact_ba1-baseline.log",
+      "original": "/private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_chorus_shared_v1_exact_ba1/parity/baseline.log",
+      "sha256": "573bbcc5d82251568c1a9a81620cbf1c4d6975cff539dedef6e8f9ac350ee29c"
+    },
+    {
+      "bytes": 74198,
+      "copy": "extra_evidence/run-03-test_chorus_shared_v1_exact_ba0-summary.json",
+      "original": "/private/tmp/d4d-wave7-5212-parent-d41-20261029/cases/test_chorus_shared_v1_exact_ba0/parity/summary.json",
+      "sha256": "d96f65d085234864f5b7ceaf9d8ff8c1655086d2857e7915fd6d96a5e1f3a8df"
+    },
+    {
+      "bytes": 74198,
+      "copy": "extra_evidence/run-03-test_chorus_shared_v1_exact_ba1-summary.json",
+      "original": "/private/tmp/d4d-wave7-5212-parent-d41-20261029/cases/test_chorus_shared_v1_exact_ba1/parity/summary.json",
+      "sha256": "1f0c8e00f7f15650cf9b3246acec51efd7646c5322af93c4700b07448cf6cc19"
+    },
+    {
+      "bytes": 73907,
+      "copy": "extra_evidence/run-10-test_chorus_shared_v1_exact_ba0-summary.json",
+      "original": "/private/tmp/d4d-wave7-5212-a14-fixed-controls-20261029/cases/test_chorus_shared_v1_exact_ba0/parity/summary.json",
+      "sha256": "24222b00e32f30a92a407d29d6328b2827c66f0c3b0523ecb757e6b62d6c5dd8"
+    },
+    {
+      "bytes": 73907,
+      "copy": "extra_evidence/run-10-test_chorus_shared_v1_exact_ba1-summary.json",
+      "original": "/private/tmp/d4d-wave7-5212-a14-fixed-controls-20261029/cases/test_chorus_shared_v1_exact_ba1/parity/summary.json",
+      "sha256": "252abe8d78471e6c53499ab6684a6d21bfe80ee93adca874ca7d18a40c026ad2"
+    },
+    {
+      "bytes": 7605,
+      "copy": "canary_outputs/scope-pipeline-proof.json",
+      "original": "/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/scope-pipeline-proof.json",
+      "sha256": "4a10944d9d967a4f2230221eb12d827956bf5517c3984456719ee88801ee1cb9"
+    },
+    {
+      "bytes": 13891,
+      "copy": "canary_outputs/shared-registration.json",
+      "original": "/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/shared-registration.json",
+      "sha256": "c6a3ec0a977edeb40841757b40e239c119f2e2d63d584e47b47e4cbb26daa735"
+    },
+    {
+      "bytes": 135,
+      "copy": "canary_outputs/EXAMPLE_d4d.yaml",
+      "original": "/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d.yaml",
+      "sha256": "c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193"
+    },
+    {
+      "bytes": 481,
+      "copy": "canary_outputs/EXAMPLE_d4d_core.yaml",
+      "original": "/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d_core.yaml",
+      "sha256": "9e8f2acef73ebff513e4a28b58096c46ad56e9f7b9f781785380d5a387b64cd8"
+    },
+    {
+      "bytes": 2350,
+      "copy": "canary_outputs/EXAMPLE_reconciliation.md",
+      "original": "/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_reconciliation.md",
+      "sha256": "31b598c7d19d4ae7b39fe3da0ff73560a3845dafbafcb9e1b7ce1544dea2bd60"
+    },
+    {
+      "bytes": 129262,
+      "copy": "canary_outputs/EXAMPLE_provenance.yaml",
+      "original": "/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_provenance.yaml",
+      "sha256": "66862e7ae231dcd575987cd1994fc366a7248b0488e0ae83cb880e50a98d3a2d"
+    },
+    {
+      "bytes": 77063,
+      "copy": "canary_outputs/EXAMPLE_api_usage_3f6b3815070be709.json",
+      "original": "/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_api_usage_3f6b3815070be709.json",
+      "sha256": "1cf44b39824112544cf44e22aad90750eb6469ffd5d32d8529b6da7ce87e7b1b"
+    },
+    {
+      "bytes": 154163,
+      "copy": "extra_evidence/d4d-wave7-portable-profile-20261029-0607.txt",
+      "original": "/private/tmp/d4d-wave7-portable-profile-20261029-0607.txt",
+      "sha256": "39b256e5fcdfd8d8a00e4dd91fc12e5ceca77b55a469ce6d23c82fe5f9e95976"
+    }
+  ],
+  "counting_note": "Canary and targeted reruns overlap; do not add them as unique cases.",
+  "merge": "c119d58ddf18cc7c4a77bc8293d09335ab24f921",
+  "original_head": "fc3417be63b55c579c48df13fb54ae33437a3977",
+  "production_assets_and_data_unchanged_since_merge": true,
+  "protected_shared_generation_sha256": "8c799066df941dd80d65ffdc23eee225f875383e046bbc1f88656f9897d01e47",
+  "runs": [
+    {
+      "base": "c119d58ddf18cc7c4a77bc8293d09335ab24f921",
+      "counts": {
+        "error": 0,
+        "failure": 0,
+        "passed": 1,
+        "skipped": 0
+      },
+      "failures": [],
+      "head": "fc3417be63b55c579c48df13fb54ae33437a3977",
+      "junit_sha256": "47bb8bcd16ee1b97181596d1520c5c264a49475f9f2ea8f5cfb3db05425adde2",
+      "outcome": {
+        "invalid_junit_cases": [],
+        "passed": true,
+        "passed_cases_by_module": {
+          "test_shared_generation_scope_context": 1
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "selection_complete": true,
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 232.59627820801688
+      },
+      "outcome_sha256": "5751cb941785bbc2944a96a8a62c3cdd888d8d23f4489314381d73c3fff0d1a4",
+      "root": "/private/tmp/d4d-wave7-5212-a14-canary-20261029",
+      "slowest_cases": [
+        {
+          "message": null,
+          "module": "tests.test_shared_generation_scope_context",
+          "name": "test_actual_cli_scope_delivery_regate_and_completed_replay",
+          "seconds": 223.968,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "base": "c119d58ddf18cc7c4a77bc8293d09335ab24f921",
+      "counts": {
+        "error": 0,
+        "failure": 4,
+        "passed": 548,
+        "skipped": 0
+      },
+      "failures": [
+        {
+          "message": "RuntimeError: baseline capture failed; see /private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_chorus_shared_v1_exact_ba0/parity/baseline.log",
+          "module": "tests.test_d41_request_parity",
+          "name": "test_chorus_shared_v1_exact_baseline_sdk_bytes[push]",
+          "seconds": 28.626,
+          "status": "failure"
+        },
+        {
+          "message": "RuntimeError: baseline capture failed; see /private/tmp/d4d-wave7-5212-a14-full-20261029/cases/test_chorus_shared_v1_exact_ba1/parity/baseline.log",
+          "module": "tests.test_d41_request_parity",
+          "name": "test_chorus_shared_v1_exact_baseline_sdk_bytes[pull_request]",
+          "seconds": 28.535,
+          "status": "failure"
+        },
+        {
+          "message": "data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: resume journal head: expected=23cd30db\u2026(unverified, not a resume anchor); found=af348245\u2026(unverified, not a resume anchor)",
+          "module": "tests.test_shared_generation_runtime",
+          "name": "test_real_complete_api_pipeline_and_completed_recheck",
+          "seconds": 267.224,
+          "status": "failure"
+        },
+        {
+          "message": "data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume",
+          "module": "tests.test_source_heading_runtime_api",
+          "name": "test_selected_form_captures_actual_default_instrument_per_invocation",
+          "seconds": 23.478,
+          "status": "failure"
+        }
+      ],
+      "head": "fc3417be63b55c579c48df13fb54ae33437a3977",
+      "junit_sha256": "b3ed54c1804b481147db8ce4fc2afad3d99f0848078ffb896852912ccfab0292",
+      "outcome": {
+        "invalid_junit_cases": [
+          {
+            "identity": [
+              "tests.test_d41_request_parity",
+              "test_chorus_shared_v1_exact_baseline_sdk_bytes[push]"
+            ],
+            "tags": [
+              "failure"
+            ]
+          },
+          {
+            "identity": [
+              "tests.test_d41_request_parity",
+              "test_chorus_shared_v1_exact_baseline_sdk_bytes[pull_request]"
+            ],
+            "tags": [
+              "failure"
+            ]
+          },
+          {
+            "identity": [
+              "tests.test_shared_generation_runtime",
+              "test_real_complete_api_pipeline_and_completed_recheck"
+            ],
+            "tags": [
+              "failure"
+            ]
+          },
+          {
+            "identity": [
+              "tests.test_source_heading_runtime_api",
+              "test_selected_form_captures_actual_default_instrument_per_invocation"
+            ],
+            "tags": [
+              "failure"
+            ]
+          }
+        ],
+        "passed": false,
+        "passed_cases_by_module": {
+          "test_api_latch_guard": 22,
+          "test_audit_omissions": 73,
+          "test_d41_request_parity": 4,
+          "test_latch_journal": 71,
+          "test_pr5212_d55_fixes": 29,
+          "test_pr5212_r3_fixes": 5,
+          "test_pr5212_r4_fixes": 5,
+          "test_report_admission": 22,
+          "test_report_gate": 40,
+          "test_shared_generation_assets": 100,
+          "test_shared_generation_runtime": 9,
+          "test_shared_generation_scope_context": 13,
+          "test_source_heading_runtime": 15,
+          "test_source_heading_runtime_api": 17,
+          "test_typed_audit": 100,
+          "test_typed_audit_omission_wire": 21,
+          "test_wave4_a14_review": 2
+        },
+        "returncode": 1,
+        "scientific_acceptance": "not_assessed",
+        "selection_complete": true,
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 6873.559255499975
+      },
+      "outcome_sha256": "7aa583b1fc4493dccc6ee94fad5ab4e5e7192d6ab41abf07fd174bf66d88dfa2",
+      "root": "/private/tmp/d4d-wave7-5212-a14-full-20261029",
+      "slowest_cases": [
+        {
+          "message": null,
+          "module": "tests.test_source_heading_runtime_api",
+          "name": "test_actual_completed_capture_is_portable_and_refuses_changed_bytes",
+          "seconds": 1358.026,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_source_heading_runtime_api",
+          "name": "test_actual_default_layout_completed_capture",
+          "seconds": 620.846,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_source_heading_runtime_api",
+          "name": "test_actual_regated_report_captured_lineage",
+          "seconds": 496.817,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_source_heading_runtime_api",
+          "name": "test_actual_sent_routing_counts_usage_and_completed_zero_calls",
+          "seconds": 474.846,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_report_admission",
+          "name": "test_chorus_wire_is_byte_identical_without_admission_and_is_what_was_counted",
+          "seconds": 283.468,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "base": "39d6c33b5abdcd05bd8ec830211adb9caf013acb",
+      "counts": {
+        "error": 0,
+        "failure": 0,
+        "passed": 6,
+        "skipped": 0
+      },
+      "failures": [],
+      "head": "662d08b6f61d205ce47ec4fe9c383e73dd3beb70",
+      "junit_sha256": "d25b45ce988efd789e67eefa4b27a8c6eeb6b75af26834289f1993c39383b241",
+      "outcome": {
+        "invalid_junit_cases": [],
+        "passed": true,
+        "passed_cases_by_module": {
+          "test_d41_request_parity": 6
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "selection_complete": true,
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 139.06498095800634
+      },
+      "outcome_sha256": "91b628892bbf62398a92facfeb04e21dec0b0da18b32b9d9c807871bf1453f30",
+      "root": "/private/tmp/d4d-wave7-5212-parent-d41-20261029",
+      "slowest_cases": [
+        {
+          "message": null,
+          "module": "tests.test_d41_request_parity",
+          "name": "test_chorus_shared_v1_exact_baseline_sdk_bytes[pull_request]",
+          "seconds": 56.928,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_d41_request_parity",
+          "name": "test_chorus_shared_v1_exact_baseline_sdk_bytes[push]",
+          "seconds": 56.137,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_d41_request_parity",
+          "name": "test_shared_v2_keeps_strict_controller_code_freshness",
+          "seconds": 22.591,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_d41_request_parity",
+          "name": "test_parity_uses_changed_request_bytes_on_both_sides",
+          "seconds": 0.284,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_d41_request_parity",
+          "name": "test_package_authority_refuses_a_late_foreign_module",
+          "seconds": 0.002,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "base": "8b885ee68262474275316755c3fc55dc05517dcb",
+      "counts": {
+        "error": 0,
+        "failure": 0,
+        "passed": 21,
+        "skipped": 0
+      },
+      "failures": [],
+      "head": "a07e8d8c09d2b90be18d95f7e55305ab3cfc8b15",
+      "junit_sha256": "deec784a8d4d1ed301b16586c6056bb0bdda72f4e2e05d6a87c254f8117b490f",
+      "outcome": {
+        "invalid_junit_cases": [],
+        "passed": true,
+        "passed_cases_by_module": {
+          "test_typed_audit_omission_wire": 21
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "selection_complete": true,
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 6.205300792003982
+      },
+      "outcome_sha256": "552381430ac8a26539d144a70c77ca3af1330166b1739c0516a3f510b8d33ad4",
+      "root": "/private/tmp/d4d-wave7-a14-parent-omission-20261029",
+      "slowest_cases": [
+        {
+          "message": null,
+          "module": "tests.test_typed_audit_omission_wire",
+          "name": "test_exact_omission_wire_roundtrip_and_independent_check[False]",
+          "seconds": 0.854,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_typed_audit_omission_wire",
+          "name": "test_exact_omission_wire_roundtrip_and_independent_check[True]",
+          "seconds": 0.809,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_typed_audit_omission_wire",
+          "name": "test_removing_wire_flag_cannot_rebind_saved_selected_workers",
+          "seconds": 0.4,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_typed_audit_omission_wire",
+          "name": "test_cross_wire_hash_is_refused_in_both_directions[True]",
+          "seconds": 0.225,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_typed_audit_omission_wire",
+          "name": "test_cross_wire_hash_is_refused_in_both_directions[False]",
+          "seconds": 0.216,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "base": "39d6c33b5abdcd05bd8ec830211adb9caf013acb",
+      "counts": {
+        "error": 0,
+        "failure": 1,
+        "passed": 0,
+        "skipped": 0
+      },
+      "failures": [
+        {
+          "message": "data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume",
+          "module": "tests.test_source_heading_runtime_api",
+          "name": "test_selected_form_captures_actual_default_instrument_per_invocation",
+          "seconds": 25.703,
+          "status": "failure"
+        }
+      ],
+      "head": "662d08b6f61d205ce47ec4fe9c383e73dd3beb70",
+      "junit_sha256": "c58d8147fa2f8f852ef77f1ea8b93903c43bb183d8196ecbc2700d21e39a4a7c",
+      "outcome": {
+        "invalid_junit_cases": [
+          {
+            "identity": [
+              "tests.test_source_heading_runtime_api",
+              "test_selected_form_captures_actual_default_instrument_per_invocation"
+            ],
+            "tags": [
+              "failure"
+            ]
+          }
+        ],
+        "passed": false,
+        "passed_cases_by_module": {
+          "test_source_heading_runtime_api": 0
+        },
+        "returncode": 1,
+        "scientific_acceptance": "not_assessed",
+        "selection_complete": true,
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 28.710916540992912
+      },
+      "outcome_sha256": "2900f7d5a82d4fcbf16dbc6cd6d74be76d2d73d4d06a58bc654121d7545df261",
+      "root": "/private/tmp/d4d-wave7-5212-parent-form-20261029",
+      "slowest_cases": [
+        {
+          "message": "data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume",
+          "module": "tests.test_source_heading_runtime_api",
+          "name": "test_selected_form_captures_actual_default_instrument_per_invocation",
+          "seconds": 25.703,
+          "status": "failure"
+        }
+      ]
+    },
+    {
+      "base": "39d6c33b5abdcd05bd8ec830211adb9caf013acb",
+      "counts": {
+        "error": 0,
+        "failure": 1,
+        "passed": 0,
+        "skipped": 0
+      },
+      "failures": [
+        {
+          "message": "data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: resume journal head: expected=89fde5ff\u2026(unverified, not a resume anchor); found=1634d9cb\u2026(unverified, not a resume anchor)",
+          "module": "tests.test_shared_generation_runtime",
+          "name": "test_real_complete_api_pipeline_and_completed_recheck",
+          "seconds": 231.52,
+          "status": "failure"
+        }
+      ],
+      "head": "662d08b6f61d205ce47ec4fe9c383e73dd3beb70",
+      "junit_sha256": "71849e247ee2a5f3a570c7612fe27a37ca2b5f873a4f760f0fccc7d7351881c6",
+      "outcome": {
+        "invalid_junit_cases": [
+          {
+            "identity": [
+              "tests.test_shared_generation_runtime",
+              "test_real_complete_api_pipeline_and_completed_recheck"
+            ],
+            "tags": [
+              "failure"
+            ]
+          }
+        ],
+        "passed": false,
+        "passed_cases_by_module": {
+          "test_shared_generation_runtime": 0
+        },
+        "returncode": 1,
+        "scientific_acceptance": "not_assessed",
+        "selection_complete": true,
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 235.92121008300455
+      },
+      "outcome_sha256": "9bbaa98ead862b9bfe517fc5bda6c7fc277908d902f950b0484c0099700e131b",
+      "root": "/private/tmp/d4d-wave7-5212-parent-replay-20261029",
+      "slowest_cases": [
+        {
+          "message": "data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: resume journal head: expected=89fde5ff\u2026(unverified, not a resume anchor); found=1634d9cb\u2026(unverified, not a resume anchor)",
+          "module": "tests.test_shared_generation_runtime",
+          "name": "test_real_complete_api_pipeline_and_completed_recheck",
+          "seconds": 231.52,
+          "status": "failure"
+        }
+      ]
+    },
+    {
+      "base": "c7e4f63a9a64278c900f0bacec2614bae1a41c2b",
+      "counts": {
+        "error": 0,
+        "failure": 1,
+        "passed": 0,
+        "skipped": 0
+      },
+      "failures": [
+        {
+          "message": "Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>",
+          "module": "tests.test_shared_generation_runtime",
+          "name": "test_real_complete_api_pipeline_and_completed_recheck",
+          "seconds": 460.785,
+          "status": "failure"
+        }
+      ],
+      "head": "a612db79b6336672c3c9b95de6b5138eed3798f4",
+      "junit_sha256": "d12c23e1714c3bcf88b97b6b1e09ffb1e19a2943c413199c0719fefbcb72ad1d",
+      "outcome": {
+        "invalid_junit_cases": [
+          {
+            "identity": [
+              "tests.test_shared_generation_runtime",
+              "test_real_complete_api_pipeline_and_completed_recheck"
+            ],
+            "tags": [
+              "failure"
+            ]
+          }
+        ],
+        "passed": false,
+        "passed_cases_by_module": {
+          "test_shared_generation_runtime": 0
+        },
+        "returncode": 1,
+        "scientific_acceptance": "not_assessed",
+        "selection_complete": true,
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 466.3837148330058
+      },
+      "outcome_sha256": "22dc0b764a6330f788e145c28e19daca4494396accacf97b09965422bbbc028f",
+      "root": "/private/tmp/d4d-wave7-5212-a14-fixed-replay-20261029",
+      "slowest_cases": [
+        {
+          "message": "Failed: DID NOT RAISE <class 'data_sheets_schema.usage_ledger.UsageLedgerError'>",
+          "module": "tests.test_shared_generation_runtime",
+          "name": "test_real_complete_api_pipeline_and_completed_recheck",
+          "seconds": 460.785,
+          "status": "failure"
+        }
+      ]
+    },
+    {
+      "base": "fc0552e9ec873d77da501e435d22b8818cb8535a",
+      "counts": {
+        "error": 0,
+        "failure": 0,
+        "passed": 1,
+        "skipped": 0
+      },
+      "failures": [],
+      "head": "cf7a1f11e5456ab1e7aae68668fe071112c22792",
+      "junit_sha256": "94a674c960cebaae34d7a21cbf83bbd6de0809d7f400a65200efe6af2ed7c7e1",
+      "outcome": {
+        "invalid_junit_cases": [],
+        "passed": true,
+        "passed_cases_by_module": {
+          "test_shared_generation_runtime": 1
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "selection_complete": true,
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 472.8665254160296
+      },
+      "outcome_sha256": "95bdf886e3881737c9a979bf49a6973c2f1430f79a91bcd29f8482622f05a3cb",
+      "root": "/private/tmp/d4d-wave7-5212-a14-fixed-replay-r2-20261029",
+      "slowest_cases": [
+        {
+          "message": null,
+          "module": "tests.test_shared_generation_runtime",
+          "name": "test_real_complete_api_pipeline_and_completed_recheck",
+          "seconds": 467.356,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "base": "fc0552e9ec873d77da501e435d22b8818cb8535a",
+      "counts": {
+        "error": 0,
+        "failure": 0,
+        "passed": 1,
+        "skipped": 0
+      },
+      "failures": [],
+      "head": "cf7a1f11e5456ab1e7aae68668fe071112c22792",
+      "junit_sha256": "8b65f007800591665b0e2b1190d7b492730659046e210f48c4275603797c593a",
+      "outcome": {
+        "invalid_junit_cases": [],
+        "passed": true,
+        "passed_cases_by_module": {
+          "test_source_heading_runtime_api": 1
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "selection_complete": true,
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 28.842487375019118
+      },
+      "outcome_sha256": "b9360e8b5977dca796850bc67c03e260998a921f3c6f4714bde722198a20d8b4",
+      "root": "/private/tmp/d4d-wave7-5212-a14-fixed-form-20261029",
+      "slowest_cases": [
+        {
+          "message": null,
+          "module": "tests.test_source_heading_runtime_api",
+          "name": "test_selected_form_captures_actual_default_instrument_per_invocation",
+          "seconds": 25.677,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "base": "fc0552e9ec873d77da501e435d22b8818cb8535a",
+      "counts": {
+        "error": 0,
+        "failure": 0,
+        "passed": 48,
+        "skipped": 0
+      },
+      "failures": [],
+      "head": "cf7a1f11e5456ab1e7aae68668fe071112c22792",
+      "junit_sha256": "5a76cc44d7698c6a1538cbb97a894d7511f2707716f525f7dede4654ebdf6233",
+      "outcome": {
+        "invalid_junit_cases": [],
+        "passed": true,
+        "passed_cases_by_module": {
+          "test_d41_request_parity": 6,
+          "test_pr5212_r3_fixes": 5,
+          "test_pr5212_r4_fixes": 5,
+          "test_shared_generation_completed_replay": 32
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "selection_complete": true,
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 315.85968758299714
+      },
+      "outcome_sha256": "e79771b380231edc95a0be4dfcee98aa32e1ede5d824daa7ad55f45ce74b34c3",
+      "root": "/private/tmp/d4d-wave7-5212-a14-fixed-controls-20261029",
+      "slowest_cases": [
+        {
+          "message": null,
+          "module": "tests.test_pr5212_r4_fixes",
+          "name": "test_dprime_refused_output_cannot_resume_rechained_10_22a",
+          "seconds": 146.242,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_d41_request_parity",
+          "name": "test_chorus_shared_v1_exact_baseline_sdk_bytes[pull_request]",
+          "seconds": 70.542,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_d41_request_parity",
+          "name": "test_chorus_shared_v1_exact_baseline_sdk_bytes[push]",
+          "seconds": 62.514,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_d41_request_parity",
+          "name": "test_shared_v2_keeps_strict_controller_code_freshness",
+          "seconds": 21.971,
+          "status": "passed"
+        },
+        {
+          "message": null,
+          "module": "tests.test_pr5212_r3_fixes",
+          "name": "test_sigterm_requires_reconciliation_before_a_new_launch_anchor",
+          "seconds": 3.049,
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "scientific_acceptance": "not_assessed"
+}

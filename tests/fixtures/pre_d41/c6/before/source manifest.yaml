@@ -1,0 +1,11 @@
+naming:
+  EXTERNAL:
+    canonical_label: External Cohort
+projects:
+  EXTERNAL:
+    bundle: /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d41-legacy-resumed.NmvBBy/pytest/c6/test_explicit_restart_preserve0/cohort
+      source.txt
+    sources:
+    - id: protocol
+      priority: 1
+      source_type: documentation

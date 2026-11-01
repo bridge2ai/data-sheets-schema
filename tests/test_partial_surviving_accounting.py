@@ -25,3 +25,7 @@ def test_partial_resume_refuses_a_missing_completed_journal_row(external, keep_r
     assert second.messages.calls == []
     assert api._progress_path(external).read_bytes() == progress
     assert not external.provenance_path.exists()
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

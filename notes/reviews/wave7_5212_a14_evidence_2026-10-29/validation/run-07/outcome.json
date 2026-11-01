@@ -1,0 +1,23 @@
+{
+  "invalid_junit_cases": [
+    {
+      "identity": [
+        "tests.test_shared_generation_runtime",
+        "test_real_complete_api_pipeline_and_completed_recheck"
+      ],
+      "tags": [
+        "failure"
+      ]
+    }
+  ],
+  "passed": false,
+  "passed_cases_by_module": {
+    "test_shared_generation_runtime": 0
+  },
+  "returncode": 1,
+  "scientific_acceptance": "not_assessed",
+  "selection_complete": true,
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 466.3837148330058
+}

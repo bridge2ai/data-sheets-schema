@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="21" skipped="0" tests="21" time="3.751" timestamp="2026-10-28T00:11:42.999125" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_pr5212_d55_fixes" name="test_guard_owns_fields_across_a_stale_writer[missing]" time="2.346"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:47271ac6fa99c4332f030daa08071bccc39ad0c09ffdddb77e6fa4d41a2870df">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_guard_owns_fields_across_0')
+stale_fields = 'missing'
+
+    @pytest.mark.parametrize('stale_fields', ['missing', 'prefix'])
+    def test_guard_owns_fields_across_a_stale_writer(tmp_path, stale_fields):
+        selected = start(tmp_path)
+        delivered(selected, tmp_path)
+        stale = ledger._read(selected)
+        path = tmp_path / 'second.json'
+        path.write_text('second delivery')
+        from data_sheets_schema import snapshot_store
+        snapshot_store.record(selected, path.name, path, usage_id='second')
+        expected = ledger._read(selected)
+        if stale_fields == 'missing':
+            for key in ('latch_snapshots', 'latch_journal', 'latch_overrides'):
+                stale.pop(key, None)
+        stale['diagnostic'] = 'ordinary caller mutation'
+&gt;       ledger._write(selected, stale)
+
+tests/test_pr5212_d55_fixes.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/usage_ledger.py:620: in _write
+    latch_journal.before_ledger_write(spec, data)
+src/data_sheets_schema/latch_journal.py:472: in before_ledger_write
+    _fail(f"attempted removal or rewrite of immutable latch: {key}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'attempted removal or rewrite of immutable latch: snapshot:47271ac6fa99c4332f030daa08071bccc39ad0c09ffdddb77e6fa4d41a2870df'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:47271ac6fa99c4332f030daa08071bccc39ad0c09ffdddb77e6fa4d41a2870df
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_guard_owns_fields_across_a_stale_writer[prefix]" time="0.023"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:2630133323181cb9bd468467210926f5cde0b191a1be08629996f6082e2ac589">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_guard_owns_fields_across_1')
+stale_fields = 'prefix'
+
+    @pytest.mark.parametrize('stale_fields', ['missing', 'prefix'])
+    def test_guard_owns_fields_across_a_stale_writer(tmp_path, stale_fields):
+        selected = start(tmp_path)
+        delivered(selected, tmp_path)
+        stale = ledger._read(selected)
+        path = tmp_path / 'second.json'
+        path.write_text('second delivery')
+        from data_sheets_schema import snapshot_store
+        snapshot_store.record(selected, path.name, path, usage_id='second')
+        expected = ledger._read(selected)
+        if stale_fields == 'missing':
+            for key in ('latch_snapshots', 'latch_journal', 'latch_overrides'):
+                stale.pop(key, None)
+        stale['diagnostic'] = 'ordinary caller mutation'
+&gt;       ledger._write(selected, stale)
+
+tests/test_pr5212_d55_fixes.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/usage_ledger.py:620: in _write
+    latch_journal.before_ledger_write(spec, data)
+src/data_sheets_schema/latch_journal.py:472: in before_ledger_write
+    _fail(f"attempted removal or rewrite of immutable latch: {key}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'attempted removal or rewrite of immutable latch: snapshot:2630133323181cb9bd468467210926f5cde0b191a1be08629996f6082e2ac589'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:2630133323181cb9bd468467210926f5cde0b191a1be08629996f6082e2ac589
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_guard_owned_conflicting_value_is_refused[latch_snapshots]" time="0.021"><failure message="AssertionError: Regex pattern did not match.&#10; Regex: 'guard-owned'&#10; Input: 'latch journal: attempted removal or rewrite of immutable latch: snapshot:4daea6643f22ef9b351933a694cfc33ebe31c4390ff24693c0d4b4ecad1eebbc'">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_guard_owned_conflicting_v0')
+key = 'latch_snapshots'
+
+    @pytest.mark.parametrize('key', ['latch_snapshots', 'latch_journal', 'latch_overrides'])
+    def test_guard_owned_conflicting_value_is_refused(tmp_path, key):
+        selected = start(tmp_path)
+        delivered(selected, tmp_path)
+        data = ledger._read(selected)
+        if key == 'latch_snapshots':
+            data[key][0]['sha256'] = 'f' * 64
+        elif key == 'latch_journal':
+            data[key]['head_sha256'] = 'f' * 64
+        else:
+            data[key] = [{'forged': True}]
+        before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
+        with pytest.raises(ledger.UsageLedgerError, match='guard-owned'):
+&gt;           ledger._write(selected, data)
+
+tests/test_pr5212_d55_fixes.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/usage_ledger.py:620: in _write
+    latch_journal.before_ledger_write(spec, data)
+src/data_sheets_schema/latch_journal.py:472: in before_ledger_write
+    _fail(f"attempted removal or rewrite of immutable latch: {key}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'attempted removal or rewrite of immutable latch: snapshot:4daea6643f22ef9b351933a694cfc33ebe31c4390ff24693c0d4b4ecad1eebbc'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:4daea6643f22ef9b351933a694cfc33ebe31c4390ff24693c0d4b4ecad1eebbc
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_guard_owned_conflicting_v0')
+key = 'latch_snapshots'
+
+    @pytest.mark.parametrize('key', ['latch_snapshots', 'latch_journal', 'latch_overrides'])
+    def test_guard_owned_conflicting_value_is_refused(tmp_path, key):
+        selected = start(tmp_path)
+        delivered(selected, tmp_path)
+        data = ledger._read(selected)
+        if key == 'latch_snapshots':
+            data[key][0]['sha256'] = 'f' * 64
+        elif key == 'latch_journal':
+            data[key]['head_sha256'] = 'f' * 64
+        else:
+            data[key] = [{'forged': True}]
+        before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
+&gt;       with pytest.raises(ledger.UsageLedgerError, match='guard-owned'):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'guard-owned'
+E        Input: 'latch journal: attempted removal or rewrite of immutable latch: snapshot:4daea6643f22ef9b351933a694cfc33ebe31c4390ff24693c0d4b4ecad1eebbc'
+
+tests/test_pr5212_d55_fixes.py:49: AssertionError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_guard_owned_conflicting_value_is_refused[latch_journal]" time="0.022"><failure message="Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_guard_owned_conflicting_v1')
+key = 'latch_journal'
+
+    @pytest.mark.parametrize('key', ['latch_snapshots', 'latch_journal', 'latch_overrides'])
+    def test_guard_owned_conflicting_value_is_refused(tmp_path, key):
+        selected = start(tmp_path)
+        delivered(selected, tmp_path)
+        data = ledger._read(selected)
+        if key == 'latch_snapshots':
+            data[key][0]['sha256'] = 'f' * 64
+        elif key == 'latch_journal':
+            data[key]['head_sha256'] = 'f' * 64
+        else:
+            data[key] = [{'forged': True}]
+        before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
+&gt;       with pytest.raises(ledger.UsageLedgerError, match='guard-owned'):
+E       Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;
+
+tests/test_pr5212_d55_fixes.py:49: Failed</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_guard_owned_conflicting_value_is_refused[latch_overrides]" time="0.021"><failure message="Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_guard_owned_conflicting_v2')
+key = 'latch_overrides'
+
+    @pytest.mark.parametrize('key', ['latch_snapshots', 'latch_journal', 'latch_overrides'])
+    def test_guard_owned_conflicting_value_is_refused(tmp_path, key):
+        selected = start(tmp_path)
+        delivered(selected, tmp_path)
+        data = ledger._read(selected)
+        if key == 'latch_snapshots':
+            data[key][0]['sha256'] = 'f' * 64
+        elif key == 'latch_journal':
+            data[key]['head_sha256'] = 'f' * 64
+        else:
+            data[key] = [{'forged': True}]
+        before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
+&gt;       with pytest.raises(ledger.UsageLedgerError, match='guard-owned'):
+E       Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;
+
+tests/test_pr5212_d55_fixes.py:49: Failed</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_interrupted_intent_requires_exact_acknowledgement_and_can_continue" time="0.017"><failure message="Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_intent_requir0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x120b055b0&gt;
+
+    def test_interrupted_intent_requires_exact_acknowledgement_and_can_continue(tmp_path, monkeypatch):
+        selected = start(tmp_path)
+        original = ledger._write_unlatched
+        with monkeypatch.context() as m:
+            m.setattr(ledger, '_write_unlatched', lambda *args: (_ for _ in ()).throw(KeyboardInterrupt()))
+            with pytest.raises(KeyboardInterrupt):
+                ledger.begin_call(selected, 'audit', 1, '2026-10-28T07:02:00Z')
+        suffix = raw_events(selected)[-1]
+&gt;       with pytest.raises(ledger.UsageLedgerError, match='required event_sha256s='):
+E       Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;
+
+tests/test_pr5212_d55_fixes.py:62: Failed</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_ineffective_override_is_refused_without_assistance[terminal]" time="0.018"><failure message="assert (b'{&quot;generati...rrides&quot;: []}') == (b'{&quot;generati... }\n  ]\n}\n')&#10;  At index 0 diff: b'{&quot;generation_id&quot;:&quot;8c3a80884d0e40c0891d6526a667a686&quot;,&quot;identity&quot;:{&quot;condition&quot;:&quot;generic&quot;,&quot;label&quot;:&quot;2026-07-29_claude-opus-5-api-generic_rep1&quot;,&quot;method&quot;:&quot;claudecode_agent&quot;,&quot;project&quot;:&quot;CHORUS&quot;},&quot;kind&quot;:&quot;generation&quot;,&quot;line&quot;:1,&quot;payload&quot;:{&quot;prior_generation_ids&quot;:[]},&quot;previous_sha256&quot;:null,&quot;sha256&quot;:&quot;df714c6c6ca2c4f22bf1334189c5db9b30e809ebab690b90dfef633f18d7bd40&quot;,&quot;version&quot;:1}\n{&quot;generation_id&quot;:&quot;8c3a80884d0e40c0891d6526a667a686&quot;,&quot;identity&quot;:{&quot;condition&quot;:&quot;generic&quot;,&quot;label&quot;:&quot;2026-07-29_claude-opus-5-api-generic_rep1&quot;,&quot;method&quot;:&quot;claudecode_agent&quot;,&quot;project&quot;:&quot;CHORUS&quot;},&quot;kind...&#10;  &#10;  ...Full output truncated (2 lines hidden), use '-vv' to show">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_ineffective_override_is_r0')
+mutation = 'terminal'
+
+    @pytest.mark.parametrize('mutation', ['terminal', 'control', 'allowance'])
+    def test_ineffective_override_is_refused_without_assistance(tmp_path, mutation):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        if mutation == 'terminal':
+            data['typed_audit'] = {'state': 'failed', 'failure_type': 'ReadTimeout'}
+        elif mutation == 'control':
+            data['typed_audit'] = {'state': 'running', 'stages': [{'state': 'admitted'}]}
+        else:
+            data['report_regate_attempted'] = True
+        ledger._write(selected, data)
+        disk_edit(selected, lambda d: d.pop('typed_audit' if mutation != 'allowance' else 'report_regate_attempted'))
+        current = ledger._read(selected)
+        mismatches = journal._mismatches(selected, current, journal._events(selected))
+        acknowledge(selected, sorted({m['event_sha256'] for m in mismatches}))
+        before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
+        with pytest.raises(ledger.UsageLedgerError):
+            journal.check(selected)
+&gt;       assert before == (journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes())
+E       assert (b'{"generati...rrides": []}') == (b'{"generati... }\n  ]\n}\n')
+E         At index 0 diff: b'{"generation_id":"8c3a80884d0e40c0891d6526a667a686","identity":{"condition":"generic","label":"2026-07-29_claude-opus-5-api-generic_rep1","method":"claudecode_agent","project":"CHORUS"},"kind":"generation","line":1,"payload":{"prior_generation_ids":[]},"previous_sha256":null,"sha256":"df714c6c6ca2c4f22bf1334189c5db9b30e809ebab690b90dfef633f18d7bd40","version":1}\n{"generation_id":"8c3a80884d0e40c0891d6526a667a686","identity":{"condition":"generic","label":"2026-07-29_claude-opus-5-api-generic_rep1","method":"claudecode_agent","project":"CHORUS"},"kind...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests/test_pr5212_d55_fixes.py:97: AssertionError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_ineffective_override_is_refused_without_assistance[control]" time="0.019"><failure message="assert (b'{&quot;generati...rrides&quot;: []}') == (b'{&quot;generati... }\n  ]\n}\n')&#10;  At index 0 diff: b'{&quot;generation_id&quot;:&quot;8d01e8210a9c49d6a898116a03f95ccc&quot;,&quot;identity&quot;:{&quot;condition&quot;:&quot;generic&quot;,&quot;label&quot;:&quot;2026-07-29_claude-opus-5-api-generic_rep1&quot;,&quot;method&quot;:&quot;claudecode_agent&quot;,&quot;project&quot;:&quot;CHORUS&quot;},&quot;kind&quot;:&quot;generation&quot;,&quot;line&quot;:1,&quot;payload&quot;:{&quot;prior_generation_ids&quot;:[]},&quot;previous_sha256&quot;:null,&quot;sha256&quot;:&quot;c0d879906991f0d3bd64268f9d8c231ce37bbd92361c9ffe2322f7680ec68b48&quot;,&quot;version&quot;:1}\n{&quot;generation_id&quot;:&quot;8d01e8210a9c49d6a898116a03f95ccc&quot;,&quot;identity&quot;:{&quot;condition&quot;:&quot;generic&quot;,&quot;label&quot;:&quot;2026-07-29_claude-opus-5-api-generic_rep1&quot;,&quot;method&quot;:&quot;claudecode_agent&quot;,&quot;project&quot;:&quot;CHORUS&quot;},&quot;kind...&#10;  &#10;  ...Full output truncated (2 lines hidden), use '-vv' to show">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_ineffective_override_is_r1')
+mutation = 'control'
+
+    @pytest.mark.parametrize('mutation', ['terminal', 'control', 'allowance'])
+    def test_ineffective_override_is_refused_without_assistance(tmp_path, mutation):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        if mutation == 'terminal':
+            data['typed_audit'] = {'state': 'failed', 'failure_type': 'ReadTimeout'}
+        elif mutation == 'control':
+            data['typed_audit'] = {'state': 'running', 'stages': [{'state': 'admitted'}]}
+        else:
+            data['report_regate_attempted'] = True
+        ledger._write(selected, data)
+        disk_edit(selected, lambda d: d.pop('typed_audit' if mutation != 'allowance' else 'report_regate_attempted'))
+        current = ledger._read(selected)
+        mismatches = journal._mismatches(selected, current, journal._events(selected))
+        acknowledge(selected, sorted({m['event_sha256'] for m in mismatches}))
+        before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
+        with pytest.raises(ledger.UsageLedgerError):
+            journal.check(selected)
+&gt;       assert before == (journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes())
+E       assert (b'{"generati...rrides": []}') == (b'{"generati... }\n  ]\n}\n')
+E         At index 0 diff: b'{"generation_id":"8d01e8210a9c49d6a898116a03f95ccc","identity":{"condition":"generic","label":"2026-07-29_claude-opus-5-api-generic_rep1","method":"claudecode_agent","project":"CHORUS"},"kind":"generation","line":1,"payload":{"prior_generation_ids":[]},"previous_sha256":null,"sha256":"c0d879906991f0d3bd64268f9d8c231ce37bbd92361c9ffe2322f7680ec68b48","version":1}\n{"generation_id":"8d01e8210a9c49d6a898116a03f95ccc","identity":{"condition":"generic","label":"2026-07-29_claude-opus-5-api-generic_rep1","method":"claudecode_agent","project":"CHORUS"},"kind...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests/test_pr5212_d55_fixes.py:97: AssertionError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_ineffective_override_is_refused_without_assistance[allowance]" time="0.016"><failure message="assert (b'{&quot;generati...rrides&quot;: []}') == (b'{&quot;generati... }\n  ]\n}\n')&#10;  At index 0 diff: b'{&quot;generation_id&quot;:&quot;7eb736b6b64d4c88baddca036f3c6d78&quot;,&quot;identity&quot;:{&quot;condition&quot;:&quot;generic&quot;,&quot;label&quot;:&quot;2026-07-29_claude-opus-5-api-generic_rep1&quot;,&quot;method&quot;:&quot;claudecode_agent&quot;,&quot;project&quot;:&quot;CHORUS&quot;},&quot;kind&quot;:&quot;generation&quot;,&quot;line&quot;:1,&quot;payload&quot;:{&quot;prior_generation_ids&quot;:[]},&quot;previous_sha256&quot;:null,&quot;sha256&quot;:&quot;77e09c66da2727434079eb88d8aba26f1145f4b3b5f9c5f37f0edb0b9b4c79b6&quot;,&quot;version&quot;:1}\n{&quot;generation_id&quot;:&quot;7eb736b6b64d4c88baddca036f3c6d78&quot;,&quot;identity&quot;:{&quot;condition&quot;:&quot;generic&quot;,&quot;label&quot;:&quot;2026-07-29_claude-opus-5-api-generic_rep1&quot;,&quot;method&quot;:&quot;claudecode_agent&quot;,&quot;project&quot;:&quot;CHORUS&quot;},&quot;kind...&#10;  &#10;  ...Full output truncated (2 lines hidden), use '-vv' to show">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_ineffective_override_is_r2')
+mutation = 'allowance'
+
+    @pytest.mark.parametrize('mutation', ['terminal', 'control', 'allowance'])
+    def test_ineffective_override_is_refused_without_assistance(tmp_path, mutation):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        if mutation == 'terminal':
+            data['typed_audit'] = {'state': 'failed', 'failure_type': 'ReadTimeout'}
+        elif mutation == 'control':
+            data['typed_audit'] = {'state': 'running', 'stages': [{'state': 'admitted'}]}
+        else:
+            data['report_regate_attempted'] = True
+        ledger._write(selected, data)
+        disk_edit(selected, lambda d: d.pop('typed_audit' if mutation != 'allowance' else 'report_regate_attempted'))
+        current = ledger._read(selected)
+        mismatches = journal._mismatches(selected, current, journal._events(selected))
+        acknowledge(selected, sorted({m['event_sha256'] for m in mismatches}))
+        before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
+        with pytest.raises(ledger.UsageLedgerError):
+            journal.check(selected)
+&gt;       assert before == (journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes())
+E       assert (b'{"generati...rrides": []}') == (b'{"generati... }\n  ]\n}\n')
+E         At index 0 diff: b'{"generation_id":"7eb736b6b64d4c88baddca036f3c6d78","identity":{"condition":"generic","label":"2026-07-29_claude-opus-5-api-generic_rep1","method":"claudecode_agent","project":"CHORUS"},"kind":"generation","line":1,"payload":{"prior_generation_ids":[]},"previous_sha256":null,"sha256":"77e09c66da2727434079eb88d8aba26f1145f4b3b5f9c5f37f0edb0b9b4c79b6","version":1}\n{"generation_id":"7eb736b6b64d4c88baddca036f3c6d78","identity":{"condition":"generic","label":"2026-07-29_claude-opus-5-api-generic_rep1","method":"claudecode_agent","project":"CHORUS"},"kind...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests/test_pr5212_d55_fixes.py:97: AssertionError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_validator_refresh_cannot_be_rewound[delete]" time="0.022"><failure message="Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_validator_refresh_cannot_0')
+damage = 'delete'
+
+    @pytest.mark.parametrize('damage', ['delete', 'pending', 'in_flight'])
+    def test_validator_refresh_cannot_be_rewound(tmp_path, damage):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        checkpoint = {'full_sha256': 'a' * 64}
+        data['validator_repair_refresh'] = {'state': 'pending', 'checkpoint': checkpoint}
+        ledger._write(selected, data)
+        data['validator_repair_refresh'].update(state='in_flight', usage_id='refresh-1')
+        ledger._write(selected, data)
+        data['validator_repair_refresh'].update(state='accepted', report_sha256='b' * 64)
+        ledger._write(selected, data)
+        def mutate(d):
+            if damage == 'delete':
+                d.pop('validator_repair_refresh')
+            else:
+                d['validator_repair_refresh']['state'] = damage
+        disk_edit(selected, mutate)
+&gt;       with pytest.raises(ledger.UsageLedgerError):
+E       Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;
+
+tests/test_pr5212_d55_fixes.py:118: Failed</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_validator_refresh_cannot_be_rewound[pending]" time="0.021"><failure message="Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_validator_refresh_cannot_1')
+damage = 'pending'
+
+    @pytest.mark.parametrize('damage', ['delete', 'pending', 'in_flight'])
+    def test_validator_refresh_cannot_be_rewound(tmp_path, damage):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        checkpoint = {'full_sha256': 'a' * 64}
+        data['validator_repair_refresh'] = {'state': 'pending', 'checkpoint': checkpoint}
+        ledger._write(selected, data)
+        data['validator_repair_refresh'].update(state='in_flight', usage_id='refresh-1')
+        ledger._write(selected, data)
+        data['validator_repair_refresh'].update(state='accepted', report_sha256='b' * 64)
+        ledger._write(selected, data)
+        def mutate(d):
+            if damage == 'delete':
+                d.pop('validator_repair_refresh')
+            else:
+                d['validator_repair_refresh']['state'] = damage
+        disk_edit(selected, mutate)
+&gt;       with pytest.raises(ledger.UsageLedgerError):
+E       Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;
+
+tests/test_pr5212_d55_fixes.py:118: Failed</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_validator_refresh_cannot_be_rewound[in_flight]" time="0.022"><failure message="Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_validator_refresh_cannot_2')
+damage = 'in_flight'
+
+    @pytest.mark.parametrize('damage', ['delete', 'pending', 'in_flight'])
+    def test_validator_refresh_cannot_be_rewound(tmp_path, damage):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        checkpoint = {'full_sha256': 'a' * 64}
+        data['validator_repair_refresh'] = {'state': 'pending', 'checkpoint': checkpoint}
+        ledger._write(selected, data)
+        data['validator_repair_refresh'].update(state='in_flight', usage_id='refresh-1')
+        ledger._write(selected, data)
+        data['validator_repair_refresh'].update(state='accepted', report_sha256='b' * 64)
+        ledger._write(selected, data)
+        def mutate(d):
+            if damage == 'delete':
+                d.pop('validator_repair_refresh')
+            else:
+                d['validator_repair_refresh']['state'] = damage
+        disk_edit(selected, mutate)
+&gt;       with pytest.raises(ledger.UsageLedgerError):
+E       Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;
+
+tests/test_pr5212_d55_fixes.py:118: Failed</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_validator_refresh_new_checkpoint_is_allowed_but_same_one_cannot_repeat" time="0.015"><failure message="Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_validator_refresh_new_che0')
+
+    def test_validator_refresh_new_checkpoint_is_allowed_but_same_one_cannot_repeat(tmp_path):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        data['validator_repair_refresh'] = {'state': 'accepted', 'checkpoint': {'sha256': 'a' * 64},
+                                           'usage_id': 'refresh', 'report_sha256': 'b' * 64}
+        ledger._write(selected, data)
+        data['validator_repair_refresh'] = {'state': 'pending', 'checkpoint': {'sha256': 'a' * 64}}
+&gt;       with pytest.raises(ledger.UsageLedgerError):
+E       Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;
+
+tests/test_pr5212_d55_fixes.py:129: Failed</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_structural_refusal_names_expected_and_found[delete]" time="0.014"><failure message="AssertionError: assert ('expected' in 'latch journal: journal was deleted from a guarded ledger')&#10; +  where 'latch journal: journal was deleted from a guarded ledger' = str(UsageLedgerError('latch journal: journal was deleted from a guarded ledger'))&#10; +    where UsageLedgerError('latch journal: journal was deleted from a guarded ledger') = &lt;ExceptionInfo UsageLedgerError('latch journal: journal was deleted from a guarded ledger') tblen=4&gt;.value">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_structural_refusal_names_0')
+damage = 'delete'
+
+    @pytest.mark.parametrize('damage', ['delete', 'truncate', 'payload', 'checkpoint'])
+    def test_structural_refusal_names_expected_and_found(tmp_path, damage):
+        selected = start(tmp_path)
+        path = journal.journal_path(selected)
+        if damage == 'delete':
+            path.unlink()
+        elif damage == 'truncate':
+            path.write_bytes(path.read_bytes()[:-1])
+        elif damage == 'payload':
+            path.write_bytes(path.read_bytes().replace(b'"value":null', b'"value":true'))
+        else:
+            disk_edit(selected, lambda d: d['latch_journal'].update(head_sha256='f' * 64))
+        with pytest.raises(ledger.UsageLedgerError) as caught:
+            journal.check(selected)
+&gt;       assert 'expected' in str(caught.value) and 'found' in str(caught.value)
+E       AssertionError: assert ('expected' in 'latch journal: journal was deleted from a guarded ledger')
+E        +  where 'latch journal: journal was deleted from a guarded ledger' = str(UsageLedgerError('latch journal: journal was deleted from a guarded ledger'))
+E        +    where UsageLedgerError('latch journal: journal was deleted from a guarded ledger') = &lt;ExceptionInfo UsageLedgerError('latch journal: journal was deleted from a guarded ledger') tblen=4&gt;.value
+
+tests/test_pr5212_d55_fixes.py:150: AssertionError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_structural_refusal_names_expected_and_found[truncate]" time="0.014"><failure message="AssertionError: assert ('expected' in 'latch journal: empty or truncated journal')&#10; +  where 'latch journal: empty or truncated journal' = str(UsageLedgerError('latch journal: empty or truncated journal'))&#10; +    where UsageLedgerError('latch journal: empty or truncated journal') = &lt;ExceptionInfo UsageLedgerError('latch journal: empty or truncated journal') tblen=5&gt;.value">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_structural_refusal_names_1')
+damage = 'truncate'
+
+    @pytest.mark.parametrize('damage', ['delete', 'truncate', 'payload', 'checkpoint'])
+    def test_structural_refusal_names_expected_and_found(tmp_path, damage):
+        selected = start(tmp_path)
+        path = journal.journal_path(selected)
+        if damage == 'delete':
+            path.unlink()
+        elif damage == 'truncate':
+            path.write_bytes(path.read_bytes()[:-1])
+        elif damage == 'payload':
+            path.write_bytes(path.read_bytes().replace(b'"value":null', b'"value":true'))
+        else:
+            disk_edit(selected, lambda d: d['latch_journal'].update(head_sha256='f' * 64))
+        with pytest.raises(ledger.UsageLedgerError) as caught:
+            journal.check(selected)
+&gt;       assert 'expected' in str(caught.value) and 'found' in str(caught.value)
+E       AssertionError: assert ('expected' in 'latch journal: empty or truncated journal')
+E        +  where 'latch journal: empty or truncated journal' = str(UsageLedgerError('latch journal: empty or truncated journal'))
+E        +    where UsageLedgerError('latch journal: empty or truncated journal') = &lt;ExceptionInfo UsageLedgerError('latch journal: empty or truncated journal') tblen=5&gt;.value
+
+tests/test_pr5212_d55_fixes.py:150: AssertionError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_structural_refusal_names_expected_and_found[payload]" time="0.016"><failure message="AssertionError: assert ('expected' in 'latch journal: broken chain: invalid event at line 2')&#10; +  where 'latch journal: broken chain: invalid event at line 2' = str(UsageLedgerError('latch journal: broken chain: invalid event at line 2'))&#10; +    where UsageLedgerError('latch journal: broken chain: invalid event at line 2') = &lt;ExceptionInfo UsageLedgerError('latch journal: broken chain: invalid event at line 2') tblen=5&gt;.value">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_structural_refusal_names_2')
+damage = 'payload'
+
+    @pytest.mark.parametrize('damage', ['delete', 'truncate', 'payload', 'checkpoint'])
+    def test_structural_refusal_names_expected_and_found(tmp_path, damage):
+        selected = start(tmp_path)
+        path = journal.journal_path(selected)
+        if damage == 'delete':
+            path.unlink()
+        elif damage == 'truncate':
+            path.write_bytes(path.read_bytes()[:-1])
+        elif damage == 'payload':
+            path.write_bytes(path.read_bytes().replace(b'"value":null', b'"value":true'))
+        else:
+            disk_edit(selected, lambda d: d['latch_journal'].update(head_sha256='f' * 64))
+        with pytest.raises(ledger.UsageLedgerError) as caught:
+            journal.check(selected)
+&gt;       assert 'expected' in str(caught.value) and 'found' in str(caught.value)
+E       AssertionError: assert ('expected' in 'latch journal: broken chain: invalid event at line 2')
+E        +  where 'latch journal: broken chain: invalid event at line 2' = str(UsageLedgerError('latch journal: broken chain: invalid event at line 2'))
+E        +    where UsageLedgerError('latch journal: broken chain: invalid event at line 2') = &lt;ExceptionInfo UsageLedgerError('latch journal: broken chain: invalid event at line 2') tblen=5&gt;.value
+
+tests/test_pr5212_d55_fixes.py:150: AssertionError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_structural_refusal_names_expected_and_found[checkpoint]" time="0.014"><failure message="AssertionError: assert ('expected' in 'latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)')&#10; +  where 'latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)' = str(UsageLedgerError('latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)'))&#10; +    where UsageLedgerError('latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)') = &lt;ExceptionInfo UsageLedgerError('latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)') tblen=4&gt;.value">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_structural_refusal_names_3')
+damage = 'checkpoint'
+
+    @pytest.mark.parametrize('damage', ['delete', 'truncate', 'payload', 'checkpoint'])
+    def test_structural_refusal_names_expected_and_found(tmp_path, damage):
+        selected = start(tmp_path)
+        path = journal.journal_path(selected)
+        if damage == 'delete':
+            path.unlink()
+        elif damage == 'truncate':
+            path.write_bytes(path.read_bytes()[:-1])
+        elif damage == 'payload':
+            path.write_bytes(path.read_bytes().replace(b'"value":null', b'"value":true'))
+        else:
+            disk_edit(selected, lambda d: d['latch_journal'].update(head_sha256='f' * 64))
+        with pytest.raises(ledger.UsageLedgerError) as caught:
+            journal.check(selected)
+&gt;       assert 'expected' in str(caught.value) and 'found' in str(caught.value)
+E       AssertionError: assert ('expected' in 'latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)')
+E        +  where 'latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)' = str(UsageLedgerError('latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)'))
+E        +    where UsageLedgerError('latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)') = &lt;ExceptionInfo UsageLedgerError('latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)') tblen=4&gt;.value
+
+tests/test_pr5212_d55_fixes.py:150: AssertionError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_resume_needs_external_head_before_recovery_or_dispatch[None]" time="0.014"><failure message="TypeError: execute() got an unexpected keyword argument 'expect_journal_head_sha256'">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_resume_needs_external_hea0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x125d81c70&gt;
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x122af1550&gt;, expected = None
+
+    @pytest.mark.parametrize('expected', [None, 'f' * 64])
+    def test_resume_needs_external_head_before_recovery_or_dispatch(tmp_path, monkeypatch, capsys, expected):
+        selected = start(tmp_path)
+        monkeypatch.setattr(api, '_execute', lambda *a, **kw: pytest.fail('recovery/dispatch reached'))
+        with pytest.raises(ledger.UsageLedgerError, match='expected.*found'):
+&gt;           api.execute(selected, client=SimpleNamespace(), expect_journal_head_sha256=expected)
+E           TypeError: execute() got an unexpected keyword argument 'expect_journal_head_sha256'
+
+tests/test_pr5212_d55_fixes.py:158: TypeError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_resume_needs_external_head_before_recovery_or_dispatch[ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff]" time="0.014"><failure message="TypeError: execute() got an unexpected keyword argument 'expect_journal_head_sha256'">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_resume_needs_external_hea1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x124f76250&gt;
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x120892490&gt;
+expected = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+
+    @pytest.mark.parametrize('expected', [None, 'f' * 64])
+    def test_resume_needs_external_head_before_recovery_or_dispatch(tmp_path, monkeypatch, capsys, expected):
+        selected = start(tmp_path)
+        monkeypatch.setattr(api, '_execute', lambda *a, **kw: pytest.fail('recovery/dispatch reached'))
+        with pytest.raises(ledger.UsageLedgerError, match='expected.*found'):
+&gt;           api.execute(selected, client=SimpleNamespace(), expect_journal_head_sha256=expected)
+E           TypeError: execute() got an unexpected keyword argument 'expect_journal_head_sha256'
+
+tests/test_pr5212_d55_fixes.py:158: TypeError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_resume_accepts_recorded_head_and_fresh_launch_needs_none" time="0.020"><failure message="TypeError: execute() got an unexpected keyword argument 'expect_journal_head_sha256'">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_resume_accepts_recorded_h0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x124f76690&gt;
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x120892850&gt;
+
+    def test_resume_accepts_recorded_head_and_fresh_launch_needs_none(tmp_path, monkeypatch, capsys):
+        from tests.test_download.test_api_runner import spec
+        selected = spec(out_dir=tmp_path)
+        monkeypatch.setattr(api, '_execute', lambda *a, **kw: {'accepted': True})
+        assert api.execute(selected)['accepted']
+        ledger.prepare_usage(selected, resume=False)
+        head = raw_events(selected)[-1]['sha256']
+&gt;       assert api.execute(selected, expect_journal_head_sha256=head)['accepted']
+E       TypeError: execute() got an unexpected keyword argument 'expect_journal_head_sha256'
+
+tests/test_pr5212_d55_fixes.py:171: TypeError</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_parity_baseline_tracks_target_merge_base" time="0.308"><failure message="AttributeError: module 'scripts.adhoc.d41_request_parity_20261026' has no attribute 'baseline_commit'">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_parity_baseline_tracks_ta0')
+
+    def test_parity_baseline_tracks_target_merge_base(tmp_path):
+        def git(*args):
+            return subprocess.check_output(['git', *args], cwd=tmp_path, text=True).strip()
+        git('init', '-q')
+        git('config', 'user.email', 'offline@example.invalid')
+        git('config', 'user.name', 'Offline fixture')
+        (tmp_path / 'asset').write_text('first')
+        git('add', 'asset')
+        git('commit', '-qm', 'initial')
+        git('branch', 'target')
+        git('checkout', '-qb', 'guard')
+        (tmp_path / 'guard').write_text('guard')
+        git('add', 'guard')
+        git('commit', '-qm', 'guard')
+&gt;       first = parity.baseline_commit(tmp_path, target='target')
+E       AttributeError: module 'scripts.adhoc.d41_request_parity_20261026' has no attribute 'baseline_commit'
+
+tests/test_pr5212_d55_fixes.py:189: AttributeError</failure></testcase></testsuite></testsuites>

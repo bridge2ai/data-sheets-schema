@@ -8,6 +8,9 @@ from pathlib import Path
 import pytest
 import yaml
 
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")
+
 from data_sheets_schema import api_runner as api, shared_generation as sg
 from data_sheets_schema import typed_audit_runtime as runtime, usage_ledger as ledger
 from tests.test_shared_generation_selection import external, offline, selected  # noqa: F401
@@ -102,6 +105,7 @@ def test_real_regate_helper_preserves_scope_and_selected_report_instruction(sele
 
 
 def test_selected_shape_repair_adds_only_scope_metadata(selected, monkeypatch):
+    ledger.prepare_usage(selected, resume=False)
     selected.full_path.parent.mkdir(parents=True, exist_ok=True)
     selected.full_path.write_text(RECORD)
     errors = ['synthetic shape finding']

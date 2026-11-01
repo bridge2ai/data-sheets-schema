@@ -1,0 +1,15 @@
+; D68-D70/#5212 serial validation, 2026-10-30. TREE is this worktree.
+; No providers or external network; local fake servers remain available.
+(version 1)
+(allow default)
+(deny network*)
+(allow network-bind network-inbound (local ip "localhost:*"))
+(allow network-outbound (remote ip "localhost:*"))
+(deny file-write*)
+(allow file-write* (subpath (param "TREE")))
+(deny file-write* (subpath (string-append (param "TREE") "/data")))
+(deny file-write* (subpath (string-append (param "TREE") "/notes")))
+(deny file-write* (literal (string-append (param "TREE") "/STATUS.md")))
+(deny file-write* (literal (string-append (param "TREE") "/src/data_sheets_schema/shared_generation.py")))
+(deny file-write* (literal (string-append (param "TREE") "/src/download/prompts/canonical_hashes.yaml")))
+(allow file-write-data (literal "/dev/null") (literal "/dev/tty"))

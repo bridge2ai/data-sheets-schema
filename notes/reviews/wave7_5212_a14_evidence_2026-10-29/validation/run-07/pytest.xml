@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="460.871" timestamp="2026-10-28T23:46:12.397408" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_shared_generation_runtime" name="test_real_complete_api_pipeline_and_completed_recheck" time="460.785"><failure message="Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;">selected = RunSpec(project='EXAMPLE', arm='baseline', method='claudecode_api', bundle=PosixPath('/private/tmp/d4d-wave7-5212-a14-...c9129755ac184578022f3b1cf5fe23d4ee2b4848314ee48e45096dce26"},"typed_protocol":"typed_audit_protocol_v1","version":1}}')
+journal_launch_monitor = {'/private/tmp/d4d-wave7-5212-a14-fixed-replay-20261029/cases/test_real_complete_api_pipelin0/output/EXAMPLE_latch_journal.jsonl': '9eecf1c53529f64dd2c91845b68d3cc06c8bc2660df5541e86d298116dcd04ff'}
+
+    def test_real_complete_api_pipeline_and_completed_recheck(selected, journal_launch_monitor):
+        c = client(selected)
+        result = api.execute(selected, client=c)
+        assert result['validation_problems'] == []
+        phases = ['full', rc.PHASE, runtime.WORKER_PHASE, runtime.OMISSION_PHASE,
+                  runtime.INTEGRATION_PHASE, 'reconcile_full', 'report']
+        assert c.messages.phases == phases
+        assert [r['phase'] for r in result['usage']] == phases
+        state = runtime._state(selected)
+        assert state['state'] == 'accepted'
+        assembly = rc._load(state['assembly'])
+        checked = typed.check(assembly, derivations=typed.DerivationCache())
+        assert checked['passed'] and checked['independently_reconstructed']
+        audit = typed._unblob(assembly['audit']).decode()
+        reconcile = c.messages.calls[phases.index('reconcile_full')]
+        assert {'type': 'text', 'text': api.CARRY_LABEL.format(name='Audit findings') + audit} in reconcile['messages'][0]['content']
+        for call in c.messages.calls[2:5]:
+            assert {'type': 'text', 'text': rc.audit_carry(selected)} in call['messages'][0]['content']
+        record = yaml.safe_load(selected.provenance_path.read_bytes())
+        assert record['shared_generation']['assembly_sha256'] == assembly['sha256']
+        assert record['receipt_completion']['counts']['unsupported'] &gt; 0
+        assert record['shared_generation']['scientific_support'] == 'unverified evaluator declarations'
+        from data_sheets_schema import snapshot_store
+        index = json.loads(snapshot_store.index_path(selected.provenance_path.parent, selected.project).read_bytes())
+        audit_snapshot = next(row for row in index['snapshots'] if row['name'] == f'{selected.project}_audit.json')
+        integration_id = next(row['usage_id'] for row in result['usage'] if row['phase'] == runtime.INTEGRATION_PHASE)
+        assert audit_snapshot['usage_id'] == integration_id
+        before = files(selected)
+        again = client(selected)
+        repeated = api.execute(replace(selected), client=again)
+        assert repeated['already_complete'] and not again.messages.calls
+        assert before == files(selected)
+        assert_completed_mutations_refuse_without_calls(selected, journal_launch_monitor)
+        assert_snapshot_attribution_checks_without_calls(selected, journal_launch_monitor)
+        from tests.test_shared_generation_completed_replay import assert_completed_replay_authority
+&gt;       assert_completed_replay_authority(selected, journal_launch_monitor)
+
+tests/test_shared_generation_runtime.py:175: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = RunSpec(project='EXAMPLE', arm='baseline', method='claudecode_api', bundle=PosixPath('/private/tmp/d4d-wave7-5212-a14-...c9129755ac184578022f3b1cf5fe23d4ee2b4848314ee48e45096dce26"},"typed_protocol":"typed_audit_protocol_v1","version":1}}')
+journal_heads = {'/private/tmp/d4d-wave7-5212-a14-fixed-replay-20261029/cases/test_real_complete_api_pipelin0/output/EXAMPLE_latch_journal.jsonl': '9eecf1c53529f64dd2c91845b68d3cc06c8bc2660df5541e86d298116dcd04ff'}
+
+    def assert_completed_replay_authority(spec, journal_heads):
+        """Reuse the existing pipeline test's completed fixture, never generate another.
+    
+        All acceptance/readers stay real. Only OS lock acquisition is inert so
+        replay may be asserted read-only; generation and durable writers are traps.
+        """
+        from data_sheets_schema import latch_journal
+        monitor_key = str(latch_journal.journal_path(spec))
+        assert monitor_key in journal_heads
+        trusted_head = journal_heads[monitor_key]
+        record = yaml.safe_load(spec.provenance_path.read_bytes())
+        index_path = snapshots.index_path(spec.metadata_dir, spec.project)
+        index = json.loads(index_path.read_bytes())
+        core = Path(original_entry(spec, record)['path']).read_bytes()
+        alternate = spec.metadata_dir / 'portable-original-core.yaml'
+        with alternate.open('xb') as stream:
+            stream.write(core)
+        baseline = inventory(spec)
+        def forbidden(*args, **kwargs):
+            raise AssertionError('completed replay cannot generate or persist new evidence')
+        for case in ('identical_path', 'different_bytes', 'missing_core_index', 'missing_intermediates'):
+            selected = deepcopy(record)
+            if case in ('identical_path', 'different_bytes'):
+                raw = core + (b'\n# Different valid original bytes.\n' if case == 'different_bytes' else b'')
+                alternate.write_bytes(raw)
+                original_entry(spec, selected).update(path=str(alternate), sha256=sha(raw))
+                spec.provenance_path.write_text(yaml.safe_dump(selected))
+            elif case == 'missing_core_index':
+                changed = deepcopy(index)
+                changed['snapshots'] = [r for r in changed['snapshots'] if r['name'] != f'{spec.project}_core.yaml']
+                index_path.write_bytes(sg.canonical(changed))
+            else:
+                selected.pop('intermediates')
+                spec.provenance_path.write_text(yaml.safe_dump(selected))
+            before = inventory(spec)
+            try:
+                with pytest.MonkeyPatch.context() as patch:
+                    for module, name in ((api, '_client'), (api, '_call_with_usage'),
+                            (api, '_call_with_retry'), (api, '_generate_phase'), (api, '_snapshot'),
+                            (api, '_save_progress'), (ledger, '_write'), (ledger, 'persist_usage'),
+                            (snapshots, '_write'), (api.provenance.ProvenanceRecord, 'write'),
+                            (api.reasoning, 'append')):
+                        patch.setattr(module, name, forbidden)
+                    patch.setattr(api, '_exclusive_run', lambda spec: nullcontext())
+                    client = SimpleNamespace(base_url=sg.capture(spec).document()['runtime']['base_url'],
+                        messages=SimpleNamespace(create=forbidden, stream=forbidden, count_tokens=forbidden))
+                    if case in ('different_bytes', 'missing_intermediates'):
+                        with pytest.raises(ledger.UsageLedgerError, match='original|attestation|packet') as refused:
+                            api.execute(replace(spec), resume=True, client=client)
+                        assert 'resume journal head:' not in str(refused.value)
+                    elif case == 'missing_core_index':
+                        # The portable reader may use the explicit record. API
+                        # resume must still refuse a changed journaled index.
+                        assert runtime.completion_check(spec, record=record) == record['shared_generation']
+&gt;                       with pytest.raises(ledger.UsageLedgerError, match='latch journal') as refused:
+E                       Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;
+
+tests/test_shared_generation_completed_replay.py:289: Failed</failure></testcase></testsuite></testsuites>

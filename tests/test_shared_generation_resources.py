@@ -120,6 +120,7 @@ def test_copied_dependency_refuses_before_any_lock_or_writer(registered, tmp_pat
     spec = selected_spec(base, reg)
     assert authority.resolve() in {path.resolve() for path in closure.resource_paths((spec,))}
     if entry == 'public':
+        usage_ledger.prepare_usage(spec, resume=False)
         destination = usage_ledger.output_locks((spec.full_path,))[0][1]
     else:
         roster_path, _ = roster(base, reg, count=1)
@@ -194,6 +195,7 @@ def test_both_record_import_roots_refuse_before_actual_entrypoint_writes(registe
     spec = selected_spec(base, reg)
     authority = logical_import if side == 'logical' else target_import
     if entry == 'public':
+        usage_ledger.prepare_usage(spec, resume=False)
         destination = usage_ledger.output_locks((spec.full_path,))[0][1]
     else:
         roster_path, _ = roster(base, reg, count=1)
@@ -311,9 +313,7 @@ def test_missing_optional_observations_and_disjoint_inputs_still_admit(registere
 
 
 def test_legacy_execute_does_not_discover_selected_resources(external, monkeypatch):
-    from contextlib import nullcontext
     monkeypatch.setattr(closure, 'resource_paths', lambda *a: pytest.fail('legacy resource discovery'))
-    monkeypatch.setattr(api, '_exclusive_run', lambda spec: nullcontext())
     monkeypatch.setattr(api, '_restore_resume_date', lambda *a, **k: None)
     marker = object()
     monkeypatch.setattr(api, '_execute', lambda *a, **k: marker)
@@ -420,3 +420,7 @@ def test_omitted_baseline_never_discovers_comparison_records(registered, monkeyp
     extra = ('--dry-run',) + (() if prefix is None else ('--canary-baseline', prefix))
     result = batch(reg, roster_path, count=1, extra=extra)
     assert result.exit_code == 0, result.output
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

@@ -1,0 +1,22 @@
+bundle: cohort source.txt
+bundle_md5: efbb86d373de5111190cf7c07143a2bb
+bundle_sha256: c515c576780da4235fa23c2596b7fa13ea0e2751256ef8c434e37e00ab438f5e
+bundle_lines: 12
+bundle_bytes: 684
+rule:
+  version: 2
+  unit: source-document
+  boundary: 'FILE: line followed by PATH: or ROLE:'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 1
+chunks:
+- id: c001
+  source: <unsegmented>
+  lines:
+  - 1
+  - 12
+  bytes: 684
+  sha256: c515c576780da4235fa23c2596b7fa13ea0e2751256ef8c434e37e00ab438f5e
