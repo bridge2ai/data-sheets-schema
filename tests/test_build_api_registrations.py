@@ -412,7 +412,9 @@ def test_cli_dry_run_single_and_all() -> None:
     assert "✓ CHORUS: registration_id=" in result.output
     assert "[dry-run]" in result.output
 
-    # All projects, each with its own limits (#5155 F4); the large projects'
+    # The historical four-project fixture, each with its own limits (#5155 F4);
+    # --all now follows the selected manifest (causally tested in BC1 generality).
+    # The large projects'
     # bounds are ones whose integration call fits today's protocol.
     runs = AI_READI_SIZING.parent.parent
     sizing = {"AI_READI": (AI_READI_SIZING, "max_paths=512,max_inventory_bytes=98304,max_workers=2"),
@@ -420,7 +422,8 @@ def test_cli_dry_run_single_and_all() -> None:
                         "max_paths=384,max_inventory_bytes=65536,max_workers=2"),
               "VOICE": (runs / "2026-09-04f_claude-opus-5-api-generic-v8_rep3" / "intermediate",
                         "max_paths=384,max_inventory_bytes=65536,max_workers=2")}
-    args = ["--all", "-l", "test_dry_all", "--dry-run", "--project-limits", "CHORUS:partition=chorus"]
+    args = ["--project", ",".join(DEFAULT_PROJECTS), "-l", "test_dry_all", "--dry-run",
+            "--project-limits", "CHORUS:partition=chorus"]
     for proj, (directory, bounds) in sizing.items():
         args += ["--project-limits", f"{proj}:{bounds},aggregate_input_tokens=4000000",
                  "--sizing-record", f"{proj}={directory}"]
