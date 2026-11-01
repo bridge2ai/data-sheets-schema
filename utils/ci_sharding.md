@@ -7,7 +7,7 @@ complete offline canary, audit/finalization and evaluation suites alongside the
 shards. Budget and native transport controls run once in the canary job, with
 the same 45-minute job limit and existing test deadlines, rather than sharing
 the time left after a full suite shard (#4466). Four more jobs each run one required long offline API case, with the same
-45-minute limit (#4517). There are thirteen Python jobs on PRs and twelve on
+45-minute limit (#4517). PR shards and every other job keep 45 minutes, while ordinary shards on main and manual runs allow 60 (D75). There are thirteen Python jobs on PRs and twelve on
 main/manual runs, plus the aggregate `test` job. The aggregate
 requires every applicable job to succeed; failure, cancellation or an unexpected
 skip in any offline lane also fails it. Package metadata still permits Python
