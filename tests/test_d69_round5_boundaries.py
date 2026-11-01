@@ -236,6 +236,31 @@ def test_pre_round4_identity_binds_sidecars_on_next_launch(tmp_path, resume):
 
 
 @pytest.mark.parametrize('resume', [False, True])
+@pytest.mark.parametrize('condition', ['matching', 'missing', 'foreign', 'contradictory'])
+def test_routing_identity_uses_its_embedded_render_condition(tmp_path, resume, condition):
+    foreign = spec(project='P', label='foreign', out_dir=tmp_path)
+    ledger.prepare_usage(foreign, resume=True)
+    run = {key: getattr(foreign, key) for key in ('project', 'method', 'label')}
+    render = {'condition': foreign.condition}
+    if condition == 'missing':
+        render.clear()
+    elif condition == 'foreign':
+        render['condition'] = 'another-condition'
+    elif condition == 'contradictory':
+        run['condition'] = 'another-condition'
+    record = tmp_path / 'P_routing_completed.json'
+    record.write_text(json.dumps({'format': 'source_heading_completed_v1',
+        'selection': {'run': run, 'render_spec': render}}))
+    selected = replace(foreign, label='selected')
+    if condition == 'matching':
+        client = FakeClient()
+        api.execute(selected, resume=resume, client=client)
+        assert len(client.messages.calls) == 4
+    else:
+        refuses(selected, record, tmp_path, resume)
+
+
+@pytest.mark.parametrize('resume', [False, True])
 @pytest.mark.parametrize('operation', ['head_read', 'launch_read', 'sidecar_read', 'append'])
 def test_transient_pre_event_failure_has_recoverable_ownership(tmp_path, monkeypatch, capsys, resume, operation):
     first = spec(project='VOICE_PEDIATRIC', out_dir=tmp_path)

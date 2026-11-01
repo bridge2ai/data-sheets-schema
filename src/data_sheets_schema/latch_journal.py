@@ -571,13 +571,24 @@ def owned_artifacts(spec, *, directories=None):
 
     unattributed = object()
 
+    def identity_record(value):
+        if value.get('format') != 'source_heading_completed_v1':
+            return value
+        # This writer keeps condition in the renderer selection, while the
+        # other three identity fields live in run. Never infer it from history.
+        selection = value.get('selection')
+        if isinstance(selection, dict):
+            run, render = selection.get('run'), selection.get('render_spec')
+            if isinstance(run, dict) and isinstance(render, dict):
+                condition = render.get('condition')
+                if isinstance(condition, str) and run.get('condition', condition) == condition:
+                    return {'run': {**run, 'condition': condition}}
+        return {'run': None}
+
     def owners_of(value):
         if not isinstance(value, dict):
             return set()
-        if value.get("format") == "source_heading_completed_v1":
-            # The completed writer's own selection, not its captured inputs.
-            selection = value.get("selection")
-            return owners_of({"run": selection.get("run")}) if isinstance(selection, dict) else {unattributed}
+        value = identity_record(value)
         declared = set()
         for key in ("identity", "run_identity", "run"):
             if key not in value:
@@ -649,8 +660,7 @@ def owned_artifacts(spec, *, directories=None):
             if event["kind"] == "latch" and event["payload"].get("key", "").startswith("snapshot:"):
                 bindings.extend((owner, p) for p in pins(event["payload"].get("value")))
     def complete_owners(value):
-        if value.get('format') == 'source_heading_completed_v1':
-            value = {'run': (value.get('selection') or {}).get('run')}
+        value = identity_record(value)
         return {identity(value[key]) for key in ('identity', 'run_identity', 'run') if key in value}
 
     canonical = {}

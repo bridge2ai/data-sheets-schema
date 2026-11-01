@@ -67,7 +67,13 @@ def assert_writer_completeness(selected, tmp_path):
             continue
         owner = value.get('identity', value.get('run_identity', value.get('run')))
         if value.get('format') == 'source_heading_completed_v1':
-            owner = value['selection']['run']
+            selection = value.get('selection', {})
+            owner = selection.get('run')
+            condition = selection.get('render_spec', {}).get('condition')
+            if (not isinstance(owner, dict) or not isinstance(condition, str)
+                    or owner.get('condition', condition) != condition):
+                continue
+            owner = {**owner, 'condition': condition}
         if not isinstance(owner, dict) or any(owner.get(key) != value
                 for key, value in ledger.run_identity(selected).items()):
             continue
