@@ -175,12 +175,13 @@ def compare(root, *, identity_pin_ruling=False):
                     request = captured_object('host_request')
                     assert request['request_sha256'] == sha(ns['canon'](request['payload']))
                     assert inner['request_sha256'] == request['request_sha256'], (side, name, 'captured request')
-                    assert request['payload']['packet_sha256'] == binding['packet_sha256']
+                    if 'packet_sha256' in request['payload']:
+                        assert request['payload']['packet_sha256'] == binding['packet_sha256']
                     verified.append('captured host request payload hash')
                 else:
                     unavailable.append('request_sha256: complete host request not captured; content/6 is its projection')
             else:
-                verified.append('no host request_sha256 field (omission request)')
+                verified.append('no request_sha256 field in transmitted object')
             bindings.append({'side': side, 'name': name, 'verified': verified, 'unverified': unavailable})
         assert len(packet_digests) <= 1, (side, 'multiple packet bindings in one capture')
     rows = []
@@ -241,6 +242,7 @@ def compare(root, *, identity_pin_ruling=False):
         'sizing_totals_equal': sizing_totals_equal,
         'registration_before_sha256': before['registration_sha256'],
         'registration_after_sha256': after['registration_sha256'],
+        'driver_sha256': sha(Path(__file__).read_bytes()),
         'comparison_source_sha256': sha(source.read_bytes())})
     for row in rows:
         print(row['name'], row['identical'], row['before_sha256'], row['after_sha256'], flush=True)

@@ -82,7 +82,8 @@ def test_tampered_evidence_is_not_accepted(captures, damage):
 
 
 @pytest.mark.parametrize("damage", [None, "host_packet", "host_request"])
-def test_captured_host_objects_are_rehashed(captures, damage):
+@pytest.mark.parametrize("omission", [False, True])
+def test_captured_host_objects_are_rehashed(captures, damage, omission):
     for side in ("before", "after"):
         folder = captures / ".bc1-byte-evidence" / side
         metadata = json.loads((folder / "capture.json").read_bytes())
@@ -90,6 +91,9 @@ def test_captured_host_objects_are_rehashed(captures, damage):
         packet = {"registration_sha256": metadata["registration_sha256"]}
         packet["sha256"] = sha(raw(packet))
         inner = {"payload": {"packet_sha256": packet["sha256"]}}
+        if omission:
+            # The omission request hashes its payload but carries no packet pin.
+            inner = {"payload": {"record": "unchanged"}}
         inner["request_sha256"] = sha(raw(inner["payload"]))
         binding = {"registration_sha256": metadata["registration_sha256"], "packet_sha256": packet["sha256"],
                    "inner_request_sha256": sha(raw(inner))}
