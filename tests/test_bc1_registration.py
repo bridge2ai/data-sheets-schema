@@ -23,7 +23,10 @@ def sizing_fixture(context_fixture, tmp_path):
         path = tmp_path / (name + ".json")
         path.write_bytes(inputs[key])
         pins[name] = reg._pin(path, inputs[key])
-    pins["source_manifest"] = None
+    manifest = tmp_path / "source_manifest.yaml"
+    manifest.write_bytes(reg._raw({"projects": {name: {"sources": []} for name in
+        ("KIDS_FIRST", "CHORUS", "AI_READI", "CM4AI", "VOICE", "VOICE_PEDIATRIC", "SYNTHETIC")}}))
+    pins["source_manifest"] = reg._pin(manifest, manifest.read_bytes())
     pins["core_schema"] = deepcopy(pins["full_schema"])
     pins["project"] = "KIDS_FIRST"
     paths = {}
@@ -119,7 +122,6 @@ def test_legacy_profile_is_preserved_but_cannot_waive_bc1_sizing(tmp_path, monke
         builder.prepare_registration("CHORUS", "offline", registration_path=tmp_path / "r.json",
             partition="chorus", bounded_carry_version=1, sizing_record=tmp_path)
     assert not (tmp_path / "r.json").exists()
-    assert set(reg.PROJECTS) == {"CHORUS", "AI_READI", "CM4AI", "VOICE", "VOICE_PEDIATRIC", "KIDS_FIRST"}
 
 
 def test_neutral_context_cannot_be_synthesized_for_bc1(tmp_path):
@@ -135,7 +137,7 @@ def test_requested_small_actual_wire_byte_limit_is_enforced(sizing_fixture):
         reg.size_inputs(registration, sizing_record=files, context_raw=inputs["context"], schema_snapshot=inputs["schema_snapshot"])
 
 
-@pytest.mark.parametrize("project", reg.PROJECTS)
+@pytest.mark.parametrize("project", ("CHORUS", "AI_READI", "CM4AI", "VOICE", "VOICE_PEDIATRIC", "KIDS_FIRST", "SYNTHETIC"))
 def test_every_project_uses_its_own_header_without_inferred_study_profile(sizing_fixture, project):
     registration, files, inputs = sizing_fixture
     registration["run"]["project"] = registration["inputs"]["project"] = project

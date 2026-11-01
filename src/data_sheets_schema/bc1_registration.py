@@ -20,7 +20,6 @@ FORMAT = "bc1_input_sizing_v4"
 FLOOR = "empty_future_floor"
 CAPS = "visible_cap_measured_escape"
 GATED_SCENARIOS = (FLOOR, CAPS)
-PROJECTS = ("CHORUS", "AI_READI", "CM4AI", "VOICE", "VOICE_PEDIATRIC", "KIDS_FIRST")
 
 
 def calibration():
@@ -145,8 +144,13 @@ def size_inputs(registration, *, sizing_record, context_raw, schema_snapshot,
     from . import bc1_codec as codec, shared_generation as shared, receipt_completion as receipts
     selection.validate_registration(registration)
     project, arm = registration["run"]["project"], registration["run"]["arm"]
-    if project not in PROJECTS:
-        raise ValueError("BC1 sizing project is not one of the six declared projects")
+    from .registry import load_registry
+    manifest = registration["inputs"].get("source_manifest")
+    manifest_path = manifest["path"] if manifest else None
+    if manifest and _pin(manifest_path, Path(manifest_path).read_bytes()) != manifest:
+        raise ValueError(f"BC1 sizing source manifest differs from its registered byte pin: {manifest_path}")
+    if not load_registry(manifest_path).declares(project):
+        raise ValueError(f"BC1 sizing project {project!r} is not declared in source manifest {manifest_path!r}")
     paths = {key: Path(getattr(sizing_record, key)) for key in ("full", "core", "receipt")}
     raws = {key: path.read_bytes() for key, path in paths.items()}
     own = _own_record(project, arm, raws["full"]) and _own_record(project, arm, raws["core"], core=True)

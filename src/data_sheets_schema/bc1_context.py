@@ -9,6 +9,7 @@ from copy import deepcopy
 import hashlib
 import json
 import re
+import unicodedata
 from typing import Any
 
 FORMAT = "bc1_neutral_term_policy_v1"
@@ -55,8 +56,13 @@ def _sources(catalog: dict) -> dict:
             if annotation is not None:
                 if not isinstance(annotation, str) or not annotation.strip():
                     raise ValueError("BC1 term-source annotation requires explicit source names")
+                # schema_digest.term_sources_of preserves the declared display
+                # text (it does not tokenize it). Keep the existing list grammar,
+                # allowing labels such as "EDAM Data" without inventing CURIEs.
+                if any(unicodedata.category(c) == "Cc" for c in annotation):
+                    raise ValueError("BC1 term-source annotation has unsupported source syntax")
                 names = [v.strip() for v in re.split(r",|;|\s+and\s+", annotation)]
-                if any(not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", v) for v in names):
+                if any(not v for v in names):
                     raise ValueError("BC1 term-source annotation has unsupported source syntax")
                 basis = "schema_annotation"
             else:
@@ -93,16 +99,14 @@ def derive_term_policy(*, selection: dict, context_raw: bytes, schema_snapshot) 
     if om._shape(context, json.loads(om._asset("context.schema.json"))):
         raise ValueError("BC1 requires authentic omission_context_v1, not evaluation rationale")
     catalog = om._schema(schema_snapshot.sources[0][1], schema_snapshot=schema_snapshot)
-    if profile["name"] == "bridge2ai":
+    if profile["vocabulary"] is not None:
         if not isinstance(profile["vocabulary"], dict) or not profile["vocabulary"].get("sha256"):
-            raise ValueError("BC1 bridge2ai profile is missing its declared vocabulary pin")
+            raise ValueError("BC1 profile is missing its declared vocabulary pin")
         required = {str(name) for cls in catalog["classes"].values() for slot in cls["slots"].values()
                     for name in slot["definition"].get("values_from", [])}
         if required - set(context["vocabulary"]):
-            raise ValueError("BC1 bridge2ai context is missing a declared pinned vocabulary")
+            raise ValueError("BC1 context is missing a declared pinned vocabulary")
         return None
-    if profile["name"] != "neutral" or profile["vocabulary"] is not None:
-        raise ValueError("BC1 neutral policy requires explicit neutral profile without a vocabulary pin")
     if context["vocabulary"] != {}:
         raise ValueError("BC1 neutral context may not inject an undeclared vocabulary")
     policy = {"format": FORMAT, "profile": profile,
@@ -123,7 +127,7 @@ def validate_term_policy(policy: dict, *, catalog: dict, context: dict) -> None:
         raise ValueError("invalid BC1 term policy")
     profile = policy["profile"]
     if (type(profile) is not dict or set(profile) != {"name", "basis", "vocabulary"}
-            or profile["name"] != "neutral" or profile["vocabulary"] is not None
+            or profile["vocabulary"] is not None
             or not isinstance(profile["basis"], str) or not profile["basis"].strip()
             or context.get("vocabulary") != {}):
         raise ValueError("BC1 policy is not an explicit neutral authority")

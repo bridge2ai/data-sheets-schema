@@ -172,9 +172,11 @@ def test_domain_inverse_is_the_only_catalog_content_removed():
     assert result == expected
 
 
-def test_bridge2ai_requires_its_declared_vocabulary_and_does_not_use_neutral_policy(fixture):
+@pytest.mark.parametrize("name", ["bridge2ai", "synthetic-pinned-profile"])
+def test_pinned_profile_requires_its_declared_vocabulary_and_does_not_use_neutral_policy(fixture, name):
     selection, inputs = fixture
-    selection["inputs"]["profile"]["name"] = "bridge2ai"
+    selection["inputs"]["profile"]["name"] = name
+    selection["inputs"]["profile"]["vocabulary"] = {}
     with pytest.raises(ValueError, match="vocabulary pin"):
         policy(fixture)
     selection["inputs"]["profile"]["vocabulary"] = {"sha256": "a" * 64}
@@ -185,6 +187,41 @@ def test_bridge2ai_requires_its_declared_vocabulary_and_does_not_use_neutral_pol
     inputs["context"] = raw(context)
     selection["inputs"]["context"].update(sha256=hashlib.sha256(inputs["context"]).hexdigest(), bytes=len(inputs["context"]))
     assert policy(fixture) is None
+
+
+@pytest.mark.parametrize("name", ["neutral", "synthetic-unpinned-profile"])
+def test_unpinned_profile_uses_neutral_checks_independent_of_name(fixture, name):
+    selection, inputs = fixture
+    selection["inputs"]["profile"]["name"] = name
+    derived = policy(fixture)
+    assert derived["profile"]["name"] == name
+    om.prepare(**inputs, term_policy=derived)
+
+
+@pytest.mark.parametrize("annotation", [
+    "EDAM Data, EDAM Format, IANA media types",
+    "EDAM Data; EDAM Format and IANA media types",
+    "Étiquettes de données, Format (v2)",
+])
+def test_source_labels_with_spaces_in_captured_schema(fixture, annotation):
+    selection, inputs = fixture
+    schema = yaml.safe_load(inputs["schema_path"].read_bytes())
+    schema["classes"]["Instance"]["attributes"]["data_substrate"]["annotations"] = {"d4d:termSources": annotation}
+    inputs["schema_path"].write_text(yaml.safe_dump(schema))
+    inputs["schema_snapshot"] = capture_schema(inputs["schema_path"], strict=True)
+    selection["inputs"]["full_schema"] = bc._schema_pin(inputs["schema_snapshot"])
+    derived = policy(fixture)
+    assert bc.permits_unbound_slot(derived, "Instance", "data_substrate")
+    assert all(label.strip() == label and label for label in derived["external_terms"]["Instance"]["data_substrate"]["sources"])
+    assert bc._sources(om._schema(inputs["schema_path"], schema_snapshot=inputs["schema_snapshot"])) == derived["external_terms"]
+
+
+@pytest.mark.parametrize("annotation", ["", "A,,B", "A;", "A, ;B", "A\x00B", "A\x7fB", "A\x85B", "A\nB", "A\tB"])
+def test_source_labels_refuse_empty_items_and_controls(annotation):
+    catalog = {"classes": {"Instance": {"slots": {"data_substrate": {"definition": {
+        "annotations": {"d4d:termSources": annotation}}}}}}}
+    with pytest.raises(ValueError, match="source"):
+        bc._sources(catalog)
 
 
 def test_core_context_uses_captured_bytes_and_requires_core_root(fixture, tmp_path):
