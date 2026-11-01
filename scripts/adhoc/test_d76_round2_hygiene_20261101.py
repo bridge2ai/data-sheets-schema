@@ -29,7 +29,7 @@ class HygieneContracts(unittest.TestCase):
         self.source.write_text('VALUE = 3\n')
         self.snapshot = {'entries': {'notes/fixture.py': {
             'mode': '100644', 'sha256': hashlib.sha256(self.source.read_bytes()).hexdigest()}}}
-        self.before = MODULE.notes_listing(self.root)
+        self.before = MODULE.cache_scope_listing(self.root)
 
     def make_cache(self, mode=py_compile.PycInvalidationMode.TIMESTAMP):
         cache = self.source.parent / '__pycache__' / ('fixture.' + sys.implementation.cache_tag + '.pyc')
@@ -174,6 +174,28 @@ class HygieneContracts(unittest.TestCase):
         module = SimpleNamespace(__file__=None, __path__=[str(source.parent), str(self.root)])
         with patch.dict(sys.modules, {'audit_controls': module}), self.assertRaises(ValueError):
             MODULE.notes_origins(self.root, self.snapshot)
+
+    def source_package_fixture(self, relative='src/data_sheets_schema/fixture.py'):
+        self.source = self.tracked_note(relative)
+        self.before = MODULE.cache_scope_listing(self.root)
+
+    def test_known_source_package_bytecode_is_explicitly_classified(self):
+        self.source_package_fixture()
+        result = self.classify(self.make_cache())
+        self.assertTrue(result['passed'], result)
+        self.assertFalse(result['unchanged'])
+        self.assertEqual(result['bytecode_roots'], ['notes', 'src/data_sheets_schema'])
+        self.assertEqual(result['allowed_new_bytecode'][0]['source'], 'src/data_sheets_schema/fixture.py')
+
+    def test_unknown_source_package_bytecode_is_refused(self):
+        self.source_package_fixture()
+        cache = self.make_cache()
+        self.snapshot['entries'].pop('src/data_sheets_schema/fixture.py')
+        self.assertFalse(self.classify(cache)['passed'])
+
+    def test_other_source_prefix_is_refused_even_if_tracked_and_valid(self):
+        self.source_package_fixture('src/foreign_package/fixture.py')
+        self.assertFalse(self.classify(self.make_cache())['passed'])
 
 
 if __name__ == '__main__':

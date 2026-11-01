@@ -203,7 +203,7 @@ def run(options):
     if options.notes_ci_job:
         hygiene_args = ('status', '--ignored', '--porcelain=v1', '-z', '--untracked-files=all')
     hygiene = common.git(options.tree, *hygiene_args).decode()
-    notes_before = notes_ci.notes_listing(options.tree) if options.notes_ci_job else None
+    notes_before = notes_ci.cache_scope_listing(options.tree) if options.notes_ci_job else None
     if options.notes_ci_job and hygiene:
         raise ValueError('notes CI mode requires a fresh tree with empty global ignored/untracked status')
     cmd = ['/usr/bin/sandbox-exec', '-D', 'LOCAL_ROOT=' + str(options.output), '-f', str(policy),
