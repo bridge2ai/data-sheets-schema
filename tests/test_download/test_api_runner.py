@@ -1290,9 +1290,10 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         self.out.mkdir(parents=True, exist_ok=True)
         # A sibling prefix alone is ambiguous. Establish its guarded identity
         # before either snapshot is written, as the real runner does.
-        usage_ledger.prepare_usage(replace(s, project="CHORUS_EXTENDED"), resume=False)
+        sibling = replace(s, project="CHORUS_EXTENDED")
+        usage_ledger.prepare_usage(sibling, resume=False)
         self.api._snapshot(s, "CHORUS_full.yaml", "id: x\n")
-        self.api._snapshot(s, "CHORUS_EXTENDED_full.yaml", "id: y\n")
+        self.api._snapshot(sibling, "CHORUS_EXTENDED_full.yaml", "id: y\n")
         block = self.api._intermediates_block(s)
         self.assertEqual([Path(i["path"]).name for i in block],
                          ["CHORUS_full.yaml"])

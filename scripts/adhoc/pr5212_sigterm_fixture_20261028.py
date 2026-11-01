@@ -3,7 +3,8 @@
 
 Input: temporary output directory. Output: durable usage/journal plus READY on
 stdout; wait between writes so the test can send the real api-stop SIGTERM.
-No provider is constructed. This tests termination/anchoring, not phase recovery.
+Uses a fake client for the read-only startup check (round 4, 2026-11-01).
+This tests termination/anchoring, not phase recovery.
 """
 from pathlib import Path
 import socket
@@ -12,7 +13,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from data_sheets_schema import api_runner as api, usage_ledger as ledger
-from tests.test_download.test_api_runner import spec
+from tests.test_download.test_api_runner import FakeClient, spec
 
 
 def between_phases(selected, **kwargs):
@@ -29,4 +30,4 @@ def refuse_network(*args, **kwargs):
 if __name__ == '__main__':
     socket.socket.connect = refuse_network
     api._execute = between_phases
-    api.execute(spec(out_dir=Path(sys.argv[1])))
+    api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())

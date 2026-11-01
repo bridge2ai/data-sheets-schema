@@ -144,6 +144,10 @@ spellings as unbound residue at all six entrypoints. Their positive prelude
 contains only the guarded sibling's actual accounting records. The completed
 verifier's prefix-sibling control runs the real writer instead of fabricating
 unbound progress, receipt, ledger and index files.
+The intermediate-prefix control now passes the sibling's spec to the snapshot
+writer. D57 executor stubs provide fake startup clients; the SIGTERM control
+requires the printed launch head, proves it is stale after interrupted later
+events, and still requires explicit reconciliation before a new anchor.
 
 Baseline age remains informational on stderr only for `baseline_for` and
 `report_basis`. Their returned metric/count mappings are unchanged. Persisting

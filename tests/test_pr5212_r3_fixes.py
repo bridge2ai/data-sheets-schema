@@ -13,7 +13,7 @@ from data_sheets_schema import api_runner as api, latch_journal as journal, usag
 from data_sheets_schema import run_lock, shared_generation as sg
 from data_sheets_schema.cli import cli
 from tests.test_latch_journal import start, raw_events
-from tests.test_download.test_api_runner import spec
+from tests.test_download.test_api_runner import FakeClient, spec
 from tests.test_shared_generation_cli import registered, roster, module  # noqa: F401
 from tests.test_generation_manifest_identity import external  # noqa: F401
 
@@ -81,12 +81,18 @@ def test_sigterm_requires_reconciliation_before_a_new_launch_anchor(tmp_path, mo
         if child.poll() is None:
             child.kill()
             child.communicate(timeout=15)
-    assert 'latch journal start:' in output and 'head_sha256=none' in output
+    start_heads = re.findall(r'^latch journal start: .* head_sha256=([0-9a-f]{64}) ', output, re.M)
+    assert len(start_heads) == 1  # The initial launch now binds its four locks.
     assert 'latch journal stop:' not in output
     selected = spec(out_dir=tmp_path)
+    assert start_heads[0] != journal.head_sha256(selected)
     monkeypatch.setattr(api, '_execute', lambda *a, **k: pytest.fail('unanchored execution'))
     with pytest.raises(ledger.UsageLedgerError, match='required from prior launch/monitor record'):
         api.execute(selected)
+    before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
+    with pytest.raises(ledger.UsageLedgerError, match='resume journal head'):
+        api.execute(selected, expect_journal_head_sha256=start_heads[0])
+    assert before == (journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes())
     assert retain_stop(capsys.readouterr().err, None) is None
     # Simulate the documented read-only inspection plus explicit owner approval
     # of a NEW external launch record. This is not an automatic fallback.
@@ -98,7 +104,8 @@ def test_sigterm_requires_reconciliation_before_a_new_launch_anchor(tmp_path, mo
     owner_approved_launch = {'head': reconciled['journal']['head_sha256'],
                             'authorization': 'synthetic owner-approved reconciliation'}
     monkeypatch.setattr(api, '_execute', lambda *a, **k: {'accepted': True})
-    assert api.execute(selected, expect_journal_head_sha256=owner_approved_launch['head'])['accepted']
+    assert api.execute(selected, client=FakeClient(),
+                       expect_journal_head_sha256=owner_approved_launch['head'])['accepted']
     assert retain_stop(capsys.readouterr().err, None) == owner_approved_launch['head']
 
 
@@ -122,6 +129,7 @@ def test_batch_checks_registration_hash_and_journal_head_together(registered, tm
         calls.append(run)
         raise ValueError('offline reached execution')
     monkeypatch.setattr(api, '_execute', execute_body)
+    monkeypatch.setattr(api, '_client', FakeClient)
     result = CliRunner().invoke(cli, ['api', 'batch', '--projects', registration['run']['project'],
         '--label-prefix', 'shared', '--replicates', '1', '--shared-generation-version', '1',
         '--shared-generation-registration', str(path), '--no-branch-guard', '--yes',
