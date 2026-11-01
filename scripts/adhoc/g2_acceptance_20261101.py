@@ -137,7 +137,9 @@ def ledger(root, output):
         started = json.loads((unit / 'started.json').read_bytes())
         assert result['identity'] == started['identity']
         nodes = json.loads((unit / 'collected.json').read_bytes())
-        assert len(nodes) == len(set(nodes))
+        # Preserve pytest's actual multiplicity: the existing full collection
+        # contains a duplicated generated parameter ID outside this shard.
+        duplicates = {node: count for node, count in Counter(nodes).items() if count > 1}
         events_path = unit / 'events.jsonl'
         events = ([json.loads(line) for line in events_path.read_text().splitlines()]
                   if events_path.exists() else [])
@@ -162,6 +164,7 @@ def ledger(root, output):
                   for path in sorted(unit.iterdir()) if path.is_file()
                   and path.suffix in ('.json', '.jsonl', '.xml', '.log')}
         units[unit.name] = {'result': result, 'collected_count': len(nodes),
+            'unique_node_count': len(set(nodes)), 'duplicate_node_ids': duplicates,
             'call_outcomes': dict(Counter(row['outcome'] for row in events if row['when'] == 'call')),
             'failed_reports': len(failures), 'skips': skipped, 'files_sha256': hashes,
             'junit_present': xml.exists(),
@@ -170,7 +173,7 @@ def ledger(root, output):
             'changes_from_tested_commit_to_final': changes}
     assignment = json.loads((root / 'shard-assignment.json').read_bytes())
     actual = json.loads((root / 'ordinary-shard-final/collected.json').read_bytes())
-    assert set(actual) == set(assignment['selected_nodes'])
+    assert Counter(actual) == Counter(assignment['selected_nodes'])
     assert any(node.startswith('tests/test_build_api_registrations.py::') for node in actual)
     assert units['ordinary-shard-final']['junit_present']
     assert not units['ordinary-shard-final']['nodes_without_teardown']
