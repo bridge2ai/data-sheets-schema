@@ -12,6 +12,7 @@ import socket
 import sys
 import pytest
 import d76_suite_common_20261031 as common
+import d76_round2_hygiene_20261101 as notes_ci
 
 ROOT = Path(os.environ['D76_TREE'])
 OUTPUT = Path(os.environ['D76_OUTPUT'])
@@ -95,6 +96,8 @@ def pytest_collection_modifyitems(items):
 def pytest_collection_finish(session):
     LEDGER['selected'] = [item.nodeid for item in session.items]
     common.save(OUTPUT / ('origins-collected-' + WORKER + '.json'), common.origins(ROOT, BASELINE))
+    if os.environ.get('D76_NOTES_CI_JOB'):
+        common.save(OUTPUT / ('notes-origins-collected-' + WORKER + '.json'), notes_ci.notes_origins(ROOT, BASELINE))
     LEDGER['origins_collected'] = True
 
 
@@ -119,6 +122,8 @@ def pytest_runtest_logreport(report):
 def pytest_sessionfinish(session, exitstatus):
     try:
         common.save(OUTPUT / ('origins-after-' + WORKER + '.json'), common.origins(ROOT, BASELINE))
+        if os.environ.get('D76_NOTES_CI_JOB'):
+            common.save(OUTPUT / ('notes-origins-after-' + WORKER + '.json'), notes_ci.notes_origins(ROOT, BASELINE))
         LEDGER['origins_after'] = True
     finally:
         common.save(OUTPUT / ('nodes-' + WORKER + '.json'), LEDGER)

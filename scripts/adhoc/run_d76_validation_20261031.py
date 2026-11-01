@@ -39,6 +39,7 @@ def bootstrap():
 bootstrap()
 import d76_suite_common_20261031 as common
 from d76_phase_accounting_20261031 import phase_accounting
+import d76_round2_hygiene_20261101 as notes_ci
 
 
 def runtime():
@@ -56,7 +57,8 @@ def runtime():
 
 def establish_child():
     root = Path(os.environ['D76_TREE'])
-    sys.path[:0] = [str(root / 'src'), str(root), str(root / 'scripts')]
+    paths = [str(root / value) for value in notes_ci.CI_PATHS] if os.environ.get('D76_NOTES_CI_JOB') else [str(root / 'src')]
+    sys.path[:0] = [*paths, str(root), str(root / 'scripts')]
     import d76_pytest_observer_20261031 as observer
     observer.install_guard()
     return observer
@@ -140,6 +142,10 @@ def scrubbed_environment(options):
         PYTHONPYCACHEPREFIX=str(options.output / 'pycache'),
         PYTHONPATH=os.pathsep.join((str(options.tree / 'src'), str(options.tree), str(HERE))),
         D76_TREE=str(options.tree), D76_OUTPUT=str(options.output), D76_RUNNER=str(Path(__file__).resolve()))
+    if options.notes_ci_job:
+        env['D76_NOTES_CI_JOB'] = options.notes_ci_job
+        env['PYTHONPATH'] = os.pathsep.join([
+            *(str(options.tree / value) for value in notes_ci.CI_PATHS), str(options.tree), str(HERE)])
     return env, removed
 
 
@@ -170,6 +176,10 @@ def run(options):
         raise ValueError('clean exact frozen checkout required')
     fairscape = common.fairscape(options.tree, before)
     targets = selected_targets(options)
+    if options.notes_ci_job:
+        notes_ci.validate_targets(options.notes_ci_job, targets)
+        if options.ci_shard or options.collect_only:
+            raise ValueError('notes CI sessions cannot be shard or collection-only runs')
     argv = command(options, targets)
     options.output.mkdir(parents=True, exist_ok=False)
     (options.output / 'temporary').mkdir()
@@ -179,7 +189,8 @@ def run(options):
     policy.write_bytes(PROFILE.read_bytes())
     env, removed = scrubbed_environment(options)
     helper_paths = [Path(__file__).resolve(), HERE / 'd76_pytest_observer_20261031.py',
-                    HERE / 'd76_suite_common_20261031.py', HERE / 'd76_phase_accounting_20261031.py', PROFILE]
+                    HERE / 'd76_suite_common_20261031.py', HERE / 'd76_phase_accounting_20261031.py',
+                    HERE / 'd76_round2_hygiene_20261101.py', PROFILE]
     helpers = {str(path): common.sha(path.read_bytes()) for path in helper_paths}
     target_hashes = {}
     for target in targets:
@@ -189,7 +200,12 @@ def run(options):
         if path.is_file():
             target_hashes[str(path)] = common.sha(path.read_bytes())
     hygiene_args = ('status', '--ignored', '--porcelain=v1', '--untracked-files=all', '--', 'notes/', 'tests/', 'utils/')
+    if options.notes_ci_job:
+        hygiene_args = ('status', '--ignored', '--porcelain=v1', '-z', '--untracked-files=all')
     hygiene = common.git(options.tree, *hygiene_args).decode()
+    notes_before = notes_ci.notes_listing(options.tree) if options.notes_ci_job else None
+    if options.notes_ci_job and hygiene:
+        raise ValueError('notes CI mode requires a fresh tree with empty global ignored/untracked status')
     cmd = ['/usr/bin/sandbox-exec', '-D', 'LOCAL_ROOT=' + str(options.output), '-f', str(policy),
            sys.executable, '-S', '-P', '-B', str(Path(__file__).resolve()), '--child']
     common.save(options.output / 'plan.json', {
@@ -197,6 +213,12 @@ def run(options):
         'detached': detached, 'targets': targets, 'target_sha256': target_hashes,
         'helpers': helpers, 'command': cmd, 'pytest_argv': argv, 'workers': options.workers,
         'collect_only': options.collect_only, 'ci_ordinary_shard_of_4': options.ci_shard,
+        'notes_ci_job': options.notes_ci_job,
+        'notes_ci_pythonpath': list(notes_ci.CI_PATHS) if options.notes_ci_job else None,
+        'hygiene_mode': 'notes_ci_new_tracked_source_bytecode' if options.notes_ci_job else 'strict_unchanged',
+        'child_startup_scope': ('Pytest controller/workers use -S -P -B. Existing CI notes tests may start '
+            'whitelisted-environment Python children with normal site startup. OS network sandbox is inherited; '
+            'pytest import attestations do not claim every descendant import.' if options.notes_ci_job else None),
         'removed_environment_names': removed, 'fairscape': fairscape, 'runtime': runtime(),
         'workflow_sha256': common.sha((options.tree / '.github/workflows/main.yaml').read_bytes()),
         'selector_sha256': common.sha((options.tree / 'utils/pytest_shard.py').read_bytes()),
@@ -208,7 +230,11 @@ def run(options):
     after = common.source(options.tree)
     common.save(options.output / 'source-after.json', after)
     hygiene_after = common.git(options.tree, *hygiene_args).decode()
-    common.save(options.output / 'hygiene.json', {'before': hygiene, 'after': hygiene_after})
+    hygiene_report = (notes_ci.classify(options.tree, before, notes_before, hygiene, hygiene_after)
+        if options.notes_ci_job else {'before': hygiene, 'after': hygiene_after,
+            'hygiene_mode': 'strict_unchanged', 'unchanged': hygiene == hygiene_after,
+            'passed': hygiene == hygiene_after})
+    common.save(options.output / 'hygiene.json', hygiene_report)
     records = {path.stem.removeprefix('nodes-'): json.loads(path.read_text())
                for path in options.output.glob('nodes-*.json')}
     master = records.get('master', {})
@@ -238,7 +264,7 @@ def run(options):
     denial_count = sum(len(value['events']) for value in denials.values())
     common.save(options.output / 'guard-denials.json', {'files': denials, 'event_count': denial_count,
         'zero_denials': not denials, 'classified_exception_policy': 'none; any denial artifact refuses acceptance'})
-    invariant = (before == after and hygiene == hygiene_after and origins_ok and helpers_same and
+    invariant = (before == after and hygiene_report['passed'] and origins_ok and helpers_same and
                  targets_same and sandbox_loaded and same_collection and not denials)
     collection_complete = options.collect_only and bool(selected) and not reports and not cases and not collection_errors and invariant
     result = {'returncode': code, 'counts': counts, 'collected_occurrences': len(collected),
@@ -247,7 +273,8 @@ def run(options):
         'selected_occurrences': len(selected), 'selected_unique': len(set(selected)),
         'node_accounting_complete': complete, 'all_worker_collections_identical': same_collection,
         'worker_count': len(workers), 'collection_errors': collection_errors,
-        'source_unchanged': before == after, 'hygiene_passed': hygiene == hygiene_after,
+        'source_unchanged': before == after, 'hygiene_passed': hygiene_report['passed'],
+        'hygiene_unchanged': hygiene_report['unchanged'], 'hygiene_mode': hygiene_report['hygiene_mode'],
         'origins_verified': origins_ok, 'helpers_unchanged': helpers_same, 'targets_unchanged': targets_same,
         'sandbox_loaded': sandbox_loaded, 'wall_seconds': time.monotonic() - started,
         'guard_denial_count': denial_count, 'zero_guard_denials': not denials,
@@ -275,6 +302,7 @@ def main():
     parser.add_argument('--workers', type=int, choices=(0, 1, 2, 3, 4), default=0)
     parser.add_argument('--collect-only', action='store_true')
     parser.add_argument('--ci-shard', type=int)
+    parser.add_argument('--notes-ci-job', choices=tuple(notes_ci.NOTES_TARGETS))
     options = parser.parse_args()
     options.tree = options.tree.resolve(strict=True)
     options.output = options.output.resolve()
