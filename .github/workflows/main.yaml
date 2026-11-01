@@ -1,6 +1,7 @@
 # Every PR runs the complete suite, including the committed corpus (#1361).
 # CI uses Python 3.12 throughout. Six PR shards shorten feedback; four on
-# main/manual leave room for PRs without removing test or schema coverage.
+# main/manual leave room for PRs without removing test or schema coverage, and
+# allow 60 minutes because GitHub runner speed varies (D75).
 ---
 name: Build and test data_sheets_schema
 
@@ -20,7 +21,7 @@ jobs:
   python-tests:
     name: Python ${{ matrix.python-version }} / shard ${{ matrix.shard }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 45 || 60 }}
     strategy:
       fail-fast: false
       matrix:
