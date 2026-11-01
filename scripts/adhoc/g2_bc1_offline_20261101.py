@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-# Purpose: isolated offline G1 checks; inputs: module/script and arguments.
-# Outputs: selected check stdout/artifacts; generality F2-F19, 2026-10-29.
+# Purpose: isolated offline G2 checks, adapted from G1's reviewed launcher.
+# Inputs: pinned checkout, module/script and arguments; outputs: logs and optional
+# collected-node/event ledgers. G2 task-7 acceptance / 2026-11-01.
 import os
 from pathlib import Path
 import runpy
@@ -119,7 +120,18 @@ elif target == 'pytest':
         args += ['-p', 'xdist.plugin']
 
     class ImmediateFailures:
+        def pytest_collection_finish(self, session):
+            if os.environ.get('G2_COLLECTED_PATH'):
+                import json
+                Path(os.environ['G2_COLLECTED_PATH']).write_text(json.dumps(
+                    [item.nodeid for item in session.items], indent=2) + '\n')
+
         def pytest_runtest_logreport(self, report):
+            if os.environ.get('G2_TEST_EVENTS_PATH'):
+                import json
+                with open(os.environ['G2_TEST_EVENTS_PATH'], 'a') as output:
+                    output.write(json.dumps({'nodeid': report.nodeid, 'when': report.when,
+                        'outcome': report.outcome, 'seconds': report.duration}) + '\n')
             if report.failed:
                 print('\nG1 immediate failure:', report.nodeid, '\n', report.longreprtext, flush=True)
                 if os.environ.get('G1_TEST_FAILURES_PATH'):
