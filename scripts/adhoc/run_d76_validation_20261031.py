@@ -100,7 +100,10 @@ def selected_targets(options):
 
 
 def command(options, targets):
-    result = [*targets, '-q', '-p', 'no:cacheprovider', '-p', 'd76_pytest_observer_20261031',
+    # Persist node identities as execution progresses so a long final case
+    # cannot hide earlier failures until the terminal summary. Collection
+    # retains the requested quiet layout; phase/accounting policy is unchanged.
+    result = [*targets, '-q' if options.collect_only else '-v', '-p', 'no:cacheprovider', '-p', 'd76_pytest_observer_20261031',
               '--rootdir', str(options.tree), '-c', str(options.tree / 'pyproject.toml'),
               '--basetemp', str(options.output / 'cases'), '--junitxml', str(options.output / 'pytest.xml'),
               '--durations=25', '-rfE']

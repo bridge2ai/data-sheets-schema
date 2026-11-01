@@ -662,11 +662,12 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         def _candidate_specs(candidate_date: str | None):
             current = _make_run_spec(candidate_date)
             yield current
+            current_literal = current.render_spec()
             # Recording may happen at the corpus root after rendering in a
             # subdirectory. Keep the current CLI spelling first, then replay
             # the supplied input spelling. Only the complete instruction SHA
             # can admit this alternative; no input bytes or hashes are changed.
-            literal = current.render_spec()
+            literal = dict(current_literal)
             literal.update(
                 bundle=str(bundle) if bundle is not None else None,
                 manifest=str(selected_manifest) if selected_manifest is not None else None,
@@ -682,11 +683,21 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             chunk_spellings = (_backfill_input_spellings(
                 Path(discovered) if discovered is not None else None, current._corpus_root)
                 if chunk_manifest is None else (Path(chunk_manifest),))
+            # The nested renderer also froze absolute output destinations.
+            # Change their spelling together, only within the known owner;
+            # every complete instruction still has to match the supplied SHA.
+            destination_choices = _record_artifact_spellings(
+                literal.get("agentic_artifact_paths"), current._corpus_root)
+            seen = [current_literal]
             for candidate_chunk in chunk_spellings:
-                candidate = {**literal, "chunk_manifest": str(candidate_chunk)
-                             if candidate_chunk is not None else None}
-                if candidate != current.render_spec():
-                    yield RunSpec.from_render_spec(candidate, project=project, method=method, label=label)
+                for destinations in destination_choices:
+                    candidate = {**literal, "chunk_manifest": str(candidate_chunk)
+                                 if candidate_chunk is not None else None}
+                    if destinations is not None:
+                        candidate["agentic_artifact_paths"] = destinations
+                    if candidate not in seen:
+                        seen.append(candidate)
+                        yield RunSpec.from_render_spec(candidate, project=project, method=method, label=label)
 
         target_sha = (hashlib.sha256(supplied_text.encode("utf-8")).hexdigest()
                       if supplied_text is not None else None)
@@ -836,6 +847,36 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                    "was recorded, so the verdict is about bytes that no longer "
                    "exist.\n      Re-run `d4d runs validate --label "
                    f"{label} --project {project}` before `d4d runs check`.")
+
+
+def _record_artifact_spellings(
+    destinations: dict[str, str] | None, owner: Path | None,
+) -> tuple[dict[str, str] | None, ...]:
+    """Keep the whole output map first, then one known-owner counterpart.
+
+    Only homogeneous relative paths or absolute paths inside the owner may
+    change spelling. Unknown owners, traversal, foreign paths and mixed maps
+    stay literal. No symlink resolution or filesystem search is performed;
+    the caller admits a candidate only by its complete instruction SHA.
+    """
+    original = (destinations,)
+    if (not isinstance(destinations, dict) or not destinations or owner is None
+            or not owner.is_absolute() or ".." in owner.parts
+            or any(not isinstance(value, str) or not value for value in destinations.values())):
+        return original
+    paths = {key: Path(value) for key, value in destinations.items()}
+    if any(".." in value.parts for value in paths.values()):
+        return original
+    if all(not value.is_absolute() for value in paths.values()):
+        alternate = {key: str(owner / value) for key, value in paths.items()}
+    elif all(value.is_absolute() for value in paths.values()):
+        try:
+            alternate = {key: str(value.relative_to(owner)) for key, value in paths.items()}
+        except ValueError:
+            return original
+    else:
+        return original
+    return original if alternate == destinations else (destinations, alternate)
 
 
 def _backfill_input_spellings(value: Path | None, owner: Path | None) -> tuple[Path | None, ...]:

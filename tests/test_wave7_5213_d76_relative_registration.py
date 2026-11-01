@@ -53,6 +53,12 @@ def test_registered_relative_inputs_are_frozen_at_binding(external, monkeypatch,
         changes = {'registered_input_paths': True} if selection == 'explicit' else {
             'condition': 'generic_v9', 'render_version': 16, 'runtime': 'Claude Code',
             'native_source_attribution_version': 1, 'native_source_attribution_max_checks': 3}
+        if selection == 'native':
+            # Renderer 16 also projects source metadata. Enrich only this
+            # temporary case; the shared external fixture predates that rule.
+            metadata = yaml.safe_load(external.manifest.read_bytes())
+            metadata['projects'][external.project]['sources'][0]['processed_file'] = external.bundle.name
+            external.manifest.write_text(yaml.safe_dump(metadata))
     monkeypatch.chdir(external.bundle.parent)
     spec = replace(base, bundle=Path(external.bundle.name), manifest=Path(external.manifest.name),
         chunk_manifest=Path(external.chunk_manifest.name), **changes)
