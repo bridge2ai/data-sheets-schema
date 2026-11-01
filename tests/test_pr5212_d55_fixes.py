@@ -270,8 +270,8 @@ def test_resume_accepts_recorded_head_and_fresh_launch_needs_none(tmp_path, monk
         ledger.prepare_usage(run, resume=resume)
         return {'accepted': True}
     monkeypatch.setattr(api, '_execute', accepted)
-    assert api.execute(selected)['accepted']
+    assert api.execute(selected, client=SimpleNamespace())['accepted']
     ledger.prepare_usage(selected, resume=False)
     head = raw_events(selected)[-1]['sha256']
-    assert api.execute(selected, expect_journal_head_sha256=head)['accepted']
+    assert api.execute(selected, client=SimpleNamespace(), expect_journal_head_sha256=head)['accepted']
     assert capsys.readouterr().err.count('latch journal stop') == 2

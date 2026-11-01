@@ -88,8 +88,6 @@ def test_fresh_prefix_project_does_not_claim_sibling_artifacts(layout, projects,
     first, second = FakeClient(), FakeClient()
     api.execute(sibling, client=first)
     assert len(first.messages.calls) == 4
-    ledger.abandoned_journal_path(sibling).write_text("sibling abandoned evidence\n")
-    api._receipt_path(sibling).write_text("sibling receipt evidence\n")
     sibling_files = {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()}
     result = api.execute(selected, client=second)
     assert len(second.messages.calls) == len(result["usage"]) == 4

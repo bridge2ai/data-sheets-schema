@@ -207,7 +207,7 @@ def test_historical_intermediate_inventory_uses_the_same_ownership_rule(tmp_path
 
 
 @pytest.mark.parametrize("binding", ["path", "sha256", "md5", "identity"])
-def test_each_foreign_artifact_needs_its_own_positive_binding(tmp_path, binding):
+def test_foreign_references_are_not_output_bindings(tmp_path, binding):
     selected = spec(project="P", out_dir=tmp_path, label="selected")
     foreign = replace(selected, label="guarded")
     ledger.prepare_usage(foreign, resume=True)
@@ -220,7 +220,10 @@ def test_each_foreign_artifact_needs_its_own_positive_binding(tmp_path, binding)
         record["companion"] = {binding: str(path) if binding == "path" else
                                hashlib.new(binding, path.read_bytes()).hexdigest()}
     foreign.provenance_path.write_text(yaml.safe_dump(record))
-    assert journal._legacy_evidence(selected) == []
+    # Only the embedded writer identity applies to this file. The arbitrary
+    # companion path/hash references were never production output bindings.
+    retained = [] if binding == "identity" else [str(path)]
+    assert journal._legacy_evidence(selected) == retained
     orphan = tmp_path / "P_other_future_writer.bin"
     orphan.write_bytes(b"independent unowned artifact")
-    assert journal._legacy_evidence(selected) == [str(orphan)]
+    assert sorted(journal._legacy_evidence(selected)) == sorted([*retained, str(orphan)])

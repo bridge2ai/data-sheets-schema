@@ -85,17 +85,24 @@ the preserved parser checks and the two repaired `metadata_dir` stubs, is in
 
 ## Round 3: fail-closed ownership and restored controls
 
-Every regular file or symlink starting with `P_` or `.P_` is a candidate in
+Every regular file or symlink starting with `P_` or `.P_` (casefolded) is a candidate in
 metadata, its immediate `intermediate/`, and the selected output directories.
 There is no list of known writers. Only positive per-file attribution to a
 different guarded identity excludes a candidate. A guarded `P_X` or
 `VOICE_PEDIATRIC` can therefore share a label with `P` or `VOICE`, respectively.
 An unguarded or ambiguous `P_reconcile_full.yaml` is refused; that may be an
 ordinary `P_reconcile` run or P's reconcile snapshot. This false refusal is an
-accepted consequence: use a new label. Phase names never decide ownership.
+accepted consequence: use a new output directory for a flat layout, or a new
+label for a split layout. Phase names never decide ownership.
 Likewise, guarded `P` history alone does not own an unattributed `P_X` file:
 that broader prefix is ambiguous for selected `P_X`. A per-file identity or
-path/hash binding can still establish foreign ownership.
+output binding can still establish foreign ownership. An output binding must
+match the canonical path, file type, every supplied digest, and any recorded
+byte count. Input/dependency pins, hashes at other paths, stale regular-file
+pins for replacement symlinks, and name prefixes alone never exclude residue.
+In particular, guarded `P_reconcile` history cannot claim an unbound
+`P_reconcile_full.yaml`. The selected writer addresses are candidates whenever
+they exist (or are symlinks), regardless of the spelling returned by enumeration.
 The sibling tests now initialize actual guarded history; arbitrary sibling
 filenames and an invalid journal no longer suffice to exclude evidence.
 
@@ -111,6 +118,33 @@ and verifier still include those locks. Pre-existing, released, edited or
 replaced locks are never excused by this startup scope distinction. A new
 identity sharing old unattributed sidecar locks may therefore require a new
 output directory, even when another identity's provenance is guarded.
+
+Round 4 makes startup checks (schema sync, model settings/header binding,
+shared preflight and client construction/validation) precede all lock writes.
+Immediately after acquisition, the first identity-bearing launch event binds
+the four sidecars as regular empty files. A failure after that event prints
+its stop head; retry with that externally retained head, as for any guarded
+resume (D57). A startup failure before locks writes no event and needs no new
+head. The batch's re-run advice therefore applies to both cases. SIGKILL
+between lock creation and the first durable event remains a window: without
+positive ownership those locks are inspection-only residue. Do not delete them
+to force a resume; use the new-location remedy above.
+
+The writer-completeness census checks every persistent artifact of each real
+controller against its output records and checks attribution from another
+label. The original singleton census continues to cover atomic temporaries.
+The activation and same-directory foreign-date controls use production launch
+events; they no longer add fixture-only lock bindings. The abandoned-journal
+controls retain byte-boundary behavior for intact foreign production rows.
+A manually torn foreign suffix has no production ownership record: those
+three variants now pin the pre-write refusal and retain applicable parser
+checks, without inventing `companions.abandoned` provenance.
+
+Baseline age remains informational on stderr only for `baseline_for` and
+`report_basis`. Their returned metric/count mappings are unchanged. Persisting
+age there would change a widely consumed mapping contract, so it is deferred;
+the run's own `checks.record_age` remains available in execution and offline
+verdicts.
 
 The completeness test drives plain, shared v1/v2, receipt completion,
 readdress, removal repair, typed audit, report regate and after-repair paths
@@ -137,7 +171,7 @@ complete inventory. Their changes retain the original downstream checks:
 - The D55 fresh-launch stub initializes accounting while its new locks are
   held, as the real executor does, instead of leaving only released locks.
 - The three predecessor-activation cases and the post-publication activation
-  case bind their completed predecessor's four lock paths explicitly. Their
+  case use their completed predecessor's production launch bindings. Their
   interruption, damage and recovery assertions remain intact.
 - The concurrency test expects the earlier inspection-only refusal for an
   unattributed foreign label and checks the whole tree. The two split/flat

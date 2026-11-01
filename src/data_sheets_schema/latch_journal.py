@@ -17,6 +17,7 @@ import re
 import stat
 import subprocess
 import sys
+import uuid
 
 from data_sheets_schema import usage_ledger as ledger
 
@@ -153,9 +154,14 @@ def refuse_legacy_execution(spec):
                 _fail("journal was deleted from a guarded ledger; found=missing journal (not a resume anchor)")
         residue = _legacy_evidence(spec)
         if path.exists() or path.is_symlink() or residue:
-            _fail(f"{record_age(_record(spec))}: artifacts have no journal for the selected run; inspection only; "
-                  "relaunch with a new label; legacy recovery never spends; files: "
+            age = f"{record_age(_record(spec))}: " if _record(spec) else ""
+            _fail(f"{age}artifacts have no journal for the selected run; inspection only; "
+                  f"{_fresh_location(spec)}; legacy recovery never spends; files: "
                   + ", ".join(sorted(set(residue) | ({str(path)} if path.exists() or path.is_symlink() else set()))))
+
+
+def _fresh_location(spec):
+    return "use a new output directory" if getattr(spec, "out_dir", None) is not None else "relaunch with a new label"
 
 
 def _canonical(value) -> bytes:
@@ -229,7 +235,7 @@ def _read_events(path) -> list[dict]:
                     or event["previous_sha256"] != previous
                     or not isinstance(event["identity"], dict)
                     or not isinstance(event["generation_id"], str) or not event["generation_id"]
-                    or event["kind"] not in {"generation", "legacy_unverifiable", "latch", "override", "aborted_update"}
+                    or event["kind"] not in {"launch", "generation", "legacy_unverifiable", "latch", "override", "aborted_update"}
                     or not isinstance(event["payload"], dict)
                     or event["sha256"] != _sha(_canonical(body))):
                 raise ValueError(f"invalid event at line {number}: expected previous_sha256={previous}, "
@@ -278,6 +284,7 @@ def _append(spec, events, event):
 def _mine(spec, events, generation=None):
     return [event for event in events
             if event["identity"] == ledger.run_identity(spec)
+            and event["kind"] != "launch"
             and (generation is None or event["generation_id"] == generation)]
 
 
@@ -507,21 +514,30 @@ def owned_artifacts(spec, *, directories=None):
     folders = {spec.metadata_dir, spec.metadata_dir / "intermediate",
                spec.full_path.parent, spec.core_path.parent, spec.report_path.parent,
                spec.provenance_path.parent}
-    files = sorted({p for folder in folders if folder.is_dir() for p in folder.iterdir()
-                    if p.is_file() or p.is_symlink()})
+    files = {p for folder in folders if folder.is_dir() for p in folder.iterdir()
+             if p.is_file() or p.is_symlink()}
+    # Include the exact writer addresses even when directory enumeration uses
+    # another spelling on a case-insensitive filesystem.
+    destinations = {spec.full_path, spec.core_path, spec.report_path, spec.provenance_path,
+                    ledger.ledger_path(spec), journal_path(spec), override_path(spec)}
+    destinations.update(spec.metadata_dir / f"{spec.project}_{suffix}" for suffix in (
+        "api_progress.json", "coverage_receipt.yaml", "reasoning.jsonl"))
+    destinations.add(spec.metadata_dir / "intermediate" / f"{spec.project}_snapshot_index.json")
+    files.update(p for p in destinations if p.exists() or p.is_symlink())
+    files = sorted(files)
     selected = ledger.run_identity(spec)
     keys = tuple(selected)
 
     def identity(value):
         if isinstance(value, dict) and all(isinstance(value.get(key), str) for key in keys):
-            return tuple(value[key] for key in keys)
+            return tuple(value[key].casefold() if key == "project" else value[key] for key in keys)
         return None
 
     selected_id = identity(selected)
     histories = {}
     journal_owners = {}
     for path in files:
-        if not path.name.endswith("_latch_journal.jsonl") or path.is_symlink():
+        if not path.name.casefold().endswith("_latch_journal.jsonl") or path.is_symlink():
             continue
         try:
             events = _read_events(path)
@@ -535,11 +551,12 @@ def owned_artifacts(spec, *, directories=None):
                 owners.add(owner)
         journal_owners[path] = owners
     guarded = {owner for owner, events in histories.items()
-               if any(e["kind"] == "generation" for e in events)
+               if any(e["kind"] in {"generation", "launch"} for e in events)
                and not any(e["kind"] == "legacy_unverifiable" for e in events)}
     scope = set(directories) if directories is not None else folders
+    prefix = spec.project.casefold() + "_"
     candidates = [path for path in files if path.parent in scope and
-                  path.name.startswith((spec.project + "_", "." + spec.project + "_"))]
+                  (path in destinations or path.name.casefold().startswith((prefix, "." + prefix)))]
     if not guarded:
         return candidates  # Without guarded identities no exclusion is possible.
 
@@ -548,6 +565,10 @@ def owned_artifacts(spec, *, directories=None):
     def owners_of(value):
         if not isinstance(value, dict):
             return set()
+        if value.get("format") == "source_heading_completed_v1":
+            # The completed writer's own selection, not its captured inputs.
+            selection = value.get("selection")
+            return owners_of({"run": selection.get("run")}) if isinstance(selection, dict) else {unattributed}
         declared = set()
         for key in ("identity", "run_identity", "run"):
             if key not in value:
@@ -557,7 +578,8 @@ def owned_artifacts(spec, *, directories=None):
             if owner is not None:
                 declared.add(owner)
             elif isinstance(candidate, dict):
-                fields = {k: v for k, v in candidate.items() if k in keys}
+                fields = {k: v.casefold() if k == "project" and isinstance(v, str) else v
+                          for k, v in candidate.items() if k in keys}
                 matches = {item for item in guarded | {selected_id} if fields and all(
                     dict(zip(keys, item)).get(k) == v for k, v in fields.items())}
                 declared.update(matches if len(matches) == 1 else {unattributed})
@@ -611,56 +633,121 @@ def owned_artifacts(spec, *, directories=None):
 
     bindings = []
     for owner in guarded:
-        bindings.extend((owner, p) for e in histories[owner] for p in pins(e["payload"]))
+        for event in histories[owner]:
+            # Only writer output sections have ownership meaning. Controller
+            # payloads also contain input/dependency pins; never recurse there.
+            bindings.extend((owner, p) for p in pins(event["payload"].get("outputs")))
+            if event["kind"] == "latch" and event["payload"].get("key", "").startswith("snapshot:"):
+                bindings.extend((owner, p) for p in pins(event["payload"].get("value")))
     for path, value in records.items():
         owners = declared[path]
         if len(owners) == 1 and owners <= guarded and (
-                path.name.endswith(("_provenance.yaml", "_snapshot_index.json"))
-                or "_api_usage_" in path.name):
-            bindings.extend((next(iter(owners)), p) for p in pins(value))
+                path.name.casefold().endswith("_provenance.yaml")
+                or re.search(r"_snapshot_index(?:\.previous-[0-9a-f]+)?\.json$", path.name.casefold())
+                or "_api_usage_" in path.name.casefold()):
+            output_sections = [value.get(key) for key in (
+                "outputs", "snapshots", "intermediates", "latch_snapshots")]
+            # Measurements pin the outputs separately from outputs.*'s path
+            # descriptions. All such constraints must agree with those bytes.
+            for measure in ("validation", "report_claims", "pair_consistency"):
+                block = value.get(measure)
+                if isinstance(block, dict):
+                    output_sections.append(block.get("artifacts"))
+            companions, receipts = value.get("companions"), value.get("receipts")
+            if isinstance(companions, dict):
+                output_sections.append(companions.get("reasoning_log"))
+            if isinstance(receipts, dict) and isinstance(receipts.get("artifacts"), dict):
+                output_sections.append(receipts["artifacts"].get("receipt"))
+            bindings.extend((next(iter(owners)), p) for section in output_sections for p in pins(section))
 
     found = []
     for path in candidates:
         owners = set(declared.get(path, ())) | journal_owners.get(path, set())
-        digests = {}
+        by_owner = {}
         for owner, pin in bindings:
-            bound_path = pin.get("path")
-            matches_path = isinstance(bound_path, str) and Path(bound_path).absolute() == path.absolute()
-            matches_hash = False
-            if not path.is_symlink():
-                for algorithm in ("sha256", "md5"):
-                    if isinstance(pin.get(algorithm), str):
-                        if algorithm not in digests:
-                            digests[algorithm] = hashlib.new(algorithm, _bytes(path)).hexdigest()
-                        matches_hash |= digests[algorithm] == pin[algorithm]
-            if matches_path or matches_hash:
+            if isinstance(pin.get("path"), str) and _artifact_address(pin["path"]) == _artifact_address(path):
+                by_owner.setdefault(owner, []).append(pin)
+        for owner, output_pins in by_owner.items():
+            if all(_output_matches(path, pin) for pin in output_pins):
                 owners.add(owner)
-        # A different project with guarded history supplies its namespace.
-        # Do not guess phase names: P_reconcile is an ordinary project too.
-        for owner in guarded:
-            project = dict(zip(keys, owner))["project"]
-            # A broader P namespace cannot disambiguate a selected P_X file.
-            # Its own identity or an exact binding can still prove ownership.
-            if (project != spec.project and not spec.project.startswith(project + "_")
-                    and path.name.startswith((project + "_", "." + project + "_"))):
-                owners.add(owner)
+            else:
+                # A contradictory digest/type cannot be erased by another
+                # path-only claim, or by the file's own embedded identity.
+                owners.add(unattributed)
         if owners and selected_id not in owners and owners <= guarded:
             continue
         found.append(path)
     return found
 
 
+def _artifact_address(path):
+    path = Path(path).absolute()
+    # Resolve directory aliases, but do not follow a candidate symlink into
+    # a different file. Names are conservatively equivalent on all volumes.
+    return str(path.parent.resolve() / path.name).casefold()
+
+
+def _output_matches(path, pin):
+    try:
+        if _artifact_address(pin["path"]) != _artifact_address(path):
+            return False
+        if pin.get("file_type", "regular") != ("symlink" if path.is_symlink() else "regular"):
+            return False
+        raw = os.readlink(path).encode() if path.is_symlink() else _bytes(path)
+        return (all(pin[key] == hashlib.new(key, raw).hexdigest()
+                    for key in ("sha256", "md5") if pin.get(key) is not None)
+                and ("bytes" not in pin or pin["bytes"] == len(raw)))
+    except (OSError, KeyError, TypeError, ValueError):
+        return False
+
+
+def start_launch(spec):
+    """First durable identity immediately after locking, before accounting.
+
+    A failed launch without a ledger remains a launch, never a generation.
+    launch_record prints its head even if the following initialization fails.
+    """
+    events = _events(spec)
+    if any(event["identity"] == ledger.run_identity(spec) for event in events):
+        return
+    locks = [path for _, path in ledger.output_locks((spec.full_path, spec.core_path,
+                                                    spec.report_path, spec.provenance_path))]
+    outputs = []
+    for path in locks:
+        raw = _bytes(path)
+        outputs.append({"path": str(path), "file_type": "regular", "bytes": len(raw), "sha256": _sha(raw)})
+    event = _event(spec, {"generation_id": uuid.uuid4().hex}, events, "launch", {"outputs": outputs})
+    _append(spec, events, event)
+
+
+def pending_launch_paths(spec, events=None):
+    """Only current, bound coordination files of a launch without accounting."""
+    events = _events(spec) if events is None else events
+    if _mine(spec, events) or ledger.ledger_path(spec).exists() or ledger.ledger_path(spec).is_symlink():
+        return set()
+    launches = [event for event in events if event["kind"] == "launch"
+                and event["identity"] == ledger.run_identity(spec)]
+    if not launches:
+        return set()
+    return {journal_path(spec), *(Path(pin["path"]) for event in launches
+        for pin in event["payload"].get("outputs", [])
+        if _output_matches(Path(pin["path"]), pin))}
+
+
 def _legacy_evidence(spec):
     """Read all attributable or ambiguous residue, including unknown writers.
 
     Residue is not age evidence. Unattributable prefix siblings require a new
-    label too; only positive per-artifact guarded ownership permits exclusion.
+    location too; only positive per-artifact guarded ownership permits exclusion.
     """
     # A fresh execute call has already checked the complete inventory before
     # acquiring locks. Its newly created, still-held lock inodes are current
     # coordination writes, not historical residue. Inventory/verifier retain
     # them; no existing, released, replaced or edited lock is exempted here.
-    return [str(path) for path in owned_artifacts(spec) if not ledger.is_new_held_lock(path)]
+    events = _events(spec)
+    startup_paths = {_artifact_address(path) for path in pending_launch_paths(spec, events)}
+    return [str(path) for path in owned_artifacts(spec) if not ledger.is_new_held_lock(path)
+            and _artifact_address(path) not in startup_paths]
 
 
 def _recover_update(spec, data, events, mine):
@@ -734,7 +821,7 @@ def _validated(spec, *, spending=False, allow_new=False, startup=False, mutation
         residue = _legacy_evidence(spec)
         if residue:
             _fail("surviving historical outputs/progress have no usage ledger or latch history; "
-                  "relaunch with a new label; historical evidence cannot become a clean resume; files: "
+                  f"{_fresh_location(spec)}; historical evidence cannot become a clean resume; files: "
                   + ", ".join(residue))
         return None, events, []
     # Strict decoding also rejects duplicate keys before the ordinary shape guard.
@@ -749,7 +836,7 @@ def _validated(spec, *, spending=False, allow_new=False, startup=False, mutation
         if "latch_journal" in data:
             _fail(f"journal was deleted from a guarded ledger: expected={data['latch_journal']}; found=missing journal")
         if spending or startup or mutation:
-            _fail("journal-less run is inspection only; relaunch with a new label; legacy recovery never spends")
+            _fail(f"journal-less run is inspection only; {_fresh_location(spec)}; legacy recovery never spends")
         mine = _legacy(spec, data, events)
         return data, events, mine
     else:
@@ -918,21 +1005,8 @@ def head_sha256(spec):
     return events[-1]['sha256'] if events else None
 
 
-@contextmanager
-def launch_record(spec, expected):
-    """D57: print externally retainable heads, requiring the prior launch head.
-
-    This never derives the caller's expectation from the mutable run directory.
-    The journal remains locally hashed, not cryptographically authenticated.
-    """
-    def display(boundary):
-        try:
-            head = head_sha256(spec)
-        except ledger.UsageLedgerError:
-            head = 'invalid'
-            boundary = 'unverified (not a resume anchor)'
-        print(f'latch journal {boundary}: project={spec.project} label={spec.label} '
-              f'head_sha256={head or "none"} path={journal_path(spec)}', file=sys.stderr, flush=True)
+def require_launch_head(spec, expected):
+    """Read-only D57 check, both before locks and again while holding them."""
     try:
         found = head_sha256(spec)
         if expected is not None and (not isinstance(expected, str) or not _HEX.fullmatch(expected)):
@@ -950,8 +1024,28 @@ def launch_record(spec, expected):
         print(redact(f'latch journal refused: project={spec.project} label={spec.label} '
                      f'{message} (not a resume anchor)'), file=sys.stderr, flush=True)
         raise ledger.UsageLedgerError(message) from None
-    display('start')
+
+
+@contextmanager
+def launch_record(spec, expected, *, initialize=False):
+    """D57: print externally retainable heads, requiring the prior launch head.
+
+    This never derives the caller's expectation from the mutable run directory.
+    The journal remains locally hashed, not cryptographically authenticated.
+    """
+    def display(boundary):
+        try:
+            head = head_sha256(spec)
+        except ledger.UsageLedgerError:
+            head = 'invalid'
+            boundary = 'unverified (not a resume anchor)'
+        print(f'latch journal {boundary}: project={spec.project} label={spec.label} '
+              f'head_sha256={head or "none"} path={journal_path(spec)}', file=sys.stderr, flush=True)
+    require_launch_head(spec, expected)
     try:
+        if initialize:
+            start_launch(spec)  # Caller holds all four locks; bind before other startup work.
+        display('start')
         yield
     finally:
         display('stop')

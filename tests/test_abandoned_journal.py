@@ -27,16 +27,6 @@ def _cut_final_newline(path):
     path.write_bytes(raw[:-1])
 
 
-def _bind_foreign_journal(other):
-    """D69: the torn file needs its own positive guarded-owner binding."""
-    import hashlib
-    import yaml
-    path = api._abandoned_ledger(other)
-    other.provenance_path.write_text(yaml.safe_dump({
-        "run": ledger.run_identity(other), "companions": {"abandoned": {
-            "path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}}}))
-
-
 def test_a_row_appended_after_a_cut_newline_starts_its_own_line(tmp_path):
     """The issue's case (B): the final newline is lost, then a resumed process journals
     another row. Both rows survive, each on its own line, and both are recovered."""
@@ -165,20 +155,28 @@ def test_each_new_generation_records_its_own_boundary(tmp_path):
     assert ledger.abandoned_journal_offset(s) == len(api._abandoned_ledger(s).read_bytes()) > first
 
 
-def test_a_first_ledger_opened_over_an_existing_journal_starts_after_it(tmp_path):
+@pytest.mark.parametrize('torn', [False, True])
+def test_a_first_ledger_opened_over_an_existing_journal_starts_after_it(tmp_path, torn):
     """#2869: a generation opened by resume with no ledger yet, as the CLI opens one, does
     not own the lines already in the journal: another run's torn line there is skipped.
-    A guarded foreign record binds this exact torn file. Unattributed residue
-    cannot enter this continuation under D69."""
+    Intact production rows establish ownership. A torn unbound suffix cannot
+    enter this continuation under D69; preserve its parser-only control."""
     other = spec(out_dir=tmp_path)
     ledger.prepare_usage(other, resume=True)
     _drop(other, 1)
-    with api._abandoned_ledger(other).open("ab") as stream:
-        stream.write(b'{"phase": "full", "usage_id": "torn"')
-    _bind_foreign_journal(other)
+    if torn:
+        with api._abandoned_ledger(other).open("ab") as stream:
+            stream.write(b'{"phase": "full", "usage_id": "torn"')
     s = replace(other, label="another_rep1")                  # another run's identity, sharing the journal
     assert ledger.abandoned_journal_offset(s) is None
     assert len(api._abandoned_rows(s)) == 1                   # no generation: read as before, torn line skipped
+    if torn:
+        from tests.test_d68_legacy_readonly import tree
+        before = tree(tmp_path)
+        with pytest.raises(ledger.UsageLedgerError, match='inspection only'):
+            ledger.prepare_usage(s, resume=True)
+        assert tree(tmp_path) == before
+        return
     ledger.prepare_usage(s, resume=True)
     assert ledger.abandoned_journal_offset(s) == len(api._abandoned_ledger(s).read_bytes())
     api._require_surviving_accounting(s, [])
@@ -254,17 +252,25 @@ def test_a_ledger_that_predates_the_boundary_reads_strictly(tmp_path):
         api._require_surviving_accounting(s, [])
 
 
-def test_a_first_ledger_opened_fresh_starts_after_the_journal(tmp_path):
+@pytest.mark.parametrize('torn', [False, True])
+def test_a_first_ledger_opened_fresh_starts_after_the_journal(tmp_path, torn):
     """#2885: the route the CLI takes on foreign progress, and --no-resume with no ledger:
     resume=False with no ledger of its own records the boundary too."""
     other = spec(out_dir=tmp_path)
     ledger.prepare_usage(other, resume=True)
     _drop(other, 1)
-    with api._abandoned_ledger(other).open("ab") as stream:
-        stream.write(b'{"phase": "full", "usage_id": "torn"')
-    _bind_foreign_journal(other)
+    if torn:
+        with api._abandoned_ledger(other).open("ab") as stream:
+            stream.write(b'{"phase": "full", "usage_id": "torn"')
     s = replace(other, label="another_rep1")
     assert not ledger.ledger_path(s).exists()
+    if torn:
+        from tests.test_d68_legacy_readonly import tree
+        before = tree(tmp_path)
+        with pytest.raises(ledger.UsageLedgerError, match='inspection only'):
+            ledger.prepare_usage(s, resume=False)
+        assert tree(tmp_path) == before
+        return
     ledger.prepare_usage(s, resume=False)
     assert ledger.abandoned_journal_offset(s) == len(api._abandoned_ledger(s).read_bytes())
     api._require_surviving_accounting(s, [])
@@ -325,16 +331,24 @@ def test_the_gone_refusal_says_its_cause_once(tmp_path):
     assert str(raised.value).count("cannot establish surviving abandoned attempts") == 1
 
 
-def test_a_ledger_first_written_by_a_call_records_its_boundary(tmp_path):
+@pytest.mark.parametrize('torn', [False, True])
+def test_a_ledger_first_written_by_a_call_records_its_boundary(tmp_path, torn):
     """#2888: a ledger opened by begin_call rather than prepare_usage starts after the
     journal's existing bytes too."""
     other = spec(out_dir=tmp_path)
     ledger.prepare_usage(other, resume=True)
     _drop(other, 1)
-    with api._abandoned_ledger(other).open("ab") as stream:
-        stream.write(b'{"phase": "full", "usage_id": "torn"')
-    _bind_foreign_journal(other)
+    if torn:
+        with api._abandoned_ledger(other).open("ab") as stream:
+            stream.write(b'{"phase": "full", "usage_id": "torn"')
     s = replace(other, label="another_rep1")
+    if torn:
+        from tests.test_d68_legacy_readonly import tree
+        before = tree(tmp_path)
+        with pytest.raises(ledger.UsageLedgerError, match='historical outputs'):
+            ledger.begin_call(s, "full", 1, "2026-09-28T00:00:00Z")
+        assert tree(tmp_path) == before
+        return
     ledger.begin_call(s, "full", 1, "2026-09-28T00:00:00Z")
     assert ledger.abandoned_journal_offset(s) == len(api._abandoned_ledger(s).read_bytes())
     assert api._abandoned_rows(s)                              # the torn line is not this generation's

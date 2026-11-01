@@ -316,9 +316,15 @@ def require_selected_resume_owner(spec, *, resume: bool) -> None:
     # Primary records can live outside the metadata container in split layout.
     locks = {lock for _, lock in usage_ledger.output_locks(
         (spec.full_path, spec.core_path, spec.report_path, spec.provenance_path))}
-    spent = bool(footprint.evidence or present or any(
+    from .latch_journal import pending_launch_paths, _artifact_address, _fresh_location
+    pending = {_artifact_address(path) for path in pending_launch_paths(spec)}
+    evidence = [path for path in footprint.evidence if _artifact_address(path) not in pending]
+    spent = bool(evidence or present or any(
         _exists(path) for _, path in footprint.mutable if path not in locks))
     if spent and not resume:
-        raise ValueError('selected outputs are already spent; no-resume requires a fresh run')
+        files = sorted({str(path) for path in [*evidence, *present,
+            *(p for _, p in footprint.mutable if p not in locks and _exists(p))]})
+        raise ValueError('selected outputs are already spent; no-resume requires a fresh run; '
+                         + _fresh_location(spec) + '; files: ' + ', '.join(files))
     if spent and not generations:
         raise ValueError('selected output evidence has no usable live ownership')

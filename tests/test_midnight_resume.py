@@ -91,7 +91,7 @@ def test_new_generation_does_not_inherit_a_predecessors_date(external, monkeypat
     Clock.day = 12
     api.execute(construct(external), client=FakeClient())
     Clock.day = 13
-    seed = (replace(external, label="another-label", out_dir=external.out_dir.parent / "another-label")
+    seed = (replace(external, label="another-label")
             if mode == "foreign" else external)
     current = construct(seed)
     client = FakeClient()

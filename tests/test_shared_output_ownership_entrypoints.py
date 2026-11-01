@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import socket
+from types import SimpleNamespace
 
 from click.testing import CliRunner
 import pytest
@@ -130,8 +131,11 @@ def test_public_execute_refuses_existing_unowned_state_before_lock(registered, t
     # D69/D73(c): unknown partial output refuses at the complete residue guard,
     # before registered shared ownership checks, lock acquisition or any write.
     error = ledger.UsageLedgerError if state == 'unknown' else ValueError
-    with pytest.raises(error, match=expected):
+    with pytest.raises(error, match=expected) as caught:
         api.execute(spec, resume=state != 'own_no_resume')
+    if state == 'own_no_resume':
+        assert 'files: ' in str(caught.value) and ledger.ledger_path(spec).name in str(caught.value)
+        assert 'use a new output directory' in str(caught.value)
     assert seen == []
     assert whole_tree(tmp_path) == before
     assert {path: path.read_bytes() for path in authorities} == authorities
@@ -156,7 +160,7 @@ def test_public_execute_rechecks_owner_inside_lock_before_date_restore(registere
     monkeypatch.setattr(api, '_restore_resume_date', lambda *a: pytest.fail('foreign owner reached date restoration'))
     seen = no_execution(monkeypatch, forbid_locks=False)
     with pytest.raises(ValueError, match='foreign or unknown ledger ownership'):
-        api.execute(spec)
+        api.execute(spec, client=SimpleNamespace(base_url=reg['runtime']['base_url']))
     assert calls == ['acquired', 'released'] and seen == []
     assert tree(tmp_path) == observed
 
@@ -176,7 +180,7 @@ def test_matching_owner_preserves_actual_automatic_date_recovery(registered, tmp
         return {'boundary': 'reached after real owner checks and actual lock/date recovery'}
     monkeypatch.setattr(api, '_execute', execute)
     monkeypatch.setattr(api, '_client', lambda: pytest.fail('provider client forbidden'))
-    result = api.execute(spec)
+    result = api.execute(spec, client=SimpleNamespace(base_url=reg['runtime']['base_url']))
     assert observed == [('2001-02-03', True, False)]
     assert result['boundary'].startswith('reached')
     assert_preserved(before)

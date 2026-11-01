@@ -6905,6 +6905,15 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
     return body
 
 
+def _refuse_shared_no_resume(spec, resume):
+    if spec.shared_generation_version and not resume:
+        from .latch_journal import _legacy_evidence, _fresh_location
+        residue = _legacy_evidence(spec)
+        if residue:
+            raise UsageLedgerError("shared generation cannot reuse spent outputs with no-resume; "
+                                   + _fresh_location(spec) + "; files: " + ", ".join(residue))
+
+
 def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             client=None, expect_journal_head_sha256: str | None = None) -> dict[str, Any]:
     """Run the phases, writing each artifact as it completes.
@@ -6928,14 +6937,17 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     if spec.native_source_attribution_version:
         raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
 
-    from .latch_journal import launch_record, refuse_legacy_execution
+    from .latch_journal import launch_record, refuse_legacy_execution, require_launch_head
     refuse_legacy_execution(spec)  # D68: refuse before even sidecar lock writes.
     if getattr(spec, 'shared_generation_version', 0):
         from .shared_generation import assert_current
         from .output_ownership import require_selected_resume_owner
         assert_current(spec)  # authority isolation precedes even sidecar lock writes
         require_selected_resume_owner(spec, resume=resume)
-    with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256):
+    _refuse_shared_no_resume(spec, resume)
+    require_launch_head(spec, expect_journal_head_sha256)
+    _, client = _startup_checks(spec, client)
+    with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256, initialize=True):
         if getattr(spec, 'shared_generation_version', 0):
             # Another sequential writer may have changed ownership while we waited.
             require_selected_resume_owner(spec, resume=resume)
@@ -7104,6 +7116,44 @@ def _thinking_basis(settings: dict) -> str:
         settings.get("thinking_note", "not requested"))
 
 
+def _startup_checks(spec, client):
+    """Read-only checks: a failed startup must leave no lock or run file."""
+    from data_sheets_schema.schema_sync import (
+        STALE, UNCHECKED_ADVICE, blocking, check as _schema_check, rebuild_advice)
+    stale = blocking(_schema_check(profile=spec.profile_obj))     # this run's instrument (#1463)
+    if stale:
+        def detail(rows):
+            return "; ".join(f"{r['class']}: {r.get('reason', r['status'])}" for r in rows)
+        # A check that could not run blocks as a stale schema does, but is not one:
+        # regenerating would change nothing (#2738).
+        not_built = [r for r in stale if r["status"] == STALE]
+        unchecked = [r for r in stale if r["status"] != STALE]
+        causes = []
+        if not_built:
+            causes.append(
+                "the merged schema is not built from the current source, so this "
+                f"run would record a digest for a schema that does not exist — "
+                f"{detail(not_built)}. Rebuild with {rebuild_advice(not_built)}, review the "
+                "diff and commit it")
+        if unchecked:
+            causes.append(
+                "the schema sync check could not run, so this run cannot establish "
+                "that the digest it would record describes the current source — "
+                f"{detail(unchecked)}. To continue, {UNCHECKED_ADVICE}")
+        raise RuntimeError("; ".join(causes) + ", or check with `d4d schema check-digest`.")
+
+    settings = _model_settings(spec.condition)
+    spec.bind_api_header_values(settings)
+    if spec.shared_generation_version:
+        from .shared_generation import preflight as shared_preflight
+        shared_preflight(spec, settings)
+    client = client or _client()
+    if spec.shared_generation_version:
+        from .shared_generation import require_client
+        require_client(spec, client)
+    return settings, client
+
+
 def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     """Execute while holding exclusive access to this run's output files."""
     if spec.render_version in (24,):
@@ -7133,44 +7183,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # nothing to preserve by continuing.
     _rewrites: list[dict[str, Any]] = []
     _rewrite_token = _REWRITE_LOG.set(_rewrites)
-    from data_sheets_schema.schema_sync import (
-        STALE, UNCHECKED_ADVICE, blocking, check as _schema_check, rebuild_advice)
-    stale = blocking(_schema_check(profile=spec.profile_obj))     # this run's instrument (#1463)
-    if stale:
-        def detail(rows):
-            return "; ".join(f"{r['class']}: {r.get('reason', r['status'])}" for r in rows)
-        # A check that could not run blocks as a stale schema does, but is not one:
-        # regenerating would change nothing (#2738).
-        not_built = [r for r in stale if r["status"] == STALE]
-        unchecked = [r for r in stale if r["status"] != STALE]
-        causes = []
-        if not_built:
-            causes.append(
-                "the merged schema is not built from the current source, so this "
-                f"run would record a digest for a schema that does not exist — "
-                f"{detail(not_built)}. Rebuild with {rebuild_advice(not_built)}, review the "
-                "diff and commit it")
-        if unchecked:
-            causes.append(
-                "the schema sync check could not run, so this run cannot establish "
-                "that the digest it would record describes the current source — "
-                f"{detail(unchecked)}. To continue, {UNCHECKED_ADVICE}")
-        raise RuntimeError("; ".join(causes) + ", or check with `d4d schema check-digest`.")
-
     from data_sheets_schema.provenance import build_record, record_path_for
-
-    settings = _model_settings(spec.condition)
-    spec.bind_api_header_values(settings)
-    if spec.shared_generation_version:
-        from .shared_generation import preflight as shared_preflight
-        shared_preflight(spec, settings)
-    if spec.shared_generation_version and not resume:
-        if latch_journal._legacy_evidence(spec):
-            raise UsageLedgerError("shared generation cannot reuse spent outputs with no-resume; register a fresh run")
-    client = client or _client()
-    if spec.shared_generation_version:
-        from .shared_generation import require_client
-        require_client(spec, client)
+    settings, client = _startup_checks(spec, client)
+    _refuse_shared_no_resume(spec, resume)
     usage: list[dict[str, Any]] = []
     fresh_generation = not resume
     generation = _usage_generation(spec) if resume else _prepare_usage(spec, resume=False)

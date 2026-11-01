@@ -19,6 +19,58 @@ from tests.test_shared_generation_runtime import offline  # noqa: F401
 from tests.test_source_heading_runtime_api import draft_files  # noqa: F401
 
 
+def assert_writer_completeness(selected, tmp_path):
+    """Independent census of persistent writes against production output records.
+
+    Inputs/dependencies and a sibling's namespace never count as output pins.
+    Atomic temporaries are separately tested by the unchanged singleton census.
+    """
+    import yaml
+    paths = {p for folder in {selected.metadata_dir, selected.full_path.parent,
+                              selected.core_path.parent} for p in folder.rglob('*') if p.is_file()}
+    bound = set()
+
+    def pins(value):
+        if isinstance(value, dict):
+            if isinstance(value.get('path'), str):
+                bound.add(Path(value['path']).resolve())
+            for child in value.values():
+                pins(child)
+        elif isinstance(value, list):
+            for child in value:
+                pins(child)
+
+    for path in paths:
+        if path == journal.journal_path(selected):
+            bound.add(path.resolve())
+            for event in journal._events(selected):
+                pins(event['payload'].get('outputs', []))
+            continue
+        try:
+            value = yaml.safe_load(path.read_bytes())
+        except (ValueError, UnicodeError, yaml.YAMLError):
+            continue
+        if not isinstance(value, dict):
+            continue
+        owner = value.get('identity', value.get('run_identity', value.get('run')))
+        if value.get('format') == 'source_heading_completed_v1':
+            owner = value['selection']['run']
+        if not isinstance(owner, dict) or not ledger.record_matches(selected, owner):
+            continue
+        bound.add(path.resolve())
+        for key in ('outputs', 'snapshots', 'intermediates'):
+            pins(value.get(key))
+        pins(value.get('validation', {}).get('artifacts'))
+        pins(value.get('companions', {}).get('reasoning_log'))
+        pins(value.get('receipts', {}).get('artifacts', {}).get('receipt'))
+    missing = sorted(str(p) for p in paths if p.resolve() not in bound)
+    (tmp_path / 'writer-census.json').write_text(json.dumps({
+        'files': sorted(map(str, paths)), 'count': len(paths), 'unbound': missing}, indent=2))
+    assert not missing, missing
+    foreign_selection = replace(selected, label='writer-census-other-label')
+    assert journal.owned_artifacts(foreign_selection) == []
+
+
 def assert_singletons_refuse(selected, artifacts, tmp_path):
     assert artifacts
     (tmp_path / "artifact-census.json").write_text(json.dumps({
@@ -104,6 +156,7 @@ def test_every_emitted_artifact_alone_refuses(controller, external, tmp_path, dr
     import yaml
     record = yaml.safe_load(selected.provenance_path.read_bytes())
     assert result["checks"]["record_age"] == canary.checks_from_record(record)["record_age"]
+    assert_writer_completeness(selected, tmp_path)
     removed = {ledger.ledger_path(selected), journal.journal_path(selected),
                api._progress_path(selected), selected.provenance_path}
     artifacts = {str(p.relative_to(selected.metadata_dir)): p.read_bytes()
