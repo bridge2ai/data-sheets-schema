@@ -34,10 +34,18 @@ def save(path, data):
     assert path.read_bytes() == raw
 
 
-def archive(ref, dest):
+def archive(ref, dest, *, refresh=False):
     commit = git('rev-parse', ref).decode().strip()
-    dest.mkdir(parents=True, exist_ok=False)
-    producer = subprocess.Popen(['git', 'archive', commit], cwd=ROOT, env=ENV, stdout=subprocess.PIPE)
+    paths = []
+    if refresh:
+        previous = json.loads((dest / '.g2-archive.json').read_bytes())['commit']
+        changes = git('diff', '--name-status', previous, commit).decode().splitlines()
+        assert all(row.startswith(('A\t', 'M\t')) for row in changes), 'refresh refuses deletions/renames'
+        paths = [row.split('\t')[1] for row in changes]
+        paths += ['src/data_sheets_schema/shared_generation.py']
+    else:
+        dest.mkdir(parents=True, exist_ok=False)
+    producer = subprocess.Popen(['git', 'archive', commit, *paths], cwd=ROOT, env=ENV, stdout=subprocess.PIPE)
     unpack = subprocess.run(['tar', '-x', '-C', str(dest)], stdin=producer.stdout, check=False)
     producer.stdout.close()
     assert producer.wait() == 0 and unpack.returncode == 0
@@ -45,10 +53,11 @@ def archive(ref, dest):
     # Initialize the already available, exact CI submodule from local objects only.
     subref = git('ls-tree', commit, 'fairscape_models').decode().split()[2]
     local = ROOT.parent.parent / 'data-sheets-schema/fairscape_models'
-    producer = subprocess.Popen(['git', 'archive', subref], cwd=local, env=ENV, stdout=subprocess.PIPE)
-    unpack = subprocess.run(['tar', '-x', '-C', str(dest / 'fairscape_models')], stdin=producer.stdout, check=False)
-    producer.stdout.close()
-    assert producer.wait() == 0 and unpack.returncode == 0
+    if not refresh:
+        producer = subprocess.Popen(['git', 'archive', subref], cwd=local, env=ENV, stdout=subprocess.PIPE)
+        unpack = subprocess.run(['tar', '-x', '-C', str(dest / 'fairscape_models')], stdin=producer.stdout, check=False)
+        producer.stdout.close()
+        assert producer.wait() == 0 and unpack.returncode == 0
     save(dest / '.g2-archive.json', {'commit': commit, 'fairscape_models': subref})
     print(commit, dest, flush=True)
 
@@ -116,9 +125,10 @@ if __name__ == '__main__':
     parser.add_argument('action', choices=['archive', 'proposal', 'compare'])
     parser.add_argument('path', type=Path)
     parser.add_argument('--ref', default='HEAD')
+    parser.add_argument('--refresh', action='store_true')
     args = parser.parse_args()
     if args.action == 'archive':
-        archive(args.ref, args.path.resolve())
+        archive(args.ref, args.path.resolve(), refresh=args.refresh)
     elif args.action == 'proposal':
         proposal(args.path)
     else:

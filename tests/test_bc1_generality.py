@@ -22,7 +22,8 @@ def synthetic(sizing_fixture):
         path.write_bytes(path.read_bytes().replace(b"KIDS_FIRST", project.encode()).replace(
             b"# Arm: de novo", ("# Arm: " + builder.ARMS["baseline"][0]).encode()))
     manifest = Path(registration["inputs"]["source_manifest"]["path"])
-    manifest.write_text(yaml.safe_dump({"profile": "neutral", "projects": {project: {"sources": []}}}))
+    manifest.write_text(yaml.safe_dump({"profile": "neutral", "projects": {project: {"sources": [
+        {"id": "source", "processed_file": "source.txt", "source_type": "documentation"}]}}}))
     registration["inputs"]["source_manifest"] = sizing._pin(manifest, manifest.read_bytes())
     return registration, files, inputs, manifest
 

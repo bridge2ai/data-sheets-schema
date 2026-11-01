@@ -24,7 +24,8 @@ def sizing_fixture(context_fixture, tmp_path):
         path.write_bytes(inputs[key])
         pins[name] = reg._pin(path, inputs[key])
     manifest = tmp_path / "source_manifest.yaml"
-    manifest.write_bytes(reg._raw({"projects": {name: {"sources": []} for name in
+    manifest.write_bytes(reg._raw({"projects": {name: {"sources": [
+        {"id": "source", "processed_file": "source.txt", "source_type": "documentation"}]} for name in
         ("KIDS_FIRST", "CHORUS", "AI_READI", "CM4AI", "VOICE", "VOICE_PEDIATRIC", "SYNTHETIC")}}))
     pins["source_manifest"] = reg._pin(manifest, manifest.read_bytes())
     pins["core_schema"] = deepcopy(pins["full_schema"])
