@@ -8,6 +8,7 @@ from copy import copy
 from pathlib import Path
 import os
 import json
+import re
 
 import pytest
 
@@ -29,6 +30,18 @@ def assert_writer_completeness(selected, tmp_path):
     paths = {p for folder in {selected.metadata_dir, selected.full_path.parent,
                               selected.core_path.parent} for p in folder.rglob('*') if p.is_file()}
     bound = set()
+    # Derive independently from writer destinations, not ownership helpers or
+    # the file's suffix. A new writer cannot authorize itself with run_identity.
+    canonical = {selected.provenance_path.resolve(), ledger.ledger_path(selected).resolve(),
+        (selected.metadata_dir / 'intermediate' / f'{selected.project}_snapshot_index.json').resolve(),
+        (selected.metadata_dir / f'{selected.project}_routing_completed.json').resolve()}
+    archive_stems = {ledger.ledger_path(selected).resolve().with_suffix(''),
+        (selected.metadata_dir / 'intermediate' / f'{selected.project}_snapshot_index').resolve()}
+
+    def canonical_record(path):
+        resolved = path.resolve()
+        return resolved in canonical or any(resolved.parent == stem.parent and re.fullmatch(
+            re.escape(stem.name) + r'\.previous-[0-9a-f]{32}\.json', resolved.name) for stem in archive_stems)
 
     def pins(value):
         if isinstance(value, dict):
@@ -55,7 +68,10 @@ def assert_writer_completeness(selected, tmp_path):
         owner = value.get('identity', value.get('run_identity', value.get('run')))
         if value.get('format') == 'source_heading_completed_v1':
             owner = value['selection']['run']
-        if not isinstance(owner, dict) or not ledger.record_matches(selected, owner):
+        if not isinstance(owner, dict) or any(owner.get(key) != value
+                for key, value in ledger.run_identity(selected).items()):
+            continue
+        if not canonical_record(path):
             continue
         bound.add(path.resolve())
         for key in ('outputs', 'snapshots', 'intermediates'):

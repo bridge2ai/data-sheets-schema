@@ -220,9 +220,9 @@ def test_foreign_references_are_not_output_bindings(tmp_path, binding):
         record["companion"] = {binding: str(path) if binding == "path" else
                                hashlib.new(binding, path.read_bytes()).hexdigest()}
     foreign.provenance_path.write_text(yaml.safe_dump(record))
-    # Only the embedded writer identity applies to this file. The arbitrary
-    # companion path/hash references were never production output bindings.
-    retained = [] if binding == "identity" else [str(path)]
+    # An embedded identity at an unknown writer's address is not authority
+    # either. The canonical provenance still cannot vouch for these references.
+    retained = [str(path)]
     assert journal._legacy_evidence(selected) == retained
     orphan = tmp_path / "P_other_future_writer.bin"
     orphan.write_bytes(b"independent unowned artifact")

@@ -19,6 +19,7 @@ class UsageLedgerError(OSError):
 
 
 _NEW_HELD_LOCKS = ContextVar("new_held_output_locks", default=())
+_LAUNCH_RECOVERY = ContextVar("output_launch_recovery", default=None)
 
 
 def is_new_held_lock(path):
@@ -58,29 +59,58 @@ def exclusive_outputs(paths):
     # metadata elsewhere. Lock the actual files, including resolved aliases,
     # in one order so partial overlap cannot bypass output ownership (#1298).
     held = []
+    created_paths = set()
+    pairs = output_locks(paths)
     token = _NEW_HELD_LOCKS.set(_NEW_HELD_LOCKS.get())
+
+    def acquire(output, path):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        created = False
+        try:
+            descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        except FileExistsError:
+            pass
+        else:
+            created_paths.add(path)
+            os.close(descriptor)
+            created = True
+        lock = FileLock(path, timeout=0)
+        held.append(lock)  # Retain even an acquire that raises after locking.
+        try:
+            lock.acquire()
+        except Timeout as exc:
+            raise UsageLedgerError(f"an API run is already active for {output}; "
+                                   "retry after it finishes") from exc
+        if created:
+            info = path.lstat()
+            _NEW_HELD_LOCKS.set((*_NEW_HELD_LOCKS.get(), (
+                path.absolute(), (info.st_dev, info.st_ino, info.st_mtime_ns))))
+
     try:
-        for output, path in output_locks(paths):
-            path.parent.mkdir(parents=True, exist_ok=True)
-            created = False
-            try:
-                descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-            except FileExistsError:
-                pass
-            else:
-                os.close(descriptor)
-                created = True
-            lock = FileLock(path, timeout=0)
-            try:
-                lock.acquire()
-            except Timeout as exc:
-                raise UsageLedgerError(f"an API run is already active for {output}; "
-                                       "retry after it finishes") from exc
-            held.append(lock)
-            if created:
-                info = path.lstat()
-                _NEW_HELD_LOCKS.set((*_NEW_HELD_LOCKS.get(), (
-                    path.absolute(), (info.st_dev, info.st_ino, info.st_mtime_ns))))
+        # Probe all pre-existing inodes before introducing a new sidecar. In
+        # particular, partial overlap must not strand a contender's unique lock.
+        ordered = sorted(pairs, key=lambda item: not (item[1].exists() or item[1].is_symlink()))
+        try:
+            for output, path in ordered:
+                acquire(output, path)
+        except Exception as exc:
+            recovery = _LAUNCH_RECOVERY.get()
+            if created_paths and recovery is not None and recovery[0] == pairs:
+                try:
+                    # One bounded recovery attempt, still holding every acquired
+                    # inode. Never unlink or replace any coordination sidecar.
+                    locked = {Path(lock.lock_file) for lock in held if lock.is_locked}
+                    for output, path in ordered:
+                        if path not in locked:
+                            acquire(output, path)
+                    recovery[1]()
+                    exc._d4d_resume_head = recovery[2]()
+                except Exception as failed_recovery:
+                    exc._d4d_unbound_launch = True
+                    if hasattr(exc, 'add_note'):
+                        exc.add_note('Launch ownership could not be durably established: '
+                                     + str(failed_recovery))
+            raise
         yield
     finally:
         _NEW_HELD_LOCKS.reset(token)

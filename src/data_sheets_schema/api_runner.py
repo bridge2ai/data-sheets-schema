@@ -6937,7 +6937,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     if spec.native_source_attribution_version:
         raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
 
-    from .latch_journal import launch_record, refuse_legacy_execution, require_launch_head
+    from .latch_journal import guarded_launch, refuse_legacy_execution, require_launch_head
     refuse_legacy_execution(spec)  # D68: refuse before even sidecar lock writes.
     if getattr(spec, 'shared_generation_version', 0):
         from .shared_generation import assert_current
@@ -6947,7 +6947,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     _refuse_shared_no_resume(spec, resume)
     require_launch_head(spec, expect_journal_head_sha256)
     _, client = _startup_checks(spec, client)
-    with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256, initialize=True):
+    with guarded_launch(spec, expect_journal_head_sha256, _exclusive_run):
         if getattr(spec, 'shared_generation_version', 0):
             # Another sequential writer may have changed ownership while we waited.
             require_selected_resume_owner(spec, resume=resume)

@@ -119,16 +119,58 @@ replaced locks are never excused by this startup scope distinction. A new
 identity sharing old unattributed sidecar locks may therefore require a new
 output directory, even when another identity's provenance is guarded.
 
-Round 4 makes startup checks (schema sync, model settings/header binding,
-shared preflight and client construction/validation) precede all lock writes.
-Immediately after acquisition, the first identity-bearing launch event binds
-the four sidecars as regular empty files. A failure after that event prints
-its stop head; retry with that externally retained head, as for any guarded
-resume (D57). A startup failure before locks writes no event and needs no new
-head. The batch's re-run advice therefore applies to both cases. SIGKILL
-between lock creation and the first durable event remains a window: without
-positive ownership those locks are inspection-only residue. Do not delete them
-to force a resume; use the new-location remedy above.
+Startup checks (schema sync, model settings/header binding, shared preflight
+and client construction/validation) precede all lock writes. Existing sidecars
+are acquired before creating new ones, so ordinary contention at an existing
+shared output leaves no new sidecar. All four acquired sidecars are bound by a
+durable launch event before accounting. A pre-round-4 guarded identity without
+that event binds its current sidecars at its next launch or resume.
+
+After a partial acquisition error, one bounded recovery attempt acquires the
+remaining locks and binds the sidecars while every acquired inode remains held.
+A transient head-read, sidecar-read or launch-write failure is retried under
+those locks. An interrupted launch append can complete only a prefix of that
+exact intended event after the unchanged verified history; it cannot truncate,
+rechain or adopt other bytes. The original exception is still raised. A
+successfully persisted launch prints its stop head, and the batch prints the
+exact `--expect-journal-head PROJECT LABEL HEAD` option. Retain that head
+outside the run directory. D57 applies to both resume modes; the batch itself
+uses the default resume mode. A pre-lock failure creates no event.
+
+The remaining interval is **first sidecar creation through successful durable
+launch publication**, including recovery. SIGKILL/process loss, persistent I/O
+or fsync failure, or contention racing creation that prevents acquiring the
+remaining locks can leave unbound sidecars. Changed/malformed history, an
+in-lock stale or mismatched external head, replaced sidecars, or unrelated
+bytes in an interrupted append are safety refusals, not permission to bind
+those files. No trusted stop anchor is issued when publication cannot be
+established. If a durable head could not be delivered to the external monitor
+(for example stderr failed), D57 still requires external reconciliation rather
+than automatically adopting a head read from the directory. Keep the files
+and sidecars for inspection; never unlink a
+possibly opened/held inode. Use a new output directory for flat output, or a
+new label for split output. Blindly repeating the same location is not a
+recovery for that residual window.
+
+Ownership pins are grouped per guarded owner and actual filesystem object.
+Together they must contain a non-null SHA-256 or MD5, and every supplied
+constraint must match. Path/byte-count descriptions alone, `present: false`,
+`exists: false`, missing-value sentinels and null digests cannot vouch for a
+present file. NFC-normalized, casefolded names gather candidates; attribution
+requires an exact canonical address or equal `lstat` device/inode values.
+Equal bytes at distinct casefold-equivalent files are still residue.
+
+Provenance, snapshot indexes and their archives, usage ledgers and their
+archives, and routing-completed records supply output bindings only at the
+runner-derived addresses for their embedded guarded identity. A record at an
+arbitrary matching suffix is residue and cannot authorize itself or another
+file. The independent writer census enforces the same address boundary.
+At **canonical** addresses an unguarded, parseable edit that retains the
+identity is still attributed: `backfill-checks`, `recheck-validation` and
+`review disposition --amend` legitimately rewrite these records after a run.
+Round 5 does not add a usage-ledger SHA-256 pin to the journal. These mutable
+record bytes are not authenticated; D57 separately anchors admission to the
+selected journal. Output pins they contain must still match current artifacts.
 
 The writer-completeness census checks every persistent artifact of each real
 controller against its output records and checks attribution from another

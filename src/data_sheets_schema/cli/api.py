@@ -1361,7 +1361,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                 canary_stop = _canary_never_ran(
                     s, canary_baseline, f"it raised {type(exc).__name__}")
             if not continue_on_error:
-                click.echo("stopping; re-run to resume unfinished phases", err=True)
+                from data_sheets_schema.latch_journal import failure_advice
+                click.echo(failure_advice(s, exc), err=True)
                 break
         if canary_stop:
             break
