@@ -198,6 +198,14 @@ def test_unpinned_profile_uses_neutral_checks_independent_of_name(fixture, name)
     om.prepare(**inputs, term_policy=derived)
 
 
+@pytest.mark.parametrize("name", [None, "", " ", 3])
+def test_profile_authority_still_requires_a_nonempty_name(fixture, name):
+    selection, _ = fixture
+    selection["inputs"]["profile"]["name"] = name
+    with pytest.raises(ValueError, match="explicit captured profile"):
+        policy(fixture)
+
+
 @pytest.mark.parametrize("annotation", [
     "EDAM Data, EDAM Format, IANA media types",
     "EDAM Data; EDAM Format and IANA media types",

@@ -88,7 +88,9 @@ def derive_term_policy(*, selection: dict, context_raw: bytes, schema_snapshot) 
         raise ValueError("BC1 context requires explicit bounded_carry.version 1")
     inputs = selection.get("inputs", {})
     profile = inputs.get("profile", {})
-    if set(profile) != {"name", "basis", "vocabulary"} or not isinstance(profile["basis"], str) or not profile["basis"].strip():
+    if (set(profile) != {"name", "basis", "vocabulary"}
+            or not isinstance(profile["name"], str) or not profile["name"].strip()
+            or not isinstance(profile["basis"], str) or not profile["basis"].strip()):
         raise ValueError("BC1 requires the explicit captured profile authority")
     pin = inputs.get("context", {})
     if pin.get("sha256") != _sha(context_raw) or pin.get("bytes") != len(context_raw):
@@ -127,6 +129,7 @@ def validate_term_policy(policy: dict, *, catalog: dict, context: dict) -> None:
         raise ValueError("invalid BC1 term policy")
     profile = policy["profile"]
     if (type(profile) is not dict or set(profile) != {"name", "basis", "vocabulary"}
+            or not isinstance(profile["name"], str) or not profile["name"].strip()
             or profile["vocabulary"] is not None
             or not isinstance(profile["basis"], str) or not profile["basis"].strip()
             or context.get("vocabulary") != {}):

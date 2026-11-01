@@ -114,3 +114,8 @@ def test_partition_declaration_controls_choices_and_calibration_exemption(sizing
     files.full.write_bytes(files.full.read_bytes() + b"\n")
     with pytest.raises(ValueError, match="pin changed"):
         builder.profile_covered("SYNTHETIC", "baseline", limits, **options)
+    files.full.write_bytes(files.full.read_bytes().replace(b"SYNTHETIC", b"OTHER"))
+    declaration["sizing_record"]["full"] = sizing._pin(files.full, files.full.read_bytes())
+    save(declaration)
+    with pytest.raises(ValueError, match="own project/arm"):
+        builder.profile_covered("SYNTHETIC", "baseline", limits, **options)

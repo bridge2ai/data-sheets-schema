@@ -217,6 +217,11 @@ def partition_profiles(source_manifest: Path | None = None) -> dict[str, dict[st
             raw = path.read_bytes()
             if hashlib.sha256(raw).hexdigest() != pin["sha256"] or len(raw) != pin["bytes"]:
                 raise ValueError(f"{project}: audit partition sizing record pin changed: {path}")
+            if key in ("full", "core"):
+                from data_sheets_schema.bc1_registration import _own_record
+                if any(not _own_record(project, ARMS[arm][0], raw, core=key == "core")
+                       for arm in profile["arms"]):
+                    raise ValueError(f"{project}: audit partition sizing record is not its own project/arm: {path}")
         name = profile.pop("name")
         if name in profiles:
             raise ValueError(f"duplicate audit partition name {name!r} in {registry.path}")
