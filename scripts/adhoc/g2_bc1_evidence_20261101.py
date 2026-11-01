@@ -216,6 +216,10 @@ def compare(root, *, identity_pin_ruling=False):
         for name in changed_code:
             for capture, pins in ((before, code_before), (after, code_after)):
                 assert capture['source_pins'][str(root / name)]['sha256'] == pins[name]
+        assert before['source_pins'].keys() == after['source_pins'].keys()
+        for path, value in before['source_pins'].items():
+            if path not in {str(root / name) for name in changed_code}:
+                assert after['source_pins'][path] == value, (path, 'non-code source pin changed')
         # Registration movement must be fully explained by those exact code pins.
         registration_delta = ns['differences'](reg_before, reg_after)
         assert {leaf['path'] for leaf in registration_delta} == {
