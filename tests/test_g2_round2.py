@@ -54,6 +54,8 @@ def calibration_case(sizing_fixture, tmp_path, monkeypatch, project):
     root = tmp_path / "calibration-root"
     (root / "config").mkdir(parents=True)
     (root / "src").symlink_to(builder.ROOT / "src", target_is_directory=True)
+    (root / ".github").symlink_to(builder.ROOT / ".github", target_is_directory=True)
+    (root / ".claude").symlink_to(builder.ROOT / ".claude", target_is_directory=True)
     (root / "pyproject.toml").write_bytes((builder.ROOT / "pyproject.toml").read_bytes())
     config = root / "config/audit_partitions.yaml"
     save(config, {"projects": {}})

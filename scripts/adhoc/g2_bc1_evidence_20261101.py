@@ -133,7 +133,7 @@ def compare(root, *, identity_pin_ruling=False):
     assert before['payloads'].keys() == after['payloads'].keys()
     assert before['audit_limits'] == after['audit_limits'] and before['calibration'] == after['calibration']
     assert before['python'] == after['python'] and before['packages'] == after['packages']
-    bindings = []
+    bindings, packets = [], {}
     for side, capture in (('before', before), ('after', after)):
         registration_raw = (evidence / side / 'registration.json').read_bytes()
         assert capture['registration_sha256'] == sha(registration_raw), (side, 'registration metadata')
@@ -158,6 +158,7 @@ def compare(root, *, identity_pin_ruling=False):
                 assert inner['payload']['packet_sha256'] == binding['packet_sha256'], (side, name, 'packet binding')
             verified = ['registration bytes', 'content/6 inner request bytes']
             unavailable = []
+            assert 'host_packet' in metadata and 'host_request' in metadata, (side, name, 'host evidence required')
             def captured_object(key):
                 pin = metadata[key]
                 raw = (root / pin['path']).read_bytes()
@@ -167,6 +168,9 @@ def compare(root, *, identity_pin_ruling=False):
                 packet = captured_object('host_packet')
                 assert packet['sha256'] == sha(ns['canon']({k: v for k, v in packet.items() if k != 'sha256'}))
                 assert binding['packet_sha256'] == packet['sha256'], (side, name, 'captured packet')
+                if side in packets:
+                    assert packets[side] == packet, (side, 'different captured packets')
+                packets[side] = packet
                 verified.append('captured packet seal')
             else:
                 unavailable.append('packet seal: complete host packet not captured')
@@ -182,6 +186,10 @@ def compare(root, *, identity_pin_ruling=False):
                     unavailable.append('request_sha256: complete host request not captured; content/6 is its projection')
             else:
                 verified.append('no request_sha256 field in transmitted object')
+            from data_sheets_schema.bc1_context import model_request
+            request = captured_object('host_request')
+            assert model_request(request, content[3]['text']) == inner, (side, name, 'host-to-model projection')
+            verified.append('exact host-to-model projection')
             bindings.append({'side': side, 'name': name, 'verified': verified, 'unverified': unavailable})
         assert len(packet_digests) <= 1, (side, 'multiple packet bindings in one capture')
     rows = []
@@ -198,7 +206,7 @@ def compare(root, *, identity_pin_ruling=False):
             'before_bytes': len(a), 'after_bytes': len(b), 'identical': a == b, 'differences': leaves})
     sizing_totals_equal = before['sizing_totals'] == after['sizing_totals']
     accepted = all(r['identical'] for r in rows) and sizing_totals_equal
-    ruling = None
+    ruling, packet_delta = None, []
     if identity_pin_ruling:
         allowed = {
             'payload/messages/0/content/5/text/@json/' + key
@@ -225,6 +233,16 @@ def compare(root, *, identity_pin_ruling=False):
         registration_delta = ns['differences'](reg_before, reg_after)
         assert {leaf['path'] for leaf in registration_delta} == {
             'payload/bounded_carry/contract/code/' + name for name in changed_code}
+        if packets:
+            assert set(packets) == {'before', 'after'}, 'both host packets required'
+            packet_delta = ns['differences'](packets['before'], packets['after'], 'packet')
+            assert {leaf['path'] for leaf in packet_delta} == {'packet/sha256', *(
+                'packet/selection/bounded_carry/contract/code/' + name for name in changed_code)}, 'host packet non-pin change'
+            for side, pins in (('before', code_before), ('after', code_after)):
+                assert packets[side]['selection']['bounded_carry']['contract']['code'] == pins
+            assert all(leaf['delta'] == 0 and isinstance(leaf['before'], str) and isinstance(leaf['after'], str)
+                       and re.fullmatch('[0-9a-f]{64}', leaf['before'])
+                       and re.fullmatch('[0-9a-f]{64}', leaf['after']) for leaf in packet_delta)
         accepted = sizing_totals_equal and all(row['before_bytes'] == row['after_bytes'] and all(
             leaf['path'] in allowed and leaf['kind'] == 'pins' and leaf['delta'] == 0
             and isinstance(leaf['before'], str) and isinstance(leaf['after'], str)
@@ -236,7 +254,7 @@ def compare(root, *, identity_pin_ruling=False):
                              for name in sorted(changed_code)},
             'allowed_paths': sorted(allowed), 'registration_delta': registration_delta}
     save(evidence / 'g2-exact-comparison.json', {'rows': rows, 'identical': all(r['identical'] for r in rows),
-        'accepted': accepted, 'binding_checks': bindings,
+        'accepted': accepted, 'binding_checks': bindings, 'host_packet_delta': packet_delta,
         'identity_pin_ruling': ruling,
         'audit_limits_before': before['audit_limits'], 'audit_limits_after': after['audit_limits'],
         'sizing_totals_equal': sizing_totals_equal,

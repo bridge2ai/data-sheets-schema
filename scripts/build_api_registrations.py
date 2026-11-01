@@ -187,8 +187,10 @@ def partition_profiles(source_manifest: Path | None = None, *, root_dir: Path | 
     """Read one unambiguous declaration per selected project and partition.
 
     The separate default file preserves historical manifest/bundle identities.
-    A manifest may instead declare projects.<P>.audit_partition. Calibration is
-    earned separately by parsing and sizing its pinned full/core/receipt.
+    A manifest may instead declare projects.<P>.audit_partition for bounds only.
+    Inline declarations never earn coverage: their source_manifest_sha256 would
+    need to hash the containing file, including that very digest. External
+    calibration is earned by parsing, binding and sizing its pinned inputs.
     """
     from data_sheets_schema.schema_cache import load_yaml
     root = Path(root_dir or ROOT).resolve()
@@ -223,7 +225,7 @@ def partition_profiles(source_manifest: Path | None = None, *, root_dir: Path | 
             continue
         profile = copy.deepcopy(row["audit_partition"])
         if (not isinstance(profile, dict)
-                or set(profile) - {"source_manifest_sha256"} != {"name", "arms", "limits", "sizing_record"}
+                or set(profile) - {"source_manifest_sha256", "calibration_bundle"} != {"name", "arms", "limits", "sizing_record"}
                 or not isinstance(profile["name"], str) or not profile["name"].strip()
                 or not isinstance(profile["arms"], list) or not profile["arms"]
                 or any(not isinstance(arm, str) or arm not in ARMS for arm in profile["arms"])
@@ -236,7 +238,11 @@ def partition_profiles(source_manifest: Path | None = None, *, root_dir: Path | 
         manifest_sha = profile.get("source_manifest_sha256")
         if manifest_sha is not None and (not isinstance(manifest_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", manifest_sha)):
             raise ValueError(f"{project}: invalid source_manifest_sha256 in {origin}")
-        for key, pin in profile["sizing_record"].items():
+        historical = profile.get("calibration_bundle", {})
+        if "calibration_bundle" in profile and (not isinstance(historical, dict)
+                or set(historical) != {"bundle", "chunk_manifest"}):
+            raise ValueError(f"{project}: invalid calibration_bundle in {origin}")
+        for key, pin in {**profile["sizing_record"], **historical}.items():
             if (not isinstance(pin, dict) or set(pin) != {"path", "sha256", "bytes"}
                     or not isinstance(pin["path"], str) or not pin["path"]
                     or not isinstance(pin["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", pin["sha256"])
@@ -384,7 +390,8 @@ def _calibration_covered(profile: dict, project: str, arm: str, *, source_manife
 
     Historical records need not validate against today's schema. They must be
     parseable records of the declared project/arm and a structured coverage
-    receipt. The existing estimator retains its historical owner allowance.
+    receipt bound to the current bundle/chunks, or to an explicitly pinned
+    historical calibration bundle. Explicit historical sizing stays permissive.
     """
     from data_sheets_schema import audit_omissions as omissions, receipts
     root = Path(root_dir or ROOT).resolve()
@@ -408,7 +415,7 @@ def _calibration_covered(profile: dict, project: str, arm: str, *, source_manife
         if registration is None:
             # Explicit sizing avoids recursion through profile_covered. This is
             # preparation only: it neither writes nor uses a token endpoint.
-            _, _, sizing = prepare_registration(project, "partition-calibration", arm=arm,
+            registration, _, sizing = prepare_registration(project, "partition-calibration", arm=arm,
                 source_manifest_path=manifest, audit_limits=expected, sizing_record=files,
                 registration_path=root / "partition-calibration.json",
                 worktree=root if root != ROOT else None)
@@ -426,9 +433,20 @@ def _calibration_covered(profile: dict, project: str, arm: str, *, source_manife
                 return False
             sizing = size_typed_audit_input(project, expected, registration, sizing_record=files,
                 context=Path(inputs["context"]["path"]).read_bytes(), schema_snapshot=snapshot)
-        return (sizing["aggregate_input_tokens"] <= expected["aggregate_input_tokens"]
-                and all(sizing[f"{stage}_input_tokens"] <= room
-                        for stage, room in _admissible_input_tokens(expected).items()))
+        # Historical sizing deliberately accepts foreign receipts to estimate
+        # their bytes. An implicit exemption additionally needs bundle identity.
+        from data_sheets_schema.chunking import validate_manifest_mapping
+        credited = profile.get("calibration_bundle", registration["inputs"])
+        for key in ("bundle", "chunk_manifest"):
+            if sg.file_pin(Path(credited[key]["path"])) != credited[key]:
+                return False
+        bundle = Path(credited["bundle"]["path"]).read_bytes()
+        chunks = yaml.safe_load(Path(credited["chunk_manifest"]["path"]).read_bytes())
+        validate_manifest_mapping(chunks, bundle, chunks["bundle"])
+        if (md5 != hashlib.md5(bundle).hexdigest()
+                or {entry["id"] for entry in entries} != set(receipts._manifest_ids(chunks))):
+            return False
+        return not _sizing_excesses(sizing, expected)
     except (OSError, ValueError, yaml.YAMLError, KeyError, TypeError):
         # Missing/malformed captured inputs cannot earn an exemption. The
         # caller must still supply and pass the ordinary sizing-record gate.
@@ -562,6 +580,17 @@ def _admissible_input_tokens(limits: dict[str, Any]) -> dict[str, int]:
             for stage in SIZING_STAGES}
 
 
+def _sizing_excesses(sizing: dict[str, Any], limits: dict[str, Any]) -> dict[str, tuple[int, int]]:
+    """One fits predicate for preparation, sidecar checks and calibration.
+
+    Empty means admitted; otherwise retain need/room pairs for diagnostics.
+    Stage order precedes aggregate, preserving preparation's first refusal.
+    """
+    rooms = {**_admissible_input_tokens(limits), "aggregate": limits["aggregate_input_tokens"]}
+    return {stage: (sizing[f"{stage}_input_tokens"], room) for stage, room in rooms.items()
+            if sizing[f"{stage}_input_tokens"] > room}
+
+
 def check_registration_sizing(registration_path: Path | str, raw: bytes, *, root_dir: Path | None = None) -> dict[str, Any] | None:
     """The sizing record beside a registration, checked against its bytes.
 
@@ -598,9 +627,7 @@ def check_registration_sizing(registration_path: Path | str, raw: bytes, *, root
     if (not isinstance(sizing, dict) or record.get("format") != SIZING_RECORD_FORMAT
             or record.get("registration_sha256") != hashlib.sha256(raw).hexdigest()):
         raise ValueError(f"{path}: is not the sizing record of these registration bytes")
-    if (sizing["aggregate_input_tokens"] > limits["aggregate_input_tokens"]
-            or any(sizing[f"{stage}_input_tokens"] > room
-                   for stage, room in _admissible_input_tokens(limits).items())):
+    if _sizing_excesses(sizing, limits):
         raise ValueError(f"{path}: its sizing does not admit the registered limits")
     return record
 
@@ -1302,9 +1329,10 @@ def prepare_registration(
         # call that cannot fit is refused after every earlier stage is billed.
         # Integration is judged at the record's own plan with responses at
         # 10-22a's mean use of their caps; its worst case is only warned.
+        excesses = _sizing_excesses(sizing, active_audit_limits)
         for stage in SIZING_STAGES:
-            need, room = sizing[f"{stage}_input_tokens"], sizing["admissible_input_tokens"][stage]
-            if need > room:
+            if stage in excesses:
+                need, room = excesses[stage]
                 detail = (f" for its own plan ({sizing['plan_workers']} worker responses and the omission's at "
                           f"10-22a's mean use of their caps; {sizing['integration_base_input_tokens']:,} without them)"
                           if stage == "integration" else "")
@@ -1316,7 +1344,7 @@ def prepare_registration(
                     f"{active_audit_limits['max_input_tokens_per_call']:,}. The runtime would refuse it only on "
                     f"reaching it, after billing every earlier stage (#5155)"
                 )
-        if active_audit_limits["aggregate_input_tokens"] < sizing["aggregate_input_tokens"]:
+        if "aggregate" in excesses:
             raise ValueError(
                 f"{project}: aggregate_input_tokens {active_audit_limits['aggregate_input_tokens']:,} is below the "
                 f"typed-audit input sized on {sizing_record.full}: {sizing['max_workers']} workers x "
