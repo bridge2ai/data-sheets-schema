@@ -6954,7 +6954,6 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     """
     if spec._replay_only:
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
-    _require_registered_input_spellings(spec)
     if dry_run:
         return plan(spec)
     if spec.render_version in (24,):  # membership is also derived by the execution-policy audit
@@ -6966,6 +6965,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     if spec.native_source_attribution_version:
         raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
 
+    # Historical/offline refusals precede newer fields; executable specs still
+    # require their construction binding before authority checks or side effects.
+    _require_registered_input_spellings(spec)
     if getattr(spec, 'shared_generation_version', 0):
         from .shared_generation import assert_current
         from .output_ownership import require_selected_resume_owner
