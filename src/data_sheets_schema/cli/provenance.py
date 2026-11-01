@@ -659,6 +659,35 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 **({"run_date": candidate_date} if candidate_date else {}),
             )
 
+        def _candidate_specs(candidate_date: str | None):
+            current = _make_run_spec(candidate_date)
+            yield current
+            # Recording may happen at the corpus root after rendering in a
+            # subdirectory. Keep the current CLI spelling first, then replay
+            # the supplied input spelling. Only the complete instruction SHA
+            # can admit this alternative; no input bytes or hashes are changed.
+            literal = current.render_spec()
+            literal.update(
+                bundle=str(bundle) if bundle is not None else None,
+                manifest=str(selected_manifest) if selected_manifest is not None else None,
+            )
+            if chunk_manifest is not None:
+                literal["chunk_manifest"] = str(chunk_manifest)
+            if _ARMS[arm][3] == RunSpec.__dataclass_fields__["manifest_line"].default:
+                literal["manifest_line"] = RunSpec.header_for_manifest(selected_manifest)
+            discovered = literal.get("chunk_manifest")
+            # With discovery, the nested renderer froze an absolute chunk
+            # locator too. Try only its one known-owner lexical counterpart,
+            # never a filesystem search; both candidates remain SHA-gated.
+            chunk_spellings = (_backfill_input_spellings(
+                Path(discovered) if discovered is not None else None, current._corpus_root)
+                if chunk_manifest is None else (Path(chunk_manifest),))
+            for candidate_chunk in chunk_spellings:
+                candidate = {**literal, "chunk_manifest": str(candidate_chunk)
+                             if candidate_chunk is not None else None}
+                if candidate != current.render_spec():
+                    yield RunSpec.from_render_spec(candidate, project=project, method=method, label=label)
+
         target_sha = (hashlib.sha256(supplied_text.encode("utf-8")).hexdigest()
                       if supplied_text is not None else None)
 
@@ -672,8 +701,9 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             # rendered, as the search below checks its candidates (#5049
             # review, F9): a wrong one would fail the render gate as a
             # `mismatch` blamed on an unchanged prompt.
-            run_spec = _make_run_spec(run_date)
-            if not _reproduces(run_spec):
+            run_spec = next((candidate for candidate in _candidate_specs(run_date)
+                             if _reproduces(candidate)), None)
+            if run_spec is None:
                 raise click.ClickException(
                     f"--run-date {run_date} does not reproduce --prompt-text under --condition {condition}; "
                     "pass the date the instruction was rendered under, or omit --run-date to search for it")
@@ -704,13 +734,13 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             matched_spec: RunSpec | None = None
             render_error: Exception | None = None
             for cand_date in candidate_dates:
-                cand_spec = _make_run_spec(cand_date)
                 try:
-                    if _reproduces(cand_spec):
-                        matched_spec = cand_spec
-                        break
+                    matched_spec = next((candidate for candidate in _candidate_specs(cand_date)
+                                         if _reproduces(candidate)), None)
                 except Exception as exc:       # noqa: BLE001 — the same for every date
                     render_error = exc
+                    break
+                if matched_spec is not None:
                     break
             run_spec = matched_spec
             if matched_spec is None:
@@ -981,6 +1011,12 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
     def candidates():
         # Finish the entire original traversal before adding spelling alternatives.
         # This preserves historical first-match ordering and profile decisions.
+        # Three input axes have at most two spellings each: on a complete miss
+        # the second pass adds at most seven renders per original candidate.
+        # Malformed historical bundle values have no renderable candidate and
+        # retain the ordinary "no spec under ..." diagnostic below.
+        if not isinstance(bundle, str):
+            return
         for alternate in (False, True):
             for delta, version, selected_chunks, selected_manifest, selected_profile, selected_destinations, scoped in product(
                     (0, -1, 1, -2, 2), (8, 7, 6, 5, 4, 3, 2, 1), chunk_choices,

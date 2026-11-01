@@ -45,8 +45,10 @@ def _digest(value: Any, size: int) -> str | None:
 def _lexical_relative(root: Path, value: Any) -> Path | None:
     """Preserve owned paths; relocate only a unique foreign preprocessed tail.
 
-    Live reads and historical lookup use the same lexical name. Count pairs
-    before normalization so traversal cannot hide an ambiguous foreign tail.
+    Live reads and historical lookup use the same lexical name. Reject parent
+    traversal before normalization: collapsing a symlink followed by `..` can
+    select a different file, and its faithful historical Git name is unknown.
+    Count pairs before normalization so an ambiguous foreign tail stays unknown.
     This record-only policy is local; other provenance resolvers have different
     ownership context.
     """
@@ -54,6 +56,8 @@ def _lexical_relative(root: Path, value: Any) -> Path | None:
         return None
     try:
         raw = Path(value)
+        if ".." in raw.parts:
+            return None
         lexical = Path(os.path.abspath(root / raw))
         try:
             return lexical.relative_to(root)

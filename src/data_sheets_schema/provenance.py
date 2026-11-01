@@ -1608,6 +1608,27 @@ def _condition_claim(label: str, stated: str | None,
             "condition_basis": "no runner stated it, no prompt file names one, and the label names no registered condition"}
 
 
+def registered_input_paths(selection: dict[str, Any] | None) -> bool:
+    """Whether the selected protocol binds input spellings in a registration.
+
+    This is a spelling policy, not validation or permission to execute. The
+    protocol's ordinary registration/policy checks still validate its complete
+    authority. Native attribution prepares its registration from the selected
+    spec; native execution and the neutral supervisor replay that registration.
+    Older registration builders select the explicit registered_input_paths
+    flag. Standalone receipt-completion v1 pins only policy/limits, not input paths;
+    receipt v2/v3 get input authority from shared generation v1/v2.
+    """
+    if not isinstance(selection, dict):
+        return False
+    shared = selection.get("shared_generation_version")
+    native = selection.get("native_source_attribution_version")
+    return (selection.get("registered_input_paths") is True
+            or (type(shared) is int and shared in (1, 2)
+             and selection.get("shared_generation_registration") is not None)
+            or (type(native) is int and native == 1))
+
+
 def build_record(project: str, method: str, label: str, *, mode: str,
                  input_bundle: Path | None = None,
                  input_verified: bool = False,
@@ -1686,7 +1707,10 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # A flat record's absolute address does not encode its launch directory.
     # Capture input addresses now, while their caller base is still known.
     output_owner = artifact_root(Path(core).absolute().with_name(f"{project}_provenance.yaml"))
-    freeze_inputs = (owner != Path.cwd().resolve() or output_owner is None
+    # D76: registered input identities remain absolute in the record as well
+    # as in RunSpec, even when publication runs at the corpus root.
+    freeze_inputs = (registered_input_paths(prompt_request_spec)
+                     or owner != Path.cwd().resolve() or output_owner is None
                      or output_owner.resolve() != Path.cwd().resolve())
 
     header = parse_header(full)

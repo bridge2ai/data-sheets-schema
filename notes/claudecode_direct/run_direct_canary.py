@@ -84,7 +84,8 @@ def spec_for(job):
         label=job["label"], condition=job["render_spec"]["condition"], manifest=Path(job["manifest"]),
         chunk_manifest=Path(job["chunks"]), profile=job["profile"], profile_basis="stated by the registered caller",
         render_version=job["render_version"], run_date=job["run_date"], runtime=job["runtime"],
-        provider=preparation.PROVIDER, reasoning_effort=preparation.EFFORT, prompt_text_env=True)
+        provider=preparation.PROVIDER, reasoning_effort=preparation.EFFORT, prompt_text_env=True,
+        registered_input_paths=True)
 
 
 def under_direct_roots(path):

@@ -581,6 +581,10 @@ class RunSpec:
     receipt_completion_registration: str | None = None
     shared_generation_version: int = 0
     shared_generation_registration: str | None = None
+    # Explicit binding for input-pinning registration builders that predate
+    # shared generation/native attribution. A spelling contract only; it
+    # grants no execution authority and changes none of their identity gates.
+    registered_input_paths: bool = False
     _shared_generation_capture: Any = field(default=None, init=False, repr=False)
     _replay_only: bool = field(default=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
@@ -591,6 +595,8 @@ class RunSpec:
     _api_header_values: dict[str, str] | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
+        if type(self.registered_input_paths) is not bool:
+            raise ValueError("registered_input_paths must be a boolean")
         if self.out_dir is not None:
             # An explicit override belongs to the launch directory. Freeze
             # it so later provenance readers cannot adopt an ancestor corpus.
@@ -670,9 +676,11 @@ class RunSpec:
                 self.manifest = self.manifest.absolute()
             if self.chunk_manifest is not None:
                 self.chunk_manifest = Path(self.chunk_manifest).absolute()
-        elif not self._replay_only:
+        elif not self._replay_only and not provenance.registered_input_paths(vars(self)):
             # Replay preserves the recorded spelling, even when inputs moved
             # or the caller now runs from the original corpus root (#5213).
+            # D76 also preserves registered input spellings: the registration
+            # and completed-capture/native permission checks bind them exactly.
             for _attr in ("bundle", "manifest", "chunk_manifest"):
                 _val = getattr(self, _attr)
                 if _val is not None and Path(_val).is_absolute():
@@ -775,6 +783,8 @@ class RunSpec:
         this instruction. It may have moved since the run. Execution still
         requires a freshly validated spec; this object is only for replay.
         """
+        if "registered_input_paths" in recorded and recorded["registered_input_paths"] is not True:
+            raise ValueError("registered_input_paths is recorded only as true")
         if any(k.startswith("receipt_completion_") for k in recorded):
             from data_sheets_schema.receipt_completion_policy import select_policy
             select_policy(render_spec=recorded)
@@ -799,6 +809,7 @@ class RunSpec:
                    receipt_completion_registration=(recorded.get("receipt_completion_registration") or {}).get("raw_json"),
                    shared_generation_version=recorded.get("shared_generation_version", 0),
                    shared_generation_registration=(recorded.get("shared_generation_registration") or {}).get("raw_json"),
+                   registered_input_paths=recorded.get("registered_input_paths", False),
                    _replay_only=True)
         if spec.native_source_attribution_version:
             if {k for k in recorded if k.startswith("native_source_attribution_")} != {
@@ -992,6 +1003,7 @@ class RunSpec:
                 shared_generation_registration={"sha256": sha(raw), "raw_json": raw.decode("utf-8")},
                 shared_generation_assets=descriptor(version=self.shared_generation_version, condition=self.condition)["assets"])
         return {**policy_metadata,
+                **({"registered_input_paths": True} if self.registered_input_paths else {}),
                 **({"agentic_artifact_paths": dict(self._agentic_artifact_paths)}
                    if self.render_version >= 4 and self._agentic_artifact_paths is not None else {}),
                 **({"agentic_toolchain": {"python": self._agentic_toolchain["python"],

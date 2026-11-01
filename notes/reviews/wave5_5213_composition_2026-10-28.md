@@ -1,5 +1,26 @@
 # Wave 5 task 4: #5213 / #5139 composition
 
+## Later composition correction, D76 (2026-10-31)
+
+Merge `87dd26182603614a16b4832ea58faf63b6f10fc2` is more than a union of
+its parents. Its remerge diff imports E3x's resolver, CLI and report text,
+whose blobs are identical to the corresponding main blobs:
+`9fc613b4c14c1fc6d0c7faae8d4179f1dfc6c1a7`,
+`db727038a53555da8d0e0a00dcca001bf9b3830f` and
+`6d86073e95bf4c283642675c9c731243f504a7e1`. It also retains the E3x test
+module with three packet-only tests appended, and adds the composition helper.
+This imports reviewed upstream behavior; it is not merely conflict-marker removal.
+
+The merge message also overcounts the superseded helper pins. **Only one
+manifest**, `notes/reviews/wave5_5213_validation_2026-10-28/manifest.json`,
+pins helper blob `f9b2e3bd66563ef58989f0b395f35e20bdd1dcf7`. The three
+manifests inherited from main pin retained helper blob
+`09c84644d1a372e36a2dacaf3b001117cb220e06`. Historical evidence and commit
+messages are preserved; this dated correction supersedes the inaccurate count.
+
+The earlier results below apply to their original frozen composition, not to
+the later D76 fixes or their validation.
+
 **The relative-path change composes cleanly with current A13/preflight code:
 166 focused checks pass.** No source repair or conflict resolution was needed.
 This supports historical input lookup and conventional-layout provenance, with
