@@ -8,8 +8,9 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
 
-from data_sheets_schema import api_runner as api, shared_generation as sg
+from data_sheets_schema import api_runner as api, shared_generation as sg, chunking
 from data_sheets_schema import source_heading_completed as complete
 from tests.test_generation_manifest_identity import external  # noqa: F401
 from tests.test_shared_generation_selection import registration_for, selected_spec as shared_v1
@@ -65,19 +66,35 @@ def test_registered_relative_inputs_are_frozen_at_binding(external, monkeypatch,
 
 
 @pytest.mark.parametrize('selection', ['explicit', 'native', 'shared'])
-def test_registered_discovered_chunk_path_is_absolute(external, monkeypatch, selection):
+@pytest.mark.parametrize('layout', ['external', 'conventional'])
+def test_registered_discovered_chunk_path_is_absolute(external, tmp_path, monkeypatch, selection, layout):
+    original = external
+    owner = external.bundle.parent
+    if layout == 'conventional':
+        owner = tmp_path / 'conventional'
+        bundle = owner / 'data/preprocessed/concatenated/EXTERNAL_preprocessed.txt'
+        bundle.parent.mkdir(parents=True)
+        bundle.write_bytes(external.bundle.read_bytes())
+        manifest = owner / 'data/preprocessed/source_manifest.yaml'
+        metadata = yaml.safe_load(external.manifest.read_bytes())
+        metadata['projects']['EXTERNAL']['bundle'] = str(bundle)
+        manifest.write_text(yaml.safe_dump(metadata))
+        chunks = owner / 'data/preprocessed/chunks/EXTERNAL_chunks.yaml'
+        chunks.parent.mkdir()
+        chunks.write_text(chunking.dump_manifest(chunking.build_manifest(bundle)))
+        original = replace(external, bundle=bundle, manifest=manifest, chunk_manifest=chunks)
     if selection == 'shared':
-        base = shared_v1(external, registration_for(external))
+        base = shared_v1(original, registration_for(original))
         changes = {}
     else:
-        base = external
+        base = original
         changes = {'condition': 'generic_v8', 'registered_input_paths': True} if selection == 'explicit' else {
             'condition': 'generic_v9', 'render_version': 16, 'runtime': 'Claude Code',
             'native_source_attribution_version': 1, 'native_source_attribution_max_checks': 3}
-    monkeypatch.chdir(external.bundle.parent)
+    monkeypatch.chdir(owner)
     spec = replace(base, chunk_manifest=None, **changes)
-    assert spec.bundle == external.bundle and spec.manifest == external.manifest
-    assert spec.chunk_manifest == external.chunk_manifest
+    assert spec.bundle == original.bundle and spec.manifest == original.manifest
+    assert spec.chunk_manifest == original.chunk_manifest
     assert spec.chunk_manifest.is_absolute()
 
 
