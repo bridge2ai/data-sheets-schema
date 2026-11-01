@@ -67,7 +67,11 @@ def assert_writer_completeness(selected, tmp_path):
     (tmp_path / 'writer-census.json').write_text(json.dumps({
         'files': sorted(map(str, paths)), 'count': len(paths), 'unbound': missing}, indent=2))
     assert not missing, missing
-    foreign_selection = replace(selected, label='writer-census-other-label')
+    # Inventory-only view, never executed: rebuilding a shared RunSpec would
+    # correctly reject its registration as belonging to the original label.
+    # Retain the actual output directories and vary only the reader identity.
+    foreign_selection = copy(selected)
+    foreign_selection.label = 'writer-census-other-label'
     assert journal.owned_artifacts(foreign_selection) == []
 
 
