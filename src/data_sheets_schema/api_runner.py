@@ -704,6 +704,17 @@ class RunSpec:
             # chose it. Freeze that path for instruction replay (#1507).
             from data_sheets_schema.chunking import manifest_for
             self.chunk_manifest = manifest_for(self.bundle, source_manifest=self.manifest)
+        if not self._replay_only and provenance.registered_input_paths(vars(self)):
+            # Bind every fresh registered locator before headers, instructions
+            # or capture: an unregistered base or conventional chunk discovery
+            # can supply relative inputs even when the registration pins them
+            # absolute (D76). absolute() preserves symlink/.. semantics; exact
+            # registration and canonical-path guards remain responsible for
+            # refusing mismatched or ambiguous authority. Replay stays literal.
+            for _attr in ("bundle", "manifest", "chunk_manifest"):
+                _val = getattr(self, _attr)
+                if _val is not None:
+                    setattr(self, _attr, Path(_val).absolute())
         if self.render_version >= 4 and self.is_agentic:
             self._agentic_artifact_paths = {
                 "full": str(self.full_path), "core": str(self.core_path),

@@ -1,6 +1,9 @@
 # D76 registration input-path inventory
 
-Source implementation: `253a436e47b828d72de99a674abcac95617666d6`.
+Initial source implementation: `253a436e47b828d72de99a674abcac95617666d6`;
+the D76-REG-3 follow-up described below also freezes fresh relative locators.
+Line pointers refer to this packet with that follow-up applied. The parent
+validation ledger records its exact committed head.
 This is the source inventory and closure-repin account, not a validation result.
 The final detached-checkout test report supplies execution evidence.
 
@@ -9,7 +12,9 @@ The common spelling predicate is `provenance.registered_input_paths`
 and native-attribution selections and an explicit boolean binding for older
 registration builders. `RunSpec.__post_init__` excludes those bindings from
 absolute-to-relative input rewriting (`api_runner.py:679`); `build_record`
-uses the same predicate (`provenance.py:1712`). Neither predicate validates a
+uses the same predicate (`provenance.py:1712`). Fresh registered relative
+locators, including discovered chunks, are frozen to absolute paths after
+discovery and before headers or capture (`api_runner.py:707`). Neither predicate validates a
 registration or grants execution authority. Existing guards still do that.
 
 The inventory used ignore-independent searches (`rg -uu`) of Python under
@@ -32,8 +37,8 @@ replay consumers were inspected separately.
 | Registered semantic evaluation v1 | `evaluation/registered_eval_runner.py:295–308` checks the selected shared registration and its pinned inputs directly | No fresh `RunSpec` is constructed here; input authority is already literal and absolute. |
 
 The explicit binding is a strict boolean (`api_runner.py:587,598`), appears in
-serialized render specs only as `true` (`:1006`), and is restored and validated by
-literal replay (`:786,812`). Old render specs without this field still omit it.
+serialized render specs only as `true` (`:1017`), and is restored and validated by
+literal replay (`:797,823`). Old render specs without this field still omit it.
 Unregistered CLI runs retain their existing cwd-dependent spelling. No code
 infers registration from project names, runtime names or profile-basis prose.
 
@@ -51,9 +56,15 @@ relax the code, instruction, input or permission checks. Historical literal
 Independent review identified that conventional chunk discovery may return a
 relative name. D76-REG-2 is addressed by freezing `manifest`, `bundle`, and
 `chunks` to absolute paths before the direct and matched builders create their
-new pins and jobs. The constructor then retains those supplied registered
-spellings. It does not reinterpret arbitrary malformed registrations or search
-for replacement inputs.
+new pins and jobs. The constructor retains supplied absolute registered
+spellings. D76-REG-3 covers an additional entry path: a fresh registration can
+bind an already-relative unregistered base, or chunk discovery can return a
+relative path after selection. Fresh registered locators are therefore made
+absolute after discovery, before constructing headers, instructions and capture.
+This uses `Path.absolute()` without collapsing parent traversal or resolving a
+symlink to a different spelling; strict registration and permission guards still
+refuse mismatches. Literal replay is excluded and retains historical spellings.
+No path search or replacement-input inference is introduced.
 
 ## Native helper closure
 
@@ -90,10 +101,14 @@ Retained evidence:
 Regression coverage is authored in
 `tests/test_wave7_5213_d76_registration.py`,
 `tests/test_wave7_5213_d76_legacy_registration.py`, and
-`tests/test_wave7_5213_d76_binding_records.py`. It includes fake-client SG v2
+`tests/test_wave7_5213_d76_binding_records.py`, and
+`tests/test_wave7_5213_d76_relative_registration.py`. It includes fake-client SG v2
 completion for all three manifest layouts, SG v1 cross-directory instruction
 identity, native execution registration with the real saved-probe verifier and
 fabricated observations, legacy fresh constructors, the actual direct preparer
 with a fake version/auth fixture, provenance spelling, invalid flags, and
-unchanged unregistered/literal-replay controls. This note does not claim those
+unchanged unregistered/literal-replay controls. The relative-registration probes
+exercise the actual SG2 completed-display guard, explicit/native/shared binding,
+external versus conventional chunk discovery, mismatch refusal and a real
+symlink/parent-traversal decoy. This note does not claim those
 checks have passed; the parent validation ledger records the pinned executions.
