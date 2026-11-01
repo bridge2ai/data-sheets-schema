@@ -35,7 +35,7 @@ for name in options.test_overlay:
 environment = bootstrap(root, base.parent)
 environment['test_overlays'] = overlays
 git_binary = shutil.which('git')
-binary = base.parent / 'offline-bin'
+binary = base.parent / (base.name + '-offline-bin')
 binary.mkdir(exist_ok=True)
 (binary / 'git').write_text((Path(__file__).parent / 'd68_local_git_20261030.sh').read_text().replace(
     '__D68_GIT_BINARY__', shlex.quote(git_binary)))
