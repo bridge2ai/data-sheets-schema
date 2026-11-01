@@ -101,8 +101,10 @@ def bytecode_record(root, relative, snapshot):
     # Compile, never execute or unmarshal, the already tracked source. Matching
     # only a header would let arbitrary bytecode claim an unchanged source.
     optimize = int(match.group(2) or 0)
-    expected_code = marshal.dumps(compile(source_raw, str(source), 'exec',
-                                         dont_inherit=True, optimize=optimize))
+    # Keep the code object referenced as py_compile/importlib do. marshal's
+    # reference-table encoding differs for an unreferenced inline temporary.
+    compiled = compile(source_raw, str(source), 'exec', dont_inherit=True, optimize=optimize)
+    expected_code = marshal.dumps(compiled)
     if raw[16:] != expected_code:
         raise ValueError('bytecode payload is not compiled tracked source')
     return {'path': relative, 'sha256': sha(raw), 'bytes': len(raw),
