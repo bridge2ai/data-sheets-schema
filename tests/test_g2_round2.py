@@ -247,6 +247,15 @@ def test_bc1_sizing_refuses_null_manifest(sizing_fixture):
             context_raw=inputs["context"], schema_snapshot=inputs["schema_snapshot"])
 
 
+def test_incomplete_registration_cannot_borrow_calibration(tmp_path):
+    manifest = builder.ROOT / "data/preprocessed/source_manifest.yaml"
+    limits = builder.resolve_audit_limits("CHORUS", "chorus")
+    registration = {"run": {"project": "CHORUS", "arm": builder.ARMS["baseline"][0]},
+        "audit_limits": limits, "inputs": {"source_manifest": pin(manifest)}}
+    with pytest.raises(ValueError, match="no partition profile covers"):
+        builder.check_registration_sizing(tmp_path / "incomplete.json", json.dumps(registration).encode())
+
+
 @pytest.mark.parametrize("exists", [False, True])
 def test_all_refuses_empty_registry(tmp_path, exists):
     manifest = tmp_path / "empty.yaml"

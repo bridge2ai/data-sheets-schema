@@ -429,7 +429,9 @@ def _calibration_covered(profile: dict, project: str, arm: str, *, source_manife
         return (sizing["aggregate_input_tokens"] <= expected["aggregate_input_tokens"]
                 and all(sizing[f"{stage}_input_tokens"] <= room
                         for stage, room in _admissible_input_tokens(expected).items()))
-    except (OSError, ValueError, yaml.YAMLError):
+    except (OSError, ValueError, yaml.YAMLError, KeyError, TypeError):
+        # Missing/malformed captured inputs cannot earn an exemption. The
+        # caller must still supply and pass the ordinary sizing-record gate.
         return False
 
 
