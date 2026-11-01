@@ -1,0 +1,397 @@
+{
+  "format": "wave5_compact_validation_evidence_v1",
+  "helpers": [
+    {
+      "name": "preserve_wave5_validation_20261028.py",
+      "sha256": "e2057f41cc3022202918321e3dd6047e1348581a63f9d133d7f0ae04e7939f05"
+    },
+    {
+      "name": "archive_n2_restack_validation_20261027.py",
+      "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+    }
+  ],
+  "runs": [
+    {
+      "files": [
+        {
+          "bytes": 406,
+          "name": "bootstrap.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 2379,
+          "name": "origins-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "12f455fab423b097c8170cd72cf7c001050c24b96ba758c6ccd6f3b2ca46bcd4"
+        },
+        {
+          "bytes": 2264,
+          "name": "origins-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "cd4a00aecf76cc18c1f6a72736d9f9fe1eea614f683fbe626ba5edd2827bbe71"
+        },
+        {
+          "bytes": 476,
+          "name": "outcome.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "15d041126e3e91338eb0f7d1b5865eb1da2d7c39d6834413037948587923d08b"
+        },
+        {
+          "bytes": 1045,
+          "name": "plan.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "ef8b518ec8459e0aa3ff2531848f30a8f30bbc7c5d0b2101546d7063c340d5d2"
+        },
+        {
+          "bytes": 421,
+          "name": "pytest-command.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "2ba7bc3a7d1a4db301e643c06642882f6e6f8cb8c20d2092e56507ad8e4499da"
+        },
+        {
+          "bytes": 1893,
+          "name": "pytest.log",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "40c7e0a5e903d82589e145ec4d55c0a6ecfd079d0c36bdb4e0d4429b57f2dd16"
+        },
+        {
+          "bytes": 1578,
+          "name": "pytest.xml",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "139f8c073d3f67eb1976ab644fe6f042d4ff7236fdc5e02e1b102e8409a7483f"
+        },
+        {
+          "bytes": 497,
+          "name": "scoring-identity.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "732f1b6a0dc89d58eb0e540d3970e0952ebbbe333d92ffa12a1d66cf2e53cf1b"
+        },
+        {
+          "bytes": 2991003,
+          "name": "source-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "671e4dae83800dd5f190528c36788ce8884ec1217a56decec7cbbdd2d181ac05"
+        },
+        {
+          "bytes": 2991003,
+          "name": "source-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "671e4dae83800dd5f190528c36788ce8884ec1217a56decec7cbbdd2d181ac05"
+        }
+      ],
+      "original_outcome": {
+        "invalid_junit_cases": [
+          {
+            "identity": [
+              "tests.test_d52_publication_labels",
+              "test_exported_unregulated_q9_labels_describe_only_retained_criteria"
+            ],
+            "tags": [
+              "failure"
+            ]
+          }
+        ],
+        "passed": false,
+        "passed_cases_by_module": {
+          "test_d52_publication_labels": 0
+        },
+        "returncode": 1,
+        "scientific_acceptance": "not_assessed",
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 2.670028915978037
+      },
+      "original_root": "/private/tmp/d4d-wave5-d52-label-baseline-20261028",
+      "packet_directory": "run-01",
+      "pass_claim": "copied outcome only; no new acceptance inferred",
+      "unread_external_directories": [
+        "cases"
+      ]
+    },
+    {
+      "files": [
+        {
+          "bytes": 406,
+          "name": "bootstrap.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 2328,
+          "name": "origins-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "91cae443829cb29cccbb2f4e4566aa2056929e83968e5ce40e97fda3d9482268"
+        },
+        {
+          "bytes": 2216,
+          "name": "origins-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "8e96e7765dadb45368b12ff109f87dc1672f9d0e9364f3fa2f80e88bcb680650"
+        },
+        {
+          "bytes": 265,
+          "name": "outcome.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "07925ede6c765f29979511bdc693244c629a07242dac47bfcc77f4fca0b6a3df"
+        },
+        {
+          "bytes": 2970,
+          "name": "plan.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "a01b3c1fd07063599e0e448b8ca8d3f0b1bf6086ef4f3dac2349da0880ad48c0"
+        },
+        {
+          "bytes": 414,
+          "name": "pytest-command.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "9b27bc2be6b2d4297a0f415b51cde0b0535306592bd7d6254bb278801f8ffa4e"
+        },
+        {
+          "bytes": 182,
+          "name": "pytest.log",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "fdbb7cc46dcb4fdc6710487a8a02df31cbf09d4abc37d6fe64a56bf90757f83f"
+        },
+        {
+          "bytes": 381,
+          "name": "pytest.xml",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "778ccbeae5e84f358bf656059f82f78d8d3e14e7721911b13238c33184186747"
+        },
+        {
+          "bytes": 497,
+          "name": "scoring-identity.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "b9b37e0724b8ebad7feadabb346b29d000fd8e4b72f22a2f82da39c8f8ad9ce2"
+        },
+        {
+          "bytes": 2996800,
+          "name": "source-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "3b826de7f6fd169a78ce8337bebc912c21189c3c923677893947c9558cb64a47"
+        },
+        {
+          "bytes": 2996800,
+          "name": "source-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "3b826de7f6fd169a78ce8337bebc912c21189c3c923677893947c9558cb64a47"
+        }
+      ],
+      "original_outcome": {
+        "invalid_junit_cases": [],
+        "passed": true,
+        "passed_cases_by_module": {
+          "test_d52_publication_labels": 1
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 5.22742308297893
+      },
+      "original_root": "/private/tmp/d4d-wave5-d52-label-canary-20261028",
+      "packet_directory": "run-02",
+      "pass_claim": "copied outcome only; no new acceptance inferred",
+      "unread_external_directories": [
+        "cases"
+      ]
+    },
+    {
+      "files": [
+        {
+          "bytes": 406,
+          "name": "bootstrap.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 457,
+          "name": "outcome.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "2f7f6198b1cf91e76a8d1a9fddde8f0b8df74eccb7b93d7b4aa96afcd87c4fcf"
+        },
+        {
+          "bytes": 3270,
+          "name": "plan.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "0577e64a6e9c3ddda130e397f1c97b75ff5a9acb3550f462a291c6b00e9402fc"
+        },
+        {
+          "bytes": 1025,
+          "name": "pytest.log",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "2ea87c72ad00587097fe1b1a279e5d5121ce6d93519b637e7769012a12b8d060"
+        },
+        {
+          "bytes": 2996800,
+          "name": "source-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "3b826de7f6fd169a78ce8337bebc912c21189c3c923677893947c9558cb64a47"
+        },
+        {
+          "bytes": 2996800,
+          "name": "source-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "3b826de7f6fd169a78ce8337bebc912c21189c3c923677893947c9558cb64a47"
+        }
+      ],
+      "original_outcome": {
+        "invalid_junit_cases": [],
+        "passed": false,
+        "passed_cases_by_module": {
+          "test_d4d_evaluator_scoring": 0,
+          "test_d52_publication_labels": 0,
+          "test_d52_scoring": 0,
+          "test_evaluation.test_explicit_dataset_scope": 0,
+          "test_evaluation_context": 0,
+          "test_rubric20_fixed_anchors": 0
+        },
+        "returncode": 1,
+        "scientific_acceptance": "not_assessed",
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 2.373073666007258
+      },
+      "original_root": "/private/tmp/d4d-wave5-d52-label-targeted-20261028",
+      "packet_directory": "run-03",
+      "pass_claim": "copied outcome only; no new acceptance inferred",
+      "unread_external_directories": []
+    },
+    {
+      "files": [
+        {
+          "bytes": 406,
+          "name": "bootstrap.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 14579,
+          "name": "origins-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "d7760b128b72cd3329f4d50d7797afdc08dc3d86e039f705f1679ecb3a2d4357"
+        },
+        {
+          "bytes": 4447,
+          "name": "origins-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "d75b33bc30b1607c2979989af6f17d9f13965bf44eb6f2e7b862225598a2000c"
+        },
+        {
+          "bytes": 491,
+          "name": "outcome.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "68e56ccf7d873cd2617a9323a88d6d909c59bfca370855f238c2dfe5f31fd1ad"
+        },
+        {
+          "bytes": 3340,
+          "name": "plan.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "63b37c19393c2f3a77f4a16fae179c127dce85cfff04ffcc247e410ff33f191f"
+        },
+        {
+          "bytes": 619,
+          "name": "pytest-command.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "5538f0f4cc48b417aeaf952f0167152c092eef44e5dab589df6afa20f91c4324"
+        },
+        {
+          "bytes": 976,
+          "name": "pytest.log",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "ce89c4db437c3d99a7114ec916bbd00613987ffdc78597350cff736cc485f5c0"
+        },
+        {
+          "bytes": 19156,
+          "name": "pytest.xml",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "e41b0b1fd306d8f58034e72976b524eec2e2a6622b868645a85027e692094712"
+        },
+        {
+          "bytes": 497,
+          "name": "scoring-identity.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "b9b37e0724b8ebad7feadabb346b29d000fd8e4b72f22a2f82da39c8f8ad9ce2"
+        },
+        {
+          "bytes": 2996800,
+          "name": "source-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "3b826de7f6fd169a78ce8337bebc912c21189c3c923677893947c9558cb64a47"
+        },
+        {
+          "bytes": 2996800,
+          "name": "source-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "3b826de7f6fd169a78ce8337bebc912c21189c3c923677893947c9558cb64a47"
+        }
+      ],
+      "original_outcome": {
+        "invalid_junit_cases": [],
+        "passed": true,
+        "passed_cases_by_module": {
+          "test_d52_publication_labels": 9,
+          "test_d52_scoring": 31,
+          "test_evaluation.test_evaluate_d4d": 18,
+          "test_evaluation.test_explicit_dataset_scope": 22,
+          "test_evaluation.test_general_context": 25,
+          "test_evaluation.test_rubric20_scoring": 16
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 36.86273375002202
+      },
+      "original_root": "/private/tmp/d4d-wave5-d52-label-targeted-corrected-20261028",
+      "packet_directory": "run-04",
+      "pass_claim": "copied outcome only; no new acceptance inferred",
+      "unread_external_directories": [
+        "cases"
+      ]
+    }
+  ],
+  "scope": "compact results, external raw inventory digests, no historical score changes",
+  "selection": "explicit top-level regular JSON/log/XML files, including ignored files",
+  "source_and_origin_inventories_embedded": false
+}

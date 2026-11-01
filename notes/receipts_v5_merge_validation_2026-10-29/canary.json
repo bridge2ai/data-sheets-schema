@@ -1,0 +1,24 @@
+{
+  "base_source_sha256": {
+    "src/data_sheets_schema/api_runner.py": "c5287825d123c8da96d29f3e10c5b37695fb80fc6041b6f09e8e8cbac5875a95",
+    "src/data_sheets_schema/backfill_checks.py": "b099224f7ebc37f59c3f5f19964ff91009521d22872dbd92be7ba00c3ad90b2f",
+    "src/data_sheets_schema/receipt_completion.py": "d9f72b79a463d19d77b309e19b24c9e96001cb03ca4f69ba1121fe40f6aa1c87",
+    "src/data_sheets_schema/receipt_completion_policy.py": "3c7c727213369638827af0bdfd71484ebdb66661d88ae8942a591990c91b4f23",
+    "src/data_sheets_schema/receipts.py": "658195581a9ca6a3dcf4700d25dd90d403985c2815c423069d2603b58b33d64d",
+    "src/data_sheets_schema/report_claims.py": "2d005a3a371f7d2b85ca3b45de3cebc591f05cda3a710195b2932ff5e5c10776",
+    "src/data_sheets_schema/shared_generation.py": "3ae7e8f5b039c65a7feaf61efdbb9dc25f2f38e5f5fc920111267aab4e8fcad0"
+  },
+  "passed": true,
+  "slices": {
+    "corpus": {
+      "checked": true,
+      "records": 1,
+      "sha256": "3e19de8474bf714dee23443b8583435811f6109e96c96e4119bd093d5102faf9"
+    },
+    "report": {
+      "checked": true,
+      "records": 1,
+      "sha256": "163bee3f9be09bfd812c561cac18e40b2b5639fa7e713593360d3425ed97c503"
+    }
+  }
+}

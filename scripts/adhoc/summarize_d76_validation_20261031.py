@@ -79,6 +79,7 @@ def main():
         denials = {str(path.relative_to(directory)): {'sha256': digest(path), 'lines': path.read_text().splitlines()}
                    for path in directory.glob('guard-denials-*.jsonl')}
         row = {'run': str(directory), 'head': plan['head'], 'outcome': outcome,
+               'collect_only': bool(plan.get('collect_only')),
                'valid_run': valid_run, 'valid_collection': valid_collection,
                'nonpassing_nodes': failing, 'xml_findings': messages, 'artifacts': artifacts,
                'guard_denials': denials}
@@ -91,7 +92,9 @@ def main():
         for row in accepted_rows)
     result = {'runs': rows, 'accepted_head': args.accepted_head,
         'accepted_runs_pass': accepted_runs_pass if args.accepted_head else None,
-        'reported_counts_sum_includes_repeats': dict(sum((Counter(row['outcome']['counts']) for row in rows), Counter()))}
+        'count_aggregation_scope': 'execution runs only; raw collection rows are retained separately',
+        'reported_counts_sum_includes_repeats': dict(sum((Counter(row['outcome']['counts'])
+            for row in rows if not row['collect_only']), Counter()))}
     gates = []
     if args.accepted_head:
         gates.append(accepted_runs_pass)

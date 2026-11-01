@@ -1,0 +1,40 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 25 items
+
+tests/test_nested_ancestor_receipts.py::test_own_holder_paths_and_multiple_receipts_count_each_row_once PASSED [  4%]
+tests/test_nested_ancestor_receipts.py::test_prefix_siblings_lists_and_other_entry_paths_do_not_credit_field[s] PASSED [  8%]
+tests/test_nested_ancestor_receipts.py::test_prefix_siblings_lists_and_other_entry_paths_do_not_credit_field[s[1]] PASSED [ 12%]
+tests/test_nested_ancestor_receipts.py::test_prefix_siblings_lists_and_other_entry_paths_do_not_credit_field[s[0].or] PASSED [ 16%]
+tests/test_nested_ancestor_receipts.py::test_prefix_siblings_lists_and_other_entry_paths_do_not_credit_field[s[0].orcid_url] PASSED [ 20%]
+tests/test_nested_ancestor_receipts.py::test_prefix_siblings_lists_and_other_entry_paths_do_not_credit_field[s[0].aff] PASSED [ 24%]
+tests/test_nested_ancestor_receipts.py::test_prefix_siblings_lists_and_other_entry_paths_do_not_credit_field[s[0].aff[0]] PASSED [ 28%]
+tests/test_nested_ancestor_receipts.py::test_list_boundary_and_wrong_nested_entry_do_not_credit_entry[s] PASSED [ 32%]
+tests/test_nested_ancestor_receipts.py::test_list_boundary_and_wrong_nested_entry_do_not_credit_entry[s[0].aff] PASSED [ 36%]
+tests/test_nested_ancestor_receipts.py::test_list_boundary_and_wrong_nested_entry_do_not_credit_entry[s[0].aff[0]] PASSED [ 40%]
+tests/test_nested_ancestor_receipts.py::test_list_boundary_and_wrong_nested_entry_do_not_credit_entry[s[1].aff[1]] PASSED [ 44%]
+tests/test_nested_ancestor_receipts.py::test_direct_or_descendant_receipt_excludes_that_holder_from_ancestor_evidence[s[0].orcid] PASSED [ 48%]
+tests/test_nested_ancestor_receipts.py::test_direct_or_descendant_receipt_excludes_that_holder_from_ancestor_evidence[s[0].orcid.value] PASSED [ 52%]
+tests/test_nested_ancestor_receipts.py::test_another_holders_indices_and_nonpositive_counts_do_not_create_ancestors PASSED [ 56%]
+tests/test_nested_ancestor_receipts.py::test_unreadable_holder_keeps_unmeasured_while_readable_empty_holder_allows_subset PASSED [ 60%]
+tests/test_nested_ancestor_receipts.py::test_final_paths_are_derived_by_existing_identity_remap_and_unusable_snapshot_refuses PASSED [ 64%]
+tests/test_nested_ancestor_receipts.py::test_default_machine_shape_and_all_original_values_are_unchanged PASSED [ 68%]
+tests/test_nested_ancestor_receipts.py::test_single_object_false_is_present_and_multiple_ancestors_do_not_multiply_rows PASSED [ 72%]
+tests/test_nested_ancestor_receipts.py::test_report_adds_only_opt_in_diagnostic_column_and_preserves_candidate_counts PASSED [ 76%]
+tests/test_nested_ancestor_receipts.py::test_cli_requires_explicit_new_report_route_before_collection[extra0] PASSED [ 80%]
+tests/test_nested_ancestor_receipts.py::test_cli_requires_explicit_new_report_route_before_collection[extra1] PASSED [ 84%]
+tests/test_nested_ancestor_receipts.py::test_cli_requires_explicit_new_report_route_before_collection[extra2] PASSED [ 88%]
+tests/test_nested_ancestor_receipts.py::test_cli_requires_explicit_new_report_route_before_collection[extra3] PASSED [ 92%]
+tests/test_nested_ancestor_receipts.py::test_cli_publishes_only_new_report_and_preserves_existing_destinations PASSED [ 96%]
+tests/test_nested_ancestor_receipts.py::test_cli_combines_attainability_without_changing_default_report_or_sidecar PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_nested_ancestor_receipts.py::test_own_holder_paths_and_multiple_receipts_count_each_row_once
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_31-xml-i4y5e_vw/pytest.xml -
+======================== 25 passed, 1 warning in 7.25s =========================

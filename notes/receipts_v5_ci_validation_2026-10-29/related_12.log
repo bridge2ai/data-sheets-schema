@@ -1,0 +1,55 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 36 items
+
+tests/test_extend_observed.py::Discovery::test_candidates_are_named_after_the_project_and_replicate_and_deduplicated PASSED [  2%]
+tests/test_extend_observed.py::Siblings::test_a_sibling_projects_transcript_is_never_offered_and_an_abbreviation_is_known PASSED [  5%]
+tests/test_extend_observed.py::Siblings::test_one_projects_refusal_does_not_stop_the_others PASSED [  8%]
+tests/test_extend_observed.py::Siblings::test_the_driver_refuses_transcripts_without_a_project_and_more_than_four PASSED [ 11%]
+tests/test_extend_observed.py::Extension::test_a_partial_estimate_is_not_the_measure_and_a_complete_one_with_no_thinking_count_is PASSED [ 13%]
+tests/test_extend_observed.py::Extension::test_a_resumed_run_is_the_set_of_its_transcripts PASSED [ 16%]
+tests/test_extend_observed.py::Extension::test_a_transcript_that_does_not_reproduce_a_prior_key_writes_nothing_and_names_the_key PASSED [ 19%]
+tests/test_extend_observed.py::Extension::test_annotate_observed_extend_keeps_the_cut_and_names_its_own_route PASSED [ 22%]
+tests/test_extend_observed.py::Extension::test_one_reproducing_transcript_extends_and_the_extension_is_recorded PASSED [ 25%]
+tests/test_extend_observed.py::Extension::test_report_mode_writes_nothing_and_an_api_record_is_refused PASSED [ 27%]
+tests/test_extend_observed.py::Extension::test_the_extension_helper_is_the_one_annotate_observed_uses PASSED [ 30%]
+tests/test_extend_observed.py::Extension::test_the_real_observer_on_a_synthetic_transcript_and_a_bundle_from_git PASSED [ 33%]
+tests/test_extend_observed.py::Extension::test_two_reproducing_transcripts_are_ambiguous_and_write_nothing PASSED [ 36%]
+tests/test_extend_observed.py::CodexRound::test_a_basis_written_by_an_earlier_round_is_stripped_not_doubled PASSED [ 38%]
+tests/test_extend_observed.py::CodexRound::test_a_record_with_no_cut_does_not_claim_one PASSED [ 41%]
+tests/test_extend_observed.py::CodexRound::test_a_sentence_ending_in_other_punctuation_is_a_sentence PASSED [ 44%]
+tests/test_extend_observed.py::CodexRound::test_an_edited_paragraph_is_reported_rather_than_guessed_at PASSED [ 47%]
+tests/test_extend_observed.py::CodexRound::test_the_no_op_extension_clause_an_earlier_round_wrote_is_stripped PASSED [ 50%]
+tests/test_extend_observed.py::CodexRound::test_the_transcript_is_recorded_by_its_bytes PASSED [ 52%]
+tests/test_extend_observed.py::CodexRound::test_three_transcripts_under_one_name_offer_the_resumed_pair PASSED [ 55%]
+tests/test_extend_observed.py::CodexRound::test_what_is_removed_is_the_text_the_last_extension_recorded PASSED [ 58%]
+tests/test_extend_observed.py::Round8::test_a_basis_with_no_terminal_punctuation_still_gets_one_and_says_so PASSED [ 61%]
+tests/test_extend_observed.py::Round8::test_a_curator_sentence_that_ends_inside_a_quote_or_bracket_is_left_alone PASSED [ 63%]
+tests/test_extend_observed.py::Round8::test_a_whitespace_only_recorded_addition_does_not_wipe_the_account PASSED [ 66%]
+tests/test_extend_observed.py::ObserverHandoff::test_annotate_observed_records_the_terminal_usage_marker PASSED [ 69%]
+tests/test_extend_observed.py::ObserverHandoff::test_every_writer_refuses_an_observation_with_malformed_events PASSED [ 72%]
+tests/test_extend_observed.py::AccountingKeysExtend::test_extension_keeps_usage_from_terminal_result PASSED [ 75%]
+tests/test_extend_observed.py::EquivalentCandidates::test_a_record_with_every_reasoning_key_still_gains_the_accounting_keys PASSED [ 77%]
+tests/test_extend_observed.py::EquivalentCandidates::test_accounting_sentences_are_recognised_for_stripping PASSED [ 80%]
+tests/test_extend_observed.py::Round6::test_a_basename_collision_does_not_collapse_distinct_runs PASSED [ 83%]
+tests/test_extend_observed.py::Round6::test_the_exclusion_marker_needs_a_cut PASSED [ 86%]
+tests/test_extend_observed.py::Round7::test_aliases_of_one_transcript_are_one_candidate PASSED [ 88%]
+tests/test_extend_observed.py::Round7::test_the_legacy_opening_paragraph_is_replaced PASSED [ 91%]
+tests/test_extend_observed.py::Round9Identification::test_a_refused_candidate_that_reproduces_every_field_counts_as_such PASSED [ 94%]
+tests/test_extend_observed.py::Round12Guards::test_zero_markers_and_the_contradictory_pair_are_refused PASSED [ 97%]
+tests/test_extend_observed.py::Round13Guards::test_impossible_terminal_thinking_markers_are_refused PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_extend_observed.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_12-xml-v9vujcny/pytest.xml -
+======================= 36 passed, 13 warnings in 3.31s ========================

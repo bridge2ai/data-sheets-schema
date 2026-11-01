@@ -1,0 +1,10 @@
+{
+  "acceptance": {
+    "passed": 899,
+    "skipped": 19
+  },
+  "inertness": "all four saved comparisons reverified",
+  "receipts_sha256": "f68c875b4e3b972d4e03ad39322a077c6b64497ece5f1e71ac5bc08aa4e9c10a",
+  "scanner": 357,
+  "source_and_tests_unchanged": true
+}

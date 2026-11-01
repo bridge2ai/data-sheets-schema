@@ -1,0 +1,37 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 18 items
+
+tests/test_receipt_completion_batch_gate.py::test_registered_gate_stops_without_baseline_even_with_continue[failed] PASSED [  5%]
+tests/test_receipt_completion_batch_gate.py::test_registered_gate_stops_without_baseline_even_with_continue[empty] PASSED [ 11%]
+tests/test_receipt_completion_batch_gate.py::test_registered_gate_stops_without_baseline_even_with_continue[missing] PASSED [ 16%]
+tests/test_receipt_completion_batch_gate.py::test_registered_gate_stops_without_baseline_even_with_continue[unchecked] PASSED [ 22%]
+tests/test_receipt_completion_batch_gate.py::test_registered_gate_stops_without_baseline_even_with_continue[legacy_block] PASSED [ 27%]
+tests/test_receipt_completion_batch_gate.py::test_registered_gate_stops_without_baseline_even_with_continue[malformed] PASSED [ 33%]
+tests/test_receipt_completion_batch_gate.py::test_registered_gate_stops_without_baseline_even_with_continue[wrong_policy] PASSED [ 38%]
+tests/test_receipt_completion_batch_gate.py::test_registered_gate_stops_without_baseline_even_with_continue[exception] PASSED [ 44%]
+tests/test_receipt_completion_batch_gate.py::test_registered_gate_stops_without_baseline_even_with_continue[invalid] PASSED [ 50%]
+tests/test_receipt_completion_batch_gate.py::test_passing_registered_results_allow_fanout_and_record_no_baseline PASSED [ 55%]
+tests/test_receipt_completion_batch_gate.py::test_later_failed_registered_result_stops_remaining_runs[failed] PASSED [ 61%]
+tests/test_receipt_completion_batch_gate.py::test_later_failed_registered_result_stops_remaining_runs[exception] PASSED [ 66%]
+tests/test_receipt_completion_batch_gate.py::test_later_failed_registered_result_stops_remaining_runs[invalid] PASSED [ 72%]
+tests/test_receipt_completion_batch_gate.py::test_single_pending_diagnostic_runs_without_claiming_gate_pass PASSED [ 77%]
+tests/test_receipt_completion_batch_gate.py::test_pending_fanout_and_explicit_bypass_refused_before_dispatch[flags0-True] PASSED [ 83%]
+tests/test_receipt_completion_batch_gate.py::test_pending_fanout_and_explicit_bypass_refused_before_dispatch[flags1-False] PASSED [ 88%]
+tests/test_receipt_completion_batch_gate.py::test_legacy_default_still_has_no_implicit_gate PASSED [ 94%]
+tests/test_receipt_completion_batch_gate.py::test_requested_baseline_remains_required PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_receipt_completion_batch_gate.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_36-xml-ouvdhh0w/pytest.xml -
+======================= 18 passed, 13 warnings in 3.29s ========================

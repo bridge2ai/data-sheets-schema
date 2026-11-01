@@ -1,0 +1,29 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 14 items
+
+tests/test_download/test_generic_v8_prompt.py::TestV8IsV7PlusTheAddedBlock::test_body_differs_from_v7_only_by_the_block PASSED [  7%]
+tests/test_download/test_generic_v8_prompt.py::TestV8IsV7PlusTheAddedBlock::test_no_project_is_named PASSED [ 14%]
+tests/test_download/test_generic_v8_prompt.py::TestV8IsV7PlusTheAddedBlock::test_the_block_carries_the_five_registered_rules PASSED [ 21%]
+tests/test_download/test_generic_v8_prompt.py::TestV8IsV7PlusTheAddedBlock::test_the_earlier_additions_survive_intact PASSED [ 28%]
+tests/test_download/test_generic_v8_prompt.py::TestV8IsV7PlusTheAddedBlock::test_the_version_stamp_names_v8 PASSED [ 35%]
+tests/test_download/test_generic_v8_prompt.py::TestV8IsRegistered::test_condition_and_axes PASSED [ 42%]
+tests/test_download/test_generic_v8_prompt.py::TestTheBlockStaysGeneric::test_backticks_name_digest_vocabulary_only PASSED [ 50%]
+tests/test_download/test_generic_v8_prompt.py::TestTheBlockStaysGeneric::test_no_dataset_identifiers PASSED [ 57%]
+tests/test_download/test_generic_v8_prompt.py::TestTheBlockStaysGeneric::test_no_expected_quantities PASSED [ 64%]
+tests/test_download/test_generic_v8_prompt.py::TestTheBlockStaysGeneric::test_no_reference_to_prior_runs PASSED [ 71%]
+tests/test_download/test_generic_v8_prompt.py::TestTheBlockStaysGeneric::test_v7_is_untouched_by_v8 PASSED [ 78%]
+tests/test_download/test_generic_v8_prompt.py::TestTheConditionIsWiredComparably::test_r1s_example_agrees_with_the_digest PASSED [ 85%]
+tests/test_download/test_generic_v8_prompt.py::TestTheConditionIsWiredComparably::test_the_audit_phase_carries_the_e2_flags PASSED [ 92%]
+tests/test_download/test_generic_v8_prompt.py::TestTheConditionIsWiredComparably::test_v8_is_launchable_from_the_cli PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_10-xml-o3y71z2d/pytest.xml -
+======================== 14 passed, 1 warning in 3.39s =========================

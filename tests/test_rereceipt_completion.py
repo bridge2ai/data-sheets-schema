@@ -273,7 +273,8 @@ def test_all_historical_assembly_digests_are_identical_and_new_bytes_are_covered
         runner.phase_instruction("full_rereceipt", 23)
 
 
-@pytest.mark.parametrize("version", [True, 2, 5, "4"])
+# v5 now exists as an explicit opt-in checker; v6 is still unsupported.
+@pytest.mark.parametrize("version", [True, 2, 6, "4"])
 def test_instrument_selection_is_explicit(version):
     with pytest.raises(ValueError, match="instrument version"):
         rc.receipt_instrument(version)

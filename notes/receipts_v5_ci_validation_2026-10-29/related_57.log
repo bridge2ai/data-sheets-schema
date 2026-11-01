@@ -1,0 +1,33 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 18 items
+
+tests/test_shared_output_ownership_entrypoints.py::test_public_execute_refuses_existing_unowned_state_before_lock[foreign] PASSED [  5%]
+tests/test_shared_output_ownership_entrypoints.py::test_public_execute_refuses_existing_unowned_state_before_lock[unknown] PASSED [ 11%]
+tests/test_shared_output_ownership_entrypoints.py::test_public_execute_refuses_existing_unowned_state_before_lock[own_no_resume] PASSED [ 16%]
+tests/test_shared_output_ownership_entrypoints.py::test_public_execute_rechecks_owner_inside_lock_before_date_restore PASSED [ 22%]
+tests/test_shared_output_ownership_entrypoints.py::test_matching_owner_preserves_actual_automatic_date_recovery PASSED [ 27%]
+tests/test_shared_output_ownership_entrypoints.py::test_legacy_public_boundary_is_unchanged PASSED [ 33%]
+tests/test_shared_output_ownership_entrypoints.py::test_actual_batch_rejects_same_project_two_labels_before_plan PASSED [ 38%]
+tests/test_shared_output_ownership_entrypoints.py::test_actual_batch_rechecks_pair_conflict_after_plan PASSED [ 44%]
+tests/test_shared_output_ownership_entrypoints.py::test_actual_batch_allows_disjoint_projects_in_same_label_directory[projects0] PASSED [ 50%]
+tests/test_shared_output_ownership_entrypoints.py::test_actual_batch_allows_disjoint_projects_in_same_label_directory[projects1] PASSED [ 55%]
+tests/test_shared_output_ownership_entrypoints.py::test_actual_batch_rechecks_pair_conflict_between_dispatches PASSED [ 61%]
+tests/test_shared_output_ownership_entrypoints.py::test_public_execute_refuses_same_run_role_alias_before_any_lock[own_lock] PASSED [ 66%]
+tests/test_shared_output_ownership_entrypoints.py::test_public_execute_refuses_same_run_role_alias_before_any_lock[core] PASSED [ 72%]
+tests/test_shared_output_ownership_entrypoints.py::test_public_execute_refuses_same_run_role_alias_before_any_lock[snapshot] PASSED [ 77%]
+tests/test_shared_output_ownership_entrypoints.py::test_actual_batch_refuses_control_progress_alias_before_plan_or_lock[symlink] PASSED [ 83%]
+tests/test_shared_output_ownership_entrypoints.py::test_actual_batch_refuses_control_progress_alias_before_plan_or_lock[hardlink] PASSED [ 88%]
+tests/test_shared_output_ownership_entrypoints.py::test_public_execute_refuses_inventory_alias_to_run_data PASSED [ 94%]
+tests/test_shared_output_ownership_entrypoints.py::test_actual_batch_refuses_inventory_alias_to_control PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_57-xml-tdrmq73l/pytest.xml -
+=================== 18 passed, 1 warning in 65.95s (0:01:05) ===================

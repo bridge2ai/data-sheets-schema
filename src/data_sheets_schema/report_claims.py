@@ -573,6 +573,11 @@ REPORT_CLAIMS_INSTRUMENT = (
     "when the key is absent from both the pinned original full snapshot "
     "and final full record; no prior-core or nested-entry identity is inferred; "
     + REPORT_CLAIMS_INSTRUMENT_V7)
+REPORT_CLAIMS_INSTRUMENT_V9 = (
+    "v9 (provedown watermarks): inline markdown watermarks (`value`{pd: expr} "
+    "and [value]<!-- pd: expr -->) are deterministically verified against "
+    "full/core/snapshot records, receipt/manifest blocks, chunk texts, and "
+    "schema declarations; " + REPORT_CLAIMS_INSTRUMENT)
 
 #: The values `disposition_rows` can read off a row's `record` cell, in the
 #: order the block lists them. Fixed keys, zero-filled, so two blocks compare
@@ -895,12 +900,16 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
     return rows
 
 
-def check_report(report: Path, full: dict, core: dict,
-                 declared: dict[str, set[str]],
+def check_report(report: Path | str, full: dict, core: dict,
+                 declared: dict[str, set[str]] | None = None,
                  snapshot: dict | None = None,
                  dispositions_expected: bool | None = None,
                  ranges: dict[str, dict[str, str | None]] | None = None, *,
-                 instrument_version: int = 8) -> dict[str, Any]:
+                 instrument_version: int = 8,
+                 check_watermarks: bool = False,
+                 receipt: dict | None = None,
+                 manifest: dict | None = None,
+                 chunk_texts: dict[str, str] | None = None) -> dict[str, Any]:
     """Findings, plus what was skipped.
 
     `declared` maps a class name to its induced slot names — passed in so a
@@ -929,22 +938,37 @@ def check_report(report: Path, full: dict, core: dict,
     Version 8 also rejects an explicitly full/both root-key removal when
     that key is absent from both the original and final full records.
     Explicit version 7 reproduces historical measurements without changing
-    their instrument or artifacts. No original core or list identity is inferred.
+    their instrument or artifacts. Version 9 (or `check_watermarks=True`)
+    additionally evaluates inline provedown watermarks (`provedown.py`).
+    No original core or list identity is inferred.
     """
-    if type(instrument_version) is not int or instrument_version not in (7, 8):
+    if type(instrument_version) is not int or instrument_version not in (7, 8, 9):
         raise ValueError(f"unsupported report-claims instrument version: {instrument_version}")
-    if not report.exists():
-        return {"checked": False, "reason": f"no report at {report}",
-                "findings": []}
-    text = report.read_text(encoding="utf-8", errors="replace")
+    if declared is None:
+        declared = declared_slots()
+    if isinstance(report, Path):
+        if not report.exists():
+            return {"checked": False, "reason": f"no report at {report}",
+                    "findings": []}
+        text = report.read_text(encoding="utf-8", errors="replace")
+    else:
+        text = str(report)
     return _check_report_text(text, full, core, declared, snapshot, dispositions_expected,
-                              ranges, instrument_version=instrument_version)
+                              ranges, instrument_version=instrument_version,
+                              check_watermarks=check_watermarks,
+                              receipt=receipt, manifest=manifest, chunk_texts=chunk_texts)
 
 
 def _check_report_text(text, full, core, declared, snapshot=None, dispositions_expected=None,
-                       ranges=None, *, instrument_version=8):
-    if type(instrument_version) is not int or instrument_version not in (7, 8):
+                       ranges=None, *, instrument_version=8, check_watermarks=False,
+                       receipt=None, manifest=None, chunk_texts=None):
+    if type(instrument_version) is not int or instrument_version not in (7, 8, 9):
         raise ValueError(f"unsupported report-claims instrument version: {instrument_version}")
+    if check_watermarks:
+        # Watermarks change the checks being performed, including when a
+        # caller otherwise requests historical v7. Never reuse that older
+        # instrument identity for the expanded measurement (#5226, R_V5-F5).
+        instrument_version = 9
     findings: list[dict[str, str]] = []
     claims = unnamed = core_cannot_hold = 0
     # Refused up front, not only on the row that would consult it (#993): a
@@ -1361,16 +1385,35 @@ def _check_report_text(text, full, core, declared, snapshot=None, dispositions_e
                            f"record does not, and no Dispositions row and no removal statement "
                            f"names it — add a `removed` row for `{key}`"),
                 "claim": ""})
+    wm_block = None
+    if check_watermarks or instrument_version == 9:
+        from data_sheets_schema.provedown import verify_watermarks
+        wm_block = verify_watermarks(
+            text, full=full, core=core, snapshot=snapshot,
+            receipt=receipt, manifest=manifest, chunk_texts=chunk_texts,
+            declared=declared,
+        )
+        claims += wm_block["total"]
+        for wf in wm_block["findings"]:
+            findings.append({
+                "kind": wf["kind"],
+                "section": wf.get("section", "provedown_watermarks"),
+                "slot": wf["slot"],
+                "record": wf["record"],
+                "detail": wf["detail"],
+                "claim": wf["claim"],
+            })
     seen, unique = set(), []
     for f in findings:
         target = f.get("record")
         if f["kind"] == "removal_not_performed" and target == "either":
             target = "core"                         # an unnamed removal is read against core
-        key = (f["kind"], f.get("slot"), target)
+        key = (f["kind"], f.get("slot"), target, f.get("claim") if str(f.get("kind")).startswith("watermark_") else None)
         if key in seen:
             continue
         seen.add(key)
         unique.append(f)
+    extra_wm = {"watermarks": wm_block} if wm_block is not None else {}
     return {"checked": True, "findings": unique, "claims_checked": claims,
             # Named rather than dropped: a claim naming no slot in backticks
             # cannot be checked, and a reader should know how many there were.
@@ -1394,7 +1437,9 @@ def _check_report_text(text, full, core, declared, snapshot=None, dispositions_e
             "prose_retention_claims": prose_retained,
             "removals_unrecorded": [u["slot"] for u in unrecorded],
             "removals_unrecorded_count": len(unrecorded) if isinstance(snapshot, dict) else None,
-            "instrument": (REPORT_CLAIMS_INSTRUMENT if instrument_version == 8
+            **extra_wm,
+            "instrument": (REPORT_CLAIMS_INSTRUMENT_V9 if instrument_version == 9
+                           else REPORT_CLAIMS_INSTRUMENT if instrument_version == 8
                            else REPORT_CLAIMS_INSTRUMENT_V7)}
 
 

@@ -1,0 +1,193 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 894,
+    "skipped": 19
+  },
+  "artifact_sha256": {
+    "acceptance.log": "0f736c3ed5f8c9523b42fa9929edda7576c293ea5086b13709d1f1a652778b4b",
+    "acceptance.xml": "7af8a2d72f8dfb1919fc965b618657ead8969ce8f3e89e0c95f75a6be3cef150",
+    "canary.json": "ecebada0ed7ca90d90e895382b21473e629cee6beb3a5dee9763b23e092ccc60",
+    "causal_before.log": "3f2de78a89d573dda0215a281fb992a0620e6f6165122a0508199a0e0b0667d0",
+    "causal_before.xml": "da65f1618a67f993452fcf8dfb4ac19be0c81a4ec9f7d3f4d7fb649e247b7e64",
+    "inertness.json": "b45e769f5df7b92fbd5a85f6e7ab834f9ec95d1c4424f6c7a6e60ab815bdca70",
+    "inertness_canary.log": "1861a654e4f97302a6cc60394024a28c96cfb7e6d09554c3050afc94455ddd3c",
+    "inertness_full.log": "70f6729505771e9e1cb0d7f472675eeab061755580522ded89cc6a510b29fa48"
+  },
+  "causal": {
+    "N1": {
+      "after": {
+        "failed": 0,
+        "passed": 34,
+        "skipped": 0
+      },
+      "before": {
+        "failed": 28,
+        "passed": 6,
+        "skipped": 0
+      },
+      "failed_before_passed_after": [
+        "test_n1_untrusted_selection_cannot_override_run[marker-legacy]",
+        "test_n1_untrusted_selection_cannot_override_run[marker-registration]",
+        "test_n1_untrusted_selection_cannot_override_run[marker-provenance]",
+        "test_n1_untrusted_selection_cannot_override_run[environment-legacy]",
+        "test_n1_untrusted_selection_cannot_override_run[environment-registration]",
+        "test_n1_untrusted_selection_cannot_override_run[environment-provenance]",
+        "test_n1_untrusted_selection_cannot_override_run[both-legacy]",
+        "test_n1_untrusted_selection_cannot_override_run[both-registration]",
+        "test_n1_untrusted_selection_cannot_override_run[both-provenance]",
+        "test_n1_explicit_check_records_disagreement[3-4]",
+        "test_n1_explicit_check_records_disagreement[3-5]",
+        "test_n1_explicit_check_records_disagreement[4-3]",
+        "test_n1_explicit_check_records_disagreement[4-5]",
+        "test_n1_explicit_check_records_disagreement[50-3]",
+        "test_n1_explicit_check_records_disagreement[50-4]",
+        "test_n1_explicit_check_records_disagreement[51-3]",
+        "test_n1_explicit_check_records_disagreement[51-4]",
+        "test_n1_explicit_check_records_disagreement[51-5]",
+        "test_n1_explicit_check_records_disagreement[None-3]",
+        "test_n1_explicit_check_records_disagreement[None-4]",
+        "test_n1_explicit_check_records_disagreement[None-5]",
+        "test_n1_explicit_check_records_disagreement[True-3]",
+        "test_n1_explicit_check_records_disagreement[True-4]",
+        "test_n1_explicit_check_records_disagreement[True-5]",
+        "test_n1_explicit_check_records_disagreement[marker6-3]",
+        "test_n1_explicit_check_records_disagreement[marker6-4]",
+        "test_n1_explicit_check_records_disagreement[marker6-5]",
+        "test_n1_claim_shape_requires_explicit_caller_version[None]"
+      ]
+    },
+    "N3": {
+      "after": {
+        "failed": 0,
+        "passed": 9,
+        "skipped": 0
+      },
+      "before": {
+        "failed": 4,
+        "passed": 5,
+        "skipped": 0
+      },
+      "failed_before_passed_after": [
+        "test_n3_pathological_pattern_refuses_within_deadline[verify]",
+        "test_n3_pathological_pattern_refuses_within_deadline[check]",
+        "test_n3_pattern_and_input_bounds_fail_closed[long-source]",
+        "test_n3_pattern_and_input_bounds_fail_closed[overflow]"
+      ]
+    },
+    "N4": {
+      "after": {
+        "failed": 0,
+        "passed": 9,
+        "skipped": 0
+      },
+      "before": {
+        "failed": 6,
+        "passed": 3,
+        "skipped": 0
+      },
+      "failed_before_passed_after": [
+        "test_n4_nonstring_scalar_coverage_uses_selected_version[2026-3]",
+        "test_n4_nonstring_scalar_coverage_uses_selected_version[2026-4]",
+        "test_n4_nonstring_scalar_coverage_uses_selected_version[2026.5-3]",
+        "test_n4_nonstring_scalar_coverage_uses_selected_version[2026.5-4]",
+        "test_n4_nonstring_scalar_coverage_uses_selected_version[True-3]",
+        "test_n4_nonstring_scalar_coverage_uses_selected_version[True-4]"
+      ]
+    }
+  },
+  "causal_base": "562ca36b29c907bd64f1a2ac63c70baf24d8e2cf",
+  "inertness": {
+    "assembly": {
+      "N11_routing_sg2_r27": {
+        "base": "e4fe1bd474ee8d0600a60d869b2b644168979859f37443b4d52661560e9793d3",
+        "head": "b6e8e7c7fdc2642c4adf5ab1efebd11968cbe064a90137fe976a1cc8ea4f2a0b"
+      },
+      "equal": true,
+      "identities": {
+        "descriptor_v1": "83d13d6270c49b59a6dec631e77852f19c63aad2a2a3435b8e2bdfd4a41c9e19",
+        "r24_rc1": "12e03e3911ff1cb16d2d69817fa55b121e36ff22bc20e64e1f468d052a5d89dc",
+        "r8_rc1": "e1da2a6015b0a75f917142d8bcd369e4b59e9d29f8b9114ad58c0c9ffc0d216b",
+        "v10_sg1_r25": "9e59f3db581c168d397793848579c62a9462e8a2e4236101af05f48803baa90e"
+      }
+    },
+    "chorus": {
+      "base_sha256": "830eb7055ba303dc03ee40352b61552d0ca1308a82f93a5a18aebe5a3f07f3d6",
+      "bytes": 142637,
+      "equal": true,
+      "head_sha256": "830eb7055ba303dc03ee40352b61552d0ca1308a82f93a5a18aebe5a3f07f3d6",
+      "runs": {
+        "2026-10-20a": {
+          "d37": [
+            58,
+            58
+          ],
+          "request_equals_saved_bytes": true,
+          "request_sha256": "3f3e8b7f541c86a0ce74ba11c4c05d1a6738f38477a3ff6ec3bb8e27eafc03f0",
+          "result_equals_saved": {
+            "CHORUS_receipt_completion_result.json": false,
+            "CHORUS_receipt_completion_result_2.json": true
+          },
+          "result_sha256": "21d3af543c2583a3323ecb1a105811d69b6a60a990994ceaa67186b038ecf90c"
+        },
+        "2026-10-22a": {
+          "d37": [
+            64,
+            64
+          ],
+          "request_equals_saved_bytes": true,
+          "request_sha256": "086dd23c1f4914195574f3e3dc4be8ec9a603b8c84d60e565cfd3c07aedc6249",
+          "result_equals_saved": {
+            "CHORUS_receipt_completion_result.json": true
+          },
+          "result_sha256": "f8dbba99b8c694c7be5563f52b4c471ac73f33d621ab5fd7a0c8b35dfa2a8a1d"
+        }
+      }
+    },
+    "corpus": {
+      "base_sha256": "52b997f6f75365ac7d80400ddf7aca145f062f0c3edff82b76dccecd84fa7ed7",
+      "bytes": 6834351,
+      "checked": 48,
+      "equal": true,
+      "head_sha256": "52b997f6f75365ac7d80400ddf7aca145f062f0c3edff82b76dccecd84fa7ed7",
+      "matches_reviewer_saved_baseline": true,
+      "records": 54,
+      "snapshots": 36
+    },
+    "report": {
+      "base_sha256": "c659ce494b0545a077abcae29a593ad0dff572a1cbb9ab99f25370ce91c65018",
+      "bytes": 2725514,
+      "checked_v7": 325,
+      "checked_v8": 325,
+      "equal": true,
+      "head_sha256": "c659ce494b0545a077abcae29a593ad0dff572a1cbb9ab99f25370ce91c65018",
+      "matches_reviewer_saved_baseline": true,
+      "records": 335
+    }
+  },
+  "limits": [
+    "Offline selected 18-module suite, not the entire repository suite.",
+    "19 existing native-runtime-only skips; no new causal test skips.",
+    "N11 shared-generation v2 identity changes; generic_v10/A21 remains identical."
+  ],
+  "protected_paths_changed": [],
+  "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+  "source_sha256": {
+    "scripts/adhoc/prove_receipts_v5_inertness_20261029.py": "ab4553d93c379a3667635b21447f86230f3af153eba8ebfeeee609537eeefdea",
+    "scripts/adhoc/receipts_v5_merge_probes_20261029/assembly_probe.py": "b134af93ec3fffd86a39c426f7c680ce62b6a30f44022feb62ff3dd6e2e6ed99",
+    "scripts/adhoc/receipts_v5_merge_probes_20261029/chorus_v10_inert.py": "adfc26fbd1a229517c94134b1cb1217fd947ed4193bf02da18f08ad1e38d82e0",
+    "scripts/adhoc/receipts_v5_merge_probes_20261029/corpus_inert.py": "73e94d238e8cee88e6415ab8762faeec5978477be73becefe19cef9c5f4d76f4",
+    "scripts/adhoc/receipts_v5_merge_probes_20261029/report_inert.py": "2d017deb0cb66e494077eaebe93311f43189e687125c6c38048df6ffbf6c912d",
+    "scripts/adhoc/summarize_receipts_v5_merge_20261029.py": "3178390f7ee3a849cf497abbfbea1298783cd7178254edd4b499553dec1ec60a",
+    "scripts/adhoc/validate_receipts_v5_merge_20261029.py": "bcda2732783f1b01fd0a73f5f24326a90d1ed8a750e9d3a63f4de9e69a0de7c4",
+    "src/data_sheets_schema/_receipt_regex.py": "0b33866aed459b144a1af8a894f43d6c16415e1eae06d8fcf75db6e0715a21c8",
+    "src/data_sheets_schema/receipts.py": "a99915b31fe7da2a6c9f3f16b65ad69ea87dfaa38609f2a7649c026637793c29",
+    "tests/test_receipts_v5_merge_n1.py": "17be91889bf6732c08acdfe5a05251cd9dc26aeae468922f73552531908e0187",
+    "tests/test_receipts_v5_merge_n3.py": "cfdccac184184074e883ac40b8160b220c9b5371c943567450e1f5324d140497",
+    "tests/test_receipts_v5_merge_n4.py": "e9dd7cd4cab7c51d58e649fca00456826d8a82074f277a69b180124d699e7031",
+    "tests/test_review_receipts_v5_20261026.py": "c9237c0bc499c37362b1ae97165292161f846d8680dd209834c2769747342809",
+    "tests/test_wave3_receipt_integration.py": "cbbf0a02c779857daf2ab63e7d4db58ac423ac4eb9d5f71e8a3a92a660064f40",
+    "tests/test_wave3_receipts_core.py": "88bb2315a76174b2355195d79e3208a45c18e44b3e17cb82256315ffc143a151"
+  },
+  "tested_head": "955af2bfe0bb09a85930dd7e4d23c3b07b68e245"
+}

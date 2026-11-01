@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 9 items
+
+tests/test_british_instrument.py::Battery::test_no_pattern_matches_the_empty_string PASSED [ 11%]
+tests/test_british_instrument.py::Battery::test_the_american_control_text_scores_zero PASSED [ 22%]
+tests/test_british_instrument.py::Battery::test_the_battery PASSED       [ 33%]
+tests/test_british_instrument.py::PrefixClassification::test_a_bare_invented_prefix_still_counts PASSED [ 44%]
+tests/test_british_instrument.py::PrefixClassification::test_a_minted_ark_is_caught_by_grounding_not_classification PASSED [ 55%]
+tests/test_british_instrument.py::PrefixClassification::test_a_urn_under_a_registered_nid_is_excused PASSED [ 66%]
+tests/test_british_instrument.py::PrefixClassification::test_a_urn_under_an_invented_nid_is_counted_as_that_namespace PASSED [ 77%]
+tests/test_british_instrument.py::PrefixClassification::test_an_attested_ark_grounds PASSED [ 88%]
+tests/test_british_instrument.py::PrefixClassification::test_ark_is_a_scheme_not_a_minted_prefix PASSED [100%]
+
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_04-xml-qrhrtoi5/pytest.xml -
+============================== 9 passed in 4.70s ===============================

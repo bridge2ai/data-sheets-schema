@@ -57,7 +57,7 @@ def test_explicit_historical_replay_keeps_the_prior_measurement(tmp_path):
     assert [f["kind"] for f in check(tmp_path, before={})] == ["removal_of_absent_slot"]
 
 
-@pytest.mark.parametrize("version", [6, 9, "8", 8.0])
+@pytest.mark.parametrize("version", [6, 10, 99, "8", 8.0])
 def test_unknown_instruments_are_not_mislabelled(tmp_path, version):
     with pytest.raises(ValueError, match="unsupported report-claims"):
         check(tmp_path, before={}, version=version)

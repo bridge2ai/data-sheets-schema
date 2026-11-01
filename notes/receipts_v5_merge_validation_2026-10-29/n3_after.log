@@ -1,0 +1,9 @@
+........................................................................ [ 76%]
+......................                                                   [100%]
+=============================== warnings summary ===============================
+tests/test_wave3_receipts_core.py::test_completed_tool_receipt_keeps_snapshot_identity_after_final_reorder[None]
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+94 passed, 1 warning in 8.41s

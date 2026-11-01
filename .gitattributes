@@ -1,2 +1,4 @@
 # The _wcrate copies are pinned by sha256 in index.yaml; never convert line endings (#5083).
 data/_wcrate/** -text
+# Preserve the exact git-show evidence, including indented blank message lines.
+notes/e3x_restack_evidence_2026-10-26/initial/source-dfef56718.txt -text -whitespace

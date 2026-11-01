@@ -1,0 +1,9 @@
+commit dfef56718f41ae95598901ad4afd13a508b534cf
+tree a1c7494309ae7188bb7c8999f6ce0c90bee5cf1c
+parent e53ec65dae3ebc3cf7a621b4940779db9fd31649
+author marcin p. joachimiak <4625870+realmarcin@users.noreply.github.com> 1793080653 -0700
+committer marcin p. joachimiak <4625870+realmarcin@users.noreply.github.com> 1793080653 -0700
+
+    Align blind-review seed help with the campaign guard
+    
+    Refs #5133. Document the reviewed E3x merge; preserve the existing seed validation predicate.

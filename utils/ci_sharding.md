@@ -62,7 +62,22 @@ partition, compared with approximately 697.3 seconds per weighted shard.
 These are estimates of test work, not wall-clock predictions; fixture reuse,
 runner load and changed tests can affect the actual result.
 
-The current snapshot comes from successful run
+The current snapshot comes from successful main run
+[41148135309](https://github.com/bridge2ai/data-sheets-schema/actions/runs/41148135309)
+at `4c07980399d47d77b64c9f2bff7a50bfc5cc6ddf`: 20,801 testcase occurrences in
+575 files, including 51 files absent from the previous snapshot. Recorded case
+times sum to 27,148.941 seconds. The four core XML hashes, saved archive digests,
+run provenance and occurrence counts are recorded in the
+[refresh evidence](../notes/ci_timing_refresh_2026-10-31/timing-refresh.json).
+Report admission now has a 2,697.097-second weight, and the API-runner weight is
+2,988.490 seconds. For the collected main ordinary lane, the refreshed assignment
+estimates about 6,787.2 case-seconds per four-way shard or 4,524.8 per six-way
+shard. These are scheduling estimates, not wall-time predictions. The
+[offline comparison](../notes/ci_timing_refresh_2026-10-31/README.md) also adds
+the ten v5 test files from #5364 using the median fallback. Tests, lane boundaries,
+deadlines and gates are unchanged; CI runtime improvement remains unmeasured.
+
+The previous snapshot comes from successful run
 [38158491197](https://github.com/bridge2ai/data-sheets-schema/actions/runs/38158491197)
 at `df2aa6c663c8d5712e3bd51885a6806f00982d79`: 18,848 testcase occurrences in
 524 files, including 243 files absent from the previous snapshot. One legitimate

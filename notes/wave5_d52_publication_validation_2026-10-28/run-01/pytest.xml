@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.067" timestamp="2026-10-28T11:41:49.232876" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_d52_publication_labels" name="test_exported_unregulated_q9_labels_describe_only_retained_criteria" time="0.042"><failure message="AssertionError">tmp_path = PosixPath('/private/tmp/d4d-wave5-d52-label-baseline-20261028/cases/test_exported_unregulated_q9_l0')
+
+    def test_exported_unregulated_q9_labels_describe_only_retained_criteria(tmp_path):
+        ev = evaluator({"regulated_access": False})
+        data = record()
+        data["regulatory_restrictions"] = {"description": "Synthetic unregulated dataset"}
+        source = tmp_path / "record.yaml"
+        source.write_text(yaml.safe_dump(data), encoding="utf-8")
+        result = ev.evaluate_d4d_file(source, "EXAMPLE", "manual")
+        target = tmp_path / "scores.json"
+        ev.export_scores_json([result], target)
+        exported = json.loads(target.read_text(encoding="utf-8"))[0]
+        question = next(q for q in exported["rubric20"]["questions"] if q["id"] == 9)
+        assert question["score"] == question["max_score"] == 5
+        assert exported["rubric20"]["fixed_max"] == 88
+        assert "3/3 fields populated" in question["score_label"]
+&gt;       assert "4 regulated-access criteria excluded under D52" in question["score_label"]
+E       AssertionError
+
+tests/test_d52_publication_labels.py:29: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,57 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 38 items
+
+tests/test_claudecode_direct_arm.py::DirectArmRegistry::test_a_claude_code_runtime_is_recognised_by_its_key_not_its_exact_string PASSED [  2%]
+tests/test_claudecode_direct_arm.py::DirectArmRegistry::test_method_resolution_finds_a_label_under_the_direct_family PASSED [  5%]
+tests/test_claudecode_direct_arm.py::DirectArmRegistry::test_the_direct_runtime_still_reads_playbooks_and_follows_the_agentic_spec PASSED [  7%]
+tests/test_claudecode_direct_arm.py::DirectArmRegistry::test_the_direct_runtime_string_folds_to_its_own_key_and_plain_claude_code_stays_agentic PASSED [ 10%]
+tests/test_claudecode_direct_arm.py::DirectArmRegistry::test_the_method_and_its_core_twin_are_registered_as_a_baseline_agent_family PASSED [ 13%]
+tests/test_claudecode_direct_arm.py::DirectArmRegistry::test_the_runtime_row_separates_the_arms_and_the_provider_is_not_compared PASSED [ 15%]
+tests/test_claudecode_direct_arm.py::ThreeRuntimeCanonicals::test_canonical_sets_enumerates_every_runtime_key PASSED [ 18%]
+tests/test_claudecode_direct_arm.py::ThreeRuntimeCanonicals::test_every_runtime_option_offers_the_direct_key PASSED [ 21%]
+tests/test_claudecode_direct_arm.py::ThreeRuntimeCanonicals::test_the_ambiguity_hint_names_every_runtime_and_the_direct_key_resolves_it PASSED [ 23%]
+tests/test_claudecode_direct_arm.py::ReasoningLogStatus::test_the_direct_runtime_reads_as_the_agentic_one_does PASSED [ 26%]
+tests/test_claudecode_direct_arm.py::HeaderBasisForTheDirectRuntime::test_a_header_effort_that_disagrees_with_the_launcher_flag_is_noted_not_erased PASSED [ 28%]
+tests/test_claudecode_direct_arm.py::HeaderBasisForTheDirectRuntime::test_a_silent_environment_leaves_both_values_asserted_and_named_as_gaps PASSED [ 31%]
+tests/test_claudecode_direct_arm.py::HeaderBasisForTheDirectRuntime::test_an_agreeing_environment_corroborates_the_effort PASSED [ 34%]
+tests/test_claudecode_direct_arm.py::AssertedEffort::test_a_rendered_recorder_line_carries_the_asserted_effort_and_nothing_else_moves PASSED [ 36%]
+tests/test_claudecode_direct_arm.py::AssertedEffort::test_the_recorder_admits_the_session_levels_and_the_ladder_agrees PASSED [ 39%]
+tests/test_claudecode_direct_arm.py::test_the_production_renderer_emits_the_effort_on_the_recorder_line_only_when_asserted PASSED [ 42%]
+tests/test_claudecode_direct_arm.py::test_the_gate_takes_the_registered_effort_when_the_copied_line_dropped_the_flag PASSED [ 44%]
+tests/test_claudecode_direct_arm.py::test_the_gate_refuses_an_effort_that_disagrees_with_the_registered_specification PASSED [ 47%]
+tests/test_claudecode_direct_arm.py::test_a_specification_asserting_an_unknown_effort_is_refused PASSED [ 50%]
+tests/test_claudecode_direct_arm.py::test_the_renderer_3_receipt_section_renders_for_both_claude_code_runtimes PASSED [ 52%]
+tests/test_claudecode_direct_arm.py::test_a_specification_that_asserts_no_effort_binds_none PASSED [ 55%]
+tests/test_claudecode_direct_arm.py::test_backfill_spec_recovers_a_direct_runtime_record[1] PASSED [ 57%]
+tests/test_claudecode_direct_arm.py::test_backfill_spec_recovers_a_direct_runtime_record[2] PASSED [ 60%]
+tests/test_claudecode_direct_arm.py::test_backfill_spec_recovers_a_direct_runtime_record[3] PASSED [ 63%]
+tests/test_claudecode_direct_arm.py::PlaybookWording::test_the_playbooks_name_the_direct_runtime_and_dictate_no_provider_string PASSED [ 65%]
+tests/test_claudecode_direct_arm.py::test_the_env_form_changes_only_the_recorder_line_and_its_note PASSED [ 68%]
+tests/test_claudecode_direct_arm.py::test_the_env_key_round_trips_and_a_non_boolean_is_refused PASSED [ 71%]
+tests/test_claudecode_direct_arm.py::test_the_env_key_is_refused_where_it_renders_nothing PASSED [ 73%]
+tests/test_claudecode_direct_arm.py::test_the_recorder_reads_the_instruction_from_the_named_variable PASSED [ 76%]
+tests/test_claudecode_direct_arm.py::test_the_named_variable_must_be_set_to_an_existing_file PASSED [ 78%]
+tests/test_claudecode_direct_arm.py::test_a_different_file_in_the_variable_is_refused_by_the_render_gate PASSED [ 81%]
+tests/test_claudecode_direct_arm.py::test_a_specification_rendering_the_env_form_requires_the_flag PASSED [ 84%]
+tests/test_claudecode_direct_arm.py::test_an_expansion_form_run_can_still_be_re_recorded_with_the_flag PASSED [ 86%]
+tests/test_claudecode_direct_arm.py::test_the_agentic_cborg_arm_can_register_the_env_form PASSED [ 89%]
+tests/test_claudecode_direct_arm.py::test_the_agentic_preparer_writes_keyed_agentic_jobs PASSED [ 92%]
+tests/test_claudecode_direct_arm.py::test_a_registered_line_as_written_records_the_receipt_expectation PASSED [ 94%]
+tests/test_claudecode_direct_arm.py::test_a_redundant_receipt_flag_on_a_registered_line_is_accepted PASSED [ 97%]
+tests/test_claudecode_direct_arm.py::test_writes_receipt_is_one_answer_for_the_record_and_the_launcher PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_claudecode_direct_arm.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_06-xml-e6ssbq3t/pytest.xml -
+======================= 38 passed, 13 warnings in 33.35s =======================

@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="5.576" timestamp="2026-10-29T20:18:12.358879" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_audit_recall_leak_rendered" name="test_the_rendered_direct_arm_prompts_quote_nothing" time="3.050" /></testsuite></testsuites>

@@ -1,0 +1,25 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 10 items
+
+tests/test_manifest_corpus_review_r12.py::test_auto_external_bundle_uses_the_same_output_owner_as_its_spec[False] PASSED [ 10%]
+tests/test_manifest_corpus_review_r12.py::test_auto_external_bundle_uses_the_same_output_owner_as_its_spec[True] PASSED [ 20%]
+tests/test_manifest_corpus_review_r12.py::test_backfill_grounding_uses_only_an_established_record_owner[False-False] PASSED [ 30%]
+tests/test_manifest_corpus_review_r12.py::test_backfill_grounding_uses_only_an_established_record_owner[False-True] PASSED [ 40%]
+tests/test_manifest_corpus_review_r12.py::test_backfill_grounding_uses_only_an_established_record_owner[True-False] PASSED [ 50%]
+tests/test_manifest_corpus_review_r12.py::test_backfill_grounding_uses_only_an_established_record_owner[True-True] PASSED [ 60%]
+tests/test_manifest_corpus_review_r12.py::test_header_only_reconstruction_uses_the_discovered_artifact_owner PASSED [ 70%]
+tests/test_manifest_corpus_review_r12.py::test_header_only_auto_selection_honors_an_explicit_manifest PASSED [ 80%]
+tests/test_manifest_corpus_review_r12.py::test_unknown_chunk_base_disables_discovery_but_preserves_verified_recovery[False] PASSED [ 90%]
+tests/test_manifest_corpus_review_r12.py::test_unknown_chunk_base_disables_discovery_but_preserves_verified_recovery[True] PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_21-xml-dozf8237/pytest.xml -
+======================== 10 passed, 1 warning in 7.03s =========================

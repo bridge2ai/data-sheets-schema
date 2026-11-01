@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="162.042" timestamp="2026-10-26T23:16:05.095117" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_arm_comparison" name="test_committed_comparison_matches_current_records" time="161.964" /></testsuite></testsuites>

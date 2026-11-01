@@ -1,0 +1,74 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 55 items
+
+tests/test_review_pack.py::Rules::test_rule_bullets_are_extracted_with_their_block PASSED [  1%]
+tests/test_review_pack.py::ValueAt::test_an_index_into_a_collapsed_string_does_not_resolve_to_a_character PASSED [  3%]
+tests/test_review_pack.py::IdSlots::test_a_fragment_on_another_base_is_constructed_not_stated PASSED [  5%]
+tests/test_review_pack.py::IdSlots::test_forced_and_optional_mints_are_told_apart PASSED [  7%]
+tests/test_review_pack.py::Pack::test_a_pair_with_matched_distributions_yields_a_reviewable_item PASSED [  9%]
+tests/test_review_pack.py::Pack::test_a_prefix_of_a_longer_url_is_not_attestation_and_an_alias_form_is PASSED [ 10%]
+tests/test_review_pack.py::Pack::test_base_in_bundle_travels_through_build_pack_against_the_bytes_the_record_read PASSED [ 12%]
+tests/test_review_pack.py::Pack::test_gaps_are_named_not_filled PASSED   [ 14%]
+tests/test_review_pack.py::Pack::test_origin_edge_cases_from_the_review PASSED [ 16%]
+tests/test_review_pack.py::Pack::test_the_pack_is_complete_and_deterministic PASSED [ 18%]
+tests/test_review_pack.py::Pack::test_the_written_pack_has_no_yaml_aliases PASSED [ 20%]
+tests/test_review_pack.py::PairWarnings::test_an_answered_pair_item_counts PASSED [ 21%]
+tests/test_review_pack.py::PairWarnings::test_the_vocabulary_counts_divergent_as_adverse_and_consistent_as_not PASSED [ 23%]
+tests/test_review_pack.py::Agree::test_a_missing_verdict_is_unanswered_not_adverse PASSED [ 25%]
+tests/test_review_pack.py::Agree::test_a_placeholder_reviewed_at_is_reported_never_failed PASSED [ 27%]
+tests/test_review_pack.py::Agree::test_all_one_class_makes_kappa_undefined_not_zero PASSED [ 29%]
+tests/test_review_pack.py::Agree::test_kappa_and_disagreements_are_computed_on_the_trichotomy PASSED [ 30%]
+tests/test_review_pack.py::Agree::test_reviews_of_different_packs_refuse_to_pair PASSED [ 32%]
+tests/test_review_pack.py::Agree::test_the_cli_reports_a_placeholder_and_still_exits_zero_under_strict PASSED [ 34%]
+tests/test_review_pack.py::Agree::test_unanswered_items_are_excluded_and_named PASSED [ 36%]
+tests/test_review_pack.py::Check::test_every_item_once_with_a_vocabulary_verdict_and_evidence PASSED [ 38%]
+tests/test_review_pack.py::IdentityJoin::test_a_receipted_item_follows_its_entry_and_the_receiptless_set_excludes_it PASSED [ 40%]
+tests/test_review_pack.py::GoneEntries::test_a_receipt_whose_entry_is_gone_shows_unresolved_and_covers_nothing PASSED [ 41%]
+tests/test_review_pack.py::RegistryLabels::test_a_values_from_curie_carries_its_pinned_label PASSED [ 43%]
+tests/test_review_pack.py::ReferenceAttributes::test_the_pack_names_the_reference_attributes PASSED [ 45%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_a_broken_core_record_names_itself_in_the_pair_gap PASSED [ 47%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_a_byte_identical_rewrite_is_not_a_rewrite PASSED [ 49%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_a_deleted_pack_does_not_delete_the_guard PASSED [ 50%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_a_failing_review_is_not_written_under_strict_and_is_not_evidence PASSED [ 52%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_a_pack_that_is_not_a_pack_is_never_attested PASSED [ 54%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_a_pack_the_record_pins_is_refused PASSED [ 56%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_a_refusal_leaves_the_instruction_file_as_it_found_it PASSED [ 58%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_a_rewrite_that_would_move_a_pinned_pack_is_refused_and_force_moves_it PASSED [ 60%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_a_stale_pin_does_not_block_and_is_named PASSED [ 61%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_an_unparsable_provenance_record_is_a_named_refusal PASSED [ 63%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_an_unreadable_pin_file_fails_closed PASSED [ 65%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_an_unreadable_sidecar_does_not_refuse_a_byte_identical_regeneration PASSED [ 67%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_an_unreadable_snapshot_is_not_reported_as_no_snapshot PASSED [ 69%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_an_unusable_snapshot_leaves_the_receipts_block_unchecked PASSED [ 70%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_build_pack_refuses_the_state_that_writes_nothing_and_returns_nothing PASSED [ 72%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_build_pack_returns_only_the_pack PASSED [ 74%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_every_way_a_read_fails_names_the_file PASSED [ 76%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_no_pack_means_no_pins_and_a_free_write PASSED [ 78%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_pack_pin_state_reads_the_same_pins_as_the_guard PASSED [ 80%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_pack_pins_folds_unreadable_into_stale PASSED [ 81%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_runs_check_reads_the_pin_state_from_the_records_location PASSED [ 83%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_runs_check_reports_a_moved_pack_through_the_cli PASSED [ 85%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_the_agent_is_told_never_to_regenerate PASSED [ 87%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_the_b_review_and_the_pack_itself PASSED [ 89%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_the_cli_names_the_record_that_would_not_parse PASSED [ 90%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_the_cli_names_whichever_file_would_not_parse PASSED [ 92%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_the_cli_refuses_without_force_and_names_what_moved PASSED [ 94%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_the_cli_says_when_a_rewrite_restored_a_stale_pins_pack PASSED [ 96%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_the_refusal_names_each_pins_class_and_the_callers_override PASSED [ 98%]
+tests/test_review_pack.py::APackIsNeverRewrittenUnderItsPin::test_writes_land_whole_and_an_unchanged_pack_is_not_reopened PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_review_pack.py::IdSlots::test_a_fragment_on_another_base_is_constructed_not_stated
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_review_pack.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_50-xml-efjyyeny/pytest.xml -
+======================= 55 passed, 13 warnings in 45.05s =======================

@@ -1449,7 +1449,7 @@ PRECISION_MODULES = {
 #: keys). The list is what keeps them model-facing; a change here is a
 #: change to the cross-check, made on purpose.
 LISTED_NOT_DERIVED = ["audit_batches", "audit_grammar", "audit_omissions", "evidence_assertions", "grounding",
-                      "scope", "source_metadata", "typed_audit"]
+                      "scope", "source_metadata"]
 
 
 class TestModelFacingDerivation(unittest.TestCase):
@@ -2234,6 +2234,9 @@ class TestModelFacingDerivation(unittest.TestCase):
         self.assertEqual(mf["listed"], sorted(scan.MODEL_FACING_MODULES))
         self.assertEqual(mf["derived_not_listed"], [])
         self.assertEqual(mf["derived_outside_closures"], [])
+        # F1's shared S7 formatter makes this module directly discoverable;
+        # it no longer relies only on the hand-kept model-facing list.
+        self.assertIn("typed_audit", mf["derived"])
         self.assertEqual(mf["listed_not_derived"], LISTED_NOT_DERIVED)
         self.assertEqual(set(mf["derived"]) | set(LISTED_NOT_DERIVED), scan.MODEL_FACING_MODULES)
 

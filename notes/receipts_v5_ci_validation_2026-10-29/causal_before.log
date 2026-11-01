@@ -1,0 +1,53 @@
+..............F
+=================================== FAILURES ===================================
+_________________ TestTheExitStatus.test_violations_are_exit_1 _________________
+
+self = <tests.test_generation_specificity_skill.TestTheExitStatus testMethod=test_violations_are_exit_1>
+
+    def test_violations_are_exit_1(self):
+        """The completed scan of this checkout has violations (the GC names
+        in CLAUDE.md and the launchers), so run() and main() both say 1."""
+>       result = _full_run()
+
+tests/test_generation_specificity_skill.py:440: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_generation_specificity_skill.py:125: in _full_run
+    return scan.run(ROOT)
+.claude/skills/d4d-generation-specificity-audit/scan.py:14586: in run
+    surfaces, facts = discover(root)
+.claude/skills/d4d-generation-specificity-audit/scan.py:10867: in discover
+    spans, wrote = text_flow(root, parsed, index, controllers, sinks)
+.claude/skills/d4d-generation-specificity-audit/scan.py:10078: in text_flow
+    flow(q, fn, _results(fn), f"its value reaches {name}()", projection,
+.claude/skills/d4d-generation-specificity-audit/scan.py:9981: in flow
+    walk(e, value_mode, projection)
+.claude/skills/d4d-generation-specificity-audit/scan.py:9976: in walk
+    walk(child, mode, project)
+.claude/skills/d4d-generation-specificity-audit/scan.py:9886: in walk
+    walk(v, mode, project)
+.claude/skills/d4d-generation-specificity-audit/scan.py:9939: in walk
+    walk(e.func.value, "selector" if e.func.attr in FILE_READ_METHODS else mode,
+.claude/skills/d4d-generation-specificity-audit/scan.py:9947: in walk
+    walk(actual, "selector" if id(actual) in selectors else (mode if carries else "data"),
+.claude/skills/d4d-generation-specificity-audit/scan.py:9939: in walk
+    walk(e.func.value, "selector" if e.func.attr in FILE_READ_METHODS else mode,
+.claude/skills/d4d-generation-specificity-audit/scan.py:9886: in walk
+    walk(v, mode, project)
+.claude/skills/d4d-generation-specificity-audit/scan.py:9887: in walk
+    effects(e.id, mode, project)
+.claude/skills/d4d-generation-specificity-audit/scan.py:9380: in effects
+    refusal(node, "projected receiving object")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <ast.Call object at 0x1363b58d0>, reason = 'projected receiving object'
+
+    def refusal(node, reason):
+>       raise ConfigError(f"{_rel(root, q)}:{getattr(node, 'lineno', fn.lineno if fn else 1)}: "
+                          f"unsupported effect on model-text local container ({reason})")
+E       d4d_specificity_scan.ConfigError: src/data_sheets_schema/receipts.py:1532: unsupported effect on model-text local container (projected receiving object)
+
+.claude/skills/d4d-generation-specificity-audit/scan.py:8360: ConfigError
+=========================== short test summary info ============================
+FAILED tests/test_generation_specificity_skill.py::TestTheExitStatus::test_violations_are_exit_1
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 14 passed in 30.41s

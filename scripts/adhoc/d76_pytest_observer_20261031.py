@@ -20,6 +20,8 @@ LEDGER = {'collected': [], 'selected': [], 'reports': [], 'collection_errors': [
           'origins_collected': False, 'origins_after': False}
 WORKER = 'master'
 GUARD_INSTALLED = False
+SERIAL_INDEX = -1
+SERIAL_NODE_INDEX = {}
 
 
 def loopback(host):
@@ -102,7 +104,15 @@ def pytest_collectreport(report):
 
 
 def pytest_runtest_logreport(report):
+    global SERIAL_INDEX
+    index = getattr(report, 'item_index', None)
+    if index is None:
+        if report.when == 'setup' or report.nodeid not in SERIAL_NODE_INDEX:
+            SERIAL_INDEX += 1
+            SERIAL_NODE_INDEX[report.nodeid] = SERIAL_INDEX
+        index = SERIAL_NODE_INDEX[report.nodeid]
     LEDGER['reports'].append({'nodeid': report.nodeid, 'when': report.when,
+                             'item_index': index, 'worker_id': getattr(report, 'worker_id', WORKER),
                              'outcome': report.outcome, 'xfail': getattr(report, 'wasxfail', None)})
 
 

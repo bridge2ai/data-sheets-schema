@@ -1,8 +1,8 @@
 """Deterministic, offline source-review packs (E2; #3280/#1782/#1801/#1815).
 
-The output is an OPERATOR-ONLY package: distribute only ``blind_*.yaml`` and
-``review_sheet.tsv`` to reviewers, never the directory or sealed key. File
-permissions are local access controls, not encryption or reviewer separation.
+The reviewer directory contains only ``blind_*.yaml`` and ``review_sheet.tsv``.
+Its separate private key must be written outside that directory and never
+distributed. File permissions are local access controls, not encryption.
 
 Selection is explicit. This prepares review materials, not scientific approval,
 generation acceptance, or proof that source content cannot reveal its origin.
@@ -12,7 +12,6 @@ remaining in source text causes refusal and requires explicit blinding review.
 from __future__ import annotations
 
 import argparse
-from collections import Counter
 import csv
 from dataclasses import dataclass
 from datetime import datetime
@@ -24,8 +23,11 @@ from pathlib import Path
 import re
 import secrets
 import shutil
+import stat
+import sys
 import tempfile
 from typing import Iterable
+import unicodedata
 
 import yaml
 
@@ -34,8 +36,14 @@ from data_sheets_schema.evaluation import registered_eval_runner as registered
 from data_sheets_schema.evaluation_context import unwrap_document
 
 FORMAT = "blind_source_review_pack_v1"
-PROJECTS = ("CHORUS", "AI_READI", "CM4AI", "VOICE")
-ARMS = ("v8", "v10")
+BLINDING_VERSION = "identity_aware_sorted_v1"
+FINGERPRINT_NOTICE = (
+    "Reviewer copies preserve scientific wording. Slot structure, size, spelling, process prose, content origin, "
+    "and matching against public source text can still reveal a generation arm. Counts are "
+    "textual hints, not arm attribution or proof of blinding; zero is not assurance. Keep "
+    "new outputs unpublished until blinded review completes. Historical public records "
+    "cannot be made secret by this pack."
+)
 REVIEW_COLUMNS = (
     "blind_id", "project", "reviewer", "accuracy_score", "completeness_score",
     "hallucination_count", "omission_notes", "verdict",
@@ -61,6 +69,7 @@ _MODEL_LITERAL = re.compile(
     r"\b(?:claude-[\w.\[\]-]+|gpt-[\w.-]+|gemini-[\w.-]+|"
     r"(?:meta-)?llama[- ][\w.-]+|deepseek-[\w.-]+)\b", re.IGNORECASE,
 )
+_CRATE_WORD = re.compile(r"\b(?:ro[- ]?)?crates?\b", re.IGNORECASE)
 
 
 def _canonical(value) -> bytes:
@@ -89,12 +98,20 @@ class Record:
     label: str
     source_path: Path
     source_sha256: str | None = None
+    input_arm: str | None = None
 
     def __post_init__(self):
         for name in ("arm", "project", "label"):
             _text(getattr(self, name), name)
-        if len(self.arm.strip()) < 2:
+        for name in ("arm", "label"):
+            value = getattr(self, name)
+            if value != value.strip() or not _fold_identity(value):
+                raise ValueError(f"{name} cannot have surrounding whitespace or an empty folded identity")
+        if len(_fold_identity(self.arm)) < 2:
             raise ValueError("arm requires at least 2 non-whitespace characters")
+        folded_arm = _fold_identity(self.arm)
+        if not folded_arm[0].isalnum() or not folded_arm[-1].isalnum():
+            raise ValueError("arm cannot have edge punctuation")
         if not isinstance(self.source_path, (str, os.PathLike)):
             raise ValueError("source_path must be a filesystem path")
         object.__setattr__(self, "source_path", Path(_text(str(self.source_path), "source_path")))
@@ -141,7 +158,7 @@ def read_manifest(path: Path) -> list[Record]:
     return records
 
 
-def validate_cohort(records: Iterable[Record], *, cohort: str = "campaign") -> list[Record]:
+def validate_cohort(records: Iterable[Record], *, cohort: str = "campaign", cohort_manifest=None) -> list[Record]:
     records = list(records)
     if not records or len(records) > MAX_RECORDS or not all(isinstance(record, Record) for record in records):
         raise ValueError(f"select 1..{MAX_RECORDS} explicit Record entries")
@@ -150,21 +167,12 @@ def validate_cohort(records: Iterable[Record], *, cohort: str = "campaign") -> l
     if cohort not in {"campaign", "synthetic"}:
         raise ValueError("cohort must be campaign or synthetic")
     if cohort == "campaign":
-        expected = Counter({(arm, project): 3 for arm in ARMS for project in PROJECTS})
-        if len(records) != 24 or Counter((r.arm, r.project) for r in records) != expected:
-            raise ValueError("campaign requires exactly 24 records: v8/v10, four projects, three per cell")
-        for record in records:
-            if record.arm == "v8":
-                suffix = "04f" if record.project in {"CHORUS", "VOICE"} else "04g"
-                labels = {f"2026-09-{suffix}_claude-opus-5-api-generic-v8_rep{i}" for i in (1, 2, 3)}
-                if record.label not in labels:
-                    raise ValueError(f"campaign v8 comparator for {record.project} requires {suffix} rep1–3")
-            elif record.arm == "v10":
-                lbl_lower = record.label.lower()
-                if "v10" not in lbl_lower and not record.label.startswith("registered-final-"):
-                    raise ValueError(
-                        f"campaign v10 record for {record.project} requires a v10 or registered-final label, got {record.label!r}"
-                    )
+        from .cohort_manifest import read_cohort
+        if cohort_manifest is None:
+            raise ValueError("campaign requires a declared cohort manifest")
+        declared, _ = read_cohort(cohort_manifest)
+        if {r.identity for r in records} != {(r["arm"], r["project"], r["label"]) for r in declared}:
+            raise ValueError("selection differs from the declared cohort")
     return sorted(records, key=lambda record: record.identity)
 
 
@@ -235,7 +243,7 @@ def _strip(raw: bytes, record: Record) -> tuple[bytes, set[str]]:
                 identifiers.update(_metadata_identifiers({key: item}))
                 continue
             if key == "arm":
-                if item != record.arm:
+                if item not in (record.arm, record.input_arm):
                     raise ValueError("ambiguous root arm; explicit blinding review required")
                 continue
             if key == "label" and item == record.label:
@@ -269,13 +277,96 @@ def _strip(raw: bytes, record: Record) -> tuple[bytes, set[str]]:
                 inspect_nested(item)
 
     inspect_nested(document)
-    blinded = registered.blind_record(yaml.safe_dump(document, sort_keys=False, allow_unicode=True).encode())
+    blinded = registered.blind_record(yaml.safe_dump(document, sort_keys=True, allow_unicode=True).encode())
     return blinded, identifiers
 
 
+def _fingerprints(blinded: bytes) -> dict:
+    """Count hints in each decoded scientific string, never across strings."""
+    from data_sheets_schema.grounding import BRITISH_INSTRUMENT, BRITISH_PATTERNS
+
+    document = unwrap_document(registered._yaml(blinded))
+    strings = list(_strings(document))
+    paths = _key_paths(document)
+    return {
+        "top_level_slots": sorted(document), "key_paths": paths,
+        "key_path_count": len(paths), "blinded_bytes": len(blinded),
+        "british_form_occurrences": sum(
+            len(pattern.findall(text.lower())) for text in strings for pattern in BRITISH_PATTERNS
+        ),
+        "british_instrument": BRITISH_INSTRUMENT,
+        "british_patterns_sha256": _sha(_canonical([pattern.pattern for pattern in BRITISH_PATTERNS])),
+        "crate_word_occurrences": sum(len(_CRATE_WORD.findall(text)) for text in strings),
+        "counting_basis": "decoded scientific string keys and values, separately; repeated occurrences count",
+        "british_basis": "BRITISH_PATTERNS applied to lowercase strings, including quoted scientific text",
+        "crate_basis": "case-insensitive Unicode word-boundary matches for crate/crates, RO-Crate, RO Crate, ROCrate",
+    }
+
+
+def _key_paths(value, prefix=()):
+    """Unique mapping paths, with typed steps and list positions collapsed."""
+    paths = set()
+    if isinstance(value, dict):
+        for key, child in value.items():
+            path = (*prefix, ("key", key))
+            paths.add(json.dumps(path, ensure_ascii=False, separators=(",", ":")))
+            paths.update(_key_paths(child, path))
+    elif isinstance(value, list):
+        for child in value:
+            paths.update(_key_paths(child, (*prefix, ("item",))))
+    return sorted(paths)
+
+
+def _separability(entries):
+    """Descriptive per-project arm contrasts; no content changes or approval."""
+    from itertools import combinations
+    result = {}
+    for project in sorted({r["project"] for r in entries}):
+        groups = {}
+        for entry in entries:
+            if entry["project"] == project:
+                groups.setdefault(entry["arm"], []).append(entry["fingerprint_diagnostics"])
+        comparisons = []
+        for left, right in combinations(sorted(groups), 2):
+            paths = {arm: [set(r["key_paths"]) for r in groups[arm]] for arm in (left, right)}
+            exclusive = {arm: sorted(set.intersection(*paths[arm]) - set.union(*paths[other]))
+                         for arm, other in ((left, right), (right, left))}
+            sizes = {arm: [min(r["blinded_bytes"] for r in groups[arm]),
+                           max(r["blinded_bytes"] for r in groups[arm])] for arm in (left, right)}
+            comparisons.append({"arms": [left, right], "record_counts": {a: len(groups[a]) for a in (left, right)},
+                "exclusive_key_paths": exclusive, "key_path_separable": any(exclusive.values()),
+                "blinded_size_ranges": sizes,
+                "size_ranges_overlap": max(sizes[left][0], sizes[right][0]) <= min(sizes[left][1], sizes[right][1])})
+        result[project] = {"status": "descriptive_only" if comparisons else "insufficient_comparison_arms",
+                           "comparisons": comparisons}
+    return result
+
+
+def _fold_identity(value):
+    return "".join(char for char in unicodedata.normalize("NFKC", value)
+                   if unicodedata.category(char) != "Cf").casefold()
+
+
 def _identifier_leaked(ident_folded: str, text_folded: str) -> bool:
-    if len(ident_folded) < 4:
-        return bool(re.search(rf"(?<![0-9a-z]){re.escape(ident_folded)}(?![0-9a-z])", text_folded))
+    """Short IDs and replicate tokens require Unicode word boundaries.
+
+    Letters, numbers and combining marks are word characters; punctuation and
+    underscores delimit tokens. Other long IDs retain substring matching.
+    No source text is normalized away.
+    """
+    ident_folded, text_folded = _fold_identity(ident_folded), _fold_identity(text_folded)
+    if not ident_folded:
+        return False
+    if len(ident_folded) < 4 or re.fullmatch(r"rep[1-9][0-9]*", ident_folded):
+        def word_character(char):
+            return char.isalnum() or unicodedata.category(char).startswith("M")
+
+        for match in re.finditer("(?=" + re.escape(ident_folded) + ")", text_folded):
+            start, end = match.start(), match.start() + len(ident_folded)
+            if ((start == 0 or not word_character(text_folded[start - 1]))
+                    and (end == len(text_folded) or not word_character(text_folded[end]))):
+                return True
+        return False
     return ident_folded in text_folded
 
 
@@ -284,16 +375,43 @@ def _leakage(raw: bytes, forbidden: set[str], *, yaml_document: bool = False):
     strings = [text]
     if yaml_document:
         strings.extend(_strings(registered._yaml(raw)))
-    folded = [item.casefold() for item in strings]
+    folded = [_fold_identity(item) for item in strings]
     if any(
-        _identifier_leaked(identifier.casefold(), item)
+        _identifier_leaked(identifier, item)
         for identifier in forbidden
         if identifier
         for item in folded
     ):
         raise ValueError("generation identity remains in reviewer content; explicit blinding review required")
-    if any(_MODEL_LITERAL.search(item) for item in strings):
+    if any(_MODEL_LITERAL.search(item) for item in folded):
         raise ValueError("generator model identifier remains in reviewer content; explicit blinding review required")
+
+
+def _identity_blind(raw: bytes, record: Record, forbidden=()) -> tuple[bytes, set[str]]:
+    if not isinstance(record, Record) or not isinstance(raw, bytes):
+        raise ValueError("blinding requires captured bytes and an explicit Record identity")
+    if record.source_sha256 is not None and _sha(raw) != record.source_sha256:
+        raise ValueError("selected source_sha256 does not match input")
+    identifiers = set(forbidden)
+    if any(not isinstance(item, str) for item in identifiers):
+        raise ValueError("forbidden blinding identifiers must be strings")
+    blinded, metadata_ids = _strip(raw, record)
+    if record.input_arm is not None:
+        metadata_ids.discard(record.input_arm)
+    identifiers.update((record.arm, record.label, str(record.source_path)))
+    identifiers.update(metadata_ids)
+    _leakage(blinded, identifiers, yaml_document=True)
+    return blinded, metadata_ids
+
+
+def blind_input(raw: bytes, record: Record, *, forbidden=()) -> bytes:
+    """Apply the pack's identity-aware gate without reading any source path.
+
+    The caller supplies the actual registered or selected identity. Campaign
+    labels are never inferred from models, conditions, filenames or source
+    metadata; an inconsistent root/wrapper arm requires explicit review.
+    """
+    return _identity_blind(raw, record, forbidden)[0]
 
 
 def _timestamp(value: str | None) -> str | None:
@@ -313,29 +431,63 @@ def _write(path: Path, raw: bytes):
         os.fsync(stream.fileno())
 
 
-def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, seed: str | int,
-                            cohort: str = "campaign", generated_at: str | None = None) -> dict:
-    """Publish a new operator-only package, refusing leaks and any overwrite.
+def _new_destination(path: Path, label: str) -> Path:
+    if path.exists() or path.is_symlink():
+        raise ValueError(f"{label} already exists; never overwrite a review package or key")
+    if not path.parent.is_dir() or path.name in {"", ".", ".."}:
+        raise ValueError(f"{label} requires an existing parent and a new name")
+    destination = path.parent.resolve(strict=True) / path.name
+    if destination.exists() or destination.is_symlink():
+        raise ValueError(f"{label} already exists; never overwrite a review package or key")
+    return destination
+
+
+def _verify_private_key(path: Path, raw: bytes, identity: tuple[int, int]):
+    info = path.lstat()
+    if (not stat.S_ISREG(info.st_mode) or stat.S_IMODE(info.st_mode) != 0o600
+            or (info.st_dev, info.st_ino) != identity):
+        raise ValueError("private key identity or permissions changed")
+    if registered._read(path) != raw:
+        raise ValueError("written private key does not match captured bytes")
+    info = path.lstat()
+    if (not stat.S_ISREG(info.st_mode) or stat.S_IMODE(info.st_mode) != 0o600
+            or (info.st_dev, info.st_ino) != identity):
+        raise ValueError("private key identity or permissions changed")
+
+
+def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_output: Path, seed: str | int,
+                            cohort: str = "campaign", generated_at: str | None = None,
+                            cohort_manifest=None) -> dict:
+    """Publish reviewer files and an external private key without overwrites.
 
     Seeded order is SHA256(seed, arm, project, label), independent of selection
     order and filesystem location. A missing generated_at stays null, avoiding
     wall-clock nondeterminism. Supplying a timestamp does not authenticate it.
-    Share only reviewer YAML files and review_sheet.tsv, NEVER the full output
-    directory/sealed_blind_key.json. This is not an authorization to score.
+    The private key is published and synced before the reviewer directory.
+    A later failure can leave an orphan private key, or both outputs if the
+    reviewer-parent sync fails; external destinations are never cleaned up.
+    This process's ordering cannot prevent later changes by another writer.
+    Share only the reviewer directory, never the key. No scoring is authorized.
     """
     if isinstance(seed, bool) or not isinstance(seed, (str, int)):
         raise ValueError("seed must be a nonempty string or integer")
     seed = _text(str(seed), "seed")
     generated_at = _timestamp(generated_at)
-    records = validate_cohort(records, cohort=cohort)
+    records = validate_cohort(records, cohort=cohort, cohort_manifest=cohort_manifest)
+    declared, cohort_pin = [], None
+    if cohort == "campaign":
+        from .cohort_manifest import read_cohort
+        declared, cohort_pin = read_cohort(cohort_manifest)
     if cohort == "campaign" and (not _SHA.fullmatch(seed) or len(set(seed)) < 8):
         raise ValueError("campaign blind review pack requires a 64-character hex seed with at least 8 distinct hex digits")
     output = Path(output_dir)
-    if output.exists() or output.is_symlink():
-        raise ValueError("output directory already exists; never overwrite a review package")
-    if not output.parent.is_dir() or output.name in {"", ".", ".."}:
-        raise ValueError("output requires an existing parent and a new directory name")
-    destination = output.parent.resolve() / output.name
+    key_path = Path(key_output)
+    if key_path.absolute() == output.absolute() or output.absolute() in key_path.absolute().parents:
+        raise ValueError("private key must be outside the reviewer directory")
+    destination = _new_destination(output, "output directory")
+    key_destination = _new_destination(key_path, "private key")
+    if key_destination == destination or destination in key_destination.parents:
+        raise ValueError("private key must be outside the reviewer directory")
     captured, paths, inodes, total = [], set(), set(), 0
     forbidden = {identifier for record in records for identifier in (record.arm, record.label, str(record.source_path))}
     for record in records:
@@ -374,14 +526,18 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, seed
             if not isinstance(prov_doc, dict):
                 raise ValueError(f"campaign record provenance at {prov_candidate} is not a YAML mapping")
             run_block = prov_doc.get("run") or {}
-            if isinstance(run_block, dict):
-                if run_block.get("label") and run_block.get("label") != record.label:
-                    raise ValueError("campaign record label does not match sibling provenance run.label")
-                cond = str(run_block.get("condition") or "")
-                if record.arm == "v10" and cond and not cond.startswith("generic_v10"):
-                    raise ValueError(f"campaign v10 record provenance condition {cond!r} is not generic_v10")
-                if record.arm == "v8" and cond and not cond.startswith("generic_v8"):
-                    raise ValueError(f"campaign v8 record provenance condition {cond!r} is not generic_v8")
+            if isinstance(run_block, dict) and run_block.get("label") and run_block["label"] != record.label:
+                raise ValueError("campaign record label does not match sibling provenance run.label")
+            declaration = next(r for r in declared if
+                (r["arm"], r["project"], r["label"]) == record.identity)
+            from .run_identity import same_run
+            if (not same_run(run_block, {**declaration, "arm": declaration["input_arm"]})
+                    or run_block.get("condition") != declaration["condition"]
+                    or (run_block.get("replicate") is not None and
+                        (type(run_block["replicate"]) is not int or run_block["replicate"] != declaration["replicate"]))):
+                raise ValueError("campaign record identity differs from the declared cohort provenance")
+            forbidden.update((declaration["comparison_arm"], declaration["condition"],
+                              declaration["method"], f'rep{declaration["replicate"]}'))
             val_block = prov_doc.get("validation") or {}
             artifacts = val_block.get("artifacts") if isinstance(val_block, dict) else None
             full_art = artifacts.get("full") if isinstance(artifacts, dict) else None
@@ -390,7 +546,7 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, seed
             rec_hash = recorded_hash(full_art)
             if hashlib.new(rec_hash[0], raw).hexdigest() != rec_hash[1]:
                 raise ValueError("campaign record bytes do not match sibling provenance validation.artifacts.full")
-        blinded, metadata_ids = _strip(raw, record)
+        blinded, metadata_ids = _identity_blind(raw, record, forbidden)
         forbidden.update(metadata_ids)
         forbidden.update((str(path), str(record.source_path.absolute())))
         captured.append((record, path, digest, blinded))
@@ -408,44 +564,100 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, seed
             "blind_id": blind_id, "arm": record.arm, "project": record.project,
             "label": record.label, "source_path": str(path),
             "source_sha256": digest, "blinded_sha256": _sha(blinded),
+            "fingerprint_diagnostics": _fingerprints(blinded),
         })
         files[filename] = blinded
     files["review_sheet.tsv"] = review.getvalue().encode()
     _leakage(files["review_sheet.tsv"], forbidden)
     key = {
         "format": FORMAT, "seed": seed, "generated_at": generated_at,
+        "blinding_version": BLINDING_VERSION,
+        "normalization": "sorted mapping keys; scientific scalar values and list order preserved",
+        "residual_fingerprint_notice": FINGERPRINT_NOTICE,
+        "structural_separability": _separability(entries),
         "timestamp_basis": "caller_supplied_unverified" if generated_at else "omitted_for_reproducibility",
-        "cohort": cohort, "generator": {
+        "cohort": cohort, "cohort_manifest": cohort_pin, "generator": {
             "algorithm": "sha256_seed_identity_order_v1",
             "module_sha256": _sha(registered._read(Path(__file__))),
             "stripper_module_sha256": _sha(registered._read(Path(registered.__file__))),
             "pyyaml_version": yaml.__version__,
         },
-        "distribution": "operator_only; share blind_*.yaml and review_sheet.tsv only, never the sealed key or directory",
+        "distribution": "reviewer directory contains YAML/TSV only; never share the separate private key",
+        "publication": "private key first; late failure may retain orphan key or both outputs; neither is overwritten or removed",
         "scientific_approval": False, "records": entries,
     }
-    files["sealed_blind_key.json"] = _canonical(key)
-    stage = Path(tempfile.mkdtemp(prefix=".blind-review-pack-", dir=destination.parent))
+    key_raw = _canonical(key)
+    owned = []
+
+    def private_stage(parent, prefix):
+        path = Path(tempfile.mkdtemp(prefix=prefix, dir=parent))
+        info = path.lstat()
+        owned.append((path, (info.st_dev, info.st_ino)))
+        os.chmod(path, 0o700)
+        return path
+
     try:
-        os.chmod(stage, 0o700)
+        stage = private_stage(destination.parent, ".blind-review-pack-")
+        key_stage = private_stage(key_destination.parent, ".blind-review-key-")
         for name, raw in files.items():
             _write(stage / name, raw)
-        # Re-read actual files after writing; no parser/cache can hide changes.
-        for name, expected in files.items():
-            actual = registered._read(stage / name)
-            if actual != expected:
-                raise ValueError("written review package does not match captured bytes")
-            if name != "sealed_blind_key.json":
+        key_file = key_stage / "sealed_blind_key.json"
+        _write(key_file, key_raw)
+        key_info = key_file.lstat()
+        key_identity = (key_info.st_dev, key_info.st_ino)
+
+        def verify_review():
+            if {path.name for path in stage.iterdir()} != set(files):
+                raise ValueError("reviewer directory contains unexpected files")
+            for name, expected in files.items():
+                actual = registered._read(stage / name)
+                if actual != expected:
+                    raise ValueError("written review package does not match captured bytes")
                 _leakage(actual, forbidden, yaml_document=name.endswith(".yaml"))
-        for _, path, digest, _ in captured:
-            if _sha(registered._read(path)) != digest:
-                raise ValueError("source changed during review pack preparation")
+            for _, path, digest, _ in captured:
+                if _sha(registered._read(path)) != digest:
+                    raise ValueError("source changed during review pack preparation")
+
+        verify_review()
+        _verify_private_key(key_file, key_raw, key_identity)
         _sync_directory(stage)
+        _sync_directory(key_stage)
+        _rename_new(key_file, key_destination)
+        _sync_directory(key_destination.parent)
+        _verify_private_key(key_destination, key_raw, key_identity)
+        verify_review()
         _rename_new(stage, destination)
         _sync_directory(destination.parent)
     finally:
-        if stage.exists():
-            shutil.rmtree(stage)
+        original_error = sys.exc_info()[1]
+        cleanup_errors = []
+        for path, identity in owned:
+            try:
+                try:
+                    info = path.lstat()
+                except FileNotFoundError:
+                    continue
+                if not stat.S_ISDIR(info.st_mode) or (info.st_dev, info.st_ino) != identity:
+                    raise OSError(f"owned staging directory was replaced; refusing cleanup: {path}")
+                shutil.rmtree(path)
+            except OSError as exc:
+                cleanup_errors.append(exc)
+        if cleanup_errors:
+            note = "Temporary staging cleanup failed; external outputs were retained: " + "; ".join(map(str, cleanup_errors))
+            if original_error is not None:
+                add_note = getattr(original_error, "add_note", None)
+                if callable(add_note):
+                    add_note(note)
+                else:
+                    # Python 3.9/3.10 do not render exception notes. Preserve
+                    # the error and attached diagnostic even if stderr fails.
+                    original_error.__notes__ = [*getattr(original_error, "__notes__", ()), note]
+                    try:
+                        print(note, file=sys.stderr)
+                    except (OSError, ValueError):
+                        pass
+            else:
+                raise OSError(note) from cleanup_errors[0]
     return key
 
 
@@ -457,21 +669,25 @@ def main(argv=None) -> int:
     parser.add_argument(
         "--seed",
         default=None,
-        help="Cryptographic seed (at least 32 characters in campaign mode; auto-generated via secrets.token_hex(32) if omitted)",
+        help="Cryptographic seed (64 hex characters with at least 8 distinct hex digits in campaign mode; auto-generated via secrets.token_hex(32) if omitted)",
     )
     parser.add_argument("--cohort", choices=("campaign", "synthetic"), default="campaign",
-                        help="Default: 24 records, v8 04f/04g + v10, 3 per project/arm; synthetic accepts other sizes")
+                        help="Campaign requires an explicit cohort manifest; synthetic accepts other sizes")
+    parser.add_argument("--cohort-manifest", type=Path, help="Declared evaluation_cohort_v1 campaign")
     parser.add_argument("--generated-at", help="Optional explicit UTC YYYY-MM-DDTHH:MM:SSZ; otherwise null, not current time")
     parser.add_argument("--output-dir", type=Path, required=True,
-                        help="New operator-only 0700 directory. Share only YAML+review_sheet, NEVER key/full directory")
+                        help="New 0700 reviewer directory containing only YAML and review_sheet.tsv")
+    parser.add_argument("--key-output", type=Path, required=True,
+                        help="New private 0600 key file outside the reviewer directory; never distribute it")
     args = parser.parse_args(argv)
     seed_val = args.seed if args.seed is not None else secrets.token_hex(32)
     try:
         records = read_manifest(args.manifest) if args.manifest else [parse_record(item) for item in args.record]
-        result = build_blind_review_pack(records, args.output_dir, seed=seed_val, cohort=args.cohort,
-                                         generated_at=args.generated_at)
+        result = build_blind_review_pack(records, args.output_dir, key_output=args.key_output,
+                                         seed=seed_val, cohort=args.cohort,
+                                         generated_at=args.generated_at, cohort_manifest=args.cohort_manifest)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
-    print(f"Prepared {len(result['records'])} blinded records. Operator-only package: {args.output_dir}")
-    print("Share only blind_*.yaml and review_sheet.tsv; never the sealed key or full directory.")
+    print(f"Prepared {len(result['records'])} blinded records. Reviewer directory: {args.output_dir}")
+    print(f"Private key: {args.key_output}; never share the sealed key.")
     return 0

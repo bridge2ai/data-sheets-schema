@@ -38,6 +38,7 @@ def bootstrap():
 
 bootstrap()
 import d76_suite_common_20261031 as common
+from d76_phase_accounting_20261031 import phase_accounting
 
 
 def runtime():
@@ -175,7 +176,7 @@ def run(options):
     policy.write_bytes(PROFILE.read_bytes())
     env, removed = scrubbed_environment(options)
     helper_paths = [Path(__file__).resolve(), HERE / 'd76_pytest_observer_20261031.py',
-                    HERE / 'd76_suite_common_20261031.py', PROFILE]
+                    HERE / 'd76_suite_common_20261031.py', HERE / 'd76_phase_accounting_20261031.py', PROFILE]
     helpers = {str(path): common.sha(path.read_bytes()) for path in helper_paths}
     target_hashes = {}
     for target in targets:
@@ -213,9 +214,14 @@ def run(options):
     selected = observations[0].get('selected', []) if observations else []
     collected = observations[0].get('collected', []) if observations else []
     same_collection = bool(observations) and all(row.get('selected') == selected and row.get('collected') == collected for row in observations)
-    cases, counts = case_counts(options.output / 'pytest.xml')
+    cases, raw_junit_counts = case_counts(options.output / 'pytest.xml')
     reports = master.get('reports', [])
-    complete = bool(selected) and Counter(selected) == Counter(row['nodeid'] for row in reports if row['when'] == 'teardown') and len(cases) == len(selected)
+    accounting = phase_accounting(selected, reports)
+    common.save(options.output / 'phase-accounting.json', accounting)
+    counts = accounting['counts']
+    complete = (accounting['all_selected_completed'] and
+                Counter(selected) == Counter(row['nodeid'] for row in reports if row['when'] == 'teardown')
+                and len(cases) == len(selected))
     collection_errors = {key: row['collection_errors'] for key, row in records.items() if row.get('collection_errors')}
     origins_ok = bool(observations) and all(row.get('origins_collected') and row.get('origins_after') for row in observations)
     helpers_same = all(common.sha(path.read_bytes()) == helpers[str(path)] for path in helper_paths)
@@ -233,6 +239,8 @@ def run(options):
                  targets_same and sandbox_loaded and same_collection and not denials)
     collection_complete = options.collect_only and bool(selected) and not reports and not cases and not collection_errors and invariant
     result = {'returncode': code, 'counts': counts, 'collected_occurrences': len(collected),
+        'counts_basis': 'completed phase-ledger occurrences; interrupted/unstarted separate',
+        'raw_junit_counts': raw_junit_counts,
         'selected_occurrences': len(selected), 'selected_unique': len(set(selected)),
         'node_accounting_complete': complete, 'all_worker_collections_identical': same_collection,
         'worker_count': len(workers), 'collection_errors': collection_errors,

@@ -1,0 +1,430 @@
+{
+  "related_00": {
+    "module": "tests/test_arm_comparison.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 60
+    }
+  },
+  "related_01": {
+    "module": "tests/test_audit_recall_leak_rendered.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 37
+    }
+  },
+  "related_02": {
+    "module": "tests/test_backfill_checks.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 19
+    }
+  },
+  "related_03": {
+    "module": "tests/test_backfill_generation_evidence.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 4
+    }
+  },
+  "related_04": {
+    "module": "tests/test_british_instrument.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 9
+    }
+  },
+  "related_05": {
+    "module": "tests/test_bundle_md5_recovery.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 13
+    }
+  },
+  "related_06": {
+    "module": "tests/test_claudecode_direct_arm.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 38
+    }
+  },
+  "related_07": {
+    "module": "tests/test_direct_keep_awake.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 26
+    }
+  },
+  "related_08": {
+    "module": "tests/test_download/test_api_runner.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 149
+    }
+  },
+  "related_09": {
+    "module": "tests/test_download/test_generic_v7_prompt.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 14
+    }
+  },
+  "related_10": {
+    "module": "tests/test_download/test_generic_v8_prompt.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 14
+    }
+  },
+  "related_11": {
+    "module": "tests/test_download/test_receipt_readdress.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 15
+    }
+  },
+  "related_12": {
+    "module": "tests/test_extend_observed.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 36
+    }
+  },
+  "related_13": {
+    "module": "tests/test_external_dataset_onboarding.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 26
+    }
+  },
+  "related_14": {
+    "module": "tests/test_final_input_routing_review.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 9
+    }
+  },
+  "related_15": {
+    "module": "tests/test_generation_manifest_identity.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 29
+    }
+  },
+  "related_16": {
+    "module": "tests/test_generation_recovery_review.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 20
+    }
+  },
+  "related_17": {
+    "module": "tests/test_generation_snapshot_ownership.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 23
+    }
+  },
+  "related_18": {
+    "module": "tests/test_generation_specificity_delegated.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 67
+    }
+  },
+  "related_19": {
+    "module": "tests/test_generic_v10_r9_enum_criteria.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 29
+    }
+  },
+  "related_20": {
+    "module": "tests/test_identifier_form.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 17
+    }
+  },
+  "related_21": {
+    "module": "tests/test_manifest_corpus_review_r12.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 10
+    }
+  },
+  "related_22": {
+    "module": "tests/test_manifest_corpus_review_r3.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 12
+    }
+  },
+  "related_23": {
+    "module": "tests/test_manifest_corpus_root.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 10
+    }
+  },
+  "related_24": {
+    "module": "tests/test_manifest_gate_and_header_review.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 18
+    }
+  },
+  "related_25": {
+    "module": "tests/test_method_resolution.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 23
+    }
+  },
+  "related_26": {
+    "module": "tests/test_name_grounding.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 128
+    }
+  },
+  "related_27": {
+    "module": "tests/test_native_attempt_supervisor.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 87
+    }
+  },
+  "related_28": {
+    "module": "tests/test_native_attribution_controller.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 43
+    }
+  },
+  "related_29": {
+    "module": "tests/test_native_execution.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 73
+    }
+  },
+  "related_30": {
+    "module": "tests/test_native_receipt_origin_reporting.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 76
+    }
+  },
+  "related_31": {
+    "module": "tests/test_nested_ancestor_receipts.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 25
+    }
+  },
+  "related_32": {
+    "module": "tests/test_neutral_generation_schema.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 7
+    }
+  },
+  "related_33": {
+    "module": "tests/test_playbook_reach.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 21
+    }
+  },
+  "related_34": {
+    "module": "tests/test_profiles.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 90
+    }
+  },
+  "related_35": {
+    "module": "tests/test_recall_target_baseline.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 79
+    }
+  },
+  "related_36": {
+    "module": "tests/test_receipt_completion_batch_gate.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 18
+    }
+  },
+  "related_37": {
+    "module": "tests/test_receipt_completion_runtime.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 85
+    }
+  },
+  "related_38": {
+    "module": "tests/test_receipt_floor_basis.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 67
+    }
+  },
+  "related_39": {
+    "module": "tests/test_receipt_identifier_basis.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 118
+    }
+  },
+  "related_40": {
+    "module": "tests/test_receipt_origin_record.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 21
+    }
+  },
+  "related_41": {
+    "module": "tests/test_receipt_read_identity.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 3
+    }
+  },
+  "related_42": {
+    "module": "tests/test_receipt_readdress_cli.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 52
+    }
+  },
+  "related_43": {
+    "module": "tests/test_receipt_readdress_input_snapshots.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 2
+    }
+  },
+  "related_44": {
+    "module": "tests/test_receipt_resolve_indices.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 55
+    }
+  },
+  "related_45": {
+    "module": "tests/test_receipt_sources.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 34
+    }
+  },
+  "related_46": {
+    "module": "tests/test_reference_rescore.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 184
+    }
+  },
+  "related_47": {
+    "module": "tests/test_removals_identifier_basis.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 81
+    }
+  },
+  "related_48": {
+    "module": "tests/test_replicate_structure.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 69
+    }
+  },
+  "related_49": {
+    "module": "tests/test_resources.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 80,
+      "skipped": 1
+    }
+  },
+  "related_50": {
+    "module": "tests/test_review_pack.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 55
+    }
+  },
+  "related_51": {
+    "module": "tests/test_review_pack_identifier_basis.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 60
+    }
+  },
+  "related_52": {
+    "module": "tests/test_self_disclaimed.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 418
+    }
+  },
+  "related_53": {
+    "module": "tests/test_self_disclaimed_baseline.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 51
+    }
+  },
+  "related_54": {
+    "module": "tests/test_shared_generation_batch_authority.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 22
+    }
+  },
+  "related_55": {
+    "module": "tests/test_shared_generation_cli.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 55
+    }
+  },
+  "related_56": {
+    "module": "tests/test_shared_generation_completed_replay.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 32
+    }
+  },
+  "related_57": {
+    "module": "tests/test_shared_output_ownership_entrypoints.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 18
+    }
+  },
+  "related_58": {
+    "module": "tests/test_source_heading_runtime_api.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 18
+    }
+  },
+  "related_59": {
+    "module": "tests/test_status_context.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 247
+    }
+  },
+  "related_60": {
+    "module": "tests/test_unusable_snapshot.py",
+    "returncode": 0,
+    "tests": {
+      "passed": 17
+    }
+  }
+}

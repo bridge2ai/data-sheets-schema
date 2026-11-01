@@ -1,0 +1,13 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave5-d52-label-baseline-20261028/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave5-d52-label-baseline-20261028/pytest.xml",
+    "tests/test_d52_publication_labels.py::test_exported_unregulated_q9_labels_describe_only_retained_criteria"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave5-evaluation-label-baseline-20261028"
+}

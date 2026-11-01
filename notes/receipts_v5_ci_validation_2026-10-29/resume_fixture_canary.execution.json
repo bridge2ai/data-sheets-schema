@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-S",
+    "-B",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/scripts/adhoc/validate_receipts_v5_merge_20261029.py",
+    "--",
+    "tests/test_audit_recall_leak_rendered.py::test_the_rendered_direct_arm_prompts_quote_nothing",
+    "-vv",
+    "--tb=short",
+    "--basetemp=/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-resume_fixture_canary-pt",
+    "--junitxml=/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-resume_fixture_canary-xml-qeghvriq/pytest.xml"
+  ],
+  "load": [
+    246.11865234375,
+    348.9775390625,
+    282.8974609375
+  ],
+  "receipts_sha256": "f68c875b4e3b972d4e03ad39322a077c6b64497ece5f1e71ac5bc08aa4e9c10a",
+  "returncode": 1,
+  "seconds": 2.605495875000088
+}

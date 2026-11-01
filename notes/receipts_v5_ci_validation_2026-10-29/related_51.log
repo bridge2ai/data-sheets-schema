@@ -1,0 +1,75 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 60 items
+
+tests/test_review_pack_identifier_basis.py::Pack::test_a_pair_with_matched_distributions_yields_a_reviewable_item PASSED [  1%]
+tests/test_review_pack_identifier_basis.py::Pack::test_a_prefix_of_a_longer_url_is_not_attestation_and_an_alias_form_is PASSED [  3%]
+tests/test_review_pack_identifier_basis.py::Pack::test_base_in_bundle_travels_through_build_pack_against_the_bytes_the_record_read PASSED [  5%]
+tests/test_review_pack_identifier_basis.py::Pack::test_gaps_are_named_not_filled PASSED [  6%]
+tests/test_review_pack_identifier_basis.py::Pack::test_origin_edge_cases_from_the_review PASSED [  8%]
+tests/test_review_pack_identifier_basis.py::Pack::test_the_pack_is_complete_and_deterministic PASSED [ 10%]
+tests/test_review_pack_identifier_basis.py::Pack::test_the_written_pack_has_no_yaml_aliases PASSED [ 11%]
+tests/test_review_pack_identifier_basis.py::test_complete_legacy_helper_output_and_explicit_none_bytes PASSED [ 13%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>0-False] PASSED [ 15%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>0-] PASSED [ 16%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>0-bad2] PASSED [ 18%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>0-bad3] PASSED [ 20%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>0-bad4] PASSED [ 21%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>0-bad5] PASSED [ 23%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>0-bad6] PASSED [ 25%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>0-bad7] PASSED [ 26%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>1-False] PASSED [ 28%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>1-] PASSED [ 30%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>1-bad2] PASSED [ 31%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>1-bad3] PASSED [ 33%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>1-bad4] PASSED [ 35%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>1-bad5] PASSED [ 36%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>1-bad6] PASSED [ 38%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>1-bad7] PASSED [ 40%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>2-False] PASSED [ 41%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>2-] PASSED [ 43%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>2-bad2] PASSED [ 45%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>2-bad3] PASSED [ 46%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>2-bad4] PASSED [ 48%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>2-bad5] PASSED [ 50%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>2-bad6] PASSED [ 51%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>2-bad7] PASSED [ 53%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>3-False] PASSED [ 55%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>3-] PASSED [ 56%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>3-bad2] PASSED [ 58%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>3-bad3] PASSED [ 60%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>3-bad4] PASSED [ 61%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>3-bad5] PASSED [ 63%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>3-bad6] PASSED [ 65%]
+tests/test_review_pack_identifier_basis.py::test_malformed_explicit_rules_refuse_before_shortcuts[<lambda>3-bad7] PASSED [ 66%]
+tests/test_review_pack_identifier_basis.py::test_explicit_empty_opposite_and_forward_reverse_aliases_never_use_ambient PASSED [ 68%]
+tests/test_review_pack_identifier_basis.py::test_url_case_path_case_and_delimiter_boundaries_are_preserved PASSED [ 70%]
+tests/test_review_pack_identifier_basis.py::test_actual_disk_authority_controls_both_inventories_and_id_labels[prefixes0-False] PASSED [ 71%]
+tests/test_review_pack_identifier_basis.py::test_actual_disk_authority_controls_both_inventories_and_id_labels[prefixes1-True] PASSED [ 73%]
+tests/test_review_pack_identifier_basis.py::test_actual_disk_authority_controls_both_inventories_and_id_labels[prefixes2-False] PASSED [ 75%]
+tests/test_review_pack_identifier_basis.py::test_historical_only_alias_is_used_even_when_current_schema_lacks_it PASSED [ 76%]
+tests/test_review_pack_identifier_basis.py::test_current_class_reference_and_pair_results_do_not_switch_with_alias_basis PASSED [ 78%]
+tests/test_review_pack_identifier_basis.py::test_class_flag_disclosure_names_the_view_actually_selected PASSED [ 80%]
+tests/test_review_pack_identifier_basis.py::test_explicit_empty_recorded_table_is_not_current_fallback PASSED [ 81%]
+tests/test_review_pack_identifier_basis.py::test_fallback_names_actual_current_bytes_separately_from_historical_request[missing] PASSED [ 83%]
+tests/test_review_pack_identifier_basis.py::test_fallback_names_actual_current_bytes_separately_from_historical_request[unrecoverable] PASSED [ 85%]
+tests/test_review_pack_identifier_basis.py::test_fallback_names_actual_current_bytes_separately_from_historical_request[malformed] PASSED [ 86%]
+tests/test_review_pack_identifier_basis.py::test_actual_historical_recovery_feeds_the_pack[git] PASSED [ 88%]
+tests/test_review_pack_identifier_basis.py::test_actual_historical_recovery_feeds_the_pack[reconstruction] PASSED [ 90%]
+tests/test_review_pack_identifier_basis.py::test_invalid_authority_refuses_before_any_instruction_or_pack_write[None] PASSED [ 91%]
+tests/test_review_pack_identifier_basis.py::test_invalid_authority_refuses_before_any_instruction_or_pack_write[False] PASSED [ 93%]
+tests/test_review_pack_identifier_basis.py::test_invalid_authority_refuses_before_any_instruction_or_pack_write[bad2] PASSED [ 95%]
+tests/test_review_pack_identifier_basis.py::test_invalid_authority_refuses_before_any_instruction_or_pack_write[bad3] PASSED [ 96%]
+tests/test_review_pack_identifier_basis.py::test_current_capture_disagreement_is_a_named_cli_refusal PASSED [ 98%]
+tests/test_review_pack_identifier_basis.py::test_existing_version6_pack_pin_blocks_automatic_upgrade PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_review_pack_identifier_basis.py::Pack::test_a_prefix_of_a_longer_url_is_not_attestation_and_an_alias_form_is
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_51-xml-tzxdx_6y/pytest.xml -
+======================== 60 passed, 1 warning in 14.28s ========================

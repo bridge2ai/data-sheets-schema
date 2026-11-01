@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-S",
+    "-B",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/scripts/adhoc/receipts_v5_ci_offline_20261029.py",
+    "--",
+    "tests/test_reference_rescore.py",
+    "-vv",
+    "--tb=short",
+    "--basetemp=/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_46-pt",
+    "--junitxml=/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_46-xml-i1goos_i/pytest.xml"
+  ],
+  "load": [
+    12.52587890625,
+    11.6162109375,
+    15.0400390625
+  ],
+  "receipts_sha256": "f68c875b4e3b972d4e03ad39322a077c6b64497ece5f1e71ac5bc08aa4e9c10a",
+  "returncode": 0,
+  "seconds": 95.35097016700001
+}

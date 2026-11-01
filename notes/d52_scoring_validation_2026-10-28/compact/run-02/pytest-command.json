@@ -1,0 +1,17 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-d52-focused-validation-20261028/cases",
+    "--junitxml",
+    "/private/tmp/d4d-d52-focused-validation-20261028/pytest.xml",
+    "tests/test_d52_scoring.py",
+    "tests/test_evaluation/test_evaluate_d4d.py",
+    "tests/test_evaluation/test_rubric20_scoring.py",
+    "tests/test_evaluation/test_general_context.py",
+    "tests/test_evaluation/test_explicit_dataset_scope.py"
+  ],
+  "cwd": "/private/tmp/d4d-codex-d52-scoring-20261028"
+}

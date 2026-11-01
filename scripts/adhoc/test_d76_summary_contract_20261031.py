@@ -118,3 +118,23 @@ def test_ci_exact_duplicate_multiset_and_held_module_pass(tmp_path):
     assert result.returncode == 0 and data['acceptance_passed'] is True
     assert data['ci_partition']['passed'] is True
     assert data['ci_partition']['actual_occurrences'] == 3
+
+
+def test_collection_rows_do_not_add_unstarted_tests_to_execution_totals(tmp_path):
+    collection = make_run(tmp_path, 'collection')
+    plan = json.loads((collection / 'plan.json').read_text())
+    plan['collect_only'] = True
+    write(collection / 'plan.json', plan)
+    nodes = json.loads((collection / 'nodes.json').read_text())
+    nodes['reports'] = []
+    write(collection / 'nodes.json', nodes)
+    outcome = json.loads((collection / 'outcome.json').read_text())
+    outcome.update(passed=False, collection_passed=True, node_accounting_complete=False,
+                   counts={'passed': 0, 'failed': 0, 'errors': 0, 'skipped': 0, 'not_started': 107})
+    write(collection / 'outcome.json', outcome)
+    result, data = summarize(tmp_path, [collection, make_run(tmp_path, 'execution')])
+    assert result.returncode == 0 and data['acceptance_passed'] is True
+    assert data['reported_counts_sum_includes_repeats']['passed'] == 107
+    assert data['reported_counts_sum_includes_repeats'].get('not_started', 0) == 0
+    assert data['runs'][0]['outcome']['counts']['not_started'] == 107
+    assert len(data['historical']['rows'][0]['eligible_observations']) == 1

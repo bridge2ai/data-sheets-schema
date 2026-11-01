@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="5" time="9.093" timestamp="2026-10-28T22:00:48.464819" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_receipts_v5_merge_r4" name="test_r4_v3_marker_is_reported_and_strict_passes" time="4.757"><failure message="assert 1 == 0">historical_record = {'core_dir': PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5r4-pt/test_r4_v3_marker_is_re...var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5r4-pt/test_r4_v3_marker_is_reported_0/CHORUS_provenance.yaml')}
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10781e650&gt;
+
+    @pytest.mark.corpus
+    def test_r4_v3_marker_is_reported_and_strict_passes(historical_record, monkeypatch):
+        receipt = historical_record["core_dir"] / "CHORUS_coverage_receipt.yaml"
+        receipt.write_text("receipt_format_version: 5\n" + receipt.read_text())
+        monkeypatch.setattr(cli, "_run_paths", lambda *args: historical_record)
+        blocks = []
+        original = rc.block_for
+    
+        def capture(*args, **kwargs):
+            block = original(*args, **kwargs)
+            blocks.append(block)
+            return block
+    
+        monkeypatch.setattr(rc, "block_for", capture)
+        result = CliRunner().invoke(cli.check, ["--method", "claudecode_api", "--label", "fixture",
+                                               "--project", "CHORUS", "--strict"])
+        assert blocks, result.output
+        block = blocks[0]
+        assert block["checked"], block
+        assert block["instrument"] == rc.receipt_instrument(3)
+        assert {"kind": "receipt_format_version_mismatch", "declared": 5, "selected": 3} in block["findings"]
+        assert (block["slots"]["with_receipt"], block["slots"]["receiptable"]) == (115, 129)
+&gt;       assert block["findings_gated"] == 0
+E       assert 1 == 0
+
+tests/test_receipts_v5_merge_r4.py:54: AssertionError</failure></testcase><testcase classname="tests.test_receipts_v5_merge_r4" name="test_r4_registered_v4_marker_is_reported_not_gated[4]" time="3.596"><failure message="assert 1 == 0">disk = {'bundle': PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5r4-pt/test_r4_registered_v4_mar...ivate/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5r4-pt/test_r4_registered_v4_marker_i0/chunks.yaml'), ...}
+marker = '4'
+
+    @pytest.mark.parametrize("marker", ["4", 3])
+    def test_r4_registered_v4_marker_is_reported_not_gated(disk, marker):
+        receipt = yaml.safe_load(disk["receipt"].read_text())
+        receipt["receipt_format_version"] = marker
+        disk["receipt"].write_text(yaml.safe_dump(receipt))
+        snapshot = disk["receipt"].parent / "intermediate/P_full.yaml"
+        snapshot.parent.mkdir()
+        shutil.copyfile(disk["full_path"], snapshot)
+        block = rc.block_for(**disk, receipt_render_spec=declaration())
+        assert block["checked"], block
+        assert block["instrument"] == rc.receipt_instrument(4)
+        assert {"kind": "receipt_format_version_mismatch", "declared": marker, "selected": 4} in block["findings"]
+&gt;       assert block["findings_gated"] == 0
+E       assert 1 == 0
+
+tests/test_receipts_v5_merge_r4.py:71: AssertionError</failure></testcase><testcase classname="tests.test_receipts_v5_merge_r4" name="test_r4_registered_v4_marker_is_reported_not_gated[3]" time="0.013"><failure message="assert 1 == 0">disk = {'bundle': PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5r4-pt/test_r4_registered_v4_mar...ivate/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5r4-pt/test_r4_registered_v4_marker_i1/chunks.yaml'), ...}
+marker = 3
+
+    @pytest.mark.parametrize("marker", ["4", 3])
+    def test_r4_registered_v4_marker_is_reported_not_gated(disk, marker):
+        receipt = yaml.safe_load(disk["receipt"].read_text())
+        receipt["receipt_format_version"] = marker
+        disk["receipt"].write_text(yaml.safe_dump(receipt))
+        snapshot = disk["receipt"].parent / "intermediate/P_full.yaml"
+        snapshot.parent.mkdir()
+        shutil.copyfile(disk["full_path"], snapshot)
+        block = rc.block_for(**disk, receipt_render_spec=declaration())
+        assert block["checked"], block
+        assert block["instrument"] == rc.receipt_instrument(4)
+        assert {"kind": "receipt_format_version_mismatch", "declared": marker, "selected": 4} in block["findings"]
+&gt;       assert block["findings_gated"] == 0
+E       assert 1 == 0
+
+tests/test_receipts_v5_merge_r4.py:71: AssertionError</failure></testcase><testcase classname="tests.test_receipts_v5_merge_r4" name="test_r4_v5_marker_still_gates[5]" time="0.000" /><testcase classname="tests.test_receipts_v5_merge_r4" name="test_r4_v5_marker_still_gates[4]" time="0.000" /></testsuite></testsuites>

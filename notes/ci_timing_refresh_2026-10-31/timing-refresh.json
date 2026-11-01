@@ -1,0 +1,256 @@
+{
+  "purpose": "Verified saved successful-run inputs and CI timing refresh for #5364",
+  "run_url": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/41148135309",
+  "run_id": 41148135309,
+  "commit": "4c07980399d47d77b64c9f2bff7a50bfc5cc6ddf",
+  "run_attempt": 1,
+  "event": "push",
+  "branch": "main",
+  "status": "completed",
+  "conclusion": "success",
+  "created_at": "2026-10-31T00:04:33Z",
+  "updated_at": "2026-10-31T00:39:59Z",
+  "workflow_path": ".github/workflows/main.yaml",
+  "interpreter": "3.12",
+  "core": {
+    "artifacts": [
+      "tests-py3.12-shard1/pytest.xml",
+      "tests-py3.12-shard2/pytest.xml",
+      "tests-py3.12-shard3/pytest.xml",
+      "tests-py3.12-shard4/pytest.xml"
+    ],
+    "case_records": 20801,
+    "unique_classname_name_pairs": 20800,
+    "mapped_files": 575,
+    "duplicate_id_groups": 1,
+    "cross_artifact_duplicate_id_groups": 0,
+    "unmapped_cases": 0,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 35,
+    "total_case_seconds": "27148.941",
+    "new_weighted_files": 51,
+    "new_weighted_file_seconds": "5838.722",
+    "old_weighted_files_missing_from_current": []
+  },
+  "core_artifacts": [
+    {
+      "name": "tests-py3.12-shard1",
+      "id": 13022826216,
+      "archive_digest": "sha256:51b3789e39222b3f9b78cb9dd725bd1dae11b728b4907693ac545996293cf9d8",
+      "archive_sha256": "51b3789e39222b3f9b78cb9dd725bd1dae11b728b4907693ac545996293cf9d8",
+      "archive_size": 101182,
+      "created_at": "2026-10-31T00:26:34Z",
+      "xml": [
+        {
+          "path": "tests-py3.12-shard1/pytest.xml",
+          "source_path": "shard1/pytest.xml",
+          "bytes": 912291,
+          "sha256": "db53d4717e2fa2e437d1d636a2e78c51d99d45f0b27722811127fae27ff65230"
+        }
+      ]
+    },
+    {
+      "name": "tests-py3.12-shard2",
+      "id": 13023256517,
+      "archive_digest": "sha256:b16660803e6bcc5482f33b6ef21d7dfe071762cf6dfe296dc5028d0488dfeba8",
+      "archive_sha256": "b16660803e6bcc5482f33b6ef21d7dfe071762cf6dfe296dc5028d0488dfeba8",
+      "archive_size": 87314,
+      "created_at": "2026-10-31T00:39:45Z",
+      "xml": [
+        {
+          "path": "tests-py3.12-shard2/pytest.xml",
+          "source_path": "shard2/pytest.xml",
+          "bytes": 782280,
+          "sha256": "097f491c112dbdda4c7cae88f48d5a29d859515915515675fe6102ddbc676d3d"
+        }
+      ]
+    },
+    {
+      "name": "tests-py3.12-shard3",
+      "id": 13023062158,
+      "archive_digest": "sha256:047cf896af2ef8e9599e3ff0b78058ca2c778d0d7f201bc2b642afec9b4a95f4",
+      "archive_sha256": "047cf896af2ef8e9599e3ff0b78058ca2c778d0d7f201bc2b642afec9b4a95f4",
+      "archive_size": 93800,
+      "created_at": "2026-10-31T00:39:51Z",
+      "xml": [
+        {
+          "path": "tests-py3.12-shard3/pytest.xml",
+          "source_path": "shard3/pytest.xml",
+          "bytes": 864115,
+          "sha256": "38395df3c5651cd360ce2eb060c16a4d031ac3650a194b643805b494bf3ebf56"
+        }
+      ]
+    },
+    {
+      "name": "tests-py3.12-shard4",
+      "id": 13022464292,
+      "archive_digest": "sha256:eea2a751f7e71adcbb65f4690169ec9b99f8f7d898f5c26f729c540387843ffc",
+      "archive_sha256": "eea2a751f7e71adcbb65f4690169ec9b99f8f7d898f5c26f729c540387843ffc",
+      "archive_size": 104390,
+      "created_at": "2026-10-31T00:34:14Z",
+      "xml": [
+        {
+          "path": "tests-py3.12-shard4/pytest.xml",
+          "source_path": "shard4/pytest.xml",
+          "bytes": 1469909,
+          "sha256": "d08b2c9151240c976a25896cb0b0e8545e010143c86e6e04eb6a9f27f44a1ef6"
+        }
+      ]
+    }
+  ],
+  "per_artifact": [
+    {
+      "name": "tests-py3.12-shard1",
+      "case_records": 5628,
+      "total_case_seconds": "4445.203"
+    },
+    {
+      "name": "tests-py3.12-shard2",
+      "case_records": 4824,
+      "total_case_seconds": "7980.363"
+    },
+    {
+      "name": "tests-py3.12-shard3",
+      "case_records": 5337,
+      "total_case_seconds": "7973.201"
+    },
+    {
+      "name": "tests-py3.12-shard4",
+      "case_records": 5012,
+      "total_case_seconds": "6750.174"
+    }
+  ],
+  "saved_metadata": {
+    "input_metadata_sha256": "90acdcb9ec77141cd2703ea6494a1a85e995d24d507d9cf2d68e8b6416076631",
+    "input_roster_sha256": "87d0691ccd4f29815ab0888022bfddd44fbd18a42a2680eb5353d6713c9be19a",
+    "total_roster_artifacts": 11,
+    "core_artifact_count": 4
+  },
+  "duplicate_occurrences": [
+    {
+      "classname": "tests.test_native_execution_permissions",
+      "name": "test_noncanonical_or_numeric_budget_never_becomes_a_native_argument[00]",
+      "occurrences": [
+        {
+          "file": "tests/test_native_execution_permissions.py",
+          "classname": "tests.test_native_execution_permissions",
+          "name": "test_noncanonical_or_numeric_budget_never_becomes_a_native_argument[00]",
+          "seconds": "0.020",
+          "skipped": false,
+          "shard": "tests-py3.12-shard4",
+          "case_element_index": 2770
+        },
+        {
+          "file": "tests/test_native_execution_permissions.py",
+          "classname": "tests.test_native_execution_permissions",
+          "name": "test_noncanonical_or_numeric_budget_never_becomes_a_native_argument[00]",
+          "seconds": "0.019",
+          "skipped": false,
+          "shard": "tests-py3.12-shard4",
+          "case_element_index": 2776
+        }
+      ]
+    }
+  ],
+  "largest_files": [
+    {
+      "file": "tests/test_download/test_api_runner.py",
+      "seconds": "2988.490",
+      "old_seconds": 329.61
+    },
+    {
+      "file": "tests/test_report_admission.py",
+      "seconds": "2697.097",
+      "old_seconds": null
+    },
+    {
+      "file": "tests/test_shared_generation_runtime.py",
+      "seconds": "2038.384",
+      "old_seconds": 3225.361
+    },
+    {
+      "file": "tests/test_native_execution.py",
+      "seconds": "1195.209",
+      "old_seconds": 1287.605
+    },
+    {
+      "file": "tests/test_native_attempt_supervisor.py",
+      "seconds": "1104.210",
+      "old_seconds": 982.919
+    },
+    {
+      "file": "tests/test_receipt_completion_runtime.py",
+      "seconds": "790.102",
+      "old_seconds": 1008.941
+    },
+    {
+      "file": "tests/test_generation_specificity_skill.py",
+      "seconds": "760.162",
+      "old_seconds": 793.568
+    },
+    {
+      "file": "tests/test_native_receipt_origin_reporting.py",
+      "seconds": "752.319",
+      "old_seconds": 996.853
+    },
+    {
+      "file": "tests/test_shared_generation_scope_context.py",
+      "seconds": "723.569",
+      "old_seconds": 607.108
+    },
+    {
+      "file": "tests/test_source_heading_runtime_api.py",
+      "seconds": "585.500",
+      "old_seconds": null
+    }
+  ],
+  "focus": {
+    "tests/test_report_admission.py": {
+      "seconds": "2697.097",
+      "old_seconds": null,
+      "cases": 22
+    },
+    "tests/test_download/test_api_runner.py": {
+      "seconds": "2988.490",
+      "old_seconds": 329.61,
+      "cases": 156
+    }
+  },
+  "validation": {
+    "output_sha256": "c93e152476baa9b7eba1400cefee18c52054b08952f7ec5ab0a75f63e54f7488",
+    "exact_core_xml_hashes_verified": true,
+    "comparison_path": "shard-comparison.json",
+    "comparison_sha256": "b849687d107733d4792aa2532f41aa829a761dfe7700112cd2f2ffe5622dbbe1",
+    "full_cases_before": 20805,
+    "full_cases_after": 20805,
+    "full_multiset_unchanged": true,
+    "ordinary_cases": 20801,
+    "shard_union_cases": 20801,
+    "shard_union_equals_ordinary_multiset": true,
+    "per_shard_cases": [
+      5177,
+      5211,
+      4781,
+      5632
+    ],
+    "focused_tests": {
+      "cases": 48,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 47
+    },
+    "focused_exit_code": 1,
+    "full_shard_execution": false,
+    "ci_speedup": "not measured",
+    "observed_run_matches_old_four_shard_assignment": true,
+    "observed_run_matches_ordinary_nodeid_multiset": true
+  },
+  "limits": [
+    "Provenance verified against supplied saved metadata, without network access.",
+    "Archive digests are copied from the saved roster; ZIP archives were not supplied for independent hashing.",
+    "JUnit times sum case phases across workers; scheduling estimates are not wall-time predictions.",
+    "Same-artifact parameter-label collisions retain every occurrence; updater inputs were not edited."
+  ]
+}

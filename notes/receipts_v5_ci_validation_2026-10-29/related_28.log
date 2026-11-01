@@ -1,0 +1,58 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 43 items
+
+tests/test_native_attribution_controller.py::test_composition_can_prepare_and_matches_every_selected_command PASSED [  2%]
+tests/test_native_attribution_controller.py::test_actual_recorder_after_final_only_writes_new_provenance PASSED [  4%]
+tests/test_native_attribution_controller.py::test_completed_report_rechecks_final_inputs_without_another_tool[core] PASSED [  6%]
+tests/test_native_attribution_controller.py::test_completed_report_rechecks_final_inputs_without_another_tool[audit] PASSED [  9%]
+tests/test_native_attribution_controller.py::test_completed_recorder_cannot_repeat_or_start_another_tool PASSED [ 11%]
+tests/test_native_attribution_controller.py::test_recorder_cannot_run_before_real_final_pass PASSED [ 13%]
+tests/test_native_attribution_controller.py::test_recorder_refuses_existing_destination_without_overwrite[regular] PASSED [ 16%]
+tests/test_native_attribution_controller.py::test_recorder_refuses_existing_destination_without_overwrite[symlink] PASSED [ 18%]
+tests/test_native_attribution_controller.py::test_recorder_refuses_existing_destination_without_overwrite[hardlink] PASSED [ 20%]
+tests/test_native_attribution_controller.py::test_failed_recorder_is_terminal_and_never_retried PASSED [ 23%]
+tests/test_native_attribution_controller.py::test_recorder_result_cannot_hide_dataset_mutation PASSED [ 25%]
+tests/test_native_attribution_controller.py::test_correction_window_refuses_derive_even_after_old_phase2_completed PASSED [ 27%]
+tests/test_native_attribution_controller.py::test_actual_callback_permits_valid_draft_before_final_command PASSED [ 30%]
+tests/test_native_attribution_controller.py::test_actual_final_result_duplicate_stdout_must_agree_with_strict_types[numeric] PASSED [ 32%]
+tests/test_native_attribution_controller.py::test_actual_final_result_duplicate_stdout_must_agree_with_strict_types[false] PASSED [ 34%]
+tests/test_native_attribution_controller.py::test_real_callback_stops_before_bad_tool_marker[missing] PASSED [ 37%]
+tests/test_native_attribution_controller.py::test_real_callback_stops_before_bad_tool_marker[failed] PASSED [ 39%]
+tests/test_native_attribution_controller.py::test_real_callback_stops_before_bad_tool_marker[unusable] PASSED [ 41%]
+tests/test_native_attribution_controller.py::test_real_callback_stops_before_bad_tool_marker[changed_report] PASSED [ 44%]
+tests/test_native_attribution_controller.py::test_real_callback_stops_before_bad_tool_marker[protected_write] PASSED [ 46%]
+tests/test_native_attribution_controller.py::test_real_callback_stops_before_bad_tool_marker[terminal_failure] PASSED [ 48%]
+tests/test_native_attribution_controller.py::test_real_callback_allows_report_only_correction_and_fresh_check PASSED [ 51%]
+tests/test_native_attribution_controller.py::test_same_frame_pending_tool_blocks_draft_callback[overlap_write] PASSED [ 53%]
+tests/test_native_attribution_controller.py::test_same_frame_pending_tool_blocks_draft_callback[overlap_read] PASSED [ 55%]
+tests/test_native_attribution_controller.py::test_existing_proxy_stop_does_not_retry_or_admit_a_tool PASSED [ 58%]
+tests/test_native_attribution_controller.py::test_unchanged_phase_history_still_stops_early_core_derivation PASSED [ 60%]
+tests/test_native_attribution_controller.py::test_composition_pin_and_selection_drift_refuses[version] PASSED [ 62%]
+tests/test_native_attribution_controller.py::test_composition_pin_and_selection_drift_refuses[policy] PASSED [ 65%]
+tests/test_native_attribution_controller.py::test_composition_pin_and_selection_drift_refuses[policy_sha256] PASSED [ 67%]
+tests/test_native_attribution_controller.py::test_composition_pin_and_selection_drift_refuses[controller_sources] PASSED [ 69%]
+tests/test_native_attribution_controller.py::test_composition_pin_and_selection_drift_refuses[registration_sha256] PASSED [ 72%]
+tests/test_native_attribution_controller.py::test_composition_pin_and_selection_drift_refuses[instruction_sha256] PASSED [ 74%]
+tests/test_native_attribution_controller.py::test_dependency_origin_is_checked_before_ambient_module_is_used PASSED [ 76%]
+tests/test_native_attribution_controller.py::test_missing_controller_dependency_refuses_without_modifying_it PASSED [ 79%]
+tests/test_native_attribution_controller.py::test_exclusive_composition_writer_preserves_inputs_and_existing_destination PASSED [ 81%]
+tests/test_native_attribution_controller.py::test_incremental_prefix_does_not_require_an_already_completed_draft PASSED [ 83%]
+tests/test_native_attribution_controller.py::test_recomputation_barrier_holds_next_real_callback PASSED [ 86%]
+tests/test_native_attribution_controller.py::test_observer_exception_stops_and_preserves_first_cause PASSED [ 88%]
+tests/test_native_attribution_controller.py::test_existing_deadline_stops_without_a_tool_or_retry PASSED [ 90%]
+tests/test_native_attribution_controller.py::test_registered_draft_limit_stops_before_fourth_call PASSED [ 93%]
+tests/test_native_attribution_controller.py::test_no_draft_authority_added_for_omitted_or_unused_manifest[absent] PASSED [ 95%]
+tests/test_native_attribution_controller.py::test_no_draft_authority_added_for_omitted_or_unused_manifest[unused] PASSED [ 97%]
+tests/test_native_attribution_controller.py::test_runtime_inadmissible_quoted_recording_identity_refuses_before_output PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_28-xml-xrbnpook/pytest.xml -
+================== 43 passed, 1 warning in 134.78s (0:02:14) ===================

@@ -1,0 +1,32 @@
+{
+  "base": "2bbb0dfff934efde670ae342ddef7c875d39cd03",
+  "changed_paths": [
+    "scripts/adhoc/archive_n2_restack_validation_20261027.py",
+    "scripts/adhoc/validate_d52_scoring_20261028.py",
+    "scripts/adhoc/wave3_validation_common_20261027.py",
+    "tests/test_d52_scoring.py"
+  ],
+  "command": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-S",
+    "-P",
+    "-B",
+    "/private/tmp/d4d-codex-d52-scoring-20261028/scripts/adhoc/validate_d52_scoring_20261028.py",
+    "--child",
+    "--output",
+    "/private/tmp/d4d-d52-baseline-validation-20261028",
+    "--module",
+    "test_d52_scoring"
+  ],
+  "credential_names_removed": [
+    "CBORG_API_KEY",
+    "GIT_PAGER",
+    "KB_AUTH_TOKEN",
+    "OPENSCIENTIST_API_KEY"
+  ],
+  "head": "615c440f1730bed2b3f33318fec4a43b23eb4052",
+  "modules": [
+    "test_d52_scoring"
+  ],
+  "scope": "Offline selected modules; Python audit guard does not isolate arbitrary child binaries."
+}

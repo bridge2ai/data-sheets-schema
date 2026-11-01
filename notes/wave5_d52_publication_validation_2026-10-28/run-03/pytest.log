@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/private/tmp/d4d-codex-wave5-evaluation-publication-20261028/scripts/adhoc/validate_d52_scoring_20261028.py", line 152, in <module>
+    raise SystemExit(child(args) if args.child else run(args))
+                     ~~~~~^^^^^^
+  File "/private/tmp/d4d-codex-wave5-evaluation-publication-20261028/scripts/adhoc/validate_d52_scoring_20261028.py", line 62, in child
+    importlib.import_module('tests.' + module)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'tests.test_d4d_evaluator_scoring'

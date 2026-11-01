@@ -1,0 +1,869 @@
+notes/claudecode_direct/test_direct_arm.py: 95
+notes/matched_cborg_2026-09-13/audit_controls/test_batch_downstream.py: 28
+notes/matched_cborg_2026-09-13/audit_controls/test_batch_evidence.py: 20
+notes/matched_cborg_2026-09-13/audit_controls/test_batch_format_registration.py: 20
+notes/matched_cborg_2026-09-13/audit_controls/test_batch_navigation_registration.py: 36
+notes/matched_cborg_2026-09-13/audit_controls/test_batch_registration.py: 47
+notes/matched_cborg_2026-09-13/audit_controls/test_batch_runtime.py: 93
+notes/matched_cborg_2026-09-13/audit_controls/test_bounded_stream.py: 42
+notes/matched_cborg_2026-09-13/audit_controls/test_bounded_transport.py: 20
+notes/matched_cborg_2026-09-13/audit_controls/test_budget_admission_plan.py: 3
+notes/matched_cborg_2026-09-13/audit_controls/test_budget_amendment_chain_registration.py: 7
+notes/matched_cborg_2026-09-13/audit_controls/test_budget_amendment_registration.py: 34
+notes/matched_cborg_2026-09-13/audit_controls/test_budget_exception.py: 64
+notes/matched_cborg_2026-09-13/audit_controls/test_buffered_stream_deadline.py: 9
+notes/matched_cborg_2026-09-13/audit_controls/test_checkpoint_eligibility.py: 103
+notes/matched_cborg_2026-09-13/audit_controls/test_claim_clarification.py: 38
+notes/matched_cborg_2026-09-13/audit_controls/test_context_preparation.py: 21
+notes/matched_cborg_2026-09-13/audit_controls/test_context_runtime.py: 27
+notes/matched_cborg_2026-09-13/audit_controls/test_contract.py: 59
+notes/matched_cborg_2026-09-13/audit_controls/test_contract_context.py: 28
+notes/matched_cborg_2026-09-13/audit_controls/test_draft_native.py: 24
+notes/matched_cborg_2026-09-13/audit_controls/test_draft_output.py: 84
+notes/matched_cborg_2026-09-13/audit_controls/test_draft_registration.py: 52
+notes/matched_cborg_2026-09-13/audit_controls/test_history_control_lifecycle.py: 27
+notes/matched_cborg_2026-09-13/audit_controls/test_history_control_selection.py: 25
+notes/matched_cborg_2026-09-13/audit_controls/test_native.py: 49
+notes/matched_cborg_2026-09-13/audit_controls/test_native_context.py: 43
+notes/matched_cborg_2026-09-13/audit_controls/test_output_parts.py: 87
+notes/matched_cborg_2026-09-13/audit_controls/test_protocol_upgrade.py: 28
+notes/matched_cborg_2026-09-13/audit_controls/test_reconcile_stopped.py: 101
+notes/matched_cborg_2026-09-13/audit_controls/test_registered_profile_closure.py: 10
+notes/matched_cborg_2026-09-13/audit_controls/test_registration.py: 93
+notes/matched_cborg_2026-09-13/audit_controls/test_response_buffer_selection.py: 117
+notes/matched_cborg_2026-09-13/audit_controls/test_runtime_closure.py: 98
+notes/matched_cborg_2026-09-13/audit_controls/test_schema_semantic_context.py: 44
+notes/matched_cborg_2026-09-13/audit_controls/test_second_budget_amendment_registration.py: 17
+notes/matched_cborg_2026-09-13/audit_controls/test_source_metadata_upgrade.py: 39
+notes/matched_cborg_2026-09-13/audit_controls/test_staged_native.py: 37
+notes/matched_cborg_2026-09-13/audit_controls/test_staged_preparation.py: 10
+notes/matched_cborg_2026-09-13/audit_controls/test_stall_allowance_checkpoint.py: 3
+notes/matched_cborg_2026-09-13/audit_controls/test_stall_policy.py: 66
+notes/matched_cborg_2026-09-13/audit_controls/test_stall_policy_transport.py: 6
+notes/matched_cborg_2026-09-13/audit_controls/test_stop_reconciliation_prepare.py: 7
+notes/matched_cborg_2026-09-13/audit_controls/test_stop_reconciliation_run.py: 7
+notes/matched_cborg_2026-09-13/audit_controls/test_thinking_display_selection.py: 32
+notes/matched_cborg_2026-09-13/audit_controls/test_transport.py: 16
+notes/matched_cborg_2026-09-13/audit_controls/test_upstream_timeout.py: 38
+notes/matched_cborg_2026-09-13/audit_controls/test_upstream_timeout_preparation.py: 12
+notes/matched_cborg_2026-09-13/audit_controls/test_worker_checkpoint.py: 38
+notes/matched_cborg_2026-09-13/audit_controls/test_worker_checkpoint_accounting.py: 36
+notes/matched_cborg_2026-09-13/audit_controls/test_worker_checkpoint_context_equivalence.py: 30
+notes/matched_cborg_2026-09-13/audit_controls/test_worker_checkpoint_registration.py: 11
+notes/matched_cborg_2026-09-13/audit_controls/test_worker_checkpoint_runtime.py: 10
+notes/matched_cborg_2026-09-13/audit_controls/test_worker_navigation_registration.py: 30
+notes/matched_cborg_2026-09-13/evaluation_controls/test_api.py: 33
+notes/matched_cborg_2026-09-13/evaluation_controls/test_budget_amendment_chain_downstream.py: 6
+notes/matched_cborg_2026-09-13/evaluation_controls/test_budget_amendment_downstream.py: 15
+notes/matched_cborg_2026-09-13/evaluation_controls/test_closure.py: 24
+notes/matched_cborg_2026-09-13/evaluation_controls/test_fitness_guidance.py: 37
+notes/matched_cborg_2026-09-13/evaluation_controls/test_instructions.py: 6
+notes/matched_cborg_2026-09-13/evaluation_controls/test_native.py: 25
+notes/matched_cborg_2026-09-13/evaluation_controls/test_offline.py: 5
+notes/matched_cborg_2026-09-13/evaluation_controls/test_prepare_evaluation.py: 9
+notes/matched_cborg_2026-09-13/evaluation_controls/test_provider_transport.py: 28
+notes/matched_cborg_2026-09-13/evaluation_controls/test_registration.py: 24
+notes/matched_cborg_2026-09-13/evaluation_controls/test_runtime_closure.py: 16
+notes/matched_cborg_2026-09-13/evaluation_controls/test_second_budget_amendment_downstream.py: 5
+notes/matched_cborg_2026-09-13/evaluation_controls/test_source_pair.py: 29
+notes/matched_cborg_2026-09-13/evaluation_controls/test_thinking_display.py: 33
+notes/matched_cborg_2026-09-13/finalization_controls/test_budget_amendment_prepare.py: 1
+notes/matched_cborg_2026-09-13/finalization_controls/test_contract.py: 64
+notes/matched_cborg_2026-09-13/finalization_controls/test_native.py: 30
+notes/matched_cborg_2026-09-13/finalization_controls/test_registration.py: 21
+notes/matched_cborg_2026-09-13/finalization_controls/test_second_budget_amendment_prepare.py: 6
+notes/matched_cborg_2026-09-13/finalization_controls/test_thinking_display.py: 20
+notes/matched_cborg_2026-09-13/native_controls/test_audit_after_probe.py: 83
+notes/matched_cborg_2026-09-13/native_controls/test_native_command_policy.py: 96
+notes/matched_cborg_2026-09-13/native_controls/test_native_control.py: 115
+notes/matched_cborg_2026-09-13/native_controls/test_native_evidence.py: 9
+notes/matched_cborg_2026-09-13/native_controls/test_native_file_policy.py: 20
+notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py: 42
+notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py: 97
+notes/matched_cborg_2026-09-13/native_controls/test_native_phase_control.py: 8
+notes/matched_cborg_2026-09-13/native_controls/test_native_phase_history.py: 28
+notes/matched_cborg_2026-09-13/native_controls/test_native_proxy.py: 55
+notes/matched_cborg_2026-09-13/native_controls/test_native_readonly.py: 69
+notes/matched_cborg_2026-09-13/native_controls/test_native_response_buffer.py: 35
+notes/matched_cborg_2026-09-13/native_controls/test_native_stall_controls.py: 41
+notes/matched_cborg_2026-09-13/native_controls/test_native_stall_policy.py: 67
+notes/matched_cborg_2026-09-13/native_controls/test_native_thinking_display.py: 49
+notes/matched_cborg_2026-09-13/native_controls/test_probe_native_history.py: 9
+notes/matched_cborg_2026-09-13/native_controls/test_source_metadata_native.py: 32
+notes/matched_cborg_2026-09-13/native_controls/test_transport_probe.py: 92
+notes/matched_cborg_2026-09-13/test_budget_amendment.py: 56
+notes/matched_cborg_2026-09-13/test_budget_amendment_chain.py: 98
+notes/matched_cborg_2026-09-13/test_budgeted_cborg.py: 34
+notes/matched_cborg_2026-09-13/test_continuation_sequence.py: 74
+notes/matched_cborg_2026-09-13/test_second_budget_amendment.py: 57
+notes/matched_cborg_2026-09-13/test_sequence_claim.py: 89
+tests/test_abandoned_journal.py: 31
+tests/test_absence_lint.py: 46
+tests/test_absence_second_reading.py: 13
+tests/test_absence_use_noun_counts.py: 3
+tests/test_absence_v3_recall.py: 39
+tests/test_agent_pin.py: 31
+tests/test_agent_pin_predecessor.py: 26
+tests/test_agent_playbooks.py: 8
+tests/test_agentic_observed.py: 47
+tests/test_agentic_provenance_completeness.py: 13
+tests/test_agentic_selected_playbook.py: 42
+tests/test_agreement.py: 55
+tests/test_american_english_rule.py: 13
+tests/test_anonymous_relationship_evidence.py: 40
+tests/test_anonymous_removal_renderer.py: 27
+tests/test_api_batch_cost.py: 55
+tests/test_api_dollar_readout.py: 37
+tests/test_api_header_instructions.py: 14
+tests/test_api_launcher.py: 41
+tests/test_api_playbook_context.py: 42
+tests/test_arm_comparison.py: 60
+tests/test_arm_comparison_removal_basis.py: 2
+tests/test_arm_confounds.py: 20
+tests/test_assembly_axis.py: 23
+tests/test_assistant_bundle.py: 26
+tests/test_assistant_generation_integration.py: 1
+tests/test_assistant_request.py: 39
+tests/test_assistant_trusted_gate.py: 27
+tests/test_assistant_workflow.py: 22
+tests/test_attainability.py: 239
+tests/test_attainability_aggregation.py: 53
+tests/test_attainability_check_gate.py: 15
+tests/test_attainability_figure.py: 49
+tests/test_attainability_join_context.py: 16
+tests/test_audit_batch_context.py: 87
+tests/test_audit_batch_format.py: 62
+tests/test_audit_batches.py: 95
+tests/test_audit_batches_v2.py: 28
+tests/test_audit_evaluation_comparability.py: 51
+tests/test_audit_grammar.py: 260
+tests/test_audit_omissions.py: 73
+tests/test_audit_recall.py: 87
+tests/test_audit_recall_leak.py: 29
+tests/test_audit_recall_leak_rendered.py: 37
+tests/test_audit_record_contract.py: 19
+tests/test_audit_schema_semantics_renderer.py: 17
+tests/test_audit_typed_format.py: 6
+tests/test_audit_typed_grammar.py: 63
+tests/test_awards.py: 9
+tests/test_backfill_checks.py: 19
+tests/test_backfill_chunk_identity.py: 15
+tests/test_backfill_generation_evidence.py: 4
+tests/test_backfill_interrupted_api.py: 10
+tests/test_backfill_manifest_portability.py: 9
+tests/test_blind_review_pack.py: 88
+tests/test_british_instrument.py: 9
+tests/test_british_normaliser.py: 17
+tests/test_build_api_registrations.py: 20
+tests/test_build_draft_contexts.py: 9
+tests/test_bundle_md5_recovery.py: 13
+tests/test_cache_dependencies_dataclass_repr.py: 16
+tests/test_canary_attempt_caps.py: 18
+tests/test_canary_budget_continuation.py: 16
+tests/test_canary_controller_receipts.py: 64
+tests/test_canary_gate.py: 35
+tests/test_canonical_resolver.py: 16
+tests/test_cborg_completed_reporting.py: 50
+tests/test_cborg_report_publication.py: 9
+tests/test_check_large_files.py: 14
+tests/test_chunking.py: 14
+tests/test_ci_bytecode_hygiene.py: 25
+tests/test_ci_sharding.py: 48
+tests/test_ci_timing_update.py: 13
+tests/test_claim_clarification_renderer.py: 42
+tests/test_claudecode_direct_arm.py: 38
+tests/test_cli/test_bundle_drift.py: 15
+tests/test_cli/test_download_cli.py: 3
+tests/test_cli/test_evaluate_cli.py: 3
+tests/test_cli/test_evaluate_runtime_option.py: 3
+tests/test_cli/test_prompt_condition_consistency.py: 13
+tests/test_cli/test_provenance_preserves_validation.py: 21
+tests/test_cli/test_provenance_prompt.py: 18
+tests/test_cli/test_render.py: 8
+tests/test_cli/test_render_gate.py: 18
+tests/test_cli/test_render_generate_all.py: 9
+tests/test_cli/test_render_prompt.py: 20
+tests/test_cli/test_repo_utils.py: 3
+tests/test_cli/test_review_disposition.py: 4
+tests/test_cli/test_rocrate_cli.py: 27
+tests/test_cli/test_rocrate_raw_merge_retirement.py: 12
+tests/test_cli/test_rocrate_transform_mapping.py: 17
+tests/test_cli/test_rocrate_transform_mapping_adversarial.py: 10
+tests/test_cli/test_runs_merge.py: 12
+tests/test_cli/test_runs_select.py: 61
+tests/test_cli/test_schema_cli.py: 6
+tests/test_cli/test_utils_cli.py: 2
+tests/test_cli/test_validate_cli.py: 32
+tests/test_cli/test_verdict_pins_schema.py: 7
+tests/test_completed_surviving_usage.py: 4
+tests/test_context_facts.py: 8
+tests/test_core_exchange_completeness.py: 8
+tests/test_core_schema_targets.py: 7
+tests/test_crate_generation_comparison.py: 33
+tests/test_d4d_full_schema.py: 5
+tests/test_d4d_pair_consistency.py: 17
+tests/test_d4d_to_synapse_table.py: 37
+tests/test_data.py: 1
+tests/test_data_standards.py: 18
+tests/test_dc_output_caps.py: 18
+tests/test_derive_core.py: 7
+tests/test_deterministic_arm_validity.py: 15
+tests/test_deterministic_publication.py: 18
+tests/test_digest_isolation.py: 9
+tests/test_direct_keep_awake.py: 26
+tests/test_download/test_api_runner.py: 149
+tests/test_download/test_audit_bundles.py: 9
+tests/test_download/test_concatenate.py: 11
+tests/test_download/test_fetch.py: 22
+tests/test_download/test_fix_mojibake.py: 6
+tests/test_download/test_generic_v2_prompt.py: 18
+tests/test_download/test_generic_v3_prompt.py: 14
+tests/test_download/test_generic_v4_prompt.py: 22
+tests/test_download/test_generic_v5_prompt.py: 22
+tests/test_download/test_generic_v6_prompt.py: 16
+tests/test_download/test_generic_v7_prompt.py: 14
+tests/test_download/test_generic_v8_prompt.py: 14
+tests/test_download/test_generic_v9_prompt.py: 22
+tests/test_download/test_organized_dataset_extractor.py: 7
+tests/test_download/test_preprocess.py: 12
+tests/test_download/test_prompt_components.py: 18
+tests/test_download/test_prompt_self_identification.py: 5
+tests/test_download/test_receipt_readdress.py: 15
+tests/test_download/test_validate_quality.py: 19
+tests/test_draft_grammar_protocol.py: 58
+tests/test_duplicate_keys.py: 36
+tests/test_enum_alias_normalisation.py: 14
+tests/test_evaluation/test_api_score_rendering.py: 5
+tests/test_evaluation/test_cross_family_analysis_statistics.py: 15
+tests/test_evaluation/test_cross_family_judge_analysis.py: 35
+tests/test_evaluation/test_cross_family_judge_panel.py: 45
+tests/test_evaluation/test_cross_family_panel.py: 26
+tests/test_evaluation/test_cross_family_panel_adversarial.py: 33
+tests/test_evaluation/test_cross_family_panel_analysis.py: 53
+tests/test_evaluation/test_cross_family_panel_cli.py: 2
+tests/test_evaluation/test_cross_family_panel_results.py: 10
+tests/test_evaluation/test_cross_family_panel_results_adversarial.py: 39
+tests/test_evaluation/test_enumeration.py: 26
+tests/test_evaluation/test_evaluate_d4d.py: 18
+tests/test_evaluation/test_evaluation_plan.py: 28
+tests/test_evaluation/test_evidence_score.py: 43
+tests/test_evaluation/test_execution_ledger_suffix.py: 4
+tests/test_evaluation/test_explicit_dataset_scope.py: 22
+tests/test_evaluation/test_field_agent_contract.py: 146
+tests/test_evaluation/test_fitness_execution.py: 9
+tests/test_evaluation/test_fitness_execution_index.py: 15
+tests/test_evaluation/test_general_agent_examples.py: 4
+tests/test_evaluation/test_general_api_judge.py: 30
+tests/test_evaluation/test_general_context.py: 25
+tests/test_evaluation/test_general_context_review.py: 10
+tests/test_evaluation/test_label_aware_scoring.py: 13
+tests/test_evaluation/test_legacy_score_repair_refuses.py: 10
+tests/test_evaluation/test_legacy_summarizer_discrimination.py: 13
+tests/test_evaluation/test_nested_support_defect_context.py: 9
+tests/test_evaluation/test_nested_support_execution.py: 40
+tests/test_evaluation/test_nested_support_plan.py: 21
+tests/test_evaluation/test_nested_support_results.py: 73
+tests/test_evaluation/test_related_datasets.py: 16
+tests/test_evaluation/test_round2_input_review.py: 55
+tests/test_evaluation/test_rubric10_model_disclosure.py: 40
+tests/test_evaluation/test_rubric10_source_alignment.py: 111
+tests/test_evaluation/test_rubric20_fields_resolve.py: 20
+tests/test_evaluation/test_rubric20_hybrid_parity.py: 19
+tests/test_evaluation/test_rubric20_model_disclosure.py: 36
+tests/test_evaluation/test_rubric20_scoring.py: 16
+tests/test_evaluation/test_rubric_association_adversarial.py: 26
+tests/test_evaluation/test_rubric_association_index.py: 32
+tests/test_evaluation/test_rubric_pooling.py: 18
+tests/test_evaluation/test_semantic_agent_grounding.py: 6
+tests/test_evaluation/test_semantic_agent_parity.py: 17
+tests/test_evaluation/test_semantic_comparison.py: 24
+tests/test_evaluation/test_semantic_context_scope.py: 24
+tests/test_evaluation/test_semantic_discrimination.py: 21
+tests/test_evaluation/test_semantic_evaluation_contract.py: 20
+tests/test_evaluation/test_semantic_evidence.py: 36
+tests/test_evaluation/test_semantic_evidence_reporting.py: 32
+tests/test_evaluation/test_semantic_evidence_v3.py: 43
+tests/test_evaluation/test_semantic_instrument_v4.py: 46
+tests/test_evaluation/test_semantic_model_disclosure.py: 46
+tests/test_evaluation/test_semantic_score_resolution.py: 12
+tests/test_evaluation/test_streaming_api_judge.py: 8
+tests/test_evaluation/test_summarize_rubric20_results.py: 36
+tests/test_evaluation/test_summary_identity_schema.py: 2
+tests/test_evaluation/test_support_ancestor_context.py: 16
+tests/test_evaluation/test_support_ancestor_context_pipeline.py: 25
+tests/test_evaluation/test_support_calibration.py: 15
+tests/test_evaluation/test_support_calibration_adversarial.py: 34
+tests/test_evaluation/test_support_calibration_cli.py: 2
+tests/test_evaluation/test_support_execution_index.py: 9
+tests/test_evaluation/test_support_execution_index_adversarial.py: 19
+tests/test_evaluation/test_support_judge.py: 46
+tests/test_evaluation/test_support_plan.py: 59
+tests/test_evaluation/test_support_scalar_reference_pipeline.py: 22
+tests/test_evaluation/test_support_scalar_references.py: 31
+tests/test_evaluation/test_support_targets.py: 47
+tests/test_evaluation/test_top_level_fitness_results.py: 52
+tests/test_evaluation/test_trusted_context_and_class_review.py: 8
+tests/test_evaluation/test_validator_discovery.py: 9
+tests/test_evaluation/test_validator_outputs.py: 5
+tests/test_evaluation/test_verifiable.py: 71
+tests/test_evaluation/test_verifiable_recorded_basis.py: 50
+tests/test_evaluation_context_files.py: 9
+tests/test_evaluation_coverage.py: 6
+tests/test_evaluation_identity.py: 10
+tests/test_evaluation_model.py: 48
+tests/test_evaluation_model_config.py: 24
+tests/test_evidence_anonymous_removals.py: 132
+tests/test_evidence_assertions.py: 154
+tests/test_evidence_generation_gate.py: 13
+tests/test_evidence_phase_contract.py: 36
+tests/test_execute_returns_record_usage.py: 1
+tests/test_extend_observed.py: 36
+tests/test_external_dataset_onboarding.py: 26
+tests/test_fairscape_integration/test_d4d_builder.py: 37
+tests/test_fairscape_integration/test_declared_assertions.py: 92
+tests/test_fairscape_integration/test_declared_evidence_outcomes.py: 26
+tests/test_fairscape_integration/test_declared_projections.py: 26
+tests/test_fairscape_integration/test_fairscape_to_d4d.py: 98
+tests/test_fairscape_integration/test_field_prioritizer.py: 14
+tests/test_fairscape_integration/test_informativeness_scorer.py: 14
+tests/test_fairscape_integration/test_linkml_map_integration.py: 7
+tests/test_fairscape_integration/test_mapping_loader.py: 15
+tests/test_fairscape_integration/test_parent_admission.py: 117
+tests/test_fairscape_integration/test_rocrate_merger.py: 18
+tests/test_fairscape_integration/test_rocrate_parser.py: 27
+tests/test_fairscape_integration/test_sssom_integration.py: 16
+tests/test_fairscape_integration/test_sssom_reader.py: 21
+tests/test_fairscape_integration/test_validator.py: 19
+tests/test_fig09_mapping_revision_display.py: 3
+tests/test_fig09_portable_locators.py: 8
+tests/test_figure_publication.py: 30
+tests/test_figure_set_2303_updates.py: 10
+tests/test_file_collection.py: 8
+tests/test_final_input_routing_review.py: 9
+tests/test_fitness_instrument_snapshot.py: 6
+tests/test_fitness_nested_vocabulary.py: 10
+tests/test_fitness_schema.py: 40
+tests/test_focused_test_command.py: 9
+tests/test_form_defects.py: 77
+tests/test_form_instrument_snapshot.py: 9
+tests/test_form_subtype_class_scope.py: 7
+tests/test_fresh_orphan_partial_generation.py: 4
+tests/test_generation_manifest_identity.py: 29
+tests/test_generation_record_schema.py: 22
+tests/test_generation_recovery_review.py: 20
+tests/test_generation_snapshot_ownership.py: 23
+tests/test_generation_specificity_delegated.py: 67
+tests/test_generation_specificity_skill.py: 357
+tests/test_generic_v10_r9_enum_criteria.py: 29
+tests/test_github_assistant_generation.py: 18
+tests/test_grounding.py: 17
+tests/test_grounding_instrument.py: 38
+tests/test_historical_digest.py: 77
+tests/test_historical_digest_cache.py: 56
+tests/test_historical_profile_identity.py: 49
+tests/test_historical_profile_inventory_cache.py: 36
+tests/test_historical_prompt_recovery.py: 12
+tests/test_identifier_form.py: 17
+tests/test_identifiers.py: 25
+tests/test_imported_schema_snapshot.py: 10
+tests/test_installed_agentic_identity.py: 22
+tests/test_installed_wheel.py: 9
+tests/test_instrument_archive_history.py: 2
+tests/test_instrument_prompt_identity.py: 10
+tests/test_instrument_provenance.py: 12
+tests/test_legacy_migration.py: 5
+tests/test_legacy_renderer_commands.py: 4
+tests/test_legacy_validator_root.py: 15
+tests/test_lexicons.py: 53
+tests/test_mailto_ids.py: 15
+tests/test_manifest_corpus_review.py: 11
+tests/test_manifest_corpus_review_r10.py: 5
+tests/test_manifest_corpus_review_r11.py: 9
+tests/test_manifest_corpus_review_r12.py: 10
+tests/test_manifest_corpus_review_r13.py: 4
+tests/test_manifest_corpus_review_r14.py: 4
+tests/test_manifest_corpus_review_r15.py: 6
+tests/test_manifest_corpus_review_r16.py: 10
+tests/test_manifest_corpus_review_r17.py: 4
+tests/test_manifest_corpus_review_r3.py: 12
+tests/test_manifest_corpus_review_r4.py: 7
+tests/test_manifest_corpus_review_r5.py: 8
+tests/test_manifest_corpus_review_r6.py: 6
+tests/test_manifest_corpus_review_r7.py: 1
+tests/test_manifest_corpus_review_r8.py: 4
+tests/test_manifest_corpus_review_r9.py: 8
+tests/test_manifest_corpus_root.py: 10
+tests/test_manifest_gate_and_header_review.py: 18
+tests/test_measure_unhyphenated_line_splits.py: 30
+tests/test_merge.py: 40
+tests/test_merge_destinations.py: 50
+tests/test_merge_pinned_fitness.py: 28
+tests/test_merge_selection_provenance.py: 43
+tests/test_method_resolution.py: 23
+tests/test_method_split.py: 2
+tests/test_midnight_resume.py: 9
+tests/test_model_disclosure.py: 78
+tests/test_name_grounding.py: 128
+tests/test_name_grounding_schema_scope.py: 35
+tests/test_native_attempt_supervisor.py: 87
+tests/test_native_attribution_controller.py: 43
+tests/test_native_attribution_results.py: 87
+tests/test_native_execution.py: 73
+tests/test_native_execution_gates.py: 72
+tests/test_native_execution_observation.py: 18
+tests/test_native_execution_permissions.py: 151
+tests/test_native_full_schema_profile_boundaries.py: 132
+tests/test_native_full_schema_profile_evidence.py: 106
+tests/test_native_full_schema_profile_operations.py: 87
+tests/test_native_full_schema_profile_runtime.py: 46
+tests/test_native_incomplete_evidence.py: 50
+tests/test_native_phase_scope_rendering.py: 4
+tests/test_native_receipt_origin_reporting.py: 76
+tests/test_native_registered_provenance.py: 7
+tests/test_native_source_attribution.py: 118
+tests/test_native_source_roster.py: 38
+tests/test_native_temperature.py: 7
+tests/test_native_trace_comparison.py: 47
+tests/test_native_trace_comparison_adversarial.py: 79
+tests/test_native_trace_prefix_profile.py: 24
+tests/test_native_trace_profile_runtime.py: 34
+tests/test_nested_ancestor_receipts.py: 25
+tests/test_nested_ranges.py: 18
+tests/test_nested_string_lists.py: 15
+tests/test_neutral_generation_schema.py: 7
+tests/test_no_real_identifiers.py: 14
+tests/test_notes_write_guard.py: 18
+tests/test_observed_effort_backfill.py: 29
+tests/test_org_registry.py: 5
+tests/test_packaging_review_r7.py: 10
+tests/test_pair_cli_historical_core.py: 19
+tests/test_pair_cli_recorded_digest.py: 19
+tests/test_pair_gate.py: 19
+tests/test_partial_surviving_accounting.py: 2
+tests/test_per_record_slots.py: 14
+tests/test_phase_dataflow.py: 15
+tests/test_phase_log.py: 10
+tests/test_pin_granularity.py: 10
+tests/test_playbook_drift.py: 10
+tests/test_playbook_reach.py: 21
+tests/test_presence_scoping.py: 9
+tests/test_profile_review_r8.py: 28
+tests/test_profile_review_r9.py: 32
+tests/test_profiles.py: 90
+tests/test_projects_registry.py: 5
+tests/test_prompt_registry.py: 37
+tests/test_prompt_render_alias.py: 6
+tests/test_provenance_header.py: 16
+tests/test_provenance_reasoning_effort.py: 21
+tests/test_provenance_reasoning_message.py: 160
+tests/test_q19_blind_second_reading.py: 7
+tests/test_q19_rationale_lint.py: 312
+tests/test_reasoning.py: 12
+tests/test_reasoning_consumers_corrupt_entries.py: 45
+tests/test_reasoning_generation_restart.py: 4
+tests/test_reasoning_log_status.py: 9
+tests/test_recall_target_baseline.py: 79
+tests/test_receipt_completion_batch_gate.py: 18
+tests/test_receipt_completion_policy.py: 67
+tests/test_receipt_completion_runtime.py: 85
+tests/test_receipt_floor_basis.py: 67
+tests/test_receipt_identifier_basis.py: 118
+tests/test_receipt_origin.py: 230
+tests/test_receipt_origin_captured.py: 24
+tests/test_receipt_origin_record.py: 21
+tests/test_receipt_read_identity.py: 3
+tests/test_receipt_readdress_cli.py: 52
+tests/test_receipt_readdress_input_snapshots.py: 2
+tests/test_receipt_rereceipt.py: 58
+tests/test_receipt_resolve_indices.py: 55
+tests/test_receipt_sources.py: 34
+tests/test_receipts.py: 50
+tests/test_receipts_v5_merge_n1.py: 34
+tests/test_receipts_v5_merge_n3.py: 9
+tests/test_receipts_v5_merge_n4.py: 9
+tests/test_receipts_v5_merge_r4.py: 5
+tests/test_receipts_v5_upgrade.py: 11
+tests/test_recheck_validation_all.py: 19
+tests/test_reconstructed_bytes.py: 12
+tests/test_record_required_values.py: 16
+tests/test_recorder_p1.py: 21
+tests/test_redundancy.py: 17
+tests/test_reference_qualification.py: 5
+tests/test_reference_rescore.py: 184
+tests/test_reference_rescore_audit.py: 16
+tests/test_reference_rescore_cborg.py: 9
+tests/test_reference_rescore_cborg_batch.py: 28
+tests/test_reference_rescore_cborg_deadline.py: 20
+tests/test_reference_rescore_cborg_validator_status.py: 17
+tests/test_registered_eval_runner.py: 128
+tests/test_registry_audit_and_prompt_replay.py: 26
+tests/test_registry_prefixes.py: 7
+tests/test_related_dataset_diagnostics.py: 56
+tests/test_release_inventory.py: 79
+tests/test_removal_repair.py: 59
+tests/test_removals.py: 186
+tests/test_removals_identifier_basis.py: 81
+tests/test_removals_person_schema.py: 11
+tests/test_rendered_provenance.py: 9
+tests/test_renderer_contract_captures.py: 8
+tests/test_replicate_structure.py: 69
+tests/test_repo_relative_paths.py: 12
+tests/test_report_audit_totals.py: 16
+tests/test_report_claims.py: 113
+tests/test_report_claims_corpus.py: 27
+tests/test_report_claims_v7.py: 23
+tests/test_report_core_inventory.py: 7
+tests/test_report_gate.py: 40
+tests/test_report_original_removal.py: 22
+tests/test_rereceipt_completion.py: 69
+tests/test_resources.py: 81
+tests/test_resume_inputs.py: 13
+tests/test_resume_instrument_and_activation.py: 9
+tests/test_retention_incentives.py: 14
+tests/test_review_pack.py: 55
+tests/test_review_pack_identifier_basis.py: 60
+tests/test_review_pack_schema_refresh.py: 1
+tests/test_review_receipts_v5_20261026.py: 32
+tests/test_reviewer_basis.py: 7
+tests/test_rocrate/test_assertions.py: 18
+tests/test_rocrate/test_atomic_publication.py: 8
+tests/test_rocrate/test_committed_outputs.py: 8
+tests/test_rocrate/test_healthsheet.py: 15
+tests/test_rocrate/test_legacy_acquisition_methods.py: 112
+tests/test_rocrate/test_legacy_creator_reference_unicode.py: 52
+tests/test_rocrate/test_legacy_creator_references.py: 148
+tests/test_rocrate/test_legacy_creators.py: 91
+tests/test_rocrate/test_legacy_creators_adversarial.py: 51
+tests/test_rocrate/test_legacy_description_lists.py: 66
+tests/test_rocrate/test_legacy_distribution_formats.py: 94
+tests/test_rocrate/test_legacy_documentary_constructors.py: 158
+tests/test_rocrate/test_legacy_doi.py: 155
+tests/test_rocrate/test_legacy_envelope_adversarial.py: 28
+tests/test_rocrate/test_legacy_publication.py: 51
+tests/test_rocrate/test_legacy_publication_adversarial.py: 39
+tests/test_rocrate/test_legacy_result_contract.py: 19
+tests/test_rocrate/test_legacy_root_gates.py: 30
+tests/test_rocrate/test_legacy_root_identity.py: 95
+tests/test_rocrate/test_legacy_root_identity_adversarial.py: 42
+tests/test_rocrate/test_legacy_root_narrative_descriptions.py: 170
+tests/test_rocrate/test_legacy_route_disposition_api_counts.py: 49
+tests/test_rocrate/test_legacy_route_disposition_publication.py: 70
+tests/test_rocrate/test_legacy_route_dispositions_core.py: 276
+tests/test_rocrate/test_legacy_sensitive_elements.py: 66
+tests/test_rocrate/test_legacy_supplemental_report.py: 28
+tests/test_rocrate/test_legacy_update_plan.py: 103
+tests/test_rocrate/test_legacy_update_plan_adversarial.py: 38
+tests/test_rocrate/test_legacy_validation_target.py: 10
+tests/test_rocrate/test_map.py: 85
+tests/test_rocrate/test_mapping_coverage.py: 5
+tests/test_rocrate/test_normalize.py: 44
+tests/test_rocrate/test_parser.py: 18
+tests/test_rocrate/test_parser_root_policy.py: 62
+tests/test_rocrate/test_production_root_gates.py: 104
+tests/test_rocrate/test_profile_root_policy.py: 72
+tests/test_rocrate/test_profile_unavailable.py: 23
+tests/test_rocrate/test_provenance.py: 43
+tests/test_rocrate/test_root_scope.py: 50
+tests/test_rocrate/test_runs.py: 87
+tests/test_rocrate/test_source_snapshot.py: 16
+tests/test_rocrate/test_transform_api.py: 3
+tests/test_rocrate_file_collection.py: 5
+tests/test_routed_condition_reporting.py: 68
+tests/test_routing_diagnostics.py: 97
+tests/test_rubric10_element4_gate.py: 16
+tests/test_run_guard.py: 2
+tests/test_run_lock.py: 15
+tests/test_run_pair_schema.py: 12
+tests/test_run_schema.py: 30
+tests/test_run_telemetry.py: 27
+tests/test_runtime_library_identity.py: 2
+tests/test_schema/test_datacite_relationships.py: 19
+tests/test_schema/test_filecollection_resources.py: 8
+tests/test_schema/test_schema_digest_optional.py: 15
+tests/test_schema/test_schema_stats.py: 11
+tests/test_schema_cache.py: 13
+tests/test_schema_cache_invalidation.py: 11
+tests/test_schema_digest_cache.py: 6
+tests/test_schema_event_replay.py: 44
+tests/test_schema_release_identity.py: 7
+tests/test_schema_semantics.py: 91
+tests/test_schema_snapshot_cache.py: 6
+tests/test_schema_snapshot_compatibility.py: 13
+tests/test_schema_straddle.py: 18
+tests/test_schema_sync.py: 54
+tests/test_schema_sync_stability.py: 10
+tests/test_schema_view.py: 6
+tests/test_scope.py: 49
+tests/test_scope_block.py: 16
+tests/test_selected_priority_and_scope.py: 34
+tests/test_self_disclaimed.py: 418
+tests/test_self_disclaimed_baseline.py: 51
+tests/test_semantic_exchange/test_comprehensive_sssom.py: 86
+tests/test_semantic_exchange/test_semantic_exchange_docs_counts.py: 6
+tests/test_semantic_exchange/test_skos_alignment_header.py: 39
+tests/test_semantic_exchange/test_sssom_validation.py: 10
+tests/test_semantic_exchange/test_structural_mapping_analysis_doc.py: 8
+tests/test_semantic_exchange/test_structural_mapping_drift.py: 68
+tests/test_semantic_taxonomy_figure.py: 52
+tests/test_semantic_v4_reporting_controller.py: 25
+tests/test_shared_generation_assets.py: 100
+tests/test_shared_generation_batch_authority.py: 22
+tests/test_shared_generation_capture.py: 10
+tests/test_shared_generation_cli.py: 55
+tests/test_shared_generation_completed_replay.py: 32
+tests/test_shared_generation_condition_compatibility.py: 6
+tests/test_shared_generation_provenance.py: 10
+tests/test_shared_generation_resources.py: 47
+tests/test_shared_generation_runtime.py: 10
+tests/test_shared_generation_scope_context.py: 11
+tests/test_shared_generation_selection.py: 39
+tests/test_shared_line_join_replay.py: 12
+tests/test_shared_output_ownership.py: 92
+tests/test_shared_output_ownership_entrypoints.py: 18
+tests/test_shared_schema_sync_resources.py: 35
+tests/test_shared_write_footprint.py: 23
+tests/test_smaller_defects.py: 18
+tests/test_snapshot_attempt_recovery.py: 2
+tests/test_snapshot_attestation.py: 5
+tests/test_source_attribution_preflight.py: 40
+tests/test_source_heading_authority.py: 4
+tests/test_source_heading_completed.py: 11
+tests/test_source_heading_output_layout.py: 10
+tests/test_source_heading_routing.py: 66
+tests/test_source_heading_runtime.py: 15
+tests/test_source_heading_runtime_api.py: 18
+tests/test_source_metadata_evidence.py: 77
+tests/test_source_metadata_renderer.py: 35
+tests/test_source_priority.py: 32
+tests/test_source_review.py: 55
+tests/test_source_snapshot.py: 24
+tests/test_spelling.py: 16
+tests/test_status_context.py: 247
+tests/test_stream_evidence.py: 17
+tests/test_stream_guard.py: 7
+tests/test_suite_does_not_mutate_the_schema.py: 2
+tests/test_term_validator_hook.py: 20
+tests/test_thinking_request.py: 18
+tests/test_thinking_tokens.py: 13
+tests/test_typed_audit.py: 100
+tests/test_typed_audit_derivations.py: 9
+tests/test_typed_audit_figure.py: 47
+tests/test_typed_audit_report.py: 41
+tests/test_unusable_snapshot.py: 17
+tests/test_uri_schemes.py: 12
+tests/test_usage_ledger.py: 59
+tests/test_v8_standards_explorer_publication.py: 4
+tests/test_values_from.py: 20
+tests/test_verdict_schema_pin.py: 11
+tests/test_voice_pediatric_bundle.py: 14
+tests/test_wave3_receipt_integration.py: 14
+tests/test_wave3_receipts_core.py: 42
+tests/test_wave3_watermark_transform.py: 45
+tests/test_wcrate_copies.py: 121
+
+==================================== ERRORS ====================================
+__________ ERROR collecting fairscape_models/tests/test_annotation.py __________
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/fairscape_models/tests/test_annotation.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+fairscape_models/tests/test_annotation.py:3: in <module>
+    from fairscape_models.annotation import Annotation
+E   ModuleNotFoundError: No module named 'fairscape_models.annotation'
+_________ ERROR collecting fairscape_models/tests/test_computation.py __________
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/fairscape_models/tests/test_computation.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+fairscape_models/tests/test_computation.py:3: in <module>
+    from fairscape_models.computation import Computation
+E   ModuleNotFoundError: No module named 'fairscape_models.computation'
+___________ ERROR collecting fairscape_models/tests/test_dataset.py ____________
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/fairscape_models/tests/test_dataset.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+fairscape_models/tests/test_dataset.py:3: in <module>
+    from fairscape_models.dataset import Dataset
+E   ModuleNotFoundError: No module named 'fairscape_models.dataset'
+__________ ERROR collecting fairscape_models/tests/test_experiment.py __________
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/fairscape_models/tests/test_experiment.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+fairscape_models/tests/test_experiment.py:3: in <module>
+    from fairscape_models.experiment import Experiment
+E   ModuleNotFoundError: No module named 'fairscape_models.experiment'
+________ ERROR collecting fairscape_models/tests/test_fairscapebase.py _________
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/fairscape_models/tests/test_fairscapebase.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+fairscape_models/tests/test_fairscapebase.py:3: in <module>
+    from fairscape_models.fairscape_base import (
+E   ModuleNotFoundError: No module named 'fairscape_models.fairscape_base'
+__________ ERROR collecting fairscape_models/tests/test_instrument.py __________
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/fairscape_models/tests/test_instrument.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+fairscape_models/tests/test_instrument.py:3: in <module>
+    from fairscape_models.instrument import Instrument
+E   ModuleNotFoundError: No module named 'fairscape_models.instrument'
+___________ ERROR collecting fairscape_models/tests/test_mlmodel.py ____________
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/fairscape_models/tests/test_mlmodel.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+fairscape_models/tests/test_mlmodel.py:3: in <module>
+    from fairscape_models.mlmodel import MLModel
+E   ModuleNotFoundError: No module named 'fairscape_models.mlmodel'
+__________ ERROR collecting fairscape_models/tests/test_model_card.py __________
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/fairscape_models/tests/test_model_card.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+fairscape_models/tests/test_model_card.py:3: in <module>
+    from fairscape_models.model_card import ModelCard
+E   ModuleNotFoundError: No module named 'fairscape_models.model_card'
+______ ERROR collecting fairscape_models/tests/test_rocrate_validation.py ______
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/fairscape_models/tests/test_rocrate_validation.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+fairscape_models/tests/test_rocrate_validation.py:6: in <module>
+    from fairscape_models.rocrate import (
+E   ModuleNotFoundError: No module named 'fairscape_models.rocrate'
+____________ ERROR collecting fairscape_models/tests/test_schema.py ____________
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/fairscape_models/tests/test_schema.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+fairscape_models/tests/test_schema.py:3: in <module>
+    from fairscape_models.schema import Schema, Property
+E   ModuleNotFoundError: No module named 'fairscape_models.schema'
+___________ ERROR collecting fairscape_models/tests/test_software.py ___________
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/fairscape_models/tests/test_software.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+fairscape_models/tests/test_software.py:3: in <module>
+    from fairscape_models.software import Software
+E   ModuleNotFoundError: No module named 'fairscape_models.software'
+________________ ERROR collecting src/renderer/test_renderer.py ________________
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/src/renderer/test_renderer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+src/renderer/__init__.py:1: in <module>
+    from .template_renderer import TemplateRenderer
+src/renderer/template_renderer.py:16: in <module>
+    from weasyprint import HTML
+E   ModuleNotFoundError: No module named 'weasyprint'
+____________ ERROR collecting src/renderer/test_yaml_extraction.py _____________
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/src/renderer/test_yaml_extraction.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+src/renderer/__init__.py:1: in <module>
+    from .template_renderer import TemplateRenderer
+src/renderer/template_renderer.py:16: in <module>
+    from weasyprint import HTML
+E   ModuleNotFoundError: No module named 'weasyprint'
+________ ERROR collecting src/scripts_obsolete/download_module_test.py _________
+src/scripts_obsolete/download_module_test.py:29: in <module>
+    response = requests.get(export_url)
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/requests/api.py:73: in get
+    return request("get", url, params=params, **kwargs)
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/requests/sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/requests/sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/requests/adapters.py:644: in send
+    resp = conn.urlopen(
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py:716: in urlopen
+    httplib_response = self._make_request(
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py:404: in _make_request
+    self._validate_conn(conn)
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py:1061: in _validate_conn
+    conn.connect()
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/urllib3/connection.py:363: in connect
+    self.sock = conn = self._new_conn()
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/urllib3/connection.py:174: in _new_conn
+    conn = connection.create_connection(
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/urllib3/util/connection.py:72: in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/socket.py:977: in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+scripts/adhoc/receipts_v5_ci_offline_20261029.py:28: in offline
+    original_offline(event, args)
+scripts/adhoc/validate_receipts_v5_merge_20261029.py:15: in offline
+    raise RuntimeError("offline validation forbids network")
+E   RuntimeError: offline validation forbids network
+__ ERROR collecting tests/test_fairscape_integration/test_canonical_routes.py __
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_fairscape_integration/test_canonical_routes.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/test_fairscape_integration/test_canonical_routes.py:21: in <module>
+    from fairscape_models.rocrate import ROCrateMetadataElem, ROCrateV1_2
+E   ModuleNotFoundError: No module named 'fairscape_models.rocrate'
+_ ERROR collecting tests/test_fairscape_integration/test_forward_typed_projections.py _
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_fairscape_integration/test_forward_typed_projections.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/test_fairscape_integration/test_forward_typed_projections.py:18: in <module>
+    from fairscape_models.rocrate import ROCrateMetadataElem, ROCrateV1_2
+E   ModuleNotFoundError: No module named 'fairscape_models.rocrate'
+_ ERROR collecting tests/test_fairscape_integration/test_nested_dataset_readback.py _
+ImportError while importing test module '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/tests/test_fairscape_integration/test_nested_dataset_readback.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/test_fairscape_integration/test_nested_dataset_readback.py:13: in <module>
+    from fairscape_models.rocrate import (
+E   ModuleNotFoundError: No module named 'fairscape_models.rocrate'
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR fairscape_models/tests/test_annotation.py
+ERROR fairscape_models/tests/test_computation.py
+ERROR fairscape_models/tests/test_dataset.py
+ERROR fairscape_models/tests/test_experiment.py
+ERROR fairscape_models/tests/test_fairscapebase.py
+ERROR fairscape_models/tests/test_instrument.py
+ERROR fairscape_models/tests/test_mlmodel.py
+ERROR fairscape_models/tests/test_model_card.py
+ERROR fairscape_models/tests/test_rocrate_validation.py
+ERROR fairscape_models/tests/test_schema.py
+ERROR fairscape_models/tests/test_software.py
+ERROR src/renderer/test_renderer.py
+ERROR src/renderer/test_yaml_extraction.py
+ERROR src/scripts_obsolete/download_module_test.py - RuntimeError: offline va...
+ERROR tests/test_fairscape_integration/test_canonical_routes.py
+ERROR tests/test_fairscape_integration/test_forward_typed_projections.py
+ERROR tests/test_fairscape_integration/test_nested_dataset_readback.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 17 errors during collection !!!!!!!!!!!!!!!!!!!

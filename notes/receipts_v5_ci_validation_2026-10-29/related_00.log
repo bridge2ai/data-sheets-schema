@@ -1,0 +1,75 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 60 items
+
+tests/test_arm_comparison.py::test_bundle_drift_checks_every_arm_project_and_replicate PASSED [  1%]
+tests/test_arm_comparison.py::test_bundle_drift_recovers_pinned_manifest_not_current_replacement PASSED [  3%]
+tests/test_arm_comparison.py::test_bundle_drift_unavailable_history_never_uses_changed_manifest[absent] PASSED [  5%]
+tests/test_arm_comparison.py::test_bundle_drift_unavailable_history_never_uses_changed_manifest[wrong_bytes] PASSED [  6%]
+tests/test_arm_comparison.py::test_bundle_drift_unavailable_history_never_uses_changed_manifest[git_unavailable] PASSED [  8%]
+tests/test_arm_comparison.py::test_bundle_drift_requires_every_manifest_hash PASSED [ 10%]
+tests/test_arm_comparison.py::test_bundle_drift_rejects_hash_pinned_duplicate_manifest_keys PASSED [ 11%]
+tests/test_arm_comparison.py::test_bundle_drift_history_lookup_uses_recorded_name_after_symlink_change PASSED [ 13%]
+tests/test_arm_comparison.py::test_bundle_drift_missing_pins_are_unknown_not_zero[inputs0] PASSED [ 15%]
+tests/test_arm_comparison.py::test_bundle_drift_missing_pins_are_unknown_not_zero[inputs1] PASSED [ 16%]
+tests/test_arm_comparison.py::test_bundle_drift_missing_pins_are_unknown_not_zero[inputs2] PASSED [ 18%]
+tests/test_arm_comparison.py::test_bundle_drift_does_not_cache_current_disk_identity PASSED [ 20%]
+tests/test_arm_comparison.py::test_bundle_drift_rejects_manifest_for_another_bundle PASSED [ 21%]
+tests/test_arm_comparison.py::test_bundle_drift_does_not_read_paths_outside_selected_checkout PASSED [ 23%]
+tests/test_arm_comparison.py::test_bundle_drift_rejects_external_manifest_link_back_into_checkout PASSED [ 25%]
+tests/test_arm_comparison.py::test_bundle_drift_report_retains_denominators_unknowns_and_record_labels PASSED [ 26%]
+tests/test_arm_comparison.py::test_bundle_drift_cli_reads_explicit_cohort_without_writing PASSED [ 28%]
+tests/test_arm_comparison.py::Rate::test_a_zero_numerator_over_a_real_denominator_is_a_rate_not_a_dash PASSED [ 30%]
+tests/test_arm_comparison.py::Rate::test_nothing_measured_and_nothing_to_divide_are_both_a_dash PASSED [ 31%]
+tests/test_arm_comparison.py::Pooled::test_a_key_no_record_carries_is_none_and_never_zero PASSED [ 33%]
+tests/test_arm_comparison.py::Pooled::test_records_counts_only_the_records_that_were_measured PASSED [ 35%]
+tests/test_arm_comparison.py::Pooled::test_the_split_is_divided_by_the_records_that_carry_it PASSED [ 36%]
+tests/test_arm_comparison.py::Metrics::test_a_block_predating_the_counters_falls_back_to_the_list PASSED [ 38%]
+tests/test_arm_comparison.py::Metrics::test_an_unchecked_receipt_measures_nothing PASSED [ 40%]
+tests/test_arm_comparison.py::Metrics::test_the_split_passes_through_as_none_where_the_block_has_none PASSED [ 41%]
+tests/test_arm_comparison.py::Metrics::test_without_a_receipt_is_the_difference_not_the_capped_list PASSED [ 43%]
+tests/test_arm_comparison.py::Metrics::test_wrongchunk_sums_the_three_attribution_kinds PASSED [ 45%]
+tests/test_arm_comparison.py::Section::test_a_whole_arm_with_the_split_names_no_record_count PASSED [ 46%]
+tests/test_arm_comparison.py::Section::test_an_arm_that_mixes_snapshot_and_no_snapshot_says_how_many_the_split_covers PASSED [ 48%]
+tests/test_arm_comparison.py::Section::test_an_arm_with_no_measured_record_is_left_out_entirely PASSED [ 50%]
+tests/test_arm_comparison.py::Section::test_an_arm_with_no_split_at_all_shows_a_dash_and_no_suffix PASSED [ 51%]
+tests/test_arm_comparison.py::test_report_cells_keep_unmeasured_zeros_out_of_the_mean PASSED [ 53%]
+tests/test_arm_comparison.py::test_check_detects_report_changes_without_overwriting_any_output PASSED [ 55%]
+tests/test_arm_comparison.py::test_report_bundle_drift_uses_selected_cohort_in_stable_order PASSED [ 56%]
+tests/test_arm_comparison.py::test_bundle_drift_survives_real_metrics_collection PASSED [ 58%]
+tests/test_arm_comparison.py::test_committed_comparison_matches_current_records PASSED [ 60%]
+tests/test_arm_comparison.py::RemovalRows::test_a_measured_record_carries_its_counts_and_a_measured_zero_stays_zero PASSED [ 61%]
+tests/test_arm_comparison.py::RemovalRows::test_a_record_with_no_snapshot_is_unmeasured_on_every_removal_row PASSED [ 63%]
+tests/test_arm_comparison.py::RemovalRows::test_an_unrecorded_count_the_block_did_not_measure_is_not_read PASSED [ 65%]
+tests/test_arm_comparison.py::RemovalRows::test_the_all_phase_row_says_it_counts_every_phase PASSED [ 66%]
+tests/test_arm_comparison.py::RemovalRows::test_the_deletion_rows_say_a_reworded_or_moved_value_counts_as_deleted PASSED [ 68%]
+tests/test_arm_comparison.py::RemovalRows::test_the_low_confidence_and_not_the_models_rows_read_the_unfounded_subsets PASSED [ 70%]
+tests/test_arm_comparison.py::RemovalRows::test_the_low_confidence_row_sizes_the_deflation_and_moves_nothing PASSED [ 71%]
+tests/test_arm_comparison.py::RemovalRows::test_the_not_the_models_row_counts_normaliser_forms_and_amends_within_the_rewrites PASSED [ 73%]
+tests/test_arm_comparison.py::RemovalRows::test_the_reconcile_row_counts_only_what_reconcile_full_removed PASSED [ 75%]
+tests/test_arm_comparison.py::RemovalRows::test_the_relocation_row_counts_unfounded_removals_with_a_candidate_and_moves_nothing PASSED [ 76%]
+tests/test_arm_comparison.py::RemovalRows::test_the_rewrite_row_counts_unfounded_in_place_rewrites_apart_from_removals PASSED [ 78%]
+tests/test_arm_comparison.py::RemovalRows::test_the_row_definition_states_the_exclusions_the_classifier_applies PASSED [ 80%]
+tests/test_arm_comparison.py::RemovalRows::test_the_rows_are_in_the_table PASSED [ 81%]
+tests/test_arm_comparison.py::ReleaseInventory::test_a_pinned_manifest_whose_corpus_differs_from_todays_is_named PASSED [ 83%]
+tests/test_arm_comparison.py::ReleaseInventory::test_a_record_pinning_no_manifest_or_no_hash_says_so_and_git_is_not_asked PASSED [ 85%]
+tests/test_arm_comparison.py::ReleaseInventory::test_records_that_read_a_crate_today_s_corpus_dropped_are_noted PASSED [ 86%]
+tests/test_arm_comparison.py::ReleaseInventory::test_release_subelements_are_counted_per_project_and_evaluator_with_na_apart PASSED [ 88%]
+tests/test_arm_comparison.py::ReleaseInventory::test_the_corpus_limited_project_is_named_with_its_inventory PASSED [ 90%]
+tests/test_arm_comparison.py::test_live_form_uses_run_schema_for_prefixes_and_identifier_walk PASSED [ 91%]
+tests/test_arm_comparison.py::test_schema_fallback_uses_todays_values_and_exposes_why[False] PASSED [ 93%]
+tests/test_arm_comparison.py::test_schema_fallback_uses_todays_values_and_exposes_why[True] PASSED [ 95%]
+tests/test_arm_comparison.py::test_missing_or_invalid_runs_do_not_acquire_live_form_measurements PASSED [ 96%]
+tests/test_arm_comparison.py::test_form_schema_section_escapes_recorded_basis_and_distinguishes_absence PASSED [ 98%]
+tests/test_arm_comparison.py::test_live_reference_worst_is_distinguished_from_stored_canary_thresholds PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_arm_comparison.py::test_committed_comparison_matches_current_records
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_00-xml-4_6dyjye/pytest.xml -
+================== 60 passed, 1 warning in 167.72s (0:02:47) ===================

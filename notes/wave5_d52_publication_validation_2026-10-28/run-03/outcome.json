@@ -1,0 +1,17 @@
+{
+  "invalid_junit_cases": [],
+  "passed": false,
+  "passed_cases_by_module": {
+    "test_d4d_evaluator_scoring": 0,
+    "test_d52_publication_labels": 0,
+    "test_d52_scoring": 0,
+    "test_evaluation.test_explicit_dataset_scope": 0,
+    "test_evaluation_context": 0,
+    "test_rubric20_fixed_anchors": 0
+  },
+  "returncode": 1,
+  "scientific_acceptance": "not_assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 2.373073666007258
+}

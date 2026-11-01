@@ -1,0 +1,13 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-d52-baseline-validation-20261028/cases",
+    "--junitxml",
+    "/private/tmp/d4d-d52-baseline-validation-20261028/pytest.xml",
+    "tests/test_d52_scoring.py"
+  ],
+  "cwd": "/private/tmp/d4d-codex-d52-scoring-20261028"
+}

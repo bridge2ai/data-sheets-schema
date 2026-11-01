@@ -1,0 +1,54 @@
+Proposed patch, not applied: the A17 review (R7) F3 asks for the typed-audit
+input sizing's sha256 and summary inside the registration. The registration
+format is closed by shared_generation.parse_registration, a protected file, so
+the builder writes the sizing beside the registration instead
+(<registration>.sizing.json, naming the registration's sha256) and
+`build_api_registrations.py --check` verifies it.
+
+This patch would let a v1 registration carry an optional `input_sizing` block:
+the sha256 of the canonical sizing object and the figures the allowance was
+checked against. The block is checked against the registration's own limits.
+Once it is applied, the builder would set
+  registration["input_sizing"] = {"instrument": sizing["instrument"],
+      "sha256": sha256(canonical(sizing)), "max_workers": ...,
+      "largest_call_input_tokens": max of the three stage figures,
+      "aggregate_input_tokens": sizing["aggregate_input_tokens"]}
+before parsing. Registrations without a sizing (the chorus profile) would
+keep their bytes. shared_generation.py is in ROUTING_CODE, so applying this
+moves the v2 routing descriptor's code identity.
+
+--- a/src/data_sheets_schema/shared_generation.py	2026-10-25 23:27:28
++++ b/src/data_sheets_schema/shared_generation.py	2026-10-25 23:27:28
+@@ -264,7 +264,8 @@
+         raise ValueError("unsupported shared registration format")
+     _exact(value, {"format", "registration_id", "registration_path", "selection", "inputs",
+                    "runtime", "audit_limits", "audit_transport", "receipt", "run"}
+-                   | ({"routing"} if version == 2 else set()), "shared registration")
++                   | ({"routing"} if version == 2 else set())
++                   | ({"input_sizing"} if "input_sizing" in value else set()), "shared registration")
+     if type(value['selection']) is not dict:
+         raise ValueError("selected descriptor must be an object")
+     if canonical(value["selection"]) != canonical(descriptor(version=version, condition=value['selection'].get('condition'))):
+@@ -316,6 +317,22 @@
+     for key in _AUDIT_LIMITS - {"context_limit_basis"}:
+         _integer(limits[key], key)
+     _text(limits["context_limit_basis"], "context limit basis")
++    if "input_sizing" in value:
++        # The builder's typed-audit input sizing (#5155): its digest and the
++        # figures the allowance was checked against. The full sizing is the
++        # sizing record beside the registration, which names these bytes.
++        sizing = value["input_sizing"]
++        _exact(sizing, {"instrument", "sha256", "max_workers", "largest_call_input_tokens",
++                        "aggregate_input_tokens"}, "registered input sizing")
++        _text(sizing["instrument"], "input sizing instrument")
++        if type(sizing["sha256"]) is not str or not re.fullmatch(r"[0-9a-f]{64}", sizing["sha256"]):
++            raise ValueError("input sizing requires the sha256 of its canonical sizing")
++        for key in ("max_workers", "largest_call_input_tokens", "aggregate_input_tokens"):
++            _integer(sizing[key], "input sizing " + key)
++        if (sizing["max_workers"] != limits["max_workers"]
++                or sizing["aggregate_input_tokens"] > limits["aggregate_input_tokens"]
++                or sizing["largest_call_input_tokens"] > limits["max_input_tokens_per_call"]):
++            raise ValueError("registered input sizing does not admit these audit limits")
+     # Even an empty record has one explicit worker, plus omission/integration.
+     # Refuse internally impossible supplied allowances before generation.
+     if limits['max_calls'] < 3 or limits['aggregate_input_tokens'] < 3:

@@ -1,0 +1,81 @@
+{
+  "data_sheets_schema": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema"
+  ],
+  "data_sheets_schema.constants": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/constants",
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/constants/__init__.py"
+  ],
+  "data_sheets_schema.constants.evaluation": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/constants/evaluation.py"
+  ],
+  "data_sheets_schema.constants.methods": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/constants/methods.py"
+  ],
+  "data_sheets_schema.constants.projects": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/constants/projects.py"
+  ],
+  "data_sheets_schema.constants.schemas": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/constants/schemas.py"
+  ],
+  "data_sheets_schema.evaluation": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/evaluation",
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/evaluation/__init__.py"
+  ],
+  "data_sheets_schema.evaluation.evaluate_d4d": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/evaluation/evaluate_d4d.py"
+  ],
+  "data_sheets_schema.evaluation.evaluate_d4d_llm": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/evaluation/evaluate_d4d_llm.py"
+  ],
+  "data_sheets_schema.evaluation_context": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/evaluation_context.py"
+  ],
+  "data_sheets_schema.judge_contract": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/judge_contract.py"
+  ],
+  "data_sheets_schema.resources": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/resources.py"
+  ],
+  "data_sheets_schema.semantic_instrument": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/semantic_instrument.py"
+  ],
+  "data_sheets_schema.semantic_scope": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/src/data_sheets_schema/semantic_scope.py"
+  ],
+  "tests": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests",
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests/__init__.py"
+  ],
+  "tests.judge_fixtures": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests/judge_fixtures.py"
+  ],
+  "tests.test_d52_scoring": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests/test_d52_scoring.py"
+  ],
+  "tests.test_evaluation": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests/test_evaluation",
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests/test_evaluation/__init__.py"
+  ],
+  "tests.test_evaluation.test_evaluate_d4d": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests/test_evaluation/test_evaluate_d4d.py"
+  ],
+  "tests.test_evaluation.test_explicit_dataset_scope": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests/test_evaluation/test_explicit_dataset_scope.py"
+  ],
+  "tests.test_evaluation.test_general_api_judge": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests/test_evaluation/test_general_api_judge.py"
+  ],
+  "tests.test_evaluation.test_general_context": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests/test_evaluation/test_general_context.py"
+  ],
+  "tests.test_evaluation.test_rubric20_scoring": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests/test_evaluation/test_rubric20_scoring.py"
+  ],
+  "tests.test_evaluation.test_semantic_context_scope": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests/test_evaluation/test_semantic_context_scope.py"
+  ],
+  "tests.test_evaluation.test_semantic_evaluation_contract": [
+    "/private/tmp/d4d-codex-d52-scoring-20261028/tests/test_evaluation/test_semantic_evaluation_contract.py"
+  ]
+}

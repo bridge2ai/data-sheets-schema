@@ -1,0 +1,74 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 55 items
+
+tests/test_shared_generation_cli.py::test_each_single_route_constructs_actual_selected_spec[plan] PASSED [  1%]
+tests/test_shared_generation_cli.py::test_each_single_route_constructs_actual_selected_spec[render-prompt] PASSED [  3%]
+tests/test_shared_generation_cli.py::test_each_single_route_constructs_actual_selected_spec[run] PASSED [  5%]
+tests/test_shared_generation_cli.py::test_explicit_conflicts_refuse_before_render[--condition-generic_v9] PASSED [  7%]
+tests/test_shared_generation_cli.py::test_explicit_conflicts_refuse_before_render[--arm-crate_only] PASSED [  9%]
+tests/test_shared_generation_cli.py::test_explicit_conflicts_refuse_before_render[--api-playbook-version-0] PASSED [ 10%]
+tests/test_shared_generation_cli.py::test_explicit_conflicts_refuse_before_render[--api-playbook-version-1] PASSED [ 12%]
+tests/test_shared_generation_cli.py::test_explicit_conflicts_refuse_before_render[--receipt-completion-version-0] PASSED [ 14%]
+tests/test_shared_generation_cli.py::test_explicit_conflicts_refuse_before_render[--receipt-completion-version-1] PASSED [ 16%]
+tests/test_shared_generation_cli.py::test_explicit_conflicts_refuse_before_render[--removal-repair-version-1] PASSED [ 18%]
+tests/test_shared_generation_cli.py::test_explicit_conflicts_refuse_before_render[--runtime-Claude Code] PASSED [ 20%]
+tests/test_shared_generation_cli.py::test_explicit_conflicts_refuse_before_render[--provider-Anthropic] PASSED [ 21%]
+tests/test_shared_generation_cli.py::test_explicit_conflicts_refuse_before_render[--bundle-/unrelated] PASSED [ 23%]
+tests/test_shared_generation_cli.py::test_explicit_conflicts_refuse_before_render[--chunk-manifest-/unrelated] PASSED [ 25%]
+tests/test_shared_generation_cli.py::test_explicit_conflicts_refuse_before_render[--manifest-none] PASSED [ 27%]
+tests/test_shared_generation_cli.py::test_matching_explicit_axes_and_paths_are_allowed PASSED [ 29%]
+tests/test_shared_generation_cli.py::test_invalid_registration_selection_is_named_refusal[missing_version] PASSED [ 30%]
+tests/test_shared_generation_cli.py::test_invalid_registration_selection_is_named_refusal[missing_path] PASSED [ 32%]
+tests/test_shared_generation_cli.py::test_invalid_registration_selection_is_named_refusal[zero_version] PASSED [ 34%]
+tests/test_shared_generation_cli.py::test_invalid_registration_selection_is_named_refusal[wrong_project] PASSED [ 36%]
+tests/test_shared_generation_cli.py::test_invalid_registration_selection_is_named_refusal[wrong_label] PASSED [ 38%]
+tests/test_shared_generation_cli.py::test_invalid_registration_selection_is_named_refusal[duplicate_json] PASSED [ 40%]
+tests/test_shared_generation_cli.py::test_invalid_registration_selection_is_named_refusal[invalid_utf8] PASSED [ 41%]
+tests/test_shared_generation_cli.py::test_render_cannot_overwrite_input_authority PASSED [ 43%]
+tests/test_shared_generation_cli.py::test_changed_registration_after_plan_refuses_before_execute PASSED [ 45%]
+tests/test_shared_generation_cli.py::test_batch_exact_roster_routes_each_registration PASSED [ 47%]
+tests/test_shared_generation_cli.py::test_batch_roster_is_complete_unique_and_explicit[single] PASSED [ 49%]
+tests/test_shared_generation_cli.py::test_batch_roster_is_complete_unique_and_explicit[missing] PASSED [ 50%]
+tests/test_shared_generation_cli.py::test_batch_roster_is_complete_unique_and_explicit[extra] PASSED [ 52%]
+tests/test_shared_generation_cli.py::test_batch_roster_is_complete_unique_and_explicit[duplicate] PASSED [ 54%]
+tests/test_shared_generation_cli.py::test_batch_roster_is_complete_unique_and_explicit[reused_id] PASSED [ 56%]
+tests/test_shared_generation_cli.py::test_batch_roster_is_complete_unique_and_explicit[wrong_row] PASSED [ 58%]
+tests/test_shared_generation_cli.py::test_batch_roster_is_complete_unique_and_explicit[duplicate_key] PASSED [ 60%]
+tests/test_shared_generation_cli.py::test_batch_roster_is_complete_unique_and_explicit[unrequested_bundle] PASSED [ 61%]
+tests/test_shared_generation_cli.py::test_pending_selected_floor_never_fans_out_from_raw_default_zero[extra0] PASSED [ 63%]
+tests/test_shared_generation_cli.py::test_pending_selected_floor_never_fans_out_from_raw_default_zero[extra1] PASSED [ 65%]
+tests/test_shared_generation_cli.py::test_pending_selected_floor_never_fans_out_from_raw_default_zero[extra2] PASSED [ 67%]
+tests/test_shared_generation_cli.py::test_changed_roster_after_confirmation_refuses_before_lock PASSED [ 69%]
+tests/test_shared_generation_cli.py::test_roster_inside_run_output_is_refused PASSED [ 70%]
+tests/test_shared_generation_cli.py::test_no_shared_selection_retains_old_spec_and_display PASSED [ 72%]
+tests/test_shared_generation_cli.py::test_actual_selected_receipt_policy_controls_each_batch_dispatch[missing] PASSED [ 74%]
+tests/test_shared_generation_cli.py::test_actual_selected_receipt_policy_controls_each_batch_dispatch[foreign_policy] PASSED [ 76%]
+tests/test_shared_generation_cli.py::test_actual_selected_receipt_policy_controls_each_batch_dispatch[unchecked] PASSED [ 78%]
+tests/test_shared_generation_cli.py::test_actual_selected_receipt_policy_controls_each_batch_dispatch[passed] PASSED [ 80%]
+tests/test_shared_generation_cli.py::test_downstream_value_errors_are_named_cli_refusals[plan] PASSED [ 81%]
+tests/test_shared_generation_cli.py::test_downstream_value_errors_are_named_cli_refusals[run] PASSED [ 83%]
+tests/test_shared_generation_cli.py::test_shared_batch_never_discovers_projects_from_default_manifest PASSED [ 85%]
+tests/test_shared_generation_cli.py::test_registration_special_file_is_refused_without_blocking PASSED [ 87%]
+tests/test_shared_generation_cli.py::test_two_projects_two_replicates_keep_distinct_registered_contexts PASSED [ 89%]
+tests/test_shared_generation_cli.py::test_render_status_names_registered_arm_with_omitted_cli_arm PASSED [ 90%]
+tests/test_shared_generation_cli.py::test_help_discloses_selected_v2_boundaries[plan] PASSED [ 92%]
+tests/test_shared_generation_cli.py::test_help_discloses_selected_v2_boundaries[render-prompt] PASSED [ 94%]
+tests/test_shared_generation_cli.py::test_help_discloses_selected_v2_boundaries[run] PASSED [ 96%]
+tests/test_shared_generation_cli.py::test_help_discloses_selected_v2_boundaries[batch] PASSED [ 98%]
+tests/test_shared_generation_cli.py::test_a_shared_registration_names_its_own_method_without_the_runtime_default PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_shared_generation_cli.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_55-xml-wcrbu__u/pytest.xml -
+================= 55 passed, 13 warnings in 138.80s (0:02:18) ==================

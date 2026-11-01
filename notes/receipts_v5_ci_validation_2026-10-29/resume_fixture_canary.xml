@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="2.158" timestamp="2026-10-29T20:16:59.374191" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_audit_recall_leak_rendered" name="test_the_rendered_direct_arm_prompts_quote_nothing" time="0.020"><error message="failed on setup with &quot;RuntimeError: offline validation forbids live commands&quot;">tests/test_audit_recall_leak_rendered.py:347: in direct_registration
+    path = direct_preparation.build(SimpleNamespace(
+notes/claudecode_direct/prepare_direct.py:194: in build
+    version = subprocess.check_output([str(executable), "--version"], text=True).strip()
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:472: in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:554: in run
+    with Popen(*popenargs, **kwargs) as process:
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/subprocess.py:1859: in _execute_child
+    sys.audit("subprocess.Popen", executable, args, cwd, env)
+scripts/adhoc/validate_receipts_v5_merge_20261029.py:19: in offline
+    raise RuntimeError("offline validation forbids live commands")
+E   RuntimeError: offline validation forbids live commands</error></testcase></testsuite></testsuites>

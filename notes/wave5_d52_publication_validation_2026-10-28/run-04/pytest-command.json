@@ -1,0 +1,18 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave5-d52-label-targeted-corrected-20261028/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave5-d52-label-targeted-corrected-20261028/pytest.xml",
+    "tests/test_d52_publication_labels.py",
+    "tests/test_d52_scoring.py",
+    "tests/test_evaluation/test_evaluate_d4d.py",
+    "tests/test_evaluation/test_rubric20_scoring.py",
+    "tests/test_evaluation/test_general_context.py",
+    "tests/test_evaluation/test_explicit_dataset_scope.py"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave5-evaluation-publication-20261028"
+}

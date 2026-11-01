@@ -1,0 +1,139 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 899,
+    "skipped": 19
+  },
+  "artifact_sha256": {
+    "r4_causal_after.log": "8459d1bf96e4c3b52fce7bdd32c6b833abbb8923829e8b7d97d6c4d9a21ec361",
+    "r4_causal_after.xml": "d1dabd9d905695d6b3d2fca4792e77a032ddb552fedea4211a1e21fd048e8ca5",
+    "r4_causal_before.log": "cc7741546d231d472f8f254fd4e7af85060c9f27204f65b76e2bcfcec5d4df24",
+    "r4_causal_before.xml": "b91a424a02cef77da1c0b6050708179f04ee267f5a73821e6c6d0423b6fa5326",
+    "r4_r6/acceptance.log": "6bc91b102c8f983714226a7df4e67c3250655190375e8345e617a51e22e242fd",
+    "r4_r6/acceptance.xml": "01ce382446682f0b04fafab96562a8eb4cde8bc81348378018546bbb9258622e",
+    "r4_r6/canary.json": "208480986cf55658b5c98319b07fa2f59bee6ebfaa635225fb11b1f1d426e902",
+    "r4_r6/inertness.json": "10b3bbe523c679ef7abc37e49bfb2a268d3b32ebee7249dcc81d3875ee87a148",
+    "r4_r6/inertness_canary.log": "9d7d645bde1352e146467796d4c60998c8e26cc3d9f758ae4c42a31a06da75a7",
+    "r4_r6/inertness_full.log": "a2a344af2e72adce1aa450199e79d64f2baa6c12836eabfe24b6a2033b9a69fb"
+  },
+  "causal_base": "e8e033bf681df97dc25fa761660f8c4c9768afb5",
+  "inertness": {
+    "assembly": {
+      "N11_routing_sg2_r27": {
+        "base": "e4fe1bd474ee8d0600a60d869b2b644168979859f37443b4d52661560e9793d3",
+        "head": "510a6bac32fbf5376a54bfb49bd3aee0af4fc712ee44e3507b7f633e51c30a00"
+      },
+      "equal": true,
+      "identities": {
+        "descriptor_v1": "83d13d6270c49b59a6dec631e77852f19c63aad2a2a3435b8e2bdfd4a41c9e19",
+        "r24_rc1": "12e03e3911ff1cb16d2d69817fa55b121e36ff22bc20e64e1f468d052a5d89dc",
+        "r8_rc1": "e1da2a6015b0a75f917142d8bcd369e4b59e9d29f8b9114ad58c0c9ffc0d216b",
+        "v10_sg1_r25": "9e59f3db581c168d397793848579c62a9462e8a2e4236101af05f48803baa90e"
+      }
+    },
+    "chorus": {
+      "base_sha256": "830eb7055ba303dc03ee40352b61552d0ca1308a82f93a5a18aebe5a3f07f3d6",
+      "bytes": 142637,
+      "equal": true,
+      "head_sha256": "830eb7055ba303dc03ee40352b61552d0ca1308a82f93a5a18aebe5a3f07f3d6",
+      "matches_committed_baseline_hash": true,
+      "runs": {
+        "2026-10-20a": {
+          "d37": [
+            58,
+            58
+          ],
+          "request_equals_saved_bytes": true,
+          "request_sha256": "3f3e8b7f541c86a0ce74ba11c4c05d1a6738f38477a3ff6ec3bb8e27eafc03f0",
+          "result_equals_saved": {
+            "CHORUS_receipt_completion_result.json": false,
+            "CHORUS_receipt_completion_result_2.json": true
+          },
+          "result_sha256": "21d3af543c2583a3323ecb1a105811d69b6a60a990994ceaa67186b038ecf90c"
+        },
+        "2026-10-22a": {
+          "d37": [
+            64,
+            64
+          ],
+          "request_equals_saved_bytes": true,
+          "request_sha256": "086dd23c1f4914195574f3e3dc4be8ec9a603b8c84d60e565cfd3c07aedc6249",
+          "result_equals_saved": {
+            "CHORUS_receipt_completion_result.json": true
+          },
+          "result_sha256": "f8dbba99b8c694c7be5563f52b4c471ac73f33d621ab5fd7a0c8b35dfa2a8a1d"
+        }
+      }
+    },
+    "corpus": {
+      "base_sha256": "52b997f6f75365ac7d80400ddf7aca145f062f0c3edff82b76dccecd84fa7ed7",
+      "bytes": 6834351,
+      "checked": 48,
+      "equal": true,
+      "head_sha256": "52b997f6f75365ac7d80400ddf7aca145f062f0c3edff82b76dccecd84fa7ed7",
+      "matches_committed_baseline_hash": true,
+      "records": 54,
+      "snapshots": 36
+    },
+    "report": {
+      "base_sha256": "c659ce494b0545a077abcae29a593ad0dff572a1cbb9ab99f25370ce91c65018",
+      "bytes": 2725514,
+      "checked_v7": 325,
+      "checked_v8": 325,
+      "equal": true,
+      "head_sha256": "c659ce494b0545a077abcae29a593ad0dff572a1cbb9ab99f25370ce91c65018",
+      "matches_committed_baseline_hash": true,
+      "records": 335
+    }
+  },
+  "inertness_started_head": "3997aff96d5b0ef81b3c8a6b307aace1ee0a2d88",
+  "limits": [
+    "Selected 19-module suite, not the entire repository suite.",
+    "R1-R3 and R5 activation blockers unchanged; no v5 activation.",
+    "R6 routing-worker pin deferred as an offline issue draft."
+  ],
+  "modules": [
+    "tests/test_canary_controller_receipts.py",
+    "tests/test_canary_gate.py",
+    "tests/test_derive_core.py",
+    "tests/test_receipt_completion_policy.py",
+    "tests/test_receipt_origin.py",
+    "tests/test_receipt_origin_captured.py",
+    "tests/test_receipt_rereceipt.py",
+    "tests/test_receipts.py",
+    "tests/test_receipts_v5_merge_n1.py",
+    "tests/test_receipts_v5_merge_n3.py",
+    "tests/test_receipts_v5_merge_n4.py",
+    "tests/test_receipts_v5_upgrade.py",
+    "tests/test_report_claims.py",
+    "tests/test_rereceipt_completion.py",
+    "tests/test_review_receipts_v5_20261026.py",
+    "tests/test_wave3_receipt_integration.py",
+    "tests/test_wave3_receipts_core.py",
+    "tests/test_wave3_watermark_transform.py",
+    "tests/test_receipts_v5_merge_r4.py"
+  ],
+  "protected_paths_changed": [],
+  "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+  "r4_causal": {
+    "after": {
+      "failed": 0,
+      "passed": 5,
+      "skipped": 0
+    },
+    "before": {
+      "failed": 3,
+      "passed": 2,
+      "skipped": 0
+    }
+  },
+  "source_sha256": {
+    "scripts/adhoc/prove_receipts_v5_inertness_20261029.py": "cfb473b805c027582bebe99f0d69ce3acca8ffd16e8998cedfa65ad4f5dfc77e",
+    "scripts/adhoc/receipts_v5_merge_probes_20261029/chorus_v10_inert.py": "93af643271212a7bd8fa06a49bdd3665aac09b68a84294dec9ddf5d3656ae72e",
+    "scripts/adhoc/validate_receipts_v5_merge_20261029.py": "de06593b551c566277513712a544c9731a1486899a8a00e80a4968df639e7c57",
+    "scripts/adhoc/validate_receipts_v5_r4_r6_20261029.py": "b1407a37aba16cf7a5a23d476eea4de8d93e3ba315256adc5904c722a27dcdb0",
+    "src/data_sheets_schema/receipts.py": "bf68565d0e758a910e5d3199b9d1b80e0d5837dc80db3b55cdc194d31a42ad17",
+    "tests/test_receipts_v5_merge_r4.py": "b0afdfe530d97a51275870f57769fe9a4d703c94cc653e4466378f2d4deb2316"
+  },
+  "tested_head": "00854fbe23755df23bc20704fd5faadff9945259"
+}

@@ -1,0 +1,36 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 17 items
+
+tests/test_identifier_form.py::TestTheNormaliser::test_a_base_without_a_trailing_delimiter_is_not_rewritten PASSED [  5%]
+tests/test_identifier_form.py::TestTheNormaliser::test_a_commented_key_closes_the_enclosing_state PASSED [ 11%]
+tests/test_identifier_form.py::TestTheNormaliser::test_a_curie_and_an_undeclared_host_are_untouched PASSED [ 17%]
+tests/test_identifier_form.py::TestTheNormaliser::test_a_dash_without_a_space_is_not_a_list_item PASSED [ 23%]
+tests/test_identifier_form.py::TestTheNormaliser::test_a_resolver_url_in_an_identifier_slot_becomes_the_curie_fragment_included PASSED [ 29%]
+tests/test_identifier_form.py::TestTheNormaliser::test_a_sibling_item_is_not_read_as_a_child PASSED [ 35%]
+tests/test_identifier_form.py::TestTheNormaliser::test_a_uri_ranged_slot_and_prose_are_untouched PASSED [ 41%]
+tests/test_identifier_form.py::TestTheNormaliser::test_block_scalar_prose_is_never_touched PASSED [ 47%]
+tests/test_identifier_form.py::TestTheNormaliser::test_curie_form_uses_the_longest_declared_base PASSED [ 52%]
+tests/test_identifier_form.py::TestTheNormaliser::test_items_under_a_multivalued_identifier_slot_are_covered PASSED [ 58%]
+tests/test_identifier_form.py::TestTheNormaliser::test_orcid_and_ror_follow_the_schemas_prefixes PASSED [ 64%]
+tests/test_identifier_form.py::TestTheNormaliser::test_rewrites_are_logged_with_their_phase PASSED [ 70%]
+tests/test_identifier_form.py::TestTheNormaliser::test_the_path_is_case_sensitive_and_the_host_is_not PASSED [ 76%]
+tests/test_identifier_form.py::TestTheNormaliser::test_the_record_chain_ends_with_it PASSED [ 82%]
+tests/test_identifier_form.py::TestTheNormaliser::test_trailing_comments_and_crlf_survive PASSED [ 88%]
+tests/test_identifier_form.py::TestOnTheRunner::test_the_written_full_and_core_carry_the_curie_and_the_grounding_check_sees_none PASSED [ 94%]
+tests/test_identifier_form.py::TestReceiptIdentityAcrossForms::test_an_entry_id_in_either_form_is_the_same_entry PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_identifier_form.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_20-xml-i5sj3jwf/pytest.xml -
+======================= 17 passed, 13 warnings in 23.78s =======================

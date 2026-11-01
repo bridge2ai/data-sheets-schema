@@ -1,0 +1,45 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 26 items
+
+tests/test_external_dataset_onboarding.py::TestTheRegistry::test_a_manifest_declares_its_projects_and_the_override_key_is_not_one PASSED [  3%]
+tests/test_external_dataset_onboarding.py::TestTheRegistry::test_a_project_whose_files_are_another_projects_is_not_preprocessed PASSED [  7%]
+tests/test_external_dataset_onboarding.py::TestTheRegistry::test_no_manifest_is_an_empty_registry_not_the_study PASSED [ 11%]
+tests/test_external_dataset_onboarding.py::TestTheRegistry::test_the_study_manifest_still_declares_its_five PASSED [ 15%]
+tests/test_external_dataset_onboarding.py::TestTheCliAcceptsAManifestDeclaredDataset::test_an_undeclared_project_is_refused_by_name_of_the_registry PASSED [ 19%]
+tests/test_external_dataset_onboarding.py::TestTheCliAcceptsAManifestDeclaredDataset::test_arbitrary_documents_reach_generated_full_core_provenance_and_status PASSED [ 23%]
+tests/test_external_dataset_onboarding.py::TestTheCliAcceptsAManifestDeclaredDataset::test_documents_go_through_preprocessing_concatenation_and_chunking PASSED [ 26%]
+tests/test_external_dataset_onboarding.py::TestTheCliAcceptsAManifestDeclaredDataset::test_list_projects_reads_the_selected_manifest PASSED [ 30%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_a_declared_external_dataset_gets_its_own_manifests_context PASSED [ 34%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_a_declared_output_directory_does_not_suppress_a_projects_own_sources PASSED [ 38%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_a_study_bundle_is_the_studys_from_any_working_directory PASSED [ 42%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_an_external_bundle_with_no_manifest_gets_no_study_context PASSED [ 46%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_an_offline_plan_assembles_for_a_receipt_condition PASSED [ 50%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_batch_takes_a_manifest_and_per_project_bundles PASSED [ 53%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_batch_with_no_manifest_refuses_a_bundle_it_would_take_by_convention PASSED [ 57%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_chunking_a_symlink_to_a_study_bundle_names_the_target PASSED [ 61%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_custom_registry_cannot_select_a_study_arm_bundle_by_project_name PASSED [ 65%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_every_study_bundle_kind_is_the_projects_including_built_directly PASSED [ 69%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_explicit_missing_manifest_fails_for_cli_and_library_specs PASSED [ 73%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_provenance_records_the_selected_manifest_or_none_never_the_study PASSED [ 76%]
+tests/test_external_dataset_onboarding.py::TestGenerationContextIsExplicit::test_the_study_bundle_selects_the_study_manifest_as_before PASSED [ 80%]
+tests/test_external_dataset_onboarding.py::TestStatusAndMakeSeeTheRegistry::test_a_missing_manifest_is_a_failure_for_list_projects PASSED [ 84%]
+tests/test_external_dataset_onboarding.py::TestStatusAndMakeSeeTheRegistry::test_bootstrap_goals_do_not_need_the_registry PASSED [ 88%]
+tests/test_external_dataset_onboarding.py::TestStatusAndMakeSeeTheRegistry::test_commands_without_a_manifest_option_take_the_root_one PASSED [ 92%]
+tests/test_external_dataset_onboarding.py::TestStatusAndMakeSeeTheRegistry::test_status_lists_the_manifests_projects PASSED [ 96%]
+tests/test_external_dataset_onboarding.py::TestStatusAndMakeSeeTheRegistry::test_the_makefile_asks_the_cli_for_its_projects PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_external_dataset_onboarding.py::TestTheCliAcceptsAManifestDeclaredDataset::test_an_undeclared_project_is_refused_by_name_of_the_registry
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_external_dataset_onboarding.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_13-xml-e2e3zden/pytest.xml -
+======================= 26 passed, 13 warnings in 33.35s =======================

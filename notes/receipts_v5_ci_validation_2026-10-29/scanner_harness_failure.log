@@ -1,0 +1,16 @@
+........................................................................ [ 20%]
+........................................................................ [ 40%]
+........................................................................ [ 60%]
+........................................................................ [ 80%]
+.....................................................................    [100%]
+=============================== warnings summary ===============================
+tests/test_generation_specificity_skill.py::TestApiMeaning::test_execute_refuses_what_the_scan_reports
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5/notes/receipts_v5_ci_validation_2026-10-29/scanner.xml -
+=============== paths added under notes/ during the run (#3772) ================
+notes/receipts_v5_ci_validation_2026-10-29/scanner.xml
+A test must write under tmp_path, never into the checkout's notes/.
+357 passed, 1 warning in 291.39s (0:04:51)

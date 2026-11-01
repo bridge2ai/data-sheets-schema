@@ -1,0 +1,14 @@
+Rebuilt A13 with git archive and canaries from 5457b71b4bc2cd6879146d7d9dfab08e56d5a2c7 in /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5r6-t28w4wwk
+corpus base canary persisted 74929 bytes
+corpus head canary persisted 74962 bytes
+report base canary persisted 8434 bytes
+report head canary persisted 8434 bytes
+corpus base full persisted 6840951 bytes
+corpus head full persisted 6842051 bytes
+report base full persisted 2725514 bytes
+report head full persisted 2725514 bytes
+chorus base full persisted 142703 bytes
+chorus head full persisted 142714 bytes
+assembly base full persisted 909 bytes
+assembly head full persisted 909 bytes
+All four inertness comparisons passed.

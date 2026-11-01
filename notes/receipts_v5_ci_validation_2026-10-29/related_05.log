@@ -1,0 +1,22 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 13 items
+
+tests/test_bundle_md5_recovery.py::Resolve::test_a_git_that_does_not_know_the_probe_is_refused_too PASSED [  7%]
+tests/test_bundle_md5_recovery.py::Resolve::test_a_shallow_clone_is_refused_not_searched PASSED [ 15%]
+tests/test_bundle_md5_recovery.py::Resolve::test_a_tool_failure_is_not_a_finding_about_the_corpus PASSED [ 23%]
+tests/test_bundle_md5_recovery.py::Resolve::test_an_unreadable_blob_is_a_tool_failure_not_a_missing_version PASSED [ 30%]
+tests/test_bundle_md5_recovery.py::Resolve::test_the_blob_whose_sha256_matches_gives_the_md5 PASSED [ 38%]
+tests/test_bundle_md5_recovery.py::Resolve::test_the_oldest_matching_commit_is_named PASSED [ 46%]
+tests/test_bundle_md5_recovery.py::Resolve::test_the_other_outcomes_say_why PASSED [ 53%]
+tests/test_bundle_md5_recovery.py::Resolve::test_the_real_history_resolves_from_any_cwd PASSED [ 61%]
+tests/test_bundle_md5_recovery.py::Apply::test_a_record_it_cannot_prove_is_not_written PASSED [ 69%]
+tests/test_bundle_md5_recovery.py::Apply::test_the_write_keeps_the_header_and_names_its_proof PASSED [ 76%]
+tests/test_bundle_md5_recovery.py::OnTheCorpus::test_every_recovered_md5_on_disk_is_current_or_a_history_before PASSED [ 84%]
+tests/test_bundle_md5_recovery.py::TestNeutralNames::test_a_file_that_is_not_a_bundle_is_recovered_by_hash PASSED [ 92%]
+tests/test_bundle_md5_recovery.py::TestNeutralNames::test_the_neutral_names_are_the_same_functions PASSED [100%]
+
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_05-xml-iauvl1_a/pytest.xml -
+============================== 13 passed in 5.27s ==============================

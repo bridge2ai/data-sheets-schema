@@ -1,0 +1,67 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 52 items
+
+tests/test_receipt_readdress_cli.py::test_help_inventory_is_readonly_and_candidates_are_structural PASSED [  1%]
+tests/test_receipt_readdress_cli.py::test_cli_applies_only_named_ordinals_and_preserves_typed_content PASSED [  3%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[extra_field] PASSED [  5%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[snippet] PASSED [  7%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[drop] PASSED [  9%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[no_target] PASSED [ 11%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[target_unresolved] PASSED [ 13%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[target_malformed] PASSED [ 15%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[target_whitespace] PASSED [ 17%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[target_bool] PASSED [ 19%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[ordinal_bool] PASSED [ 21%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[ordinal_negative] PASSED [ 23%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[ordinal_large] PASSED [ 25%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[chunk_unknown] PASSED [ 26%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[old_slot_wrong] PASSED [ 28%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[already_resolves] PASSED [ 30%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[duplicate] PASSED [ 32%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[empty] PASSED [ 34%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[row_list] PASSED [ 36%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[bad_version] PASSED [ 38%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[old_receipt] PASSED [ 40%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[old_full] PASSED [ 42%]
+tests/test_receipt_readdress_cli.py::test_entire_map_refuses_before_publication[late_invalid] PASSED [ 44%]
+tests/test_receipt_readdress_cli.py::test_ambiguous_or_unsupported_input_is_not_silently_normalised[duplicate_keys] PASSED [ 46%]
+tests/test_receipt_readdress_cli.py::test_ambiguous_or_unsupported_input_is_not_silently_normalised[duplicate_chunks] PASSED [ 48%]
+tests/test_receipt_readdress_cli.py::test_ambiguous_or_unsupported_input_is_not_silently_normalised[cycle] PASSED [ 50%]
+tests/test_receipt_readdress_cli.py::test_ambiguous_or_unsupported_input_is_not_silently_normalised[merge] PASSED [ 51%]
+tests/test_receipt_readdress_cli.py::test_ambiguous_or_unsupported_input_is_not_silently_normalised[bad_entry] PASSED [ 53%]
+tests/test_receipt_readdress_cli.py::test_ambiguous_or_unsupported_input_is_not_silently_normalised[bad_status] PASSED [ 55%]
+tests/test_receipt_readdress_cli.py::test_ambiguous_or_unsupported_input_is_not_silently_normalised[wrong_full_shape] PASSED [ 57%]
+tests/test_receipt_readdress_cli.py::test_alias_side_effect_outside_named_slot_is_refused PASSED [ 59%]
+tests/test_receipt_readdress_cli.py::test_non_slot_preservation_is_checked_after_actual_apply[false_to_zero] PASSED [ 61%]
+tests/test_receipt_readdress_cli.py::test_non_slot_preservation_is_checked_after_actual_apply[snippet] PASSED [ 63%]
+tests/test_receipt_readdress_cli.py::test_non_slot_preservation_is_checked_after_actual_apply[status] PASSED [ 65%]
+tests/test_receipt_readdress_cli.py::test_non_slot_preservation_is_checked_after_actual_apply[unselected_slot] PASSED [ 67%]
+tests/test_receipt_readdress_cli.py::test_requested_target_survives_helper_answer_mutation PASSED [ 69%]
+tests/test_receipt_readdress_cli.py::test_giant_out_of_range_old_index_remains_visible_and_repairable PASSED [ 71%]
+tests/test_receipt_readdress_cli.py::test_long_leading_zero_index_keeps_existing_resolution PASSED [ 73%]
+tests/test_receipt_readdress_cli.py::test_serialization_readback_and_complete_inventory_limits PASSED [ 75%]
+tests/test_receipt_readdress_cli.py::test_existing_or_alias_outputs_never_replace_input_bytes[receipt] PASSED [ 76%]
+tests/test_receipt_readdress_cli.py::test_existing_or_alias_outputs_never_replace_input_bytes[full] PASSED [ 78%]
+tests/test_receipt_readdress_cli.py::test_existing_or_alias_outputs_never_replace_input_bytes[map] PASSED [ 80%]
+tests/test_receipt_readdress_cli.py::test_existing_or_alias_outputs_never_replace_input_bytes[existing] PASSED [ 82%]
+tests/test_receipt_readdress_cli.py::test_existing_or_alias_outputs_never_replace_input_bytes[symlink] PASSED [ 84%]
+tests/test_receipt_readdress_cli.py::test_existing_or_alias_outputs_never_replace_input_bytes[dangling] PASSED [ 86%]
+tests/test_receipt_readdress_cli.py::test_existing_or_alias_outputs_never_replace_input_bytes[hardlink] PASSED [ 88%]
+tests/test_receipt_readdress_cli.py::test_fresh_input_check_and_exclusive_open_close_the_normal_race PASSED [ 90%]
+tests/test_receipt_readdress_cli.py::test_write_failure_keeps_primary_error_and_cli_never_reports_success[write_and_close] PASSED [ 92%]
+tests/test_receipt_readdress_cli.py::test_write_failure_keeps_primary_error_and_cli_never_reports_success[short_and_close] PASSED [ 94%]
+tests/test_receipt_readdress_cli.py::test_write_failure_keeps_primary_error_and_cli_never_reports_success[close] PASSED [ 96%]
+tests/test_receipt_readdress_cli.py::test_path_only_output_never_inherits_origin_and_synthetic_history_counts_only_moves PASSED [ 98%]
+tests/test_receipt_readdress_cli.py::test_cli_requires_map_and_new_output_together PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_42-xml-955dou94/pytest.xml -
+======================== 52 passed, 1 warning in 1.96s =========================

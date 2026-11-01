@@ -391,7 +391,6 @@ def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
     """Read schema once, capture input bytes, render no transport-specific call."""
     if any(type(n) is not int or n < 1 for n in (max_output_tokens, max_request_bytes)):
         raise ValueError("request/output limits must be explicit positive integers")
-    policy = _asset("policy.md").decode("utf-8")
     response_schema = json.loads(_asset("response.schema.json"))
     context_schema = json.loads(_asset("context.schema.json"))
     document = _mapping(record, "record")
@@ -432,7 +431,24 @@ def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
     scopes = [s["owner"] for s in context_doc["scopes"]]
     if "" not in scopes or len(scopes) != len(set(scopes)) or any(s not in owners for s in scopes):
         raise ValueError("scopes must include root once and name distinct existing typed owners")
-    payload = {"policy": policy, "response_schema": response_schema,
+    prepared = _render_prepared(record=record, bundle=bundle, manifest=manifest, receipt=receipt,
+        context=context, context_doc=context_doc, catalog=catalog, owners=owners, chunks=chunks, prior=prior,
+        max_output_tokens=max_output_tokens, max_request_bytes=max_request_bytes)
+    if len(_json(prepared.request()).encode()) > max_request_bytes:
+        raise ValueError("complete request exceeds max_request_bytes; no partial request returned")
+    return prepared
+
+
+def _render_prepared(*, record, bundle, manifest, receipt, context, context_doc, catalog, owners,
+                     chunks, prior, max_output_tokens, max_request_bytes):
+    """Format bytes only; execution must enter through validating ``prepare``.
+
+    The registration sizer also uses this formatter for explicitly historical
+    records/receipts, which need not belong to the new registration's bundle.
+    Formatting such an estimate grants no packet or execution authority.
+    """
+    payload = {"policy": _asset("policy.md").decode("utf-8"),
+               "response_schema": json.loads(_asset("response.schema.json")),
                "contract_sha256": dict(ASSET_SHA256), "context": context_doc,
                "record_yaml": record.decode("utf-8"), "receipt_yaml": receipt.decode("utf-8"),
                "schema": catalog, "owner_classes": owners,
@@ -443,10 +459,7 @@ def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
                "limits": {"max_output_tokens": max_output_tokens, "max_request_bytes": max_request_bytes,
                           "max_input_bytes": MAX_INPUT_BYTES, "max_response_bytes": MAX_RESPONSE_BYTES,
                           "max_schema_bytes": MAX_SCHEMA_BYTES, "max_nodes": MAX_NODES, "max_depth": MAX_DEPTH}}
-    encoded = _json(payload)
-    if len(_json(Prepared(encoded).request()).encode()) > max_request_bytes:
-        raise ValueError("complete request exceeds max_request_bytes; no partial request returned")
-    return Prepared(encoded)
+    return Prepared(_json(payload))
 
 
 def _file(path: Path, limit: int) -> bytes:

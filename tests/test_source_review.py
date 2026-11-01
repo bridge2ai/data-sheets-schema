@@ -13,6 +13,7 @@ import pytest
 import yaml
 
 from data_sheets_schema import api_runner as api, chunking, evidence_assertions as evidence, source_review
+from tests.backoff_sleep import BackoffSleeps
 from tests.test_evidence_generation_gate import run, specification
 from tests.test_evidence_phase_contract import PhaseContractFake
 from tests.test_download.test_api_runner import FakeResponse
@@ -274,12 +275,14 @@ def test_unusable_reviews_never_retry_or_resume(tmp_path,monkeypatch,phase,kind,
             return super().create(**kwargs)
     fake=UnusableReviewFake(spec,'header_fix' if phase=='report_regate' else 'valid')
     monkeypatch.setattr(api,'MAX_ATTEMPTS',2)
-    monkeypatch.setattr(api.time,'sleep',lambda _:None)
+    sleeps = BackoffSleeps()
+    monkeypatch.setattr(api.time, 'sleep', sleeps)
     monkeypatch.setattr(api,'_validator_lines',lambda *args:
         (['Synthetic shape finding'],None) if phase=='report_after_repair' and not fake.repaired else ([],None))
     with pytest.raises(RuntimeError,match='evidence assertions failed'):
         api.execute(spec,client=SimpleNamespace(messages=fake))
     assert_resume_refuses_unchanged(spec,fake,calls)
+    assert sleeps == []
     snapshots=list((spec.metadata_dir/'intermediate').glob(f'EXAMPLE_{phase}_rejected_response_*.txt'))
     assert len(snapshots)==1
     assert snapshots[0].read_text()==('' if kind=='empty' else '{"source_review":')

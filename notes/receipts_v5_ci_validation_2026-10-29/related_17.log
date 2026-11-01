@@ -1,0 +1,42 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 23 items
+
+tests/test_generation_snapshot_ownership.py::test_portable_checks_use_only_the_matching_records_phase_evidence[True-foreign] PASSED [  4%]
+tests/test_generation_snapshot_ownership.py::test_portable_checks_use_only_the_matching_records_phase_evidence[True-missing] PASSED [  8%]
+tests/test_generation_snapshot_ownership.py::test_portable_checks_use_only_the_matching_records_phase_evidence[False-foreign] PASSED [ 13%]
+tests/test_generation_snapshot_ownership.py::test_portable_checks_use_only_the_matching_records_phase_evidence[False-missing] PASSED [ 17%]
+tests/test_generation_snapshot_ownership.py::test_completed_shortcut_cannot_discard_a_delivered_paid_attempt PASSED [ 21%]
+tests/test_generation_snapshot_ownership.py::test_strict_chunk_check_refuses_missing_selected_input[bundle] PASSED [ 26%]
+tests/test_generation_snapshot_ownership.py::test_strict_chunk_check_refuses_missing_selected_input[project] PASSED [ 30%]
+tests/test_generation_snapshot_ownership.py::test_owned_checks_pin_and_parse_the_same_read PASSED [ 34%]
+tests/test_generation_snapshot_ownership.py::test_portable_phase_evidence_refuses_ambiguous_or_foreign_ownership PASSED [ 39%]
+tests/test_generation_snapshot_ownership.py::test_surviving_index_requires_an_expected_owner_and_current_inputs PASSED [ 43%]
+tests/test_generation_snapshot_ownership.py::test_archived_newer_attempt_cannot_hide_behind_a_restored_old_index PASSED [ 47%]
+tests/test_generation_snapshot_ownership.py::test_missing_index_recovery_preserves_all_phase_evidence_in_order PASSED [ 52%]
+tests/test_generation_snapshot_ownership.py::test_identified_record_without_phase_attestation_is_unusable PASSED [ 56%]
+tests/test_generation_snapshot_ownership.py::test_historical_report_pin_disambiguates_only_attested_phase_bytes[None] PASSED [ 60%]
+tests/test_generation_snapshot_ownership.py::test_historical_report_pin_disambiguates_only_attested_phase_bytes[hash] PASSED [ 65%]
+tests/test_generation_snapshot_ownership.py::test_historical_report_pin_disambiguates_only_attested_phase_bytes[path] PASSED [ 69%]
+tests/test_generation_snapshot_ownership.py::test_historical_report_pin_disambiguates_only_attested_phase_bytes[bytes] PASSED [ 73%]
+tests/test_generation_snapshot_ownership.py::test_strict_chunk_check_requires_a_readable_nonempty_registry[None] PASSED [ 78%]
+tests/test_generation_snapshot_ownership.py::test_strict_chunk_check_requires_a_readable_nonempty_registry[projects: {}\n] PASSED [ 82%]
+tests/test_generation_snapshot_ownership.py::test_strict_chunk_check_requires_a_readable_nonempty_registry[projects: []\n] PASSED [ 86%]
+tests/test_generation_snapshot_ownership.py::test_completed_record_phase_wins_over_a_same_generation_old_index PASSED [ 91%]
+tests/test_generation_snapshot_ownership.py::test_completed_api_shortcut_checks_the_portable_phase_after_rerun PASSED [ 95%]
+tests/test_generation_snapshot_ownership.py::test_live_phase_check_uses_current_index_over_an_older_portable_record PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_generation_snapshot_ownership.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_17-xml-2gxdxo6e/pytest.xml -
+======================= 23 passed, 13 warnings in 44.58s =======================

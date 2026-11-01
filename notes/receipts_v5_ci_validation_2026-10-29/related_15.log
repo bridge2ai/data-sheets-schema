@@ -1,0 +1,48 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-receipts-v5
+configfile: pyproject.toml
+collecting ... collected 29 items
+
+tests/test_generation_manifest_identity.py::test_changed_inputs_refuse_resume_without_spending_or_restamping[False-source-path] PASSED [  3%]
+tests/test_generation_manifest_identity.py::test_changed_inputs_refuse_resume_without_spending_or_restamping[False-source-bytes] PASSED [  6%]
+tests/test_generation_manifest_identity.py::test_changed_inputs_refuse_resume_without_spending_or_restamping[False-chunk-path] PASSED [ 10%]
+tests/test_generation_manifest_identity.py::test_changed_inputs_refuse_resume_without_spending_or_restamping[False-chunk-bytes] PASSED [ 13%]
+tests/test_generation_manifest_identity.py::test_changed_inputs_refuse_resume_without_spending_or_restamping[False-bundle-bytes] PASSED [ 17%]
+tests/test_generation_manifest_identity.py::test_changed_inputs_refuse_resume_without_spending_or_restamping[True-source-path] PASSED [ 20%]
+tests/test_generation_manifest_identity.py::test_changed_inputs_refuse_resume_without_spending_or_restamping[True-source-bytes] PASSED [ 24%]
+tests/test_generation_manifest_identity.py::test_changed_inputs_refuse_resume_without_spending_or_restamping[True-chunk-path] PASSED [ 27%]
+tests/test_generation_manifest_identity.py::test_changed_inputs_refuse_resume_without_spending_or_restamping[True-chunk-bytes] PASSED [ 31%]
+tests/test_generation_manifest_identity.py::test_changed_inputs_refuse_resume_without_spending_or_restamping[True-bundle-bytes] PASSED [ 34%]
+tests/test_generation_manifest_identity.py::test_same_inputs_resume_keeps_charges_and_completed_phases PASSED [ 37%]
+tests/test_generation_manifest_identity.py::test_manifest_drift_during_response_retains_charge_and_refuses_publication PASSED [ 41%]
+tests/test_generation_manifest_identity.py::test_agentic_render_to_record_preserves_selected_inputs[command] PASSED [ 44%]
+tests/test_generation_manifest_identity.py::test_agentic_render_to_record_preserves_selected_inputs[header] PASSED [ 48%]
+tests/test_generation_manifest_identity.py::test_agentic_render_to_record_preserves_selected_inputs[none] PASSED [ 51%]
+tests/test_generation_manifest_identity.py::test_historical_render_keeps_original_command_and_current_render_is_named PASSED [ 55%]
+tests/test_generation_manifest_identity.py::test_noncanonical_chunk_ids_are_refused_and_cannot_be_recredited PASSED [ 58%]
+tests/test_generation_manifest_identity.py::test_invalid_selected_context_fails_before_plan_or_call[priority] PASSED [ 62%]
+tests/test_generation_manifest_identity.py::test_invalid_selected_context_fails_before_plan_or_call[table] PASSED [ 65%]
+tests/test_generation_manifest_identity.py::test_invalid_selected_context_fails_before_plan_or_call[naming] PASSED [ 68%]
+tests/test_generation_manifest_identity.py::test_invalid_selected_context_fails_before_plan_or_call[scope] PASSED [ 72%]
+tests/test_generation_manifest_identity.py::test_invalid_selected_context_fails_before_plan_or_call[sources] PASSED [ 75%]
+tests/test_generation_manifest_identity.py::test_canonical_gaps_follow_selected_registry[False-None] PASSED [ 79%]
+tests/test_generation_manifest_identity.py::test_canonical_gaps_follow_selected_registry[False-EXTERNAL] PASSED [ 82%]
+tests/test_generation_manifest_identity.py::test_canonical_gaps_follow_selected_registry[True-None] PASSED [ 86%]
+tests/test_generation_manifest_identity.py::test_canonical_gaps_follow_selected_registry[True-EXTERNAL] PASSED [ 89%]
+tests/test_generation_manifest_identity.py::test_changed_inputs_in_portable_record_are_refused_without_a_ledger PASSED [ 93%]
+tests/test_generation_manifest_identity.py::test_legacy_progress_without_input_evidence_requires_explicit_restart PASSED [ 96%]
+tests/test_generation_manifest_identity.py::test_current_and_legacy_prompt_specs_both_verify_against_their_own_hash PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_generation_manifest_identity.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-v5ci-related_15-xml-ce68nds1/pytest.xml -
+================== 29 passed, 13 warnings in 72.97s (0:01:12) ==================

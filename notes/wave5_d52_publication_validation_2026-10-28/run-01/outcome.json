@@ -1,0 +1,22 @@
+{
+  "invalid_junit_cases": [
+    {
+      "identity": [
+        "tests.test_d52_publication_labels",
+        "test_exported_unregulated_q9_labels_describe_only_retained_criteria"
+      ],
+      "tags": [
+        "failure"
+      ]
+    }
+  ],
+  "passed": false,
+  "passed_cases_by_module": {
+    "test_d52_publication_labels": 0
+  },
+  "returncode": 1,
+  "scientific_acceptance": "not_assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 2.670028915978037
+}

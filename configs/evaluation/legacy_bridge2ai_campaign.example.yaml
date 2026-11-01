@@ -1,0 +1,6 @@
+# Example only. Replace proposed labels with the actual registered cohort.
+format: evaluation_cohort_v1
+cells:
+  - {arm: v8, projects: [CHORUS, VOICE], replicates: [1, 2, 3], label_template: '2026-09-04f_claude-opus-5-api-generic-v8_rep{replicate}', method: claudecode_api, condition: generic_v8, input_arm: baseline}
+  - {arm: v8, projects: [AI_READI, CM4AI], replicates: [1, 2, 3], label_template: '2026-09-04g_claude-opus-5-api-generic-v8_rep{replicate}', method: claudecode_api, condition: generic_v8, input_arm: baseline}
+  - {arm: v10, projects: [CHORUS, AI_READI, CM4AI, VOICE], replicates: [1, 2, 3], label_template: 'registered-final-{project}-{replicate}', method: claudecode_api, condition: generic_v10, input_arm: baseline}

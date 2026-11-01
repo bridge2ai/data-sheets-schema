@@ -1,0 +1,18 @@
+{
+  "cwd": "/private/tmp/d4d-codex-e3x-restack-20261026",
+  "pytest_args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-e3x-restack-evidence-20261026/isolated-local-2e74ad0ac/cases",
+    "--junitxml",
+    "/private/tmp/d4d-e3x-restack-evidence-20261026/isolated-local-2e74ad0ac/pytest.xml",
+    "tests/test_arm_comparison.py",
+    "tests/test_blind_review_pack.py",
+    "tests/test_registered_eval_runner.py",
+    "tests/test_audit_evaluation_comparability.py",
+    "-m",
+    "not corpus"
+  ]
+}
