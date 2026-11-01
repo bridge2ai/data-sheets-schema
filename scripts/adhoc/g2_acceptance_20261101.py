@@ -45,14 +45,21 @@ def run(tree, output, arguments):
         'python': sys.version, 'launcher_sha256': hashlib.sha256(launcher.read_bytes()).hexdigest(),
         'poetry_lock_sha256': hashlib.sha256((tree / 'poetry.lock').read_bytes()).hexdigest()})
     with (output / 'pytest.log').open('w') as log:
-        result = subprocess.run(command, cwd=tree, env=env, stdout=log, stderr=subprocess.STDOUT)
+        child = subprocess.Popen(command, cwd=tree, env=env, stdout=log, stderr=subprocess.STDOUT)
+        while True:
+            try:
+                returncode = child.wait(timeout=45)
+                break
+            except subprocess.TimeoutExpired:
+                print(output.name, 'elapsed', round(time.monotonic() - start), flush=True)
+                progress(output / 'events.jsonl')
     suites = []
     if (output / 'junit.xml').is_file():
         suites = [suite.attrib for suite in ET.parse(output / 'junit.xml').iter('testsuite')]
-    save(output / 'result.json', {'identity': identity, 'returncode': result.returncode,
+    save(output / 'result.json', {'identity': identity, 'returncode': returncode,
         'seconds': time.monotonic() - start, 'suites': suites})
     print(json.dumps(json.loads((output / 'result.json').read_bytes())), flush=True)
-    return result.returncode
+    return returncode
 
 
 def scope(tree, path):
@@ -93,12 +100,21 @@ def progress(path):
     events = [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []
     counts = Counter(row['outcome'] for row in events if row['when'] == 'call')
     errors = [row for row in events if row['when'] != 'call' and row['outcome'] == 'failed']
-    print(dict(counts), 'setup/teardown errors', len(errors), 'last:', events[-1] if events else None)
+    print(dict(counts), 'setup/teardown errors', len(errors), 'last:', events[-1] if events else None, flush=True)
+
+
+def details(paths):
+    for path in paths:
+        if path.is_file():
+            for line in path.read_text().splitlines():
+                row = json.loads(line)
+                print(path.parent.name, row['nodeid'], row['when'])
+                print(row['longrepr'][-2200:])
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=['run', 'scope', 'shard', 'failures', 'progress'])
+    parser.add_argument('action', choices=['run', 'scope', 'shard', 'failures', 'progress', 'details'])
     parser.add_argument('--tree', type=Path)
     parser.add_argument('--output', type=Path)
     parser.add_argument('--collection', type=Path)
@@ -112,5 +128,7 @@ if __name__ == '__main__':
         shard(args.tree.resolve(), args.collection, args.output)
     elif args.action == 'failures':
         failures([Path(p) for p in args.arguments + rest], args.output)
+    elif args.action == 'details':
+        details([Path(p) for p in args.arguments + rest])
     else:
         progress(Path(args.arguments[0]))

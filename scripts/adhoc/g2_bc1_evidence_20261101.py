@@ -11,6 +11,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -84,7 +85,7 @@ def proposal(output):
     print(output, sha(patch), sha(candidate), flush=True)
 
 
-def compare(root):
+def compare(root, *, identity_pin_ruling=False):
     # Reuse the reviewed lossless expansion and exhaustive leaf comparison.
     # Its P4a-specific schema-change assertions/report are not a G2 byte proof.
     source = ROOT / 'scripts/adhoc/g2_bc1_byte_proof/compare.py'
@@ -113,7 +114,42 @@ def compare(root):
         assert sum(leaf['delta'] for leaf in leaves) == len(b) - len(a)
         rows.append({'name': name, 'before_sha256': sha(a), 'after_sha256': sha(b),
             'before_bytes': len(a), 'after_bytes': len(b), 'identical': a == b, 'differences': leaves})
+    accepted = all(r['identical'] for r in rows)
+    ruling = None
+    if identity_pin_ruling:
+        allowed = {
+            'payload/messages/0/content/5/text/@json/' + key
+            for key in ('inner_request_sha256', 'packet_sha256', 'registration_sha256')}
+        allowed.update({'payload/messages/0/content/6/text/@json/payload/packet_sha256',
+                        'payload/messages/0/content/6/text/@json/request_sha256'})
+        expected_code = {'src/data_sheets_schema/bc1_context.py',
+                         'src/data_sheets_schema/bc1_registration.py'}
+        reg_before, reg_after = [json.loads((evidence / name / 'registration.json').read_bytes())
+                                 for name in ('before', 'after')]
+        code_before = reg_before['bounded_carry']['contract']['code']
+        code_after = reg_after['bounded_carry']['contract']['code']
+        assert code_before.keys() == code_after.keys()
+        changed_code = {name for name in code_before if code_before[name] != code_after[name]}
+        assert changed_code == expected_code, changed_code
+        for name in changed_code:
+            for capture, pins in ((before, code_before), (after, code_after)):
+                assert capture['source_pins'][str(root / name)]['sha256'] == pins[name]
+        # Registration movement must be fully explained by those exact code pins.
+        registration_delta = ns['differences'](reg_before, reg_after)
+        assert {leaf['path'] for leaf in registration_delta} == {
+            'payload/bounded_carry/contract/code/' + name for name in changed_code}
+        accepted = all(row['before_bytes'] == row['after_bytes'] and all(
+            leaf['path'] in allowed and leaf['kind'] == 'pins' and leaf['delta'] == 0
+            and isinstance(leaf['before'], str) and isinstance(leaf['after'], str)
+            and re.fullmatch('[0-9a-f]{64}', leaf['before'])
+            and re.fullmatch('[0-9a-f]{64}', leaf['after']) for leaf in row['differences']) for row in rows)
+        ruling = {'date': '2026-11-01', 'accepted': bool(accepted),
+            'changed_leaf_count': sum(len(row['differences']) for row in rows),
+            'changed_code': {name: {'before': code_before[name], 'after': code_after[name]}
+                             for name in sorted(changed_code)},
+            'allowed_paths': sorted(allowed), 'registration_delta': registration_delta}
     save(evidence / 'g2-exact-comparison.json', {'rows': rows, 'identical': all(r['identical'] for r in rows),
+        'identity_pin_ruling': ruling,
         'audit_limits_before': before['audit_limits'], 'audit_limits_after': after['audit_limits'],
         'sizing_totals_equal': before['sizing_totals'] == after['sizing_totals'],
         'registration_before_sha256': before['registration_sha256'],
@@ -121,7 +157,7 @@ def compare(root):
         'comparison_source_sha256': sha(source.read_bytes())})
     for row in rows:
         print(row['name'], row['identical'], row['before_sha256'], row['after_sha256'], flush=True)
-    return 0 if all(r['identical'] for r in rows) else 1
+    return 0 if accepted else 1
 
 
 def summary(root):
@@ -158,12 +194,13 @@ if __name__ == '__main__':
     parser.add_argument('path', type=Path)
     parser.add_argument('--ref', default='HEAD')
     parser.add_argument('--refresh', action='store_true')
+    parser.add_argument('--identity-pin-ruling', action='store_true')
     args = parser.parse_args()
     if args.action == 'archive':
         archive(args.ref, args.path.resolve(), refresh=args.refresh)
     elif args.action == 'proposal':
         proposal(args.path)
     elif args.action == 'compare':
-        raise SystemExit(compare(args.path))
+        raise SystemExit(compare(args.path, identity_pin_ruling=args.identity_pin_ruling))
     else:
         summary(args.path)
