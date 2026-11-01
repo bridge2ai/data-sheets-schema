@@ -112,9 +112,82 @@ def details(paths):
                 print(row['longrepr'][-2200:])
 
 
+def failure_summary(paths):
+    for path in paths:
+        if not path.is_file():
+            continue
+        rows = [json.loads(line) for line in path.read_text().splitlines()]
+        groups = Counter()
+        for row in rows:
+            errors = [line.strip() for line in row['longrepr'].splitlines() if line.startswith('E ')]
+            groups[(row['when'], errors[-1] if errors else row['longrepr'].splitlines()[-1])] += 1
+        print(path.parent.name, len(rows), 'failed reports')
+        for signature, count in groups.items():
+            print(count, *signature)
+
+
+def ledger(root, output):
+    """Join immutable unit evidence without converting failures into passes."""
+    repo = Path(__file__).resolve().parents[2]
+    final_head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repo).decode().strip()
+    units, failed_nodes = {}, {}
+    for result_path in sorted(root.glob('*/result.json')):
+        unit = result_path.parent
+        result = json.loads(result_path.read_bytes())
+        started = json.loads((unit / 'started.json').read_bytes())
+        assert result['identity'] == started['identity']
+        nodes = json.loads((unit / 'collected.json').read_bytes())
+        assert len(nodes) == len(set(nodes))
+        events_path = unit / 'events.jsonl'
+        events = ([json.loads(line) for line in events_path.read_text().splitlines()]
+                  if events_path.exists() else [])
+        assert all(row['nodeid'] in nodes for row in events)
+        failures_path = unit / 'failures.jsonl'
+        failures = ([json.loads(line) for line in failures_path.read_text().splitlines()]
+                    if failures_path.exists() else [])
+        assert len(failures) == sum(row['outcome'] == 'failed' for row in events)
+        for row in failures:
+            errors = [line.strip() for line in row['longrepr'].splitlines() if line.startswith('E ')]
+            failed_nodes.setdefault(row['nodeid'], []).append({'unit': unit.name,
+                'when': row['when'], 'signature': errors[-1] if errors else row['longrepr'].splitlines()[-1],
+                'trace_sha256': hashlib.sha256(row['longrepr'].encode()).hexdigest()})
+        skipped = [{'class': node.get('classname'), 'name': node.get('name'),
+                    'reason': node.find('skipped').get('message')}
+                   for node in ET.parse(unit / 'junit.xml').iter('testcase')
+                   if node.find('skipped') is not None]
+        changes = subprocess.check_output(['git', 'diff', '--name-only',
+            result['identity']['commit'], final_head], cwd=repo).decode().splitlines()
+        hashes = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                  for path in sorted(unit.iterdir()) if path.is_file()
+                  and path.suffix in ('.json', '.jsonl', '.xml', '.log')}
+        units[unit.name] = {'result': result, 'collected_count': len(nodes),
+            'call_outcomes': dict(Counter(row['outcome'] for row in events if row['when'] == 'call')),
+            'failed_reports': len(failures), 'skips': skipped, 'files_sha256': hashes,
+            'changes_from_tested_commit_to_final': changes}
+    assignment = json.loads((root / 'shard-assignment.json').read_bytes())
+    actual = json.loads((root / 'ordinary-shard/collected.json').read_bytes())
+    assert set(actual) == set(assignment['selected_nodes'])
+    assert any(node.startswith('tests/test_build_api_registrations.py::') for node in actual)
+    outcomes = {}
+    for name in units:
+        path = root / name / 'events.jsonl'
+        events = [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []
+        for row in events:
+            if row['nodeid'] in failed_nodes:
+                outcomes.setdefault(row['nodeid'], {}).setdefault(name, {})[row['when']] = row['outcome']
+    document = {'final_head': final_head, 'units': units, 'failed_nodes': failed_nodes,
+        'failed_node_outcomes_by_unit': outcomes, 'shard': assignment['shard'],
+        'shard_matches_ci_assignment': True, 'shard_contains_builder': True}
+    save(output, document)
+    print('Final head:', final_head, 'unique nodes with any failure:', len(failed_nodes))
+    for name, unit in units.items():
+        print(name, unit['collected_count'], unit['call_outcomes'],
+              'failed reports', unit['failed_reports'], 'skips', len(unit['skips']))
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=['run', 'scope', 'shard', 'failures', 'progress', 'details'])
+    parser.add_argument('action', choices=['run', 'scope', 'shard', 'failures', 'progress', 'details', 'failure-summary', 'ledger'])
     parser.add_argument('--tree', type=Path)
     parser.add_argument('--output', type=Path)
     parser.add_argument('--collection', type=Path)
@@ -130,5 +203,9 @@ if __name__ == '__main__':
         failures([Path(p) for p in args.arguments + rest], args.output)
     elif args.action == 'details':
         details([Path(p) for p in args.arguments + rest])
+    elif args.action == 'failure-summary':
+        failure_summary([Path(p) for p in args.arguments + rest])
+    elif args.action == 'ledger':
+        ledger(args.tree.resolve(), args.output)
     else:
         progress(Path(args.arguments[0]))
