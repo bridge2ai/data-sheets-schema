@@ -18,6 +18,7 @@ REPORT = ROOT.parent / "plans/reviews/d41_legacy_impl_d68_d70_2026-10-30.md"
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--phases", nargs="+", required=True)
 parser.add_argument("--final-phases", nargs="+", required=True)
+parser.add_argument("--implementation-phases", nargs="+", default=[])
 parser.add_argument("--census", required=True)
 parser.add_argument("--prefix", default="r3-final")
 args = parser.parse_args()
@@ -49,11 +50,21 @@ for name in args.phases:
     result = json.loads(raw)
     failures = [r for r in result["reports"] if r["outcome"] == "failed"]
     final = name in args.final_phases
+    implementation = name in args.implementation_phases
     if final:
         assert result["environment"]["head"] == head, (name, "not final commit")
+    changed_tests = []
+    if implementation:
+        phase_head = result["environment"]["head"]
+        git("merge-base", "--is-ancestor", phase_head, head)
+        assert not git("diff", "--name-only", phase_head, head, "--", "src",
+            "utils/pytest_shard.py", "utils/ci_test_durations.json"), (name, "implementation changed")
+        changed_tests = [path for path in git("diff", "--name-only", phase_head, head,
+            "--", "tests").splitlines() if path.endswith(".py")]
     counts = Counter(r["outcome"] for r in result["reports"] if r["when"] == "call")
     skips = [r for r in result["reports"] if r["outcome"] == "skipped"]
     phases.append({"name": name, "head": result["environment"]["head"], "final": final,
+        "implementation": implementation, "tests_changed_after_phase": changed_tests,
         "exit_code": result["exit_code"], "selected": len(result["selected"]),
         "call_outcomes": dict(counts), "skipped": len(skips),
         "skipped_nodes": [{"nodeid": row["nodeid"], "message": relative(row.get("message", ""))}
@@ -70,6 +81,9 @@ for name in args.phases:
                 continue
             artifact_censuses.append({"phase": name, "case": path.parent.name,
                 "source": relative(path), **json.loads(path.read_text())})
+final_test_files = {path for phase in phases if phase["final"] for path in phase["passed_by_file"]}
+for phase in phases:
+    assert set(phase["tests_changed_after_phase"]) <= final_test_files, (phase["name"], "changed tests not rerun")
 census = json.loads((SCRATCH / args.census).read_text())
 assert census["after_head"] == head
 protected = git("diff", "--name-only", "c9567e3c3", head, "--", "data",
@@ -121,11 +135,20 @@ lines = [f"# D68–D70 / D73 round-three implementation: `{head}`", "",
     "| Phase | Source | Passed | Call failures | Skips | Collection errors | Selected |", "|---|---|---:|---:|---:|---:|---:|"]
 for phase in phases:
     counts = phase["call_outcomes"]
-    lines.append(f"| {phase['name']} | `{phase['head'][:9]}`{' final' if phase['final'] else ' historical'} | "
+    scope = "final" if phase["final"] else "implementation before final main merge" if phase["implementation"] else "historical"
+    lines.append(f"| {phase['name']} | `{phase['head'][:9]}` {scope} | "
         f"{counts.get('passed', 0)} | {counts.get('failed', 0)} | {phase['skipped']} | "
         f"{len(phase['collection_errors'])} | {phase['selected']} |")
 lines += ["", "Phase counts overlap; they are not summed as unique tests. Raw reports, exact arguments, "
     f"hashes and per-file counts: `{relative(destination)}`.", "",
+    "A late main-only CI timeout update is merged last. Phases labelled implementation "
+    "precede that final merge; their src tree, shard plugin and timing file are verified "
+    "identical to final HEAD. Every test file changed by the final merge is required to "
+    "pass in the final-head phases. As specified for the final main merge, focused files "
+    "and collection are repeated from its pinned archive. The full broad and ordinary-shard "
+    "runs are reported at their actual pre-merge head, not relabelled as final-head runs. "
+    "The final broad selection and focused selection together cover all requested files; "
+    "the broad phase does not repeat changed files already covered by the focused phase.", "",
     "Before-fix controls overlay the committed regression tests onto older pinned source; "
     "final validation uses unmodified final-commit archives. Earlier NF3-B/#5409 dispositions "
     "for all 16 nodes remain in notes/reviews/d73_5212_review_followup_2026-10-31.md.", "",
@@ -181,8 +204,8 @@ for label in ("before", "after"):
         f"canary eligible {counts['after']['canary']}; evaluation eligible {counts['after']['evaluation']}; "
         f"v8 records {counts['v8_records']}.")
 lines += ["- Round-three per-record eligibility changes: 0. V8 comparator changes: 0.", "",
-    "Remaining failures in final-commit phases:", ""]
-remaining = [r for p in phases if p["final"] for r in p["failures"]]
+    "Remaining failures in implementation validation:", ""]
+remaining = [r for p in phases if p["final"] or p["implementation"] for r in p["failures"]]
 for row in remaining:
     baselines = [phase["name"] for phase in phases if not phase["final"]
         and phase["head"].startswith("c9567e3c3")
@@ -192,14 +215,15 @@ for row in remaining:
 if not remaining:
     lines.append("None.")
 skipped_groups = Counter((row["nodeid"].split("::", 1)[0], row["message"])
-    for phase in phases if phase["final"] for row in phase["skipped_nodes"])
+    for phase in phases if phase["final"] or phase["implementation"] for row in phase["skipped_nodes"])
 if skipped_groups:
-    lines += ["", "Skipped final-commit cases (phase counts may overlap):", ""]
+    lines += ["", "Skipped implementation-validation cases (phase counts may overlap):", ""]
     lines += [f"- {count} in `{path}`: {reason}" for (path, reason), count in skipped_groups.items()]
 lines += ["", "No protected source pins, shared_generation.py, live data/ runs, ATTIC or STATUS were edited. "
     "No provider, external network, actual remote Git, actual push or gh operation was used. "
-    "Only the ordinary shard containing the D68 file is run for the final commit; other "
-    "final-commit shards and the actual CI platform remain unverified locally.", ""]
+    "Only the ordinary shard containing the D68 file is used for implementation acceptance. "
+    "Other shards, the full shard after the final CI-only merge, and the actual CI platform "
+    "remain unverified locally.", ""]
 if REPORT.exists():
     prior = REPORT.read_bytes()
     backup = SCRATCH / ("report-before-round3-" + hashlib.sha256(prior).hexdigest()[:12] + ".md")
