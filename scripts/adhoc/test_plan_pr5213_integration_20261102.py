@@ -5,6 +5,7 @@ Inputs: sibling planning helper and unchanged sharding source. Output: unittest
 results only, no pytest or real production imports; temporary fixtures are owned.
 """
 from collections import Counter
+from contextlib import ExitStack
 from copy import deepcopy
 import hashlib
 import importlib.util
@@ -106,6 +107,134 @@ class PlanningContracts(unittest.TestCase):
         self.assertEqual(len(set(helper.SG2)), 3)
         self.assertEqual({node.rsplit('[', 1)[-1] for node in helper.SG2},
                          {'none]', 'explicit]', 'conventional]'})
+
+
+class JournalSelectionContracts(unittest.TestCase):
+    def test_three_way_split_retains_other_registration_cases_and_duplicates(self):
+        other = [helper.SG2_PREFIX.split('::')[0] + f'::test_other[{i}]' for i in range(10)]
+        census = ['census'] * 2
+        full = ['journal', 'journal', *census, *helper.SG2, *other]
+        grouped, separate = helper.journal_split(full, census, helper.SG2)
+        self.assertEqual(grouped, ['journal', 'journal', *other])
+        self.assertEqual(Counter(separate), Counter(helper.SG2))
+        self.assertEqual(Counter(grouped) + Counter(census) + Counter(separate), Counter(full))
+
+    def test_old_roster_without_sg2_has_no_synthetic_coverage(self):
+        full = ['journal', 'census', 'journal']
+        grouped, separate = helper.journal_split(full, ['census'], helper.SG2)
+        self.assertEqual(grouped, ['journal', 'journal'])
+        self.assertEqual(separate, [])
+        self.assertEqual(Counter(grouped) + Counter(['census']), Counter(full))
+
+    def test_only_actual_sg2_intersection_is_credited(self):
+        full = [helper.SG2[1], 'census', 'journal']
+        grouped, separate = helper.journal_split(full, ['census'], helper.SG2)
+        self.assertEqual(grouped, ['journal'])
+        self.assertEqual(separate, [helper.SG2[1]])
+
+    def test_insufficient_or_overlapping_separate_occurrences_refuse(self):
+        for full, census in ((['journal'], ['missing']),
+                             ([helper.SG2[0]], [helper.SG2[0]]),
+                             ([helper.SG2[0]] * 2, [])):
+            with self.subTest(full=full, census=census), self.assertRaises(ValueError):
+                helper.journal_split(full, census, helper.SG2)
+
+    def freeze_fixture(self, root, include_registration):
+        tree = root / 'source'
+        tree.mkdir()
+        registration = helper.SG2_PREFIX.split('::')[0]
+        journal = 'tests/test_journal_contract.py'
+        census = 'tests/test_d69_artifact_completeness.py'
+        ordering = 'tests/test_ordering_contract.py'
+        ci = 'tests/test_ci_sharding.py'
+        other = [registration + f'::test_other[{i}]' for i in range(10)]
+        full = [journal + '::test_same'] * 2 + [census + f'::test_census[{i}]' for i in range(11)]
+        full += [*helper.SG2, *other, ordering + '::test_order', ci + '::test_shard']
+        journal_modules = [journal, census] + ([registration] if include_registration else [])
+        for name in [journal, census, registration, ordering, ci, helper.NOTES,
+                     'scripts/adhoc/d70_corpus_eligibility_20261030.py']:
+            path = tree / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text('# owned synthetic planning fixture\n')
+        args = types.SimpleNamespace(tree=tree, head='a' * 40, collection=root / 'collection',
+                                     ordering=ordering, output=root / 'selection')
+        evidence = {'plan': {'worktree': str(tree)},
+                    'nodes': {'collected': full, 'selected': full}, 'files': {}}
+        with ExitStack() as stack:
+            stack.enter_context(patch.object(helper, 'source_identity', return_value={
+                'head': args.head, 'git_tree': 'b' * 40}))
+            stack.enter_context(patch.object(helper, 'producer_identity', return_value={
+                'producer_head': 'c' * 40, 'producer_git_tree': 'd' * 40}))
+            stack.enter_context(patch.object(helper, 'run_evidence', return_value=evidence))
+            stack.enter_context(patch.object(helper, 'roster', return_value=(
+                journal_modules, journal_modules, [registration], {})))
+            stack.enter_context(patch.object(helper, 'git', return_value=helper.NOTES + '\n'))
+            stack.enter_context(patch.object(helper, 'invariants', return_value={}))
+            helper.freeze(args)
+        return args, other
+
+    def test_freeze_and_report_use_existing_nine_groups_and_distinct_producer(self):
+        for present in (False, True):
+            with self.subTest(registration_in_journal=present), tempfile.TemporaryDirectory() as temporary:
+                args, other = self.freeze_fixture(Path(temporary), present)
+                plan_path = args.output / 'plan.json'
+                plan = helper.read(plan_path)
+                groups = {name: helper.read(value['path']) for name, value in plan['groups'].items()}
+                required = set(groups) - {'d76', 'journal-owner-legacy'}
+                self.assertEqual(required, {'ordering', 'ci-sharding', 'writer-census',
+                    'd76-without-sg2', 'journal-without-census', 'notes-budget',
+                    'sg2-none', 'sg2-explicit', 'sg2-conventional'})
+                self.assertEqual(plan['head'], 'a' * 40)
+                self.assertEqual(plan['producer_head'], 'c' * 40)
+                self.assertEqual(plan['journal_separately_scheduled_sg2'], helper.SG2 if present else [])
+                self.assertEqual(groups['d76-without-sg2'], other)
+                self.assertTrue(set(groups['journal-without-census']).isdisjoint(helper.SG2))
+                self.assertEqual(set(other).issubset(groups['journal-without-census']), present)
+                self.assertEqual(Counter(groups['journal-without-census'])
+                    + Counter(groups['writer-census']) + Counter(plan['journal_separately_scheduled_sg2']),
+                    Counter(groups['journal-owner-legacy']))
+                manifest = Path(temporary) / 'manifest.json'
+                manifest.write_text(json.dumps({'head': args.head,
+                    'runs': [{'group': name, 'directory': name} for name in sorted(required)]}))
+
+                def run(group, head):
+                    self.assertEqual(head, args.head)
+                    nodes = groups[group]
+                    return {'plan': {'targets': nodes, 'deadline_seconds': 1800,
+                                'notes_ci_job': 'ci-offline-canary-budget' if group == 'notes-budget' else None},
+                        'nodes': {'collected': nodes, 'selected': nodes}, 'files': {},
+                        'outcome': {'worker_count': 0, 'counts': {'passed': len(nodes)}, 'passed': True},
+                        'phases': {'occurrences': [{'nodeid': node, 'status': 'passed'} for node in nodes]}}
+
+                report_args = types.SimpleNamespace(plan=plan_path, manifest=manifest,
+                                                     output=Path(temporary) / 'report.json')
+                with patch.object(helper, 'run_evidence', side_effect=run), patch.object(
+                        helper, 'producer_identity', return_value={'producer_head': 'c' * 40,
+                                                                   'producer_git_tree': 'd' * 40}):
+                    helper.report(report_args)
+                report = helper.read(report_args.output)
+                self.assertTrue(report['complete_required_groups'])
+                self.assertTrue(report['journal_split_exact_counter'])
+                self.assertEqual(report['journal_separately_scheduled_sg2'], helper.SG2 if present else [])
+                self.assertEqual(report['head'], 'a' * 40)
+                self.assertEqual(report['producer_head'], 'c' * 40)
+
+    def test_report_rejects_grouped_sg2_even_when_selection_hash_is_updated(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            args, _ = self.freeze_fixture(Path(temporary), True)
+            plan_path = args.output / 'plan.json'
+            plan = helper.read(plan_path)
+            target = plan['groups']['journal-without-census']
+            path = Path(target['path'])
+            path.write_text(json.dumps(helper.read(path) + [helper.SG2[0]]))
+            target['sha256'] = helper.sha(path)
+            plan_path.write_text(json.dumps(plan))
+            manifest = Path(temporary) / 'manifest.json'
+            manifest.write_text(json.dumps({'head': args.head, 'runs': []}))
+            with patch.object(helper, 'run_evidence') as run, self.assertRaisesRegex(ValueError, 'journal split'):
+                helper.report(types.SimpleNamespace(plan=plan_path, manifest=manifest,
+                                                     output=Path(temporary) / 'report.json'))
+            run.assert_not_called()
 
 
 class TimingSourceRevisionContracts(unittest.TestCase):

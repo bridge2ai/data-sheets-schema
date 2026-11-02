@@ -98,6 +98,13 @@ def source_identity(tree, head):
     return {'head': head, 'git_tree': git(tree, 'rev-parse', 'HEAD^{tree}').strip()}
 
 
+def producer_identity():
+    """Keep the evidence producer revision distinct from the tested source."""
+    tree = HERE.parents[1]
+    identity = source_identity(tree, git(tree, 'rev-parse', 'HEAD').strip())
+    return {'producer_head': identity['head'], 'producer_git_tree': identity['git_tree']}
+
+
 def function_bytes(raw, name):
     text = raw.decode('utf-8')
     matches = [node for node in ast.parse(text).body
@@ -211,6 +218,20 @@ def without_occurrences(full, separate):
     return grouped
 
 
+def journal_split(full, census, scheduled_sg2):
+    """Credit SG2 only where the already-scheduled occurrences join this roster."""
+    overlap = Counter(full) & Counter(scheduled_sg2)
+    if overlap & Counter(census):
+        raise ValueError('writer census and separately scheduled SG2 must not overlap')
+    separate_sg2 = list(overlap.elements())
+    grouped = without_occurrences(full, [*census, *separate_sg2])
+    if any(node in scheduled_sg2 for node in grouped):
+        raise ValueError('journal contains an SG2 occurrence without a separate execution')
+    if Counter(grouped) + Counter(census) + overlap != Counter(full):
+        raise ValueError('journal groups do not exactly cover requested occurrences')
+    return grouped, separate_sg2
+
+
 def freeze(args):
     identity = source_identity(args.tree, args.head)
     evidence = run_evidence(args.collection, args.head, collection=True)
@@ -233,12 +254,13 @@ def freeze(args):
     if any(Counter(groups['d76'])[node] != 1 for node in SG2):
         raise ValueError('each of the three SG2 cases must appear exactly once')
     groups['d76-without-sg2'] = [node for node in groups['d76'] if node not in SG2]
-    groups['journal-without-census'] = without_occurrences(groups['journal-owner-legacy'], groups['writer-census'])
+    groups['journal-without-census'], journal_sg2 = journal_split(
+        groups['journal-owner-legacy'], groups['writer-census'], SG2)
     groups['notes-budget'] = [NOTES]
     for node in SG2:
         groups['sg2-' + node.rsplit('[', 1)[1][:-1]] = [node]
-    # Census and ordering are deliberately separate obligations; retain overlaps
-    # as observed repetitions rather than silently treating counts as unique.
+    # SG2 is executed once in its serial groups and credited to both applicable
+    # rosters. Census and ordering remain separate obligations with honest overlap.
     if args.output.exists():
         raise ValueError('fresh selection directory required')
     args.output.mkdir(parents=True)
@@ -249,13 +271,17 @@ def freeze(args):
         files[name] = {'path': str(path), 'sha256': sha(path), 'occurrences': len(nodes)}
     source_files = sorted(set(journal + d76 + [args.ordering, NOTES, 'tests/test_ci_sharding.py',
         'scripts/adhoc/d70_corpus_eligibility_20261030.py']))
-    save(args.output / 'plan.json', {**identity, 'source': str(args.tree), 'baseline_heads': BASELINES,
+    save(args.output / 'plan.json', {**identity, **producer_identity(),
+        'source': str(args.tree), 'baseline_heads': BASELINES,
         'main_invariants': invariants(args.tree),
         'collection': str(args.collection), 'collection_artifact_sha256': evidence['files'],
         'search': search, 'direct_modules': direct, 'explicit_modules': list(EXPLICIT),
         'journal_owner_legacy_modules': journal, 'd76_modules': d76,
         'notes_changed_incoming': changed_notes, 'groups': files,
-        'journal_split_exact_counter': Counter(groups['journal-without-census']) + Counter(groups['writer-census']) == Counter(groups['journal-owner-legacy']),
+        'journal_separately_scheduled_sg2': journal_sg2,
+        'journal_split_exact_counter': (Counter(groups['journal-without-census'])
+            + Counter(groups['writer-census']) + Counter(journal_sg2)
+            == Counter(groups['journal-owner-legacy'])),
         'diagnostic_only_groups': ['d76', 'journal-owner-legacy'],
         'source_file_sha256': {name: sha(args.tree / name) for name in source_files},
         'execution': {'maximum_workers': 2, 'one_controller': True, 'sg2_workers': 0,
@@ -491,7 +517,8 @@ def partitions(args):
                 'exact_full_counter': True, 'api_lanes': api,
                 'projection': projected_shards(shards, weights, rows, plugin, allowance)})
     save(args.output / 'projection-cases.json', rows)
-    save(args.output / 'partition-proof.json', {**identity, 'full_occurrences': len(full),
+    save(args.output / 'partition-proof.json', {**identity, **producer_identity(),
+        'full_occurrences': len(full),
         'unique_nodeids': len(set(full)), 'collection_hashes': proof['files'],
         'plugin_sha256': sha(args.tree / 'utils/pytest_shard.py'),
         'weights_sha256': sha(args.tree / 'utils/ci_test_durations.json'),
@@ -511,6 +538,21 @@ def report(args):
     manifest = read(args.manifest)
     if manifest['head'] != plan['head']:
         raise ValueError('manifest differs from frozen selection head')
+    selections = {}
+    for group, target in plan['groups'].items():
+        if sha(target['path']) != target['sha256']:
+            raise ValueError('selection changed')
+        selections[group] = read(target['path'])
+    scheduled_sg2 = [node for group, nodes in selections.items()
+                     if group.startswith('sg2-') for node in nodes]
+    if Counter(scheduled_sg2) != Counter(SG2):
+        raise ValueError('separately scheduled SG2 selection differs')
+    journal_grouped, journal_sg2 = journal_split(selections['journal-owner-legacy'],
+        selections['writer-census'], scheduled_sg2)
+    if (Counter(journal_grouped) != Counter(selections['journal-without-census'])
+            or Counter(journal_sg2) != Counter(plan.get('journal_separately_scheduled_sg2', []))
+            or plan.get('journal_split_exact_counter') is not True):
+        raise ValueError('frozen journal split differs from its exact occurrence union')
     rows, covered = [], set()
     for item in manifest['runs']:
         group = item['group']
@@ -542,8 +584,11 @@ def report(args):
             'failures': [row for row in result['phases']['occurrences']
                          if row['status'] not in ('passed', 'skipped')]})
     required = set(plan['groups']) - {'d76', 'journal-owner-legacy'}
-    save(args.output, {'head': plan['head'], 'plan_sha256': sha(args.plan),
+    save(args.output, {'head': plan['head'], **producer_identity(),
+        'plan_sha256': sha(args.plan),
         'manifest_sha256': sha(args.manifest), 'runs': rows,
+        'journal_separately_scheduled_sg2': journal_sg2,
+        'journal_split_exact_counter': True,
         'missing_groups': sorted(required - covered),
         'complete_required_groups': required == covered,
         'all_literal_outcomes_pass': required == covered and all(row['literal_passed'] for row in rows),

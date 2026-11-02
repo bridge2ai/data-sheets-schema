@@ -118,6 +118,27 @@ Fresh pinned parent comparisons and repaired-head validation are recorded in
 the integration report. The unchanged round-three timing observations must
 remain identified as prior-revision measurements for this changed module.
 
+## I11 — Keep SG2 singleton scheduling when journal discovery includes its module
+
+Read-only review caught a scheduling defect before the journal group ran.
+The I10 fixture's journal import adds its module to the required ignore-
+independent search: the journal roster becomes1655 cases, including the three
+SG2 cases. Removing only the eleven writer-census cases would leave1644 in a
+two-worker group and rerun SG2 outside its required singleton schedule.
+
+Disposition: remove the intersection with already separately scheduled SG2
+cases as well as the writer census. Prove the exact occurrence union of1641
+grouped journal cases,11 writer cases and3 singleton SG2 cases equals1655.
+Keep the other ten newly discovered registration-module cases. Preserve the
+nine run groups and strict runtime source/head/evidence checks. The current
+serial SG2 run is unaffected; the incorrect journal group was never launched.
+
+This change affects only the evidence producer, its contracts and this record.
+Runtime tests remain pinned to aa205, with the corrected producer separately
+committed, archived, contract-tested and identified in its output. Record an
+explicit production/test/runtime-helper equivalence proof; do not relabel any
+runtime result as an execution at the newer producer commit.
+
 ## Reviewed mutation-evidence method
 
 The existing validation runner correctly refuses an uncommitted source mutation.
