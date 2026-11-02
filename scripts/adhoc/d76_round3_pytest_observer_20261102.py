@@ -30,7 +30,8 @@ _EVIDENCE_OPEN = io.open
 _EVIDENCE_REPLACE = os.replace
 _EVIDENCE_ENCODE = json.JSONEncoder(sort_keys=True).encode
 _PHASE_STREAM = None
-_DENIAL_PATH = None
+# The controller/worker bootstrap installs the guard before pytest_configure.
+_DENIAL_PATH = str(OUTPUT.absolute() / ('guard-denials-' + str(os.getpid()) + '.jsonl'))
 _CHECKPOINT_PATHS = None
 
 
@@ -103,7 +104,7 @@ def install_guard():
 
 
 def pytest_configure(config):
-    global WORKER, _PHASE_STREAM, _DENIAL_PATH, _CHECKPOINT_PATHS
+    global WORKER, _PHASE_STREAM, _CHECKPOINT_PATHS
     WORKER = getattr(config, 'workerinput', {}).get('workerid', 'master')
     if not (sys.flags.no_site and sys.flags.safe_path and sys.dont_write_bytecode):
         raise ValueError('D76 pytest process requires -S -P -B')
@@ -111,7 +112,6 @@ def pytest_configure(config):
     # Keep the phase stream open; even captured Path.open delegates to io.open.
     _CHECKPOINT_PATHS = (str(OUTPUT / ('nodes-' + WORKER + '.json.tmp')),
                          str(OUTPUT / ('nodes-' + WORKER + '.json')))
-    _DENIAL_PATH = str(OUTPUT / ('guard-denials-' + str(os.getpid()) + '.jsonl'))
     try:
         _PHASE_STREAM = _EVIDENCE_OPEN(str(OUTPUT / ('phases-' + WORKER + '.jsonl')),
                                        'a', encoding='utf-8', buffering=1)

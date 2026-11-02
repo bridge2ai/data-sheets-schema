@@ -1,8 +1,9 @@
 # T7: startup guard refusals lack a configured evidence path
 
 Local review issue draft for PR #5213, D76 round 3, 2026-11-02. No GitHub issue
-has been created. Status: regression contracts prepared; before/after execution
-and implementation are pending. Existing evidence remains unchanged.
+has been created. Status: failing-before evidence captured; minimal observer
+repair prepared; after-repair validation pending. Existing evidence remains
+unchanged.
 
 ## Finding
 
@@ -34,11 +35,28 @@ installation order without contacting a provider or network:
 - Allowed local startup events must create neither a denial artifact nor a
   phase journal before configuration.
 
-The proposed repair is to initialize the process-specific denial path before
-installing the audit hook. Retain the existing captured opener, on-demand
+The repair initializes the absolute, process-specific denial path at import,
+before installing the audit hook, and removes its redundant assignment during
+pytest configuration. It retains the existing captured opener, on-demand
 creation, late-denial persistence, fatal write errors, and unchanged runner
-acceptance rules. Do not create an empty final denial file on clean startup.
+acceptance rules. It creates no empty final denial file on clean startup.
 
-The validation owner will capture failing-before and passing-after evidence.
-This draft makes no test-pass, full-suite, merge-readiness, or issue-closure
-claim. The source implementation has not been changed as part of this draft.
+## Captured baseline and remaining validation
+
+At tests-only commit `13128650c586e1d0de46d71c84d6bd30b697b991`, the validation
+owner ran the ten contracts against unchanged observer bytes
+`50109df46a128456cb0eda3e356b91b6394c747ecee4508c79392c743f13e2b2`:
+**9 passed, 1 error**, reported runtime 0.082 seconds. The new startup-denial
+case errors at observer line 79 with
+`TypeError: expected str, bytes or os.PathLike object, not NoneType`.
+The clean-startup control and eight existing contracts pass.
+
+Evidence: `d4d-executions/plans/reviews/pr5213_d76_round3_2026-11-02/observer-contracts-before-t7/unittest.log`,
+SHA-256 `943922a9dc129f789e0a2fd48ad0c48640c1a4bbecfff9ba201829bf7c7cdaa2`.
+The frozen contract file SHA-256 is
+`46805b3fe1e65ad1160cf350c21f7a960c5f478517b83e83ce7227fb2bd02b71`.
+
+The validation owner will run the unchanged contracts after independent review
+of the repair. This draft makes no passing-after, full-suite, merge-readiness,
+or issue-closure claim. No production behavior or runner acceptance rule was
+modified.
