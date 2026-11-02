@@ -126,6 +126,24 @@ shared output leaves no new sidecar. All four acquired sidecars are bound by a
 durable launch event before accounting. A pre-round-4 guarded identity without
 that event binds its current sidecars at its next launch or resume.
 
+Main's existing authority/alias and selected-owner refusals run before D69,
+through the same `_prelock_checks` path for direct and batch execution. Batch
+also supplies its cross-run authority check there after planning. D69 checks
+before client preparation to preserve the no-client legacy refusal, and again
+as the final check immediately before locking. Schema/configuration checks run
+both before locking and inside it: the first keeps startup failures free of run
+writes; the second detects changes while waiting for physical exclusion. Both
+use the spec's profile. These are read-only checks of run state; schema rebuild
+comparisons use temporary files outside the run's output namespace.
+
+The #5212 subprocess tests share one checkpoint waiter. It drains stdout and
+stderr, returns on the checkpoint, and fails on child exit or a 120-second
+deadline with both exit status and stderr. The deadline bounds failure only;
+successful children proceed immediately. Per-test `subprocess-checkpoints.json`
+records the measured wait time. Real-process contention controls preserve
+sidecar bytes and inodes; FileLock's attempted open can update an empty
+sidecar's mtime even when its nonblocking lock fails.
+
 After a partial acquisition error, one bounded recovery attempt acquires the
 remaining locks and binds the sidecars while every acquired inode remains held.
 A transient head-read, sidecar-read or launch-write failure is retried under

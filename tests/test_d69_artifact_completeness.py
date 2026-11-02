@@ -110,8 +110,8 @@ def assert_singletons_refuse(selected, artifacts, tmp_path):
             root.mkdir()
             # Keep the actual run's pinned inputs; only relocate its output
             # properties. Reconstructing registration for every singleton is
-            # unnecessary: the public read-only guard precedes registration
-            # checks and must refuse before either can mutate this tree.
+            # unnecessary: main's authority/owner refusals now precede D69,
+            # and each must refuse before any writer can mutate this tree.
             fresh = copy(selected)
             fresh.out_dir = root
             assert fresh.metadata_dir == root
@@ -121,7 +121,9 @@ def assert_singletons_refuse(selected, artifacts, tmp_path):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(raw)
             before, client = tree(root), FakeClient()
-            with pytest.raises(ledger.UsageLedgerError, match="inspection only") as caught:
+            with pytest.raises((ledger.UsageLedgerError, ValueError), match=(
+                    "inspection only|selected output evidence has no usable live ownership|"
+                    "selected outputs are already spent")) as caught:
                 api.execute(fresh, resume=resume, client=client)
             assert path.name in str(caught.value)
             assert client.messages.calls == [], relative

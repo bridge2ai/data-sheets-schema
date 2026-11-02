@@ -637,7 +637,9 @@ class TestRoundFour(_Clean):
                 return real(*a, **kw)
             with mock.patch.object(schema_sync, "check", spy):
                 api_runner.execute(spec, client=self._fake_client())
-            self.assertEqual([p.name for p in seen if p is not None], ["bridge2ai"])
+            # Pre-lock startup and the recheck after acquiring physical locks
+            # must both use this spec's instrument, even if the environment differs.
+            self.assertEqual([p.name for p in seen if p is not None], ["bridge2ai", "bridge2ai"])
             rec = yaml.safe_load((Path(d) / "CHORUS_provenance.yaml").read_text(encoding="utf-8"))
             self.assertEqual(rec["schema"]["profile"], "bridge2ai")
             self.assertEqual(rec["schema"]["digest_md5"], self.STUDY)

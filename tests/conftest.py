@@ -36,6 +36,52 @@ NOTES = ROOT / "notes"
 
 
 @pytest.fixture
+def subprocess_checkpoint(tmp_path):
+    """#5212: bound a missing checkpoint, while draining both child pipes.
+
+    The 120-second deadline accommodates loaded four-worker CI. Successful
+    checkpoints return immediately. Keep consumed stderr for later assertions
+    and persist timings so READY latency is measured rather than guessed.
+    """
+    import json
+    import selectors
+    import time
+    measurements = []
+
+    def wait(child, line='READY', *, timeout=120):
+        started = time.monotonic()
+        output = {'stdout': bytearray(), 'stderr': bytearray()}
+        with selectors.DefaultSelector() as selector:
+            for name in output:
+                pipe = getattr(child, name)
+                assert pipe is not None, f'checkpoint requires piped {name}'
+                selector.register(pipe, selectors.EVENT_READ, name)
+            while True:
+                remaining = timeout - (time.monotonic() - started)
+                for key, _ in selector.select(max(0, min(remaining, 0.1))):
+                    chunk = os.read(key.fileobj.fileno(), 65536)
+                    if chunk:
+                        output[key.data].extend(chunk)
+                    else:
+                        selector.unregister(key.fileobj)
+                elapsed = time.monotonic() - started
+                decoded = {name: bytes(raw).decode('utf-8', errors='replace')
+                           for name, raw in output.items()}
+                ready = line + '\n' in decoded['stdout'].splitlines(keepends=True)
+                status = child.poll()
+                if ready or status is not None or elapsed >= timeout:
+                    result = dict(decoded, elapsed_seconds=elapsed, checkpoint=line,
+                                  reached=ready, exit_status=status, deadline_seconds=timeout)
+                    measurements.append(result)
+                    (tmp_path / 'subprocess-checkpoints.json').write_text(json.dumps(measurements, indent=2))
+                    assert ready, (f'checkpoint {line!r} not reached after {elapsed:.3f}s '
+                                   f'(deadline={timeout}s); exit_status={status}; '
+                                   f'stderr={decoded["stderr"]!r}; stdout={decoded["stdout"]!r}')
+                    return result
+    return wait
+
+
+@pytest.fixture
 def journal_launch_monitor(monkeypatch):
     """Explicit opt-in launch record for pre-D57 runner regression fixtures.
 

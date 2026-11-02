@@ -13,6 +13,7 @@ import shlex
 import shutil
 import sys
 import tempfile
+import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from d41_legacy_controls_20261029 import bootstrap
@@ -21,6 +22,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--tree', type=Path, required=True)
 parser.add_argument('--basetemp', type=Path, required=True)
 parser.add_argument('--test-overlay', action='append', default=[])
+parser.add_argument('--notes', action='store_true', help='Use the workflow notes-lane import/bytecode environment')
 options, args = parser.parse_known_args()
 root, base = options.tree.resolve(), options.basetemp.resolve()
 assert 'scratch-5212fix' in base.parts
@@ -34,6 +36,17 @@ for name in options.test_overlay:
     overlays[name] = hashlib.sha256(source.read_bytes()).hexdigest()
 environment = bootstrap(root, base.parent)
 environment['test_overlays'] = overlays
+if options.notes:
+    # The offline notes controls deliberately reject a bytecode prefix.
+    # CI uses PYTHONDONTWRITEBYTECODE and these same import roots instead.
+    os.environ.pop('PYTHONPYCACHEPREFIX', None)
+    sys.pycache_prefix = None
+    notes = root / 'notes/matched_cborg_2026-09-13'
+    imports = [str(root / 'src'), str(notes), str(notes / 'native_controls'),
+               str(notes / 'evaluation_controls')]
+    sys.path[:0] = imports
+    os.environ['PYTHONPATH'] = os.pathsep.join(imports)
+environment['notes_lane'] = options.notes
 git_binary = shutil.which('git')
 binary = base.parent / (base.name + '-offline-bin')
 binary.mkdir(exist_ok=True)
@@ -67,6 +80,7 @@ class Observer:
 
     def pytest_runtest_logreport(self, report):
         row = {'nodeid': report.nodeid, 'when': report.when, 'outcome': report.outcome,
+               'duration_seconds': report.duration,
                **({'message': str(report.longrepr)} if report.failed or report.skipped else {})}
         self.reports.append(row)
         if report.failed:
@@ -75,8 +89,10 @@ class Observer:
                 stream.write(json.dumps(row) + '\n')
 
 observer = Observer()
+started = time.monotonic()
 code = pytest.main([*args, '--basetemp', str(base), '-p', 'no:cacheprovider'], plugins=[observer])
 base.with_suffix('.json').write_text(json.dumps({'exit_code': int(code), 'args': args,
+    'wall_seconds': time.monotonic() - started,
     'tree': str(root), 'environment': environment, 'selected': observer.selected,
     'reports': observer.reports, 'collection_errors': observer.errors}, indent=2))
 raise SystemExit(code)

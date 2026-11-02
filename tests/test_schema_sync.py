@@ -185,13 +185,26 @@ class GateTest(unittest.TestCase):
         The others describe records that remain usable evidence; this one
         corrupts the run's central input before a token is spent.
         """
-        import inspect
-
-        from data_sheets_schema.api_runner import _execute
-        source = inspect.getsource(_execute)
-        self.assertIn("schema_sync", source)
-        # Before the client is built, or the check is decoration.
-        self.assertLess(source.index("schema_sync"), source.index("_client()"))
+        from unittest import mock
+        from data_sheets_schema import api_runner, schema_sync
+        from tests.test_download.test_api_runner import spec
+        seen = []
+        def stale(**kwargs):
+            seen.append('schema')
+            return [{'class': 'Dataset', 'status': STALE, 'reason': 'injected stale schema'}]
+        def forbidden(name):
+            def reached(*args, **kwargs):
+                seen.append(name)
+                raise AssertionError(f'stale schema reached {name}')
+            return reached
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(schema_sync, 'check', stale), \
+                mock.patch.object(api_runner, '_client', forbidden('client')), \
+                mock.patch.object(api_runner, '_exclusive_run', forbidden('lock')):
+            with self.assertRaisesRegex(RuntimeError, 'merged schema is not built'):
+                api_runner.execute(spec(out_dir=Path(directory)))
+            self.assertEqual(seen, ['schema'])
+            self.assertEqual(list(Path(directory).iterdir()), [])
 
 
 

@@ -6914,6 +6914,36 @@ def _refuse_shared_no_resume(spec, resume):
                                    + _fresh_location(spec) + "; files: " + ", ".join(residue))
 
 
+def _prelock_checks(specs, *, resume=True, selection_check=None, prepare=None):
+    """Keep existing authority refusals ahead of D69 at every lock entry.
+
+    The batch supplies its additional cross-run authority check. All checks
+    are read-only with respect to run outputs. An optional preparation builds
+    the client only after legacy refusal, then D69 is repeated immediately
+    before acquisition: preparation cannot make a previously checked namespace
+    safe to write without another inventory.
+    """
+    from .latch_journal import refuse_legacy_execution
+    specs = tuple(specs)
+    if selection_check is not None:
+        selection_check()
+    for spec in specs:
+        if getattr(spec, 'shared_generation_version', 0):
+            from .shared_generation import assert_current
+            from .output_ownership import require_selected_resume_owner
+            assert_current(spec)
+            require_selected_resume_owner(spec, resume=resume)
+    if prepare is not None:
+        for spec in specs:
+            refuse_legacy_execution(spec)
+        result = prepare()
+    else:
+        result = None
+    for spec in specs:
+        refuse_legacy_execution(spec)
+    return result
+
+
 def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             client=None, expect_journal_head_sha256: str | None = None) -> dict[str, Any]:
     """Run the phases, writing each artifact as it completes.
@@ -6937,19 +6967,16 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     if spec.native_source_attribution_version:
         raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
 
-    from .latch_journal import guarded_launch, refuse_legacy_execution, require_launch_head
-    refuse_legacy_execution(spec)  # D68: refuse before even sidecar lock writes.
-    if getattr(spec, 'shared_generation_version', 0):
-        from .shared_generation import assert_current
-        from .output_ownership import require_selected_resume_owner
-        assert_current(spec)  # authority isolation precedes even sidecar lock writes
-        require_selected_resume_owner(spec, resume=resume)
-    _refuse_shared_no_resume(spec, resume)
-    require_launch_head(spec, expect_journal_head_sha256)
-    _, client = _startup_checks(spec, client)
+    from .latch_journal import guarded_launch, require_launch_head
+    def prepare():
+        _refuse_shared_no_resume(spec, resume)
+        require_launch_head(spec, expect_journal_head_sha256)
+        return _startup_checks(spec, client)
+    _, client = _prelock_checks((spec,), resume=resume, prepare=prepare)
     with guarded_launch(spec, expect_journal_head_sha256, _exclusive_run):
         if getattr(spec, 'shared_generation_version', 0):
             # Another sequential writer may have changed ownership while we waited.
+            from .output_ownership import require_selected_resume_owner
             require_selected_resume_owner(spec, resume=resume)
         if resume:
             _restore_resume_date(spec)
@@ -7184,6 +7211,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     _rewrites: list[dict[str, Any]] = []
     _rewrite_token = _REWRITE_LOG.set(_rewrites)
     from data_sheets_schema.provenance import build_record, record_path_for
+    # Recheck the instrument/configuration after waiting for physical locks.
+    # The earlier check keeps ordinary startup failures free of run writes;
+    # this one prevents a pre-lock result from masking subsequent input drift.
     settings, client = _startup_checks(spec, client)
     _refuse_shared_no_resume(spec, resume)
     usage: list[dict[str, Any]] = []

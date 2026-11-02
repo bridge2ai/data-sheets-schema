@@ -321,10 +321,9 @@ def require_selected_resume_owner(spec, *, resume: bool) -> None:
     evidence = [path for path in footprint.evidence if _artifact_address(path) not in pending]
     spent = bool(evidence or present or any(
         _exists(path) for _, path in footprint.mutable if path not in locks))
-    if spent and not resume:
+    if spent and (not resume or not generations):
         files = sorted({str(path) for path in [*evidence, *present,
             *(p for _, p in footprint.mutable if p not in locks and _exists(p))]})
-        raise ValueError('selected outputs are already spent; no-resume requires a fresh run; '
-                         + _fresh_location(spec) + '; files: ' + ', '.join(files))
-    if spent and not generations:
-        raise ValueError('selected output evidence has no usable live ownership')
+        reason = ('selected outputs are already spent; no-resume requires a fresh run'
+                  if not resume else 'selected output evidence has no usable live ownership')
+        raise ValueError(reason + '; ' + _fresh_location(spec) + '; files: ' + ', '.join(files))

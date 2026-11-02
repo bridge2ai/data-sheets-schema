@@ -1,7 +1,6 @@
 """R1/R2/R5 regression contracts, #5212, 2026-10-28; offline only."""
 from pathlib import Path
 import re
-import selectors
 import signal
 import subprocess
 import sys
@@ -61,21 +60,18 @@ def test_refused_forgery_cannot_supply_the_next_monitored_resume_head(tmp_path, 
     assert before == (journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes())
 
 
-def test_sigterm_requires_reconciliation_before_a_new_launch_anchor(tmp_path, monkeypatch, capsys):
+def test_sigterm_requires_reconciliation_before_a_new_launch_anchor(tmp_path, monkeypatch, capsys, subprocess_checkpoint):
     child = subprocess.Popen([sys.executable, str(ROOT / 'scripts/adhoc/pr5212_sigterm_fixture_20261028.py'),
                               str(tmp_path)], cwd=ROOT, text=True, stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        with selectors.DefaultSelector() as ready:
-            ready.register(child.stdout, selectors.EVENT_READ)
-            assert ready.select(timeout=30), 'SIGTERM fixture never reached its checkpoint'
-            line = child.stdout.readline().strip()
-            assert line == 'READY', child.communicate(timeout=15)[1]
+        checkpoint = subprocess_checkpoint(child)
         lock = run_lock.Lock(tmp_path / 'synthetic-lock', child.pid, 'r1-sigterm', [], 'offline')
         monkeypatch.setattr(run_lock, 'live', lambda: [lock])
         result = CliRunner().invoke(cli, ['api', 'stop', '--label-prefix', lock.label_prefix])
         assert result.exit_code == 0 and '(TERM)' in result.output
         _, output = child.communicate(timeout=15)
+        output = checkpoint['stderr'] + output
         assert child.returncode == -signal.SIGTERM
     finally:
         if child.poll() is None:
