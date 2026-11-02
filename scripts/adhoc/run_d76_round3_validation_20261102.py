@@ -24,6 +24,15 @@ PROFILE = HERE / 'd76_loopback_only_20261031.sb'
 PROFILE_SHA = '3b819cf36924cb66296dc532b6e8f0e589e21100a45fd965bba9c2052a39cb6e'
 
 
+def archive_sha(path):
+    """Archive verification must not allocate the entire retained source tar."""
+    digest = hashlib.sha256()
+    with path.open('rb') as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+
 def bootstrap():
     if not (sys.flags.no_site and sys.flags.safe_path and sys.dont_write_bytecode):
         raise ValueError('run this helper with -S -P -B')
@@ -269,7 +278,7 @@ def run(options):
         raise ValueError('archive proof source identity differs')
     for artifact in (proof, proof.get('fairscape', {})):
         archive_path = Path(artifact['archive'])
-        if archive_path.is_symlink() or common.sha(archive_path.read_bytes()) != artifact['archive_sha256']:
+        if archive_path.is_symlink() or archive_sha(archive_path) != artifact['archive_sha256']:
             raise ValueError('retained git archive changed')
     fairscape = common.fairscape(options.tree, before)
     targets = selected_targets(options)

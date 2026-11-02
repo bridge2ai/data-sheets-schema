@@ -43,6 +43,13 @@ def tar_members(*members):
     return tarfile.open(fileobj=raw, mode='r:')
 
 
+def sandbox_child(root, mode, *args):
+    # Match the actual driver: supervisor outside the profile, child and all
+    # descendants inside it. Sandboxing the supervisor changes killpg semantics.
+    return ['/usr/bin/sandbox-exec', '-D', 'LOCAL_ROOT=' + str(root), '-f', str(runner.PROFILE),
+            sys.executable, '-S', '-P', '-B', str(Path(__file__).resolve()), mode, *args]
+
+
 class ArchiveContracts(unittest.TestCase):
     def test_regular_files_directories_and_internal_symlinks(self):
         with tar_members(('src', tarfile.DIRTYPE, ''), ('src/code.py', tarfile.REGTYPE, ''),
@@ -97,6 +104,7 @@ class ArchiveContracts(unittest.TestCase):
             self.assertEqual(archive_source.value(destination, 'rev-parse', 'HEAD'), head)
             self.assertEqual(archive_source.value(destination, 'status', '--porcelain'), '')
             self.assertEqual(report['archive_sha256'], archive_source.sha(base / 'source.tar'))
+            self.assertEqual(runner.archive_sha(base / 'source.tar'), report['archive_sha256'])
 
 
 class CommandContracts(unittest.TestCase):
@@ -180,8 +188,8 @@ class DeadlineContracts(unittest.TestCase):
             root = Path(temporary).resolve()
             config = SimpleNamespace(tree=root, output=root, deadline_seconds=1, metrics=False)
             with (root / 'child.log').open('wb') as stream:
-                code, expired = runner.execute_bounded([sys.executable, '-S', '-P', '-B',
-                    str(Path(__file__).resolve()), '--deadline-child'], config, dict(os.environ), stream)
+                code, expired = runner.execute_bounded(sandbox_child(root, '--deadline-child'),
+                    config, dict(os.environ), stream)
             self.assertTrue(expired)
             self.assertNotEqual(code, 0)
             record = json.loads((root / 'deadline.json').read_text())
@@ -195,8 +203,7 @@ class DeadlineContracts(unittest.TestCase):
             root = Path(temporary).resolve()
             config = SimpleNamespace(tree=root, output=root, deadline_seconds=1, metrics=False)
             with (root / 'child.log').open('wb') as stream:
-                _, expired = runner.execute_bounded([sys.executable, '-S', '-P', '-B',
-                    str(Path(__file__).resolve()), '--deadline-parent', str(root)],
+                _, expired = runner.execute_bounded(sandbox_child(root, '--deadline-parent', str(root)),
                     config, dict(os.environ), stream)
             self.assertTrue(expired)
             heartbeat = root / 'heartbeat.txt'
