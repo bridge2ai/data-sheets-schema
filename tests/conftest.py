@@ -35,6 +35,67 @@ ROOT = Path(__file__).resolve().parents[1]
 NOTES = ROOT / "notes"
 
 
+@pytest.fixture(autouse=True)
+def prelock_refusal_diagnostics(request, monkeypatch):
+    """Apply one hash assertion to every #5212 round-3–7 pre-lock refusal.
+
+    Observe diagnostics without replacing any existing expected exception or
+    tree/call assertion. A successful prior launch's printed head is outside
+    the next call's capture. Post-lock failures may print their retained head.
+    """
+    names = {'test_d68_legacy_readonly.py', 'test_d69_fail_closed.py',
+             'test_d69_artifact_completeness.py', 'test_d69_round4_ownership.py',
+             'test_d69_round5_boundaries.py', 'test_d69_round5_launch.py',
+             'test_d70_record_age.py'}
+    if not (request.node.path.name in names or request.node.path.name.startswith('test_pr5212_')):
+        return
+    from contextlib import redirect_stderr
+    from functools import wraps
+    from data_sheets_schema import api_runner as api, latch_journal as journal
+    from tests.test_pr5212_round7_journal import assert_no_unverified_hashes
+    calls = []
+
+    class Tee:
+        def __init__(self, original):
+            self.original, self.chunks = original, []
+        def write(self, value):
+            self.chunks.append(value)
+            return self.original.write(value)
+        def __getattr__(self, key):
+            return getattr(self.original, key)
+
+    def observe(function, *, execution=False):
+        @wraps(function)
+        def checked(*args, **kwargs):
+            state = {'locked': False}
+            if execution:
+                calls.append(state)
+            captured = Tee(sys.stderr)
+            try:
+                with redirect_stderr(captured):
+                    return function(*args, **kwargs)
+            except Exception as exc:
+                if not execution or not state['locked']:
+                    assert_no_unverified_hashes(exc, ''.join(captured.chunks))
+                raise
+            finally:
+                if execution:
+                    calls.pop()
+        return checked
+
+    acquire = journal.guarded_launch
+    @wraps(acquire)
+    def lock_boundary(*args, **kwargs):
+        if calls:
+            calls[-1]['locked'] = True
+        return acquire(*args, **kwargs)
+    monkeypatch.setattr(journal, 'guarded_launch', lock_boundary)
+    monkeypatch.setattr(api, 'execute', observe(api.execute, execution=True))
+    monkeypatch.setattr(api, '_prelock_checks', observe(api._prelock_checks))
+    for name in ('_events', '_read_events', 'require_launch_head', 'refuse_legacy_execution'):
+        monkeypatch.setattr(journal, name, observe(getattr(journal, name)))
+
+
 @pytest.fixture
 def subprocess_checkpoint(tmp_path):
     """#5212: bound a missing checkpoint, while draining both child pipes.

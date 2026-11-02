@@ -119,8 +119,9 @@ replaced locks are never excused by this startup scope distinction. A new
 identity sharing old unattributed sidecar locks may therefore require a new
 output directory, even when another identity's provenance is guarded.
 
-Startup checks (schema sync, model settings/header binding, shared preflight
-and client construction/validation) precede all lock writes. Existing sidecars
+Per-run startup checks (schema sync, model settings/header binding, shared
+preflight and client construction/validation) precede the run's lock writes.
+Existing sidecars
 are acquired before creating new ones, so ordinary contention at an existing
 shared output leaves no new sidecar. All four acquired sidecars are bound by a
 durable launch event before accounting. A pre-round-4 guarded identity without
@@ -128,13 +129,27 @@ that event binds its current sidecars at its next launch or resume.
 
 Main's existing authority/alias and selected-owner refusals run before D69,
 through the same `_prelock_checks` path for direct and batch execution. Batch
-also supplies its cross-run authority check there after planning. D69 checks
-before client preparation to preserve the no-client legacy refusal, and again
-as the final check immediately before locking. Schema/configuration checks run
-both before locking and inside it: the first keeps startup failures free of run
-writes; the second detects changes while waiting for physical exclusion. Both
-use the spec's profile. These are read-only checks of run state; schema rebuild
+also supplies its cross-run authority check there after planning, and checks
+every shared spec's owner before its coordination lock: an owner refusal on a
+later replicate stops the batch before the first run spends. Batch planning
+checks model/header/shared-plan inputs, but does not perform full per-run
+`_startup_checks` before that coordination lock. Full preparation happens when
+each spec is dispatched through `execute`, after the coordination lock and
+before its own output locks. Direct execution checks D69 before client
+preparation to preserve the no-client legacy refusal; both entrypoints also
+check D69 as the final check immediately before their lock. Per-run schema and
+configuration checks run before output locking and again inside it: the first
+keeps startup failures free of run writes; the second detects changes while
+waiting for physical exclusion. Both use the spec's profile. Date restoration
+remains inside the output locks, so its refusal now loses to the startup
+checks moved outward. These are read-only checks of run state; schema rebuild
 comparisons use temporary files outside the run's output namespace.
+
+Every journal decoder redacts unverified digest-shaped values in failures.
+Malformed or unreadable journals grant no pending-launch ownership exemption:
+main's owner/spent predicates decide first, followed by D69's sanitized refusal
+if they pass. Valid bound launches without accounting retain their recovery
+exemption. Existing accounting rules out that exemption without decoding.
 
 The #5212 subprocess tests share one checkpoint waiter. It drains stdout and
 stderr, returns on the checkpoint, and fails on child exit or a 120-second

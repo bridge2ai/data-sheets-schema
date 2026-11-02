@@ -8,11 +8,13 @@ from copy import copy
 from pathlib import Path
 import os
 import json
+import hashlib
 import re
 
 import pytest
 
 from data_sheets_schema import api_runner as api, usage_ledger as ledger, latch_journal as journal
+from data_sheets_schema import output_ownership
 from tests.test_download.test_api_runner import FakeClient, spec
 from tests.test_d68_legacy_readonly import tree
 from tests.test_generation_manifest_identity import external  # noqa: F401
@@ -101,7 +103,8 @@ def assert_singletons_refuse(selected, artifacts, tmp_path):
     assert artifacts
     (tmp_path / "artifact-census.json").write_text(json.dumps({
         "files": sorted(artifacts), "singletons": len(artifacts),
-        "refusal_checks": 2 * len(artifacts)}, indent=2) + "\n")
+        "refusal_checks": 2 * len(artifacts),
+        "d69_only_refusal_checks": 2 * len(artifacts)}, indent=2) + "\n")
     # Rebuild the output layout under a fresh isolated label directory while
     # retaining the same selected identity and input files.
     for ordinal, (relative, raw) in enumerate(sorted(artifacts.items())):
@@ -128,6 +131,23 @@ def assert_singletons_refuse(selected, artifacts, tmp_path):
             assert path.name in str(caught.value)
             assert client.messages.calls == [], relative
             assert tree(root) == before, relative
+            # Independent D69 proof: preserve every actual writer's bytes and
+            # address shape under an ordinary selection whose main ownership
+            # and spent predicates pass, in both resume modes. The original
+            # registered-controller checks above remain unchanged.
+            isolated = tmp_path / f"d69-only-{ordinal}-{resume}"
+            isolated.mkdir()
+            ordinary = spec(project=selected.project, label=selected.label, out_dir=isolated)
+            artifact = isolated / relative
+            artifact.parent.mkdir(parents=True, exist_ok=True)
+            artifact.write_bytes(raw)
+            before, client = tree(isolated), FakeClient()
+            output_ownership.require_selected_resume_owner(ordinary, resume=resume)
+            with pytest.raises(ledger.UsageLedgerError, match="inspection only") as caught:
+                api.execute(ordinary, resume=resume, client=client)
+            assert artifact.name in str(caught.value)
+            assert client.messages.calls == [], relative
+            assert tree(isolated) == before, relative
 
 
 @pytest.mark.parametrize("controller", ["plain", "shared_v1_typed_audit_regate", "shared_v2",
@@ -200,6 +220,16 @@ def test_every_emitted_artifact_alone_refuses(controller, external, tmp_path, dr
         assert any(Path(name).name.startswith("." + selected.project + "_coverage_receipt.")
                    for name in temporaries)
     assert_singletons_refuse(selected, artifacts, tmp_path)
+    # Retain one real emitted artifact per writer for the pinned-main control.
+    token = {"plain": "_audit", "shared_v1_typed_audit_regate": "typed_audit",
+             "shared_v2": "routing", "receipt_completion_readdress": "coverage_receipt",
+             "removal_repair_after_repair": "removal_repair"}[controller]
+    name = next(name for name in sorted(artifacts) if token in name)
+    ordinal = sorted(artifacts).index(name)
+    (tmp_path / "writer-control.json").write_text(json.dumps({
+        "writer": controller, "project": selected.project, "artifact": name,
+        "source": str(tmp_path / f"singleton-{ordinal}-True" / name),
+        "sha256": hashlib.sha256(artifacts[name]).hexdigest()}, indent=2))
 
 
 def test_snapshot_index_temporary_before_publication_is_residue(tmp_path, monkeypatch):

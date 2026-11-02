@@ -21,6 +21,8 @@ p.add_argument('--tree', type=Path, required=True)
 p.add_argument('--basetemp', type=Path, required=True)
 p.add_argument('--lane', required=True)
 p.add_argument('--plan', action='store_true')
+p.add_argument('--workers', type=int, choices=(3, 4), default=4,
+               help='Ordinary shard workers; three while the shared-machine companion suite runs')
 a = p.parse_args()
 assert 'scratch-5212fix' in a.basetemp.parts
 site = Path(sys.executable).parent.parent / 'lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages'
@@ -35,7 +37,7 @@ for number in range(1, 7):
     step = next(step for step in jobs['python-tests']['steps'] if step.get('name') == 'Run the suite shard including corpus checks')
     command = step['run']
     command = command.replace("${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 6 || 4 }}", f'{number}/6')
-    command = command.replace('-n logical --maxprocesses=4', '-n 4')
+    command = command.replace('-n logical --maxprocesses=4', f'-n {a.workers}')
     lanes[f'shard-{number}'] = (command, False)
 for lane in ('routing-dispatch', 'routing-portable', 'routing-regate', 'routing-default-layout'):
     step = next(step for step in jobs['api-completion']['steps'] if step.get('name') == 'Run the required offline API case')
@@ -63,7 +65,7 @@ argv = [sys.executable, '-S', '-P', '-B', str(runner), '--tree', str(a.tree),
 record = {'lane': a.lane, 'workflow_sha256': hashlib.sha256(raw).hexdigest(),
           'workflow_command': command, 'pytest_args': args, 'launcher': argv,
           'head': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=a.tree, text=True).strip(),
-          'notes_lane': notes, 'max_workers': 4 if a.lane.startswith('shard-') else 1}
+          'notes_lane': notes, 'max_workers': a.workers if a.lane.startswith('shard-') else 1}
 scope = ['notes/'] if notes else ['notes/', 'tests/', 'utils/']
 status_command = ['git', 'status', '--ignored', '--porcelain', '--', *scope]
 record['hygiene_before'] = subprocess.check_output(status_command, cwd=a.tree, text=True).splitlines()

@@ -135,8 +135,7 @@ def refuse_legacy_execution(spec):
         events = _events(spec)
     except ledger.UsageLedgerError as exc:
         # Preserve D57 even though this check now precedes launch_record.
-        message = re.sub(r'[0-9a-fA-F]{64,}',
-                         lambda match: match[0][:8] + '…(unverified, not a resume anchor)', str(exc))
+        message = _redact_unverified(str(exc))
         print(f'latch journal refused: {message} (not a resume anchor)', file=sys.stderr, flush=True)
         raise ledger.UsageLedgerError(message) from None
     own = _mine(spec, events)
@@ -176,7 +175,9 @@ def _sha(raw: bytes) -> str:
 
 
 def _fail(message):
-    raise ledger.UsageLedgerError(f"latch journal: {message}")
+    # A valid chain does not turn arbitrary embedded diagnostic values into
+    # launch anchors. Keep semantic refusals under the same decoder rule.
+    raise ledger.UsageLedgerError(_redact_unverified(f"latch journal: {message}"))
 
 
 def journal_path(spec) -> Path:
@@ -216,7 +217,23 @@ def _events(spec) -> list[dict]:
     return _read_events(journal_path(spec))
 
 
+def _redact_unverified(message):
+    """D57: a refused diagnostic is never a source of resume anchors."""
+    return re.sub(r'[0-9a-fA-F]{64,}',
+                  lambda match: match[0][:8] + '…(unverified, not a resume anchor)', message)
+
+
 def _read_events(path) -> list[dict]:
+    # Sanitize at the decoding boundary, including I/O and JSON diagnostics.
+    # Every caller gets this rule, even an owner/inventory reader that runs
+    # before the D69 or launch-head guard. No partial chain is trusted.
+    try:
+        return _decode_events(path)
+    except (ledger.UsageLedgerError, OSError, ValueError, RecursionError) as exc:
+        raise ledger.UsageLedgerError(_redact_unverified(str(exc))) from None
+
+
+def _decode_events(path) -> list[dict]:
     if not path.exists() and not path.is_symlink():
         return []
     raw = _bytes(path)
@@ -841,8 +858,17 @@ def start_launch(spec):
 
 def pending_launch_paths(spec, events=None):
     """Only current, bound coordination files of a launch without accounting."""
-    events = _events(spec) if events is None else events
-    if _mine(spec, events) or ledger.ledger_path(spec).exists() or ledger.ledger_path(spec).is_symlink():
+    if ledger.ledger_path(spec).exists() or ledger.ledger_path(spec).is_symlink():
+        return set()
+    if events is None:
+        try:
+            events = _events(spec)
+        except ledger.UsageLedgerError:
+            # Invalid/unreadable history establishes no exemption. Main's
+            # owner/spent predicates decide first; if they pass, D69 reports
+            # its own sanitized journal refusal before any lock or write.
+            return set()
+    if _mine(spec, events):
         return set()
     launches = [event for event in events if event["kind"] == "launch"
                 and event["identity"] == ledger.run_identity(spec)]
@@ -1142,11 +1168,8 @@ def require_launch_head(spec, expected):
         # No refused diagnostic is a source of anchors, including malformed
         # expectations and hashes embedded in broken-chain errors. Redact the
         # exception too, and suppress its unsafe context in CLI/log tracebacks.
-        def redact(message):
-            return re.sub(r'[0-9a-fA-F]{64,}',
-                          lambda match: match[0][:8] + '…(unverified, not a resume anchor)', message)
-        message = redact(str(exc))
-        print(redact(f'latch journal refused: project={spec.project} label={spec.label} '
+        message = _redact_unverified(str(exc))
+        print(_redact_unverified(f'latch journal refused: project={spec.project} label={spec.label} '
                      f'{message} (not a resume anchor)'), file=sys.stderr, flush=True)
         redacted = ledger.UsageLedgerError(message)
         redacted._d4d_head_refused = getattr(exc, '_d4d_head_refused', False)

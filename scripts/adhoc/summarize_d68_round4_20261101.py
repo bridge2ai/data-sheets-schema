@@ -32,6 +32,7 @@ for argument in sys.argv[1:]:
         'failures': failed, 'skips': skipped,
         'artifact_census_nodes': len(census), 'artifacts': sum(c['singletons'] for c in census),
         'refusal_checks': sum(c['refusal_checks'] for c in census),
+        'd69_only_refusal_checks': sum(c.get('d69_only_refusal_checks', 0) for c in census),
         'writer_counts': [c['count'] for c in writers],
         'unbound_writer_files': [p for c in writers for p in c['unbound']]}
 print(json.dumps(results, indent=2))

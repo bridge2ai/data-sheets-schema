@@ -21,6 +21,7 @@ selection.add_argument('--failures-tsv', type=Path)
 selection.add_argument('--failures-json', type=Path, help='Replay failed nodes from an offline phase ledger')
 p.add_argument('--exclude', action='append', default=[])
 p.add_argument('--extra', action='append', default=[])
+p.add_argument('--workers', type=int, choices=(3, 4), default=4)
 a = p.parse_args()
 assert 'scratch-5212fix' in a.basetemp.parts
 source = a.failures_tsv or a.failures_json
@@ -41,7 +42,7 @@ command = [sys.executable, '-S', '-P', '-B',
            str(Path(__file__).with_name('run_d68_round4_20261101.py')),
            '--tree', str(a.tree), '--basetemp', str(a.basetemp),
            *(['--notes'] if notes else []), *nodes, *a.extra, '-v',
-           *([] if notes else ['-n', '4', '--dist', 'load', '--maxschedchunk=1']), '--durations=25']
+           *([] if notes else ['-n', str(a.workers), '--dist', 'load', '--maxschedchunk=1']), '--durations=25']
 record = {'command': command, 'nodes': nodes, 'extra': a.extra, 'excluded': a.exclude,
           'selection_source': str(source), 'source_sha256': hashlib.sha256(raw).hexdigest()}
 target = a.basetemp.with_suffix('.selection.json')
