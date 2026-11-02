@@ -221,6 +221,26 @@ def test_non_suffix_input_authority_field_breaks_the_actual_classification(monke
         classification.test_all_runspec_registration_and_version_axes_have_a_binding_classification()
 
 
+def test_library_prompt_render_checks_binding_before_shared_capture(external, monkeypatch):
+    spec = _bound(external, monkeypatch, shared=True)
+    original = spec.bundle
+    alias = original.with_name('render-alias-' + original.name)
+    alias.symlink_to(original)
+    spec.bundle = alias
+    authorities = []
+
+    def forbidden(*args, **kwargs):
+        authorities.append('capture')
+        raise AssertionError('shared capture reached before input-integrity refusal')
+
+    monkeypatch.setattr(sg, 'capture', forbidden)
+    before = _tree(external.bundle.parent)
+    with pytest.raises(ValueError, match='registered input spelling changed after construction'):
+        api.resolve_prompt(spec)
+    assert authorities == []
+    assert _tree(external.bundle.parent) == before
+
+
 # Compatibility controls: these pass before the repair and must keep passing.
 @pytest.mark.parametrize('as_strings', [False, True])
 def test_untouched_exact_path_types_keep_the_original_literal_binding(external, monkeypatch, as_strings):
