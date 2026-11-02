@@ -27,6 +27,7 @@ bundle plus digest form a cached prefix reused across all six phases.
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import os
@@ -503,6 +504,7 @@ class _RegisteredInputBinding:
     spellings: tuple[tuple[str, str | None], ...] | None
     selectors: tuple[tuple[str, type, Any], ...]
     registration_inputs: tuple[tuple[str, str | None], ...] | None
+    historical_replay: bool = False
 
 
 # RunSpec is an unhashable mutable dataclass, so use object identity plus a weak
@@ -526,6 +528,12 @@ def _remember_input_binding(spec, binding: _RegisteredInputBinding) -> None:
 def _input_binding(spec) -> _RegisteredInputBinding | None:
     saved = _REGISTERED_INPUT_BINDINGS.get(id(spec))
     return saved[1] if saved is not None and saved[0]() is spec else None
+
+
+def _remember_replay_origin(spec) -> None:
+    # Missing registry state is never evidence of historical construction.
+    # Only the explicit constructor/factory establishes this inspection origin.
+    _remember_input_binding(spec, _RegisteredInputBinding(None, (), None, historical_replay=True))
 
 
 def _registered_input_spellings(spec) -> tuple[tuple[str, str | None], ...]:
@@ -814,12 +822,25 @@ class RunSpec:
             # Retain the construction decision independently of mutable spec
             # attributes. Keep a private mirror for inspection, never authority.
             _freeze_input_binding(self, registration)
+        else:
+            _remember_replay_origin(self)
 
     def __copy__(self):
         # Shallow copying preserves the original binding, including any drift;
         # only dataclasses.replace performs a fresh validated construction.
         copied = object.__new__(type(self))
         copied.__dict__.update(self.__dict__)
+        binding = _input_binding(self)
+        if binding is not None:
+            _remember_input_binding(copied, binding)
+        return copied
+
+    def __deepcopy__(self, memo):
+        # Preserve original construction evidence, never recapture current
+        # fields. Memoize before copying dynamic state, which may refer to self.
+        copied = object.__new__(type(self))
+        memo[id(self)] = copied
+        copied.__dict__.update(copy.deepcopy(self.__dict__, memo))
         binding = _input_binding(self)
         if binding is not None:
             _remember_input_binding(copied, binding)
@@ -974,6 +995,9 @@ class RunSpec:
         spec.profile = recorded.get("profile")                    # what was recorded, or None for an older spec
         spec.profile_basis = recorded.get("profile_basis")
         spec._replay_only = True
+        # Completed-capture subclasses intentionally skip live __post_init__.
+        # Successful literal restoration establishes their origin here too.
+        _remember_replay_origin(spec)
         return spec
 
     @property
@@ -3095,13 +3119,19 @@ def _require_registered_input_spellings(spec: RunSpec) -> None:
     Historical replay remains inspection-only; execute refuses it separately.
     """
     binding = _input_binding(spec)
-    if spec._replay_only:
-        if binding is not None:
-            raise ValueError("registered input construction cannot be changed to historical replay; "
-                             "construct a literal replay RunSpec")
+    if binding is None:
+        raise ValueError("registered inputs have no construction origin; "
+                         "construct a new validated RunSpec or literal replay")
+    if binding.historical_replay:
+        if not spec._replay_only:
+            raise ValueError("historical replay construction origin cannot execute; "
+                             "construct a new validated RunSpec")
         return  # Historical inspection retains its literal recorded substitutions.
+    if spec._replay_only:
+        raise ValueError("registered input construction cannot be changed to historical replay; "
+                         "construct a literal replay RunSpec")
     mirror = spec._registered_input_spellings
-    if binding is None or (binding.spellings is not None and mirror is None):
+    if binding.spellings is not None and mirror is None:
         raise ValueError("registered inputs have no construction binding; "
                          "construct a new validated RunSpec")
     bound = binding.spellings

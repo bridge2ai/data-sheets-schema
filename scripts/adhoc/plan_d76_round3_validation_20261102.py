@@ -42,6 +42,9 @@ NEW_BASELINES = {
     'replay-flag-v2': ('tests/test_wave7_5213_d76_round3_replay_flag.py',
         '26539d25fa47073e8b33b74661ce23d7fc0771330af1b433e9d40159d015dcba',
         '0fa-replay-flag-v2-baseline6', 6, 0),
+    'copy-origin': ('tests/test_wave7_5213_d76_round3_copy_origin.py',
+        'ff6ff19380b3269a99f7dcf997a2631a417f731d522c043c0d8371c00857e998',
+        '0fa-copy-origin-baseline25', 13, 12),
 }
 PROBE_HASHES = {
     'codex-r2-20261101/test_postconstruction_admission.py': 'da5bfe1535cb810ee4b9700adb98d2788ccc86cb92bfb4f00a5a6dbb3591f19c',
@@ -286,7 +289,7 @@ def before_manifest(root, head, evidence):
                 evidence_sha256={file: sha(regular(run / file)) for file in ('plan.json', 'outcome.json', 'nodes.json', 'pytest.xml')})
         result[name] = row
     return {'modules': result,
-        'causal_limits': 'Controls need not fail before. The corrected G1 unshared-plan case reaches a later wrong chunk-identity refusal, not a write/spend boundary; five other corrected G1 cases expose bypasses. Original flawed G1 v1 evidence is retained but excluded from this exact manifest.',
+        'causal_limits': 'Controls need not fail before. Corrected G1 and G2 unshared-plan cases reach a later wrong chunk-identity refusal, not a write/spend boundary. Other G1/G2 cases expose authority/render/output bypasses; execution still refuses replay. Original flawed G1 v1 evidence is retained but excluded from this exact manifest. G2 also has a separate current0f682 comparison, where an untouched fresh deepcopy fails compatibility; that comparison is not substituted for this original0fa baseline.',
         'join_policy': 'Map only a single hash-bound exported file to its exact final module; preserve the complete parameter suffix and occurrence multiplicity. No function-name glob or cross-file matching.'}
 
 
