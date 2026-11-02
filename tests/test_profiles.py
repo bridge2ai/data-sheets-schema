@@ -1104,8 +1104,10 @@ class TestRoundEight(_Clean):
     """The Codex round-5 findings (#1606–#1611)."""
 
     def _recorder(self, args, env):
-        """The recorder from the checkout root with its writes captured —
-        the record's `build_record` keywords and nothing on disk."""
+        """Build real input identities and capture publication writes.
+
+        Keep the builder spy's keywords available to the profile assertions.
+        """
         import click.testing
         from data_sheets_schema import provenance as pv
         from data_sheets_schema.cli import provenance as prov_cli
@@ -1113,8 +1115,9 @@ class TestRoundEight(_Clean):
             for k in ("D4D_PROFILE",):
                 if k not in env:
                     os.environ.pop(k, None)
-            rec = mock.Mock(data={}, validation_carried=None)
-            with mock.patch.object(pv, "build_record", return_value=rec) as build, \
+            with mock.patch.object(pv, "build_record", wraps=pv.build_record) as build, \
+                    mock.patch.object(pv.ProvenanceRecord, "write", autospec=True,
+                                      side_effect=lambda _record, path: path), \
                     mock.patch.object(prov_cli, "_inline_checks"):
                 r = click.testing.CliRunner().invoke(prov_cli.provenance, ["record", *args])
         return r, (build.call_args.kwargs if build.call_args else None)

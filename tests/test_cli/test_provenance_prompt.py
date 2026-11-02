@@ -238,6 +238,7 @@ class TestMidnightCrossingRunDate(unittest.TestCase):
 
     def test_prompt_text_header_and_window_recover_midnight_run_date(self):
         from unittest import mock
+        from data_sheets_schema import provenance as pv
         from data_sheets_schema.api_runner import RunSpec, resolve_prompt
         from data_sheets_schema.cli import provenance as prov_cli
         from data_sheets_schema.cli.api import ARMS
@@ -266,10 +267,10 @@ class TestMidnightCrossingRunDate(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             prompt_file = Path(tmp) / "rendered_prompt.txt"
             prompt_file.write_text(sent, encoding="utf-8")
-            fake_rec = mock.MagicMock(validation_carried=None)
-            fake_rec.write.return_value = repo_root / "VOICE_provenance.yaml"
-
-            with mock.patch("data_sheets_schema.provenance.build_record", return_value=fake_rec) as build, \
+            # Build genuine input identities; capture only publication writes.
+            with mock.patch.object(pv, "build_record", wraps=pv.build_record) as build, \
+                 mock.patch.object(pv.ProvenanceRecord, "write", autospec=True,
+                                   side_effect=lambda _record, path: path), \
                  mock.patch.object(prov_cli, "_recorded_receipt_origin", return_value=None), \
                  mock.patch.object(prov_cli, "_inline_checks"):
                 r = CliRunner().invoke(
@@ -296,6 +297,7 @@ class TestMidnightCrossingRunDate(unittest.TestCase):
 
     def test_explicit_run_date_flag_sets_spec_run_date_and_rejects_bad_dates(self):
         from unittest import mock
+        from data_sheets_schema import provenance as pv
         from data_sheets_schema.cli import provenance as prov_cli
 
         repo_root = Path(__file__).resolve().parents[2]
@@ -304,9 +306,9 @@ class TestMidnightCrossingRunDate(unittest.TestCase):
             self.skipTest("VOICE bundle absent")
 
         label = "2026-10-14_claude-opus-5-generic-v8_rep1"
-        fake_rec = mock.MagicMock(validation_carried=None)
-        fake_rec.write.return_value = repo_root / "VOICE_provenance.yaml"
-        with mock.patch("data_sheets_schema.provenance.build_record", return_value=fake_rec) as build, \
+        with mock.patch.object(pv, "build_record", wraps=pv.build_record) as build, \
+             mock.patch.object(pv.ProvenanceRecord, "write", autospec=True,
+                               side_effect=lambda _record, path: path), \
              mock.patch.object(prov_cli, "_recorded_receipt_origin", return_value=None), \
              mock.patch.object(prov_cli, "_inline_checks"):
             r = CliRunner().invoke(
@@ -372,6 +374,7 @@ class TestRunDateRecoveryPaths(unittest.TestCase):
     def _record(self, label, text=None, today="2026-10-20", extra=(), runtime="Claude Code"):
         import datetime as _dt
         from unittest import mock
+        from data_sheets_schema import provenance as pv
         from data_sheets_schema.cli import provenance as prov_cli
 
         class FrozenDate(_dt.date):
@@ -380,10 +383,10 @@ class TestRunDateRecoveryPaths(unittest.TestCase):
                 return _dt.date.fromisoformat(today)
 
         self.prompt_file.write_text(self._render(label) if text is None else text, encoding="utf-8")
-        fake_rec = mock.MagicMock(validation_carried=None)
-        fake_rec.write.return_value = self.repo_root / "VOICE_provenance.yaml"
         with mock.patch("datetime.date", FrozenDate), \
-             mock.patch("data_sheets_schema.provenance.build_record", return_value=fake_rec) as build, \
+             mock.patch.object(pv, "build_record", wraps=pv.build_record) as build, \
+             mock.patch.object(pv.ProvenanceRecord, "write", autospec=True,
+                               side_effect=lambda _record, path: path), \
              mock.patch.object(prov_cli, "_recorded_receipt_origin", return_value=None), \
              mock.patch.object(prov_cli, "_inline_checks"):
             r = CliRunner().invoke(prov_cli.provenance, [
