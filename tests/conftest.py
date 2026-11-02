@@ -43,10 +43,23 @@ def prelock_refusal_diagnostics(request, monkeypatch):
     tree/call assertion. A successful prior launch's printed head is outside
     the next call's capture. Post-lock failures may print their retained head.
     """
-    names = {'test_d68_legacy_readonly.py', 'test_d69_fail_closed.py',
+    # Include existing test files adapted during rounds 3–6, as well as the
+    # dedicated regressions. Their original assertions remain authoritative.
+    names = {'test_abandoned_journal.py', 'test_api_batch_cost.py',
+             'test_api_latch_guard.py', 'test_api_runner.py', 'test_backoff_sleep.py',
+             'test_ci_sharding.py', 'test_d68_legacy_readonly.py', 'test_d69_fail_closed.py',
              'test_d69_artifact_completeness.py', 'test_d69_round4_ownership.py',
              'test_d69_round5_boundaries.py', 'test_d69_round5_launch.py',
-             'test_d70_record_age.py'}
+             'test_d70_record_age.py', 'test_duplicate_keys.py',
+             'test_fresh_orphan_partial_generation.py', 'test_generation_recovery_review.py',
+             'test_generation_specificity_skill.py', 'test_latch_journal.py',
+             'test_midnight_resume.py', 'test_profiles.py',
+             'test_reasoning_generation_restart.py', 'test_registered_eval_runner.py',
+             'test_report_admission.py', 'test_resume_instrument_and_activation.py',
+             'test_schema_sync.py', 'test_shared_generation_resources.py',
+             'test_shared_generation_scope_context.py',
+             'test_shared_output_ownership_entrypoints.py', 'test_source_review.py',
+             'test_thinking_request.py', 'test_usage_ledger.py'}
     if not (request.node.path.name in names or request.node.path.name.startswith('test_pr5212_')):
         return
     from contextlib import redirect_stderr
