@@ -25,6 +25,9 @@ def test_fresh_registered_spec_cannot_become_literal_replay_by_flag_mutation(
     monkeypatch.chdir(external.bundle.parent)
     spec = (selected_spec(external, registration_for(external)) if shared else
             replace(external, condition='generic_v8', registered_input_paths=True))
+    # A usable API replay needs the header values captured while still fresh;
+    # otherwise a separate missing-header refusal masks the flag bypass.
+    spec.bind_api_header_values(api._model_settings(spec.condition))
     original = spec.bundle
     alias = original.with_name('replay-alias-' + original.name)
     alias.symlink_to(original)
