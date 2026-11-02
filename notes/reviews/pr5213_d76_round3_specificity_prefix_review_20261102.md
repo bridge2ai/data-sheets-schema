@@ -102,3 +102,56 @@ No production validators, network requests or provider calls run in these
 fixtures. The validation owner will record the exact before/after source and
 test hashes, node identities and outcomes. No tests were launched by this
 review author, and no scanner or runtime implementation was changed here.
+
+## Follow-up review of repair draft b04: R1/R3/R4/R5
+
+The following static findings refer specifically to repair draft SHA-256
+`b04cff3e8a3209d514d568ade3a306127127124a4b77067ce411db0c52362a5a`.
+They remain within the declared source domain and do not expand the claim to
+arbitrary runtime objects. The separate six-case source-only module
+`tests/test_wave7_5213_d76_specificity_prefix_followup.py` preserves the frozen
+52+22 cases; each follow-up calibrates its unchanged source first. Reproduction
+and repair verification are pending with the validation owner.
+
+### R1 follow-up — aggregate abstract work must be bounded
+
+The repair unrolls each finite loop but has no shared abstract-work budget.
+Nested finite loops multiply analyzer work despite the 64-element per-loop
+limit. Add a shared, conservative visit budget across nested loops and helper
+calls; exhaustion must refuse the certificate. The new test calibrates a small
+nested loop, then requests refusal of a modest source fixture with 8,192 inner
+passes against a budget of at most 4,096 visits. No production fixture code is
+executed and no wall-clock performance claim is made.
+
+### R3 follow-up — default expressions use the containing scope
+
+`global_reads()` applies a function's local-parameter shadowing to expressions
+in its defaults. In `def redirect(validate=validate)`, the default captures the
+module's certified callable before the same-named local formal exists. The
+receiving body can change that callable's `__code__`; treating the default read
+as local hides the visible alias escape. Resolve defaults and related
+definition-time expressions in their actual enclosing scope.
+
+### R3/R4 follow-up — wildcard imports make the trusted binding ambiguous
+
+`stable_binding()` does not reject a module-level wildcard import, whose AST
+alias is `*` instead of the affected trusted name. A real adjacent source module
+can export a replacement `validate` callable after its certified declaration.
+Either derive the complete imported binding closure or conservatively refuse
+wildcard imports in the relevant source module; do not retain the earlier AST
+as proof of the current binding.
+
+### R5 follow-up — method definition expressions can alter class fields
+
+The repaired class-body check inspects method decorators but omits positional
+defaults, keyword-only defaults and method annotations. With eager annotations,
+each can run `locals().__setitem__('base_prompt', PromptDescriptor())` during
+class creation, installing a descriptor despite the plain annotated field.
+The three controls use a valid required-field descriptor and an otherwise inert
+method body; the annotation fixture has no postponed-annotations import. Prove
+these definition-time expressions inert or conservatively reject unsupported
+behavior, while preserving ordinary existing method defaults and annotations.
+
+No scanner implementation was edited or tests launched by this follow-up
+review author. These are additional issue details for AGY, not new GitHub
+publications or claims that the repaired certificate is accepted.
