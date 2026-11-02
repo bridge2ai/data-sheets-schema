@@ -179,3 +179,21 @@ requires a separately pinned eight-case before/after run; no results are claimed
 for the new bytes here. Resolve or conservatively reject eager executable
 annotations and callable-value escapes while retaining valid source type
 annotations. No scanner edits or tests were performed by this review author.
+
+### R3 annotation revision — close direct eager type-metadata consumers
+
+The bounded repair may retain valid type annotations for the certified plain
+class, but an eager `value: RunSpec` stores that live class in the function's
+annotation dictionary. The directly visible assignment
+`keep.__annotations__['value'].base_prompt = PromptDescriptor()` is therefore
+another class-alias writer. One calibrated control covers this path, bringing
+the additive follow-up roster to nine cases. The historical eight-case fixture
+hash `d276c5cdcbdacaf7e25c69eaa5472ce7f4e667e409cc449508c9209982fccdee`
+and its evidence remain separately retained; none of those eight assertions was
+changed. The new nine-case bytes require their own before/after proof.
+
+The agreed static scope is conservative refusal of directly visible annotation
+metadata access through attributes, literal keys or literal `getattr`, together
+with an explicit non-reflective type-annotation assumption. This is not a claim
+to solve arbitrary dynamic reflection or obfuscated Python. No source repair,
+test execution or GitHub publication was performed by this review author.

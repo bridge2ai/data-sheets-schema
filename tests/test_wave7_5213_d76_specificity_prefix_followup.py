@@ -103,3 +103,16 @@ def test_r3_eager_annotation_value_cannot_escape_to_a_callable_writer(tmp_path):
     # Merely rejecting annotation Calls is insufficient: this annotation has
     # no Call node, but it exports the actual callable through __annotations__.
     review._refuses(fixture)
+
+
+def test_r3_eager_class_annotation_metadata_cannot_install_a_field_descriptor(tmp_path):
+    fixture = review._reading_fixture(tmp_path)
+    review._calibrate(fixture, tmp_path)
+    path = fixture[0] / review.base.scan.RUNNER
+    review._install_descriptor_definition(path)
+    path.write_text(path.read_text() + '\n'
+        'def keep(value: RunSpec):\n    pass\n'
+        "keep.__annotations__['value'].base_prompt = PromptDescriptor()\n")
+    # An otherwise valid eager type annotation exposes the live class. This
+    # direct metadata consumer must not bypass the existing class-alias check.
+    review._refuses(fixture)
