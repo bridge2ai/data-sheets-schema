@@ -149,9 +149,57 @@ REGISTRATION_AXES = {
 }
 
 
+# Every dataclass field is reviewed, regardless of its name. True identifies an
+# input locator, a registration selector or retained input identity; it does not
+# mean that the field alone grants execution authority.
+RUNSPEC_FIELDS = {
+    'project': (False, 'dataset identifier; a shared registration independently binds it'),
+    'arm': (False, 'display/method selection, not an input registration'),
+    'method': (False, 'output and runtime method, not input authority'),
+    'bundle': (True, 'the selected factual input locator'),
+    'label': (False, 'run/output identifier, not an input registration'),
+    'condition': (False, 'procedure selection; registration axes own input authority'),
+    'condition_stated': (False, 'records whether the caller chose the condition'),
+    'condition_mismatch_allowed': (False, 'label/condition policy, not input authority'),
+    'manifest_line': (False, 'rendered header; the manifest locator supplies the input'),
+    'manifest': (True, 'selected source-manifest locator or explicit absence'),
+    'chunk_manifest': (True, 'selected chunk mapping locator or explicit absence'),
+    'profile': (False, 'profile selection is independently pinned by shared registration'),
+    'profile_basis': (False, 'explanation of profile selection, not authority'),
+    'render_version': (False, 'historical renderer/procedure version only'),
+    'run_date': (False, 'frozen display date, not input authority'),
+    'out_dir': (False, 'output destination, not an input registration'),
+    'runtime': (False, 'execution runtime declaration'),
+    'provider': (False, 'provider declaration, not input authority'),
+    'reasoning_effort': (False, 'model invocation parameter'),
+    'prompt_text_env': (False, 'recorder command syntax, not input authority'),
+    'api_playbook_version': (False, 'enclosing shared selection owns the input registration'),
+    'native_source_attribution_version': (True, 'native attribution input registration selector'),
+    'native_source_attribution_max_checks': (False, 'native observation limit, not input identity'),
+    'removal_repair_version': (False, 'restore-only procedure axis'),
+    'receipt_completion_version': (False, 'v1 pins policy; v2/v3 inherit shared input authority'),
+    'receipt_completion_registration': (False, 'standalone receipt policy/limits, not input pins'),
+    'shared_generation_version': (True, 'input registration selector when registration is present'),
+    'shared_generation_registration': (True, 'parsed registration pins the shared input paths'),
+    'registered_input_paths': (True, 'explicit binding for older registration constructors'),
+    '_registered_input_spellings': (True, 'input identity mirror; independent registry is authoritative'),
+    '_shared_generation_capture': (True, 'captured shared input/authority bytes'),
+    '_replay_only': (False, 'literal historical inspection; execution is refused'),
+    '_automatic_run_date': (False, 'implicit-clock recovery marker'),
+    '_agentic_artifact_paths': (False, 'frozen output destinations'),
+    '_agentic_toolchain': (False, 'agent toolchain identity, not source-input registration'),
+    '_chunk_check_uses_manifest': (False, 'chunk validation discovery flag, not a pinned locator'),
+    '_corpus_root': (False, 'corpus/output owner; does not itself bind registered input identity'),
+    '_api_header_values': (False, 'frozen model/provider header values'),
+}
+
+
 def test_all_runspec_registration_and_version_axes_have_a_binding_classification():
-    axes = {field.name for field in fields(api.RunSpec)
-            if field.name.endswith(('_registration', '_version'))}
+    names = {field.name for field in fields(api.RunSpec)}
+    assert names == set(RUNSPEC_FIELDS)
+    for name, (input_pinning, reason) in RUNSPEC_FIELDS.items():
+        assert type(input_pinning) is bool and reason, name
+    axes = {name for name in names if name.endswith(('_registration', '_version'))}
     assert axes == set(REGISTRATION_AXES)
     for name, (reason, selection, expected) in REGISTRATION_AXES.items():
         assert reason

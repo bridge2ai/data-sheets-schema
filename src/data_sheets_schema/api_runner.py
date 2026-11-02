@@ -35,6 +35,7 @@ import subprocess
 import tempfile
 import time
 import uuid
+import weakref
 from dataclasses import dataclass, field
 from functools import cached_property, lru_cache
 from datetime import datetime, timezone
@@ -490,6 +491,71 @@ CLAUDE_CODE_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)"})
 #: recorder reads it with `--prompt-text-env` (#2282).
 LAUNCH_INSTRUCTION_VARIABLE = "D4D_LAUNCH_INSTRUCTION"
 
+
+_REGISTERED_INPUT_FIELDS = ("bundle", "manifest", "chunk_manifest")
+_INPUT_BINDING_SELECTORS = ("registered_input_paths", "native_source_attribution_version",
+                            "shared_generation_version", "shared_generation_registration")
+_PLATFORM_PATH_TYPE = type(Path())
+
+
+@dataclass(frozen=True)
+class _RegisteredInputBinding:
+    spellings: tuple[tuple[str, str | None], ...] | None
+    selectors: tuple[tuple[str, type, Any], ...]
+    registration_inputs: tuple[tuple[str, str | None], ...] | None
+
+
+# RunSpec is an unhashable mutable dataclass, so use object identity plus a weak
+# reference rather than its equality/hash. Neither the binding nor the cleanup
+# closure retains the spec. This is an API invariant, not a security boundary
+# against arbitrary Python that can rewrite this module or its registry.
+_REGISTERED_INPUT_BINDINGS: dict[int, tuple[weakref.ReferenceType, _RegisteredInputBinding]] = {}
+
+
+def _remember_input_binding(spec, binding: _RegisteredInputBinding) -> None:
+    identity = id(spec)
+
+    def forget(reference):
+        saved = _REGISTERED_INPUT_BINDINGS.get(identity)
+        if saved is not None and saved[0] is reference:
+            del _REGISTERED_INPUT_BINDINGS[identity]
+
+    _REGISTERED_INPUT_BINDINGS[identity] = (weakref.ref(spec, forget), binding)
+
+
+def _input_binding(spec) -> _RegisteredInputBinding | None:
+    saved = _REGISTERED_INPUT_BINDINGS.get(id(spec))
+    return saved[1] if saved is not None and saved[0]() is spec else None
+
+
+def _registered_input_spellings(spec) -> tuple[tuple[str, str | None], ...]:
+    result = []
+    for name in _REGISTERED_INPUT_FIELDS:
+        value = getattr(spec, name)
+        if value is not None and type(value) not in (str, _PLATFORM_PATH_TYPE):
+            raise ValueError(f"registered input {name} requires an exact str or "
+                             f"{_PLATFORM_PATH_TYPE.__name__}; construct a new validated RunSpec")
+        result.append((name, None if value is None else os.fspath(value)))
+    return tuple(result)
+
+
+def _freeze_input_binding(spec, registration: dict | None) -> None:
+    selected = provenance.registered_input_paths(vars(spec))
+    spellings = _registered_input_spellings(spec) if selected else None
+    selectors = tuple((name, type(getattr(spec, name)), getattr(spec, name))
+                      for name in _INPUT_BINDING_SELECTORS) if selected else ()
+    registered = None
+    if registration is not None:
+        inputs = registration['inputs']
+        registered = tuple((name, None if inputs[pin] is None else inputs[pin]['path'])
+                           for name, pin in (("bundle", "bundle"), ("manifest", "source_manifest"),
+                                             ("chunk_manifest", "chunk_manifest")))
+        if spellings != registered:
+            raise ValueError("registered input spellings differ from parsed registration")
+    spec._registered_input_spellings = spellings
+    _remember_input_binding(spec, _RegisteredInputBinding(spellings, selectors, registered))
+
+
 @dataclass
 class RunSpec:
     project: str
@@ -738,18 +804,26 @@ class RunSpec:
 
         from .shared_generation import select as select_shared
         select_shared(self)
+        registration = None
         if self.shared_generation_version:
             from .shared_generation import parse_registration, capture
-            parse_registration(self.shared_generation_registration.encode("utf-8"))
+            registration = parse_registration(self.shared_generation_registration.encode("utf-8"))
             if not self._replay_only:
                 capture(self)
-        if not self._replay_only and provenance.registered_input_paths(vars(self)):
-            # Keep the validated literal substitutions independent of later
-            # mutations to either the input fields or the binding selectors.
-            # This private execution anchor is never part of a render spec.
-            self._registered_input_spellings = tuple(
-                (name, None if getattr(self, name) is None else str(getattr(self, name)))
-                for name in ("bundle", "manifest", "chunk_manifest"))
+        if not self._replay_only:
+            # Retain the construction decision independently of mutable spec
+            # attributes. Keep a private mirror for inspection, never authority.
+            _freeze_input_binding(self, registration)
+
+    def __copy__(self):
+        # Shallow copying preserves the original binding, including any drift;
+        # only dataclasses.replace performs a fresh validated construction.
+        copied = object.__new__(type(self))
+        copied.__dict__.update(self.__dict__)
+        binding = _input_binding(self)
+        if binding is not None:
+            _remember_input_binding(copied, binding)
+        return copied
 
     def _select_profile(self) -> None:
         from data_sheets_schema.profiles import select_profile
@@ -1383,6 +1457,7 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
     Built here rather than handed to the model as a file reference, so the text
     in the request is the text that was hashed.
     """
+    _require_registered_input_spellings(spec)
     body = prompt_body(spec.base_prompt)
     if spec.api_playbook_version:
         from data_sheets_schema.api_playbook import adapt_template
@@ -3013,20 +3088,46 @@ def _carry_sizes(spec: RunSpec) -> tuple[dict[str, int], str]:
 
 
 def _require_registered_input_spellings(spec: RunSpec) -> None:
-    """Refuse changed bound inputs without normalizing or re-rendering them."""
+    """One entry invariant, before authority checks, writes or provider access.
+
+    Compare only literal filesystem spellings with independently retained
+    construction state. Do not normalize paths or re-render cached instructions.
+    Historical replay remains inspection-only; execute refuses it separately.
+    """
     if spec._replay_only:
         return  # Historical inspection retains its literal recorded substitutions.
-    bound = spec._registered_input_spellings
+    binding = _input_binding(spec)
+    mirror = spec._registered_input_spellings
+    if binding is None or (binding.spellings is not None and mirror is None):
+        raise ValueError("registered inputs have no construction binding; "
+                         "construct a new validated RunSpec")
+    bound = binding.spellings
     if bound is None:
-        if provenance.registered_input_paths(vars(spec)):
+        if mirror is not None or provenance.registered_input_paths(vars(spec)):
             raise ValueError("registered inputs have no construction binding; "
                              "construct a new validated RunSpec")
         return
-    changed = [name for name, original in bound
-               if (None if getattr(spec, name) is None else str(getattr(spec, name))) != original]
+    valid_roster = (mirror is bound and type(mirror) is tuple
+                    and len(mirror) == len(_REGISTERED_INPUT_FIELDS)
+                    and all(type(row) is tuple and len(row) == 2
+                            and type(row[0]) is str and row[0] == name
+                            and (row[1] is None or type(row[1]) is str)
+                            for name, row in zip(_REGISTERED_INPUT_FIELDS, mirror)))
+    if not valid_roster:
+        raise ValueError("registered input construction binding was replaced; "
+                         "construct a new validated RunSpec")
+    current = _registered_input_spellings(spec)
+    changed = [name for (name, original), (_, value) in zip(bound, current) if value != original]
     if changed:
         raise ValueError("registered input spelling changed after construction: "
                          + ", ".join(changed) + "; construct a new validated RunSpec")
+    for name, original_type, original in binding.selectors:
+        value = getattr(spec, name)
+        if type(value) is not original_type or value != original:
+            raise ValueError(f"registered input binding selection changed after construction: {name}; "
+                             "construct a new validated RunSpec")
+    if binding.registration_inputs is not None and current != binding.registration_inputs:
+        raise ValueError("registered input spellings differ from parsed registration")
 
 
 def plan(spec: RunSpec) -> dict[str, Any]:

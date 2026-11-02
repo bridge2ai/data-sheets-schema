@@ -499,6 +499,15 @@ def _write_verdict(res: dict, v: dict, canary_baseline: str | None, rbasis: dict
     rec.write(path)
 
 
+def _require_input_binding(spec):
+    """Apply the library entry invariant before any CLI authority or receipt check."""
+    from data_sheets_schema.api_runner import _require_registered_input_spellings
+    try:
+        _require_registered_input_spellings(spec)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
 def _plan_or_refuse(spec):
     """A plan that cannot be assembled is a refusal with a reason, not a
     traceback (#742): a receipt condition on a bundle with no chunk manifest."""
@@ -631,6 +640,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
                  runtime=runtime, provider=provider, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration,
                  shared_generation_version=shared_generation_version, shared_generation_registration=shared_generation_registration,
                  method=method, **_manifest_kw(manifest, chunk_manifest))
+    _require_input_binding(spec)
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
     _warn_method_runtime(spec.method, spec.runtime, spec.condition)
@@ -710,6 +720,7 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
     """Render every phase without calling the API — no key, no charge."""
     from data_sheets_schema.api_runner import plan
     spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, shared_generation_version=shared_generation_version, shared_generation_registration=shared_generation_registration, **_manifest_kw(manifest, chunk_manifest))
+    _require_input_binding(spec)
     _require_bundle(spec, project, bundle)
     p = _plan_or_refuse(spec)
     if as_json:
@@ -782,6 +793,7 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
     _require_repo_root_cwd("d4d api run")          # the record and the outputs land under the cwd (#1643)
     from data_sheets_schema.api_runner import execute, plan
     spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, shared_generation_version=shared_generation_version, shared_generation_registration=shared_generation_registration, **_manifest_kw(manifest, chunk_manifest))
+    _require_input_binding(spec)
     _require_bundle(spec, project, bundle)
     _require_canonical_prompts(spec)
     _refuse_condition_mismatch(spec, allow_condition_mismatch)
@@ -1061,6 +1073,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                           '_shared_capture': roster['registrations'][(p, f'{label_prefix}_rep{n}')]} if roster else {})
             s = _spec(p, arm, f"{label_prefix}_rep{n}", condition,
                       bundle=bundles.get(p), manifest=requested, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, **shared_kw)
+            _require_input_binding(s)
             # As `plan` and `run` do: a project no selected manifest declares
             # needs an explicit bundle, never the repository's by convention
             # (#1367 round 2, #1386).
