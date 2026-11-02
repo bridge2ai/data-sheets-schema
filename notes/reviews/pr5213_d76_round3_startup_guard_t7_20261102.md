@@ -2,8 +2,8 @@
 
 Local review issue draft for PR #5213, D76 round 3, 2026-11-02. No GitHub issue
 has been created. Status: failing-before evidence captured; minimal observer
-repair prepared; after-repair validation pending. Existing evidence remains
-unchanged.
+repair committed and unchanged contracts pass afterward. Existing evidence
+remains unchanged; complete final-candidate validation is separate.
 
 ## Finding
 
@@ -56,7 +56,15 @@ SHA-256 `943922a9dc129f789e0a2fd48ad0c48640c1a4bbecfff9ba201829bf7c7cdaa2`.
 The frozen contract file SHA-256 is
 `46805b3fe1e65ad1160cf350c21f7a960c5f478517b83e83ce7227fb2bd02b71`.
 
-The validation owner will run the unchanged contracts after independent review
-of the repair. This draft makes no passing-after, full-suite, merge-readiness,
-or issue-closure claim. No production behavior or runner acceptance rule was
-modified.
+After independent review, local repair commit
+`b45b15b173def3f110d3a0cb49d47934747207fa` passed the unchanged ten contracts
+in 0.078 seconds under the same sandbox and interpreter settings.
+After-log SHA-256:
+`01e63b905ca272af9d94edfc7600be4b93bfe1d527766fe24ba5d094f945af2f`.
+Repaired observer SHA-256:
+`1c5e7bcca891f1b348e5ea791e73caa05e79f2982f992fa2102137e864290286`.
+The before-log and contract-file hashes above remain unchanged.
+
+This helper evidence does not retroactively fill the startup logging gap in
+prior fc055 runs. No full-suite, merge-readiness or GitHub issue-closure claim
+is made here. No production behavior or runner acceptance rule was modified.
