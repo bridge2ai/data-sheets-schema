@@ -197,3 +197,32 @@ metadata access through attributes, literal keys or literal `getattr`, together
 with an explicit non-reflective type-annotation assumption. This is not a claim
 to solve arbitrary dynamic reflection or obfuscated Python. No source repair,
 test execution or GitHub publication was performed by this review author.
+
+### R3 compatibility finding — postponed type text was treated as eager lookup
+
+Independent static review of repair SHA-256
+`7ea85cc8acf13ac08cee92e1ae41eab48e643803464c846b8e2292b6311e0a0a`
+found a conservative false rejection: the actual runner declares
+`RunSpec | ValidationInputs` under `from __future__ import annotations` at
+`api_runner.py:4233` and `:4432`. The checker tried to resolve the second name as
+an eager standard type instead of recognizing that this annotation is stored
+as text. This was a static compatibility finding, not a newly executed test
+failure or a reason to weaken the precondition.
+
+The revised grammar distinguishes postponed type text generically: supported
+Name/qualified-name, subscript, tuple and union syntax does not perform eager
+binding lookup. No identifier exception is used. Eager annotations still need
+proved type roles and refuse visible metadata consumers; certified callable
+functions receive no annotation exemption in either mode. Dynamic runtime
+type introspection remains outside the declared source-domain model. Existing
+real-source and renamed-source calibration cases cover this route. The narrow
+revision is prepared at scanner SHA-256
+`5a622d7fec7e0cd406937a5a5602f7866a6aa08f5002327970ffc71e0e0c57d5`;
+independent re-review and after-tests remain pending.
+
+The final static recheck also required `level == 0` on the `__future__` import:
+a relative import of a same-named project module does not enable language-level
+postponed annotations. The one-line identity correction is included at scanner
+SHA-256 `1c6b726abeb089f1508344b0feaf217949ed1c4b3c54383d09b5052abf862902`.
+This was a source-review finding, not a newly reproduced test failure; all
+frozen test modules remain unchanged and after-validation is still pending.

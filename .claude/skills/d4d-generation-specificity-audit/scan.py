@@ -14212,6 +14212,15 @@ def _prefix_normal_form(node):
     class Normalize(ast.NodeTransformer):
         def __init__(self):
             self.scopes = []
+            self.next_scope = 0
+
+        def push_scope(self, names):
+            serial = self.next_scope
+            self.next_scope += 1
+            scope = {name: f'_scope_{serial}_local_{i}'
+                     for i, name in enumerate(dict.fromkeys(names))}
+            self.scopes.append(scope)
+            return scope
 
         def visit_FunctionDef(self, n):
             # Keep a function's external role. A nested function is a local.
@@ -14226,14 +14235,23 @@ def _prefix_normal_form(node):
                 for item in items:
                     if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                         yield item.name
+                    elif isinstance(item, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+                        # Comprehension targets belong to their own lexical
+                        # scope. A walrus target instead belongs to the owner.
+                        for child in ast.walk(item):
+                            if isinstance(child, ast.NamedExpr) and isinstance(child.target, ast.Name):
+                                yield child.target.id
                     else:
                         for child in ast.iter_child_nodes(item):
                             if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Store):
                                 yield child.id
                             yield from locals_in([child])
             bound += list(locals_in(n.body))
-            scope = {name: f'_local_{i}' for i, name in enumerate(dict.fromkeys(bound))}
-            self.scopes.append(scope)
+            # Defaults are evaluated in the containing scope, not in the new
+            # function's argument/local scope.
+            n.args.defaults = [self.visit(s) for s in n.args.defaults]
+            n.args.kw_defaults = [self.visit(s) if s else None for s in n.args.kw_defaults]
+            scope = self.push_scope(bound)
             for a in n.args.posonlyargs + n.args.args + n.args.kwonlyargs:
                 a.arg = scope[a.arg]; a.annotation = None
             if n.args.vararg:
@@ -14245,10 +14263,28 @@ def _prefix_normal_form(node):
                       and isinstance(s.value, ast.Constant) and type(s.value.value) is str)]
             # Arguments have already been renamed; visit body/defaults only.
             n.body = [self.visit(s) for s in n.body]
-            n.args.defaults = [self.visit(s) for s in n.args.defaults]
-            n.args.kw_defaults = [self.visit(s) if s else None for s in n.args.kw_defaults]
             self.scopes.pop()
             return n
+
+        def comprehension(self, n):
+            first_iter = self.visit(n.generators[0].iter)
+            names = [x.id for g in n.generators for x in ast.walk(g.target) if isinstance(x, ast.Name)]
+            self.push_scope(names)
+            for index, generator in enumerate(n.generators):
+                generator.iter = first_iter if index == 0 else self.visit(generator.iter)
+                generator.target = self.visit(generator.target)
+                generator.ifs = [self.visit(x) for x in generator.ifs]
+            if isinstance(n, ast.DictComp):
+                n.key, n.value = self.visit(n.key), self.visit(n.value)
+            else:
+                n.elt = self.visit(n.elt)
+            self.scopes.pop()
+            return n
+
+        visit_ListComp = comprehension
+        visit_SetComp = comprehension
+        visit_DictComp = comprehension
+        visit_GeneratorExp = comprehension
 
         def visit_Name(self, n):
             for scope in reversed(self.scopes):
@@ -14277,9 +14313,190 @@ class _SourceDomainPrecondition:
         self.roles, self.sites, self.active = {}, [], set()
         self.parents = _parents(tree)
         self.fields = {}
+        self._parent_maps = {id(tree): self.parents}
+        self._annotation_maps = {}
+        self._builtins_checked, self._imports_checked, self._callables_checked = set(), set(), set()
+        self.work_remaining = 4096
 
     def fail(self, why):
         raise _not_derived('the selected prompt adaptation', 'precondition: ' + why)
+
+    def spend_work(self):
+        self.work_remaining -= 1
+        if self.work_remaining < 0:
+            self.fail('shared source-domain abstract-work budget exceeded (4096 visits)')
+
+    def parents_for(self, tree):
+        if id(tree) not in self._parent_maps:
+            self._parent_maps[id(tree)] = _parents(tree)
+        return self._parent_maps[id(tree)]
+
+    def module_nodes(self, tree):
+        """Include bindings inside module control flow, excluding local scopes."""
+        def walk(n):
+            yield n
+            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+                # Definitions bind in the parent scope. Their body/parameters
+                # do not; definition-time defaults/decorators still do.
+                expressions = list(getattr(n, 'decorator_list', []))
+                if hasattr(n, 'args'):
+                    expressions += list(n.args.defaults) + [x for x in n.args.kw_defaults if x]
+                    args = n.args.posonlyargs + n.args.args + n.args.kwonlyargs
+                    args += [a for a in (n.args.vararg, n.args.kwarg) if a is not None]
+                    expressions += [a.annotation for a in args if a.annotation is not None]
+                    if getattr(n, 'returns', None) is not None:
+                        expressions.append(n.returns)
+                if isinstance(n, ast.ClassDef):
+                    expressions += list(n.bases) + [k.value for k in n.keywords]
+                for expression in expressions:
+                    yield from walk(expression)
+                return
+            for child in ast.iter_child_nodes(n):
+                yield from walk(child)
+        for statement in tree.body:
+            yield from walk(statement)
+
+    def stable_binding(self, tree, name, definition):
+        accepted = {id(n) for n in ast.walk(definition)}
+        for n in self.module_nodes(tree):
+            if isinstance(n, ast.ImportFrom) and any(a.name == '*' for a in n.names):
+                self.fail('wildcard import leaves module bindings unproved')
+            if id(n) in accepted:
+                continue
+            if ((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
+                    or _rebinding(n, name, self.resolver)):
+                self.fail(f'{name} has another source binding')
+        if any(isinstance(n, (ast.Global, ast.Nonlocal)) and name in n.names for n in ast.walk(tree)):
+            self.fail(f'{name} has a global/nonlocal binding declaration')
+
+    def global_reads(self, tree, name):
+        """Find reads of this module binding, without confusing local names."""
+        parents = self.parents_for(tree)
+        def local_binds(fn):
+            args = fn.args.posonlyargs + fn.args.args + fn.args.kwonlyargs + [fn.args.vararg, fn.args.kwarg]
+            if any(a and a.arg == name for a in args):
+                return True
+            def writes(n):
+                if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+                    return getattr(n, 'name', None) == name
+                if isinstance(n, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+                    return any(isinstance(x, ast.NamedExpr) and isinstance(x.target, ast.Name)
+                               and x.target.id == name for x in ast.walk(n))
+                return ((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
+                        or bool(_rebinding(n, name, fn)) or any(writes(x) for x in ast.iter_child_nodes(n)))
+            body = fn.body if isinstance(fn.body, list) else [fn.body]
+            return any(writes(s) for s in body)
+        for n in ast.walk(tree):
+            if not isinstance(n, ast.Name) or n.id != name or not isinstance(n.ctx, ast.Load):
+                continue
+            child, owner, shadowed = n, parents.get(id(n)), False
+            while owner is not None:
+                if isinstance(owner, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+                    in_first_iter = any(n is x for x in ast.walk(owner.generators[0].iter))
+                    if not in_first_iter and any(isinstance(x, ast.Name) and x.id == name
+                            for g in owner.generators for x in ast.walk(g.target)):
+                        shadowed = True; break
+                if isinstance(owner, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+                    body = owner.body
+                    in_body = any(child is s for s in body) if isinstance(body, list) else child is body
+                    # Defaults, decorators and eager annotations are evaluated
+                    # in the enclosing scope, before same-named formals exist.
+                    if in_body and local_binds(owner):
+                        shadowed = True; break
+                child, owner = owner, parents.get(id(owner))
+            if not shadowed:
+                yield n
+
+    def annotation_map(self, tree):
+        if id(tree) not in self._annotation_maps:
+            roots = {}
+            for owner in ast.walk(tree):
+                for attr in ('annotation', 'returns'):
+                    annotation = getattr(owner, attr, None)
+                    if isinstance(annotation, ast.AST):
+                        for n in ast.walk(annotation):
+                            roots.setdefault(id(n), []).append(annotation)
+            self._annotation_maps[id(tree)] = roots
+        return self._annotation_maps[id(tree)]
+
+    def annotations(self, tree):
+        return set(self.annotation_map(tree))
+
+    def type_annotation(self, tree, annotation, name):
+        """Allow declared type expressions, never function-valued annotations.
+
+        Eager type annotations export the live type in metadata. Visible
+        metadata access therefore closes this source-domain route; arbitrary
+        dynamic reflection remains outside the certificate's stated domain.
+        """
+        postponed = any(isinstance(n, ast.ImportFrom) and n.level == 0 and n.module == '__future__'
+                        and any(a.name == 'annotations' for a in n.names) for n in tree.body)
+        if not postponed and any(isinstance(n, ast.Attribute) and n.attr == '__annotations__'
+                or isinstance(n, ast.Constant) and n.value == '__annotations__' for n in ast.walk(tree)):
+            self.fail('eager type annotation has visible metadata access')
+        builtins = {'str', 'int', 'bool', 'float', 'bytes', 'object', 'type',
+                    'dict', 'list', 'tuple', 'set', 'frozenset'}
+        def check(n):
+            if isinstance(n, ast.Name):
+                if postponed:
+                    return  # Stored type text, not an eager object lookup.
+                if n.id == name:
+                    return
+                if n.id in builtins:
+                    self.builtin(tree, n.id)
+                    return
+                self.imported(tree, n.id, module='typing', member='Any')
+                return
+            if isinstance(n, ast.Constant) and (n.value is None or n.value is Ellipsis or type(n.value) is str):
+                return
+            if isinstance(n, ast.BinOp) and isinstance(n.op, ast.BitOr):
+                check(n.left); check(n.right); return
+            if isinstance(n, ast.Tuple):
+                for element in n.elts:
+                    check(element)
+                return
+            if isinstance(n, ast.Subscript):
+                if postponed and isinstance(n.value, (ast.Name, ast.Attribute)):
+                    check(n.value); check(n.slice); return
+                if isinstance(n.value, ast.Name) and n.value.id in builtins:
+                    self.builtin(tree, n.value.id)
+                    check(n.slice)
+                    return
+            if postponed and isinstance(n, ast.Attribute) and isinstance(n.value, (ast.Name, ast.Attribute)):
+                check(n.value)
+                return
+            if isinstance(n, ast.Attribute) and n.attr == 'ReferenceType' and isinstance(n.value, ast.Name):
+                self.imported(tree, n.value.id, module='weakref')
+                self.module_member(tree, n.value.id, 'ReferenceType', type_member=True)
+                return
+            self.fail('annotation is not a supported non-reflective type expression')
+        check(annotation)
+
+    def callable_uses(self, tree, name, *, decorator=False, members=False, type_role=False):
+        key = (id(tree), name, decorator, members, type_role)
+        if key in self._callables_checked:
+            return
+        parents, annotations = self.parents_for(tree), self.annotations(tree)
+        for n in self.global_reads(tree, name):
+            parent = parents[id(n)]
+            if id(n) in annotations:
+                if not type_role:
+                    self.fail(f'callable {name} escapes through an annotation')
+                roots = self.annotation_map(tree)[id(n)]
+                if len(roots) != 1:
+                    self.fail('ambiguous type-annotation role')
+                self.type_annotation(tree, roots[0], name)
+                continue
+            if isinstance(parent, ast.Call) and parent.func is n:
+                continue
+            if decorator and isinstance(parent, (ast.ClassDef, ast.FunctionDef)) and n in parent.decorator_list:
+                continue
+            if members and isinstance(parent, ast.Attribute) and isinstance(parent.ctx, ast.Load):
+                caller = parents.get(id(parent))
+                if isinstance(caller, ast.Call) and caller.func is parent:
+                    continue
+            self.fail(f'{name} escapes its direct source callable binding')
+        self._callables_checked.add(key)
 
     def unique(self, tree, name, kind):
         matches = [n for n in tree.body if isinstance(n, kind) and n.name == name]
@@ -14288,6 +14505,8 @@ class _SourceDomainPrecondition:
         node = matches[0]
         if getattr(node, 'decorator_list', None) and kind is ast.FunctionDef:
             self.fail(f'{name} is decorated')
+        self.stable_binding(tree, name, node)
+        self.callable_uses(tree, name, type_role=kind is ast.ClassDef)
         for stmt in tree.body:
             if stmt is node:
                 continue
@@ -14310,6 +14529,13 @@ class _SourceDomainPrecondition:
     def builtin(self, tree, name):
         # Do not borrow a builtin that this module shadows, including a global
         # writer in a different function. Local shadows are rejected by grammar.
+        key = (id(tree), name)
+        if key in self._builtins_checked:
+            return
+        for n in self.module_nodes(tree):
+            if ((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
+                    or _rebinding(n, name, self.resolver)):
+                self.fail(f'builtin {name} is shadowed')
         for stmt in tree.body:
             if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 if stmt.name == name:
@@ -14322,13 +14548,18 @@ class _SourceDomainPrecondition:
                 self.fail(f'builtin {name} is shadowed')
         if any(isinstance(n, ast.Global) and name in n.names for n in ast.walk(tree)):
             self.fail(f'builtin {name} has a global writer')
+        self._builtins_checked.add(key)
 
     def imported(self, tree, name, *, module, member=None):
+        key = (id(tree), name, module, member)
+        if key in self._imports_checked:
+            return
         imports = [n for n in tree.body if isinstance(n, (ast.Import, ast.ImportFrom))
                    and any((a.asname or a.name.split('.')[0]) == name for a in n.names)]
         if len(imports) != 1:
             self.fail(f'{name} has no unique visible import')
         node = imports[0]
+        self.stable_binding(tree, name, node)
         aliases = [a for a in node.names if (a.asname or a.name.split('.')[0]) == name]
         if (len(aliases) != 1 or (member is None and not (
                 isinstance(node, ast.Import) and aliases[0].name == module))
@@ -14346,11 +14577,12 @@ class _SourceDomainPrecondition:
                 self.fail(f'import {name} is rebound')
         if any(isinstance(n, ast.Global) and name in n.names for n in ast.walk(tree)):
             self.fail(f'import {name} has a global writer')
+        self._imports_checked.add(key)
 
-    def module_member(self, tree, name, member):
-        parents = _parents(tree)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Name) and node.id == name and isinstance(node.ctx, ast.Load):
+    def module_member(self, tree, name, member, *, type_member=False):
+        parents = self.parents_for(tree)
+        annotations = self.annotations(tree) if type_member else set()
+        for node in self.global_reads(tree, name):
                 parent = parents.get(id(node))
                 if not isinstance(parent, ast.Attribute) or parent.value is not node:
                     self.fail(f'module {name} escapes through an alias or opaque use')
@@ -14358,10 +14590,16 @@ class _SourceDomainPrecondition:
                     self.fail(f'{name}.{member} is rebound')
                 if parent.attr == '__dict__':
                     self.fail(f'{name} has reflective access')
+                if parent.attr == member and not (isinstance(parents.get(id(parent)), ast.Call)
+                                                  and parents[id(parent)].func is parent):
+                    if type_member and id(parent) in annotations:
+                        continue
+                    self.fail(f'{name}.{member} escapes its direct call binding')
 
-    def global_value(self, name):
+    def global_value(self, name, tree=None):
+        tree = self.tree if tree is None else tree
         values = []
-        for node in self.tree.body:
+        for node in tree.body:
             if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id == name:
                 values.append((node, node.value))
             elif isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
@@ -14370,9 +14608,56 @@ class _SourceDomainPrecondition:
                 self.fail(f'{name} is not a literal source binding')
         if len(values) != 1:
             self.fail(f'{name} is not uniquely initialized')
-        if any(isinstance(n, ast.Global) and name in n.names for n in ast.walk(self.tree)):
+        self.stable_binding(tree, name, values[0][0])
+        if any(isinstance(n, ast.Global) and name in n.names for n in ast.walk(tree)):
             self.fail(f'{name} has a global writer')
         return values[0]
+
+    def plain_default(self, value, tree, path, active=None):
+        """Follow actual default bindings; unknown descriptor factories refuse."""
+        active = set() if active is None else active
+        if value is None or isinstance(value, ast.Constant) and type(value.value) in (str, int, float, bool, bytes, type(None)):
+            return
+        if isinstance(value, ast.Tuple):
+            for item in value.elts:
+                self.plain_default(item, tree, path, active)
+            return
+        if isinstance(value, ast.Name):
+            key = (str(path), value.id)
+            if key in active:
+                self.fail('recursive field default binding')
+            active = active | {key}
+            imports = [n for n in tree.body if isinstance(n, ast.ImportFrom)
+                       and any((a.asname or a.name) == value.id for a in n.names)]
+            if imports:
+                if len(imports) != 1:
+                    self.fail('ambiguous imported default')
+                imported = imports[0]
+                self.stable_binding(tree, value.id, imported)
+                alias = next(a for a in imported.names if (a.asname or a.name) == value.id)
+                target = _resolve_module(self.root, path, imported.module or '', imported.level, {})
+                if target is None or not _is_inside(target, self.root) or not target.is_file():
+                    self.fail('imported default has no source in the supplied root')
+                other = _tree(target)
+                declaration, expression = self.global_value(alias.name, other)
+                self.sites.append(f'{_rel(self.root, target)}:{declaration.lineno}')
+                self.plain_default(expression, other, target, active)
+                return
+            _, expression = self.global_value(value.id, tree)
+            self.plain_default(expression, tree, path, active)
+            return
+        if isinstance(value, ast.Call) and isinstance(value.func, ast.Name):
+            if value.func.id == 'object' and not value.args and not value.keywords:
+                self.builtin(tree, 'object')
+                return  # Exact plain object sentinel, not an annotated guess.
+            self.imported(tree, value.func.id, module='dataclasses', member='field')
+            self.callable_uses(tree, value.func.id)
+            if value.args or any(k.arg not in ('default', 'init', 'repr', 'compare', 'hash', 'kw_only') for k in value.keywords):
+                self.fail('field factory has unproved behavior')
+            for keyword in value.keywords:
+                self.plain_default(keyword.value, tree, path, active)
+            return
+        self.fail('field default is not source-proven plain data or a sentinel')
 
     def record_fields(self, name, *, frozen=False):
         node = self.unique(self.tree, name, ast.ClassDef)
@@ -14383,6 +14668,7 @@ class _SourceDomainPrecondition:
         if not isinstance(callee, ast.Name):
             self.fail('dataclass decorator is opaque')
         self.imported(self.tree, callee.id, module='dataclasses', member='dataclass')
+        self.callable_uses(self.tree, callee.id, decorator=True)
         if frozen and ast.unparse(decorator) != callee.id + '(frozen=True)':
             self.fail('registry record is not frozen')
         if not frozen and not isinstance(decorator, ast.Name):
@@ -14391,18 +14677,46 @@ class _SourceDomainPrecondition:
                   if isinstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name)}
         if len(fields) != sum(isinstance(n, ast.AnnAssign) for n in node.body):
             self.fail('ambiguous dataclass fields')
+        if set(fields) & {'__dict__', '__class__', '__weakref__'}:
+            self.fail('reserved descriptors are not ordinary declared fields')
         if any(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name in
-               ('__getattribute__', '__getattr__', '__eq__', '__ne__', '__bool__') for n in node.body):
+               ('__getattribute__', '__getattr__', '__eq__', '__ne__', '__bool__', '__dict__', '__class__', '__weakref__') for n in node.body):
             self.fail('custom dataclass dispatch')
         for stmt in node.body:
             if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)) and stmt.name in fields:
                 self.fail('a declared field is also a descriptor')
+            if isinstance(stmt, ast.AnnAssign):
+                self.plain_default(stmt.value, self.tree, self.path)
+                if any(isinstance(n, ast.Call) for n in ast.walk(stmt.annotation)):
+                    self.fail('field annotation has executable behavior')
+            elif isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if frozen:
+                    self.fail('registry record has additional behavior')
+                for default in list(stmt.args.defaults) + [x for x in stmt.args.kw_defaults if x is not None]:
+                    self.plain_default(default, self.tree, self.path)
+                arguments = stmt.args.posonlyargs + stmt.args.args + stmt.args.kwonlyargs
+                arguments += [a for a in (stmt.args.vararg, stmt.args.kwarg) if a is not None]
+                annotations = [a.annotation for a in arguments if a.annotation is not None]
+                annotations += [stmt.returns] if stmt.returns is not None else []
+                if any(isinstance(n, ast.Call) for annotation in annotations for n in ast.walk(annotation)):
+                    self.fail('method annotation has executable class-creation behavior')
+                for decorator in stmt.decorator_list:
+                    if not isinstance(decorator, ast.Name):
+                        self.fail('method decorator has unproved class-creation behavior')
+                    if decorator.id in ('property', 'classmethod', 'staticmethod'):
+                        self.builtin(self.tree, decorator.id)
+                    else:
+                        self.imported(self.tree, decorator.id, module='functools', member='cached_property')
+                        self.callable_uses(self.tree, decorator.id, decorator=True)
+            elif not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant) and type(stmt.value.value) is str):
+                self.fail('dataclass body installs unproved attributes or behavior')
         for n in ast.walk(self.tree):
             if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name) and n.value.id == name:
                 if isinstance(n.ctx, (ast.Store, ast.Del)) or n.attr == '__dict__':
                     self.fail('dataclass field binding is changed')
         if frozen and any(not isinstance(n, (ast.AnnAssign, ast.Expr)) for n in node.body):
             self.fail('registry record has additional behavior')
+        self.sites.append(f'{RUNNER}:{node.lineno}')
         return node, fields
 
     def unify(self, role, node):
@@ -14435,6 +14749,7 @@ class _SourceDomainPrecondition:
             if paths:
                 try:
                     self.imported(self.tree, annotation.id, module='pathlib', member='Path')
+                    self.callable_uses(self.tree, annotation.id, members=True, type_role=True)
                 except ConfigError:
                     return False
                 return True
@@ -14499,6 +14814,16 @@ class _SourceDomainPrecondition:
                 non_doc = [n for n in caller.body if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant))]
                 self.unify('replay' if len(non_doc) == 1 else 'capture', caller)
                 self.unique(self.tree, caller.name, ast.FunctionDef)
+        allowed_readers = {id(guard)} | {id(fn) for fn in callers if fn.name in ('__copy__', '__deepcopy__')}
+        for n in self.global_reads(self.tree, lookup.name):
+            parent = self.parents[id(n)]
+            if not isinstance(parent, ast.Call) or parent.func is not n:
+                self.fail('registry lookup escapes through an alias')
+            owner = parent
+            while not isinstance(owner, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Module)):
+                owner = self.parents[id(owner)]
+            if id(owner) not in allowed_readers:
+                self.fail('registry lookup has an unproved record consumer')
         # No alternate construction of a purported frozen record or call alias.
         annotations = {id(n) for owner in ast.walk(self.tree) for attr in ('annotation', 'returns')
                        if isinstance(getattr(owner, attr, None), ast.AST) for n in ast.walk(getattr(owner, attr))}
@@ -14525,13 +14850,17 @@ class _SourceDomainPrecondition:
         for key, module, member in (('_R_weakref', 'weakref', 'ref'), ('_R_os', 'os', 'fspath'), ('_R_copy', 'copy', 'deepcopy')):
             self.imported(self.tree, r[key], module=module)
             self.module_member(self.tree, r[key], member)
-        _, expression = self.global_value(r['_R_path_type'])
+        path_declaration, expression = self.global_value(r['_R_path_type'])
+        allowed_path_type = {id(n) for n in ast.walk(spellings)} | {id(n) for n in ast.walk(path_declaration)}
+        if any(id(n) not in allowed_path_type for n in self.global_reads(self.tree, r['_R_path_type'])):
+            self.fail('standard path type escapes its spelling-check source role')
         if not (isinstance(expression, ast.Call) and isinstance(expression.func, ast.Name)
                 and expression.func.id == 'type' and len(expression.args) == 1 and not expression.keywords
                 and isinstance(expression.args[0], ast.Call) and not expression.args[0].args
                 and not expression.args[0].keywords and isinstance(expression.args[0].func, ast.Name)):
             self.fail('path type is not derived from the standard Path constructor')
         self.imported(self.tree, expression.args[0].func.id, module='pathlib', member='Path')
+        self.callable_uses(self.tree, expression.args[0].func.id, members=True, type_role=True)
         provenance = r['_R_provenance']
         self.imported(self.tree, provenance, module='data_sheets_schema', member='provenance')
         self.module_member(self.tree, provenance, r['_R_predicate'])
@@ -14564,6 +14893,7 @@ class _SourceDomainPrecondition:
         self.active.add(fn.name)
         returns = []
         def expr(n):
+            self.spend_work()
             if isinstance(n, ast.Constant):
                 return ('none' if n.value is None else 'primitive',)
             if isinstance(n, ast.Name):
@@ -14615,6 +14945,7 @@ class _SourceDomainPrecondition:
             self.fail('expression is outside the finite precondition grammar')
         def block(statements):
             for s in statements:
+                self.spend_work()
                 if isinstance(s, ast.Expr) and isinstance(s.value, ast.Constant) and type(s.value.value) is str:
                     continue
                 if isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Name):
@@ -14627,9 +14958,15 @@ class _SourceDomainPrecondition:
                     if left != env:
                         self.fail('branch-dependent local ownership')
                 elif isinstance(s, ast.For) and not s.orelse and isinstance(s.target, ast.Name):
-                    if expr(s.iter)[0] != 'finite':
+                    finite = expr(s.iter)
+                    if finite[0] != 'finite':
                         self.fail('unbounded or borrowed iteration')
-                    env[s.target.id] = ('primitive',); block(s.body)
+                    # A later iteration must see ownership changes made by the
+                    # preceding one. Looking only once can turn a fresh alias
+                    # into a borrowed write on the second actual iteration.
+                    for _ in range(finite[1]):
+                        env[s.target.id] = ('primitive',)
+                        block(s.body)
                 elif isinstance(s, ast.Return):
                     value = ('none',) if s.value is None else expr(s.value)
                     if discarded and value != ('none',):
@@ -14661,14 +14998,19 @@ class _SourceDomainPrecondition:
             self.active.remove(fn.name)
 
     def certify(self, call):
+        self.spend_work()
+        self.roles.clear()
+        self.sites.clear()
         if (not isinstance(call.func, ast.Name) or len(call.args) != 1 or call.keywords
                 or not isinstance(call.args[0], ast.Name) or call.args[0].id != 'spec'):
             self.fail('prefix is not a direct discarded call on the unchanged spec')
-        params = self.resolver.args.posonlyargs + self.resolver.args.args
+        params = (self.resolver.args.posonlyargs + self.resolver.args.args + self.resolver.args.kwonlyargs
+                  + [a for a in (self.resolver.args.vararg, self.resolver.args.kwarg) if a is not None])
         spec = next((a for a in params if a.arg == 'spec'), None)
         if spec is None or not isinstance(spec.annotation, ast.Name):
             self.fail('spec has no declared dataclass source role')
         self.spec_class, self.fields = self.record_fields(spec.annotation.id)
+        declarations = list(self.sites)
         guard = self.unique(self.tree, call.func.id, ast.FunctionDef)
         # Binding at the call itself cannot be borrowed from a global function
         # when the resolver assigns, imports or captures the same local name.
@@ -14683,18 +15025,21 @@ class _SourceDomainPrecondition:
         try:
             self.unify('guard', guard)
         except ConfigError:
-            self.roles.clear(); self.sites.clear()
+            self.roles.clear(); self.sites = list(declarations)
             self.simple(guard, [('spec',)], discarded=True)
             detail = {'grammar': 'finite primitive checks and fresh local containers'}
         else:
-            self.roles.clear(); self.sites.clear()
+            self.roles.clear(); self.sites = list(declarations)
             detail = self.identity_certificate(guard)
         return {**detail, 'call': f'{RUNNER}:{call.lineno}', 'source': sorted(set(self.sites)),
                 'basis': 'source-domain precondition certificate',
                 'assumptions': ['source-declared primitive/standard-Path fields and plain dataclasses',
-                                'trusted standard-library semantics and the certified capture roles'],
+                                'trusted standard-library semantics and the certified capture roles',
+                                'non-reflective type annotations; visible eager metadata access refuses'],
+                'abstract_work_limit': 4096,
                 'excluded': ['malformed or custom runtime field values',
-                             'arbitrary hostile Python or runtime monkeypatching outside these source bindings']}
+                             'arbitrary hostile Python or runtime monkeypatching outside these source bindings',
+                             'arbitrary dynamic reflection or runtime type-introspection consumers']}
 
 
 def _selected_template(root, tree, selection, body):
@@ -14711,8 +15056,9 @@ def _selected_template(root, tree, selection, body):
         raise fail('resolve_prompt is missing')
     statements = [n for n in fn.body if not isinstance(n, ast.Expr) or not isinstance(n.value, ast.Constant)]
     preconditions = []
+    prefix_proof = _SourceDomainPrecondition(root, tree, fn)
     while statements and isinstance(statements[0], ast.Expr) and isinstance(statements[0].value, ast.Call):
-        preconditions.append(_SourceDomainPrecondition(root, tree, fn).certify(statements[0].value))
+        preconditions.append(prefix_proof.certify(statements[0].value))
         statements = statements[1:]
     # A standalone legacy adapter fixture need not define an executor. Without
     # one, no new branch may be skipped; full api_meaning still requires it.
