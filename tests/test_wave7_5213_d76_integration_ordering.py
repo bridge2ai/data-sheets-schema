@@ -49,7 +49,7 @@ def _shared_pair(external):
     for index in (1, 2):
         base = replace(external, method='claudecode_api', label=f'order_rep{index}')
         reg = registration_for(base)
-        reg['registration_path'] = str(external.bundle.parent / f'registration-{index}.json')
+        reg['registration_path'] = str(external.bundle.absolute().parent / f'registration-{index}.json')
         reg['registration_id'] = f'invented-ordering-{index}'
         reg['receipt']['coverage_floor'] = {'state': 'registered', 'numerator': 1, 'denominator': 2}
         result.append(selected_spec(base, reg))

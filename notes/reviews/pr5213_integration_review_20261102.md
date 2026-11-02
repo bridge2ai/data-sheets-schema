@@ -69,6 +69,20 @@ the ordinary ownership refusal. Both dry-run modes are also included in the
 shared authority/owner matrix. These additions produce81 intended cases;
 the executed collection remains authoritative for the eventual count.
 
+## I6 — Invented registration destinations must satisfy the real constructor
+
+The first full ordering run completed57 passing and24 failing cases. All24
+failed during `_shared_pair` construction: it replaced the valid absolute
+`registration_path` with a path derived from the deliberately relative bundle.
+The real registration parser correctly refused it before the ordering assertions.
+These are integration-owned fixture failures, not evidence about guard order
+or environmental failures. The module is new and absent from both parent heads.
+
+Disposition: make only the invented registration destination absolute before
+serialization. Keep the real parser, production guards and all81 assertions.
+Preserve the failed run, then validate a repaired shared-fixture canary and the
+complete ordering cohort from a new pinned archive. Results belong in the report.
+
 ## Reviewed mutation-evidence method
 
 The existing validation runner correctly refuses an uncommitted source mutation.
