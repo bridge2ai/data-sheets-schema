@@ -3,6 +3,7 @@
 # Inputs: D76_TREE/OUTPUT/RUNNER supplied by run_d76_validation; outputs: per-process JSON.
 # Serves PR #5213/D76 round 3; 2026-11-02. Incremental evidence survives deadlines.
 import ipaddress
+import io
 import json
 import os
 from pathlib import Path
@@ -23,14 +24,36 @@ WORKER = 'master'
 GUARD_INSTALLED = False
 SERIAL_INDEX = -1
 SERIAL_NODE_INDEX = {}
+# Evidence belongs to the observer, not to the filesystem/serialization API
+# under test. Capture callables before test fixtures can replace module globals.
+_EVIDENCE_OPEN = io.open
+_EVIDENCE_REPLACE = os.replace
+_EVIDENCE_ENCODE = json.JSONEncoder(sort_keys=True).encode
+_PHASE_STREAM = None
+_DENIAL_PATH = None
+_CHECKPOINT_PATHS = None
+
+
+def _append_evidence(stream, value):
+    if stream is None or stream.closed:
+        raise RuntimeError('D76 evidence stream is not configured or is closed')
+    stream.write(_EVIDENCE_ENCODE(value) + '\n')
+    stream.flush()  # Preserve each completed row before a deadline/interruption.
+
+
+def _close_phase_stream():
+    if _PHASE_STREAM is not None:
+        _PHASE_STREAM.close()
 
 
 def checkpoint():
     """Atomic current ledger; append-only phase journal remains the raw history."""
-    destination = OUTPUT / ('nodes-' + WORKER + '.json')
-    temporary = OUTPUT / ('nodes-' + WORKER + '.json.tmp')
-    temporary.write_text(json.dumps(LEDGER, sort_keys=True) + '\n')
-    os.replace(temporary, destination)
+    if _CHECKPOINT_PATHS is None:
+        raise RuntimeError('D76 evidence checkpoint is not configured')
+    temporary, destination = _CHECKPOINT_PATHS
+    with _EVIDENCE_OPEN(temporary, 'w', encoding='utf-8') as stream:
+        stream.write(_EVIDENCE_ENCODE(LEDGER) + '\n')
+    _EVIDENCE_REPLACE(temporary, destination)
 
 
 def loopback(host):
@@ -50,8 +73,11 @@ def install_guard():
         return
     GUARD_INSTALLED = True
     def deny(event, detail):
-        with (OUTPUT / ('guard-denials-' + str(os.getpid()) + '.jsonl')).open('a') as stream:
-            stream.write(json.dumps({'event': event, 'detail': detail}) + '\n')
+        # Audit hooks survive sessionfinish/unconfigure, including atexit. Use
+        # the captured C-level opener on demand rather than a closed stream.
+        # The runner refuses any denial artifact; clean runs create none.
+        with _EVIDENCE_OPEN(_DENIAL_PATH, 'a', encoding='utf-8') as stream:
+            _append_evidence(stream, {'event': event, 'detail': detail})
         raise RuntimeError('D76 offline guard refuses ' + event + ': ' + detail)
     def audit(event, args):
         if event in {'socket.connect', 'socket.sendto', 'socket.bind'}:
@@ -77,15 +103,26 @@ def install_guard():
 
 
 def pytest_configure(config):
-    global WORKER
+    global WORKER, _PHASE_STREAM, _DENIAL_PATH, _CHECKPOINT_PATHS
     WORKER = getattr(config, 'workerinput', {}).get('workerid', 'master')
     if not (sys.flags.no_site and sys.flags.safe_path and sys.dont_write_bytecode):
         raise ValueError('D76 pytest process requires -S -P -B')
-    install_guard()
-    common.save(OUTPUT / ('runtime-' + WORKER + '.json'), {
-        'python': sys.version, 'executable': sys.executable, 'flags': str(sys.flags),
-        'pid': os.getpid(), 'site_startup': False, 'pth_execution': False,
-        'sys_path': sys.path, 'root': str(ROOT)})
+    # Configure controller/worker-specific evidence before test-owned patches.
+    # Keep the phase stream open; even captured Path.open delegates to io.open.
+    _CHECKPOINT_PATHS = (str(OUTPUT / ('nodes-' + WORKER + '.json.tmp')),
+                         str(OUTPUT / ('nodes-' + WORKER + '.json')))
+    _DENIAL_PATH = str(OUTPUT / ('guard-denials-' + str(os.getpid()) + '.jsonl'))
+    try:
+        _PHASE_STREAM = _EVIDENCE_OPEN(str(OUTPUT / ('phases-' + WORKER + '.jsonl')),
+                                       'a', encoding='utf-8', buffering=1)
+        install_guard()
+        common.save(OUTPUT / ('runtime-' + WORKER + '.json'), {
+            'python': sys.version, 'executable': sys.executable, 'flags': str(sys.flags),
+            'pid': os.getpid(), 'site_startup': False, 'pth_execution': False,
+            'sys_path': sys.path, 'root': str(ROOT)})
+    except BaseException:
+        _close_phase_stream()
+        raise
 
 
 @pytest.hookimpl(optionalhook=True)
@@ -127,9 +164,8 @@ def pytest_runtest_logreport(report):
                              'item_index': index, 'worker_id': getattr(report, 'worker_id', WORKER),
                              'outcome': report.outcome, 'xfail': getattr(report, 'wasxfail', None),
                              'duration_seconds': report.duration}
+    _append_evidence(_PHASE_STREAM, row)
     LEDGER['reports'].append(row)
-    with (OUTPUT / ('phases-' + WORKER + '.jsonl')).open('a') as stream:
-        stream.write(json.dumps(row, sort_keys=True) + '\n')
 
 
 def pytest_sessionfinish(session, exitstatus):
@@ -139,4 +175,12 @@ def pytest_sessionfinish(session, exitstatus):
             common.save(OUTPUT / ('notes-origins-after-' + WORKER + '.json'), notes_ci.notes_origins(ROOT, BASELINE))
         LEDGER['origins_after'] = True
     finally:
-        checkpoint()
+        try:
+            checkpoint()
+        finally:
+            _close_phase_stream()
+
+
+def pytest_unconfigure(config):
+    # Also covers configuration/session failures; repeated close is harmless.
+    _close_phase_stream()
