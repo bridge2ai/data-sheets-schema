@@ -314,7 +314,97 @@ def projected_shards(shards, weights, rows, plugin, allowance):
     return output
 
 
-def projection_rows(tree, full, plugin, weights, evidence_path):
+def timing_source_revisions(tree, evidence, manifest_path, final_head):
+    """Bind explicitly reviewed source changes without relabelling old timings.
+
+    This checks source identities and review scope, not timing equivalence.
+    A prior-revision observation remains an estimate for the revised test.
+    """
+    measured = evidence['local']['test_source_sha256']
+    current = {path: sha(tree / path) for path in measured}
+    changed = {path for path in measured if current[path] != measured[path]}
+    if manifest_path is None:
+        if changed:
+            raise ValueError('locally measured test source changed without a reviewed transition: '
+                             + ', '.join(sorted(changed)))
+        return {}, None
+
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError('duplicate timing source-revision key: ' + key)
+            result[key] = value
+        return result
+
+    raw = Path(manifest_path).read_bytes()
+    manifest = json.loads(raw, object_pairs_hook=unique)
+    if (type(manifest) is not dict or set(manifest) != {'format', 'transitions'}
+            or manifest['format'] != 'timing_source_revisions_v1'
+            or type(manifest['transitions']) is not list):
+        raise ValueError('invalid timing source-revision manifest')
+    fields = {'path', 'measured_commit', 'measured_file_sha256', 'revised_commit',
+              'revised_file_sha256', 'patch_sha256', 'issue', 'disposition'}
+    entries = {}
+    for entry in manifest['transitions']:
+        if (type(entry) is not dict or set(entry) != fields
+                or any(type(value) is not str or not value.strip() for value in entry.values())
+                or entry['disposition'] != 'reuse_prior_revision_measurement'):
+            raise ValueError('invalid timing source-revision transition')
+        path = entry['path']
+        relative = Path(path)
+        if (relative.is_absolute() or '..' in relative.parts or relative.as_posix() != path
+                or not path.startswith('tests/') or not path.endswith('.py')
+                or path not in measured or (tree / path).is_symlink()):
+            raise ValueError('invalid measured test path in timing transition: ' + path)
+        if path in entries:
+            raise ValueError('duplicate timing source-revision transition: ' + path)
+        for key in ('measured_commit', 'revised_commit'):
+            if not re.fullmatch(r'[0-9a-f]{40}', entry[key]):
+                raise ValueError('full source commit required in timing transition')
+        for key in ('measured_file_sha256', 'revised_file_sha256', 'patch_sha256'):
+            if not re.fullmatch(r'[0-9a-f]{64}', entry[key]):
+                raise ValueError('full source/patch digest required in timing transition')
+        entries[path] = entry
+    if set(entries) != changed:
+        raise ValueError('timing transitions must cover exactly the changed measured files; '
+                         f'missing={sorted(changed - set(entries))}, extra={sorted(set(entries) - changed)}')
+    if not re.fullmatch(r'[0-9a-f]{40}', final_head or '') or git(tree, 'rev-parse', 'HEAD').strip() != final_head:
+        raise ValueError('timing transitions require the exact final source HEAD')
+    applications = {}
+    for path, entry in entries.items():
+        if (entry['measured_commit'] != evidence['round3_commit']
+                or entry['measured_commit'] != evidence['local']['measured_commit']
+                or entry['measured_file_sha256'] != measured[path]
+                or entry['revised_file_sha256'] != current[path]):
+            raise ValueError('timing transition differs from measured/current source identity: ' + path)
+        for key in ('measured_commit', 'revised_commit'):
+            if git(tree, 'rev-parse', entry[key] + '^{commit}').strip() != entry[key]:
+                raise ValueError('timing transition commit identity differs: ' + path)
+        try:
+            git(tree, 'merge-base', '--is-ancestor', entry['revised_commit'], final_head)
+        except subprocess.CalledProcessError as exc:
+            raise ValueError('revised timing source is not an ancestor of final HEAD: ' + path) from exc
+        old = git(tree, 'show', entry['measured_commit'] + ':' + path).encode()
+        revised = git(tree, 'show', entry['revised_commit'] + ':' + path).encode()
+        if (hashlib.sha256(old).hexdigest() != entry['measured_file_sha256']
+                or hashlib.sha256(revised).hexdigest() != entry['revised_file_sha256']
+                or (tree / path).read_bytes() != revised):
+            raise ValueError('timing transition Git blobs differ from declared source: ' + path)
+        patch = git(tree, 'diff', '--no-ext-diff', '--no-textconv', '--no-renames',
+                    '--no-color', '--binary', '--full-index', '--src-prefix=a/', '--dst-prefix=b/',
+                    '--no-relative', '--unified=3', entry['measured_commit'],
+                    entry['revised_commit'], '--', path).encode()
+        if not patch or hashlib.sha256(patch).hexdigest() != entry['patch_sha256']:
+            raise ValueError('reviewed timing source patch differs: ' + path)
+        applications[path] = dict(entry)
+    return applications, {'path': str(manifest_path), 'sha256': hashlib.sha256(raw).hexdigest(),
+        'final_head': final_head, 'transitions': applications,
+        'scope': 'Exact reviewed source transitions; reused measurements remain from the prior test revision. '
+                 'Source/diff verification does not establish timing equivalence.'}
+
+
+def projection_rows(tree, full, plugin, weights, evidence_path, source_revisions=None, final_head=None):
     evidence = read(evidence_path)
     if (evidence['main_commit'] != BASELINES['main']
             or evidence['round3_commit'] != BASELINES['round3']
@@ -328,9 +418,7 @@ def projection_rows(tree, full, plugin, weights, evidence_path):
     main_raw = git(tree, 'show', BASELINES['main'] + ':utils/ci_test_durations.json').encode()
     if prior['refreshed_weights_sha256'] != hashlib.sha256(main_raw).hexdigest():
         raise ValueError('prior timing observations do not bind main weights')
-    for path, digest in evidence['local']['test_source_sha256'].items():
-        if sha(tree / path) != digest:
-            raise ValueError('locally measured test source changed: ' + path)
+    revisions, revision_proof = timing_source_revisions(tree, evidence, source_revisions, final_head)
     local_files = set(evidence['local']['file_seconds'])
     observed = defaultdict(deque)
     for row in prior['cases']:
@@ -347,7 +435,9 @@ def projection_rows(tree, full, plugin, weights, evidence_path):
     for node in ordinary:
         if observed[node]:
             row = observed[node].popleft()
-            rows.append({**row, 'timing_basis': 'observed'})
+            revision = revisions.get(row['file'])
+            rows.append({**row, 'timing_basis': 'observed_prior_test_revision' if revision else 'observed',
+                         **({'source_revision': revision} if revision else {})})
         else:
             module = node.split('::', 1)[0]
             row = {'nodeid': node, 'file': module, 'seconds': estimated[module] / counts[module],
@@ -365,6 +455,8 @@ def projection_rows(tree, full, plugin, weights, evidence_path):
     return rows, allowance, {'evidence': str(evidence_path), 'sha256': sha(evidence_path),
         'prior_evidence': str(prior_path), 'prior_sha256': sha(prior_path),
         'empirical_allowance': projection, 'unmeasured_cases': fallbacks,
+        'reviewed_source_revisions': revision_proof,
+        'prior_test_revision_cases': [row for row in rows if row['timing_basis'] == 'observed_prior_test_revision'],
         'unused_prior_observations': [row for queue in observed.values() for row in queue],
         'fallback_limit': 'Equal per-case file share is an explicit assumption, not a measured bound or CI guarantee.'}
 
@@ -381,7 +473,8 @@ def partitions(args):
     current = plugin.read_weights(args.tree / 'utils/ci_test_durations.json')
     old_raw = git(args.tree, 'show', BASELINES['main'] + ':utils/ci_test_durations.json')
     old = json.loads(old_raw)['file_seconds']
-    rows, allowance, timing_proof = projection_rows(args.tree, full, plugin, current, args.timing_evidence)
+    rows, allowance, timing_proof = projection_rows(args.tree, full, plugin, current,
+        args.timing_evidence, args.timing_source_revisions, args.head)
     ordinary = plugin.partition_lanes(full)['ordinary']
     if Counter(row['nodeid'] for row in rows) != Counter(ordinary):
         raise ValueError('projection timing rows must join the full ordinary occurrence Counter')
@@ -472,6 +565,8 @@ def main():
             p.add_argument('--ordering', required=True)
         else:
             p.add_argument('--timing-evidence', type=Path, required=True)
+            p.add_argument('--timing-source-revisions', type=Path,
+                           help='Exact reviewed old/new source identities for reused prior-revision timings')
     p = sub.add_parser('report')
     p.add_argument('--plan', type=Path, required=True)
     p.add_argument('--manifest', type=Path, required=True)

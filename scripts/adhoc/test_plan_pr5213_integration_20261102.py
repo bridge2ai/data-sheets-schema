@@ -5,9 +5,13 @@ Inputs: sibling planning helper and unchanged sharding source. Output: unittest
 results only, no pytest or real production imports; temporary fixtures are owned.
 """
 from collections import Counter
+from copy import deepcopy
+import hashlib
 import importlib.util
+import json
 from pathlib import Path
 import sys
+import tempfile
 import types
 import unittest
 from unittest.mock import patch
@@ -102,6 +106,158 @@ class PlanningContracts(unittest.TestCase):
         self.assertEqual(len(set(helper.SG2)), 3)
         self.assertEqual({node.rsplit('[', 1)[-1] for node in helper.SG2},
                          {'none]', 'explicit]', 'conventional]'})
+
+
+class TimingSourceRevisionContracts(unittest.TestCase):
+    """Real local Git blobs/ancestry, isolated beneath an owned temp directory."""
+
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.tree = Path(self.temporary.name) / 'source'
+        self.tree.mkdir()
+        helper.git(self.tree, 'init', '-q', '-b', 'timing-contract')
+        (self.tree / 'tests').mkdir()
+        (self.tree / 'utils').mkdir()
+        self.path = 'tests/case.py'
+        self.control = 'tests/control.py'
+        self.old = b'def test_case():\n    assert True\n'
+        self.revised = b'def test_case():\n    assert True  # reviewed fixture adjustment\n'
+        (self.tree / self.path).write_bytes(self.old)
+        (self.tree / self.control).write_bytes(b'def test_control():\n    assert True\n')
+        self.weights = {'tests/case.py': 13, 'tests/control.py': 2}
+        self.weights_path = self.tree / 'utils/ci_test_durations.json'
+        self.weights_path.write_text(json.dumps({'schema_version': 1, 'file_seconds': self.weights}))
+        self.measured_head = self.commit('measured test source')
+        (self.tree / self.path).write_bytes(self.revised)
+        self.revised_head = self.commit('reviewed fixture source')
+        (self.tree / 'followup.txt').write_text('later evidence helper commit\n')
+        self.final_head = self.commit('final source')
+        patch_bytes = helper.git(self.tree, 'diff', '--no-ext-diff', '--no-textconv', '--no-renames',
+            '--no-color', '--binary', '--full-index', '--src-prefix=a/', '--dst-prefix=b/',
+            '--no-relative', '--unified=3', self.measured_head, self.revised_head, '--', self.path).encode()
+        self.entry = {'path': self.path, 'measured_commit': self.measured_head,
+            'measured_file_sha256': hashlib.sha256(self.old).hexdigest(),
+            'revised_commit': self.revised_head,
+            'revised_file_sha256': hashlib.sha256(self.revised).hexdigest(),
+            'patch_sha256': hashlib.sha256(patch_bytes).hexdigest(),
+            'issue': 'local fixture review', 'disposition': 'reuse_prior_revision_measurement'}
+        self.manifest = Path(self.temporary.name) / 'source-revisions.json'
+        self.write_manifest([self.entry])
+        self.evidence = {'round3_commit': self.measured_head,
+            'local': {'measured_commit': self.measured_head, 'test_source_sha256': {
+                self.path: self.entry['measured_file_sha256'], self.control: helper.sha(self.tree / self.control)}}}
+
+    def commit(self, message):
+        helper.git(self.tree, 'add', '--all')
+        helper.git(self.tree, '-c', 'user.name=Offline timing contract',
+            '-c', 'user.email=timing-contract@localhost', '-c', 'core.hooksPath=/dev/null',
+            'commit', '-q', '-m', message)
+        return helper.git(self.tree, 'rev-parse', 'HEAD').strip()
+
+    def write_manifest(self, rows):
+        self.manifest.write_text(json.dumps({'format': 'timing_source_revisions_v1', 'transitions': rows}))
+
+    def validate(self, evidence=None, head=None):
+        return helper.timing_source_revisions(self.tree, evidence or self.evidence,
+            self.manifest, head or self.final_head)
+
+    def test_exact_reviewed_ancestor_transition_is_not_a_current_measurement(self):
+        applications, proof = self.validate()
+        self.assertEqual(applications, {self.path: self.entry})
+        self.assertEqual(proof['sha256'], helper.sha(self.manifest))
+        self.assertEqual(proof['final_head'], self.final_head)
+        self.assertIn('does not establish timing equivalence', proof['scope'])
+
+    def test_missing_transition_is_refused(self):
+        with self.assertRaisesRegex(ValueError, 'without a reviewed transition'):
+            helper.timing_source_revisions(self.tree, self.evidence, None, self.final_head)
+        self.write_manifest([])
+        with self.assertRaisesRegex(ValueError, 'missing='):
+            self.validate()
+
+    def test_unused_or_duplicate_transition_is_refused(self):
+        unused = {**self.entry, 'path': self.control}
+        self.write_manifest([self.entry, unused])
+        with self.assertRaisesRegex(ValueError, 'extra='):
+            self.validate()
+        self.write_manifest([self.entry, self.entry])
+        with self.assertRaisesRegex(ValueError, 'duplicate timing source-revision transition'):
+            self.validate()
+
+    def test_duplicate_json_key_is_refused(self):
+        self.manifest.write_text('{"format":"timing_source_revisions_v1",'
+                                 '"format":"timing_source_revisions_v1","transitions":[]}')
+        with self.assertRaisesRegex(ValueError, 'duplicate timing source-revision key'):
+            self.validate()
+
+    def test_wrong_source_hash_or_patch_is_refused(self):
+        for key in ('measured_file_sha256', 'revised_file_sha256', 'patch_sha256'):
+            with self.subTest(key=key):
+                self.write_manifest([{**self.entry, key: '0' * 64}])
+                with self.assertRaises(ValueError):
+                    self.validate()
+
+    def test_git_blob_check_is_not_replaced_by_metadata_agreement(self):
+        evidence = deepcopy(self.evidence)
+        evidence['local']['test_source_sha256'][self.path] = '0' * 64
+        self.write_manifest([{**self.entry, 'measured_file_sha256': '0' * 64}])
+        with self.assertRaisesRegex(ValueError, 'Git blobs differ'):
+            self.validate(evidence=evidence)
+        self.write_manifest([{**self.entry, 'revised_commit': self.measured_head}])
+        with self.assertRaisesRegex(ValueError, 'Git blobs differ'):
+            self.validate()
+
+    def test_exact_blob_on_nonancestor_commit_is_refused(self):
+        tree = helper.git(self.tree, 'rev-parse', self.revised_head + '^{tree}').strip()
+        unrelated = helper.git(self.tree, '-c', 'user.name=Offline timing contract',
+            '-c', 'user.email=timing-contract@localhost', 'commit-tree', tree, '-m', 'unrelated source').strip()
+        self.write_manifest([{**self.entry, 'revised_commit': unrelated}])
+        with self.assertRaisesRegex(ValueError, 'not an ancestor'):
+            self.validate()
+
+    def test_additional_unreviewed_source_drift_is_refused(self):
+        (self.tree / self.path).write_bytes(self.revised + b'# unreviewed\n')
+        with self.assertRaisesRegex(ValueError, 'current source identity'):
+            self.validate()
+        (self.tree / self.path).write_bytes(self.revised)
+        (self.tree / self.control).write_text('def test_control():\n    assert False\n')
+        with self.assertRaisesRegex(ValueError, 'missing='):
+            self.validate()
+
+    def test_moving_final_reference_is_refused(self):
+        with self.assertRaisesRegex(ValueError, 'exact final source HEAD'):
+            self.validate(head=self.measured_head)
+
+    def test_all_thirteen_rows_keep_historical_timings_and_metadata(self):
+        prior_path = Path(self.temporary.name) / 'prior.json'
+        prior_path.write_text(json.dumps({'refreshed_weights_sha256': helper.sha(self.weights_path),
+            'cases': [], 'wall_projection': {'allowance_minutes': 2}}))
+        rows = [{'file': self.path, 'nodeid': self.path + f'::test_case[{index}]',
+                 'seconds': 1, 'origin': 'local_round3_junit', 'outcome': 'passed'} for index in range(13)]
+        rows.append({'file': self.control, 'nodeid': self.control + '::test_control',
+                     'seconds': 2, 'origin': 'local_round3_junit', 'outcome': 'passed'})
+        evidence = {**deepcopy(self.evidence), 'main_commit': self.measured_head,
+            'timings_sha256': helper.sha(self.weights_path), 'main_entries_and_provenance_preserved': True,
+            'cases': rows, 'prior_timing_evidence': {'path': str(prior_path),
+                'sha256': helper.sha(prior_path), 'wall_projection': {'allowance_minutes': 2}}}
+        evidence['local']['file_seconds'] = self.weights
+        evidence_path = Path(self.temporary.name) / 'timing-evidence.json'
+        evidence_path.write_text(json.dumps(evidence))
+        before = evidence_path.read_bytes(), self.weights_path.read_bytes()
+        full = [row['nodeid'] for row in rows] + list(plugin.API_CASE_LANES.values())
+        with patch.dict(helper.BASELINES, {'main': self.measured_head, 'round3': self.measured_head}):
+            projected, allowance, proof = helper.projection_rows(self.tree, full, plugin, self.weights,
+                evidence_path, self.manifest, self.final_head)
+        historical = [row for row in projected if row['timing_basis'] == 'observed_prior_test_revision']
+        self.assertEqual(len(historical), 13)
+        self.assertEqual([row['seconds'] for row in projected], [row['seconds'] for row in rows])
+        self.assertTrue(all(row['source_revision'] == self.entry for row in historical))
+        self.assertEqual(projected[-1]['timing_basis'], 'observed')
+        self.assertEqual(proof['prior_test_revision_cases'], historical)
+        self.assertEqual(allowance, 120)
+        self.assertEqual(before, (evidence_path.read_bytes(), self.weights_path.read_bytes()))
+        self.assertEqual(evidence['local']['test_source_sha256'][self.path], self.entry['measured_file_sha256'])
 
 
 if __name__ == '__main__':
