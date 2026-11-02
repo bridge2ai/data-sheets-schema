@@ -14082,6 +14082,621 @@ def _template_shape(statements):
     return ast.dump(TextShape().visit(copied), include_attributes=False)
 
 
+# Closed source-role grammars for a construction-identity precondition. These
+# describe operations, not function names or file hashes. Roles are unified with
+# actual definitions, imports, literal field sets and every registry writer.
+# As with the template grammar above, a harmless unrecognized refactor refuses.
+_PREFIX_IDENTITY_GRAMMARS = {
+    'guard': '''
+def _R_guard(spec):
+    binding = _R_lookup(spec)
+    if binding is None:
+        raise ValueError('missing')
+    if binding._R_historical:
+        if not spec._replay_only:
+            raise ValueError('replay')
+        return
+    if spec._replay_only:
+        raise ValueError('replay')
+    mirror = spec._registered_input_spellings
+    if binding._R_spellings_field is not None and mirror is None:
+        raise ValueError('missing')
+    bound = binding._R_spellings_field
+    if bound is None:
+        if mirror is not None or _R_provenance._R_predicate(vars(spec)):
+            raise ValueError('missing')
+        return
+    valid_roster = (mirror is bound and type(mirror) is tuple
+                   and len(mirror) == len(_R_fields)
+                   and all(type(row) is tuple and len(row) == 2
+                           and type(row[0]) is str and row[0] == name
+                           and (row[1] is None or type(row[1]) is str)
+                           for name, row in zip(_R_fields, mirror)))
+    if not valid_roster:
+        raise ValueError('replaced')
+    current = _R_spellings(spec)
+    changed = [name for (name, original), (_, value) in zip(bound, current) if value != original]
+    if changed:
+        raise ValueError('changed' + ', '.join(changed) + 'construct')
+    for name, original_type, original in binding._R_selectors_field:
+        value = getattr(spec, name)
+        if type(value) is not original_type or value != original:
+            raise ValueError(f'changed {name}; construct')
+    if binding._R_registration_field is not None and current != binding._R_registration_field:
+        raise ValueError('registration')
+''',
+    'lookup': '''
+def _R_lookup(spec):
+    saved = _R_registry.get(id(spec))
+    return saved[1] if saved is not None and saved[0]() is spec else None
+''',
+    'remember': '''
+def _R_remember(spec, binding):
+    identity = id(spec)
+    def forget(reference):
+        saved = _R_registry.get(identity)
+        if saved is not None and saved[0] is reference:
+            del _R_registry[identity]
+    _R_registry[identity] = (_R_weakref.ref(spec, forget), binding)
+''',
+    'spellings': '''
+def _R_spellings(spec):
+    result = []
+    for name in _R_fields:
+        value = getattr(spec, name)
+        if value is not None and type(value) not in (str, _R_path_type):
+            raise ValueError(f'input {name} exact ' f'{_R_path_type.__name__}; new')
+        result.append((name, None if value is None else _R_os.fspath(value)))
+    return tuple(result)
+''',
+    'capture': '''
+def _R_capture(spec, registration):
+    selected = _R_provenance._R_predicate(vars(spec))
+    spellings = _R_spellings(spec) if selected else None
+    selectors = tuple((name, type(getattr(spec, name)), getattr(spec, name))
+                      for name in _R_selectors) if selected else ()
+    registered = None
+    if registration is not None:
+        inputs = registration['inputs']
+        registered = tuple((name, None if inputs[pin] is None else inputs[pin]['path'])
+                           for name, pin in (('bundle', 'bundle'), ('manifest', 'source_manifest'),
+                                             ('chunk_manifest', 'chunk_manifest')))
+        if spellings != registered:
+            raise ValueError('registration')
+    spec._registered_input_spellings = spellings
+    _R_remember(spec, _R_record(spellings, selectors, registered))
+''',
+    'replay': '''
+def _R_replay(spec):
+    _R_remember(spec, _R_record(None, (), None, _R_historical=True))
+''',
+    'copy': '''
+def __copy__(self):
+    copied = object.__new__(type(self))
+    copied.__dict__.update(self.__dict__)
+    binding = _R_lookup(self)
+    if binding is not None:
+        _R_remember(copied, binding)
+    return copied
+''',
+    'deepcopy': '''
+def __deepcopy__(self, memo):
+    copied = object.__new__(type(self))
+    memo[id(self)] = copied
+    copied.__dict__.update(_R_copy.deepcopy(self.__dict__, memo))
+    binding = _R_lookup(self)
+    if binding is not None:
+        _R_remember(copied, binding)
+    return copied
+''',
+    'predicate': '''
+def _R_predicate(selection):
+    if not isinstance(selection, dict):
+        return False
+    shared = selection.get('shared')
+    native = selection.get('native')
+    return (selection.get('explicit') is True
+            or (type(shared) is int and shared != 0 and selection.get('registration') is not None)
+            or (type(native) is int and native != 0))
+''',
+}
+
+
+def _prefix_normal_form(node):
+    """Alpha-rename local bindings; retain external operations and AST shape.
+
+    Only diagnostic string contents are irrelevant to a discarded precondition.
+    String positions, calls inside formatted strings and their control remain.
+    """
+    copied = ast.parse(ast.unparse(node)).body[0]
+    class Normalize(ast.NodeTransformer):
+        def __init__(self):
+            self.scopes = []
+
+        def visit_FunctionDef(self, n):
+            # Keep a function's external role. A nested function is a local.
+            if self.scopes and n.name in self.scopes[-1]:
+                n.name = self.scopes[-1][n.name]
+            bound = [a.arg for a in n.args.posonlyargs + n.args.args + n.args.kwonlyargs]
+            if n.args.vararg:
+                bound.append(n.args.vararg.arg)
+            if n.args.kwarg:
+                bound.append(n.args.kwarg.arg)
+            def locals_in(items):
+                for item in items:
+                    if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                        yield item.name
+                    else:
+                        for child in ast.iter_child_nodes(item):
+                            if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Store):
+                                yield child.id
+                            yield from locals_in([child])
+            bound += list(locals_in(n.body))
+            scope = {name: f'_local_{i}' for i, name in enumerate(dict.fromkeys(bound))}
+            self.scopes.append(scope)
+            for a in n.args.posonlyargs + n.args.args + n.args.kwonlyargs:
+                a.arg = scope[a.arg]; a.annotation = None
+            if n.args.vararg:
+                n.args.vararg.arg = scope[n.args.vararg.arg]; n.args.vararg.annotation = None
+            if n.args.kwarg:
+                n.args.kwarg.arg = scope[n.args.kwarg.arg]; n.args.kwarg.annotation = None
+            n.returns = None
+            n.body = [s for s in n.body if not (isinstance(s, ast.Expr)
+                      and isinstance(s.value, ast.Constant) and type(s.value.value) is str)]
+            # Arguments have already been renamed; visit body/defaults only.
+            n.body = [self.visit(s) for s in n.body]
+            n.args.defaults = [self.visit(s) for s in n.args.defaults]
+            n.args.kw_defaults = [self.visit(s) if s else None for s in n.args.kw_defaults]
+            self.scopes.pop()
+            return n
+
+        def visit_Name(self, n):
+            for scope in reversed(self.scopes):
+                if n.id in scope:
+                    n.id = scope[n.id]; break
+            return n
+
+        def visit_Constant(self, n):
+            if type(n.value) is str:
+                n.value = '<text>'
+            return n
+    return Normalize().visit(copied)
+
+
+class _SourceDomainPrecondition:
+    """Closed source-domain certificate, not universal Python runtime purity.
+
+    The domain is the declared primitive/standard-Path RunSpec with ordinary
+    dataclass fields and the proved capture grammar. Malformed/custom objects,
+    arbitrary monkeypatches and hostile Python outside these source bindings
+    are excluded explicitly in the returned evidence. No production code runs.
+    """
+    def __init__(self, root, tree, resolver):
+        self.root, self.tree, self.resolver = root, tree, resolver
+        self.path = _resolved(root / RUNNER)
+        self.roles, self.sites, self.active = {}, [], set()
+        self.parents = _parents(tree)
+        self.fields = {}
+
+    def fail(self, why):
+        raise _not_derived('the selected prompt adaptation', 'precondition: ' + why)
+
+    def unique(self, tree, name, kind):
+        matches = [n for n in tree.body if isinstance(n, kind) and n.name == name]
+        if len(matches) != 1:
+            self.fail(f'{name} has no unique source definition')
+        node = matches[0]
+        if getattr(node, 'decorator_list', None) and kind is ast.FunctionDef:
+            self.fail(f'{name} is decorated')
+        for stmt in tree.body:
+            if stmt is node:
+                continue
+            if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                if stmt.name == name:
+                    self.fail(f'{name} is rebound')
+                continue
+            if isinstance(stmt, (ast.Import, ast.ImportFrom)) and any(
+                    (a.asname or a.name.split('.')[0]) == name for a in stmt.names):
+                self.fail(f'{name} is rebound by an import')
+            if any(isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del))
+                   for n in ast.walk(stmt)):
+                self.fail(f'{name} is rebound')
+        for fn in ast.walk(tree):
+            if isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)) and any(
+                    isinstance(n, ast.Global) and name in n.names for n in ast.walk(fn)):
+                self.fail(f'{name} has a global writer')
+        return node
+
+    def builtin(self, tree, name):
+        # Do not borrow a builtin that this module shadows, including a global
+        # writer in a different function. Local shadows are rejected by grammar.
+        for stmt in tree.body:
+            if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                if stmt.name == name:
+                    self.fail(f'builtin {name} is shadowed')
+            elif isinstance(stmt, (ast.Import, ast.ImportFrom)):
+                if any((a.asname or a.name.split('.')[0]) == name for a in stmt.names):
+                    self.fail(f'builtin {name} is shadowed')
+            elif any(isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del))
+                     for n in ast.walk(stmt)):
+                self.fail(f'builtin {name} is shadowed')
+        if any(isinstance(n, ast.Global) and name in n.names for n in ast.walk(tree)):
+            self.fail(f'builtin {name} has a global writer')
+
+    def imported(self, tree, name, *, module, member=None):
+        imports = [n for n in tree.body if isinstance(n, (ast.Import, ast.ImportFrom))
+                   and any((a.asname or a.name.split('.')[0]) == name for a in n.names)]
+        if len(imports) != 1:
+            self.fail(f'{name} has no unique visible import')
+        node = imports[0]
+        aliases = [a for a in node.names if (a.asname or a.name.split('.')[0]) == name]
+        if (len(aliases) != 1 or (member is None and not (
+                isinstance(node, ast.Import) and aliases[0].name == module))
+                or (member is not None and not (isinstance(node, ast.ImportFrom)
+                    and node.level == 0 and node.module == module and aliases[0].name == member))):
+            self.fail(f'{name} is not the required source import')
+        for stmt in tree.body:
+            if stmt is node:
+                continue
+            if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                if stmt.name == name:
+                    self.fail(f'import {name} is rebound')
+            elif any(isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del))
+                     for n in ast.walk(stmt)):
+                self.fail(f'import {name} is rebound')
+        if any(isinstance(n, ast.Global) and name in n.names for n in ast.walk(tree)):
+            self.fail(f'import {name} has a global writer')
+
+    def module_member(self, tree, name, member):
+        parents = _parents(tree)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Name) and node.id == name and isinstance(node.ctx, ast.Load):
+                parent = parents.get(id(node))
+                if not isinstance(parent, ast.Attribute) or parent.value is not node:
+                    self.fail(f'module {name} escapes through an alias or opaque use')
+                if parent.attr in (member, '__dict__') and isinstance(parent.ctx, (ast.Store, ast.Del)):
+                    self.fail(f'{name}.{member} is rebound')
+                if parent.attr == '__dict__':
+                    self.fail(f'{name} has reflective access')
+
+    def global_value(self, name):
+        values = []
+        for node in self.tree.body:
+            if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id == name:
+                values.append((node, node.value))
+            elif isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+                values.append((node, node.value))
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node.name == name:
+                self.fail(f'{name} is not a literal source binding')
+        if len(values) != 1:
+            self.fail(f'{name} is not uniquely initialized')
+        if any(isinstance(n, ast.Global) and name in n.names for n in ast.walk(self.tree)):
+            self.fail(f'{name} has a global writer')
+        return values[0]
+
+    def record_fields(self, name, *, frozen=False):
+        node = self.unique(self.tree, name, ast.ClassDef)
+        if node.bases or node.keywords or len(node.decorator_list) != 1:
+            self.fail(f'{name} is not a plain dataclass')
+        decorator = node.decorator_list[0]
+        callee = decorator.func if isinstance(decorator, ast.Call) else decorator
+        if not isinstance(callee, ast.Name):
+            self.fail('dataclass decorator is opaque')
+        self.imported(self.tree, callee.id, module='dataclasses', member='dataclass')
+        if frozen and ast.unparse(decorator) != callee.id + '(frozen=True)':
+            self.fail('registry record is not frozen')
+        if not frozen and not isinstance(decorator, ast.Name):
+            self.fail('unsupported dataclass options')
+        fields = {n.target.id: n.annotation for n in node.body
+                  if isinstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name)}
+        if len(fields) != sum(isinstance(n, ast.AnnAssign) for n in node.body):
+            self.fail('ambiguous dataclass fields')
+        if any(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name in
+               ('__getattribute__', '__getattr__', '__eq__', '__ne__', '__bool__') for n in node.body):
+            self.fail('custom dataclass dispatch')
+        for stmt in node.body:
+            if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)) and stmt.name in fields:
+                self.fail('a declared field is also a descriptor')
+        for n in ast.walk(self.tree):
+            if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name) and n.value.id == name:
+                if isinstance(n.ctx, (ast.Store, ast.Del)) or n.attr == '__dict__':
+                    self.fail('dataclass field binding is changed')
+        if frozen and any(not isinstance(n, (ast.AnnAssign, ast.Expr)) for n in node.body):
+            self.fail('registry record has additional behavior')
+        return node, fields
+
+    def unify(self, role, node):
+        expected = _prefix_normal_form(ast.parse(_PREFIX_IDENTITY_GRAMMARS[role]).body[0])
+        actual = _prefix_normal_form(node)
+        def same(a, b):
+            if isinstance(a, ast.AST):
+                return type(a) is type(b) and all(same(getattr(a, k), getattr(b, k)) for k in a._fields)
+            if isinstance(a, list):
+                return isinstance(b, list) and len(a) == len(b) and all(same(x, y) for x, y in zip(a, b))
+            if isinstance(a, str) and a.startswith('_R_'):
+                old = self.roles.setdefault(a, b)
+                return isinstance(b, str) and b == old
+            return a == b
+        if not same(expected, actual):
+            self.fail(f'{role} does not satisfy the closed identity-state grammar')
+        self.sites.append(f'{RUNNER}:{node.lineno}')
+
+    def primitive_annotation(self, annotation, *, paths=False):
+        if isinstance(annotation, ast.Constant) and annotation.value is None:
+            return True
+        if isinstance(annotation, ast.BinOp) and isinstance(annotation.op, ast.BitOr):
+            return self.primitive_annotation(annotation.left, paths=paths) and self.primitive_annotation(annotation.right, paths=paths)
+        if isinstance(annotation, ast.Name):
+            if annotation.id in ('str', 'int', 'bool', 'float', 'bytes', 'object'):
+                self.builtin(self.tree, annotation.id)
+                # object is permitted only for an input path's AUTO sentinel;
+                # the spelling grammar rejects it before os.fspath.
+                return annotation.id != 'object' or paths
+            if paths:
+                try:
+                    self.imported(self.tree, annotation.id, module='pathlib', member='Path')
+                except ConfigError:
+                    return False
+                return True
+        return False
+
+    def identity_certificate(self, guard):
+        self.unify('guard', guard)
+        r = self.roles
+        lookup = self.unique(self.tree, r['_R_lookup'], ast.FunctionDef)
+        self.unify('lookup', lookup)
+        spellings = self.unique(self.tree, r['_R_spellings'], ast.FunctionDef)
+        self.unify('spellings', spellings)
+        registry, initial = self.global_value(r['_R_registry'])
+        if not isinstance(initial, ast.Dict) or initial.keys:
+            self.fail('identity registry is not an initially empty exact dict')
+        writers = []
+        for n in ast.walk(self.tree):
+            if isinstance(n, ast.Subscript) and isinstance(n.value, ast.Name) and n.value.id == r['_R_registry'] and isinstance(n.ctx, ast.Store):
+                owner = n
+                while owner is not self.tree and not (isinstance(owner, ast.FunctionDef) and self.parents.get(id(owner)) is self.tree):
+                    owner = self.parents[id(owner)]
+                writers.append(owner)
+        if len(writers) != 1 or not isinstance(writers[0], ast.FunctionDef):
+            self.fail('registry has an additional or unproved writer')
+        remember = self.unique(self.tree, writers[0].name, ast.FunctionDef)
+        self.unify('remember', remember)
+        # Every reference to the registry is closed over lookup/get, this exact
+        # writer and its identity-checked weakref cleanup; alias escapes refuse.
+        allowed = {id(n) for fn in (lookup, remember) for n in ast.walk(fn)} | {id(n) for n in ast.walk(registry)}
+        if any(isinstance(n, ast.Name) and n.id == r['_R_registry'] and id(n) not in allowed for n in ast.walk(self.tree)):
+            self.fail('registry escapes its certified read/write closure')
+        record_arg = remember.args.args[1].annotation
+        if not isinstance(record_arg, ast.Name):
+            self.fail('registry writer has no record source role')
+        r['_R_record'] = record_arg.id
+        record, record_fields = self.record_fields(record_arg.id, frozen=True)
+        slots = [r[k] for k in ('_R_spellings_field', '_R_selectors_field', '_R_registration_field', '_R_historical')]
+        if list(record_fields) != slots or ast.unparse(record_fields[slots[3]]) != 'bool':
+            self.fail('registry record fields differ from the certified roles')
+        declarations = [n for n in record.body if isinstance(n, ast.AnnAssign)]
+        if any(n.value is not None for n in declarations[:-1]) or not (
+                isinstance(declarations[-1].value, ast.Constant) and declarations[-1].value.value is False):
+            self.fail('registry record has an unproved default value')
+        callers = []
+        for n in ast.walk(self.tree):
+            if isinstance(n, ast.Name) and n.id == remember.name and isinstance(n.ctx, ast.Load):
+                parent = self.parents[id(n)]
+                if not isinstance(parent, ast.Call) or parent.func is not n:
+                    self.fail('registry writer escapes through an alias')
+                owner = parent
+                while not isinstance(owner, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Module)):
+                    owner = self.parents[id(owner)]
+                callers.append(owner)
+        if len(callers) != 4 or len({id(n) for n in callers}) != 4:
+            self.fail('registry writers are not a closed construction/copy set')
+        for caller in callers:
+            if caller.name in ('__copy__', '__deepcopy__'):
+                self.unify('copy' if caller.name == '__copy__' else 'deepcopy', caller)
+                if self.parents.get(id(caller)) is not self.spec_class:
+                    self.fail('copy origin is outside the declared spec')
+            else:
+                non_doc = [n for n in caller.body if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant))]
+                self.unify('replay' if len(non_doc) == 1 else 'capture', caller)
+                self.unique(self.tree, caller.name, ast.FunctionDef)
+        # No alternate construction of a purported frozen record or call alias.
+        annotations = {id(n) for owner in ast.walk(self.tree) for attr in ('annotation', 'returns')
+                       if isinstance(getattr(owner, attr, None), ast.AST) for n in ast.walk(getattr(owner, attr))}
+        for n in ast.walk(self.tree):
+            if isinstance(n, ast.Name) and n.id == record.name and isinstance(n.ctx, ast.Load) and id(n) not in annotations:
+                p = self.parents[id(n)]
+                if not isinstance(p, ast.Call) or p.func is not n or not any(n is x for fn in callers for x in ast.walk(fn)):
+                    self.fail('record construction escapes the capture grammar')
+        literal_sets = {}
+        for key, paths in (('_R_fields', True), ('_R_selectors', False)):
+            _, expression = self.global_value(r[key])
+            try:
+                names = ast.literal_eval(expression)
+            except (ValueError, TypeError):
+                self.fail('captured field roster is not literal')
+            if (type(names) is not tuple or not names or len(set(names)) != len(names)
+                    or any(type(name) is not str or name not in self.fields
+                           or not self.primitive_annotation(self.fields[name], paths=paths) for name in names)):
+                self.fail('captured names do not select ordinary declared primitive/path fields')
+            literal_sets[key] = list(names)
+        # Mirror/replay fields are also ordinary declared dataclass fields.
+        if '_registered_input_spellings' not in self.fields or ast.unparse(self.fields.get('_replay_only', ast.Constant(None))) != 'bool':
+            self.fail('mirror/replay field domain is not declared')
+        for key, module, member in (('_R_weakref', 'weakref', 'ref'), ('_R_os', 'os', 'fspath'), ('_R_copy', 'copy', 'deepcopy')):
+            self.imported(self.tree, r[key], module=module)
+            self.module_member(self.tree, r[key], member)
+        _, expression = self.global_value(r['_R_path_type'])
+        if not (isinstance(expression, ast.Call) and isinstance(expression.func, ast.Name)
+                and expression.func.id == 'type' and len(expression.args) == 1 and not expression.keywords
+                and isinstance(expression.args[0], ast.Call) and not expression.args[0].args
+                and not expression.args[0].keywords and isinstance(expression.args[0].func, ast.Name)):
+            self.fail('path type is not derived from the standard Path constructor')
+        self.imported(self.tree, expression.args[0].func.id, module='pathlib', member='Path')
+        provenance = r['_R_provenance']
+        self.imported(self.tree, provenance, module='data_sheets_schema', member='provenance')
+        self.module_member(self.tree, provenance, r['_R_predicate'])
+        target = _resolved(self.root / 'src/data_sheets_schema/provenance.py')
+        other = _tree(target)
+        predicate = self.unique(other, r['_R_predicate'], ast.FunctionDef)
+        self.unify('predicate', predicate)
+        self.sites[-1] = f'{_rel(self.root, target)}:{predicate.lineno}'
+        for name in ('vars', 'type', 'len', 'tuple', 'str', 'all', 'zip', 'getattr', 'id', 'ValueError', 'object'):
+            self.builtin(self.tree, name)
+        for name in ('isinstance', 'dict', 'type', 'int'):
+            self.builtin(other, name)
+        return {'grammar': 'closed construction-identity registry and capture roles',
+                'input_fields': literal_sets['_R_fields'], 'selector_fields': literal_sets['_R_selectors']}
+
+    def simple(self, fn, values, *, discarded=False):
+        """Finite local effect grammar; borrowed containers are never written.
+
+        This deliberately does not model arbitrary methods, callbacks, imports,
+        iteration protocols or Python control flow. Fresh lists can be built but
+        cannot be stored in a borrowed object or escape a discarded call.
+        """
+        if fn.name in self.active:
+            self.fail('recursive precondition')
+        self.unique(self.tree, fn.name, ast.FunctionDef)
+        if (fn.args.posonlyargs or fn.args.kwonlyargs or fn.args.defaults or fn.args.vararg
+                or fn.args.kwarg or len(fn.args.args) != len(values)):
+            self.fail('unsupported precondition signature')
+        env = dict(zip((n.arg for n in fn.args.args), values))
+        self.active.add(fn.name)
+        returns = []
+        def expr(n):
+            if isinstance(n, ast.Constant):
+                return ('none' if n.value is None else 'primitive',)
+            if isinstance(n, ast.Name):
+                if n.id in env:
+                    return env[n.id]
+                if n.id in ('str', 'int', 'bool', 'tuple', 'dict', 'float', 'bytes'):
+                    self.builtin(self.tree, n.id); return ('primitive',)
+                self.fail('unproved expression binding ' + n.id)
+            if isinstance(n, ast.Attribute):
+                value = expr(n.value)
+                if value == ('spec',) and n.attr in self.fields:
+                    annotation = self.fields[n.attr]
+                    if (not any(isinstance(part, ast.Name) and part.id == 'object' for part in ast.walk(annotation))
+                            and self.primitive_annotation(annotation, paths=True)):
+                        return ('primitive',)
+                    if isinstance(annotation, ast.Name) and annotation.id in ('dict', 'list'):
+                        self.builtin(self.tree, annotation.id); return ('borrowed',)
+                self.fail('descriptor or unproved borrowed attribute')
+            if isinstance(n, ast.List):
+                for item in n.elts:
+                    if expr(item)[0] not in ('primitive', 'none'):
+                        self.fail('fresh container holds unproved values')
+                return ('fresh-list', id(n))
+            if isinstance(n, ast.Tuple):
+                if len(n.elts) > 64 or any(expr(x)[0] not in ('primitive', 'none') for x in n.elts):
+                    self.fail('unproved finite tuple')
+                return ('finite', len(n.elts))
+            if isinstance(n, ast.Compare):
+                operands = [expr(n.left)] + [expr(x) for x in n.comparators]
+                if any(x[0] not in ('primitive', 'none') for x in operands):
+                    self.fail('comparison is outside the primitive source domain')
+                return ('primitive',)
+            if isinstance(n, ast.BoolOp):
+                if any(expr(x)[0] not in ('primitive', 'none') for x in n.values):
+                    self.fail('unproved truthiness')
+                return ('primitive',)
+            if isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.Not):
+                if expr(n.operand)[0] not in ('primitive', 'none'):
+                    self.fail('unproved truthiness')
+                return ('primitive',)
+            if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and not n.keywords:
+                args = [expr(x) for x in n.args]
+                if n.func.id in env:
+                    self.fail('dynamic or aliased precondition call')
+                if n.func.id == 'len' and len(args) == 1 and args[0][0] in ('fresh-list', 'finite', 'primitive'):
+                    self.builtin(self.tree, 'len'); return ('primitive',)
+                target = self.unique(self.tree, n.func.id, ast.FunctionDef)
+                return self.simple(target, args)
+            self.fail('expression is outside the finite precondition grammar')
+        def block(statements):
+            for s in statements:
+                if isinstance(s, ast.Expr) and isinstance(s.value, ast.Constant) and type(s.value.value) is str:
+                    continue
+                if isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Name):
+                    env[s.targets[0].id] = expr(s.value)
+                elif isinstance(s, ast.If):
+                    if expr(s.test)[0] not in ('primitive', 'none'):
+                        self.fail('unproved branch condition')
+                    before = dict(env); block(s.body); left = dict(env)
+                    env.clear(); env.update(before); block(s.orelse)
+                    if left != env:
+                        self.fail('branch-dependent local ownership')
+                elif isinstance(s, ast.For) and not s.orelse and isinstance(s.target, ast.Name):
+                    if expr(s.iter)[0] != 'finite':
+                        self.fail('unbounded or borrowed iteration')
+                    env[s.target.id] = ('primitive',); block(s.body)
+                elif isinstance(s, ast.Return):
+                    value = ('none',) if s.value is None else expr(s.value)
+                    if discarded and value != ('none',):
+                        self.fail('discarded precondition returns replacement data')
+                    returns.append(value)
+                elif isinstance(s, ast.Raise) and s.cause is None and isinstance(s.exc, ast.Call) and isinstance(s.exc.func, ast.Name) and s.exc.func.id == 'ValueError' and not s.exc.keywords:
+                    if s.exc.func.id in env:
+                        self.fail('exception constructor is a local alias')
+                    self.builtin(self.tree, 'ValueError')
+                    if any(expr(x)[0] not in ('primitive', 'none') for x in s.exc.args):
+                        self.fail('unproved exception payload')
+                elif isinstance(s, ast.Expr) and isinstance(s.value, ast.Call) and isinstance(s.value.func, ast.Attribute) and s.value.func.attr == 'append' and len(s.value.args) == 1 and not s.value.keywords:
+                    if expr(s.value.func.value)[0] != 'fresh-list' or expr(s.value.args[0])[0] not in ('primitive', 'none'):
+                        self.fail('append writes borrowed state')
+                elif isinstance(s, ast.Expr) and isinstance(s.value, ast.Call):
+                    if expr(s.value) != ('none',):
+                        self.fail('opaque discarded result')
+                elif isinstance(s, ast.Pass):
+                    pass
+                else:
+                    self.fail('statement mutates borrowed state or has unsupported control')
+        try:
+            block(fn.body)
+            if returns and any(value != returns[0] for value in returns):
+                self.fail('inconsistent helper result domain')
+            self.sites.append(f'{RUNNER}:{fn.lineno}')
+            return returns[0] if returns else ('none',)
+        finally:
+            self.active.remove(fn.name)
+
+    def certify(self, call):
+        if (not isinstance(call.func, ast.Name) or len(call.args) != 1 or call.keywords
+                or not isinstance(call.args[0], ast.Name) or call.args[0].id != 'spec'):
+            self.fail('prefix is not a direct discarded call on the unchanged spec')
+        params = self.resolver.args.posonlyargs + self.resolver.args.args
+        spec = next((a for a in params if a.arg == 'spec'), None)
+        if spec is None or not isinstance(spec.annotation, ast.Name):
+            self.fail('spec has no declared dataclass source role')
+        self.spec_class, self.fields = self.record_fields(spec.annotation.id)
+        guard = self.unique(self.tree, call.func.id, ast.FunctionDef)
+        # Binding at the call itself cannot be borrowed from a global function
+        # when the resolver assigns, imports or captures the same local name.
+        if call.func.id in {a.arg for a in params} or any(
+                isinstance(n, ast.Name) and n.id == call.func.id and isinstance(n.ctx, (ast.Store, ast.Del))
+                or isinstance(n, (ast.Import, ast.ImportFrom)) and any((a.asname or a.name.split('.')[0]) == call.func.id for a in n.names)
+                for n in ast.walk(self.resolver)):
+            self.fail('callee is shadowed at the prefix call')
+        # Complex registry proofs are selected by an independently unified
+        # grammar, never a helper name. Failed role unification is not permission
+        # to skip: the finite grammar must then prove the whole helper instead.
+        try:
+            self.unify('guard', guard)
+        except ConfigError:
+            self.roles.clear(); self.sites.clear()
+            self.simple(guard, [('spec',)], discarded=True)
+            detail = {'grammar': 'finite primitive checks and fresh local containers'}
+        else:
+            self.roles.clear(); self.sites.clear()
+            detail = self.identity_certificate(guard)
+        return {**detail, 'call': f'{RUNNER}:{call.lineno}', 'source': sorted(set(self.sites)),
+                'basis': 'source-domain precondition certificate',
+                'assumptions': ['source-declared primitive/standard-Path fields and plain dataclasses',
+                                'trusted standard-library semantics and the certified capture roles'],
+                'excluded': ['malformed or custom runtime field values',
+                             'arbitrary hostile Python or runtime monkeypatching outside these source bindings']}
+
+
 def _selected_template(root, tree, selection, body):
     """Derive the selected base text from one proven section-selection adapter.
 
@@ -14095,6 +14710,10 @@ def _selected_template(root, tree, selection, body):
     if fn is None:
         raise fail('resolve_prompt is missing')
     statements = [n for n in fn.body if not isinstance(n, ast.Expr) or not isinstance(n.value, ast.Constant)]
+    preconditions = []
+    while statements and isinstance(statements[0], ast.Expr) and isinstance(statements[0].value, ast.Call):
+        preconditions.append(_SourceDomainPrecondition(root, tree, fn).certify(statements[0].value))
+        statements = statements[1:]
     # A standalone legacy adapter fixture need not define an executor. Without
     # one, no new branch may be skipped; full api_meaning still requires it.
     early = _early_axis_refusal(tree) if _function(tree, 'execute') is not None else {}
@@ -14266,7 +14885,8 @@ def _selected_template(root, tree, selection, body):
     return adapted, {'field': branch.test.attr, 'version': version, 'policy_asset': asset,
                      'basis': 'Adapted base prompt and selected policy, before runtime substitutions and request additions.',
                      'evidence': [f'{RUNNER}:{call.lineno}', f'{_rel(root, path)}:{adapter.lineno}',
-                                  f'{_rel(root, path)}:{route.lineno}', asset]}
+                                  f'{_rel(root, path)}:{route.lineno}', asset],
+                     **({'preconditions': preconditions} if preconditions else {})}
 
 
 def _selected_request_additions(root, tree, selection):

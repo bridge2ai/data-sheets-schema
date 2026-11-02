@@ -1,0 +1,95 @@
+# D76 T8 source-certificate review: R1–R7
+
+Offline issue drafts for PR #5213 and AGY publication, 2026-11-02. No GitHub
+issues have been created. Findings below refer to scanner draft SHA-256
+`b69a4333acdfd5adee5d09111b90cc36d8d3c9f025225d652fc65fa86dd3f08f`.
+Status: static adversarial review; supplemental regressions prepared; runtime
+reproduction and repairs pending. Do not close these from this document alone.
+
+The bounded certificate explicitly assumes primitive/standard-Path fields,
+ordinary dataclasses and trusted standard-library semantics. These findings
+concern visible source bindings or behavior inside that scope, not arbitrary
+hostile Python outside the inspected source.
+
+## R1 — finite-loop analysis loses ownership after the first iteration
+
+Priority: high; must address. `simple()` analyzes a finite loop body only once.
+A fresh list may be appended to, then rebound to a declared borrowed list field;
+the second actual iteration mutates the borrowed list. The supplemental fixture
+uses a valid `inputs: list` field, avoiding an unrelated invalid dict method.
+Require stable ownership across iterations or bounded abstract unrolling.
+
+## R2 — keyword-only and variadic resolver parameters shadow the source callee
+
+Priority: high; must address. `certify()` checks positional resolver arguments
+but omits keyword-only, vararg and kwargs bindings. A keyword-only callable can
+therefore replace the analyzed top-level helper. Variadic bindings are additional
+refusal controls: their tuple/dict values are not certified callables, and must
+not borrow a same-named global function's proof.
+
+## R3 — callable and class aliases can invalidate the analyzed definition
+
+Priority: high; must address. `unique()` checks Name stores but misses visible
+callable attribute mutation such as replacing a helper's `__code__`, including
+through an alias or a receiving helper. An imported predicate member can also
+escape to an alias whose `__code__` is replaced by a function that mutates the
+selection dictionary. The old pure AST is then no longer the callee's behavior.
+Class aliases can similarly install field descriptors beyond
+the direct `RunSpec.field` check. A module-alias `os.fspath` replacement control
+is included; an already-conservative refusal of that control is not a newly
+reproduced hole. Close the relevant explicit mutation and escape paths.
+
+## R4 — literal field rosters and standard path roles have unexamined writers
+
+Priority: high; must address. `global_value()` considers only direct module-body
+assignments and explicit `global` declarations. Compound-statement assignments
+and imports can replace a roster after its accepted literal initialization.
+The roster substitutions select the existing `RunSpec.base_prompt` property,
+rather than an ordinary declared field; no nonexistent attribute is needed.
+The standard path-type role can also be replaced or have `__fspath__` changed
+while the certificate continues citing the original declaration. The tests use
+a real adjacent source module for import rebinding, and valid path subclasses.
+Verify all source bindings and visible member mutation of these trusted roles.
+
+## R5 — field annotations and frozen dataclasses do not rule out descriptors
+
+Priority: high; must address. `record_fields()` misses descriptor-valued field
+defaults, later class assignments and behavior-bearing class expressions.
+It also permits a custom `__dict__` descriptor although the certified predicate
+uses `vars(spec)`. A frozen record may acquire custom dispatch through a class
+expression. The descriptor fixture raises `AttributeError` for class access,
+so dataclasses treats it as a required field; no invalid default-ordering trick
+is used. Validate class-body/default behavior and every relevant read protocol.
+
+## R6 — the registry lookup result can escape its supposedly closed writers
+
+Priority: high; must address. Direct registry-name references are closed, but an
+extra caller can obtain the record through the approved lookup and mutate it
+using `object.__setattr__`, without naming the registry. The record is therefore
+not protected by checking only the writer and raw dictionary accesses. Prove
+the lookup caller/consumer closure as well as construction and copy paths.
+
+## R7 — alpha normalization conflates nested and captured bindings
+
+Priority: medium; must address certificate correctness. Every nested function
+reuses `_local_0`, `_local_1`, and so on. Replacing weakref-cleanup comparison
+`saved[0] is reference` with `saved[0] is spec` gives the same normalized name for
+the inner parameter and captured outer spec. They are not alpha-equivalent:
+the altered closure retains the spec and no longer performs the intended
+identity-checked cleanup. Use lexical scope-qualified identities; preserve
+comprehension/captured-variable boundaries too.
+
+## Supplemental evidence contract
+
+`tests/test_wave7_5213_d76_specificity_prefix_review.py` defines 21 source-only
+cases covering these seven families. The original frozen 52-case module remains
+unchanged. Every mutation first derives the unchanged fixture and compares its
+adapted output with the established no-prefix fixture. A failed calibration
+means the unsafe mutation has not yet been tested; it must not be reported as
+proof of either acceptance or refusal. In particular, real-registry controls
+may need the positive calibration repaired before their attack is reachable.
+
+No production validators, network requests or provider calls run in these
+fixtures. The validation owner will record the exact before/after source and
+test hashes, node identities and outcomes. No tests were launched by this
+review author, and no scanner or runtime implementation was changed here.
