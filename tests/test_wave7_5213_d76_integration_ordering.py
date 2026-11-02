@@ -153,6 +153,29 @@ def _arguments(route, spec, sibling, output, tmp_path):
             *(['--out', str(output)] if command == 'render-prompt' else [])]
 
 
+def _capture_batch_fixture(route, spec, sibling, arguments, monkeypatch):
+    """Finish real roster parsing before observing the assembled-spec boundary.
+
+    Registration parsing legitimately reads prompt descriptors before any spec
+    exists. As with the real constructed specs supplied below, retain its real
+    result rather than trapping that earlier construction work as a late read.
+    The entry's D76, _shared_current, owner and pre-lock checks remain untouched.
+    """
+    if not route.startswith('cli-batch') or not spec.shared_generation_version:
+        return
+    path = arguments[arguments.index('--shared-generation-registration') + 1]
+    pairs = [(value.project, value.label) for value in (sibling, spec)]
+    captured = module._shared_roster(path, pairs)
+
+    def already_captured(actual_path, actual_pairs, *, expect_sha256=None):
+        assert Path(actual_path) == Path(path)
+        assert actual_pairs == pairs
+        assert expect_sha256 is None
+        return captured
+
+    monkeypatch.setattr(module, '_shared_roster', already_captured)
+
+
 def _invoke(route, spec, sibling, fake, arguments, monkeypatch):
     if route.startswith('cli-'):
         specs = {value.label: value for value in (sibling, spec)}
@@ -226,6 +249,7 @@ def test_d76_precedes_shared_authority_and_owner_refusals(
     _mutate(spec, 'bundle')
     output = tmp_path / 'must-not-render.txt'
     arguments = _arguments(route, spec, sibling, output, tmp_path) if route.startswith('cli-') else None
+    _capture_batch_fixture(route, spec, sibling, arguments, monkeypatch)
     seen, fake = _traps(monkeypatch)
     before = tree(tmp_path)
     status, message = _invoke(route, spec, sibling, fake, arguments, monkeypatch)

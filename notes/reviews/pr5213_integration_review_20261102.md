@@ -83,6 +83,22 @@ serialization. Keep the real parser, production guards and all81 assertions.
 Preserve the failed run, then validate a repaired shared-fixture canary and the
 complete ordering cohort from a new pinned archive. Results belong in the report.
 
+## I7 — Observe the batch boundary after real roster construction
+
+After I6, the ordering cohort completed77 passing and4 failing cases. Only
+the shared batch authority/owner cases failed: `_shared_roster` legitimately
+reads prompt descriptors while parsing registrations, before any `_spec` call.
+The test had installed its post-construction prompt-read sentinel too early.
+These are integration-owned test setup failures, not guard-order evidence.
+
+Disposition: run the real roster parser before installing the sentinels, then
+supply its actual captured result with exact path/pair/hash-option assertions.
+This matches the existing use of real constructed specs to test later caller
+mutation. All guard, authority, inventory, client and lock assertions remain;
+production code is unchanged. The batch mutation must still be caught when
+the per-spec D76 check is moved after `_shared_current`. Retain the failed run
+and validate a shared batch canary before the full rerun.
+
 ## Reviewed mutation-evidence method
 
 The existing validation runner correctly refuses an uncommitted source mutation.
