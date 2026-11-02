@@ -140,6 +140,28 @@ class CommandContracts(unittest.TestCase):
         self.assertEqual(hygiene.ci_paths('ci-offline-canary-budget'), ('src',))
         self.assertNotIn(hygiene.MATCHED + '/evaluation_controls', hygiene.ci_paths('ci-offline-audit'))
 
+    def test_notes_children_start_without_a_bytecode_cache_prefix(self):
+        for job in hygiene.NOTES_TARGETS:
+            with self.subTest(job=job), patch.dict(os.environ,
+                    {'PYTHONPYCACHEPREFIX': '/inherited-cache'}, clear=True):
+                env, removed = runner.scrubbed_environment(options(notes_ci_job=job))
+                self.assertIn('PYTHONPYCACHEPREFIX', removed)
+                self.assertNotIn('PYTHONPYCACHEPREFIX', env)
+                self.assertEqual(env['PYTHONDONTWRITEBYTECODE'], '1')
+                observed = subprocess.check_output([sys.executable, '-S', '-P', '-B',
+                    str(Path(__file__).resolve()), '--cache-prefix-contract'],
+                    env=env, text=True)
+                self.assertEqual(json.loads(observed),
+                    {'prefix': None, 'dont_write_bytecode': True})
+
+    def test_ordinary_children_retain_the_external_cache_prefix(self):
+        with patch.dict(os.environ,
+                {'PYTHONPYCACHEPREFIX': '/inherited-cache'}, clear=True):
+            env, removed = runner.scrubbed_environment(options())
+            self.assertIn('PYTHONPYCACHEPREFIX', removed)
+            self.assertEqual(env['PYTHONPYCACHEPREFIX'], '/evidence/pycache')
+            self.assertEqual(env['PYTHONDONTWRITEBYTECODE'], '1')
+
     def test_missing_or_partial_junit_does_not_fabricate_passes(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / 'partial.xml'
@@ -249,7 +271,10 @@ class DeadlineContracts(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    if sys.argv[1:] == ['--deadline-child']:
+    if sys.argv[1:] == ['--cache-prefix-contract']:
+        print(json.dumps({'prefix': sys.pycache_prefix,
+                          'dont_write_bytecode': sys.dont_write_bytecode}))
+    elif sys.argv[1:] == ['--deadline-child']:
         print('started', flush=True)
         time.sleep(5)
     elif sys.argv[1:2] == ['--deadline-parent']:

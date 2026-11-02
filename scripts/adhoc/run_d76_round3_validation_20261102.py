@@ -159,6 +159,10 @@ def scrubbed_environment(options):
         PYTHONPATH=os.pathsep.join((str(options.tree / 'src'), str(options.tree), str(HERE))),
         D76_TREE=str(options.tree), D76_OUTPUT=str(options.output), D76_RUNNER=str(Path(__file__).resolve()))
     if options.notes_ci_job:
+        # Match the workflow's notes jobs: pinned transport refuses a cache
+        # prefix even when bytecode writes are disabled. Ordinary/API tests
+        # retain their external prefix; notes child caches are audited below.
+        env.pop('PYTHONPYCACHEPREFIX')
         env['D76_NOTES_CI_JOB'] = options.notes_ci_job
         env['PYTHONPATH'] = os.pathsep.join([
             *(str(options.tree / value) for value in notes_ci.ci_paths(options.notes_ci_job)), str(options.tree), str(HERE)])
