@@ -198,7 +198,8 @@ def test_offline_canary_retains_complete_commands_and_independent_job_budget():
     jobs = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())["jobs"]
     job = jobs["offline-canary"]
     assert job["runs-on"] == "ubuntu-latest"
-    assert job["timeout-minutes"] == jobs["python-tests"]["timeout-minutes"] == 45
+    assert job["timeout-minutes"] == 45
+    assert jobs["python-tests"]["timeout-minutes"] == "${{ github.event_name == 'pull_request' && 45 || 60 }}"
     assert "if" not in job and "strategy" not in job and "needs" not in job
     steps = job["steps"]
     checkout, submodule, setup = steps[:3]
@@ -345,7 +346,7 @@ def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence():
     assert job["strategy"] == {"fail-fast": False, "matrix": {"case": list(API_CASE_LANES)}}
     assert "if" not in job and "needs" not in job
     assert job["runs-on"] == "ubuntu-latest"
-    assert job["timeout-minutes"] == jobs["python-tests"]["timeout-minutes"] == 45
+    assert job["timeout-minutes"] == 45
     checkout, submodule, setup, case, clean, upload = job["steps"]
     assert checkout["uses"] == "actions/checkout@v5"
     assert checkout["with"] == {"fetch-depth": 0}

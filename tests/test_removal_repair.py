@@ -535,3 +535,7 @@ def test_completed_repair_cannot_restart_generation_after_lost_progress(external
         api.execute(replace(spec), client=second)
     assert second.messages.calls == []
     assert originals == (spec.full_path.read_bytes(), spec.core_path.read_bytes())
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

@@ -1,0 +1,178 @@
+{
+  "archive": {
+    "bytes": 133040,
+    "path": "evidence.tar.gz",
+    "sha256": "7079cdba917623adf1acbb3f5aceb7bbb84ccfed878b3429f0b7e3c4961aea11"
+  },
+  "archive_round_trip_verified": true,
+  "files": {
+    "canary/command.json": {
+      "bytes": 462,
+      "sha256": "e8f8c76f401ed87dbca7f6cfe589192c9ec5524610dab933164f183fc07835d1"
+    },
+    "canary/outcome.json": {
+      "bytes": 388,
+      "sha256": "389c58a5dab50c9558e6ddae2a0de46ca1d19c780445149af3d68171a24c522a"
+    },
+    "canary/pytest.log": {
+      "bytes": 869,
+      "sha256": "fc682bccfab6144b9208e60021f77686a8a6945ab6db461345ab4d04ebb9000b"
+    },
+    "canary/results.xml": {
+      "bytes": 372,
+      "sha256": "882471099efccbc35f68fa2bb21095ac229efec08d9357160d236ed37e878b05"
+    },
+    "canary/source-pins.json": {
+      "bytes": 96899,
+      "sha256": "af994fa29e6664db5d2d223f9f94e76b3778c24c90a0fc66e58841a7b1872f0a"
+    },
+    "core/command.json": {
+      "bytes": 497,
+      "sha256": "93b131987dfd1c2787b24d0508a0174dde35719da8ce20db9d556953dc4260e4"
+    },
+    "core/outcome.json": {
+      "bytes": 388,
+      "sha256": "513da3ab2ddae993bb7eab3c0aa553e60822b449db5595355472a11d3159ce58"
+    },
+    "core/pytest.log": {
+      "bytes": 950,
+      "sha256": "b2486b6affd6bdf3a199f7fe45ea0de2611cd3c37eb9c58a22e922c80e8680e3"
+    },
+    "core/results.xml": {
+      "bytes": 18211,
+      "sha256": "4f4874a5267a855e8b7ade6713afa963867586352800b0a0aa1e217763aa98be"
+    },
+    "core/source-pins.json": {
+      "bytes": 96899,
+      "sha256": "af994fa29e6664db5d2d223f9f94e76b3778c24c90a0fc66e58841a7b1872f0a"
+    },
+    "merge-tree-a14.txt": {
+      "bytes": 41,
+      "sha256": "c5dc87f5c195b32f83cc755419aaf7a44115b34521e6379a0c9bc384d68aef44"
+    },
+    "report/command.json": {
+      "bytes": 427,
+      "sha256": "de309c40e8db0f8a5b8a61138057235c7c7f39fede260841122dcd9e908cae95"
+    },
+    "report/outcome.json": {
+      "bytes": 389,
+      "sha256": "73d95f664a1e6c01c6a17b09edcd50f12e1cc13bd4a0a0a6498de03a6e556937"
+    },
+    "report/pytest.log": {
+      "bytes": 3747,
+      "sha256": "b9bb70c7802503e056450bf239b012a38a765c650ccde88eca66632cbdc0bae0"
+    },
+    "report/results.xml": {
+      "bytes": 10791,
+      "sha256": "9abea876489e910b876e2df8d9574aac9a6038dc45fb3b40cdad8ded0d92cfd2"
+    },
+    "report/source-pins.json": {
+      "bytes": 96899,
+      "sha256": "af994fa29e6664db5d2d223f9f94e76b3778c24c90a0fc66e58841a7b1872f0a"
+    }
+  },
+  "groups": {
+    "canary": {
+      "errors": 0,
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "failures": 0,
+      "group": "canary",
+      "head": "aa1df716fb32390dcea2d7b1a9c8edbc6ae45be9",
+      "matches_final_production": true,
+      "modules": {
+        "tests.test_pr5212_r3_fixes": {
+          "failed": 0,
+          "passed": 1,
+          "skipped": 0
+        }
+      },
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "returncode": 0,
+      "skipped": 0,
+      "source_unchanged": true,
+      "tests": 1
+    },
+    "core": {
+      "errors": 0,
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "failures": 0,
+      "group": "core",
+      "head": "aa1df716fb32390dcea2d7b1a9c8edbc6ae45be9",
+      "matches_final_production": true,
+      "modules": {
+        "tests.test_api_latch_guard": {
+          "failed": 0,
+          "passed": 22,
+          "skipped": 0
+        },
+        "tests.test_latch_journal": {
+          "failed": 0,
+          "passed": 71,
+          "skipped": 0
+        },
+        "tests.test_pr5212_d55_fixes": {
+          "failed": 0,
+          "passed": 29,
+          "skipped": 0
+        },
+        "tests.test_pr5212_r3_fixes": {
+          "failed": 0,
+          "passed": 5,
+          "skipped": 0
+        }
+      },
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "returncode": 0,
+      "skipped": 0,
+      "source_unchanged": true,
+      "tests": 127
+    },
+    "report": {
+      "errors": 0,
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "failures": 1,
+      "group": "report",
+      "head": "8cdb1951887b9221d8bca0f16c20947955e7dc38",
+      "matches_final_production": true,
+      "modules": {
+        "tests.test_report_admission": {
+          "failed": 1,
+          "passed": 21,
+          "skipped": 0
+        },
+        "tests.test_report_gate.TestDispositionRows": {
+          "failed": 0,
+          "passed": 2,
+          "skipped": 0
+        },
+        "tests.test_report_gate.TestPresenceClaims": {
+          "failed": 0,
+          "passed": 15,
+          "skipped": 0
+        },
+        "tests.test_report_gate.TestTheAssemblyDigestCoversIt": {
+          "failed": 0,
+          "passed": 2,
+          "skipped": 0
+        },
+        "tests.test_report_gate.TestTheGateReading": {
+          "failed": 0,
+          "passed": 9,
+          "skipped": 0
+        },
+        "tests.test_report_gate.TestTheRunnerGate": {
+          "failed": 0,
+          "passed": 12,
+          "skipped": 0
+        }
+      },
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "returncode": 1,
+      "skipped": 0,
+      "source_unchanged": true,
+      "tests": 62
+    }
+  },
+  "production_sources_sha256": "55d6d46d9cfcfd1453e278e3f3825a6e5830339c23b323bd2ec65f1d1d4d2b84",
+  "purpose": "#5212 R1-R9 offline acceptance; no full-suite or CI claim"
+}

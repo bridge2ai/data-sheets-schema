@@ -335,6 +335,8 @@ def test_request_bound_preserves_whole_full_without_call(selected):
 
 
 def test_actual_readdress_exchange_is_preserved_for_completion(selected):
+    from data_sheets_schema import latch_journal
+
     c = client(selected, bad_address=True)
     api.execute(selected, client=c)
     outcome = rc.recover(selected)
@@ -344,6 +346,57 @@ def test_actual_readdress_exchange_is_preserved_for_completion(selected):
     actual = c.messages.completion_calls[0]['messages']
     assert actual[:-2] == transcript['messages']
     assert [r['phase'] for r in ledger.merge_usage(selected, [])][:3] == ['full', 'full_readdress', rc.PHASE]
+
+    # Moving the controller's active transcript selector must preserve both
+    # delivered exchanges as separate usage-bound, immutable snapshots.
+    account = ledger._read(selected)
+    exchanges = [pin for pin in account['latch_snapshots']
+                 if pin['name'] == f'{selected.project}_{rc.TRANSCRIPT}']
+    assert len(exchanges) == 2
+    saved = [rc._load(pin) for pin in exchanges]
+    assert [value['phase'] for value in saved] == ['full', 'full_readdress']
+    assert [value['usage_id'] for value in saved] == [pin['usage_id'] for pin in exchanges]
+    assert len({pin['path'] for pin in exchanges}) == len({pin['usage_id'] for pin in exchanges}) == 2
+    original_receipt = saved[0]['response'].split(api.RECEIPT_MARK, 1)
+    assert yaml.safe_load(original_receipt[0]) == FULL
+    assert yaml.safe_load(original_receipt[1]) == receipt(selected, bad_address=True)
+    assert saved[1] == transcript
+    selectors = [{key: pin[key] for key in ('path', 'sha256')} for pin in exchanges]
+    assert account['receipt_completion_transcript'] == selectors[1]
+
+    journal_path = latch_journal.journal_path(selected)
+    journal_bytes = journal_path.read_bytes()
+    events = [json.loads(line) for line in journal_bytes.splitlines()]
+    selector_history = [event['payload']['value'] for event in events
+                        if event['kind'] == 'latch'
+                        and event['payload']['key'].endswith(':receipt_completion_transcript')]
+    assert selector_history == selectors
+    for pin in exchanges:
+        assert hashlib.sha256(Path(pin['path']).read_bytes()).hexdigest() == pin['sha256']
+        index = json.loads(Path(pin['index_path']).read_bytes())
+        assert {key: value for key, value in pin.items() if key != 'index_path'} in index['snapshots']
+        assert any(event['kind'] == 'latch'
+                   and event['payload']['key'].startswith('snapshot:')
+                   and event['payload']['value'] == pin for event in events)
+
+    # Even an intact, formerly valid response cannot become the current selector
+    # through a raw ledger edit. Refusal must precede both count and create calls.
+    evidence_paths = {journal_path, selected.full_path, selected.core_path, selected.provenance_path,
+                      api._receipt_path(selected), api._progress_path(selected)}
+    for pin in account['latch_snapshots']:
+        evidence_paths.update((Path(pin['path']), Path(pin['index_path'])))
+    before = {path: path.read_bytes() if path.exists() else None for path in evidence_paths}
+    edited = copy.deepcopy(account)
+    edited['receipt_completion_transcript'] = selectors[0]
+    ledger_path = ledger.ledger_path(selected)
+    ledger_path.write_text(json.dumps(edited))
+    edited_bytes = ledger_path.read_bytes()
+    second = client(selected)
+    with pytest.raises(ledger.UsageLedgerError, match='latch journal:'):
+        api.execute(replace(selected), client=second)
+    assert not second.messages.calls and not second.messages.count_calls
+    assert ledger_path.read_bytes() == edited_bytes
+    assert {path: path.read_bytes() if path.exists() else None for path in evidence_paths} == before
 
 
 def test_cli_plan_selects_exact_registration_and_does_not_run(selected, tmp_path):
@@ -622,7 +675,8 @@ def test_new_axis_does_not_reopen_terminal_generation_admission(selected, termin
         data['removal_repair_admission'] = {'state': 'accepted', 'usage_id': 'repair',
                                           'response_sha256': 'a' * 64, 'report_refresh': 'complete'}
     ledger._write(selected, data)
-    with pytest.raises(ledger.UsageLedgerError, match='evidence refusal|source-review admission|after removal repair'):
+    with pytest.raises(ledger.UsageLedgerError,
+                       match='evidence refusal|source-review admission|after removal repair|historical terminal failure or evidence rejection remains latched'):
         ledger.begin_call(selected, phase, 1, 'synthetic')
     assert ledger._read(selected) == data
 
@@ -744,3 +798,7 @@ def test_the_record_states_the_answer_envelope_and_parser(selected, mode, envelo
     assert outcome['answer_parser'] == rereceipt.ANSWER_PARSER
     assert rc.recover(selected)['answer_envelope'] == envelope
 
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

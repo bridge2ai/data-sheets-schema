@@ -373,13 +373,16 @@ class TestTheRunnerGate(unittest.TestCase):
     def test_a_prior_invocations_regeneration_is_not_repeated(self):
         """#965: once per run, not once per invocation."""
         s = spec(out_dir=self.out)
+        from data_sheets_schema import usage_ledger
+        generation = usage_ledger.prepare_usage(s, resume=True)
         s.provenance_path.parent.mkdir(parents=True, exist_ok=True)
         s.full_path.write_text(yaml.safe_dump(FULL)); s.core_path.write_text(yaml.safe_dump(CORE))
+        api_runner._snapshot(s, f"{s.project}_full.yaml", s.full_path.read_text())
         s.report_path.write_text("# R\n\n## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
                                  "| `keywords` | removed | full | gone |\n")
         s.provenance_path.write_text(yaml.safe_dump({
             "run": {"project": s.project, "method": s.method, "label": s.label,
-                    "condition": s.condition},
+                    "condition": s.condition, "generation_id": generation},
             "report_gate": {"regenerated": True, "findings_after": 1}}))
         class Boom:
             messages = property(lambda self: (_ for _ in ()).throw(AssertionError("must not call")))
@@ -414,10 +417,13 @@ class TestTheRunnerGate(unittest.TestCase):
                     messages = property(lambda self: (_ for _ in ()).throw(AssertionError("must not call")))
                 # Exercise the gate itself, without the v9 terminal-refusal
                 # guard masking whether its allowance can reset (#1821).
+                from data_sheets_schema import usage_ledger
+                rejected = usage_ledger._read(s).get('report_rejections', [])
                 for _ in range(3):
                     gate = api_runner._gate_report(s, Boom(), api_runner._model_settings(), [], {})
                     self.assertTrue(gate["regeneration_attempted"])
                     self.assertFalse(gate["regenerated"])
+                    self.assertEqual(usage_ledger._read(s).get('report_rejections', []), rejected)
                     record["report_gate"] = gate
                     s.provenance_path.write_text(yaml.safe_dump(record))
 
@@ -449,6 +455,18 @@ class TestTheRunnerGate(unittest.TestCase):
         self.assertIn("worse", g["reason"])
         self.assertEqual(g["findings_after"], 1)
         self.assertNotIn("license", s.report_path.read_text())
+        from data_sheets_schema import latch_journal, usage_ledger
+        ledger = usage_ledger._read(s)
+        call_id = next(row["usage_id"] for row in res["usage"] if row["phase"] == "report_regate")
+        saved = [entry for entry in ledger["latch_snapshots"] if entry["usage_id"] == call_id]
+        self.assertEqual(len(saved), 1)
+        raw = Path(saved[0]["path"]).read_bytes()
+        self.assertIn(b"| `license` | retained |", raw)
+        self.assertEqual(saved[0]["sha256"], hashlib.sha256(raw).hexdigest())
+        integrity = latch_journal.provenance(s)
+        self.assertEqual(d["model"]["runtime_integrity"], integrity)
+        self.assertTrue(integrity["verified"])
+        self.assertFalse(integrity["assisted"])
 
     def test_a_truncated_rewrite_is_not_written(self):
         fake = _ReportFake("| `keywords` | removed | full | gone |\n", "| `keywords` | retained | full | kept |\n")
@@ -526,3 +544,8 @@ class TestTheAssemblyDigestCoversIt(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+import pytest
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

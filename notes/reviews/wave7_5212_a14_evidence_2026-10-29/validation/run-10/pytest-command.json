@@ -1,0 +1,16 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave7-5212-a14-fixed-controls-20261029/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave7-5212-a14-fixed-controls-20261029/pytest.xml",
+    "tests/test_d41_request_parity.py",
+    "tests/test_shared_generation_completed_replay.py",
+    "tests/test_pr5212_r3_fixes.py",
+    "tests/test_pr5212_r4_fixes.py"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave7-5212-a14-20261029"
+}

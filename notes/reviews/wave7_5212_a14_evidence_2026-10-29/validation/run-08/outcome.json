@@ -1,0 +1,13 @@
+{
+  "invalid_junit_cases": [],
+  "passed": true,
+  "passed_cases_by_module": {
+    "test_shared_generation_runtime": 1
+  },
+  "returncode": 0,
+  "scientific_acceptance": "not_assessed",
+  "selection_complete": true,
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 472.8665254160296
+}

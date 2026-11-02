@@ -1,0 +1,29 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave7-5212-a14-full-20261029/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave7-5212-a14-full-20261029/pytest.xml",
+    "tests/test_latch_journal.py",
+    "tests/test_api_latch_guard.py",
+    "tests/test_pr5212_d55_fixes.py",
+    "tests/test_pr5212_r3_fixes.py",
+    "tests/test_pr5212_r4_fixes.py",
+    "tests/test_report_admission.py",
+    "tests/test_report_gate.py",
+    "tests/test_shared_generation_scope_context.py",
+    "tests/test_d41_request_parity.py",
+    "tests/test_typed_audit.py",
+    "tests/test_audit_omissions.py",
+    "tests/test_typed_audit_omission_wire.py",
+    "tests/test_wave4_a14_review.py",
+    "tests/test_shared_generation_runtime.py",
+    "tests/test_source_heading_runtime.py",
+    "tests/test_source_heading_runtime_api.py",
+    "tests/test_shared_generation_assets.py"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave7-5212-a14-20261029"
+}

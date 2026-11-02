@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="3.061" timestamp="2026-10-28T01:05:27.797117" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_pr5212_d55_fixes" name="test_pre_d56_ineffective_acknowledgement_cannot_bypass_startup[terminal]" time="2.453"><failure message="Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_pre_d56_ineffective_ackno0')
+kind = 'terminal'
+
+    @pytest.mark.parametrize('kind', ['terminal', 'control'])
+    def test_pre_d56_ineffective_acknowledgement_cannot_bypass_startup(tmp_path, kind):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        data['typed_audit'] = ({'state': 'failed', 'failure_type': 'ReadTimeout'} if kind == 'terminal'
+                               else {'state': 'running', 'stages': [{'state': 'admitted', 'usage_id': 'spent'}]})
+        ledger._write(selected, data)
+        if kind == 'terminal':
+            disk_edit(selected, lambda d: d['typed_audit'].update(state='running'))
+        else:
+            disk_edit(selected, lambda d: d['typed_audit']['stages'][0].update(state='prepared'))
+        data = ledger._read(selected)
+        events = journal._events(selected)
+        mismatches = journal._mismatches(selected, data, events)
+        acknowledge(selected, sorted({m['event_sha256'] for m in mismatches}))
+        payload = journal._override(selected, data, {m['event_sha256'] for m in mismatches})
+        payload['discrepancies'] = mismatches
+        # Reproduce A's pre-D56 behavior: it recorded this ineffective override
+        # before refusing. Upgrading that history must still refuse at startup.
+        event = journal._event(selected, data, events, 'override', payload)
+        journal._append(selected, events, event)
+        data['latch_journal'] = journal._checkpoint(selected, event)
+        data['latch_overrides'] = journal._acknowledgements(events)
+        ledger._write_unlatched(selected, data)
+        before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
+        message = 'historical terminal failure' if kind == 'terminal' else 'control-state discrepancy'
+&gt;       with pytest.raises(ledger.UsageLedgerError, match=message):
+E       Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;
+
+tests/test_pr5212_d55_fixes.py:195: Failed</failure></testcase><testcase classname="tests.test_pr5212_d55_fixes" name="test_pre_d56_ineffective_acknowledgement_cannot_bypass_startup[control]" time="0.015"><failure message="Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_pre_d56_ineffective_ackno1')
+kind = 'control'
+
+    @pytest.mark.parametrize('kind', ['terminal', 'control'])
+    def test_pre_d56_ineffective_acknowledgement_cannot_bypass_startup(tmp_path, kind):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        data['typed_audit'] = ({'state': 'failed', 'failure_type': 'ReadTimeout'} if kind == 'terminal'
+                               else {'state': 'running', 'stages': [{'state': 'admitted', 'usage_id': 'spent'}]})
+        ledger._write(selected, data)
+        if kind == 'terminal':
+            disk_edit(selected, lambda d: d['typed_audit'].update(state='running'))
+        else:
+            disk_edit(selected, lambda d: d['typed_audit']['stages'][0].update(state='prepared'))
+        data = ledger._read(selected)
+        events = journal._events(selected)
+        mismatches = journal._mismatches(selected, data, events)
+        acknowledge(selected, sorted({m['event_sha256'] for m in mismatches}))
+        payload = journal._override(selected, data, {m['event_sha256'] for m in mismatches})
+        payload['discrepancies'] = mismatches
+        # Reproduce A's pre-D56 behavior: it recorded this ineffective override
+        # before refusing. Upgrading that history must still refuse at startup.
+        event = journal._event(selected, data, events, 'override', payload)
+        journal._append(selected, events, event)
+        data['latch_journal'] = journal._checkpoint(selected, event)
+        data['latch_overrides'] = journal._acknowledgements(events)
+        ledger._write_unlatched(selected, data)
+        before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
+        message = 'historical terminal failure' if kind == 'terminal' else 'control-state discrepancy'
+&gt;       with pytest.raises(ledger.UsageLedgerError, match=message):
+E       Failed: DID NOT RAISE &lt;class 'data_sheets_schema.usage_ledger.UsageLedgerError'&gt;
+
+tests/test_pr5212_d55_fixes.py:195: Failed</failure></testcase></testsuite></testsuites>

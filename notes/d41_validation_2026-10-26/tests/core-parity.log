@@ -1,0 +1,52 @@
+........................................................................ [ 35%]
+F....................................................................... [ 71%]
+..........................................................               [100%]
+=================================== FAILURES ===================================
+________________ test_chorus_shared_v1_exact_baseline_sdk_bytes ________________
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-core-parity-20261026/test_chorus_shared_v1_exact_ba0')
+
+    def test_chorus_shared_v1_exact_baseline_sdk_bytes(tmp_path):
+        available = subprocess.run(['git', 'cat-file', '-e', parity.BASE + '^{commit}'], cwd=ROOT,
+                                   capture_output=True).returncode == 0
+        if not available:
+            pytest.skip('Pinned f8c5ac73c Git object unavailable; local D41 parity artifact is still required.')
+>       result = parity.compare(ROOT, tmp_path / 'parity')
+
+tests/test_d41_request_parity.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/claude-guard')
+workdir = PosixPath('/private/tmp/d4d-h3-core-parity-20261026/test_chorus_shared_v1_exact_ba0/parity')
+
+    def compare(root, workdir):
+        root, workdir = root.resolve(), workdir.resolve()
+        workdir.mkdir(parents=True, exist_ok=False)
+        baseline = unpack_baseline(root, workdir / 'baseline-code')
+        fixture = workdir / 'common-fixture'
+        fixture.mkdir()
+        helper_before = pin(__file__)
+        production_before = {str(p.relative_to(root)): pin(p) for p in (root / PACKAGE).glob('*.py')}
+        captures = {}
+        for mode, code_root in [('baseline', workdir / 'baseline-code'), ('candidate', root)]:
+            out = workdir / mode
+            env = {**os.environ, 'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONPATH': str(code_root / 'src') + os.pathsep + str(root)}
+            command = [sys.executable, str(Path(__file__).resolve()), '--capture', mode, '--root', str(root),
+                       '--code-root', str(code_root), '--fixture', str(fixture), '--out', str(out)]
+            completed = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True, timeout=300)
+            save(workdir / (mode + '.log'), (completed.stdout + completed.stderr).encode())
+            if completed.returncode:
+>               raise RuntimeError(f'{mode} capture failed; see {workdir / (mode + ".log")}')
+E               RuntimeError: baseline capture failed; see /private/tmp/d4d-h3-core-parity-20261026/test_chorus_shared_v1_exact_ba0/parity/baseline.log
+
+scripts/adhoc/d41_request_parity_20261026.py:314: RuntimeError
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+------- generated xml file: /private/tmp/d4d-h3-core-parity-20261026.xml -------
+=========================== short test summary info ============================
+FAILED tests/test_d41_request_parity.py::test_chorus_shared_v1_exact_baseline_sdk_bytes
+1 failed, 201 passed, 1 warning in 120.72s (0:02:00)

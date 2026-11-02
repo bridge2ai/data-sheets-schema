@@ -157,3 +157,7 @@ def test_no_selected_manifest_keeps_new_outputs_in_the_callers_directory(tmp_pat
     assert corpus.root() == tmp_path.resolve()
     target = provenance.record_path_for("UNDECLARED", "external", "run")
     assert target.resolve() == tmp_path / "data/d4d_concatenated/external_core/run/UNDECLARED_provenance.yaml"
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

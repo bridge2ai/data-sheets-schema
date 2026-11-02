@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="75" time="10.155" timestamp="2026-10-25T21:04:56.368319" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_latch_journal" name="test_saved_response_is_bound_to_usage_name_path_index_and_actual_bytes" time="2.090" /><testcase classname="tests.test_latch_journal" name="test_saved_response_rewriting_is_refused_even_if_mutable_pins_agree[bytes]" time="0.017" /><testcase classname="tests.test_latch_journal" name="test_saved_response_rewriting_is_refused_even_if_mutable_pins_agree[index]" time="0.017" /><testcase classname="tests.test_latch_journal" name="test_saved_response_rewriting_is_refused_even_if_mutable_pins_agree[ledger-pin]" time="0.018" /><testcase classname="tests.test_latch_journal" name="test_saved_response_rewriting_is_refused_even_if_mutable_pins_agree[all-three]" time="0.018" /><testcase classname="tests.test_latch_journal" name="test_saved_response_rewriting_is_refused_even_if_mutable_pins_agree[delete-file]" time="0.018" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[state-typed_audit]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[state-receipt_completion]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[failure-type-typed_audit]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[failure-type-receipt_completion]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[delete-typed_audit]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[delete-receipt_completion]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[stage-admission-typed_audit]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_inherited_failure_cannot_be_edited_back_to_live[stage-admission-receipt_completion]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_terminal_override_preserves_evidence_but_never_authorizes_retry" time="0.014"><failure message="AssertionError: Regex pattern did not match.&#10; Regex: 'historical terminal failure'&#10; Input: 'latch journal: invalid explicit override: override does not name exactly this identity, generation and discrepancy set; discrepancies=[{&quot;event_sha256&quot;:&quot;1054c700df6f49c30aecd9f7e2ce41cc9f6d1ed722d9157de5bb0805542cf477&quot;,&quot;expected&quot;:{&quot;failure_type&quot;:&quot;ValueError&quot;,&quot;state&quot;:&quot;failed&quot;},&quot;found&quot;:{&quot;failure_type&quot;:&quot;ValueError&quot;,&quot;state&quot;:&quot;running&quot;},&quot;key&quot;:&quot;controller:typed_audit&quot;},{&quot;event_sha256&quot;:&quot;6fb398ced816ef5bda28c30f71ae2f30abf2154b5b5bacb0c33b1733ee2dc2f7&quot;,&quot;expected&quot;:&quot;failed&quot;,&quot;found&quot;:{&quot;__d4d_latch_missing__&quot;:true},&quot;key&quot;:&quot;terminal:field:[\\&quot;typed_audit\\&quot;,\\&quot;state\\&quot;]&quot;},{&quot;event_sha256&quot;:&quot;94bc9e3e11c17d5d275c74407e81dcfcbcb78b92ccb6c0ab116d7d7fb2d808ea&quot;,&quot;expected&quot;:{&quot;failure_type&quot;:&quot;ValueError&quot;,&quot;state&quot;:&quot;failed&quot;},&quot;found&quot;:{&quot;__d4d_latch_missing__&quot;:true},&quot;key&quot;:&quot;terminal:typed_audit&quot;}]'">spec = RunSpec(project='CHORUS', arm='BASELINE (input documents only)', method='claudecode_agent', bundle=PosixPath('data/pre...tion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None)
+data = {'abandoned_journal_offset': 0, 'accept_legacy': False, 'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity...eneric', 'label': '2026-07-29_claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, ...}
+required = {'1054c700df6f49c30aecd9f7e2ce41cc9f6d1ed722d9157de5bb0805542cf477', '6fb398ced816ef5bda28c30f71ae2f30abf2154b5b5bacb0c33b1733ee2dc2f7', '94bc9e3e11c17d5d275c74407e81dcfcbcb78b92ccb6c0ab116d7d7fb2d808ea'}
+
+    def _override(spec, data, required):
+        path = override_path(spec)
+        if not path.exists() and not path.is_symlink():
+            _fail("unacknowledged discrepancy; required event_sha256s=" + ",".join(sorted(required)))
+        try:
+            raw = _bytes(path)
+            value = _json(raw)
+            keys = {"format", "identity", "generation_id", "event_sha256s", "authorization", "authorized_by", "authorized_at"}
+            if (not isinstance(value, dict) or set(value) != keys
+                    or value["format"] != OVERRIDE_FORMAT or value["identity"] != data["identity"]
+                    or value["generation_id"] != data["generation_id"]
+                    or not isinstance(value["event_sha256s"], list)
+                    or any(not isinstance(item, str) or not _HEX.fullmatch(item) for item in value["event_sha256s"])
+                    or len(set(value["event_sha256s"])) != len(value["event_sha256s"])
+                    or set(value["event_sha256s"]) != set(required)
+                    or any(not isinstance(value[key], str) or not value[key].strip()
+                           for key in ("authorization", "authorized_by", "authorized_at"))):
+&gt;               raise ValueError("override does not name exactly this identity, generation and discrepancy set")
+E               ValueError: override does not name exactly this identity, generation and discrepancy set
+
+src/data_sheets_schema/latch_journal.py:290: ValueError
+
+During handling of the above exception, another exception occurred:
+
+spec = RunSpec(project='CHORUS', arm='BASELINE (input documents only)', method='claudecode_agent', bundle=PosixPath('data/pre...tion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None)
+data = {'abandoned_journal_offset': 0, 'accept_legacy': False, 'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity...eneric', 'label': '2026-07-29_claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, ...}
+events = [{'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity': {'condition': 'generic', 'label': '2026-07-29_claud..._claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, 'kind': 'latch', 'line': 6, ...}]
+mine = [{'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity': {'condition': 'generic', 'label': '2026-07-29_claud..._claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, 'kind': 'latch', 'line': 6, ...}]
+discrepancies = [{'event_sha256': '1054c700df6f49c30aecd9f7e2ce41cc9f6d1ed722d9157de5bb0805542cf477', 'expected': {'failure_type': 'Va...lure_type': 'ValueError', 'state': 'failed'}, 'found': {'__d4d_latch_missing__': True}, 'key': 'terminal:typed_audit'}]
+
+    def _apply_override(spec, data, events, mine, discrepancies):
+        prior = _acknowledgements(mine)
+        covered = [item for record in prior for item in record.get("discrepancies", [])]
+        pending = [item for item in discrepancies if item not in covered]
+        if pending:
+            try:
+&gt;               acknowledgement = _override(spec, data, {item["event_sha256"] for item in pending})
+
+src/data_sheets_schema/latch_journal.py:305: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/latch_journal.py:295: in _override
+    _fail(f"invalid explicit override: {exc}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'invalid explicit override: override does not name exactly this identity, generation and discrepancy set'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: invalid explicit override: override does not name exactly this identity, generation and discrepancy set
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-focused-20261026/test_terminal_override_preserv0')
+
+    def test_terminal_override_preserves_evidence_but_never_authorizes_retry(tmp_path):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        data['typed_audit'] = {'state': 'failed', 'failure_type': 'ValueError'}
+        ledger._write(selected, data)
+        event = latch_event(selected, 'terminal:typed_audit')
+        disk_edit(selected, lambda account: account['typed_audit'].update(state='running'))
+        acknowledge(selected, [event['sha256']])
+        with pytest.raises(ledger.UsageLedgerError, match='historical terminal failure'):
+&gt;           journal.check(selected)
+
+tests/test_latch_journal.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:412: in _validated
+    mine = _apply_override(spec, data, events, mine, discrepancies)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = RunSpec(project='CHORUS', arm='BASELINE (input documents only)', method='claudecode_agent', bundle=PosixPath('data/pre...tion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None)
+data = {'abandoned_journal_offset': 0, 'accept_legacy': False, 'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity...eneric', 'label': '2026-07-29_claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, ...}
+events = [{'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity': {'condition': 'generic', 'label': '2026-07-29_claud..._claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, 'kind': 'latch', 'line': 6, ...}]
+mine = [{'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity': {'condition': 'generic', 'label': '2026-07-29_claud..._claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, 'kind': 'latch', 'line': 6, ...}]
+discrepancies = [{'event_sha256': '1054c700df6f49c30aecd9f7e2ce41cc9f6d1ed722d9157de5bb0805542cf477', 'expected': {'failure_type': 'Va...lure_type': 'ValueError', 'state': 'failed'}, 'found': {'__d4d_latch_missing__': True}, 'key': 'terminal:typed_audit'}]
+
+    def _apply_override(spec, data, events, mine, discrepancies):
+        prior = _acknowledgements(mine)
+        covered = [item for record in prior for item in record.get("discrepancies", [])]
+        pending = [item for item in discrepancies if item not in covered]
+        if pending:
+            try:
+                acknowledgement = _override(spec, data, {item["event_sha256"] for item in pending})
+            except ledger.UsageLedgerError as exc:
+                def bounded(value):
+                    raw = _canonical(value)
+                    return value if len(raw) &lt;= 240 else {"type": type(value).__name__,
+                        "canonical_bytes": len(raw), "canonical_sha256": _sha(raw)}
+                summary = [{"event_sha256": item["event_sha256"], "key": item["key"],
+                            "expected": bounded(item["expected"]), "found": bounded(item["found"])}
+                           for item in pending[:4]]
+&gt;               raise ledger.UsageLedgerError(str(exc) + "; discrepancies=" + _canonical(summary).decode()
+                                             + (f"; {len(pending) - 4} further discrepancies" if len(pending) &gt; 4 else "")) from exc
+E               data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: invalid explicit override: override does not name exactly this identity, generation and discrepancy set; discrepancies=[{"event_sha256":"1054c700df6f49c30aecd9f7e2ce41cc9f6d1ed722d9157de5bb0805542cf477","expected":{"failure_type":"ValueError","state":"failed"},"found":{"failure_type":"ValueError","state":"running"},"key":"controller:typed_audit"},{"event_sha256":"6fb398ced816ef5bda28c30f71ae2f30abf2154b5b5bacb0c33b1733ee2dc2f7","expected":"failed","found":{"__d4d_latch_missing__":true},"key":"terminal:field:[\"typed_audit\",\"state\"]"},{"event_sha256":"94bc9e3e11c17d5d275c74407e81dcfcbcb78b92ccb6c0ab116d7d7fb2d808ea","expected":{"failure_type":"ValueError","state":"failed"},"found":{"__d4d_latch_missing__":true},"key":"terminal:typed_audit"}]
+
+src/data_sheets_schema/latch_journal.py:314: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-focused-20261026/test_terminal_override_preserv0')
+
+    def test_terminal_override_preserves_evidence_but_never_authorizes_retry(tmp_path):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        data['typed_audit'] = {'state': 'failed', 'failure_type': 'ValueError'}
+        ledger._write(selected, data)
+        event = latch_event(selected, 'terminal:typed_audit')
+        disk_edit(selected, lambda account: account['typed_audit'].update(state='running'))
+        acknowledge(selected, [event['sha256']])
+&gt;       with pytest.raises(ledger.UsageLedgerError, match='historical terminal failure'):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'historical terminal failure'
+E        Input: 'latch journal: invalid explicit override: override does not name exactly this identity, generation and discrepancy set; discrepancies=[{"event_sha256":"1054c700df6f49c30aecd9f7e2ce41cc9f6d1ed722d9157de5bb0805542cf477","expected":{"failure_type":"ValueError","state":"failed"},"found":{"failure_type":"ValueError","state":"running"},"key":"controller:typed_audit"},{"event_sha256":"6fb398ced816ef5bda28c30f71ae2f30abf2154b5b5bacb0c33b1733ee2dc2f7","expected":"failed","found":{"__d4d_latch_missing__":true},"key":"terminal:field:[\\"typed_audit\\",\\"state\\"]"},{"event_sha256":"94bc9e3e11c17d5d275c74407e81dcfcbcb78b92ccb6c0ab116d7d7fb2d808ea","expected":{"failure_type":"ValueError","state":"failed"},"found":{"__d4d_latch_missing__":true},"key":"terminal:typed_audit"}]'
+
+tests/test_latch_journal.py:121: AssertionError</failure></testcase><testcase classname="tests.test_latch_journal" name="test_pending_admission_can_be_accepted_only_by_a_validated_writer" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_manual_pending_to_accepted_cannot_bypass_source_review" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_deleted_evidence_refusal_remains_terminal" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_report_rejections_are_nonterminal_and_preserve_one_regate_allowance" time="0.024" /><testcase classname="tests.test_latch_journal" name="test_chain_and_checkpoint_corruption_refuse_continuation[delete]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_chain_and_checkpoint_corruption_refuse_continuation[truncate]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_chain_and_checkpoint_corruption_refuse_continuation[payload]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_chain_and_checkpoint_corruption_refuse_continuation[checkpoint]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_chain_and_checkpoint_corruption_refuse_continuation[ledger-delete]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_chain_and_checkpoint_corruption_refuse_continuation[duplicate-key]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_exact_override_is_durable_and_does_not_cover_a_later_mutation" time="0.024" /><testcase classname="tests.test_latch_journal" name="test_existing_override_file_cannot_acknowledge_new_bytes_of_same_event" time="0.021" /><testcase classname="tests.test_latch_journal" name="test_override_is_exact_and_attributable[wrong-line]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_override_is_exact_and_attributable[extra-line]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_override_is_exact_and_attributable[wrong-generation]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_override_is_exact_and_attributable[no-timezone]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_override_is_exact_and_attributable[empty-owner]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_legacy_account_requires_explicit_unverifiable_baseline" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_journal_separates_flat_identities_and_retains_explicit_generation_history" time="0.026" /><testcase classname="tests.test_latch_journal" name="test_snapshot_index_write_crash_keeps_delivery_latched_and_refuses_restart" time="0.016" /><testcase classname="tests.test_latch_journal" name="test_recovery_roster_includes_journal_and_dangling_override_sidecar" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[verified-1]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[verified-False]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[assisted-True]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[assisted-0]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[evidence_only-True]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[evidence_only-0]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[overrides-None]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_strict_clean_metadata[authentication-authenticated]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_complete_journal_pins[path-]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_complete_journal_pins[sha256-invalid]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_complete_journal_pins[head_sha256-None]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_complete_journal_pins[line_count-True]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_eligibility_requires_complete_journal_pins[line_count-0]" time="0.012" /><testcase classname="tests.test_latch_journal" name="test_every_controller_failure_type_is_latched_without_freezing_siblings[scalar]" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_every_controller_failure_type_is_latched_without_freezing_siblings[nested]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_every_controller_failure_type_is_latched_without_freezing_siblings[list-nested]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_spent_transport_regate_allowance_cannot_be_refunded[false]" time="0.020" /><testcase classname="tests.test_latch_journal" name="test_spent_transport_regate_allowance_cannot_be_refunded[deleted]" time="0.020" /><testcase classname="tests.test_latch_journal" name="test_pending_call_cannot_be_erased_then_blessed_by_an_ordinary_write" time="0.020" /><testcase classname="tests.test_latch_journal" name="test_prepared_controller_cannot_replace_unresolved_admitted_state" time="0.013" /><testcase classname="tests.test_latch_journal" name="test_missing_ledger_legacy_history_never_becomes_a_clean_resume[provenance]" time="0.015" /><testcase classname="tests.test_latch_journal" name="test_missing_ledger_legacy_history_never_becomes_a_clean_resume[progress]" time="0.015" /><testcase classname="tests.test_latch_journal" name="test_missing_ledger_legacy_history_never_becomes_a_clean_resume[snapshot-index]" time="0.016" /><testcase classname="tests.test_latch_journal" name="test_missing_ledger_legacy_history_never_becomes_a_clean_resume[unowned-output]" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_foreign_flat_label_provenance_does_not_masquerade_as_current_history" time="0.014" /><testcase classname="tests.test_latch_journal" name="test_discrepancy_error_names_key_expected_and_found_without_large_payload" time="0.013" /><testcase classname="tests.test_api_latch_guard" name="test_retry_rechecks_edited_history_before_second_physical_dispatch" time="0.013" /><testcase classname="tests.test_api_latch_guard" name="test_permitted_transport_retry_and_wire_are_unchanged" time="0.013" /><testcase classname="tests.test_api_latch_guard" name="test_startup_refuses_before_schema_or_recovery" time="0.006" /><testcase classname="tests.test_api_latch_guard" name="test_report_rejections_survive_worse_regeneration_without_refunding_it" time="0.031" /><testcase classname="tests.test_api_latch_guard" name="test_assisted_or_malformed_integrity_blocks_live_and_offline_canary_without_changing_quality[change0]" time="0.000" /><testcase classname="tests.test_api_latch_guard" name="test_assisted_or_malformed_integrity_blocks_live_and_offline_canary_without_changing_quality[change1]" time="0.000" /><testcase classname="tests.test_api_latch_guard" name="test_assisted_or_malformed_integrity_blocks_live_and_offline_canary_without_changing_quality[change2]" time="0.000" /><testcase classname="tests.test_api_latch_guard" name="test_assisted_or_malformed_integrity_blocks_live_and_offline_canary_without_changing_quality[change3]" time="0.000" /><testcase classname="tests.test_api_latch_guard" name="test_clean_or_legacy_integrity_does_not_fabricate_a_new_quality_measurement" time="0.000" /><testcase classname="tests.test_api_latch_guard" name="test_assisted_record_cannot_supply_baseline_metrics" time="0.004" /><testcase classname="tests.test_registered_eval_runner" name="test_d41_ineligible_record_refuses_before_rating_preparation[None]" time="3.433" /><testcase classname="tests.test_registered_eval_runner" name="test_d41_ineligible_record_refuses_before_rating_preparation[integrity1]" time="1.127" /><testcase classname="tests.test_registered_eval_runner" name="test_d41_ineligible_record_refuses_before_rating_preparation[integrity2]" time="1.078" /></testsuite></testsuites>

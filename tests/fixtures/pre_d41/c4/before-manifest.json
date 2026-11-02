@@ -1,0 +1,66 @@
+{
+  "cohort source.txt": {
+    "bytes": 684,
+    "sha256": "c515c576780da4235fa23c2596b7fa13ea0e2751256ef8c434e37e00ab438f5e"
+  },
+  "cohort source_chunks.yaml": {
+    "bytes": 528,
+    "sha256": "01817276d6ee6297b96da7c6996a434a5a83ab2656b11bf391c2c6f6191ff30f"
+  },
+  "outputs/.EXTERNAL_d4d.yaml_api_run.lock": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outputs/.EXTERNAL_d4d_core.yaml_api_run.lock": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outputs/.EXTERNAL_provenance.yaml_api_run.lock": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outputs/.EXTERNAL_reconciliation.md_api_run.lock": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outputs/EXTERNAL_api_progress.json": {
+    "bytes": 3698,
+    "sha256": "06f69abf861d4d7ea5b13995abc33fe47520b7e5bb084635d7a627bafd880dce"
+  },
+  "outputs/EXTERNAL_api_usage_f4cd3de7180382eb.json": {
+    "bytes": 3440,
+    "sha256": "7ee0552ad3a4cbc1cee31fc21b61f9ae39e18cb338b8502af9275878fa4f1923"
+  },
+  "outputs/EXTERNAL_d4d.yaml": {
+    "bytes": 58,
+    "sha256": "64bea46796fc5ce0198c255c9b0b81d73d2663efb518729b6561352aa993268f"
+  },
+  "outputs/EXTERNAL_d4d_core.yaml": {
+    "bytes": 422,
+    "sha256": "3fbfbac2b99c55de252d8e33546205ccf976592a7dfe93fca4c7288c690f1353"
+  },
+  "outputs/EXTERNAL_reasoning.previous-dbac45ac488c493ea4466433c3e1bcf9.jsonl": {
+    "bytes": 522,
+    "sha256": "33514f925b889f0b2c540b3b4acd6756f24674a582754d0159140d2707235507"
+  },
+  "outputs/intermediate/EXTERNAL_core.yaml": {
+    "bytes": 422,
+    "sha256": "3fbfbac2b99c55de252d8e33546205ccf976592a7dfe93fca4c7288c690f1353"
+  },
+  "outputs/intermediate/EXTERNAL_full.yaml": {
+    "bytes": 58,
+    "sha256": "64bea46796fc5ce0198c255c9b0b81d73d2663efb518729b6561352aa993268f"
+  },
+  "outputs/intermediate/EXTERNAL_snapshot_index.json": {
+    "bytes": 3402,
+    "sha256": "22c41863ec3b311c19432cbdee1704c415886652b35db40ae6b46d16130d205e"
+  },
+  "outputs/intermediate/EXTERNAL_snapshot_index.previous-b6bf9e8478c14b9a8b1271cb42553388.json": {
+    "bytes": 3402,
+    "sha256": "22c41863ec3b311c19432cbdee1704c415886652b35db40ae6b46d16130d205e"
+  },
+  "source manifest.yaml": {
+    "bytes": 336,
+    "sha256": "6155f5bd8caa06d8cec8f913b0d048a6acac01c67e1d3d0e3e877367bd435c2b"
+  }
+}

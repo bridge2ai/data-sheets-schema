@@ -404,3 +404,8 @@ class TestVerdictRewriteSkip(unittest.TestCase):
             written = yaml.safe_load(path.read_text())["canary"]
             self.assertEqual(written["rows"], [other])
             self.assertEqual(written["prior_verdict"]["rows"], [row])
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+import pytest
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

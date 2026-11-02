@@ -68,3 +68,7 @@ def test_backfill_keeps_a_real_generated_runs_evidence_and_behavior(generated, c
         api.execute(replace(spec), client=client)
         assert client.messages.calls == []
     assert spec.provenance_path.read_bytes() == original
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

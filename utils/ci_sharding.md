@@ -7,7 +7,7 @@ complete offline canary, audit/finalization and evaluation suites alongside the
 shards. Budget and native transport controls run once in the canary job, with
 the same 45-minute job limit and existing test deadlines, rather than sharing
 the time left after a full suite shard (#4466). Four more jobs each run one required long offline API case, with the same
-45-minute limit (#4517). There are thirteen Python jobs on PRs and twelve on
+45-minute limit (#4517). PR shards and every other job keep 45 minutes, while ordinary shards on main and manual runs allow 60 (D75). There are thirteen Python jobs on PRs and twelve on
 main/manual runs, plus the aggregate `test` job. The aggregate
 requires every applicable job to succeed; failure, cancellation or an unexpected
 skip in any offline lane also fails it. Package metadata still permits Python
@@ -62,7 +62,31 @@ partition, compared with approximately 697.3 seconds per weighted shard.
 These are estimates of test work, not wall-clock predictions; fixture reuse,
 runner load and changed tests can affect the actual result.
 
-The current snapshot comes from successful main run
+The current snapshot uses PR run
+[41438863804](https://github.com/bridge2ai/data-sheets-schema/actions/runs/41438863804)
+at `80fbca8b746ac411bbe96ea9de8543a6f3a7b821`: 21,882 ordinary testcase
+occurrences in 607 files. Five shards supplied completed JUnit files. Shard 4
+was cancelled at the job deadline with 3,975 passes, 11 skips and one case
+without a completed result. Its available timings are estimates from consecutive
+result timestamps on each worker, including setup, prior teardown and scheduling
+delay. The one unfinished case uses its completed local JUnit duration, 200.986
+seconds; `source.supplement` identifies that case and hashes both supplemental
+inputs. This mixed snapshot is not evidence that the cancelled CI run passed.
+
+The [round-8 refresh helper](../scripts/adhoc/refresh_pr5212_ci_timings_20261102.py)
+checks each input's node multiset against the plugin's old partition and passes
+the observations through the unchanged timing updater. It adds 32 previously
+unweighted files and retains any unmeasured old entries. The resulting six-way
+partition has about 6,408 case-seconds per shard; the four-way partition has
+about 9,612. These totals overlap across four workers. A simple scheduling model
+with an empirical startup/overhead allowance projects about 29.4 and 42.8 minutes
+respectively, below 80% of the existing limits. These are estimates, particularly
+for the incomplete shard; subsequent CI must establish actual completion times.
+The [collection checker](../scripts/adhoc/check_pr5212_ci_partition_20261102.py)
+verifies both real layouts without executing full shards. Tests, lanes, deadlines
+and the partition algorithm are unchanged.
+
+The preceding snapshot comes from successful main run
 [41148135309](https://github.com/bridge2ai/data-sheets-schema/actions/runs/41148135309)
 at `4c07980399d47d77b64c9f2bff7a50bfc5cc6ddf`: 20,801 testcase occurrences in
 575 files, including 51 files absent from the previous snapshot. Recorded case
@@ -77,7 +101,7 @@ shard. These are scheduling estimates, not wall-time predictions. The
 the ten v5 test files from #5364 using the median fallback. Tests, lane boundaries,
 deadlines and gates are unchanged; CI runtime improvement remains unmeasured.
 
-The previous snapshot comes from successful run
+An earlier snapshot comes from successful run
 [38158491197](https://github.com/bridge2ai/data-sheets-schema/actions/runs/38158491197)
 at `df2aa6c663c8d5712e3bd51885a6806f00982d79`: 18,848 testcase occurrences in
 524 files, including 243 files absent from the previous snapshot. One legitimate

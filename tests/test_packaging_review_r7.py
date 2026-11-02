@@ -9,7 +9,7 @@ from types import SimpleNamespace
 import pytest
 import yaml
 
-from data_sheets_schema import api_runner as api, provenance, resources
+from data_sheets_schema import api_runner as api, provenance, resources, usage_ledger
 from tests.test_download.test_api_runner import FakeMessages, FakeResponse, spec
 
 
@@ -18,6 +18,7 @@ def test_readable_repair_gets_another_round_when_schema_findings_increase(tmp_pa
     bundle = tmp_path / "bundle.txt"
     bundle.write_text("Synthetic input\n")
     run = spec(project="EXTERNAL", bundle=bundle, manifest=None, profile="neutral", out_dir=tmp_path)
+    usage_ledger.prepare_usage(run, resume=False)
     run.full_path.write_text("id: x\ntitle: [unclosed\n", encoding="utf-8")
 
     class Repairs(FakeMessages):

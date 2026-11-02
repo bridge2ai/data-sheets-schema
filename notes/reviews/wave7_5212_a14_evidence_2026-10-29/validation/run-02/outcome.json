@@ -1,0 +1,66 @@
+{
+  "invalid_junit_cases": [
+    {
+      "identity": [
+        "tests.test_d41_request_parity",
+        "test_chorus_shared_v1_exact_baseline_sdk_bytes[push]"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_d41_request_parity",
+        "test_chorus_shared_v1_exact_baseline_sdk_bytes[pull_request]"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_shared_generation_runtime",
+        "test_real_complete_api_pipeline_and_completed_recheck"
+      ],
+      "tags": [
+        "failure"
+      ]
+    },
+    {
+      "identity": [
+        "tests.test_source_heading_runtime_api",
+        "test_selected_form_captures_actual_default_instrument_per_invocation"
+      ],
+      "tags": [
+        "failure"
+      ]
+    }
+  ],
+  "passed": false,
+  "passed_cases_by_module": {
+    "test_api_latch_guard": 22,
+    "test_audit_omissions": 73,
+    "test_d41_request_parity": 4,
+    "test_latch_journal": 71,
+    "test_pr5212_d55_fixes": 29,
+    "test_pr5212_r3_fixes": 5,
+    "test_pr5212_r4_fixes": 5,
+    "test_report_admission": 22,
+    "test_report_gate": 40,
+    "test_shared_generation_assets": 100,
+    "test_shared_generation_runtime": 9,
+    "test_shared_generation_scope_context": 13,
+    "test_source_heading_runtime": 15,
+    "test_source_heading_runtime_api": 17,
+    "test_typed_audit": 100,
+    "test_typed_audit_omission_wire": 21,
+    "test_wave4_a14_review": 2
+  },
+  "returncode": 1,
+  "scientific_acceptance": "not_assessed",
+  "selection_complete": true,
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 6873.559255499975
+}

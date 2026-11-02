@@ -117,3 +117,7 @@ annotations:
     assert _typed(value['annotations']['nested'][0]) != _typed(value['annotations']['nested'][2])
     quoted = record.replace('issued: 2026-01-02', "issued: '2026-01-02'")
     assert sg.schema_context(selected, quoted) != sg.schema_context(selected, record)
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

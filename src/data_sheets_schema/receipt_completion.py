@@ -381,6 +381,8 @@ def _recover_reasoning(spec, response, row, payload, *, phase=PHASE) -> None:
 
 
 def _receipt_publish(spec, inputs, result) -> None:
+    from .latch_journal import refuse_legacy_execution
+    refuse_legacy_execution(spec)
     import os
     import tempfile
     from data_sheets_schema import api_runner as api
@@ -393,7 +395,8 @@ def _receipt_publish(spec, inputs, result) -> None:
         return  # interrupted after publication; never re-merge
     if sha(raw) != sha(inputs['receipt'].encode()):
         raise UsageLedgerError('receipt completion cannot overwrite unexpected receipt drift')
-    with tempfile.NamedTemporaryFile(mode='wb', dir=path.parent, delete=False) as stream:
+    with tempfile.NamedTemporaryFile(mode='wb', dir=path.parent,
+                                     prefix=f'.{path.stem}.', delete=False) as stream:
         temporary = Path(stream.name)
         stream.write(result['receipt_yaml'].encode())
         stream.flush()
@@ -524,6 +527,8 @@ def _checked_result(inputs, response, result):
 
 def recover(spec, *, allow_unfinished=False) -> dict | None:
     """Recover only pinned outcomes; missing progress can never restart full."""
+    from .latch_journal import refuse_legacy_execution
+    refuse_legacy_execution(spec)
     from data_sheets_schema import usage_ledger as ledger
     state = _state(spec)
     if state is None:
@@ -589,6 +594,8 @@ def _audit_carry(outcome):
 
 def run(spec, client, settings: dict, usage: list) -> dict:
     """Called after full progress publication, before any core/audit continuation."""
+    from .latch_journal import refuse_legacy_execution
+    refuse_legacy_execution(spec)
     import time
     from datetime import datetime, timezone
     from data_sheets_schema import api_runner as api, reasoning, usage_ledger as ledger
