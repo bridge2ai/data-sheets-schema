@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import functools
+from dataclasses import dataclass
 
 import os
 import click
@@ -381,8 +382,8 @@ def _generated_date(text: str) -> str | None:
 @click.option('--provider', default=None, help='Provider the spec declared.')
 @click.option('--bundle-for-spec', 'bundle_for_spec', default=None,
               type=click.Path(),
-              help='Bundle the instruction was rendered against, when it '
-                   'differs from --input-bundle.')
+              help='Spelling of the same input bundle used by the instruction; '
+                   'must identify the same file as --input-bundle.')
 @click.option('--reasoning-effort', 'reasoning_effort', default=None,
               type=click.Choice(EFFORT_CHOICES),
               help='Reasoning effort this run was launched at, where the '
@@ -433,8 +434,9 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     Refuses to run from anywhere but the repository root — see
     _require_repo_root_cwd.
 
-    Every field is observed at run time — hardware, software versions, input
-    hashes. Use this from inside a generation process.
+    Hardware, software versions and current input hashes are observed here.
+    Input consumption remains caller-asserted unless an admitted instruction
+    independently binds its absolute input paths. Use this inside generation.
 
     Pass --prompt for every prompt file the run consumed. Without it the
     record's `prompts` block is null, which is what the agentic path produced
@@ -445,6 +447,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     so a record that cannot identify its own prompt cannot be placed in it.
     """
     _require_repo_root_cwd("d4d provenance record")
+    recording_cwd = Path.cwd()
     from datetime import date, timedelta
     import hashlib
     import re
@@ -621,19 +624,37 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                       if header_unused else None)
     digest = schema_digest.fingerprint(
         schema_digest.digest_text("Dataset", profile=profile_selection.profile))
+    from data_sheets_schema.corpus import root as corpus_root
+    from data_sheets_schema.chunking import manifest_for
+    record_owner = corpus_root(selected_manifest)
+    # Supplied relative inputs belong to the recording cwd, even when the
+    # manifest owns outputs elsewhere. Capture once before trying spellings.
+    record_bundle = _record_input_anchor(resolved_bundle, recording_cwd)
+    discovered_chunks = (Path(chunk_manifest) if chunk_manifest else
+                         manifest_for(record_bundle.address, source_manifest=selected_manifest)
+                         if record_bundle is not None else None)
+    record_inputs = {
+        "bundle": record_bundle,
+        "manifest": _record_input_anchor(selected_manifest, recording_cwd),
+        "chunk_manifest": _record_input_anchor(discovered_chunks, recording_cwd),
+    }
+    if bundle_for_spec is not None and not _record_matches_input(
+            bundle_for_spec, recording_cwd, record_bundle):
+        raise click.ClickException("rendering bundle conflicts with the selected recording input")
+
+    def spec_agrees(candidate):
+        return all(
+            (name == "chunk_manifest" and candidate.get(name) is None and chunk_manifest is None)
+            or _record_matches_input(candidate.get(name), record_owner, anchor)
+            for name, anchor in record_inputs.items())
+
     spec = None
+    instruction_admitted = False
     if registered is not None:
-        def same_path(left, right):
-            return ((left is None and right is None) or
-                    (left is not None and right is not None and Path(left).resolve() == Path(right).resolve()))
-        for name, selected_path, registered_path in (
-                ("bundle", resolved_bundle, registered.bundle),
-                ("rendering bundle", bundle_for_spec or resolved_bundle, registered.bundle),
-                ("manifest", selected_manifest, registered.manifest),
-                ("chunk manifest", chunk_manifest, registered.chunk_manifest)):
-            if not same_path(selected_path, registered_path):
-                raise click.ClickException(f"{name} conflicts with the registered rendering specification")
         spec = registered.render_spec()
+        if not spec_agrees(spec):
+            raise click.ClickException("selected inputs conflict with the registered rendering specification")
+        instruction_admitted = True  # exact supplied bytes were checked above
         selected = selected_manifest if registered.manifest_used else None
         manifest_basis = None if registered.manifest_used else "the registered instruction declares manifest context unused"
     elif condition:
@@ -666,7 +687,8 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             # Recording and rendering may run on either side of the corpus
             # root/subdirectory boundary. Keep the current CLI spelling first,
             # then the supplied inputs and their bounded owner counterparts.
-            # Only the complete instruction SHA can admit an alternative.
+            # Both the anchored file identity and the complete instruction
+            # SHA must admit an alternative.
             literal = dict(current_literal)
             literal.update(
                 bundle=str(bundle) if bundle is not None else None,
@@ -675,13 +697,16 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             if chunk_manifest is not None:
                 literal["chunk_manifest"] = str(chunk_manifest)
             discovered = literal.get("chunk_manifest")
-            bundle_spellings = _backfill_input_spellings(
-                Path(bundle) if bundle is not None else None, current._corpus_root)
-            manifest_spellings = _backfill_input_spellings(selected_manifest, current._corpus_root)
+            bundle_spellings = _record_input_spellings(
+                Path(bundle) if bundle is not None else None, record_inputs["bundle"], record_owner)
+            manifest_spellings = _record_input_spellings(
+                selected_manifest, record_inputs["manifest"], record_owner)
             # Explicit and discovered chunk locators need the same bounded
             # counterpart. Never search for another file or resolve symlinks.
-            chunk_spellings = _backfill_input_spellings(
-                Path(discovered) if discovered is not None else None, current._corpus_root)
+            chunk_spellings = (_record_input_spellings(
+                Path(chunk_manifest) if chunk_manifest is not None else record_inputs["chunk_manifest"].address,
+                record_inputs["chunk_manifest"], record_owner)
+                if discovered is not None and record_inputs["chunk_manifest"] is not None else (None,))
             # The nested renderer also froze absolute output destinations.
             # Change their spelling together, only within the known owner;
             # every complete instruction still has to match the supplied SHA.
@@ -707,7 +732,8 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                       if supplied_text is not None else None)
 
         def _reproduces(cand_spec: RunSpec) -> bool:
-            return hashlib.sha256(resolve_prompt(cand_spec).encode("utf-8")).hexdigest() == target_sha
+            return (spec_agrees(cand_spec.render_spec())
+                    and hashlib.sha256(resolve_prompt(cand_spec).encode("utf-8")).hexdigest() == target_sha)
 
         if supplied_text is None:
             run_spec = _make_run_spec(run_date)
@@ -784,10 +810,15 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         else:
             spec = run_spec.render_spec()
             manifest_unused_line = run_spec
+            if not spec_agrees(spec):
+                raise click.ClickException("request specification does not name the selected recording inputs")
+            instruction_admitted = supplied_text is not None and _reproduces(run_spec)
         if not manifest_unused_line.manifest_used:
             selected = None
             manifest_basis = f"the arm's header declares the source manifest unused ({manifest_unused_line.manifest_line})"
 
+    input_verified = (instruction_admitted
+                      and _record_absolute_input_declarations(spec, supplied_text, selected is not None))
     rec = build_record(project, method, label, mode="live",
                        # The selected manifest owns outputs even when this
                        # arm consumes none of its context blocks.
@@ -795,7 +826,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        outputs=({key: Path(value) for key, value in registered._agentic_artifact_paths.items()
                                  if key in {"full", "core", "report"}} if registered is not None else None),
                        input_bundle=Path(input_bundle) if input_bundle else None,
-                       input_verified=True,
+                       input_verified=input_verified, input_asserted=not input_verified,
                        prompt_paths=[Path(p) for p in prompts] or None,
                        prompt_request=supplied_text,
                        prompt_request_spec=spec,
@@ -808,6 +839,25 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        manifest=selected, manifest_basis=manifest_basis,
                        selected_manifest=selected_manifest,
                        chunk_manifest=Path(chunk_manifest) if chunk_manifest else None)
+    # Check the actual recorded identities too, before any write. A matching
+    # prompt SHA cannot authorize another file, including a same-byte alias.
+    recorded_inputs = rec.data["inputs"]
+    recorded_paths = {
+        "bundle": recorded_inputs.get("bundle_path"),
+        "manifest": (recorded_inputs.get("source_manifest") or {}).get("path"),
+        "chunk_manifest": (recorded_inputs.get("chunks") or {}).get("path"),
+    }
+    for name, anchor in record_inputs.items():
+        if anchor is not None and _record_input_anchor(anchor.address, recording_cwd) != anchor:
+            raise click.ClickException(f"{name} changed while recording provenance")
+        if name == "manifest" and selected is None:
+            continue  # selected namespace is not consumed manifest context
+        if name == "chunk_manifest" and recorded_paths[name] is None:
+            continue  # missing/stale chunk evidence stays null, never verified
+        if not _record_matches_input(recorded_paths[name], record_owner, anchor):
+            raise click.ClickException(f"recorded {name} differs from the selected recording input")
+    if record_bundle is not None and recorded_inputs.get("bundle_md5") != record_bundle.md5:
+        raise click.ClickException("recorded bundle digest differs from the selected recording input")
     if phases_skipped:
         known = _known_phases()
         bad = [n for n in phases_skipped if n not in known]
@@ -851,6 +901,89 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                    "was recorded, so the verdict is about bytes that no longer "
                    "exist.\n      Re-run `d4d runs validate --label "
                    f"{label} --project {project}` before `d4d runs check`.")
+
+
+@dataclass(frozen=True)
+class _RecorderInput:
+    address: Path
+    identity: tuple | None
+    md5: str | None
+
+
+def _record_file_identity(path: Path) -> tuple | None:
+    """Physical identity without replacing the spelling used to open a file."""
+    try:
+        entry, target = path.lstat(), path.stat()
+        return (str(path.resolve(strict=True)), entry.st_dev, entry.st_ino, entry.st_mode,
+                target.st_size, target.st_mtime_ns, target.st_ctime_ns)
+    except (OSError, RuntimeError):
+        return None
+
+
+def _record_input_anchor(value, base: Path) -> _RecorderInput | None:
+    if value is None:
+        return None
+    path = Path(value)
+    address = path if path.is_absolute() else base / path
+    identity = _record_file_identity(address)
+    try:
+        import hashlib
+        digest = hashlib.md5(address.read_bytes()).hexdigest()
+    except OSError:
+        digest = None
+    return _RecorderInput(address, identity, digest)
+
+
+def _record_matches_input(value, base: Path, anchor: _RecorderInput | None) -> bool:
+    if value is None or anchor is None:
+        return value is None and anchor is None
+    path = Path(value)
+    address = path if path.is_absolute() else base / path
+    identity = _record_file_identity(address)
+    if anchor.identity is None:
+        # An absent optional sidecar can retain only its literal address;
+        # absence supplies no identity evidence for a different spelling.
+        return address == anchor.address and identity is None
+    return identity == anchor.identity
+
+
+def _record_input_spellings(value, anchor: _RecorderInput | None, owner: Path) -> tuple:
+    """Recorder-only counterparts of the cwd-anchored file, never owner/value."""
+    if value is None or anchor is None:
+        return (value,)
+    value = Path(value)
+    choices = [value]
+    if (anchor.identity is not None and owner.is_absolute()
+            and ".." not in owner.parts and ".." not in value.parts
+            and ".." not in anchor.address.parts):
+        choices.append(anchor.address)
+        try:
+            choices.append(anchor.address.relative_to(owner))
+        except ValueError:
+            pass
+    return tuple(dict.fromkeys(path for path in choices
+                              if _record_matches_input(path, owner, anchor)))
+
+
+def _record_absolute_input_declarations(spec, instruction, manifest_used: bool) -> bool:
+    """Verify only the admitted renderer's explicit absolute input declarations.
+
+    Older/other renderers and missing instructions remain caller assertions.
+    No ledger, progress file, receipt or freshly computed identity is treated
+    as evidence of what the earlier run consumed by this recorder.
+    """
+    if not isinstance(spec, dict) or not isinstance(instruction, str):
+        return False
+    bundle, chunks = spec.get("bundle"), spec.get("chunk_manifest")
+    if not all(isinstance(path, str) and Path(path).is_absolute() for path in (bundle, chunks)):
+        return False
+    declaration = (f"Read only this source bundle: `{bundle}`. Read this chunk manifest first: "
+                   f"`{chunks}`. Use its ordered chunk IDs and line windows.")
+    if declaration not in instruction:
+        return False
+    manifest = spec.get("manifest")
+    return (not manifest_used or isinstance(manifest, str) and Path(manifest).is_absolute()
+            and f"The only source manifest for this run is `{manifest}`. Its declarations" in instruction)
 
 
 def _record_artifact_spellings(
