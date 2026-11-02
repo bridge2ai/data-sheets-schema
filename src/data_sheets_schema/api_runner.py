@@ -3094,9 +3094,12 @@ def _require_registered_input_spellings(spec: RunSpec) -> None:
     construction state. Do not normalize paths or re-render cached instructions.
     Historical replay remains inspection-only; execute refuses it separately.
     """
-    if spec._replay_only:
-        return  # Historical inspection retains its literal recorded substitutions.
     binding = _input_binding(spec)
+    if spec._replay_only:
+        if binding is not None:
+            raise ValueError("registered input construction cannot be changed to historical replay; "
+                             "construct a literal replay RunSpec")
+        return  # Historical inspection retains its literal recorded substitutions.
     mirror = spec._registered_input_spellings
     if binding is None or (binding.spellings is not None and mirror is None):
         raise ValueError("registered inputs have no construction binding; "
