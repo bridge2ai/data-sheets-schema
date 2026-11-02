@@ -3,7 +3,8 @@
 Inputs: the source-only T8 fixtures and current scanner. Outputs: pytest results
 and owned temporary source fixtures. 2026-11-02. No production helper execution.
 Each mutation first calibrates its unchanged fixture; a calibration failure is
-not evidence that the mutation was rejected. The frozen 52-case suite is intact.
+not evidence that the mutation was rejected. Original 52-case assertions remain
+intact; the added real-source fixture dependency is versioned separately.
 """
 import textwrap
 
@@ -167,6 +168,20 @@ def test_r5_declared_field_annotations_do_not_authorize_descriptor_behavior(tmp_
         _replace_once(path, '    guide_version: int\n',
                       "    guide_version: int\n"
                       "    locals().__setitem__('base_prompt', PromptDescriptor())\n")
+    _refuses(fixture)
+
+
+def test_r5_imported_field_default_must_resolve_to_its_source_value(tmp_path):
+    fixture = _reading_fixture(tmp_path)
+    _calibrate(fixture, tmp_path)
+    path = fixture[0] / base.scan.RUNNER
+    (path.parent / 'prefix_descriptor.py').write_text(
+        textwrap.dedent(_DESCRIPTOR) + '\nDEFAULT_PROMPT = PromptDescriptor()\n')
+    _replace_once(path, '@dataclass\nclass RunSpec:',
+        'from data_sheets_schema.prefix_descriptor import DEFAULT_PROMPT\n'
+        '@dataclass\nclass RunSpec:')
+    _replace_once(path, '    base_prompt: str | None\n',
+        '    base_prompt: str | None = DEFAULT_PROMPT\n')
     _refuses(fixture)
 
 

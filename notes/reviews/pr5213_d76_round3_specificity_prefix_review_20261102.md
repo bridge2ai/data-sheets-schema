@@ -60,6 +60,9 @@ uses `vars(spec)`. A frozen record may acquire custom dispatch through a class
 expression. The descriptor fixture raises `AttributeError` for class access,
 so dataclasses treats it as a required field; no invalid default-ordering trick
 is used. Validate class-body/default behavior and every relevant read protocol.
+An additional control imports such a descriptor-valued default from an adjacent
+source module. Imported defaults require source resolution too; recognizing a
+default's identifier or import statement alone does not prove it inert.
 
 ## R6 — the registry lookup result can escape its supposedly closed writers
 
@@ -81,9 +84,15 @@ comprehension/captured-variable boundaries too.
 
 ## Supplemental evidence contract
 
-`tests/test_wave7_5213_d76_specificity_prefix_review.py` defines 21 source-only
-cases covering these seven families. The original frozen 52-case module remains
-unchanged. Every mutation first derives the unchanged fixture and compares its
+`tests/test_wave7_5213_d76_specificity_prefix_review.py` now defines 22 source-only
+cases covering these seven families. The initial frozen 52-case module's
+assertions and case roster are unchanged; its `_real_fixture` now also copies
+`src/data_sheets_schema/registry.py` so the real `AUTO` default can be resolved
+from source rather than trusted by identifier. This is a fixture-dependency
+change with a new file hash, not a claim that the previous frozen bytes changed.
+The original 52- and 21-case versions and their retained outcomes remain
+historical evidence; the revised 52+22 fixtures require a new before run against
+the unchanged scanner draft. Every mutation first derives the unchanged fixture and compares its
 adapted output with the established no-prefix fixture. A failed calibration
 means the unsafe mutation has not yet been tested; it must not be reported as
 proof of either acceptance or refusal. In particular, real-registry controls

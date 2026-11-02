@@ -63,7 +63,8 @@ def test_observational_prefix_keeps_exact_adapter(tmp_path, definitions, prefix)
 def _real_fixture(tmp_path):
     fixture = fixture_module.TestSelectedTemplateDerivation().fixture(tmp_path)
     root, body, selection = fixture
-    for relative in (scan.RUNNER, 'src/data_sheets_schema/provenance.py'):
+    for relative in (scan.RUNNER, 'src/data_sheets_schema/provenance.py',
+                     'src/data_sheets_schema/registry.py'):
         (root / relative).write_text((ROOT / relative).read_text())
     selection['cases'][0]['values'] = {'api_playbook_version': 2}
     return root, body, selection
