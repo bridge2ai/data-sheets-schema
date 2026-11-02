@@ -21,7 +21,7 @@ sys.path.insert(0, str(HERE))
 
 
 @contextmanager
-def configured_observer(worker='master'):
+def configured_observer(worker='master', *, configure=True):
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary)
         (root / 'source-before.json').write_text('{}\n')
@@ -36,7 +36,12 @@ def configured_observer(worker='master'):
             with patch.object(sys, 'flags', SimpleNamespace(no_site=True, safe_path=True)), \
                     patch.object(sys, 'dont_write_bytecode', True), \
                     patch.object(sys, 'addaudithook', callbacks.append):
-                observer.pytest_configure(SimpleNamespace(workerinput={'workerid': worker}))
+                if configure:
+                    observer.pytest_configure(SimpleNamespace(workerinput={'workerid': worker}))
+                else:
+                    # The real controller and worker bootstrap install the hook
+                    # before pytest calls pytest_configure.
+                    observer.install_guard()
             try:
                 yield observer, root, callbacks
             finally:
@@ -66,6 +71,29 @@ def patched_io():
 
 
 class ObserverIOContracts(unittest.TestCase):
+    def test_startup_denial_is_persisted_before_pytest_configure(self):
+        with configured_observer(configure=False) as (observer, root, callbacks):
+            self.assertEqual(len(callbacks), 1)
+            self.assertIsNone(observer._PHASE_STREAM)
+            with patched_io():
+                with self.assertRaisesRegex(RuntimeError, 'offline guard refuses socket.connect'):
+                    callbacks[0]('socket.connect', (SimpleNamespace(family=socket.AF_INET), ('192.0.2.1', 443)))
+            files = list(root.glob('guard-denials-*.jsonl'))
+            self.assertEqual(len(files), 1)
+            self.assertEqual(json.loads(files[0].read_text()),
+                {'event': 'socket.connect', 'detail': 'non-loopback socket'})
+            self.assertEqual(observer.LEDGER['reports'], [])
+            self.assertEqual(list(root.glob('phases-*.jsonl')), [])
+
+    def test_clean_startup_does_not_publish_a_denial_artifact(self):
+        with configured_observer(configure=False) as (observer, root, callbacks):
+            self.assertEqual(len(callbacks), 1)
+            callbacks[0]('socket.getaddrinfo', ('localhost', 443, 0, 0, 0))
+            callbacks[0]('socket.connect', (SimpleNamespace(family=socket.AF_UNIX), '/local/socket'))
+            self.assertEqual(list(root.glob('guard-denials-*.jsonl')), [])
+            self.assertEqual(list(root.glob('phases-*.jsonl')), [])
+            self.assertEqual(observer.LEDGER['reports'], [])
+
     def test_clean_session_does_not_publish_a_denial_artifact(self):
         with configured_observer() as (observer, root, _):
             observer.pytest_runtest_logreport(report('setup', worker='master'))
