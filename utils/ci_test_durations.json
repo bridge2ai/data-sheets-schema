@@ -600,6 +600,77 @@
     "tests/test_wave4_a14_review.py": 0.114,
     "tests/test_wave5_5094_legacy_snapshots.py": 0.27,
     "tests/test_wave5_5095_review.py": 1.805,
+    "tests/test_wave7_5213_d76_registration.py": 2384.875,
     "tests/test_wcrate_copies.py": 0.315
-  }
+  },
+  "local_overrides": [
+    {
+      "name": "d76_sg2_2026_11_02",
+      "module": "tests/test_wave7_5213_d76_registration.py",
+      "baseline_head": "0fa106e4d558c1c119e8f386222e225ac3acca24",
+      "file_seconds": 2384.875,
+      "node_estimate_seconds": {
+        "test_sg2_root_launch_completes_and_records_registered_paths[none]": 844,
+        "test_sg2_root_launch_completes_and_records_registered_paths[explicit]": 753,
+        "test_sg2_root_launch_completes_and_records_registered_paths[conventional]": 773
+      },
+      "observations": {
+        "test_sg2_root_launch_completes_and_records_registered_paths[none]": [
+          {
+            "source": "historical_junit",
+            "seconds": 702.437
+          },
+          {
+            "source": "fresh_serial_diagnostic",
+            "seconds": 767.0248282499961
+          }
+        ],
+        "test_sg2_root_launch_completes_and_records_registered_paths[explicit]": [
+          {
+            "source": "historical_junit",
+            "seconds": 626.19
+          },
+          {
+            "source": "fresh_serial_diagnostic",
+            "seconds": 683.6608499579888
+          }
+        ],
+        "test_sg2_root_launch_completes_and_records_registered_paths[conventional]": [
+          {
+            "source": "historical_junit",
+            "seconds": 702.1
+          }
+        ]
+      },
+      "other_historical_module_seconds": 14.875,
+      "diagnostic_complete_required_sequence": true,
+      "diagnostic_literal_counts": {
+        "errors": 0,
+        "failed": 0,
+        "interrupted": 0,
+        "not_started": 0,
+        "passed": 49,
+        "skipped": 0,
+        "unexpected": 0,
+        "xpassed": 0
+      },
+      "diagnostic_literal_passed": true,
+      "diagnostic_summary_sha256": "2fe6d1044cb2d66843aaeb3b2f051a0b82b46864f13123098d747ee263d59bff",
+      "historical_junit_sha256": "555e35d52f31be4b321463202033613342937d434125dec14e7146f99470d18b",
+      "historical_plan_sha256": "afe1520bb571b9a7c468f15cceecf97e4cae863735de44fd3f00f2a6ab9a9883",
+      "historical_proof_sha256": {
+        "plan.json": "afe1520bb571b9a7c468f15cceecf97e4cae863735de44fd3f00f2a6ab9a9883",
+        "outcome.json": "6e90cbe0c0de16e1e2a4917ef3c057b1fb2a700c9d56814a935d297e3b0e571f",
+        "phase-accounting.json": "4847f596894aa84c06e03952648966026a82163c977ad2be0768edcb5ed30be4",
+        "nodes.json": "9e44e5dcc6ba0cc64a3c68002c9c5606f833724cd1f9224f1e86c121bef48509",
+        "source-before.json": "6cd70852c5f78b24f590bcba1c397d62d02b7196476d666b49ec743d0af23672",
+        "source-after.json": "6cd70852c5f78b24f590bcba1c397d62d02b7196476d666b49ec743d0af23672",
+        "hygiene.json": "12c46ac31dc187d61f910884deae15b88b30e60fec4292e2060e4fe5fdc68c21",
+        "guard-denials.json": "7e5ad018d44b2f15516dc5f35edd5121b4968b37cca52918f1bf10f95318be22"
+      },
+      "assertion_body_ast_sha256": "526e67f255346b5686fddece6cbc5e76caecd7888c229a43e9ee461dba34d888",
+      "method": "Per node: ceiling(max(retained observations)*1.10). Module sum includes other retained case times.",
+      "limits": "macOS/Python3.13 observations across different concurrency modes; child isolation may change runtime. Only the file aggregate is consumed by the current scheduler; no node scheduling or CI budget claim."
+    }
+  ]
 }
