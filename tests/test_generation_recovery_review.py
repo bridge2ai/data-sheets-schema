@@ -90,6 +90,8 @@ def client_named(marker, fail_on=None):
 
 
 def test_changed_input_restart_recovers_only_its_own_snapshots(external):
+    import re
+
     api.execute(external, client=client_named("GENERATION_A_EVIDENCE"))
     old_record = yaml.safe_load(external.provenance_path.read_text())
     old = {entry["path"]: Path(entry["path"]).read_bytes() for entry in old_record["intermediates"]}
@@ -122,16 +124,40 @@ def test_changed_input_restart_recovers_only_its_own_snapshots(external):
     # Hash drift in the selected snapshot is refused before any further calls.
     api._save_progress(external, ["full", "core"], None)
     saved_progress = api._progress_path(external).read_bytes()
+    saved_ledger = ledger.ledger_path(external).read_bytes()
+    account = json.loads(saved_ledger)
+    journal_path = Path(account["latch_journal"]["path"])
+    journal_before = journal_path.read_bytes()
+    snapshot_event, = [event for line in journal_before.splitlines()
+                       if (event := json.loads(line))["kind"] == "latch"
+                       and event["identity"] == account["identity"]
+                       and event["generation_id"] == account["generation_id"]
+                       and event["payload"]["key"].startswith("snapshot:")
+                       and event["payload"]["value"]["path"] == str(phase1)]
+    expected_sha256 = hashlib.sha256(phase1.read_bytes()).hexdigest()
+    assert snapshot_event["payload"]["value"]["sha256"] == expected_sha256
     phase1.write_text(phase1.read_text() + "\n# tampered\n")
+    tampered_snapshot = phase1.read_bytes()
     refused = client_named("GENERATION_B_EVIDENCE")
     assert receipts.phase1_snapshot_state(api._receipt_path(external))[0] == "unusable"
     assert api.report_claims_block(external)["checked"] is False
     with pytest.raises(ledger.UsageLedgerError, match="snapshot bytes changed"):
         api._save_progress(external, ["full", "core"], None)
     assert api._progress_path(external).read_bytes() == saved_progress
-    with pytest.raises(ledger.UsageLedgerError, match="snapshot bytes changed"):
+    prefix = ("latch journal: unacknowledged discrepancy; required event_sha256s="
+              + snapshot_event["sha256"] + "; discrepancies=")
+    with pytest.raises(ledger.UsageLedgerError, match="^" + re.escape(prefix)) as caught:
         api.execute(replace(external), client=refused)
+    assert json.loads(str(caught.value)[len(prefix):]) == [{
+        "event_sha256": snapshot_event["sha256"],
+        "key": snapshot_event["payload"]["key"] + ":bytes",
+        "expected": expected_sha256,
+        "found": hashlib.sha256(tampered_snapshot).hexdigest()}]
     assert refused.messages.calls == []
+    assert api._progress_path(external).read_bytes() == saved_progress
+    assert phase1.read_bytes() == tampered_snapshot
+    assert ledger.ledger_path(external).read_bytes() == saved_ledger
+    assert journal_path.read_bytes() == journal_before
 
 
 def test_drift_before_receipt_readdressing_keeps_delivered_response(external):
@@ -160,19 +186,10 @@ def test_drift_before_receipt_readdressing_keeps_delivered_response(external):
     assert not spec.full_path.exists() and not spec.provenance_path.exists()
 
 
-def test_explicit_restart_preserves_an_unreadable_snapshot_index(external):
-    path = snapshot_store.index_path(external.metadata_dir, external.project)
-    path.parent.mkdir(parents=True)
-    original = b"incomplete prior index bytes\n"
-    path.write_bytes(original)
-    refused = FakeClient()
-    with pytest.raises(ledger.UsageLedgerError, match="cannot recover generation snapshots"):
-        api.execute(external, client=refused)
-    assert refused.messages.calls == [] and path.read_bytes() == original
-    api.execute(external, resume=False, client=FakeClient())
-    assert json.loads(path.read_text())["generation_id"] == ledger.generation_id(external)
-    assert any(archive.read_bytes() == original
-               for archive in path.parent.glob(f"{path.stem}.previous-*.json"))
+@pytest.mark.parametrize("resume", [True, False])
+def test_explicit_restart_preserves_an_unreadable_snapshot_index(tmp_path, resume):
+    from tests.test_d68_legacy_readonly import test_authentic_legacy_refuses_without_calls_or_tree_changes
+    test_authentic_legacy_refuses_without_calls_or_tree_changes("c6", "execute", resume, tmp_path)
 
 
 @pytest.mark.parametrize("damage", [None, "custom", "unsupported-rule", "bundle", "missing-bundle", "chunks", "missing-chunks", "sources"])
@@ -211,3 +228,7 @@ def test_registry_bundle_audit_checks_external_destinations(tmp_path, damage):
     else:
         assert str(bundle if damage in ("bundle", "missing-bundle", "sources") else chunks) in audit.output
     assert {str(path): path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()} == before
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

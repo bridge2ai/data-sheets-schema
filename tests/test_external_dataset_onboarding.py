@@ -520,3 +520,8 @@ class TestStatusAndMakeSeeTheRegistry(_Offline):
         r = CliRunner().invoke(cli, ["--manifest", str(m), "review", "pack",
                                      "--project", "EXTERNAL_CLINICAL", "--label", "L"])
         self.assertNotIn("not declared by the selected manifest", r.output)
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+import pytest
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

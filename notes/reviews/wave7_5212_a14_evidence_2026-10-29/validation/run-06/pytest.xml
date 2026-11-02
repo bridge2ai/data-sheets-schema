@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="231.753" timestamp="2026-10-28T23:39:36.938223" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_shared_generation_runtime" name="test_real_complete_api_pipeline_and_completed_recheck" time="231.520"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: resume journal head: expected=89fde5ff…(unverified, not a resume anchor); found=1634d9cb…(unverified, not a resume anchor)">selected = RunSpec(project='EXAMPLE', arm='baseline', method='claudecode_api', bundle=PosixPath('/private/tmp/d4d-wave7-5212-pare...ion_version":2,"renderer":25,"runtime":"Claude API (direct)","typed_protocol":"typed_audit_protocol_v1","version":1}}')
+
+    def test_real_complete_api_pipeline_and_completed_recheck(selected):
+        c = client(selected)
+        result = api.execute(selected, client=c)
+        assert result['validation_problems'] == []
+        phases = ['full', rc.PHASE, runtime.WORKER_PHASE, runtime.OMISSION_PHASE,
+                  runtime.INTEGRATION_PHASE, 'reconcile_full', 'report']
+        assert c.messages.phases == phases
+        assert [r['phase'] for r in result['usage']] == phases
+        state = runtime._state(selected)
+        assert state['state'] == 'accepted'
+        assembly = rc._load(state['assembly'])
+        checked = typed.check(assembly, derivations=typed.DerivationCache())
+        assert checked['passed'] and checked['independently_reconstructed']
+        audit = typed._unblob(assembly['audit']).decode()
+        reconcile = c.messages.calls[phases.index('reconcile_full')]
+        assert {'type': 'text', 'text': api.CARRY_LABEL.format(name='Audit findings') + audit} in reconcile['messages'][0]['content']
+        for call in c.messages.calls[2:5]:
+            assert {'type': 'text', 'text': rc.audit_carry(selected)} in call['messages'][0]['content']
+        record = yaml.safe_load(selected.provenance_path.read_bytes())
+        assert record['shared_generation']['assembly_sha256'] == assembly['sha256']
+        assert record['receipt_completion']['counts']['unsupported'] &gt; 0
+        assert record['shared_generation']['scientific_support'] == 'unverified evaluator declarations'
+        from data_sheets_schema import snapshot_store
+        index = json.loads(snapshot_store.index_path(selected.provenance_path.parent, selected.project).read_bytes())
+        audit_snapshot = next(row for row in index['snapshots'] if row['name'] == f'{selected.project}_audit.json')
+        integration_id = next(row['usage_id'] for row in result['usage'] if row['phase'] == runtime.INTEGRATION_PHASE)
+        assert audit_snapshot['usage_id'] == integration_id
+        before = files(selected)
+        again = client(selected)
+        repeated = api.execute(replace(selected), client=again)
+        assert repeated['already_complete'] and not again.messages.calls
+        assert before == files(selected)
+        assert_completed_mutations_refuse_without_calls(selected)
+        assert_snapshot_attribution_checks_without_calls(selected)
+        from tests.test_shared_generation_completed_replay import assert_completed_replay_authority
+&gt;       assert_completed_replay_authority(selected)
+
+tests/test_shared_generation_runtime.py:175: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_shared_generation_completed_replay.py:281: in assert_completed_replay_authority
+    result = api.execute(replace(spec), resume=True, client=client)
+tests/conftest.py:59: in monitored_execute
+    return execute(spec, **kwargs)
+src/data_sheets_schema/api_runner.py:6908: in execute
+    with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256):
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/contextlib.py:141: in __enter__
+    return next(self.gen)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = RunSpec(project='EXAMPLE', arm='baseline', method='claudecode_api', bundle=PosixPath('/private/tmp/d4d-wave7-5212-pare...ion_version":2,"renderer":25,"runtime":"Claude API (direct)","typed_protocol":"typed_audit_protocol_v1","version":1}}')
+expected = '89fde5ff7305a4cb38e7455fccd4094c6fb4ce26de2570d10cd007a2a8e0baad'
+
+    @contextmanager
+    def launch_record(spec, expected):
+        """D57: print externally retainable heads, requiring the prior launch head.
+    
+        This never derives the caller's expectation from the mutable run directory.
+        The journal remains locally hashed, not cryptographically authenticated.
+        """
+        def display(boundary):
+            try:
+                head = head_sha256(spec)
+            except ledger.UsageLedgerError:
+                head = 'invalid'
+                boundary = 'unverified (not a resume anchor)'
+            print(f'latch journal {boundary}: project={spec.project} label={spec.label} '
+                  f'head_sha256={head or "none"} path={journal_path(spec)}', file=sys.stderr, flush=True)
+        try:
+            found = head_sha256(spec)
+            if expected is not None and (not isinstance(expected, str) or not _HEX.fullmatch(expected)):
+                _fail(f'resume journal head: expected=64 lowercase hexadecimal digits; found={expected!r}')
+            if found != expected:
+                _fail(f'resume journal head: expected={expected or "required from prior launch/monitor record"}; found={found or "missing"}')
+        except ledger.UsageLedgerError as exc:
+            # No refused diagnostic is a source of anchors, including malformed
+            # expectations and hashes embedded in broken-chain errors. Redact the
+            # exception too, and suppress its unsafe context in CLI/log tracebacks.
+            def redact(message):
+                return re.sub(r'[0-9a-fA-F]{64,}',
+                              lambda match: match[0][:8] + '…(unverified, not a resume anchor)', message)
+            message = redact(str(exc))
+            print(redact(f'latch journal refused: project={spec.project} label={spec.label} '
+                         f'{message} (not a resume anchor)'), file=sys.stderr, flush=True)
+&gt;           raise ledger.UsageLedgerError(message) from None
+E           data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: resume journal head: expected=89fde5ff…(unverified, not a resume anchor); found=1634d9cb…(unverified, not a resume anchor)
+
+src/data_sheets_schema/latch_journal.py:676: UsageLedgerError</failure></testcase></testsuite></testsuites>

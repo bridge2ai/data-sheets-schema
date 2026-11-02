@@ -1,0 +1,12 @@
+; #5212/D68-D70, 2026-10-31: reproduce checkout-write refusals on a base copy.
+; Inputs: authorized SCRATCH and BASE worktree paths. Outputs: scratch reports.
+; BASE stays read-only, just as the primary checkout does in the main profile.
+(version 1)
+(allow default)
+(deny network*)
+(allow network-bind network-inbound (local ip "localhost:*"))
+(allow network-outbound (remote ip "localhost:*"))
+(deny file-write*)
+(allow file-write* (subpath (param "SCRATCH")))
+(deny file-write* (subpath (param "BASE")))
+(allow file-write-data (literal "/dev/null") (literal "/dev/tty"))

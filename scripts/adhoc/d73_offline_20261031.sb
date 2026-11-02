@@ -1,0 +1,9 @@
+; D73/#5212 review validation, 2026-10-31: write only to the authorized scratch.
+(version 1)
+(allow default)
+(deny network*)
+(allow network-bind network-inbound (local ip "localhost:*"))
+(allow network-outbound (remote ip "localhost:*"))
+(deny file-write*)
+(allow file-write* (subpath (param "SCRATCH")))
+(allow file-write-data (literal "/dev/null") (literal "/dev/tty"))

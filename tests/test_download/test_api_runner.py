@@ -124,6 +124,7 @@ class TestValidatorRepairRefreshCheckpoint:
 
     def test_missing_corrupt_or_stale_checkpoint_refuses_before_calls(self, tmp_path, monkeypatch):
         from dataclasses import replace
+        import hashlib
         from data_sheets_schema import api_runner as api, usage_ledger as ledger
         from tests.test_report_admission import Counted, client_for
         selected, _ = self.pending(tmp_path, monkeypatch)
@@ -132,6 +133,26 @@ class TestValidatorRepairRefreshCheckpoint:
                                                selected.core_path, selected.report_path)}
         progress = json.loads(original[progress_path])
         data = json.loads(original[ledger_path])
+        journal_path = Path(data["latch_journal"]["path"])
+        journal_before = journal_path.read_bytes()
+        controller_events = [event for line in journal_before.splitlines()
+                             if (event := json.loads(line))["kind"] == "latch"
+                             and event["identity"] == data["identity"]
+                             and event["generation_id"] == data["generation_id"]
+                             and event["payload"]["key"] == "controller:validator_repair_refresh"]
+        controller_event = controller_events[-1]
+        assert controller_event["payload"]["value"] == data[api.VALIDATOR_REFRESH_KEY]
+
+        def controller_summary(value):
+            # Independently hash the fixture's large controller value; the
+            # public diagnostic abbreviates it instead of echoing its body.
+            raw = json.dumps(value, sort_keys=True, separators=(",", ":"),
+                             ensure_ascii=True, allow_nan=False).encode()
+            assert isinstance(value, dict) and len(raw) > 240
+            return {"type": "dict", "canonical_bytes": len(raw),
+                    "canonical_sha256": hashlib.sha256(raw).hexdigest()}
+
+        expected_controller = controller_summary(data[api.VALIDATOR_REFRESH_KEY])
         mutations = [
             (progress_path, None), (progress_path, b"{broken"), (progress_path, b"[]"),
             (progress_path, json.dumps({k: v for k, v in progress.items() if k != api.VALIDATOR_REFRESH_KEY}).encode()),
@@ -160,10 +181,27 @@ class TestValidatorRepairRefreshCheckpoint:
                 error, message = ValueError, "^unreadable selected ownership declaration:"
             elif path == progress_path and changed == b"[]":
                 error, message = ValueError, "^selected ownership declaration must be a mapping:"
-            with pytest.raises(error, match=message):
+            elif path == ledger_path:
+                prefix = ("latch journal: unacknowledged discrepancy; required event_sha256s="
+                          + controller_event["sha256"] + "; discrepancies=")
+                message = "^" + re.escape(prefix)
+            with pytest.raises(error, match=message) as caught:
                 api.execute(replace(selected), client=client_for(again))
+            if path == ledger_path:
+                changed_data = json.loads(changed)
+                if api.VALIDATOR_REFRESH_KEY not in changed_data:
+                    found = {"__d4d_latch_missing__": True}
+                elif changed_data[api.VALIDATOR_REFRESH_KEY] is None:
+                    found = None
+                else:
+                    found = controller_summary(changed_data[api.VALIDATOR_REFRESH_KEY])
+                assert json.loads(str(caught.value)[len(prefix):]) == [{
+                    "event_sha256": controller_event["sha256"],
+                    "key": "controller:validator_repair_refresh",
+                    "expected": expected_controller, "found": found}]
             assert not again.calls and not again.count_calls
             assert {p: p.read_bytes() if p.exists() else None for p in original} == before_attempt
+            assert journal_path.read_bytes() == journal_before
             for saved, raw in original.items():
                 saved.write_bytes(raw)
         again = Counted(selected)
@@ -1010,7 +1048,10 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         self.settings = {"name": "claude-opus-5", "temperature": 0.0}
 
     def _spec_with_artifacts(self):
+        from data_sheets_schema import usage_ledger
         s = spec(out_dir=self.out)
+        # These are this generation's repair inputs, not unaccounted history.
+        usage_ledger.prepare_usage(s, resume=False)
         self.out.mkdir(parents=True, exist_ok=True)
         for p in (s.full_path, s.core_path):
             p.write_text("id: x\ntitle: T\nname: n\ndescription: d\n"
@@ -1243,10 +1284,16 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         self.assertEqual(second.name, "CHORUS_repair_full_r1_2.yaml")
 
     def test_intermediates_do_not_claim_a_prefix_sibling_project(self):
+        from dataclasses import replace
+        from data_sheets_schema import usage_ledger
         s = spec(out_dir=self.out)
         self.out.mkdir(parents=True, exist_ok=True)
+        # A sibling prefix alone is ambiguous. Establish its guarded identity
+        # before either snapshot is written, as the real runner does.
+        sibling = replace(s, project="CHORUS_EXTENDED")
+        usage_ledger.prepare_usage(sibling, resume=False)
         self.api._snapshot(s, "CHORUS_full.yaml", "id: x\n")
-        self.api._snapshot(s, "CHORUS_EXTENDED_full.yaml", "id: y\n")
+        self.api._snapshot(sibling, "CHORUS_EXTENDED_full.yaml", "id: y\n")
         block = self.api._intermediates_block(s)
         self.assertEqual([Path(i["path"]).name for i in block],
                          ["CHORUS_full.yaml"])
@@ -1310,7 +1357,9 @@ class TestResumeAndRetry(unittest.TestCase):
         self.assertEqual(len(again.messages.calls), 4)
 
     def test_corrupt_progress_file_is_ignored_not_fatal(self):
+        from data_sheets_schema import usage_ledger
         s = spec(out_dir=self.out)
+        usage_ledger.prepare_usage(s, resume=False)
         p = self.api._progress_path(s)
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text("{not json", encoding="utf-8")
@@ -2190,10 +2239,21 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
 
     REC = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
 
+    def _prepare_generation(self, spec, *, completed=False):
+        """Create current accounting before any synthetic output appears."""
+        from data_sheets_schema import usage_ledger
+        usage_ledger.prepare_usage(spec, resume=False)
+        if completed:
+            usage = []
+            for phase in ("full", "core", "audit", "reconcile_full",
+                          "reconcile_core", "report"):
+                usage_ledger.append_usage(spec, usage, {
+                    "usage_id": f"fixture-{phase}", "phase": phase,
+                    "input_tokens": 100, "output_tokens": 200})
+
     def _complete_run(self, spec, *, provenance=True, label=None):
-        """Lay down a finished run: three artifacts and its provenance record."""
-        import hashlib
-        import yaml as _yaml
+        """Lay down current accounting, artifacts and optional provenance."""
+        self._prepare_generation(spec, completed=provenance)
         spec.out_dir.mkdir(parents=True, exist_ok=True)
         spec.full_path.write_text(self.REC)
         spec.core_path.write_text(self.REC)
@@ -2218,19 +2278,22 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
         import hashlib
         import yaml as _yaml
 
+        from data_sheets_schema import usage_ledger
         from data_sheets_schema.provenance import build_record
+        generation = usage_ledger.generation_id(spec)
+        self.assertIsNotNone(generation, "initialize the fixture before its artifacts")
         def sha(p):
             return hashlib.sha256(p.read_bytes()).hexdigest()
         rec = build_record(spec.project, spec.method, label or spec.label,
                            mode="live", input_bundle=spec.bundle,
                            input_verified=True, concat_dir=spec.out_dir)
         data = dict(rec.data)
-        data["run"] = {**(data.get("run") or {}), "method": spec.method,
-                       "label": label or spec.label, "project": spec.project}
-        data["api_usage"] = [{"phase": ph, "input_tokens": 100,
-                              "output_tokens": 200} for ph in
-                             ("full", "core", "audit", "reconcile_full",
-                              "reconcile_core", "report")]
+        data["run"] = {**(data.get("run") or {}),
+                       **usage_ledger.run_identity(spec), "label": label or spec.label,
+                       "generation_id": generation,
+                       "prior_generation_ids": usage_ledger.prior_generation_ids(spec)}
+        # Rewriting provenance reads the same charges; it never creates more.
+        data["api_usage"] = usage_ledger.merge_usage(spec, [])
         data["validation"] = {"artifacts": {
             "full": {"path": str(spec.full_path), "sha256": sha(spec.full_path)},
             "core": {"path": str(spec.core_path), "sha256": sha(spec.core_path)},
@@ -2258,6 +2321,78 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
             execute(spec, client=self._no_api(called))
             self.assertEqual(called["n"], 0,
                              "a completed run must cost nothing to resume")
+
+    def test_deleted_completed_accounting_requires_exact_restoration(self):
+        import tempfile
+        from data_sheets_schema import latch_journal, snapshot_store, usage_ledger
+        from data_sheets_schema.api_runner import execute
+
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            self._complete_run(spec)
+            # A completed generation has finished snapshot activation. Keep
+            # the exact-byte restoration assertion against that settled state.
+            snapshot_store.finish_activation(spec)
+            # Settle current coordination too. Older generation-only fixtures
+            # legitimately gain a launch event at their next execution.
+            with usage_ledger.exclusive_run(spec):
+                latch_journal.start_launch(spec)
+            account = usage_ledger.ledger_path(spec)
+            account_before = account.read_bytes()
+            journal = latch_journal.journal_path(spec)
+            journal_before = journal.read_bytes()
+            record_before = spec.provenance_path.read_bytes()
+            account.unlink()
+            called = {"n": 0}
+            with self.assertRaisesRegex(usage_ledger.UsageLedgerError,
+                                        "usage ledger deleted while its generation journal survives"):
+                execute(spec, client=self._no_api(called))
+            self.assertEqual(called["n"], 0)
+            self.assertFalse(account.exists())
+            self.assertEqual(journal.read_bytes(), journal_before)
+            self.assertEqual(spec.provenance_path.read_bytes(), record_before)
+
+            account.write_bytes(account_before)
+            result = execute(spec, client=self._no_api(called))
+            self.assertTrue(result["already_complete"])
+            self.assertEqual(len(result["usage"]), 6)
+            self.assertEqual(called["n"], 0)
+            self.assertEqual(account.read_bytes(), account_before)
+            self.assertEqual(journal.read_bytes(), journal_before)
+            self.assertEqual(spec.provenance_path.read_bytes(), record_before)
+
+    def test_journalless_current_outputs_without_accounting_are_not_clean_resumes(self):
+        import tempfile
+        from data_sheets_schema import latch_journal, usage_ledger
+        from data_sheets_schema.api_runner import execute
+        from data_sheets_schema.provenance import build_record
+        from tests.test_d68_legacy_readonly import tree as whole_tree
+
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            spec.out_dir.mkdir(parents=True)
+            spec.full_path.write_text(self.REC)
+            spec.core_path.write_text(self.REC)
+            spec.report_path.write_text("# historical report\n")
+            rec = build_record(spec.project, spec.method, spec.label, mode="live",
+                               input_bundle=spec.bundle, input_verified=True,
+                               concat_dir=spec.out_dir)
+            rec.data["run"] = usage_ledger.run_identity(spec)
+            rec.data["api_usage"] = [{"phase": "full", "input_tokens": 100,
+                                      "output_tokens": 200}]
+            spec.provenance_path.parent.mkdir(parents=True, exist_ok=True)
+            spec.provenance_path.write_text(yaml.safe_dump(rec.data))
+            # build_record names the current commit: no journal does not make
+            # these newly written artifacts positively historical evidence.
+            before = whole_tree(Path(td))
+            called = {"n": 0}
+            with self.assertRaisesRegex(usage_ledger.UsageLedgerError,
+                                        "post-D41: artifacts have no journal for the selected run; inspection only"):
+                execute(spec, client=self._no_api(called))
+            self.assertEqual(called["n"], 0)
+            self.assertEqual(whole_tree(Path(td)), before)
+            self.assertFalse(usage_ledger.ledger_path(spec).exists())
+            self.assertFalse(latch_journal.journal_path(spec).exists())
 
     def test_resume_will_not_report_a_non_conforming_record_as_complete(self):
         """The resume exit has now been patched three times for one omission.
@@ -2330,6 +2465,7 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
                "keywords: [a]\ninstances: not-a-list\n")
         with tempfile.TemporaryDirectory() as td:
             spec = self._spec(td)
+            self._prepare_generation(spec, completed=True)
             spec.out_dir.mkdir(parents=True, exist_ok=True)
             # Lay the invalid records down *first*, then hash them, so the
             # provenance is internally consistent and the run resumes.
@@ -2365,12 +2501,24 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
         would write, and inferring completion from them would restamp another
         run's outputs as its own.
         """
+        import hashlib
         import tempfile
         from data_sheets_schema.api_runner import RunSpec, execute
 
         with tempfile.TemporaryDirectory() as td:
             old = self._spec(td)
             self._complete_run(old)
+            from data_sheets_schema import usage_ledger
+            # This synthetic completed record bound full/core only. The report
+            # also needs positive ownership before a different label can start.
+            record = yaml.safe_load(old.provenance_path.read_text())
+            record["validation"]["artifacts"]["report"] = {
+                "path": str(old.report_path),
+                "sha256": hashlib.sha256(old.report_path.read_bytes()).hexdigest()}
+            old.provenance_path.write_text(yaml.safe_dump(record))
+            old_account = usage_ledger.ledger_path(old)
+            old_account_before = old_account.read_bytes()
+            old_record_before = old.provenance_path.read_bytes()
             new = RunSpec(project="P", arm="baseline", method="claudecode_agent",
                           bundle=old.bundle, label="2026-07-31_DIFFERENT_rep1",
                           out_dir=old.out_dir)
@@ -2380,6 +2528,9 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
                 execute(new, client=self._no_api(called))
             self.assertEqual(called["n"], 1,
                              "the new label claimed the old run's outputs")
+            self.assertEqual(old_account.read_bytes(), old_account_before)
+            self.assertEqual(old.provenance_path.read_bytes(), old_record_before)
+            self.assertNotEqual(usage_ledger.ledger_path(new), old_account)
 
     def test_a_corrupt_artifact_is_not_resumed_on_top_of(self):
         """The exact debris one VOICE run left: progress said `core` was done,
@@ -2392,19 +2543,20 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as td:
             spec = self._spec(td)
-            spec.out_dir.mkdir(parents=True)
+            from data_sheets_schema import api_runner, usage_ledger
+            generation = usage_ledger.prepare_usage(spec, resume=False)
+            spec.out_dir.mkdir(parents=True, exist_ok=True)
             spec.full_path.write_text(self.REC)
             # Keep actual phase ownership evidence before corrupting the
             # working artifact: the test isolates artifact validation.
-            from data_sheets_schema import api_runner, usage_ledger
-            usage_ledger.prepare_usage(spec, resume=True)
             api_runner._snapshot(spec, f"{spec.project}_full.yaml", self.REC)
             api_runner._snapshot(spec, f"{spec.project}_core.yaml", self.REC)
             spec.core_path.write_text(
                 "_distributions: []\ncompression: none\ndialect: x\n")
             _progress_path(spec).parent.mkdir(parents=True, exist_ok=True)
             _progress_path(spec).write_text(json.dumps(
-                {"completed": ["full", "core"], "input_identity": spec.input_identity()}))
+                {"completed": ["full", "core"], "input_identity": spec.input_identity(),
+                 "run_identity": usage_ledger.run_identity(spec), "generation_id": generation}))
 
             ran = []
 
@@ -2449,7 +2601,8 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as td:
             spec = self._spec(td)
-            spec.out_dir.mkdir(parents=True)
+            self._prepare_generation(spec)
+            spec.out_dir.mkdir(parents=True, exist_ok=True)
             spec.full_path.write_text("id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n")     # phase 1 only
 
             calls = {"n": 0}
@@ -2586,3 +2739,8 @@ class TestReceiptCondition(unittest.TestCase):
         from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS, assembly_digest
         self.assertIn("full_receipt", PHASE_INSTRUCTIONS)
         self.assertIn("#710", assembly_digest()["layout"])
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+import pytest
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

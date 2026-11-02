@@ -163,6 +163,12 @@ def test_intent_persistence_failure_prevents_the_paid_call(tmp_path, monkeypatch
 @pytest.mark.parametrize("phase", ["full", "repair_full", "report_after_repair", "full_readdress"])
 def test_response_persistence_failure_blocks_the_next_invocation(tmp_path, monkeypatch, phase):
     s = spec(out_dir=tmp_path)
+    # These private phases run after public startup in production. Establish
+    # that real launch before injecting a response/checkpoint storage failure.
+    from data_sheets_schema.latch_journal import start_launch
+    with ledger.exclusive_run(s):
+        start_launch(s)
+        ledger.prepare_usage(s, resume=False)
     body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
     s.full_path.write_text(body)
     s.core_path.write_text(body)
@@ -191,19 +197,30 @@ def test_response_persistence_failure_blocks_the_next_invocation(tmp_path, monke
                 api._readdress_receipt(s, api.build_phase(s, "full", carry={}), body,
                                       body, receipt, client, settings, usage)
     before = ledger.ledger_path(s).read_bytes()
+    from data_sheets_schema.latch_journal import journal_path
+    journal_before = journal_path(s).read_bytes()
     pending = json.loads(before)["pending_call"]
     assert pending["phase"] == phase and pending["usage_id"]
     assert len(client.messages.calls) == 1 and usage == []
     # Restoring storage cannot turn the unresolved completed response into a
     # new run with a silently smaller total, or permit a no-call success exit.
-    with pytest.raises(ledger.UsageLedgerError, match="unresolved accounting"):
+    # The append-only transition preceded the failed atomic ledger write.
+    # That interrupted transaction cannot be blessed from mutable state.
+    with pytest.raises(ledger.UsageLedgerError, match="checkpoint does not match journal head"):
         api.execute(s, client=client)
     assert len(client.messages.calls) == 1
     assert ledger.ledger_path(s).read_bytes() == before
-    # Explicit fresh is allowed, with the uncertain historical bytes retained.
-    ledger.prepare_usage(s, resume=False)
-    ledger.require_resolved(s)
-    assert any(path.read_bytes() == before for path in tmp_path.glob("*.previous-*.json"))
+    with pytest.raises(ledger.UsageLedgerError, match="checkpoint does not match journal head"):
+        ledger.prepare_usage(s, resume=False)
+    assert ledger.ledger_path(s).read_bytes() == before
+    assert journal_path(s).read_bytes() == journal_before
+    # A separate explicit attempt can start without resetting this evidence.
+    fresh = replace(s, out_dir=tmp_path / 'separate-attempt', label='fresh_rep1')
+    ledger.prepare_usage(fresh, resume=False)
+    ledger.require_resolved(fresh)
+    assert ledger.merge_usage(fresh, []) == []
+    assert ledger.ledger_path(s).read_bytes() == before
+    assert journal_path(s).read_bytes() == journal_before
 
 
 def test_interrupt_before_response_accounting_remains_unresolved(tmp_path, monkeypatch):
@@ -219,6 +236,12 @@ def test_interrupt_before_response_accounting_remains_unresolved(tmp_path, monke
     with pytest.raises(ledger.UsageLedgerError, match="unresolved accounting"):
         api.execute(s, client=client)
     assert len(client.messages.calls) == 1
+    # Here no accounting transition was attempted, so the intact pending
+    # ledger/journal can still be archived by an explicit nonshared fresh run.
+    before = ledger.ledger_path(s).read_bytes()
+    ledger.prepare_usage(s, resume=False)
+    ledger.require_resolved(s)
+    assert any(path.read_bytes() == before for path in tmp_path.glob('*.previous-*.json'))
 
 
 def test_recovered_counters_resolve_the_same_pending_call(tmp_path):
@@ -281,8 +304,21 @@ def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_pat
         for contender, resume in ((s, True), (s, False),
                                   (replace(s, label="another_rep1"), True)):
             client = FakeClient()
+            # The production launch binds its sidecars, so every contender
+            # reaches the physical lock and must still be excluded.
+            from tests.test_d68_legacy_readonly import tree
+            before_tree = tree(tmp_path)
             with pytest.raises(ledger.UsageLedgerError, match="already active"):
                 api.execute(contender, resume=resume, client=client)
+            after_tree = tree(tmp_path)
+            for _, lock in ledger.output_locks((s.full_path, s.core_path, s.report_path, s.provenance_path)):
+                name = str(lock.relative_to(tmp_path))
+                if name in before_tree:
+                    # FileLock can refresh an existing sidecar's mtime while
+                    # trying acquisition. Mode, size, inode and bytes must stay.
+                    assert after_tree[name][:2] + after_tree[name][3:] == before_tree[name][:2] + before_tree[name][3:]
+                    after_tree[name] = before_tree[name]
+            assert after_tree == before_tree
             assert client.messages.calls == []
             assert ledger.ledger_path(s).read_bytes() == before
         assert not ledger.ledger_path(replace(s, label="another_rep1")).exists()
@@ -329,12 +365,25 @@ def test_split_and_flat_layouts_cannot_overlap_in_either_direction(tmp_path, mon
     flat = replace(split, out_dir=directory)
     assert (split.full_path == flat.full_path if shared_directory == "full"
             else split.core_path == flat.core_path)
+    # Pre-existing unbound sidecars are residue; current-lock proof must not
+    # excuse them. Physical lock exclusion is exercised separately below.
+    for selected in (split, flat):
+        with ledger.exclusive_run(selected):
+            pass
     for owner, contender in ((split, flat), (flat, split)):
         with ledger.exclusive_run(owner):
-            client = FakeClient()
+            # Test physical exclusion directly, including the second iteration
+            # when old unbound sidecars make the public guard refuse earlier.
             with pytest.raises(ledger.UsageLedgerError, match="already active"):
+                with ledger.exclusive_run(contender):
+                    pytest.fail("overlapping output lock was acquired")
+            client = FakeClient()
+            from tests.test_d68_legacy_readonly import tree
+            before = tree(tmp_path)
+            with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
                 api.execute(contender, client=client)
             assert client.messages.calls == []
+            assert tree(tmp_path) == before
             assert not ledger.ledger_path(contender).exists()
         # Failed acquisition must release files taken before the overlap.
         with ledger.exclusive_run(contender):
@@ -349,8 +398,13 @@ def test_output_aliases_share_the_physical_file_lock(tmp_path):
     owner.full_path.write_text("record")
     alias.full_path.symlink_to(owner.full_path)
     with ledger.exclusive_run(owner):
-        client = FakeClient()
+        # Test physical locking directly; D68 now refuses orphan output
+        # evidence before execute reaches the lock acquisition.
         with pytest.raises(ledger.UsageLedgerError, match="already active"):
+            with ledger.exclusive_run(alias):
+                pytest.fail("overlapping physical output lock was acquired")
+        client = FakeClient()
+        with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
             api.execute(alias, client=client)
         assert client.messages.calls == []
     with ledger.exclusive_run(alias):
@@ -360,6 +414,7 @@ def test_output_aliases_share_the_physical_file_lock(tmp_path):
 @pytest.mark.parametrize("phase", ["repair_full", "report_after_repair", "full_readdress"])
 def test_auxiliary_calls_are_durable_before_later_processing_fails(tmp_path, monkeypatch, phase):
     s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=False)
     body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
     s.full_path.write_text(body)
     s.core_path.write_text(body)
@@ -434,23 +489,13 @@ def test_resume_after_reasoning_failure_does_not_misattribute_the_retry(tmp_path
 def test_hard_exit_then_resume_preserves_completed_call_usage(tmp_path, completed_phase):
     s = spec(out_dir=tmp_path)
     root = Path(__file__).resolve().parents[1]
-    code = """
-import os, sys
-from pathlib import Path
-from data_sheets_schema import api_runner as api
-from tests.test_download.test_api_runner import FakeClient, spec
-save = api._save_progress
-def exit_after_progress(run, completed, audit):
-    save(run, completed, audit)
-    if sys.argv[2] in completed:
-        os._exit(23)
-api._save_progress = exit_after_progress
-api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
-"""
+    helper = root / 'scripts/adhoc/pr5212_hard_exit_fixture_20261028.py'
     environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
-    killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), completed_phase],
+    killed = subprocess.run([sys.executable, str(helper), str(tmp_path), completed_phase],
                             cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
     assert killed.returncode == 23, killed.stdout + killed.stderr
+    head = next(line.split('=', 1)[1] for line in killed.stderr.splitlines()
+                if line.startswith('test launch monitor head='))
     assert not s.provenance_path.exists()
     assert completed_phase in json.loads(api._progress_path(s).read_text())["completed"]
     completed = ledger.merge_usage(s, [])
@@ -458,12 +503,12 @@ api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
     saved_ledger = ledger.ledger_path(s).read_bytes()
     ledger.ledger_path(s).unlink()
     blocked = FakeClient()
-    with pytest.raises(ledger.UsageLedgerError, match="ledger is missing"):
-        api.execute(s, client=blocked)
+    with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
+        api.execute(s, client=blocked, expect_journal_head_sha256=head)
     assert blocked.messages.calls == []
     ledger.ledger_path(s).write_bytes(saved_ledger)
     client = FakeClient()
-    resumed = api.execute(s, client=client)
+    resumed = api.execute(s, client=client, expect_journal_head_sha256=head)
     assert "full" in resumed["skipped"]
     assert len(client.messages.calls) == 3
     final = yaml.safe_load(s.provenance_path.read_text())["api_usage"]
@@ -486,40 +531,56 @@ def test_explicit_fresh_execution_does_not_import_previous_usage(tmp_path, porta
     # Even a stale progress file must not defeat an explicit fresh request.
     api._save_progress(s, list(api.PHASES), None)
     if portable_prior:
+        saved_ledger = ledger.ledger_path(s).read_bytes()
+        from data_sheets_schema.latch_journal import journal_path
+        saved_journal = journal_path(s).read_bytes()
         ledger.ledger_path(s).unlink()
+        blocked = FakeClient()
+        with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
+            api.execute(s, resume=False, client=blocked)
+        assert blocked.messages.calls == []
+        assert journal_path(s).read_bytes() == saved_journal
+        # Restore exact accounting; no override, invented counters or reset.
+        ledger.ledger_path(s).write_bytes(saved_ledger)
     new = api.execute(s, resume=False, client=FakeClient())["usage"]
     assert len(old) == len(new) == 4
     assert {r["usage_id"] for r in old}.isdisjoint(r["usage_id"] for r in new)
     archived = list(tmp_path.glob("*.previous-*.json"))
-    if portable_prior:
-        assert archived == []
-    else:
-        assert len(archived) == 1 and json.loads(archived[0].read_text())["rows"] == old
+    assert len(archived) == 1 and json.loads(archived[0].read_text())["rows"] == old
     assert yaml.safe_load(s.provenance_path.read_text())["run"]["prior_generation_ids"] == [previous_generation]
     entries = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
     current_ids = {r["usage_id"] for r in new}
     expected = sum(e["reasoning_tokens_estimate"] or 0 for e in entries if e["usage_id"] in current_ids)
     assert expected > 0
     assert run_telemetry(tmp_path, s.project)["total_reasoning_tokens_estimate"] == expected
-    # A finished portable record is sufficient for the no-call exit even if
-    # its recovery ledger is not copied alongside it.
+    # A guarded record cannot silently lose its accounting, including on a
+    # purported no-call exit. Its intact evidence still supports that exit.
+    saved_ledger = ledger.ledger_path(s).read_bytes()
+    saved_record = s.provenance_path.read_bytes()
     ledger.ledger_path(s).unlink()
     complete = FakeClient()
-    assert api.execute(s, client=complete)["already_complete"]
+    with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
+        api.execute(s, client=complete)
     assert complete.messages.calls == [] and not ledger.ledger_path(s).exists()
     api._save_progress(s, list(api.PHASES), None)
     # Even legacy-shaped progress must not erase an identity retained in
     # provenance and turn a missing journal into a new generation.
     assert "generation_id" not in json.loads(api._progress_path(s).read_text())
-    with pytest.raises(ledger.UsageLedgerError, match="ledger is missing"):
+    with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
         api.execute(s, client=complete)
     assert complete.messages.calls == []
+    assert s.provenance_path.read_bytes() == saved_record
+    ledger.ledger_path(s).write_bytes(saved_ledger)
+    api._progress_path(s).unlink()
+    assert api.execute(s, client=complete)["already_complete"]
+    assert complete.messages.calls == []
+    assert s.provenance_path.read_bytes() == saved_record
 
 
 @pytest.mark.parametrize("stage,legacy_prior", [
     ("before_progress", False), ("full", False), ("core", False), ("full", True),
 ])
-def test_interrupted_fresh_generation_cannot_recover_previous_charges(tmp_path, stage, legacy_prior):
+def test_interrupted_fresh_generation_cannot_recover_previous_charges(tmp_path, stage, legacy_prior, journal_launch_monitor):
     s = spec(out_dir=tmp_path)
     old = api.execute(s, client=FakeClient())["usage"]
     old_ids = {r["usage_id"] for r in old}
@@ -538,35 +599,22 @@ def test_interrupted_fresh_generation_cannot_recover_previous_charges(tmp_path, 
         api._reasoning_path(s).write_text("\n".join(json.dumps(e) for e in reasoning) + "\n")
     old_provenance = s.provenance_path.read_bytes()
     root = Path(__file__).resolve().parents[1]
-    code = """
-import os, sys
-from pathlib import Path
-from data_sheets_schema import api_runner as api
-from tests.test_download.test_api_runner import FakeClient, spec
-save, generate = api._save_progress, api._generate_phase
-def exit_after_progress(run, completed, audit):
-    save(run, completed, audit)
-    if sys.argv[2] in completed:
-        os._exit(23)
-def exit_before_progress(*args, **kwargs):
-    if sys.argv[2] == 'before_progress':
-        os._exit(23)
-    return generate(*args, **kwargs)
-api._save_progress = exit_after_progress
-api._generate_phase = exit_before_progress
-api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
-"""
+    helper = root / 'scripts/adhoc/pr5212_hard_exit_fixture_20261028.py'
+    from data_sheets_schema.latch_journal import journal_path
+    prior_head = journal_launch_monitor[str(journal_path(s))]
     environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
-    killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), stage],
+    killed = subprocess.run([sys.executable, str(helper), str(tmp_path), stage, prior_head],
                             cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
     assert killed.returncode == 23, killed.stdout + killed.stderr
+    head = next(line.split('=', 1)[1] for line in killed.stderr.splitlines()
+                if line.startswith('test launch monitor head='))
     assert s.provenance_path.read_bytes() == old_provenance
     generation = ledger.generation_id(s)
     assert generation != old_generation
     if stage != "before_progress":
         assert json.loads(api._progress_path(s).read_text())["generation_id"] == generation
     client = FakeClient()
-    resumed = api.execute(s, client=client)
+    resumed = api.execute(s, client=client, expect_journal_head_sha256=head)
     assert len(resumed["usage"]) == 4
     assert old_ids.isdisjoint(r["usage_id"] for r in resumed["usage"])
     assert len(client.messages.calls) == (4 if stage == "before_progress" else 3)
@@ -580,9 +628,15 @@ api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
     assert run_telemetry(tmp_path, s.project)["total_reasoning_tokens_estimate"] == expected
 
 
-def test_legacy_partial_run_adopts_a_generation_without_losing_recorded_usage(tmp_path):
+def test_legacy_shaped_artifacts_cannot_erase_a_guarded_generation(tmp_path):
     s = spec(out_dir=tmp_path)
-    api.execute(s, client=FakeClient())
+    original_usage = api.execute(s, client=FakeClient())["usage"]
+    from data_sheets_schema.snapshot_store import index_path
+    from data_sheets_schema.latch_journal import journal_path
+    preserved = {path: path.read_bytes() for path in (
+        ledger.ledger_path(s), s.provenance_path, api._reasoning_path(s),
+        index_path(s.metadata_dir, s.project))}
+    journal_before = journal_path(s).read_bytes()
     prior = yaml.safe_load(s.provenance_path.read_text())
     del prior["run"]["generation_id"]
     for entry in prior["intermediates"]:
@@ -598,15 +652,26 @@ def test_legacy_partial_run_adopts_a_generation_without_losing_recorded_usage(tm
     old = prior["api_usage"]
     s.provenance_path.write_text(yaml.safe_dump(prior))
     ledger.ledger_path(s).unlink()
-    # This fixture simulates a run from before generation identities and
-    # snapshot indices existed; retaining the new index would contradict it.
-    from data_sheets_schema.snapshot_store import index_path
+    # Removing modern fields and the index does not erase the independently
+    # retained journal or turn guarded work into an adoptable legacy account.
     index_path(s.metadata_dir, s.project).unlink()
     api._save_progress(s, list(api.PHASES), None)
     assert "generation_id" not in json.loads(api._progress_path(s).read_text())
     client = FakeClient()
+    altered = {path: path.read_bytes() for path in (
+        s.provenance_path, api._reasoning_path(s), api._progress_path(s))}
+    with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
+        api.execute(s, client=client)
+    assert client.messages.calls == []
+    assert not ledger.ledger_path(s).exists()
+    assert journal_path(s).read_bytes() == journal_before
+    assert all(path.read_bytes() == raw for path, raw in altered.items())
+    for path, raw in preserved.items():
+        path.write_bytes(raw)
+    api._progress_path(s).unlink()
     resumed = api.execute(s, client=client)
-    assert client.messages.calls == [] and resumed["usage"] == old
+    assert client.messages.calls == [] and resumed["usage"] == original_usage
+    assert [{k: v for k, v in entry.items() if k != "usage_id"} for entry in original_usage] == old
     final = yaml.safe_load(s.provenance_path.read_text())
     assert final["run"]["generation_id"] == ledger.generation_id(s)
 
@@ -630,6 +695,7 @@ def test_fresh_generation_does_not_import_old_abandoned_stream_charges(tmp_path)
 
 @pytest.mark.parametrize("change,stale_progress", [
     ({"label": "another_rep1"}, False), ({"label": "another_rep1"}, True),
+    ({"label": "another_rep1"}, "unbound"),
     ({"method": "another_method"}, False),
     ({"condition": "tuned", "condition_mismatch_allowed": True}, False),
 ])
@@ -644,6 +710,12 @@ def test_new_identity_in_a_shared_directory_starts_its_own_generation(tmp_path, 
     old.full_path.write_text(body)
     old.core_path.write_text(body)
     old.report_path.write_text("# Report\n")
+    # Positive per-artifact ownership, not a foreign run field excusing every
+    # unrelated file in the directory (D69 round-three review finding 3).
+    from data_sheets_schema.provenance import _hashed_artifact
+    prior["outputs"] = {str(path): _hashed_artifact(path)
+                        for path in (old.full_path, old.core_path, old.report_path)}
+    old.provenance_path.write_text(yaml.safe_dump(prior))
     api._record_incomplete_stream(old, "full", 1, "2026-09-11T00:00:00Z", {}, [])
     journal = api._abandoned_ledger(old).read_bytes()
     old_ledger = ledger.ledger_path(old).read_bytes()
@@ -652,8 +724,18 @@ def test_new_identity_in_a_shared_directory_starts_its_own_generation(tmp_path, 
         # Older progress carries the label/generation but no full identity.
         data = json.loads(api._progress_path(old).read_text())
         data.pop("run_identity", None)
+        if stale_progress == "unbound":
+            data.pop("generation_id", None)
         api._progress_path(old).write_text(json.dumps(data))
     current = replace(old, **change)
+    if stale_progress == "unbound":
+        from tests.test_d68_legacy_readonly import tree
+        before = tree(tmp_path)
+        client = FakeClient()
+        with pytest.raises(ledger.UsageLedgerError, match="inspection only"):
+            api.execute(current, client=client)
+        assert client.messages.calls == [] and tree(tmp_path) == before
+        return
 
     class Started(Exception):
         pass
@@ -701,7 +783,7 @@ def test_abandoned_only_state_with_no_ledger_cannot_silently_start_over(tmp_path
     before = api._abandoned_ledger(s).read_bytes()
     assert not s.provenance_path.exists() and not api._progress_path(s).exists()
     client = FakeClient()
-    with pytest.raises(ledger.UsageLedgerError, match="abandoned.*ledger is missing"):
+    with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
         api.execute(s, client=client)
     assert client.messages.calls == [] and not ledger.ledger_path(s).exists()
     assert api._abandoned_ledger(s).read_bytes() == before
@@ -718,9 +800,9 @@ def test_completed_record_covers_its_abandoned_rows_but_not_later_charges(tmp_pa
     assert api.merge_abandoned_rows(s, []) == abandoned
     result = api.execute(s, client=FakeClient())
     assert all(result["usage"].count(entry) == 1 for entry in abandoned)
-    ledger.ledger_path(s).unlink()
-    # A portable completed record covers these exact charges. Foreign
-    # progress in the shared directory must survive this read-only exit.
+    saved_ledger = ledger.ledger_path(s).read_bytes()
+    # With intact accounting, a completed record covers these exact charges.
+    # Foreign progress must survive this read-only exit.
     other = {"label": "another_rep1", "generation_id": "other-generation", "completed": ["full"]}
     api._progress_path(s).write_text(json.dumps(other))
     progress_bytes = api._progress_path(s).read_bytes()
@@ -728,6 +810,12 @@ def test_completed_record_covers_its_abandoned_rows_but_not_later_charges(tmp_pa
     assert api.execute(s, client=client)["already_complete"]
     assert client.messages.calls == []
     assert api._progress_path(s).read_bytes() == progress_bytes
+    ledger.ledger_path(s).unlink()
+    with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
+        api.execute(s, client=client)
+    assert client.messages.calls == []
+    assert api._progress_path(s).read_bytes() == progress_bytes
+    ledger.ledger_path(s).write_bytes(saved_ledger)
     api._progress_path(s).unlink()
     # A later fresh invocation can fail before writing any progress or
     # provenance. Its surviving charges must prevent returning the old record.
@@ -735,7 +823,7 @@ def test_completed_record_covers_its_abandoned_rows_but_not_later_charges(tmp_pa
     later = []
     api._record_incomplete_stream(s, "full", 1, "2026-09-11T00:01:00Z", {}, later)
     ledger.ledger_path(s).unlink()
-    with pytest.raises(ledger.UsageLedgerError, match="abandoned.*ledger is missing"):
+    with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
         api.execute(s, client=client)
     assert client.messages.calls == [] and not ledger.ledger_path(s).exists()
 
@@ -754,7 +842,7 @@ def test_reasoning_only_state_requires_its_missing_usage_ledger(tmp_path, monkey
     reasoning_bytes = api._reasoning_path(s).read_bytes()
     assert not api._progress_path(s).exists() and not s.provenance_path.exists()
     ledger.ledger_path(s).unlink()
-    with pytest.raises(ledger.UsageLedgerError, match="reasoning.*ledger is missing"):
+    with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
         api.execute(s, client=client)
     assert len(client.messages.calls) == 1
     assert api._reasoning_path(s).read_bytes() == reasoning_bytes
@@ -762,7 +850,12 @@ def test_reasoning_only_state_requires_its_missing_usage_ledger(tmp_path, monkey
     ledger.ledger_path(s).write_bytes(saved)
     resumed = api.execute(s, client=client)
     assert len(resumed["usage"]) == len(client.messages.calls) == 5
+    completed_ledger = ledger.ledger_path(s).read_bytes()
     ledger.ledger_path(s).unlink()
+    with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
+        api.execute(s, client=client)
+    assert len(client.messages.calls) == 5
+    ledger.ledger_path(s).write_bytes(completed_ledger)
     assert api.execute(s, client=client)["already_complete"]
     assert len(client.messages.calls) == 5
 
@@ -1040,7 +1133,7 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_p
 
     def execute(run, **kwargs):
         if threading.current_thread() is threading.main_thread():
-            raise ledger.UsageLedgerError("already active")     # every contender is refused
+            raise ledger.UsageLedgerError("already active")  # every contender is refused
         api._begin_usage_call(run)                  # the patched boundary: sets entered, waits
         if late == "raises":
             raise marker
@@ -1084,3 +1177,7 @@ def test_the_concurrency_test_reports_a_first_run_that_ends_without_the_boundary
     with pytest.raises(AssertionError, match="first run finished without reaching the request boundary"):
         test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
     assert clock.reads == 1 and joins == [guard], (clock.reads, joins)
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

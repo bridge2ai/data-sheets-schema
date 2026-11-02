@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "generation_id": "48c0a30076aa4a16ac61f49402858045",
+  "run_identity": {
+    "project": "EXTERNAL",
+    "label": "synthetic",
+    "method": "custom",
+    "condition": "generic_v6"
+  },
+  "input_identity": {
+    "bundle": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/cohort source.txt",
+      "sha256": "c515c576780da4235fa23c2596b7fa13ea0e2751256ef8c434e37e00ab438f5e"
+    },
+    "source_manifest": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/source manifest.yaml",
+      "sha256": "85628480a0c7e55474f8b9e57521081cd8550bb94963dee0fcfe2f4288393581"
+    },
+    "chunks": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/cohort source_chunks.yaml",
+      "sha256": "01817276d6ee6297b96da7c6996a434a5a83ab2656b11bf391c2c6f6191ff30f"
+    },
+    "profile": {
+      "name": "neutral",
+      "digest_md5": "94859bbbe7fa229619a3d5e2a50c3668"
+    },
+    "instruction": {
+      "render_version": 8,
+      "spec": {
+        "api_header_values": {
+          "Temperature": "not sent (claude-opus-5 rejects the parameter; the config's value did not reach the request)",
+          "Model": "claude-opus-5",
+          "Reasoning effort": "not set by the request (the provider's own choice; not recorded as a value)"
+        },
+        "render_version": 8,
+        "chunk_manifest": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/cohort source_chunks.yaml",
+        "condition": "generic_v6",
+        "arm": "BASELINE (input documents only)",
+        "manifest_line": "# Source manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/source manifest.yaml",
+        "run_date": "2026-09-12",
+        "manifest": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/source manifest.yaml",
+        "profile": "neutral",
+        "runtime": "Claude API (direct)",
+        "provider": "Anthropic",
+        "bundle": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/cohort source.txt"
+      },
+      "sha256": "01c957882f2e064da5b53ac9a3fe2dadca50348e28cf3fa755e417d8c234fdb0"
+    }
+  },
+  "snapshots": [
+    {
+      "name": "EXTERNAL_full.yaml",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_full.yaml",
+      "sha256": "64bea46796fc5ce0198c255c9b0b81d73d2663efb518729b6561352aa993268f",
+      "usage_id": "df8ec4138f8541ebb0a506f05ec5c422"
+    },
+    {
+      "name": "EXTERNAL_core.yaml",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_core.yaml",
+      "sha256": "0f0d6bd86be1b586e66ae8a4dd070595c2e98ac756f629e47e3fe02c0a77c9c8"
+    },
+    {
+      "name": "EXTERNAL_audit.json",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_audit.json",
+      "sha256": "d2599fa20dba2f61c3689037aad8da15a28b1e69215248620dfd79ee614f8050",
+      "usage_id": "d36b6f7b67b945688354014b7d42eb7b"
+    },
+    {
+      "name": "EXTERNAL_reconcile_full.yaml",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_reconcile_full.yaml",
+      "sha256": "30f136e566bcfa4d7e6b2eca68031f39758c6b3d3ff4b76b160016c0b0da9a6b",
+      "usage_id": "56043abe3fd04e55961b05a271352b7c"
+    },
+    {
+      "name": "EXTERNAL_reconcile_core.yaml",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_reconcile_core.yaml",
+      "sha256": "17c4c2751e21cb3ce3b67b00855dcdd2b50e3af871216ca656046a06d9f9b950"
+    },
+    {
+      "name": "EXTERNAL_report.md",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_report.md",
+      "sha256": "fa0c5e6507387fc43a7e731c1afbb85b201b5a1a81d38a270f5e95defbb851c6",
+      "usage_id": "c3fc81dc7e2a4be196a4e67f8f8649c3"
+    }
+  ]
+}

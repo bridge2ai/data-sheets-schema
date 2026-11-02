@@ -229,6 +229,8 @@ class PreparedEvaluation:
     system_prompt: bytes
     predecessor: str
     preamble: str
+    # Informational age is outside the immutable plan and its spending identity.
+    generation_record_age: str = "age unestablished"
 
     @property
     def digest(self) -> str:
@@ -247,6 +249,14 @@ class PreparedEvaluation:
         selected = self.document()["instrument"]
         if agent_pin.spawn_preamble(selected["agent"], predecessor_text=self.predecessor) != self.preamble:
             raise ValueError("prepared definition challenge changed")
+
+
+def require_eligible_generation(record):
+    """D70 campaign eligibility, separate from evaluation quality checks."""
+    from data_sheets_schema.latch_journal import record_eligibility_problem
+    problem = record_eligibility_problem(record)
+    if problem:
+        raise ValueError(f"generation runtime integrity is ineligible for registered evaluation: {problem}")
 
 
 def prepare(
@@ -336,6 +346,7 @@ def prepare(
         raise ValueError("requires the generated record's provenance")
     if not same_run(prior.get("run"), reg["run"]):
         raise ValueError("record provenance identifies another registered run")
+    require_eligible_generation(prior)
     if (not isinstance(prior.get("shared_generation"), dict)
             or prior["shared_generation"].get("authority") != captured.identity()):
         raise ValueError("record provenance is not bound to this generation registration")
@@ -399,7 +410,8 @@ def prepare(
         "evaluation/registered_eval_runner.py", "evaluation/blind_review_pack.py", "evaluation/validate.py",
         "evaluation_context.py", "semantic_scope.py", "semantic_instrument.py",
         "semantic_evidence.py", "semantic_evidence_authority.py", "judge_contract.py",
-        "agent_pin.py", "provenance.py", "evaluation/run_identity.py", "cli/api.py", "runs.py",
+        "agent_pin.py", "provenance.py", "latch_journal.py",
+        "evaluation/run_identity.py", "cli/api.py", "runs.py",
     ):
         take(Path(__file__).parents[1] / module)
     manifest = {
@@ -447,10 +459,11 @@ def prepare(
         "generation_acceptance_verified": False,
         "authorities": [shared.file_pin(Path(path), raw) for path, raw in sorted(authorities.items())],
     }
+    from data_sheets_schema.latch_journal import record_age
     result = PreparedEvaluation(
         shared.canonical(manifest), tuple(sorted(authorities.items())), tuple(resources.items()),
         original, blinded, shared.canonical(normalized), resources[selected.definition_path],
-        effective_system, predecessor, preamble,
+        effective_system, predecessor, preamble, generation_record_age=record_age(prior),
     )
     result.assert_current()
     return result
@@ -655,9 +668,13 @@ def execute(
     Live output is technically validated evidence, not a scientific approval.
     """
     prepared.assert_current()
+    from data_sheets_schema.latch_journal import record_age
     plan = prepared.document()
+    prior = _yaml(dict(prepared.authorities)[plan["generation_provenance"]["path"]])
+    require_eligible_generation(prior)
     summary = {"plan_sha256": prepared.digest, "plan": plan, "status": "dry-run",
-               "model_calls": 0, "scientific_review_verified": False}
+               "model_calls": 0, "scientific_review_verified": False,
+               "generation_record_age": record_age(prior)}
     if dry_run:
         return summary
     if not isinstance(plan_sha256, str) or plan_sha256 != prepared.digest:

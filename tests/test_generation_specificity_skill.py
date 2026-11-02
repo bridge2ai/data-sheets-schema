@@ -5960,7 +5960,10 @@ class TestApiMeaning(unittest.TestCase):
                       if r not in ex["refused"] and r not in selected)
         with mock.patch.object(api_runner, "_exclusive_run", side_effect=RuntimeError("past the refusal")), \
                 self.assertRaisesRegex(RuntimeError, "past the refusal"):
-            api_runner.execute(self._spec_at(allowed))
+            from tests.test_download.test_api_runner import FakeClient
+            client = FakeClient()
+            api_runner.execute(self._spec_at(allowed), client=client)
+        self.assertEqual(client.messages.calls, [])
 
     def test_shared_request_builders_are_discovered_as_model_text(self):
         for module in ('shared_generation', 'typed_audit_runtime', 'typed_audit', 'audit_omissions', 'audit_batches'):
@@ -7835,3 +7838,8 @@ class TestOfflineDraftSurface(unittest.TestCase):
             {'generic_v10_source_heading_routing_v1', 'generic_v10_source_heading_span_v1'})
         hits, _ = _plant(rel, 'POLICY_PROBE = "Always describe CM4AI."')
         self.assertTrue(any(h['violation'] and 'offline_draft' in h['gates_in'] for h in hits))
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+import pytest
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

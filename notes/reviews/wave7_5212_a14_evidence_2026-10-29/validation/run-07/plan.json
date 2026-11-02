@@ -1,0 +1,33 @@
+{
+  "base": "c7e4f63a9a64278c900f0bacec2614bae1a41c2b",
+  "changed_paths": [
+    "notes/reviews/wave7_5212_a14_independent_review_2026-10-29.md",
+    "scripts/adhoc/preserve_wave7_5212_a14_20261029.py",
+    "scripts/adhoc/validate_wave7_parent_20261029.py"
+  ],
+  "command": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-S",
+    "-P",
+    "-B",
+    "/private/tmp/d4d-codex-wave7-5212-a14-20261029/scripts/adhoc/validate_wave7_parent_20261029.py",
+    "--child",
+    "--output",
+    "/private/tmp/d4d-wave7-5212-a14-fixed-replay-20261029",
+    "--module",
+    "test_shared_generation_runtime",
+    "--test-node",
+    "test_real_complete_api_pipeline_and_completed_recheck"
+  ],
+  "credential_names_removed": [
+    "GIT_PAGER",
+    "KB_AUTH_TOKEN",
+    "OPENSCIENTIST_API_KEY"
+  ],
+  "head": "a612db79b6336672c3c9b95de6b5138eed3798f4",
+  "modules": [
+    "test_shared_generation_runtime"
+  ],
+  "scope": "Offline selected modules; Python audit guard does not isolate arbitrary child binaries.",
+  "test_node": "test_real_complete_api_pipeline_and_completed_recheck"
+}

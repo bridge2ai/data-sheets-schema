@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/usr/bin/sample",
+    "9273",
+    "1",
+    "-file",
+    "/private/tmp/d4d-wave7-portable-profile-20261029-0607.txt"
+  ],
+  "limits": "Native frames do not identify the Python mutation iteration. Activity and a finite outer sequence of 21 rechecks do not prove termination. The test later completed; its JUnit result supplies that evidence.",
+  "recorded_local_time": "2026-10-28 23:06:52.662 -0700",
+  "scope": "One-second native read-only diagnostic of the original pytest process.",
+  "source_unchanged": true
+}

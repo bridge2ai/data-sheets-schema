@@ -231,3 +231,7 @@ def test_completed_resume_rechecks_without_calls_or_writes(tmp_path, monkeypatch
     assert len(fake.calls) == calls
     assert files == {p: hashlib.sha256(p.read_bytes()).hexdigest()
                      for p in spec.metadata_dir.rglob("*") if p.is_file()}
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

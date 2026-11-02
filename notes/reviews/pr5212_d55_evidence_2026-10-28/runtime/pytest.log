@@ -1,0 +1,321 @@
+........................................................................ [ 14%]
+........................................................................ [ 29%]
+........................................................................ [ 44%]
+........................................................................ [ 58%]
+...................FFFF................................................. [ 73%]
+........................................................................ [ 88%]
+.........................................................                [100%]
+=================================== FAILURES ===================================
+_ test_interrupted_fresh_generation_cannot_recover_previous_charges[before_progress-False] _
+
+tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat0')
+stage = 'before_progress', legacy_prior = False
+
+    @pytest.mark.parametrize("stage,legacy_prior", [
+        ("before_progress", False), ("full", False), ("core", False), ("full", True),
+    ])
+    def test_interrupted_fresh_generation_cannot_recover_previous_charges(tmp_path, stage, legacy_prior):
+        s = spec(out_dir=tmp_path)
+        old = api.execute(s, client=FakeClient())["usage"]
+        old_ids = {r["usage_id"] for r in old}
+        old_generation = ledger.generation_id(s)
+        api._save_progress(s, list(api.PHASES), None)
+        if legacy_prior:
+            prior = yaml.safe_load(s.provenance_path.read_text())
+            del prior["run"]["generation_id"]
+            s.provenance_path.write_text(yaml.safe_dump(prior))
+            progress = json.loads(api._progress_path(s).read_text())
+            del progress["generation_id"]
+            api._progress_path(s).write_text(json.dumps(progress))
+            reasoning = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
+            for entry in reasoning:
+                entry.pop("usage_id")
+            api._reasoning_path(s).write_text("\n".join(json.dumps(e) for e in reasoning) + "\n")
+        old_provenance = s.provenance_path.read_bytes()
+        root = Path(__file__).resolve().parents[1]
+        code = """
+    import os, sys
+    from pathlib import Path
+    from data_sheets_schema import api_runner as api
+    from tests.test_download.test_api_runner import FakeClient, spec
+    save, generate = api._save_progress, api._generate_phase
+    def exit_after_progress(run, completed, audit):
+        save(run, completed, audit)
+        if sys.argv[2] in completed:
+            os._exit(23)
+    def exit_before_progress(*args, **kwargs):
+        if sys.argv[2] == 'before_progress':
+            os._exit(23)
+        return generate(*args, **kwargs)
+    api._save_progress = exit_after_progress
+    api._generate_phase = exit_before_progress
+    api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
+    """
+        environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
+        killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), stage],
+                                cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
+>       assert killed.returncode == 23, killed.stdout + killed.stderr
+E       AssertionError: latch journal start: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=4c6406187cc1f70faea4e632a1874b4988eb319cc30295404a52546264df420b path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat0/CHORUS_latch_journal.jsonl
+E         latch journal stop: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=4c6406187cc1f70faea4e632a1874b4988eb319cc30295404a52546264df420b path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat0/CHORUS_latch_journal.jsonl
+E         Traceback (most recent call last):
+E           File "<string>", line 17, in <module>
+E             api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
+E             ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/api_runner.py", line 6692, in execute
+E             with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256):
+E                                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/contextlib.py", line 141, in __enter__
+E             return next(self.gen)
+E           File "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/latch_journal.py", line 665, in launch_record
+E             _fail(f'resume journal head: expected={expected or "required from prior launch/monitor record"}; found={found or "missing"}')
+E             ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/latch_journal.py", line 38, in _fail
+E             raise ledger.UsageLedgerError(f"latch journal: {message}")
+E         data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: resume journal head: expected=required from prior launch/monitor record; found=4c6406187cc1f70faea4e632a1874b4988eb319cc30295404a52546264df420b
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python', '-c', "...d=required from prior launch/monitor record; found=4c6406187cc1f70faea4e632a1874b4988eb319cc30295404a52546264df420b\n').returncode
+
+tests/test_usage_ledger.py:587: AssertionError
+----------------------------- Captured stderr call -----------------------------
+latch journal start: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=none path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat0/CHORUS_latch_journal.jsonl
+latch journal stop: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=4c6406187cc1f70faea4e632a1874b4988eb319cc30295404a52546264df420b path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat0/CHORUS_latch_journal.jsonl
+_ test_interrupted_fresh_generation_cannot_recover_previous_charges[full-False] _
+
+tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat1')
+stage = 'full', legacy_prior = False
+
+    @pytest.mark.parametrize("stage,legacy_prior", [
+        ("before_progress", False), ("full", False), ("core", False), ("full", True),
+    ])
+    def test_interrupted_fresh_generation_cannot_recover_previous_charges(tmp_path, stage, legacy_prior):
+        s = spec(out_dir=tmp_path)
+        old = api.execute(s, client=FakeClient())["usage"]
+        old_ids = {r["usage_id"] for r in old}
+        old_generation = ledger.generation_id(s)
+        api._save_progress(s, list(api.PHASES), None)
+        if legacy_prior:
+            prior = yaml.safe_load(s.provenance_path.read_text())
+            del prior["run"]["generation_id"]
+            s.provenance_path.write_text(yaml.safe_dump(prior))
+            progress = json.loads(api._progress_path(s).read_text())
+            del progress["generation_id"]
+            api._progress_path(s).write_text(json.dumps(progress))
+            reasoning = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
+            for entry in reasoning:
+                entry.pop("usage_id")
+            api._reasoning_path(s).write_text("\n".join(json.dumps(e) for e in reasoning) + "\n")
+        old_provenance = s.provenance_path.read_bytes()
+        root = Path(__file__).resolve().parents[1]
+        code = """
+    import os, sys
+    from pathlib import Path
+    from data_sheets_schema import api_runner as api
+    from tests.test_download.test_api_runner import FakeClient, spec
+    save, generate = api._save_progress, api._generate_phase
+    def exit_after_progress(run, completed, audit):
+        save(run, completed, audit)
+        if sys.argv[2] in completed:
+            os._exit(23)
+    def exit_before_progress(*args, **kwargs):
+        if sys.argv[2] == 'before_progress':
+            os._exit(23)
+        return generate(*args, **kwargs)
+    api._save_progress = exit_after_progress
+    api._generate_phase = exit_before_progress
+    api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
+    """
+        environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
+        killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), stage],
+                                cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
+>       assert killed.returncode == 23, killed.stdout + killed.stderr
+E       AssertionError: latch journal start: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=62e050cba8eb9247504417b5b4436578b3067d2cf8e9e2f1c1661ae228e1796b path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat1/CHORUS_latch_journal.jsonl
+E         latch journal stop: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=62e050cba8eb9247504417b5b4436578b3067d2cf8e9e2f1c1661ae228e1796b path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat1/CHORUS_latch_journal.jsonl
+E         Traceback (most recent call last):
+E           File "<string>", line 17, in <module>
+E             api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
+E             ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/api_runner.py", line 6692, in execute
+E             with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256):
+E                                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/contextlib.py", line 141, in __enter__
+E             return next(self.gen)
+E           File "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/latch_journal.py", line 665, in launch_record
+E             _fail(f'resume journal head: expected={expected or "required from prior launch/monitor record"}; found={found or "missing"}')
+E             ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/latch_journal.py", line 38, in _fail
+E             raise ledger.UsageLedgerError(f"latch journal: {message}")
+E         data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: resume journal head: expected=required from prior launch/monitor record; found=62e050cba8eb9247504417b5b4436578b3067d2cf8e9e2f1c1661ae228e1796b
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python', '-c', "...d=required from prior launch/monitor record; found=62e050cba8eb9247504417b5b4436578b3067d2cf8e9e2f1c1661ae228e1796b\n').returncode
+
+tests/test_usage_ledger.py:587: AssertionError
+----------------------------- Captured stderr call -----------------------------
+latch journal start: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=none path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat1/CHORUS_latch_journal.jsonl
+latch journal stop: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=62e050cba8eb9247504417b5b4436578b3067d2cf8e9e2f1c1661ae228e1796b path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat1/CHORUS_latch_journal.jsonl
+_ test_interrupted_fresh_generation_cannot_recover_previous_charges[core-False] _
+
+tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat2')
+stage = 'core', legacy_prior = False
+
+    @pytest.mark.parametrize("stage,legacy_prior", [
+        ("before_progress", False), ("full", False), ("core", False), ("full", True),
+    ])
+    def test_interrupted_fresh_generation_cannot_recover_previous_charges(tmp_path, stage, legacy_prior):
+        s = spec(out_dir=tmp_path)
+        old = api.execute(s, client=FakeClient())["usage"]
+        old_ids = {r["usage_id"] for r in old}
+        old_generation = ledger.generation_id(s)
+        api._save_progress(s, list(api.PHASES), None)
+        if legacy_prior:
+            prior = yaml.safe_load(s.provenance_path.read_text())
+            del prior["run"]["generation_id"]
+            s.provenance_path.write_text(yaml.safe_dump(prior))
+            progress = json.loads(api._progress_path(s).read_text())
+            del progress["generation_id"]
+            api._progress_path(s).write_text(json.dumps(progress))
+            reasoning = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
+            for entry in reasoning:
+                entry.pop("usage_id")
+            api._reasoning_path(s).write_text("\n".join(json.dumps(e) for e in reasoning) + "\n")
+        old_provenance = s.provenance_path.read_bytes()
+        root = Path(__file__).resolve().parents[1]
+        code = """
+    import os, sys
+    from pathlib import Path
+    from data_sheets_schema import api_runner as api
+    from tests.test_download.test_api_runner import FakeClient, spec
+    save, generate = api._save_progress, api._generate_phase
+    def exit_after_progress(run, completed, audit):
+        save(run, completed, audit)
+        if sys.argv[2] in completed:
+            os._exit(23)
+    def exit_before_progress(*args, **kwargs):
+        if sys.argv[2] == 'before_progress':
+            os._exit(23)
+        return generate(*args, **kwargs)
+    api._save_progress = exit_after_progress
+    api._generate_phase = exit_before_progress
+    api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
+    """
+        environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
+        killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), stage],
+                                cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
+>       assert killed.returncode == 23, killed.stdout + killed.stderr
+E       AssertionError: latch journal start: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=7d99a27202e9c3e9bf2cb27ad5dda25e8e0950df8ef538ba007c8d81ec515d5d path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat2/CHORUS_latch_journal.jsonl
+E         latch journal stop: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=7d99a27202e9c3e9bf2cb27ad5dda25e8e0950df8ef538ba007c8d81ec515d5d path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat2/CHORUS_latch_journal.jsonl
+E         Traceback (most recent call last):
+E           File "<string>", line 17, in <module>
+E             api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
+E             ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/api_runner.py", line 6692, in execute
+E             with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256):
+E                                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/contextlib.py", line 141, in __enter__
+E             return next(self.gen)
+E           File "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/latch_journal.py", line 665, in launch_record
+E             _fail(f'resume journal head: expected={expected or "required from prior launch/monitor record"}; found={found or "missing"}')
+E             ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/latch_journal.py", line 38, in _fail
+E             raise ledger.UsageLedgerError(f"latch journal: {message}")
+E         data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: resume journal head: expected=required from prior launch/monitor record; found=7d99a27202e9c3e9bf2cb27ad5dda25e8e0950df8ef538ba007c8d81ec515d5d
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python', '-c', "...d=required from prior launch/monitor record; found=7d99a27202e9c3e9bf2cb27ad5dda25e8e0950df8ef538ba007c8d81ec515d5d\n').returncode
+
+tests/test_usage_ledger.py:587: AssertionError
+----------------------------- Captured stderr call -----------------------------
+latch journal start: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=none path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat2/CHORUS_latch_journal.jsonl
+latch journal stop: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=7d99a27202e9c3e9bf2cb27ad5dda25e8e0950df8ef538ba007c8d81ec515d5d path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat2/CHORUS_latch_journal.jsonl
+_ test_interrupted_fresh_generation_cannot_recover_previous_charges[full-True] _
+
+tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat3')
+stage = 'full', legacy_prior = True
+
+    @pytest.mark.parametrize("stage,legacy_prior", [
+        ("before_progress", False), ("full", False), ("core", False), ("full", True),
+    ])
+    def test_interrupted_fresh_generation_cannot_recover_previous_charges(tmp_path, stage, legacy_prior):
+        s = spec(out_dir=tmp_path)
+        old = api.execute(s, client=FakeClient())["usage"]
+        old_ids = {r["usage_id"] for r in old}
+        old_generation = ledger.generation_id(s)
+        api._save_progress(s, list(api.PHASES), None)
+        if legacy_prior:
+            prior = yaml.safe_load(s.provenance_path.read_text())
+            del prior["run"]["generation_id"]
+            s.provenance_path.write_text(yaml.safe_dump(prior))
+            progress = json.loads(api._progress_path(s).read_text())
+            del progress["generation_id"]
+            api._progress_path(s).write_text(json.dumps(progress))
+            reasoning = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
+            for entry in reasoning:
+                entry.pop("usage_id")
+            api._reasoning_path(s).write_text("\n".join(json.dumps(e) for e in reasoning) + "\n")
+        old_provenance = s.provenance_path.read_bytes()
+        root = Path(__file__).resolve().parents[1]
+        code = """
+    import os, sys
+    from pathlib import Path
+    from data_sheets_schema import api_runner as api
+    from tests.test_download.test_api_runner import FakeClient, spec
+    save, generate = api._save_progress, api._generate_phase
+    def exit_after_progress(run, completed, audit):
+        save(run, completed, audit)
+        if sys.argv[2] in completed:
+            os._exit(23)
+    def exit_before_progress(*args, **kwargs):
+        if sys.argv[2] == 'before_progress':
+            os._exit(23)
+        return generate(*args, **kwargs)
+    api._save_progress = exit_after_progress
+    api._generate_phase = exit_before_progress
+    api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
+    """
+        environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
+        killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), stage],
+                                cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
+>       assert killed.returncode == 23, killed.stdout + killed.stderr
+E       AssertionError: latch journal start: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=c2d9a24ea6582e6155d2bd724ec703b4ef70ec34933727d3946c47427187806f path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat3/CHORUS_latch_journal.jsonl
+E         latch journal stop: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=c2d9a24ea6582e6155d2bd724ec703b4ef70ec34933727d3946c47427187806f path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat3/CHORUS_latch_journal.jsonl
+E         Traceback (most recent call last):
+E           File "<string>", line 17, in <module>
+E             api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
+E             ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/api_runner.py", line 6692, in execute
+E             with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256):
+E                                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/contextlib.py", line 141, in __enter__
+E             return next(self.gen)
+E           File "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/latch_journal.py", line 665, in launch_record
+E             _fail(f'resume journal head: expected={expected or "required from prior launch/monitor record"}; found={found or "missing"}')
+E             ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/latch_journal.py", line 38, in _fail
+E             raise ledger.UsageLedgerError(f"latch journal: {message}")
+E         data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: resume journal head: expected=required from prior launch/monitor record; found=c2d9a24ea6582e6155d2bd724ec703b4ef70ec34933727d3946c47427187806f
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python', '-c', "...d=required from prior launch/monitor record; found=c2d9a24ea6582e6155d2bd724ec703b4ef70ec34933727d3946c47427187806f\n').returncode
+
+tests/test_usage_ledger.py:587: AssertionError
+----------------------------- Captured stderr call -----------------------------
+latch journal start: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=none path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat3/CHORUS_latch_journal.jsonl
+latch journal stop: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=c2d9a24ea6582e6155d2bd724ec703b4ef70ec34933727d3946c47427187806f path=/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_fresh_generat3/CHORUS_latch_journal.jsonl
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_download/test_api_runner.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--- generated xml file: /private/tmp/codex-5212-evidence/runtime/results.xml ---
+=========================== short test summary info ============================
+FAILED tests/test_usage_ledger.py::test_interrupted_fresh_generation_cannot_recover_previous_charges[before_progress-False]
+FAILED tests/test_usage_ledger.py::test_interrupted_fresh_generation_cannot_recover_previous_charges[full-False]
+FAILED tests/test_usage_ledger.py::test_interrupted_fresh_generation_cannot_recover_previous_charges[core-False]
+FAILED tests/test_usage_ledger.py::test_interrupted_fresh_generation_cannot_recover_previous_charges[full-True]
+4 failed, 485 passed, 13 warnings in 3398.93s (0:56:38)

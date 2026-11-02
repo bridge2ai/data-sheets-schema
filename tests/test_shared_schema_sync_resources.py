@@ -348,3 +348,7 @@ def test_absent_comparison_pin_preserves_actual_missing_vocabulary_finding(regis
     actual = provenance._profile_digest_disagreement({'schema': {'profile': 'neutral', 'digest_md5': digest}})
     assert actual and 'cannot be checked here' in actual and str(absent) in actual
     assert not absent.exists() and profiles.NEUTRAL.pin_path is None
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

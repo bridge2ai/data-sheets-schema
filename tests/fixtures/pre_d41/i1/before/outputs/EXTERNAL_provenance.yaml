@@ -1,0 +1,571 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-09-12T12:00:00+00:00'
+run:
+  label: synthetic
+  project: EXTERNAL
+  method: custom
+  arm: unknown
+  replicate: null
+  condition: generic_v6
+  condition_basis: stated by the runner
+  generation_id: 48c0a30076aa4a16ac61f49402858045
+  prior_generation_ids: []
+model:
+  generation_method: schema-grounded API, four model phases with the core derived
+    from the full record (#694)
+  agent_runtime: Claude API (direct)
+  provider: Anthropic
+  base_url: null
+  model: claude-opus-5
+  max_tokens_by_phase:
+    full: 96000
+    reconcile_full: 96000
+    repair_full: 96000
+    audit: 24000
+    report: 24000
+    report_regate: 24000
+  context:
+    peak_request_tokens: 200
+    peak_phase: full
+    peak_basis: 'observed: input + cache_read + cache_write of the largest request'
+    limit_tokens: null
+    limit_basis: not stated by the route and not returned by the provider; headroom
+      cannot be computed from this record
+  thinking_requested:
+    type: adaptive
+  thinking_basis: set on every generation-phase request (full, audit, reconcile, report,
+    repair, regate, readdress); on this model family adaptive thinking is also the
+    default when the parameter is omitted, so the request states the regime rather
+    than changing it, and a phase returning no thinking block is a legal adaptive
+    outcome, not a deviation. The judging paths (merge, agreement, evidence_score,
+    form_defects) send no parameter and are not covered by this line
+  temperature: null
+  temperature_basis: not applicable to this model
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt_v6.md
+    sha256: 57ac203090ee6bab7ad89f4e1cecfe78dcf3fe6d29c44687d843c5e0215e9160
+    bytes: 13827
+    exists: true
+  request:
+    sha256: 01c957882f2e064da5b53ac9a3fe2dadca50348e28cf3fa755e417d8c234fdb0
+    bytes: 13083
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      api_header_values:
+        Temperature: not sent (claude-opus-5 rejects the parameter; the config's value
+          did not reach the request)
+        Model: claude-opus-5
+        Reasoning effort: not set by the request (the provider's own choice; not recorded
+          as a value)
+      render_version: 8
+      chunk_manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/cohort
+        source_chunks.yaml
+      condition: generic_v6
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/source
+        manifest.yaml'
+      run_date: '2026-09-12'
+      manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/source
+        manifest.yaml
+      profile: neutral
+      profile_basis: manifest:/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/source
+        manifest.yaml@85628480a0c7 (undeclared)
+      runtime: Claude API (direct)
+      provider: Anthropic
+      bundle: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/cohort
+        source.txt
+  resolved:
+    sha256: 01c957882f2e064da5b53ac9a3fe2dadca50348e28cf3fa755e417d8c234fdb0
+    bytes: 13083
+  assembly:
+    sha256: 39fadef4fcbd7d25c9e494abd8671d319897ba72ed89d7fa87617e47654285c3
+    layout: 'schema digest, input bundle, source ranking, declared naming, declared
+      scope (#932), arm prompt, carried artifacts, computed audit counts and core
+      inventory for reports, phase instruction; audit counts come from the structured
+      entries, never their prose summary (#1802); core derived from the full record,
+      not generated (#694); audit and reconcile_full address the full record only,
+      the core being its projection (#705); under a receipt condition the bundle carries
+      [cNNN] chunk markers and the full phase instruction asks for the coverage receipt
+      after the record (#710); a receipt entry whose slot is not a path in the record
+      just written gets one follow-up turn — the full-phase exchange replayed as an
+      assistant turn, then the unresolved entries with their chunk and ordinal and
+      the re-addressing instruction — whose answer moves the entry only to a resolving
+      path or drops it (#952); the report phase ends with a dispositions table, checked
+      against the records before the run completes, and a report with contradictory
+      claims, unrecorded changes or a missing dispositions table is regenerated once
+      with the discrepancies named (#929, #1181); the report phase carries the core
+      class''s top-level slot inventory before its instruction, so the model can see
+      which slots the core declares — the gate still judges presence in the two records,
+      and the inventory decides only whether a finding carries the ''core class declares
+      no such slot'' cause (#998)'
+  context_blocks:
+    source_ranking:
+      sent: true
+      bytes: 488
+    declared_naming:
+      sent: true
+      bytes: 459
+    declared_scope:
+      sent: false
+      basis: project declares none, or the manifest was not readable
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: 669d3f53725a62ecca20f1a95518b4878280ac278d91e626b762d1cb1bfe7cc1
+    bytes: 57830
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: acfbda817247ace3b2b5c2cc947a0dec678cdd53422dc0f234ed55352500dbb4
+    bytes: 12553
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: a5b4940b4acd4d4d359ff243aaa6f55209f71285993b49d398616e196a9092f2
+    bytes: 6909
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules.md
+    sha256: 851c0911da08bf0747c55a5f84e4578b192bd87616677773f6b58a4771b37b73
+    bytes: 24252
+    exists: true
+  consumed: false
+  consumed_basis: this runtime renders a condition prompt and sends nothing else,
+    so these were not read; they are hashed so an unchanged hash shows that (#545)
+phase_log: null
+schema:
+  declared_version: 3.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  core_declared_version: 3.0.0
+  core_declared_in: src/data_sheets_schema/schema/data_sheets_schema_core.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+  merged_schema_carries_version: true
+  digest_md5: 94859bbbe7fa229619a3d5e2a50c3668
+  profile: neutral
+  profile_basis: manifest:/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/source
+    manifest.yaml@85628480a0c7 (undeclared)
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: f8c5ac73caba610d40c49aaceddb31ead3590a72
+  commit_short: f8c5ac73c
+  branch: HEAD
+  resource_root: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/pre
+  resource_kind: checkout
+  dirty: false
+  dirty_file_count: 0
+  dirty_paths: []
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/cohort
+    source.txt
+  chunks:
+    path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/cohort
+      source_chunks.yaml
+    sha256: 01817276d6ee6297b96da7c6996a434a5a83ab2656b11bf391c2c6f6191ff30f
+    bundle_name: cohort source.txt
+    rule:
+      version: 2
+      unit: source-document
+      boundary: 'FILE: line followed by PATH: or ROLE:'
+      preamble: own-chunk
+      split: line-window
+      max_lines: 400
+      max_bytes: 48000
+    chunk_count: 1
+  receipt_expected: false
+  bundle_md5: efbb86d373de5111190cf7c07143a2bb
+  bundle_bytes: 684
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/source
+      manifest.yaml
+    md5: 4a5805675596cc9afa1e839ebf4d5ed7
+  dispositions_expected: true
+outputs:
+  full:
+    path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_d4d.yaml
+    bytes: 68
+    slots: 5
+  core:
+    path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_d4d_core.yaml
+    bytes: 468
+    slots: 7
+  report:
+    path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_reconciliation.md
+    bytes: 151
+    slots: null
+companions:
+  reasoning_log:
+    path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_reasoning.jsonl
+    present: true
+    md5: 9bcd4b2e8a626e4eca6b48d24f4e10c3
+    note: one JSON line per phase; absent for a runtime that cannot report its own
+      token accounting (#400)
+  telemetry_report:
+    path: data/run_telemetry/synthetic.yaml
+    present: false
+    note: derived from records like this one, per label rather than per run; `d4d
+      runs telemetry` writes it
+  prompt_registry:
+    path: src/download/prompts/canonical_hashes.yaml
+    present: true
+    md5: 7e44780e7227905fa2e855959a46a4c7
+    note: the pins the recorded prompt hashes were judged against
+  digest_inventory:
+    path: src/data_sheets_schema/schema/digest_inventory.yaml
+    present: true
+    md5: 59eb49602f449dd74eecce6df72d12ca
+    note: digest to slot inventory, which decides whether a slot predates a pair
+unrecoverable:
+- field: model.model
+  reason: the record header predates model identity being written into headers
+unverified:
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''unknown''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+- field: model.temperature
+  value: null
+  reason: 'claude-opus-5 rejects `temperature` (400: deprecated for this model), so
+    the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config is not
+    sent and does not apply. Sampling for this model family is selected by model-name
+    suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). claude-opus-5 rejects `temperature` (400: deprecated
+  for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: None at None.'
+api_usage:
+- usage_id: df8ec4138f8541ebb0a506f05ec5c422
+  phase: full
+  attempt: 1
+  started_at: '2026-09-12T12:00:00+00:00'
+  seconds: 0.461
+  input_tokens: 100
+  output_tokens: 50
+  thinking_tokens: null
+  cache_read: 0
+  cache_write: 100
+  max_tokens: 96000
+  stop_reason: null
+- usage_id: d36b6f7b67b945688354014b7d42eb7b
+  phase: audit
+  attempt: 1
+  started_at: '2026-09-12T12:00:00+00:00'
+  seconds: 0.007
+  input_tokens: 100
+  output_tokens: 50
+  thinking_tokens: null
+  cache_read: 0
+  cache_write: 100
+  max_tokens: 24000
+  stop_reason: null
+- usage_id: 56043abe3fd04e55961b05a271352b7c
+  phase: reconcile_full
+  attempt: 1
+  started_at: '2026-09-12T12:00:00+00:00'
+  seconds: 0.007
+  input_tokens: 100
+  output_tokens: 50
+  thinking_tokens: null
+  cache_read: 0
+  cache_write: 100
+  max_tokens: 96000
+  stop_reason: null
+- usage_id: c3fc81dc7e2a4be196a4e67f8f8649c3
+  phase: report
+  attempt: 1
+  started_at: '2026-09-12T12:00:00+00:00'
+  seconds: 0.007
+  input_tokens: 100
+  output_tokens: 50
+  thinking_tokens: null
+  cache_read: 0
+  cache_write: 100
+  max_tokens: 24000
+  stop_reason: null
+phases_skipped: null
+repair: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_d4d.yaml
+      md5: c8460526646d4bf6029a573734f68f4c
+    core:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_d4d_core.yaml
+      md5: f9e1f90e8e13bcc5bdbee463fd6366bf
+  schema:
+    full_sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+    core_sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+  duplicate_keys:
+    full: []
+    core: []
+  recorded_by: api_runner.execute
+core_derivation:
+  derived: true
+  rule: shared slots copied from the full record; resources projected by id with full-only
+    nested slots dropped; distributions built from file_collections (one per collection
+    over the shared slots, total_bytes as bytes) and from each collection's File entries
+    (one per file over the slots CoreDistribution and File share); dialect from the
+    File entries when they agree on one value, else absent
+  from:
+    path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_d4d.yaml
+    md5: c8460526646d4bf6029a573734f68f4c
+  identity_slots: 79
+  projected_slots:
+  - resources
+  distribution_slots:
+    collection:
+    - compression
+    - conforms_to
+    - conforms_to_standard
+    - description
+    - id
+    - name
+    - notes
+    - path
+    - source_caveats
+    file:
+    - bytes
+    - compression
+    - conforms_to
+    - conforms_to_standard
+    - description
+    - encoding
+    - format
+    - hash
+    - id
+    - md5
+    - media_type
+    - name
+    - notes
+    - path
+    - sha256
+    - source_caveats
+  conditional:
+    dialect: derived only when every File-level dialect in the full record agrees
+      on one value
+  phase: reconcile_core
+pair_consistency:
+  ran: true
+  consistent: true
+  artifacts:
+    full:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_d4d.yaml
+      md5: c8460526646d4bf6029a573734f68f4c
+    core:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_d4d_core.yaml
+      md5: f9e1f90e8e13bcc5bdbee463fd6366bf
+  errors: 0
+  warnings: 0
+  identity_slots: 79
+  schema_moved: false
+  findings: []
+  findings_truncated: null
+normalisation:
+  identifier_form: {}
+  mailto_ids: {}
+  mailto_ids_skipped: []
+  mailto_ids_skipped_count: 0
+  occurrences: 0
+  distinct_values: 0
+  british_spellings: {}
+  british_occurrences: 0
+  british_rewrites: []
+  british_distinct: []
+  british_skipped: []
+  british_skipped_count: 0
+  british_normaliser: 'v2 (#1006): one rule per BRITISH_PATTERNS v4 entry; v1 (#1002)
+    mirrored v3; double-quoted spans, identifier-shaped tokens, title-case runs, genus
+    names and verbatim slots left as written'
+report_gate:
+  checked: true
+  claims_checked_before: 1
+  findings_before: 0
+  rows_by_record_before:
+    full: 1
+    core: 0
+    both: 0
+    either: 0
+    no_record_column: 0
+    invalid: 0
+  regenerated: false
+  regeneration_attempted: false
+  report_audit_totals_before:
+    checked: true
+    instrument_version: 1
+    reason: null
+    stated_total: null
+    stated_totals: []
+    stated_by_severity: {}
+    computed_total: 0
+    computed_by_severity: {}
+    mismatches: []
+    findings: []
+    status: no_total_stated
+  findings_include_report_audit_totals: true
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 1
+  claims_unnamed: 0
+  disposition_rows: 1
+  rows_by_record:
+    full: 1
+    core: 0
+    both: 0
+    either: 0
+    no_record_column: 0
+    invalid: 0
+  claims_core_cannot_hold: 0
+  snapshot_checked: true
+  snapshot_basis: 'dispositions table expected: unrecorded removals are findings'
+  prose_retention_claims: 0
+  removals_unrecorded: []
+  removals_unrecorded_count: 0
+  instrument: 'v8 (#1808): an explicitly full/both top-level removal is false when
+    the key is absent from both the pinned original full snapshot and final full record;
+    no prior-core or nested-entry identity is inferred; v7 (#1089, #1194, #1196):
+    attributed schema claims, exact nested paths and record scopes, table positions,
+    mixed list counts and removal suppression are distinguished; phase-1 snapshot
+    bytes are pinned; v6 (#994): a `both` row''s path is judged step by step against
+    the core class''s declared ranges rather than at its root alone, a `[*]` wildcard
+    is a step''s subscript rather than a step of its own, and `claims_core_cannot_hold`
+    counts only a path the core cannot hold: one that descends through a scalar violates
+    the core schema''s declared range, carries its own cause and is excluded from
+    that count; v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
+    snapshot carried that the final full record does not, with no `removed` row or
+    removal sentence naming it, is `removal_not_recorded`; a prose retention claim
+    (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
+    read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions
+    rows by their record column — `full`, `core`, `both`, `either` for an empty cell,
+    `no_record_column` for a table with no such column, `invalid` for anything else
+    — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full`
+    row resolves against the full record only), is countable from the block; v3 (#1022,
+    #1046): a schema claim that names its own scope — the core schema, the full schema,
+    a class — is resolved against that scope only, not against every class; v2 (#990):
+    a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+    counts them'
+  artifacts:
+    report:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_reconciliation.md
+      md5: c730322e5fb0db26e1eabbf38f06ad0f
+    full:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_d4d.yaml
+      md5: c8460526646d4bf6029a573734f68f4c
+    core:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_d4d_core.yaml
+      md5: f9e1f90e8e13bcc5bdbee463fd6366bf
+    phase1_snapshot:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_full.yaml
+      sha256: 64bea46796fc5ce0198c255c9b0b81d73d2663efb518729b6561352aa993268f
+      state: usable
+  schema:
+    full_sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+    core_sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+  dispositions_expected: true
+report_audit_totals:
+  checked: true
+  instrument_version: 1
+  reason: null
+  stated_total: null
+  stated_totals: []
+  stated_by_severity: {}
+  computed_total: 0
+  computed_by_severity: {}
+  mismatches: []
+  findings: []
+  status: no_total_stated
+grounding:
+  checked: true
+  instrument: 'v1 (#4090): external identifiers with ARKs, resolver-URL findings,
+    run-schema basis'
+  counts:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/cohort
+        source.txt
+      md5: efbb86d373de5111190cf7c07143a2bb
+form:
+  checked: true
+  records:
+  - /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_d4d.yaml
+  - /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
+  british_instrument: 'v4 (#1006; v3 #836/#859)'
+  british_spellings: 0
+  organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
+receipts:
+  expected: false
+  non_checks:
+  - that a chunk marked nothing_relevant truly held nothing for the record — a judgement;
+    sample by chunk id in review
+  - that a verified snippet supports the value it is attached to — a snippet can be
+    real and irrelevant; sample by slot path in review
+  checked: false
+  reason: no coverage receipt at /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/EXTERNAL_coverage_receipt.yaml
+intermediates:
+- path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_full.yaml
+  sha256: 64bea46796fc5ce0198c255c9b0b81d73d2663efb518729b6561352aa993268f
+  phase: EXTERNAL_full.yaml
+  generation_id: 48c0a30076aa4a16ac61f49402858045
+  usage_id: df8ec4138f8541ebb0a506f05ec5c422
+- path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_core.yaml
+  sha256: 0f0d6bd86be1b586e66ae8a4dd070595c2e98ac756f629e47e3fe02c0a77c9c8
+  phase: EXTERNAL_core.yaml
+  generation_id: 48c0a30076aa4a16ac61f49402858045
+- path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_audit.json
+  sha256: d2599fa20dba2f61c3689037aad8da15a28b1e69215248620dfd79ee614f8050
+  phase: EXTERNAL_audit.json
+  generation_id: 48c0a30076aa4a16ac61f49402858045
+  usage_id: d36b6f7b67b945688354014b7d42eb7b
+- path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_reconcile_full.yaml
+  sha256: 30f136e566bcfa4d7e6b2eca68031f39758c6b3d3ff4b76b160016c0b0da9a6b
+  phase: EXTERNAL_reconcile_full.yaml
+  generation_id: 48c0a30076aa4a16ac61f49402858045
+  usage_id: 56043abe3fd04e55961b05a271352b7c
+- path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_reconcile_core.yaml
+  sha256: 17c4c2751e21cb3ce3b67b00855dcdd2b50e3af871216ca656046a06d9f9b950
+  phase: EXTERNAL_reconcile_core.yaml
+  generation_id: 48c0a30076aa4a16ac61f49402858045
+- path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/review-d41-legacy-20261030/run1/pytest/i1/test_automatic_date_is_restore0/outputs/intermediate/EXTERNAL_report.md
+  sha256: fa0c5e6507387fc43a7e731c1afbb85b201b5a1a81d38a270f5e95defbb851c6
+  phase: EXTERNAL_report.md
+  generation_id: 48c0a30076aa4a16ac61f49402858045
+  usage_id: c3fc81dc7e2a4be196a4e67f8f8649c3

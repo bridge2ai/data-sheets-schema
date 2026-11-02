@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "identity": {
+    "project": "EXTERNAL",
+    "label": "synthetic",
+    "method": "custom",
+    "condition": "generic_v6"
+  },
+  "generation_id": "9e75b21de99447caa364b35daab05e8b",
+  "prior_generation_ids": [],
+  "accept_legacy": true,
+  "rows": [
+    {
+      "usage_id": "53362822b99c47b2876d26cd1e9015c6",
+      "phase": "full",
+      "attempt": 1,
+      "started_at": "2026-10-31T03:22:25+00:00",
+      "seconds": 0.621,
+      "input_tokens": 100,
+      "output_tokens": 50,
+      "thinking_tokens": null,
+      "cache_read": 0,
+      "cache_write": 100,
+      "max_tokens": 96000,
+      "stop_reason": null
+    },
+    {
+      "usage_id": "7bbaeaceacef4b65b12c00fb8120540b",
+      "phase": "audit",
+      "attempt": 1,
+      "started_at": "2026-10-31T03:22:29+00:00",
+      "seconds": 0.116,
+      "input_tokens": 100,
+      "output_tokens": 50,
+      "thinking_tokens": null,
+      "cache_read": 0,
+      "cache_write": 100,
+      "max_tokens": 24000,
+      "stop_reason": null
+    },
+    {
+      "usage_id": "1211c76e8d8a4e319e45b348d11c6150",
+      "phase": "reconcile_full",
+      "attempt": 1,
+      "started_at": "2026-10-31T03:22:30+00:00",
+      "seconds": 0.014,
+      "input_tokens": 100,
+      "output_tokens": 50,
+      "thinking_tokens": null,
+      "cache_read": 0,
+      "cache_write": 100,
+      "max_tokens": 96000,
+      "stop_reason": null
+    },
+    {
+      "usage_id": "1bcc6930a32b4e3b9a066cc0aafb3d08",
+      "phase": "report",
+      "attempt": 1,
+      "started_at": "2026-10-31T03:22:30+00:00",
+      "seconds": 0.012,
+      "input_tokens": 100,
+      "output_tokens": 50,
+      "thinking_tokens": null,
+      "cache_read": 0,
+      "cache_write": 100,
+      "max_tokens": 24000,
+      "stop_reason": null
+    }
+  ],
+  "input_identity": {
+    "bundle": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/.d68-validation/split-layout-f8/run/cohort source.txt",
+      "sha256": "c515c576780da4235fa23c2596b7fa13ea0e2751256ef8c434e37e00ab438f5e"
+    },
+    "source_manifest": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/.d68-validation/split-layout-f8/run/source manifest.yaml",
+      "sha256": "9ccfef527c5ab5bd6ad9ef9f6ae7507697d9182566edfbf1a570708ec332ca4f"
+    },
+    "chunks": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/.d68-validation/split-layout-f8/run/cohort source_chunks.yaml",
+      "sha256": "01817276d6ee6297b96da7c6996a434a5a83ab2656b11bf391c2c6f6191ff30f"
+    },
+    "profile": {
+      "name": "neutral",
+      "digest_md5": "94859bbbe7fa229619a3d5e2a50c3668"
+    },
+    "instruction": {
+      "render_version": 8,
+      "spec": {
+        "api_header_values": {
+          "Temperature": "not sent (claude-opus-5 rejects the parameter; the config's value did not reach the request)",
+          "Model": "claude-opus-5",
+          "Reasoning effort": "not set by the request (the provider's own choice; not recorded as a value)"
+        },
+        "render_version": 8,
+        "chunk_manifest": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/.d68-validation/split-layout-f8/run/cohort source_chunks.yaml",
+        "condition": "generic_v6",
+        "arm": "BASELINE (input documents only)",
+        "manifest_line": "# Source manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/.d68-validation/split-layout-f8/run/source manifest.yaml",
+        "run_date": "2026-10-31",
+        "manifest": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/.d68-validation/split-layout-f8/run/source manifest.yaml",
+        "profile": "neutral",
+        "runtime": "Claude API (direct)",
+        "provider": "Anthropic",
+        "bundle": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-legacy/.d68-validation/split-layout-f8/run/cohort source.txt"
+      },
+      "sha256": "e17cee96d32765a0134dca6521bc211243fbbb502d4ec7180238db8d6e91d837"
+    }
+  },
+  "abandoned_journal_offset": 0
+}

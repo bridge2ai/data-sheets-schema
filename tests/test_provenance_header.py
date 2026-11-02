@@ -225,6 +225,8 @@ class TestEveryArtifactWriteIsStamped(unittest.TestCase):
         from tests.test_download.test_api_runner import spec
         tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
         s = spec(out_dir=Path(tmp.name) / "out")
+        from data_sheets_schema.usage_ledger import prepare_usage
+        prepare_usage(s, resume=False)
         s.full_path.parent.mkdir(parents=True, exist_ok=True)
         s.core_path.parent.mkdir(parents=True, exist_ok=True)
         s.full_path.write_text("# Model: claude-opus-5\n# Temperature: 0.0\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n")

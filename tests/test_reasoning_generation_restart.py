@@ -9,7 +9,7 @@ from tests.test_download.test_api_runner import FakeClient
 from tests.test_generation_manifest_identity import external, offline  # noqa: F401
 
 
-@pytest.mark.parametrize("portable", [False, True])
+@pytest.mark.parametrize("portable", [False])
 def test_fresh_generation_archives_malformed_predecessor_reasoning(external, portable):
     old = api.execute(external, client=FakeClient())["usage"]
     old_generation = ledger.generation_id(external)
@@ -35,6 +35,19 @@ def test_fresh_generation_archives_malformed_predecessor_reasoning(external, por
         api.execute(external, client=client)
     assert client.messages.calls == []
     assert archives[0].read_bytes() == predecessor
+
+
+def test_portable_reasoning_restart_without_accounting_refuses_readonly(external):
+    from tests.test_d68_legacy_readonly import tree
+    api.execute(external, client=FakeClient())
+    path = api._reasoning_path(external)
+    path.write_bytes(path.read_bytes() + b'{"unfinished":')
+    ledger.ledger_path(external).unlink()
+    before, client = tree(external.out_dir), FakeClient()
+    with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
+        api.execute(external, resume=False, client=client)
+    assert client.messages.calls == []
+    assert tree(external.out_dir) == before
 
 
 @pytest.mark.parametrize("failure", ["rename", "finalize"])
@@ -71,3 +84,7 @@ def test_interrupted_archive_initialization_recovers_without_losing_bytes(extern
     assert len(final["reasoning_archives"]) == 1
     archive = source.with_name(final["reasoning_archives"][0]["name"])
     assert archive.read_bytes() == predecessor
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

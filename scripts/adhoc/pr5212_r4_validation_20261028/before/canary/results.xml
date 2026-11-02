@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.981" timestamp="2026-10-28T17:29:21.024335" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_pr5212_r3_fixes" name="test_refused_forgery_cannot_supply_the_next_monitored_resume_head" time="2.197"><failure message="AssertionError: assert '0fbc2440438...3fbc75de3200' not in '\nlatch jou...bc75de3200\n'&#10;  '0fbc24404384e84a47...7140bbd3fbc75de3200' is contained here:&#10;    80; found=0fbc24404384e84a47582aa22349f18f4e186daa852ac7140bbd3fbc75de3200 (not a resume anchor)&#10;    &#10;    latch journal: resume journal head: expected=f21cf6c626bb1c120837dc7db3b8b4f080e1c80f60183042060969951725fa80; found=0fbc24404384e84a47582aa22349f18f4e186daa852ac7140bbd3fbc75de3200">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_refused_forgery_cannot_su0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x108f69220&gt;
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x1093ee7b0&gt;
+caplog = &lt;_pytest.logging.LogCaptureFixture object at 0x1093ee900&gt;
+
+    def test_refused_forgery_cannot_supply_the_next_monitored_resume_head(tmp_path, monkeypatch, capsys, caplog):
+        selected = start(tmp_path)
+        retained = raw_events(selected)[-1]['sha256']
+        # Forge a consistent local chain and checkpoint, as the attack in R2 did.
+        events = raw_events(selected)
+        events[0]['payload']['counterfeit'] = 'untrusted replacement'
+        previous = None
+        for event in events:
+            event['previous_sha256'] = previous
+            event['sha256'] = journal._sha(journal._canonical({k: v for k, v in event.items() if k != 'sha256'}))
+            previous = event['sha256']
+        journal.journal_path(selected).write_bytes(b''.join(journal._canonical(e) + b'\n' for e in events))
+        data = ledger._read(selected)
+        data['latch_journal'] = journal._checkpoint(selected, events[-1])
+        ledger._write_unlatched(selected, data)
+        assert journal.check(selected)['verified'] and previous != retained
+        before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
+        monkeypatch.setattr(api, '_execute', lambda *a, **k: pytest.fail('refused launch reached execution'))
+        for _ in range(2):
+            with pytest.raises(ledger.UsageLedgerError, match='resume journal head') as caught:
+                api.execute(selected, expect_journal_head_sha256=retained)
+            captured = capsys.readouterr()
+            output = '\n'.join((captured.out, captured.err, str(caught.value), caplog.text))
+            assert 'latch journal refused:' in output and 'not a resume anchor' in output
+&gt;           assert previous not in output
+E           AssertionError: assert '0fbc2440438...3fbc75de3200' not in '\nlatch jou...bc75de3200\n'
+E             '0fbc24404384e84a47...7140bbd3fbc75de3200' is contained here:
+E               80; found=0fbc24404384e84a47582aa22349f18f4e186daa852ac7140bbd3fbc75de3200 (not a resume anchor)
+E               
+E               latch journal: resume journal head: expected=f21cf6c626bb1c120837dc7db3b8b4f080e1c80f60183042060969951725fa80; found=0fbc24404384e84a47582aa22349f18f4e186daa852ac7140bbd3fbc75de3200
+
+tests/test_pr5212_r3_fixes.py:53: AssertionError</failure></testcase></testsuite></testsuites>

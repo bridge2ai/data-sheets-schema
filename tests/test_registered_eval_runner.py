@@ -89,6 +89,10 @@ def registration(tmp_path_factory):
             "path": str(record), "md5": hashlib.md5(record.read_bytes()).hexdigest(),
         }}},
     })
+    # Reconstruct run identity without assigning this synthetic fixture a
+    # generation age from the test checkout; its age is deliberately unknown.
+    prior.data.pop("repo")
+    prior.data.pop("record_generated_at")
     prior.write(provenance)
     return dict(
         registration=Path(reg["registration_path"]), record=record, context=context,
@@ -206,6 +210,55 @@ def test_preparation_validates_real_registration_and_separate_context(prepared, 
     assert plan["scientific_review_verified"] is False
     assert plan["generation_acceptance_verified"] is False
     assert dict(prepared.authorities)[str(registration["record"])] == prepared.original
+
+
+def test_unestablished_age_is_reported_without_changing_the_plan(prepared, tmp_path):
+    assert prepared.generation_record_age == "age unestablished"
+    destination = tmp_path / "dry-run"
+    result = runner.execute(prepared, destination, dry_run=True)
+    assert result["generation_record_age"] == "age unestablished"
+    assert result["model_calls"] == 0 and not destination.exists()
+    historical = replace(prepared, generation_record_age="pre-D41")
+    assert historical.manifest == prepared.manifest and historical.digest == prepared.digest
+    prior = runner.execute(historical, destination, dry_run=True)
+    assert {k: v for k, v in result.items() if k != "generation_record_age"} == {
+        k: v for k, v in prior.items() if k != "generation_record_age"}
+
+
+@pytest.mark.parametrize("integrity", [None, {}, {
+    "format": "d4d_latch_guard_v1", "verified": True, "assisted": True,
+    "evidence_only": True, "overrides": [{"authorization": "synthetic acknowledgement"}],
+    "journal": {"path": "journal.jsonl", "sha256": "a" * 64,
+                "head_sha256": "b" * 64, "line_count": 1}}])
+def test_d41_ineligible_record_refuses_before_rating_preparation(registration, tmp_path, integrity):
+    prior = yaml.safe_load(registration["provenance"].read_bytes())
+    prior["model"] = {"runtime_integrity": integrity}
+    path = tmp_path / "d41-provenance.yaml"
+    path.write_text(yaml.safe_dump(prior))
+    with pytest.raises(ValueError, match="runtime integrity is ineligible"):
+        runner.prepare(**{**registration, "provenance": path,
+                          "provenance_sha256": sha(path.read_bytes())})
+
+
+def test_prepare_rejects_post_d41_provenance_with_absent_integrity(registration, tmp_path):
+    from data_sheets_schema.latch_journal import D41_COMMIT
+    prior = yaml.safe_load(registration["provenance"].read_bytes())
+    prior["repo"] = {"commit": D41_COMMIT}
+    prior.pop("model", None)
+    path = tmp_path / "post-d41.yaml"
+    path.write_text(yaml.safe_dump(prior))
+    with pytest.raises(ValueError, match="post-D41: missing runtime_integrity block"):
+        runner.prepare(**{**registration, "provenance": path,
+                          "provenance_sha256": sha(path.read_bytes())})
+
+
+def test_dispatch_rechecks_age_when_local_evidence_changes(prepared, tmp_path, monkeypatch):
+    from data_sheets_schema import latch_journal
+    monkeypatch.setattr(latch_journal, "record_age", lambda *a, **k: "post-D41")
+    output = tmp_path / "never-created"
+    with pytest.raises(ValueError, match="post-D41: missing runtime_integrity block"):
+        runner.execute(prepared, output, plan_sha256=prepared.digest, environ={})
+    assert not output.exists()
 
 
 def rebind_record(registration, directory, raw):
