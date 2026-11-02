@@ -132,12 +132,17 @@ def _record(spec):
 def refuse_legacy_execution(spec):
     """Read-only pre-lock refusal; repeat the guard at write/spend boundaries."""
     try:
-        events = _events(spec)
+        _refuse_legacy_execution(spec)
     except ledger.UsageLedgerError as exc:
-        # Preserve D57 even though this check now precedes launch_record.
+        # Include semantic failures containing untrusted embedded values.
+        # Post-lock override diagnostics still need their verified event IDs.
         message = _redact_unverified(str(exc))
         print(f'latch journal refused: {message} (not a resume anchor)', file=sys.stderr, flush=True)
         raise ledger.UsageLedgerError(message) from None
+
+
+def _refuse_legacy_execution(spec):
+    events = _events(spec)
     own = _mine(spec, events)
     path = ledger.ledger_path(spec)
     if own and not path.exists() and not path.is_symlink():
@@ -175,9 +180,7 @@ def _sha(raw: bytes) -> str:
 
 
 def _fail(message):
-    # A valid chain does not turn arbitrary embedded diagnostic values into
-    # launch anchors. Keep semantic refusals under the same decoder rule.
-    raise ledger.UsageLedgerError(_redact_unverified(f"latch journal: {message}"))
+    raise ledger.UsageLedgerError(f"latch journal: {message}")
 
 
 def journal_path(spec) -> Path:

@@ -17,6 +17,8 @@ p = argparse.ArgumentParser()
 p.add_argument('--tree', type=Path, required=True)
 p.add_argument('--basetemp', type=Path, required=True)
 p.add_argument('--workers', type=int, choices=(3, 4), default=3)
+p.add_argument('--probe-dir', type=Path, help='Read-only directory of independent observer plugins')
+p.add_argument('--plugin', action='append', default=[])
 p.add_argument('--plan', action='store_true')
 a = p.parse_args()
 assert 'scratch-5212fix' in a.basetemp.parts
@@ -25,11 +27,17 @@ search = ['rg', '-uu', '-l', '--glob', 'test*.py',
           'tests']
 files = sorted(subprocess.check_output(search, cwd=a.tree, text=True).splitlines())
 assert files and len(files) == len(set(files))
-command = [sys.executable, '-S', '-P', '-B',
-           str(Path(__file__).with_name('run_d68_round4_20261101.py')),
+assert not a.plugin or a.probe_dir is not None
+runner = ('run_pr5212_review_probes_20261102.py' if a.probe_dir
+          else 'run_d68_round4_20261101.py')
+command = [sys.executable, '-S', '-P', '-B', str(Path(__file__).with_name(runner)),
+           *(['--probe-dir', str(a.probe_dir)] if a.probe_dir else []),
            '--tree', str(a.tree), '--basetemp', str(a.basetemp), *files,
+           *(value for name in a.plugin for value in ('-p', name)),
            '-v', '-n', str(a.workers), '--dist', 'load', '--maxschedchunk=1', '--durations=25']
 record = {'search': search, 'ignored_files_included': True, 'files': files,
+          'observer_sha256': {name: hashlib.sha256(
+              (a.probe_dir / (name + '.py')).read_bytes()).hexdigest() for name in a.plugin},
           'sha256': {name: hashlib.sha256((a.tree / name).read_bytes()).hexdigest() for name in files},
           'command': command}
 manifest = a.basetemp.with_suffix('.selection.json')
