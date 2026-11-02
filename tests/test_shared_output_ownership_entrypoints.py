@@ -127,15 +127,14 @@ def test_public_execute_refuses_existing_unowned_state_before_lock(registered, t
     authorities = {Path(path): raw for path, raw in sg.capture(spec).files}
     seen = no_execution(monkeypatch)
     expected = {'foreign': 'foreign or unknown ledger ownership',
-                'unknown': 'artifacts have no journal for the selected run; inspection only',
+                'unknown': 'no usable live ownership',
                 'own_no_resume': 'already spent; no-resume'}[state]
-    # D69/D73(c): unknown partial output refuses at the complete residue guard,
-    # before registered shared ownership checks, lock acquisition or any write.
-    error = ledger.UsageLedgerError if state == 'unknown' else ValueError
-    with pytest.raises(error, match=expected) as caught:
+    # Main's selected-owner refusal precedes D69, locks and all writes.
+    with pytest.raises(ValueError, match=expected) as caught:
         api.execute(spec, resume=state != 'own_no_resume')
-    if state == 'own_no_resume':
-        assert 'files: ' in str(caught.value) and ledger.ledger_path(spec).name in str(caught.value)
+    if state in ('unknown', 'own_no_resume'):
+        path = spec.full_path if state == 'unknown' else ledger.ledger_path(spec)
+        assert 'files: ' in str(caught.value) and str(path) in str(caught.value)
         assert 'use a new output directory' in str(caught.value)
     assert seen == []
     assert whole_tree(tmp_path) == before
