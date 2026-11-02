@@ -99,6 +99,25 @@ production code is unchanged. The batch mutation must still be caught when
 the per-spec D76 check is moved after `_shared_current`. Retain the failed run
 and validate a shared batch canary before the full rerun.
 
+## I10 — Completed-replay fixture must supply the admitted launch's stop head
+
+The first integrated SG2 `none` run completed its initial publication, seven
+fake deliveries and all absolute input/provenance checks, then failed at the
+second `execute` call. That caller omitted `expect_journal_head_sha256`.
+Merged main correctly requires an explicit head retained from the preceding
+launch/monitor record. The completed-replay/no-call assertions were not reached.
+This is an integration fixture mismatch; no environmental recurrence is claimed.
+
+Disposition: capture the successful first launch's emitted stop line, require
+exactly one complete line for the actual project, label and journal path, and
+pass its lowercase64-hex head explicitly to replay. Re-emit captured output
+so the retained logs keep those anchors. Do not derive the expectation by
+rereading the mutable journal. Keep every original delivery, path, capture,
+already-complete and zero-create/count assertion; production guards stay intact.
+Fresh pinned parent comparisons and repaired-head validation are recorded in
+the integration report. The unchanged round-three timing observations must
+remain identified as prior-revision measurements for this changed module.
+
 ## Reviewed mutation-evidence method
 
 The existing validation runner correctly refuses an uncommitted source mutation.

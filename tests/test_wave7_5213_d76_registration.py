@@ -16,7 +16,7 @@ import sys
 import pytest
 import yaml
 
-from data_sheets_schema import api_runner as api, provenance, shared_generation as sg
+from data_sheets_schema import api_runner as api, latch_journal, provenance, shared_generation as sg
 from data_sheets_schema import native_attribution_registration as native_draft
 from data_sheets_schema import native_execution_permissions as permissions
 from data_sheets_schema import native_execution_registration as native_registration
@@ -58,7 +58,8 @@ def test_sg2_root_launch_completes_and_records_registered_paths(tmp_path, reques
         assert marker == request.node.nodeid
         assert os.environ.get('D4D_SG2_CHILD_PID') == str(os.getpid())
         _assert_sg2_root_launch(tmp_path, request.getfixturevalue('draft_files'),
-                              request.getfixturevalue('monkeypatch'), layout)
+                              request.getfixturevalue('monkeypatch'), layout,
+                              request.getfixturevalue('capsys'))
         return
     root = Path(__file__).resolve().parents[1]
     output = tmp_path / 'isolated-sg2'
@@ -90,12 +91,30 @@ def test_sg2_root_launch_completes_and_records_registered_paths(tmp_path, reques
     assert (output / 'pytest.xml').stat().st_size > 0
 
 
-def _assert_sg2_root_launch(tmp_path, draft_files, monkeypatch, layout):
+def _assert_sg2_root_launch(tmp_path, draft_files, monkeypatch, layout, capsys):
     spec, reg = _registered_at_root(tmp_path, draft_files, monkeypatch, layout)
     fake = client(spec)
     # Exercise publication before checking paths: the original regression
     # happens after seven fake deliveries, not merely during construction.
     result = api.execute(spec, client=fake)
+    # Retain the first successful launch's external stop record. A replay must
+    # supply that anchor explicitly; reading the mutable journal is not consent
+    # to adopt whichever head happens to be present at the next invocation.
+    launch_output = capsys.readouterr()
+    with capsys.disabled():
+        sys.stdout.write(launch_output.out)
+        sys.stderr.write(launch_output.err)
+        sys.stdout.flush()
+        sys.stderr.flush()
+    stop_lines = [line for line in launch_output.err.splitlines()
+                  if line.startswith('latch journal stop:')]
+    assert len(stop_lines) == 1, launch_output.err
+    stop = re.fullmatch(
+        re.escape(f'latch journal stop: project={spec.project} label={spec.label} head_sha256=')
+        + r'([0-9a-f]{64})'
+        + re.escape(f' path={latch_journal.journal_path(spec)}'), stop_lines[0])
+    assert stop is not None, stop_lines[0]
+    retained_head = stop.group(1)
     assert result['validation_problems'] == []
     assert 'routing_completed_capture' in result
     assert len(fake.messages.calls) == 7
@@ -112,7 +131,8 @@ def _assert_sg2_root_launch(tmp_path, draft_files, monkeypatch, layout):
     # A completed replay independently rechecks the retained capture and makes
     # no fake deliveries or count requests.
     replay = client(spec)
-    again = api.execute(replace(spec), client=replay)
+    again = api.execute(replace(spec), client=replay,
+                        expect_journal_head_sha256=retained_head)
     assert again['already_complete'] is True
     assert replay.messages.calls == []
     assert replay.messages.count_calls == []
