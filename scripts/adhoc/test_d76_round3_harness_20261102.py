@@ -17,6 +17,7 @@ import tempfile
 import time
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -194,8 +195,12 @@ class DeadlineContracts(unittest.TestCase):
             self.assertNotEqual(code, 0)
             record = json.loads((root / 'deadline.json').read_text())
             self.assertTrue(record['expired'])
-            self.assertEqual(record['signals'][0], 'SIGTERM')
-            self.assertEqual(record['signals'][-1], 'SIGKILL')
+            self.assertEqual(record['signals'][0]['signal'], 'SIGTERM')
+            self.assertEqual(record['signals'][-1]['signal'], 'SIGKILL')
+            self.assertTrue(record['termination_verified'])
+            for entry in record['signals']:
+                if 'group_state_before_reap' in entry:
+                    self.assertTrue(entry['group_state_before_reap']['all_retired'])
             self.assertIn('started', (root / 'child.log').read_text())
 
     def test_term_ignoring_descendant_stops_before_terminal_result(self):
@@ -211,7 +216,36 @@ class DeadlineContracts(unittest.TestCase):
             first = heartbeat.read_bytes()
             time.sleep(0.3)
             self.assertEqual(heartbeat.read_bytes(), first)
-            self.assertIn('SIGKILL', json.loads((root / 'deadline.json').read_text())['signals'])
+            self.assertIn('SIGKILL', [row['signal'] for row in json.loads((root / 'deadline.json').read_text())['signals']])
+
+    def test_group_observation_requires_owned_leader_and_no_live_members(self):
+        for stdout, expected in [('42 42 Z\n43 42 Z\n', True), ('42 42 Z\n43 42 S\n', False),
+                                 ('43 42 Z\n', False), ('42 42 R\n', False)]:
+            observation = SimpleNamespace(stdout=stdout, stderr='', returncode=0)
+            with self.subTest(stdout=stdout), patch.object(runner.subprocess, 'run', return_value=observation):
+                self.assertEqual(runner.owned_group_state(42)['all_retired'], expected)
+
+    def test_unavailable_group_observation_never_proves_retirement(self):
+        observation = SimpleNamespace(stdout='', stderr='not permitted', returncode=1)
+        with patch.object(runner.subprocess, 'run', return_value=observation):
+            self.assertFalse(runner.owned_group_state(42)['all_retired'])
+
+    def test_unverified_group_refusal_is_persisted_without_reaping(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            config = SimpleNamespace(tree=root, output=root, deadline_seconds=1, metrics=False)
+            from unittest.mock import Mock
+            child = Mock(pid=42)
+            with (root / 'child.log').open('wb') as stream, \
+                    patch.object(runner.subprocess, 'Popen', return_value=child), \
+                    patch.object(runner.time, 'monotonic', side_effect=[0, 2]), \
+                    patch.object(runner.time, 'sleep'), \
+                    patch.object(runner.os, 'killpg', side_effect=[None, PermissionError('denied')]), \
+                    patch.object(runner, 'owned_group_state', return_value={'all_retired': False}):
+                with self.assertRaisesRegex(RuntimeError, 'retirement is unverified'):
+                    runner.execute_bounded(['owned-only-fixture'], config, {}, stream)
+            child.wait.assert_not_called()
+            self.assertFalse(json.loads((root / 'deadline.json').read_text())['termination_verified'])
 
 
 if __name__ == '__main__':

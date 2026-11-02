@@ -200,6 +200,28 @@ def phase_journal(path):
                   'complete_rows': len(rows), 'malformed_rows': errors, 'passed': not errors}
 
 
+def owned_group_state(group):
+    """Read state only; the unreaped owned leader reserves this group identity."""
+    observed = None
+    try:
+        observed = subprocess.run(['/bin/ps', '-axo', 'pid=,pgid=,state='],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=3)
+        members = []
+        for line in observed.stdout.splitlines():
+            pid, pgid, state = line.split()
+            if int(pgid) == group:
+                members.append({'pid': int(pid), 'group': int(pgid), 'state': state})
+        retired = (observed.returncode == 0 and any(row['pid'] == group for row in members)
+                   and all(row['state'].startswith('Z') for row in members))
+        return {'observed': observed.returncode == 0, 'members': members, 'all_retired': retired,
+                'returncode': observed.returncode, 'stdout': observed.stdout, 'stderr': observed.stderr}
+    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+        return {'observed': False, 'all_retired': False, 'error': repr(exc),
+                'stdout': observed.stdout if observed is not None else None,
+                'stderr': observed.stderr if observed is not None else None,
+                'returncode': observed.returncode if observed is not None else None}
+
+
 def execute_bounded(cmd, options, env, stream):
     """Deadline owns exactly one new process group; no unrelated process signals."""
     started = time.monotonic()
@@ -207,6 +229,7 @@ def execute_bounded(cmd, options, env, stream):
                              stderr=subprocess.STDOUT, start_new_session=True)
     timed_out = False
     signals = []
+    retirement = None
     common.save(options.output / 'controller.json', {'pid': child.pid, 'process_group': child.pid,
         'deadline_seconds': options.deadline_seconds, 'new_session': True})
     try:
@@ -238,9 +261,21 @@ def execute_bounded(cmd, options, env, stream):
         for sig in (signal.SIGTERM, signal.SIGKILL):
             try:
                 os.killpg(child.pid, sig)
-                signals.append(sig.name)
+                signals.append({'signal': sig.name, 'sent': True})
             except ProcessLookupError:
-                pass
+                signals.append({'signal': sig.name, 'sent': False, 'error': 'ProcessLookupError'})
+            except PermissionError as exc:
+                # macOS may refuse signals to a zombie-only group. Do not infer
+                # that from EPERM: independently inspect the still-owned group.
+                retirement = owned_group_state(child.pid)
+                signals.append({'signal': sig.name, 'sent': False, 'error': repr(exc),
+                                'group_state_before_reap': retirement})
+                if sig != signal.SIGKILL or not retirement['all_retired']:
+                    common.save(options.output / 'deadline.json', {'expired': True,
+                        'seconds': options.deadline_seconds, 'signals': signals,
+                        'termination_verified': False, 'controller_pid': child.pid,
+                        'policy': 'no source-after or terminal test acceptance before verified retirement'})
+                    raise RuntimeError('owned deadline group retirement is unverified; evidence retained') from exc
             if sig == signal.SIGTERM:
                 # Never poll/wait/reap the leader during this grace. Even if it
                 # exits on TERM, its unreaped PID prevents group-ID reuse while
@@ -252,6 +287,7 @@ def execute_bounded(cmd, options, env, stream):
             raise RuntimeError('owned pytest process did not reap after deadline SIGKILL') from exc
     common.save(options.output / 'deadline.json', {'expired': timed_out, 'seconds': options.deadline_seconds,
         'wall_seconds': time.monotonic() - started, 'signals': signals, 'returncode': code,
+        'termination_verified': True, 'group_state_before_reap': retirement,
         'limit_scope': 'pytest controller and its new process group; separately sessioned descendants are not claimed; no timing-performance claim'})
     return code, timed_out
 
