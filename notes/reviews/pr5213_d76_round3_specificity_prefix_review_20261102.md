@@ -155,3 +155,27 @@ behavior, while preserving ordinary existing method defaults and annotations.
 No scanner implementation was edited or tests launched by this follow-up
 review author. These are additional issue details for AGY, not new GitHub
 publications or claims that the repaired certificate is accepted.
+
+### R3 follow-up revision — eager annotations are not inert callable metadata
+
+Review of the subsequent held repair SHA-256
+`533abc46a8be207e54cf8efd8a3b06c10e340631ecf26a0f6e63a8eaa8a08098`
+found that `callable_uses()` still exempts every name inside annotations.
+In a module without postponed annotations, a function annotation can execute
+`setattr(validate, '__code__', mutate.__code__)` at definition time. Even an
+annotation with no Call node can retain the callable: `def keep(value: validate)`
+exposes it through `keep.__annotations__['value']` for a subsequent visible code
+mutation. Both invalidate the old source proof without changing the declared
+primitive input domain. Relevant definition-time annotations also belong in
+the module binding analysis; they must not be skipped when they rebind a trusted
+name.
+
+Two calibrated controls are appended to the separate follow-up module, making
+its new roster eight cases. The prior six assertions are unchanged, and its
+historical six-case hash
+`51caab53119ed8cbc371389a99adf1ec31b2e672a55d14a58571eef67362dcb2`
+and retained six-failure before evidence remain intact. This additive revision
+requires a separately pinned eight-case before/after run; no results are claimed
+for the new bytes here. Resolve or conservatively reject eager executable
+annotations and callable-value escapes while retaining valid source type
+annotations. No scanner edits or tests were performed by this review author.

@@ -75,3 +75,31 @@ def test_r1_nested_finite_loops_have_a_shared_abstract_work_bound(tmp_path):
     # per-loop length caps alone do not bound nested or interprocedural work.
     # This is a deterministic refusal contract, not a timing benchmark.
     review._refuses(fixture)
+
+
+def test_r3_eager_function_annotation_cannot_mutate_the_certified_callable(tmp_path):
+    fixture = review._simple(tmp_path,
+        "def mutate(spec):\n    spec.base_prompt = 'changed'\n"
+        "def validate(spec):\n    return None\n")
+    review._calibrate(fixture, tmp_path)
+    path = fixture[0] / review.base.scan.RUNNER
+    path.write_text(path.read_text() + '\n'
+        "def unused(value: setattr(validate, '__code__', mutate.__code__)):\n"
+        '    pass\n')
+    # With no postponed-annotations import, this expression changes the live
+    # callable at definition time, even though the receiving function is unused.
+    review._refuses(fixture)
+
+
+def test_r3_eager_annotation_value_cannot_escape_to_a_callable_writer(tmp_path):
+    fixture = review._simple(tmp_path,
+        "def mutate(spec):\n    spec.base_prompt = 'changed'\n"
+        "def validate(spec):\n    return None\n")
+    review._calibrate(fixture, tmp_path)
+    path = fixture[0] / review.base.scan.RUNNER
+    path.write_text(path.read_text() + '\n'
+        'def keep(value: validate):\n    pass\n'
+        "keep.__annotations__['value'].__code__ = mutate.__code__\n")
+    # Merely rejecting annotation Calls is insufficient: this annotation has
+    # no Call node, but it exports the actual callable through __annotations__.
+    review._refuses(fixture)
