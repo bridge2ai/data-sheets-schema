@@ -72,10 +72,6 @@ def _mentions_runspec(text, bindings, runspec_classes=(), *, _depth=0):
         return False
     if _depth > 8:
         raise ValueError('RunSpec annotation inventory exceeds eight forward-reference levels')
-    names = set(re.findall(r'[A-Za-z_][A-Za-z_0-9]*', text))
-    if ('RunSpec' in names or any(bindings.get(name, '').endswith('.RunSpec')
-            or bindings.get(name) in runspec_classes for name in names)):
-        return True
     # Preserve the full module-qualified spelling: splitting m.Derived into
     # unrelated identifiers loses a known subclass reached through an import.
     # Parse syntax only; annotations and their referenced modules are not run.
@@ -83,14 +79,25 @@ def _mentions_runspec(text, bindings, runspec_classes=(), *, _depth=0):
         annotation = ast.parse(text, mode='eval')
     except SyntaxError as exc:
         raise ValueError('unsupported source annotation in RunSpec inventory: ' + text) from exc
-    for node in ast.walk(annotation):
+    def visit(node):
+        if isinstance(node, ast.Subscript):
+            container = _qualified(node.value)
+            resolved = _resolve(container, bindings) if container else None
+            if resolved in {'typing.Literal', 'typing_extensions.Literal'}:
+                return False  # Literal arguments are values, never forward types.
+            if resolved in {'typing.Annotated', 'typing_extensions.Annotated'}:
+                arguments = node.slice.elts if isinstance(node.slice, ast.Tuple) else [node.slice]
+                return bool(arguments) and visit(arguments[0])  # Remaining arguments are metadata.
         spelling = _qualified(node)
-        if spelling and _resolve(spelling, bindings) in runspec_classes:
-            return True
-        if (isinstance(node, ast.Constant) and isinstance(node.value, str)
-                and _mentions_runspec(node.value, bindings, runspec_classes, _depth=_depth + 1)):
-            return True
-    return False
+        if spelling:
+            resolved = _resolve(spelling, bindings)
+            if spelling == 'RunSpec' or resolved.endswith('.RunSpec') or resolved in runspec_classes:
+                return True
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return _mentions_runspec(node.value, bindings, runspec_classes, _depth=_depth + 1)
+        return any(visit(child) for child in ast.iter_child_nodes(node))
+
+    return visit(annotation)
 
 
 def _scope_nodes(tree):
