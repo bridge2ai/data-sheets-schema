@@ -1,13 +1,13 @@
 [
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_ordinary_object_and_copy_mutations_refuse",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_path_subclasses_cannot_lie_to_the_boundary",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_missing_registry_does_not_establish_origin",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_collected_identity_cannot_authorize_a_forged_spec",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_full_field_roster_rejects_new_unclassified_fields",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_replace_with_different_shared_locator_revalidates",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_public_phase_builder_refuses_before_shared_authority",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_public_phase_builder_does_not_mix_changed_bundle_with_cached_instruction",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_recorder.py",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_public_registration.py",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_identity_reuse.py"
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_ordinary_object_and_copy_mutations_refuse",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_path_subclasses_cannot_lie_to_the_boundary",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_missing_registry_does_not_establish_origin",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_collected_identity_cannot_authorize_a_forged_spec",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_full_field_roster_rejects_new_unclassified_fields",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_replace_with_different_shared_locator_revalidates",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_public_phase_builder_refuses_before_shared_authority",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_public_phase_builder_does_not_mix_changed_bundle_with_cached_instruction",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_recorder.py",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_public_registration.py",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_identity_reuse.py"
 ]

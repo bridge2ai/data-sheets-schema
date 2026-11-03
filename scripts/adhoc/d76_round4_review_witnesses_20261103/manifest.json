@@ -19,7 +19,7 @@
       ],
       "destination": {
         "bytes": 8980,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py",
         "sha256": "8997eed49d264f5ae571aefeef909085286e66d47683bfeeaf94f7b967f50005"
       },
       "imports": [
@@ -38,7 +38,7 @@
         "types",
         "weakref"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py",
       "role": "round3_witness_assertions_and_hostile_python_observations",
       "source": {
         "bytes": 8980,
@@ -55,7 +55,7 @@
       ],
       "destination": {
         "bytes": 4182,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_recorder.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_recorder.py",
         "sha256": "9ef0e4b2a74e0b26ad51da33a3675a0b97655b686a7ab9826639e7a703e75d5a"
       },
       "imports": [
@@ -70,7 +70,7 @@
         "unicodedata",
         "yaml"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_recorder.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_recorder.py",
       "role": "round3_witness_assertions",
       "source": {
         "bytes": 4182,
@@ -85,7 +85,7 @@
       ],
       "destination": {
         "bytes": 1553,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_public_registration.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_public_registration.py",
         "sha256": "38a51a2bddca4c22c550bdb5427e8b00d9b16902a9aabc1d7ddbea13e184b574"
       },
       "imports": [
@@ -95,7 +95,7 @@
         "tests.test_native_source_attribution",
         "tests.test_source_attribution_preflight"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_public_registration.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_public_registration.py",
       "role": "round3_witness_assertions",
       "source": {
         "bytes": 1553,
@@ -110,7 +110,7 @@
       ],
       "destination": {
         "bytes": 1267,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_identity_reuse.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_identity_reuse.py",
         "sha256": "5c83a7ce4cbc18f8b735836caf870b516635a851151eea1b3878017733dfe84a"
       },
       "imports": [
@@ -123,7 +123,7 @@
         "tests.test_shared_generation_runtime",
         "weakref"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_identity_reuse.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_identity_reuse.py",
       "role": "round3_followup_assertions_with_allocator_observation",
       "source": {
         "bytes": 1267,
@@ -141,7 +141,7 @@
       ],
       "destination": {
         "bytes": 6091,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_prior_adversarial.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_prior_adversarial.py",
         "sha256": "56299298c1c9e65df8e64e90688481ab93e1e9bcaef2b3b73dc403c6a5cf8482"
       },
       "imports": [
@@ -152,7 +152,7 @@
         "pytest",
         "yaml"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_prior_adversarial.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_prior_adversarial.py",
       "role": "retained_round2_assertions",
       "source": {
         "bytes": 6091,
@@ -171,7 +171,7 @@
       ],
       "destination": {
         "bytes": 8378,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_recheck_edges.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_recheck_edges.py",
         "sha256": "bf64b7e1834bf239331746c54cc60d15fbbe05a5d7a70c701054defd549dbc5a"
       },
       "imports": [
@@ -190,7 +190,7 @@
         "tests.test_shared_generation_selection",
         "yaml"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_recheck_edges.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_recheck_edges.py",
       "role": "retained_round2_assertions_with_old_diagnostics",
       "source": {
         "bytes": 8378,
@@ -205,7 +205,7 @@
       ],
       "destination": {
         "bytes": 1600,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_postconstruction_binding.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_postconstruction_binding.py",
         "sha256": "6f6b0648dd23ad3f7499df4bec908432fb7c6baeeeb9216d3cda1c73f17f294d"
       },
       "imports": [
@@ -215,7 +215,7 @@
         "tests.test_source_heading_runtime_api",
         "tests.test_wave7_5213_d76_registration"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_postconstruction_binding.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_postconstruction_binding.py",
       "role": "retained_round2_low_level_observations",
       "source": {
         "bytes": 1600,
@@ -230,7 +230,7 @@
       ],
       "destination": {
         "bytes": 1644,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_postconstruction_admission.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_postconstruction_admission.py",
         "sha256": "da5bfe1535cb810ee4b9700adb98d2788ccc86cb92bfb4f00a5a6dbb3591f19c"
       },
       "imports": [
@@ -241,7 +241,7 @@
         "tests.test_source_heading_runtime_api",
         "tests.test_wave7_5213_d76_registration"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_postconstruction_admission.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_postconstruction_admission.py",
       "role": "retained_round2_defect_assertion_expected_to_invert",
       "source": {
         "bytes": 1644,
@@ -262,7 +262,7 @@
       ],
       "destination": {
         "bytes": 8967,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_round2_adversarial.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_round2_adversarial.py",
         "sha256": "7fa547b6f4c10e34974fa1ec7d78c33c222718e8a0b409f93e24ddcb775af468"
       },
       "imports": [
@@ -283,7 +283,7 @@
         "types",
         "yaml"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_round2_adversarial.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_round2_adversarial.py",
       "role": "retained_round2_assertions_with_interpreter_sensitive_exception",
       "source": {
         "bytes": 8967,
@@ -298,7 +298,7 @@
       ],
       "destination": {
         "bytes": 1626,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_replace_portable.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_replace_portable.py",
         "sha256": "5ebc95dbb971f9b4690f7ea6161f7be01dabc3fe0a41b0c61f1376218c057e07"
       },
       "imports": [
@@ -308,7 +308,7 @@
         "pytest",
         "tests.test_generation_manifest_identity"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_replace_portable.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_replace_portable.py",
       "role": "separate_portable_replacement_assertions",
       "source": {
         "bytes": 1626,
@@ -331,7 +331,7 @@
       ],
       "destination": {
         "bytes": 12050,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/round2_binding_source.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/round2_binding_source.py",
         "sha256": "893f136d901579acba2777da87fd475b8db3e71561746f9275f8ccadba540fb2"
       },
       "imports": [
@@ -348,7 +348,7 @@
         "tests.test_source_heading_runtime_api",
         "tests.test_wave7_5213_d76_registration"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/round2_binding_source.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/round2_binding_source.py",
       "role": "imported_frozen_round2_fixture_not_a_replay_target",
       "source": {
         "bytes": 12050,
@@ -364,7 +364,7 @@
       ],
       "destination": {
         "bytes": 5594,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/round2_recorder_source.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/round2_recorder_source.py",
         "sha256": "52b096e07edcc04a26028ae6f1ef68a140b95a31abd7f7c6b0bbf4249b0edb42"
       },
       "imports": [
@@ -379,7 +379,7 @@
         "tests.test_manifest_corpus_root",
         "yaml"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/round2_recorder_source.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/round2_recorder_source.py",
       "role": "imported_frozen_round2_fixture_not_a_replay_target",
       "source": {
         "bytes": 5594,
@@ -392,11 +392,11 @@
       "declared_test_functions": [],
       "destination": {
         "bytes": 16939,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/review-report.md",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/review-report.md",
         "sha256": "f8e929cf6da6c9b89d2139bffb9314feec93cf00eabb893765646db6bd07e368"
       },
       "imports": [],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/review-report.md",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/review-report.md",
       "role": "historical_report",
       "source": {
         "bytes": 16939,
@@ -422,7 +422,7 @@
       ],
       "destination": {
         "bytes": 10040,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_anchor_probes.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r3_anchor_probes.py",
         "sha256": "51a6a84bf0cbad1e434c3942cbc5535b3d4619a622cade5e936191b1a81b0c2c"
       },
       "imports": [
@@ -438,7 +438,7 @@
         "weakref",
         "yaml"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_anchor_probes.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r3_anchor_probes.py",
       "role": "round3_assertions_and_printed_hostile_python_observations",
       "source": {
         "bytes": 10040,
@@ -454,7 +454,7 @@
       ],
       "destination": {
         "bytes": 1341,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_classification_proof.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r3_classification_proof.py",
         "sha256": "52f86cb4333dfee39aaad02ab83cc6f5bc1dfb8b78e9b40d9f4e0ca800f90e65"
       },
       "imports": [
@@ -463,7 +463,7 @@
         "pytest",
         "tests.test_wave7_5213_d76_round2_binding"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_classification_proof.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r3_classification_proof.py",
       "role": "round3_roster_assertions",
       "source": {
         "bytes": 1341,
@@ -478,7 +478,7 @@
       ],
       "destination": {
         "bytes": 4104,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_cross_corpus_recorder.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r3_cross_corpus_recorder.py",
         "sha256": "941b420983f5896b395fadb5d5fb0cedba41d9a75a39ce2d4fd17f248288469f"
       },
       "imports": [
@@ -493,7 +493,7 @@
         "tests.test_manifest_corpus_root",
         "yaml"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_cross_corpus_recorder.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r3_cross_corpus_recorder.py",
       "role": "round3_printed_record_observations",
       "source": {
         "bytes": 4104,
@@ -508,7 +508,7 @@
       ],
       "destination": {
         "bytes": 3440,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_verified_basis.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r3_verified_basis.py",
         "sha256": "2ca7d209300c9a64504232faad0691803a774c0cf701fd4ea40de7b0458bc01d"
       },
       "imports": [
@@ -522,7 +522,7 @@
         "tests.test_manifest_corpus_root",
         "yaml"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_verified_basis.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r3_verified_basis.py",
       "role": "round3_printed_byte_evidence_observations",
       "source": {
         "bytes": 3440,
@@ -539,7 +539,7 @@
       ],
       "destination": {
         "bytes": 5002,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_probe_recorder_residuals.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_probe_recorder_residuals.py",
         "sha256": "a49fa816ca3b7f35df14bce35dd8778545aa94bf7279cfd102b79ed2ebc891fd"
       },
       "imports": [
@@ -554,7 +554,7 @@
         "tests.test_manifest_corpus_root",
         "yaml"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_probe_recorder_residuals.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_probe_recorder_residuals.py",
       "role": "retained_round2_printed_recorder_observations",
       "source": {
         "bytes": 5002,
@@ -578,7 +578,7 @@
       ],
       "destination": {
         "bytes": 8442,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r2_boundary_probes.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r2_boundary_probes.py",
         "sha256": "f5228d207264d341151b493ede89169460ecd183efdf7f9c91226b07fe77d953"
       },
       "imports": [
@@ -591,7 +591,7 @@
         "tests.test_shared_generation_selection",
         "yaml"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r2_boundary_probes.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r2_boundary_probes.py",
       "role": "retained_round2_assertions_and_printed_observations",
       "source": {
         "bytes": 8442,
@@ -612,7 +612,7 @@
       ],
       "destination": {
         "bytes": 9053,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_codex_r2_round2_adversarial_copy.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_codex_r2_round2_adversarial_copy.py",
         "sha256": "1a0eb676455e868d54ab6cdb03b6bcbcea39d1e57c5ae3eb6297961b9e426003"
       },
       "imports": [
@@ -633,7 +633,7 @@
         "types",
         "yaml"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_codex_r2_round2_adversarial_copy.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_codex_r2_round2_adversarial_copy.py",
       "role": "two_report_selected_functions_from_copied_codex_round2_witness",
       "source": {
         "bytes": 9053,
@@ -656,7 +656,7 @@
       ],
       "destination": {
         "bytes": 12050,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/round2_binding_source.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/round2_binding_source.py",
         "sha256": "893f136d901579acba2777da87fd475b8db3e71561746f9275f8ccadba540fb2"
       },
       "imports": [
@@ -673,7 +673,7 @@
         "tests.test_source_heading_runtime_api",
         "tests.test_wave7_5213_d76_registration"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/round2_binding_source.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/round2_binding_source.py",
       "role": "imported_frozen_round2_fixture_not_a_replay_target",
       "source": {
         "bytes": 12050,
@@ -689,7 +689,7 @@
       ],
       "destination": {
         "bytes": 5594,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/round2_recorder_source.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/round2_recorder_source.py",
         "sha256": "52b096e07edcc04a26028ae6f1ef68a140b95a31abd7f7c6b0bbf4249b0edb42"
       },
       "imports": [
@@ -704,7 +704,7 @@
         "tests.test_manifest_corpus_root",
         "yaml"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/round2_recorder_source.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/round2_recorder_source.py",
       "role": "imported_frozen_round2_fixture_not_a_replay_target",
       "source": {
         "bytes": 5594,
@@ -717,7 +717,7 @@
       "declared_test_functions": [],
       "destination": {
         "bytes": 2056,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/sg2_child_preconditions.py",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/sg2_child_preconditions.py",
         "sha256": "724ed53219391556dc6b08018db4a7e147f555c5b289a1ef0a37918e2ec5a6f4"
       },
       "imports": [
@@ -726,7 +726,7 @@
         "subprocess",
         "sys"
       ],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/sg2_child_preconditions.py",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/sg2_child_preconditions.py",
       "role": "standalone_historical_review_attestation_observation_not_pytest",
       "source": {
         "bytes": 2056,
@@ -739,11 +739,11 @@
       "declared_test_functions": [],
       "destination": {
         "bytes": 21747,
-        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/review-report.md",
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/review-report.md",
         "sha256": "3ab849ef92e4dd9640519475323f991f7a726c56ab21b2f002a74c72fc1a0825"
       },
       "imports": [],
-      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/review-report.md",
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/review-report.md",
       "role": "historical_report",
       "source": {
         "bytes": 21747,
@@ -753,48 +753,48 @@
     }
   ],
   "helper": {
-    "bytes": 18986,
+    "bytes": 28914,
     "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/bundle_d76_round4_review_witnesses_20261103.py",
-    "sha256": "e855a64221ca29b6cc13967d3704239e30e0e39097802c400d24b49717fba467"
+    "sha256": "fd9c83c2b7cf23567f97a8dea2d3d0b49133e7c84492306fcabe355674cbbce7"
   },
   "local_import_closure": [
     {
-      "destination": "codex/round2_recorder_source.py",
-      "importer": "codex/test_new_recorder.py",
+      "destination": "tests/codex/round2_recorder_source.py",
+      "importer": "tests/codex/test_new_recorder.py",
       "module": "round2_recorder_source"
     },
     {
-      "destination": "codex/test_new_guard.py",
-      "importer": "codex/test_identity_reuse.py",
+      "destination": "tests/codex/test_new_guard.py",
+      "importer": "tests/codex/test_identity_reuse.py",
       "module": "test_new_guard"
     },
     {
-      "destination": "codex/round2_binding_source.py",
-      "importer": "codex/test_round2_adversarial.py",
+      "destination": "tests/codex/round2_binding_source.py",
+      "importer": "tests/codex/test_round2_adversarial.py",
       "module": "round2_binding_source"
     },
     {
-      "destination": "codex/round2_recorder_source.py",
-      "importer": "codex/test_round2_adversarial.py",
+      "destination": "tests/codex/round2_recorder_source.py",
+      "importer": "tests/codex/test_round2_adversarial.py",
       "module": "round2_recorder_source"
     },
     {
-      "destination": "claude/round2_binding_source.py",
-      "importer": "claude/test_codex_r2_round2_adversarial_copy.py",
+      "destination": "tests/claude/round2_binding_source.py",
+      "importer": "tests/claude/test_codex_r2_round2_adversarial_copy.py",
       "module": "round2_binding_source"
     },
     {
-      "destination": "claude/round2_recorder_source.py",
-      "importer": "claude/test_codex_r2_round2_adversarial_copy.py",
+      "destination": "tests/claude/round2_recorder_source.py",
+      "importer": "tests/claude/test_codex_r2_round2_adversarial_copy.py",
       "module": "round2_recorder_source"
     }
   ],
   "originals_unchanged_after_copy": true,
   "purpose": "PR #5213 round-4 task9 reviewer witness replay preparation",
   "readme": {
-    "bytes": 4308,
+    "bytes": 4314,
     "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/README.md",
-    "sha256": "7063429ac86cb98e8f8724bb95fecef4607471d69a777bca861e8ad2a42de7b8"
+    "sha256": "ec9d994301fccbe02f6cadbc24cff33531eaa81b1c533502bc1b9d74ae74b530"
   },
   "replay_groups": [
     {
@@ -802,17 +802,17 @@
       "name": "codex-round3-assertions",
       "reviewer": "codex",
       "targets": [
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_ordinary_object_and_copy_mutations_refuse",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_path_subclasses_cannot_lie_to_the_boundary",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_missing_registry_does_not_establish_origin",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_collected_identity_cannot_authorize_a_forged_spec",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_full_field_roster_rejects_new_unclassified_fields",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_replace_with_different_shared_locator_revalidates",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_public_phase_builder_refuses_before_shared_authority",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_public_phase_builder_does_not_mix_changed_bundle_with_cached_instruction",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_recorder.py",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_public_registration.py",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_identity_reuse.py"
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_ordinary_object_and_copy_mutations_refuse",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_path_subclasses_cannot_lie_to_the_boundary",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_missing_registry_does_not_establish_origin",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_collected_identity_cannot_authorize_a_forged_spec",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_full_field_roster_rejects_new_unclassified_fields",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_replace_with_different_shared_locator_revalidates",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_public_phase_builder_refuses_before_shared_authority",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_public_phase_builder_does_not_mix_changed_bundle_with_cached_instruction",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_recorder.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_public_registration.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_identity_reuse.py"
       ]
     },
     {
@@ -820,7 +820,7 @@
       "name": "codex-hostile-python-observations",
       "reviewer": "codex",
       "targets": [
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_registry_forgery_is_the_documented_hostile_python_residual"
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_new_guard.py::test_registry_forgery_is_the_documented_hostile_python_residual"
       ]
     },
     {
@@ -828,10 +828,10 @@
       "name": "codex-retained-round2",
       "reviewer": "codex",
       "targets": [
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_prior_adversarial.py",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_recheck_edges.py",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_round2_adversarial.py",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_replace_portable.py"
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_prior_adversarial.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_recheck_edges.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_round2_adversarial.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_replace_portable.py"
       ]
     },
     {
@@ -839,7 +839,7 @@
       "name": "codex-retained-low-level-observations",
       "reviewer": "codex",
       "targets": [
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_postconstruction_binding.py"
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_postconstruction_binding.py"
       ]
     },
     {
@@ -847,7 +847,7 @@
       "name": "codex-retained-defect-observation",
       "reviewer": "codex",
       "targets": [
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_postconstruction_admission.py"
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_postconstruction_admission.py"
       ]
     },
     {
@@ -855,8 +855,8 @@
       "name": "claude-round3-anchor-and-roster",
       "reviewer": "claude",
       "targets": [
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_anchor_probes.py",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_classification_proof.py"
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r3_anchor_probes.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r3_classification_proof.py"
       ]
     },
     {
@@ -864,9 +864,9 @@
       "name": "claude-record-observations",
       "reviewer": "claude",
       "targets": [
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_verified_basis.py",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_cross_corpus_recorder.py",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_probe_recorder_residuals.py"
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r3_verified_basis.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r3_cross_corpus_recorder.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_probe_recorder_residuals.py"
       ]
     },
     {
@@ -874,7 +874,7 @@
       "name": "claude-retained-boundary",
       "reviewer": "claude",
       "targets": [
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r2_boundary_probes.py"
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_r2_boundary_probes.py"
       ]
     },
     {
@@ -882,8 +882,8 @@
       "name": "claude-retained-codex-selected",
       "reviewer": "claude",
       "targets": [
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_codex_r2_round2_adversarial_copy.py::test_owner_counterpart_cannot_select_a_different_file",
-        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_codex_r2_round2_adversarial_copy.py::test_private_anchor_replacement_cannot_restore_spend"
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_codex_r2_round2_adversarial_copy.py::test_owner_counterpart_cannot_select_a_different_file",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/test_codex_r2_round2_adversarial_copy.py::test_private_anchor_replacement_cannot_restore_spend"
       ]
     }
   ],
@@ -1030,54 +1030,54 @@
       "FRESH_TEMP"
     ],
     "current_claim": "review-only source attestation preconditions, not ordinary SG2 portability",
-    "path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/sg2_child_preconditions.py",
+    "path": "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/claude/sg2_child_preconditions.py",
     "pytest_target": false
   },
   "target_files": [
     {
-      "bytes": 1357,
+      "bytes": 1423,
       "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/codex-round3-assertions.json",
-      "sha256": "8960286e8991ce682854bef7cda18daaa41d35c11ea4f2e50de9d584bbf74433"
+      "sha256": "d0ed65b8979ff530a92d67256602cec3fbdd7d8b3eb2c589dd8f7347f08ce02f"
     },
     {
-      "bytes": 148,
+      "bytes": 154,
       "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/codex-hostile-python-observations.json",
-      "sha256": "48b4a2e037b6f6d4d18809c1932b304b262ae192f7737aa62bbabbabf4d22a40"
+      "sha256": "bc18a91c795a91e7353dfa0962e9e32f209553013b19d7d58edbfcb5f0303ab4"
     },
     {
-      "bytes": 351,
+      "bytes": 375,
       "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/codex-retained-round2.json",
-      "sha256": "aa8b78848e74c9cdc06b266df070fd956d65a137af73ed1cedef8f0f711b6f9b"
+      "sha256": "fbfcc5e4912382f24392214e0960ea342a072d528b87052db46bf1a4e2ff01e3"
     },
     {
-      "bytes": 98,
+      "bytes": 104,
       "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/codex-retained-low-level-observations.json",
-      "sha256": "a771ee05c6d9669d83d251e92b54fe1b23e7640e3e4fa5ed2756cac3f30b3876"
+      "sha256": "02f24425ca2260924af58e13045a957242df752c120828d6b2e7c3d8102d053a"
     },
     {
-      "bytes": 100,
+      "bytes": 106,
       "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/codex-retained-defect-observation.json",
-      "sha256": "2d86f1213aedcdb2828301cb2e4d116ff6652e5abe43986deb9a66861ce377c4"
+      "sha256": "8b375bfbeb281953d40a54d110e2cbea690ffd6097caa47d6c7f253d996846b0"
     },
     {
-      "bytes": 186,
+      "bytes": 198,
       "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/claude-round3-anchor-and-roster.json",
-      "sha256": "d02499693fbd2dfd6da8570873f4cca550c25d7c571b79df008e106ba92ca88b"
+      "sha256": "bdada22bc1b77340f6728ec4d731f43f65cb9da705c21079e2010f72830c326a"
     },
     {
-      "bytes": 284,
+      "bytes": 302,
       "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/claude-record-observations.json",
-      "sha256": "3a06f097732255359272be618f628f2f2e2e3adb8f2d6cba26b5a9bd4f7704e7"
+      "sha256": "0b1c8805c81f0ea77a97b32f082f3d1089a5dcf7c6e447f6e4f8c28fd80efe12"
     },
     {
-      "bytes": 93,
+      "bytes": 99,
       "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/claude-retained-boundary.json",
-      "sha256": "4dc47a61f9ac7edcac805262eeb962a95340538ac70bea716c3d8380d07b5ba4"
+      "sha256": "394a53e618f9ffeef5d3d54163354edd75d3dee41dc6779d7c5228862e6b6303"
     },
     {
-      "bytes": 320,
+      "bytes": 332,
       "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/claude-retained-codex-selected.json",
-      "sha256": "adf15f498e402f1690611b86fa66cbc57121544815d976fb865bab3efa1bb639"
+      "sha256": "940119713b59c63d96cd781538793706252ffd8a3bb0034fe6fc08115ac6759d"
     }
   ],
   "witnesses_executed": false

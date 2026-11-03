@@ -47,7 +47,7 @@ the committed round-4 assertion tests and retained output records for those
 claims; if observations are separately logged, identify that execution rather
 than pretending it came from an unlogged passing phase.
 
-`claude/sg2_child_preconditions.py` is a standalone diagnostic, not a pytest test.
+`tests/claude/sg2_child_preconditions.py` is a standalone diagnostic, not a pytest test.
 It accepts CHECKOUT, NON_GIT_COPY and FRESH_TEMP arguments and creates only its
 temporary Git repository. It demonstrates `d76_suite_common.source()` review
 attestation preconditions, which intentionally remain strict. Its statement

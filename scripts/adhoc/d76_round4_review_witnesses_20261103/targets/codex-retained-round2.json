@@ -1,6 +1,6 @@
 [
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_prior_adversarial.py",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_recheck_edges.py",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_round2_adversarial.py",
-  "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_replace_portable.py"
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_prior_adversarial.py",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_recheck_edges.py",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_round2_adversarial.py",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/tests/codex/test_replace_portable.py"
 ]

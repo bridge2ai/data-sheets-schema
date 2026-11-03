@@ -89,12 +89,12 @@ def imports(raw: bytes, filename: str) -> list[str]:
 
 
 def groups(test_functions: dict[str, list[str]]) -> list[dict]:
-    prefix = BUNDLE + "/"
+    prefix = BUNDLE + "/tests/"
 
     def file(reviewer, name):
         return prefix + reviewer + "/" + name
 
-    guard = "codex/test_new_guard.py"
+    guard = "tests/codex/test_new_guard.py"
     residual = "test_registry_forgery_is_the_documented_hostile_python_residual"
     if residual not in test_functions[guard]:
         raise ValueError("the reviewed hostile-Python observation function is missing")
@@ -189,7 +189,7 @@ the committed round-4 assertion tests and retained output records for those
 claims; if observations are separately logged, identify that execution rather
 than pretending it came from an unlogged passing phase.
 
-`claude/sg2_child_preconditions.py` is a standalone diagnostic, not a pytest test.
+`tests/claude/sg2_child_preconditions.py` is a standalone diagnostic, not a pytest test.
 It accepts CHECKOUT, NON_GIT_COPY and FRESH_TEMP arguments and creates only its
 temporary Git repository. It demonstrates `d76_suite_common.source()` review
 attestation preconditions, which intentionally remain strict. Its statement
@@ -209,13 +209,180 @@ round-3 replacement is `test_r3_classification_proof.py`.
 """
 
 
+def inventory(directory: Path) -> dict:
+    """Include ignored/hidden files and reject symlinks before moving payloads."""
+    result = {}
+    for path in sorted(directory.rglob('*')):
+        if path.is_symlink():
+            raise ValueError('bundle symlink is unsupported: ' + str(path))
+        if path.is_file():
+            raw = regular_bytes(path)
+            result[str(path.relative_to(directory))] = {'sha256': sha(raw), 'bytes': len(raw)}
+        elif not path.is_dir():
+            raise ValueError('bundle contains a nonregular entry: ' + str(path))
+    return result
+
+
+def relocate_existing(repo: Path, execution: Path, expected: str, report: Path) -> int:
+    """R4-I18: preserve payload bytes while making their test-only placement explicit."""
+    destination = repo / BUNDLE
+    if destination.resolve(strict=True) != destination:
+        raise ValueError('physical bundle path required')
+    if (not report.is_absolute() or '..' in report.parts or report.exists() or report.is_symlink()
+            or report.parent.resolve(strict=True) != report.parent or report.is_relative_to(repo)):
+        raise ValueError('fresh external physical report path required')
+    manifest_path = destination / 'manifest.json'
+    raw_manifest = regular_bytes(manifest_path)
+    if sha(raw_manifest) != expected:
+        raise ValueError('existing manifest SHA differs')
+    manifest = json.loads(raw_manifest)
+    if manifest['repository'] != str(repo) or manifest['source_execution_root'] != str(execution):
+        raise ValueError('existing source/repository roots differ')
+    if (destination / 'tests').exists() or (destination / 'tests').is_symlink():
+        raise ValueError('relocated payload destination must be fresh')
+    before = inventory(destination)
+    expected_files = {'manifest.json', 'README.md'}
+    payloads, originals, test_functions = [], {}, {}
+    for row in manifest['files']:
+        relative = Path(row['repository_relative_path']).relative_to(BUNDLE)
+        if len(relative.parts) != 2 or relative.parts[0] not in FILES:
+            raise ValueError('unexpected old payload path: ' + str(relative))
+        reviewer, name = relative.parts
+        if name not in {*FILES[reviewer], 'review-report.md'}:
+            raise ValueError('unexpected payload name: ' + name)
+        old = destination / relative
+        new = destination / 'tests' / relative
+        raw = regular_bytes(old)
+        source = Path(row['source']['path'])
+        if (row['destination'] != source_metadata(old, raw)
+                or row['source'] != source_metadata(source, regular_bytes(source))
+                or regular_bytes(source) != raw or row['bytes_equal'] is not True):
+            raise ValueError('recorded/original payload bytes differ: ' + str(old))
+        originals[source] = raw
+        expected_files.add(str(relative))
+        payloads.append((old, new, raw, row))
+        if name.startswith('test_'):
+            test_functions['tests/' + str(relative)] = functions(raw, str(source))
+    expected_payloads = {reviewer + '/' + name for reviewer, names in FILES.items()
+                         for name in [*names, 'review-report.md']}
+    if {str(old.relative_to(destination)) for old, _, _, _ in payloads} != expected_payloads or len(payloads) != 24:
+        raise ValueError('exact 24-file payload roster required')
+    old_groups = manifest['replay_groups']
+    new_groups = groups(test_functions)
+    expected_groups = json.loads(json.dumps(old_groups))
+    for group in expected_groups:
+        group['targets'] = [target.replace(BUNDLE + '/', BUNDLE + '/tests/', 1) for target in group['targets']]
+    if new_groups != expected_groups:
+        raise ValueError('replay target change extends beyond the placement prefix')
+    target_updates = []
+    for row, old_group, new_group in zip(manifest['target_files'], old_groups, new_groups, strict=True):
+        path = destination / 'targets' / (old_group['name'] + '.json')
+        raw = regular_bytes(path)
+        if row != source_metadata(path, raw) or json.loads(raw) != old_group['targets']:
+            raise ValueError('existing target file differs: ' + str(path))
+        expected_files.add(str(path.relative_to(destination)))
+        target_updates.append((path, raw, json_bytes(new_group['targets'])))
+    readme_path = destination / 'README.md'
+    old_readme = regular_bytes(readme_path)
+    new_readme = old_readme.replace(b'`claude/sg2_child_preconditions.py`',
+                                   b'`tests/claude/sg2_child_preconditions.py`')
+    if manifest['readme'] != source_metadata(readme_path, old_readme) or new_readme != NOTES.encode():
+        raise ValueError('README change extends beyond the placement path')
+    if set(before) != expected_files:
+        raise ValueError('bundle inventory has missing/extra files')
+    for row in [*manifest['reports'], *manifest['selection_queue_sources']]:
+        path = Path(row['path'])
+        raw = regular_bytes(path)
+        if any(row[key] != source_metadata(path, raw)[key] for key in ('path', 'bytes', 'sha256')):
+            raise ValueError('external selection evidence changed: ' + str(path))
+        originals[path] = raw
+    helper = Path(__file__).resolve(strict=True)
+    helper_raw = regular_bytes(helper)
+    proof = {'issue': 'R4-I18', 'complete': False, 'tests_executed': False,
+             'before_manifest_sha256': expected, 'before_files': before,
+             'producer': source_metadata(helper, helper_raw), 'payloads': []}
+    with report.open('xb') as stream:
+        stream.write(json_bytes(proof))
+    try:
+        # The first file is the canary: the same rename/readback path must
+        # preserve its bytes before the other 23 files can move.
+        for old, new, raw, row in payloads:
+            if regular_bytes(old) != raw:
+                raise ValueError('payload changed before relocation: ' + str(old))
+            new.parent.mkdir(parents=True, exist_ok=True)
+            if new.exists() or new.is_symlink():
+                raise ValueError('payload destination is not fresh: ' + str(new))
+            old.rename(new)
+            if regular_bytes(new) != raw or old.exists():
+                raise ValueError('relocated payload differs: ' + str(new))
+            proof['payloads'].append({'before_path': str(old), 'after_path': str(new),
+                                      'before_sha256': sha(raw), 'after_sha256': sha(regular_bytes(new)),
+                                      'bytes': len(raw), 'byte_identical': True})
+            if len(proof['payloads']) == 1:
+                proof['canary'] = dict(proof['payloads'][0])
+                report.write_bytes(json_bytes(proof))
+            row['destination'] = source_metadata(new, raw)
+            row['repository_relative_path'] = str(new.relative_to(repo))
+        for reviewer in FILES:
+            (destination / reviewer).rmdir()  # Only now-empty old directories.
+        for path, old, new in target_updates:
+            if regular_bytes(path) != old:
+                raise ValueError('target changed during relocation')
+            path.write_bytes(new)
+            if regular_bytes(path) != new:
+                raise ValueError('target write did not persist')
+        readme_path.write_bytes(new_readme)
+        if regular_bytes(readme_path) != new_readme:
+            raise ValueError('README write did not persist')
+        for row in manifest['local_import_closure']:
+            for key in ('importer', 'destination'):
+                row[key] = 'tests/' + row[key]
+        manifest['replay_groups'] = new_groups
+        manifest['target_files'] = [source_metadata(path, regular_bytes(path)) for path, _, _ in target_updates]
+        manifest['readme'] = source_metadata(readme_path, new_readme)
+        manifest['helper'] = source_metadata(helper, helper_raw)
+        manifest['standalone_diagnostic']['path'] = BUNDLE + '/tests/claude/sg2_child_preconditions.py'
+        manifest_path.write_bytes(json_bytes(manifest))
+        if json.loads(regular_bytes(manifest_path)) != manifest:
+            raise ValueError('manifest write did not persist')
+        for path, raw in originals.items():
+            if regular_bytes(path) != raw:
+                raise ValueError('external original changed during relocation: ' + str(path))
+        if regular_bytes(helper) != helper_raw:
+            raise ValueError('producer changed during relocation')
+        after = inventory(destination)
+        expected_after = {('tests/' + name if name in expected_payloads else name) for name in before}
+        if set(after) != expected_after:
+            raise ValueError('relocated inventory differs')
+        proof.update(complete=True, after_files=after, originals_unchanged=True,
+                     after_manifest_sha256=sha(regular_bytes(manifest_path)))
+    except Exception as exc:
+        proof['error'] = type(exc).__name__ + ': ' + str(exc)
+        raise
+    finally:
+        report.write_bytes(json_bytes(proof))
+    print(json.dumps({'report': str(report), 'sha256': sha(regular_bytes(report)),
+                      'manifest_sha256': proof['after_manifest_sha256'], 'byte_identical_payloads': len(payloads),
+                      'replay_groups': len(new_groups), 'tests_executed': False}, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--execution-root", type=Path, required=True)
+    parser.add_argument("--relocate-existing", action="store_true")
+    parser.add_argument("--before-manifest-sha256")
+    parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     repo = args.repo.resolve(strict=True)
     execution = args.execution_root.resolve(strict=True)
+    if args.relocate_existing:
+        if not args.before_manifest_sha256 or args.report is None:
+            parser.error('--relocate-existing requires --before-manifest-sha256 and --report')
+        return relocate_existing(repo, execution, args.before_manifest_sha256, args.report)
+    if args.before_manifest_sha256 or args.report:
+        parser.error('relocation proof arguments require --relocate-existing')
     destination = repo / BUNDLE
     if destination.exists() or destination.is_symlink():
         raise ValueError("bundle destination must be fresh: " + str(destination))
@@ -232,7 +399,7 @@ def main() -> int:
             source = source_dir / name
             raw = regular_bytes(source)
             originals[source] = raw
-            relative = reviewer + "/" + name
+            relative = "tests/" + reviewer + "/" + name
             imported = imports(raw, str(source))
             declared_tests = functions(raw, str(source))
             if name.startswith("test_"):
@@ -243,14 +410,14 @@ def main() -> int:
                     if module + ".py" not in selected:
                         raise ValueError("uncopied local dependency: " + str(local))
                     local_imports.append({"importer": relative, "module": module,
-                                          "destination": reviewer + "/" + module + ".py"})
+                                          "destination": "tests/" + reviewer + "/" + module + ".py"})
                 if module.startswith("tests."):
                     fixture_modules.add(module)
             prepared.append((source, relative, role, raw, imported, declared_tests))
         report = execution / "plans/reviews" / ("pr5213_d13c1711e_" + reviewer + "_recheck_2026-11-02.md")
         raw = regular_bytes(report)
         originals[report] = raw
-        prepared.append((report, reviewer + "/review-report.md", "historical_report", raw, [], []))
+        prepared.append((report, "tests/" + reviewer + "/review-report.md", "historical_report", raw, [], []))
         report_rows.append(source_metadata(report, raw))
         for name in QUEUES[reviewer]:
             path = source_dir / name
@@ -315,7 +482,7 @@ def main() -> int:
         "originals_unchanged_after_copy": True, "witnesses_executed": False,
         "acceptance": "not_assessed", "counts": "Final-source pytest collection required; no new count is inferred from AST functions.",
         "standalone_diagnostic": {
-            "path": BUNDLE + "/claude/sg2_child_preconditions.py",
+            "path": BUNDLE + "/tests/claude/sg2_child_preconditions.py",
             "argv": ["CHECKOUT", "NON_GIT_COPY", "FRESH_TEMP"],
             "pytest_target": False, "current_claim": "review-only source attestation preconditions, not ordinary SG2 portability",
         },
