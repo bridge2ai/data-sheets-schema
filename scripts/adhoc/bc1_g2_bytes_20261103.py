@@ -25,6 +25,15 @@ HISTORY = ROOT.parent / ('codex-x-generality-g1/data/ATTIC/d4d_concatenated_arch
     'claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate')
 
 
+def changes(a, b, path='registration'):
+    if a == b:
+        return []
+    if isinstance(a, dict) and isinstance(b, dict):
+        return [row for key in sorted(set(a) | set(b))
+                for row in changes(a.get(key), b.get(key), path + '/' + key)]
+    return [{'path': path, 'before': a, 'after': b}]
+
+
 def capture(root, side):
     launcher = ROOT / 'scripts/adhoc/g2_bc1_offline_20261101.py'
     env = dict(os.environ, G1_CHECKOUT_ROOT=str(root), G2_BC1_ARCHIVE=str(HISTORY))
@@ -87,9 +96,19 @@ def compare(root):
     import copy
     normalized = copy.deepcopy(after)
     normalized['bounded_carry']['contract']['code'] = old_code
+    old_stage, new_stage = [reg['selection']['stage_contracts']['request_code_sha256'] for reg in registrations]
+    assert old_stage.keys() == new_stage.keys()
+    for stage, code in ((old_stage, old_code), (new_stage, new_code)):
+        assert all(code[name] == digest for name, digest in stage.items() if name in code), 'stage code differs from verified closure'
+    assert all(new_stage[name] == digest for name, digest in old_stage.items() if name not in old_code), 'non-closure stage code moved'
+    normalized['selection']['stage_contracts']['request_code_sha256'] = old_stage
     for name in ('full_schema', 'core_schema'):
         normalized['inputs'][name] = before['inputs'][name]
-    assert normalized == before, 'registration change outside schema/code pins'
+    unexplained = changes(before, normalized)
+    result.update(accepted=False, moved_code=moved, registration_changes=changes(before, after),
+                  unexplained_registration_changes=unexplained)
+    evidence.save(folder / 'integration-comparison.json', result)
+    assert not unexplained, ('registration change outside schema/code pins', unexplained)
     failures = []
     for row in result['rows']:
         name = row['name']
