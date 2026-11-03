@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # Purpose: retain round-2 merge attribution and reproducible integration evidence.
-# Inputs: pinned local heads; outputs: scratch JSON ledger. BC1+G2 tasks 2/9,
+# Inputs: pinned local heads; outputs: scratch and review JSON ledgers. Tasks 2-9,
 # 2026-11-03. Offline; no protected source or historical evidence is authored.
 import argparse
+from collections import Counter
 import copy
 import json
 from pathlib import Path
@@ -145,9 +146,71 @@ def batch(tree, output, manifest):
         assert code in (0, 1), ('validation did not complete', name, code)
 
 
+def scan(tree, output):
+    output.mkdir(parents=True, exist_ok=False)
+    launcher = ROOT / 'scripts/adhoc/g2_bc1_offline_20261101.py'
+    import os
+    env = dict(os.environ, G1_CHECKOUT_ROOT=str(tree), PYTHONDONTWRITEBYTECODE='1')
+    command = [sys.executable, '-S', '-B', str(launcher),
+               str(tree / '.claude/skills/d4d-generation-specificity-audit/scan.py'),
+               '--root', str(tree), '--report', str(output / 'audit.md'), '--json', str(output / 'audit.json')]
+    with (output / 'scan.log').open('w') as log:
+        result = subprocess.run(command, cwd=tree, env=env, stdout=log, stderr=subprocess.STDOUT, timeout=3600)
+    reports = {name: evidence.sha((output / name).read_bytes())
+               for name in ('audit.md', 'audit.json') if (output / name).is_file()}
+    evidence.save(output / 'result.json', {'returncode': result.returncode, 'command': command,
+        'archive': json.loads((tree / '.g2-archive.json').read_bytes()), 'reports': reports})
+    print('scanner exit', result.returncode, 'reports', reports, flush=True)
+    return result.returncode
+
+
+def summarize(output):
+    scratch = ROOT.parent / 'scratch-bc1g2/round2'
+    output.mkdir(parents=True, exist_ok=True)
+    units, totals = {}, {}
+    for mode in ('without', 'with'):
+        counts = Counter()
+        for result_path in sorted((scratch / mode).glob('*/result.json')):
+            unit = json.loads(result_path.read_bytes())
+            assert unit['returncode'] in (0, 1), result_path
+            name = str(result_path.parent.relative_to(scratch))
+            target = output / name
+            target.mkdir(parents=True, exist_ok=True)
+            for filename in ('started.json', 'result.json', 'pytest.log', 'junit.xml', 'events.jsonl',
+                             'failures.jsonl', 'collected.json'):
+                source = result_path.parent / filename
+                if source.is_file():
+                    shutil.copyfile(source, target / filename)
+            if result_path.parent.name == 'collect':
+                continue
+            for suite in unit['suites']:
+                for key in ('tests', 'errors', 'failures', 'skipped'):
+                    counts[key] += int(suite[key])
+            failures = result_path.with_name('failures.jsonl')
+            unit['failures'] = [json.loads(line) for line in failures.read_text().splitlines()] if failures.exists() else []
+            units[name] = unit
+        counts['passed'] = counts['tests'] - counts['errors'] - counts['failures'] - counts['skipped']
+        totals[mode] = dict(counts)
+    byte_folder = ROOT.parent / 'scratch-bc1g2/byte-proof/.bc1-byte-evidence'
+    comparisons = {}
+    for filename in ('round2-pin-comparison.json', 'round2-amendment.json'):
+        shutil.copyfile(byte_folder / filename, output / filename)
+        comparisons[filename] = json.loads((byte_folder / filename).read_bytes())
+    for filename in ('merge-lost-lines.json', 'merge-preview.log', 'scope.json'):
+        shutil.copyfile(scratch / filename, output / filename)
+    summary = {'head': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT).decode().strip(),
+        'commits': subprocess.check_output(['git', 'log', '--first-parent', '--format=%H %s', ROUND1 + '..HEAD'],
+                                         cwd=ROOT).decode().splitlines(),
+        'totals': totals, 'units': units,
+        'byte_proofs': {name: {key: doc[key] for key in ('accepted', 'moved_code', 'sizing_totals_equal')}
+                       for name, doc in comparisons.items()}}
+    evidence.save(output / 'summary.json', summary)
+    print(json.dumps(totals, indent=2), flush=True)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=('audit', 'recapture', 'compare', 'scope', 'batch'))
+    parser.add_argument('action', choices=('audit', 'recapture', 'compare', 'scope', 'batch', 'scan', 'summarize'))
     parser.add_argument('output', type=Path)
     parser.add_argument('--ref')
     parser.add_argument('--tree', type=Path)
@@ -157,5 +220,7 @@ if __name__ == '__main__':
         recapture(args.output.resolve(), args.ref)
     elif args.action == 'batch':
         batch(args.tree.resolve(), args.output.resolve(), args.scope.resolve())
+    elif args.action == 'scan':
+        raise SystemExit(scan(args.tree.resolve(), args.output.resolve()))
     else:
         globals()[args.action](args.output.resolve())
