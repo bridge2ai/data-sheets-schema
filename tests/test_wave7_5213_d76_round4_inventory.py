@@ -136,6 +136,71 @@ def factory_caller():
     assert len(missing_contracts(root)) == 5
 
 
+def test_inventory_follows_runspec_subclass_and_alias_factories(tmp_path):
+    root = _source(tmp_path, '''
+class RunSpec:
+    @classmethod
+    def from_render_spec(cls, recorded):
+        return cls()
+
+class SelectedRunSpec(RunSpec):
+    pass
+
+Alias = SelectedRunSpec
+
+def unchanged_base_factory():
+    return RunSpec()
+
+def subclass_factory():
+    return SelectedRunSpec()
+
+def aliased_factory():
+    return Alias()
+
+def inherited_restore(recorded):
+    return Alias.from_render_spec(recorded)
+
+def aliased_annotation(value: Alias):
+    return value
+''')
+    names = {candidate.qualname for candidate in discover(root)}
+    assert 'unchanged_base_factory' in names, 'ordinary constructor discovery must calibrate'
+    assert {'subclass_factory', 'aliased_factory', 'inherited_restore', 'aliased_annotation'} <= names
+
+
+def test_function_local_import_cannot_hide_a_public_runspec_annotation(tmp_path):
+    root = _source(tmp_path, '''
+from .api_runner import RunSpec as Selected
+
+def public_consumer(value: Selected):
+    return value
+
+def unrelated_function():
+    from unrelated_package import AnotherType as Selected
+    return Selected
+''', name='consumer.py')
+    names = {candidate.qualname for candidate in discover(root)}
+    assert 'public_consumer' in names
+
+
+def test_match_arm_declarations_remain_public_inventory_candidates(tmp_path):
+    root = _source(tmp_path, '''
+match True:
+    case True:
+        def conditional_public(spec):
+            return spec
+
+class RunSpec:
+    match True:
+        case True:
+            @property
+            def conditional_member(self):
+                return None
+''')
+    names = {candidate.qualname for candidate in discover(root)}
+    assert {'conditional_public', 'RunSpec.conditional_member'} <= names
+
+
 def test_new_public_callable_in_a_scratch_copy_has_no_implicit_exemption(tmp_path):
     root = _source(tmp_path, '''
 def original(spec):
