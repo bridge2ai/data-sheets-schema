@@ -89,7 +89,8 @@ def test_bc1_typed_entry_legacy_refuses_before_dispatch(registered, tmp_path):
     before = tree(tmp_path)
     script = BC1Script(registered)
     with pytest.raises(ledger.UsageLedgerError, match='artifacts have no journal'):
-        typed.run(registered, carry={}, settings={}, usage=[], client=scripted_client(script))
+        typed.run(registered, carry={}, settings=api._model_settings(registered.condition),
+                  usage=[], client=scripted_client(script))
     assert script.calls == [] and tree(tmp_path) == before
 
 
