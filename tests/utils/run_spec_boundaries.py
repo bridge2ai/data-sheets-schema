@@ -36,9 +36,10 @@ class _Definition:
     path: str
     node: ast.FunctionDef | ast.AsyncFunctionDef
     public: bool
-    runspec_member: bool
+    owner_class: str | None
     member_kind: str
     bindings: dict[str, str]
+    call_bindings: dict[str, str]
 
     @property
     def identity(self):
@@ -60,16 +61,41 @@ def _annotation_text(node):
     return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else ast.unparse(node)
 
 
-def _mentions_runspec(text, bindings):
+def _mentions_runspec(text, bindings, runspec_classes=()):
     if not text:
         return False
     names = set(re.findall(r'[A-Za-z_][A-Za-z_0-9]*', text))
-    return 'RunSpec' in names or any(bindings.get(name, '').endswith('.RunSpec') for name in names)
+    return ('RunSpec' in names or any(bindings.get(name, '').endswith('.RunSpec')
+            or bindings.get(name) in runspec_classes for name in names))
 
 
-def _imports(tree, module, package):
+def _scope_nodes(tree):
+    """Walk one lexical namespace, including control-flow declaration arms."""
+    def visit(node):
+        yield node
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+            return
+        for child in ast.iter_child_nodes(node):
+            yield from visit(child)
+    for statement in tree.body:
+        yield from visit(statement)
+
+
+def _resolve(spelling, bindings):
+    first, *rest = spelling.split('.')
+    return '.'.join([bindings.get(first, first), *rest])
+
+
+def _imports(tree, module, package, *, inherited=None, qualname=''):
+    """Resolve visible imports/simple aliases without flattening child scopes.
+
+    Annotation bindings belong to the enclosing scope. Function-local imports
+    are used only for that function's calls, never another function's annotation.
+    """
+    visible = dict(inherited or {})
     result = {}
-    for node in ast.walk(tree):
+    nodes = tuple(_scope_nodes(tree))
+    for node in nodes:
         if isinstance(node, ast.Import):
             for alias in node.names:
                 result[alias.asname or alias.name.split('.')[0]] = alias.name if alias.asname else alias.name.split('.')[0]
@@ -83,6 +109,33 @@ def _imports(tree, module, package):
             for alias in node.names:
                 if alias.name != '*':
                     result[alias.asname or alias.name] = '.'.join(filter(None, (target, alias.name)))
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            result[node.name] = '.'.join(filter(None, (module, qualname, node.name)))
+    visible.update(result)
+    # Follow finite source aliases to imported or declared functions/classes.
+    # Unresolved/dynamic assignments are not treated as proof of a new type.
+    aliases = []
+    for node in nodes:
+        if isinstance(node, ast.Assign):
+            targets, value = node.targets, node.value
+        elif isinstance(node, ast.AnnAssign) and node.value is not None:
+            targets, value = [node.target], node.value
+        else:
+            continue
+        spelling = _qualified(value)
+        if spelling:
+            aliases.extend((target.id, spelling) for target in targets if isinstance(target, ast.Name))
+    for _ in range(len(aliases) + 1):
+        changed = False
+        for target, spelling in aliases:
+            if spelling.split('.')[0] not in visible:
+                continue
+            resolved = _resolve(spelling, visible)
+            if visible.get(target) != resolved:
+                visible[target] = result[target] = resolved
+                changed = True
+        if not changed:
+            break
     return result
 
 
@@ -91,6 +144,7 @@ def _definitions(root):
     if not source.is_dir():
         raise ValueError('RunSpec inventory requires src/data_sheets_schema')
     definitions = []
+    classes = []
     # Path enumeration intentionally includes ignored and hidden source files.
     for path in sorted(source.rglob('*.py')):
         if path.is_symlink():
@@ -104,7 +158,9 @@ def _definitions(root):
         tree = ast.parse(path.read_text(), filename=str(relative))
         bindings = _imports(tree, module, package)
 
-        def walk(statements, parents=(), inside_function=False, runspec_class=False, public_classes=True):
+        def walk(statements, parents=(), inside_function=False, owner_class=None,
+                 public_classes=True, visible=None):
+            visible = bindings if visible is None else visible
             for node in statements:
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                     decorators = {_qualified(item) for item in node.decorator_list}
@@ -116,23 +172,30 @@ def _definitions(root):
                     definitions.append(_Definition(
                         module, '.'.join((*parents, node.name)), str(relative), node,
                         not inside_function and public_classes and not node.name.startswith('_'),
-                        runspec_class and not inside_function, kind, bindings))
-                    walk(node.body, (*parents, node.name), True, False, public_classes)
+                        owner_class if not inside_function else None, kind, visible,
+                        {**visible, **_imports(node, module, package, inherited=visible,
+                                             qualname='.'.join((*parents, node.name)))}))
+                    local = definitions[-1].call_bindings
+                    walk(node.body, (*parents, node.name), True, None, public_classes, local)
                 elif isinstance(node, ast.ClassDef):
-                    is_runspec = node.name == 'RunSpec' or any(
-                        _mentions_runspec(ast.unparse(base), bindings) for base in node.bases)
-                    walk(node.body, (*parents, node.name), inside_function, is_runspec,
-                         public_classes and not node.name.startswith('_'))
+                    identity = '.'.join((module, *parents, node.name))
+                    classes.append((identity, node, visible))
+                    local = {**visible, **_imports(node, module, package, inherited=visible,
+                                                  qualname='.'.join((*parents, node.name)))}
+                    walk(node.body, (*parents, node.name), inside_function, identity,
+                         public_classes and not node.name.startswith('_'), local)
                 else:
                     # Module/class conditional declarations are still public.
                     for field in ('body', 'orelse', 'finalbody'):
                         nested = getattr(node, field, None)
                         if isinstance(nested, list):
-                            walk(nested, parents, inside_function, runspec_class, public_classes)
+                            walk(nested, parents, inside_function, owner_class, public_classes, visible)
                     for handler in getattr(node, 'handlers', ()):
-                        walk(handler.body, parents, inside_function, runspec_class, public_classes)
+                        walk(handler.body, parents, inside_function, owner_class, public_classes, visible)
+                    for case in getattr(node, 'cases', ()):
+                        walk(case.body, parents, inside_function, owner_class, public_classes, visible)
         walk(tree.body)
-    return definitions
+    return definitions, classes
 
 
 def discover(root: Path) -> tuple[Boundary, ...]:
@@ -143,7 +206,15 @@ def discover(root: Path) -> tuple[Boundary, ...]:
     Nested/private factories participate in the call graph but are not exports.
     """
     root = Path(root)
-    definitions = _definitions(root)
+    definitions, classes = _definitions(root)
+    runspec_classes = {identity for identity, node, _ in classes if node.name == 'RunSpec'}
+    while True:
+        additions = {identity for identity, node, bindings in classes
+                     if any(_mentions_runspec(ast.unparse(base), bindings, runspec_classes)
+                            for base in node.bases)} - runspec_classes
+        if not additions:
+            break
+        runspec_classes.update(additions)
     identities = {definition.identity for definition in definitions}
     factory = set()
     calls = {}
@@ -155,12 +226,13 @@ def discover(root: Path) -> tuple[Boundary, ...]:
         parameters += [arg for arg in (node.args.vararg, node.args.kwarg) if arg is not None]
         if any(arg.arg in {'spec', 'specs'} for arg in parameters):
             why.add('spec-signature')
-        if any(_mentions_runspec(_annotation_text(arg.annotation), definition.bindings) for arg in parameters):
+        if any(_mentions_runspec(_annotation_text(arg.annotation), definition.bindings, runspec_classes)
+               for arg in parameters):
             why.add('RunSpec-parameter-annotation')
-        if _mentions_runspec(_annotation_text(node.returns), definition.bindings):
+        if _mentions_runspec(_annotation_text(node.returns), definition.bindings, runspec_classes):
             why.add('RunSpec-return-annotation')
             factory.add(definition.identity)
-        if definition.runspec_member:
+        if definition.owner_class in runspec_classes:
             why.add('RunSpec-public-member')
         targets = set()
         for item in ast.walk(node):
@@ -169,17 +241,19 @@ def discover(root: Path) -> tuple[Boundary, ...]:
             spelling = _qualified(item.func)
             if not spelling:
                 continue
-            first, *rest = spelling.split('.')
-            resolved = '.'.join([definition.bindings.get(first, first), *rest])
+            resolved = _resolve(spelling, definition.call_bindings)
             if (spelling == 'RunSpec' or resolved.endswith('.RunSpec')
                     or resolved.endswith('.RunSpec.from_render_spec')
-                    or spelling == 'RunSpec.from_render_spec'):
+                    or spelling == 'RunSpec.from_render_spec'
+                    or resolved in runspec_classes
+                    or resolved.endswith('.from_render_spec')
+                    and resolved.removesuffix('.from_render_spec') in runspec_classes):
                 why.add('RunSpec-construction')
                 factory.add(definition.identity)
             if spelling == 'cls' and definition.qualname.endswith('.from_render_spec'):
                 why.add('RunSpec-construction')
                 factory.add(definition.identity)
-            for prefix in (definition.qualname.rpartition('.')[0], ''):
+            for prefix in (definition.qualname, definition.qualname.rpartition('.')[0], ''):
                 local = '.'.join(filter(None, (definition.module, prefix, spelling)))
                 if local in identities:
                     targets.add(local)
