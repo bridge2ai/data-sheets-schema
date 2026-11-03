@@ -14083,7 +14083,7 @@ def _selection_text(selection):
             f"renderer {_span(selection['renderers'])}")
 
 
-def _bc1_entry_dispatch(tree, entry, expected, path):
+def _bc1_entry_dispatch(tree, entry, path):
     """Find one structural dispatch after a closed class of guard statements.
 
     The prefix permits the initial docstring, non-star relative imports, and
@@ -14092,6 +14092,9 @@ def _bc1_entry_dispatch(tree, entry, expected, path):
     not a purity proof for imported code. Other statements, assignment
     expressions and rebinding any dispatch name anywhere in the entry refuse.
     """
+    expected = ast.parse('''if selected := _bc1(spec):
+    return selected.run(spec, carry=carry, client=client, settings=settings, usage=usage)
+''').body[0]
     shape = ast.dump(expected, include_attributes=False)
     matches = [stmt for stmt in entry.body
                if ast.dump(stmt, include_attributes=False) == shape]
@@ -14157,6 +14160,10 @@ def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes:
                 raise _not_derived('the follow-up turns', 'BC1 backend entry identity changed')
         helper_funcs = {n.name: n for n in helper_tree.body
                         if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+        # Validate the shared entry before following either backend's calls, so
+        # its dispatch-name refusals do not depend on import-closure ordering.
+        if _rel(root, path) == 'src/data_sheets_schema/typed_audit_runtime.py' and 'run' in helper_funcs:
+            _bc1_entry_dispatch(helper_tree, helper_funcs['run'], _rel(root, path))
         for name, fn in helper_funcs.items():
             for call in ast.walk(fn):
                 if not isinstance(call, ast.Call):
@@ -14195,9 +14202,6 @@ def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes:
     return None
 ''').body[0]
                     entry_fn = _function(dispatch_tree, 'run')
-                    expected_entry = ast.parse('''if selected := _bc1(spec):
-    return selected.run(spec, carry=carry, client=client, settings=settings, usage=usage)
-''').body[0]
                     if (selector is None or entry_fn is None or selector.decorator_list or entry_fn.decorator_list
                             or _params(selector) != ['spec']
                             or [ast.dump(n, include_attributes=False) for n in selector.body] !=
@@ -14206,8 +14210,7 @@ def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes:
                             or any(isinstance(n, ast.Name) and n.id == '_bc1' and isinstance(n.ctx, (ast.Store, ast.Del))
                                    or _rebinding(n, '_bc1', selector) for n in ast.walk(dispatch_tree))):
                         raise _not_derived('the follow-up turns', 'BC1 backend dispatch changed')
-                    dispatch = _bc1_entry_dispatch(dispatch_tree, entry_fn, expected_entry,
-                                                   _rel(root, dispatch_path))
+                    dispatch = _bc1_entry_dispatch(dispatch_tree, entry_fn, _rel(root, dispatch_path))
                     for entry_tree, entry in ((dispatch_tree, entry_fn), (helper_tree, fn)):
                         if (entry.decorator_list
                                 or sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))

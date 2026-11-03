@@ -3,14 +3,20 @@
 # Inputs: pinned local heads; outputs: scratch JSON ledger. BC1+G2 tasks 2/9,
 # 2026-11-03. Offline; no protected source or historical evidence is authored.
 import argparse
+import copy
 import json
 from pathlib import Path
+import re
+import shutil
 import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).parent))
 import bc1_g2_merge_audit_20261103 as merge_audit
+import bc1_g2_bytes_20261103 as byte_proof
+import bc1_g2_validate_20261103 as validation
+import g2_bc1_evidence_20261101 as evidence
 
 ROUND1 = '92a1c4afa0df9ebb361f87eab1d5fd5bc0b11054'
 G1_FIXES = 'bc8f981f758c46d5bb027c61294d8a67bf70ed30'
@@ -27,9 +33,129 @@ def audit(output):
     assert sum(row['lost_count'] for row in result['files']) == 5
 
 
+def recapture(root, ref):
+    """Preserve both prior captures while reusing their exact absolute root."""
+    assert root == ROOT.parent / 'scratch-bc1g2/byte-proof'
+    previous = root.parent / 'round2/round1-capture-retained'
+    assert not previous.exists()
+    old = json.loads((root / '.bc1-byte-evidence/integration-comparison.json').read_bytes())
+    assert old['accepted']
+    root.rename(previous)
+    evidence.archive(ref, root)
+    subprocess.run(['bash', str(byte_proof.PACKET / 'apply_protected.sh'), str(root)], check=True)
+    shutil.copytree(previous / '.bc1-byte-evidence', root / '.bc1-byte-evidence')
+    byte_proof.capture(root, 'round2')
+
+
+def compare_pins(root):
+    """Only this round's one closure pin and its derived seals may move."""
+    folder = root / '.bc1-byte-evidence'
+    sides = ('after', 'round2')
+    evidence.compare(root, sides=sides, output_name='round2-pins-exact.json')
+    result = json.loads((folder / 'round2-pins-exact.json').read_bytes())
+    captures = [json.loads((folder / side / 'capture.json').read_bytes()) for side in sides]
+    registrations = [json.loads((folder / side / 'registration.json').read_bytes()) for side in sides]
+    old, new = registrations
+    codes = [reg['bounded_carry']['contract']['code'] for reg in registrations]
+    assert codes[0].keys() == codes[1].keys()
+    moved = {name: {'before': codes[0][name], 'after': codes[1][name]}
+             for name in codes[0] if codes[0][name] != codes[1][name]}
+    assert set(moved) == {'src/data_sheets_schema/latch_journal.py'}, moved
+    assert captures[0]['source_pins'].keys() == captures[1]['source_pins'].keys()
+    for capture, code in zip(captures, codes):
+        for name, digest in code.items():
+            assert capture['source_pins'][str(root / name)]['sha256'] == digest, name
+    for path, pin in captures[0]['source_pins'].items():
+        if path not in {str(root / name) for name in moved}:
+            assert captures[1]['source_pins'][path] == pin, ('non-code source changed', path)
+    for name in moved:
+        assert evidence.sha((root / name).read_bytes()) == moved[name]['after']
+    normalized = copy.deepcopy(new)
+    normalized['bounded_carry']['contract']['code'] = codes[0]
+    stages = [reg['selection']['stage_contracts']['request_code_sha256'] for reg in registrations]
+    assert stages[0].keys() == stages[1].keys()
+    assert {name for name in stages[0] if stages[0][name] != stages[1][name]} == set(moved)
+    for stage, code in zip(stages, codes):
+        assert all(stage[name] == code[name] for name in moved)
+    normalized['selection']['stage_contracts']['request_code_sha256'] = stages[0]
+    assert normalized == old, byte_proof.changes(old, normalized)
+    packets = []
+    for capture in captures:
+        host_pins = [pin['host_packet'] for name, pin in capture['payloads'].items()
+                     if name.startswith('typed_audit_')]
+        hosts = [json.loads((root / pin['path']).read_bytes()) for pin in host_pins]
+        assert hosts and all(host == hosts[0] for host in hosts)
+        packets.append(hosts[0])
+    normalized_packet = copy.deepcopy(packets[1])
+    for packet, reg in zip(packets, registrations):
+        assert packet['selection']['bounded_carry'] == reg['bounded_carry']
+        assert packet['selection']['selection'] == reg['selection']
+    normalized_packet['sha256'] = packets[0]['sha256']
+    normalized_packet['selection']['bounded_carry']['contract']['code'] = codes[0]
+    normalized_packet['selection']['selection']['stage_contracts']['request_code_sha256'] = stages[0]
+    assert normalized_packet == packets[0], byte_proof.changes(packets[0], normalized_packet, 'packet')
+    allowed = {'payload/messages/0/content/5/text/@json/' + key
+               for key in ('inner_request_sha256', 'packet_sha256', 'registration_sha256')}
+    allowed.update({'payload/messages/0/content/6/text/@json/payload/packet_sha256',
+                    'payload/messages/0/content/6/text/@json/request_sha256'})
+    valid_leaves = all(row['before_bytes'] == row['after_bytes'] and all(
+        leaf['path'] in allowed and leaf['kind'] == 'pins' and leaf['delta'] == 0
+        and all(isinstance(leaf[side], str) and re.fullmatch('[0-9a-f]{64}', leaf[side])
+                for side in ('before', 'after')) for leaf in row['differences']) for row in result['rows'])
+    result.update(accepted=bool(result['sizing_totals_equal'] and valid_leaves), moved_code=moved,
+                  registration_changes=byte_proof.changes(old, new),
+                  host_packet_delta=byte_proof.changes(*packets, 'packet'),
+                  changed_leaf_count=sum(len(row['differences']) for row in result['rows']))
+    evidence.save(folder / 'round2-pin-comparison.json', result)
+    assert result['accepted'], 'STOP: non-pin or sizing difference against round 1'
+    print(json.dumps({key: result[key] for key in ('accepted', 'moved_code', 'changed_leaf_count')}), flush=True)
+
+
+def compare(root):
+    compare_pins(root)
+    byte_proof.compare(root, sides=('before', 'round2'), output_name='round2-amendment.json',
+                       exact_name='round2-amendment-exact.json')
+
+
+def scope(output):
+    previous = ROOT.parent / 'scratch-bc1g2/validation-scope.json'
+    selected = json.loads(previous.read_bytes())
+    touched = subprocess.check_output(['git', 'diff', '--name-only', ROUND1, 'HEAD', '--', 'tests'], cwd=ROOT)
+    added = sorted(set(touched.decode().splitlines()) - set(selected['files']))
+    assert all(path.endswith('.py') for path in added)
+    selected['files'] = sorted([*selected['files'], *added])
+    selected['groups'][11].extend(added)
+    selected.update(round1_manifest_sha256=evidence.sha(previous.read_bytes()), round2_added=added)
+    evidence.save(output, selected)
+
+
+def batch(tree, output, manifest):
+    """Serial groups, two workers each; nested-xdist CI checks run serially."""
+    selected = json.loads(manifest.read_bytes())
+    for index, files in enumerate(selected['groups']):
+        files = [name for name in files if name != 'tests/test_ci_sharding.py']
+        code = validation.run(tree, output / f'group-{index:02}', [*files, '-n', '2', '--maxschedchunk=1', '-q'])
+        assert code in (0, 1), ('validation did not complete', index, code)
+    for name, files, args in (
+        ('ci-sharding', ['tests/test_ci_sharding.py'], ['-q']),
+        ('extra', ['tests/test_neutral_generation_schema.py', 'tests/test_external_dataset_onboarding.py'],
+         ['-n', '2', '--maxschedchunk=1', '-q']),
+        ('collect', ['tests'], ['--collect-only', '-q'])):
+        code = validation.run(tree, output / name, [*files, *args])
+        assert code in (0, 1), ('validation did not complete', name, code)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=('audit',))
+    parser.add_argument('action', choices=('audit', 'recapture', 'compare', 'scope', 'batch'))
     parser.add_argument('output', type=Path)
+    parser.add_argument('--ref')
+    parser.add_argument('--tree', type=Path)
+    parser.add_argument('--scope', type=Path)
     args = parser.parse_args()
-    audit(args.output)
+    if args.action == 'recapture':
+        recapture(args.output.resolve(), args.ref)
+    elif args.action == 'batch':
+        batch(args.tree.resolve(), args.output.resolve(), args.scope.resolve())
+    else:
+        globals()[args.action](args.output.resolve())

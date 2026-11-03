@@ -115,7 +115,8 @@ def metadata(dest):
     print(commit, 'detached local metadata', dest, flush=True)
 
 
-def compare(root, *, identity_pin_ruling=False):
+def compare(root, *, identity_pin_ruling=False, sides=('before', 'after'),
+            output_name='g2-exact-comparison.json'):
     # Reuse the reviewed lossless expansion and exhaustive leaf comparison.
     # Its P4a-specific schema-change assertions/report are not a G2 byte proof.
     source = ROOT / 'scripts/adhoc/g2_bc1_byte_proof/compare.py'
@@ -128,14 +129,16 @@ def compare(root, *, identity_pin_ruling=False):
     ns = {'__file__': str(source), '__name__': 'g2_reviewed_compare'}
     exec(compile(ast.Module(body=prefix, type_ignores=[]), str(source), 'exec'), ns)
     evidence = root / '.bc1-byte-evidence'
-    before, after = [json.loads((evidence / name / 'capture.json').read_bytes()) for name in ('before', 'after')]
+    assert len(sides) == 2 and len(set(sides)) == 2
+    folders = dict(zip(('before', 'after'), sides))
+    before, after = [json.loads((evidence / name / 'capture.json').read_bytes()) for name in sides]
     assert not before['errors'] and not after['errors']
     assert before['payloads'].keys() == after['payloads'].keys()
     assert before['audit_limits'] == after['audit_limits'] and before['calibration'] == after['calibration']
     assert before['python'] == after['python'] and before['packages'] == after['packages']
     bindings, packets = [], {}
     for side, capture in (('before', before), ('after', after)):
-        registration_raw = (evidence / side / 'registration.json').read_bytes()
+        registration_raw = (evidence / folders[side] / 'registration.json').read_bytes()
         assert capture['registration_sha256'] == sha(registration_raw), (side, 'registration metadata')
         packet_digests = set()
         for name, metadata in capture['payloads'].items():
@@ -216,7 +219,7 @@ def compare(root, *, identity_pin_ruling=False):
         expected_code = {'src/data_sheets_schema/bc1_context.py',
                          'src/data_sheets_schema/bc1_registration.py'}
         reg_before, reg_after = [json.loads((evidence / name / 'registration.json').read_bytes())
-                                 for name in ('before', 'after')]
+                                 for name in sides]
         code_before = reg_before['bounded_carry']['contract']['code']
         code_after = reg_after['bounded_carry']['contract']['code']
         assert code_before.keys() == code_after.keys()
@@ -253,7 +256,8 @@ def compare(root, *, identity_pin_ruling=False):
             'changed_code': {name: {'before': code_before[name], 'after': code_after[name]}
                              for name in sorted(changed_code)},
             'allowed_paths': sorted(allowed), 'registration_delta': registration_delta}
-    save(evidence / 'g2-exact-comparison.json', {'rows': rows, 'identical': all(r['identical'] for r in rows),
+    save(evidence / output_name, {'rows': rows, 'identical': all(r['identical'] for r in rows),
+        'capture_sides': list(sides),
         'accepted': accepted, 'binding_checks': bindings, 'host_packet_delta': packet_delta,
         'identity_pin_ruling': ruling,
         'audit_limits_before': before['audit_limits'], 'audit_limits_after': after['audit_limits'],

@@ -2,6 +2,7 @@
 from copy import deepcopy
 import hashlib
 import json
+import shutil
 
 import pytest
 
@@ -65,6 +66,22 @@ def accepted(root):
 
 def test_valid_identity_only_control(captures):
     assert accepted(captures)
+
+
+def test_named_captures_preserve_prior_evidence_and_bind_selected_registration(captures):
+    folder = captures / '.bc1-byte-evidence'
+    shutil.copytree(folder / 'before', folder / 'prior')
+    shutil.copytree(folder / 'after', folder / 'round2')
+    # The registration must come from the selected capture, not a fixed name.
+    (folder / 'after/registration.json').write_bytes(b'{}')
+    assert proof.compare(captures, identity_pin_ruling=True, sides=('prior', 'round2'),
+                         output_name='selected.json') == 0
+    assert json.loads((folder / 'selected.json').read_bytes())['capture_sides'] == ['prior', 'round2']
+    assert not (folder / 'g2-exact-comparison.json').exists()
+    (folder / 'round2/registration.json').write_bytes(b'{}')
+    with pytest.raises(AssertionError, match='registration metadata'):
+        proof.compare(captures, identity_pin_ruling=True, sides=('prior', 'round2'),
+                      output_name='damaged.json')
 
 
 @pytest.mark.parametrize("damage", ["registration_binding", "registration_metadata", "inner_binding",

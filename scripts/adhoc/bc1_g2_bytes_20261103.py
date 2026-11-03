@@ -72,20 +72,21 @@ def pair(root, ref):
     capture(root, 'after')
 
 
-def compare(root):
+def compare(root, *, sides=('before', 'after'), output_name='integration-comparison.json',
+            exact_name='g2-exact-comparison.json'):
     # Includes exact registration, packet, request and host-to-model bindings;
     # the identity-only verdict is not used for this declared schema amendment.
-    evidence.compare(root)
+    evidence.compare(root, sides=sides, output_name=exact_name)
     folder = root / '.bc1-byte-evidence'
-    result = json.loads((folder / 'g2-exact-comparison.json').read_bytes())
-    captures = [json.loads((folder / side / 'capture.json').read_bytes()) for side in ('before', 'after')]
-    registrations = [json.loads((folder / side / 'registration.json').read_bytes()) for side in ('before', 'after')]
+    result = json.loads((folder / exact_name).read_bytes())
+    captures = [json.loads((folder / side / 'capture.json').read_bytes()) for side in sides]
+    registrations = [json.loads((folder / side / 'registration.json').read_bytes()) for side in sides]
     before, after = registrations
     old_code, new_code = [reg['bounded_carry']['contract']['code'] for reg in registrations]
     assert old_code.keys() == new_code.keys()
     moved = {name: {'before': old_code[name], 'after': new_code[name]} for name in old_code
              if old_code[name] != new_code[name]}
-    for side, code, capture_doc in zip(('before', 'after'), (old_code, new_code), captures):
+    for side, code, capture_doc in zip(sides, (old_code, new_code), captures):
         for name, digest in code.items():
             assert capture_doc['source_pins'][str(root / name)]['sha256'] == digest, (side, name)
     assert captures[0]['source_pins'].keys() == captures[1]['source_pins'].keys()
@@ -107,7 +108,7 @@ def compare(root):
     unexplained = changes(before, normalized)
     result.update(accepted=False, moved_code=moved, registration_changes=changes(before, after),
                   unexplained_registration_changes=unexplained)
-    evidence.save(folder / 'integration-comparison.json', result)
+    evidence.save(folder / output_name, result)
     assert not unexplained, ('registration change outside schema/code pins', unexplained)
     failures = []
     for row in result['rows']:
@@ -140,7 +141,7 @@ def compare(root):
     result.update(accepted=not failures, amendment='P4a amendment 1 v3', moved_code=moved,
                   amendment_failures=failures,
                   sizing_note='Expected schema growth is accounted per payload; identical sizing totals are not claimed.')
-    evidence.save(folder / 'integration-comparison.json', result)
+    evidence.save(folder / output_name, result)
     print(json.dumps({'accepted': not failures, 'moved_code': moved, 'failures': failures}, indent=2))
     assert not failures, 'STOP: difference outside the approved schema amendment'
 
