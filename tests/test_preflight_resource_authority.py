@@ -55,6 +55,20 @@ def _registration(directory):
     return builder.build_registration("CHORUS", "authority", partition="chorus", registration_path=directory / "registration.json", write_to_disk=False)
 
 
+def _copy_partition_resources(selected):
+    # The declared files and their verified evidence are one selected-tree unit.
+    sources = [ROOT / name for name in builder.AUDIT_PARTITION_FILES]
+    for declaration in builder.partition_profiles().values():
+        pins = [*declaration["sizing_record"].values(),
+                *declaration.get("calibration_bundle", {}).values()]
+        sources.extend(Path(pin["path"]) for pin in pins)
+    for source in sources:
+        if source.is_relative_to(ROOT):
+            target = selected / source.relative_to(ROOT)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+
+
 @pytest.fixture
 def selected_resources(tmp_path):
     original = _registration(tmp_path)
@@ -63,11 +77,6 @@ def selected_resources(tmp_path):
     shutil.copyfile(ROOT / "pyproject.toml", selected / "pyproject.toml")
     sources = [pin for key in ("full_schema", "core_schema") for pin in original["inputs"][key]["sources"]]
     sources.extend([original["runtime"]["config"], original["inputs"]["profile"]["vocabulary"]])
-    # Carry the declaration's referenced evidence, without naming any project
-    # or historical fixture here. The reader has already verified these pins.
-    for declaration in builder.partition_profiles().values():
-        sources.extend(declaration["sizing_record"].values())
-        sources.extend(declaration.get("calibration_bundle", {}).values())
     for pin in sources:
         if pin and Path(pin["path"]).is_relative_to(ROOT):
             source = Path(pin["path"])
@@ -79,10 +88,11 @@ def selected_resources(tmp_path):
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(raw)
     # Selected-tree authority includes A14's executable request closure.
-    for name in (*sg.REQUEST_CODE, *builder.AUDIT_PARTITION_FILES):
+    for name in sg.REQUEST_CODE:
         target = selected / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / name, target)
+    _copy_partition_resources(selected)
     args = dict(project="CHORUS", label="selected", registration_path=tmp_path / "selected.json",
                 bundle_path=original["inputs"]["bundle"]["path"],
                 chunk_manifest_path=original["inputs"]["chunk_manifest"]["path"],
@@ -267,6 +277,10 @@ def test_valid_partition_still_publishes_requested_draft(tmp_path, selected_reso
     args.pop("context_path")
     args.update(registration_path=output / "registration.json", context_dir=output / "contexts",
                 synthesize_draft_context=True, write_to_disk=True)
+    # The draft context does not exist yet, so it cannot earn implicit coverage.
+    # Explicit sizing accepts its in-memory bytes through the normal gate.
+    args["sizing_record"] = builder.SizingRecord.in_directory(
+        ROOT / "tests/fixtures/audit_batches/chorus_v10_2026-10-22a", "CHORUS")
     reg = builder.build_registration(**args)
     assert Path(reg["registration_path"]).is_file()
     assert Path(reg["inputs"]["context"]["path"]) == output / "contexts" / "chorus_omission_context.json"
@@ -338,6 +352,7 @@ def test_copied_cli_selects_foreign_tree_from_another_checkout(tmp_path, option,
         target = selected / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / relative, target)
+    _copy_partition_resources(selected)
     copied = tmp_path / "caller-inputs" / "build_api_registrations.py"
     copied.parent.mkdir()
     shutil.copyfile(Path(builder.__file__), copied)
