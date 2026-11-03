@@ -13,6 +13,23 @@ This repository stores a LinkML schema representation for the original Datasheet
 
 We are also tracking related developments, such as augmented Datasheets for Datasets models as in [Augmented Datasheets for Speech Datasets and Ethical Decision-Making](https://dl.acm.org/doi/10.1145/3593013.3594049).
 
+## Offline API registration partitions
+
+The offline API registration builder reads partition declarations from
+[`config/audit_partitions.yaml`](config/audit_partitions.yaml) or the selected
+source manifest's `projects.<project>.audit_partition`. An inline declaration
+is **bounds-only and never earns calibration coverage**: it cannot contain the
+SHA-256 of its own containing manifest, including that digest. Use the separate
+config file to declare the selected `source_manifest_sha256` and pinned
+`sizing_record` full, core and receipt files. Coverage requires parseable records
+of that project and arm, matching receipt bundle/chunk identities, and sizing
+that fits the declared limits. Otherwise an explicit sizing record is required.
+For a calibration from another bundle, an external declaration must also name
+`calibration_bundle`, with `bundle` and `chunk_manifest` pins (each has `path`,
+`sha256`, and `bytes`); both pins and the deterministic chunk manifest are
+verified. Explicitly requested historical sizing remains permissive about older
+receipt bundles. BC1 always requires its own actual-record sizing sidecar.
+
 ## Bridge2AI Generating Center Datasheets
 
 ChatGPT-chat comparison arm datasheets for Bridge2AI data generating projects (note: these records were generated via a ChatGPT chat interface rather than hand-curated, document superseded data releases, and there is no CHORUS record; see CLAUDE.md and issue #177):

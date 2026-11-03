@@ -24,7 +24,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.build_api_registrations import (
     DEFAULT_AUDIT_LIMITS,
-    PARTITION_PROFILES,
+    partition_profiles,
     SIZING_EXPECTED_INPUT_TOKENS_PER_RESPONSE_TOKEN,
     SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN,
     SIZING_OMISSION_RESPONSE_CAP_FRACTION,
@@ -115,7 +115,7 @@ def test_chorus_sizing_covers_its_canary_and_the_profile_allowance(tmp_path):
     assert profile["max_workers"] == 4
     assert profile["aggregate_input_tokens"] == (4 * profile["worker_input_tokens"] + profile["omission_input_tokens"]
                                                  + profile["integration_worst_input_tokens"])
-    assert MEASURED["aggregate"] < profile["aggregate_input_tokens"] < PARTITION_PROFILES["chorus"]["limits"]["aggregate_input_tokens"]
+    assert MEASURED["aggregate"] < profile["aggregate_input_tokens"] < partition_profiles()["chorus"]["limits"]["aggregate_input_tokens"]
     assert profile["admissible_input_tokens"] == {"worker": 936000, "omission": 968000, "integration": 968000}
     assert all(profile[f"{stage}_input_tokens"] <= room for stage, room in profile["admissible_input_tokens"].items())
     assert profile["integration_worst_input_tokens"] > 968000

@@ -1,0 +1,148 @@
+{
+  "attributes": {
+    "effective": {
+      "eol": "unspecified",
+      "filter": "unspecified",
+      "merge": "bc1-keep-first",
+      "text": "unspecified",
+      "working-tree-encoding": "unspecified"
+    },
+    "tracked_ancestor_attributes": {}
+  },
+  "attributes_sha256": "9dc2def3f37f3da241330d135469a7828156481e09c0583a8649ff0a313cc328",
+  "effective_base_blob": "f0b55f73e6e9e5bdc9cbb42b175b9a7bdff9d839",
+  "expected_behavior": "three-way file merge invokes keep-first driver",
+  "git_policy": {
+    "GIT_NO_LAZY_FETCH": "1",
+    "hooks": "/dev/null",
+    "protocol": "file only"
+  },
+  "head": "c76b01c123de75de9d1008e1fb94d080528758aa",
+  "helper_sha256": "0e6d1d80858f0f72389c4bf55d399ab7f1dbd93e80f59de62581d64525f53d20",
+  "incoming": {
+    "blob": "d32d915cf46e74e9f897ff8a305d294e1feb7ee5",
+    "mode": "100644",
+    "ref": "20def9d63a3131ef9b56eca39b61fbf5f6aaab49"
+  },
+  "merge_bases": [
+    {
+      "blob": "3fbe1b2c1ee89387369e34ae4f7363e0e89c34ed",
+      "mode": "100644",
+      "ref": "fba016d92fd292c66d580006e848b8c43eb59505"
+    },
+    {
+      "blob": "f0b55f73e6e9e5bdc9cbb42b175b9a7bdff9d839",
+      "mode": "100644",
+      "ref": "8b885ee68262474275316755c3fc55dc05517dcb"
+    }
+  ],
+  "protected_blob": "91105618cd25e33962b1c2d30f20b37101530bb2",
+  "protected_mode": "100644",
+  "protected_path_changes": [
+    {
+      "from": "c76b01c123de75de9d1008e1fb94d080528758aa",
+      "protected_name_status": [
+        "M\tsrc/data_sheets_schema/shared_generation.py"
+      ],
+      "rename_detection": "git diff --no-ext-diff --no-textconv --name-status --find-renames",
+      "to": "20def9d63a3131ef9b56eca39b61fbf5f6aaab49"
+    },
+    {
+      "from": "fba016d92fd292c66d580006e848b8c43eb59505",
+      "protected_name_status": [
+        "M\tsrc/data_sheets_schema/shared_generation.py"
+      ],
+      "rename_detection": "git diff --no-ext-diff --no-textconv --name-status --find-renames",
+      "to": "c76b01c123de75de9d1008e1fb94d080528758aa"
+    },
+    {
+      "from": "fba016d92fd292c66d580006e848b8c43eb59505",
+      "protected_name_status": [
+        "M\tsrc/data_sheets_schema/shared_generation.py"
+      ],
+      "rename_detection": "git diff --no-ext-diff --no-textconv --name-status --find-renames",
+      "to": "20def9d63a3131ef9b56eca39b61fbf5f6aaab49"
+    },
+    {
+      "from": "8b885ee68262474275316755c3fc55dc05517dcb",
+      "protected_name_status": [
+        "M\tsrc/data_sheets_schema/shared_generation.py"
+      ],
+      "rename_detection": "git diff --no-ext-diff --no-textconv --name-status --find-renames",
+      "to": "c76b01c123de75de9d1008e1fb94d080528758aa"
+    },
+    {
+      "from": "8b885ee68262474275316755c3fc55dc05517dcb",
+      "protected_name_status": [
+        "M\tsrc/data_sheets_schema/shared_generation.py"
+      ],
+      "rename_detection": "git diff --no-ext-diff --no-textconv --name-status --find-renames",
+      "to": "20def9d63a3131ef9b56eca39b61fbf5f6aaab49"
+    }
+  ],
+  "protected_sha256": "1c4436b5ea689fcd674c848a722dd9a86495692ad83401682f3d805f49acb6d6",
+  "scope": "preflight only; no merge or source edit",
+  "tree_attributes": {
+    "20def9d63a3131ef9b56eca39b61fbf5f6aaab49": {
+      "effective": {
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "merge": "bc1-keep-first",
+        "text": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "tracked_ancestor_attributes": {
+        ".gitattributes": {
+          "blob": "112aa67003b49b31da9eeaaa4b46660b4292a4c6",
+          "text": "# The _wcrate copies are pinned by sha256 in index.yaml; never convert line endings (#5083).\ndata/_wcrate/** -text\n# Retain D41 validation output and SDK capture bytes exactly, including whitespace.\nnotes/d41_validation_2026-10-26/** -text -whitespace\n"
+        }
+      }
+    },
+    "8b885ee68262474275316755c3fc55dc05517dcb": {
+      "effective": {
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "merge": "bc1-keep-first",
+        "text": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "tracked_ancestor_attributes": {
+        ".gitattributes": {
+          "blob": "ed13cd0cd8df4320bb2065faaed0d8e32037c720",
+          "text": "# The _wcrate copies are pinned by sha256 in index.yaml; never convert line endings (#5083).\ndata/_wcrate/** -text\n"
+        }
+      }
+    },
+    "c76b01c123de75de9d1008e1fb94d080528758aa": {
+      "effective": {
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "merge": "bc1-keep-first",
+        "text": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "tracked_ancestor_attributes": {
+        ".gitattributes": {
+          "blob": "ed13cd0cd8df4320bb2065faaed0d8e32037c720",
+          "text": "# The _wcrate copies are pinned by sha256 in index.yaml; never convert line endings (#5083).\ndata/_wcrate/** -text\n"
+        }
+      }
+    },
+    "fba016d92fd292c66d580006e848b8c43eb59505": {
+      "effective": {
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "merge": "bc1-keep-first",
+        "text": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "tracked_ancestor_attributes": {
+        ".gitattributes": {
+          "blob": "ed13cd0cd8df4320bb2065faaed0d8e32037c720",
+          "text": "# The _wcrate copies are pinned by sha256 in index.yaml; never convert line endings (#5083).\ndata/_wcrate/** -text\n"
+        }
+      }
+    }
+  },
+  "virtual_base_basis": "Actual bases fba016d92fd292c66d580006e848b8c43eb59505(C) and 8b885ee68262474275316755c3fc55dc05517dcb(A) have sole common base cd07f2a3738e146eeaa30ae86d35d3161eb3413b(C); unchanged C plus changed A yields A. Incoming20def9d63 is D, so both sides changed from A. Parent review required before merge."
+}

@@ -112,6 +112,7 @@ MODEL_FACING_MODULES = frozenset({
     "agentic_runtime", "audit_batch_context", "audit_batch_format", "audit_grammar",
     "healthsheet", "rocrate_normalize",
     "shared_generation", "typed_audit_runtime", "typed_audit", "audit_omissions", "audit_batches",
+    "bc1_audit", "bc1_codec", "bc1_context", "bc1_runtime", "bc1_selection",
     "source_heading_runtime",
     # found by the derivation (#4085): the opt-in renderer-24 receipt turn,
     # the API playbook adaptation, the native attribution instructions, the
@@ -3523,6 +3524,11 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
         return binds_of[q]
 
     _audit_evidence_modules = (
+        # BC1 uses the same canonical JSON, text and captured-evidence
+        # operations as the v10 typed-audit modules below. Keep unknown
+        # receiving effects subject to the existing closed summaries.
+        "bc1_audit.py", "bc1_codec.py", "bc1_context.py", "bc1_runtime.py",
+        "bc1_selection.py", "bc1_registration.py",
         "schema_semantics.py", "duplicate_keys.py", "schema_view.py", "receipts.py",
         "schema_snapshot.py", "schema_digest.py", "fitness_schema.py", "profiles.py",
         "resources.py", "corpus.py", "registry.py", "snapshot_store.py",
@@ -7244,6 +7250,31 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             return True
         return False
 
+    def bc1_schema_read(q, fn, call):
+        """Finite LinkML reads used by BC1's captured core catalog."""
+        if (q is None or Path(q).name != 'bc1_context.py' or fn is None or fn.name != '_core_catalog'
+                or len(call.args) != 1 or call.keywords or isinstance(call.args[0], ast.Starred)):
+            return False
+        if ast.unparse(call.func) == 'json_dumper.dumps':
+            imports = [n for n in fn.body if isinstance(n, ast.ImportFrom) and n.level == 0
+                       and n.module == 'linkml_runtime.dumpers' and len(n.names) == 1
+                       and n.names[0].name == 'json_dumper' and n.names[0].asname is None]
+            if len(imports) != 1:
+                return False
+            _require_followup_binding(_rel(root, q), parsed[q][1], fn, call)
+            return True
+        if ast.unparse(call.func) in {'view.is_inlined', 'view.get_class', 'view.get_enum', 'view.class_induced_slots'}:
+            contexts = [item for n in ast.walk(fn) if isinstance(n, ast.With) for item in n.items
+                        if isinstance(item.optional_vars, ast.Name) and item.optional_vars.id == 'view'
+                        and ast.unparse(item.context_expr) == 'captured_view(replay)']
+            stores = [n for n in ast.walk(fn) if isinstance(n, ast.Name) and n.id == 'view'
+                      and isinstance(n.ctx, (ast.Store, ast.Del))]
+            if len(contexts) != 1 or stores != [contexts[0].optional_vars]:
+                return False
+            _require_followup_binding(_rel(root, q), parsed[q][1], fn, contexts[0].context_expr)
+            return True
+        return False
+
     detached_value_helpers_of = {}
     entry_scalar_rebinding_of = {}
 
@@ -9679,7 +9710,9 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                             continue
                         if q is not None and str(q).endswith("schema_snapshot.py") and isinstance(node.func, ast.Name) and node.func.id == "read":
                             continue
-                        if _is_audit_evidence_module(q):
+                        if bc1_schema_read(q, fn, node):
+                            continue
+                        if _is_audit_evidence_module(q) and not Path(q).name.startswith('bc1_'):
                             continue
                     if may_reference(actual, context):
                         receiving.append(actual)
@@ -13171,6 +13204,53 @@ def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
                     for node in ast.walk(source)):
                 raise fail('selector builtin identity is shadowed')
     body = helper.body
+    if len(body) == 11 and same(body[0], 'from .bc1_selection import validate_spec_mode') \
+            and same(body[1], 'validate_spec_mode(spec)'):
+        # BC1 adds a refusing guard before the unchanged shared selector.
+        # Prove that it cannot mutate/escape spec before using the parent's
+        # tuple proof; do not simply ignore an arbitrary helper call.
+        _require_followup_binding(_rel(root, helper_path), helper_tree, helper, body[1].value)
+        bc1_path = root / 'src/data_sheets_schema/bc1_selection.py'
+        bc1_tree = _tree(bc1_path)
+        validator = _function(bc1_tree, 'validate_spec_mode')
+        enabled = _function(bc1_tree, 'enabled')
+        effective_definition(bc1_tree, validator, 'validate_spec_mode')
+        effective_definition(bc1_tree, enabled, 'enabled')
+        enabled_body = ast.parse('''def enabled(spec):
+    value = getattr(spec, "bounded_carry_version", 0)
+    if type(value) is not int or value not in (0, VERSION):
+        raise ValueError("bounded_carry_version must be the integer 0 or 1")
+    return value == VERSION
+''').body[0].body
+        if (_params(enabled) != ['spec'] or _params(validator) != ['spec']
+                or [dump(n) for n in enabled.body] != [dump(n) for n in enabled_body]
+                or _module_constants(bc1_path).get('VERSION') != 1):
+            raise fail('BC1 selector domain or read-only enabled helper changed')
+        for name in ('getattr', 'type', 'int', 'str', 'VERSION'):
+            for node in ast.walk(bc1_tree):
+                if (_rebinding(node, name, validator) or isinstance(node, ast.arg) and node.arg == name
+                        or name != 'VERSION' and isinstance(node, ast.Name) and node.id == name
+                        and isinstance(node.ctx, (ast.Store, ast.Del))):
+                    raise fail('BC1 selector authority is shadowed')
+        parents = _parents(validator)
+        scalar_fields = {'shared_generation_registration', 'shared_generation_version',
+                         'condition', 'render_version', 'api_playbook_version',
+                         'receipt_completion_version', 'runtime',
+                         'native_source_attribution_version', 'removal_repair_version'}
+        for node in ast.walk(validator):
+            if not isinstance(node, ast.Name) or node.id != 'spec':
+                continue
+            parent = parents.get(id(node))
+            read = (isinstance(node.ctx, ast.Load) and isinstance(parent, ast.Call)
+                and ((ast.unparse(parent) == 'enabled(spec)') or (
+                    isinstance(parent.func, ast.Name) and parent.func.id == 'getattr'
+                    and len(parent.args) in (2, 3) and not parent.keywords
+                    and parent.args[0] is node and isinstance(parent.args[1], ast.Constant)
+                    and type(parent.args[1].value) is str and parent.args[1].value in scalar_fields
+                    and (len(parent.args) == 2 or isinstance(parent.args[2], ast.Constant)))))
+            if not read:
+                raise fail('BC1 selector mutates or escapes its spec')
+        body = body[2:]
     if len(body) != 9:
         raise fail('unsupported shared selector body')
     if not (isinstance(body[0], ast.Assign) and len(body[0].targets) == 1
@@ -13724,6 +13804,51 @@ def _delegated_plan(root, tree):
     plan = _function(tree, 'plan')
     branches = [n for n in plan.body if isinstance(n, ast.If) and any(isinstance(x, ast.Return)
                 for x in ast.walk(n))]
+    roster_plans = []
+    bc1_branch = ast.parse('''if spec.bounded_carry_version:
+    from .bc1_registration import plan as bc1_plan
+    return bc1_plan(spec, settings)
+''').body[0]
+    for branch in list(branches):
+        if ast.dump(branch, include_attributes=False) != ast.dump(bc1_branch, include_attributes=False):
+            continue
+        _require_followup_binding(RUNNER, tree, plan, branch.body[1].value)
+        # BC1's plan reports a registered roster, not conditional phase text.
+        # Authenticate this finite source shape before keeping the parent's
+        # phase-family derivation. Any changed route/helper fails closed.
+        path = root / 'src/data_sheets_schema/bc1_registration.py'
+        source = _tree(path)
+        function = _function(source, 'plan')
+        expected = ast.parse('''def plan(spec, settings):
+    from . import shared_generation as shared
+    selection.validate_spec_mode(spec)
+    captured = shared.preflight(spec, settings)
+    reg = captured.document()
+    limits = reg["audit_limits"]
+    roster = selection.allowances(limits["max_workers"], reg["bounded_carry"]["fan_in"],
+        **{key: limits[key] for key in ("worker_output_tokens", "omission_output_tokens", "integration_output_tokens")})
+    return {"project": spec.project, "arm": spec.arm, "method": spec.method, "label": spec.label,
+        "condition": spec.condition, "bounded_carry": deepcopy(reg["bounded_carry"]),
+        "registered_maximum_roster": roster, "registered_audit_allowances": deepcopy(limits),
+        "actual_plan_workers": None, "actual_request_bytes": None, "actual_provider_token_counts": None,
+        "estimate_basis": "A future full record determines the fixed worker/group plan. Registered allowances do not predict actual spend.",
+        "readiness": {"scientific_approval": "unverified", "campaign_launch": "not authorized by a plan",
+                      "native_direct": "unsupported", "actual_request_count": "required before every dispatch"}}
+''').body[0]
+        body = function.body if function else []
+        if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) \
+                and isinstance(body[0].value.value, str):
+            body = body[1:]
+        if (function is None or function.decorator_list or _params(function) != ['spec', 'settings']
+                or [ast.dump(n, include_attributes=False) for n in body] !=
+                   [ast.dump(n, include_attributes=False) for n in expected.body]
+                or sum(isinstance(n, ast.FunctionDef) and n.name == 'plan' for n in source.body) != 1
+                or any(isinstance(n, ast.Name) and n.id == 'plan' and isinstance(n.ctx, (ast.Store, ast.Del))
+                       or _rebinding(n, 'plan', function) for n in ast.walk(source))):
+            raise _not_derived('the optional plan', 'BC1 roster-only source shape changed')
+        roster_plans.append({'field': 'bounded_carry_version', 'kind': 'registered roster only',
+                             'evidence': [f'{_rel(root, path)}:{function.lineno}', f'{RUNNER}:{branch.lineno}']})
+        branches.remove(branch)
     if not branches:
         return None
     if len(branches) != 1:
@@ -13754,6 +13879,17 @@ def _delegated_plan(root, tree):
     if any(isinstance(n, (ast.Raise, ast.Assert)) for n in helper.body):
         raise _not_derived('the optional plan', 'delegate unconditionally refuses')
     returns = [n for n in ast.walk(helper) if isinstance(n, ast.Return)]
+    if roster_plans and len(helper.body) >= 3:
+        expected_import = ast.parse('from .bc1_selection import enabled as bc1_enabled').body[0]
+        expected_branch = ast.parse('''if bc1_enabled(spec):
+    from .bc1_registration import plan as bc1_plan
+    return bc1_plan(spec, settings)
+''').body[0]
+        if (ast.dump(helper.body[1], include_attributes=False) == ast.dump(expected_import, include_attributes=False)
+                and ast.dump(helper.body[2], include_attributes=False) == ast.dump(expected_branch, include_attributes=False)):
+            _require_followup_binding(_rel(root, target), helper_tree, helper, helper.body[2].test)
+            _require_followup_binding(_rel(root, target), helper_tree, helper, helper.body[2].body[1].value)
+            returns.remove(helper.body[2].body[1])
     if len(returns) != 1 or returns[0] not in helper.body or not isinstance(returns[0].value, ast.Dict):
         raise _not_derived('the optional plan', 'delegate must return its one literal plan dictionary')
     keys = [k.value if isinstance(k, ast.Constant) else None for k in returns[0].value.keys]
@@ -13789,10 +13925,10 @@ def _delegated_plan(root, tree):
             raise _not_derived('the optional plan', 'duplicate or missing exact phase-colon prefix')
         phases.append(match.group(1))
     # The legacy return must remain the single unconditional alternative.
-    if len([n for n in ast.walk(plan) if isinstance(n, ast.Return)]) != 2 or not (
+    if len([n for n in ast.walk(plan) if isinstance(n, ast.Return)]) != 2 + len(roster_plans) or not (
             isinstance(plan.body[-1], ast.Return) and isinstance(plan.body[-1].value, ast.Dict)):
         raise _not_derived('the optional plan', 'unproved legacy alternative or early bypass')
-    return {'selection': selection, 'phases': phases,
+    return {'selection': selection, 'phases': phases, 'roster_only_plans': roster_plans,
             'evidence': [*guards, f'{_rel(root, target)}:{returns[0].lineno}']}
 
 
@@ -13961,6 +14097,12 @@ def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes:
             continue
         helper_tree = _tree(path)
         bindings = _bindings(root, path, helper_tree, {})
+        # Check before the name-keyed map can discard a duplicate BC1 entry.
+        if _rel(root, path) == 'src/data_sheets_schema/bc1_runtime.py':
+            entries = [n for n in helper_tree.body
+                       if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name == 'run']
+            if len(entries) != 1:
+                raise _not_derived('the follow-up turns', 'BC1 backend entry identity changed')
         helper_funcs = {n.name: n for n in helper_tree.body
                         if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
         for name, fn in helper_funcs.items():
@@ -13984,10 +14126,48 @@ def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes:
                     raise _not_derived("the follow-up turns", f"helper call at {rel}:{call.lineno} names no phase")
                 constants = _module_constants(path)
                 values = ({_literal_phase(root, path, helper_tree, fn, arg)}
-                          if isinstance(arg, ast.Name) and arg.id in constants else
+                          if isinstance(arg, ast.Name) and (arg.id in constants or arg.id in bindings) else
                           _phase_names(arg, fn, helper_funcs, constants))
                 entries = [(caller, c) for caller in funcs.values() for c in ast.walk(caller)
                            if isinstance(c, ast.Call) and _imported_target(c, runner_bindings) == (_resolved(path), name)]
+                dispatch_evidence = []
+                if rel == 'src/data_sheets_schema/bc1_runtime.py' and name == 'run' and not entries:
+                    dispatch_path = root / 'src/data_sheets_schema/typed_audit_runtime.py'
+                    dispatch_tree = _tree(dispatch_path)
+                    selector = _function(dispatch_tree, '_bc1')
+                    expected_selector = ast.parse('''def _bc1(spec):
+    from .bc1_selection import enabled
+    if enabled(spec):
+        from . import bc1_runtime
+        return bc1_runtime
+    return None
+''').body[0]
+                    entry_fn = _function(dispatch_tree, 'run')
+                    expected_entry = ast.parse('''if selected := _bc1(spec):
+    return selected.run(spec, carry=carry, client=client, settings=settings, usage=usage)
+''').body[0]
+                    if (selector is None or entry_fn is None or selector.decorator_list or entry_fn.decorator_list
+                            or _params(selector) != ['spec'] or len(entry_fn.body) < 2
+                            or [ast.dump(n, include_attributes=False) for n in selector.body] !=
+                               [ast.dump(n, include_attributes=False) for n in expected_selector.body]
+                            or ast.dump(entry_fn.body[1], include_attributes=False) !=
+                               ast.dump(expected_entry, include_attributes=False)
+                            or sum(isinstance(n, ast.FunctionDef) and n.name == '_bc1' for n in dispatch_tree.body) != 1
+                            or any(isinstance(n, ast.Name) and n.id == '_bc1' and isinstance(n.ctx, (ast.Store, ast.Del))
+                                   or _rebinding(n, '_bc1', selector) for n in ast.walk(dispatch_tree))):
+                        raise _not_derived('the follow-up turns', 'BC1 backend dispatch changed')
+                    for entry_tree, entry in ((dispatch_tree, entry_fn), (helper_tree, fn)):
+                        if (entry.decorator_list
+                                or sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+                                       and n.name == 'run' for n in entry_tree.body) != 1
+                                or any(isinstance(n, ast.Name) and n.id == 'run' and isinstance(n.ctx, (ast.Store, ast.Del))
+                                       or _rebinding(n, 'run', entry) for n in ast.walk(entry_tree))):
+                            raise _not_derived('the follow-up turns', 'BC1 backend entry identity changed')
+                    _require_followup_binding(_rel(root, dispatch_path), dispatch_tree, selector, selector.body[1].test)
+                    entries = [(caller, c) for caller in funcs.values() for c in ast.walk(caller)
+                               if isinstance(c, ast.Call) and _imported_target(c, runner_bindings) == (_resolved(dispatch_path), 'run')]
+                    dispatch_evidence = [f'{_rel(root, dispatch_path)}:{selector.lineno}',
+                                         f'{_rel(root, dispatch_path)}:{entry_fn.body[1].lineno}']
                 if not entries:
                     raise _not_derived("the follow-up turns", f"{rel}:{name} has no direct imported runner caller")
                 for phase in values:
@@ -14010,6 +14190,8 @@ def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes:
                                                f"helper phase `{phase}` has an unguarded runner caller")
                         replacement = _helper_replacement(caller, entry, selection, funcs, wrappers)
                         via.append({"call": f"api_runner.py:{entry.lineno}", "guards": guards,
+                                    **({'bounded_carry_version': 1, 'dispatch_evidence': dispatch_evidence}
+                                       if dispatch_evidence else {}),
                                     **({'replacement': replacement} if replacement else {})})
                     row = out.setdefault(phase, {"calls": [], "conditions": scopes[phase]["conditions"],
                                                 "selection": selection, "via": [],
@@ -14317,15 +14499,36 @@ def _selected_request_additions(root, tree, selection):
             if not isinstance(node, ast.Dict):
                 continue
             for key, value in zip(node.keys, node.values):
-                if not isinstance(key, ast.Constant) or key.value != 'text' or not isinstance(value, ast.Call):
+                if not isinstance(key, ast.Constant) or key.value != 'text':
                     continue
-                _require_followup_binding(RUNNER, tree, fn, value)
-                target = _imported_target(value, _bindings(root, _resolved(root / RUNNER), tree, {}))
-                if target is None or target[1] is None or not value.args or ast.unparse(value.args[0]) != 'spec':
-                    raise _not_derived('selected request additions', 'unbound text builder or changed spec')
-                additions.append({'builder': _rel(root, target[0]) + ':' + target[1],
-                                  'call': f'{RUNNER}:{value.lineno}',
-                                  'size_basis': 'Selected request text; not part of the legacy digest-only estimate.'})
+                builders = [(value, None)] if isinstance(value, ast.Call) else []
+                if isinstance(value, ast.Name) and value.id == 'schema_text':
+                    expected = ast.parse('''if spec.bounded_carry_version:
+    from .bc1_context import downstream_schema_context
+    schema_text = downstream_schema_context(spec, selected_record)
+else:
+    schema_text = schema_context(spec, selected_record)
+''').body[0]
+                    routes = [n for n in branch.body if isinstance(n, ast.If)
+                              and ast.dump(n, include_attributes=False) == ast.dump(expected, include_attributes=False)]
+                    stores = [n for n in ast.walk(fn) if isinstance(n, ast.Name) and n.id == 'schema_text'
+                              and isinstance(n.ctx, (ast.Store, ast.Del))]
+                    if (len(routes) != 1 or len(stores) != 2
+                            or set(map(id, stores)) != {id(routes[0].body[1].targets[0]), id(routes[0].orelse[0].targets[0])}
+                            or not any(node is n for stmt in branch.body[branch.body.index(routes[0]) + 1:]
+                                       for n in ast.walk(stmt))):
+                        raise _not_derived('selected request additions', 'BC1 schema text assignment changed')
+                    builders = [(routes[0].body[1].value, 'spec.bounded_carry_version'),
+                                (routes[0].orelse[0].value, 'not spec.bounded_carry_version')]
+                for builder, guard in builders:
+                    _require_followup_binding(RUNNER, tree, fn, builder)
+                    target = _imported_target(builder, _bindings(root, _resolved(root / RUNNER), tree, {}))
+                    if target is None or target[0] is None or target[1] is None or not builder.args or ast.unparse(builder.args[0]) != 'spec':
+                        raise _not_derived('selected request additions', 'unbound text builder or changed spec')
+                    additions.append({'builder': _rel(root, target[0]) + ':' + target[1],
+                                      'call': f'{RUNNER}:{builder.lineno}',
+                                      **({'guard': guard} if guard else {}),
+                                      'size_basis': 'Selected request text; not part of the legacy digest-only estimate.'})
     return additions
 
 

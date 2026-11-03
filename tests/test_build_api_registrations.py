@@ -412,7 +412,9 @@ def test_cli_dry_run_single_and_all() -> None:
     assert "✓ CHORUS: registration_id=" in result.output
     assert "[dry-run]" in result.output
 
-    # All projects, each with its own limits (#5155 F4); the large projects'
+    # The historical four-project fixture, each with its own limits (#5155 F4);
+    # --all now follows the selected manifest (causally tested in BC1 generality).
+    # The large projects'
     # bounds are ones whose integration call fits today's protocol.
     runs = AI_READI_SIZING.parent.parent
     sizing = {"AI_READI": (AI_READI_SIZING, "max_paths=512,max_inventory_bytes=98304,max_workers=2"),

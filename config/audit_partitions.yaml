@@ -1,0 +1,36 @@
+# Audit partition declarations, separated from the byte-pinned source manifest.
+# F4 / G2, 2026-11-01. Values and historical commentary moved verbatim.
+projects:
+  CHORUS:
+    audit_partition:
+      name: chorus
+      # What 2026-10-22a ran: 98 paths in three workers (35/54/9), the fullest
+      # 39 bytes under the inventory bound, each using 14k-50k of its 64k.
+      # Baseline arm only: 15 of the 18 CHORUS crate-arm records fail planning
+      # under these bounds, all on the worker count (16 before A17), and the de
+      # novo arm has no v10 evidence. Billed typed-audit input was 1,002,650
+      # (10-20a, with a worker that hit the then 25k cap) and 1,148,972 (10-22a,
+      # with an integration attempt that timed out) of the 4,000,000 allowance.
+      # Sized on 10-22a's own record, the largest plan these bounds admit needs
+      # about 1.92M at worst. Its expected integration call fits the window;
+      # the worst case, every response at its cap, does not and is warned.
+      arms: [baseline]
+      source_manifest_sha256: b28c300596cc9be964e93f1a21609f24a8b53d55302abc5fb45a29681e55cea8
+      limits:
+        max_paths: 80
+        max_inventory_bytes: 12288
+        max_workers: 4
+        aggregate_input_tokens: 4000000
+      sizing_record:
+        full:
+          path: tests/fixtures/audit_batches/chorus_v10_2026-10-22a/CHORUS_full.yaml
+          sha256: 440ea561b0a26e73b82d12e0093ad1a4ba8288abb3aa8a3c82ed8a2e3dbab0d7
+          bytes: 19165
+        core:
+          path: tests/fixtures/audit_batches/chorus_v10_2026-10-22a/CHORUS_core.yaml
+          sha256: 473d3b94296f1cb2aec491b1bba77c64aced2f4803e8361b96b520e7f50e6f38
+          bytes: 18663
+        receipt:
+          path: tests/fixtures/audit_batches/chorus_v10_2026-10-22a/CHORUS_coverage_receipt.yaml
+          sha256: 5829b77841b837f5d30b12e55db6b1e22bb701d7fe71036d7225a7a2db3693db
+          bytes: 16825

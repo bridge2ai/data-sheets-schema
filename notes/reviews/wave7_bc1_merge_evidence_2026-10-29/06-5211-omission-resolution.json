@@ -1,0 +1,11 @@
+{
+  "after_sha256": "cd17fed4c330320511519c5757f29666021d6639b8998ac9dc4c5a244a67b03c",
+  "before_sha256": "95ddd54b9501af22e07c5948da7226d8486c6e64e9c6886d43133ccd6bae28db",
+  "helper_sha256": "7fa57c9db6d4800f0f8f3ecfdc54b746e5762617a994d23f239eca7335b1dc07",
+  "incoming": "3c41133fcdcdb6db4d09564dc365b8b42b39c390",
+  "merge": "5211-omission",
+  "path": "src/data_sheets_schema/audit_omissions.py",
+  "protected_sha256": "1c4436b5ea689fcd674c848a722dd9a86495692ad83401682f3d805f49acb6d6",
+  "review": "Codex parent read-only review before application",
+  "scope": "ordinary conflict union only; no tests or protected edits"
+}

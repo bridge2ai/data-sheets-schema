@@ -14,7 +14,7 @@ Usage examples:
     # never defaulted; the chorus profile is validated for CHORUS only):
     python scripts/build_api_registrations.py -p CHORUS --partition chorus -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 -o data/registrations/generic_v10
 
-    # Any other project names bounds sized for it (see PARTITION_PROFILES) and an
+    # Any other project names bounds sized for it (see partition declarations) and an
     # aggregate input allowance, checked against an earlier run's record (#5155):
     python scripts/build_api_registrations.py -p AI_READI --max-paths N --max-inventory-bytes B --max-workers W --aggregate-input-tokens T --sizing-record AI_READI=<intermediate directory of an earlier AI_READI API run> -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 -o data/registrations/generic_v10
 
@@ -35,6 +35,7 @@ import inspect
 import json
 import math
 import os
+import re
 import sys
 import threading
 import types
@@ -179,21 +180,93 @@ DEFAULT_AUDIT_LIMITS: dict[str, Any] = {
 # validated for its project; a multi-project build can give each project its
 # own (`--project-limits`).
 PARTITION_KEYS = ("max_paths", "max_inventory_bytes", "max_workers")
-PARTITION_PROFILES: dict[str, dict[str, Any]] = {
-    # What 2026-10-22a ran: 98 paths in three workers (35/54/9), the fullest
-    # 39 bytes under the inventory bound, each using 14k-50k of its 64k.
-    # Baseline arm only: 15 of the 18 CHORUS crate-arm records fail planning
-    # under these bounds, all on the worker count (16 before A17), and the de
-    # novo arm has no v10 evidence. Billed typed-audit input was 1,002,650
-    # (10-20a, with a worker that hit the then 25k cap) and 1,148,972 (10-22a,
-    # with an integration attempt that timed out) of the 4,000,000 allowance.
-    # Sized on 10-22a's own record, the largest plan these bounds admit needs
-    # about 1.92M at worst. Its expected integration call fits the window;
-    # the worst case, every response at its cap, does not and is warned.
-    "chorus": {"projects": ("CHORUS",), "arms": ("baseline",),
-               "limits": {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 4,
-                          "aggregate_input_tokens": 4000000}},
-}
+
+def partition_profiles(source_manifest: Path | None = None, *, root_dir: Path | None = None) -> dict[str, dict[str, Any]]:
+    """Read one unambiguous declaration per selected project and partition.
+
+    The separate default file preserves historical manifest/bundle identities.
+    A manifest may instead declare projects.<P>.audit_partition for bounds only.
+    Inline declarations never earn coverage: their source_manifest_sha256 would
+    need to hash the containing file, including that very digest. External
+    calibration is earned by parsing, binding and sizing its pinned inputs.
+    """
+    from data_sheets_schema.schema_cache import load_yaml
+    root = Path(root_dir or ROOT).resolve()
+    manifest = Path(source_manifest) if source_manifest is not None else root / "data/preprocessed/source_manifest.yaml"
+    try:
+        registry = load_registry(manifest)
+    except click.ClickException as exc:
+        raise ValueError(str(exc)) from exc
+    if not isinstance(registry.data.get("projects", {}), dict):
+        raise ValueError(f"invalid projects mapping in source manifest {manifest}")
+    config = root / "config/audit_partitions.yaml"
+    try:
+        declared = load_yaml(config)
+    except (OSError, yaml.YAMLError, UnicodeError) as exc:
+        raise ValueError(f"cannot read audit partition declarations {config}: {exc}") from exc
+    if (not isinstance(declared, dict) or set(declared) != {"projects"}
+            or not isinstance(declared["projects"], dict)):
+        raise ValueError(f"invalid audit partition projects mapping in {config}")
+    for project, row in declared["projects"].items():
+        if not isinstance(project, str) or not isinstance(row, dict):
+            raise ValueError(f"{project}: invalid audit partition entry in {config}")
+    profiles = {}
+    for project in registry.projects():
+        entry = registry.entry(project)
+        inline = isinstance(entry, dict) and "audit_partition" in entry
+        external = declared["projects"].get(project, {})
+        if inline and "audit_partition" in external and entry["audit_partition"] != external["audit_partition"]:
+            raise ValueError(f"{project}: conflicting audit_partition declarations in {registry.path} and {config}")
+        row = entry if inline else external
+        origin = registry.path if inline else config
+        if "audit_partition" not in row:
+            continue
+        profile = copy.deepcopy(row["audit_partition"])
+        if (not isinstance(profile, dict)
+                or set(profile) - {"source_manifest_sha256", "calibration_bundle"} != {"name", "arms", "limits", "sizing_record"}
+                or not isinstance(profile["name"], str) or not profile["name"].strip()
+                or not isinstance(profile["arms"], list) or not profile["arms"]
+                or any(not isinstance(arm, str) or arm not in ARMS for arm in profile["arms"])
+                or not isinstance(profile["limits"], dict)
+                or set(profile["limits"]) != {*PARTITION_KEYS, "aggregate_input_tokens"}
+                or any(type(value) is not int or value <= 0 for value in profile["limits"].values())
+                or not isinstance(profile["sizing_record"], dict)
+                or set(profile["sizing_record"]) != {"full", "core", "receipt"}):
+            raise ValueError(f"{project}: invalid audit_partition declaration in {origin}")
+        manifest_sha = profile.get("source_manifest_sha256")
+        if manifest_sha is not None and (not isinstance(manifest_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", manifest_sha)):
+            raise ValueError(f"{project}: invalid source_manifest_sha256 in {origin}")
+        historical = profile.get("calibration_bundle", {})
+        if "calibration_bundle" in profile and (not isinstance(historical, dict)
+                or set(historical) != {"bundle", "chunk_manifest"}):
+            raise ValueError(f"{project}: invalid calibration_bundle in {origin}")
+        for key, pin in {**profile["sizing_record"], **historical}.items():
+            if (not isinstance(pin, dict) or set(pin) != {"path", "sha256", "bytes"}
+                    or not isinstance(pin["path"], str) or not pin["path"]
+                    or not isinstance(pin["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", pin["sha256"])
+                    or type(pin["bytes"]) is not int or pin["bytes"] <= 0):
+                raise ValueError(f"{project}: audit partition in {origin} requires a pinned sizing record ({key})")
+            path = (registry.anchored(Path(pin["path"])) if inline else root / pin["path"]).resolve()
+            try:
+                raw = path.read_bytes()
+            except OSError as exc:
+                raise ValueError(f"{project}: cannot read audit partition pin {path} from {origin}: {exc}") from exc
+            if hashlib.sha256(raw).hexdigest() != pin["sha256"] or len(raw) != pin["bytes"]:
+                raise ValueError(f"{project}: audit partition sizing record pin changed: {path} (in {origin})")
+            if key in ("full", "core"):
+                from data_sheets_schema.bc1_registration import _own_record
+                try:
+                    own = all(_own_record(project, ARMS[arm][0], raw, core=key == "core") for arm in profile["arms"])
+                except UnicodeError:
+                    own = False
+                if not own:
+                    raise ValueError(f"{project}: audit partition sizing record is not its own project/arm: {path} (in {origin})")
+            pin["path"] = str(path)
+        name = profile.pop("name")
+        if name in profiles:
+            raise ValueError(f"{project}: duplicate audit partition name {name!r} in {origin}")
+        profiles[name] = {**profile, "projects": [project]}
+    return profiles
 
 # What a sizing depends on: the plan's shape, the stage caps that bound every
 # response the integration call carries, and the allowance under test.
@@ -230,6 +303,10 @@ def resolve_audit_limits(
     overrides: dict[str, Any] | None = None,
     *,
     arm: str = "baseline",
+    bounded_carry_version: int = 0,
+    bc1_fan_in: int = 2,
+    source_manifest: Path | None = None,
+    root_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Defaults, then a named partition profile, then explicit overrides.
 
@@ -240,11 +317,16 @@ def resolve_audit_limits(
     an allowance no plan can use. A supplied value that disagrees is refused.
     ``max_calls`` defaults to that roster's length and may not be smaller.
     """
+    if type(bounded_carry_version) is not int or bounded_carry_version not in (0, 1):
+        raise ValueError("bounded_carry_version must be 0 or 1")
     limits = copy.deepcopy(DEFAULT_AUDIT_LIMITS)
+    if bounded_carry_version == 1:
+        limits["integration_output_tokens"] = 64_000
     if partition is not None:
-        if partition not in PARTITION_PROFILES:
-            raise ValueError(f"unknown partition profile {partition!r}; known: {sorted(PARTITION_PROFILES)}")
-        profile = PARTITION_PROFILES[partition]
+        profiles = partition_profiles(source_manifest, root_dir=root_dir)
+        if partition not in profiles:
+            raise ValueError(f"unknown partition profile {partition!r}; known: {sorted(profiles)}")
+        profile = profiles[partition]
         if project not in profile["projects"] or arm not in profile["arms"]:
             raise ValueError(
                 f"partition profile {partition!r} is validated only for {', '.join(profile['projects'])} "
@@ -267,7 +349,14 @@ def resolve_audit_limits(
     roster = limits["max_workers"] + 2
     aggregate = (limits["max_workers"] * limits["worker_output_tokens"]
                  + limits["omission_output_tokens"] + limits["integration_output_tokens"])
+    if bounded_carry_version == 1:
+        from data_sheets_schema.bc1_selection import allowances
+        selected = allowances(limits["max_workers"], bc1_fan_in,
+            **{key: limits[key] for key in ("worker_output_tokens", "omission_output_tokens", "integration_output_tokens")})
+        roster, aggregate = selected["max_calls"], selected["aggregate_output_tokens"]
     if limits.get("aggregate_output_tokens") is not None and limits["aggregate_output_tokens"] != aggregate:
+        if bounded_carry_version == 1:
+            raise ValueError(f"BC1 aggregate_output_tokens must cover the explicit worker/omission/group/final roster: {aggregate}")
         raise ValueError(
             f"aggregate_output_tokens {limits['aggregate_output_tokens']} disagrees with the stage caps: "
             f"{limits['max_workers']} x {limits['worker_output_tokens']} + {limits['omission_output_tokens']}"
@@ -277,6 +366,8 @@ def resolve_audit_limits(
     if limits.get("max_calls") is None:
         limits["max_calls"] = roster
     if limits["max_calls"] < roster:
+        if bounded_carry_version == 1:
+            raise ValueError(f"BC1 max_calls {limits['max_calls']} cannot cover every worker, omission, group and final check ({roster})")
         raise ValueError(
             f"max_calls {limits['max_calls']} cannot cover {limits['max_workers']} workers"
             f" plus omission and integration ({roster})"
@@ -284,25 +375,103 @@ def resolve_audit_limits(
     return limits
 
 
-def profile_sized(partition: str | None, limits: dict[str, Any]) -> bool:
-    """Keep calibrated bounds/caps, with no smaller allowance or admission ceiling."""
-    if partition is None:
-        return False
-    expected = {**DEFAULT_AUDIT_LIMITS, **PARTITION_PROFILES[partition]["limits"]}
+def _profile_limits_cover(profile: dict, limits: dict) -> bool:
+    expected = {**DEFAULT_AUDIT_LIMITS, **profile["limits"]}
     return (all(limits[key] == expected[key] for key in SIZING_KEYS if key != "aggregate_input_tokens")
             and limits["aggregate_input_tokens"] >= expected["aggregate_input_tokens"]
             and all(limits[key] >= expected[key] for key in ADMISSION_CEILING_KEYS))
 
 
-def profile_covered(project: str, arm: str | None, limits: dict[str, Any]) -> bool:
-    """A profile validated for this project and arm covers these limits, named or not.
+def _calibration_covered(profile: dict, project: str, arm: str, *, source_manifest: Path | None,
+                         root_dir: Path | None, registration: dict | None) -> bool:
+    """Earn coverage with the gate's offline estimator, never a declaration alone.
 
-    A registration does not record how its limits were chosen. Equal partition
-    bounds and output caps may inherit calibration only when aggregate input
-    and every per-call admission ceiling are at least as permissive.
+    Historical records need not validate against today's schema. They must be
+    parseable records of the declared project/arm and a structured coverage
+    receipt bound to the current bundle/chunks, or to an explicitly pinned
+    historical calibration bundle. Explicit historical sizing stays permissive.
     """
-    return any(project in profile["projects"] and arm in profile["arms"] and profile_sized(name, limits)
-               for name, profile in PARTITION_PROFILES.items())
+    from data_sheets_schema import audit_omissions as omissions, receipts
+    root = Path(root_dir or ROOT).resolve()
+    manifest = Path(source_manifest) if source_manifest is not None else root / "data/preprocessed/source_manifest.yaml"
+    try:
+        manifest_sha = hashlib.sha256(manifest.read_bytes()).hexdigest()
+        if profile.get("source_manifest_sha256") != manifest_sha:
+            return False
+        files = SizingRecord(**{key: Path(pin["path"]) for key, pin in profile["sizing_record"].items()})
+        for key in ("full", "core"):
+            if not omissions._mapping(getattr(files, key).read_bytes(), f"calibration {key}"):
+                return False
+        receipt = receipts.load_receipt(files.receipt)
+        entries, findings = receipts._receipt_entries(receipt)
+        md5 = receipt.get("bundle_md5")
+        if (not isinstance(md5, str) or not re.fullmatch(r"[0-9a-f]{32}", md5)
+                or findings or not entries or len({entry["id"] for entry in entries}) != len(entries)
+                or any(not entry["id"] or entry.get("status") not in receipts.STATUSES for entry in entries)):
+            return False
+        expected = resolve_audit_limits(project, overrides=profile["limits"], arm=arm)
+        if registration is None:
+            # Explicit sizing avoids recursion through profile_covered. This is
+            # preparation only: it neither writes nor uses a token endpoint.
+            registration, _, sizing = prepare_registration(project, "partition-calibration", arm=arm,
+                source_manifest_path=manifest, audit_limits=expected, sizing_record=files,
+                registration_path=root / "partition-calibration.json",
+                worktree=root if root != ROOT else None)
+        else:
+            if (registration["run"]["project"] != project or registration["run"]["arm"] != ARMS[arm][0]
+                    or registration["inputs"].get("source_manifest") != sg.file_pin(manifest)):
+                return False
+            inputs = registration["inputs"]
+            # A checker must not grant coverage to stale captured input pins.
+            for key in ("bundle", "chunk_manifest", "context"):
+                if sg.file_pin(Path(inputs[key]["path"])) != inputs[key]:
+                    return False
+            snapshot = capture_schema(Path(inputs["full_schema"]["root"]), strict=True)
+            if sg.schema_pin(snapshot) != inputs["full_schema"]:
+                return False
+            sizing = size_typed_audit_input(project, expected, registration, sizing_record=files,
+                context=Path(inputs["context"]["path"]).read_bytes(), schema_snapshot=snapshot)
+        # Historical sizing deliberately accepts foreign receipts to estimate
+        # their bytes. An implicit exemption additionally needs bundle identity.
+        from data_sheets_schema.chunking import validate_manifest_mapping
+        credited = profile.get("calibration_bundle", registration["inputs"])
+        for key in ("bundle", "chunk_manifest"):
+            if sg.file_pin(Path(credited[key]["path"])) != credited[key]:
+                return False
+        bundle = Path(credited["bundle"]["path"]).read_bytes()
+        chunks = yaml.safe_load(Path(credited["chunk_manifest"]["path"]).read_bytes())
+        validate_manifest_mapping(chunks, bundle, chunks["bundle"])
+        if (md5 != hashlib.md5(bundle).hexdigest()
+                or {entry["id"] for entry in entries} != set(receipts._manifest_ids(chunks))):
+            return False
+        return not _sizing_excesses(sizing, expected)
+    except (OSError, ValueError, yaml.YAMLError, KeyError, TypeError):
+        # Missing/malformed captured inputs cannot earn an exemption. The
+        # caller must still supply and pass the ordinary sizing-record gate.
+        return False
+
+
+def profile_sized(partition: str | None, limits: dict[str, Any], *, source_manifest: Path | None = None,
+                  root_dir: Path | None = None, registration: dict | None = None) -> bool:
+    """Keep earned calibration, bounds/caps, allowances and admission ceilings."""
+    if partition is None:
+        return False
+    profiles = partition_profiles(source_manifest, root_dir=root_dir)
+    if partition not in profiles or not _profile_limits_cover(profiles[partition], limits):
+        return False
+    profile = profiles[partition]
+    return all(_calibration_covered(profile, profile["projects"][0], arm,
+        source_manifest=source_manifest, root_dir=root_dir, registration=registration) for arm in profile["arms"])
+
+
+def profile_covered(project: str, arm: str | None, limits: dict[str, Any], *, source_manifest: Path | None = None,
+                    root_dir: Path | None = None, registration: dict | None = None) -> bool:
+    """Only verified calibration for this project, arm and manifest grants coverage."""
+    return any(project in profile["projects"] and arm in profile["arms"]
+               and _profile_limits_cover(profile, limits)
+               and _calibration_covered(profile, project, arm, source_manifest=source_manifest,
+                                        root_dir=root_dir, registration=registration)
+               for profile in partition_profiles(source_manifest, root_dir=root_dir).values())
 
 
 # Typed-audit input sizing (#5155), calibrated on CHORUS 2026-10-22a.
@@ -334,6 +503,8 @@ def profile_covered(project: str, arm: str | None, limits: dict[str, Any]) -> bo
 #   envelopes cost, for a response written as text with no thinking.
 SIZING_INSTRUMENT = "typed_audit_input_sizing_v3"
 SIZING_BYTES_PER_TOKEN = 2.0
+# Historical v0 calibration retained byte-for-byte. BC1 uses the explicit
+# per-call measured ratios in bc1_registration.calibration (D59/F6).
 SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN = 3.5
 SIZING_EXPECTED_INPUT_TOKENS_PER_RESPONSE_TOKEN = 1.2
 # 10-22a's typed workers used 50,130, 43,348 and 14,032 of 64,000 (mean
@@ -360,12 +531,27 @@ class SizingRecord:
     full: Path
     core: Path
     receipt: Path
+    receipt_result: Path | None = None
 
     @classmethod
-    def in_directory(cls, directory: Path | str, project: str) -> "SizingRecord":
+    def in_directory(cls, directory: Path | str, project: str, *, effective_receipt: bool = False) -> "SizingRecord":
         """An API run's intermediate directory: {P}_full.yaml, {P}_core.yaml, {P}_coverage_receipt.yaml."""
         root = Path(directory)
-        return cls(*(root / f"{project}_{name}.yaml" for name in ("full", "core", "coverage_receipt")))
+        full, core, receipt = (root / f"{project}_{name}.yaml" for name in ("full", "core", "coverage_receipt"))
+        if not effective_receipt:
+            return cls(full, core, receipt)
+        result_path = root / f"{project}_receipt_completion_result.json"
+        outcome = json.loads(result_path.read_bytes())
+        expected = outcome.get("receipt_after_sha256")
+        text = outcome.get("receipt_yaml")
+        if not isinstance(text, str) or hashlib.sha256(text.encode()).hexdigest() != expected:
+            raise ValueError("BC1 sizing completion result has invalid effective receipt bytes")
+        # Completed runs retain the pre-completion receipt in intermediate/.
+        # Select only exact completed bytes, never a best-effort stale fallback.
+        for candidate in (receipt, root.parent / receipt.name):
+            if candidate.is_file() and candidate.read_bytes() == text.encode():
+                return cls(full, core, candidate, result_path)
+        raise ValueError("BC1 sizing cannot find the completion result's exact effective receipt")
 
 
 SIZING_RECORD_FORMAT = "typed_audit_input_sizing_record_v1"
@@ -392,7 +578,18 @@ def _admissible_input_tokens(limits: dict[str, Any]) -> dict[str, int]:
             for stage in SIZING_STAGES}
 
 
-def check_registration_sizing(registration_path: Path | str, raw: bytes) -> dict[str, Any] | None:
+def _sizing_excesses(sizing: dict[str, Any], limits: dict[str, Any]) -> dict[str, tuple[int, int]]:
+    """One fits predicate for preparation, sidecar checks and calibration.
+
+    Empty means admitted; otherwise retain need/room pairs for diagnostics.
+    Stage order precedes aggregate, preserving preparation's first refusal.
+    """
+    rooms = {**_admissible_input_tokens(limits), "aggregate": limits["aggregate_input_tokens"]}
+    return {stage: (sizing[f"{stage}_input_tokens"], room) for stage, room in rooms.items()
+            if sizing[f"{stage}_input_tokens"] > room}
+
+
+def check_registration_sizing(registration_path: Path | str, raw: bytes, *, root_dir: Path | None = None) -> dict[str, Any] | None:
     """The sizing record beside a registration, checked against its bytes.
 
     Returns None when a partition profile covers the registration's limits.
@@ -401,9 +598,22 @@ def check_registration_sizing(registration_path: Path | str, raw: bytes) -> dict
     """
     reg = json.loads(raw)
     limits = reg["audit_limits"]
+    if "bounded_carry" in reg:
+        from data_sheets_schema.bc1_registration import check_sizing_record
+        path = sizing_path(registration_path)
+        if not path.is_file():
+            raise ValueError("BC1 always requires its own actual-record sizing sidecar")
+        record = json.loads(path.read_bytes())
+        if (record.get("format") != SIZING_RECORD_FORMAT
+                or record.get("registration_sha256") != hashlib.sha256(raw).hexdigest()):
+            raise ValueError("BC1 sizing sidecar belongs to different registration bytes")
+        check_sizing_record(reg, record.get("sizing"))
+        return record
     _require_request_byte_calibration(limits)
     arm = next((key for key, value in ARMS.items() if value[0] == reg["run"]["arm"]), None)
-    covered = profile_covered(reg["run"]["project"], arm, limits)
+    manifest = reg["inputs"].get("source_manifest")
+    covered = bool(manifest) and profile_covered(reg["run"]["project"], arm, limits,
+        source_manifest=Path(manifest["path"]), root_dir=root_dir, registration=reg)
     path = sizing_path(registration_path)
     if not path.is_file():
         if covered:
@@ -415,9 +625,7 @@ def check_registration_sizing(registration_path: Path | str, raw: bytes) -> dict
     if (not isinstance(sizing, dict) or record.get("format") != SIZING_RECORD_FORMAT
             or record.get("registration_sha256") != hashlib.sha256(raw).hexdigest()):
         raise ValueError(f"{path}: is not the sizing record of these registration bytes")
-    if (sizing["aggregate_input_tokens"] > limits["aggregate_input_tokens"]
-            or any(sizing[f"{stage}_input_tokens"] > room
-                   for stage, room in _admissible_input_tokens(limits).items())):
+    if _sizing_excesses(sizing, limits):
         raise ValueError(f"{path}: its sizing does not admit the registered limits")
     return record
 
@@ -823,6 +1031,8 @@ def prepare_registration(
     synthesize_draft_context: bool = False,
     sizing_record: SizingRecord | Path | str | None = None,
     sizing_stand_in: bool = False,
+    bounded_carry_version: int = 0,
+    bc1_fan_in: int = 2,
     worktree: Path | str | None = None,
 ) -> tuple[dict[str, Any], list[tuple[Path, bytes]], dict[str, Any] | None]:
     """Build a complete shared_generation_registration_v1 document without writing it.
@@ -839,11 +1049,19 @@ def prepare_registration(
     It is refused when a typed-audit call cannot fit its window or the
     allowance is below the sizing (#5155).
     """
+    if type(bounded_carry_version) is not int or bounded_carry_version not in (0, 1):
+        raise ValueError("bounded_carry_version must be 0 or 1")
+    if bounded_carry_version == 1:
+        from data_sheets_schema import bc1_selection
+        if sizing_record is None or sizing_stand_in:
+            raise ValueError("BC1 requires an actual sizing record of this project and arm; no stand-in waiver")
+        if synthesize_draft_context:
+            raise ValueError("BC1 requires an existing authentic omission context; no draft vocabulary injection")
+        bc1_selection.require_hooks()
     if arm not in ARMS:
         raise ValueError(f"unknown arm '{arm}'; must be one of {sorted(ARMS.keys())}")
     # Library callers need the same refusal-before-write guarantee as the
     # CLI precheck: context synthesis below can create files and directories.
-    active_audit_limits = resolve_audit_limits(project, partition, audit_limits, arm=arm)
     arm_display, method, pattern, _ = ARMS[arm]
     root_dir = Path(worktree).resolve() if worktree is not None else ROOT
     # One lookup rule for every project, including caller/environment overrides.
@@ -868,6 +1086,10 @@ def prepare_registration(
         selection = select_profile(sm_resolved)
         prof = selection.profile
         prof_name, prof_basis = selection.name, selection.basis
+
+    active_audit_limits = resolve_audit_limits(project, partition, audit_limits, arm=arm,
+        bounded_carry_version=bounded_carry_version, bc1_fan_in=bc1_fan_in,
+        source_manifest=sm_resolved, root_dir=root_dir)
 
     # Resolve bundle
     if bundle_path is not None:
@@ -1039,14 +1261,26 @@ def prepare_registration(
         "receipt": active_receipt,
     }
 
+    if bounded_carry_version == 1:
+        reg["bounded_carry"] = bc1_selection.registration_block(fan_in=bc1_fan_in)
     canonical_bytes = sg.canonical(reg)
 
     # Validate strictly with shared_generation.parse_registration
     sg.parse_registration(canonical_bytes)
-    _require_request_byte_calibration(active_audit_limits)
+    if bounded_carry_version == 0:
+        _require_request_byte_calibration(active_audit_limits)
 
     sizing = None
-    if sizing_record is not None or not profile_covered(project, arm, active_audit_limits):
+    if bounded_carry_version == 1:
+        from data_sheets_schema import bc1_registration
+        if not isinstance(sizing_record, SizingRecord):
+            sizing_record = SizingRecord.in_directory(sizing_record, project, effective_receipt=True)
+        context_raw = resolved_context_raw if resolved_context_raw is not None else resolved_context.read_bytes()
+        sizing = bc1_registration.size_inputs(reg, sizing_record=sizing_record,
+            context_raw=context_raw, schema_snapshot=full_schema)
+        bc1_registration.check_sizing_record(reg, sizing)
+    elif sizing_record is not None or not profile_covered(project, arm, active_audit_limits,
+            source_manifest=sm_resolved, root_dir=root_dir, registration=reg):
         if sizing_record is None:
             raise ValueError(
                 f"{project}: an audit-limit combination no partition profile covers needs a sizing record (#5155, #5211); "
@@ -1061,9 +1295,10 @@ def prepare_registration(
         # call that cannot fit is refused after every earlier stage is billed.
         # Integration is judged at the record's own plan with responses at
         # 10-22a's mean use of their caps; its worst case is only warned.
+        excesses = _sizing_excesses(sizing, active_audit_limits)
         for stage in SIZING_STAGES:
-            need, room = sizing[f"{stage}_input_tokens"], sizing["admissible_input_tokens"][stage]
-            if need > room:
+            if stage in excesses:
+                need, room = excesses[stage]
                 detail = (f" for its own plan ({sizing['plan_workers']} worker responses and the omission's at "
                           f"10-22a's mean use of their caps; {sizing['integration_base_input_tokens']:,} without them)"
                           if stage == "integration" else "")
@@ -1075,7 +1310,7 @@ def prepare_registration(
                     f"{active_audit_limits['max_input_tokens_per_call']:,}. The runtime would refuse it only on "
                     f"reaching it, after billing every earlier stage (#5155)"
                 )
-        if active_audit_limits["aggregate_input_tokens"] < sizing["aggregate_input_tokens"]:
+        if "aggregate" in excesses:
             raise ValueError(
                 f"{project}: aggregate_input_tokens {active_audit_limits['aggregate_input_tokens']:,} is below the "
                 f"typed-audit input sized on {sizing_record.full}: {sizing['max_workers']} workers x "
@@ -1397,9 +1632,8 @@ def parse_sizing_records(values: tuple[str, ...] | list[str]) -> dict[str, Path]
 )
 @click.option(
     "--partition", "partition",
-    type=click.Choice(sorted(PARTITION_PROFILES)),
-    help="Named audit partition bounds validated for a project, with their input allowance (chorus: "
-         "80 paths, 12,288 bytes, 4 workers, 4,000,000 input tokens; CHORUS only). Without it "
+    type=str,
+    help="Named audit partition declared for a project and arm, with its pinned sizing record. Without it "
          "--max-paths, --max-inventory-bytes, --max-workers and --aggregate-input-tokens are required, "
          "with a --sizing-record: none of them has a default.",
 )
@@ -1505,6 +1739,10 @@ def parse_sizing_records(values: tuple[str, ...] | list[str]) -> dict[str, Path]
     is_flag=True,
     help="Validate existing registrations and roster on disk without rebuilding; attests pinned bytes, not runtime admission.",
 )
+@click.option("--bounded-carry-version", type=click.IntRange(0, 1), default=0, show_default=True,
+              help="Explicit BC1 mode; version1 requires reviewed protected hooks and actual project sizing.")
+@click.option("--bc1-fan-in", type=click.IntRange(1, 2), default=2, show_default=True,
+              help="Registered BC1 worker inputs per integration group; never changed after dispatch.")
 @click.option(
     "--replace",
     is_flag=True,
@@ -1556,6 +1794,8 @@ def cli(
     synthesize_draft_context: bool,
     dry_run: bool,
     check: bool,
+    bounded_carry_version: int,
+    bc1_fan_in: int,
     replace: bool = False,
     worktree: Path | None = None,
 ) -> None:
@@ -1565,7 +1805,12 @@ def cli(
     """
     target_projects: list[str] = []
     if all_projects:
-        target_projects = load_registry(source_manifest or default_manifest_path()).projects()
+        selected_registry = load_registry(source_manifest or default_manifest_path())
+        target_projects = selected_registry.projects()
+        if not target_projects:
+            exists = selected_registry.path is not None and selected_registry.path.exists()
+            raise click.UsageError(f"--all source manifest {selected_registry.path} declares no projects "
+                                   f"({'exists' if exists else 'missing'})")
     elif projects:
         for p in projects:
             for item in p.split(","):
@@ -1635,7 +1880,7 @@ def cli(
                 except (FileNotFoundError, ValueError) as exc:
                     raise click.ClickException(f"Input pin verification failed for {reg_file.name}: {exc}") from exc
                 try:
-                    sized = check_registration_sizing(reg_file, raw)
+                    sized = check_registration_sizing(reg_file, raw, root_dir=worktree)
                 except ValueError as exc:
                     raise click.ClickException(str(exc)) from exc
                 verified[(proj, lbl)] = (reg_file, hashlib.sha256(raw).hexdigest())
@@ -1677,17 +1922,22 @@ def cli(
         part, overrides = limits_for(proj)
         if part is None and any(overrides.get(key) is None for key in PARTITION_KEYS):
             raise click.UsageError(
-                f"{proj}: audit partition bounds have no default (D-C, 2026-10-23): pass --partition chorus "
-                "for CHORUS, or --max-paths, --max-inventory-bytes and --max-workers (or --project-limits) "
+                f"{proj}: audit partition bounds have no default (D-C, 2026-10-23): pass a declared --partition "
+                "or --max-paths, --max-inventory-bytes and --max-workers (or --project-limits) "
                 "sized for the project"
             )
         try:
-            resolve_audit_limits(proj, part, overrides or None, arm=arm)
+            resolve_audit_limits(proj, part, overrides or None, arm=arm,
+                                 bounded_carry_version=bounded_carry_version, bc1_fan_in=bc1_fan_in,
+                                 source_manifest=select_manifest(proj, bundle,
+                                     requested=source_manifest if source_manifest is not None else AUTO),
+                                 root_dir=worktree)
         except ValueError as exc:
             raise click.UsageError(f"{proj}: {exc}") from exc
 
     registrations: list[dict[str, Any]] = []
     outputs: list[tuple[Path, bytes]] = []
+    selected_manifest = source_manifest
     click.echo(f"Building registrations for {target_projects} (arm: {arm}, labels: {target_labels})...")
 
     # Every registration is built, sized and checked before any file is written.
@@ -1704,7 +1954,7 @@ def cli(
                     id_prefix=id_prefix,
                     context_path=context_file,
                     context_dir=context_dir,
-                    source_manifest_path=source_manifest,
+                    source_manifest_path=selected_manifest,
                     bundle_path=bundle,
                     chunk_manifest_path=chunk_manifest,
                     profile_name=profile_name,
@@ -1715,6 +1965,8 @@ def cli(
                     synthesize_draft_context=synthesize_draft_context,
                     sizing_record=records.get(proj),
                     worktree=worktree,
+                    bounded_carry_version=bounded_carry_version,
+                    bc1_fan_in=bc1_fan_in,
                 )
             except (ValueError, FileNotFoundError) as exc:
                 raise click.ClickException(f"{proj} ({lbl}): {exc}") from exc
@@ -1725,7 +1977,15 @@ def cli(
             click.echo(
                 f"  ✓ {proj}: registration_id={reg['registration_id']} sha256={reg_sha} context_sha256={ctx_sha}"
             )
-            if sizing is not None:
+            if sizing is not None and bounded_carry_version == 1:
+                cap = sizing["own_plan_scenarios"]["visible_cap_ascii_scenario"]
+                click.echo(f"    BC1 actual record: {sizing['plan_workers']} workers, "
+                           f"{len(sizing['groups'])} integration groups and one final check; "
+                           f"{cap['calls']} calls in this plan")
+                click.echo("    Future response scenarios are hypothetical; actual provider counts remain required.")
+                click.echo(f"    sizing record {Path(sizing['sidecar']['path']).name} "
+                           f"sha256={sizing['sidecar']['sha256']}")
+            elif sizing is not None:
                 limits, room = reg["audit_limits"], sizing["admissible_input_tokens"]
                 click.echo(
                     f"    input sized on {sizing['sizing_record']['full']['path']}"
