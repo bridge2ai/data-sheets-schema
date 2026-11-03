@@ -239,6 +239,31 @@ def public_consumer(value: selected_model.Derived):
                and 'RunSpec-parameter-annotation' in candidate.reasons for candidate in candidates)
 
 
+@pytest.mark.parametrize('annotation', [
+    'selected_model.Derived',
+    'list[selected_model.Derived]',
+    'list["selected_model.Derived"]',
+    'Optional["selected_model.Derived"]',
+    '"list[selected_model.Derived]"',
+], ids=['direct', 'list-direct', 'list-quoted', 'optional-quoted', 'whole-quoted'])
+def test_qualified_subclass_forward_references_remain_visible(tmp_path, annotation):
+    root = _source(tmp_path, '''
+class RunSpec:
+    pass
+
+class Derived(RunSpec):
+    pass
+''', name='model.py')
+    (root / 'src/data_sheets_schema/consumer.py').write_text(
+        'from typing import Optional\n'
+        'from . import model as selected_model\n\n'
+        f'def public_consumer(value: {annotation}):\n'
+        '    return value\n')
+    candidates = discover(root)
+    assert any(candidate.identity == 'data_sheets_schema.consumer.public_consumer'
+               and 'RunSpec-parameter-annotation' in candidate.reasons for candidate in candidates)
+
+
 def test_new_public_callable_in_a_scratch_copy_has_no_implicit_exemption(tmp_path):
     root = _source(tmp_path, '''
 def original(spec):
