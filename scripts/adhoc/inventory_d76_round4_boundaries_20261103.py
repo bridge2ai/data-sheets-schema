@@ -37,16 +37,24 @@ def main():
     candidates = module.discover(source)
     files = sorted({candidate.path for candidate in candidates})
     hashes = {path: sha(source / path) for path in files}
+    sidecar = source / module.SIDECAR
+    sidecar_sha256 = sha(sidecar) if sidecar.is_file() else None
     rows = []
     for candidate in candidates:
-        mode, error = module.contract(candidate)
+        if candidate.source_sha256 != hashes[candidate.path]:
+            raise ValueError('source changed between discovery and contract inventory')
+        mode, error = module.contract(candidate, source)
         rows.append({**asdict(candidate), 'identity': candidate.identity,
                      'contract': mode, 'contract_error': error})
     if hashes != {path: sha(source / path) for path in files}:
         raise ValueError('candidate source changed during inventory')
+    if sidecar_sha256 != (sha(sidecar) if sidecar.is_file() else None):
+        raise ValueError('protected-contract sidecar changed during inventory')
     result = {'source': str(source), 'method': 'all package Python files, including ignored/hidden; AST only',
               'producer': str(Path(__file__).resolve()), 'producer_sha256': sha(Path(__file__)),
               'utility': str(utility), 'utility_sha256': sha(utility),
+              'protected_contract_sidecar': str(sidecar),
+              'protected_contract_sidecar_sha256': sidecar_sha256,
               'candidate_count': len(rows), 'candidate_source_sha256': hashes,
               'missing_contract_count': sum(row['contract_error'] is not None for row in rows),
               'candidates': rows,

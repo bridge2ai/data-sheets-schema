@@ -22,7 +22,7 @@ from tests.utils.run_spec_boundaries import contract, discover, missing_contract
 
 ROOT = Path(__file__).resolve().parents[1]
 DISCOVERED = discover(ROOT)
-GUARDED = tuple(candidate for candidate in DISCOVERED if contract(candidate) == ('guarded', None))
+GUARDED = tuple(candidate for candidate in DISCOVERED if contract(candidate, ROOT) == ('guarded', None))
 
 
 def test_every_public_runspec_boundary_has_an_explicit_contract():
@@ -264,8 +264,11 @@ class Derived(RunSpec):
                and 'RunSpec-parameter-annotation' in candidate.reasons for candidate in candidates)
 
 
-def test_new_public_callable_in_a_scratch_copy_has_no_implicit_exemption(tmp_path):
+def test_new_public_callable_in_a_scratch_copy_has_no_implicit_exemption(tmp_path, monkeypatch):
     root = _source(tmp_path, '''
+class RunSpec:
+    pass
+
 def original(spec):
     """RunSpec boundary: validated-caller
 
@@ -273,12 +276,18 @@ def original(spec):
     """
     return None
 ''')
+    monkeypatch.setitem(globals(), 'ROOT', root)
+    test_every_public_runspec_boundary_has_an_explicit_contract()
+    (tmp_path / 'closed-inventory-before.txt').write_text('Actual closed-inventory assertion passed before insertion.\n')
     assert missing_contracts(root) == ()
     path = root / 'src/data_sheets_schema/new_public_module.py'
     path.write_text('from .api_runner import RunSpec\n\ndef newly_added(value: RunSpec):\n    return value.bundle.read_bytes()\n')
     missing = missing_contracts(root)
     assert len(missing) == 1
     assert 'new_public_module.newly_added' in missing[0]
+    with pytest.raises(AssertionError, match=r'new_public_module\.newly_added') as failure:
+        test_every_public_runspec_boundary_has_an_explicit_contract()
+    (tmp_path / 'closed-inventory-after.txt').write_text(str(failure.getrepr()) + '\n')
 
 
 def test_explicit_other_type_classification_does_not_hide_a_runspec_annotation(tmp_path):
@@ -303,3 +312,35 @@ def test_a_guard_declaration_cannot_replace_the_runtime_refusal(external, monkey
     with pytest.raises(AssertionError):
         _assert_first_boundary(missing_guard, external, monkeypatch)
     _assert_first_boundary(api._require_registered_input_spellings, external, monkeypatch)
+
+
+def test_protected_contracts_bind_function_and_shared_source_bytes():
+    selected = next(row for row in DISCOVERED
+                    if row.identity == 'data_sheets_schema.shared_generation.capture')
+    assert contract(selected, ROOT) == ('validated-caller', None)
+    assert contract(replace(selected, function_sha256='0' * 64), ROOT)[1] == (
+        'protected function bytes, including docstring, changed')
+    assert contract(replace(selected, source_sha256='0' * 64), ROOT)[1] == (
+        'protected shared-generation source bytes changed')
+
+
+def test_latch_contract_pins_the_function_not_unrelated_module_docstrings():
+    selected = next(row for row in DISCOVERED
+                    if row.identity == 'data_sheets_schema.latch_journal.refuse_legacy_execution')
+    assert contract(selected, ROOT) == ('validated-caller', None)
+    assert contract(replace(selected, source_sha256='0' * 64), ROOT) == ('validated-caller', None)
+    assert contract(replace(selected, function_sha256='0' * 64), ROOT)[1] == (
+        'protected function bytes, including docstring, changed')
+
+
+def test_new_public_protected_function_has_no_sidecar_exemption(tmp_path):
+    import shutil
+
+    root = _source(tmp_path, 'def new_public(spec):\n    return spec\n', name='shared_generation.py')
+    destination = root / 'tests/utils'
+    destination.mkdir(parents=True)
+    shutil.copyfile(ROOT / 'tests/utils/run_spec_boundary_contracts.json',
+                    destination / 'run_spec_boundary_contracts.json')
+    missing = missing_contracts(root)
+    assert len(missing) == 1
+    assert 'data_sheets_schema.shared_generation.new_public' in missing[0]

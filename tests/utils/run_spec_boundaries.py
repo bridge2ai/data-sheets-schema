@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass
+import hashlib
+import json
 from pathlib import Path
 import re
 
@@ -23,6 +25,8 @@ class Boundary:
     parameters: tuple[tuple[str, str | None], ...]
     docstring: str
     member_kind: str
+    source_sha256: str
+    function_sha256: str
 
     @property
     def identity(self) -> str:
@@ -40,6 +44,8 @@ class _Definition:
     member_kind: str
     bindings: dict[str, str]
     call_bindings: dict[str, str]
+    source_sha256: str
+    function_sha256: str
 
     @property
     def identity(self):
@@ -61,9 +67,11 @@ def _annotation_text(node):
     return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else ast.unparse(node)
 
 
-def _mentions_runspec(text, bindings, runspec_classes=()):
+def _mentions_runspec(text, bindings, runspec_classes=(), *, _depth=0):
     if not text:
         return False
+    if _depth > 8:
+        raise ValueError('RunSpec annotation inventory exceeds eight forward-reference levels')
     names = set(re.findall(r'[A-Za-z_][A-Za-z_0-9]*', text))
     if ('RunSpec' in names or any(bindings.get(name, '').endswith('.RunSpec')
             or bindings.get(name) in runspec_classes for name in names)):
@@ -73,11 +81,16 @@ def _mentions_runspec(text, bindings, runspec_classes=()):
     # Parse syntax only; annotations and their referenced modules are not run.
     try:
         annotation = ast.parse(text, mode='eval')
-    except SyntaxError:
-        return False
-    return any(spelling and _resolve(spelling, bindings) in runspec_classes
-               for node in ast.walk(annotation)
-               for spelling in (_qualified(node),))
+    except SyntaxError as exc:
+        raise ValueError('unsupported source annotation in RunSpec inventory: ' + text) from exc
+    for node in ast.walk(annotation):
+        spelling = _qualified(node)
+        if spelling and _resolve(spelling, bindings) in runspec_classes:
+            return True
+        if (isinstance(node, ast.Constant) and isinstance(node.value, str)
+                and _mentions_runspec(node.value, bindings, runspec_classes, _depth=_depth + 1)):
+            return True
+    return False
 
 
 def _scope_nodes(tree):
@@ -166,7 +179,10 @@ def _definitions(root):
         if package:
             parts.pop()
         module = '.'.join(parts)
-        tree = ast.parse(path.read_text(), filename=str(relative))
+        raw = path.read_bytes()
+        lines = raw.splitlines(keepends=True)
+        source_sha256 = hashlib.sha256(raw).hexdigest()
+        tree = ast.parse(raw, filename=str(relative))
         bindings = _imports(tree, module, package)
 
         def walk(statements, parents=(), inside_function=False, owner_class=None,
@@ -185,7 +201,11 @@ def _definitions(root):
                         not inside_function and public_classes and not node.name.startswith('_'),
                         owner_class if not inside_function else None, kind, visible,
                         {**visible, **_imports(node, module, package, inherited=visible,
-                                             qualname='.'.join((*parents, node.name)))}))
+                                             qualname='.'.join((*parents, node.name)))},
+                        source_sha256,
+                        hashlib.sha256(b''.join(lines[
+                            min([node.lineno, *(item.lineno for item in node.decorator_list)]) - 1:
+                            node.end_lineno])).hexdigest()))
                     local = definitions[-1].call_bindings
                     walk(node.body, (*parents, node.name), True, None, public_classes, local)
                 elif isinstance(node, ast.ClassDef):
@@ -293,12 +313,66 @@ def discover(root: Path) -> tuple[Boundary, ...]:
         result.append(Boundary(
             definition.module, definition.qualname, definition.path, node.lineno,
             tuple(sorted(why)), tuple((arg.arg, _annotation_text(arg.annotation)) for arg in parameters),
-            ast.get_docstring(node) or '', definition.member_kind))
+            ast.get_docstring(node) or '', definition.member_kind,
+            definition.source_sha256, definition.function_sha256))
     return tuple(sorted(result, key=lambda candidate: (candidate.path, candidate.line, candidate.qualname)))
 
 
-def contract(boundary: Boundary) -> tuple[str | None, str | None]:
-    """Read an explicit source contract; never infer an exemption from a name."""
+SIDECAR = Path('tests/utils/run_spec_boundary_contracts.json')
+
+
+def _unique_json_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError('duplicate protected-contract JSON key: ' + key)
+        result[key] = value
+    return result
+
+
+def _protected_contract(boundary, root):
+    path = root / SIDECAR
+    if not path.exists():
+        if path.is_symlink():
+            raise ValueError('protected-contract sidecar must not be a symlink')
+        return None
+    if path.is_symlink() or not path.is_file():
+        raise ValueError('protected-contract sidecar must be a regular file')
+    document = json.loads(path.read_bytes(), object_pairs_hook=_unique_json_object)
+    if (document.get('schema_version') != 1
+            or document.get('approval', {}).get('authorized') is not True):
+        raise ValueError('protected contracts require the explicit recorded ruling')
+    rows = document.get('contracts')
+    if not isinstance(rows, list) or len(rows) != 21:
+        raise ValueError('protected contracts must contain exactly the 21 approved identities')
+    identities = [row.get('identity') for row in rows]
+    if any(not isinstance(identity, str) for identity in identities) or len(set(identities)) != len(rows):
+        raise ValueError('protected contract identities must be unique strings')
+    for row in rows:
+        if row['identity'] != boundary.identity:
+            continue
+        if (row.get('source_path') != boundary.path
+                or row.get('proposed_mode') != 'validated-caller'
+                or not isinstance(row.get('proposed_precondition'), str)
+                or not row['proposed_precondition'].strip()):
+            return None, 'protected contract identity/path/precondition differs'
+        if row.get('function_sha256') != boundary.function_sha256:
+            return None, 'protected function bytes, including docstring, changed'
+        if boundary.path == 'src/data_sheets_schema/shared_generation.py':
+            if document.get('shared_generation_sha256') != boundary.source_sha256:
+                return None, 'protected shared-generation source bytes changed'
+        elif boundary.identity != 'data_sheets_schema.latch_journal.refuse_legacy_execution':
+            return None, 'identity is outside the protected-contract ruling'
+        return 'validated-caller', None
+    return None
+
+
+def contract(boundary: Boundary, root: Path | None = None) -> tuple[str | None, str | None]:
+    """Read a source contract or exact approved pin, never a file-wide waiver."""
+    root = Path(root) if root is not None else Path(__file__).resolve().parents[2]
+    protected = _protected_contract(boundary, root)
+    if protected is not None:
+        return protected
     declarations = re.findall(r'^RunSpec boundary:\s*(\S+)\s*$', boundary.docstring, re.MULTILINE)
     if len(declarations) != 1:
         return None, 'needs exactly one RunSpec boundary declaration'
@@ -322,7 +396,7 @@ def missing_contracts(root: Path) -> tuple[str, ...]:
     """Return all unresolved candidates, including ignored/hidden Python files."""
     missing = []
     for candidate in discover(root):
-        _, error = contract(candidate)
+        _, error = contract(candidate, root)
         if error:
             missing.append(f'{candidate.path}:{candidate.line} {candidate.identity}: {error}')
     return tuple(missing)
