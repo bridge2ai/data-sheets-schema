@@ -1,5 +1,8 @@
 # BC1+G2 additive CI timings (#5485)
 
+The first section records the initial unscaled commit `6e578a600`; the current
+derived weights and their reproduction command are in the follow-up below.
+
 Parent `0ff5c9ba7665eb51b69e597c391cb1ae6a07c44c`; offline, 2026-11-03.
 Fresh collection: 22,364 cases, 635 files; 22,360 ordinary cases and four
 dedicated API cases. The 28 missing weights exactly match the collected files
@@ -58,3 +61,49 @@ Full report: sibling `plans/reviews/bc1_g2_ci_timing_2026-11-03.md`.
 Raw logs, JUnit, all per-file source-coverage checks, assignments and verification:
 sibling `scratch-bc1g2-timing/` (`measurement.json`, `verification.json`,
 `collection/`, `canary/`, `focused/`). The saved XML inputs are read-only.
+
+## Follow-up: measured-ratio scaling
+
+The lead authorized **local sum × 2.729** for exactly the six local-source files.
+Their values are **derived scheduling weights, not measured Linux runtimes**;
+the other 629 weights and all original measurement provenance are unchanged.
+`source.bc1_g2_measured_ratio_scaling_20261103` records each file's local sum,
+multiplier, derived value, and both complete-file comparison totals/artifact hashes.
+
+The comparison files are `test_shared_generation_runtime.py` (1071.593 local,
+2924.539 CI seconds; ratio 2.729150899642) and `test_d42_claude_d55.py`
+(1238.718 local, 3336.845 CI seconds; ratio 2.693789062563). The larger ratio
+rounded to three decimal places is the explicitly requested **2.729**.
+
+| File (`tests/`) | Local sum (s) | Derived weight (s) | PR shard | Main shard |
+| --- | ---: | ---: | ---: | ---: |
+| test_bc1_audit.py | 8.279 | 22.593391 | 6 | 2 |
+| test_bc1_g2_journal.py | 577.396 | 1575.713684 | 6 | 2 |
+| test_bc1_registration.py | 1063.186 | 2901.434594 | 3 | 3 |
+| test_bc1_runtime.py | 46.966 | 128.170214 | 3 | 4 |
+| test_g2_round2.py | 6.471 | 17.659359 | 4 | 4 |
+| test_wave7_bc1_formatter_cache.py | 0.194 | 0.529426 | 6 | 2 |
+
+Using the same case-seconds / 4 + 330.553-second formula, the heaviest PR
+estimate is **2140.518100 s**, 19.481900 s below 2160. **Main exceeds the
+2880-second threshold:** its heaviest estimate is **3045.500046 s**, an excess
+of **165.500046 s**. D75's 45/60-minute limits remain unchanged; the decision
+is the owner's. These are scheduling estimates, not observed Linux completion.
+The journal-before-parse case lands on PR 6/main 2; both long registration
+refusal cases land on PR 3/main 3.
+
+Rerun: **61 passed** (48 sharding, 13 timing-update), zero failures/errors/skips;
+246.62 pytest / 247.05 supervised seconds. The new-weight canary passed first.
+The unchanged runner remains serial outside, at most two nested workers, and
+bounded by 3600 seconds. Both plans preserve all 22,364 collected occurrences.
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python scripts/adhoc/scale_ci_timings_bc1g2_20261103.py
+PYTHONDONTWRITEBYTECODE=1 python scripts/adhoc/scale_ci_timings_bc1g2_20261103.py --verify-tests
+```
+
+`--apply` additionally updates the weights; the default writes scratch evidence.
+Current weights SHA256: `a554dc4277711297225ec79ba9b0dee0f83b5d6c98ed900cbff833814f90c499`.
+Full tables and the second commit identity are appended to the existing external
+report. Follow-up artifacts are in `scratch-bc1g2-timing/measured-ratio-scaling/`,
+`scaled-canary/` and `scaled-focused/`; initial evidence is retained unchanged.

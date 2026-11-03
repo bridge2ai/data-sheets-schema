@@ -388,9 +388,402 @@
           }
         }
       }
+    },
+    "bc1_g2_measured_ratio_scaling_20261103": {
+      "parent_commit": "6e578a6007a60b08bb37c0a29b66581d4dd5c6c4",
+      "parent_weights_sha256": "c790fef1855113af99516909515e89a11c77ffc3b51e1c9a1a8b3ff33d883600",
+      "manifest_sha256": "3d4124aa981280f61f5922d84e8f7ef833b766e547b8c351de1f385ac5136f07",
+      "authorization": "Lead follow-up: exactly six local-source weights = local sum x 2.729.",
+      "method": "Use the larger of the two observed complete-file CI/local ratios rounded to three decimal places as explicitly requested. Values are derived scheduling weights, not measured Linux runtimes; preserve all other weights and prior measurements.",
+      "files": {
+        "tests/test_bc1_audit.py": {
+          "value_kind": "derived",
+          "local_sum_seconds": 8.279,
+          "applied_ratio": 2.729,
+          "derived_seconds": 22.593391,
+          "local_artifacts": [
+            {
+              "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-11/junit.xml",
+              "sha256": "c32b51c8b3ccaadb6327df79341ad9341c7e3d79b8554844671b978389582e5b"
+            }
+          ],
+          "ratio_evidence": [
+            {
+              "file": "tests/test_shared_generation_runtime.py",
+              "local": {
+                "measured_seconds": 1071.593,
+                "cases": 10,
+                "artifacts": [
+                  {
+                    "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-02/junit.xml",
+                    "sha256": "b50c1cc328d4b9d05c2e8b14d295804a0b0ef74c2b4ccd0fa695dfbae5d9fc2f"
+                  }
+                ]
+              },
+              "linux_ci": {
+                "measured_seconds": 2924.539,
+                "cases": 10,
+                "artifacts": [
+                  {
+                    "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard4/pytest.xml",
+                    "sha256": "75aa17cf6057263242fb806e61228972bdc844120eebf5bf621066ee5a9e074d"
+                  }
+                ]
+              },
+              "observed_ratio": "2.729150899641934951049512268",
+              "ratio_rounded_to_three_decimals": 2.729
+            },
+            {
+              "file": "tests/test_d42_claude_d55.py",
+              "local": {
+                "measured_seconds": 1238.718,
+                "cases": 23,
+                "artifacts": [
+                  {
+                    "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-01/junit.xml",
+                    "sha256": "f509ab88cc132a3d9e1385e9d1d56c5fd4881419f27eb120160e497cd1b58d48"
+                  }
+                ]
+              },
+              "linux_ci": {
+                "measured_seconds": 3336.845,
+                "cases": 23,
+                "artifacts": [
+                  {
+                    "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard3/pytest.xml",
+                    "sha256": "55b6f3c70d91110a80b5c10dc6a2bf4580c36924c855a68ebc0759cc0f742e77"
+                  }
+                ]
+              },
+              "observed_ratio": "2.693789062563069237711892457",
+              "ratio_rounded_to_three_decimals": 2.694
+            }
+          ]
+        },
+        "tests/test_bc1_g2_journal.py": {
+          "value_kind": "derived",
+          "local_sum_seconds": 577.396,
+          "applied_ratio": 2.729,
+          "derived_seconds": 1575.713684,
+          "local_artifacts": [
+            {
+              "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-11/junit.xml",
+              "sha256": "c32b51c8b3ccaadb6327df79341ad9341c7e3d79b8554844671b978389582e5b"
+            }
+          ],
+          "ratio_evidence": [
+            {
+              "file": "tests/test_shared_generation_runtime.py",
+              "local": {
+                "measured_seconds": 1071.593,
+                "cases": 10,
+                "artifacts": [
+                  {
+                    "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-02/junit.xml",
+                    "sha256": "b50c1cc328d4b9d05c2e8b14d295804a0b0ef74c2b4ccd0fa695dfbae5d9fc2f"
+                  }
+                ]
+              },
+              "linux_ci": {
+                "measured_seconds": 2924.539,
+                "cases": 10,
+                "artifacts": [
+                  {
+                    "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard4/pytest.xml",
+                    "sha256": "75aa17cf6057263242fb806e61228972bdc844120eebf5bf621066ee5a9e074d"
+                  }
+                ]
+              },
+              "observed_ratio": "2.729150899641934951049512268",
+              "ratio_rounded_to_three_decimals": 2.729
+            },
+            {
+              "file": "tests/test_d42_claude_d55.py",
+              "local": {
+                "measured_seconds": 1238.718,
+                "cases": 23,
+                "artifacts": [
+                  {
+                    "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-01/junit.xml",
+                    "sha256": "f509ab88cc132a3d9e1385e9d1d56c5fd4881419f27eb120160e497cd1b58d48"
+                  }
+                ]
+              },
+              "linux_ci": {
+                "measured_seconds": 3336.845,
+                "cases": 23,
+                "artifacts": [
+                  {
+                    "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard3/pytest.xml",
+                    "sha256": "55b6f3c70d91110a80b5c10dc6a2bf4580c36924c855a68ebc0759cc0f742e77"
+                  }
+                ]
+              },
+              "observed_ratio": "2.693789062563069237711892457",
+              "ratio_rounded_to_three_decimals": 2.694
+            }
+          ]
+        },
+        "tests/test_bc1_registration.py": {
+          "value_kind": "derived",
+          "local_sum_seconds": 1063.186,
+          "applied_ratio": 2.729,
+          "derived_seconds": 2901.434594,
+          "local_artifacts": [
+            {
+              "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-11/junit.xml",
+              "sha256": "c32b51c8b3ccaadb6327df79341ad9341c7e3d79b8554844671b978389582e5b"
+            }
+          ],
+          "ratio_evidence": [
+            {
+              "file": "tests/test_shared_generation_runtime.py",
+              "local": {
+                "measured_seconds": 1071.593,
+                "cases": 10,
+                "artifacts": [
+                  {
+                    "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-02/junit.xml",
+                    "sha256": "b50c1cc328d4b9d05c2e8b14d295804a0b0ef74c2b4ccd0fa695dfbae5d9fc2f"
+                  }
+                ]
+              },
+              "linux_ci": {
+                "measured_seconds": 2924.539,
+                "cases": 10,
+                "artifacts": [
+                  {
+                    "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard4/pytest.xml",
+                    "sha256": "75aa17cf6057263242fb806e61228972bdc844120eebf5bf621066ee5a9e074d"
+                  }
+                ]
+              },
+              "observed_ratio": "2.729150899641934951049512268",
+              "ratio_rounded_to_three_decimals": 2.729
+            },
+            {
+              "file": "tests/test_d42_claude_d55.py",
+              "local": {
+                "measured_seconds": 1238.718,
+                "cases": 23,
+                "artifacts": [
+                  {
+                    "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-01/junit.xml",
+                    "sha256": "f509ab88cc132a3d9e1385e9d1d56c5fd4881419f27eb120160e497cd1b58d48"
+                  }
+                ]
+              },
+              "linux_ci": {
+                "measured_seconds": 3336.845,
+                "cases": 23,
+                "artifacts": [
+                  {
+                    "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard3/pytest.xml",
+                    "sha256": "55b6f3c70d91110a80b5c10dc6a2bf4580c36924c855a68ebc0759cc0f742e77"
+                  }
+                ]
+              },
+              "observed_ratio": "2.693789062563069237711892457",
+              "ratio_rounded_to_three_decimals": 2.694
+            }
+          ]
+        },
+        "tests/test_bc1_runtime.py": {
+          "value_kind": "derived",
+          "local_sum_seconds": 46.966,
+          "applied_ratio": 2.729,
+          "derived_seconds": 128.170214,
+          "local_artifacts": [
+            {
+              "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-11/junit.xml",
+              "sha256": "c32b51c8b3ccaadb6327df79341ad9341c7e3d79b8554844671b978389582e5b"
+            }
+          ],
+          "ratio_evidence": [
+            {
+              "file": "tests/test_shared_generation_runtime.py",
+              "local": {
+                "measured_seconds": 1071.593,
+                "cases": 10,
+                "artifacts": [
+                  {
+                    "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-02/junit.xml",
+                    "sha256": "b50c1cc328d4b9d05c2e8b14d295804a0b0ef74c2b4ccd0fa695dfbae5d9fc2f"
+                  }
+                ]
+              },
+              "linux_ci": {
+                "measured_seconds": 2924.539,
+                "cases": 10,
+                "artifacts": [
+                  {
+                    "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard4/pytest.xml",
+                    "sha256": "75aa17cf6057263242fb806e61228972bdc844120eebf5bf621066ee5a9e074d"
+                  }
+                ]
+              },
+              "observed_ratio": "2.729150899641934951049512268",
+              "ratio_rounded_to_three_decimals": 2.729
+            },
+            {
+              "file": "tests/test_d42_claude_d55.py",
+              "local": {
+                "measured_seconds": 1238.718,
+                "cases": 23,
+                "artifacts": [
+                  {
+                    "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-01/junit.xml",
+                    "sha256": "f509ab88cc132a3d9e1385e9d1d56c5fd4881419f27eb120160e497cd1b58d48"
+                  }
+                ]
+              },
+              "linux_ci": {
+                "measured_seconds": 3336.845,
+                "cases": 23,
+                "artifacts": [
+                  {
+                    "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard3/pytest.xml",
+                    "sha256": "55b6f3c70d91110a80b5c10dc6a2bf4580c36924c855a68ebc0759cc0f742e77"
+                  }
+                ]
+              },
+              "observed_ratio": "2.693789062563069237711892457",
+              "ratio_rounded_to_three_decimals": 2.694
+            }
+          ]
+        },
+        "tests/test_g2_round2.py": {
+          "value_kind": "derived",
+          "local_sum_seconds": 6.471,
+          "applied_ratio": 2.729,
+          "derived_seconds": 17.659359,
+          "local_artifacts": [
+            {
+              "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-11/junit.xml",
+              "sha256": "c32b51c8b3ccaadb6327df79341ad9341c7e3d79b8554844671b978389582e5b"
+            }
+          ],
+          "ratio_evidence": [
+            {
+              "file": "tests/test_shared_generation_runtime.py",
+              "local": {
+                "measured_seconds": 1071.593,
+                "cases": 10,
+                "artifacts": [
+                  {
+                    "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-02/junit.xml",
+                    "sha256": "b50c1cc328d4b9d05c2e8b14d295804a0b0ef74c2b4ccd0fa695dfbae5d9fc2f"
+                  }
+                ]
+              },
+              "linux_ci": {
+                "measured_seconds": 2924.539,
+                "cases": 10,
+                "artifacts": [
+                  {
+                    "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard4/pytest.xml",
+                    "sha256": "75aa17cf6057263242fb806e61228972bdc844120eebf5bf621066ee5a9e074d"
+                  }
+                ]
+              },
+              "observed_ratio": "2.729150899641934951049512268",
+              "ratio_rounded_to_three_decimals": 2.729
+            },
+            {
+              "file": "tests/test_d42_claude_d55.py",
+              "local": {
+                "measured_seconds": 1238.718,
+                "cases": 23,
+                "artifacts": [
+                  {
+                    "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-01/junit.xml",
+                    "sha256": "f509ab88cc132a3d9e1385e9d1d56c5fd4881419f27eb120160e497cd1b58d48"
+                  }
+                ]
+              },
+              "linux_ci": {
+                "measured_seconds": 3336.845,
+                "cases": 23,
+                "artifacts": [
+                  {
+                    "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard3/pytest.xml",
+                    "sha256": "55b6f3c70d91110a80b5c10dc6a2bf4580c36924c855a68ebc0759cc0f742e77"
+                  }
+                ]
+              },
+              "observed_ratio": "2.693789062563069237711892457",
+              "ratio_rounded_to_three_decimals": 2.694
+            }
+          ]
+        },
+        "tests/test_wave7_bc1_formatter_cache.py": {
+          "value_kind": "derived",
+          "local_sum_seconds": 0.194,
+          "applied_ratio": 2.729,
+          "derived_seconds": 0.529426,
+          "local_artifacts": [
+            {
+              "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-12/junit.xml",
+              "sha256": "0cced2f74577244880dfc3c1c77ae91fda7a7fd7a43b872f04a0998922d6e953"
+            }
+          ],
+          "ratio_evidence": [
+            {
+              "file": "tests/test_shared_generation_runtime.py",
+              "local": {
+                "measured_seconds": 1071.593,
+                "cases": 10,
+                "artifacts": [
+                  {
+                    "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-02/junit.xml",
+                    "sha256": "b50c1cc328d4b9d05c2e8b14d295804a0b0ef74c2b4ccd0fa695dfbae5d9fc2f"
+                  }
+                ]
+              },
+              "linux_ci": {
+                "measured_seconds": 2924.539,
+                "cases": 10,
+                "artifacts": [
+                  {
+                    "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard4/pytest.xml",
+                    "sha256": "75aa17cf6057263242fb806e61228972bdc844120eebf5bf621066ee5a9e074d"
+                  }
+                ]
+              },
+              "observed_ratio": "2.729150899641934951049512268",
+              "ratio_rounded_to_three_decimals": 2.729
+            },
+            {
+              "file": "tests/test_d42_claude_d55.py",
+              "local": {
+                "measured_seconds": 1238.718,
+                "cases": 23,
+                "artifacts": [
+                  {
+                    "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-01/junit.xml",
+                    "sha256": "f509ab88cc132a3d9e1385e9d1d56c5fd4881419f27eb120160e497cd1b58d48"
+                  }
+                ]
+              },
+              "linux_ci": {
+                "measured_seconds": 3336.845,
+                "cases": 23,
+                "artifacts": [
+                  {
+                    "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard3/pytest.xml",
+                    "sha256": "55b6f3c70d91110a80b5c10dc6a2bf4580c36924c855a68ebc0759cc0f742e77"
+                  }
+                ]
+              },
+              "observed_ratio": "2.693789062563069237711892457",
+              "ratio_rounded_to_three_decimals": 2.694
+            }
+          ]
+        }
+      }
     }
   },
-  "method": "Sum JUnit case times by collected file, with a 0.001-second floor. These are scheduling estimates, not wall-clock predictions or a test allowlist. Untimed collected files use the median known duration; obsolete entries are ignored. Missing-shard observations use elapsed time between consecutive results on each CI worker (first result measured from pytest session start; includes setup, prior teardown and scheduling delay). Unfinished cases use completed local JUnit times listed in source.supplement. Unmeasured prior entries retain their exact values. BC1/G2 additions (2026-11-03) only fill previously unweighted files: sum one complete source per current collected file, preferring run 41707437114, then run 41700664435 for G1 files, then round-2 local with-mode JUnit (macOS Python 3.13, two workers). Exact case-occurrence multisets and pinned XML SHA256 values are checked; 0.001-second floor, no local-time scaling. Completed failures/skips remain timing observations, not evidence of CI success. Original provenance and every existing weight are retained.",
+  "method": "Sum JUnit case times by collected file, with a 0.001-second floor. These are scheduling estimates, not wall-clock predictions or a test allowlist. Untimed collected files use the median known duration; obsolete entries are ignored. Missing-shard observations use elapsed time between consecutive results on each CI worker (first result measured from pytest session start; includes setup, prior teardown and scheduling delay). Unfinished cases use completed local JUnit times listed in source.supplement. Unmeasured prior entries retain their exact values. BC1/G2 additions (2026-11-03) only fill previously unweighted files: sum one complete source per current collected file, preferring run 41707437114, then run 41700664435 for G1 files, then round-2 local with-mode JUnit (macOS Python 3.13, two workers). Exact case-occurrence multisets and pinned XML SHA256 values are checked; 0.001-second floor, no local-time scaling. Completed failures/skips remain timing observations, not evidence of CI success. Original provenance and every existing weight are retained. Follow-up: measured-ratio scaling (2026-11-03) supersedes only the six initial local-source weights with local sum x 2.729, the larger of two observed complete-file Linux-CI/local ratios rounded to three decimals, as authorized by the lead. These six weights are derived, not measured; source.bc1_g2_measured_ratio_scaling_20261103 records each local sum, multiplier and both paired measurements with XML hashes. All other weights and the prior measured provenance remain unchanged.",
   "file_seconds": {
     "tests/test_abandoned_journal.py": 13.002,
     "tests/test_absence_lint.py": 140.49203,
@@ -450,18 +843,18 @@
     "tests/test_backfill_manifest_portability.py": 10.015,
     "tests/test_backoff_sleep.py": 0.169,
     "tests/test_bc1_api_rendering.py": 8.308,
-    "tests/test_bc1_audit.py": 8.279,
+    "tests/test_bc1_audit.py": 22.593391,
     "tests/test_bc1_codec.py": 0.038,
     "tests/test_bc1_context.py": 5.283,
     "tests/test_bc1_derivation_cache.py": 15.434,
     "tests/test_bc1_g2_integration.py": 30.493,
-    "tests/test_bc1_g2_journal.py": 577.396,
+    "tests/test_bc1_g2_journal.py": 1575.713684,
     "tests/test_bc1_g2_round2.py": 128.116,
     "tests/test_bc1_generality.py": 3.13,
     "tests/test_bc1_pipeline.py": 57.17,
-    "tests/test_bc1_registration.py": 1063.186,
+    "tests/test_bc1_registration.py": 2901.434594,
     "tests/test_bc1_resources.py": 0.483,
-    "tests/test_bc1_runtime.py": 46.966,
+    "tests/test_bc1_runtime.py": 128.170214,
     "tests/test_bc1_selection.py": 34.91,
     "tests/test_bc1_specificity.py": 2.469,
     "tests/test_blind_review_pack.py": 6.581141,
@@ -682,7 +1075,7 @@
     "tests/test_form_subtype_class_scope.py": 0.142,
     "tests/test_fresh_orphan_partial_generation.py": 17.238,
     "tests/test_g2_comparator.py": 0.328,
-    "tests/test_g2_round2.py": 6.471,
+    "tests/test_g2_round2.py": 17.659359,
     "tests/test_generality_context.py": 0.044,
     "tests/test_generality_evaluation.py": 18.905,
     "tests/test_generality_native_legacy.py": 0.028,
@@ -1025,7 +1418,7 @@
     "tests/test_wave6_a14_a17_sizing.py": 87.264,
     "tests/test_wave7_a17_vocabulary_warning.py": 5.852,
     "tests/test_wave7_bc1_d63_calibration.py": 12.679,
-    "tests/test_wave7_bc1_formatter_cache.py": 0.194,
+    "tests/test_wave7_bc1_formatter_cache.py": 0.529426,
     "tests/test_wcrate_copies.py": 0.664043
   }
 }
