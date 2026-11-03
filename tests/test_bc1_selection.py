@@ -18,6 +18,7 @@ import data_sheets_schema
 from data_sheets_schema import api_runner as api, bc1_selection as bc
 from data_sheets_schema import shared_generation as original_shared
 from scripts.adhoc import make_bc1_shared_generation_patch_20261027 as proposal
+from scripts.adhoc.prepare_wave7_bc1_shared_proposal_20261029 import transform as integrated_proposal
 from tests import test_shared_generation_selection as parent_tests
 from tests.test_generation_manifest_identity import external  # noqa: F401
 
@@ -36,7 +37,7 @@ def simulated_hooks(monkeypatch):
     shadow.__file__, shadow.__package__ = str(path), original_shared.__package__
     monkeypatch.setitem(sys.modules, name, shadow)
     monkeypatch.setattr(data_sheets_schema, 'shared_generation', shadow)
-    exec(compile(proposal.proposed_source(before.decode()), str(path) + ' [BC1 simulation]', 'exec'), shadow.__dict__)
+    exec(compile(integrated_proposal(before.decode()), str(path) + ' [BC1 simulation]', 'exec'), shadow.__dict__)
     for modname, module in tuple(sys.modules.items()):
         if modname.startswith('data_sheets_schema.') or modname == parent_tests.__name__:
             for key, value in tuple(vars(module).items()):
