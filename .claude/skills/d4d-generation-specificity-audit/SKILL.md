@@ -503,6 +503,14 @@ None falls back to a constant (#4025).
   not assume arbitrary compound
   selectors, helper delegation or nested dead functions are equivalent; changed
   shapes stop with “not derived” until explicitly supported and tested (#4263).
+- BC1's typed entry has exactly one top-level dispatch matching its derived
+  structure. Its position is not fixed. Before it, only the initial docstring,
+  non-star relative imports and bare calls to those uniquely bound imports with
+  name-valued arguments are admitted. This declares the syntax of guard calls;
+  it does not prove imported code pure. Assignments, returns, assignment
+  expressions, other prefix statements, duplicated dispatches and rebinding
+  dispatch names anywhere in the entry refuse. Evidence cites the matched
+  dispatch's actual source line (BG-1, 2026-11-03).
 - The guard in `build_phase` that raises on `render_version >= N` and
   `phase == "audit"`, in either order, gives the renderer from which the
   audit is a registered native batch. RunSpec's `render_version not in

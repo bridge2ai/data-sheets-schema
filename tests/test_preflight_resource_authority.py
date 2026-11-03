@@ -63,6 +63,11 @@ def selected_resources(tmp_path):
     shutil.copyfile(ROOT / "pyproject.toml", selected / "pyproject.toml")
     sources = [pin for key in ("full_schema", "core_schema") for pin in original["inputs"][key]["sources"]]
     sources.extend([original["runtime"]["config"], original["inputs"]["profile"]["vocabulary"]])
+    # Carry the declaration's referenced evidence, without naming any project
+    # or historical fixture here. The reader has already verified these pins.
+    for declaration in builder.partition_profiles().values():
+        sources.extend(declaration["sizing_record"].values())
+        sources.extend(declaration.get("calibration_bundle", {}).values())
     for pin in sources:
         if pin and Path(pin["path"]).is_relative_to(ROOT):
             source = Path(pin["path"])
@@ -74,7 +79,7 @@ def selected_resources(tmp_path):
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(raw)
     # Selected-tree authority includes A14's executable request closure.
-    for name in sg.REQUEST_CODE:
+    for name in (*sg.REQUEST_CODE, *builder.AUDIT_PARTITION_FILES):
         target = selected / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / name, target)
@@ -125,10 +130,14 @@ def test_explicit_project_manifest_comes_from_selected_tree(selected_resources):
     assert reg["inputs"]["profile"]["name"] == "neutral"
 
 
-@pytest.mark.parametrize("resource", ["prompt", "config", "vocabulary", "full_schema", "core_schema", "request_code"])
+@pytest.mark.parametrize("resource", ["prompt", "config", "vocabulary", "full_schema", "core_schema", "request_code",
+                                      *builder.AUDIT_PARTITION_FILES])
 def test_missing_selected_resource_refuses_without_fallback(selected_resources, resource):
     selected, original, args = selected_resources
-    if resource == "prompt":
+    if resource in builder.AUDIT_PARTITION_FILES:
+        builder.build_registration(**args)  # Positive selected-tree control.
+        relative = resource
+    elif resource == "prompt":
         relative = next(iter(sg.ASSET_HASHES))
     elif resource == "request_code":
         relative = sg.REQUEST_CODE[0]
@@ -141,10 +150,50 @@ def test_missing_selected_resource_refuses_without_fallback(selected_resources, 
     target = selected / relative
     target.unlink()
     before = Path.cwd()
-    with pytest.raises((OSError, ValueError)):
+    with pytest.raises((OSError, ValueError)) as error:
         builder.build_registration(**args)
+    if resource in builder.AUDIT_PARTITION_FILES:
+        assert str(target) in str(error.value)
     assert Path.cwd() == before
     assert (ROOT / relative).is_file()  # The other checkout still supplies it.
+
+
+def test_added_declaration_is_read_and_missing_or_malformed_refuses(selected_resources, monkeypatch):
+    selected, _, args = selected_resources
+    options = dict(source_manifest=Path(args["source_manifest_path"]), root_dir=selected)
+    before = builder.partition_profiles(**options)
+    extra = "config/additional_audit_partitions.yaml"
+    monkeypatch.setattr(builder, "AUDIT_PARTITION_FILES", (*builder.AUDIT_PARTITION_FILES, extra))
+    target = selected / extra
+    with pytest.raises(ValueError) as missing:
+        builder.partition_profiles(**options)
+    assert str(target) in str(missing.value)
+    target.write_text("projects: []\n")
+    with pytest.raises(ValueError) as malformed:
+        builder.partition_profiles(**options)
+    assert str(target) in str(malformed.value)
+    target.write_text("projects: {}\n")
+    assert builder.partition_profiles(**options) == before
+
+
+def test_multiple_declarations_keep_one_authority_per_project(selected_resources, monkeypatch):
+    import yaml
+    selected, _, args = selected_resources
+    options = dict(source_manifest=Path(args["source_manifest_path"]), root_dir=selected)
+    first = selected / builder.AUDIT_PARTITION_FILES[0]
+    extra = "config/additional_audit_partitions.yaml"
+    target = selected / extra
+    before = builder.partition_profiles(**options)
+    target.write_bytes(first.read_bytes())
+    monkeypatch.setattr(builder, "AUDIT_PARTITION_FILES", (*builder.AUDIT_PARTITION_FILES, extra))
+    assert builder.partition_profiles(**options) == before
+    document = yaml.safe_load(target.read_bytes())
+    project, entry = next(iter(document["projects"].items()))
+    entry["audit_partition"]["limits"]["max_paths"] += 1
+    target.write_text(yaml.safe_dump(document))
+    with pytest.raises(ValueError) as conflicting:
+        builder.partition_profiles(**options)
+    assert all(text in str(conflicting.value) for text in (project, str(first), str(target)))
 
 
 def test_selected_prompt_drift_is_not_hidden_by_callers_valid_prompt(selected_resources):

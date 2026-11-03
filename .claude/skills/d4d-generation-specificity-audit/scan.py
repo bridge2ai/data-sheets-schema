@@ -14083,6 +14083,58 @@ def _selection_text(selection):
             f"renderer {_span(selection['renderers'])}")
 
 
+def _bc1_entry_dispatch(tree, entry, expected, path):
+    """Find one structural dispatch after a closed class of guard statements.
+
+    The prefix permits the initial docstring, non-star relative imports, and
+    bare calls to those imported names with only name-valued arguments. Calls
+    must have a unique visible import. This is a structural guard-call contract,
+    not a purity proof for imported code. Other statements, assignment
+    expressions and rebinding any dispatch name anywhere in the entry refuse.
+    """
+    shape = ast.dump(expected, include_attributes=False)
+    matches = [stmt for stmt in entry.body
+               if ast.dump(stmt, include_attributes=False) == shape]
+    if len(matches) != 1:
+        raise _not_derived('the follow-up turns',
+                           f'expected exactly one BC1 dispatch in {path}; found {len(matches)}')
+    dispatch = matches[0]
+    prefix = entry.body[:entry.body.index(dispatch)]
+    for stmt in prefix:
+        if any(isinstance(node, ast.NamedExpr) for node in ast.walk(stmt)):
+            raise _not_derived('the follow-up turns',
+                               f'BC1 dispatch prefix contains NamedExpr at {path}:{stmt.lineno}')
+    names = {node.id for node in ast.walk(expected) if isinstance(node, ast.Name)}
+    dispatch_nodes = {id(node) for node in ast.walk(dispatch)}
+    for node in ast.walk(entry):
+        if id(node) in dispatch_nodes:
+            continue
+        for name in sorted(names):
+            if (isinstance(node, ast.Name) and node.id == name
+                    and isinstance(node.ctx, (ast.Store, ast.Del))) or _rebinding(node, name, entry):
+                raise _not_derived('the follow-up turns',
+                                   f'BC1 dispatch name `{name}` is rebound at {path}:{node.lineno}')
+    imports = set()
+    for index, stmt in enumerate(prefix):
+        if (index == 0 and isinstance(stmt, ast.Expr)
+                and isinstance(stmt.value, ast.Constant) and isinstance(stmt.value.value, str)):
+            continue
+        if (isinstance(stmt, ast.ImportFrom) and stmt.level > 0
+                and all(alias.name != '*' for alias in stmt.names)):
+            imports.update(alias.asname or alias.name for alias in stmt.names)
+            continue
+        if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
+            call = stmt.value
+            if (isinstance(call.func, ast.Name) and call.func.id in imports
+                    and all(isinstance(arg, ast.Name) for arg in call.args)
+                    and all(kw.arg is not None and isinstance(kw.value, ast.Name) for kw in call.keywords)):
+                _require_followup_binding(path, tree, entry, call)
+                continue
+        raise _not_derived('the follow-up turns',
+                           f'unsupported BC1 dispatch prefix {type(stmt).__name__} at {path}:{stmt.lineno}')
+    return dispatch
+
+
 def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes: dict) -> dict:
     """Direct imported helper calls, found through the runner's import closure.
 
@@ -14147,15 +14199,15 @@ def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes:
     return selected.run(spec, carry=carry, client=client, settings=settings, usage=usage)
 ''').body[0]
                     if (selector is None or entry_fn is None or selector.decorator_list or entry_fn.decorator_list
-                            or _params(selector) != ['spec'] or len(entry_fn.body) < 2
+                            or _params(selector) != ['spec']
                             or [ast.dump(n, include_attributes=False) for n in selector.body] !=
                                [ast.dump(n, include_attributes=False) for n in expected_selector.body]
-                            or ast.dump(entry_fn.body[1], include_attributes=False) !=
-                               ast.dump(expected_entry, include_attributes=False)
                             or sum(isinstance(n, ast.FunctionDef) and n.name == '_bc1' for n in dispatch_tree.body) != 1
                             or any(isinstance(n, ast.Name) and n.id == '_bc1' and isinstance(n.ctx, (ast.Store, ast.Del))
                                    or _rebinding(n, '_bc1', selector) for n in ast.walk(dispatch_tree))):
                         raise _not_derived('the follow-up turns', 'BC1 backend dispatch changed')
+                    dispatch = _bc1_entry_dispatch(dispatch_tree, entry_fn, expected_entry,
+                                                   _rel(root, dispatch_path))
                     for entry_tree, entry in ((dispatch_tree, entry_fn), (helper_tree, fn)):
                         if (entry.decorator_list
                                 or sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
@@ -14167,7 +14219,7 @@ def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes:
                     entries = [(caller, c) for caller in funcs.values() for c in ast.walk(caller)
                                if isinstance(c, ast.Call) and _imported_target(c, runner_bindings) == (_resolved(dispatch_path), 'run')]
                     dispatch_evidence = [f'{_rel(root, dispatch_path)}:{selector.lineno}',
-                                         f'{_rel(root, dispatch_path)}:{entry_fn.body[1].lineno}']
+                                         f'{_rel(root, dispatch_path)}:{dispatch.lineno}']
                 if not entries:
                     raise _not_derived("the follow-up turns", f"{rel}:{name} has no direct imported runner caller")
                 for phase in values:

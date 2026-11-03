@@ -165,7 +165,11 @@ def test_build_registration_finds_draft_contexts(tmp_path):
 
     reg = build_registration(
         project="CHORUS",
-        partition="chorus",
+        # This tests context discovery with a dummy bundle. Use the builder's
+        # explicit historical sizing route, not implicit calibration coverage.
+        audit_limits={"max_paths": 80, "max_inventory_bytes": 12288,
+                      "max_workers": 4, "aggregate_input_tokens": 4000000},
+        sizing_record=Path(__file__).resolve().parents[1] / "tests/fixtures/audit_batches/chorus_v10_2026-10-22a",
         label="test_label",
         registration_path=reg_path,
         bundle_path=bundle_path,

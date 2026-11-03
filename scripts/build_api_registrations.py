@@ -180,6 +180,9 @@ DEFAULT_AUDIT_LIMITS: dict[str, Any] = {
 # validated for its project; a multi-project build can give each project its
 # own (`--project-limits`).
 PARTITION_KEYS = ("max_paths", "max_inventory_bytes", "max_workers")
+# Selected-tree declaration resources, shared by the reader and tree builders.
+# Calibration pins inside these files remain relative to that selected tree.
+AUDIT_PARTITION_FILES = ("config/audit_partitions.yaml",)
 
 def _manifest_path(source_manifest: Path | None, *, root_dir: Path | None = None) -> Path:
     """Use the checkout anchor for explicit paths, including CLI prechecks."""
@@ -206,22 +209,28 @@ def partition_profiles(source_manifest: Path | None = None, *, root_dir: Path | 
         raise ValueError(str(exc)) from exc
     if not isinstance(registry.data.get("projects", {}), dict):
         raise ValueError(f"invalid projects mapping in source manifest {manifest}")
-    config = root / "config/audit_partitions.yaml"
-    try:
-        declared = load_yaml(config)
-    except (OSError, yaml.YAMLError, UnicodeError) as exc:
-        raise ValueError(f"cannot read audit partition declarations {config}: {exc}") from exc
-    if (not isinstance(declared, dict) or set(declared) != {"projects"}
-            or not isinstance(declared["projects"], dict)):
-        raise ValueError(f"invalid audit partition projects mapping in {config}")
-    for project, row in declared["projects"].items():
-        if not isinstance(project, str) or not isinstance(row, dict):
-            raise ValueError(f"{project}: invalid audit partition entry in {config}")
+    declared, origins = {}, {}
+    for relative in AUDIT_PARTITION_FILES:
+        config = root / relative
+        try:
+            document = load_yaml(config)
+        except (OSError, yaml.YAMLError, UnicodeError) as exc:
+            raise ValueError(f"cannot read audit partition declarations {config}: {exc}") from exc
+        if (not isinstance(document, dict) or set(document) != {"projects"}
+                or not isinstance(document["projects"], dict)):
+            raise ValueError(f"invalid audit partition projects mapping in {config}")
+        for project, row in document["projects"].items():
+            if not isinstance(project, str) or not isinstance(row, dict):
+                raise ValueError(f"{project}: invalid audit partition entry in {config}")
+            if project in declared and declared[project] != row:
+                raise ValueError(f"{project}: conflicting audit_partition declarations in {origins[project]} and {config}")
+            declared[project], origins[project] = row, config
     profiles = {}
     for project in registry.projects():
         entry = registry.entry(project)
         inline = isinstance(entry, dict) and "audit_partition" in entry
-        external = declared["projects"].get(project, {})
+        external = declared.get(project, {})
+        config = origins.get(project)
         if inline and "audit_partition" in external and entry["audit_partition"] != external["audit_partition"]:
             raise ValueError(f"{project}: conflicting audit_partition declarations in {registry.path} and {config}")
         row = entry if inline else external
