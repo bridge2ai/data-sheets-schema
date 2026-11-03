@@ -8,7 +8,7 @@
  NAME = "shared_generation_v1"
  FORMAT = "shared_generation_registration_v1"
  PROMPT = "src/download/prompts/d4d_generic_arm_prompt_v10.md"
-@@ -172,6 +173,8 @@
+@@ -258,6 +259,8 @@
  
  
  def select(spec) -> dict | None:
@@ -17,7 +17,7 @@
      version = getattr(spec, "shared_generation_version", 0)
      if type(version) is not int or version not in (0, 1, 2):
          raise ValueError("shared_generation_version must be the integer 0, 1 or 2")
-@@ -264,7 +267,8 @@
+@@ -350,7 +353,8 @@
          raise ValueError("unsupported shared registration format")
      _exact(value, {"format", "registration_id", "registration_path", "selection", "inputs",
                     "runtime", "audit_limits", "audit_transport", "receipt", "run"}
@@ -27,7 +27,7 @@
      if type(value['selection']) is not dict:
          raise ValueError("selected descriptor must be an object")
      if canonical(value["selection"]) != canonical(descriptor(version=version, condition=value['selection'].get('condition'))):
-@@ -351,6 +355,9 @@
+@@ -437,6 +441,9 @@
              raise ValueError('routing generation exceeds finite call/request bounds')
          if limits['max_output_tokens'] >= limits['context_limit_tokens']:
              raise ValueError("generation output cap leaves no input context")
@@ -37,18 +37,18 @@
      return value
  
  
-@@ -648,6 +655,10 @@
-     Software's induced keys are included for generation before values exist.
+@@ -742,6 +749,10 @@
+     descriptions and comments.
      """
      captured = _context_capture(spec)
 +    from .bc1_selection import enabled as bc1_enabled
 +    if bc1_enabled(spec):
 +        from .bc1_context import schema_context as bc1_schema_context
 +        return bc1_schema_context(captured, record)
+     retain = None if retain_description_paths is None else tuple(sorted({str(p) for p in retain_description_paths}))
      return memo(spec, 'schema_context', [canonical(schema_pin(captured.full_schema)),
          *[raw for _name, _path, raw in captured.full_schema.sources],
-         canonical(record)], lambda: _schema_context(captured, record))
-@@ -714,6 +725,10 @@
+@@ -851,6 +862,10 @@
  
  def plan(spec, settings):
      """No client or historical-output discovery; dynamic sizes remain unknown."""
