@@ -29,14 +29,26 @@ def save(path, value):
 
 
 def dependency_configuration(root):
+    root = Path(root).resolve()
+    source_roots = tuple(root / name for name in ("src", "tests", "scripts"))
+    environment_roots = tuple(Path(value).resolve() for value in (sys.prefix, sys.exec_prefix))
     paths = []
     for value in sys.path:
         if not value:
             continue
         path = Path(value)
-        if path.is_absolute() and path.exists() and not path.resolve().is_relative_to(root):
-            if str(path) not in paths:
-                paths.append(str(path))
+        if not path.is_absolute() or not path.exists():
+            continue
+        physical = path.resolve()
+        # Source imports are supplied explicitly by bootstrap, even when the
+        # interpreter environment itself happens to be rooted at this checkout.
+        if physical == root or any(physical.is_relative_to(source) for source in source_roots):
+            continue
+        if physical.is_relative_to(root) and not any(
+                physical.is_relative_to(prefix) for prefix in environment_roots):
+            continue
+        if str(path) not in paths:
+            paths.append(str(path))
     return {"paths": paths, "prefix": sys.prefix, "exec_prefix": sys.exec_prefix}
 
 

@@ -65,8 +65,19 @@ def _mentions_runspec(text, bindings, runspec_classes=()):
     if not text:
         return False
     names = set(re.findall(r'[A-Za-z_][A-Za-z_0-9]*', text))
-    return ('RunSpec' in names or any(bindings.get(name, '').endswith('.RunSpec')
-            or bindings.get(name) in runspec_classes for name in names))
+    if ('RunSpec' in names or any(bindings.get(name, '').endswith('.RunSpec')
+            or bindings.get(name) in runspec_classes for name in names)):
+        return True
+    # Preserve the full module-qualified spelling: splitting m.Derived into
+    # unrelated identifiers loses a known subclass reached through an import.
+    # Parse syntax only; annotations and their referenced modules are not run.
+    try:
+        annotation = ast.parse(text, mode='eval')
+    except SyntaxError:
+        return False
+    return any(spelling and _resolve(spelling, bindings) in runspec_classes
+               for node in ast.walk(annotation)
+               for spelling in (_qualified(node),))
 
 
 def _scope_nodes(tree):
@@ -259,8 +270,11 @@ def discover(root: Path) -> tuple[Boundary, ...]:
                     targets.add(local)
             if resolved in identities:
                 targets.add(resolved)
-        calls[definition.identity] = targets
-        reasons[definition.identity] = why
+        # Conditional declarations may share a qualified name. Retain the
+        # conservative union so a later untyped arm cannot erase an earlier
+        # RunSpec contract or factory call; every visible arm is then reviewed.
+        calls.setdefault(definition.identity, set()).update(targets)
+        reasons.setdefault(definition.identity, set()).update(why)
     while True:
         additions = {name for name, targets in calls.items() if targets & factory} - factory
         if not additions:
