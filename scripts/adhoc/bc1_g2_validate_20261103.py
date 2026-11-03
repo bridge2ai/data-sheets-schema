@@ -109,10 +109,12 @@ def run(tree, output, arguments):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=('archive', 'test', 'metadata', 'scope'))
+    parser.add_argument('action', choices=('archive', 'test', 'metadata', 'scope', 'group'))
     parser.add_argument('tree', type=Path)
     parser.add_argument('--ref')
     parser.add_argument('--output', type=Path)
+    parser.add_argument('--scope', type=Path)
+    parser.add_argument('--group', type=int)
     args, rest = parser.parse_known_args()
     if args.action == 'archive':
         archive(args.ref, args.tree.resolve())
@@ -120,5 +122,8 @@ if __name__ == '__main__':
         metadata(args.tree)
     elif args.action == 'scope':
         scope(args.output)
+    elif args.action == 'group':
+        groups = json.loads(args.scope.read_bytes())['groups']
+        raise SystemExit(run(args.tree, args.output, [*groups[args.group], *rest]))
     else:
         raise SystemExit(run(args.tree, args.output, rest))
