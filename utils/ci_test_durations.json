@@ -624,6 +624,7 @@
     "tests/test_status_context.py": 45.524,
     "tests/test_stream_evidence.py": 1.008,
     "tests/test_stream_guard.py": 0.017,
+    "tests/test_subprocess_deadline.py": 1.049,
     "tests/test_suite_does_not_mutate_the_schema.py": 45.444,
     "tests/test_term_validator_hook.py": 0.112,
     "tests/test_thinking_request.py": 13.785,
@@ -665,6 +666,9 @@
     "tests/test_wave7_5213_d76_round3_copy_origin.py": 17.454,
     "tests/test_wave7_5213_d76_round3_recorder.py": 17.889,
     "tests/test_wave7_5213_d76_round3_replay_flag.py": 7.003,
+    "tests/test_wave7_5213_d76_round4_boundaries.py": 9.931,
+    "tests/test_wave7_5213_d76_round4_inventory.py": 3.286,
+    "tests/test_wave7_5213_d76_round4_recorder.py": 30.424,
     "tests/test_wave7_5213_d76_specificity_prefix.py": 29.19,
     "tests/test_wave7_5213_d76_specificity_prefix_followup.py": 1.041,
     "tests/test_wave7_5213_d76_specificity_prefix_review.py": 62.792,
@@ -937,6 +941,159 @@
       ],
       "fallback_policy": "No invented measurement is installed. The unchanged plugin uses the median known collected-file duration.",
       "limits": "Local macOS/Python3.13, three pytest workers. JUnit case times are not runner-monotonic or CI wall-time guarantees. The builder-generated GitHub source label is deliberately not used for these local observations."
+    },
+    {
+      "kind": "local_round4_new_or_changed_file_junit",
+      "measured_commit": "e97831616f56f2741bdf9fa9d55c74afab3c6c46",
+      "base_commit": "1e0700be79fbc90340d07f8c6b04d470d06acfae",
+      "base_timings_sha256": "598b13502c5f5af898f4c85a35cc05b769830606cb4eb0245882d6e0a4d42cad",
+      "file_seconds": {
+        "tests/test_subprocess_deadline.py": 1.049,
+        "tests/test_wave7_5213_d76_round4_boundaries.py": 9.931,
+        "tests/test_wave7_5213_d76_round4_inventory.py": 3.286,
+        "tests/test_wave7_5213_d76_round4_recorder.py": 30.424
+      },
+      "test_cases": 64,
+      "test_source_sha256": {
+        "tests/test_subprocess_deadline.py": "98cd60c8aeba098287a50d5fbae5a0bf5171b9a298c61562092fd8461199fee2",
+        "tests/test_wave7_5213_d76_round4_boundaries.py": "042eba57ad5d5058d202e958f5e7e6e21a392b4f6678729e66545978b984ccbc",
+        "tests/test_wave7_5213_d76_round4_inventory.py": "b0ed118615b3fb390d7a1d175d557e05120510d5f07362bef7c5585845d1564c",
+        "tests/test_wave7_5213_d76_round4_recorder.py": "14f3a10b4da564b39ec2f2d583d671d96b90f57e9ac57fb362a630e8c29bdd92"
+      },
+      "source_runs": [
+        {
+          "directory": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/pr5213_d76_round4_2026-11-03/prelim-e9783-new-modules",
+          "head": "e97831616f56f2741bdf9fa9d55c74afab3c6c46",
+          "files": {
+            "plan.json": "2f3a2df1031f8ad7edfad3f9d77dacee2166ad1e0f305be28c2778eb375b1f9c",
+            "outcome.json": "6eb7d89a7c7e9f69fea73168e88e9e2483ce2b0c2d8e31e5bad59d9ee579a03a",
+            "nodes.json": "03755e53591cb3f8b84608f85a39a2b0d9daf159804cc68c58a8559f58009dae",
+            "phase-accounting.json": "a9fc72ff80e64a2242b8b786532ccd08f8bc670eae24a7fe341a364c72d5eaa9",
+            "source-before.json": "4e0e761ce490d0eb63682c58c24ff60904f9aa1d6719024f07e6fd01e5ef0e74",
+            "source-after.json": "4e0e761ce490d0eb63682c58c24ff60904f9aa1d6719024f07e6fd01e5ef0e74",
+            "pytest-command.json": "7fb165bc96536ac4398cc2fb5f6c32f8c8476b39e9c52aa68f17ce0386ee7cf0",
+            "pytest.xml": "ac99db922f849d567793a3b595484dde3de54c6877ee4b1d7c7b87141a2b5bb7"
+          },
+          "original_counts": {
+            "errors": 0,
+            "failed": 0,
+            "interrupted": 0,
+            "not_started": 0,
+            "passed": 64,
+            "skipped": 0,
+            "unexpected": 0,
+            "xpassed": 0
+          },
+          "original_run_all_passed": true
+        }
+      ],
+      "retired_modules": {
+        "tests/test_wave7_5213_d76_specificity_prefix.py": {
+          "base_commit": "1e0700be79fbc90340d07f8c6b04d470d06acfae",
+          "source_sha256": "9af3d57f6dc6bffbee76bab83fa2d80330507d126e884b33be7cbfe963f33aa7",
+          "absent_at_measured_commit": "e97831616f56f2741bdf9fa9d55c74afab3c6c46"
+        },
+        "tests/test_wave7_5213_d76_specificity_prefix_followup.py": {
+          "base_commit": "1e0700be79fbc90340d07f8c6b04d470d06acfae",
+          "source_sha256": "b33defd477704e7edbeda813d096483f78ff76c6feac570ad332497d38ebabf7",
+          "absent_at_measured_commit": "e97831616f56f2741bdf9fa9d55c74afab3c6c46"
+        },
+        "tests/test_wave7_5213_d76_specificity_prefix_review.py": {
+          "base_commit": "1e0700be79fbc90340d07f8c6b04d470d06acfae",
+          "source_sha256": "cfd9fd371537a782c129849eee6512dc50528f55ae7cbf029521075833febe08",
+          "absent_at_measured_commit": "e97831616f56f2741bdf9fa9d55c74afab3c6c46"
+        }
+      },
+      "retained_prior_revision_modules": [
+        "tests/test_wave7_5213_d76_registration.py"
+      ],
+      "retained_revision_policy": "Old measurements keep their original source commits and digests. The partition verifier requires an exact reviewed source-transition manifest before use.",
+      "collection": {
+        "directory": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/pr5213_d76_round4_2026-11-03/prelim-e9783-full-collection",
+        "head": "e97831616f56f2741bdf9fa9d55c74afab3c6c46",
+        "files": {
+          "plan.json": "c9622ce680c6772d94349c70330ca01c5cf5feb5b7446ee42961e13c69f07448",
+          "outcome.json": "630b0b3f542848db5773241a8254fb89c83aee3665d84ee8f6d26346b11f6222",
+          "nodes.json": "b9ed90abd9df26405ce344d1f59c31a1becc5709ee6083adce89f44feae3399f",
+          "phase-accounting.json": "e564b24bbc72d029c3d43fce60d332575732793a0f3949984311b67b1daf14d0",
+          "source-before.json": "4e0e761ce490d0eb63682c58c24ff60904f9aa1d6719024f07e6fd01e5ef0e74",
+          "source-after.json": "4e0e761ce490d0eb63682c58c24ff60904f9aa1d6719024f07e6fd01e5ef0e74",
+          "pytest-command.json": "b3c4a062942a4411fa4dcc7bed7a93c5df4072ff925929c96a37b088b414ce7b"
+        },
+        "expected_occurrences": {
+          "tests/test_subprocess_deadline.py::test_default_route_has_no_review_adapter": 1,
+          "tests/test_subprocess_deadline.py::test_review_adapter_must_bind_source_and_bytes[digest]": 1,
+          "tests/test_subprocess_deadline.py::test_review_adapter_must_bind_source_and_bytes[root]": 1,
+          "tests/test_subprocess_deadline.py::test_review_adapter_must_bind_source_and_bytes[head]": 1,
+          "tests/test_subprocess_deadline.py::test_explicit_valid_adapter_is_selected_without_import": 1,
+          "tests/test_subprocess_deadline.py::test_child_marker_cannot_select_another_node_or_process[node]": 1,
+          "tests/test_subprocess_deadline.py::test_child_marker_cannot_select_another_node_or_process[pid]": 1,
+          "tests/test_subprocess_deadline.py::test_exact_child_marker_returns_to_the_original_assertion_body": 1,
+          "tests/test_subprocess_deadline.py::test_ordinary_child_strips_ambient_review_plugins_and_credentials": 1,
+          "tests/test_subprocess_deadline.py::test_dependencies_follow_parent_paths_not_a_venv_directory_formula": 1,
+          "tests/test_subprocess_deadline.py::test_repository_local_environment_dependencies_are_retained": 1,
+          "tests/test_subprocess_deadline.py::test_ordinary_utility_and_sg2_wrapper_do_not_import_review_scripts": 1,
+          "tests/test_subprocess_deadline.py::test_timeout_retires_owned_group_before_final_reap": 1,
+          "tests/test_subprocess_deadline.py::test_live_or_unobserved_group_never_counts_as_retired[42 42 Z\\n43 42 S\\n-0]": 1,
+          "tests/test_subprocess_deadline.py::test_live_or_unobserved_group_never_counts_as_retired[43 42 Z\\n-0]": 1,
+          "tests/test_subprocess_deadline.py::test_live_or_unobserved_group_never_counts_as_retired[-1]": 1,
+          "tests/test_subprocess_deadline.py::test_live_or_unobserved_group_never_counts_as_retired[malformed\\n-0]": 1,
+          "tests/test_subprocess_deadline.py::test_generic_child_runs_a_real_case_in_a_non_git_source": 1,
+          "tests/test_wave7_5213_d76_round4_boundaries.py::test_public_phase_builder_refuses_before_shared_authority": 1,
+          "tests/test_wave7_5213_d76_round4_boundaries.py::test_public_phase_builder_does_not_mix_changed_bundle_with_cached_instruction": 1,
+          "tests/test_wave7_5213_d76_round4_boundaries.py::test_native_registration_refuses_drift_before_reading_input_pins[registration]": 1,
+          "tests/test_wave7_5213_d76_round4_boundaries.py::test_native_registration_refuses_drift_before_reading_input_pins[write_registration]": 1,
+          "tests/test_wave7_5213_d76_round4_boundaries.py::test_public_rendering_refuses_drift_before_prompt_or_input_reads[resolve_prompt]": 1,
+          "tests/test_wave7_5213_d76_round4_boundaries.py::test_public_rendering_refuses_drift_before_prompt_or_input_reads[instruction]": 1,
+          "tests/test_wave7_5213_d76_round4_boundaries.py::test_valid_phase_inspection_preserves_bound_inputs_and_literal_instruction[False]": 1,
+          "tests/test_wave7_5213_d76_round4_boundaries.py::test_valid_phase_inspection_preserves_bound_inputs_and_literal_instruction[True]": 1,
+          "tests/test_wave7_5213_d76_round4_boundaries.py::test_unchanged_native_spec_retains_valid_registration_and_exclusive_write[registration]": 1,
+          "tests/test_wave7_5213_d76_round4_boundaries.py::test_unchanged_native_spec_retains_valid_registration_and_exclusive_write[write_registration]": 1,
+          "tests/test_wave7_5213_d76_round4_boundaries.py::test_literal_historical_rendering_retains_recorded_spelling": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_every_public_runspec_boundary_has_an_explicit_contract": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_declared_entry_guard_precedes_input_model_and_authority[data_sheets_schema.api_runner.RunSpec.base_prompt]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_declared_entry_guard_precedes_input_model_and_authority[data_sheets_schema.api_runner.resolve_prompt]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_declared_entry_guard_precedes_input_model_and_authority[data_sheets_schema.api_runner.build_phase]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_declared_entry_guard_precedes_input_model_and_authority[data_sheets_schema.api_runner.plan]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_declared_entry_guard_precedes_input_model_and_authority[data_sheets_schema.api_runner.execute]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_declared_entry_guard_precedes_input_model_and_authority[data_sheets_schema.native_attribution_registration.registration]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_declared_entry_guard_precedes_input_model_and_authority[data_sheets_schema.native_attribution_registration.write_registration]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_inventory_discovers_members_annotations_factories_and_untyped_signatures": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_inventory_follows_runspec_subclass_and_alias_factories": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_function_local_import_cannot_hide_a_public_runspec_annotation": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_match_arm_declarations_remain_public_inventory_candidates": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_conditional_definition_cannot_erase_another_arms_runspec_contract": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_module_qualified_subclass_annotation_is_a_runspec_boundary": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_qualified_subclass_forward_references_remain_visible[direct]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_qualified_subclass_forward_references_remain_visible[list-direct]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_qualified_subclass_forward_references_remain_visible[list-quoted]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_qualified_subclass_forward_references_remain_visible[optional-quoted]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_qualified_subclass_forward_references_remain_visible[whole-quoted]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_non_type_annotation_metadata_does_not_break_inventory[literal-value]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_non_type_annotation_metadata_does_not_break_inventory[annotated-metadata]": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_annotated_forward_type_remains_visible_beside_plain_metadata": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_new_public_callable_in_a_scratch_copy_has_no_implicit_exemption": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_explicit_other_type_classification_does_not_hide_a_runspec_annotation": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_a_guard_declaration_cannot_replace_the_runtime_refusal": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_protected_contracts_bind_function_and_shared_source_bytes": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_latch_contract_pins_the_function_not_unrelated_module_docstrings": 1,
+          "tests/test_wave7_5213_d76_round4_inventory.py::test_new_public_protected_function_has_no_sidecar_exemption": 1,
+          "tests/test_wave7_5213_d76_round4_recorder.py::test_in_place_bundle_edit_is_asserted_despite_absolute_bound_paths[True]": 1,
+          "tests/test_wave7_5213_d76_round4_recorder.py::test_in_place_bundle_edit_is_asserted_despite_absolute_bound_paths[False]": 1,
+          "tests/test_wave7_5213_d76_round4_recorder.py::test_absolute_declarations_without_valid_chunk_byte_evidence_remain_asserted[stale_digest]": 1,
+          "tests/test_wave7_5213_d76_round4_recorder.py::test_absolute_declarations_without_valid_chunk_byte_evidence_remain_asserted[missing_manifest]": 1,
+          "tests/test_wave7_5213_d76_round4_recorder.py::test_absolute_declarations_without_valid_chunk_byte_evidence_remain_asserted[malformed_manifest]": 1,
+          "tests/test_wave7_5213_d76_round4_recorder.py::test_matching_bound_manifest_verifies_only_the_evidenced_bundle[nested]": 1,
+          "tests/test_wave7_5213_d76_round4_recorder.py::test_matching_bound_manifest_verifies_only_the_evidenced_bundle[root]": 1
+        }
+      },
+      "input_manifest": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/pr5213_d76_round4_2026-11-03/round4-timing-manifest-e978.json",
+        "sha256": "5d90c78f63664c8b898cc7747146fa2ff46e1ff959ea3e90dd6db89e72344ac1"
+      },
+      "producer_sha256": "c1c8517da6d33cce1b94817ef20174fdbb57b1fc453e20986177b81c43e8e674",
+      "updater_sha256": "5b9ac3b7f2fe2db0076be4b39adb8ad8bfe2c5ceee79543a0b330dd2e9686f3d",
+      "limits": "Local macOS/Python, at most two workers; scheduling estimates, not CI wall-time guarantees."
     }
   ]
 }
