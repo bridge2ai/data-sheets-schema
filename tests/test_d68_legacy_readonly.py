@@ -173,6 +173,65 @@ def test_completed_legacy_verifier_is_readonly(case, tmp_path, monkeypatch):
     assert result["legacy_unverifiable"] and not result["campaign_eligible"]
     assert result["new_calls"] == 0 and result["accounting_completeness"] == "unknown"
     assert len(result["observed_usage"]) == 4
+    from data_sheets_schema import run_schema
+    record = yaml.safe_load(selected.provenance_path.read_bytes())
+    assert set(result["schema_basis"]) == {"full", "core"}
+    for role in ("full", "core"):
+        raw, basis = run_schema.run_schema_bytes(record, kind=role)
+        assert raw is not None and basis["source"] != run_schema.TODAY
+        assert hashlib.sha256(raw).hexdigest() == record["schema"][role + "_sha256"]
+        assert result["schema_basis"][role] == basis
+    assert tree(root) == before
+
+
+@pytest.mark.parametrize("role", ["full", "core"])
+@pytest.mark.parametrize("git_available", [True, False])
+def test_verifier_refuses_unrecoverable_schema_with_resolution_reason(role, git_available, tmp_path, monkeypatch):
+    from data_sheets_schema import provenance, run_schema
+    root, old, selected = fixture("i1", tmp_path)
+    no_verifier_execution(monkeypatch)
+    record = yaml.safe_load(selected.provenance_path.read_bytes())
+    # Keep the other role resolvable even in an archive with no git history.
+    for kind in ("full", "core"):
+        raw = Path(record["schema"][kind + "_path"]).read_bytes()
+        for algorithm in ("sha256", "md5"):
+            key = kind + "_" + algorithm
+            if key in record["schema"]:
+                record["schema"][key] = hashlib.new(algorithm, raw).hexdigest()
+    record["schema"][role + "_sha256"] = "0" * 64
+    selected.provenance_path.write_text(yaml.safe_dump(record))
+    if not git_available:
+        def unavailable(*args, **kwargs):
+            raise provenance.GitUnavailable("not a git repository")
+        monkeypatch.setattr(provenance, "committed_bytes_for", unavailable)
+    raw, basis = run_schema.run_schema_bytes(record, kind=role)
+    assert raw is None and basis["reason"]
+    before = tree(root)
+    with pytest.raises(ledger.UsageLedgerError) as caught:
+        journal.verify_completed_legacy(selected.provenance_path, evidence_root=root, recorded_root=old)
+    assert str(caught.value) == (
+        f"latch journal: legacy {role} schema bytes cannot be established: {basis['reason']}")
+    assert "changed" not in str(caught.value)
+    assert tree(root) == before
+
+
+@pytest.mark.parametrize("role", ["full", "core"])
+@pytest.mark.parametrize("path", ["/outside/schema.yaml", "../schema.yaml"])
+def test_verifier_preserves_schema_path_refusal(role, path, tmp_path, monkeypatch):
+    from data_sheets_schema import run_schema
+    root, old, selected = fixture("i1", tmp_path)
+    no_verifier_execution(monkeypatch)
+    record = yaml.safe_load(selected.provenance_path.read_bytes())
+    record["schema"][role + "_path"] = path
+    selected.provenance_path.write_text(yaml.safe_dump(record))
+    resolve = run_schema.run_schema_bytes
+    def checked(record, *, kind):
+        assert kind != role, "unsafe path reached schema resolution"
+        return resolve(record, kind=kind)
+    monkeypatch.setattr(run_schema, "run_schema_bytes", checked)
+    before = tree(root)
+    with pytest.raises(ledger.UsageLedgerError, match="invalid schema resource path"):
+        journal.verify_completed_legacy(selected.provenance_path, evidence_root=root, recorded_root=old)
     assert tree(root) == before
 
 
