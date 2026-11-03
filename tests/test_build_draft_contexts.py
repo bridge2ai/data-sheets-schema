@@ -161,7 +161,8 @@ def test_build_registration_finds_draft_contexts(tmp_path):
     bundle_path = tmp_path / "bundle.txt"
     chunks_path = tmp_path / "chunks.yaml"
     bundle_path.write_text("DUMMY BUNDLE CONTENT\n", encoding="utf-8")
-    chunks_path.write_text("version: 2\nchunks: []\n", encoding="utf-8")
+    from data_sheets_schema.chunking import build_manifest, dump_manifest
+    chunks_path.write_text(dump_manifest(build_manifest(bundle_path)), encoding="utf-8")
 
     reg = build_registration(
         project="CHORUS",
