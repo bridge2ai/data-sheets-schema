@@ -435,8 +435,10 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     _require_repo_root_cwd.
 
     Hardware, software versions and current input hashes are observed here.
-    Input consumption remains caller-asserted unless an admitted instruction
-    independently binds its absolute input paths. Use this inside generation.
+    Bundle consumption remains caller-asserted unless an admitted instruction
+    binds absolute paths and its chunk manifest attests the hashed bundle
+    digest. Chunk/source-manifest consumption retains separate evidence gaps.
+    Use this inside generation.
 
     Pass --prompt for every prompt file the run consumed. Without it the
     record's `prompts` block is null, which is what the agentic path produced
@@ -817,8 +819,19 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             selected = None
             manifest_basis = f"the arm's header declares the source manifest unused ({manifest_unused_line.manifest_line})"
 
-    input_verified = (instruction_admitted
-                      and _record_absolute_input_declarations(spec, supplied_text, selected is not None))
+    # Admitted paths identify the selected files, not their earlier contents.
+    # Require the instruction-bound chunk manifest to attest the exact bundle
+    # digest captured above. Missing, stale or malformed evidence remains an
+    # assertion; the post-build anchor/digest checks below still reject races.
+    from data_sheets_schema.chunking import chunks_input
+    chunk_anchor = record_inputs["chunk_manifest"]
+    input_verified = (
+        instruction_admitted
+        and _record_absolute_input_declarations(spec, supplied_text, selected is not None)
+        and record_bundle is not None and chunk_anchor is not None
+        and chunks_input(record_bundle.address, record_bundle.md5,
+                         manifest=chunk_anchor.address,
+                         source_manifest=selected_manifest) is not None)
     rec = build_record(project, method, label, mode="live",
                        # The selected manifest owns outputs even when this
                        # arm consumes none of its context blocks.
@@ -827,6 +840,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                                  if key in {"full", "core", "report"}} if registered is not None else None),
                        input_bundle=Path(input_bundle) if input_bundle else None,
                        input_verified=input_verified, input_asserted=not input_verified,
+                       input_sidecars_asserted=True,
                        prompt_paths=[Path(p) for p in prompts] or None,
                        prompt_request=supplied_text,
                        prompt_request_spec=spec,
@@ -966,8 +980,9 @@ def _record_input_spellings(value, anchor: _RecorderInput | None, owner: Path) -
 
 
 def _record_absolute_input_declarations(spec, instruction, manifest_used: bool) -> bool:
-    """Verify only the admitted renderer's explicit absolute input declarations.
+    """Recognize the admitted renderer's explicit absolute input declarations.
 
+    These declarations bind paths, not the bytes previously consumed.
     Older/other renderers and missing instructions remain caller assertions.
     No ledger, progress file, receipt or freshly computed identity is treated
     as evidence of what the earlier run consumed by this recorder.

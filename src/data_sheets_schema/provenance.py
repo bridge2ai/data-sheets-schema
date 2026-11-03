@@ -1633,6 +1633,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  input_bundle: Path | None = None,
                  input_verified: bool = False,
                  input_asserted: bool = False,
+                 input_sidecars_asserted: bool = False,
                  concat_dir: Path = CONCAT_DIR,
                  prompt_paths: list[Path] | None = None,
                  prompt_request: str | None = None,
@@ -1659,6 +1660,10 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     ``input_asserted`` is the live recorder's explicit alternative: hash the
     caller-selected files, but qualify their relationship to the consumed
     inputs under ``hash_basis`` and ``unverified``. It grants no verification.
+    ``hash_basis`` describes the bundle digest. ``input_sidecars_asserted``
+    separately marks chunk/source-manifest bytes as unverified when the live
+    recorder has evidence for the bundle but not those sidecars' consumption.
+    It does not change the explicit verification contract of other callers.
 
     ``manifest`` is the source manifest the run *consulted*: a path, or
     ``None`` for a run that selected none, or ``registry.AUTO`` to decide by
@@ -1681,6 +1686,9 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     if input_asserted and (input_verified or mode != "live"):
         raise ValueError("asserted input capture requires live, unverified provenance")
     hash_inputs = input_verified or input_asserted
+    if input_sidecars_asserted and (mode != "live" or not hash_inputs):
+        raise ValueError("asserted sidecar capture requires live input hashing")
+    sidecars_unverified = input_asserted or input_sidecars_asserted
     # Taken from the caller when it knows, reconstructed only when it does not.
     # A run with `--out-dir` writes flat into that directory, and rebuilding the
     # standard layout here made the record name output and companion files that
@@ -1769,8 +1777,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                                       else "asserted by the recorder caller; consumed bytes not independently verified")})
         if input_asserted:
             unverified.append({"field": "inputs.bundle_md5",
-                               "reason": "the selected file was hashed, but no admitted absolute input declaration "
-                                         "or run-written digest establishes the bytes consumed; "
+                               "reason": "the selected file was hashed, but no admitted matching bundle digest "
+                                         "establishes the bytes consumed; absolute input paths alone are not byte evidence; "
                                          "this recorder does not consult usage ledgers or progress journals"})
         # The chunk manifest that anchors a coverage receipt's ids to these
         # bytes (#707) — only when one exists for exactly this md5; a manifest
@@ -1782,10 +1790,14 @@ def build_record(project: str, method: str, label: str, *, mode: str,
             inputs["chunks"]["path"] = str(Path(inputs["chunks"]["path"]).absolute())
         elif inputs["chunks"] is not None and inputs["chunks"].get("path"):
             inputs["chunks"]["path"] = str(_rel_if_owned(Path(inputs["chunks"]["path"])))
-        if input_asserted and inputs["chunks"] is not None:
+        if sidecars_unverified:
             unverified.append({"field": "inputs.chunks.sha256",
-                               "reason": "the selected chunk manifest matches the caller's bundle; "
-                                         "its consumption by the run is asserted, not independently verified"})
+                               "reason": (
+                                   "the selected chunk manifest matches the caller's bundle, but its earlier bytes "
+                                   "and consumption by the run are not independently verified"
+                                   if inputs["chunks"] is not None else
+                                   "no valid chunk manifest attests the selected bundle; "
+                                   "the chunk bytes consumed by the run are not independently verified")})
     elif bundle:
         inputs["bundle_md5"] = None
         inputs["chunks"] = None      # nothing anchors chunk ids to unverified bytes (#716)
@@ -1834,7 +1846,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
             manifest_md5 = None
         if hash_inputs and manifest_md5 is not None:
             inputs["source_manifest"] = {"path": str(manifest), "md5": manifest_md5}
-            if input_asserted:
+            if sidecars_unverified:
                 unverified.append({"field": "inputs.source_manifest.md5",
                                    "reason": "the caller-selected source manifest was hashed; "
                                              "the bytes consumed by the run are not independently verified"})
