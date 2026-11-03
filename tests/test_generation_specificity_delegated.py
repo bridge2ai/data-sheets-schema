@@ -16,6 +16,7 @@ RUNNER = 'src/data_sheets_schema/api_runner.py'
 SHARED = 'src/data_sheets_schema/shared_generation.py'
 MODES = 'src/data_sheets_schema/source_heading_runtime.py'
 FILES = (RUNNER, SHARED, MODES, 'src/data_sheets_schema/receipt_completion.py',
+         'src/data_sheets_schema/removal_repair.py',
          'src/data_sheets_schema/bc1_selection.py',
          'src/data_sheets_schema/bc1_registration.py',
          'src/data_sheets_schema/bc1_runtime.py',

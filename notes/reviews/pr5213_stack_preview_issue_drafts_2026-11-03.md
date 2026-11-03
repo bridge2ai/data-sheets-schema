@@ -99,3 +99,26 @@ The evidence helper checks exact expected node multiplicity against pytest
 setup/call/teardown events. It reports JUnit testcase totals and statuses; it
 does not claim a per-node JUnit identity join. Final acceptance separately
 checks every return code, any skip/failure, and exactly one strict Issue H xfail.
+
+## R5-I6: the new scanner control fixture omitted a real optional-turn module
+
+At tests-only commit `c06404ba51efd164b632eea931b8fb07c4866626`, the documented
+selector fails with the intended scanner refusal. The no-docstring control
+instead reaches `planned optional turns have no derived helper call:
+removal_repair_full`: its copied-source fixture omits `removal_repair.py`,
+which the new full follow-up derivation requires. This is a test-fixture defect,
+not a second production scanner failure. Preserve that result and include the
+actual required module before repeating the controls; do not mock away the
+missing-call refusal.
+
+## R5-I7: the attempted single regression canary selected both parameters
+
+The executor used the new positive function's unqualified name, selecting two
+cases instead of the one requested parameter. It stopped before the nine-case
+group and retained both failures. This is not counted as a valid single-unit
+canary. The corrected selector must explicitly name `[d76_contract]` and verify
+one collected/executed case and the intended refusal before proceeding.
+
+Both preliminary failures are retained under `scanner-regression-before/canary`:
+result SHA-256 `8f1fef9f2d7a07d709fa1e077b278f1802f189a212ecec2ef41c5ca0aac3a4ce`,
+failure traces `38e31615d6770442cd15594e2711159e74574fc0a37d2cb53e830ef4a2db4aa0`.
