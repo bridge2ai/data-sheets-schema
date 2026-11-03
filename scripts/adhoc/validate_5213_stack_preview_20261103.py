@@ -66,7 +66,7 @@ def init(options):
     assert len(original) == len(set(original)) == 349
     d76_files = sorted({node.split('::')[0] for node in original})
     runs = {
-        'canary': {'targets': [CANARY], 'workers': 0},
+        'canary': {'targets': [CANARY], 'workers': 2},
         'full-collection': {'targets': ['tests'], 'workers': 0, 'collect_only': True},
         'd76-without-sg2': {'targets': d76_files, 'workers': 2, 'exclude': SG2},
     }

@@ -59,5 +59,43 @@ twenty-one identities, their caller preconditions, strict function/source checks
 and refusal of undeclared helpers. Recompute current line locations, preserve
 the original approval/proposal provenance, and distinguish the old latch-module
 snapshot metadata from its unchanged enforced function pin. Neither the checker
-nor protected source may be edited. Validation remains pending for this rebind
-and the integrated stack.
+nor protected source may be edited. Results of the rebind and integrated stack
+validation belong in the final external review report; this records the finding
+and authorized repair before that validation.
+
+## R5-I4: the BC1 scanner rejects the required initial caller docstring
+
+The first full scan of the no-overlay archive at
+`1222b8ce398c112fdd81cd9e58bdceef38c07144` exited 2 and produced no audit:
+`BC1 selector domain or read-only enabled helper changed`. The log is retained
+at `plans/reviews/pr5213_stack_preview_2026-11-03/scanner-final/scan.log`,
+SHA-256 `0f643247148bc89566388ff7db1c399a38cfbf8e000f40d2c6c3fcd8777ec141`.
+The scanner compares every statement in `bc1_selection.enabled` to an exact
+three-statement body; the required initial caller-contract docstring adds a
+fourth AST node. This interaction is introduced by the preview integration.
+
+Disposition: recognize only one initial literal-string docstring, then retain
+the exact executable-body, selector-domain and rebinding checks. Positive
+docstring/no-docstring controls and negative extra-statement/expression controls
+must demonstrate that the fix does not hide changed executable behavior. The
+original scanner failure and unexecuted final-test plan remain preserved.
+
+## R5-I5: the planned canary did not use the parallel cohorts' concurrency mode
+
+Independent review of the unexecuted `1222b8ce3` final plan found `workers=0`
+for its single-case canary and `workers=2` for the main cohorts. A successful
+serial canary does not verify the xdist launch and evidence path used by those
+cohorts. The earlier serial task3 canaries and their results remain literal
+evidence; they are not recast as parallel canaries.
+
+Disposition: keep exactly one real test case but use two workers through the
+same launcher, sandbox, environment and external artifact path as the parallel
+cohorts. Verify its persisted registration before releasing those cohorts.
+The three SG2 trials and the outer CI-sharding controller remain serial;
+the first SG2 trial must pass and its persisted result be verified before the
+remaining two. Preserve the old unexecuted plan and create a fresh final plan.
+
+The evidence helper checks exact expected node multiplicity against pytest
+setup/call/teardown events. It reports JUnit testcase totals and statuses; it
+does not claim a per-node JUnit identity join. Final acceptance separately
+checks every return code, any skip/failure, and exactly one strict Issue H xfail.
