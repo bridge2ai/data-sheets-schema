@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+# Purpose: bound offline checks where GNU timeout is unavailable on macOS.
+# Inputs: seconds and command argv; outputs: child output and exit status (124 on timeout).
+# Serves G1V-1/G1V-2 packet validation, 2026-11-03. No shell or network operations.
+import os
+import signal
+import subprocess
+import sys
+
+seconds = float(sys.argv[1])
+child = subprocess.Popen(sys.argv[2:], start_new_session=True)
+try:
+    status = child.wait(timeout=seconds)
+except subprocess.TimeoutExpired:
+    os.killpg(child.pid, signal.SIGTERM)
+    try:
+        child.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        os.killpg(child.pid, signal.SIGKILL)
+        child.wait()
+    status = 124
+raise SystemExit(status if status >= 0 else 128 - status)

@@ -59,7 +59,8 @@ def run(folder):
     files[str(registration)] = registration.read_bytes()
     captured = shared._capture_bytes(registration.read_bytes(), reg, files)
     provenance = folder / 'synthetic-provenance.yaml'
-    provenance.write_text(yaml.safe_dump({'record_type': 'd4d_generation_provenance', 'run': reg['run'],
+    provenance.write_text(yaml.safe_dump({'record_type': 'd4d_generation_provenance',
+        'run': {**reg['run'], 'condition': reg['selection']['condition']},
         'shared_generation': {'authority': captured.identity()},
         'validation': {'artifacts': {'full': {'path': str(record),
             'md5': hashlib.md5(record.read_bytes()).hexdigest()}}}}))
@@ -68,6 +69,7 @@ def run(folder):
     prepared = evaluator.prepare(registration, record, applicability, rubric='rubric20',
         instrument_version='5.0', context_sha256=sha(applicability.read_bytes()),
         provenance=provenance, provenance_sha256=sha(provenance.read_bytes()),
+        comparison_arm='v10',
         model='claude-opus-5', canonical_model='claude-opus-5', context_window=1000000,
         base_url=evaluator.CBORG_BASE_URL, runtime=runtime, runtime_sha256=sha(runtime.read_bytes()),
         runtime_version='2.1.269')
