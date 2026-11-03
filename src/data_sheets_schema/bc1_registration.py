@@ -411,7 +411,14 @@ def check_sizing_record(registration, sizing):
 
 
 def plan(spec, settings):
-    """Registration roster only; no historical record or provider discovery."""
+    """Registration roster only; no historical record or provider discovery.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The guarded API planning caller supplies the same
+    D76-admitted spec and bound model settings. Registered roster allowances and
+    current-input checks do not authorize calls or predict actual future usage.
+    """
     from . import shared_generation as shared
     selection.validate_spec_mode(spec)
     captured = shared.preflight(spec, settings)

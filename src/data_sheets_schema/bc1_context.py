@@ -306,6 +306,13 @@ def downstream_schema_context(spec, record=None):
 
     The protected shared-generation public wrapper selects the complete BC1
     context. Call its existing A14 implementation explicitly for these phases.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The guarded request builder or validated transport checker
+    supplies the same D76-admitted selection and its matching record, when present.
+    Captured schema authority is rechecked before A14 formatting; this helper does
+    not admit independent execution.
     """
     from . import shared_generation as shared
     captured = shared.assert_current(spec)

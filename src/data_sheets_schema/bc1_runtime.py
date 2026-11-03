@@ -140,6 +140,14 @@ def prepare_packet_bytes(spec, captured, originals, receipt_raw, *, derivations=
 
     `originals` is exactly the two immutable original record byte strings. No
     ledger, endpoint, snapshot write, or provider is needed for this interface.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies either the same D76-admitted spec or
+    the checked offline sizing projection carrying only project, together with the
+    matching captured registration/schema, immutable original full/core bytes and
+    effective receipt bytes. Pure assembly does not establish a RunSpec binding or
+    authorize execution.
     """
     reg = captured.document()
     inputs, limits = reg['inputs'], reg['audit_limits']
@@ -159,6 +167,13 @@ def prepare_packet_bytes(spec, captured, originals, receipt_raw, *, derivations=
 
 
 def prepare_packet(spec, *, record=None, derivations=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The typed-audit caller supplies the same D76-admitted
+    selected run or matching completed-capture view, with original records and
+    effective receipt evidence belonging to that selection. Packet preparation does
+    not authorize a new call.
+    """
     _selected(spec)
     from . import api_runner as api
     captured = sg.assert_current(spec)
@@ -218,6 +233,12 @@ def render_request(*, packet, stage, inner, settings, audit_limits, registration
 
 
 def build_request(spec, packet, stage, workers, omission, settings, stages=(), *, derivations=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The admitted audit caller supplies the same selected run,
+    registered prepared stage, exact prior worker/omission/stage evidence and bound
+    settings. Rendering the request does not independently admit or dispatch it.
+    """
     _selected(spec)
     from . import api_runner as api
     captured = sg.assert_current(spec)
@@ -340,6 +361,12 @@ def _rebuild(spec, state, *, settle=False, record=None, derivations=None):
 
 
 def recover_delivered(spec, *, record=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API continuation caller retains the same D76-admitted
+    selection and owner with complete saved response/usage identities. Rebuilding may
+    settle that evidence without initiating a fresh call.
+    """
     state = _state(spec)
     if state is None:
         return
@@ -349,6 +376,12 @@ def recover_delivered(spec, *, record=None):
 
 
 def recover(spec, *, carry=None, terminal=False, independent=False, record=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The recovery caller supplies the same D76-admitted selection
+    or matching completed-capture view, with matching record/carry when present. Exact
+    saved stages and attributed terminal evidence are rebuilt without authorizing retries.
+    """
     derivations = audit.DerivationCache() if independent or terminal else _derivations(spec)
     return _recover(spec, carry=carry, terminal=terminal, record=record, derivations=derivations)
 
@@ -387,6 +420,12 @@ def _recover(spec, *, carry, terminal, record, derivations):
 
 
 def completion_check(spec, carry=None, *, record=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API completion/resume or completed-capture caller supplies
+    the same validated selection and matching record/carry for terminal independent
+    rebuild. The result does not establish scientific approval or authorize new calls.
+    """
     outcome = recover(spec, carry=carry, terminal=True, independent=True, record=record)
     reg = sg.capture(spec).document()
     return {'protocol': reg['selection']['protocol'], 'generation_id': ledger.generation_id(spec),
@@ -396,7 +435,14 @@ def completion_check(spec, carry=None, *, record=None):
 
 
 def model_carry(spec, complete_audit_text):
-    """Only the verified model view is compact; host audit evidence stays full."""
+    """Only the verified model view is compact; host audit evidence stays full.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The guarded request builder or validated transport checker
+    supplies the same D76-admitted selection and complete exact host audit. Projection
+    preserves host evidence and grants no new execution authority.
+    """
     derivations = audit.DerivationCache()
     _recover(spec, carry={'Audit findings': complete_audit_text}, terminal=True, record=None, derivations=derivations)
     assembly = receipts._load(_state(spec)['assembly'])
@@ -404,6 +450,12 @@ def model_carry(spec, complete_audit_text):
 
 
 def resume_guard(spec, progress, *, record=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API continuation caller supplies the same entry-validated
+    selected owner and authentic progress or independently matching completed provenance.
+    Missing progress cannot authorize restarting admitted stages.
+    """
     state = _state(spec)
     if state is None:
         return
@@ -425,6 +477,12 @@ def resume_guard(spec, progress, *, record=None):
 
 
 def require_admission(spec, phase, *, data=None, usage_id=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: usage_ledger.begin_call supplies the same entry-validated spec,
+    prepared phase and current ledger transaction/usage identity when present. Stage
+    admission may be marked only within that caller-owned transaction.
+    """
     _selected(spec)
     sg.assert_current(spec)
     data = ledger._read(spec) if data is None else data
@@ -457,6 +515,12 @@ def require_admission(spec, phase, *, data=None, usage_id=None):
 
 
 def require_request(spec, phase, kwargs):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The physical-call caller supplies the same admitted owner and
+    exact counted/saved request wire for its prepared stage. Context and carry comparison
+    cannot authorize independent dispatch.
+    """
     _selected(spec)
     sg.require_generation_context(spec, kwargs['messages'])
     sg.require_routing_context(spec, kwargs['messages'])
@@ -499,6 +563,13 @@ def require_request(spec, phase, kwargs):
 
 
 def run(spec, *, carry, client, settings, usage):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API audit caller supplies the D76-admitted selected spec,
+    exact phase-one carry and the same settings/client/ledger. Each registered stage
+    still requires current call admission; raw response evidence is saved before
+    accounting/validation, with no adaptive regrouping or new-response retry.
+    """
     _selected(spec)
     from . import api_runner as api, reasoning
     captured = sg.preflight(spec, settings)
