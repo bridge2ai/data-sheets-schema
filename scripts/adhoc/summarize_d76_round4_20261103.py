@@ -118,7 +118,8 @@ def verified_row(row, directory):
                 raise ValueError('nonpassing phase occurrence has no JUnit message')
     literal_pass = (outcome.get('collection_passed') is True if collection else
                     outcome.get('passed') is True)
-    literal_pass = literal_pass and outcome['returncode'] == 0
+    literal_pass = (literal_pass and outcome['returncode'] == 0
+                    and raw_counts['failed'] == 0 and raw_counts['errors'] == 0)
     if not collection:
         literal_pass = literal_pass and not any(
             value for status, value in outcome['counts'].items() if status not in ('passed', 'skipped'))
