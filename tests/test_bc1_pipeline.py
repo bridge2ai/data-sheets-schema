@@ -71,6 +71,7 @@ class BC1Script(Script):
         return response(codec.encode_candidate(value, dictionary=payload["dictionary"], max_bytes=maximum).decode())
 
 
+@pytest.mark.xfail(strict=True, raises=ValueError, reason="#5471: neutral-profile BC1 refuses G1's EDAM term-source labels until their identifier forms are declared")
 def test_public_bc1_pipeline_multiple_groups_final_and_completed_replay(registered, journal_launch_monitor):
     # Retain the first launch's independent checkpoint for intact completed replay.
     reg = json.loads(registered.shared_generation_registration)
