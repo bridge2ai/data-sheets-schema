@@ -37,7 +37,8 @@ def audit(output):
 def recapture(root, ref):
     """Preserve both prior captures while reusing their exact absolute root."""
     assert root == ROOT.parent / 'scratch-bc1g2/byte-proof'
-    previous = root.parent / 'round2/round1-capture-retained'
+    previous_commit = json.loads((root / '.g2-archive.json').read_bytes())['commit']
+    previous = root.parent / 'round2' / ('capture-retained-' + previous_commit[:12])
     assert not previous.exists()
     old = json.loads((root / '.bc1-byte-evidence/integration-comparison.json').read_bytes())
     assert old['accepted']
