@@ -6,9 +6,7 @@ never launch a native executable or contact a provider.
 """
 from dataclasses import replace
 import hashlib
-import importlib.util
 import json
-import os
 from pathlib import Path
 import re
 import sys
@@ -25,6 +23,7 @@ from tests.test_shared_generation_selection import registration_for, selected_sp
 from tests.test_shared_generation_runtime import offline  # noqa: F401
 from tests.test_source_heading_runtime_api import draft_files, selected_spec, client  # noqa: F401
 from tests.test_receipt_completion_runtime import registration as receipt_registration
+from tests.utils.isolated_pytest import run_isolated_pytest
 
 
 def _registered_at_root(tmp_path, draft_files, monkeypatch, layout):
@@ -53,42 +52,12 @@ def _registered_at_root(tmp_path, draft_files, monkeypatch, layout):
 def test_sg2_root_launch_completes_and_records_registered_paths(tmp_path, request, layout):
     # This expensive full-publication/replay case must have a finite failure
     # mode in ordinary CI too, without depending on the local review harness.
-    marker = os.environ.get('D4D_SG2_CHILD_CASE')
-    if marker is not None:
-        assert marker == request.node.nodeid
-        assert os.environ.get('D4D_SG2_CHILD_PID') == str(os.getpid())
-        _assert_sg2_root_launch(tmp_path, request.getfixturevalue('draft_files'),
-                              request.getfixturevalue('monkeypatch'), layout,
-                              request.getfixturevalue('capsys'))
+    if run_isolated_pytest(request, tmp_path, root=Path(__file__).resolve().parents[1],
+                          seconds=1800, label=f'SG2 {layout}', evidence_name='isolated-sg2'):
         return
-    root = Path(__file__).resolve().parents[1]
-    output = tmp_path / 'isolated-sg2'
-    log = tmp_path / 'isolated-sg2.log'
-    env = {key: value for key, value in os.environ.items() if key not in
-           {'PYTHONPATH', 'PYTHONHOME', 'PYTEST_CURRENT_TEST', 'PYTEST_PLUGINS',
-            'PYTEST_DISABLE_PLUGIN_AUTOLOAD', 'D4D_SG2_CHILD_CASE', 'D4D_SG2_CHILD_PID'}
-           and not key.startswith(('PYTEST_XDIST_', 'D76_', 'ANTHROPIC_', 'CBORG_', 'OPENAI_',
-                                   'AZURE_', 'AWS_', 'GOOGLE_API_', 'GEMINI_', 'VERTEX_'))
-           and not re.search(r'(API_KEY|ACCESS_KEY|SECRET|TOKEN|CREDENTIAL)', key, re.I)
-           and not key.upper().endswith('_PROXY')}
-    env.update(PYTHONDONTWRITEBYTECODE='1', PYTEST_ADDOPTS='')
-    command = [sys.executable, '-S', '-P', '-B',
-        str(root / 'scripts/adhoc/run_d76_sg2_case_20261102.py'),
-        '--layout', layout, '--output', str(output)]
-    helper = importlib.util.spec_from_file_location('_d4d_sg2_deadline',
-        root / 'scripts/adhoc/d76_process_deadline_20261102.py')
-    supervisor = importlib.util.module_from_spec(helper)
-    sys.modules[helper.name] = supervisor
-    helper.loader.exec_module(supervisor)
-    with log.open('wb') as stream:
-        completed = supervisor.run(command, cwd=root, env=env, stream=stream,
-                        evidence=tmp_path / 'isolated-sg2-supervisor', seconds=1800)
-    assert not completed.expired, f'SG2 {layout} exceeded the 1800-second subprocess deadline; retained log: {log}'
-    assert completed.returncode == 0, log.read_text(errors='replace')[-20000:]
-    report = json.loads((output / 'outcome.json').read_text())
-    assert report['nodeid'] == request.node.nodeid
-    assert report['passed'] is True
-    assert (output / 'pytest.xml').stat().st_size > 0
+    _assert_sg2_root_launch(tmp_path, request.getfixturevalue('draft_files'),
+                          request.getfixturevalue('monkeypatch'), layout,
+                          request.getfixturevalue('capsys'))
 
 
 def _assert_sg2_root_launch(tmp_path, draft_files, monkeypatch, layout, capsys):

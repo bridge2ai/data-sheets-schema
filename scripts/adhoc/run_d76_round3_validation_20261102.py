@@ -148,7 +148,8 @@ def scrubbed_environment(options):
                            'GEMINI_', 'VERTEX_', 'GIT_', 'D76_'))
         or key.upper().endswith('_PROXY')
         or key in {'D4D_INSTALL_TESTS', 'D4D_PROFILE', 'D4D_RESOURCE_ROOT', 'PYTHONHOME',
-                   'PYTHONPATH', 'PYTEST_PLUGINS', 'PYTEST_DISABLE_PLUGIN_AUTOLOAD', 'PYTHONPYCACHEPREFIX'})
+                   'PYTHONPATH', 'PYTEST_PLUGINS', 'PYTEST_DISABLE_PLUGIN_AUTOLOAD', 'PYTHONPYCACHEPREFIX',
+                   'D4D_ISOLATED_TEST_REVIEW'})
     for key in removed:
         env.pop(key)
     env.update(PYTHONDONTWRITEBYTECODE='1', PYTEST_ADDOPTS='', PIP_NO_INDEX='1',
@@ -166,6 +167,11 @@ def scrubbed_environment(options):
         env['D76_NOTES_CI_JOB'] = options.notes_ci_job
         env['PYTHONPATH'] = os.pathsep.join([
             *(str(options.tree / value) for value in notes_ci.ci_paths(options.notes_ci_job)), str(options.tree), str(HERE)])
+    if getattr(options, 'attest_isolated_tests', False):
+        adapter = options.tree / 'scripts/adhoc/run_d76_sg2_case_20261102.py'
+        env['D4D_ISOLATED_TEST_REVIEW'] = json.dumps({
+            'root': str(options.tree), 'runner': str(adapter),
+            'sha256': common.sha(adapter.read_bytes()), 'head': options.expect_head}, sort_keys=True)
     return env, removed
 
 
@@ -337,6 +343,10 @@ def run(options):
     helper_paths = [Path(__file__).resolve(), HERE / 'd76_round3_pytest_observer_20261102.py',
                     HERE / 'd76_suite_common_20261031.py', HERE / 'd76_phase_accounting_20261031.py',
                     HERE / 'd76_round3_hygiene_20261102.py', HERE / 'd76_round3_metrics_20261102.py', PROFILE]
+    if options.attest_isolated_tests:
+        helper_paths += [options.tree / 'scripts/adhoc/run_d76_sg2_case_20261102.py',
+                         options.tree / 'tests/utils/isolated_pytest.py',
+                         options.tree / 'tests/utils/subprocess_deadline.py']
     helpers = {str(path): common.sha(path.read_bytes()) for path in helper_paths}
     target_hashes = {}
     for target in targets:
@@ -362,6 +372,7 @@ def run(options):
         'collect_only': options.collect_only, 'ci_ordinary_shard_of_6': options.ci_shard,
         'ci_api_lane': options.ci_lane, 'deadline_seconds': options.deadline_seconds, 'metrics': options.metrics,
         'notes_ci_job': options.notes_ci_job,
+        'attest_isolated_tests': options.attest_isolated_tests,
         'notes_ci_pythonpath': list(notes_ci.ci_paths(options.notes_ci_job)) if options.notes_ci_job else None,
         'hygiene_mode': 'notes_ci_new_tracked_source_bytecode' if notes_ci.permits_bytecode(options.notes_ci_job) else 'strict_unchanged',
         'child_startup_scope': ('Pytest controller/workers use -S -P -B. Existing CI notes tests may start '
@@ -464,6 +475,8 @@ def main():
     parser.add_argument('--ci-lane', choices=('routing-dispatch', 'routing-portable', 'routing-regate', 'routing-default-layout'))
     parser.add_argument('--deadline-seconds', type=float, default=2700)
     parser.add_argument('--metrics', action='store_true')
+    parser.add_argument('--attest-isolated-tests', action='store_true',
+                        help='Explicitly attest isolated test children through the pinned review adapter')
     parser.add_argument('--notes-ci-job', choices=tuple(notes_ci.NOTES_TARGETS))
     options = parser.parse_args()
     options.tree = options.tree.resolve(strict=True)
