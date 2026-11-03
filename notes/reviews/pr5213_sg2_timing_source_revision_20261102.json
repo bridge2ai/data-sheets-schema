@@ -5,10 +5,10 @@
       "path": "tests/test_wave7_5213_d76_registration.py",
       "measured_commit": "d13c1711e19dcdcc7f624b66e15b735ebc0aab8f",
       "measured_file_sha256": "f6991011d1e61ac8f3a862cbe542125558c3f3c2aa540a83cfe3cd0976ea7b73",
-      "revised_commit": "aeb7b5bf0ae01c2a34c32fdc2d7a0672e0d2b64d",
-      "revised_file_sha256": "f97b6ecdc74add977d60ffe25a1be958e2625ac17a2e48a148b3fc6009102720",
-      "patch_sha256": "53df5386da855e74bd215c13f8631ad1837d98f245aaf51b4443d48c3917a7c4",
-      "issue": "notes/reviews/pr5213_integration_review_20261102.md#i10--completed-replay-fixture-must-supply-the-admitted-launchs-stop-head",
+      "revised_commit": "55603b60a4284dfbb6c641acad370b374a086165",
+      "revised_file_sha256": "1c5b349e74dac25db9e90786f625b4ffa1abbc0431edc3e7d12b17665318af5b",
+      "patch_sha256": "8aa7711a2e7f52830b55462829f8acf9223311917ae109709cf4a7733ca75898",
+      "issue": "notes/reviews/pr5213_d76_round4_local_issues_20261103.md; integration I10 retained-stop-head fixture and round-four generic SG2 wrapper; prior measurements remain scheduling estimates, not current-source timing equivalence",
       "disposition": "reuse_prior_revision_measurement"
     }
   ]

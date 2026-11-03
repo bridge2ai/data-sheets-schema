@@ -626,6 +626,14 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
 
     The digest is of the resolved text, not the file. Substitution is what makes
     the two different objects, which is why `prompt_request_hash` exists.
+
+    \f
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The command constructs a RunSpec from CLI arguments and checks its
+    input invariant before rendering or writing the selected instruction; it accepts no
+    caller-supplied mutable RunSpec.
     """
     import hashlib
     from data_sheets_schema import prompt_registry as pr
@@ -717,7 +725,16 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
               help="flat output directory (the assistant layout)")
 @click.option("--json", "as_json", is_flag=True, help="emit the full plan as JSON")
 def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, out_dir, as_json, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None):
-    """Render every phase without calling the API — no key, no charge."""
+    """Render every phase without calling the API — no key, no charge.
+
+    \f
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The command constructs a RunSpec and checks its input invariant
+    before delegation to api_runner.plan; callers must retain that check before policy or
+    phase inspection.
+    """
     from data_sheets_schema.api_runner import plan
     spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, shared_generation_version=shared_generation_version, shared_generation_registration=shared_generation_registration, **_manifest_kw(manifest, chunk_manifest))
     _require_input_binding(spec)
@@ -790,7 +807,16 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
               help="flat output directory (the assistant layout)")
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
 def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, expect_journal_head_sha256=None):
-    """Execute every phase (four model calls, plus one bounded re-addressing call under a receipt condition when a receipt entry names a slot the record does not carry, #952; the core is derived from the full) and write outputs plus a live provenance record."""
+    """Execute every phase (four model calls, plus one bounded re-addressing call under a receipt condition when a receipt entry names a slot the record does not carry, #952; the core is derived from the full) and write outputs plus a live provenance record.
+
+    \f
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The command constructs a RunSpec and checks its input invariant
+    before dry-run planning or execution; the delegated API retains ownership, journal and
+    lock ordering.
+    """
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d api run")          # the record and the outputs land under the cwd (#1643)
     from data_sheets_schema.api_runner import execute, plan
@@ -1032,6 +1058,14 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
 
     Each run resumes independently, so a sweep interrupted partway costs only
     the unfinished phases to complete rather than restarting.
+
+    \f
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Each constructed RunSpec is checked before batch authority and
+    selected-owner checks; the same checked objects must reach planning/execution without
+    mutation.
     """
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d api batch")          # the record and the outputs land under the cwd (#1643)
@@ -1597,7 +1631,16 @@ def prompts_pin_cmd(path, reason):
 @api.command("check-routing-completed")
 @click.argument("capture", type=click.Path(exists=True, dir_okay=False, path_type=Path))
 def check_routing_completed_cmd(capture):
-    """Recheck a complete selected-v2 capture without original paths or calls."""
+    """Recheck a complete selected-v2 capture without original paths or calls.
+
+    \f
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller selects an immutable completed-capture file;
+    recheck_completed reconstructs only its private read-only RunSpec context and does not
+    authorize requests, recovery or provider delivery.
+    """
     from data_sheets_schema.source_heading_completed import recheck_completed, MAX_ENVELOPE_BYTES
     try:
         with capture.open('rb') as stream:

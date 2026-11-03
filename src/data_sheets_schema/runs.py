@@ -1292,6 +1292,12 @@ def verify_request(method: str, label: str, project: str,
 
     `absent` is not `mismatch`. Failing history for a field that postdates it is
     the same error the live-provenance cutoff exists to avoid.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller selects a saved request record for verification; this
+    function reconstructs its literal RunSpec and compares request evidence without granting
+    execution authority.
     """
     import yaml as _yaml
     from data_sheets_schema.provenance import record_path_for

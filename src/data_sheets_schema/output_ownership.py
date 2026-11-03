@@ -217,6 +217,12 @@ def require_disjoint_selected_outputs(specs, *, control_paths=()) -> None:
     The resource-resolved digest inventory is shared bookkeeping, but cannot
     alias run data or controls. Reusable read-only inputs are not run outputs.
     Batch callers supply their actual derived control paths at every check.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API batch caller has checked each selected RunSpec before
+    comparing write footprints; it must retain these same selections and perform the
+    existing locked ownership checks before writes.
     """
     selected = []
     for spec in specs:
@@ -283,6 +289,12 @@ def require_selected_resume_owner(spec, *, resume: bool) -> None:
     Missing optional state is allowed. Existing project evidence without any
     usable owner is not a fresh run. Only stable run/generation fields are read:
     automatic run-date recovery and full input identity checks happen later.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API caller has checked the selected RunSpec before reading
+    ownership evidence, with resume matching the intended launch; ownership checks must also
+    retain their existing position under the coordination lock.
     """
     if not _selected(spec):
         return

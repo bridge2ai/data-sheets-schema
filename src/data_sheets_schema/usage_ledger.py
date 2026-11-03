@@ -41,7 +41,14 @@ def is_new_held_lock(path):
 
 @contextmanager
 def exclusive_run(spec):
-    """One writer for shared artifacts, across processes and run identities."""
+    """One writer for shared artifacts, across processes and run identities.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The execution caller has checked the selected RunSpec and startup
+    ownership/journal conditions before acquiring its output locks; lock acquisition alone
+    never validates input binding or admits a request.
+    """
     with exclusive_outputs((spec.full_path, spec.core_path,
                             spec.report_path, spec.provenance_path)):
         yield
@@ -139,11 +146,24 @@ def recovery_files(directory: Path, project: str) -> list[Path]:
 
 
 def run_identity(spec) -> dict:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies populated identity fields during construction,
+    validated inspection or an admitted transaction; this identity projection does not
+    validate inputs or authorize generation.
+    """
     return {key: getattr(spec, key) for key in ("project", "label", "method", "condition")}
 
 
 def identity_is_foreign(spec, identity, *, recorded: bool = False) -> bool:
-    """Use actual conflicting identity evidence, not a missing optional field."""
+    """Use actual conflicting identity evidence, not a missing optional field.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the selected identity from construction,
+    validated inspection or an admitted run; comparing identity fields does not replace
+    input or ownership admission.
+    """
     if not isinstance(identity, dict):
         return False
     expected = run_identity(spec)
@@ -154,6 +174,12 @@ def identity_is_foreign(spec, identity, *, recorded: bool = False) -> bool:
 
 
 def record_matches(spec, identity) -> bool:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the selected identity and candidate record
+    during validated inspection or recovery; matching identity fields does not establish
+    input freshness or authorize continuation.
+    """
     return (isinstance(identity, dict)
             and all(identity.get(key) == getattr(spec, key) for key in ("project", "method", "label"))
             and not identity_is_foreign(spec, identity, recorded=True))
@@ -181,6 +207,12 @@ def _record_generations(spec) -> list[str]:
 def ledger_path(spec) -> Path:
     # Flat output directories may be reused for another label. Keep those
     # accounts separate, without putting an arbitrary label in a filename.
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the selected identity during construction,
+    validated inspection or an admitted transaction; deriving its accounting path does not
+    authorize reads, writes or spending.
+    """
     key = hashlib.sha256(json.dumps(run_identity(spec), sort_keys=True).encode()).hexdigest()[:16]
     return spec.metadata_dir / f"{spec.project}_api_usage_{key}.json"
 
@@ -242,23 +274,50 @@ def _validate_data(spec, data, path):
 
 
 def abandoned_journal_path(spec) -> Path:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the selected run during validated inspection
+    or an admitted transaction; this path formatter does not authorize an abandoned-attempt
+    write or restart.
+    """
     return spec.metadata_dir / f"{spec.project}_abandoned_attempts.jsonl"
 
 
 def abandoned_journal_offset(spec) -> int | None:
     """Where this generation's rows start in the abandoned-attempts journal: None when
     there is no generation (no ledger), and 0 for a ledger that predates the boundary,
-    whose rows are then read strictly throughout (#2859, #2869)."""
+    whose rows are then read strictly throughout (#2859, #2869).
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The recovery/provenance caller supplies the same admitted run
+    whose abandoned-attempt boundary is being read; an absent generation is not
+    authorization to spend.
+    """
     return _read(spec).get("abandoned_journal_offset", 0) if ledger_path(spec).exists() else None
 
 
 def recorded_inputs(spec) -> dict | None:
-    """Only persisted pins count as evidence for a legacy progress file."""
+    """Only persisted pins count as evidence for a legacy progress file.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The resume/inspection caller supplies the validated selected run
+    before reading its persisted pins; those pins are historical evidence, not a substitute
+    for checking current inputs before another request.
+    """
     return _read(spec).get("input_identity") if ledger_path(spec).is_file() else None
 
 
 def pin_inputs(spec) -> None:
-    """Bind a verified legacy continuation before it can make another call."""
+    """Bind a verified legacy continuation before it can make another call.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The continuation caller has validated the selected RunSpec and
+    established that this same ledger may continue before persisting its input identity;
+    pinning does not authorize an otherwise refused legacy restart.
+    """
     data = _read(spec)
     if data.get("input_identity") is None:
         data["input_identity"] = spec.input_identity()
@@ -362,6 +421,12 @@ def identity_refusal(pinned: dict, where: str) -> str:
 
 
 def require_resolved(spec) -> None:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The resume/request caller has checked the selected RunSpec and its
+    owner before comparing current identity with saved pins or finishing recorded
+    initialization; this is additional accounting admission, not the D76 entry check.
+    """
     data = _read(spec)
     pending = data.get("pending_call")
     if pending is not None:
@@ -378,7 +443,14 @@ def require_resolved(spec) -> None:
 
 
 def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
-    """Commit intent before a request so response persistence can fail safely."""
+    """Commit intent before a request so response persistence can fail safely.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The request caller has checked the selected RunSpec, exact request
+    and current ownership before committing intent; retain journal, receipt, repair and
+    source-review gates before any physical attempt.
+    """
     from data_sheets_schema import latch_journal
     latch_journal.check(spec)
     require_resolved(spec)
@@ -432,6 +504,12 @@ def validator_refresh(spec) -> dict | None:
     The obligation survives absent/corrupt progress. Admission is consumed at
     begin_call, so an interruption before call admission remains pending; a delivery
     whose accepted report checkpoint is missing cannot silently be billed again.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The recovery/request caller supplies the same admitted run before
+    reading its durable report-refresh obligation; reading an accepted state does not
+    authorize regeneration of paid work.
     """
     if not ledger_path(spec).exists():
         return None
@@ -459,6 +537,12 @@ def validator_refresh(spec) -> dict | None:
 
 
 def prepare_validator_refresh(spec, checkpoint: dict) -> None:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The guarded repair caller supplies the selected run and exact
+    accepted repair checkpoint after resolved accounting; only that run's next report-
+    refresh obligation may be prepared.
+    """
     require_resolved(spec)
     if not ledger_path(spec).exists():
         raise UsageLedgerError("validator repair needs its generation ledger")
@@ -471,7 +555,14 @@ def prepare_validator_refresh(spec, checkpoint: dict) -> None:
 
 
 def finish_validator_refresh(spec) -> None:
-    """Called only after the report write and normal source-review gates pass."""
+    """Called only after the report write and normal source-review gates pass.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The report-completion caller retains the admitted run and
+    completed usage identity after writing the report and passing source-review gates; this
+    records acceptance, not new request admission.
+    """
     value = validator_refresh(spec)
     data = _read(spec)
     if (value is None or value["state"] != "in_flight" or data.get("pending_call") is not None
@@ -486,7 +577,14 @@ def finish_validator_refresh(spec) -> None:
 
 
 def removal_repair_attempted(spec) -> bool:
-    """Admission exhausts the restore-only allowance, including lost responses."""
+    """Admission exhausts the restore-only allowance, including lost responses.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The recovery/admission caller supplies the selected validated run
+    before inspecting its durable repair allowance; a missing output does not restore an
+    allowance already spent or admitted.
+    """
     if not ledger_path(spec).exists():
         return False
     data = _read(spec)
@@ -496,7 +594,14 @@ def removal_repair_attempted(spec) -> bool:
 
 
 def require_removal_repair_admission(spec, *, phase: str | None = None) -> None:
-    """Interrupted restoration cannot authorize regeneration of its old phases."""
+    """Interrupted restoration cannot authorize regeneration of its old phases.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The continuation/request caller supplies the entry-validated
+    selected run and intended phase; durable restoration and report obligations must be
+    satisfied before another permitted request.
+    """
     if not removal_repair_attempted(spec):
         return
     data = _read(spec)
@@ -516,7 +621,14 @@ def require_removal_repair_admission(spec, *, phase: str | None = None) -> None:
 
 
 def accept_removal_repair(spec, reading: dict) -> None:
-    """Publish acceptance only after final bytes and their progress pins exist."""
+    """Publish acceptance only after final bytes and their progress pins exist.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The repair-completion caller retains the admitted run and verified
+    delivered repair reading after final bytes/progress pins exist; recording acceptance
+    must not discard or reassign paid evidence.
+    """
     data = _read(spec)
     if (data.get("evidence_refusal") is not None or data.get("pending_call") is not None
             or data.get("removal_repair_admission") != {"state": "pending"}
@@ -531,7 +643,14 @@ def accept_removal_repair(spec, reading: dict) -> None:
 
 
 def finish_removal_report(spec) -> None:
-    """A single refresh must finish before accepted restoration can resume."""
+    """A single refresh must finish before accepted restoration can resume.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The report-completion caller supplies the same admitted run after
+    its one permitted refresh is accounted and verified; this closes that obligation without
+    admitting another report.
+    """
     data = _read(spec)
     admission = data.get("removal_repair_admission") or {}
     if (admission.get("state") != "accepted" or admission.get("report_refresh") != "pending"
@@ -543,7 +662,14 @@ def finish_removal_report(spec) -> None:
 
 
 def accepted_removal_outcome(spec) -> dict:
-    """Recover provenance only; callers still recompute the current reading."""
+    """Recover provenance only; callers still recompute the current reading.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The recovery/provenance caller supplies the validated selected run
+    and separately recomputes its current reading; the saved accepted outcome is historical
+    provenance, not fresh acceptance.
+    """
     require_removal_repair_admission(spec)
     admission = _read(spec).get("removal_repair_admission") or {}
     out = admission.get("reading")
@@ -555,7 +681,14 @@ def accepted_removal_outcome(spec) -> dict:
 
 
 def report_regate_attempted(spec) -> bool:
-    """Paid or admitted work exhausts the allowance, not retained output."""
+    """Paid or admitted work exhausts the allowance, not retained output.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The request/recovery caller supplies the selected validated run
+    before inspecting its durable regate allowance; delivered or admitted work remains spent
+    even when output files are absent.
+    """
     if not ledger_path(spec).exists():
         return False
     data = _read(spec)
@@ -565,7 +698,14 @@ def report_regate_attempted(spec) -> bool:
 
 
 def evidence_refusal(spec) -> dict | None:
-    """A terminal refusal belongs to this ledger's current generation."""
+    """A terminal refusal belongs to this ledger's current generation.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The request/provenance caller supplies the same selected run
+    before reading its terminal refusal; an observed refusal must not be treated as
+    permission for another call.
+    """
     if not ledger_path(spec).exists():
         return None
     refusal = _read(spec).get("evidence_refusal")
@@ -577,7 +717,14 @@ def evidence_refusal(spec) -> dict | None:
 
 
 def record_evidence_refusal(spec, stage: str, reading: dict) -> None:
-    """Atomically retain rejection independently of progress and final files."""
+    """Atomically retain rejection independently of progress and final files.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The evidence-check caller retains the admitted run and exact
+    rejection reading; persist the terminal result under that same owner even when it
+    prevents further input admission.
+    """
     if not ledger_path(spec).exists():
         raise UsageLedgerError("cannot record evidence refusal without the generation ledger")
     data = _read(spec)
@@ -588,7 +735,14 @@ def record_evidence_refusal(spec, stage: str, reading: dict) -> None:
 
 def record_report_rejection(spec, stage: str, report_sha256: str, reading: dict,
                             usage_id: str | None = None, reason: str | None = None) -> None:
-    """Retain every report rejection without consuming or expanding regate allowance."""
+    """Retain every report rejection without consuming or expanding regate allowance.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The report-check caller retains the admitted run, exact rejected
+    report hash and any associated usage identity; rejection persistence must not consume or
+    expand request allowance.
+    """
     if not re.fullmatch(r"[a-f0-9]{64}", str(report_sha256)):
         raise UsageLedgerError("report rejection requires the exact rejected report hash")
     if not ledger_path(spec).exists():
@@ -605,7 +759,14 @@ def record_report_rejection(spec, stage: str, report_sha256: str, reading: dict,
 
 
 def require_source_review_admission(spec) -> None:
-    """A delivered review interrupted before acceptance cannot authorize another call."""
+    """A delivered review interrupted before acceptance cannot authorize another call.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The request/continuation caller supplies the entry-validated
+    selected run before checking prior delivered review acceptance; interrupted delivery
+    cannot authorize another call.
+    """
     for row in _read(spec)["rows"]:
         if "source_review_admission" not in row:
             continue  # historical protocols and phases that do not produce reviews
@@ -618,7 +779,14 @@ def require_source_review_admission(spec) -> None:
 
 
 def cancel_call(spec, identifier: str) -> None:
-    """Resolve a transport error that delivered no completed response."""
+    """Resolve a transport error that delivered no completed response.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The transport-error handler supplies the same admitted run and
+    exact pending usage identity only when no completed response was delivered; cancellation
+    is accounting resolution, not new input admission.
+    """
     data = _read(spec)
     if (data.get("pending_call") or {}).get("usage_id") != identifier:
         raise UsageLedgerError("cannot resolve a different pending API call")
@@ -627,7 +795,14 @@ def cancel_call(spec, identifier: str) -> None:
 
 
 def prepare_usage(spec, *, resume: bool) -> str:
-    """Establish the generation boundary before any call can be made (#1291)."""
+    """Establish the generation boundary before any call can be made (#1291).
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The execution caller has checked the selected RunSpec and retained
+    startup ownership, expected-head and lock ordering before establishing this generation
+    boundary; the independent legacy refusal remains mandatory before writes.
+    """
     from data_sheets_schema.latch_journal import refuse_legacy_execution
     refuse_legacy_execution(spec)  # D68/D69: before archival or activation writes.
     if getattr(spec, "_replay_only", False):
@@ -710,14 +885,32 @@ def _finish_reasoning_archive(spec, data: dict) -> None:
 
 
 def generation_id(spec) -> str | None:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the same selected or admitted run during
+    validated inspection or accounting; reading its generation identifier does not authorize
+    input selection or spending.
+    """
     return _read(spec)["generation_id"] if ledger_path(spec).exists() else None
 
 
 def prior_generation_ids(spec) -> list[str]:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the selected or admitted owner before reading
+    its explicitly archived generation history; history cannot authorize adopting unrelated
+    evidence.
+    """
     return list(_read(spec).get("prior_generation_ids", []))
 
 
 def same_generation(spec, identifier) -> bool:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The completion/snapshot caller supplies the selected validated
+    owner and candidate generation; compatibility of an identifier does not independently
+    admit another request.
+    """
     if not ledger_path(spec).exists():
         return True  # a completed portable record needs no recovery journal
     data = _read(spec)
@@ -726,7 +919,14 @@ def same_generation(spec, identifier) -> bool:
 
 
 def persist_usage(spec, row: dict) -> None:
-    """Atomically save a call or its later outcome under the same identity."""
+    """Atomically save a call or its later outcome under the same identity.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The delivery/recovery caller retains the same admitted run and
+    stable usage identity when saving completed counters or later outcomes; paid accounting
+    must survive input-file drift and is not a fresh request authorization.
+    """
     if not isinstance(row.get("usage_id"), str) or not row["usage_id"]:
         raise UsageLedgerError("cannot persist an API usage row without its identity")
     data = _read(spec)
@@ -775,6 +975,12 @@ def _write_unlatched(spec, data: dict) -> None:
 
 
 def append_usage(spec, usage: list[dict], row: dict) -> dict:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The delivery caller supplies the same admitted run and completed
+    usage row; durable persistence must precede the in-memory append, without requiring
+    fresh input bytes merely to retain paid evidence.
+    """
     row.setdefault("usage_id", uuid.uuid4().hex)
     persist_usage(spec, row)
     usage.append(row)
@@ -782,7 +988,14 @@ def append_usage(spec, usage: list[dict], row: dict) -> dict:
 
 
 def merge_usage(spec, usage: list[dict]) -> list[dict]:
-    """Recover each journaled call once; final record/live rows take precedence."""
+    """Recover each journaled call once; final record/live rows take precedence.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The recovery/provenance caller supplies the validated selected run
+    and its matching recorded rows; merge each surviving usage identity once and do not
+    interpret the merged counters as new admission.
+    """
     have = {r["usage_id"] for r in usage
             if isinstance(r, dict) and isinstance(r.get("usage_id"), str)}
     for row in _read(spec)["rows"]:
@@ -793,7 +1006,14 @@ def merge_usage(spec, usage: list[dict]) -> list[dict]:
 
 
 def require_matching_usage(spec, usage: list[dict], *, complete: bool = False) -> None:
-    """A stable ID never excuses contradictory surviving call counters."""
+    """A stable ID never excuses contradictory surviving call counters.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The completion/recovery caller supplies the selected validated
+    owner and matching usage rows; stable identifiers cannot excuse contradictory counters
+    or missing completed calls.
+    """
     recorded = {row.get("usage_id"): row for row in usage if isinstance(row, dict)}
     for row in _read(spec)["rows"]:
         previous = recorded.get(row["usage_id"])

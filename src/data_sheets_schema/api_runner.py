@@ -423,6 +423,12 @@ SHARED_PHASE_MAX_TOKENS = {"report": 128000, "reconcile_full": 128000}
 
 def phase_max_tokens(spec: "RunSpec", ph: str, default: int, *,
                      model: str | None = None) -> int:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The plan/execute admission caller has validated this RunSpec
+    before resolving model/configuration limits; this helper only derives the selected phase
+    cap.
+    """
     value = PHASE_MAX_TOKENS.get(ph, default)
     # Complete source reviews repeat every scalar plus its quotations and
     # judgments. The opt-in v3 audit/report needs room beyond the historical
@@ -853,18 +859,36 @@ class RunSpec:
 
     @property
     def profile_obj(self):
-        """The `Profile` the digest is rendered under."""
+        """The `Profile` the digest is rendered under.
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: The RunSpec is under construction or its caller has validated the
+        current binding before profile lookup; this property is not generation admission.
+        """
         from data_sheets_schema.profiles import profile_named
         return profile_named(self.profile) if self.profile else None
 
     @property
     def profile_selection(self):
-        """What the record states: the profile and why (#1443)."""
+        """What the record states: the profile and why (#1443).
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: The RunSpec is under construction or its caller has validated the
+        current binding before presenting the selected profile and basis.
+        """
         from data_sheets_schema.profiles import Selection
         return Selection(self.profile_obj, self.profile_basis) if self.profile else None
 
     @staticmethod
     def header_for_manifest(manifest: Path | None) -> str:
+        """RunSpec boundary: validated-caller
+
+        RunSpec precondition: The constructor or validated rendering caller supplies the
+        selected manifest path; this static helper formats metadata without reading inputs or
+        authorizing execution.
+        """
         if manifest is None:
             return ("# Source manifest: not used (no manifest selected; "
                     "the bundle was passed explicitly)")
@@ -872,7 +896,13 @@ class RunSpec:
 
     @property
     def is_agentic(self) -> bool:
-        """Whether the runtime follows the shared agentic playbook."""
+        """Whether the runtime follows the shared agentic playbook.
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: The caller is constructing the RunSpec or has validated it before
+        route selection; this property only classifies stored fields.
+        """
         return self.runtime in AGENTIC_RUNTIMES
 
     @property
@@ -884,7 +914,13 @@ class RunSpec:
         condition, as the playbook does (#709). Any other run writes one only
         under a receipt condition (#710). One answer for the record the
         recorder writes and the block the launcher recomputes, so the two
-        agree by construction."""
+        agree by construction.
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: The caller is constructing the RunSpec or has validated it before
+        receipt-route selection; this property only classifies stored fields.
+        """
         if self.is_agentic and self._agentic_artifact_paths is not None:
             return "receipt" in self._agentic_artifact_paths
         return self.condition in RECEIPT_CONDITIONS
@@ -897,6 +933,12 @@ class RunSpec:
         The source manifest contributes a recorded path/header, not bytes to
         this instruction. It may have moved since the run. Execution still
         requires a freshly validated spec; this object is only for replay.
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: The caller supplies a literal saved renderer specification for
+        inspection; this factory validates/restores it and establishes replay origin, which
+        never authorizes execution.
         """
         if "registered_input_paths" in recorded and recorded["registered_input_paths"] is not True:
             raise ValueError("registered_input_paths is recorded only as true")
@@ -1002,7 +1044,13 @@ class RunSpec:
 
     @property
     def api_header_values(self) -> dict[str, str]:
-        """Freeze the displayed request settings, independently of live config (#1809)."""
+        """Freeze the displayed request settings, independently of live config (#1809).
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: The caller has validated this RunSpec before observing or freezing
+        request settings; recorded replay headers remain literal inspection data.
+        """
         if self._api_header_values is None:
             if self._replay_only:
                 raise ValueError("renderer v8 requires recorded API header values")
@@ -1010,7 +1058,13 @@ class RunSpec:
         return dict(self._api_header_values)
 
     def bind_api_header_values(self, settings: dict[str, Any]) -> None:
-        """Before planning or spending, bind the instruction to request settings."""
+        """Before planning or spending, bind the instruction to request settings.
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: The planning or execution caller has validated this RunSpec before
+        this method reads selected policy/shared authority and binds request settings.
+        """
         if self.render_version < 8 or self.is_agentic:
             return
         if self.api_playbook_version:
@@ -1035,7 +1089,14 @@ class RunSpec:
     @property
     def manifest_used(self) -> bool:
         """Whether the run consults a manifest at all: one is selected and
-        the arm's header does not declare it unused (#603)."""
+        the arm's header does not declare it unused (#603).
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: The caller is constructing the RunSpec or has validated it before
+        consuming the selected manifest/header declaration; this property only classifies stored
+        fields.
+        """
         return self.manifest is not None and not manifest_declared_unused(self.manifest_line)
 
     def input_identity(self) -> dict[str, Any]:
@@ -1044,6 +1105,12 @@ class RunSpec:
         Keeping the ledger filename stable preserves old charges when a
         caller changes inputs. Stored pins, not renamed accounts, refuse
         mixing generations (#1402).
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: The planning/execution caller has validated the RunSpec
+        immediately before hashing its selected inputs and shared authority; this method is not
+        an independent admission gate.
         """
         from data_sheets_schema.chunking import manifest_for
         if self.api_playbook_version:
@@ -1094,6 +1161,12 @@ class RunSpec:
         changed but not what it should have been. Storing the spec beside it
         lets `verify_request()` re-render and compare, which is what turns
         "do not intervene" from a rule into something detectable (#420).
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: The caller has validated the current RunSpec or is inspecting a
+        genuine literal replay before serializing its rendering selection; serialization never
+        authorizes execution.
         """
         policy_metadata = {}
         if self.native_source_attribution_version:
@@ -1159,11 +1232,22 @@ class RunSpec:
         A six-phase run takes tens of minutes, which is long enough for it to
         happen. Resolving once closes it for the whole spec rather than for one
         field of it.
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: Consumers must validate the same RunSpec before using cached
+        instruction text with current inputs; uncached rendering checks the invariant, while the
+        cached text remains inspectable evidence.
         """
         return resolve_prompt(self)
 
     @property
     def output_root(self) -> Path:
+        """RunSpec boundary: validated-caller
+
+        RunSpec precondition: The caller is constructing the RunSpec or has validated it before
+        using derived output locations; deriving a path does not authorize writes.
+        """
         if self.shared_generation_version == 2:
             # Keep the ordinary destination but freeze its absolute identity;
             # later cwd changes must not change selected output ownership.
@@ -1174,12 +1258,22 @@ class RunSpec:
 
     @property
     def full_path(self) -> Path:
+        """RunSpec boundary: validated-caller
+
+        RunSpec precondition: The caller is constructing the RunSpec or has validated it before
+        using the full-output location; deriving a path does not authorize writes.
+        """
         if self.out_dir:
             return self.out_dir / f"{self.project}_d4d.yaml"
         return self.output_root / self.method / self.label / f"{self.project}_d4d.yaml"
 
     @property
     def core_path(self) -> Path:
+        """RunSpec boundary: validated-caller
+
+        RunSpec precondition: The caller is constructing the RunSpec or has validated it before
+        using the core-output location; deriving a path does not authorize writes.
+        """
         if self.out_dir:
             return self.out_dir / f"{self.project}_d4d_core.yaml"
         return (self.output_root / f"{self.method}_core" / self.label /
@@ -1187,6 +1281,11 @@ class RunSpec:
 
     @property
     def report_path(self) -> Path:
+        """RunSpec boundary: validated-caller
+
+        RunSpec precondition: The caller is constructing the RunSpec or has validated it before
+        using the report location; deriving a path does not authorize writes.
+        """
         if self.out_dir:
             return self.out_dir / f"{self.project}_reconciliation.md"
         return (self.output_root / f"{self.method}_core" / self.label /
@@ -1202,15 +1301,27 @@ class RunSpec:
         progress file landing beside the *full* record while provenance landed
         in the `_core` directory. Reading a run's state then meant knowing which
         of three conventions applied.
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: The caller is constructing the RunSpec or has validated it before
+        using the metadata directory; deriving a path does not authorize writes.
         """
         return self.out_dir or self.report_path.parent
 
     @property
     def provenance_path(self) -> Path:
+        """RunSpec boundary: validated-caller
+
+        RunSpec precondition: The caller is constructing the RunSpec or has validated it before
+        using the provenance location; deriving a path does not authorize writes.
+        """
         return self.metadata_dir / f"{self.project}_provenance.yaml"
 
     @property
     def base_prompt(self) -> Path:
+        """RunSpec boundary: guarded
+        """
         _require_registered_input_spellings(self)
         try:
             return CONDITION_PROMPTS[self.condition]
@@ -1222,6 +1333,12 @@ class RunSpec:
 
     @property
     def prompt_files(self) -> list[Path]:
+        """RunSpec boundary: validated-caller
+
+        RunSpec precondition: The rendering/provenance caller has validated the current RunSpec
+        before enumerating selected prompt assets; this list is not independent input or launch
+        admission.
+        """
         if self.shared_generation_version:
             from .shared_generation import captured_assets
             return [Path(name) for name in sorted(captured_assets())]
@@ -1296,6 +1413,12 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
 
     Recorded per block: whether it was sent and how many bytes, so a run whose
     rule refers to a declaration it never received says so in its own record.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The generation/provenance caller supplies the unchanged validated
+    spec or its literal recorded rendering selection before manifest-derived context
+    inspection; these observations do not independently prove consumption.
     """
     out: dict[str, Any] = {}
     # A spec that predates the field (a reconstructed one, a duck-typed one
@@ -1411,6 +1534,12 @@ def resolved_prompt_digest(spec: RunSpec) -> dict[str, Any]:
     in project, arm, label, model, provider or date were indistinguishable by
     their recorded prompt evidence. Substitution is exactly what makes the file
     and the request different objects, so the request needs its own hash.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The generation/provenance caller has validated the current spec
+    before combining its cached instruction digest with current inputs; hashing cached text
+    is not fresh input admission.
     """
     text = spec.instruction
     return {"sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
@@ -1418,7 +1547,14 @@ def resolved_prompt_digest(spec: RunSpec) -> dict[str, Any]:
 
 
 def agentic_selected_inputs(spec: RunSpec) -> str:
-    """Bind every manifest-dependent playbook step to this run's inputs."""
+    """Bind every manifest-dependent playbook step to this run's inputs.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: resolve_prompt has validated this RunSpec before deriving its
+    manifest, bundle and artifact command arguments; this formatter does not admit
+    execution.
+    """
     import shlex
     paths = spec._agentic_artifact_paths
     def command(*args):
@@ -1481,6 +1617,8 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
 
     Built here rather than handed to the model as a file reference, so the text
     in the request is the text that was hashed.
+
+    RunSpec boundary: guarded
     """
     body = prompt_body(spec.base_prompt)
     if spec.api_playbook_version:
@@ -1717,7 +1855,14 @@ NATIVE_EVIDENCE_STOP = (
 
 
 def native_evidence_instructions(spec: RunSpec) -> str:
-    """Bind the native evidence protocol to this run's exact destinations."""
+    """Bind the native evidence protocol to this run's exact destinations.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The guarded rendering/native-registration caller supplies the
+    unchanged selected spec before deriving native evidence commands; command text is not
+    execution authority.
+    """
     import shlex
     paths = spec._agentic_artifact_paths
     directory = Path(paths["core"]).parent / "evidence"
@@ -2912,6 +3057,8 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
 
     The bundle and schema digest are the cached prefix: identical across all
     six phases of a run, and by far the largest inputs.
+
+    RunSpec boundary: guarded
     """
     _require_registered_input_spellings(spec)
     if phase not in PHASES:
@@ -3169,6 +3316,8 @@ def plan(spec: RunSpec) -> dict[str, Any]:
 
     Lets the whole assembly — prompt resolution, caching layout, token cost — be
     inspected and tested without a key or a charge.
+
+    RunSpec boundary: guarded
     """
     # Public batch planning precedes even its control-lock filesystem writes.
     _require_registered_input_spellings(spec)
@@ -4247,6 +4396,12 @@ def validation_block(spec: RunSpec | ValidationInputs, problems: list[dict[str, 
 
     md5 to match `provenance._artifact()`, which already hashes run outputs that
     way; see INPUT_HASH there for why prompts use sha256 and these do not.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: When passing a RunSpec, execute or a validated saved-record
+    inspection caller has checked the selected spec before hashing outputs; independent
+    ValidationInputs callers remain artifact-only inspection.
     """
     from data_sheets_schema.provenance import _md5
     artifacts = {}
@@ -4438,6 +4593,12 @@ def validate_outputs(spec: RunSpec | ValidationInputs) -> list[dict[str, str]]:
     Returned so the caller can record the outcome in provenance before deciding
     what to do: a record that fails validation should still be inspectable, and
     the provenance should say it failed rather than omit the question.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: When passing a RunSpec, execute or a validated saved-record
+    inspection caller has checked the selected spec before artifact validation; independent
+    ValidationInputs callers remain artifact-only inspection.
     """
     problems: list[dict[str, str]] = []
     for path, schema, cls in ((spec.full_path, FULL_SCHEMA_PATH, "Dataset"),
@@ -4484,6 +4645,12 @@ def pair_consistency(spec: RunSpec) -> dict[str, Any] | None:
     records are individually valid; the defect being fixed here is that it was
     invisible, not that it is fatal. Returns None when the checker cannot run,
     so "not established" stays distinct from "consistent".
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: When passing a RunSpec, execute or a validated saved-record
+    inspection caller has checked the selected spec before reading the full/core pair;
+    independent ValidationInputs callers remain artifact-only inspection.
     """
     try:
         from data_sheets_schema.d4d_pair_consistency import (load_pair_schema,
@@ -4613,6 +4780,12 @@ def report_claims_block(spec: RunSpec, *, record: dict | None = None) -> dict[st
 
     Reported, never fatal, like the pair check: a wrong report does not make a
     record wrong, and the whole corpus predates this.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The execute/report-check caller has validated the selected RunSpec
+    before collecting report-claim evidence from its artifacts; this evidence helper does
+    not authorize a request.
     """
     try:
         import yaml as _yaml
@@ -4663,7 +4836,14 @@ def report_claims_block(spec: RunSpec, *, record: dict | None = None) -> dict[st
 
 def report_audit_totals_block(spec: RunSpec, carry: dict[str, str] | None = None,
                              *, record: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Check written report's stated finding totals against structured audit (#4766)."""
+    """Check written report's stated finding totals against structured audit (#4766).
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The execute/report-check caller has validated the selected RunSpec
+    before reading its audit/report evidence; this check does not authorize provider
+    delivery.
+    """
     from data_sheets_schema.report_audit_totals import check_report_audit_totals
     audit_source = carry.get("Audit findings") if carry else None
     if audit_source is None:
@@ -4711,7 +4891,14 @@ def _current_report_audit_totals(spec: RunSpec, existing: dict[str, Any]) -> dic
 
 
 def source_metadata_authority(spec: RunSpec) -> dict[str, Any]:
-    """Only the selected v5 instrument receives actual manifest-byte authority."""
+    """Only the selected v5 instrument receives actual manifest-byte authority.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The guarded rendering/execution caller has validated the current
+    RunSpec before selected source-metadata authority is read; this helper is subordinate to
+    that input boundary.
+    """
     if spec.render_version < 16:
         return {}
     if getattr(spec, "shared_generation_version", 0):
@@ -4723,7 +4910,14 @@ def source_metadata_authority(spec: RunSpec) -> dict[str, Any]:
 
 
 def source_metadata_block(spec: RunSpec) -> str:
-    """Expose a bounded metadata projection, never arbitrary manifest content."""
+    """Expose a bounded metadata projection, never arbitrary manifest content.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: resolve_prompt or the guarded execution path has validated this
+    RunSpec before source-metadata evidence is assembled; the returned block is not a launch
+    gate.
+    """
     from data_sheets_schema.source_metadata import projection
     authority = source_metadata_authority(spec)
     raw = authority.get("source_manifest_raw")
@@ -4733,7 +4927,13 @@ def source_metadata_block(spec: RunSpec) -> str:
 
 def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool = False,
                           reconciled: bool = False) -> dict[str, Any]:
-    """Check the explicit v9 protocol against this invocation's own carry."""
+    """Check the explicit v9 protocol against this invocation's own carry.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The guarded execution/report-check caller has validated this
+    RunSpec before gathering evidence checks over its selected inputs and outputs.
+    """
     from data_sheets_schema import evidence_assertions as evidence
     protocol = evidence.protocol_for_renderer(spec.render_version)
     try:
@@ -4792,7 +4992,14 @@ def _assert_evidence_clean(out: dict | None, stage: str, *, spec: RunSpec | None
 
 def require_evidence_checks(spec: RunSpec, carry: dict[str, str], *, stage: str,
                             preserve: bool = True, fail: bool = True) -> dict | None:
-    """Preserve a failed reading before stopping further phases or spending."""
+    """Preserve a failed reading before stopping further phases or spending.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: execute has validated the current RunSpec before delegating
+    selected evidence-gate checks; this helper does not independently authorize input
+    selection or spending.
+    """
     if spec.render_version < 9:
         return
     out = evidence_checks_block(spec, carry, reconciled=stage == "reconcile",
@@ -4808,7 +5015,13 @@ def require_evidence_checks(spec: RunSpec, carry: dict[str, str], *, stage: str,
 
 
 def require_source_reviews(spec: RunSpec, carry: dict[str, str], *, evidence=None) -> None:
-    """Admit a report before any repair/rewrite can replace its source judgment."""
+    """Admit a report before any repair/rewrite can replace its source judgment.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: execute has validated the current RunSpec before delegating
+    selected source-review checks; callers must retain its existing output/admission gates.
+    """
     if spec.render_version < 12:
         return
     out = evidence if evidence is not None else evidence_checks_block(spec, carry, report=True)
@@ -4896,7 +5109,14 @@ def _pending_source_review(spec: RunSpec, phase: str, response) -> dict:
 
 
 def saved_evidence_checks(spec: RunSpec, record: dict) -> dict:
-    """Recheck an already completed run using its attested phase inputs."""
+    """Recheck an already completed run using its attested phase inputs.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The execution or saved-record inspection caller has validated its
+    current or literal restored RunSpec before reading saved evidence; saved checks do not
+    independently admit a launch.
+    """
     from data_sheets_schema import snapshot_store
     carry = {}
     for suffix, label in (("full.yaml", "Original full record"),
@@ -4926,6 +5146,12 @@ def grounding_block(spec: RunSpec) -> dict[str, Any] | None:
     outcome.
 
     Reported, never fatal, following #520.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The guarded execution/provenance caller has validated the current
+    RunSpec before collecting source-grounding evidence; this block does not establish
+    launch authority.
     """
     from data_sheets_schema.grounding import GROUNDING_INSTRUMENT
 
@@ -6951,7 +7177,13 @@ def _require_surviving_accounting(spec: RunSpec, usage: list[dict] | None = None
 
 
 def merge_abandoned_rows(spec: RunSpec, usage: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Recover this generation's drops once; legacy rows use snapshot paths."""
+    """Recover this generation's drops once; legacy rows use snapshot paths.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The guarded execute recovery path has validated this RunSpec and
+    retained journal/ownership admission before merging abandoned accounting rows.
+    """
     def key(row):
         uid = row.get("usage_id")
         return ("usage_id", uid) if isinstance(uid, str) and uid else ("snapshot", row.get("snapshot"))
@@ -7156,6 +7388,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     a clean regeneration. An existing journal requires its head from the prior
     launch/monitor record as ``expect_journal_head_sha256``, even on a fresh
     generation request. Start/stop heads are printed to stderr for that record.
+
+    RunSpec boundary: guarded
     """
     if spec._replay_only:
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")

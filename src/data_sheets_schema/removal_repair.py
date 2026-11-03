@@ -154,7 +154,14 @@ def request_payload(original_raw: str, current_raw: str, audit_raw: str,
 
 
 def inspect_run(spec, *, record=None) -> tuple[dict, dict]:
-    """Current reading and exact request inputs, with no historical glob fallback."""
+    """Current reading and exact request inputs, with no historical glob fallback.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The inspection caller supplies the same run/snapshot owner and
+    optional matching provenance record before reading attested originals and current full
+    output; output drift is evidence to report, not new request authority.
+    """
     from data_sheets_schema.snapshot_store import read_latest
     inputs = {}
     pins = {}
@@ -185,12 +192,25 @@ def inspect_run(spec, *, record=None) -> tuple[dict, dict]:
 
 
 def output_pins(spec) -> dict:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the correct admitted owner's full/core paths;
+    this operation reports their current bytes, including changed outputs, rather than
+    admitting new generation.
+    """
     return {name: {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
             for name, path in (("full", spec.full_path), ("core", spec.core_path))}
 
 
 def completion_check(spec, *, record=None, expected_outputs=None) -> dict:
-    """Recompute final facts; a saved/model-written pass is never authority."""
+    """Recompute final facts; a saved/model-written pass is never authority.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API completion/resume caller supplies the same selected owner,
+    matching record and expected pins; independently compare final evidence without granting
+    authority or silently adopting unusable snapshots.
+    """
     from data_sheets_schema.usage_ledger import UsageLedgerError
     out = {"policy": policy_identity(), "checked": False, "findings": []}
     try:
@@ -214,7 +234,14 @@ def completion_check(spec, *, record=None, expected_outputs=None) -> dict:
 
 
 def refresh_outcome(spec, outcome: dict, *, record=None) -> dict:
-    """Update actual residuals without ever clearing an earlier refusal."""
+    """Update actual residuals without ever clearing an earlier refusal.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The finalization caller retains the admitted owner and prior
+    repair outcome; inspect current evidence while preserving any earlier refusal, without
+    treating this update as fresh-call admission.
+    """
     checked = completion_check(spec, record=record, expected_outputs=outcome.get("output_pins"))
     findings = list(outcome.get("findings") or [])
     findings.extend(f for f in checked["findings"] if f not in findings)
@@ -228,6 +255,13 @@ def run(spec, client, settings: dict, usage: list) -> dict:
     Rejections are terminal in the existing generation ledger. It owns the
     allowance too, so an interrupted/failed/truncated delivery cannot buy a
     second attempt by dropping a response or removing a progress file.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API repair caller supplies the D76-admitted generation,
+    settings/client and exact original/audit/full/core evidence; retain the one-attempt
+    ledger allowance, persist delivered evidence first, and require unchanged inputs before
+    output publication.
     """
     import tempfile
     import time

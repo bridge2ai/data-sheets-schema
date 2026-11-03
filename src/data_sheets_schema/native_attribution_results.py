@@ -561,7 +561,14 @@ def _blocks(event):
 
 
 def capture(composition_path, transcript_path, control_path, *, config_root=None):
-    """Prepare one current-authority snapshot. Old code pins are never upgraded."""
+    """Prepare one current-authority snapshot. Old code pins are never upgraded.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The selected composition is verified before constructing its
+    CapturedDraft/state, which must remain bound to that exact registration and immutable
+    capture.
+    """
     snap = Capture(Path.cwd().resolve())
     raw = snap.read(composition_path, 'composition')
     value = composition.verified_composition(raw)
@@ -844,6 +851,12 @@ def check_capture(prepared):
 
 
 def check_files(composition_path, transcript_path, control_path, *, config_root=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies paths for the verified composition/capture
+    check; the helper obtains its state through capture rather than accepting a mutable
+    RunSpec.
+    """
     prepared = capture(composition_path, transcript_path, control_path, config_root=config_root)
     return check_capture(prepared)
 
@@ -882,6 +895,11 @@ def write_report(prepared, destination):
 
 
 def main(argv=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The CLI supplies explicit paths to the verified capture/check
+    flow; it accepts no caller-supplied mutable RunSpec or independent launch authority.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--composition', type=Path, required=True)
     parser.add_argument('--transcript', type=Path, required=True)

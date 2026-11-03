@@ -447,6 +447,14 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     not from a Claude Code one. A prompt is a generation input like the bundle,
     and the prompt-condition study is precisely a comparison between prompts,
     so a record that cannot identify its own prompt cannot be placed in it.
+
+    \f
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Explicit CLI paths and instruction evidence are admitted through
+    the recorder identity and full-instruction checks before publication; any constructed or
+    restored spec remains local to that verification, not an execution authority.
     """
     _require_repo_root_cwd("d4d provenance record")
     recording_cwd = Path.cwd()
@@ -1078,6 +1086,14 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
     trying the record's own date and its neighbours for the `# Generated:`
     line. A spec that does not re-render to the hash is not written: that
     would assert a condition the run may not have used.
+
+    \f
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller selects a saved provenance record and literal
+    instruction for reconstruction; a locally reconstructed RunSpec is only evidence for a
+    matching render specification, never permission to execute.
     """
     from data_sheets_schema.cli.method import resolve_method
     method = method or resolve_method(label, project)

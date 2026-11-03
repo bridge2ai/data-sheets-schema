@@ -137,6 +137,11 @@ def validate_spec_against_pair_schema(
     induced by `Dataset` / `CoreDataset`, `FileCollection` / `CoreDistribution`,
     and `File` / `CoreDistribution`, and only the expressions this executor
     actually implements. This is not a general-purpose LinkML-Map evaluator.
+
+    RunSpec boundary: unrelated
+
+    RunSpec precondition: The spec parameter is a LinkML TransformationSpecification or
+    None, not a generation RunSpec.
     """
     if spec is None:
         spec, _, _ = load_transformation_spec()

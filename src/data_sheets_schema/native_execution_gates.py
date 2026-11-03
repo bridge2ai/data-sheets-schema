@@ -19,7 +19,14 @@ GATES = ('terminal', 'shutdown', 'first_stop', 'live_attribution', 'saved_attrib
 
 
 def capture(value, controls, *, authority_inputs, registration_raw):
-    """Capture selected native authority and outputs; never invent a recipe."""
+    """Capture selected native authority and outputs; never invent a recipe.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the selected attempt/authority; replay.capture
+    establishes the verified state and snapshot, which must remain unchanged before sealing
+    execution-gate evidence.
+    """
     from data_sheets_schema import api_runner as api, receipts
     attempt = Path(value['attempt_directory'])
     prepared = replay.capture(value['composition'], attempt / 'transcript.jsonl',

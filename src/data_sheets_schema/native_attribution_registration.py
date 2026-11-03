@@ -64,6 +64,8 @@ def _code_pins():
 
 
 def registration(spec):
+    """RunSpec boundary: guarded
+    """
     from data_sheets_schema.api_runner import assembly_digest, _require_registered_input_spellings
     _require_registered_input_spellings(spec)
     policy.command_args(spec)  # requires active version and explicit finite limit
@@ -93,7 +95,14 @@ def registration(spec):
 
 
 def verified(raw):
-    """Strictly reconstruct the offline selection; never infer a missing axis."""
+    """Strictly reconstruct the offline selection; never infer a missing axis.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies literal saved registration bytes;
+    from_render_spec establishes replay origin and the complete guarded registration
+    encoding must match before returning the spec.
+    """
     from data_sheets_schema.api_runner import RunSpec
     if type(raw) is not bytes:
         raise ValueError('registration must be captured bytes')
@@ -116,7 +125,10 @@ def verified(raw):
 
 
 def write_registration(spec, destination):
-    """One exclusive file; no partial directory, sidecar or historical rewrite."""
+    """One exclusive file; no partial directory, sidecar or historical rewrite.
+
+    RunSpec boundary: guarded
+    """
     from data_sheets_schema.api_runner import _require_registered_input_spellings
     _require_registered_input_spellings(spec)
     value = registration(spec)
@@ -159,7 +171,14 @@ def _commands(spec):
 
 
 def command_kind(command, spec, *, expected=None):
-    """The extra adapter admits only exact bound helper spellings."""
+    """The extra adapter admits only exact bound helper spellings.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the unchanged spec from verified
+    registration/state and the matching expected command set; this command classifier is not
+    an execution entry.
+    """
     if not isinstance(command, str):
         raise ValueError('helper command must be text')
     expected = _commands(spec) if expected is None else expected
@@ -378,6 +397,12 @@ def verify_history(registration_raw, events):
 
 
 def main(argv=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: Explicit CLI/render-spec input is parsed into a fresh RunSpec or
+    literal replay, then delegated to guarded registration/write_registration before inputs
+    are consumed or output published.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='operation', required=True)
     prepare = commands.add_parser('prepare', help='write a new offline-only registration')

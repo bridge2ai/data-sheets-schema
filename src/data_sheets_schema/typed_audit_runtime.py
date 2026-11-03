@@ -75,7 +75,14 @@ def _derivations(spec):
 
 
 def prepare_packet(spec, *, record=None):
-    """Use the single captured registration closure and exact saved originals."""
+    """Use the single captured registration closure and exact saved originals.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The typed-audit caller supplies the same D76-admitted selected
+    spec and pinned originals/effective receipt; authority/evidence checks build that
+    registered packet, without independently admitting dispatch.
+    """
     from . import api_runner as api
     captured = sg.assert_current(spec)
     reg = captured.document()
@@ -128,7 +135,14 @@ def _derive_inner(spec, packet, stage, workers, omission):
 
 
 def build_request(spec, packet, stage, workers, omission, settings):
-    """One exact outer wire; the inner format remains the released typed API."""
+    """One exact outer wire; the inner format remains the released typed API.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The typed-audit caller supplies the same entry-validated selection
+    and registered packet/stage; request derivation must retain exact captured context and
+    receipt carry before later counting and admission.
+    """
     from . import api_runner as api
     captured = sg.assert_current(spec)
     reg = captured.document()
@@ -305,7 +319,14 @@ def _rebuild(spec, state, *, settle=False, record=None, _reader=None):
 
 
 def recover_delivered(spec, *, record=None):
-    """Before generic pending-call refusal, recover only complete bound evidence."""
+    """Before generic pending-call refusal, recover only complete bound evidence.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API resume caller retains the admitted owner and complete
+    saved response/usage identities; rebuilding verifies packet/authority and settles
+    accounting without initiating a fresh call.
+    """
     state = _state(spec)
     if state is None:
         return
@@ -315,6 +336,12 @@ def recover_delivered(spec, *, record=None):
 
 
 def recover(spec, *, carry=None, terminal=False, independent=False, record=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The recovery caller supplies the same run/selected registration
+    and optional matching record; rebuild exact saved stages/assembly, with attributed audit
+    evidence for terminal recovery, without authorizing retries.
+    """
     state = _state(spec)
     if state is None:
         if terminal:
@@ -357,6 +384,12 @@ def recover(spec, *, carry=None, terminal=False, independent=False, record=None)
 
 
 def completion_check(spec, carry=None, *, record=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API completion/resume or completed-capture caller supplies the
+    same validated selection and matching record for terminal independent rebuild; the
+    result does not establish scientific approval or authorize new calls.
+    """
     outcome = recover(spec, carry=carry, terminal=True, independent=True, record=record)
     routing = {}
     if spec.shared_generation_version == 2:
@@ -370,6 +403,12 @@ def completion_check(spec, carry=None, *, record=None):
 
 
 def resume_guard(spec, progress, *, record=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API continuation caller supplies the entry-validated selected
+    owner and authentic progress or independently matching completed provenance; missing
+    progress must not authorize restarting admitted stages.
+    """
     state = _state(spec)
     if state is None:
         return
@@ -403,7 +442,14 @@ def resume_guard(spec, progress, *, record=None):
 
 
 def require_admission(spec, phase, *, data=None, usage_id=None):
-    """The usage journal consumes the child allowance in its own transaction."""
+    """The usage journal consumes the child allowance in its own transaction.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: usage_ledger.begin_call supplies the same entry-validated spec,
+    current ledger transaction and usage identity; stage admission may be marked only within
+    that transaction.
+    """
     if not getattr(spec, 'shared_generation_version', 0):
         return
     sg.assert_current(spec)
@@ -436,6 +482,12 @@ def require_admission(spec, phase, *, data=None, usage_id=None):
 
 
 def require_request(spec, phase, kwargs):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The physical-call caller supplies the same prepared stage and
+    exact counted/saved request wire under its admitted owner; context/carry comparison does
+    not authorize independent dispatch.
+    """
     sg.require_generation_context(spec, kwargs['messages'])
     sg.require_routing_context(spec, kwargs['messages'])
     if phase not in PHASES:
@@ -473,7 +525,15 @@ def require_request(spec, phase, kwargs):
 
 
 def run(spec, *, carry, client, settings, usage):
-    """Real audit phase; scripted clients in tests use this same entry point."""
+    """Real audit phase; scripted clients in tests use this same entry point.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API audit caller supplies the D76-admitted selected spec,
+    exact phase-one carry and same settings/client/ledger; each registered stage requires
+    current call admission, while raw response evidence must be saved before
+    accounting/validation.
+    """
     from .latch_journal import refuse_legacy_execution
     refuse_legacy_execution(spec)
     from . import api_runner as api, reasoning

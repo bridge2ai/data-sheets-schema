@@ -90,7 +90,14 @@ def _fixture(raw):
 
 
 def recipe_steps(spec, policy, fixture):
-    """Closed helper sequence; the caller cannot supply argv or shell commands."""
+    """Closed helper sequence; the caller cannot supply argv or shell commands.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the unchanged spec and matching policy from
+    draft.verified/verified composition, or the identical literal replay restored after
+    exact registration and fixture-hash checks; recipe expansion does not admit an attempt.
+    """
     commands = draft._commands(spec)
     spellings = policy['helper_arguments']['spellings']
     receipt = next(c for c in spellings['receipts'] if '--write' not in shlex.split(c))
@@ -120,7 +127,14 @@ def recipe_steps(spec, policy, fixture):
 
 def registration(composition_path, fixture_path, *, attempt_id, attempt_directory,
                  evidence_directory, deadline_seconds, synthetic_runtime, receipt_origin_version=0):
-    """Prepare offline identity only. No directory is reserved and no child starts."""
+    """Prepare offline identity only. No directory is reserved and no child starts.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies explicit paths/registration bytes; this
+    factory reconstructs selection through verified composition and draft.verified, rather
+    than adopting a caller-supplied RunSpec.
+    """
     if type(receipt_origin_version) is not int or receipt_origin_version not in (0, 1):
         raise ValueError('receipt_origin_version must be exactly integer 0 or 1')
     if not isinstance(attempt_id, str) or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', attempt_id) is None:
@@ -168,6 +182,11 @@ def registration(composition_path, fixture_path, *, attempt_id, attempt_director
 
 
 def verified(raw):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies exact saved registration bytes; reconstruction
+    verifies composition and draft selection before any resulting RunSpec is consumed.
+    """
     if type(raw) is not bytes or len(raw) > MAX_BYTES:
         raise ValueError('supervisor registration must be bounded exact bytes')
     value = draft._json(raw)
@@ -245,7 +264,14 @@ class NeutralState:
 
 
 def supervise(registration_raw):
-    """Consume one neutral attempt. There is deliberately no retry/resume flag."""
+    """Consume one neutral attempt. There is deliberately no retry/resume flag.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The supervisor reconstructs its spec through verified
+    composition/registration and must retain separate freshness and one-attempt checks
+    before reservations or dispatch; callers must not mutate the verified state.
+    """
     from data_sheets_schema import native_supervisor_gates as gates
     value = verified(registration_raw)
     raw = _file(value['composition'], 'composition')
@@ -350,7 +376,14 @@ def supervise(registration_raw):
 
 
 def read_final(registration_raw):
-    """Read-only committed-result check; no directory or attempt is resumed."""
+    """Read-only committed-result check; no directory or attempt is resumed.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The reader reconstructs the selected spec from verified
+    registration/composition before inspecting final evidence; this inspection does not
+    authorize another attempt.
+    """
     value = verified(registration_raw)
     evidence, attempt = Path(value['evidence_directory']), Path(value['attempt_directory'])
     final_raw = _file(evidence/'final.json', 'final result')

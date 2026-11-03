@@ -145,7 +145,14 @@ def record_paths(provenance: Path) -> dict[str, Path]:
 
 def instruction_text(record: dict[str, Any], instruction_file: Path | None) -> tuple[str | None, str]:
     """(text, basis). The launcher's file when given and its hash matches the
-    record; else re-rendered from the recorded spec; else None."""
+    record; else re-rendered from the recorded spec; else None.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies a saved record and optional captured
+    instruction; reconstruction uses literal replay only to verify instruction evidence,
+    never to admit execution.
+    """
     req = ((record.get("prompts") or {}).get("request")) or {}
     want = req.get("sha256")
     if instruction_file is not None and instruction_file.exists():
@@ -460,7 +467,14 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     leaves both files as it found them (#1124 review, MF-R1). The text then
     travels out of band, appended to `instruction_out`, never as a key of
     the returned mapping (round 3, SF-R3a: a caller that dumped the mapping
-    would have written a pack with an extra key and a different sha256)."""
+    would have written a pack with an extra key and a different sha256).
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller selects the provenance and instruction evidence for a
+    review package; instruction_text may reconstruct literal replay, which remains
+    inspection-only throughout this build.
+    """
     from data_sheets_schema.backfill_checks import _split_header
     from data_sheets_schema.chunking import chunk_texts, load_manifest
     from data_sheets_schema.receipts import claim_receipts, dataset_identifier_forms, load_receipt
@@ -917,7 +931,14 @@ def write_pack(provenance: Path, instruction_file: Path | None = None,
     `d4d-review-record` run regenerated the pack it was reviewing, moving
     the committed `pack_version: 3` file to 4 underneath the sha256 its own
     record attests and breaking the pairing `d4d review agree` depends on.
-    Regenerating a pack is a deliberate act, like rotating a prompt pin."""
+    Regenerating a pack is a deliberate act, like rotating a prompt pin.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller selects the same provenance/instruction evidence passed
+    to build_pack and an authorized review-package destination; package publication does not
+    authorize the reconstructed replay to execute.
+    """
     current, stale, unreadable = pack_pins_report(provenance)
     out = record_paths(provenance)["pack"]
     blind = [{"by": u["by"], "path": u["path"], "sha256": f"unreadable ({u['error']})"} for u in unreadable]
