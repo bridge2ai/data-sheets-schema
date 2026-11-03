@@ -298,6 +298,37 @@ class TimingSourceRevisionContracts(unittest.TestCase):
         self.assertEqual(proof['final_head'], self.final_head)
         self.assertIn('does not establish timing equivalence', proof['scope'])
 
+    def test_new_measurement_keeps_a_distinct_per_file_source_commit(self):
+        evidence = deepcopy(self.evidence)
+        evidence['local']['test_source_sha256'][self.path] = hashlib.sha256(self.revised).hexdigest()
+        evidence['local_source_commits'] = {self.path: self.revised_head, self.control: self.measured_head}
+        applications, proof = helper.timing_source_revisions(
+            self.tree, evidence, None, self.final_head)
+        self.assertEqual((applications, proof), ({}, None))
+        self.assertEqual(evidence['round3_commit'], self.measured_head)
+
+    def test_per_file_source_commit_cannot_relabel_an_old_digest(self):
+        evidence = deepcopy(self.evidence)
+        evidence['local_source_commits'] = {self.path: self.revised_head, self.control: self.measured_head}
+        with self.assertRaisesRegex(ValueError, 'measured digest'):
+            self.validate(evidence)
+
+    def test_per_file_source_map_must_cover_the_exact_measured_roster(self):
+        evidence = deepcopy(self.evidence)
+        evidence['local_source_commits'] = {self.path: self.measured_head}
+        with self.assertRaisesRegex(ValueError, 'exact measured roster'):
+            self.validate(evidence)
+
+    def test_composite_view_transition_uses_per_file_commit_without_global_measurement(self):
+        evidence = deepcopy(self.evidence)
+        del evidence['local']['measured_commit']
+        evidence['local']['kind'] = 'composite_projection_not_one_measurement'
+        evidence['local_source_commits'] = {self.path: self.measured_head, self.control: self.measured_head}
+        applications, proof = self.validate(evidence)
+        self.assertEqual(applications, {self.path: self.entry})
+        self.assertEqual(proof['transitions'][self.path]['measured_commit'], self.measured_head)
+        self.assertNotIn('measured_commit', evidence['local'])
+
     def test_missing_transition_is_refused(self):
         with self.assertRaisesRegex(ValueError, 'without a reviewed transition'):
             helper.timing_source_revisions(self.tree, self.evidence, None, self.final_head)

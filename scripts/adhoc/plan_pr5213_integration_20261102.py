@@ -347,6 +347,18 @@ def timing_source_revisions(tree, evidence, manifest_path, final_head):
     A prior-revision observation remains an estimate for the revised test.
     """
     measured = evidence['local']['test_source_sha256']
+    per_file_commits = evidence.get('local_source_commits')
+    if per_file_commits is not None:
+        if type(per_file_commits) is not dict or set(per_file_commits) != set(measured):
+            raise ValueError('per-file timing source commits must cover the exact measured roster')
+        for path, commit in per_file_commits.items():
+            if not isinstance(commit, str) or not re.fullmatch(r'[0-9a-f]{40}', commit):
+                raise ValueError('full per-file timing source commit required')
+            raw = git(tree, 'show', commit + ':' + path).encode()
+            if hashlib.sha256(raw).hexdigest() != measured[path]:
+                raise ValueError('per-file timing source does not match its measured digest: ' + path)
+    elif evidence['local']['measured_commit'] != evidence['round3_commit']:
+        raise ValueError('historical timing source commit differs')
     current = {path: sha(tree / path) for path in measured}
     changed = {path for path in measured if current[path] != measured[path]}
     if manifest_path is None:
@@ -399,8 +411,9 @@ def timing_source_revisions(tree, evidence, manifest_path, final_head):
         raise ValueError('timing transitions require the exact final source HEAD')
     applications = {}
     for path, entry in entries.items():
-        if (entry['measured_commit'] != evidence['round3_commit']
-                or entry['measured_commit'] != evidence['local']['measured_commit']
+        measured_commit = (per_file_commits[path] if per_file_commits is not None
+                           else evidence['local']['measured_commit'])
+        if (entry['measured_commit'] != measured_commit
                 or entry['measured_file_sha256'] != measured[path]
                 or entry['revised_file_sha256'] != current[path]):
             raise ValueError('timing transition differs from measured/current source identity: ' + path)
