@@ -23,7 +23,7 @@ _CLASSIFICATION_ONLY = object()
 
 def validate_scope(result: dict, *, document: dict | None = None, input_sha256: str | None = None,
                    expected_context: dict | None | object = _CLASSIFICATION_ONLY, resource_reader=None):
-    if result.get("version") not in {"2.0", "3.0", "4.0"}:
+    if result.get("version") not in {"2.0", "3.0", "4.0", "5.0"}:
         return
     rubric_name = result.get("rubric", "").removesuffix("-semantic")
     if rubric_name not in {"rubric10", "rubric20"}:

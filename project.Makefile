@@ -718,20 +718,8 @@ process-all-concat:
 # Extract D4D metadata from individual files using GPT-5 (with validation)
 # Usage: make extract-d4d-individual-gpt5 PROJECT=AI_READI
 extract-d4d-individual-gpt5:
-ifndef PROJECT
-	$(error PROJECT is not defined. Usage: make extract-d4d-individual-gpt5 PROJECT=AI_READI)
-endif
-	@echo "Extracting D4D metadata for $(PROJECT) using GPT-5..."
-	@mkdir -p $(D4D_INDIVIDUAL_DIR)/gpt5/$(PROJECT)
-	@if [ ! -d "aurelian" ]; then \
-		echo "❌ Error: aurelian directory not found"; \
-		echo "Please ensure the aurelian submodule is initialized"; \
-		exit 1; \
-	fi
-	cd aurelian && uv run python ../src/download/interactive_d4d_wrapper.py \
-		-i ../$(RAW_DIR)/$(PROJECT) \
-		-o ../$(D4D_INDIVIDUAL_DIR)/gpt5/$(PROJECT)
-	@echo "✅ D4D extraction complete for $(PROJECT)"
+	@echo "Retired historical generator (F16). Select a declared manifest and registered protocol; see docs/shared-generation-api-v1.md."
+	@exit 2
 
 # Extract D4D metadata from all projects using GPT-5
 extract-d4d-individual-all-gpt5:

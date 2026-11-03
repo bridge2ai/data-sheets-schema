@@ -63,8 +63,8 @@ def issue_taxonomy(result: dict, *, legacy_classifier: Callable[[dict], str] | N
     acceptance must also run the semantic scope and evidence validators.
     """
     version = result.get("version")
-    structured = version in ("3.0", "4.0")
-    if version == "4.0":
+    structured = version in ("3.0", "4.0", "5.0")
+    if version in ("4.0", "5.0"):
         from data_sheets_schema.semantic_instrument import select_semantic_instrument
         select_semantic_instrument(result.get("rubric"), version)
     if not structured and version not in (None, "1.0", "1.1", "1.2", "2.0"):

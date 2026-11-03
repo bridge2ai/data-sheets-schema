@@ -36,7 +36,8 @@ def reconstruction(generation, monkeypatch):
 
 @pytest.mark.parametrize("schema", [None, {}, {"digest_md5": "older-digest"}])
 def test_historical_profile_fallback_agrees_with_a_study_spec(schema):
-    data = {"schema": schema, "prompts": {"request": {"spec": {"profile": "bridge2ai"}}}}
+    data = {"record_generated_at": "2026-09-01T00:00:00Z",
+            "schema": schema, "prompts": {"request": {"spec": {"profile": "bridge2ai"}}}}
     assert provenance._spec_profile_disagreement(data) is None
     data["prompts"]["request"]["spec"]["profile"] = "neutral"
     assert "different instruments" in provenance._spec_profile_disagreement(data)
@@ -51,7 +52,8 @@ def test_fallback_profile_checks_known_digest_evidence(explicit_null, digest_pro
     schema = {"digest_md5": digest}
     if explicit_null:
         schema["profile"] = None
-    data = {"schema": schema, "prompts": {"request": {"spec": {"profile": "bridge2ai"}}}}
+    data = {"record_generated_at": "2026-09-01T00:00:00Z",
+            "schema": schema, "prompts": {"request": {"spec": {"profile": "bridge2ai"}}}}
     findings = provenance.profile_problems(data)
     assert bool(findings) == (digest_profile == "neutral"), findings
     if findings:

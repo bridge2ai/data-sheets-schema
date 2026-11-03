@@ -1499,14 +1499,20 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
 
     for entry in bindings:
         verify(entry)
-    repo = Path(__file__).resolve().parents[2]
+    from data_sheets_schema import run_schema
+    schema_basis = {}
     for role in ("full", "core"):
         schema = record["schema"]
         schema_path = Path(schema[role + "_path"])
         if schema_path.is_absolute() or ".." in schema_path.parts:
             _fail("invalid schema resource path")
-        if _sha(_bytes(repo / schema_path)) != schema[role + "_sha256"]:
-            _fail("legacy schema binding changed")
+        schema_sha256 = schema.get(role + "_sha256")
+        if not isinstance(schema_sha256, str) or not _HEX.fullmatch(schema_sha256):
+            _fail(f"legacy schema.{role}_sha256 must be a 64-character lowercase hex string")
+        schema_bytes, basis = run_schema.run_schema_bytes(record, kind=role)
+        if schema_bytes is None:
+            _fail(f"legacy {role} schema bytes cannot be established: {basis['reason']}")
+        schema_basis[role] = basis
     usage = record.get("api_usage")
     if not isinstance(usage, list) or not {"full", "audit", "reconcile_full", "report"}.issubset(
             {row.get("phase") for row in usage}):
@@ -1561,10 +1567,12 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
             "campaign_eligible": False, "age": "pre-D41", "new_calls": 0,
             "accounting_completeness": "unknown", "observed_usage": usage,
             "record_sha256": _sha(raw_record), "evidence_sha256": _sha(_canonical(before)),
+            "schema_basis": schema_basis,
             "verified_files": before,
             "verification_scope": "selected-project full/metadata artifacts and explicitly bound input files",
             "recorded_root": str(old), "evidence_root": str(root),
-            "verification": "recorded identity, instruction, schema, files and observed accounting"}
+            "verification": "recorded identity, instruction, schema bindings, files and observed accounting; "
+                            "current output validation"}
 
 
 def eligibility_problem(block):

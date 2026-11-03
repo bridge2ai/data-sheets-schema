@@ -136,7 +136,7 @@ def resource_paths(specs) -> tuple[Path, ...]:
     invariants first. This reads protected resource paths, not a provider or writer
     admission.
     """
-    from . import audit_omissions, provenance, prompt_registry, shared_generation
+    from . import audit_omissions, bc1_selection, provenance, prompt_registry, shared_generation
     from .evidence_assertions import protocol_for_renderer
     from .resources import resource_path
     from .schema_digest import resolve_schema
@@ -146,6 +146,11 @@ def resource_paths(specs) -> tuple[Path, ...]:
     if any(spec.shared_generation_version == 2 for spec in specs):
         paths.extend(resource_path(name) for name in (*shared_generation.ROUTING_ASSET_HASHES,
                                                      *shared_generation.ROUTING_CODE))
+    if any(bc1_selection.enabled(spec) for spec in specs):
+        # BC1 selects shared v1 but binds this entire code closure. Protect
+        # those actual files before any run writer; do not select v2 assets.
+        paths.extend(resource_path(name) for name in
+                     (*shared_generation.ROUTING_CODE, *bc1_selection.EXTRA_CODE))
     # Omission assets are module-adjacent, unlike the resource_path assets.
     paths.extend(audit_omissions.ASSETS / name for name in audit_omissions.ASSET_SHA256)
     paths.extend(resource_path(Path(

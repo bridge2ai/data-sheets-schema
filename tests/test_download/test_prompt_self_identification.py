@@ -104,11 +104,16 @@ class TestThePremise(unittest.TestCase):
         from pathlib import Path
 
         from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        if condition == 'tuned':
+            with self.assertRaisesRegex(ValueError, 'tuned'):
+                RunSpec(project='CHORUS', arm='BASELINE', method='claudecode_agent',
+                        bundle=Path('unused.txt'), label='L', condition=condition)
         spec = RunSpec(project="CHORUS", arm="BASELINE",
                        method="claudecode_agent",
                        bundle=Path("data/preprocessed/concatenated/"
                                    "CHORUS_preprocessed.txt"),
-                       label="2026-08-05_test", condition=condition)
+                       label="2026-08-05_test", condition=condition,
+                       _replay_only=condition == 'tuned', render_version=7)
         return resolve_prompt(spec)
 
     def test_the_tuned_arm_has_its_header_corrected_by_the_runner(self):

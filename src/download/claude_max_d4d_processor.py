@@ -14,6 +14,9 @@ python claude_max_d4d_processor.py
 Then copy-paste the generated prompts into Claude Pro/Max and save responses as YAML files.
 """
 
+# Historical source retained for provenance; no new invocation is supported (F16).
+raise RuntimeError('Historical D4D generator retired (F16); use the manifest-driven registered pipeline')
+
 import json
 import os
 import re

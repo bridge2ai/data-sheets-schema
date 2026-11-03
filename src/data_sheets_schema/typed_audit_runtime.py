@@ -32,6 +32,16 @@ class Outcome:
     acceptance: dict
 
 
+def _bc1(spec):
+    # Lazy import preserves the historical implementation and avoids a module
+    # cycle: BC1 reuses only explicitly selected accounting/snapshot helpers.
+    from .bc1_selection import enabled
+    if enabled(spec):
+        from . import bc1_runtime
+        return bc1_runtime
+    return None
+
+
 def _state(spec):
     return ledger._read(spec).get('typed_audit') if ledger.ledger_path(spec).exists() else None
 
@@ -83,6 +93,8 @@ def prepare_packet(spec, *, record=None):
     spec and pinned originals/effective receipt; authority/evidence checks build that
     registered packet, without independently admitting dispatch.
     """
+    if selected := _bc1(spec):
+        return selected.prepare_packet(spec, record=record)
     from . import api_runner as api
     captured = sg.assert_current(spec)
     reg = captured.document()
@@ -327,6 +339,8 @@ def recover_delivered(spec, *, record=None):
     saved response/usage identities; rebuilding verifies packet/authority and settles
     accounting without initiating a fresh call.
     """
+    if selected := _bc1(spec):
+        return selected.recover_delivered(spec, record=record)
     state = _state(spec)
     if state is None:
         return
@@ -342,6 +356,8 @@ def recover(spec, *, carry=None, terminal=False, independent=False, record=None)
     and optional matching record; rebuild exact saved stages/assembly, with attributed audit
     evidence for terminal recovery, without authorizing retries.
     """
+    if selected := _bc1(spec):
+        return selected.recover(spec, carry=carry, terminal=terminal, independent=independent, record=record)
     state = _state(spec)
     if state is None:
         if terminal:
@@ -390,6 +406,8 @@ def completion_check(spec, carry=None, *, record=None):
     same validated selection and matching record for terminal independent rebuild; the
     result does not establish scientific approval or authorize new calls.
     """
+    if selected := _bc1(spec):
+        return selected.completion_check(spec, carry, record=record)
     outcome = recover(spec, carry=carry, terminal=True, independent=True, record=record)
     routing = {}
     if spec.shared_generation_version == 2:
@@ -409,6 +427,8 @@ def resume_guard(spec, progress, *, record=None):
     owner and authentic progress or independently matching completed provenance; missing
     progress must not authorize restarting admitted stages.
     """
+    if selected := _bc1(spec):
+        return selected.resume_guard(spec, progress, record=record)
     state = _state(spec)
     if state is None:
         return
@@ -450,6 +470,8 @@ def require_admission(spec, phase, *, data=None, usage_id=None):
     current ledger transaction and usage identity; stage admission may be marked only within
     that transaction.
     """
+    if selected := _bc1(spec):
+        return selected.require_admission(spec, phase, data=data, usage_id=usage_id)
     if not getattr(spec, 'shared_generation_version', 0):
         return
     sg.assert_current(spec)
@@ -488,6 +510,8 @@ def require_request(spec, phase, kwargs):
     exact counted/saved request wire under its admitted owner; context/carry comparison does
     not authorize independent dispatch.
     """
+    if selected := _bc1(spec):
+        return selected.require_request(spec, phase, kwargs)
     sg.require_generation_context(spec, kwargs['messages'])
     sg.require_routing_context(spec, kwargs['messages'])
     if phase not in PHASES:
@@ -536,6 +560,8 @@ def run(spec, *, carry, client, settings, usage):
     """
     from .latch_journal import refuse_legacy_execution
     refuse_legacy_execution(spec)
+    if selected := _bc1(spec):
+        return selected.run(spec, carry=carry, client=client, settings=settings, usage=usage)
     from . import api_runner as api, reasoning
     captured = sg.preflight(spec, settings)
     reg = captured.document()

@@ -91,7 +91,8 @@ class TestTheScopeComesFromEvidence(unittest.TestCase):
         core.write_text("id: x\n", encoding="utf-8")
         if digest is not None:
             (self.dir / "P_provenance.yaml").write_text(
-                yaml.safe_dump({"schema": {"digest_md5": digest}}),
+                yaml.safe_dump({"record_generated_at": "2026-09-12T00:00:00Z",
+                                "schema": {"digest_md5": digest}}),
                 encoding="utf-8")
         return core
 

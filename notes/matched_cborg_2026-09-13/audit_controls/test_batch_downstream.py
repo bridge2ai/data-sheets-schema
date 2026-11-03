@@ -69,7 +69,7 @@ def test_per_job_batch_renderer_cannot_bypass_generation_selector(tmp_path, vers
 @pytest.mark.parametrize('private', [False, True])
 @pytest.mark.parametrize('version', [20, 21])
 def test_library_generation_rejects_batch_renderer_before_output_or_provider(tmp_path, monkeypatch, private, version):
-    spec = SimpleNamespace(render_version=version, _replay_only=False)
+    spec = SimpleNamespace(render_version=version, _replay_only=False, condition='generic')
     monkeypatch.setattr(api_runner, '_exclusive_run', lambda *a, **k: pytest.fail('generation output lock reached'))
     with pytest.raises(ValueError, match='separately registered audit continuation'):
         if private:

@@ -132,6 +132,7 @@ class Pack(unittest.TestCase):
         instr = tmp / "instruction.md"; instr.write_text(INSTRUCTION)
         prov = core / "P_provenance.yaml"
         prov.write_text("# header\n" + yaml.safe_dump({
+            "record_generated_at": "2026-09-01T00:00:00Z",
             "run": {"label": "L", "project": "P", "method": "claudecode_agent"},
             "prompts": {"request": {"sha256": hashlib.sha256(INSTRUCTION.encode()).hexdigest()}},
             "inputs": {"bundle_path": str(bundle), "bundle_md5": md5,

@@ -255,7 +255,7 @@ def test_receipt_correction_cannot_reopen_later_attempt(phase):
 
 
 def test_render24_cannot_spend_through_either_execution_entrypoint():
-    spec = SimpleNamespace(render_version=24, _replay_only=False)
+    spec = SimpleNamespace(render_version=24, _replay_only=False, condition='generic')
     for fn, kwargs in ((runner.execute, {}), (runner._execute, {"resume": False, "client": object()})):
         with pytest.raises(ValueError, match="offline only"):
             fn(spec, **kwargs)

@@ -1,5 +1,9 @@
 # D4D Deterministic Assistant: Creating New Datasheets
 
+HISTORICAL — RETIRED (F16, 2026-10-29). Refuse new generation under this
+prompt. Retained only to interpret historical work; use the current
+manifest-driven registered pipeline for new work.
+
 This document contains instructions for the D4D Deterministic Assistant when creating new D4D datasheets using Claude Code with temperature=0.0 settings.
 
 ## Your Role

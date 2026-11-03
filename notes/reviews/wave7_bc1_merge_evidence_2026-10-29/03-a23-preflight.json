@@ -1,0 +1,110 @@
+{
+  "attributes": {
+    "effective": {
+      "eol": "unspecified",
+      "filter": "unspecified",
+      "merge": "bc1-keep-first",
+      "text": "unspecified",
+      "working-tree-encoding": "unspecified"
+    },
+    "tracked_ancestor_attributes": {}
+  },
+  "attributes_sha256": "9dc2def3f37f3da241330d135469a7828156481e09c0583a8649ff0a313cc328",
+  "effective_base_blob": "3fbe1b2c1ee89387369e34ae4f7363e0e89c34ed",
+  "expected_behavior": "incoming equals effective base; preserve current bytes without file merge",
+  "git_policy": {
+    "GIT_NO_LAZY_FETCH": "1",
+    "hooks": "/dev/null",
+    "protocol": "file only"
+  },
+  "head": "e18c3319e7051ef6f1ec9ce34d7ddecbe67c6247",
+  "helper_sha256": "0e6d1d80858f0f72389c4bf55d399ab7f1dbd93e80f59de62581d64525f53d20",
+  "incoming": {
+    "blob": "3fbe1b2c1ee89387369e34ae4f7363e0e89c34ed",
+    "mode": "100644",
+    "ref": "90312e30e8d957e3b79510abe9ea768967983224"
+  },
+  "merge_bases": [
+    {
+      "blob": "3fbe1b2c1ee89387369e34ae4f7363e0e89c34ed",
+      "mode": "100644",
+      "ref": "cf01eb12bbbbde04854163ecb1036cf9a5431e6e"
+    }
+  ],
+  "protected_blob": "91105618cd25e33962b1c2d30f20b37101530bb2",
+  "protected_mode": "100644",
+  "protected_path_changes": [
+    {
+      "from": "e18c3319e7051ef6f1ec9ce34d7ddecbe67c6247",
+      "protected_name_status": [
+        "M\tsrc/data_sheets_schema/shared_generation.py"
+      ],
+      "rename_detection": "git diff --no-ext-diff --no-textconv --name-status --find-renames",
+      "to": "90312e30e8d957e3b79510abe9ea768967983224"
+    },
+    {
+      "from": "cf01eb12bbbbde04854163ecb1036cf9a5431e6e",
+      "protected_name_status": [
+        "M\tsrc/data_sheets_schema/shared_generation.py"
+      ],
+      "rename_detection": "git diff --no-ext-diff --no-textconv --name-status --find-renames",
+      "to": "e18c3319e7051ef6f1ec9ce34d7ddecbe67c6247"
+    },
+    {
+      "from": "cf01eb12bbbbde04854163ecb1036cf9a5431e6e",
+      "protected_name_status": [],
+      "rename_detection": "git diff --no-ext-diff --no-textconv --name-status --find-renames",
+      "to": "90312e30e8d957e3b79510abe9ea768967983224"
+    }
+  ],
+  "protected_sha256": "1c4436b5ea689fcd674c848a722dd9a86495692ad83401682f3d805f49acb6d6",
+  "scope": "preflight only; no merge or source edit",
+  "tree_attributes": {
+    "90312e30e8d957e3b79510abe9ea768967983224": {
+      "effective": {
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "merge": "bc1-keep-first",
+        "text": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "tracked_ancestor_attributes": {
+        ".gitattributes": {
+          "blob": "ed13cd0cd8df4320bb2065faaed0d8e32037c720",
+          "text": "# The _wcrate copies are pinned by sha256 in index.yaml; never convert line endings (#5083).\ndata/_wcrate/** -text\n"
+        }
+      }
+    },
+    "cf01eb12bbbbde04854163ecb1036cf9a5431e6e": {
+      "effective": {
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "merge": "bc1-keep-first",
+        "text": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "tracked_ancestor_attributes": {
+        ".gitattributes": {
+          "blob": "ed13cd0cd8df4320bb2065faaed0d8e32037c720",
+          "text": "# The _wcrate copies are pinned by sha256 in index.yaml; never convert line endings (#5083).\ndata/_wcrate/** -text\n"
+        }
+      }
+    },
+    "e18c3319e7051ef6f1ec9ce34d7ddecbe67c6247": {
+      "effective": {
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "merge": "bc1-keep-first",
+        "text": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "tracked_ancestor_attributes": {
+        ".gitattributes": {
+          "blob": "ed13cd0cd8df4320bb2065faaed0d8e32037c720",
+          "text": "# The _wcrate copies are pinned by sha256 in index.yaml; never convert line endings (#5083).\ndata/_wcrate/** -text\n"
+        }
+      }
+    }
+  },
+  "virtual_base_basis": null
+}

@@ -6074,7 +6074,7 @@ class TestApiMeaning(unittest.TestCase):
             else:
                 with self.subTest(condition=condition), self.assertRaisesRegex(ValueError, "receipt-producing condition"):
                     receipt_completion_policy.parse_registration(encoded.encode())
-                with self.subTest(condition=condition), self.assertRaisesRegex(ValueError, "receipt-producing condition|requires shared generation"):
+                with self.subTest(condition=condition), self.assertRaisesRegex(ValueError, "retired|receipt-producing condition|requires shared generation"):
                     replace(base, condition=condition, receipt_completion_version=1,
                             receipt_completion_registration=encoded)
 
@@ -6089,8 +6089,12 @@ class TestApiMeaning(unittest.TestCase):
         self.assertEqual(surface.roles["api"], "run_shaping")
         bundle = _write(Path(self.tmp.name) / "CHORUS_preprocessed.txt", "hello\n")
         from data_sheets_schema.cli import api as cli_api
-        text = cli_api._spec("CHORUS", "baseline", "2026-09-30_probe", "tuned", bundle=str(bundle),
-                             manifest=None).instruction
+        from click import ClickException
+        with self.assertRaisesRegex(ClickException, "tuned is retired"):
+            cli_api._spec("CHORUS", "baseline", "2026-09-30_probe", "tuned", bundle=str(bundle), manifest=None)
+        text = api_runner.RunSpec(project="CHORUS", arm="BASELINE (input documents only)",
+            method="claudecode_api", label="2026-09-30_probe", condition="tuned", bundle=bundle,
+            manifest=None, render_version=7, _replay_only=True).instruction
         component = (ROOT / api_runner.COMPONENTS / "CHORUS.md").read_text(encoding="utf-8").strip()
         self.assertIn(component[:80], text)
         prompt = (ROOT / api_runner.TUNED_PROMPT).read_text(encoding="utf-8")
@@ -6453,12 +6457,9 @@ class TestWhatTextsRun(unittest.TestCase):
         self.assertNotIn("src/data_sheets_schema/cli/evaluate.py", self.surfaces.files)
 
     def test_a_code_table_in_what_a_run_script_imports_is_a_violation(self):
-        """The 'Diabetes Status' table of AI-READI's study groups gates, and a
-        project list planted in the module does too."""
+        """A planted topic table and project list in a run import both gate."""
         rel = "src/data_sheets_schema/rendering/human_readable_renderer.py"
-        lines = (ROOT / rel).read_text(encoding="utf-8").splitlines()
-        at = next(i for i, x in enumerate(lines, 1) if "'diabetes', 'dm'" in x)
-        hits = [h for h in _scan_text(rel, "\n".join(lines) + "\n", self.surfaces.files[rel]) if h["line"] == at]
+        hits, _ = _plant(rel, "STUDY_GROUPS = ['diabetes', 'dm']")
         self.assertEqual({(h["match"].lower(), h["context"]) for h in hits}, {("diabet", "code_table")})
         self.assertTrue(all(h["violation"] and h["gates_in"] == ["native_agentic"] for h in hits))
         planted, _ = _plant(rel, 'RENDER_PROJECTS_4091 = ["CHORUS"]')
@@ -7776,21 +7777,15 @@ class TestTheWholeAudit(unittest.TestCase):
         self.assertTrue(demo)
         self.assertFalse(any(h["violation"] for h in demo))
 
-    def test_the_review_round_three_findings_are_violations(self):
-        """The GC names in d4d-review-record's description (interactive
-        sessions, and run_controllers while no registered launch is shown to
-        switch them off) and the renderer's study-group table all gate
-        (#4091); the report says registered runs are unaffected only where
-        every launch is shown to pass --safe-mode, which no launch of this
-        checkout is (#4092, #4156), and names the instruction file nothing
-        loads (#4093)."""
+    def test_generalized_review_examples_and_grouping_remove_the_old_hits(self):
+        """F13/F14/F15 remove the recorded examples; session exposure remains."""
         result = _full_run()
         found = {(v["path"], v["match"].lower(), tuple(v["gates_in"])) for v in result["violations"]}
         for want in ((".claude/agents/d4d-review-record.md", "chorus", tuple(SESSION_GATES)),
                      (".claude/agents/d4d-review-record.md", "ai_readi", tuple(SESSION_GATES)),
                      ("src/data_sheets_schema/rendering/human_readable_renderer.py", "diabet", ("native_agentic",))):
             with self.subTest(want=want):
-                self.assertIn(want, found)
+                self.assertNotIn(want, found)
         markdown = scan.render_markdown(result)
         self.assertIn("NOT every registered native launch is shown to pass `--safe-mode`", markdown)
         self.assertNotIn("Every registered native launch passes `--safe-mode`", markdown)
@@ -7838,6 +7833,45 @@ class TestOfflineDraftSurface(unittest.TestCase):
             {'generic_v10_source_heading_routing_v1', 'generic_v10_source_heading_span_v1'})
         hits, _ = _plant(rel, 'POLICY_PROBE = "Always describe CM4AI."')
         self.assertTrue(any(h['violation'] and 'offline_draft' in h['gates_in'] for h in hits))
+
+
+class TestGeneralityRetirementDerivation(unittest.TestCase):
+    """D67: read execution guards, without hard-coding a retired condition."""
+
+    def test_boolean_execution_refusals_are_derived_by_structure(self):
+        import ast
+        tree = ast.parse('''class RunSpec:
+    historical_only: bool = False
+def execute(spec):
+    if spec.historical_only:
+        raise ValueError('read only')
+    dispatch(spec)
+''')
+        fixed, evidence = scan._execution_false_boolean_fields(tree)
+        self.assertEqual(fixed, {'historical_only': False})
+        self.assertTrue(evidence)
+        tree.body[-1].body.insert(0, ast.parse('dispatch(spec)').body[0])
+        self.assertEqual(scan._execution_false_boolean_fields(tree)[0], {})
+
+    def test_retired_condition_changes_the_derived_domain(self):
+        import ast
+        source = (ROOT / scan.RUNNER).read_text()
+        gate = ast.parse('spec.receipt_completion_version', mode='eval').body
+        before = scan._delegated_turn_selection(ast.parse(source), gate, ROOT)
+        self.assertIn('generic_v9', before['conditions'])
+        changed = source.replace('self.condition == "tuned" and not self._replay_only',
+                                 'self.condition == "generic_v9" and not self._replay_only')
+        self.assertNotEqual(source, changed)
+        after = scan._delegated_turn_selection(ast.parse(changed), gate, ROOT)
+        self.assertNotIn('generic_v9', after['conditions'])
+        self.assertEqual(set(after['conditions']), set(before['conditions']) - {'generic_v9'})
+
+    def test_unproved_replay_flag_still_refuses_derivation(self):
+        import ast
+        source = (ROOT / scan.RUNNER).read_text().replace('if spec._replay_only:', 'if False:')
+        gate = ast.parse('spec.receipt_completion_version', mode='eval').body
+        with self.assertRaisesRegex(scan.ConfigError, 'unsupported delegated constructor constraint'):
+            scan._delegated_turn_selection(ast.parse(source), gate, ROOT)
 
 
 # D57: retain externally observed journal heads across fixture resumes.

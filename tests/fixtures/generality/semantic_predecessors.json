@@ -1,0 +1,11 @@
+{
+  "captured_at_base": "55c7b94b838eb500888055da5a47acf2ee9e2e15",
+  "sha256": {
+    ".claude/agents/d4d-rubric10-semantic.md": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+    "data/rubric/rubric10.txt": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
+    "src/download/prompts/rubric10_semantic_schema.json": "0241a3ef5fd168204db7d33ea3d2f44db3316216a642577924f1830c8bbdb1a1",
+    ".claude/agents/d4d-rubric20-semantic-v4.md": "b8f5c7686660aa856fa2317904776c3e25678506d82482dc90fe4bf408cba454",
+    "data/rubric/rubric20_semantic_v4.txt": "dac1a89ae97b2c4a019889879d669b6aceba0baa17a3e65f04383a084db5eae5",
+    "src/download/prompts/rubric20_semantic_v4_schema.json": "164d31a7f614c5d3da892be13f6b6dce21fececdf69a91e9b142995675a6cd76"
+  }
+}

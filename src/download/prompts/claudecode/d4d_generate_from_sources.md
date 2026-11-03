@@ -1,5 +1,9 @@
 # D4D Generation from Source Documents
 
+HISTORICAL — RETIRED (F16, 2026-10-29). Refuse new generation under this
+prompt. Retained only to interpret historical work; use the current
+manifest-driven registered pipeline for new work.
+
 Generate new D4D datasheets using Claude Code directly from source documents.
 
 ## Overview

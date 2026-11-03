@@ -1,0 +1,17 @@
+--- a/src/data_sheets_schema/shared_generation.py
++++ b/src/data_sheets_schema/shared_generation.py
+@@ -589,6 +589,14 @@ def _capture_bytes(raw, reg, files, *, captured_only=False):
+     from .audit_omissions import _mapping
+     from . import audit_omissions as omissions
+     context = _mapping(files[selected["context"]["path"]], "generation scope context", json_only=True)
++    # F2: validate caller-authored registrations as well as builder outputs.
++    # Read the captured pin, never today's ambient vocabulary or profile name.
++    vocabulary_pin = selected['profile']['vocabulary']
++    expected_vocabulary = {}
++    if vocabulary_pin is not None:
++        expected_vocabulary = _mapping(files[vocabulary_pin['path']], 'profile vocabulary').get('vocabularies', {})
++    if context.get('vocabulary', {}) != expected_vocabulary:
++        raise ValueError('context vocabulary differs from the registered profile')
+     if omissions._shape(context, json.loads(omissions._asset('context.schema.json'))):
+         raise ValueError('generation scope context does not satisfy omission_context_v1')
+     owners = [scope['owner'] for scope in context['scopes']]

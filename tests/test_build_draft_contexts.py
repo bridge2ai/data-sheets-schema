@@ -18,12 +18,8 @@ from jsonschema import Draft202012Validator
 from data_sheets_schema import audit_omissions as omissions
 from data_sheets_schema import shared_generation as sg
 from scripts.build_draft_contexts import (
-    ALL_CAMPAIGN_PROJECTS,
-    ALL_GC_PROJECTS,
     DEFAULT_MANIFEST_PATH,
     DEFAULT_OUT_DIR,
-    DEFAULT_PROJECTS,
-    KIDS_FIRST_MANIFEST_PATH,
     SCHEMA_PATH,
     build_draft_scope_context,
     generate_draft_contexts,
@@ -31,6 +27,12 @@ from scripts.build_draft_contexts import (
     main,
 )
 from scripts.build_api_registrations import build_registration
+from data_sheets_schema.registry import load_registry
+
+ALL_GC_PROJECTS = load_registry(DEFAULT_MANIFEST_PATH).projects()
+DEFAULT_PROJECTS = ALL_GC_PROJECTS
+KIDS_FIRST_MANIFEST_PATH = Path(__file__).resolve().parents[1] / 'notes/matched_cborg_2026-09-13/kids_first/manifest.yaml'
+ALL_CAMPAIGN_PROJECTS = [*ALL_GC_PROJECTS, 'KIDS_FIRST']
 
 
 @pytest.fixture
@@ -159,15 +161,21 @@ def test_build_registration_finds_draft_contexts(tmp_path):
     bundle_path = tmp_path / "bundle.txt"
     chunks_path = tmp_path / "chunks.yaml"
     bundle_path.write_text("DUMMY BUNDLE CONTENT\n", encoding="utf-8")
-    chunks_path.write_text("version: 2\nchunks: []\n", encoding="utf-8")
+    from data_sheets_schema.chunking import build_manifest, dump_manifest
+    chunks_path.write_text(dump_manifest(build_manifest(bundle_path)), encoding="utf-8")
 
     reg = build_registration(
         project="CHORUS",
-        partition="chorus",
+        # This tests context discovery with a dummy bundle. Use the builder's
+        # explicit historical sizing route, not implicit calibration coverage.
+        audit_limits={"max_paths": 80, "max_inventory_bytes": 12288,
+                      "max_workers": 4, "aggregate_input_tokens": 4000000},
+        sizing_record=Path(__file__).resolve().parents[1] / "tests/fixtures/audit_batches/chorus_v10_2026-10-22a",
         label="test_label",
         registration_path=reg_path,
         bundle_path=bundle_path,
         chunk_manifest_path=chunks_path,
+        source_manifest_path=DEFAULT_MANIFEST_PATH,
     )
 
     # Context should resolve to the newly created data/omission_contexts/chorus_omission_context.json
@@ -234,7 +242,8 @@ def test_single_synthesizer_agreement_between_builders(manifest_data):
     for proj in ALL_CAMPAIGN_PROJECTS:
         mdata = kf_data if proj == "KIDS_FIRST" else manifest_data
         from_draft_builder = build_draft_scope_context(proj, mdata)
-        from_reg_builder = build_draft_context(proj)
+        from_reg_builder = build_draft_context(proj, source_manifest_path=(
+            KIDS_FIRST_MANIFEST_PATH if proj == 'KIDS_FIRST' else DEFAULT_MANIFEST_PATH))
         assert from_reg_builder == from_draft_builder, f"Synthesizer mismatch for {proj}"
         if proj == "KIDS_FIRST":
             assert from_reg_builder["vocabulary"] == {}
