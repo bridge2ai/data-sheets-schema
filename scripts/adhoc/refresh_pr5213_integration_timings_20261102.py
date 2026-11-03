@@ -220,7 +220,7 @@ def additional_main():
     tree = args.tree.resolve(strict=True)
     manifest_raw = args.additional_manifest.read_bytes()
     manifest = json.loads(manifest_raw)
-    require(set(manifest) == {'base_commit', 'measured_commit', 'prior_evidence',
+    require(set(manifest) - {'remeasure_modules'} == {'base_commit', 'measured_commit', 'prior_evidence',
                             'prior_evidence_sha256', 'collection', 'runs', 'retired_modules'},
             'unexpected additional measurement manifest fields')
     base, head = manifest['base_commit'], manifest['measured_commit']
@@ -264,9 +264,14 @@ def additional_main():
     hashes = {path: sha(git(tree, 'show', head + ':' + path)) for path in current_modules}
     added = set(git(tree, 'diff', '--name-only', '--diff-filter=A', base, head,
                     '--', 'tests').decode().splitlines())
-    required = {path for path in current_modules
-                if (path in added and path not in original['file_seconds'])
-                or (path in old_hashes and hashes[path] != old_hashes[path])}
+    changed_measured = {path for path in current_modules
+                        if path in old_hashes and hashes[path] != old_hashes[path]}
+    remeasure = manifest.get('remeasure_modules', sorted(changed_measured))
+    require(isinstance(remeasure, list) and all(isinstance(path, str) for path in remeasure)
+            and len(remeasure) == len(set(remeasure)) and set(remeasure) <= changed_measured,
+            'explicit remeasurement must name distinct source-changed measured modules')
+    required = {path for path in current_modules if path in added and path not in original['file_seconds']}
+    required.update(remeasure)
     require(required, 'no new or source-changed local module to refresh')
     for path in required:
         require((tree / path).is_file() and not (tree / path).is_symlink()
@@ -297,6 +302,9 @@ def additional_main():
               'file_seconds': measured['file_seconds'], 'test_cases': len(rows),
               'test_source_sha256': {path: hashes[path] for path in sorted(required)},
               'source_runs': proofs, 'retired_modules': retired_proofs,
+              'retained_prior_revision_modules': sorted(changed_measured - set(remeasure)),
+              'retained_revision_policy': 'Old measurements keep their original source commits and digests. '
+                  'The partition verifier requires an exact reviewed source-transition manifest before use.',
               'collection': collection_proof,
               'input_manifest': {'path': str(args.additional_manifest), 'sha256': sha(manifest_raw)},
               'producer_sha256': sha(Path(__file__).read_bytes()), 'updater_sha256': sha(updater_raw),

@@ -309,6 +309,22 @@ class AdditionalMainRoundTrips(unittest.TestCase):
         self.assertEqual(proof['evidence_sha256'], helper.sha((output / 'evidence.json').read_bytes()))
         self.assertEqual(self.prior_path.read_bytes(), self.prior_bytes)
 
+    def test_explicit_prior_revision_reuse_never_relabels_changed_source_as_current(self):
+        manifest = helper.read(self.manifest)
+        manifest['remeasure_modules'] = []
+        self.manifest.write_bytes(helper.encode(manifest))
+        self.durations.pop(self.changed)
+        output, _ = self.refresh('explicit-prior-revision')
+        evidence = helper.read(output / 'evidence.json')
+        self.assertEqual(evidence['local_source_commits'][self.changed], self.base)
+        self.assertEqual(evidence['local']['test_source_sha256'][self.changed],
+                         self.prior['local']['test_source_sha256'][self.changed])
+        self.assertNotEqual(evidence['local']['test_source_sha256'][self.changed],
+                            helper.sha((self.tree / self.changed).read_bytes()))
+        self.assertEqual(evidence['local']['file_seconds'][self.changed], 3.0)
+        self.assertEqual(evidence['additional_measurements']['retained_prior_revision_modules'], [self.changed])
+        self.assertEqual(evidence['local_source_commits'][self.added], self.head)
+
     def test_second_refresh_retains_each_unmodified_measurement_source(self):
         first, _ = self.refresh('first-installed', install=True)
         first_evidence = (first / 'evidence.json').read_bytes()

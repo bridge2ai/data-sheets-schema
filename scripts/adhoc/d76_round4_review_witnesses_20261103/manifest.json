@@ -1,0 +1,1084 @@
+{
+  "acceptance": "not_assessed",
+  "bundle": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103",
+  "counts": "Final-source pytest collection required; no new count is inferred from AST functions.",
+  "date": "2026-11-03",
+  "files": [
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_ordinary_object_and_copy_mutations_refuse",
+        "test_path_subclasses_cannot_lie_to_the_boundary",
+        "test_missing_registry_does_not_establish_origin",
+        "test_registry_forgery_is_the_documented_hostile_python_residual",
+        "test_collected_identity_cannot_authorize_a_forged_spec",
+        "test_full_field_roster_rejects_new_unclassified_fields",
+        "test_replace_with_different_shared_locator_revalidates",
+        "test_public_phase_builder_refuses_before_shared_authority",
+        "test_public_phase_builder_does_not_mix_changed_bundle_with_cached_instruction"
+      ],
+      "destination": {
+        "bytes": 8980,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py",
+        "sha256": "8997eed49d264f5ae571aefeef909085286e66d47683bfeeaf94f7b967f50005"
+      },
+      "imports": [
+        "copy",
+        "data_sheets_schema",
+        "dataclasses",
+        "gc",
+        "os",
+        "pathlib",
+        "pickle",
+        "pytest",
+        "tests.test_generation_manifest_identity",
+        "tests.test_shared_generation_runtime",
+        "tests.test_shared_generation_selection",
+        "tests.test_wave7_5213_d76_round2_binding",
+        "types",
+        "weakref"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py",
+      "role": "round3_witness_assertions_and_hostile_python_observations",
+      "source": {
+        "bytes": 8980,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/test_new_guard.py",
+        "sha256": "8997eed49d264f5ae571aefeef909085286e66d47683bfeeaf94f7b967f50005"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_explicit_rendering_bundle_cannot_hide_a_different_recorded_input",
+        "test_no_supplied_instruction_never_verifies_consumption",
+        "test_shadow_alias_cannot_promote_an_owner_file"
+      ],
+      "destination": {
+        "bytes": 4182,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_recorder.py",
+        "sha256": "9ef0e4b2a74e0b26ad51da33a3675a0b97655b686a7ab9826639e7a703e75d5a"
+      },
+      "imports": [
+        "click.testing",
+        "data_sheets_schema.cli",
+        "data_sheets_schema.resources",
+        "hashlib",
+        "pathlib",
+        "pytest",
+        "round2_recorder_source",
+        "tests.test_manifest_corpus_root",
+        "unicodedata",
+        "yaml"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_recorder.py",
+      "role": "round3_witness_assertions",
+      "source": {
+        "bytes": 4182,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/test_new_recorder.py",
+        "sha256": "9ef0e4b2a74e0b26ad51da33a3675a0b97655b686a7ab9826639e7a703e75d5a"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_native_registration_refuses_drift_before_reading_input_pins"
+      ],
+      "destination": {
+        "bytes": 1553,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_public_registration.py",
+        "sha256": "38a51a2bddca4c22c550bdb5427e8b00d9b16902a9aabc1d7ddbea13e184b574"
+      },
+      "imports": [
+        "data_sheets_schema",
+        "pathlib",
+        "pytest",
+        "tests.test_native_source_attribution",
+        "tests.test_source_attribution_preflight"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_public_registration.py",
+      "role": "round3_witness_assertions",
+      "source": {
+        "bytes": 1553,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/test_new_public_registration.py",
+        "sha256": "38a51a2bddca4c22c550bdb5427e8b00d9b16902a9aabc1d7ddbea13e184b574"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_actual_allocator_reuse_cannot_supply_construction_origin"
+      ],
+      "destination": {
+        "bytes": 1267,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_identity_reuse.py",
+        "sha256": "5c83a7ce4cbc18f8b735836caf870b516635a851151eea1b3878017733dfe84a"
+      },
+      "imports": [
+        "data_sheets_schema",
+        "dataclasses",
+        "gc",
+        "pytest",
+        "test_new_guard",
+        "tests.test_generation_manifest_identity",
+        "tests.test_shared_generation_runtime",
+        "weakref"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_identity_reuse.py",
+      "role": "round3_followup_assertions_with_allocator_observation",
+      "source": {
+        "bytes": 1267,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/test_identity_reuse.py",
+        "sha256": "5c83a7ce4cbc18f8b735836caf870b516635a851151eea1b3878017733dfe84a"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_arm_comparison_must_not_hash_a_lexically_collapsed_decoy",
+        "test_arm_comparison_must_not_admit_a_decoy_chunk_manifest",
+        "test_plain_parent_traversal_keeps_absolute_instruction_identity",
+        "test_fresh_paths_depend_on_cwd_and_checkout_alias"
+      ],
+      "destination": {
+        "bytes": 6091,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_prior_adversarial.py",
+        "sha256": "56299298c1c9e65df8e64e90688481ab93e1e9bcaef2b3b73dc403c6a5cf8482"
+      },
+      "imports": [
+        "data_sheets_schema",
+        "data_sheets_schema.evaluation",
+        "hashlib",
+        "pathlib",
+        "pytest",
+        "yaml"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_prior_adversarial.py",
+      "role": "retained_round2_assertions",
+      "source": {
+        "bytes": 6091,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/test_prior_adversarial.py",
+        "sha256": "56299298c1c9e65df8e64e90688481ab93e1e9bcaef2b3b73dc403c6a5cf8482"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_traversal_positions_stay_unknown_with_symlinked_root",
+        "test_plain_paths_remain_usable_with_symlinked_root",
+        "test_registered_drift_refuses_before_any_client_access",
+        "test_cwd_dependent_chunk_discovery_cannot_silently_change_registration",
+        "test_recorder_cannot_substitute_unused_input_spelling"
+      ],
+      "destination": {
+        "bytes": 8378,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_recheck_edges.py",
+        "sha256": "bf64b7e1834bf239331746c54cc60d15fbbe05a5d7a70c701054defd549dbc5a"
+      },
+      "imports": [
+        "click.testing",
+        "data_sheets_schema",
+        "data_sheets_schema.cli",
+        "data_sheets_schema.cli.api",
+        "data_sheets_schema.evaluation",
+        "data_sheets_schema.resources",
+        "dataclasses",
+        "hashlib",
+        "pathlib",
+        "pytest",
+        "tests.test_generation_manifest_identity",
+        "tests.test_manifest_corpus_root",
+        "tests.test_shared_generation_selection",
+        "yaml"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_recheck_edges.py",
+      "role": "retained_round2_assertions_with_old_diagnostics",
+      "source": {
+        "bytes": 8378,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/test_recheck_edges.py",
+        "sha256": "bf64b7e1834bf239331746c54cc60d15fbbe05a5d7a70c701054defd549dbc5a"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_postconstruction_relative_spelling_is_admitted_by_preflight_but_rejected_late"
+      ],
+      "destination": {
+        "bytes": 1600,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_postconstruction_binding.py",
+        "sha256": "6f6b0648dd23ad3f7499df4bec908432fb7c6baeeeb9216d3cda1c73f17f294d"
+      },
+      "imports": [
+        "data_sheets_schema",
+        "pathlib",
+        "pytest",
+        "tests.test_source_heading_runtime_api",
+        "tests.test_wave7_5213_d76_registration"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_postconstruction_binding.py",
+      "role": "retained_round2_low_level_observations",
+      "source": {
+        "bytes": 1600,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/test_postconstruction_binding.py",
+        "sha256": "6f6b0648dd23ad3f7499df4bec908432fb7c6baeeeb9216d3cda1c73f17f294d"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_relative_spelling_after_binding_reaches_provider_boundary"
+      ],
+      "destination": {
+        "bytes": 1644,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_postconstruction_admission.py",
+        "sha256": "da5bfe1535cb810ee4b9700adb98d2788ccc86cb92bfb4f00a5a6dbb3591f19c"
+      },
+      "imports": [
+        "data_sheets_schema",
+        "pathlib",
+        "pytest",
+        "tests.test_shared_generation_runtime",
+        "tests.test_source_heading_runtime_api",
+        "tests.test_wave7_5213_d76_registration"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_postconstruction_admission.py",
+      "role": "retained_round2_defect_assertion_expected_to_invert",
+      "source": {
+        "bytes": 1644,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/test_postconstruction_admission.py",
+        "sha256": "da5bfe1535cb810ee4b9700adb98d2788ccc86cb92bfb4f00a5a6dbb3591f19c"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_absolute_alias_mutation_precedes_authority_and_every_side_effect",
+        "test_private_anchor_replacement_cannot_restore_spend",
+        "test_uncaptured_binding_selectors_cannot_disable_a_captured_anchor",
+        "test_new_dataclass_axis_breaks_the_actual_classification_test",
+        "test_replace_revalidates_and_does_not_copy_cached_instruction_or_binding",
+        "test_historical_or_native_refusal_precedes_missing_binding",
+        "test_owner_counterpart_cannot_select_a_different_file"
+      ],
+      "destination": {
+        "bytes": 8967,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_round2_adversarial.py",
+        "sha256": "7fa547b6f4c10e34974fa1ec7d78c33c222718e8a0b409f93e24ddcb775af468"
+      },
+      "imports": [
+        "click.testing",
+        "data_sheets_schema",
+        "data_sheets_schema.cli",
+        "dataclasses",
+        "importlib",
+        "pathlib",
+        "pytest",
+        "round2_binding_source",
+        "round2_recorder_source",
+        "tests.test_generation_manifest_identity",
+        "tests.test_manifest_corpus_root",
+        "tests.test_shared_generation_runtime",
+        "tests.test_source_heading_runtime_api",
+        "tests.test_wave7_5213_d76_registration",
+        "types",
+        "yaml"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_round2_adversarial.py",
+      "role": "retained_round2_assertions_with_interpreter_sensitive_exception",
+      "source": {
+        "bytes": 8967,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/test_round2_adversarial.py",
+        "sha256": "7fa547b6f4c10e34974fa1ec7d78c33c222718e8a0b409f93e24ddcb775af468"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_replace_revalidates_and_preserves_replay_refusal"
+      ],
+      "destination": {
+        "bytes": 1626,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_replace_portable.py",
+        "sha256": "5ebc95dbb971f9b4690f7ea6161f7be01dabc3fe0a41b0c61f1376218c057e07"
+      },
+      "imports": [
+        "data_sheets_schema",
+        "dataclasses",
+        "pathlib",
+        "pytest",
+        "tests.test_generation_manifest_identity"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_replace_portable.py",
+      "role": "separate_portable_replacement_assertions",
+      "source": {
+        "bytes": 1626,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/test_replace_portable.py",
+        "sha256": "5ebc95dbb971f9b4690f7ea6161f7be01dabc3fe0a41b0c61f1376218c057e07"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_bound_spelling_mutation_refuses_before_any_spend_or_write",
+        "test_explicit_binding_cannot_be_disabled_after_mutating_a_locator",
+        "test_all_runspec_registration_and_version_axes_have_a_binding_classification",
+        "test_registration_spelling_policy_is_version_agnostic",
+        "test_invalid_or_disabled_versions_do_not_select_a_binding",
+        "test_shared_generation_requires_registration_to_select_binding",
+        "test_standalone_receipt_registration_has_no_input_authority",
+        "test_literal_historical_replay_stays_literal_and_cannot_execute",
+        "test_bound_locator_removal_or_alias_requires_fresh_construction"
+      ],
+      "destination": {
+        "bytes": 12050,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/round2_binding_source.py",
+        "sha256": "893f136d901579acba2777da87fd475b8db3e71561746f9275f8ccadba540fb2"
+      },
+      "imports": [
+        "click.testing",
+        "data_sheets_schema",
+        "data_sheets_schema.cli",
+        "dataclasses",
+        "importlib",
+        "pathlib",
+        "pytest",
+        "tests.test_generation_manifest_identity",
+        "tests.test_receipt_completion_runtime",
+        "tests.test_shared_generation_runtime",
+        "tests.test_source_heading_runtime_api",
+        "tests.test_wave7_5213_d76_registration"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/round2_binding_source.py",
+      "role": "imported_frozen_round2_fixture_not_a_replay_target",
+      "source": {
+        "bytes": 12050,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/round2_binding_source.py",
+        "sha256": "893f136d901579acba2777da87fd475b8db3e71561746f9275f8ccadba540fb2"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_both_recorder_directions_preserve_the_full_instruction",
+        "test_full_hash_still_refuses_a_different_byte_identical_locator"
+      ],
+      "destination": {
+        "bytes": 5594,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/round2_recorder_source.py",
+        "sha256": "52b096e07edcc04a26028ae6f1ef68a140b95a31abd7f7c6b0bbf4249b0edb42"
+      },
+      "imports": [
+        "click.testing",
+        "data_sheets_schema",
+        "data_sheets_schema.cli",
+        "data_sheets_schema.cli.api",
+        "data_sheets_schema.resources",
+        "hashlib",
+        "pytest",
+        "shutil",
+        "tests.test_manifest_corpus_root",
+        "yaml"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/round2_recorder_source.py",
+      "role": "imported_frozen_round2_fixture_not_a_replay_target",
+      "source": {
+        "bytes": 5594,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/round2_recorder_source.py",
+        "sha256": "52b096e07edcc04a26028ae6f1ef68a140b95a31abd7f7c6b0bbf4249b0edb42"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [],
+      "destination": {
+        "bytes": 16939,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/codex/review-report.md",
+        "sha256": "f8e929cf6da6c9b89d2139bffb9314feec93cf00eabb893765646db6bd07e368"
+      },
+      "imports": [],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/review-report.md",
+      "role": "historical_report",
+      "source": {
+        "bytes": 16939,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/pr5213_d13c1711e_codex_recheck_2026-11-02.md",
+        "sha256": "f8e929cf6da6c9b89d2139bffb9314feec93cf00eabb893765646db6bd07e368"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_object_setattr",
+        "test_copies_keep_binding",
+        "test_pickle_round_trip",
+        "test_replace_with_decoy",
+        "test_subclass_skipping_post_init",
+        "test_lying_path_types",
+        "test_id_reuse_by_forged_spec",
+        "test_registry_mutation",
+        "test_mirror_replacement",
+        "test_selector_flip",
+        "test_round2_private_rewrite_witness",
+        "test_native_write_registration_with_cached_instruction"
+      ],
+      "destination": {
+        "bytes": 10040,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_anchor_probes.py",
+        "sha256": "51a6a84bf0cbad1e434c3942cbc5535b3d4619a622cade5e936191b1a81b0c2c"
+      },
+      "imports": [
+        "copy",
+        "data_sheets_schema",
+        "dataclasses",
+        "gc",
+        "pathlib",
+        "pickle",
+        "pytest",
+        "tests.test_generation_manifest_identity",
+        "tests.test_shared_generation_selection",
+        "weakref",
+        "yaml"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_anchor_probes.py",
+      "role": "round3_assertions_and_printed_hostile_python_observations",
+      "source": {
+        "bytes": 10040,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/test_r3_anchor_probes.py",
+        "sha256": "51a6a84bf0cbad1e434c3942cbc5535b3d4619a622cade5e936191b1a81b0c2c"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_unmodified_roster_passes",
+        "test_any_unclassified_field_fails_the_roster"
+      ],
+      "destination": {
+        "bytes": 1341,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_classification_proof.py",
+        "sha256": "52f86cb4333dfee39aaad02ab83cc6f5bc1dfb8b78e9b40d9f4e0ca800f90e65"
+      },
+      "imports": [
+        "data_sheets_schema",
+        "dataclasses",
+        "pytest",
+        "tests.test_wave7_5213_d76_round2_binding"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_classification_proof.py",
+      "role": "round3_roster_assertions",
+      "source": {
+        "bytes": 1341,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/test_r3_classification_proof.py",
+        "sha256": "52f86cb4333dfee39aaad02ab83cc6f5bc1dfb8b78e9b40d9f4e0ca800f90e65"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_relative_instruction_from_another_corpus"
+      ],
+      "destination": {
+        "bytes": 4104,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_cross_corpus_recorder.py",
+        "sha256": "941b420983f5896b395fadb5d5fb0cedba41d9a75a39ce2d4fd17f248288469f"
+      },
+      "imports": [
+        "click.testing",
+        "data_sheets_schema",
+        "data_sheets_schema.cli",
+        "data_sheets_schema.cli.api",
+        "data_sheets_schema.resources",
+        "hashlib",
+        "pytest",
+        "shutil",
+        "tests.test_manifest_corpus_root",
+        "yaml"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_cross_corpus_recorder.py",
+      "role": "round3_printed_record_observations",
+      "source": {
+        "bytes": 4104,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/test_r3_cross_corpus_recorder.py",
+        "sha256": "941b420983f5896b395fadb5d5fb0cedba41d9a75a39ce2d4fd17f248288469f"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_verified_basis_requires_consumed_bytes"
+      ],
+      "destination": {
+        "bytes": 3440,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_verified_basis.py",
+        "sha256": "2ca7d209300c9a64504232faad0691803a774c0cf701fd4ea40de7b0458bc01d"
+      },
+      "imports": [
+        "click.testing",
+        "data_sheets_schema",
+        "data_sheets_schema.cli",
+        "data_sheets_schema.cli.api",
+        "data_sheets_schema.resources",
+        "hashlib",
+        "pytest",
+        "tests.test_manifest_corpus_root",
+        "yaml"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_verified_basis.py",
+      "role": "round3_printed_byte_evidence_observations",
+      "source": {
+        "bytes": 3440,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/test_r3_verified_basis.py",
+        "sha256": "2ca7d209300c9a64504232faad0691803a774c0cf701fd4ea40de7b0458bc01d"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_a_nested_render_root_record_relative_spellings",
+        "test_b_root_render_nested_record_absolute",
+        "test_c_different_byte_identical_bundle_is_never_a_match"
+      ],
+      "destination": {
+        "bytes": 5002,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_probe_recorder_residuals.py",
+        "sha256": "a49fa816ca3b7f35df14bce35dd8778545aa94bf7279cfd102b79ed2ebc891fd"
+      },
+      "imports": [
+        "click.testing",
+        "data_sheets_schema",
+        "data_sheets_schema.cli",
+        "data_sheets_schema.cli.api",
+        "data_sheets_schema.resources",
+        "hashlib",
+        "pytest",
+        "shutil",
+        "tests.test_manifest_corpus_root",
+        "yaml"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_probe_recorder_residuals.py",
+      "role": "retained_round2_printed_recorder_observations",
+      "source": {
+        "bytes": 5002,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/test_probe_recorder_residuals.py",
+        "sha256": "a49fa816ca3b7f35df14bce35dd8778545aa94bf7279cfd102b79ed2ebc891fd"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_public_mutation_refuses_before_authority_lock_date_or_client",
+        "test_private_binding_replacement_bypasses_the_guard",
+        "test_clearing_private_binding_alone_still_refuses_shared",
+        "test_explicit_flag_disabled_and_binding_cleared",
+        "test_replace_after_mutation_revalidates",
+        "test_replay_flag_via_replace_and_copy",
+        "test_order_native_offline_refusal_precedes_the_guard",
+        "test_order_historical_replay_precedes_the_guard",
+        "test_dry_run_is_guarded_and_free",
+        "test_pathlike_with_matching_str_but_other_fspath"
+      ],
+      "destination": {
+        "bytes": 8442,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r2_boundary_probes.py",
+        "sha256": "f5228d207264d341151b493ede89169460ecd183efdf7f9c91226b07fe77d953"
+      },
+      "imports": [
+        "copy",
+        "data_sheets_schema",
+        "dataclasses",
+        "pathlib",
+        "pytest",
+        "tests.test_generation_manifest_identity",
+        "tests.test_shared_generation_selection",
+        "yaml"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r2_boundary_probes.py",
+      "role": "retained_round2_assertions_and_printed_observations",
+      "source": {
+        "bytes": 8442,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/test_r2_boundary_probes.py",
+        "sha256": "f5228d207264d341151b493ede89169460ecd183efdf7f9c91226b07fe77d953"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_absolute_alias_mutation_precedes_authority_and_every_side_effect",
+        "test_private_anchor_replacement_cannot_restore_spend",
+        "test_uncaptured_binding_selectors_cannot_disable_a_captured_anchor",
+        "test_new_dataclass_axis_breaks_the_actual_classification_test",
+        "test_replace_revalidates_and_does_not_copy_cached_instruction_or_binding",
+        "test_historical_or_native_refusal_precedes_missing_binding",
+        "test_owner_counterpart_cannot_select_a_different_file"
+      ],
+      "destination": {
+        "bytes": 9053,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_codex_r2_round2_adversarial_copy.py",
+        "sha256": "1a0eb676455e868d54ab6cdb03b6bcbcea39d1e57c5ae3eb6297961b9e426003"
+      },
+      "imports": [
+        "click.testing",
+        "data_sheets_schema",
+        "data_sheets_schema.cli",
+        "dataclasses",
+        "importlib",
+        "pathlib",
+        "pytest",
+        "round2_binding_source",
+        "round2_recorder_source",
+        "tests.test_generation_manifest_identity",
+        "tests.test_manifest_corpus_root",
+        "tests.test_shared_generation_runtime",
+        "tests.test_source_heading_runtime_api",
+        "tests.test_wave7_5213_d76_registration",
+        "types",
+        "yaml"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_codex_r2_round2_adversarial_copy.py",
+      "role": "two_report_selected_functions_from_copied_codex_round2_witness",
+      "source": {
+        "bytes": 9053,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/test_codex_r2_round2_adversarial_copy.py",
+        "sha256": "1a0eb676455e868d54ab6cdb03b6bcbcea39d1e57c5ae3eb6297961b9e426003"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_bound_spelling_mutation_refuses_before_any_spend_or_write",
+        "test_explicit_binding_cannot_be_disabled_after_mutating_a_locator",
+        "test_all_runspec_registration_and_version_axes_have_a_binding_classification",
+        "test_registration_spelling_policy_is_version_agnostic",
+        "test_invalid_or_disabled_versions_do_not_select_a_binding",
+        "test_shared_generation_requires_registration_to_select_binding",
+        "test_standalone_receipt_registration_has_no_input_authority",
+        "test_literal_historical_replay_stays_literal_and_cannot_execute",
+        "test_bound_locator_removal_or_alias_requires_fresh_construction"
+      ],
+      "destination": {
+        "bytes": 12050,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/round2_binding_source.py",
+        "sha256": "893f136d901579acba2777da87fd475b8db3e71561746f9275f8ccadba540fb2"
+      },
+      "imports": [
+        "click.testing",
+        "data_sheets_schema",
+        "data_sheets_schema.cli",
+        "dataclasses",
+        "importlib",
+        "pathlib",
+        "pytest",
+        "tests.test_generation_manifest_identity",
+        "tests.test_receipt_completion_runtime",
+        "tests.test_shared_generation_runtime",
+        "tests.test_source_heading_runtime_api",
+        "tests.test_wave7_5213_d76_registration"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/round2_binding_source.py",
+      "role": "imported_frozen_round2_fixture_not_a_replay_target",
+      "source": {
+        "bytes": 12050,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/round2_binding_source.py",
+        "sha256": "893f136d901579acba2777da87fd475b8db3e71561746f9275f8ccadba540fb2"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [
+        "test_both_recorder_directions_preserve_the_full_instruction",
+        "test_full_hash_still_refuses_a_different_byte_identical_locator"
+      ],
+      "destination": {
+        "bytes": 5594,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/round2_recorder_source.py",
+        "sha256": "52b096e07edcc04a26028ae6f1ef68a140b95a31abd7f7c6b0bbf4249b0edb42"
+      },
+      "imports": [
+        "click.testing",
+        "data_sheets_schema",
+        "data_sheets_schema.cli",
+        "data_sheets_schema.cli.api",
+        "data_sheets_schema.resources",
+        "hashlib",
+        "pytest",
+        "shutil",
+        "tests.test_manifest_corpus_root",
+        "yaml"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/round2_recorder_source.py",
+      "role": "imported_frozen_round2_fixture_not_a_replay_target",
+      "source": {
+        "bytes": 5594,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/round2_recorder_source.py",
+        "sha256": "52b096e07edcc04a26028ae6f1ef68a140b95a31abd7f7c6b0bbf4249b0edb42"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [],
+      "destination": {
+        "bytes": 2056,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/sg2_child_preconditions.py",
+        "sha256": "724ed53219391556dc6b08018db4a7e147f555c5b289a1ef0a37918e2ec5a6f4"
+      },
+      "imports": [
+        "importlib.util",
+        "pathlib",
+        "subprocess",
+        "sys"
+      ],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/sg2_child_preconditions.py",
+      "role": "standalone_historical_review_attestation_observation_not_pytest",
+      "source": {
+        "bytes": 2056,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/sg2_child_preconditions.py",
+        "sha256": "724ed53219391556dc6b08018db4a7e147f555c5b289a1ef0a37918e2ec5a6f4"
+      }
+    },
+    {
+      "bytes_equal": true,
+      "declared_test_functions": [],
+      "destination": {
+        "bytes": 21747,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/claude/review-report.md",
+        "sha256": "3ab849ef92e4dd9640519475323f991f7a726c56ab21b2f002a74c72fc1a0825"
+      },
+      "imports": [],
+      "repository_relative_path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/review-report.md",
+      "role": "historical_report",
+      "source": {
+        "bytes": 21747,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/pr5213_d13c1711e_claude_recheck_2026-11-02.md",
+        "sha256": "3ab849ef92e4dd9640519475323f991f7a726c56ab21b2f002a74c72fc1a0825"
+      }
+    }
+  ],
+  "helper": {
+    "bytes": 18986,
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/bundle_d76_round4_review_witnesses_20261103.py",
+    "sha256": "e855a64221ca29b6cc13967d3704239e30e0e39097802c400d24b49717fba467"
+  },
+  "local_import_closure": [
+    {
+      "destination": "codex/round2_recorder_source.py",
+      "importer": "codex/test_new_recorder.py",
+      "module": "round2_recorder_source"
+    },
+    {
+      "destination": "codex/test_new_guard.py",
+      "importer": "codex/test_identity_reuse.py",
+      "module": "test_new_guard"
+    },
+    {
+      "destination": "codex/round2_binding_source.py",
+      "importer": "codex/test_round2_adversarial.py",
+      "module": "round2_binding_source"
+    },
+    {
+      "destination": "codex/round2_recorder_source.py",
+      "importer": "codex/test_round2_adversarial.py",
+      "module": "round2_recorder_source"
+    },
+    {
+      "destination": "claude/round2_binding_source.py",
+      "importer": "claude/test_codex_r2_round2_adversarial_copy.py",
+      "module": "round2_binding_source"
+    },
+    {
+      "destination": "claude/round2_recorder_source.py",
+      "importer": "claude/test_codex_r2_round2_adversarial_copy.py",
+      "module": "round2_recorder_source"
+    }
+  ],
+  "originals_unchanged_after_copy": true,
+  "purpose": "PR #5213 round-4 task9 reviewer witness replay preparation",
+  "readme": {
+    "bytes": 4308,
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/README.md",
+    "sha256": "7063429ac86cb98e8f8724bb95fecef4607471d69a777bca861e8ad2a42de7b8"
+  },
+  "replay_groups": [
+    {
+      "interpretation": "Refusal/assertion evidence; allocator reuse must additionally be observed, not inferred from a pass.",
+      "name": "codex-round3-assertions",
+      "reviewer": "codex",
+      "targets": [
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_ordinary_object_and_copy_mutations_refuse",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_path_subclasses_cannot_lie_to_the_boundary",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_missing_registry_does_not_establish_origin",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_collected_identity_cannot_authorize_a_forged_spec",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_full_field_roster_rejects_new_unclassified_fields",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_replace_with_different_shared_locator_revalidates",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_public_phase_builder_refuses_before_shared_authority",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_public_phase_builder_does_not_mix_changed_bundle_with_cached_instruction",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_recorder.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_public_registration.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_identity_reuse.py"
+      ]
+    },
+    {
+      "interpretation": "Tests intentionally rewrite the private registry and expect authority access. A pass confirms the documented residual, not isolation against arbitrary Python.",
+      "name": "codex-hostile-python-observations",
+      "reviewer": "codex",
+      "targets": [
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_new_guard.py::test_registry_forgery_is_the_documented_hostile_python_residual"
+      ]
+    },
+    {
+      "interpretation": "Literal historical assertions retained. Three locator-message failures and one Python-version-specific init=False exception failure occurred at d13; classify actual final outcomes without rewriting them.",
+      "name": "codex-retained-round2",
+      "reviewer": "codex",
+      "targets": [
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_prior_adversarial.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_recheck_edges.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_round2_adversarial.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_replace_portable.py"
+      ]
+    },
+    {
+      "interpretation": "Calls lower-level shared-generation helpers directly. A pass does not test the repaired public entry invariant.",
+      "name": "codex-retained-low-level-observations",
+      "reviewer": "codex",
+      "targets": [
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_postconstruction_binding.py"
+      ]
+    },
+    {
+      "interpretation": "The original assertion expects a fake generation call. Early refusal intentionally inverts it; subsequent assertions receive no credit after failure.",
+      "name": "codex-retained-defect-observation",
+      "reviewer": "codex",
+      "targets": [
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/codex/test_postconstruction_admission.py"
+      ]
+    },
+    {
+      "interpretation": "Mixed assertions and printed observations; hostile registry rewriting and inconclusive allocator loops are not clean-refusal evidence.",
+      "name": "claude-round3-anchor-and-roster",
+      "reviewer": "claude",
+      "targets": [
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_anchor_probes.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_classification_proof.py"
+      ]
+    },
+    {
+      "interpretation": "Mostly printed observations. Inspect retained records/output separately; successful pytest phases do not prove basis wording or even successful CLI recording.",
+      "name": "claude-record-observations",
+      "reviewer": "claude",
+      "targets": [
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_verified_basis.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_cross_corpus_recorder.py",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_probe_recorder_residuals.py"
+      ]
+    },
+    {
+      "interpretation": "Mixed direct refusal assertions and printed old bypass probes. Preserve actual diagnostics and do not infer assertions from test names.",
+      "name": "claude-retained-boundary",
+      "reviewer": "claude",
+      "targets": [
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r2_boundary_probes.py"
+      ]
+    },
+    {
+      "interpretation": "Exactly the two functions selected by Claude queue2; they duplicate Codex evidence and are not extra unique cases.",
+      "name": "claude-retained-codex-selected",
+      "reviewer": "claude",
+      "targets": [
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_codex_r2_round2_adversarial_copy.py::test_owner_counterpart_cannot_select_a_different_file",
+        "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_codex_r2_round2_adversarial_copy.py::test_private_anchor_replacement_cannot_restore_spend"
+      ]
+    }
+  ],
+  "reports": [
+    {
+      "bytes": 16939,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/pr5213_d13c1711e_codex_recheck_2026-11-02.md",
+      "sha256": "f8e929cf6da6c9b89d2139bffb9314feec93cf00eabb893765646db6bd07e368"
+    },
+    {
+      "bytes": 21747,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/pr5213_d13c1711e_claude_recheck_2026-11-02.md",
+      "sha256": "3ab849ef92e4dd9640519475323f991f7a726c56ab21b2f002a74c72fc1a0825"
+    }
+  ],
+  "repository": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity",
+  "reviewed_head": "d13c1711e19dcdcc7f624b66e15b735ebc0aab8f",
+  "runtime_fixture_preparation_snapshots": [
+    {
+      "bytes": 13449,
+      "module": "tests.test_generation_manifest_identity",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/tests/test_generation_manifest_identity.py",
+      "relative_path": "tests/test_generation_manifest_identity.py",
+      "role": "preparation_snapshot_only_use_final_archive_fixture",
+      "sha256": "edba4d1aa5f1205583ff05dfc8b5d60b8f7cd5cdb81e36c8e5253fa3ca78a131"
+    },
+    {
+      "bytes": 8339,
+      "module": "tests.test_manifest_corpus_root",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/tests/test_manifest_corpus_root.py",
+      "relative_path": "tests/test_manifest_corpus_root.py",
+      "role": "preparation_snapshot_only_use_final_archive_fixture",
+      "sha256": "bfbd91f4cbeaf23e305fdf251b0cb05c7d8d958d999367632f3b59391f057605"
+    },
+    {
+      "bytes": 22850,
+      "module": "tests.test_native_source_attribution",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/tests/test_native_source_attribution.py",
+      "relative_path": "tests/test_native_source_attribution.py",
+      "role": "preparation_snapshot_only_use_final_archive_fixture",
+      "sha256": "86395e9fdd668d74d7ccf85ec5678af9c1cc73ea361fcbd9492fe3f4b0c466e0"
+    },
+    {
+      "bytes": 41014,
+      "module": "tests.test_receipt_completion_runtime",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/tests/test_receipt_completion_runtime.py",
+      "relative_path": "tests/test_receipt_completion_runtime.py",
+      "role": "preparation_snapshot_only_use_final_archive_fixture",
+      "sha256": "2a0ec438a10bdf1da3b7ce0d37ab24445f8f9c74b4ea2d43d732f25c7c1a6bb1"
+    },
+    {
+      "bytes": 26294,
+      "module": "tests.test_shared_generation_runtime",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/tests/test_shared_generation_runtime.py",
+      "relative_path": "tests/test_shared_generation_runtime.py",
+      "role": "preparation_snapshot_only_use_final_archive_fixture",
+      "sha256": "fceccb051e75142947c58cb194c0cf8f127bedfe0bee035dd0310434e8a41254"
+    },
+    {
+      "bytes": 9232,
+      "module": "tests.test_shared_generation_selection",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/tests/test_shared_generation_selection.py",
+      "relative_path": "tests/test_shared_generation_selection.py",
+      "role": "preparation_snapshot_only_use_final_archive_fixture",
+      "sha256": "76bcf2ee51ec0235bbbc60eca617508e8997b778816a1a14ba47521a242ca72b"
+    },
+    {
+      "bytes": 11708,
+      "module": "tests.test_source_attribution_preflight",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/tests/test_source_attribution_preflight.py",
+      "relative_path": "tests/test_source_attribution_preflight.py",
+      "role": "preparation_snapshot_only_use_final_archive_fixture",
+      "sha256": "6010b123d684b294a4e5e27f5c3ab9053110d4a88292f53fbe73c0165380cf9e"
+    },
+    {
+      "bytes": 37881,
+      "module": "tests.test_source_heading_runtime_api",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/tests/test_source_heading_runtime_api.py",
+      "relative_path": "tests/test_source_heading_runtime_api.py",
+      "role": "preparation_snapshot_only_use_final_archive_fixture",
+      "sha256": "eb80605d40055d86ac1f71962b86e7519e3da53b09ffeff283d8aecc849e7546"
+    },
+    {
+      "bytes": 10339,
+      "module": "tests.test_wave7_5213_d76_registration",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/tests/test_wave7_5213_d76_registration.py",
+      "relative_path": "tests/test_wave7_5213_d76_registration.py",
+      "role": "preparation_snapshot_only_use_final_archive_fixture",
+      "sha256": "1c5b349e74dac25db9e90786f625b4ffa1abbc0431edc3e7d12b17665318af5b"
+    },
+    {
+      "bytes": 15663,
+      "module": "tests.test_wave7_5213_d76_round2_binding",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/tests/test_wave7_5213_d76_round2_binding.py",
+      "relative_path": "tests/test_wave7_5213_d76_round2_binding.py",
+      "role": "preparation_snapshot_only_use_final_archive_fixture",
+      "sha256": "d04588a0c3ea9dfcd2c88be52703046a37d93262a98490cfd0f7d122c85ce513"
+    }
+  ],
+  "schema_version": 1,
+  "selection_queue_sources": [
+    {
+      "bytes": 3112,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/required_serial.py",
+      "reviewer": "codex",
+      "sha256": "c802af9ee0f4c32c463d73af6aada81ed5a567bc0cc28a39b9fc738b18e733d0"
+    },
+    {
+      "bytes": 3003,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/additional_serial.py",
+      "reviewer": "codex",
+      "sha256": "3a6736400c7a0216ccc5026dc3bb9c66c5c176711330fc42d2a95cbe9e87dbfa"
+    },
+    {
+      "bytes": 1864,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/codex/scripts/adhoc/complete_serial.py",
+      "reviewer": "codex",
+      "sha256": "24406ac71111f7ab4998183e47e0e2e013b200dc0a141da84d9dbd87aa11d07f"
+    },
+    {
+      "bytes": 966,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/queue1.sh",
+      "reviewer": "claude",
+      "sha256": "bc7bddbecab08e778c8a0ad1368577533aba06bfc6f102f2b8a9270b1b41ea36"
+    },
+    {
+      "bytes": 2420,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/queue2.sh",
+      "reviewer": "claude",
+      "sha256": "e8e8d6997a9dc1ff96e6b8742fb0655df3403f002fce6dc437d14a090f15da66"
+    },
+    {
+      "bytes": 1255,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-5213r3check/claude/scripts/adhoc/queue3.sh",
+      "reviewer": "claude",
+      "sha256": "8002905dd033ba0906d16ecc5dbd81ad9daf4bde8c641c71aa4024123ff710fa"
+    }
+  ],
+  "source_execution_root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions",
+  "standalone_diagnostic": {
+    "argv": [
+      "CHECKOUT",
+      "NON_GIT_COPY",
+      "FRESH_TEMP"
+    ],
+    "current_claim": "review-only source attestation preconditions, not ordinary SG2 portability",
+    "path": "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/sg2_child_preconditions.py",
+    "pytest_target": false
+  },
+  "target_files": [
+    {
+      "bytes": 1357,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/codex-round3-assertions.json",
+      "sha256": "8960286e8991ce682854bef7cda18daaa41d35c11ea4f2e50de9d584bbf74433"
+    },
+    {
+      "bytes": 148,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/codex-hostile-python-observations.json",
+      "sha256": "48b4a2e037b6f6d4d18809c1932b304b262ae192f7737aa62bbabbabf4d22a40"
+    },
+    {
+      "bytes": 351,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/codex-retained-round2.json",
+      "sha256": "aa8b78848e74c9cdc06b266df070fd956d65a137af73ed1cedef8f0f711b6f9b"
+    },
+    {
+      "bytes": 98,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/codex-retained-low-level-observations.json",
+      "sha256": "a771ee05c6d9669d83d251e92b54fe1b23e7640e3e4fa5ed2756cac3f30b3876"
+    },
+    {
+      "bytes": 100,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/codex-retained-defect-observation.json",
+      "sha256": "2d86f1213aedcdb2828301cb2e4d116ff6652e5abe43986deb9a66861ce377c4"
+    },
+    {
+      "bytes": 186,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/claude-round3-anchor-and-roster.json",
+      "sha256": "d02499693fbd2dfd6da8570873f4cca550c25d7c571b79df008e106ba92ca88b"
+    },
+    {
+      "bytes": 284,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/claude-record-observations.json",
+      "sha256": "3a06f097732255359272be618f628f2f2e2e3adb8f2d6cba26b5a9bd4f7704e7"
+    },
+    {
+      "bytes": 93,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/claude-retained-boundary.json",
+      "sha256": "4dc47a61f9ac7edcac805262eeb962a95340538ac70bea716c3d8380d07b5ba4"
+    },
+    {
+      "bytes": 320,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-w7-5213-path-identity/scripts/adhoc/d76_round4_review_witnesses_20261103/targets/claude-retained-codex-selected.json",
+      "sha256": "adf15f498e402f1690611b86fa66cbc57121544815d976fb865bab3efa1bb639"
+    }
+  ],
+  "witnesses_executed": false
+}

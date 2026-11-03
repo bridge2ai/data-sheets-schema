@@ -1,0 +1,5 @@
+[
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_verified_basis.py",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_r3_cross_corpus_recorder.py",
+  "scripts/adhoc/d76_round4_review_witnesses_20261103/claude/test_probe_recorder_residuals.py"
+]
