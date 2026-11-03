@@ -201,6 +201,44 @@ class RunSpec:
     assert {'conditional_public', 'RunSpec.conditional_member'} <= names
 
 
+def test_conditional_definition_cannot_erase_another_arms_runspec_contract(tmp_path):
+    root = _source(tmp_path, '''
+class RunSpec:
+    pass
+
+enabled = True
+if enabled:
+    def public_consumer(value: RunSpec):
+        return value
+else:
+    def public_consumer(value):
+        return value
+''')
+    candidates = [candidate for candidate in discover(root) if candidate.qualname == 'public_consumer']
+    assert candidates, 'a later same-qualified definition must not erase the RunSpec arm'
+    assert any('RunSpec-parameter-annotation' in candidate.reasons for candidate in candidates)
+    assert missing_contracts(root)
+
+
+def test_module_qualified_subclass_annotation_is_a_runspec_boundary(tmp_path):
+    root = _source(tmp_path, '''
+class RunSpec:
+    pass
+
+class Derived(RunSpec):
+    pass
+''', name='model.py')
+    (root / 'src/data_sheets_schema/consumer.py').write_text('''
+from . import model as selected_model
+
+def public_consumer(value: selected_model.Derived):
+    return value
+''')
+    candidates = discover(root)
+    assert any(candidate.identity == 'data_sheets_schema.consumer.public_consumer'
+               and 'RunSpec-parameter-annotation' in candidate.reasons for candidate in candidates)
+
+
 def test_new_public_callable_in_a_scratch_copy_has_no_implicit_exemption(tmp_path):
     root = _source(tmp_path, '''
 def original(spec):
