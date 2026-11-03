@@ -49,11 +49,13 @@ def junit_key(node):
     return '.'.join(names[:-1]), names[-1]
 
 
-def xml_outcomes(directory, selected, expected):
+def xml_outcomes(directory, selected, expected, *, collection=False):
     identities = defaultdict(set)
     for node in selected:
         identities[junit_key(node)].add(node)
     counts = Counter(passed=0, failed=0, errors=0, skipped=0)
+    selected_counts = Counter(selected)
+    observed, passing, errors = Counter(), Counter(), Counter()
     observations = []
     cases = list(ET.parse(directory / 'pytest.xml').getroot().iter('testcase'))
     for index, case in enumerate(cases):
@@ -62,19 +64,35 @@ def xml_outcomes(directory, selected, expected):
                   'failed' if any(item.tag == 'failure' for item in details) else
                   'skipped' if details else 'passed')
         counts[status] += 1
+        key = case.get('classname', ''), case.get('name', '')
+        node = None
+        if not collection:
+            matches = identities.get(key, set())
+            if len(matches) != 1:
+                raise ValueError('JUnit testcase identity is absent or ambiguous: ' + repr(key))
+            node = next(iter(matches))
+            observed[node] += 1
+            if status == 'passed':
+                passing[node] += 1
+            elif status == 'errors':
+                errors[node] += 1
         if not details:
             continue
-        key = case.get('classname', ''), case.get('name', '')
-        matches = identities.get(key, set())
-        if len(matches) != 1:
-            raise ValueError('JUnit nonpassing identity is absent or ambiguous: ' + repr(key))
-        observations.append({'xml_case_index': index, 'nodeid': next(iter(matches)),
+        observations.append({'xml_case_index': index, 'nodeid': node,
                              'status': status, 'classname': key[0], 'name': key[1],
                              'messages': [{'tag': item.tag, 'message': item.get('message'),
                                            'text': item.text or ''} for item in details]})
     if dict(counts) != expected:
         raise ValueError('top-level JUnit literal counts differ from runner raw_junit_counts')
-    return dict(counts), observations
+    extras = observed - selected_counts
+    if not collection and (selected_counts - observed or passing - selected_counts or extras - errors):
+        raise ValueError('JUnit selected occurrence coverage or passing multiplicity differs')
+    # Pytest may write an extra error testcase for a teardown error. Such XML
+    # rows remain literal observations; they never become extra selected tests.
+    join = {'execution_identity_join_applied': not collection,
+            'selected_occurrences': len(selected), 'xml_testcase_rows': len(cases),
+            'additional_error_rows_by_node': dict(extras)}
+    return dict(counts), observations, join
 
 
 def verified_row(row, directory):
@@ -89,7 +107,8 @@ def verified_row(row, directory):
                 or Counter(item['nodeid'] for item in occurrences) != Counter(nodes['selected'])
                 or Counter(item['status'] for item in occurrences) != Counter(outcome['counts'])):
             raise ValueError('selected occurrence/complete phase/count join differs')
-    raw_counts, messages = xml_outcomes(directory, nodes['selected'], outcome['raw_junit_counts'])
+    raw_counts, messages, xml_join = xml_outcomes(
+        directory, nodes['selected'], outcome['raw_junit_counts'], collection=collection)
     phase_nonpassing = [{key: item[key] for key in ('nodeid', 'item_index', 'status', 'complete')}
                         for item in occurrences if item['status'] != 'passed']
     if not collection:
@@ -108,7 +127,7 @@ def verified_row(row, directory):
             'counts': outcome['counts'], 'raw_junit_counts': raw_counts,
             'selected_occurrences': len(nodes['selected']),
             'collected_occurrences': len(nodes['collected']),
-            'phase_nonpassing': phase_nonpassing, 'xml_nonpassing': messages,
+            'phase_nonpassing': phase_nonpassing, 'xml_nonpassing': messages, 'xml_identity_join': xml_join,
             'literal_pass': literal_pass, 'requirement_met': not row['require_pass'] or literal_pass,
             'returncode': outcome['returncode'], 'runner_monotonic_seconds': outcome['wall_seconds'],
             'command': evidence['command'], 'proofs': {key: outcome[key] for key in verification.PROOFS},
@@ -160,7 +179,8 @@ def summarize(manifest):
             'scientific_acceptance': 'not_assessed',
             'limits': ['Counts are per-run observations; overlapping cohorts and repeated nodes are not unique tests.',
                        'Classification is supplied context, never a conversion of a literal failure into a pass.',
-                       'JUnit messages join exact node identity, not xdist worker/occurrence indices; XML indices retain repeats.',
+                       'Every execution JUnit case joins exact selected node identity; passing multiplicity cannot exceed selection. Additional error XML rows remain separate observations.',
+                       'JUnit messages do not join xdist worker/occurrence indices; XML indices retain repeats. Explicit collection-only rows do not claim execution coverage.',
                        'Only listed directories and their top-level files are read; child XML is never included.',
                        'This ledger does not establish that the supplied roster covers every required task or CI lane.',
                        'Invalid or incomplete proof rows remain nonaccepted even when require_pass is false.']}

@@ -186,6 +186,19 @@ class LedgerContracts(unittest.TestCase):
         self.assertFalse(result['all_rows_verified'])
         self.assertFalse(result['required_outcomes_accepted'])
 
+    def test_raw_xml_failure_cannot_be_accepted_from_passing_phase_claims(self):
+        row = self.fixture()
+        path = Path(row['directory']) / 'pytest.xml'
+        tree = ET.parse(path)
+        case = next(tree.getroot().iter('testcase'))
+        ET.SubElement(case, 'failure', message='literal failed assertion').text = 'retained failure'
+        tree.write(path, encoding='utf-8')
+        self.edit(row, 'outcome.json', 'raw_junit_counts',
+                  {'passed': 0, 'failed': 1, 'errors': 0, 'skipped': 0})
+        result = helper.summarize({'runs': [row]})
+        self.assertFalse(result['required_outcomes_accepted'])
+        self.assertFalse(result['all_literal_outcomes_pass'])
+
 
 if __name__ == '__main__':
     unittest.main()
