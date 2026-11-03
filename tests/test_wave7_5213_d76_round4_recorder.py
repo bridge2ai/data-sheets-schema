@@ -92,7 +92,10 @@ def test_absolute_declarations_without_valid_chunk_byte_evidence_remain_asserted
         chunks.unlink()
     else:
         chunks.write_text("unclosed: [\n")
-    record = _record_current(rendered, monkeypatch)
+    # An absent explicit --chunk-manifest is rejected by Click before the
+    # recorder runs. Omit that option to exercise its normal discovery path.
+    record = _record_current(rendered, monkeypatch,
+                             explicit_chunks=evidence != "missing_manifest")
     assert record["inputs"]["bundle_md5"] == consumed_md5
     assert record["inputs"]["chunks"] is None
     assert "asserted" in record["inputs"]["hash_basis"]
