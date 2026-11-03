@@ -181,6 +181,13 @@ DEFAULT_AUDIT_LIMITS: dict[str, Any] = {
 # own (`--project-limits`).
 PARTITION_KEYS = ("max_paths", "max_inventory_bytes", "max_workers")
 
+def _manifest_path(source_manifest: Path | None, *, root_dir: Path | None = None) -> Path:
+    """Use the checkout anchor for explicit paths, including CLI prechecks."""
+    root = Path(root_dir or ROOT).resolve()
+    return (root / (source_manifest if source_manifest is not None
+                    else Path("data/preprocessed/source_manifest.yaml"))).resolve()
+
+
 def partition_profiles(source_manifest: Path | None = None, *, root_dir: Path | None = None) -> dict[str, dict[str, Any]]:
     """Read one unambiguous declaration per selected project and partition.
 
@@ -192,7 +199,7 @@ def partition_profiles(source_manifest: Path | None = None, *, root_dir: Path | 
     """
     from data_sheets_schema.schema_cache import load_yaml
     root = Path(root_dir or ROOT).resolve()
-    manifest = Path(source_manifest) if source_manifest is not None else root / "data/preprocessed/source_manifest.yaml"
+    manifest = _manifest_path(source_manifest, root_dir=root)
     try:
         registry = load_registry(manifest)
     except click.ClickException as exc:
@@ -323,9 +330,11 @@ def resolve_audit_limits(
     if bounded_carry_version == 1:
         limits["integration_output_tokens"] = 64_000
     if partition is not None:
+        source_manifest = _manifest_path(source_manifest, root_dir=root_dir)
         profiles = partition_profiles(source_manifest, root_dir=root_dir)
         if partition not in profiles:
-            raise ValueError(f"unknown partition profile {partition!r}; known: {sorted(profiles)}")
+            raise ValueError(f"unknown partition profile {partition!r} in source manifest {source_manifest}; "
+                             f"known: {sorted(profiles)}")
         profile = profiles[partition]
         if project not in profile["projects"] or arm not in profile["arms"]:
             raise ValueError(
@@ -393,7 +402,7 @@ def _calibration_covered(profile: dict, project: str, arm: str, *, source_manife
     """
     from data_sheets_schema import audit_omissions as omissions, receipts
     root = Path(root_dir or ROOT).resolve()
-    manifest = Path(source_manifest) if source_manifest is not None else root / "data/preprocessed/source_manifest.yaml"
+    manifest = _manifest_path(source_manifest, root_dir=root)
     try:
         manifest_sha = hashlib.sha256(manifest.read_bytes()).hexdigest()
         if profile.get("source_manifest_sha256") != manifest_sha:
@@ -1067,8 +1076,7 @@ def prepare_registration(
     # One lookup rule for every project, including caller/environment overrides.
     requested = AUTO
     if source_manifest_path is not None:
-        raw_sm = Path(source_manifest_path)
-        requested = (root_dir / raw_sm).resolve()
+        requested = _manifest_path(Path(source_manifest_path), root_dir=root_dir)
         if not requested.is_file():
             raise FileNotFoundError(f"source manifest not found: {source_manifest_path}")
     sm_resolved = select_manifest(project, bundle_path, requested=requested)
@@ -1803,6 +1811,9 @@ def cli(
 
     --check attests pinned bytes, not runtime admission.
     """
+    # Normalize once before roster selection, partition precheck or building.
+    if source_manifest is not None:
+        source_manifest = _manifest_path(source_manifest, root_dir=worktree)
     target_projects: list[str] = []
     if all_projects:
         selected_registry = load_registry(source_manifest or default_manifest_path())
