@@ -185,6 +185,32 @@ def test_completed_legacy_verifier_is_readonly(case, tmp_path, monkeypatch):
 
 
 @pytest.mark.parametrize("role", ["full", "core"])
+def test_verifier_refuses_md5_only_schema_binding(role, tmp_path, monkeypatch):
+    from data_sheets_schema import run_schema
+    root, old, selected = fixture("i1", tmp_path)
+    no_verifier_execution(monkeypatch)
+    record = yaml.safe_load(selected.provenance_path.read_bytes())
+    raw, _ = run_schema.run_schema_bytes(record, kind=role)
+    assert raw is not None
+    record["schema"][role + "_md5"] = hashlib.md5(raw).hexdigest()
+    del record["schema"][role + "_sha256"]
+    selected.provenance_path.write_text(yaml.safe_dump(record))
+    resolve = run_schema.run_schema_bytes
+    resolved = []
+    def observed(record, *, kind):
+        resolved.append(kind)
+        return resolve(record, kind=kind)
+    monkeypatch.setattr(run_schema, "run_schema_bytes", observed)
+    before = tree(root)
+    with pytest.raises(ledger.UsageLedgerError) as caught:
+        journal.verify_completed_legacy(selected.provenance_path, evidence_root=root, recorded_root=old)
+    assert str(caught.value) == (
+        f"latch journal: legacy schema.{role}_sha256 must be a 64-character lowercase hex string")
+    assert role not in resolved
+    assert tree(root) == before
+
+
+@pytest.mark.parametrize("role", ["full", "core"])
 @pytest.mark.parametrize("git_available", [True, False])
 def test_verifier_refuses_unrecoverable_schema_with_resolution_reason(role, git_available, tmp_path, monkeypatch):
     from data_sheets_schema import provenance, run_schema

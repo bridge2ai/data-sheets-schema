@@ -1407,6 +1407,9 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
         schema_path = Path(schema[role + "_path"])
         if schema_path.is_absolute() or ".." in schema_path.parts:
             _fail("invalid schema resource path")
+        schema_sha256 = schema.get(role + "_sha256")
+        if not isinstance(schema_sha256, str) or not _HEX.fullmatch(schema_sha256):
+            _fail(f"legacy schema.{role}_sha256 must be a 64-character lowercase hex string")
         schema_bytes, basis = run_schema.run_schema_bytes(record, kind=role)
         if schema_bytes is None:
             _fail(f"legacy {role} schema bytes cannot be established: {basis['reason']}")
