@@ -3,7 +3,6 @@ import hashlib
 import json
 from dataclasses import replace
 from pathlib import Path
-import sys
 
 import pytest
 import yaml
@@ -42,17 +41,14 @@ def registered(base_registered):
                    shared_generation_registration=raw.decode())
 
 
-def test_every_bc1_response_is_journaled_before_parse(registered, journal_launch_monitor, tmp_path):
+def test_every_bc1_response_is_journaled_before_parse(registered, journal_launch_monitor, tmp_path, monkeypatch):
     observed = {}
     active = []
-    def monitor(frame, event, arg):
-        if event != 'call' or frame.f_code is not runtime._rebuild.__code__:
-            return
-        selected = frame.f_locals.get('spec')
+    original = runtime._rebuild
+    def observed_rebuild(selected, state, **kwargs):
         if selected.project != registered.project or selected.label != registered.label:
-            return
+            return original(selected, state, **kwargs)
         active[:] = [selected]
-        state = frame.f_locals['state']
         for row in state.get('stages', []):
             if row.get('state') != 'response_saved':
                 continue
@@ -72,12 +68,11 @@ def test_every_bc1_response_is_journaled_before_parse(registered, journal_launch
             assert snapshots and responses, 'BC1 parse reached without final D41 response journal pins'
             observed[saved['usage_id']] = {'phase': row['selection']['phase'], 'raw_sha256': pin['sha256'],
                 'snapshot_event': snapshots[-1]['sha256'], 'response_event': responses[-1]['sha256']}
-    previous = sys.getprofile()
-    sys.setprofile(monitor)
-    try:
-        pipeline(registered, journal_launch_monitor)
-    finally:
-        sys.setprofile(previous)
+        return original(selected, state, **kwargs)
+    # Observe the parse boundary only. Every original reconstruction, parse,
+    # admission and journal check still executes; no guard is stubbed.
+    monkeypatch.setattr(runtime, '_rebuild', observed_rebuild)
+    pipeline(registered, journal_launch_monitor)
     assert active
     usage = ledger._read(active[0])['rows']
     typed_rows = [row for row in usage if row['phase'] in runtime.PHASES]
