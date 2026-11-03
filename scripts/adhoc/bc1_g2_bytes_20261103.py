@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -78,6 +79,10 @@ def compare(root):
     for side, code, capture_doc in zip(('before', 'after'), (old_code, new_code), captures):
         for name, digest in code.items():
             assert capture_doc['source_pins'][str(root / name)]['sha256'] == digest, (side, name)
+    assert captures[0]['source_pins'].keys() == captures[1]['source_pins'].keys()
+    for path, old_pin in captures[0]['source_pins'].items():
+        if path not in {str(root / name) for name in moved} and '/src/data_sheets_schema/schema/' not in path:
+            assert captures[1]['source_pins'][path] == old_pin, ('unexpected source change', path)
     # Only captured schema pins and code closure pins may move registration.
     import copy
     normalized = copy.deepcopy(after)
@@ -102,6 +107,17 @@ def compare(root):
             required = 0 if kind == 'pins' else 135 if kind == 'digest' else 189 if kind.startswith('description_') else 123
             if leaf['delta'] != required or kind == 'other':
                 failures.append({'name': name, 'leaf': leaf})
+            if kind == 'pins':
+                a, b = leaf['before'], leaf['after']
+                valid = (isinstance(a, str) and isinstance(b, str) and len(a) == len(b)
+                         and len(a) in (32, 64) and re.fullmatch('[0-9a-f]+', a)
+                         and re.fullmatch('[0-9a-f]+', b))
+                valid = valid or (leaf['path'].endswith('/bytes') and type(a) is int and type(b) is int)
+                if not valid:
+                    failures.append({'name': name, 'invalid_identity_leaf': leaf})
+            if kind.startswith('termSources_') and (leaf['before'] is not None or leaf['after'] != {
+                'd4d:termSources': {'tag': 'd4d:termSources', 'value': 'EDAM Data, EDAM Format, IANA media types'}}):
+                failures.append({'name': name, 'unexpected_annotation': leaf})
     result.update(accepted=not failures, amendment='P4a amendment 1 v3', moved_code=moved,
                   amendment_failures=failures,
                   sizing_note='Expected schema growth is accounted per payload; identical sizing totals are not claimed.')
