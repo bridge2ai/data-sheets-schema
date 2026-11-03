@@ -64,7 +64,8 @@ def _code_pins():
 
 
 def registration(spec):
-    from data_sheets_schema.api_runner import assembly_digest
+    from data_sheets_schema.api_runner import assembly_digest, _require_registered_input_spellings
+    _require_registered_input_spellings(spec)
     policy.command_args(spec)  # requires active version and explicit finite limit
     before = _inputs(spec)
     rendered = spec.render_spec()
@@ -116,6 +117,8 @@ def verified(raw):
 
 def write_registration(spec, destination):
     """One exclusive file; no partial directory, sidecar or historical rewrite."""
+    from data_sheets_schema.api_runner import _require_registered_input_spellings
+    _require_registered_input_spellings(spec)
     value = registration(spec)
     # Verify exact round-trip before opening any output file.
     raw = _encoded(value)

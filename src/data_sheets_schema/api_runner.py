@@ -1211,6 +1211,7 @@ class RunSpec:
 
     @property
     def base_prompt(self) -> Path:
+        _require_registered_input_spellings(self)
         try:
             return CONDITION_PROMPTS[self.condition]
         except KeyError:
@@ -1481,7 +1482,6 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
     Built here rather than handed to the model as a file reference, so the text
     in the request is the text that was hashed.
     """
-    _require_registered_input_spellings(spec)
     body = prompt_body(spec.base_prompt)
     if spec.api_playbook_version:
         from data_sheets_schema.api_playbook import adapt_template
@@ -2913,6 +2913,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
     The bundle and schema digest are the cached prefix: identical across all
     six phases of a run, and by far the largest inputs.
     """
+    _require_registered_input_spellings(spec)
     if phase not in PHASES:
         raise ValueError(f"unknown phase {phase!r}")
     if spec.render_version >= 20 and phase == "audit":
