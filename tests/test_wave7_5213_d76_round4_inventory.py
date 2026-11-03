@@ -264,6 +264,38 @@ class Derived(RunSpec):
                and 'RunSpec-parameter-annotation' in candidate.reasons for candidate in candidates)
 
 
+@pytest.mark.parametrize('annotation', [
+    'Literal["not a valid expression"]',
+    'Annotated[int, "display label"]',
+], ids=['literal-value', 'annotated-metadata'])
+def test_non_type_annotation_metadata_does_not_break_inventory(tmp_path, annotation):
+    root = _source(tmp_path,
+                   'from typing import Annotated, Literal\n\n'
+                   f'def unrelated(value: {annotation}):\n'
+                   '    return value\n')
+    assert discover(root) == ()
+    assert missing_contracts(root) == ()
+
+
+def test_annotated_forward_type_remains_visible_beside_plain_metadata(tmp_path):
+    root = _source(tmp_path, '''
+class RunSpec:
+    pass
+
+class Derived(RunSpec):
+    pass
+''', name='model.py')
+    (root / 'src/data_sheets_schema/consumer.py').write_text('''
+from typing import Annotated
+from . import model as selected_model
+
+def public_consumer(value: Annotated["selected_model.Derived", "display label"]):
+    return value
+''')
+    assert any(candidate.identity == 'data_sheets_schema.consumer.public_consumer'
+               and 'RunSpec-parameter-annotation' in candidate.reasons for candidate in discover(root))
+
+
 def test_new_public_callable_in_a_scratch_copy_has_no_implicit_exemption(tmp_path, monkeypatch):
     root = _source(tmp_path, '''
 class RunSpec:
