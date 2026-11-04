@@ -14,6 +14,7 @@ import pytest
 
 from scripts import build_api_registrations as builder
 from data_sheets_schema import shared_generation as sg
+from tests.utils.partition_resources import copy_partition_resources
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,6 +65,7 @@ def test_worktree_override_uses_selected_tree_schema_resources(tmp_path):
     initial = registration(tmp_path)
     target = tmp_path / "selected_worktree"
     target.mkdir()
+    copy_partition_resources(target)
     shutil.copyfile(ROOT / "pyproject.toml", target / "pyproject.toml")
     expected = {}
     for name in ("full_schema", "core_schema"):

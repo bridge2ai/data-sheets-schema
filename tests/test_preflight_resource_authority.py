@@ -20,6 +20,7 @@ from scripts import build_api_registrations as builder
 from data_sheets_schema import api_runner as api, shared_generation as sg
 from data_sheets_schema.schema_snapshot import capture_schema
 from tests.test_source_heading_runtime_api import draft_files, selected_spec
+from tests.utils.partition_resources import copy_partition_resources
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -55,20 +56,6 @@ def _registration(directory):
     return builder.build_registration("CHORUS", "authority", partition="chorus", registration_path=directory / "registration.json", write_to_disk=False)
 
 
-def _copy_partition_resources(selected):
-    # The declared files and their verified evidence are one selected-tree unit.
-    sources = [ROOT / name for name in builder.AUDIT_PARTITION_FILES]
-    for declaration in builder.partition_profiles().values():
-        pins = [*declaration["sizing_record"].values(),
-                *declaration.get("calibration_bundle", {}).values()]
-        sources.extend(Path(pin["path"]) for pin in pins)
-    for source in sources:
-        if source.is_relative_to(ROOT):
-            target = selected / source.relative_to(ROOT)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(source, target)
-
-
 @pytest.fixture
 def selected_resources(tmp_path):
     original = _registration(tmp_path)
@@ -92,7 +79,7 @@ def selected_resources(tmp_path):
         target = selected / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / name, target)
-    _copy_partition_resources(selected)
+    copy_partition_resources(selected)
     args = dict(project="CHORUS", label="selected", registration_path=tmp_path / "selected.json",
                 bundle_path=original["inputs"]["bundle"]["path"],
                 chunk_manifest_path=original["inputs"]["chunk_manifest"]["path"],
@@ -352,7 +339,7 @@ def test_copied_cli_selects_foreign_tree_from_another_checkout(tmp_path, option,
         target = selected / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / relative, target)
-    _copy_partition_resources(selected)
+    copy_partition_resources(selected)
     copied = tmp_path / "caller-inputs" / "build_api_registrations.py"
     copied.parent.mkdir()
     shutil.copyfile(Path(builder.__file__), copied)
