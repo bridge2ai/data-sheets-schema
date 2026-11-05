@@ -21,7 +21,7 @@ def historical_inputs(tmp_path):
 
     All retained fixture evidence lives beneath ``record.parent``. Cohort and
     decision paths are the corresponding pins in ``registration``. The fixture
-    deliberately has no shared registration, recorded generation age, runtime
+    deliberately has no shared registration or runtime
     integrity block, or ``run.condition``.
     """
     root = tmp_path.resolve() / "historical-evidence"
@@ -39,6 +39,7 @@ def historical_inputs(tmp_path):
     provenance = root / "retained-provenance.yaml"
     provenance.write_text(yaml.safe_dump({
         "record_type": "d4d_generation_provenance",
+        "record_generated_at": "2026-01-01T00:00:00+00:00",
         "run": {"project": project, "label": label, "method": "claudecode_api",
                 "arm": "baseline", "replicate": 1},
         "prompts": {"request": {"spec": {"condition": condition}}},
@@ -109,7 +110,7 @@ def test_historical_full_record_prepare_execute_saved_package_audit(historical_i
     assert plan["historical_identity"]["evidence_status"] == {
         "generation_registration": "not_recorded", "generation_acceptance": "not_established",
     }
-    assert prepared.generation_record_age == "age unestablished"
+    assert prepared.generation_record_age == "pre-D41"
     assert plan["scientific_review_verified"] is False
     assert plan["generation_acceptance_verified"] is False
 

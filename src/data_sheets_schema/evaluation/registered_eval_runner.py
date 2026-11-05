@@ -325,7 +325,7 @@ def prepare(
     def take(path, expected=None, limit=MAX_FILE_BYTES):
         path = Path(path).absolute()
         if is_historical and (path.resolve() != path or ".." in path.parts):
-            raise ValueError("historical authorities require canonical absolute paths without aliases")
+            raise ValueError(f"historical authorities require canonical absolute paths without aliases: {path}")
         raw = _read(path, limit)
         if expected is not None and (not _SHA.fullmatch(expected) or _sha(raw) != expected):
             raise ValueError(f"SHA256 pin differs: {path}")
@@ -448,6 +448,7 @@ def prepare(
         take(Path(__file__).parents[1] / module)
     manifest = {
         "format": FORMAT,
+        "generation_authority_kind": "shared_generation_v1",
         "generation_registration": shared.file_pin(registration, reg_raw),
         "generation_run": reg["run"],
         "omission_context": inputs["context"],

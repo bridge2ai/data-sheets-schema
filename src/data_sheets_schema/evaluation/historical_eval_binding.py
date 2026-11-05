@@ -92,6 +92,9 @@ def admit(raw, read_pin, *, binding_path):
     prior = runner._yaml(provenance_raw)
     run = normalized_run(prior, condition_pointer=doc["condition_pointer"])
     runner.require_eligible_generation(prior)
+    from data_sheets_schema.latch_journal import record_age
+    if record_age(prior) != "pre-D41":
+        raise ValueError("historical authority requires positive pre-D41 age evidence")
     cohort = parse_cohort(cohort_raw)
     entries = [entry for entry in cohort if same_run(
         {**entry, "arm": entry["input_arm"]}, run)
@@ -124,17 +127,23 @@ def admit(raw, read_pin, *, binding_path):
     check_output(artifact, required=True)
     # Older provenance can retain a second description (and old hash claims)
     # under outputs. Missing claims stay unknown; supplied claims must agree.
+    disagreements = []
     if "outputs" in prior:
         if not isinstance(prior["outputs"], dict):
             raise ValueError("historical outputs must be a mapping")
         if "full" in prior["outputs"]:
             check_output(prior["outputs"]["full"], required=False)
+            output = prior["outputs"]["full"]
+            if "bytes" in output and output["bytes"] != len(original):
+                disagreements.append({"source": "outputs.full.bytes",
+                                      "claimed": output["bytes"], "actual": len(original)})
     binding_pin = runner.shared.file_pin(Path(binding_path), raw)
     checked_pin(binding_pin)
     identity = {
         "kind": KIND, "cohort": doc["cohort"], "decision": doc["decision"],
         "decision_reference": reference, "condition_pointer": doc["condition_pointer"],
         "normalized_run": run,
+        "recorded_byte_claim_disagreements": disagreements,
         "evidence_status": {"generation_registration": "not_recorded",
                             "generation_acceptance": "not_established"},
     }
@@ -177,7 +186,7 @@ def capture_for_pack(bindings, *, cohort_pin, decisions):
         nonlocal total
         path = Path(path).absolute()
         if path.resolve() != path or ".." in path.parts:
-            raise ValueError("historical authorities require canonical absolute paths without aliases")
+            raise ValueError(f"historical authorities require canonical absolute paths without aliases: {path}")
         raw = runner._read(path)
         if str(path) in snapshots and snapshots[str(path)] != raw:
             raise ValueError("historical pack authority changed during capture")

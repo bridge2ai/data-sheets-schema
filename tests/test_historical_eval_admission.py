@@ -88,19 +88,19 @@ def test_post_d41_missing_integrity_refuses_with_positive_commit_evidence(histor
         runner.prepare_historical(**inputs)
 
 
-@pytest.mark.parametrize("recorded_at,expected_age", [
-    (None, "age unestablished"), ("2026-01-01T00:00:00+00:00", "pre-D41"),
-])
-def test_pre_d41_and_unknown_age_remain_eligible_without_invented_controls(
-        historical_inputs, recorded_at, expected_age):
+def test_pre_d41_remains_eligible_without_invented_controls(historical_inputs):
     prior = yaml.safe_load(historical_inputs["provenance"].read_bytes())
-    if recorded_at:
-        prior["record_generated_at"] = recorded_at
     inputs = rebind_provenance(historical_inputs, prior)
     prepared = runner.prepare_historical(**inputs)
-    assert prepared.generation_record_age == expected_age
+    assert prepared.generation_record_age == "pre-D41"
     assert prepared.document()["generation_acceptance_verified"] is False
-    assert "model" not in yaml.safe_load(inputs["provenance"].read_bytes())
+    assert_no_invented_controls(prepared.document())
+
+
+def assert_no_invented_controls(plan):
+    assert plan["generation_registration"] is None and plan["omission_context"] is None
+    assert not {"runtime_integrity", "shared_generation", "model", "generation_controls"} & set(plan)
+    assert not {"runtime_integrity", "shared_generation", "model", "generation_controls"} & set(plan["historical_identity"])
 
 
 @pytest.mark.parametrize("raw", [b'{"format":', b'{"format":1,"format":2}', b'{"format":NaN}'])
@@ -177,8 +177,8 @@ def test_retained_outputs_description_allows_agreeing_or_unknown_claims(historic
         output.update(md5=hashlib.md5(raw).hexdigest(), sha256=sha(raw))
     prior["outputs"] = {"full": output}
     inputs = rebind_provenance(historical_inputs, prior)
-    runner.prepare_historical(**inputs)
-    assert yaml.safe_load(inputs["provenance"].read_bytes())["outputs"]["full"] == output
+    prepared = runner.prepare_historical(**inputs)
+    assert_no_invented_controls(prepared.document())
 
 
 @pytest.mark.parametrize("mutation,reason", [
@@ -314,3 +314,8 @@ def test_retained_d64_records_admit_read_only_under_explicit_pins(historical_inp
                                     binding_path=str(historical_inputs["registration"]))
         assert admitted["cohort_entry"] == row
         assert before == {path: path.read_bytes() for path in before}
+        disagreements = admitted["historical_identity"]["recorded_byte_claim_disagreements"]
+        if row["project"] == "VOICE" and row["replicate"] == 1:
+            assert disagreements == [{"source": "outputs.full.bytes", "claimed": 64790, "actual": 64794}]
+        else:
+            assert disagreements == []

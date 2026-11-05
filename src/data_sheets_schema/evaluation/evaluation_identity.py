@@ -8,6 +8,10 @@ import hashlib
 import json
 
 
+class ConditionIdentityIncomplete(ValueError):
+    """A named condition authority is absent or ambiguous."""
+
+
 def _digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"),
                                      allow_nan=False).encode()).hexdigest()
@@ -29,14 +33,14 @@ def evaluation_condition_key(plan):
         matches = [pin for pin in plan["authorities"]
                    if pin["path"].endswith("/data_sheets_schema/" + module)]
         if len(matches) != 1:
-            raise ValueError("evaluation condition requires each common evaluator implementation")
+            raise ConditionIdentityIncomplete("evaluation condition requires each common evaluator implementation: " + module)
         pin = matches[0]
         implementations.append({"module": module, "sha256": pin["sha256"], "bytes": pin["bytes"]})
     selected = select_semantic_instrument(plan["instrument"]["rubric"], plan["instrument"]["version"])
     schema_pins = [pin for pin in plan["authorities"]
                    if pin["path"].endswith("/" + selected.schema_path)]
     if len(schema_pins) != 1:
-        raise ValueError("evaluation condition requires the selected instrument schema")
+        raise ConditionIdentityIncomplete("evaluation condition requires the selected instrument schema: " + selected.schema_path)
     schema = {"resource": selected.schema_path,
               **{key: schema_pins[0][key] for key in ("sha256", "bytes")}}
     runtime = deepcopy(plan["runtime"])

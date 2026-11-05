@@ -13,6 +13,7 @@ import pytest
 import yaml
 
 from data_sheets_schema.evaluation import registered_eval_runner as runner
+from data_sheets_schema.evaluation.evaluation_identity import evaluation_condition_key, repeat_key
 from tests.test_historical_eval_admission import (
     binding_document, rebind_evidence, rebind_provenance, rebind_record,
 )
@@ -100,6 +101,10 @@ def test_historical_and_shared_adapters_have_identical_model_facing_bytes(
     shared = runner.prepare(**shared_inputs)
     retrospective = runner.prepare_historical(**historical_options)
     left, right = shared.document(), retrospective.document()
+    assert left["generation_authority_kind"] == "shared_generation_v1"
+    assert right["generation_authority_kind"] == "historical_provenance_v1"
+    assert evaluation_condition_key(left) == evaluation_condition_key(right)
+    assert repeat_key(left) != repeat_key(right)
     assert left["generation_registration"] is not None
     assert right["generation_registration"] is None
     assert shared.original == retrospective.original
@@ -133,7 +138,7 @@ def test_historical_and_shared_adapters_have_identical_model_facing_bytes(
 
 
 @pytest.mark.parametrize("rubric,version", INSTRUMENTS)
-def test_existing_shared_preparation_is_byte_identical_to_pinned_base_algorithm(
+def test_shared_preparation_differs_from_pinned_base_only_by_explicit_kind(
         registration, base_prepare, rubric, version):
     """Same current resources/globals, not an old-runtime or provider replay."""
     options = {**registration, "rubric": rubric, "instrument_version": version, "repeat_count": 1}
@@ -141,8 +146,11 @@ def test_existing_shared_preparation_is_byte_identical_to_pinned_base_algorithm(
               for key in ("registration", "record", "provenance", "context", "runtime")}
     expected = base_prepare(**options)
     actual = runner.prepare(**options)
-    assert actual == expected
-    assert actual.manifest == expected.manifest and actual.digest == expected.digest
+    actual_plan = actual.document()
+    assert actual_plan.pop("generation_authority_kind") == "shared_generation_v1"
+    assert actual_plan == expected.document()
+    from dataclasses import replace
+    assert replace(actual, manifest=expected.manifest) == expected
     assert runner.rating_prompt(actual).encode() == runner.rating_prompt(expected).encode()
     assert actual.system_prompt == expected.system_prompt
     assert before == {path: path.read_bytes() for path in before}

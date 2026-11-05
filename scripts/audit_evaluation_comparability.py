@@ -410,6 +410,8 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
                 and runner.shared.canonical(plan) == manifest_raw,
                 "registered_manifest_format_or_encoding")
         is_historical = plan["format"] == historical.EVALUATION_FORMAT
+        kind = historical.KIND if is_historical else "shared_generation_v1"
+        package["generation_authority_kind"] = kind
         require(plan.get("execution_mode") == "isolated_no_tools_controller_validation",
                 "registered_execution_mode_unsupported")
         require(receipt.get("plan_sha256") == sha(manifest_raw) and receipt.get("plan") == plan,
@@ -423,6 +425,7 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
                         for value in run.values()), "registered_run_identity_invalid")
         package["generation_run"] = run
         record = {"arm": arm, "project": run["project"], "label": run["label"],
+            "generation_authority_kind": kind,
             "replicate": None, "canonical": False, "provenance_files": [], "record_path": None,
             "record_sha256": None, "validation_passed": None, "generation_method": run["method"],
             "record_role": plan.get("record_role"), "registered_run": run, "reasons": []}
@@ -498,8 +501,19 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
             provenance_run = admitted["normalized_run"]
             forbidden_paths = historical.forbidden_paths(admitted)
             package.update(generation_authority_kind=historical.KIND,
-                           historical_identity=identity)
+                           historical_identity=identity,
+                           recorded_byte_claim_disagreements=identity["recorded_byte_claim_disagreements"])
         else:
+            shared_fields = {
+                "format", "generation_registration", "generation_run", "omission_context", "record",
+                "record_role", "generation_provenance", "record_registration_binding", "blinding",
+                "blinded_input_sha256", "applicability_context", "context_sha256", "instrument", "runtime",
+                "repeat_count", "max_cost_dollars", "reserved_cost_dollars_per_attempt", "cost_basis",
+                "execution_mode", "execution_adapter", "scientific_review_verified",
+                "generation_acceptance_verified", "authorities"}
+            require(set(plan) in (shared_fields, shared_fields | {"generation_authority_kind"})
+                    and plan.get("generation_authority_kind", "shared_generation_v1") == "shared_generation_v1",
+                    "registered_shared_manifest_contract")
             generation_raw = original_pin("generation_registration")
             generation = document(generation_raw, json_only=True)
             require(generation.get("format") == runner.shared.FORMAT
@@ -669,7 +683,11 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         condition = {"source": "registered_blinded", "record_role": "full", "original_sha256": sha(original),
             "blinded_sha256": sha(blinded), "blinding": blinding, "adapter": adapter,
             "instrument": selected_instrument, "runtime": runtime, "implementation_pins": implementation_pins}
-        condition_key, fixed_record_key = evaluation_condition_key(plan), repeat_key(plan)
+        from data_sheets_schema.evaluation.evaluation_identity import ConditionIdentityIncomplete
+        try:
+            condition_key, fixed_record_key = evaluation_condition_key(plan), repeat_key(plan)
+        except ConditionIdentityIncomplete as exc:
+            raise RegisteredRefusal("registered_condition_identity_incomplete: " + str(exc)) from None
         ratings, attempts = receipt.get("ratings"), receipt.get("attempts")
         require(isinstance(ratings, list) and isinstance(attempts, list)
                 and len(ratings) <= len(attempts) <= plan["repeat_count"], "registered_attempt_roster_invalid")
@@ -737,6 +755,7 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
                 "reasons": reasons, "pending": pending,
                 "contract_checked": True, "eligible_for_condition_review": not reasons and not pending,
                 "source": "registered_blinded", "input_condition": condition,
+                "generation_authority_kind": kind,
                 "evaluation_condition_key": condition_key, "repeat_key": fixed_record_key,
                 "manifest_sha256": sha(manifest_raw), "receipt_sha256": sha(receipt_raw),
                 "transcript_sha256": sha(trace_raw), "transcript_pin_supplied": "transcript_sha256" in rating,
@@ -950,6 +969,7 @@ def evaluation_condition_groups(records):
                 member = {name: record[name] for name in ("arm", "project", "label", "replicate",
                           "generation_method", "record_path", "record_sha256", "provenance_sha256")}
                 member.update(rubric=rubric, record_role=row["record_role"],
+                    generation_authority_kind=row["generation_authority_kind"],
                     generation_run=record["registered_run"], rating_path=row["path"], rating_sha256=row["sha256"],
                     manifest_sha256=row["manifest_sha256"], receipt_sha256=row["receipt_sha256"],
                     transcript_sha256=row["transcript_sha256"], rating_index=row["rating_index"],
@@ -961,6 +981,8 @@ def evaluation_condition_groups(records):
         members.sort(key=lambda member: tuple(member[name] for name in (
             "arm", "project", "label", "rubric", "rating_path", "rating_index")))
         result.append({"evaluation_condition_key": key, "members": members,
+            "generation_authority_kinds": {kind: sum(member["generation_authority_kind"] == kind for member in members)
+                for kind in sorted({member["generation_authority_kind"] for member in members})},
             "bound_rating_files": len(members),
             "record_count": len({tuple(member[name] for name in ("arm", "project", "label", "record_sha256"))
                                  for member in members}),
