@@ -1,0 +1,533 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/historical-evaluation/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>Explicit historical-artifact evaluation (#5126) - data-sheets-schema</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="None" data-md-color-accent="None">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#explicit-historical-artifact-evaluation-5126" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="data-sheets-schema" class="md-header__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            data-sheets-schema
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Explicit historical-artifact evaluation (#5126)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="data-sheets-schema" class="md-nav__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    data-sheets-schema
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../home/" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../d4d_core/" class="md-nav__link">
+        D4D-Core
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic_exchange/" class="md-nav__link">
+        Semantic Exchange
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Schema Documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        CLI Reference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        About
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#input-binding" class="md-nav__link">
+    Input binding
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preparation-output-and-ingestion" class="md-nav__link">
+    Preparation, output and ingestion
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#campaign-pack" class="md-nav__link">
+    Campaign pack
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remaining-decisions" class="md-nav__link">
+    Remaining decisions
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/historical-evaluation.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="explicit-historical-artifact-evaluation-5126">Explicit historical-artifact evaluation (#5126)</h1>
+<p>Historical admission evaluates retained bytes under a newly selected evaluation
+condition. It does not reconstruct a generation registration, certify provider
+execution, approve a scientific instrument, or authorize scoring. Original
+records, provenance and previous ratings remain unchanged.</p>
+<p>The existing <code>shared_generation_v1</code> admission remains the default. Its refusals
+never fall back to historical admission. Historical admission rejects provenance
+containing <code>shared_generation</code>, requires the D70/D73 eligibility check and an
+explicitly passed historical full-output validation. Unknown generation fields
+remain unknown. Routed shared-v2 and native authority adapters are separate work.
+Admission additionally requires positive <code>pre-D41</code> age evidence; unknown age and
+post-D41 ancestry refuse even with valid runtime integrity. D73 classifies a new
+rerun on recorded historical code lineage outside D41 ancestry as pre-D41, even
+with a recent timestamp. Thus a future no-crate rerun on historical v8 code can
+qualify with its actual immutable commit, passed validation and separately pinned
+cohort; timestamps or missing controls alone cannot establish that lineage.</p>
+<h2 id="input-binding">Input binding</h2>
+<p>Preparation trusts the cohort and decision pins in the binding; only the binding
+digest is supplied independently at preparation. Audit and campaign packing
+enforce independent selection of the exact cohort and decision document.
+The cohort selects run identities, not file paths or approval. The decision
+reference is evidence to review, not an authenticated approval bit. A source
+binding is strict JSON with exactly:</p>
+<pre><code class="language-json">{
+  &quot;format&quot;: &quot;historical_artifact_binding_v1&quot;,
+  &quot;record_role&quot;: &quot;full&quot;,
+  &quot;record&quot;: {&quot;path&quot;: &quot;/absolute/full.yaml&quot;, &quot;sha256&quot;: &quot;64 lowercase hex digits&quot;, &quot;bytes&quot;: 123},
+  &quot;provenance&quot;: {&quot;path&quot;: &quot;/absolute/provenance.yaml&quot;, &quot;sha256&quot;: &quot;64 lowercase hex digits&quot;, &quot;bytes&quot;: 456},
+  &quot;cohort&quot;: {&quot;path&quot;: &quot;/absolute/cohort.yaml&quot;, &quot;sha256&quot;: &quot;64 lowercase hex digits&quot;, &quot;bytes&quot;: 789},
+  &quot;decision&quot;: {&quot;path&quot;: &quot;/absolute/decision.md&quot;, &quot;sha256&quot;: &quot;64 lowercase hex digits&quot;, &quot;bytes&quot;: 234},
+  &quot;decision_reference&quot;: &quot;Approved analysis decision and section&quot;,
+  &quot;condition_pointer&quot;: &quot;/prompts/request/spec/condition&quot;
+}
+</code></pre>
+<p>Replace every illustrative pin with the independently verified exact file bytes.
+Use canonical absolute paths without symlink aliases. Each provenance artifact
+path and every MD5/SHA256 assertion present must match the selected full record.
+Stale <code>outputs.full.bytes</code> claims are reported, not gated: the package's
+<code>historical_identity.recorded_byte_claim_disagreements</code> records source, claimed
+and actual byte counts, also exposed on the audit package. This differs from
+the binding's own byte counts, which must always match exactly.
+The explicit historical condition pointer must exist; a conflicting
+<code>run.condition</code> refuses. The normalized identity is stored only in the new
+evaluation binding, never written into historical provenance.</p>
+<p><code>configs/evaluation/d64_retained_v8_comparator.yaml</code> declares the nine retained
+D64 candidates. It is not a final funded E5 cohort. The analysis plan excludes
+historical with-crate AI_READI records; its conditional no-crate comparator and
+missingness rules remain separate. Project membership is declared data, not a
+special case in the admission code. Supply the exact scoped cohort and decision
+pin selected for the future rating registration.
+The pinned cohort's optional <code>exclusions</code> list matches literal identity fields;
+any cell expanding to an excluded identity refuses. D64 declares all three
+excluded historical AI_READI labels, leaving separately selected reruns possible.</p>
+<h2 id="preparation-output-and-ingestion">Preparation, output and ingestion</h2>
+<p>The evaluator CLI accepts explicit
+<code>--authority-kind historical_provenance_v1 --registration BINDING.json
+--registration-sha256 SHA256</code> together with the existing record, provenance,
+context, rubric/version, runtime, budget and output options. <code>--dry-run</code> prepares
+an offline plan without a runtime call. The Python API is
+<code>registered_eval_runner.prepare_historical(...)</code>; shared preparation and the
+historical adapter use one prompt, resource selection, no-tools adapter and
+acceptance path. Generation identities and provenance stay out of the rating
+prompt. Retained transcripts, receipts, failed attempts and plan locks use the
+existing evaluator protocol.</p>
+<p>The output <code>registration.json</code> has format
+<code>registered_historical_semantic_evaluation_v1</code> and
+<code>generation_authority_kind: historical_provenance_v1</code>. It binds the source
+binding, normalized identity, original/provenance bytes, selected cohort and
+decision, original and blinded hashes, context and evaluator resources/code.
+<code>generation_registration</code> and <code>omission_context</code> remain null;
+generation acceptance and scientific review remain false.</p>
+<p>For ingestion, pass the package through <code>--registered-evaluation ARM=DIR</code>, the
+independently selected <code>--roster-manifest</code>, and <code>--historical-decision FILE</code>.
+The audit re-admits the saved binding, checks exact selected cohort and decision
+pins, recomputes blinding and revalidates saved transcripts and receipt joins.
+It never executes historical code or a runtime binary. Missing committed-package
+or execution-lock evidence stays pending. Hash consistency is not proof of
+execution or scientific comparability.</p>
+<p>The evaluation-condition key excludes generation labels, arms and record hashes;
+it retains instrument/context, blinding policy/emitter, common evaluator code,
+runtime byte identity, adapter and per-rating budget. The repeat key additionally
+binds the complete record, generation evidence and blinding instance. Different
+records cannot inflate a fixed-record repeat panel. Independent sessions may
+return identical score JSON.</p>
+<p>The audit's <code>evaluation_condition_groups</code> exposes each condition's exact record
+and rating members, their receipt/transcript identities and pending evidence.
+It counts records separately from rating files and grants no comparability,
+review or session-independence approval. Historical admission-code pins remain
+required package evidence, separate from the common evaluator-condition key.
+Every new plan and audited package, bound row and group member records
+<code>generation_authority_kind</code>; group <code>generation_authority_kinds</code> counts label
+shared-generation and historical-provenance ratings even when pooled.</p>
+<p>Two shared-v10 audit behaviors changed with this route: <code>repeat_panel</code> now
+includes <code>repeat_key</code>, so record/generation pins and per-attempt cost changes
+split panels; all 15 common evaluator-module pins and the selected schema pin
+are required. Missing or ambiguous condition pins produce
+<code>registered_condition_identity_incomplete</code> with the offending resource name.
+Older shared manifests may omit the kind (inferred strictly from their format),
+but unknown or historical-only keys and contradictory kinds refuse. New shared
+plans add the explicit kind; their model-facing preparation is unchanged.</p>
+<h2 id="campaign-pack">Campaign pack</h2>
+<p>Historical campaign packing is opt-in, using repeated
+<code>--historical-binding SHA256=PATH</code> and <code>--historical-decision FILE</code>, plus the
+existing record-selection and cohort manifests. It uses the same explicit
+historical condition adapter. Missing/conflicting condition evidence is refused;
+synthetic mode is not a substitute for campaign admission. Historical authority
+pins appear in the separate private key, not the reviewer directory. Captured
+binding, provenance, cohort and decision bytes are rechecked before publication.</p>
+<h2 id="remaining-decisions">Remaining decisions</h2>
+<p>The owner still selects the exact scoped cohort and decision reference, rubric20
+instrument under #2911/P4b, reviewed context and implementation pins, evaluator
+runtime and budget. Semantic 5.0 support in the runner does not imply support by
+the current comparability audit, which targets rubric10 3.0 and rubric20 3.0/4.0.
+D52 deterministic changes do not automatically establish equivalent semantic
+instrument changes. Support-judge calibration is separate. No rating run is
+authorized by this implementation or its offline tests.</p>
+<p>Known review follow-ups: canonical-path enforcement includes implementation
+resources, so a symlinked checkout refuses and reports its offending path (F9).
+The decision reference remains descriptive text; its occurrence in the pinned
+decision document is not checked (F10). Neither limitation authenticates approval.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+    
+    
+  </body>
+</html>

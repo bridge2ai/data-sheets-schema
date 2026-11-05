@@ -1421,6 +1421,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/historical-evaluation/</loc>
+         <lastmod>2026-11-05</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/historical-profile-identity/</loc>
          <lastmod>2026-11-05</lastmod>
          <changefreq>daily</changefreq>
