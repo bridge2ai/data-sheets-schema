@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import argparse
 import csv
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 import hashlib
 import io
@@ -551,6 +551,12 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
                               declaration["method"], f'rep{declaration["replicate"]}'))
             if historical_input:
                 forbidden.update(historical.forbidden_paths(historical_input))
+                input_arm = historical_input["normalized_run"]["arm"]
+                if record.input_arm not in (None, input_arm, declaration["input_arm"]):
+                    raise ValueError("historical pack input arm conflicts with its admitted provenance")
+                # CLI selections do not carry input_arm. Use the same validated
+                # provenance identity as the historical semantic evaluator.
+                record = replace(record, input_arm=input_arm)
             val_block = prov_doc.get("validation") or {}
             artifacts = val_block.get("artifacts") if isinstance(val_block, dict) else None
             full_art = artifacts.get("full") if isinstance(artifacts, dict) else None

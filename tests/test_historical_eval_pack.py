@@ -36,6 +36,67 @@ def assert_unpublished(arguments):
     assert not arguments["key_output"].exists()
 
 
+def cli_parsed_selection(arguments, route):
+    """Use the real CLI readers, which do not accept an input_arm field."""
+    selected = arguments["records"][0]
+    if route == "record":
+        parsed = [pack.parse_record(
+            f"{selected.arm}:{selected.project}:{selected.label}={selected.source_path}")]
+    else:
+        manifest = selected.source_path.with_name("cli-selection.json")
+        manifest.write_text(json.dumps({"records": [{
+            "arm": selected.arm, "project": selected.project, "label": selected.label,
+            "source_path": str(selected.source_path), "source_sha256": selected.source_sha256,
+        }]}))
+        parsed = pack.read_manifest(manifest)
+    assert len(parsed) == 1 and parsed[0].input_arm is None
+    return parsed
+
+
+@pytest.mark.parametrize("route", ["record", "manifest"])
+@pytest.mark.parametrize("envelope", ["root", "wrapper"])
+def test_cli_selection_uses_admitted_input_arm_and_preserves_scientific_baseline(
+        historical_inputs, route, envelope):
+    scientific = {"id": "example:baseline-measurement", "name": "Fictional scientific dataset",
+                  "description": "The baseline assessment precedes the follow-up assessment.",
+                  "consented": False, "ordered_values": [None, False, "005", "baseline"]}
+    source = {**scientific, "arm": "baseline"}
+    if envelope == "wrapper":
+        source = {"Dataset": source}
+    raw = b"# Arm: baseline\n" + yaml.safe_dump(source, sort_keys=False).encode()
+    inputs = rebind_record(historical_inputs, raw)
+    arguments = pack_arguments(inputs)
+    arguments["records"] = cli_parsed_selection(arguments, route)
+    key = pack.build_blind_review_pack(**arguments)
+    saved = (arguments["output_dir"] / "blind_01.yaml").read_bytes()
+    assert saved and sha(saved) == key["records"][0]["blinded_sha256"]
+    doc = yaml.safe_load(saved)
+    assert "arm" not in doc
+    assert doc.get("Dataset", doc) == scientific
+    assert inputs["record"].read_bytes() == raw
+    assert json.loads(arguments["key_output"].read_bytes()) == key
+    assert key["historical_bindings"][0]["identity"]["normalized_run"]["arm"] == "baseline"
+
+
+@pytest.mark.parametrize("route", ["record", "manifest"])
+def test_cli_selection_still_refuses_conflicting_root_arm(historical_inputs, route):
+    inputs = rebind_record(historical_inputs,
+        b"id: example:record\nname: Scientific dataset\narm: conflicting-input-arm\n")
+    arguments = pack_arguments(inputs)
+    arguments["records"] = cli_parsed_selection(arguments, route)
+    with pytest.raises(ValueError, match="ambiguous root arm"):
+        pack.build_blind_review_pack(**arguments)
+    assert_unpublished(arguments)
+
+
+def test_supplied_input_arm_cannot_override_admitted_historical_run(historical_inputs):
+    arguments = pack_arguments(historical_inputs)
+    arguments["records"] = [replace(arguments["records"][0], input_arm="crate_only")]
+    with pytest.raises(ValueError, match="input.arm"):
+        pack.build_blind_review_pack(**arguments)
+    assert_unpublished(arguments)
+
+
 def test_real_campaign_pack_keeps_scientific_values_and_historical_evidence(historical_inputs):
     inputs = rebind_record(historical_inputs, historical_inputs["record"].read_bytes() + (
         "generation_metadata:\n  model: opaque-fixture-generator\n"
