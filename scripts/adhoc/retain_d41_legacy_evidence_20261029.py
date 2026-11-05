@@ -256,8 +256,10 @@ def main():
     if args.runtime_ci_root:
         diagnostics = []
         for case in ("test_real_legacy_launcher_keep0", "test_real_legacy_launcher_keep2"):
+            attempts = [p for p in (args.runtime_ci_root / case / "registration/attempts").glob("*") if p.is_dir()]
+            assert len(attempts) == 1, f"expected exactly one attempt directory: {attempts}"
             for name in ("controller_traceback.txt", "result.json"):
-                original = args.runtime_ci_root / case / "registration/attempts/CHORUS_direct_rep1" / name
+                original = attempts[0] / name
                 raw = original.read_bytes()
                 retained = args.scratch / "validation-diagnostics" / case / name
                 retained.parent.mkdir(parents=True, exist_ok=True)

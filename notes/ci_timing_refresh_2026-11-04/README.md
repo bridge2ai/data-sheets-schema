@@ -53,7 +53,8 @@ serial outer pytest, caps nested xdist at two, disables dependency `.pth`
 execution, strips credentials, and installs an offline socket audit hook.
 The exact invocation and environment are retained in each scratch evidence folder.
 
-`profile_admission_r3_20261104.py run g1` and then `run bc1g2` run the same
+`profile_admission_r3_20261104.py run g1 --case tests/test_report_admission.py::test_chorus_wire_is_byte_identical_without_admission_and_is_what_was_counted`
+and then the same command with `run bc1g2` run the same
 slow admission case at exact source commits in fresh, isolated scratch archives.
 The first run is the end-to-end canary. Each retains the source archive and its
 SHA256, every included file's hash, imported-module origins, environment, JUnit,

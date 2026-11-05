@@ -45,7 +45,8 @@ def test_chorus_shared_v1_exact_baseline_sdk_bytes(tmp_path, monkeypatch, event)
     monkeypatch.setenv('D41_PARITY_TARGET', 'deleted/nonexistent-branch')
     # The helper runs from source even with no git executable/history available.
     monkeypatch.setenv('PATH', str(tmp_path))
-    result = parity.compare(ROOT, tmp_path / 'parity')
+    result = parity.compare(ROOT, tmp_path / 'parity', project='CHORUS',
+        partition='chorus', context_path=ROOT / 'data/omission_contexts/chorus_omission_context.json')
     assert result['passed']
     assert {'full', 'reconcile_full', 'report', 'report_regate', 'full_receipt_completion',
             'typed_audit_omission', 'typed_audit_integration'} <= result['rows'].keys()
