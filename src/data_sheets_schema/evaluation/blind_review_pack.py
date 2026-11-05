@@ -457,7 +457,7 @@ def _verify_private_key(path: Path, raw: bytes, identity: tuple[int, int]):
 
 def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_output: Path, seed: str | int,
                             cohort: str = "campaign", generated_at: str | None = None,
-                            cohort_manifest=None) -> dict:
+                            cohort_manifest=None, historical_bindings=(), historical_decisions=()) -> dict:
     """Publish reviewer files and an external private key without overwrites.
 
     Seeded order is SHA256(seed, arm, project, label), independent of selection
@@ -478,6 +478,11 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
     if cohort == "campaign":
         from .cohort_manifest import read_cohort
         declared, cohort_pin = read_cohort(cohort_manifest)
+    from . import historical_eval_binding as historical
+    historical_inputs, historical_snapshots = historical.capture_for_pack(
+        historical_bindings, cohort_pin=cohort_pin, decisions=historical_decisions)
+    if set(historical_inputs) - {record.identity for record in records}:
+        raise ValueError("historical binding is outside the selected campaign")
     if cohort == "campaign" and (not _SHA.fullmatch(seed) or len(set(seed)) < 8):
         raise ValueError("campaign blind review pack requires a 64-character hex seed with at least 8 distinct hex digits")
     output = Path(output_dir)
@@ -507,8 +512,13 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
             raise ValueError("selected source_sha256 does not match input")
         if cohort == "campaign":
             from data_sheets_schema.provenance import record_path_for, recorded_hash
-            prov_candidate = path.parent / f"{record.project}_provenance.yaml"
-            if not prov_candidate.is_file() and path.parent.parent != path.parent:
+            historical_input = historical_inputs.get(record.identity)
+            if historical_input and (str(record.source_path.absolute()) != historical_input["record"]["path"]
+                                     or raw != historical_input["original"]):
+                raise ValueError("historical pack selected record differs from its binding")
+            prov_candidate = (Path(historical_input["generation_provenance"]["path"]) if historical_input
+                              else path.parent / f"{record.project}_provenance.yaml")
+            if not historical_input and not prov_candidate.is_file() and path.parent.parent != path.parent:
                 method_dir = path.parent.parent.name
                 concat_dir = path.parent.parent.parent
                 corpus_prov = record_path_for(record.project, method_dir, record.label, concat_dir=concat_dir)
@@ -522,10 +532,11 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
                 raise ValueError(
                     f"campaign record {record.project}:{record.label} has no provenance record at {prov_candidate}"
                 )
-            prov_doc = registered._yaml(registered._read(prov_candidate))
+            prov_doc = (historical_input["provenance"] if historical_input
+                        else registered._yaml(registered._read(prov_candidate)))
             if not isinstance(prov_doc, dict):
                 raise ValueError(f"campaign record provenance at {prov_candidate} is not a YAML mapping")
-            run_block = prov_doc.get("run") or {}
+            run_block = (historical_input["normalized_run"] if historical_input else prov_doc.get("run") or {})
             if isinstance(run_block, dict) and run_block.get("label") and run_block["label"] != record.label:
                 raise ValueError("campaign record label does not match sibling provenance run.label")
             declaration = next(r for r in declared if
@@ -538,6 +549,8 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
                 raise ValueError("campaign record identity differs from the declared cohort provenance")
             forbidden.update((declaration["comparison_arm"], declaration["condition"],
                               declaration["method"], f'rep{declaration["replicate"]}'))
+            if historical_input:
+                forbidden.update(historical.forbidden_paths(historical_input))
             val_block = prov_doc.get("validation") or {}
             artifacts = val_block.get("artifacts") if isinstance(val_block, dict) else None
             full_art = artifacts.get("full") if isinstance(artifacts, dict) else None
@@ -586,6 +599,10 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
         "publication": "private key first; late failure may retain orphan key or both outputs; neither is overwritten or removed",
         "scientific_approval": False, "records": entries,
     }
+    if historical_inputs:
+        key["historical_bindings"] = [{"binding": value["historical_binding"],
+                                       "identity": value["historical_identity"]}
+                                      for _, value in sorted(historical_inputs.items())]
     key_raw = _canonical(key)
     owned = []
 
@@ -617,6 +634,9 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
             for _, path, digest, _ in captured:
                 if _sha(registered._read(path)) != digest:
                     raise ValueError("source changed during review pack preparation")
+            for path, expected in historical_snapshots.items():
+                if Path(path).resolve() != Path(path) or registered._read(Path(path)) != expected:
+                    raise ValueError("historical authority changed during review pack preparation")
 
         verify_review()
         _verify_private_key(key_file, key_raw, key_identity)
@@ -674,6 +694,10 @@ def main(argv=None) -> int:
     parser.add_argument("--cohort", choices=("campaign", "synthetic"), default="campaign",
                         help="Campaign requires an explicit cohort manifest; synthetic accepts other sizes")
     parser.add_argument("--cohort-manifest", type=Path, help="Declared evaluation_cohort_v1 campaign")
+    parser.add_argument("--historical-binding", action="append", default=[], metavar="SHA256=PATH",
+                        help="Explicit pinned historical full-record binding; repeat per selected record")
+    parser.add_argument("--historical-decision", action="append", default=[], type=Path,
+                        help="Independently selected decision reference; repeat if needed")
     parser.add_argument("--generated-at", help="Optional explicit UTC YYYY-MM-DDTHH:MM:SSZ; otherwise null, not current time")
     parser.add_argument("--output-dir", type=Path, required=True,
                         help="New 0700 reviewer directory containing only YAML and review_sheet.tsv")
@@ -683,9 +707,12 @@ def main(argv=None) -> int:
     seed_val = args.seed if args.seed is not None else secrets.token_hex(32)
     try:
         records = read_manifest(args.manifest) if args.manifest else [parse_record(item) for item in args.record]
+        from .historical_eval_binding import parse_binding_argument
         result = build_blind_review_pack(records, args.output_dir, key_output=args.key_output,
                                          seed=seed_val, cohort=args.cohort,
-                                         generated_at=args.generated_at, cohort_manifest=args.cohort_manifest)
+                                         generated_at=args.generated_at, cohort_manifest=args.cohort_manifest,
+                                         historical_bindings=[parse_binding_argument(value) for value in args.historical_binding],
+                                         historical_decisions=args.historical_decision)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
     print(f"Prepared {len(result['records'])} blinded records. Reviewer directory: {args.output_dir}")
