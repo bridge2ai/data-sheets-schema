@@ -16,9 +16,22 @@ def read_cohort(path):
     """
     path = Path(path).absolute()
     raw = runner._read(path)
+    return parse_cohort(raw), runner.shared.file_pin(path, raw)
+
+
+def parse_cohort(raw):
+    """Read captured cohort bytes without reopening an authority path."""
     doc = runner._yaml(raw)
-    if not isinstance(doc, dict) or set(doc) != {"format", "cells"} or doc["format"] != FORMAT:
+    if (not isinstance(doc, dict) or not {"format", "cells"} <= set(doc)
+            or set(doc) - {"format", "cells", "exclusions"} or doc["format"] != FORMAT):
         raise ValueError("requires evaluation_cohort_v1 with cells")
+    exclusions = doc.get("exclusions", [])
+    if (not isinstance(exclusions, list) or len(exclusions) > 1000
+            or any(not isinstance(item, dict) or not item
+                   or set(item) - {"project", "label", "method", "condition", "input_arm"}
+                   or any(not isinstance(value, str) or not value.strip() for value in item.values())
+                   for item in exclusions)):
+        raise ValueError("cohort exclusions require explicit literal identity fields")
     if not isinstance(doc["cells"], list) or not 1 <= len(doc["cells"]) <= 1000:
         raise ValueError("cohort requires 1..1000 cells")
     records, identities = [], set()
@@ -58,4 +71,7 @@ def read_cohort(path):
                                 "replicate": replicate, "method": cell["method"],
                                 "condition": cell["condition"], "input_arm": cell["input_arm"],
                                 "comparison_arm": cell["comparison_arm"]})
-    return sorted(records, key=lambda r: (r["arm"], r["project"], r["label"])), runner.shared.file_pin(path, raw)
+    if any(all(record[key] == value for key, value in exclusion.items())
+           for record in records for exclusion in exclusions):
+        raise ValueError("cohort member matches a declared exclusion")
+    return sorted(records, key=lambda r: (r["arm"], r["project"], r["label"]))

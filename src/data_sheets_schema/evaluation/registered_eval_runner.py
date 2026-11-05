@@ -39,6 +39,13 @@ FORMAT = "registered_semantic_evaluation_v1"
 RECEIPT_FORMAT = "registered_evaluation_receipt_v2"
 MAX_FILE_BYTES = shared.MAX_AUTHORITY_BYTES
 MAX_TRACE_BYTES = 32_000_000
+EVALUATOR_MODULES = (
+    "evaluation/registered_eval_runner.py", "evaluation/blind_review_pack.py", "evaluation/validate.py",
+    "evaluation_context.py", "semantic_scope.py", "semantic_instrument.py",
+    "semantic_evidence.py", "semantic_evidence_authority.py", "judge_contract.py",
+    "agent_pin.py", "provenance.py", "latch_journal.py",
+    "evaluation/run_identity.py", "cli/api.py", "runs.py",
+)
 
 
 def _default_lock_dir(checkout_root: Path | None = None) -> Path:
@@ -240,7 +247,10 @@ class PreparedEvaluation:
         return _json(self.manifest)
 
     def assert_current(self):
+        is_historical = self.document().get("generation_authority_kind") == "historical_provenance_v1"
         for path, raw in self.authorities:
+            if is_historical and Path(path).resolve() != Path(path):
+                raise ValueError(f"historical authority alias changed: {path}")
             if _read(Path(path), max(MAX_FILE_BYTES, len(raw))) != raw:
                 raise ValueError(f"prepared authority changed: {path}")
         binary = self.document()["runtime"]["binary"]
@@ -269,12 +279,18 @@ def prepare(
     provenance: Path, provenance_sha256: str, comparison_arm: str, record_role: str = "full",
     effort: str = "high", canonical_model: str | None = None,
     context_window: int | None = None,
+    authority_kind: str = "shared_generation_v1",
 ) -> PreparedEvaluation:
     """Validate generation authority and prepare one record's independent panel.
 
     `repeat_count=3` means one primary and two additional ratings. This low-level
     route does not select a cohort or claim the five-project panel is complete.
     """
+    if authority_kind not in {"shared_generation_v1", "historical_provenance_v1"}:
+        raise ValueError("select an explicit supported generation authority kind")
+    is_historical = authority_kind == "historical_provenance_v1"
+    if is_historical:
+        from . import historical_eval_binding as historical
     if rubric not in {"rubric10", "rubric20"} or instrument_version not in (
         ("3.0", "5.0") if rubric == "rubric10" else ("3.0", "4.0", "5.0")
     ):
@@ -308,6 +324,8 @@ def prepare(
 
     def take(path, expected=None, limit=MAX_FILE_BYTES):
         path = Path(path).absolute()
+        if is_historical and (path.resolve() != path or ".." in path.parts):
+            raise ValueError(f"historical authorities require canonical absolute paths without aliases: {path}")
         raw = _read(path, limit)
         if expected is not None and (not _SHA.fullmatch(expected) or _sha(raw) != expected):
             raise ValueError(f"SHA256 pin differs: {path}")
@@ -317,23 +335,39 @@ def prepare(
         return raw
 
     registration = Path(registration).absolute()
+    if is_historical and (not isinstance(registration_sha256, str) or not _SHA.fullmatch(registration_sha256)):
+        raise ValueError("an independent historical binding SHA256 is required")
     reg_raw = take(registration, registration_sha256, shared.MAX_REGISTRATION_BYTES)
-    reg = shared.parse_registration(reg_raw)
-    if reg["format"] != shared.FORMAT or reg["registration_path"] != str(registration):
-        raise ValueError("requires shared_generation_registration_v1 at its declared path")
-    inputs = reg["inputs"]
-    pins = [inputs[key] for key in ("bundle", "chunk_manifest", "source_manifest", "context")
-            if inputs[key] is not None]
-    pins.extend(inputs["full_schema"]["sources"])
-    pins.extend(inputs["core_schema"]["sources"])
-    pins.extend(pin for pin in (inputs["profile"]["vocabulary"], reg["runtime"]["config"]) if pin)
-    for pin in pins:
-        raw = take(pin["path"], pin["sha256"])
-        if len(raw) != pin["bytes"]:
-            raise ValueError("registered authority byte count differs")
-    # Reuse complete schema-closure and omission_context_v1 validation. This
-    # does not construct a new RunSpec or claim generation output acceptance.
-    captured = shared._capture_bytes(reg_raw, reg, dict(authorities))
+    admitted = None
+    if is_historical:
+        admitted = historical.admit(reg_raw, lambda pin: take(pin["path"], pin["sha256"]),
+                                    binding_path=str(registration))
+        if admitted["comparison_arm"] != comparison_arm or record_role != "full":
+            raise ValueError("historical comparison arm/full role differs from the declared cohort")
+        if (str(Path(record).absolute()) != admitted["record"]["path"]
+                or str(Path(provenance).absolute()) != admitted["generation_provenance"]["path"]):
+            raise ValueError("historical selected paths differ from the pinned binding")
+        reg = {"run": admitted["generation_run"]}
+        inputs = {"context": None}
+        for module in ("evaluation/historical_eval_binding.py", "evaluation/cohort_manifest.py"):
+            take(Path(__file__).parents[1] / module)
+    else:
+        reg = shared.parse_registration(reg_raw)
+        if reg["format"] != shared.FORMAT or reg["registration_path"] != str(registration):
+            raise ValueError("requires shared_generation_registration_v1 at its declared path")
+        inputs = reg["inputs"]
+        pins = [inputs[key] for key in ("bundle", "chunk_manifest", "source_manifest", "context")
+                if inputs[key] is not None]
+        pins.extend(inputs["full_schema"]["sources"])
+        pins.extend(inputs["core_schema"]["sources"])
+        pins.extend(pin for pin in (inputs["profile"]["vocabulary"], reg["runtime"]["config"]) if pin)
+        for pin in pins:
+            raw = take(pin["path"], pin["sha256"])
+            if len(raw) != pin["bytes"]:
+                raise ValueError("registered authority byte count differs")
+        # Reuse complete schema-closure and omission_context_v1 validation. This
+        # does not construct a new RunSpec or claim generation output acceptance.
+        captured = shared._capture_bytes(reg_raw, reg, dict(authorities))
     original = take(record, record_sha256)
     if record_role not in {"full", "core"}:
         raise ValueError("record_role must explicitly select full or core")
@@ -347,7 +381,7 @@ def prepare(
     if not same_run(prior.get("run"), reg["run"]):
         raise ValueError("record provenance identifies another registered run")
     require_eligible_generation(prior)
-    if (not isinstance(prior.get("shared_generation"), dict)
+    if not is_historical and (not isinstance(prior.get("shared_generation"), dict)
             or prior["shared_generation"].get("authority") != captured.identity()):
         raise ValueError("record provenance is not bound to this generation registration")
     validation = prior.get("validation")
@@ -375,11 +409,14 @@ def prepare(
         raise ValueError("blinding implementation has an unexpected source path")
     take(Path(__file__))
     take(pack_source)
-    blinding = blinding_identity(reg["run"], prior["run"], comparison_arm, blind.BLINDING_VERSION)
+    normalized_run = admitted["normalized_run"] if admitted else prior["run"]
+    blinding = blinding_identity(reg["run"], normalized_run, comparison_arm, blind.BLINDING_VERSION)
+    forbidden_paths = (historical.forbidden_paths(admitted) if admitted
+                       else (str(registration), str(Path(provenance).absolute())))
     blinded = blind.blind_input(original, blind.Record(
         comparison_arm, reg["run"]["project"], reg["run"]["label"],
         Path(record).absolute(), _sha(original), input_arm=reg["run"]["arm"]),
-        forbidden=(str(registration), str(Path(provenance).absolute()), *forbidden_blinding_identities(blinding)))
+        forbidden=(*forbidden_paths, *forbidden_blinding_identities(blinding)))
     selected = select_semantic_instrument(rubric, instrument_version)
     resources = {}
     for rel in (selected.definition_path, selected.rubric_path,
@@ -407,16 +444,11 @@ def prepare(
         raise ValueError("pin the exact CLI version, for example 2.1.269")
     # Bind executable validator code too; no current scientific approval is
     # inferred from selecting these versioned instruments or captured bytes.
-    for module in (
-        "evaluation/registered_eval_runner.py", "evaluation/blind_review_pack.py", "evaluation/validate.py",
-        "evaluation_context.py", "semantic_scope.py", "semantic_instrument.py",
-        "semantic_evidence.py", "semantic_evidence_authority.py", "judge_contract.py",
-        "agent_pin.py", "provenance.py", "latch_journal.py",
-        "evaluation/run_identity.py", "cli/api.py", "runs.py",
-    ):
+    for module in EVALUATOR_MODULES:
         take(Path(__file__).parents[1] / module)
     manifest = {
         "format": FORMAT,
+        "generation_authority_kind": "shared_generation_v1",
         "generation_registration": shared.file_pin(registration, reg_raw),
         "generation_run": reg["run"],
         "omission_context": inputs["context"],
@@ -460,6 +492,11 @@ def prepare(
         "generation_acceptance_verified": False,
         "authorities": [shared.file_pin(Path(path), raw) for path, raw in sorted(authorities.items())],
     }
+    if admitted:
+        manifest.update(format=historical.EVALUATION_FORMAT, generation_authority_kind=historical.KIND,
+                        generation_registration=None, historical_binding=admitted["historical_binding"],
+                        historical_identity=admitted["historical_identity"],
+                        record_registration_binding="historical provenance artifact identity checked; generation authority unavailable")
     from data_sheets_schema.latch_journal import record_age
     result = PreparedEvaluation(
         shared.canonical(manifest), tuple(sorted(authorities.items())), tuple(resources.items()),
@@ -468,6 +505,14 @@ def prepare(
     )
     result.assert_current()
     return result
+
+
+def prepare_historical(**kwargs) -> PreparedEvaluation:
+    """Explicit historical admission; never a fallback after modern refusal."""
+    from .historical_eval_binding import KIND
+    if "authority_kind" in kwargs:
+        raise ValueError("prepare_historical fixes its own authority kind")
+    return prepare(**kwargs, authority_kind=KIND)
 
 
 def rating_prompt(prepared: PreparedEvaluation) -> str:
@@ -902,6 +947,8 @@ def execute(
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--registration", type=Path, required=True)
+    parser.add_argument("--authority-kind", choices=("shared_generation_v1", "historical_provenance_v1"),
+                        default="shared_generation_v1", help="Explicit admission route; never inferred from failure")
     parser.add_argument("--record", type=Path, required=True)
     parser.add_argument("--context", type=Path, required=True)
     parser.add_argument("--context-sha256", required=True)

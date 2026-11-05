@@ -32,6 +32,7 @@ from data_sheets_schema.evaluation_context import context_digest, normalize_cont
 from data_sheets_schema.evaluation.validate import validate_evaluation
 from data_sheets_schema.evaluation.run_identity import same_run, blinding_identity, forbidden_blinding_identities, yaml_emitter_identity
 from data_sheets_schema.evaluation.cohort_manifest import read_cohort
+from data_sheets_schema.evaluation.evaluation_identity import evaluation_condition_key, repeat_key
 from data_sheets_schema.semantic_instrument import select_semantic_instrument
 from data_sheets_schema.semantic_scope import validate_scope
 
@@ -382,7 +383,7 @@ def committed_package(capture):
 
 
 def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts, authority_roots=(),
-                   execution_lock_root=None, roster=()):
+                   execution_lock_root=None, roster=(), roster_pin=None, historical_decisions=()):
     """Read saved E1 evidence, then reuse its actual offline acceptance validator.
 
     This does not call prepare/assert_current, execute historical code, read a
@@ -390,10 +391,12 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
     """
     from data_sheets_schema.evaluation import registered_eval_runner as runner
     from data_sheets_schema.evaluation import blind_review_pack as blind
+    from data_sheets_schema.evaluation import historical_eval_binding as historical
     from data_sheets_schema.provenance import resolve_record_input
 
     capture = RegisteredCapture(root, directory, authority_roots)
     package = {"arm": arm, "path": relative(root, capture.directory), "reasons": [],
+               "generation_authority_kind": None,
                "attempts": [], "record": None, "rows": [], "generation_acceptance_verified": False,
                "lock_consistent": False, "lock_status": "not_checked", "committed_package": False}
     try:
@@ -404,8 +407,12 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         require(receipt.get("format") == runner.RECEIPT_FORMAT, "registered_receipt_format_unsupported")
         marked_receipt = receipt.get("format") is not None
         package.update(manifest_sha256=sha(manifest_raw), receipt_sha256=sha(receipt_raw))
-        require(plan.get("format") == runner.FORMAT and runner.shared.canonical(plan) == manifest_raw,
+        require(plan.get("format") in (runner.FORMAT, historical.EVALUATION_FORMAT)
+                and runner.shared.canonical(plan) == manifest_raw,
                 "registered_manifest_format_or_encoding")
+        is_historical = plan["format"] == historical.EVALUATION_FORMAT
+        kind = historical.KIND if is_historical else "shared_generation_v1"
+        package["generation_authority_kind"] = kind
         require(plan.get("execution_mode") == "isolated_no_tools_controller_validation",
                 "registered_execution_mode_unsupported")
         require(receipt.get("plan_sha256") == sha(manifest_raw) and receipt.get("plan") == plan,
@@ -419,6 +426,7 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
                         for value in run.values()), "registered_run_identity_invalid")
         package["generation_run"] = run
         record = {"arm": arm, "project": run["project"], "label": run["label"],
+            "generation_authority_kind": kind,
             "replicate": None, "canonical": False, "provenance_files": [], "record_path": None,
             "record_sha256": None, "validation_passed": None, "generation_method": run["method"],
             "record_role": plan.get("record_role"), "registered_run": run, "reasons": []}
@@ -434,10 +442,16 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
             require(entry["path"] not in authorities, "registered_authorities_ambiguous")
             authorities[entry["path"]] = entry
 
-        def original_pin(key):
-            pin = checked_pin(plan.get(key))
+        def captured_pin(pin):
+            pin = checked_pin(pin)
+            if is_historical:
+                require(str(Path(pin["path"]).resolve()) == pin["path"],
+                        "registered_historical_authority_alias")
             require(authorities.get(pin["path"]) == pin, "registered_authority_not_captured")
             return capture.pinned(pin)
+
+        def original_pin(key):
+            return captured_pin(plan.get(key))
 
         # Extra authority roots admit registrations and their inputs, never the
         # audited record or provenance. Compare canonical paths, not two Nones
@@ -446,55 +460,110 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         provenance_path = Path(checked_pin(plan.get("generation_provenance"))["path"]).resolve()
         require(record_path.is_relative_to(root), "registered_record_outside_root")
         require(provenance_path.is_relative_to(root), "registered_provenance_outside_root")
-        generation_raw = original_pin("generation_registration")
-        generation = document(generation_raw, json_only=True)
-        require(generation.get("format") == runner.shared.FORMAT
-                and generation.get("registration_path") == plan["generation_registration"]["path"]
-                and generation.get("run") == run, "registered_generation_identity_mismatch")
-        # The supported shared-v1 parser checks its immutable descriptor and
-        # structural contracts, not equality to a historical executable tree.
-        try:
-            runner.shared.parse_registration(generation_raw)
-        except (ValueError, RuntimeError, OSError):
-            raise RegisteredRefusal("registered_generation_registration_unsupported") from None
-        provenance_raw = original_pin("generation_provenance")
-        provenance = document(provenance_raw)
-        require(provenance.get("record_type") == "d4d_generation_provenance"
-                and same_run(provenance.get("run"), run),
-                "registered_provenance_identity_mismatch")
         assignments = [entry for entry in roster if entry["arm"] == arm
                        and entry["project"] == run["project"] and entry["label"] == run["label"]]
-        require(len(assignments) == 1 and same_run(
-            {**assignments[0], "arm": assignments[0]["input_arm"]}, run)
-            and assignments[0]["condition"] == provenance["run"].get("condition")
-            and (provenance["run"].get("replicate") is None or
-                 (type(provenance["run"]["replicate"]) is int
-                  and provenance["run"]["replicate"] == assignments[0]["replicate"])),
-            "registered_arm_mapping_undeclared_or_mismatched")
-        prior = mapping(mapping(provenance.get("shared_generation")).get("authority"))
-        require(prior.get("registration") == {"sha256": sha(generation_raw),
-                "raw_json": generation_raw.decode()}, "registered_provenance_registration_mismatch")
-        inputs = mapping(generation.get("inputs"))
-        pins = [inputs[key] for key in ("bundle", "chunk_manifest", "source_manifest", "context")
-                if inputs.get(key) is not None]
-        for name in ("full_schema", "core_schema"):
-            sources = mapping(inputs.get(name)).get("sources")
-            require(isinstance(sources, list) and 0 < len(sources) <= 256,
-                    "registered_generation_sources_invalid")
-            pins.extend(sources)
-        pins.extend(pin for pin in (mapping(inputs.get("profile")).get("vocabulary"),
-                                    mapping(generation.get("runtime")).get("config")) if pin)
-        pins.append(plan["generation_registration"])
-        expected = {}
-        for pin in pins:
-            checked_pin(pin)
-            require(pin["path"] not in expected or expected[pin["path"]] == pin,
-                    "registered_generation_sources_conflict")
-            require(authorities.get(pin["path"]) == pin, "registered_generation_source_not_captured")
-            expected[pin["path"]] = pin
-        require(prior.get("files") == [expected[key] for key in sorted(expected)]
-                and plan.get("omission_context") == inputs.get("context"),
-                "registered_provenance_capture_mismatch")
+        if is_historical:
+            require(set(plan) == {
+                "format", "generation_registration", "generation_run", "omission_context", "record",
+                "record_role", "generation_provenance", "record_registration_binding", "blinding",
+                "blinded_input_sha256", "applicability_context", "context_sha256", "instrument", "runtime",
+                "repeat_count", "max_cost_dollars", "reserved_cost_dollars_per_attempt", "cost_basis",
+                "execution_mode", "execution_adapter", "scientific_review_verified",
+                "generation_acceptance_verified", "authorities", "generation_authority_kind",
+                "historical_binding", "historical_identity"}
+                and plan["scientific_review_verified"] is False
+                and plan["generation_acceptance_verified"] is False,
+                "registered_historical_manifest_contract")
+            require(plan.get("generation_authority_kind") == historical.KIND
+                    and plan.get("generation_registration") is None
+                    and plan.get("omission_context") is None
+                    and plan.get("record_registration_binding") ==
+                    "historical provenance artifact identity checked; generation authority unavailable",
+                    "registered_historical_authority_kind_mismatch")
+            binding_raw = original_pin("historical_binding")
+            admitted = historical.admit(binding_raw, captured_pin,
+                                         binding_path=plan["historical_binding"]["path"])
+            require(plan.get("historical_identity") == admitted["historical_identity"]
+                    and plan["historical_binding"] == admitted["historical_binding"]
+                    and run == admitted["generation_run"]
+                    and plan["record"] == admitted["record"]
+                    and plan["generation_provenance"] == admitted["generation_provenance"],
+                    "registered_historical_identity_mismatch")
+            identity = admitted["historical_identity"]
+            require(identity["cohort"] == roster_pin and len(assignments) == 1
+                    and assignments[0] == admitted["cohort_entry"],
+                    "registered_historical_cohort_not_selected")
+            selected_decisions = [runner.shared.file_pin(Path(path).absolute(),
+                capture.take(str(Path(path).absolute()))) for path in historical_decisions]
+            require(sum(pin == identity["decision"] for pin in selected_decisions) == 1,
+                    "registered_historical_decision_not_selected")
+            provenance_raw = original_pin("generation_provenance")
+            provenance = admitted["provenance"]
+            provenance_run = admitted["normalized_run"]
+            forbidden_paths = historical.forbidden_paths(admitted)
+            package.update(generation_authority_kind=historical.KIND,
+                           historical_identity=identity,
+                           recorded_byte_claim_disagreements=identity["recorded_byte_claim_disagreements"])
+        else:
+            shared_fields = {
+                "format", "generation_registration", "generation_run", "omission_context", "record",
+                "record_role", "generation_provenance", "record_registration_binding", "blinding",
+                "blinded_input_sha256", "applicability_context", "context_sha256", "instrument", "runtime",
+                "repeat_count", "max_cost_dollars", "reserved_cost_dollars_per_attempt", "cost_basis",
+                "execution_mode", "execution_adapter", "scientific_review_verified",
+                "generation_acceptance_verified", "authorities"}
+            require(set(plan) in (shared_fields, shared_fields | {"generation_authority_kind"})
+                    and plan.get("generation_authority_kind", "shared_generation_v1") == "shared_generation_v1",
+                    "registered_shared_manifest_contract")
+            generation_raw = original_pin("generation_registration")
+            generation = document(generation_raw, json_only=True)
+            require(generation.get("format") == runner.shared.FORMAT
+                    and generation.get("registration_path") == plan["generation_registration"]["path"]
+                    and generation.get("run") == run, "registered_generation_identity_mismatch")
+            # The supported shared-v1 parser checks its immutable descriptor and
+            # structural contracts, not equality to a historical executable tree.
+            try:
+                runner.shared.parse_registration(generation_raw)
+            except (ValueError, RuntimeError, OSError):
+                raise RegisteredRefusal("registered_generation_registration_unsupported") from None
+            provenance_raw = original_pin("generation_provenance")
+            provenance = document(provenance_raw)
+            require(provenance.get("record_type") == "d4d_generation_provenance"
+                    and same_run(provenance.get("run"), run),
+                    "registered_provenance_identity_mismatch")
+            require(len(assignments) == 1 and same_run(
+                {**assignments[0], "arm": assignments[0]["input_arm"]}, run)
+                and assignments[0]["condition"] == provenance["run"].get("condition")
+                and (provenance["run"].get("replicate") is None or
+                     (type(provenance["run"]["replicate"]) is int
+                      and provenance["run"]["replicate"] == assignments[0]["replicate"])),
+                "registered_arm_mapping_undeclared_or_mismatched")
+            prior = mapping(mapping(provenance.get("shared_generation")).get("authority"))
+            require(prior.get("registration") == {"sha256": sha(generation_raw),
+                    "raw_json": generation_raw.decode()}, "registered_provenance_registration_mismatch")
+            inputs = mapping(generation.get("inputs"))
+            pins = [inputs[key] for key in ("bundle", "chunk_manifest", "source_manifest", "context")
+                    if inputs.get(key) is not None]
+            for name in ("full_schema", "core_schema"):
+                sources = mapping(inputs.get(name)).get("sources")
+                require(isinstance(sources, list) and 0 < len(sources) <= 256,
+                        "registered_generation_sources_invalid")
+                pins.extend(sources)
+            pins.extend(pin for pin in (mapping(inputs.get("profile")).get("vocabulary"),
+                                        mapping(generation.get("runtime")).get("config")) if pin)
+            pins.append(plan["generation_registration"])
+            expected = {}
+            for pin in pins:
+                checked_pin(pin)
+                require(pin["path"] not in expected or expected[pin["path"]] == pin,
+                        "registered_generation_sources_conflict")
+                require(authorities.get(pin["path"]) == pin, "registered_generation_source_not_captured")
+                expected[pin["path"]] = pin
+            require(prior.get("files") == [expected[key] for key in sorted(expected)]
+                    and plan.get("omission_context") == inputs.get("context"),
+                    "registered_provenance_capture_mismatch")
+            provenance_run = provenance["run"]
+            forbidden_paths = (plan["generation_registration"]["path"], plan["generation_provenance"]["path"])
         original = original_pin("record")
         require(capture.take("original.yaml") == original, "registered_original_copy_mismatch")
         artifact = mapping(mapping(mapping(provenance.get("validation")).get("artifacts")).get("full"))
@@ -523,11 +592,11 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
                 "registered_yaml_emitter_version_mismatch")
         require(mapping(blinding).get("dumper_class") == emitter["dumper_class"],
                 "registered_yaml_dumper_class_mismatch")
-        require(blinding == blinding_identity(run, provenance["run"], mapping(blinding).get("arm"), blind.BLINDING_VERSION),
+        require(blinding == blinding_identity(run, provenance_run, mapping(blinding).get("arm"), blind.BLINDING_VERSION),
                 "registered_blinding_unsupported_or_mismatched")
         blinded = blind.blind_input(original, blind.Record(blinding["arm"], run["project"], run["label"],
             Path(plan["record"]["path"]), sha(original), input_arm=run["arm"]), forbidden=(
-                plan["generation_registration"]["path"], plan["generation_provenance"]["path"],
+                *forbidden_paths,
                 *forbidden_blinding_identities(blinding)))
         require(capture.take("record.yaml") == blinded and plan.get("blinded_input_sha256") == sha(blinded),
                 "registered_blinded_input_mismatch")
@@ -607,9 +676,19 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         for name in ("evaluation/registered_eval_runner.py", "evaluation/blind_review_pack.py"):
             require(sum(entry["path"].endswith("/" + name) for entry in implementation_pins) == 1,
                     "registered_blinding_implementation_pin_missing")
+        if is_historical:
+            for name in ("evaluation/historical_eval_binding.py", "evaluation/cohort_manifest.py"):
+                require(sum(entry["path"].endswith("/data_sheets_schema/" + name)
+                            for entry in implementation_pins) == 1,
+                        "registered_historical_implementation_pin_missing")
         condition = {"source": "registered_blinded", "record_role": "full", "original_sha256": sha(original),
             "blinded_sha256": sha(blinded), "blinding": blinding, "adapter": adapter,
             "instrument": selected_instrument, "runtime": runtime, "implementation_pins": implementation_pins}
+        from data_sheets_schema.evaluation.evaluation_identity import ConditionIdentityIncomplete
+        try:
+            condition_key, fixed_record_key = evaluation_condition_key(plan), repeat_key(plan)
+        except ConditionIdentityIncomplete as exc:
+            raise RegisteredRefusal("registered_condition_identity_incomplete: " + str(exc)) from None
         ratings, attempts = receipt.get("ratings"), receipt.get("attempts")
         require(isinstance(ratings, list) and isinstance(attempts, list)
                 and len(ratings) <= len(attempts) <= plan["repeat_count"], "registered_attempt_roster_invalid")
@@ -677,6 +756,8 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
                 "reasons": reasons, "pending": pending,
                 "contract_checked": True, "eligible_for_condition_review": not reasons and not pending,
                 "source": "registered_blinded", "input_condition": condition,
+                "generation_authority_kind": kind,
+                "evaluation_condition_key": condition_key, "repeat_key": fixed_record_key,
                 "manifest_sha256": sha(manifest_raw), "receipt_sha256": sha(receipt_raw),
                 "transcript_sha256": sha(trace_raw), "transcript_pin_supplied": "transcript_sha256" in rating,
                 "rating_index": index, "original_sha256": sha(original), "record_role": "full"})
@@ -850,7 +931,7 @@ def repeat_panel(rows):
     for row in rows:
         if row["reasons"]:
             continue
-        key = (row["version"], row["evaluator"], row["context_hash"],
+        key = (row["version"], row["evaluator"], row["context_hash"], row.get("repeat_key"),
                json.dumps(row.get("input_condition"), sort_keys=True, allow_nan=False))
         groups.setdefault(key, []).append(row)
     best = max(groups.values(), key=lambda group: len({row["session_id"] for row in group
@@ -869,8 +950,51 @@ def repeat_panel(rows):
         "basis": "Distinct reported sessions of one fixed input/condition; registered rows additionally join retained transcripts and receipts. Neither proves independent evaluators or human approval."}
 
 
+def evaluation_condition_groups(records):
+    """Group bound registered ratings across records without granting acceptance.
+
+    Per-record repeats remain in repeat_panel. Pending publication/lock evidence
+    remains attached to each member; matching keys establish declared conditions
+    only, not scientific comparability or authenticated execution.
+    """
+    groups = {}
+    for record in records:
+        if record["reasons"]:
+            continue
+        for rubric, block in record["evaluations"].items():
+            for row in block["files"]:
+                if (row["reasons"] or row.get("source") != "registered_blinded"
+                        or row.get("contract_checked") is not True):
+                    continue
+                key = row["evaluation_condition_key"]
+                member = {name: record[name] for name in ("arm", "project", "label", "replicate",
+                          "generation_method", "record_path", "record_sha256", "provenance_sha256")}
+                member.update(rubric=rubric, record_role=row["record_role"],
+                    generation_authority_kind=row["generation_authority_kind"],
+                    generation_run=record["registered_run"], rating_path=row["path"], rating_sha256=row["sha256"],
+                    manifest_sha256=row["manifest_sha256"], receipt_sha256=row["receipt_sha256"],
+                    transcript_sha256=row["transcript_sha256"], rating_index=row["rating_index"],
+                    session_id=row["session_id"], repeat_key=row["repeat_key"], pending=list(row["pending"]),
+                    eligible_for_condition_review=row["eligible_for_condition_review"])
+                groups.setdefault(key, []).append(member)
+    result = []
+    for key, members in sorted(groups.items()):
+        members.sort(key=lambda member: tuple(member[name] for name in (
+            "arm", "project", "label", "rubric", "rating_path", "rating_index")))
+        result.append({"evaluation_condition_key": key, "members": members,
+            "generation_authority_kinds": {kind: sum(member["generation_authority_kind"] == kind for member in members)
+                for kind in sorted({member["generation_authority_kind"] for member in members})},
+            "bound_rating_files": len(members),
+            "record_count": len({tuple(member[name] for name in ("arm", "project", "label", "record_sha256"))
+                                 for member in members}),
+            "comparable_for_final_v10": False, "context_human_review_verified": False,
+            "independence_verified": False})
+    return result
+
+
 def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None, contexts=None,
-          registered_evaluations=(), authority_roots=(), execution_lock_root=None):
+          registered_evaluations=(), authority_roots=(), execution_lock_root=None,
+          historical_decisions=()):
     root = Path(root).resolve()
     roster, roster_pin = read_cohort(roster_manifest)
     if rubric20_version not in ("3.0", "4.0"):
@@ -878,6 +1002,8 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
     contexts = {} if contexts is None else contexts
     normalized_contexts = {project: normalize_context(value) for project, value in contexts.items()}
     registered_evaluations = tuple(registered_evaluations)
+    historical_decisions = tuple(historical_decisions)
+    require(len(historical_decisions) <= 1000, "too many explicit historical decisions")
     require(len(registered_evaluations) <= 1000, "too many explicit registered directories")
     snapshots = {rubric: instrument(rubric, "3.0" if rubric == "rubric10" else rubric20_version)
                  for rubric in RUBRICS}
@@ -929,9 +1055,11 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
             package = registered_run(root, arm, directory, snapshots=snapshots,
                                      evaluator_model=evaluator_model, contexts=normalized_contexts,
                                      authority_roots=authority_roots, execution_lock_root=execution_lock_root,
-                                     roster=roster)
+                                     roster=roster, roster_pin=roster_pin,
+                                     historical_decisions=historical_decisions)
         except (OSError, ValueError) as exc:
             package = {"arm": arm, "path": str(directory), "status": "refused", "record": None,
+                "generation_authority_kind": None,
                 "rows": [], "attempts": [], "reasons": [str(exc) if isinstance(exc, RegisteredRefusal)
                     else "registered_directory_missing_or_external"]}
         packages.append(package)
@@ -955,6 +1083,7 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
                 package["rows"] = []
             else:
                 record["registered_run"] = candidate["registered_run"]
+                record["generation_authority_kind"] = candidate["generation_authority_kind"]
         else:
             record = candidate
             record["evaluations"] = {rubric: {"files": []} for rubric in RUBRICS}
@@ -1066,6 +1195,7 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
             "bound_registered_rating_files": sum(not row["reasons"] for package in packages for row in package["rows"]),
             "projects_with_repeat_actions": len(repeat_gaps)},
         "summary": summary, "records": records, "rescore_tuples": rescore,
+        "evaluation_condition_groups": evaluation_condition_groups(records),
         "registered_evaluations": [{key: value for key, value in package.items() if key not in {"record", "rows"}}
                                    for package in packages],
         "repeat_panel_actions": repeat_gaps,
@@ -1137,6 +1267,8 @@ def main(argv=None):
                         help="Additional trusted authority directory; repeatable, read-only")
     parser.add_argument("--execution-lock-root", type=Path,
                         help="Execution lock store; defaults to the runner's local Git-common-dir store")
+    parser.add_argument("--historical-decision", type=Path, action="append", default=[],
+                        help="Independently selected historical decision file; does not authenticate human approval")
     parser.add_argument("--format", choices=("json", "markdown"), default="markdown")
     parser.add_argument("--rubric20-version", choices=("3.0", "4.0"), default="3.0")
     parser.add_argument("--evaluator-model", help="Explicit final-condition evaluator; no alias equivalence inferred")
@@ -1163,7 +1295,8 @@ def main(argv=None):
         registered.append((arm, name))
     result = audit(root, roster_manifest=args.roster_manifest, rubric20_version=args.rubric20_version,
                    evaluator_model=args.evaluator_model, contexts=contexts, registered_evaluations=registered,
-                   authority_roots=args.authority_root, execution_lock_root=args.execution_lock_root)
+                   authority_roots=args.authority_root, execution_lock_root=args.execution_lock_root,
+                   historical_decisions=args.historical_decision)
     print(json.dumps(result, sort_keys=True, indent=2, allow_nan=False) if args.format == "json" else markdown(result), end="\n")
     return 0
 

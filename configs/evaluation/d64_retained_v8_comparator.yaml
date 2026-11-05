@@ -1,0 +1,12 @@
+# Declared retained comparator candidates under D64; scope/funding remain external.
+# Decision: notes/generic_v10_analysis_plan.md section 2, ratified by D65.
+# Historical AI_READI with-crate outputs are deliberately not members.
+# This file is data, not an active rating authorization or a complete E5 roster.
+format: evaluation_cohort_v1
+exclusions:
+  - {project: AI_READI, label: '2026-09-04g_claude-opus-5-api-generic-v8_rep1'}
+  - {project: AI_READI, label: '2026-09-04g_claude-opus-5-api-generic-v8_rep2'}
+  - {project: AI_READI, label: '2026-09-04g_claude-opus-5-api-generic-v8_rep3'}
+cells:
+  - {arm: retained-v8, projects: [CHORUS, VOICE], replicates: [1, 2, 3], label_template: '2026-09-04f_claude-opus-5-api-generic-v8_rep{replicate}', method: claudecode_api, condition: generic_v8, input_arm: baseline}
+  - {arm: retained-v8, projects: [CM4AI], replicates: [1, 2, 3], label_template: '2026-09-04g_claude-opus-5-api-generic-v8_rep{replicate}', method: claudecode_api, condition: generic_v8, input_arm: baseline}
