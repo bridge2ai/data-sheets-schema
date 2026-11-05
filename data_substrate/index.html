@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -384,7 +391,7 @@
 
 
 <h1 id="slot-data_substrate">Slot: data_substrate</h1>
-<p><em>Type of data (e.g., raw text, images) as a term from the pinned standards registry. A <em>term</em>, not a description: prose characterising the instances — "multimodal per-participant records comprising tabular survey and clinical data" — belongs in <code>instance_type</code>, which is ranged <code>string</code> for exactly that. Where no registry term fits, prefer omission here and describe it there.</em></p>
+<p><em>Type or format of data (e.g., raw text, images): an EDAM Data or Format term or an IANA media type, written as a CURIE with the schema's declared <code>EDAM</code> or <code>mediatypes</code> prefix, when the documents supply one; or a term from the selected profile's pinned standards registry. A <em>term</em>, not a description: prose characterising the instances — "multimodal per-participant records comprising tabular survey and clinical data" — belongs in <code>instance_type</code>, which is ranged <code>string</code> for exactly that. Where no declared term fits, prefer omission here and describe it there.</em></p>
 <p>__</p>
 <p>URI: <a href="http://purl.org/dc/terms/type">dcterms:type</a>
 Alias: data_substrate</p>
@@ -412,6 +419,21 @@ Alias: data_substrate</p>
 <li>Range: <a href="../Uriorcurie/">Uriorcurie</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:termSources</td>
+<td>EDAM Data, EDAM Format, IANA media types</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -439,11 +461,17 @@ Alias: data_substrate</p>
 <details>
 
 <pre><code class="language-yaml">name: data_substrate
-description: 'Type of data (e.g., raw text, images) as a term from the pinned standards
-  registry. A *term*, not a description: prose characterising the instances — &quot;multimodal
-  per-participant records comprising tabular survey and clinical data&quot; — belongs in
-  `instance_type`, which is ranged `string` for exactly that. Where no registry term
-  fits, prefer omission here and describe it there.
+annotations:
+  d4d:termSources:
+    tag: d4d:termSources
+    value: EDAM Data, EDAM Format, IANA media types
+description: 'Type or format of data (e.g., raw text, images): an EDAM Data or Format
+  term or an IANA media type, written as a CURIE with the schema''s declared `EDAM`
+  or `mediatypes` prefix, when the documents supply one; or a term from the selected
+  profile''s pinned standards registry. A *term*, not a description: prose characterising
+  the instances — &quot;multimodal per-participant records comprising tabular survey and
+  clinical data&quot; — belongs in `instance_type`, which is ranged `string` for exactly
+  that. Where no declared term fits, prefer omission here and describe it there.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema

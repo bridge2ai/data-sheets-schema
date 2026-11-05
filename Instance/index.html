@@ -324,7 +324,7 @@
 <tr>
 <td><a href="../data_substrate/">data_substrate</a></td>
 <td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>Type of data (e</td>
+<td>Type or format of data (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -492,11 +492,18 @@ attributes:
     range: string
   data_substrate:
     name: data_substrate
-    description: 'Type of data (e.g., raw text, images) as a term from the pinned
-      standards registry. A *term*, not a description: prose characterising the instances
-      — "multimodal per-participant records comprising tabular survey and clinical
-      data" — belongs in `instance_type`, which is ranged `string` for exactly that.
-      Where no registry term fits, prefer omission here and describe it there.
+    annotations:
+      d4d:termSources:
+        tag: d4d:termSources
+        value: EDAM Data, EDAM Format, IANA media types
+    description: 'Type or format of data (e.g., raw text, images): an EDAM Data or
+      Format term or an IANA media type, written as a CURIE with the schema''s declared
+      `EDAM` or `mediatypes` prefix, when the documents supply one; or a term from
+      the selected profile''s pinned standards registry. A *term*, not a description:
+      prose characterising the instances — "multimodal per-participant records comprising
+      tabular survey and clinical data" — belongs in `instance_type`, which is ranged
+      `string` for exactly that. Where no declared term fits, prefer omission here
+      and describe it there.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -624,11 +631,18 @@ attributes:
     range: string
   data_substrate:
     name: data_substrate
-    description: 'Type of data (e.g., raw text, images) as a term from the pinned
-      standards registry. A *term*, not a description: prose characterising the instances
-      — "multimodal per-participant records comprising tabular survey and clinical
-      data" — belongs in `instance_type`, which is ranged `string` for exactly that.
-      Where no registry term fits, prefer omission here and describe it there.
+    annotations:
+      d4d:termSources:
+        tag: d4d:termSources
+        value: EDAM Data, EDAM Format, IANA media types
+    description: 'Type or format of data (e.g., raw text, images): an EDAM Data or
+      Format term or an IANA media type, written as a CURIE with the schema''s declared
+      `EDAM` or `mediatypes` prefix, when the documents supply one; or a term from
+      the selected profile''s pinned standards registry. A *term*, not a description:
+      prose characterising the instances — "multimodal per-participant records comprising
+      tabular survey and clinical data" — belongs in `instance_type`, which is ranged
+      `string` for exactly that. Where no declared term fits, prefer omission here
+      and describe it there.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
