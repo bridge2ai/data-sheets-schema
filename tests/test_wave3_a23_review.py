@@ -17,7 +17,7 @@ import yaml
 
 from scripts.build_api_registrations import build_draft_context
 from scripts.build_draft_contexts import (
-    DEFAULT_MANIFEST_PATH, KIDS_FIRST_MANIFEST_PATH,
+    DEFAULT_MANIFEST_PATH,
     build_draft_scope_context, load_project_manifest_data,
 )
 
@@ -210,9 +210,12 @@ def test_explicit_manifest_authority_survives_both_synthesizer_entrypoints(tmp_p
 
 
 @pytest.mark.parametrize('argument', [None, DEFAULT_MANIFEST_PATH])
-def test_default_manifest_still_resolves_the_registered_kids_first_authority(argument):
-    selected = load_project_manifest_data('KIDS_FIRST', argument)
-    assert selected == yaml.safe_load(KIDS_FIRST_MANIFEST_PATH.read_bytes())
+def test_kids_first_requires_a_declaring_manifest(argument):
+    with pytest.raises(ValueError, match='KIDS_FIRST'):
+        load_project_manifest_data('KIDS_FIRST', argument)
+    manifest = ROOT / 'notes/matched_cborg_2026-09-13/kids_first/manifest.yaml'
+    selected = load_project_manifest_data('KIDS_FIRST', manifest)
+    assert selected == yaml.safe_load(manifest.read_bytes())
     doc = build_draft_scope_context('KIDS_FIRST', selected)
     assert doc['vocabulary'] == {}
     assert doc['scopes'][0]['release'] == 'https://kidsfirstdrc.org/'

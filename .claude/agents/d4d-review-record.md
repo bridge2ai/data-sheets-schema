@@ -3,8 +3,8 @@ name: d4d-review-record
 description: |
   When to use: Review a generated D4D record against the instruction it was sent, the input bundle it was allowed to read, and its coverage receipt — the judgement the deterministic receipt validator cannot make (#787).
   Examples:
-    - "Review the CHORUS record of label 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1"
-    - "Run d4d-review-record on AI_READI 2026-08-28c_claude-opus-5-api-generic-v7_rep1"
+    - "Review the <PROJECT> record of label <LABEL>"
+    - "Run d4d-review-record on <PROJECT> <LABEL>"
     - "Did this run follow its instruction's rules, and are its receipts real support?"
 model: claude-opus-5
 color: yellow
@@ -76,7 +76,7 @@ the only source of dataset facts.
   older, and then the key is simply absent: treat the join as `index` —
   `pack.receipt_join.basis` says whether the join was by
   identity or (no snapshot, the agentic path) by index. A `values_from`
-  CURIE (`B2AI_TOPIC:43`) carries its pinned registry label as
+  CURIE (`VOCAB:123`, an illustrative placeholder) carries its pinned registry label as
   `value_label` (#912): judge whether the *label* is what the passage
   supports — a well-formed CURIE for the wrong concept is `misread`, and
   `exempt_by_nature` no longer applies to a term that carries its label

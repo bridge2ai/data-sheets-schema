@@ -100,6 +100,8 @@ def test_an_abandoned_attempt_is_priced_at_the_cap_it_recorded(tmp_path):
         (run_dir / "CHORUS_abandoned_attempts.jsonl").write_text(
             json.dumps({"phase": "report", "attempt": 1, "usage_id": "u1", "max_tokens": max_tokens}) + "\n",
             encoding="utf-8")
-        return dr.compute_readout(run_dir / "CHORUS_api_usage_x.json", project="CHORUS")["settled_dollars"]
+        # Declare the same input allowance so this assertion isolates output caps.
+        return dr.compute_readout(run_dir / "CHORUS_api_usage_x.json", project="CHORUS",
+                                  custom_bounds={"report": 1000})["settled_dollars"]
     assert abs((settled(60000) - settled(50000)) - 10000 * 25e-6) < 1e-9
 

@@ -122,7 +122,7 @@ def test_repinning_format_system_cannot_bypass_replay(metadata_ancestry, tmp_pat
 
 @pytest.mark.parametrize('private', [False, True])
 def test_format_renderer_cannot_execute_generation(tmp_path, monkeypatch, private):
-    spec = SimpleNamespace(render_version=21, _replay_only=False)
+    spec = SimpleNamespace(render_version=21, _replay_only=False, condition='generic')
     monkeypatch.setattr(api_runner, '_exclusive_run', lambda *a, **k: pytest.fail('output lock reached'))
     with pytest.raises(ValueError, match='separately registered audit continuation'):
         (api_runner._execute if private else api_runner.execute)(spec, resume=False, client=object())

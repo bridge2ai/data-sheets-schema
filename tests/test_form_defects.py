@@ -817,6 +817,8 @@ def test_1541_legacy_mapping_is_study_profile_even_under_neutral_ambient(
 
     monkeypatch.setenv(profiles.ENV_VAR, "neutral")
     case = _profile_case(tmp_path)
+    document = '' if document == '{}' else document
+    document = 'record_generated_at: 2026-09-01T00:00:00Z\n' + document
     _profile_record(case, provenance=document)
     _profile_caches(case)
     result = _profile_main(case, monkeypatch)

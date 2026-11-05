@@ -18,8 +18,9 @@ contexts, `{project}_{phase}_context.json` where the runner pins one, #5157, and
 shared generation 2's counted requests); a measured attempt of the same request
 in this generation; the generation's measured `full` request plus the files the
 phase carries, at one token per byte, within the room the context window leaves
-beside max_tokens; and the static project baseline, which the display flags as
-possibly low (#5117).
+beside max_tokens; otherwise the declared registration window less max_tokens,
+priced entirely as cache writes. Without declared or measured data the bound is unknown;
+project identity supplies no token estimate (F10).
 
 Abandoned attempts are priced from the journal: this generation's from its
 boundary and a prior generation's wherever it lies. Without the stream's final
@@ -69,30 +70,6 @@ PHASE_OUTPUT_CAPS: dict[str, int] = {
     "report_regate": CAP_REPORT_FAMILY,
     "repair_full": CAP_REPORT_FAMILY,
     "report_after_repair": CAP_REPORT_FAMILY,
-}
-
-# Baseline reference input bounds (tokens or split) from preserved empirical runs:
-# - CHORUS: v9 full input (9,636 uncached + 31,703 cache_write = 41,339 tokens)
-# - AI_READI: v8 full input (6,361 uncached + 203,662 cache_write = 210,023 tokens)
-PROJECT_BASELINE_INPUT_BOUNDS: dict[str, dict[str, Any]] = {
-    "CHORUS": {
-        "full": {"input_tokens": 9636, "cache_write": 31703, "cache_read": 0},
-        "full_readdress": {"input_tokens": 41339 + 46182},  # input + v9 full response
-        "reconcile_full": {"input_tokens": 22057, "cache_write": 0, "cache_read": 31703},
-        "report": {"input_tokens": 44534, "cache_write": 0, "cache_read": 31703},
-        "report_regate": {"input_tokens": 76237 + 96000 + 1500},  # report + 96k report + regate instructions
-        "repair_full": {"input_tokens": 8914, "cache_write": 17406, "cache_read": 0},
-        "report_after_repair": {"input_tokens": 44563, "cache_write": 0, "cache_read": 31703},
-    },
-    "AI_READI": {
-        "full": {"input_tokens": 6361, "cache_write": 203662, "cache_read": 0},
-        "full_readdress": {"input_tokens": 210023 + 115616},  # input + v8 full response
-        "reconcile_full": {"input_tokens": 43279, "cache_write": 0, "cache_read": 203662},
-        "report": {"input_tokens": 134946, "cache_write": 186293, "cache_read": 17369},
-        "report_regate": {"input_tokens": 338608 + 96000 + 1500},  # report + 96k report + regate instructions
-        "repair_full": {"input_tokens": 37011, "cache_write": 17419, "cache_read": 0},
-        "report_after_repair": {"input_tokens": 134823, "cache_write": 186293, "cache_read": 17369},
-    },
 }
 
 #: Phases whose every attempt sends the same request, so a measured attempt in
@@ -195,7 +172,8 @@ def price_abandoned_row(
             phase, project, ledger_data=ledger_data, custom_bounds=custom_bounds, metadata_dir=metadata_dir,
             registration=registration, max_tokens=cap,
         )
-        input_dollars = price_input_bound(bound, worst_case_cache=worst_case_cache) if bound is not None else 0.0
+        input_dollars = price_input_bound(bound, worst_case_cache=worst_case_cache) if bound is not None else None
+    priced_components = (input_dollars or 0.0) + output_tokens * RATE_OUTPUT
     return {
         "phase": phase,
         "usage_id": entry.get("usage_id"),
@@ -203,8 +181,10 @@ def price_abandoned_row(
         "final_usage": final,
         "output_tokens_priced": output_tokens,
         "input_source": input_source,
+        "input_bound_unknown": input_dollars is None,
         "input_bound_static": input_source.startswith("baseline["),
-        "dollars": input_dollars + output_tokens * RATE_OUTPUT,
+        "dollars": None if input_dollars is None else priced_components,
+        "priced_components_dollars": priced_components,
     }
 
 
@@ -652,13 +632,20 @@ def resolve_pending_input_bound(
                 source += f"; capped at the {window:,}-token window less {max_tokens:,} max_tokens"
             return bound, source
 
-    # 6. Project-specific empirical baseline bounds
-    if project and project in PROJECT_BASELINE_INPUT_BOUNDS:
-        proj_bounds = PROJECT_BASELINE_INPUT_BOUNDS[project]
-        if phase in proj_bounds:
-            return proj_bounds[phase], f"baseline[{project}][{phase}]"
+    # N2: an uncounted request still fits the registered context window.
+    # Cache writes are the most expensive input category; no measured cache
+    # allocation is available here, so price the entire allowance at that rate.
+    if isinstance(registration, Mapping):
+        window = _context_window(registration, None, None)
+        cap = max_tokens if type(max_tokens) is int and max_tokens > 0 else get_phase_output_cap(
+            phase, registration=registration)
+        if window is not None:
+            if cap >= window:
+                raise ValueError('registered context window must exceed max_tokens')
+            return {'cache_write': window - cap}, 'registration context_limit_tokens - max_tokens'
 
-    # 7. Unresolved input bound: return None so caller fails closed rather than pricing as $0.00
+    # No name-keyed fallback: use declared custom bounds or this run's measurements.
+    # Unresolved input bound: return None so caller fails closed rather than pricing as $0.00
     return None, "unknown"
 
 
@@ -695,6 +682,8 @@ def price_pending_call(
         counted = _phase_count_pin(phase, project, metadata_dir, ledger_data)
         saved_request = counted[0] if counted is not None else None
 
+    if saved_request is None and type(pending.get('max_tokens')) is int and pending['max_tokens'] > 0:
+        saved_request = {'max_tokens': pending['max_tokens']}
     output_cap = get_phase_output_cap(phase, saved_request=saved_request, registration=registration)
     output_cost = output_cap * RATE_OUTPUT
 
@@ -863,7 +852,7 @@ def compute_readout(
                 worst_case_cache=worst_case_cache,
             )
             abandoned.append(priced)
-            settled_cost += priced["dollars"]
+            settled_cost += priced["priced_components_dollars"]
 
         # 3. Include unrecorded reasoning JSONL entries whose usage_id is not in seen_usage_ids
         for search_dir in (metadata_dir, metadata_dir.parent):
@@ -924,12 +913,13 @@ def compute_readout(
         pending_unknown = bool(pending_info.get("input_bound_unknown"))
         pending_worst_case = pending_info["pending_worst_case_dollars"]
 
-    if pending_unknown or pending_worst_case is None:
+    abandoned_unknown = any(row["input_bound_unknown"] for row in abandoned)
+    if pending_unknown or pending_worst_case is None or abandoned_unknown:
         total_projected_worst_case: float | None = None
         headroom = None
-        # Fail closed when pending input bound is unknown and a trigger or cap is active
-        trigger_reached = trigger is not None or (settled_cost >= trigger if trigger is not None else False)
-        cap_reached = cap is not None or (settled_cost >= cap if cap is not None else False)
+        # Fail closed for any unresolved input bound when a spending gate is active.
+        trigger_reached = trigger is not None
+        cap_reached = cap is not None
     else:
         total_projected_worst_case = settled_cost + pending_worst_case
         headroom = (cap - total_projected_worst_case) if cap is not None else None
@@ -945,10 +935,13 @@ def compute_readout(
             "condition": condition,
         },
         "settled_calls": settled_call_count,
-        "settled_dollars": settled_cost,
+        "settled_dollars": None if abandoned_unknown else settled_cost,
+        "settled_priced_components_dollars": settled_cost,
         # Included in settled_dollars; listed so each price can be read.
         "abandoned_calls": len(abandoned),
-        "abandoned_dollars": sum(row["dollars"] for row in abandoned),
+        "abandoned_dollars": None if abandoned_unknown else sum(row["dollars"] for row in abandoned),
+        "abandoned_priced_components_dollars": sum(row["priced_components_dollars"] for row in abandoned),
+        "abandoned_input_bound_unknown": abandoned_unknown,
         "abandoned_input_bound_static": any(bool(row.get("input_bound_static")) for row in abandoned),
         "abandoned_attempts": abandoned,
         "has_pending_call": pending_info is not None,
@@ -976,15 +969,23 @@ def format_readout(summary: Mapping[str, Any]) -> str:
         lines.append(f"Ledger: {summary['ledger_file']}")
 
     settled_dollars = summary["settled_dollars"]
-    lines.append(f"Settled calls: {summary['settled_calls']:3d} | Spent: ${settled_dollars:10.8f}")
+    if settled_dollars is None:
+        lines.append(f"Settled calls: {summary['settled_calls']:3d} | Spent: UNKNOWN "
+                     f"(priced components: ${summary['settled_priced_components_dollars']:10.8f}; input unresolved)")
+    else:
+        lines.append(f"Settled calls: {summary['settled_calls']:3d} | Spent: ${settled_dollars:10.8f}")
     abandoned = summary.get("abandoned_attempts") or []
     if abandoned:
         open_ended = sum(1 for row in abandoned if not row.get("final_usage"))
+        abandoned_price = ("UNKNOWN" if summary['abandoned_dollars'] is None
+                           else f"${summary['abandoned_dollars']:10.8f}")
         lines.append(
-            f"  of which abandoned attempts: {len(abandoned):3d} | ${summary['abandoned_dollars']:10.8f}"
+            f"  of which abandoned attempts: {len(abandoned):3d} | {abandoned_price}"
             f" ({open_ended} without final usage, output priced at max_tokens)"
         )
         for row in abandoned:
+            if row.get("input_bound_unknown"):
+                lines.append(f"WARNING: abandoned {row['phase']} input is UNKNOWN; supply a declared or measured bound")
             if row.get("input_bound_static"):
                 lines.append(
                     f"WARNING: abandoned {row['phase']} input is a static baseline from earlier runs "
@@ -1017,7 +1018,7 @@ def format_readout(summary: Mapping[str, Any]) -> str:
 
     total = summary.get("total_projected_dollars")
     if total is None:
-        lines.append("Total worst-case: UNKNOWN (unresolved pending input bound)")
+        lines.append("Total worst-case: UNKNOWN (unresolved input bound)")
     else:
         lines.append(f"Total worst-case: ${total:10.8f}")
 
@@ -1033,7 +1034,14 @@ def format_readout(summary: Mapping[str, Any]) -> str:
     if trigger is not None:
         lines.append(f"Operator stop trigger: ${trigger:.2f}")
 
-    if summary.get("cap_reached"):
+    # Unknown input is a stop condition, not evidence that dollars exceeded
+    # the cap. Retain the fail-closed exit flags, but name the actual reason.
+    known = summary.get('settled_priced_components_dollars') or 0.0
+    pending = summary.get('pending_call') or {}
+    known += pending.get('output_worst_case_dollars') or 0.0
+    if total is None and not (cap is not None and known >= cap):
+        lines.append('>>> ALERT: input bound unknown; resolve the bound before continuing. <<<')
+    elif summary.get("cap_reached"):
         lines.append(">>> ALERT: CAP EXCEEDED! Run 'd4d api stop --label-prefix <prefix>' immediately! <<<")
     elif summary.get("trigger_reached"):
         lines.append(">>> ALERT: TRIGGER REACHED! Projected worst-case meets or exceeds operator stop trigger! <<<")

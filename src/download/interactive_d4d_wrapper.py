@@ -5,6 +5,9 @@ Validated D4D Agent Wrapper - Processes downloaded files with validation steps:
 2. Verifies each file contains specific information about the project in its column
 3. Generates D4D YAML metadata using the Anthropic Claude API
 """
+# Historical source retained for provenance; no new invocation is supported (F16).
+raise RuntimeError('Historical D4D generator retired (F16); use the manifest-driven registered pipeline')
+
 import asyncio
 import json
 import os

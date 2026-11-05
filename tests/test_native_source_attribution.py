@@ -217,6 +217,7 @@ def test_historical_execution_refusal_precedes_new_axis_access(version, private,
     class HistoricalRefusedSpec:
         render_version = version
         _replay_only = False
+        condition = 'generic'
 
         @property
         def native_source_attribution_version(self):

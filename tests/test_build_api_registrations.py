@@ -17,7 +17,6 @@ if str(ROOT) not in sys.path:
 
 from scripts.build_api_registrations import (
     DEFAULT_AUDIT_LIMITS,
-    DEFAULT_PROJECTS,
     DEFAULT_RECEIPT_LIMITS,
     SizingRecord,
     build_draft_context,
@@ -161,8 +160,8 @@ scope:
     referent_id: "CHORUS-2026-v1"
     referent_note: "Comprehensive EHR and ICU waveform data."
 source_priority:
-  tier_1: ["protocol", "dataset_profile"]
-  tier_2: ["publication"]
+  1: ["protocol", "dataset_profile"]
+  2: ["publication"]
 """,
         encoding="utf-8",
     )
@@ -293,6 +292,7 @@ def test_build_registration_error_cases(tmp_path: Path) -> None:
             project="CHORUS",
             label="test",
             bundle_path=tmp_path / "nonexistent_bundle.txt",
+            source_manifest_path=ROOT / 'data/preprocessed/source_manifest.yaml',
             registration_path=reg_path,
         )
 
@@ -315,12 +315,12 @@ def test_build_registration_error_cases(tmp_path: Path) -> None:
             registration_path=None,
         )
 
-    # Missing implicit context file fails closed unless synthesize_draft_context=True
+    # A project without a declaration fails before looking for a context.
     dummy_bundle = tmp_path / "bundle.txt"
     dummy_chunks = tmp_path / "chunks.yaml"
     dummy_bundle.write_text("BUNDLE\n", encoding="utf-8")
     dummy_chunks.write_text("version: 2\nchunks: []\n", encoding="utf-8")
-    with pytest.raises(FileNotFoundError, match="no omission context file found"):
+    with pytest.raises(ValueError, match="No manifest declares"):
         build_registration(
             audit_limits=dict(EXPLICIT_BOUNDS),
             project="UNREGISTERED_PROJECT_XYZ",
@@ -420,13 +420,14 @@ def test_cli_dry_run_single_and_all() -> None:
                         "max_paths=384,max_inventory_bytes=65536,max_workers=2"),
               "VOICE": (runs / "2026-09-04f_claude-opus-5-api-generic-v8_rep3" / "intermediate",
                         "max_paths=384,max_inventory_bytes=65536,max_workers=2")}
-    args = ["--all", "-l", "test_dry_all", "--dry-run", "--project-limits", "CHORUS:partition=chorus"]
+    # This historical sizing fixture covers four projects; request that cohort explicitly.
+    args = ["-p", "CHORUS,AI_READI,CM4AI,VOICE", "-l", "test_dry_all", "--dry-run", "--project-limits", "CHORUS:partition=chorus"]
     for proj, (directory, bounds) in sizing.items():
         args += ["--project-limits", f"{proj}:{bounds},aggregate_input_tokens=4000000",
                  "--sizing-record", f"{proj}={directory}"]
     result_all = runner.invoke(cli, args)
     assert result_all.exit_code == 0, result_all.output
-    for proj in DEFAULT_PROJECTS:
+    for proj in ('CHORUS', *sizing):
         assert f"✓ {proj}:" in result_all.output
     assert result_all.output.count("input sized on") == 3
     assert "✓ Roster with 4 rows:" in result_all.output
@@ -543,6 +544,7 @@ def test_build_registration_kids_first_neutral_profile(tmp_path: Path) -> None:
     reg = build_registration(
         audit_limits=dict(EXPLICIT_BOUNDS),
         project="KIDS_FIRST",
+        source_manifest_path=ROOT / 'notes/matched_cborg_2026-09-13/kids_first/manifest.yaml',
         label="2026-10-kfa_claude-opus-5-api-generic-v10_rep1",
         registration_path=reg_path,
         coverage_floor="13/20",

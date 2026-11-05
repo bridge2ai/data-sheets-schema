@@ -381,8 +381,6 @@ class HumanReadableRenderer:
                     category_names.append('Race/Ethnicity')
                 elif any(term in data_lower for term in ['male', 'female', 'gender', 'sex']):
                     category_names.append('Sex')
-                elif any(term in data_lower for term in ['diabetes', 'dm', 'lifestyle', 'oral', 'insulin']):
-                    category_names.append('Diabetes Status')
                 else:
                     category_names.append(f'Category {i+1}')
             else:

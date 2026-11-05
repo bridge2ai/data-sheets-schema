@@ -104,8 +104,8 @@ Three artifacts and one validator, both runtimes.
 --project P` writes `data/preprocessed/chunks/{PROJECT}_chunks.yaml`:
 
 ```yaml
-bundle: data/preprocessed/concatenated/CHORUS_preprocessed.txt
-bundle_md5: 9b2ef4b65d67957f79362266cab0bc7a      # what the 2026-08-24 records pin
+bundle: data/preprocessed/concatenated/PROJECT_preprocessed.txt
+bundle_md5: 0123456789abcdef0123456789abcdef      # synthetic illustrative digest
 rule: {unit: source-document, max_lines: 400, max_bytes: 60000,
        preamble: own-chunk}                          # recorded, re-derivable
 chunks:
@@ -114,23 +114,22 @@ chunks:
   lines: [1, 16]
   sha256: …
 - id: c001
-  source: reporter_nih_gov_project-details-10472824_row7.txt   # from the FILE: header
+  source: project_description.txt   # from the FILE: header
   lines: [17, 300]
   sha256: …
 - id: c002
-  source: bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt
+  source: collection_protocol.txt
   ...
 ```
 
-(Values illustrative except the md5 and source names, which are CHORUS's
-real ones; the bundle is 1,699 lines and would yield about eight chunks.)
+(All values, digests and source names in this example are synthetic.)
 
 Chunks follow source-document boundaries in the concatenated bundle — it
 carries a summary, a table of contents and a `FILE:/PATH:/SIZE:` header per
 document, all inside the hashed bytes — and split long documents into
 windows bounded in *both* lines and bytes. Lines alone do not guarantee one
-read: the file tool's cap is ~25k tokens, and a 400-line window of AI_READI
-today is ~63k characters with single lines of 13k, so `max_bytes` is what
+read: the file tool's cap is ~25k tokens, and a 400-line window can contain
+~63k characters with single lines of 13k, so `max_bytes` is what
 keeps a chunk readable in one call (the cap that silently truncated the v5
 agents' reads, #700). The preamble is its own chunk rather than nobody's.
 Same bytes + same rule = same manifest, so the manifest is re-derivable and
@@ -140,7 +139,7 @@ its hash is a receipt for the chunking.
 reads.** `{PROJECT}_coverage_receipt.yaml` beside the record:
 
 ```yaml
-bundle_md5: 9b2ef4b65d67957f79362266cab0bc7a   # must equal the manifest's
+bundle_md5: 0123456789abcdef0123456789abcdef   # must equal the manifest's
 chunks:
 - id: c001
   status: extracted        # extracted | redundant_with | nothing_relevant | duplicate_of
@@ -238,7 +237,7 @@ comparable metrics per run — chunk coverage, snippet verification rate, share
 of populated slots with a receipt — plus a cross-check (receipt vs
 transcript). The coverage gap #700 measured by transcript forensics becomes a
 first-class recorded fact on every run, on both arms, and the
-populated-slot gap between arms (CHORUS 49 vs 58) gets a per-slot answer:
+populated-slot gap between arms (for example, 49 vs 58) gets a per-slot answer:
 which chunk the API arm drew each extra slot from, and whether the agentic
 arm marked that chunk `nothing_relevant`.
 

@@ -608,13 +608,22 @@ class TestTheInstructionCarriesNoProjectSpecificScope(unittest.TestCase):
     """
 
     def _rendered(self, project, condition):
-        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
-        return resolve_prompt(RunSpec(
+        from data_sheets_schema.api_runner import RunSpec, request_header_values, resolve_prompt
+        options = dict(
             project=project, arm="BASELINE", method="claudecode_agent",
             bundle=Path(f"data/preprocessed/concatenated/{project}"
                         f"_preprocessed.txt"),
             label="L", condition=condition, manifest_line="",
-            run_date="2026-08-11"))
+            run_date="2026-08-11")
+        if condition == "tuned":
+            with self.assertRaisesRegex(ValueError, "tuned is retired"):
+                RunSpec(**options)
+        spec = RunSpec(**options, _replay_only=condition == "tuned")
+        if condition == "tuned":
+            # Replay uses the historical request's declared header, never live settings.
+            spec._api_header_values = request_header_values(
+                {"name": "historical test model", "temperature": 0.0, "effort": "high"})
+        return resolve_prompt(spec)
 
     def test_no_rendered_instruction_names_another_project(self):
         from data_sheets_schema.api_runner import CONDITION_PROMPTS, SOURCE_HEADING_CONDITIONS

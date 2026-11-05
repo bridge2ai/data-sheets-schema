@@ -79,6 +79,13 @@ projects:
         role: AI-readiness self-assessment
 
   CM4AI:
+    source_archives:
+      ro-crate-metadata.json:
+        path: raw/cm4ai_release_metadata.zip
+        member: cm4ai_release_metadata/ro-crate-metadata.json
+      ro-crate-linkml.yaml:
+        path: raw/cm4ai_release_metadata.zip
+        member: cm4ai_release_metadata/ro-crate-linkml.yaml
     source_type: dataverse
     dataset_url: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
     doi: 10.18130/V3/HIGT4C

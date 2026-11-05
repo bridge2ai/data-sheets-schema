@@ -26,8 +26,13 @@ def offline(monkeypatch):
 
 @pytest.mark.parametrize("condition", [name for name in api.CONDITION_PROMPTS if name != "generic_v10" and name not in api.SOURCE_HEADING_CONDITIONS])
 def test_actual_requests_deliver_policy_and_keep_selected_rules(external, condition):
-    spec = replace(external, condition=condition, api_playbook_version=1)
-    original = replace(external, condition=condition)
+    if condition == 'tuned':
+        with pytest.raises(ValueError, match='tuned'):
+            replace(external, condition=condition)
+    spec = replace(external, condition=condition, api_playbook_version=1,
+                   _replay_only=condition == 'tuned')
+    original = replace(external, condition=condition, _replay_only=condition == 'tuned')
+    spec._api_header_values = original._api_header_values = external.api_header_values
     raw = api.prompt_body(spec.base_prompt)
     rules = raw[raw.index("UNIFORM DECISION RULES —"):raw.index("RETURN:")].strip()
     instruction = spec.instruction
@@ -61,7 +66,10 @@ def test_template_adaptation_never_scrubs_tuned_evidence(external, tmp_path, mon
     evidence = "A source quotes `RETURN:` and `.claude/commands/example.md`; preserve evidence text."
     (components / f"{external.project}.md").write_text(evidence)
     monkeypatch.setattr(api, "COMPONENTS", components)
-    spec = replace(external, condition="tuned", api_playbook_version=1)
+    with pytest.raises(ValueError, match='tuned'):
+        replace(external, condition='tuned', api_playbook_version=1)
+    spec = replace(external, condition="tuned", api_playbook_version=1, _replay_only=True)
+    spec._api_header_values = external.api_header_values
     assert evidence in spec.instruction
     assert "PROJECT-SPECIFIC EVIDENCE" in spec.instruction
     assert "# Mode: API phase controller, tuned prompt" in spec.instruction

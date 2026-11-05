@@ -96,19 +96,17 @@ from data_sheets_schema import receipt_completion as rc
 from data_sheets_schema import shared_generation as sg
 from data_sheets_schema.chunking import CONCAT_DIR as BUNDLE_DIR, manifest_for
 from data_sheets_schema.cli.api import ARMS
-from data_sheets_schema.profiles import profile_named, select_profile
-from data_sheets_schema.registry import load_registry
+from data_sheets_schema.profiles import profile_named, select_profile, vocabulary_for
+from data_sheets_schema.registry import AUTO, load_registry, select_manifest, default_manifest_path
 from data_sheets_schema.resources import checkout_at, resource_path
 from data_sheets_schema.schema_snapshot import capture_schema
 
-DEFAULT_PROJECTS = ("CHORUS", "AI_READI", "CM4AI", "VOICE")
 DEFAULT_CONDITION = "generic_v10"
 DEFAULT_ID_PREFIX = "generic-v10"
 DEFAULT_RECEIPT_ID = "generic-v10-receipt"
 DEFAULT_PROVIDER = "LBL CBORG (proxy to Anthropic)"
 DEFAULT_BASE_URL = "https://api.cborg.lbl.gov"
 DEFAULT_MODEL = "claude-opus-5"
-DEFAULT_VOCABULARIES_PATH = Path("src/data_sheets_schema/b2ai_registry_vocabularies.yaml")
 
 
 def _worktree_resources(function):
@@ -755,6 +753,7 @@ def build_draft_context(
     context_path: Path | str | None = None,
     write_to_disk: bool = True,
     worktree: Path | str | None = None,
+    profile_name: str | None = None,
 ) -> dict[str, Any]:
     """Synthesize a compliant root-only omission_context_v1 draft document.
 
@@ -768,18 +767,7 @@ def build_draft_context(
     )
 
     manifest_data = load_project_manifest_data(project, source_manifest_path)
-    doc = build_draft_scope_context(project, manifest_data)
-
-    vocab_path = resource_path(DEFAULT_VOCABULARIES_PATH)
-    if vocab_path.is_file():
-        declared_prof = str(manifest_data.get("profile") or "").strip().lower()
-        if declared_prof != "neutral":
-            vocab_data = yaml.safe_load(vocab_path.read_text(encoding="utf-8")) or {}
-            doc["vocabulary"] = vocab_data.get("vocabularies", {})
-        else:
-            doc["vocabulary"] = {}
-    elif worktree is not None:
-        raise FileNotFoundError(f"selected worktree vocabulary is missing: {vocab_path}")
+    doc = build_draft_scope_context(project, manifest_data, profile_name=profile_name)
 
     if write_to_disk and context_path is not None:
         target = Path(context_path).resolve()
@@ -858,39 +846,28 @@ def prepare_registration(
     active_audit_limits = resolve_audit_limits(project, partition, audit_limits, arm=arm)
     arm_display, method, pattern, _ = ARMS[arm]
     root_dir = Path(worktree).resolve() if worktree is not None else ROOT
-    kids_first_manifest = (
-        root_dir / "notes" / "matched_cborg_2026-09-13" / "kids_first" / "manifest.yaml"
-    )
-
-    # Resolve manifest
-    default_study_manifest = (root_dir / "data" / "preprocessed" / "source_manifest.yaml").resolve()
-    sm_resolved: Path | None = None
+    # One lookup rule for every project, including caller/environment overrides.
+    requested = AUTO
     if source_manifest_path is not None:
         raw_sm = Path(source_manifest_path)
-        p = raw_sm.resolve()
-        if not p.is_file() and not raw_sm.is_absolute():
-            alt = (root_dir / raw_sm).resolve()
-            if alt.is_file():
-                p = alt
-        if p.is_file():
-            sm_resolved = p
-        else:
+        requested = (root_dir / raw_sm).resolve()
+        if not requested.is_file():
             raise FileNotFoundError(f"source manifest not found: {source_manifest_path}")
-    else:
-        if project.upper() == "KIDS_FIRST" and kids_first_manifest.is_file():
-            sm_resolved = kids_first_manifest.resolve()
-        elif default_study_manifest.is_file():
-            sm_resolved = default_study_manifest
-
+    sm_resolved = select_manifest(project, bundle_path, requested=requested)
+    if sm_resolved is None:
+        raise ValueError(f"No manifest declares {project!r} and its bundle; pass --source-manifest")
+    sm_resolved = sm_resolved.resolve()
     reg_registry = load_registry(sm_resolved)
-    if (
-        not reg_registry.declares(project)
-        and project.upper() == "KIDS_FIRST"
-        and sm_resolved == default_study_manifest
-        and kids_first_manifest.is_file()
-    ):
-        sm_resolved = kids_first_manifest.resolve()
-        reg_registry = load_registry(sm_resolved)
+    if not reg_registry.declares(project):
+        raise ValueError(f"source manifest does not declare {project!r}: {sm_resolved}")
+
+    if profile_name is not None:
+        prof = profile_named(profile_name)
+        prof_name, prof_basis = prof.name, "stated by the caller"
+    else:
+        selection = select_profile(sm_resolved)
+        prof = selection.profile
+        prof_name, prof_basis = selection.name, selection.basis
 
     # Resolve bundle
     if bundle_path is not None:
@@ -970,6 +947,7 @@ def prepare_registration(
             draft_doc = build_draft_context(
                 project=project,
                 source_manifest_path=sm_resolved,
+                profile_name=prof_name,
                 context_path=target_context,
                 write_to_disk=False,
                 worktree=worktree,
@@ -982,16 +960,9 @@ def prepare_registration(
                 "run scripts/build_draft_contexts.py first or pass --synthesize-draft-context"
             )
 
-    # Resolve profile
-    if profile_name is not None:
-        prof = profile_named(profile_name)
-        prof_name = prof.name
-        prof_basis = "stated by the caller"
-    else:
-        sel = select_profile(sm_resolved)
-        prof = profile_named(sel.name)
-        prof_name = sel.name
-        prof_basis = sel.basis
+    context_raw = resolved_context_raw if resolved_context_raw is not None else resolved_context.read_bytes()
+    if json.loads(context_raw).get("vocabulary", {}) != vocabulary_for(prof):
+        raise ValueError("context vocabulary differs from the selected profile")
 
     prof_vocab_pin = None
     if prof.pin_path:
@@ -1342,7 +1313,7 @@ def parse_sizing_records(values: tuple[str, ...] | list[str]) -> dict[str, Path]
 @click.option(
     "--all", "all_projects",
     is_flag=True,
-    help=f"Build registrations for all four study projects ({', '.join(DEFAULT_PROJECTS)}).",
+    help="Build registrations for every project declared by the selected manifest.",
 )
 @click.option(
     "--label", "-l", "labels",
@@ -1392,9 +1363,9 @@ def parse_sizing_records(values: tuple[str, ...] | list[str]) -> dict[str, Path]
 @click.option(
     "--source-manifest", "-m",
     type=click.Path(path_type=Path),
-    default=Path("data/preprocessed/source_manifest.yaml"),
+    default=None,
     show_default=True,
-    help="Path to source_manifest.yaml.",
+    help="Declared source manifest; otherwise use the registry's project/bundle lookup.",
 )
 @click.option(
     "--bundle",
@@ -1594,7 +1565,7 @@ def cli(
     """
     target_projects: list[str] = []
     if all_projects:
-        target_projects = list(DEFAULT_PROJECTS)
+        target_projects = load_registry(source_manifest or default_manifest_path()).projects()
     elif projects:
         for p in projects:
             for item in p.split(","):

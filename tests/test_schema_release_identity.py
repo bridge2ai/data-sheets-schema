@@ -18,7 +18,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / "src" / "data_sheets_schema" / "schema"
-RELEASE = "3.0.0"
+RELEASE = "3.1.0"
 
 
 def _declared(path: Path) -> str | None:

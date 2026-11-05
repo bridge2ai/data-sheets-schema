@@ -591,6 +591,8 @@ class RunSpec:
     _api_header_values: dict[str, str] | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
+        if self.condition == "tuned" and not self._replay_only:
+            raise ValueError("tuned is retired for new registrations (D67); historical records may only be replayed for reading")
         if self.out_dir is not None:
             # An explicit override belongs to the launch directory. Freeze
             # it so later provenance readers cannot adopt an ancestor corpus.
@@ -6954,6 +6956,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     launch/monitor record as ``expect_journal_head_sha256``, even on a fresh
     generation request. Start/stop heads are printed to stderr for that record.
     """
+    if spec.condition == "tuned":
+        raise ValueError("tuned is retired for execution (D67); historical records remain readable")
     if spec._replay_only:
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
     if dry_run:

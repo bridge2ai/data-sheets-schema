@@ -21,7 +21,8 @@ def _record(tmp, prior=PRIOR, api=False):
     core = Path(tmp) / "claudecode_agent_core" / "L_rep1"; core.mkdir(parents=True, exist_ok=True)
     bundle = Path(tmp) / "P_preprocessed.txt"; bundle.write_text("FILE: a\nline\n" * 6)
     md5 = hashlib.md5(bundle.read_bytes()).hexdigest()
-    rec = {"inputs": {"bundle_path": str(bundle), "bundle_md5": md5},
+    rec = {"record_generated_at": "2026-08-28T10:00:00+00:00",
+           "inputs": {"bundle_path": str(bundle), "bundle_md5": md5},
            "phase_log": {"run_observed": dict(prior), "run_observed_until": "2026-08-28T10:00:00+00:00"}}
     if api:
         rec["api_usage"] = [{"phase": "full"}]

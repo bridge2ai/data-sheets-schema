@@ -276,9 +276,9 @@ def prepare(
     route does not select a cohort or claim the five-project panel is complete.
     """
     if rubric not in {"rubric10", "rubric20"} or instrument_version not in (
-        ("3.0",) if rubric == "rubric10" else ("3.0", "4.0")
+        ("3.0", "5.0") if rubric == "rubric10" else ("3.0", "4.0", "5.0")
     ):
-        raise ValueError("select rubric10 3.0 or rubric20 3.0/4.0 explicitly")
+        raise ValueError("select rubric10 3.0/5.0 or rubric20 3.0/4.0/5.0 explicitly")
     if type(repeat_count) is not int or not 1 <= repeat_count <= 100:
         raise ValueError("repeat_count must be an integer from 1 through 100")
     if rubric != "rubric20" and repeat_count != 1:
@@ -385,9 +385,10 @@ def prepare(
     for rel in (selected.definition_path, selected.rubric_path,
                 selected.schema_path, selected.evidence_authority_path):
         resources[rel] = take(resource_path(rel))
-    if instrument_version == "4.0":
+    if instrument_version in ("4.0", "5.0"):
         # The real released v3 definition, not a fabricated weak predecessor.
-        predecessor_path = select_semantic_instrument("rubric20", "3.0").definition_path
+        previous = "4.0" if rubric == "rubric20" and instrument_version == "5.0" else "3.0"
+        predecessor_path = select_semantic_instrument(rubric, previous).definition_path
         predecessor = take(resource_path(predecessor_path)).decode()
     else:
         predecessor = agent_pin._previous_text(selected.agent)
@@ -911,7 +912,7 @@ def main(argv=None) -> int:
     parser.add_argument("--registration-sha256")
     parser.add_argument("--record-sha256")
     parser.add_argument("--rubric", choices=("rubric10", "rubric20"), required=True)
-    parser.add_argument("--instrument-version", choices=("3.0", "4.0"), required=True)
+    parser.add_argument("--instrument-version", choices=("3.0", "4.0", "5.0"), required=True)
     parser.add_argument("--base-url")
     parser.add_argument("--model")
     parser.add_argument("--canonical-model", help="Exact canonical identity attested by modelUsage")

@@ -62,7 +62,7 @@ fan out.
    - "Publications and preprints that describe or use the {DATASET} dataset
      ({aliases}); give DOIs."
    - "Persistent identifiers, registry entries and repository records for
-     {DATASET} (DOI, RRID, FAIRhub/PhysioNet/Zenodo entries)."
+     {DATASET} (persistent identifiers and entries in its declared repositories)."
    - "The data use license or access agreement governing {DATASET}: name,
      version, terms, where published."
    - "Version history and release notes of {DATASET}: version numbers,

@@ -31,17 +31,18 @@ def select_semantic_instrument(rubric_name: str, version: str) -> SemanticInstru
     rubric = rubric_name.removesuffix("-semantic")
     if rubric not in {"rubric10", "rubric20"}:
         raise ValueError(f"unknown general-context semantic rubric: {rubric_name}")
-    if version not in ("2.0", "3.0", "4.0") or (version == "4.0" and rubric != "rubric20"):
+    if version not in ("2.0", "3.0", "4.0", "5.0") or (version == "4.0" and rubric != "rubric20"):
         raise ValueError(f"unsupported semantic instrument: {rubric_name} version {version!r}")
-    suffix = "_semantic_v4" if version == "4.0" else ""
-    agent = f"d4d-{rubric}-semantic" + ("-v4" if version == "4.0" else "")
+    version_suffix = f"v{version[0]}" if version in ("4.0", "5.0") else ""
+    suffix = f"_semantic_{version_suffix}" if version_suffix else ""
+    agent = f"d4d-{rubric}-semantic" + (f"-{version_suffix}" if version_suffix else "")
     return SemanticInstrument(
         rubric_path=f"data/rubric/{rubric}{suffix}.txt",
         definition_path=f".claude/agents/{agent}.md",
         schema_path=f"src/download/prompts/{rubric}_semantic"
-                    + ("_v4" if version == "4.0" else "") + "_schema.json",
+                    + (f"_{version_suffix}" if version_suffix else "") + "_schema.json",
         agent=agent,
         version=version,
         evidence_authority_path=("data/rubric/semantic_evidence_authority_v3.json"
-                                 if version in ("3.0", "4.0") else None),
+                                 if version in ("3.0", "4.0", "5.0") else None),
     )

@@ -135,8 +135,8 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
                 raise ValueError(f"expected {rubric}, found {declared}")
             instrument = (None if declared in field_rubrics else
                           select_semantic_instrument(declared, semantic_version))
-            if semantic_version not in ("3.0", "4.0"):
-                raise ValueError("exact new-output semantic acceptance supports versions 3.0 and 4.0")
+            if semantic_version not in ("3.0", "4.0", "5.0"):
+                raise ValueError("exact new-output semantic acceptance supports versions 3.0, 4.0 and 5.0")
             if declared in field_rubrics and semantic_version != "3.0":
                 raise ValueError("--semantic-version is not a field-agent validation option")
             expected_version = "2.0" if instrument is None else instrument.version
@@ -162,9 +162,9 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
                     raise ValueError(f"version-{expected_version[0]} output validation requires --agent-definition to verify its instrument pin")
                 import hashlib
                 definition_sha256 = hashlib.sha256(definition_path.read_bytes()).hexdigest()
-                if instrument.version == "4.0" and definition_sha256 != hashlib.sha256(
+                if instrument.version in ("4.0", "5.0") and definition_sha256 != hashlib.sha256(
                         resource_path(instrument.definition_path).read_bytes()).hexdigest():
-                    raise ValueError("supplied definition is not the selected semantic version-4 instrument")
+                    raise ValueError(f"supplied definition is not the selected semantic version-{instrument.version[0]} instrument")
                 if doc["metadata"]["instrument_sha256"] != definition_sha256:
                     raise ValueError("evaluation instrument SHA256 does not match the supplied agent definition")
                 from data_sheets_schema.evaluation_context import load_context, load_document
@@ -259,9 +259,9 @@ def main(eval_base: Path | None = None, schema_dir: Path | None = None) -> int:
             continue
 
         schema = schemas[rubric]
-        if eval_data.get("version") == "4.0":
+        if eval_data.get("version") in ("4.0", "5.0"):
             try:
-                instrument = select_semantic_instrument(rubric, "4.0")
+                instrument = select_semantic_instrument(rubric, eval_data["version"])
                 schema = load_schema(schema_dir / Path(instrument.schema_path).name)
             except (OSError, ValueError) as exc:
                 status, errors = "invalid", [str(exc)]
@@ -312,7 +312,7 @@ def cli(argv: List[str] | None = None, *, eval_base: Path | None = None,
     parser.add_argument("--context", type=Path, help="trusted caller YAML/JSON applicability declarations; omitted predicates remain unknown")
     parser.add_argument("--project", help="trusted project identity; required for field-agent output acceptance")
     parser.add_argument("--method", help="trusted method identity; required for field-agent output acceptance")
-    parser.add_argument("--semantic-version", choices=("3.0", "4.0"), default=None,
+    parser.add_argument("--semantic-version", choices=("3.0", "4.0", "5.0"), default=None,
                         help="explicit semantic instrument for new outputs (default: 3.0)")
     args = parser.parse_args(argv)
     if args.rubric and not args.files:

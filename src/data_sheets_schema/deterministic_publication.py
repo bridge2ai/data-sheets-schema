@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 import subprocess
 import zipfile
+import yaml
 
 from data_sheets_schema import figure_publication
 from data_sheets_schema.crate_generation_comparison import parse_report, source_evidence_rows
@@ -102,7 +103,9 @@ def prepare(repo: Path, packages: Path, concat: Path, method: str,
     code_commit, code_paths = _code(repo)
     for name in code_paths + [SCHEMA, TABLE]:
         capture(repo / name)
-    capture(packages / "crate_manifest.yaml")
+    crate_manifest = yaml.safe_load(capture(packages / "crate_manifest.yaml"))
+    if not isinstance(crate_manifest, dict) or not isinstance(crate_manifest.get('projects'), dict):
+        raise ValueError('crate manifest requires a projects mapping')
     items = []
     for project in projects:
         project_dir = packages / project
@@ -119,13 +122,25 @@ def prepare(repo: Path, packages: Path, concat: Path, method: str,
         if method == "rocrate_mapped":
             source_names.append("ro-crate-linkml.yaml")
         sources = []
+        declared_archives = (crate_manifest['projects'].get(project) or {}).get('source_archives', {})
+        if not isinstance(declared_archives, dict):
+            raise ValueError('source_archives must map source names to archive path/member declarations')
         for name in source_names:
             direct = next((project_dir / base / name for base in ("raw", "crate")
                            if (project_dir / base / name).is_file()), None)
-            if project == "CM4AI":
-                archive = project_dir / "raw/cm4ai_release_metadata.zip"
+            if name in declared_archives:
+                declaration = declared_archives[name]
+                if (not isinstance(declaration, dict) or set(declaration) != {'path', 'member'}
+                        or any(not isinstance(declaration[k], str) or not declaration[k] for k in declaration)):
+                    raise ValueError('archive source requires path and member strings')
+                relative, member_path = Path(declaration['path']), Path(declaration['member'])
+                if any(p.is_absolute() or '..' in p.parts for p in (relative, member_path)):
+                    raise ValueError('archive source paths must remain within their declared project/archive')
+                archive = project_dir / relative
+                if not archive.resolve().is_relative_to(project_dir.resolve()):
+                    raise ValueError('archive source escapes project directory')
                 archive_raw = capture(archive)
-                member = f"cm4ai_release_metadata/{name}"
+                member = declaration['member']
                 with zipfile.ZipFile(io.BytesIO(archive_raw)) as handle:
                     matches = [entry for entry in handle.infolist() if entry.filename == member]
                     if len(matches) != 1 or matches[0].is_dir() or matches[0].file_size > 16 * 1024 * 1024:

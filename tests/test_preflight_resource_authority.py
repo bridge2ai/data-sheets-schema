@@ -100,14 +100,17 @@ def test_explicit_tree_selects_schema_configuration_and_vocabulary(selected_reso
     assert Path.cwd() == before
 
 
-def test_default_kids_first_manifest_comes_from_selected_tree(selected_resources):
+def test_explicit_project_manifest_comes_from_selected_tree(selected_resources):
     selected, _, args = selected_resources
     relative = Path("notes/matched_cborg_2026-09-13/kids_first/manifest.yaml")
     manifest = selected / relative
     manifest.parent.mkdir(parents=True)
     shutil.copyfile(ROOT / relative, manifest)
-    args.pop("source_manifest_path")
+    args["source_manifest_path"] = manifest
     args["project"] = "KIDS_FIRST"
+    # This neutral declaration cannot reuse a study-vocabulary context.
+    args.pop("context_path")
+    args["synthesize_draft_context"] = True
     args.pop("partition")
     # Mechanics-only manifest/authority fixture, not a Kids First sizing claim.
     # A17 requires explicit input sizing outside the CHORUS profile; deliberately
@@ -166,12 +169,11 @@ def test_check_uses_selected_prompt_authority_and_restores_cwd(selected_resource
 
 
 def test_positional_draft_context_worktree_selects_vocabulary(selected_resources, checkout_unchanged):
-    selected, _, _ = selected_resources
-    assert not builder.DEFAULT_VOCABULARIES_PATH.is_absolute()
+    selected, original, _ = selected_resources
     vocabulary = selected / "src/data_sheets_schema/b2ai_registry_vocabularies.yaml"
     vocabulary.write_text("vocabularies:\n  SELECTED_TREE: [selected-only]\n")
     before = Path.cwd()
-    doc = builder.build_draft_context("CHORUS", None, None, False, selected)
+    doc = builder.build_draft_context("CHORUS", original["inputs"]["source_manifest"]["path"], None, False, selected)
     assert doc["vocabulary"] == {"SELECTED_TREE": ["selected-only"]}
     assert Path.cwd() == before
 
@@ -373,6 +375,7 @@ def test_synthesized_context_requires_selected_vocabulary(selected_resources, tm
     result = CliRunner().invoke(builder.cli, args)
     # A17's prepare-then-write CLI reports preparation failures as Click errors.
     assert result.exit_code == 1, result.output
-    assert "selected worktree vocabulary is missing:" in result.output
+    assert "src/data_sheets_schema/b2ai_registry_vocabularies.yaml" in result.output
+    assert "which is not there" in result.output
     assert not out_dir.exists(), "refusal must precede writing a draft context"
     assert Path.cwd() == before

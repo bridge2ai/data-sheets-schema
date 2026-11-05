@@ -2,6 +2,9 @@
 """
 Fix failed D4D extractions by regenerating them with improved YAML validation.
 """
+# Historical source retained for provenance; no new invocation is supported (F16).
+raise RuntimeError('Historical D4D generator retired (F16); use the manifest-driven registered pipeline')
+
 import asyncio
 import json
 import os

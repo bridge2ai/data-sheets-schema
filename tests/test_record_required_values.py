@@ -21,7 +21,8 @@ def record(mode="live"):
         "record_mode": mode, "record_generated_at": "2026-09-11T00:00:00Z",
         "run": {"project": "TEST", "method": "fixture", "label": "test_rep1", "arm": "fixture"},
         "schema": {"declared_version": "test", "declared_in": "fixture",
-                   "merged_schema_carries_version": False, "full_path": "full.yaml", "core_path": "core.yaml"},
+                   "merged_schema_carries_version": False, "full_path": "full.yaml", "core_path": "core.yaml",
+                   "profile": "neutral"},
         "repo": {"commit": "fixture"}, "software": {"python": "fixture"},
         "outputs": {"full": {"path": "full.yaml"}},
     }

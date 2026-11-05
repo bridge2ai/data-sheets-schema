@@ -13089,6 +13089,43 @@ def _correlated_turn_selection(tree: ast.Module, test) -> dict:
             'evidence': [f'api_runner.py:{line}' for line in evidence]}
 
 
+def _execution_false_boolean_fields(tree: ast.Module) -> tuple[dict, list]:
+    """Boolean defaults that a direct early execution guard requires false.
+
+    This permits read-only replay flags in constructor constraints without
+    assuming any flag name or condition. Missing, nested or late guards prove
+    nothing; the selector interpreter still refuses unknown constraints.
+    """
+    cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'RunSpec'), None)
+    execute = _function(tree, 'execute')
+    if cls is None or execute is None:
+        return {}, []
+    declarations = {}
+    for node in cls.body:
+        if not (isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name)
+                and isinstance(node.annotation, ast.Name) and node.annotation.id == 'bool'):
+            continue
+        value = node.value
+        if isinstance(value, ast.Call) and ast.unparse(value.func) == 'field' and not value.args:
+            defaults = [k.value for k in value.keywords if k.arg == 'default']
+            value = defaults[0] if len(defaults) == 1 else None
+        if isinstance(value, ast.Constant) and value.value is False:
+            declarations[node.target.id] = node
+    fixed, evidence = {}, []
+    for node in execute.body:
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
+            continue
+        if not (isinstance(node, ast.If) and not node.orelse and len(node.body) == 1
+                and isinstance(node.body[0], ast.Raise)):
+            break
+        test = node.test
+        if (isinstance(test, ast.Attribute) and isinstance(test.value, ast.Name)
+                and test.value.id == 'spec' and test.attr in declarations):
+            fixed[test.attr] = False
+            evidence.extend([declarations[test.attr].lineno, node.lineno])
+    return fixed, [f'api_runner.py:{line}' for line in sorted(set(evidence))]
+
+
 def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
     """Prove the fixed shared selector's closed tuples from source (#4503).
 
@@ -13542,6 +13579,7 @@ def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
                     elif name == 'condition' and isinstance(atom.ops[0], ast.In) and isinstance(atom.comparators[0], ast.Name):
                         matched |= wanted in constant_set(atom.comparators[0].id)
                 if not matched: raise fail('shared tuple lacks an exact reciprocal constructor guard')
+    execution_fixed, execution_evidence = _execution_false_boolean_fields(tree)
     cases, evaluations = [], 0
     for values in product(*(domains[n] for n in names)):
         axes = {**dict(zip(names, values)), **inactive_native}
@@ -13554,7 +13592,7 @@ def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
         for renderer, native, condition in product(renderers, (False, True), conditions):
             evaluations += 1
             if evaluations > 100000: raise fail('delegated selection exceeds finite derivation bound')
-            row = {**axes, 'render_version':renderer, 'is_agentic':native, 'condition':condition}
+            row = {**axes, **execution_fixed, 'render_version':renderer, 'is_agentic':native, 'condition':condition}
             violations = [all([bool(evaluate(expr, row)) == polarity for expr, polarity in chain])
                           for _, chain in constraints]
             if any(violations): continue
@@ -13575,7 +13613,7 @@ def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
     if {case['values'][test.attr] for case in cases} != set(domains[test.attr]) - {0}:
         raise fail('delegated enabled domain has an impossible or unproved case')
     evidence = [f'api_runner.py:{node.lineno}' for node in [*domain_nodes.values(), *calls, *[n for n,_ in constraints]]]
-    evidence += [f'{_rel(root, helper_path)}:{helper.lineno}', f'{_rel(root, modes_path)}:{modes_line}', *native_evidence]
+    evidence += [f'{_rel(root, helper_path)}:{helper.lineno}', f'{_rel(root, modes_path)}:{modes_line}', *native_evidence, *execution_evidence]
     return {'field':test.attr,'default':0,'enabled_values':[v for v in domains[test.attr] if v],
             'runtime':'api','renderers':sorted({r for c in cases for r in c['renderers']}),
             'conditions':sorted({v for c in cases for v in c['conditions']}),'cases':cases,'evidence':sorted(set(evidence))}

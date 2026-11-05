@@ -281,6 +281,16 @@ def test_candidate_lookup_cannot_mutate_the_original_snapshot(candidate, monkeyp
 
 def test_profile_unknown_stays_unknown_and_schema_is_recovered_once(candidate, monkeypatch, tmp_path):
     root, record = candidate
+    # P4a finding 5: resolve this fixture's recorded code in its own history,
+    # with a later introduction boundary. Execution dates no longer date code.
+    from data_sheets_schema import profiles
+    subprocess.check_call(['git', '-C', str(root), '-c', 'user.name=Fixture',
+                           '-c', 'user.email=fixture@example.org', 'commit',
+                           '--allow-empty', '-qm', 'Introduce profiles'])
+    boundary = subprocess.check_output(['git', '-C', str(root), 'rev-parse', 'HEAD']).decode().strip()
+    monkeypatch.setattr(profiles, '_CHECKOUT_ROOT', root)
+    monkeypatch.setattr(profiles, 'PROFILES_INTRODUCED_COMMIT', boundary)
+    record['record_generated_at'] = '2026-09-01T00:00:00Z'
     path = tmp_path / 'old.yaml'
     path.write_bytes(SCHEMA)
     record['schema']['full_path'] = str(path)

@@ -29,7 +29,7 @@ def files(tmp_path, digest=None, *, profile=None, full=None, core=None):
     c.write_text(yaml.safe_dump(core if core is not None else {"id": "example"}))
     schema = {} if digest is None else {"digest_md5": digest}
     if profile: schema["profile"] = profile
-    p.write_text(yaml.safe_dump({"schema": schema}))
+    p.write_text(yaml.safe_dump({"record_generated_at": "2026-09-01T00:00:00Z", "schema": schema}))
     return f, c, p
 
 

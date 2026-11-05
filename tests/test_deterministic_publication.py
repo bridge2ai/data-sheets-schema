@@ -5,6 +5,7 @@ from pathlib import Path
 import zipfile
 
 import pytest
+import yaml
 
 from data_sheets_schema import deterministic_publication as publication
 
@@ -225,21 +226,25 @@ def test_sidecar_must_reconcile_report_counts_and_per_field_identity(inputs, cha
     assert not (inputs[2] / 'rocrate_static_map/new-label').exists()
 
 
-def test_cm4ai_member_hash_is_bound_to_archive_and_extracted_copy(inputs):
+@pytest.mark.parametrize('project', ['CM4AI', 'NEWPROJ'])
+def test_declared_member_hash_is_bound_to_archive_and_extracted_copy(inputs, project):
     repo, packages, concat, _, add = inputs
-    base = add('CM4AI')
+    base = add(project)
     metadata = (base / 'raw/ro-crate-metadata.json').read_bytes()
-    archive = base / 'raw/cm4ai_release_metadata.zip'
+    archive = base / 'raw/release.zip'
     with zipfile.ZipFile(archive, 'w') as handle:
-        handle.writestr('cm4ai_release_metadata/ro-crate-metadata.json', metadata)
-    ready = prepared(inputs, projects=['CM4AI'])
+        handle.writestr('release/ro-crate-metadata.json', metadata)
+    (packages / 'crate_manifest.yaml').write_text(yaml.safe_dump({'projects': {project: {
+        'source_archives': {'ro-crate-metadata.json': {'path': 'raw/release.zip',
+            'member': 'release/ro-crate-metadata.json'}}}}}))
+    ready = prepared(inputs, projects=[project])
     source = ready['items'][0]['sources'][0]
-    assert source['member'] == 'cm4ai_release_metadata/ro-crate-metadata.json'
+    assert source['member'] == 'release/ro-crate-metadata.json'
     assert source['sha256'] == sha(metadata)
     assert source['archive_sha256'] == sha(archive.read_bytes())
     (base / 'raw/ro-crate-metadata.json').write_bytes(b'not the archive copy')
     with pytest.raises(ValueError, match='differs from archive'):
-        prepared(inputs, projects=['CM4AI'])
+        prepared(inputs, projects=[project])
 
 
 def test_upstream_arm_binds_original_linkml_and_retains_repair_report(inputs):

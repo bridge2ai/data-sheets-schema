@@ -1267,7 +1267,7 @@ def profile_assessment(data: dict[str, Any]) -> tuple[list[str], dict[str, Any]]
 def _spec_profile_disagreement(data: dict[str, Any]) -> str | None:
     """Compare the stored spec's profile with the one record readers use.
 
-    A missing historical profile has the documented study fallback; an
+    A missing profile has the dated historical fallback or is neutral; an
     explicit different profile identifies a different instrument (#1740).
     """
     schema = data.get("schema") if isinstance(data, dict) else None
@@ -1277,10 +1277,13 @@ def _spec_profile_disagreement(data: dict[str, Any]) -> str | None:
     if not isinstance(spec, dict) or not isinstance(spec.get("profile"), str):
         return None
     if not isinstance(schema, dict):
-        schema = {}                        # no schema block, or null: the readers read the study's (#1709)
+        schema = {}                        # for_record decides the dated fallback (#1709, F18)
     stated = schema.get("profile")
     from data_sheets_schema.profiles import for_record
-    effective = for_record(data).name if stated is None else stated
+    try:
+        effective = for_record(data).name if stated is None else stated
+    except ValueError as exc:
+        return str(exc)
     if effective != spec["profile"]:
         basis = f" (read as {effective!r})" if stated is None else ""
         return (f"prompts.request.spec.profile is {spec['profile']!r} but schema.profile is "

@@ -145,8 +145,8 @@ def document_for(prepared):
     )
     doc["model"].update(name=plan["runtime"]["canonical_model"],
                         evaluator_model=plan["runtime"]["canonical_model"], temperature=None)
-    if instrument["version"] == "4.0":
-        selected = select_semantic_instrument("rubric20", "4.0")
+    if number == 20 and instrument["version"] in ("4.0", "5.0"):
+        selected = select_semantic_instrument("rubric20", instrument['version'])
         rubric = yaml.safe_load(dict(prepared.resources)[selected.rubric_path])
         q19 = rubric["d4d_evaluation_rubric"]["rubric"][18]["name"]
         for group in doc["categories"]:
@@ -518,7 +518,7 @@ def test_changed_schema_closure_is_not_a_cosmetic_registration(registration, tmp
         runner.prepare(**{**registration, "registration": path})
 
 
-@pytest.mark.parametrize("number,version", [(10, "3.0"), (20, "3.0"), (20, "4.0")])
+@pytest.mark.parametrize("number,version", [(10, "3.0"), (20, "3.0"), (20, "4.0"), (10, "5.0"), (20, "5.0")])
 def test_real_instruments_echo_and_semantic_acceptance(registration, number, version):
     selected = runner.prepare(**{**registration, "rubric": f"rubric{number}", "instrument_version": version})
     doc, cost = runner._accept(selected, trace_for(selected))
