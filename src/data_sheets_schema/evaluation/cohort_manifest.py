@@ -16,6 +16,11 @@ def read_cohort(path):
     """
     path = Path(path).absolute()
     raw = runner._read(path)
+    return parse_cohort(raw), runner.shared.file_pin(path, raw)
+
+
+def parse_cohort(raw):
+    """Read captured cohort bytes without reopening an authority path."""
     doc = runner._yaml(raw)
     if not isinstance(doc, dict) or set(doc) != {"format", "cells"} or doc["format"] != FORMAT:
         raise ValueError("requires evaluation_cohort_v1 with cells")
@@ -58,4 +63,4 @@ def read_cohort(path):
                                 "replicate": replicate, "method": cell["method"],
                                 "condition": cell["condition"], "input_arm": cell["input_arm"],
                                 "comparison_arm": cell["comparison_arm"]})
-    return sorted(records, key=lambda r: (r["arm"], r["project"], r["label"])), runner.shared.file_pin(path, raw)
+    return sorted(records, key=lambda r: (r["arm"], r["project"], r["label"]))
