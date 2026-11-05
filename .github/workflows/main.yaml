@@ -122,6 +122,49 @@ jobs:
           path: test-results/*
           retention-days: 14
 
+  # SG2 root launches need independent budgets, like the API cases.
+  sg2-completion:
+    name: Python 3.12 / SG2 case ${{ matrix.case }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [sg2-none, sg2-conventional, sg2-explicit]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+      - name: Set up the cached project environment
+        uses: ./.github/actions/setup-project
+        with:
+          python-version: "3.12"
+      - name: Run the required offline SG2 case
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/d4d-tests-pycache
+        run: |
+          mkdir -p test-results
+          set -o pipefail
+          poetry run python -m pytest tests -v -p no:cacheprovider \
+            -p utils.pytest_shard --ci-lane=${{ matrix.case }} \
+            --durations=25 --junitxml=test-results/pytest.xml \
+            2>&1 | tee test-results/pytest.log
+      - name: Require the case to leave notes/, tests/ and utils/ untouched
+        if: always()
+        run: |
+          changed="$(git status --ignored --porcelain -- notes/ tests/ utils/)"
+          test -z "$changed" || { printf '%s\n' "$changed"; exit 1; }
+      - name: Preserve test results, timings and incomplete-case output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-py3.12-sg2-${{ matrix.case }}
+          path: test-results/*
+          retention-days: 14
+
   # Run these controls once with their own existing 45-minute job budget.
   # They must not share the remainder of a full shard's budget (#4466).
   offline-canary:
@@ -310,7 +353,7 @@ jobs:
   # skip in any required test lane must make this aggregate fail (#1812, #2237).
   test:
     if: always()
-    needs: [python-tests, api-completion, offline-canary, offline-audit, offline-evaluation, schema-examples]
+    needs: [python-tests, api-completion, sg2-completion, offline-canary, offline-audit, offline-evaluation, schema-examples]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -318,6 +361,7 @@ jobs:
         env:
           PYTHON_RESULT: ${{ needs.python-tests.result }}
           API_RESULT: ${{ needs.api-completion.result }}
+          SG2_RESULT: ${{ needs.sg2-completion.result }}
           CANARY_RESULT: ${{ needs.offline-canary.result }}
           AUDIT_RESULT: ${{ needs.offline-audit.result }}
           EVALUATION_RESULT: ${{ needs.offline-evaluation.result }}
@@ -326,6 +370,7 @@ jobs:
         run: |
           test "$PYTHON_RESULT" = success
           test "$API_RESULT" = success
+          test "$SG2_RESULT" = success
           test "$CANARY_RESULT" = success
           test "$AUDIT_RESULT" = success
           test "$EVALUATION_RESULT" = success

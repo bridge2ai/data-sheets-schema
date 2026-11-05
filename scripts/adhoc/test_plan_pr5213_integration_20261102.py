@@ -40,7 +40,7 @@ class PlanningContracts(unittest.TestCase):
             helper.require_collection(base, {**nodes, 'selected': ['a', 'b']}, outcome)
 
     def test_duplicate_occurrences_are_preserved_in_six_and_four_partitions(self):
-        nodes = ['tests/a.py::same', 'tests/a.py::same', 'tests/b.py::one', *plugin.API_CASE_LANES.values()]
+        nodes = ['tests/a.py::same', 'tests/a.py::same', 'tests/b.py::one', *plugin.DEDICATED_CASE_LANES.values()]
         for total in (6, 4):
             shards, api = helper.partition(nodes, plugin, {'tests/a.py': 8, 'tests/b.py': 3}, total)
             joined = Counter(n for group in shards for n in group)
@@ -405,7 +405,7 @@ class TimingSourceRevisionContracts(unittest.TestCase):
         evidence_path = Path(self.temporary.name) / 'timing-evidence.json'
         evidence_path.write_text(json.dumps(evidence))
         before = evidence_path.read_bytes(), self.weights_path.read_bytes()
-        full = [row['nodeid'] for row in rows] + list(plugin.API_CASE_LANES.values())
+        full = [row['nodeid'] for row in rows] + list(plugin.DEDICATED_CASE_LANES.values())
         with patch.dict(helper.BASELINES, {'main': self.measured_head, 'round3': self.measured_head}):
             projected, allowance, proof = helper.projection_rows(self.tree, full, plugin, self.weights,
                 evidence_path, self.manifest, self.final_head)

@@ -1,6 +1,7 @@
 """Scheduling hints retain JUnit occurrences without accepting copied inputs."""
 
 import hashlib
+from collections import Counter
 import subprocess
 import xml.etree.ElementTree as ET
 
@@ -120,3 +121,28 @@ def test_empty_input_still_refuses(timing_inputs, empty_artifact):
         junit(results, "shard1")
     with pytest.raises(ValueError, match="no test cases|no pytest.xml"):
         estimate(timing_inputs)
+
+
+def test_round7_refresh_preserves_history_and_excludes_dedicated_sg2():
+    """The installed hints retain their measured/estimated distinction."""
+    import json
+    from pathlib import Path
+    from decimal import Decimal
+
+    data = json.loads((Path(__file__).resolve().parents[1] / 'utils/ci_test_durations.json').read_text())
+    proof = data['ci_refresh_5213_20261105']
+    local = {f: v for block in data['local_overrides'] for f, v in block['file_seconds'].items()}
+    assert len(local) == len(proof['weights']) == 25
+    assert len(set(data['file_seconds']) - set(local)) == 635
+    assert proof['run_id'] == 41990198212
+    assert len(proof['sg2_local_seconds']) == 3
+    assert Counter(row['basis'] for row in proof['weights']) == {
+        'CI JUnit': 18, 'local remainder x 2.1033': 7}
+    for row in proof['weights']:
+        assert row['before'] == local[row['file']]
+        assert row['after'] == data['file_seconds'][row['file']]
+        if row['basis'] != 'CI JUnit':
+            remainder = Decimal(str(row['before'])) - Decimal(str(row['sg2_deducted']))
+            assert row['after'] == float((remainder * Decimal('2.1033')).quantize(Decimal('0.001')))
+        if row['sg2_deducted']:
+            assert row['sg2_deducted'] == sum(proof['sg2_local_seconds'].values())

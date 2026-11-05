@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 import pytest
 import yaml
 
-from utils.pytest_shard import API_CASE_LANES, balanced_files, partition_lanes, read_weights, shard_for
+from utils.pytest_shard import API_CASE_LANES, SG2_CASE_LANES, DEDICATED_CASE_LANES, balanced_files, partition_lanes, read_weights, shard_for
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,7 +23,7 @@ def _run(root, *args):
     env = os.environ.copy()
     env["PYTHONPATH"] = os.pathsep.join((str(ROOT), str(ROOT / "src")))
     return subprocess.run(
-        [sys.executable, "-m", "pytest", "-p", "utils.pytest_shard", "-q",
+        [sys.executable, "-m", "pytest", "-p", "xdist.plugin", "-p", "utils.pytest_shard", "-q",
          "-p", "no:cacheprovider", *args], cwd=root, env=env,
         capture_output=True, text=True, timeout=90,
     )
@@ -56,7 +56,7 @@ def _assert_complete_partition(tmp_path, weighted, total, lanes=False):
     whole = _run(tmp_path, "--junitxml=all.xml")
     assert whole.returncode == 0, whole.stdout + whole.stderr
     expected = _cases(tmp_path / "all.xml")
-    assert sum(expected.values()) == (94 if lanes else 84)
+    assert sum(expected.values()) == (97 if lanes else 84)
     flags = []
     if weighted:
         # Only about half the files have timings. Untimed files must still run;
@@ -70,12 +70,12 @@ def _assert_complete_partition(tmp_path, weighted, total, lanes=False):
         flags.append("--ci-lane=ordinary")
     actual = Counter()
     for index in range(1, total + 1):
-        result = _run(tmp_path, f"--ci-shard={index}/{total}", "-n", "logical", "--maxprocesses=4",
+        result = _run(tmp_path, f"--ci-shard={index}/{total}", "-n", "2", "--maxprocesses=2",
                       "--dist=load", "--maxschedchunk=1", *flags, f"--junitxml=shard-{index}.xml")
         assert result.returncode == 0, result.stdout + result.stderr
         actual.update(_cases(tmp_path / f"shard-{index}.xml"))
     if lanes:
-        for lane in API_CASE_LANES:
+        for lane in DEDICATED_CASE_LANES:
             result = _run(tmp_path, f"--ci-lane={lane}", f"--junitxml={lane}.xml")
             assert result.returncode == 0, result.stdout + result.stderr
             cases = _cases(tmp_path / f"{lane}.xml")
@@ -169,7 +169,7 @@ def test_aggregate_check_rejects_failed_cancelled_and_skipped_dependencies(tmp_p
     gate = workflow["jobs"]["test"]
     assert gate["if"] == "always()"
     assert set(gate["needs"]) == {
-        "python-tests", "api-completion", "offline-canary", "offline-audit", "offline-evaluation", "schema-examples"
+        "python-tests", "api-completion", "sg2-completion", "offline-canary", "offline-audit", "offline-evaluation", "schema-examples"
     }
     step = gate["steps"][0]
     statuses = ("success", "failure", "cancelled", "skipped")
@@ -189,7 +189,7 @@ def test_aggregate_check_rejects_failed_cancelled_and_skipped_dependencies(tmp_p
             expected_build = "skipped" if event == "pull_request" else "success"
             assert (result.returncode == 0) == (
                 all(results[job] == "success" for job in
-                    ("python-tests", "api-completion", "offline-canary", "offline-audit", "offline-evaluation"))
+                    ("python-tests", "api-completion", "sg2-completion", "offline-canary", "offline-audit", "offline-evaluation"))
                 and results["schema-examples"] == expected_build
             ), (event, results)
 
@@ -249,7 +249,7 @@ def test_offline_canary_retains_complete_commands_and_independent_job_budget():
                for spec in jobs.values() for step in spec.get("steps", [])) == 1
 
 
-def _lane_fixture(root, *, body="assert True", decorator="", fixture=""):
+def _lane_fixture(root, *, body="assert True", decorator="", fixture="", target="routing-dispatch"):
     path = root / "tests/test_source_heading_runtime_api.py"
     path.parent.mkdir(exist_ok=True)
     if not (root / "pytest.ini").exists():
@@ -257,7 +257,7 @@ def _lane_fixture(root, *, body="assert True", decorator="", fixture=""):
     text = "import pytest\n" + fixture
     for lane, node in API_CASE_LANES.items():
         name = node.split("::")[1]
-        if lane == "routing-dispatch":
+        if lane == target:
             text += decorator + f"def {name}():\n    {body}\n"
         else:
             text += f"def {name}(): assert True\n"
@@ -266,6 +266,13 @@ def _lane_fixture(root, *, body="assert True", decorator="", fixture=""):
     text += "@pytest.mark.parametrize('value', [0, '0', '00'])\n"
     text += "def test_ordinary_collision(value): assert value in (0, '0', '00')\n"
     path.write_text(text)
+    (root / "tests/test_wave7_5213_d76_registration.py").write_text(
+        "import pytest\n" + (fixture if target.startswith("sg2-") else "") +
+        "@pytest.mark.parametrize('mode', ['none', 'conventional', 'explicit'])\n"
+        + (decorator if target.startswith("sg2-") else "")
+        + "def test_sg2_root_launch_completes_and_records_registered_paths(mode):\n    "
+        + (body if target.startswith("sg2-") else "assert mode") + "\n"
+    )
     return path
 
 
@@ -277,7 +284,7 @@ def test_explicit_lanes_and_real_shards_equal_full_default_collection(tmp_path, 
 
 def test_lane_partition_is_complete_order_preserving_and_strict():
     ordinary = ["test_new.py::test_a[param]", "tests/test_source_heading_runtime_api.py::test_new"]
-    nodes = [ordinary[0], *API_CASE_LANES.values(), ordinary[1]]
+    nodes = [ordinary[0], *DEDICATED_CASE_LANES.values(), ordinary[1]]
     split = partition_lanes(nodes)
     assert split["ordinary"] == ordinary
     assert Counter(node for group in split.values() for node in group) == Counter(nodes)
@@ -328,23 +335,29 @@ def test_missing_dedicated_target_cannot_disappear_from_any_lane(tmp_path, lane)
      "@pytest.fixture\ndef broken():\n    yield\n    raise RuntimeError('teardown failure')\n", 1),
     ("pytest.exit('preserve actual exit', returncode=17)", "", "", 17),
 ])
-def test_dedicated_case_requires_real_unqualified_pass(tmp_path, body, decorator, fixture, code):
-    _lane_fixture(tmp_path, body=body, decorator=decorator, fixture=fixture)
-    result = _run(tmp_path, "--ci-lane=routing-dispatch")
+@pytest.mark.parametrize("lane", ["routing-dispatch", *SG2_CASE_LANES])
+def test_dedicated_case_requires_real_unqualified_pass(tmp_path, body, decorator, fixture, code, lane):
+    _lane_fixture(tmp_path, body=body, decorator=decorator, fixture=fixture, target=lane)
+    result = _run(tmp_path, f"--ci-lane={lane}")
     assert result.returncode == code, result.stdout + result.stderr
 
 
-def test_dedicated_collect_only_does_not_pass_as_execution(tmp_path):
+@pytest.mark.parametrize("lane", DEDICATED_CASE_LANES)
+def test_dedicated_collect_only_does_not_pass_as_execution(tmp_path, lane):
     _lane_fixture(tmp_path)
-    result = _run(tmp_path, "--ci-lane=routing-dispatch", "--collect-only")
+    result = _run(tmp_path, f"--ci-lane={lane}", "--collect-only")
     assert result.returncode == 1
     assert "did not pass setup, call and teardown" in result.stdout
 
 
-def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence():
+@pytest.mark.parametrize("job_name,lanes,artifact", [
+    ("api-completion", API_CASE_LANES, "api"),
+    ("sg2-completion", SG2_CASE_LANES, "sg2"),
+])
+def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job_name, lanes, artifact):
     jobs = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())["jobs"]
-    job = jobs["api-completion"]
-    assert job["strategy"] == {"fail-fast": False, "matrix": {"case": list(API_CASE_LANES)}}
+    job = jobs[job_name]
+    assert job["strategy"] == {"fail-fast": False, "matrix": {"case": list(lanes)}}
     assert "if" not in job and "needs" not in job
     assert job["runs-on"] == "ubuntu-latest"
     assert job["timeout-minutes"] == 45
@@ -367,7 +380,7 @@ def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence():
     assert clean["if"] == "always()"
     assert clean["run"] == jobs["python-tests"]["steps"][4]["run"]
     assert upload["if"] == "always()" and upload["uses"] == "actions/upload-artifact@v4"
-    assert upload["with"] == {"name": "tests-py3.12-api-${{ matrix.case }}",
+    assert upload["with"] == {"name": "tests-py3.12-" + artifact + "-${{ matrix.case }}",
                               "path": "test-results/*", "retention-days": 14}
     ordinary = jobs["python-tests"]["steps"][3]["run"]
     assert shlex.split(ordinary).count("--ci-lane=ordinary") == 1

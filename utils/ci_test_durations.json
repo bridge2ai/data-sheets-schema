@@ -7671,7 +7671,7 @@
   },
   "method": "Sum JUnit case times by collected file, with a 0.001-second floor. These are scheduling estimates, not wall-clock predictions or a test allowlist. Untimed collected files use the median known duration; obsolete entries are ignored. Missing-shard observations use elapsed time between consecutive results on each CI worker (first result measured from pytest session start; includes setup, prior teardown and scheduling delay). Unfinished cases use completed local JUnit times listed in source.supplement. Unmeasured prior entries retain their exact values. BC1/G2 additions (2026-11-03) only fill previously unweighted files: sum one complete source per current collected file, preferring run 41707437114, then run 41700664435 for G1 files, then round-2 local with-mode JUnit (macOS Python 3.13, two workers). Exact case-occurrence multisets and pinned XML SHA256 values are checked; 0.001-second floor, no local-time scaling. Completed failures/skips remain timing observations, not evidence of CI success. Original provenance and every existing weight are retained. Follow-up: measured-ratio scaling (2026-11-03) supersedes only the six initial local-source weights with local sum x 2.729, the larger of two observed complete-file Linux-CI/local ratios rounded to three decimals, as authorized by the lead. These six weights are derived, not measured; source.bc1_g2_measured_ratio_scaling_20261103 records each local sum, multiplier and both paired measurements with XML hashes. All other weights and the prior measured provenance remain unchanged. All-file BC1/G2 refresh (2026-11-04): use run 41735860489, then 41707437114, then retain current weight, requiring an exact current case-occurrence multiset within one shard XML per file. Preserve all earlier provenance. Completed failures/skips are timing observations. Inputs are SHA256-pinned in the new source block.",
   "file_seconds": {
-    "tests/test_5139_relative_paths.py": 0.416,
+    "tests/test_5139_relative_paths.py": 0.095,
     "tests/test_abandoned_journal.py": 18.951,
     "tests/test_absence_lint.py": 140.49203,
     "tests/test_absence_second_reading.py": 170.881,
@@ -8276,7 +8276,7 @@
     "tests/test_status_context.py": 56.56,
     "tests/test_stream_evidence.py": 1.041,
     "tests/test_stream_guard.py": 0.017,
-    "tests/test_subprocess_deadline.py": 1.049,
+    "tests/test_subprocess_deadline.py": 0.422,
     "tests/test_suite_does_not_mutate_the_schema.py": 38.269,
     "tests/test_term_validator_hook.py": 0.174,
     "tests/test_thinking_request.py": 14.892,
@@ -8293,8 +8293,8 @@
     "tests/test_values_from.py": 0.147,
     "tests/test_verdict_schema_pin.py": 8.801,
     "tests/test_voice_pediatric_bundle.py": 0.46,
-    "tests/test_wave3_5139_paths.py": 1.313,
-    "tests/test_wave3_5139_review.py": 0.022,
+    "tests/test_wave3_5139_paths.py": 1.956,
+    "tests/test_wave3_5139_review.py": 0.046,
     "tests/test_wave3_a23_review.py": 1.139,
     "tests/test_wave3_receipt_integration.py": 0.076,
     "tests/test_wave3_receipts_core.py": 0.052,
@@ -8306,27 +8306,27 @@
     "tests/test_wave5_5094_legacy_snapshots.py": 0.54,
     "tests/test_wave5_5095_review.py": 52.935,
     "tests/test_wave6_a14_a17_sizing.py": 101.523,
-    "tests/test_wave7_5213_d76_arm_paths.py": 0.088,
-    "tests/test_wave7_5213_d76_binding_records.py": 2.294,
-    "tests/test_wave7_5213_d76_legacy_registration.py": 0.168,
-    "tests/test_wave7_5213_d76_recorder.py": 32.963,
-    "tests/test_wave7_5213_d76_registration.py": 2245.206,
-    "tests/test_wave7_5213_d76_relative_registration.py": 50.083,
-    "tests/test_wave7_5213_d76_round2_binding.py": 317.916,
-    "tests/test_wave7_5213_d76_round2_recorder.py": 26.628,
-    "tests/test_wave7_5213_d76_round3_binding.py": 281.075,
-    "tests/test_wave7_5213_d76_round3_copy_origin.py": 17.454,
-    "tests/test_wave7_5213_d76_round3_recorder.py": 17.889,
-    "tests/test_wave7_5213_d76_round3_replay_flag.py": 7.003,
-    "tests/test_wave7_5213_d76_round4_boundaries.py": 9.931,
-    "tests/test_wave7_5213_d76_round4_inventory.py": 3.286,
-    "tests/test_wave7_5213_d76_round4_recorder.py": 30.424,
-    "tests/test_wave7_5213_d76_specificity_prefix.py": 29.19,
-    "tests/test_wave7_5213_d76_specificity_prefix_followup.py": 1.041,
-    "tests/test_wave7_5213_d76_specificity_prefix_review.py": 62.792,
-    "tests/test_wave7_5213_nf3.py": 0.153,
-    "tests/test_wave7_5213_nf3_backfill.py": 1.05,
-    "tests/test_wave7_5213_path_identity.py": 1.332,
+    "tests/test_wave7_5213_d76_arm_paths.py": 0.103,
+    "tests/test_wave7_5213_d76_binding_records.py": 4.825,
+    "tests/test_wave7_5213_d76_legacy_registration.py": 0.276,
+    "tests/test_wave7_5213_d76_recorder.py": 39.918,
+    "tests/test_wave7_5213_d76_registration.py": 39.744,
+    "tests/test_wave7_5213_d76_relative_registration.py": 93.427,
+    "tests/test_wave7_5213_d76_round2_binding.py": 757.573,
+    "tests/test_wave7_5213_d76_round2_recorder.py": 49.952,
+    "tests/test_wave7_5213_d76_round3_binding.py": 591.185,
+    "tests/test_wave7_5213_d76_round3_copy_origin.py": 33.885,
+    "tests/test_wave7_5213_d76_round3_recorder.py": 25.814,
+    "tests/test_wave7_5213_d76_round3_replay_flag.py": 12.608,
+    "tests/test_wave7_5213_d76_round4_boundaries.py": 7.253,
+    "tests/test_wave7_5213_d76_round4_inventory.py": 14.428,
+    "tests/test_wave7_5213_d76_round4_recorder.py": 50.532,
+    "tests/test_wave7_5213_d76_specificity_prefix.py": 61.395,
+    "tests/test_wave7_5213_d76_specificity_prefix_followup.py": 2.19,
+    "tests/test_wave7_5213_d76_specificity_prefix_review.py": 132.07,
+    "tests/test_wave7_5213_nf3.py": 0.193,
+    "tests/test_wave7_5213_nf3_backfill.py": 2.029,
+    "tests/test_wave7_5213_path_identity.py": 0.366,
     "tests/test_wave7_a17_vocabulary_warning.py": 4.02,
     "tests/test_wave7_bc1_d63_calibration.py": 9.395,
     "tests/test_wave7_bc1_formatter_cache.py": 0.437,
@@ -14634,5 +14634,281 @@
     }
   ],
   "limits": "No fresh measurement. Historical source identities, retirements and all outcomes remain literal. Obsolete weights are ignored by collection; absent weights retain the existing median fallback."
-}
+},
+  "ci_refresh_5213_20261105": {
+    "run_id": 41990198212,
+    "commit": "d0974d4bcc0f254272ec5a95e94d83ae801bbd38",
+    "date": "2026-11-05",
+    "rule": "CI JUnit sum for all 18 observed override files (14 exceed 1 second locally); seven missing files use local x 2.1033. Registration first subtracts its three original local SG2 case times. Floor 0.001s, round to 0.001s. Historical provenance unchanged; cancelled shard is not a successful run.",
+    "artifacts": [
+      {
+        "path": "tests-py3.12-api-routing-default-layout/pytest.xml",
+        "sha256": "c8a84295127177dc277cb9d989ddce442111fd5f07fd2ad2ec55f3d8c768830c"
+      },
+      {
+        "path": "tests-py3.12-api-routing-dispatch/pytest.xml",
+        "sha256": "a1b79e5eb0c699f94c3ebdb92387f2d0bc6647d1fd571f67ef0b0c152175ba9e"
+      },
+      {
+        "path": "tests-py3.12-api-routing-portable/pytest.xml",
+        "sha256": "5ff297828959fd00d8b0390d721b3331301541da02c82e14b08c4bbe14ef20f4"
+      },
+      {
+        "path": "tests-py3.12-api-routing-regate/pytest.xml",
+        "sha256": "136666c6a5b375a5ea57eee9a9d88441d268c128be62eac4d1480203120b1864"
+      },
+      {
+        "path": "tests-py3.12-offline-audit/audit-controls.xml",
+        "sha256": "aea3f57b9d8dfd58180fd976bc0475b8e06b206140a24d24a6f9eda249a954ef"
+      },
+      {
+        "path": "tests-py3.12-offline-canary/budget.xml",
+        "sha256": "6acf16567b4b6917a8c96cdc60f4605709b3c4ed05c99cd65954c3d34aad8967"
+      },
+      {
+        "path": "tests-py3.12-offline-canary/native.xml",
+        "sha256": "9612736330925df29c6a5e896e10573386fe56f34415f7874ab498edb344073d"
+      },
+      {
+        "path": "tests-py3.12-offline-evaluation/evaluation-controls.xml",
+        "sha256": "fb869283a7e48f037e61aabf6a7bb6acd7e63e09da326421e1ccfc5003af1949"
+      },
+      {
+        "path": "tests-py3.12-shard1/pytest.xml",
+        "sha256": "5b243420990647657de492ecec311ea48b09fc5f36ba9f18c22b1f40d2c3957a"
+      },
+      {
+        "path": "tests-py3.12-shard2/pytest.xml",
+        "sha256": "7a3d6ea056847d385b4982fa65801680528c252c61116e8b2c6cbd461e8447f5"
+      },
+      {
+        "path": "tests-py3.12-shard3/pytest.xml",
+        "sha256": "e4cabcc97b93d569f467d741ca395e6d07fd7c29a993ea9d6105c8bc2a83613c"
+      },
+      {
+        "path": "tests-py3.12-shard4/pytest.xml",
+        "sha256": "f1aa1358911e37968ed78d7c6b7070dc694c8c26eab62055ed138b199c3084e5"
+      },
+      {
+        "path": "tests-py3.12-shard6/pytest.xml",
+        "sha256": "88028966a0a745dce8e1edbb062330a88c73db16dca8a1037c2545a26a2be4a2"
+      },
+      {
+        "path": "tests-py3.12-shard7/pytest.xml",
+        "sha256": "a8bd40f73a22b519f0bd0b49443352a52478f0a8e7814a7ffef68c3cf119b027"
+      },
+      {
+        "path": "tests-py3.12-shard8/pytest.xml",
+        "sha256": "be26d88124a15cb8656061453939f28087aafe4725397953b6d4f49825eaf8b2"
+      }
+    ],
+    "local_artifacts": [
+      {
+        "path": "local-shard1/pytest.xml",
+        "sha256": "11a881d6e77b4b84dedf6d36f9ee6a975b77c93b01725e72b7855b4b64b9b674"
+      },
+      {
+        "path": "local-shard2/pytest.xml",
+        "sha256": "3ef11814944b9fb785a8bf95a41efbe42201811ced38e9bdfc998f8c1c3d8785"
+      },
+      {
+        "path": "local-shard3/pytest.xml",
+        "sha256": "b4f06e272e28e2a4faaf94190e42970c905c17d3e559378c178a1097b38b3587"
+      },
+      {
+        "path": "local-shard4/pytest.xml",
+        "sha256": "86b8bdd4b12085b42fc05d10743ce5b8a0a2716a6fb3c4fce5cf78f44372af67"
+      },
+      {
+        "path": "local-shard5/pytest.xml",
+        "sha256": "e709f0bda7a35eda477fb4d3a162ce237b37d390c39429ae5d2a27085b596f75"
+      },
+      {
+        "path": "local-shard6/pytest.xml",
+        "sha256": "622b6231c7833a7f06c09d9ef15213192dd2c20004d8712eb614d6dee30a7017"
+      }
+    ],
+    "sg2_local_seconds": {
+      "tests/test_wave7_5213_d76_registration.py::test_sg2_root_launch_completes_and_records_registered_paths[explicit]": 749.198,
+      "tests/test_wave7_5213_d76_registration.py::test_sg2_root_launch_completes_and_records_registered_paths[none]": 747.858,
+      "tests/test_wave7_5213_d76_registration.py::test_sg2_root_launch_completes_and_records_registered_paths[conventional]": 729.254
+    },
+    "weights": [
+      {
+        "file": "tests/test_5139_relative_paths.py",
+        "before": 0.416,
+        "after": 0.095,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_subprocess_deadline.py",
+        "before": 1.049,
+        "after": 0.422,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave3_5139_paths.py",
+        "before": 1.313,
+        "after": 1.956,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave3_5139_review.py",
+        "before": 0.022,
+        "after": 0.046,
+        "basis": "local remainder x 2.1033",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_arm_paths.py",
+        "before": 0.088,
+        "after": 0.103,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_binding_records.py",
+        "before": 2.294,
+        "after": 4.825,
+        "basis": "local remainder x 2.1033",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_legacy_registration.py",
+        "before": 0.168,
+        "after": 0.276,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_recorder.py",
+        "before": 32.963,
+        "after": 39.918,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_registration.py",
+        "before": 2245.206,
+        "after": 39.744,
+        "basis": "local remainder x 2.1033",
+        "sg2_deducted": 2226.31
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_relative_registration.py",
+        "before": 50.083,
+        "after": 93.427,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_round2_binding.py",
+        "before": 317.916,
+        "after": 757.573,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_round2_recorder.py",
+        "before": 26.628,
+        "after": 49.952,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_round3_binding.py",
+        "before": 281.075,
+        "after": 591.185,
+        "basis": "local remainder x 2.1033",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_round3_copy_origin.py",
+        "before": 17.454,
+        "after": 33.885,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_round3_recorder.py",
+        "before": 17.889,
+        "after": 25.814,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_round3_replay_flag.py",
+        "before": 7.003,
+        "after": 12.608,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_round4_boundaries.py",
+        "before": 9.931,
+        "after": 7.253,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_round4_inventory.py",
+        "before": 3.286,
+        "after": 14.428,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_round4_recorder.py",
+        "before": 30.424,
+        "after": 50.532,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_specificity_prefix.py",
+        "before": 29.19,
+        "after": 61.395,
+        "basis": "local remainder x 2.1033",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_specificity_prefix_followup.py",
+        "before": 1.041,
+        "after": 2.19,
+        "basis": "local remainder x 2.1033",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_d76_specificity_prefix_review.py",
+        "before": 62.792,
+        "after": 132.07,
+        "basis": "local remainder x 2.1033",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_nf3.py",
+        "before": 0.153,
+        "after": 0.193,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_nf3_backfill.py",
+        "before": 1.05,
+        "after": 2.029,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      },
+      {
+        "file": "tests/test_wave7_5213_path_identity.py",
+        "before": 1.332,
+        "after": 0.366,
+        "basis": "CI JUnit",
+        "sg2_deducted": 0.0
+      }
+    ]
+  }
 }

@@ -8,7 +8,7 @@ shards. Budget and native transport controls run once in the canary job, with
 the same 45-minute job limit and existing test deadlines, rather than sharing
 the time left after a full suite shard (#4466). Four more jobs each run one required long offline API case, with the same
 45-minute limit (#4517). Ordinary shards retain D75's 45-minute PR and
-60-minute main/manual limits. There are fifteen Python jobs on PRs and fourteen on
+60-minute main/manual limits. There are eighteen Python jobs on PRs and seventeen on
 main/manual runs, plus the aggregate `test` job. The aggregate
 requires every applicable job to succeed; failure, cancellation or an unexpected
 skip in any offline lane also fails it. Package metadata still permits Python
@@ -46,8 +46,8 @@ The workflow supplies `--ci-shard-timings=utils/ci_test_durations.json` to the
 pytest partition plugin. It assigns the actual collected file set using
 largest estimated durations first, placing each file on the least loaded
 shard. Sorted file paths and shard indices break ties, so all xdist workers
-produce the same assignment. Every ordinary test in a file remains together; the four separately scheduled
-API cases are removed by the explicit lane partition before file balancing.
+produce the same assignment. Every ordinary test in a file remains together; the seven separately scheduled
+API and SG2 cases are removed by the explicit lane partition before file balancing.
 
 Timings are scheduling hints. They cannot select or omit tests. Newly collected
 files use the median duration of known collected files (one second if none are
@@ -147,10 +147,11 @@ new tests; coverage never depends on a timing entry.
 ## Required long API cases
 
 The workflow opts into `--ci-lane=ordinary` for the existing shards and one of
-four dedicated lanes for each long offline API case. All jobs collect `tests`.
+seven dedicated lanes for long offline API and SG2 cases. All jobs collect `tests`.
 `utils.pytest_shard.API_CASE_LANES` is the single exact node roster for dispatch,
 portable completed capture, regated report, and default-layout completion.
-`partition_lanes` requires all four exact nodes once before returning singleton
+`DEDICATED_CASE_LANES` combines that roster with `SG2_CASE_LANES`.
+`partition_lanes` requires all seven exact nodes once before returning singleton
 case lanes and the complete ordinary complement. A missing, renamed or repeated dedicated
 target fails collection. Ordinary parameter IDs may collide: every occurrence
 is retained, with its original order and one owning shard, and coverage is
@@ -167,10 +168,10 @@ Dedicated jobs preserve checkout history, submodule setup, the Python 3.12 proje
 environment and bytecode prefix. They retain JUnit plus streamed text output in
 separate `tests-py3.12-api-<lane>` artifacts for 14 days, even when a failed test
 does not complete JUnit. A hard runner cancellation can still prevent upload.
-The aggregate requires the entire four-case matrix to succeed on PR, main and
-manual events, as well as the existing jobs. PRs have sixteen required successes
-plus the expected schema/example skip; main/manual have fifteen successes (D81).
-Across PR, manual and the separate large-files check this is thirty-two
+The aggregate requires the entire API and SG2 matrices to succeed on PR, main and
+manual events, as well as the existing jobs. PRs have nineteen required successes
+plus the expected schema/example skip; main/manual have eighteen successes (D81).
+Across PR, manual and the separate large-files check this is thirty-eight
 required successes and one expected skip, without counting unrelated automation.
 
 This change responds to the actual 45-minute PR shard timeout in run37452512623.
@@ -179,3 +180,24 @@ must not be added as wall time. The longest observed case took about 36 minutes,
 so isolation reduces job competition without guaranteeing success under any
 runner load. Test bodies, runtime deadlines and scientific/provider settings are
 unchanged. Validate actual subsequent CI before claiming a speedup or completion.
+
+## SG2 isolation and #5213 CI refresh (2026-11-05)
+
+Three additional 45-minute jobs select exactly `sg2-none`, `sg2-conventional`
+and `sg2-explicit`. Each runs one root-launch registration case, subject to the
+same no-skip/no-xfail/no-collection-only outcome gate as the API lanes. Their
+`tests-py3.12-sg2-<lane>` artifacts retain JUnit and streamed output for 14 days.
+The aggregate requires both dedicated matrices; D81's 8/6 ordinary shards and
+D75's 45/60-minute limits are unchanged.
+
+`refresh_5213_weights_ci_20261105.py` uses retained run 41990198212 artifacts.
+Of 25 local-override files, 18 have CI JUnit sums (the lead's 14 counted only
+files whose previous weights exceeded one second). Seven unmeasured files use
+local time times 2.1033. Registration first subtracts its three original local
+SG2 durations because these cases now have dedicated jobs. All 635 other weights
+and historical provenance remain unchanged. The new provenance records input
+hashes and every before/after value. These estimates do not turn the cancelled
+shard into successful-run evidence. Predict ordinary loads as case-seconds / 4;
+use 0.92 for the historical main-weight sensitivity and do not multiply newly
+CI-measured or already-scaled weights by 2.1 again. Single-case duration and
+setup/scheduling overhead can dominate that idealized average.
