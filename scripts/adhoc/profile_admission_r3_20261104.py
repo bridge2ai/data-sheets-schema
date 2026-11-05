@@ -22,8 +22,6 @@ ROOT = Path(__file__).resolve().parents[2]
 SCRATCH = ROOT.parent / 'scratch-bc1g2-timing'
 COMMITS = {'g1': 'bc8f981f758c46d5bb027c61294d8a67bf70ed30',
            'bc1g2': 'decf0cab1376d608d2ce411d2d6d8ce3e2ac42ce'}
-CASE = ('tests/test_report_admission.py::'
-        'test_chorus_wire_is_byte_identical_without_admission_and_is_what_was_counted')
 PATHS = ['src', 'tests', 'scripts', 'utils', 'config', 'configs', '.claude',
          '.github', 'project', 'data/preprocessed', 'data/rubric',
          'pyproject.toml', 'poetry.lock', 'conftest.py']
@@ -61,10 +59,10 @@ def prepare(label):
     return directory
 
 
-def run(label):
+def run(label, case):
     directory = prepare(label)
     command = [sys.executable, '-S', '-P', '-B', str(Path(__file__).resolve()),
-               'worker', label]
+               'worker', label, '--case', case]
     start = time.monotonic()
     with (directory / 'pytest.log').open('w') as stream:
         child = subprocess.Popen(command, cwd=ROOT, stdout=stream,
@@ -86,7 +84,7 @@ def run(label):
     return code
 
 
-def worker(label):
+def worker(label, case):
     directory = SCRATCH / f'r3-profile-{label}'
     tree = directory / 'tree'
     snapshot = json.loads((directory / 'snapshot.json').read_text())
@@ -104,14 +102,14 @@ def worker(label):
     import tempfile
     tempfile.tempdir = os.environ['TMPDIR']
     import pytest
-    env.update(commit=COMMITS[label], case=CASE, load_average_before=list(os.getloadavg()),
+    env.update(commit=COMMITS[label], case=case, load_average_before=list(os.getloadavg()),
                snapshot_sha256=sha(directory / 'snapshot.json'))
     save(directory / 'environment.json', env)
     profiler = cProfile.Profile()
     wall, cpu = time.monotonic(), time.process_time()
     profiler.enable()
     try:
-        code = pytest.main([CASE, '-q', '--durations=5', '-p', 'no:cacheprovider',
+        code = pytest.main([case, '-q', '--durations=5', '-p', 'no:cacheprovider',
             '--basetemp', str(directory / 'temporary/pytest'),
             '--junitxml', str(directory / 'junit.xml')])
     finally:
@@ -129,7 +127,7 @@ def worker(label):
                  callers={key(k): list(v) for k, v in value[4].items()})
             for func, value in stats.stats.items()]
     rows.sort(key=lambda row: -row['cumulative_seconds'])
-    save(directory / 'profile.json', dict(commit=COMMITS[label], case=CASE,
+    save(directory / 'profile.json', dict(commit=COMMITS[label], case=case,
         exit_code=int(code), wall_seconds=elapsed, cpu_seconds=cpu_elapsed,
         load_average_after=list(os.getloadavg()), total_calls=stats.total_calls,
         profile_sha256=sha(directory / 'profile.pstats'), functions=rows))
@@ -142,5 +140,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=('run', 'worker'))
     parser.add_argument('label', choices=COMMITS)
+    parser.add_argument('--case', required=True)
     args = parser.parse_args()
-    raise SystemExit(run(args.label) if args.mode == 'run' else worker(args.label))
+    raise SystemExit(run(args.label, args.case) if args.mode == 'run' else worker(args.label, args.case))

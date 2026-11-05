@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """D41 offline wire parity, 2026-10-26; refs #5138, #5142.
 
-Inputs: current package source with/without the D41 transport callback, real CHORUS inputs,
+Inputs: current package source with/without the D41 transport callback, caller-selected project inputs,
 synthetic records/replies and a fresh scratch directory. Outputs: exact SDK
 HTTP request bodies and a JSON parity report. MockTransport handles every
 request; no provider, token-count endpoint, generation or scoring is used.
@@ -123,14 +123,14 @@ def _module_authority(root, code_root, *, modules=None):
     return selected
 
 
-def _fixture(root, fixture, registration_snapshot):
+def _fixture(root, fixture, registration_snapshot, *, project, partition, context_path):
     from data_sheets_schema import api_runner as api, shared_generation as sg
     from scripts.build_api_registrations import build_registration
     reg_path = fixture / 'registration.json'
-    reg = build_registration('CHORUS', '2026-10-26_d41-offline-parity_rep1',
+    reg = build_registration(project, '2026-10-26_d41-offline-parity_rep1',
         registration_path=reg_path, registration_id='d41-offline-request-fixture',
-        context_path=root / 'data/omission_contexts/chorus_omission_context.json',
-        profile_name='bridge2ai', partition='chorus', write_to_disk=False)
+        context_path=context_path,
+        profile_name='bridge2ai', partition=partition, write_to_disk=False)
     # A synthetic route declaration, never a registration for provider execution.
     reg['runtime']['provider'] = 'D41 offline MockTransport'
     reg['runtime']['base_url'] = 'https://offline.invalid'
@@ -281,7 +281,7 @@ def _transport(api, req, settings, cap, *, guarded, deny=False, guard_check=None
     return bodies, callback_calls
 
 
-def capture(root, code_root, fixture, output, mode):
+def capture(root, code_root, fixture, output, mode, *, project, partition, context_path):
     root, code_root = root.resolve(), code_root.resolve()
     os.chdir(root)
     sys.path[:0] = [str(code_root / 'src'), str(root)]
@@ -306,7 +306,8 @@ def capture(root, code_root, fixture, output, mode):
     # The only counterfactual is omission of the guard callback at the physical
     # transport boundary. Builders, descriptors, resources and SDK stay identical.
     guarded = mode == 'candidate'
-    spec, reg, settings = _fixture(root, fixture, output / 'registration.json')
+    spec, reg, settings = _fixture(root, fixture, output / 'registration.json',
+        project=project, partition=partition, context_path=context_path)
     # Identical synthetic state setup, outside request inputs, on both sides.
     # Only candidate transports invoke the real D41 check on that state.
     guard_spec = replace(spec, out_dir=output / 'guard-state')
@@ -351,7 +352,7 @@ def capture(root, code_root, fixture, output, mode):
     return result
 
 
-def compare(root, workdir):
+def compare(root, workdir, *, project, partition, context_path):
     root, workdir = root.resolve(), workdir.resolve()
     workdir.mkdir(parents=True, exist_ok=False)
     baseline = {'scope': PACKAGE, 'counterfactual': 'same tree, before_attempt callback omitted'}
@@ -366,7 +367,8 @@ def compare(root, workdir):
         env = {**os.environ, 'PYTHONDONTWRITEBYTECODE': '1',
                'PYTHONPATH': str(code_root / 'src') + os.pathsep + str(root)}
         command = [sys.executable, str(Path(__file__).resolve()), '--capture', mode, '--root', str(root),
-                   '--code-root', str(code_root), '--fixture', str(fixture), '--out', str(out)]
+                   '--code-root', str(code_root), '--fixture', str(fixture), '--out', str(out),
+                   '--project', project, '--partition', partition, '--context-path', str(context_path.resolve())]
         completed = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True, timeout=300)
         save(workdir / (mode + '.log'), (completed.stdout + completed.stderr).encode())
         if completed.returncode:
@@ -394,14 +396,14 @@ def compare(root, workdir):
                        'baseline': before, 'candidate': after}
     if helper_before != pin(__file__) or production_before != {str(p.relative_to(root)): pin(p) for p in (root / PACKAGE).rglob('*.py')}:
         raise RuntimeError('source changed during request comparison')
-    result = {'format': 'd41_chorus_request_parity_v1', 'passed': True, 'baseline': baseline,
+    result = {'format': f'd41_{project.lower()}_request_parity_v1', 'passed': True, 'baseline': baseline,
         'helper': helper_before, 'production_sources': production_before, 'rows': rows,
         'environment': right['environment'],
         'common_resources': right['common_resources'],
         'fixture_selection': right['fixture_selection'],
         'excluded_request_branches': ['full readdress and receipt after readdress', 'schema repair'],
         'captures': {mode: pin(workdir / mode / 'capture.json') for mode in captures},
-        'scope': 'Exact generic_v10/shared-v1 CHORUS request construction with explicitly selected bridge2ai profile and real SDK serialization; synthetic records/replies, no run admission or acceptance claim.',
+        'scope': f'Exact generic_v10/shared-v1 {project} request construction with explicitly selected bridge2ai profile and real SDK serialization; synthetic records/replies, no run admission or acceptance claim.',
         'shared_v2': 'Controller code identity and registration SHA must change; no normalization or shared-v2 byte-parity claim. Journal is included in ROUTING_CODE since db88ca68c.'}
     save(workdir / 'summary.json', json.dumps(result, indent=2, sort_keys=True).encode() + b'\n')
     return result
@@ -411,15 +413,20 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--workdir', type=Path)
+    parser.add_argument('--project', required=True)
+    parser.add_argument('--partition', required=True)
+    parser.add_argument('--context-path', type=Path, required=True)
     parser.add_argument('--capture', choices=('baseline', 'candidate'))
     parser.add_argument('--code-root', type=Path)
     parser.add_argument('--fixture', type=Path)
     parser.add_argument('--out', type=Path)
     args = parser.parse_args()
     if args.capture:
-        capture(args.root, args.code_root, args.fixture, args.out, args.capture)
+        capture(args.root, args.code_root, args.fixture, args.out, args.capture,
+            project=args.project, partition=args.partition, context_path=args.context_path.resolve())
     else:
-        result = compare(args.root, args.workdir)
+        result = compare(args.root, args.workdir, project=args.project,
+            partition=args.partition, context_path=args.context_path.resolve())
         print(json.dumps({'passed': result['passed'], 'requests': len(result['rows']), 'summary': str(args.workdir / 'summary.json')}))
 
 
