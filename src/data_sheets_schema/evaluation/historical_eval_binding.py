@@ -105,14 +105,30 @@ def admit(raw, read_pin, *, binding_path):
     artifact = artifacts.get("full") if isinstance(artifacts, dict) else None
     if not isinstance(artifact, dict) or not isinstance(artifact.get("path"), str):
         raise ValueError("historical provenance must bind its full output")
-    resolved = resolve_record_input(Path(artifact["path"]), Path(doc["provenance"]["path"]))
-    if resolved is None or str(resolved.absolute()) != doc["record"]["path"]:
-        raise ValueError("historical full output path differs from provenance")
-    hashes = {key: artifact[key] for key in ("md5", "sha256") if key in artifact}
-    if not hashes or any(not isinstance(digest, str)
-                         or hashlib.new(key, original).hexdigest() != digest
-                         for key, digest in hashes.items()):
-        raise ValueError("historical full output hash differs from provenance")
+    def check_output(entry, *, required):
+        if not isinstance(entry, dict):
+            raise ValueError("historical full output declaration must be a mapping")
+        if required or "path" in entry:
+            path = entry.get("path")
+            if not isinstance(path, str) or not path:
+                raise ValueError("historical full output path must be explicit")
+            resolved = resolve_record_input(Path(path), Path(doc["provenance"]["path"]))
+            if resolved is None or str(resolved.absolute()) != doc["record"]["path"]:
+                raise ValueError("historical full output path differs from provenance")
+        hashes = {key: entry[key] for key in ("md5", "sha256") if key in entry}
+        if (required and not hashes) or any(
+                not isinstance(digest, str) or hashlib.new(key, original).hexdigest() != digest
+                for key, digest in hashes.items()):
+            raise ValueError("historical full output hash differs from provenance")
+
+    check_output(artifact, required=True)
+    # Older provenance can retain a second description (and old hash claims)
+    # under outputs. Missing claims stay unknown; supplied claims must agree.
+    if "outputs" in prior:
+        if not isinstance(prior["outputs"], dict):
+            raise ValueError("historical outputs must be a mapping")
+        if "full" in prior["outputs"]:
+            check_output(prior["outputs"]["full"], required=False)
     binding_pin = runner.shared.file_pin(Path(binding_path), raw)
     checked_pin(binding_pin)
     identity = {
