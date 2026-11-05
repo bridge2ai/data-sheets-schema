@@ -19,7 +19,9 @@ def main():
                       PYTHONPATH=str(root / 'src') + os.pathsep + str(root),
                       PYTHONPYCACHEPREFIX=str(scratch / 'pycache'))
     sys.pycache_prefix = str(scratch / 'pycache')
-    sys.path[:0] = [str(root / 'src'), str(root)]
+    # A directly executed tests/ helper must not shadow the root utils package.
+    sys.path[:] = [str(root / 'src'), str(root),
+                   *(p for p in sys.path if p != str(root / 'tests'))]
 
     def deny_network(event, args):
         if event in {'socket.connect', 'socket.connect_ex', 'socket.getaddrinfo', 'socket.sendto'}:
