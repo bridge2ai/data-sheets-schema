@@ -1,7 +1,7 @@
 # Every PR runs the complete suite, including the committed corpus (#1361).
-# CI uses Python 3.12 throughout. Six PR shards shorten feedback; four on
-# main/manual leave room for PRs without removing test or schema coverage, and
-# allow 60 minutes because GitHub runner speed varies (D75).
+# CI uses Python 3.12 throughout. D81 selects eight PR shards and six on
+# main/manual without removing test or schema coverage. D75 retains the
+# 45-minute PR and 60-minute main/manual ordinary-shard limits.
 ---
 name: Build and test data_sheets_schema
 
@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.12"]
-        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[1, 2, 3, 4, 5, 6]' || '[1, 2, 3, 4]') }}
+        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[1, 2, 3, 4, 5, 6, 7, 8]' || '[1, 2, 3, 4, 5, 6]') }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -56,7 +56,7 @@ jobs:
           PYTHONPYCACHEPREFIX: ${{ runner.temp }}/d4d-tests-pycache
         run: >-
           poetry run python -m pytest tests -v -p no:cacheprovider
-          -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 6 || 4 }}
+          -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 8 || 6 }}
           --ci-shard-timings=utils/ci_test_durations.json --ci-lane=ordinary
           --durations=25 -n logical --maxprocesses=4 --dist load --maxschedchunk=1
           --junitxml=test-results/pytest.xml

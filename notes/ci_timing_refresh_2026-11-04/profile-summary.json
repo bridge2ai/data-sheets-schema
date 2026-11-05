@@ -1,0 +1,1084 @@
+{
+  "evidence": {
+    "g1": {
+      "commit": "bc8f981f758c46d5bb027c61294d8a67bf70ed30",
+      "case": "tests/test_report_admission.py::test_chorus_wire_is_byte_identical_without_admission_and_is_what_was_counted",
+      "exit_code": 0,
+      "wall_seconds": 546.1687387080165,
+      "cpu_seconds": 503.783952,
+      "load_average_after": [
+        7.13037109375,
+        7.21875,
+        7.11279296875
+      ],
+      "total_calls": 1186642825,
+      "profile_sha256": "5d5e06a753dfe034ecd8f8c81b6f06062b24ebe3c7a79ee141213cc926ec359b",
+      "junit_seconds": 542.363,
+      "artifacts": {
+        "profile.json": "6eb38b83f85fba5935d680bfb9ed3e4651d992099ae169a849417543b0eef15b",
+        "profile.pstats": "5d5e06a753dfe034ecd8f8c81b6f06062b24ebe3c7a79ee141213cc926ec359b",
+        "junit.xml": "7a07cabcfde76df5b8239baa1f48b6c68ae083835d4345eb256985096dc11301",
+        "execution.json": "c8a33c77be1713636d7e0c7f45df7c13a8f903d8e360845a5a3c7a6d88667fc6",
+        "environment.json": "420255535c34ad59d612ba66b15740a0fefb9834aef5f4199595c38b5bf581b2",
+        "snapshot.json": "28b63cd034edb5c456c5086eb8bef24def3ba78724e85fcae5d22f629b30a166",
+        "module-origins.json": "f1436db22c63a265754591c38cba7072e56fcd82cd6da30bdd09ff5c2a5a7b8c"
+      }
+    },
+    "bc1g2": {
+      "commit": "decf0cab1376d608d2ce411d2d6d8ce3e2ac42ce",
+      "case": "tests/test_report_admission.py::test_chorus_wire_is_byte_identical_without_admission_and_is_what_was_counted",
+      "exit_code": 0,
+      "wall_seconds": 574.370986874972,
+      "cpu_seconds": 520.2186489999999,
+      "load_average_after": [
+        17.630859375,
+        11.31982421875,
+        8.81640625
+      ],
+      "total_calls": 1186878201,
+      "profile_sha256": "c4e2b3cf40d29d0d07efed2a8f2f81993b173c4cd49a7dc04f5e14f103f70220",
+      "junit_seconds": 571.855,
+      "artifacts": {
+        "profile.json": "c601c6729df656f676349cabdd40b06f949482d62f7a72fe6eee9cfa291e8699",
+        "profile.pstats": "c4e2b3cf40d29d0d07efed2a8f2f81993b173c4cd49a7dc04f5e14f103f70220",
+        "junit.xml": "0336d19e554d416766ddad351ea0044c5e39eab8609e1c55d01157bf86d613b8",
+        "execution.json": "c5fc04f9a426b4c071d58f871e09552400fb4d405fdf1761e030a6bd9ed64e75",
+        "environment.json": "3d70066fd7a3a619ce58789f5c8e7e125f3529517cec608b7e8b9f88017b81f0",
+        "snapshot.json": "939741ec1086cc6601fa14fe47ceb3422c235e69243ae152c4a30f8b884d3731",
+        "module-origins.json": "62c92fdd5bd1d7dfda0de0eb4fe23989de87b7c3389e79a57b512ea91c34d971"
+      }
+    }
+  },
+  "comparison": {
+    "local_junit_ratio": 1.0543768656785215,
+    "local_cpu_ratio": 1.0326225099762605,
+    "local_call_ratio": 1.0001983545469968,
+    "yaml_self_seconds": {
+      "g1": 230.93149601899998,
+      "bc1g2": 241.402950497
+    },
+    "bc1_module_self_seconds": {
+      "g1": 0.0,
+      "bc1g2": 0.042715251
+    },
+    "ci_file_ratio": 1.2805229003938765,
+    "ci_case_ratio": 1.2773186612456544
+  },
+  "requested_categories": [
+    {
+      "function": "<tree>/src/data_sheets_schema/bc1_selection.py:validate_spec_mode",
+      "g1_calls": 0,
+      "bc1g2_calls": 1703,
+      "g1_self": 0.0,
+      "bc1g2_self": 0.005541734,
+      "g1_cumulative": 0.0,
+      "bc1g2_cumulative": 0.184241639,
+      "delta_cumulative": 0.184241639
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/bc1_selection.py:enabled",
+      "g1_calls": 0,
+      "bc1g2_calls": 3788,
+      "g1_self": 0.0,
+      "bc1g2_self": 0.003191905,
+      "g1_cumulative": 0.0,
+      "bc1g2_cumulative": 0.00456326,
+      "delta_cumulative": 0.00456326
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/bc1_selection.py:_pairs",
+      "g1_calls": 0,
+      "bc1g2_calls": 45873,
+      "g1_self": 0.0,
+      "bc1g2_self": 0.033975069000000004,
+      "g1_cumulative": 0.0,
+      "bc1g2_cumulative": 0.033975069000000004,
+      "delta_cumulative": 0.033975069000000004
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:_bc1",
+      "g1_calls": 0,
+      "bc1g2_calls": 102,
+      "g1_self": 0.0,
+      "bc1g2_self": 0.000570885,
+      "g1_cumulative": 0.0,
+      "bc1g2_cumulative": 0.000866374,
+      "delta_cumulative": 0.000866374
+    },
+    {
+      "function": "<tree>/scripts/build_api_registrations.py:partition_profiles",
+      "g1_calls": 0,
+      "bc1g2_calls": 0,
+      "g1_self": 0.0,
+      "bc1g2_self": 0.0,
+      "g1_cumulative": 0.0,
+      "bc1g2_cumulative": 0.0,
+      "delta_cumulative": 0.0
+    },
+    {
+      "function": "<tree>/scripts/build_api_registrations.py:size_typed_audit_input",
+      "g1_calls": 0,
+      "bc1g2_calls": 0,
+      "g1_self": 0.0,
+      "bc1g2_self": 0.0,
+      "g1_cumulative": 0.0,
+      "bc1g2_cumulative": 0.0,
+      "delta_cumulative": 0.0
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/bc1_registration.py:size_inputs",
+      "g1_calls": 0,
+      "bc1g2_calls": 0,
+      "g1_self": 0.0,
+      "bc1g2_self": 0.0,
+      "g1_cumulative": 0.0,
+      "bc1g2_cumulative": 0.0,
+      "delta_cumulative": 0.0
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/schema_cache.py:load_yaml",
+      "g1_calls": 14,
+      "bc1g2_calls": 14,
+      "g1_self": 0.0029407020000000003,
+      "bc1g2_self": 0.001223048,
+      "g1_cumulative": 5.366733458000001,
+      "bc1g2_cumulative": 5.418084417,
+      "delta_cumulative": 0.05135095899999964
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/schema_snapshot.py:capture_schema",
+      "g1_calls": 5670,
+      "bc1g2_calls": 5670,
+      "g1_self": 0.028187752000000003,
+      "bc1g2_self": 0.031186281000000003,
+      "g1_cumulative": 19.012189531,
+      "bc1g2_cumulative": 18.381793544,
+      "delta_cumulative": -0.630395987
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/audit_omissions.py:_schema",
+      "g1_calls": 10,
+      "bc1g2_calls": 10,
+      "g1_self": 0.06603827500000001,
+      "bc1g2_self": 0.067805445,
+      "g1_cumulative": 68.031135749,
+      "bc1g2_cumulative": 68.90394879,
+      "delta_cumulative": 0.8728130410000006
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/audit_omissions.py:_read",
+      "g1_calls": 322,
+      "bc1g2_calls": 322,
+      "g1_self": 0.08598681400000001,
+      "bc1g2_self": 0.085318188,
+      "g1_cumulative": 184.66777288,
+      "bc1g2_cumulative": 194.97125408000002,
+      "delta_cumulative": 10.303481200000022
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/duplicate_keys.py:nesting_exceeds",
+      "g1_calls": 312,
+      "bc1g2_calls": 312,
+      "g1_self": 1.097211838,
+      "bc1g2_self": 1.2527767520000002,
+      "g1_cumulative": 138.694920496,
+      "bc1g2_cumulative": 148.04441134,
+      "delta_cumulative": 9.349490844000002
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:capture",
+      "g1_calls": 1693,
+      "bc1g2_calls": 1693,
+      "g1_self": 0.042503098,
+      "bc1g2_self": 0.049314724000000004,
+      "g1_cumulative": 126.05932353400001,
+      "bc1g2_cumulative": 136.76992648200002,
+      "delta_cumulative": 10.710602948000002
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:assert_current",
+      "g1_calls": 1641,
+      "bc1g2_calls": 1641,
+      "g1_self": 0.377985061,
+      "bc1g2_self": 0.49113895500000004,
+      "g1_cumulative": 120.40340865600001,
+      "bc1g2_cumulative": 131.928042962,
+      "delta_cumulative": 11.524634305999996
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:_contracts_digest",
+      "g1_calls": 5057,
+      "bc1g2_calls": 5057,
+      "g1_self": 1.819086973,
+      "bc1g2_self": 2.4873540540000003,
+      "g1_cumulative": 89.514779747,
+      "bc1g2_cumulative": 97.603293362,
+      "delta_cumulative": 8.088513614999997
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:recover",
+      "g1_calls": 22,
+      "bc1g2_calls": 22,
+      "g1_self": 0.06250791,
+      "bc1g2_self": 0.067299286,
+      "g1_cumulative": 267.576218541,
+      "bc1g2_cumulative": 291.37181695600003,
+      "delta_cumulative": 23.79559841500003
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:_rebuild",
+      "g1_calls": 34,
+      "bc1g2_calls": 34,
+      "g1_self": 0.08931976100000001,
+      "bc1g2_self": 0.11911310000000001,
+      "g1_cumulative": 259.453185958,
+      "bc1g2_cumulative": 282.858773875,
+      "delta_cumulative": 23.40558791699999
+    }
+  ],
+  "module_self_times": [
+    {
+      "file": "~",
+      "g1_self": 153.99723744700012,
+      "bc1g2_self": 161.7314531049999,
+      "delta_self": 7.734215657999783
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/yaml/scanner.py",
+      "g1_self": 124.07152407899997,
+      "bc1g2_self": 130.295903811,
+      "delta_self": 6.224379732000017
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/shared_generation.py",
+      "g1_self": 7.326690494,
+      "bc1g2_self": 10.320474155999996,
+      "delta_self": 2.993783661999996
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/yaml/reader.py",
+      "g1_self": 55.66661273200001,
+      "bc1g2_self": 57.600730688,
+      "delta_self": 1.9341179559999873
+    },
+    {
+      "file": "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/pathlib/_local.py",
+      "g1_self": 24.364846101999998,
+      "bc1g2_self": 25.582177083999994,
+      "delta_self": 1.2173309819999965
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/yaml/parser.py",
+      "g1_self": 17.779783045,
+      "bc1g2_self": 18.730960523999997,
+      "delta_self": 0.9511774789999983
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml_runtime/utils/yamlutils.py",
+      "g1_self": 13.035016928999996,
+      "bc1g2_self": 13.979957240000003,
+      "delta_self": 0.944940311000007
+    },
+    {
+      "file": "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/json/encoder.py",
+      "g1_self": 25.482995066,
+      "bc1g2_self": 26.269241536000003,
+      "delta_self": 0.7862464700000018
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/yaml/constructor.py",
+      "g1_self": 15.334255219,
+      "bc1g2_self": 16.082672881000008,
+      "delta_self": 0.7484176620000085
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/jsonasobj2/_jsonobj.py",
+      "g1_self": 16.750813756999996,
+      "bc1g2_self": 17.25396963399999,
+      "delta_self": 0.503155876999994
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/audit_batches.py",
+      "g1_self": 4.023003715,
+      "bc1g2_self": 4.475402985,
+      "delta_self": 0.4523992699999999
+    },
+    {
+      "file": "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/json/decoder.py",
+      "g1_self": 8.104798277,
+      "bc1g2_self": 8.553698200000001,
+      "delta_self": 0.4488999230000008
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/audit_grammar.py",
+      "g1_self": 4.017796145999999,
+      "bc1g2_self": 4.303279097,
+      "delta_self": 0.28548295100000054
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/receipt_completion.py",
+      "g1_self": 0.7699103420000002,
+      "bc1g2_self": 1.0040183500000002,
+      "delta_self": 0.23410800799999998
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/typed_audit.py",
+      "g1_self": 1.044796399,
+      "bc1g2_self": 1.2616463240000007,
+      "delta_self": 0.21684992500000067
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/resources.py",
+      "g1_self": 2.8240909020000005,
+      "bc1g2_self": 3.037970488999999,
+      "delta_self": 0.21387958699999876
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/yaml/resolver.py",
+      "g1_self": 3.628191541000001,
+      "bc1g2_self": 3.8138133720000003,
+      "delta_self": 0.1856218309999993
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/duplicate_keys.py",
+      "g1_self": 1.571401615,
+      "bc1g2_self": 1.7524601400000002,
+      "delta_self": 0.18105852500000008
+    },
+    {
+      "file": "<frozen posixpath>",
+      "g1_self": 2.320579273000001,
+      "bc1g2_self": 2.4805500300000003,
+      "delta_self": 0.15997075699999908
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/shared_write_footprint.py",
+      "g1_self": 0.684164733,
+      "bc1g2_self": 0.8317645840000001,
+      "delta_self": 0.14759985100000006
+    },
+    {
+      "file": "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/email/feedparser.py",
+      "g1_self": 3.3797827270000003,
+      "bc1g2_self": 3.5147420540000005,
+      "delta_self": 0.13495932700000024
+    },
+    {
+      "file": "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/pathlib/_abc.py",
+      "g1_self": 1.7563207860000003,
+      "bc1g2_self": 1.8866051560000003,
+      "delta_self": 0.13028437000000004
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/yaml/composer.py",
+      "g1_self": 4.945158506000001,
+      "bc1g2_self": 5.047353558,
+      "delta_self": 0.10219505199999901
+    },
+    {
+      "file": "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/importlib/metadata/__init__.py",
+      "g1_self": 2.3588589729999994,
+      "bc1g2_self": 2.4565315699999988,
+      "delta_self": 0.09767259699999942
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/yaml/error.py",
+      "g1_self": 1.6748023690000002,
+      "bc1g2_self": 1.7700886980000001,
+      "delta_self": 0.09528632899999989
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/yaml/__init__.py",
+      "g1_self": 1.721745868,
+      "bc1g2_self": 1.8159746200000002,
+      "delta_self": 0.09422875200000025
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/api_runner.py",
+      "g1_self": 0.4382140159999996,
+      "bc1g2_self": 0.5248478539999999,
+      "delta_self": 0.0866338380000003
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml_runtime/utils/formatutils.py",
+      "g1_self": 6.217297878,
+      "bc1g2_self": 6.295767114000001,
+      "delta_self": 0.078469236000001
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/receipts.py",
+      "g1_self": 0.43869385100000013,
+      "bc1g2_self": 0.5165507129999998,
+      "delta_self": 0.07785686199999964
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml_runtime/utils/schemaview.py",
+      "g1_self": 5.988110515,
+      "bc1g2_self": 6.065083021999999,
+      "delta_self": 0.07697250699999891
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/typed_audit_runtime.py",
+      "g1_self": 0.33118759600000003,
+      "bc1g2_self": 0.407537953,
+      "delta_self": 0.07635035699999998
+    },
+    {
+      "file": "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/json/__init__.py",
+      "g1_self": 0.814668142,
+      "bc1g2_self": 0.8892875130000001,
+      "delta_self": 0.07461937100000005
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/yaml/tokens.py",
+      "g1_self": 0.9929758090000003,
+      "bc1g2_self": 1.0629621049999998,
+      "delta_self": 0.0699862959999995
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/audit_batch_format.py",
+      "g1_self": 0.946061919,
+      "bc1g2_self": 1.01584566,
+      "delta_self": 0.06978374100000007
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/schema_snapshot.py",
+      "g1_self": 1.156298382,
+      "bc1g2_self": 1.2230238660000001,
+      "delta_self": 0.06672548400000022
+    },
+    {
+      "file": "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/email/message.py",
+      "g1_self": 1.169644107,
+      "bc1g2_self": 1.2261636400000002,
+      "delta_self": 0.05651953300000012
+    },
+    {
+      "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml_runtime/utils/metamodelcore.py",
+      "g1_self": 0.420749694,
+      "bc1g2_self": 0.47674171699999995,
+      "delta_self": 0.055992022999999946
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/api_playbook.py",
+      "g1_self": 0.22837869,
+      "bc1g2_self": 0.281927815,
+      "delta_self": 0.05354912500000003
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/shared_generation_resources.py",
+      "g1_self": 0.7416153529999999,
+      "bc1g2_self": 0.7852120719999999,
+      "delta_self": 0.04359671899999995
+    },
+    {
+      "file": "<tree>/src/data_sheets_schema/bc1_selection.py",
+      "g1_self": 0.0,
+      "bc1g2_self": 0.042715251,
+      "delta_self": 0.042715251
+    }
+  ],
+  "function_times": [
+    {
+      "function": "<tree>/src/data_sheets_schema/api_runner.py:_execute",
+      "g1_calls": 2,
+      "bc1g2_calls": 2,
+      "g1_self": 0.006314744000000001,
+      "bc1g2_self": 0.010268003000000001,
+      "g1_cumulative": 507.96852333400005,
+      "bc1g2_cumulative": 542.975008625,
+      "delta_cumulative": 35.00648529099993
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/api_runner.py:execute",
+      "g1_calls": 2,
+      "bc1g2_calls": 2,
+      "g1_self": 0.000434791,
+      "bc1g2_self": 0.000382248,
+      "g1_cumulative": 528.385734584,
+      "bc1g2_cumulative": 559.3822695,
+      "delta_cumulative": 30.996534915999973
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:recover",
+      "g1_calls": 22,
+      "bc1g2_calls": 22,
+      "g1_self": 0.06250791,
+      "bc1g2_self": 0.067299286,
+      "g1_cumulative": 267.576218541,
+      "bc1g2_cumulative": 291.37181695600003,
+      "delta_cumulative": 23.79559841500003
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:_rebuild",
+      "g1_calls": 34,
+      "bc1g2_calls": 34,
+      "g1_self": 0.08931976100000001,
+      "bc1g2_self": 0.11911310000000001,
+      "g1_cumulative": 259.453185958,
+      "bc1g2_cumulative": 282.858773875,
+      "delta_cumulative": 23.40558791699999
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/api_runner.py:_call_with_usage",
+      "g1_calls": 16,
+      "bc1g2_calls": 16,
+      "g1_self": 0.003039412,
+      "bc1g2_self": 0.0037487910000000004,
+      "g1_cumulative": 138.068075125,
+      "bc1g2_cumulative": 158.82089983400002,
+      "delta_cumulative": 20.75282470900001
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/usage_ledger.py:begin_call",
+      "g1_calls": 16,
+      "bc1g2_calls": 16,
+      "g1_self": 0.002076712,
+      "bc1g2_self": 0.002031867,
+      "g1_cumulative": 66.002577664,
+      "bc1g2_cumulative": 81.860779253,
+      "delta_cumulative": 15.858201589000004
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:require_admission",
+      "g1_calls": 16,
+      "bc1g2_calls": 16,
+      "g1_self": 0.006422415000000001,
+      "bc1g2_self": 0.0077262500000000005,
+      "g1_cumulative": 58.861095169,
+      "bc1g2_cumulative": 74.512770835,
+      "delta_cumulative": 15.651675665999996
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/api_runner.py:_gate_report",
+      "g1_calls": 2,
+      "bc1g2_calls": 2,
+      "g1_self": 0.000201411,
+      "bc1g2_self": 0.000717707,
+      "g1_cumulative": 46.097201667,
+      "bc1g2_cumulative": 60.188273708000004,
+      "delta_cumulative": 14.091072041000004
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/api_runner.py:_regenerate_report",
+      "g1_calls": 2,
+      "bc1g2_calls": 2,
+      "g1_self": 0.00077171,
+      "bc1g2_self": 0.000891209,
+      "g1_cumulative": 43.486578292000004,
+      "bc1g2_cumulative": 56.539065084,
+      "delta_cumulative": 13.052486791999996
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:assert_current",
+      "g1_calls": 1641,
+      "bc1g2_calls": 1641,
+      "g1_self": 0.377985061,
+      "bc1g2_self": 0.49113895500000004,
+      "g1_cumulative": 120.40340865600001,
+      "bc1g2_cumulative": 131.928042962,
+      "delta_cumulative": 11.524634305999996
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:capture",
+      "g1_calls": 1693,
+      "bc1g2_calls": 1693,
+      "g1_self": 0.042503098,
+      "bc1g2_self": 0.049314724000000004,
+      "g1_cumulative": 126.05932353400001,
+      "bc1g2_cumulative": 136.76992648200002,
+      "delta_cumulative": 10.710602948000002
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/audit_omissions.py:_mapping",
+      "g1_calls": 322,
+      "bc1g2_calls": 322,
+      "g1_self": 0.0144282,
+      "bc1g2_self": 0.018838791,
+      "g1_cumulative": 184.68223137400003,
+      "bc1g2_cumulative": 194.990119415,
+      "delta_cumulative": 10.307888040999984
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/audit_omissions.py:_read",
+      "g1_calls": 322,
+      "bc1g2_calls": 322,
+      "g1_self": 0.08598681400000001,
+      "bc1g2_self": 0.085318188,
+      "g1_cumulative": 184.66777288,
+      "bc1g2_cumulative": 194.97125408000002,
+      "delta_cumulative": 10.303481200000022
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:descriptor",
+      "g1_calls": 5057,
+      "bc1g2_calls": 5057,
+      "g1_self": 0.167820392,
+      "bc1g2_self": 0.25993360400000004,
+      "g1_cumulative": 116.55392489900001,
+      "bc1g2_cumulative": 126.560613348,
+      "delta_cumulative": 10.006688448999995
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit.py:assemble",
+      "g1_calls": 30,
+      "bc1g2_calls": 30,
+      "g1_self": 0.050670714000000006,
+      "bc1g2_self": 0.06299199500000001,
+      "g1_cumulative": 187.610736374,
+      "bc1g2_cumulative": 197.493895833,
+      "delta_cumulative": 9.883159459000012
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/api_runner.py:input_identity",
+      "g1_calls": 516,
+      "bc1g2_calls": 516,
+      "g1_self": 0.041494622,
+      "bc1g2_self": 0.06182881900000001,
+      "g1_cumulative": 108.98788866400001,
+      "bc1g2_cumulative": 118.64954383400001,
+      "delta_cumulative": 9.661655170000003
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/api_runner.py:_generate_phase",
+      "g1_calls": 6,
+      "bc1g2_calls": 6,
+      "g1_self": 0.001215753,
+      "bc1g2_self": 0.000550907,
+      "g1_cumulative": 98.08993425000001,
+      "bc1g2_cumulative": 107.45021079300001,
+      "delta_cumulative": 9.360276542999998
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/duplicate_keys.py:nesting_exceeds",
+      "g1_calls": 312,
+      "bc1g2_calls": 312,
+      "g1_self": 1.097211838,
+      "bc1g2_self": 1.2527767520000002,
+      "g1_cumulative": 138.694920496,
+      "bc1g2_cumulative": 148.04441134,
+      "delta_cumulative": 9.349490844000002
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit.py:_bounded_json",
+      "g1_calls": 184,
+      "bc1g2_calls": 184,
+      "g1_self": 0.00054374,
+      "bc1g2_self": 0.000606586,
+      "g1_cumulative": 140.761663743,
+      "bc1g2_cumulative": 150.105543583,
+      "delta_cumulative": 9.34387984
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:_check_response",
+      "g1_calls": 84,
+      "bc1g2_calls": 84,
+      "g1_self": 0.009387986000000001,
+      "bc1g2_self": 0.00971134,
+      "g1_cumulative": 126.006232705,
+      "bc1g2_cumulative": 135.293820629,
+      "delta_cumulative": 9.287587924000007
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:_contracts_digest",
+      "g1_calls": 5057,
+      "bc1g2_calls": 5057,
+      "g1_self": 1.819086973,
+      "bc1g2_self": 2.4873540540000003,
+      "g1_cumulative": 89.514779747,
+      "bc1g2_cumulative": 97.603293362,
+      "delta_cumulative": 8.088513614999997
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:prepare_packet",
+      "g1_calls": 36,
+      "bc1g2_calls": 36,
+      "g1_self": 0.016934206,
+      "bc1g2_self": 0.024385828000000002,
+      "g1_cumulative": 78.041071708,
+      "bc1g2_cumulative": 85.32426279500001,
+      "delta_cumulative": 7.283191087000006
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:build_request",
+      "g1_calls": 90,
+      "bc1g2_calls": 90,
+      "g1_self": 0.009817709,
+      "bc1g2_self": 0.010150422000000001,
+      "g1_cumulative": 85.938565205,
+      "bc1g2_cumulative": 93.178172129,
+      "delta_cumulative": 7.239606924
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:_build_request_bytes",
+      "g1_calls": 90,
+      "bc1g2_calls": 90,
+      "g1_self": 0.038534268,
+      "bc1g2_self": 0.056185059,
+      "g1_cumulative": 77.027439916,
+      "bc1g2_cumulative": 83.640805919,
+      "delta_cumulative": 6.613366002999996
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:_validate_base",
+      "g1_calls": 34,
+      "bc1g2_calls": 34,
+      "g1_self": 0.020567535,
+      "bc1g2_self": 0.027844206000000003,
+      "g1_cumulative": 43.796085041000005,
+      "bc1g2_cumulative": 50.07795762200001,
+      "delta_cumulative": 6.281872581000002
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:parse_registration",
+      "g1_calls": 2832,
+      "bc1g2_calls": 2832,
+      "g1_self": 0.13739241400000002,
+      "bc1g2_self": 0.149590562,
+      "g1_cumulative": 68.98683793000001,
+      "bc1g2_cumulative": 74.93815123200001,
+      "delta_cumulative": 5.951313302000003
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/receipt_completion.py:recover",
+      "g1_calls": 242,
+      "bc1g2_calls": 242,
+      "g1_self": 0.13948663,
+      "bc1g2_self": 0.175957634,
+      "g1_cumulative": 62.41417903000001,
+      "bc1g2_cumulative": 68.04834271,
+      "delta_cumulative": 5.634163679999993
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/snapshot_store.py:read_latest",
+      "g1_calls": 100,
+      "bc1g2_calls": 100,
+      "g1_self": 0.00303299,
+      "bc1g2_self": 0.003549361,
+      "g1_cumulative": 39.091211797,
+      "bc1g2_cumulative": 44.110032038,
+      "delta_cumulative": 5.018820241
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:require_request",
+      "g1_calls": 16,
+      "bc1g2_calls": 16,
+      "g1_self": 0.008760319,
+      "bc1g2_self": 0.008016677,
+      "g1_cumulative": 64.338609459,
+      "bc1g2_cumulative": 69.04764558400001,
+      "delta_cumulative": 4.7090361250000115
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:_originals",
+      "g1_calls": 38,
+      "bc1g2_calls": 38,
+      "g1_self": 0.0016073740000000002,
+      "bc1g2_self": 0.001889508,
+      "g1_cumulative": 29.509693332,
+      "bc1g2_cumulative": 34.023039831000006,
+      "delta_cumulative": 4.513346499000004
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/receipt_completion.py:audit_carry",
+      "g1_calls": 186,
+      "bc1g2_calls": 186,
+      "g1_self": 0.092120007,
+      "bc1g2_self": 0.113560594,
+      "g1_cumulative": 48.669446537000006,
+      "bc1g2_cumulative": 52.526083879000005,
+      "delta_cumulative": 3.856637341999999
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:_separate_inputs",
+      "g1_calls": 1693,
+      "bc1g2_calls": 1693,
+      "g1_self": 0.031285772,
+      "bc1g2_self": 0.035057416,
+      "g1_cumulative": 41.194434202000004,
+      "bc1g2_cumulative": 44.978596549,
+      "delta_cumulative": 3.7841623469999988
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:_separate_authorities",
+      "g1_calls": 1693,
+      "bc1g2_calls": 1693,
+      "g1_self": 0.8715877870000001,
+      "bc1g2_self": 1.251625766,
+      "g1_cumulative": 41.16314843,
+      "bc1g2_cumulative": 44.943539133,
+      "delta_cumulative": 3.780390703000002
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:_context_capture",
+      "g1_calls": 408,
+      "bc1g2_calls": 408,
+      "g1_self": 0.0023485420000000003,
+      "bc1g2_self": 0.0023585750000000003,
+      "g1_cumulative": 29.810332714,
+      "bc1g2_cumulative": 33.573217706,
+      "delta_cumulative": 3.762884992
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:captured_assets",
+      "g1_calls": 33775,
+      "bc1g2_calls": 33775,
+      "g1_self": 2.484335389,
+      "bc1g2_self": 4.023681021000001,
+      "g1_cumulative": 28.760993003000003,
+      "bc1g2_cumulative": 32.505889735000004,
+      "delta_cumulative": 3.744896732000001
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:select",
+      "g1_calls": 1699,
+      "bc1g2_calls": 1699,
+      "g1_self": 0.010955996,
+      "bc1g2_self": 0.023552718,
+      "g1_cumulative": 39.641351331,
+      "bc1g2_cumulative": 43.218981247,
+      "delta_cumulative": 3.5776299159999994
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/receipt_completion.py:schema_identity",
+      "g1_calls": 516,
+      "bc1g2_calls": 516,
+      "g1_self": 0.047109816000000006,
+      "bc1g2_self": 0.062034679,
+      "g1_cumulative": 38.442628788,
+      "bc1g2_cumulative": 41.724640832000006,
+      "delta_cumulative": 3.2820120440000053
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/receipt_completion.py:schema_capture",
+      "g1_calls": 518,
+      "bc1g2_calls": 518,
+      "g1_self": 0.006830226,
+      "bc1g2_self": 0.0072975290000000005,
+      "g1_cumulative": 38.542576138,
+      "bc1g2_cumulative": 41.807826333,
+      "delta_cumulative": 3.265250195
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:run",
+      "g1_calls": 2,
+      "bc1g2_calls": 2,
+      "g1_self": 0.026855786000000003,
+      "bc1g2_self": 0.027253250000000003,
+      "g1_cumulative": 146.499876833,
+      "bc1g2_cumulative": 149.501067584,
+      "delta_cumulative": 3.0011907509999958
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:completion_check",
+      "g1_calls": 6,
+      "bc1g2_calls": 6,
+      "g1_self": 0.011235333,
+      "bc1g2_self": 0.012799252,
+      "g1_cumulative": 131.29037329000002,
+      "bc1g2_cumulative": 134.182898834,
+      "delta_cumulative": 2.8925255439999944
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/schema_view.py:captured_view",
+      "g1_calls": 68,
+      "bc1g2_calls": 68,
+      "g1_self": 0.000396081,
+      "bc1g2_self": 0.00046158,
+      "g1_cumulative": 39.041961126000004,
+      "bc1g2_cumulative": 41.854755835000006,
+      "delta_cumulative": 2.812794709000002
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/schema_view.py:parse",
+      "g1_calls": 40,
+      "bc1g2_calls": 40,
+      "g1_self": 0.25555712500000005,
+      "bc1g2_self": 0.268173959,
+      "g1_cumulative": 46.340857588,
+      "bc1g2_cumulative": 48.984698625,
+      "delta_cumulative": 2.6438410370000014
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/api_runner.py:render_spec",
+      "g1_calls": 520,
+      "bc1g2_calls": 520,
+      "g1_self": 0.022024829000000003,
+      "bc1g2_self": 0.026041790000000002,
+      "g1_cumulative": 26.107883131,
+      "bc1g2_cumulative": 28.702937125000002,
+      "delta_cumulative": 2.5950539940000006
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:core_text",
+      "g1_calls": 6,
+      "bc1g2_calls": 6,
+      "g1_self": 0.00024704,
+      "bc1g2_self": 0.000300165,
+      "g1_cumulative": 14.921543916000001,
+      "bc1g2_cumulative": 17.488634376,
+      "delta_cumulative": 2.5670904599999993
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:_core_text",
+      "g1_calls": 6,
+      "bc1g2_calls": 6,
+      "g1_self": 0.000366913,
+      "bc1g2_self": 0.000349129,
+      "g1_cumulative": 14.47989875,
+      "bc1g2_cumulative": 17.034734375,
+      "delta_cumulative": 2.554835624999999
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit.py:_derive",
+      "g1_calls": 504,
+      "bc1g2_calls": 504,
+      "g1_self": 0.149699977,
+      "bc1g2_self": 0.19677832,
+      "g1_cumulative": 120.33490273000001,
+      "bc1g2_cumulative": 122.63977875500001,
+      "delta_cumulative": 2.3048760249999987
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/schema_view.py:version_document",
+      "g1_calls": 37,
+      "bc1g2_calls": 37,
+      "g1_self": 0.01329917,
+      "bc1g2_self": 0.017590543,
+      "g1_cumulative": 19.982405377000003,
+      "bc1g2_cumulative": 21.733804293000002,
+      "delta_cumulative": 1.7513989159999994
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation_resources.py:resource_paths",
+      "g1_calls": 1693,
+      "bc1g2_calls": 1693,
+      "g1_self": 0.07099385400000001,
+      "bc1g2_self": 0.07872304100000001,
+      "g1_cumulative": 20.235122258,
+      "bc1g2_cumulative": 21.965234315,
+      "delta_cumulative": 1.7301120569999995
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_write_footprint.py:require_separate",
+      "g1_calls": 1693,
+      "bc1g2_calls": 1693,
+      "g1_self": 0.177615306,
+      "bc1g2_self": 0.191125864,
+      "g1_cumulative": 20.047289383000003,
+      "bc1g2_cumulative": 21.717776482,
+      "delta_cumulative": 1.670487098999999
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/audit_batch_format.py:render",
+      "g1_calls": 10130,
+      "bc1g2_calls": 10130,
+      "g1_self": 0.164270142,
+      "bc1g2_self": 0.18008907000000002,
+      "g1_cumulative": 23.089616554000003,
+      "bc1g2_cumulative": 24.737211625,
+      "delta_cumulative": 1.6475950709999978
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation_resources.py:schema_sync_paths",
+      "g1_calls": 1693,
+      "bc1g2_calls": 1693,
+      "g1_self": 0.16894276500000002,
+      "bc1g2_self": 0.18194417200000002,
+      "g1_cumulative": 17.235367474,
+      "bc1g2_cumulative": 18.820609319000003,
+      "delta_cumulative": 1.5852418450000023
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/api_runner.py:build_phase",
+      "g1_calls": 8,
+      "bc1g2_calls": 8,
+      "g1_self": 0.0008450980000000001,
+      "bc1g2_self": 0.001279875,
+      "g1_cumulative": 9.567355877,
+      "bc1g2_cumulative": 11.143465041,
+      "delta_cumulative": 1.576109164
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:memo",
+      "g1_calls": 242,
+      "bc1g2_calls": 242,
+      "g1_self": 0.016225151,
+      "bc1g2_self": 0.022364041,
+      "g1_cumulative": 48.204190338000004,
+      "bc1g2_cumulative": 49.770924587,
+      "delta_cumulative": 1.5667342489999996
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/api_runner.py:_validator_lines",
+      "g1_calls": 6,
+      "bc1g2_calls": 6,
+      "g1_self": 0.00042942,
+      "bc1g2_self": 0.000596748,
+      "g1_cumulative": 18.516835166,
+      "bc1g2_cumulative": 20.068585876,
+      "delta_cumulative": 1.5517507100000003
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/audit_batch_format.py:contract",
+      "g1_calls": 10146,
+      "bc1g2_calls": 10146,
+      "g1_self": 0.07086829600000001,
+      "bc1g2_self": 0.073643098,
+      "g1_cumulative": 21.344377124,
+      "bc1g2_cumulative": 22.876017387,
+      "delta_cumulative": 1.531640263
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/api_runner.py:validate_outputs",
+      "g1_calls": 2,
+      "bc1g2_calls": 2,
+      "g1_self": 0.00025708400000000003,
+      "bc1g2_self": 0.00033658200000000004,
+      "g1_cumulative": 12.394864166000001,
+      "bc1g2_cumulative": 13.893782749000001,
+      "delta_cumulative": 1.498918583
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/audit_batch_format.py:synthetic_examples",
+      "g1_calls": 10146,
+      "bc1g2_calls": 10146,
+      "g1_self": 0.209546998,
+      "bc1g2_self": 0.225705277,
+      "g1_cumulative": 20.699440649,
+      "bc1g2_cumulative": 22.181856026000002,
+      "delta_cumulative": 1.4824153770000024
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/resources.py:resource_path",
+      "g1_calls": 634321,
+      "bc1g2_calls": 634321,
+      "g1_self": 1.008424433,
+      "bc1g2_self": 1.0797748070000002,
+      "g1_cumulative": 18.631423354000002,
+      "bc1g2_cumulative": 19.979060081,
+      "delta_cumulative": 1.3476367269999976
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/shared_generation.py:document",
+      "g1_calls": 613,
+      "bc1g2_calls": 613,
+      "g1_self": 0.001519671,
+      "bc1g2_self": 0.001754272,
+      "g1_cumulative": 15.142197123,
+      "bc1g2_cumulative": 16.473468585000003,
+      "delta_cumulative": 1.331271462000002
+    },
+    {
+      "function": "<tree>/src/data_sheets_schema/typed_audit_runtime.py:_prepare_packet_bytes",
+      "g1_calls": 36,
+      "bc1g2_calls": 36,
+      "g1_self": 0.0037928730000000004,
+      "bc1g2_self": 0.0040830350000000005,
+      "g1_cumulative": 37.350694126,
+      "bc1g2_cumulative": 38.641062333,
+      "delta_cumulative": 1.2903682070000002
+    }
+  ],
+  "note": "Module self time is additive. Cumulative function times overlap; do not add them. Same-file/name functions are grouped across moved line numbers. cProfile perturbs runtime. Leading 40 module increases and 60 project-function cumulative increases are retained here; the hash-pinned scratch profiles retain every function and caller."
+}

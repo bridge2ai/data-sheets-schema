@@ -1,0 +1,11 @@
+{
+  "applied": true,
+  "base_path": "src/data_sheets_schema/shared_generation.py",
+  "base_sha256": "8c799066df941dd80d65ffdc23eee225f875383e046bbc1f88656f9897d01e47",
+  "format": "bc1_protected_hook_proposal_v1",
+  "identity_note": "Applying this changes the shared source hash; build fresh BC1 registrations afterward.",
+  "proposal_sha256": "d1b713c5046ab08a163f7590272b903b804c23efb01e8c3891b0dda0661c1faf",
+  "proposed_source_sha256": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",
+  "scope": "BC1 hooks on final D41/G1; main journal and canonical assets retained unchanged",
+  "syntax_checked": true
+}

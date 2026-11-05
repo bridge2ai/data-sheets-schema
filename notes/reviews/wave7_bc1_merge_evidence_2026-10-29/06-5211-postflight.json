@@ -1,0 +1,52 @@
+{
+  "attributes": {
+    "effective": {
+      "eol": "unspecified",
+      "filter": "unspecified",
+      "merge": "bc1-keep-first",
+      "text": "unspecified",
+      "working-tree-encoding": "unspecified"
+    },
+    "tracked_ancestor_attributes": {}
+  },
+  "attributes_sha256": "9dc2def3f37f3da241330d135469a7828156481e09c0583a8649ff0a313cc328",
+  "conflicts": {
+    "scripts/build_api_registrations.py": {
+      "hunks": [
+        {
+          "line": 881,
+          "text": "<<<<<<< HEAD\n    bounded_carry_version: int = 0,\n    bc1_fan_in: int = 2,\n=======\n>>>>>>> 3c41133fcdcdb6db4d09564dc365b8b42b39c390\n"
+        },
+        {
+          "line": 1823,
+          "text": "<<<<<<< HEAD\n                    context_dir=context_dir or out_dir,\n                    source_manifest_path=selected_manifest,\n=======\n                    context_dir=context_dir,\n                    source_manifest_path=source_manifest,\n>>>>>>> 3c41133fcdcdb6db4d09564dc365b8b42b39c390\n"
+        },
+        {
+          "line": 1840,
+          "text": "<<<<<<< HEAD\n                    bounded_carry_version=bounded_carry_version,\n                    bc1_fan_in=bc1_fan_in,\n=======\n>>>>>>> 3c41133fcdcdb6db4d09564dc365b8b42b39c390\n"
+        },
+        {
+          "line": 1855,
+          "text": "<<<<<<< HEAD\n            if sizing is not None and bounded_carry_version == 1:\n                cap = sizing[\"own_plan_scenarios\"][\"visible_cap_ascii_scenario\"]\n                click.echo(f\"    BC1 actual record: {sizing['plan_workers']} workers, \"\n                           f\"{len(sizing['groups'])} integration groups and one final check; \"\n                           f\"{cap['calls']} calls in this plan\")\n                click.echo(\"    Future response scenarios are hypothetical; actual provider counts remain required.\")\n                click.echo(f\"    sizing record {Path(sizing['sidecar']['path']).name} \"\n                           f\"sha256={sizing['sidecar']['sha256']}\")\n            elif sizing is not None:\n=======\n            if sizing is not None:\n>>>>>>> 3c41133fcdcdb6db4d09564dc365b8b42b39c390\n"
+        }
+      ],
+      "index_stages": "100644 8bccb7131f208ab22fcbd8e989d2eae237737657 1\tscripts/build_api_registrations.py\n100644 ea24264f971c9be44423b2a6047145120e707f8a 2\tscripts/build_api_registrations.py\n100644 0cabbb9bd6151605c3868316156ecbeb1c965d0d 3\tscripts/build_api_registrations.py\n"
+    },
+    "src/data_sheets_schema/audit_omissions.py": {
+      "hunks": [
+        {
+          "line": 481,
+          "text": "<<<<<<< HEAD\n    if term_policy is not None:\n        payload[\"term_policy\"] = term_policy\n    encoded = _json(payload)\n    if len(_json(Prepared(encoded).request()).encode()) > max_request_bytes:\n        raise ValueError(\"complete request exceeds max_request_bytes; no partial request returned\")\n    return Prepared(encoded)\n=======\n    return Prepared(_json(payload))\n>>>>>>> 3c41133fcdcdb6db4d09564dc365b8b42b39c390\n"
+        }
+      ],
+      "index_stages": "100644 f8e485aa74c5da7007524bb5d9ae90dbe54f4b07 1\tsrc/data_sheets_schema/audit_omissions.py\n100644 24d39eae8a52933172f6910bc0cb33371dc6e6fa 2\tsrc/data_sheets_schema/audit_omissions.py\n100644 6bc14a2486b8b589721567aa71281c68ca69a606 3\tsrc/data_sheets_schema/audit_omissions.py\n"
+    }
+  },
+  "head": "6701408b4adfbad3c6aec1141a0bfd25d247ef5e",
+  "helper_sha256": "0e6d1d80858f0f72389c4bf55d399ab7f1dbd93e80f59de62581d64525f53d20",
+  "merge_head": "3c41133fcdcdb6db4d09564dc365b8b42b39c390",
+  "protected_blob": "91105618cd25e33962b1c2d30f20b37101530bb2",
+  "protected_mode": "100644",
+  "protected_sha256": "1c4436b5ea689fcd674c848a722dd9a86495692ad83401682f3d805f49acb6d6",
+  "scope": "protected postcheck and verbatim ordinary conflict evidence"
+}

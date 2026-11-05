@@ -161,11 +161,16 @@ def test_build_registration_finds_draft_contexts(tmp_path):
     bundle_path = tmp_path / "bundle.txt"
     chunks_path = tmp_path / "chunks.yaml"
     bundle_path.write_text("DUMMY BUNDLE CONTENT\n", encoding="utf-8")
-    chunks_path.write_text("version: 2\nchunks: []\n", encoding="utf-8")
+    from data_sheets_schema.chunking import build_manifest, dump_manifest
+    chunks_path.write_text(dump_manifest(build_manifest(bundle_path)), encoding="utf-8")
 
     reg = build_registration(
         project="CHORUS",
-        partition="chorus",
+        # This tests context discovery with a dummy bundle. Use the builder's
+        # explicit historical sizing route, not implicit calibration coverage.
+        audit_limits={"max_paths": 80, "max_inventory_bytes": 12288,
+                      "max_workers": 4, "aggregate_input_tokens": 4000000},
+        sizing_record=Path(__file__).resolve().parents[1] / "tests/fixtures/audit_batches/chorus_v10_2026-10-22a",
         label="test_label",
         registration_path=reg_path,
         bundle_path=bundle_path,

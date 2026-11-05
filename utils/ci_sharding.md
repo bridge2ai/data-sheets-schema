@@ -1,13 +1,14 @@
 # CI test partitioning
 
 Every pull request runs the complete collected suite, including corpus tests,
-on six Python 3.12 shards. Main and manual runs use four Python 3.12 shards
+on eight Python 3.12 shards. Main and manual runs use six Python 3.12 shards (D81)
 and one separate schema/example build. Three additional Python 3.12 jobs run the
 complete offline canary, audit/finalization and evaluation suites alongside the
 shards. Budget and native transport controls run once in the canary job, with
 the same 45-minute job limit and existing test deadlines, rather than sharing
 the time left after a full suite shard (#4466). Four more jobs each run one required long offline API case, with the same
-45-minute limit (#4517). PR shards and every other job keep 45 minutes, while ordinary shards on main and manual runs allow 60 (D75). There are thirteen Python jobs on PRs and twelve on
+45-minute limit (#4517). Ordinary shards retain D75's 45-minute PR and
+60-minute main/manual limits. There are fifteen Python jobs on PRs and fourteen on
 main/manual runs, plus the aggregate `test` job. The aggregate
 requires every applicable job to succeed; failure, cancellation or an unexpected
 skip in any offline lane also fails it. Package metadata still permits Python
@@ -167,9 +168,9 @@ environment and bytecode prefix. They retain JUnit plus streamed text output in
 separate `tests-py3.12-api-<lane>` artifacts for 14 days, even when a failed test
 does not complete JUnit. A hard runner cancellation can still prevent upload.
 The aggregate requires the entire four-case matrix to succeed on PR, main and
-manual events, as well as the existing jobs. PRs have fourteen required successes
-plus the expected schema/example skip; main/manual have thirteen successes.
-Across PR, manual and the separate large-files check this is twenty-eight
+manual events, as well as the existing jobs. PRs have sixteen required successes
+plus the expected schema/example skip; main/manual have fifteen successes (D81).
+Across PR, manual and the separate large-files check this is thirty-two
 required successes and one expected skip, without counting unrelated automation.
 
 This change responds to the actual 45-minute PR shard timeout in run37452512623.

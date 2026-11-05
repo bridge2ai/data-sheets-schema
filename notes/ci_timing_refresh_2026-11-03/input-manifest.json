@@ -1,0 +1,149 @@
+{
+  "head": "0ff5c9ba7665eb51b69e597c391cb1ae6a07c44c",
+  "collection_path": "scratch-bc1g2-timing/collection/collection.json",
+  "collection_sha256": "fdeada3de90ce15965ee6f73baa83f528efcd6c6f1b56b07b914624fd0c119d2",
+  "baseline_sha256": "472968d9d011b59eb9b41a6056fdbeba880cba09e198ce1cbaa5b5e1ae0350e6",
+  "xml": [
+    {
+      "source": "bc1g2",
+      "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard2/pytest.xml",
+      "sha256": "7347dd06391e251c957fbd238436d938ae71f748ed8283d84bcb3a1fa9c3d1f2"
+    },
+    {
+      "source": "bc1g2",
+      "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard3/pytest.xml",
+      "sha256": "55b6f3c70d91110a80b5c10dc6a2bf4580c36924c855a68ebc0759cc0f742e77"
+    },
+    {
+      "source": "bc1g2",
+      "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard4/pytest.xml",
+      "sha256": "75aa17cf6057263242fb806e61228972bdc844120eebf5bf621066ee5a9e074d"
+    },
+    {
+      "source": "bc1g2",
+      "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard6/pytest.xml",
+      "sha256": "0f933c35a461a1dc88b5922c13d91f51d5d617d117f8e665f313148c1bcdcd7f"
+    },
+    {
+      "source": "g1",
+      "path": "scratch-bc1g2-timing/run-41700664435/tests-py3.12-shard1/pytest.xml",
+      "sha256": "f94cb62b1a4cd36a68ddc4a8a1dfff8da4be2267805f4244ee5229363cddc5da"
+    },
+    {
+      "source": "g1",
+      "path": "scratch-bc1g2-timing/run-41700664435/tests-py3.12-shard2/pytest.xml",
+      "sha256": "963ac68cc150f3e5364f24954544d29a20acd1c9d6740923f5c9f043f9374b21"
+    },
+    {
+      "source": "g1",
+      "path": "scratch-bc1g2-timing/run-41700664435/tests-py3.12-shard3/pytest.xml",
+      "sha256": "0a16c821255df598b57864c9dfa999a6e654f854c593eaaba9958a70e06b2a17"
+    },
+    {
+      "source": "g1",
+      "path": "scratch-bc1g2-timing/run-41700664435/tests-py3.12-shard4/pytest.xml",
+      "sha256": "d5c3e32c9d9457306307d3722f0667d2c96487f003bbe0d3f273c1c65c06f7cd"
+    },
+    {
+      "source": "g1",
+      "path": "scratch-bc1g2-timing/run-41700664435/tests-py3.12-shard5/pytest.xml",
+      "sha256": "6d952fae5e9578884a7be43e6938c3e4cb98d6058f39080b74fd50462e7a017d"
+    },
+    {
+      "source": "g1",
+      "path": "scratch-bc1g2-timing/run-41700664435/tests-py3.12-shard6/pytest.xml",
+      "sha256": "2b73ed13bbf7d5ae23b12f58307f1a1bcd34c194dd1ab3faa1e50940c214d32d"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-00/junit.xml",
+      "sha256": "ad91aae1d141147b05d28ece957641696f43bd1a0a02e37002baa8118e7c101a"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-01/junit.xml",
+      "sha256": "f509ab88cc132a3d9e1385e9d1d56c5fd4881419f27eb120160e497cd1b58d48"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-02/junit.xml",
+      "sha256": "b50c1cc328d4b9d05c2e8b14d295804a0b0ef74c2b4ccd0fa695dfbae5d9fc2f"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-03/junit.xml",
+      "sha256": "04c3daf11d2130e17a5d106cbd5e6c61fd0408220c60fc816dceb2fb289a6700"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-04/junit.xml",
+      "sha256": "603801d7c5564e8e859e5bbfb1dae1bb7aa0a90df85c378e0baea73963c23327"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-05/junit.xml",
+      "sha256": "8d99ff072180a0fe73631d6af0c513955cdc3747f5f74a85e6c115a7b420eea4"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-06/junit.xml",
+      "sha256": "43ac596cfc7062327cc369d19fd63362afbdb4d30a28ebb09eb584d7412f8e5d"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-07/junit.xml",
+      "sha256": "a2be94df9c7831d7bff81038c5aef5ccb3cf7cabb28cbf61c1468a645e53b7b4"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-08/junit.xml",
+      "sha256": "6097e60d3a8c5541bcb95dab027ddec690e6777795c1e6a0cbdd762396e0c04e"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-09/junit.xml",
+      "sha256": "1faf923aae75467307927f07c230aa233781cd1b074bf62061747fb4b07da396"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-10/junit.xml",
+      "sha256": "fa9bae5266c4667fba07bd10ec21a8e4f5e869f48daf5aeb04db136d78b38b55"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-11/junit.xml",
+      "sha256": "c32b51c8b3ccaadb6327df79341ad9341c7e3d79b8554844671b978389582e5b"
+    },
+    {
+      "source": "local-with",
+      "path": "plans/reviews/bc1_g2_integration_2026-11-03/round2/evidence/with/group-12/junit.xml",
+      "sha256": "0cced2f74577244880dfc3c1c77ae91fda7a7fd7a43b872f04a0998922d6e953"
+    }
+  ],
+  "metadata": [
+    {
+      "path": "scratch-bc1g2-timing/run-41707437114/run_metadata.json",
+      "sha256": "76077815c82ee9ff047166c83c27d317f82af0bf9e4b8065abb13a7fdd3c6437"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41707437114/artifacts_roster.json",
+      "sha256": "9e02695f3f5a9f9388cb532bc348f97b53bafffd4c39151cc92940bf1d2d9baf"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41707437114/jobs.json",
+      "sha256": "5a23744be71813890689ffe0fa9c808c328a78a75544e5ca0dd788fb4718d4cf"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41700664435/run_metadata.json",
+      "sha256": "e34e913223a6420b94a85f6625b836b967fd6099b73d7d46ac6e76b67388de65"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41700664435/artifacts_roster.json",
+      "sha256": "4416bd77c1cdcb1ff8f220e4692173735336362b4f10236366b22a711381eda0"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41700664435/jobs.json",
+      "sha256": "82727d0509e5fd36d58528d56337c6856ed5bb8fce5f48a9b2600a395fca7d6a"
+    }
+  ]
+}

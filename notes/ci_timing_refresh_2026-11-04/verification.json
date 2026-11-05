@@ -1,0 +1,20 @@
+{
+  "weights_sha256": "845434a3e72483fb81a16d1634e84b06040d4d5864a3cb6cd2720bcd2c716305",
+  "exact_reproduction": true,
+  "prior_provenance_preserved": true,
+  "hash_mismatch_refused_before_write": true,
+  "layouts": [
+    {
+      "shards": 6,
+      "cases": 22364,
+      "missing": 0,
+      "extra": 0
+    },
+    {
+      "shards": 4,
+      "cases": 22364,
+      "missing": 0,
+      "extra": 0
+    }
+  ]
+}

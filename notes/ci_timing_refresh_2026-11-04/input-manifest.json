@@ -1,0 +1,147 @@
+{
+  "baseline": "decf0cab1376d608d2ce411d2d6d8ce3e2ac42ce",
+  "baseline_weights_sha256": "a554dc4277711297225ec79ba9b0dee0f83b5d6c98ed900cbff833814f90c499",
+  "collection": {
+    "path": "scratch-bc1g2-timing/r3-collection/collection.json",
+    "sha256": "7156d07c6acce24c8a1745deff4b65e042891d492126835f1a3d0cb8336dac9a"
+  },
+  "xml": [
+    {
+      "path": "scratch-bc1g2-timing/run-41735860489/tests-py3.12-shard1/pytest.xml",
+      "sha256": "cb322e476636ab043418a369c7864c1cec96374be65fb12496301a69eec83ce5",
+      "run": "41735860489",
+      "shard": 1
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41735860489/tests-py3.12-shard3/pytest.xml",
+      "sha256": "743e24ee278e572c53ede0b971e5d48e41c8752fd44d88898c149318d6519a39",
+      "run": "41735860489",
+      "shard": 3
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41735860489/tests-py3.12-shard4/pytest.xml",
+      "sha256": "b07559fa9bc6711d3f769a3b3ebb488a6c9df6e9f82a808014495fce6c9addb2",
+      "run": "41735860489",
+      "shard": 4
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41735860489/tests-py3.12-shard5/pytest.xml",
+      "sha256": "1c7907b48149bd5063bbdd928f64f04275b6b16b154d51efb51d5de2ec641ca1",
+      "run": "41735860489",
+      "shard": 5
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41735860489/tests-py3.12-shard6/pytest.xml",
+      "sha256": "3213c6fd7f986f3c7c91d414da8862398aa2f7f41473c947675d988dabd374db",
+      "run": "41735860489",
+      "shard": 6
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard2/pytest.xml",
+      "sha256": "7347dd06391e251c957fbd238436d938ae71f748ed8283d84bcb3a1fa9c3d1f2",
+      "run": "41707437114",
+      "shard": 2
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard3/pytest.xml",
+      "sha256": "55b6f3c70d91110a80b5c10dc6a2bf4580c36924c855a68ebc0759cc0f742e77",
+      "run": "41707437114",
+      "shard": 3
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard4/pytest.xml",
+      "sha256": "75aa17cf6057263242fb806e61228972bdc844120eebf5bf621066ee5a9e074d",
+      "run": "41707437114",
+      "shard": 4
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41707437114/tests-py3.12-shard6/pytest.xml",
+      "sha256": "0f933c35a461a1dc88b5922c13d91f51d5d617d117f8e665f313148c1bcdcd7f",
+      "run": "41707437114",
+      "shard": 6
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41700664435/tests-py3.12-shard1/pytest.xml",
+      "sha256": "f94cb62b1a4cd36a68ddc4a8a1dfff8da4be2267805f4244ee5229363cddc5da",
+      "run": "41700664435",
+      "shard": 1
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41700664435/tests-py3.12-shard2/pytest.xml",
+      "sha256": "963ac68cc150f3e5364f24954544d29a20acd1c9d6740923f5c9f043f9374b21",
+      "run": "41700664435",
+      "shard": 2
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41700664435/tests-py3.12-shard3/pytest.xml",
+      "sha256": "0a16c821255df598b57864c9dfa999a6e654f854c593eaaba9958a70e06b2a17",
+      "run": "41700664435",
+      "shard": 3
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41700664435/tests-py3.12-shard4/pytest.xml",
+      "sha256": "d5c3e32c9d9457306307d3722f0667d2c96487f003bbe0d3f273c1c65c06f7cd",
+      "run": "41700664435",
+      "shard": 4
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41700664435/tests-py3.12-shard5/pytest.xml",
+      "sha256": "6d952fae5e9578884a7be43e6938c3e4cb98d6058f39080b74fd50462e7a017d",
+      "run": "41700664435",
+      "shard": 5
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41700664435/tests-py3.12-shard6/pytest.xml",
+      "sha256": "2b73ed13bbf7d5ae23b12f58307f1a1bcd34c194dd1ab3faa1e50940c214d32d",
+      "run": "41700664435",
+      "shard": 6
+    }
+  ],
+  "metadata": [
+    {
+      "path": "scratch-bc1g2-timing/run-41735860489/run_metadata.json",
+      "sha256": "65f011685207cdfaeb05be8844c62116bade9567fa0eaaad44282d431d6730ff",
+      "run": "41735860489"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41735860489/artifacts_roster.json",
+      "sha256": "318ceb4ae732003209daebd8bc59b4aedec9721708a1cf37769a381c300f2841",
+      "run": "41735860489"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41735860489/jobs.json",
+      "sha256": "bca2e78466935f0533f8d1f53afe176db665eeca15aaab04f660699cef8732fd",
+      "run": "41735860489"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41707437114/run_metadata.json",
+      "sha256": "76077815c82ee9ff047166c83c27d317f82af0bf9e4b8065abb13a7fdd3c6437",
+      "run": "41707437114"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41707437114/artifacts_roster.json",
+      "sha256": "9e02695f3f5a9f9388cb532bc348f97b53bafffd4c39151cc92940bf1d2d9baf",
+      "run": "41707437114"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41707437114/jobs.json",
+      "sha256": "5a23744be71813890689ffe0fa9c808c328a78a75544e5ca0dd788fb4718d4cf",
+      "run": "41707437114"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41700664435/run_metadata.json",
+      "sha256": "e34e913223a6420b94a85f6625b836b967fd6099b73d7d46ac6e76b67388de65",
+      "run": "41700664435"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41700664435/artifacts_roster.json",
+      "sha256": "4416bd77c1cdcb1ff8f220e4692173735336362b4f10236366b22a711381eda0",
+      "run": "41700664435"
+    },
+    {
+      "path": "scratch-bc1g2-timing/run-41700664435/jobs.json",
+      "sha256": "82727d0509e5fd36d58528d56337c6856ed5bb8fce5f48a9b2600a395fca7d6a",
+      "run": "41700664435"
+    }
+  ]
+}

@@ -20,6 +20,7 @@ from scripts import build_api_registrations as builder
 from data_sheets_schema import api_runner as api, shared_generation as sg
 from data_sheets_schema.schema_snapshot import capture_schema
 from tests.test_source_heading_runtime_api import draft_files, selected_spec
+from tests.utils.partition_resources import copy_partition_resources
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -78,6 +79,7 @@ def selected_resources(tmp_path):
         target = selected / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / name, target)
+    copy_partition_resources(selected)
     args = dict(project="CHORUS", label="selected", registration_path=tmp_path / "selected.json",
                 bundle_path=original["inputs"]["bundle"]["path"],
                 chunk_manifest_path=original["inputs"]["chunk_manifest"]["path"],
@@ -125,10 +127,14 @@ def test_explicit_project_manifest_comes_from_selected_tree(selected_resources):
     assert reg["inputs"]["profile"]["name"] == "neutral"
 
 
-@pytest.mark.parametrize("resource", ["prompt", "config", "vocabulary", "full_schema", "core_schema", "request_code"])
+@pytest.mark.parametrize("resource", ["prompt", "config", "vocabulary", "full_schema", "core_schema", "request_code",
+                                      *builder.AUDIT_PARTITION_FILES])
 def test_missing_selected_resource_refuses_without_fallback(selected_resources, resource):
     selected, original, args = selected_resources
-    if resource == "prompt":
+    if resource in builder.AUDIT_PARTITION_FILES:
+        builder.build_registration(**args)  # Positive selected-tree control.
+        relative = resource
+    elif resource == "prompt":
         relative = next(iter(sg.ASSET_HASHES))
     elif resource == "request_code":
         relative = sg.REQUEST_CODE[0]
@@ -141,10 +147,50 @@ def test_missing_selected_resource_refuses_without_fallback(selected_resources, 
     target = selected / relative
     target.unlink()
     before = Path.cwd()
-    with pytest.raises((OSError, ValueError)):
+    with pytest.raises((OSError, ValueError)) as error:
         builder.build_registration(**args)
+    if resource in builder.AUDIT_PARTITION_FILES:
+        assert str(target) in str(error.value)
     assert Path.cwd() == before
     assert (ROOT / relative).is_file()  # The other checkout still supplies it.
+
+
+def test_added_declaration_is_read_and_missing_or_malformed_refuses(selected_resources, monkeypatch):
+    selected, _, args = selected_resources
+    options = dict(source_manifest=Path(args["source_manifest_path"]), root_dir=selected)
+    before = builder.partition_profiles(**options)
+    extra = "config/additional_audit_partitions.yaml"
+    monkeypatch.setattr(builder, "AUDIT_PARTITION_FILES", (*builder.AUDIT_PARTITION_FILES, extra))
+    target = selected / extra
+    with pytest.raises(ValueError) as missing:
+        builder.partition_profiles(**options)
+    assert str(target) in str(missing.value)
+    target.write_text("projects: []\n")
+    with pytest.raises(ValueError) as malformed:
+        builder.partition_profiles(**options)
+    assert str(target) in str(malformed.value)
+    target.write_text("projects: {}\n")
+    assert builder.partition_profiles(**options) == before
+
+
+def test_multiple_declarations_keep_one_authority_per_project(selected_resources, monkeypatch):
+    import yaml
+    selected, _, args = selected_resources
+    options = dict(source_manifest=Path(args["source_manifest_path"]), root_dir=selected)
+    first = selected / builder.AUDIT_PARTITION_FILES[0]
+    extra = "config/additional_audit_partitions.yaml"
+    target = selected / extra
+    before = builder.partition_profiles(**options)
+    target.write_bytes(first.read_bytes())
+    monkeypatch.setattr(builder, "AUDIT_PARTITION_FILES", (*builder.AUDIT_PARTITION_FILES, extra))
+    assert builder.partition_profiles(**options) == before
+    document = yaml.safe_load(target.read_bytes())
+    project, entry = next(iter(document["projects"].items()))
+    entry["audit_partition"]["limits"]["max_paths"] += 1
+    target.write_text(yaml.safe_dump(document))
+    with pytest.raises(ValueError) as conflicting:
+        builder.partition_profiles(**options)
+    assert all(text in str(conflicting.value) for text in (project, str(first), str(target)))
 
 
 def test_selected_prompt_drift_is_not_hidden_by_callers_valid_prompt(selected_resources):
@@ -218,6 +264,10 @@ def test_valid_partition_still_publishes_requested_draft(tmp_path, selected_reso
     args.pop("context_path")
     args.update(registration_path=output / "registration.json", context_dir=output / "contexts",
                 synthesize_draft_context=True, write_to_disk=True)
+    # The draft context does not exist yet, so it cannot earn implicit coverage.
+    # Explicit sizing accepts its in-memory bytes through the normal gate.
+    args["sizing_record"] = builder.SizingRecord.in_directory(
+        ROOT / "tests/fixtures/audit_batches/chorus_v10_2026-10-22a", "CHORUS")
     reg = builder.build_registration(**args)
     assert Path(reg["registration_path"]).is_file()
     assert Path(reg["inputs"]["context"]["path"]) == output / "contexts" / "chorus_omission_context.json"
@@ -289,6 +339,7 @@ def test_copied_cli_selects_foreign_tree_from_another_checkout(tmp_path, option,
         target = selected / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / relative, target)
+    copy_partition_resources(selected)
     copied = tmp_path / "caller-inputs" / "build_api_registrations.py"
     copied.parent.mkdir()
     shutil.copyfile(Path(builder.__file__), copied)
