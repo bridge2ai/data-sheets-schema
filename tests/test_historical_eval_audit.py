@@ -140,7 +140,7 @@ def test_same_cohort_bytes_at_unselected_path_do_not_replace_pinned_selection(hi
 
 @pytest.mark.parametrize(("mutation", "reason"), [
     ("unknown_format", "registered_manifest_format_or_encoding"),
-    ("shared_format", "registered_pin_invalid"),
+    ("shared_format", "registered_shared_manifest_contract"),
     ("kind", "registered_historical_authority_kind_mismatch"),
     ("historical_identity", "registered_historical_identity_mismatch"),
     ("extra_field", "registered_historical_manifest_contract"),

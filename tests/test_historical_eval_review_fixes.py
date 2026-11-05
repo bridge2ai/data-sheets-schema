@@ -121,8 +121,12 @@ def test_real_mixed_condition_group_labels_each_evidence_kind(
     from tests.test_historical_eval_parity import equivalent_historical_inputs
     from tests.test_historical_eval_audit import historical_audit
     from tests.test_registered_eval_runner import install_cli
+    shared_prior = yaml.safe_load(registered_generation_inputs["provenance"].read_bytes())
+    shared_prior["run"]["replicate"] = 17
+    counterpart = historical_inputs["record"].parent / "shared-counterpart.yaml"
+    counterpart.write_text(yaml.safe_dump(shared_prior))
     inputs = equivalent_historical_inputs(
-        {**registered_generation_inputs, "repeat_count": 3}, historical_inputs)
+        {**registered_generation_inputs, "repeat_count": 3, "provenance": counterpart}, historical_inputs)
     prepared = runner.prepare_historical(**inputs)
     output = inputs["record"].parent / "mixed-historical"
     with monkeypatch.context() as mocked:

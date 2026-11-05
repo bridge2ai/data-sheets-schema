@@ -396,6 +396,7 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
 
     capture = RegisteredCapture(root, directory, authority_roots)
     package = {"arm": arm, "path": relative(root, capture.directory), "reasons": [],
+               "generation_authority_kind": None,
                "attempts": [], "record": None, "rows": [], "generation_acceptance_verified": False,
                "lock_consistent": False, "lock_status": "not_checked", "committed_package": False}
     try:
@@ -1058,6 +1059,7 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
                                      historical_decisions=historical_decisions)
         except (OSError, ValueError) as exc:
             package = {"arm": arm, "path": str(directory), "status": "refused", "record": None,
+                "generation_authority_kind": None,
                 "rows": [], "attempts": [], "reasons": [str(exc) if isinstance(exc, RegisteredRefusal)
                     else "registered_directory_missing_or_external"]}
         packages.append(package)
@@ -1081,6 +1083,7 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
                 package["rows"] = []
             else:
                 record["registered_run"] = candidate["registered_run"]
+                record["generation_authority_kind"] = candidate["generation_authority_kind"]
         else:
             record = candidate
             record["evaluations"] = {rubric: {"files": []} for rubric in RUBRICS}
