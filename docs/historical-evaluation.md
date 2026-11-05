@@ -81,6 +81,12 @@ binds the complete record, generation evidence and blinding instance. Different
 records cannot inflate a fixed-record repeat panel. Independent sessions may
 return identical score JSON.
 
+The audit's `evaluation_condition_groups` exposes each condition's exact record
+and rating members, their receipt/transcript identities and pending evidence.
+It counts records separately from rating files and grants no comparability,
+review or session-independence approval. Historical admission-code pins remain
+required package evidence, separate from the common evaluator-condition key.
+
 ## Campaign pack
 
 Historical campaign packing is opt-in, using repeated

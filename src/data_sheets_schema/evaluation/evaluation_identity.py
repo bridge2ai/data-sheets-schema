@@ -22,6 +22,7 @@ def evaluation_condition_key(plan):
     the number of ratings and total panel allocation are not one rating's input.
     """
     from .registered_eval_runner import EVALUATOR_MODULES
+    from data_sheets_schema.semantic_instrument import select_semantic_instrument
 
     implementations = []
     for module in EVALUATOR_MODULES:
@@ -31,6 +32,13 @@ def evaluation_condition_key(plan):
             raise ValueError("evaluation condition requires each common evaluator implementation")
         pin = matches[0]
         implementations.append({"module": module, "sha256": pin["sha256"], "bytes": pin["bytes"]})
+    selected = select_semantic_instrument(plan["instrument"]["rubric"], plan["instrument"]["version"])
+    schema_pins = [pin for pin in plan["authorities"]
+                   if pin["path"].endswith("/" + selected.schema_path)]
+    if len(schema_pins) != 1:
+        raise ValueError("evaluation condition requires the selected instrument schema")
+    schema = {"resource": selected.schema_path,
+              **{key: schema_pins[0][key] for key in ("sha256", "bytes")}}
     runtime = deepcopy(plan["runtime"])
     binary = runtime["binary"]
     if binary is not None:
@@ -42,6 +50,7 @@ def evaluation_condition_key(plan):
         "record_role": plan["record_role"],
         "context_sha256": plan["context_sha256"],
         "instrument": plan["instrument"],
+        "instrument_schema": schema,
         "execution_adapter": plan["execution_adapter"],
         "execution_mode": plan["execution_mode"],
         "runtime": runtime,

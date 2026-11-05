@@ -440,6 +440,9 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
 
         def captured_pin(pin):
             pin = checked_pin(pin)
+            if is_historical:
+                require(str(Path(pin["path"]).resolve()) == pin["path"],
+                        "registered_historical_authority_alias")
             require(authorities.get(pin["path"]) == pin, "registered_authority_not_captured")
             return capture.pinned(pin)
 
@@ -658,6 +661,11 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         for name in ("evaluation/registered_eval_runner.py", "evaluation/blind_review_pack.py"):
             require(sum(entry["path"].endswith("/" + name) for entry in implementation_pins) == 1,
                     "registered_blinding_implementation_pin_missing")
+        if is_historical:
+            for name in ("evaluation/historical_eval_binding.py", "evaluation/cohort_manifest.py"):
+                require(sum(entry["path"].endswith("/data_sheets_schema/" + name)
+                            for entry in implementation_pins) == 1,
+                        "registered_historical_implementation_pin_missing")
         condition = {"source": "registered_blinded", "record_role": "full", "original_sha256": sha(original),
             "blinded_sha256": sha(blinded), "blinding": blinding, "adapter": adapter,
             "instrument": selected_instrument, "runtime": runtime, "implementation_pins": implementation_pins}
@@ -922,6 +930,45 @@ def repeat_panel(rows):
         "basis": "Distinct reported sessions of one fixed input/condition; registered rows additionally join retained transcripts and receipts. Neither proves independent evaluators or human approval."}
 
 
+def evaluation_condition_groups(records):
+    """Group bound registered ratings across records without granting acceptance.
+
+    Per-record repeats remain in repeat_panel. Pending publication/lock evidence
+    remains attached to each member; matching keys establish declared conditions
+    only, not scientific comparability or authenticated execution.
+    """
+    groups = {}
+    for record in records:
+        if record["reasons"]:
+            continue
+        for rubric, block in record["evaluations"].items():
+            for row in block["files"]:
+                if (row["reasons"] or row.get("source") != "registered_blinded"
+                        or row.get("contract_checked") is not True):
+                    continue
+                key = row["evaluation_condition_key"]
+                member = {name: record[name] for name in ("arm", "project", "label", "replicate",
+                          "generation_method", "record_path", "record_sha256", "provenance_sha256")}
+                member.update(rubric=rubric, record_role=row["record_role"],
+                    generation_run=record["registered_run"], rating_path=row["path"], rating_sha256=row["sha256"],
+                    manifest_sha256=row["manifest_sha256"], receipt_sha256=row["receipt_sha256"],
+                    transcript_sha256=row["transcript_sha256"], rating_index=row["rating_index"],
+                    session_id=row["session_id"], repeat_key=row["repeat_key"], pending=list(row["pending"]),
+                    eligible_for_condition_review=row["eligible_for_condition_review"])
+                groups.setdefault(key, []).append(member)
+    result = []
+    for key, members in sorted(groups.items()):
+        members.sort(key=lambda member: tuple(member[name] for name in (
+            "arm", "project", "label", "rubric", "rating_path", "rating_index")))
+        result.append({"evaluation_condition_key": key, "members": members,
+            "bound_rating_files": len(members),
+            "record_count": len({tuple(member[name] for name in ("arm", "project", "label", "record_sha256"))
+                                 for member in members}),
+            "comparable_for_final_v10": False, "context_human_review_verified": False,
+            "independence_verified": False})
+    return result
+
+
 def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None, contexts=None,
           registered_evaluations=(), authority_roots=(), execution_lock_root=None,
           historical_decisions=()):
@@ -1123,6 +1170,7 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
             "bound_registered_rating_files": sum(not row["reasons"] for package in packages for row in package["rows"]),
             "projects_with_repeat_actions": len(repeat_gaps)},
         "summary": summary, "records": records, "rescore_tuples": rescore,
+        "evaluation_condition_groups": evaluation_condition_groups(records),
         "registered_evaluations": [{key: value for key, value in package.items() if key not in {"record", "rows"}}
                                    for package in packages],
         "repeat_panel_actions": repeat_gaps,
