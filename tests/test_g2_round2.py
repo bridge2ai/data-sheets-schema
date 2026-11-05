@@ -16,6 +16,7 @@ from tests.test_bc1_context import fixture, policy
 from tests.test_bc1_context import fixture as context_fixture
 from tests.test_bc1_registration import sizing_fixture
 from tests.test_bc1_selection import external, simulated_hooks, registered
+from tests.utils.partition_resources import copy_partition_resources
 
 
 def pin(path):
@@ -28,16 +29,17 @@ def declaration(tmp_path, monkeypatch):
     """Isolated config authority; real CHORUS calibration bytes, no data edits."""
     root = tmp_path / "checkout"
     (root / "config").mkdir(parents=True)
+    copy_partition_resources(root)
     manifest = tmp_path / "manifest.yaml"
     original = builder.ROOT / "data/preprocessed/source_manifest.yaml"
     manifest.write_bytes(original.read_bytes())
-    config = root / "config/audit_partitions.yaml"
-    doc = yaml.safe_load((builder.ROOT / "config/audit_partitions.yaml").read_bytes())
+    config = root / builder.AUDIT_PARTITION_FILES[0]
+    doc = yaml.safe_load(config.read_bytes())
     row = doc["projects"]["CHORUS"]["audit_partition"]
     # Compatible with the reviewed head, which has no manifest pin yet.
     row.pop("source_manifest_sha256", None)
     for value in row["sizing_record"].values():
-        value["path"] = str(builder.ROOT / value["path"])
+        value["path"] = str(root / value["path"])
     config.write_text(yaml.safe_dump(doc))
     monkeypatch.setattr(builder, "ROOT", root)
     monkeypatch.chdir(root)
@@ -53,11 +55,12 @@ def calibration_case(sizing_fixture, tmp_path, monkeypatch, project):
     registration, files, inputs = sizing_fixture
     root = tmp_path / "calibration-root"
     (root / "config").mkdir(parents=True)
+    copy_partition_resources(root)
     (root / "src").symlink_to(builder.ROOT / "src", target_is_directory=True)
     (root / ".github").symlink_to(builder.ROOT / ".github", target_is_directory=True)
     (root / ".claude").symlink_to(builder.ROOT / ".claude", target_is_directory=True)
     (root / "pyproject.toml").write_bytes((builder.ROOT / "pyproject.toml").read_bytes())
-    config = root / "config/audit_partitions.yaml"
+    config = root / builder.AUDIT_PARTITION_FILES[0]
     save(config, {"projects": {}})
     monkeypatch.setattr(builder.api, "FULL_SCHEMA_PATH", inputs["schema_path"])
     monkeypatch.setattr(builder.api, "CORE_SCHEMA_PATH", inputs["schema_path"])
@@ -361,7 +364,8 @@ def test_valid_calibration_and_single_variable_negative_controls(sizing_fixture,
     registration, files, inputs = sizing_fixture
     root = tmp_path / "root"
     (root / "config").mkdir(parents=True)
-    config = root / "config/audit_partitions.yaml"
+    copy_partition_resources(root)
+    config = root / builder.AUDIT_PARTITION_FILES[0]
     save(config, {"projects": {}})
     monkeypatch.setattr(builder, "ROOT", root)
     monkeypatch.setattr(builder.api, "FULL_SCHEMA_PATH", inputs["schema_path"])

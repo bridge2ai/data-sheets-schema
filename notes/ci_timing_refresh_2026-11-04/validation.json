@@ -1,0 +1,246 @@
+[
+  {
+    "label": "r3-failing-first",
+    "command": [
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "-S",
+      "-P",
+      "-B",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-bc1g2-timing/scripts/adhoc/refresh_ci_timings_bc1g2_20261103.py",
+      "worker",
+      "--label",
+      "r3-failing-first",
+      "--",
+      "tests/test_wave4_5095_review.py::test_worktree_override_uses_selected_tree_schema_resources",
+      "-q"
+    ],
+    "exit_code": 1,
+    "deadline_seconds": 3600,
+    "wall_seconds": 8.177267500024755,
+    "counts": {
+      "failure": 1
+    },
+    "by_module": {
+      "tests.test_wave4_5095_review": {
+        "failure": 1
+      }
+    },
+    "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+    "head": "decf0cab1376d608d2ce411d2d6d8ce3e2ac42ce",
+    "weights_sha256": "a554dc4277711297225ec79ba9b0dee0f83b5d6c98ed900cbff833814f90c499",
+    "artifacts": {
+      "junit.xml": "a196079326ccc7d8af3bbaf6eeef28bbb2b8a381fd4d4a55ede5f48393d5f5b4",
+      "execution.json": "880f36d5d704fd04e560d7c6eb562e1360bf2966c0ae2a906a8cdd53cadfe6b8",
+      "environment.json": "643c68f18e6a3b6e0ae2db52c26354a41973227bd04f9d5d9e6935c53ed7ffe3",
+      "collection.json": "c13ad938df2ea1f3b43b951d121aec22e5a30c8f0736920e9c11eb39c5f3c9f9",
+      "module-origins.json": "c2920b6323facdf64584cce0f0f708e3b98e28e0f605bb1572533c972f7b8b15"
+    }
+  },
+  {
+    "label": "r3-fix-canary",
+    "command": [
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "-S",
+      "-P",
+      "-B",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-bc1g2-timing/scripts/adhoc/refresh_ci_timings_bc1g2_20261103.py",
+      "worker",
+      "--label",
+      "r3-fix-canary",
+      "--",
+      "tests/test_wave4_5095_review.py::test_worktree_override_uses_selected_tree_schema_resources",
+      "-q"
+    ],
+    "exit_code": 0,
+    "deadline_seconds": 3600,
+    "wall_seconds": 11.46494083298603,
+    "counts": {
+      "passed": 1
+    },
+    "by_module": {
+      "tests.test_wave4_5095_review": {
+        "passed": 1
+      }
+    },
+    "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+    "head": "decf0cab1376d608d2ce411d2d6d8ce3e2ac42ce",
+    "weights_sha256": "a554dc4277711297225ec79ba9b0dee0f83b5d6c98ed900cbff833814f90c499",
+    "artifacts": {
+      "junit.xml": "44692f5ef6bb29610da8e319db4d2686da23c66b7abf6e1eea1ace3584cebf08",
+      "execution.json": "5a2c413082af7ae9c00fc71245e7d72e6b17a085be9a369049954b34285b31af",
+      "environment.json": "643c68f18e6a3b6e0ae2db52c26354a41973227bd04f9d5d9e6935c53ed7ffe3",
+      "collection.json": "0e92a32e58847e2fd02cc827847227e2ea8bcd2e772bd8bca24bb5a70d5b5c79",
+      "module-origins.json": "c004e985fc0a69c14c6a021de1a9968a2bbe827fd08f794eeec789595cbbd42f"
+    }
+  },
+  {
+    "label": "r3-fixture-contracts",
+    "command": [
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "-S",
+      "-P",
+      "-B",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-bc1g2-timing/scripts/adhoc/refresh_ci_timings_bc1g2_20261103.py",
+      "worker",
+      "--label",
+      "r3-fixture-contracts",
+      "--",
+      "tests/test_preflight_resource_authority.py",
+      "tests/test_build_api_registrations.py",
+      "tests/test_wave4_5095_review.py",
+      "tests/test_wave5_5095_review.py",
+      "tests/test_g2_round2.py",
+      "tests/test_wave4_a17_a13_integration.py",
+      "tests/utils",
+      "-q",
+      "--durations=15"
+    ],
+    "exit_code": 0,
+    "deadline_seconds": 3600,
+    "wall_seconds": 225.1019126669853,
+    "counts": {
+      "passed": 148
+    },
+    "by_module": {
+      "tests.test_preflight_resource_authority": {
+        "passed": 40
+      },
+      "tests.test_build_api_registrations": {
+        "passed": 34
+      },
+      "tests.test_wave4_5095_review": {
+        "passed": 5
+      },
+      "tests.test_wave5_5095_review": {
+        "passed": 5
+      },
+      "tests.test_g2_round2": {
+        "passed": 61
+      },
+      "tests.test_wave4_a17_a13_integration": {
+        "passed": 3
+      }
+    },
+    "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+    "head": "decf0cab1376d608d2ce411d2d6d8ce3e2ac42ce",
+    "weights_sha256": "a554dc4277711297225ec79ba9b0dee0f83b5d6c98ed900cbff833814f90c499",
+    "artifacts": {
+      "junit.xml": "de2f93fcdd7e6bfb444c90c93e91efcaee389c1ef432a971dc4117ead0893242",
+      "execution.json": "c2085bd5082834e2eca7b67d9453d7ac86d47ccb98c96d4fed8049cd70611138",
+      "environment.json": "643c68f18e6a3b6e0ae2db52c26354a41973227bd04f9d5d9e6935c53ed7ffe3",
+      "collection.json": "36b39ef5df8ccc366a23728c5de2084bc61e3c14b56cb46ff6c68b7abe557bdd",
+      "module-origins.json": "396d205c3f27b8122236eefd3b243d6fefc7365b44a5b120e2aeec6a2569a419"
+    }
+  },
+  {
+    "label": "r3-collection",
+    "command": [
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "-S",
+      "-P",
+      "-B",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-bc1g2-timing/scripts/adhoc/refresh_ci_timings_bc1g2_20261103.py",
+      "worker",
+      "--label",
+      "r3-collection",
+      "--",
+      "tests",
+      "--collect-only",
+      "-q"
+    ],
+    "exit_code": 0,
+    "deadline_seconds": 3600,
+    "wall_seconds": 39.29282658302691,
+    "counts": {},
+    "by_module": {},
+    "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+    "head": "fbefb2fe1107fffd73866f1c2ad2a24e11d74268",
+    "weights_sha256": "a554dc4277711297225ec79ba9b0dee0f83b5d6c98ed900cbff833814f90c499",
+    "artifacts": {
+      "junit.xml": "bb3aa58368baf53188b64cf212358deb9b3519ad867964343126d268cec85b2e",
+      "execution.json": "288dade2e31874da61f02dd2344bc371707c5fbdacb0910a761f12ee736587cc",
+      "environment.json": "af8b5e024c2e0fe2d2fd1c11b2e819ad59df8bb25cf91ed20c7023d06733c549",
+      "collection.json": "7156d07c6acce24c8a1745deff4b65e042891d492126835f1a3d0cb8336dac9a",
+      "module-origins.json": "14ec2734e93592c10d66d498afb0e9268d509e2b74485cdeac65f502ba5af71d"
+    }
+  },
+  {
+    "label": "r3-weights-canary",
+    "command": [
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "-S",
+      "-P",
+      "-B",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-bc1g2-timing/scripts/adhoc/refresh_ci_timings_bc1g2_20261103.py",
+      "worker",
+      "--label",
+      "r3-weights-canary",
+      "--",
+      "tests/test_ci_sharding.py::test_measured_partition_is_order_independent_and_reduces_estimated_imbalance",
+      "-q"
+    ],
+    "exit_code": 0,
+    "deadline_seconds": 3600,
+    "wall_seconds": 2.2161958750220947,
+    "counts": {
+      "passed": 1
+    },
+    "by_module": {
+      "tests.test_ci_sharding": {
+        "passed": 1
+      }
+    },
+    "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+    "head": "fbefb2fe1107fffd73866f1c2ad2a24e11d74268",
+    "weights_sha256": "845434a3e72483fb81a16d1634e84b06040d4d5864a3cb6cd2720bcd2c716305",
+    "artifacts": {
+      "junit.xml": "0a6ec6d388edcaf6dbe4c3e353776f2c489954170be0deda044c4c308a80a4ec",
+      "execution.json": "054cce211c5fb6d01d60751611da2b73e073335bfd05602a0ee2381ea6defab2",
+      "environment.json": "b97906359ef68035019b5ae9ed30cb895a53cef547692919d52d8c58e2ef28fc",
+      "collection.json": "da34bb95300593c4fdaded8f561b6d2ccf65e80b80d9c564d3655680ddac9a10",
+      "module-origins.json": "d6ebd9040d3dd4accc5d864115966da6c1ffaf6b8fecbb213be57b71bc72cec2"
+    }
+  },
+  {
+    "label": "r3-weights-contracts",
+    "command": [
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "-S",
+      "-P",
+      "-B",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-bc1g2-timing/scripts/adhoc/refresh_ci_timings_bc1g2_20261103.py",
+      "worker",
+      "--label",
+      "r3-weights-contracts",
+      "--",
+      "tests/test_ci_sharding.py",
+      "tests/test_ci_timing_update.py",
+      "-q",
+      "--durations=10"
+    ],
+    "exit_code": 0,
+    "deadline_seconds": 3600,
+    "wall_seconds": 258.03420179197565,
+    "counts": {
+      "passed": 61
+    },
+    "by_module": {
+      "tests.test_ci_sharding": {
+        "passed": 48
+      },
+      "tests.test_ci_timing_update": {
+        "passed": 13
+      }
+    },
+    "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+    "head": "fbefb2fe1107fffd73866f1c2ad2a24e11d74268",
+    "weights_sha256": "845434a3e72483fb81a16d1634e84b06040d4d5864a3cb6cd2720bcd2c716305",
+    "artifacts": {
+      "junit.xml": "1aa17cdb555a04ded613d4c3d09d0eb09478820d6a52e0f1d788b8b2fd3e56a5",
+      "execution.json": "b8a50f5dada7dc6d78383f6344da5b58c1e39d9ad8e973c6d25afd3dcdd825e6",
+      "environment.json": "b97906359ef68035019b5ae9ed30cb895a53cef547692919d52d8c58e2ef28fc",
+      "collection.json": "3667cbb1e81d4c970953941c7e5d91b203a3a8467425db184d1fffded9887229",
+      "module-origins.json": "c18519a8adc6670e287d76c2654f8ec7ccc609def1b5be8cfdf005421114eccf"
+    }
+  }
+]
