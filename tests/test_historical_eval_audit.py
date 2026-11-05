@@ -1,7 +1,9 @@
 """Offline historical audit joins and distinct condition/repeat keys (#5126)."""
 from copy import deepcopy
 import json
+import os
 from pathlib import Path
+import subprocess
 
 import pytest
 import yaml
@@ -66,6 +68,53 @@ def test_saved_historical_rating_is_bound_without_generation_acceptance(historic
     assert groups[0]["comparable_for_final_v10"] is False
     assert result["targets"]["context_human_review_verified"] is False
     assert before == {path: path.read_bytes() for path in historical_case["root"].rglob("*") if path.is_file()}
+
+
+def test_committed_historical_package_reaches_condition_review_without_scientific_acceptance(
+        historical_case, monkeypatch):
+    root, output = historical_case["root"], historical_case["output"]
+    before = {path: path.read_bytes() for path in root.rglob("*") if path.is_file()}
+    # Git must operate only in this fresh synthetic fixture, without inherited
+    # repository selection, configuration, templates, hooks, or signing.
+    for name in tuple(os.environ):
+        if name.startswith("GIT_"):
+            monkeypatch.delenv(name)
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+    monkeypatch.setenv("GIT_CONFIG_SYSTEM", os.devnull)
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", os.devnull)
+    monkeypatch.setenv("GIT_ATTR_NOSYSTEM", "1")
+    command = ["git", "-c", "core.hooksPath=" + os.devnull,
+               "-c", "commit.gpgsign=false", "-c", "core.autocrlf=false",
+               "-c", "user.name=Synthetic Fixture", "-c", "user.email=fixture@example.invalid"]
+    for arguments in (
+        ["init", "--quiet", "--template=", "--initial-branch=fixture"],
+        ["add", "--", output.relative_to(root).as_posix()],
+        ["commit", "--quiet", "--no-gpg-sign", "-m", "Capture synthetic evaluation evidence"],
+    ):
+        subprocess.run([*command, *arguments], cwd=root, check=True, capture_output=True)
+
+    result = historical_audit(historical_case)
+    package = result["registered_evaluations"][0]
+    assert package["reasons"] == []
+    assert package["committed_package"] is True
+    assert package["lock_consistent"] is True and package["lock_status"] == "consistent"
+    assert package["generation_acceptance_verified"] is False
+    block = result["records"][0]["evaluations"]["rubric20"]
+    assert block["status"] == "condition_review_pending"
+    assert block["reasons"] == block["pending"] == []
+    assert block["comparable_for_final_v10"] is False
+    assert block["files"][0]["eligible_for_condition_review"] is True
+    assert block["files"][0]["pending"] == []
+    group = result["evaluation_condition_groups"][0]
+    assert group["members"][0]["eligible_for_condition_review"] is True
+    assert group["members"][0]["pending"] == []
+    assert group["comparable_for_final_v10"] is False
+    assert group["context_human_review_verified"] is False
+    assert group["independence_verified"] is False
+    assert historical_case["prepared"].document()["scientific_review_verified"] is False
+    after = {path: path.read_bytes() for path in root.rglob("*")
+             if path.is_file() and ".git" not in path.relative_to(root).parts}
+    assert before == after
 
 
 @pytest.mark.parametrize("selection", ["missing", "other", "duplicate"])
