@@ -188,6 +188,16 @@ def validate(output, python):
     tree.mkdir()
     with tarfile.open(archive) as bundle:
         bundle.extractall(tree, filter='data')
+    submodule_commit = git('rev-parse', head + ':fairscape_models').decode().strip()
+    local_submodule = ROOT.parent.parent / 'data-sheets-schema/fairscape_models'
+    submodule_archive = output / 'fairscape_models.tar'
+    with submodule_archive.open('wb') as stream:
+        subprocess.run(['git', '-c', 'protocol.allow=never', '-C', str(local_submodule),
+                        'archive', submodule_commit], stdout=stream, check=True)
+    with tarfile.open(submodule_archive) as bundle:
+        bundle.extractall(tree / 'fairscape_models', filter='data')
+    (output / 'submodule.json').write_text(json.dumps({'commit': submodule_commit,
+        'archive_sha256': sha(submodule_archive), 'source': str(local_submodule)}, indent=2) + '\n')
     # Local object alternates supply identity/history without a fetch or checkout.
     subprocess.run(['git', 'init', '-q', str(tree)], check=True)
     objects = Path(git('rev-parse', '--git-common-dir').decode().strip()).resolve() / 'objects'
@@ -196,7 +206,9 @@ def validate(output, python):
     subprocess.run(['git', '-C', str(tree), 'read-tree', head], check=True)
     env = {k: v for k, v in os.environ.items() if not any(s in k.upper() for s in
            ('TOKEN', 'SECRET', 'API_KEY', 'CREDENTIAL', 'PROXY')) and not k.startswith('GIT_')}
-    env.update(PYTHONPATH=str(tree) + os.pathsep + str(tree / 'src'),
+    (output / 'tmp').mkdir()
+    env.update(PYTHONPATH=os.pathsep.join(map(str, (tree, tree / 'src', tree / 'fairscape_models'))),
+               TMPDIR=str(output / 'tmp'),
                PYTHONPYCACHEPREFIX=str(output / 'pycache'), PYTEST_DISABLE_PLUGIN_AUTOLOAD='1',
                GIT_NO_LAZY_FETCH='1', GIT_CONFIG_COUNT='1',
                GIT_CONFIG_KEY_0='protocol.allow', GIT_CONFIG_VALUE_0='never')
@@ -325,6 +337,12 @@ def report(output, destination):
         'actual gate in unconditional errexit subshells. The canary exercises this complete gate test. '
         'Earlier superseded archive runs were intentionally stopped during the old gate test; their partial '
         'logs remain in the sibling `_evidence` and `_final` directories and are not counted as passing contracts.', '',
+        'Validation environment corrections: `_verified` retained 125 passing contracts and 14 old refresh-fixture '
+        'failures from macOS `/var` versus `/private/var` aliases. A physical TMPDIR resolved all 14; `_validated` '
+        'then passed 139 contracts but full collection reported three missing FAIRSCAPE imports because a Git '
+        'archive omits submodule contents. The producer now supplies a physical temporary directory and archives '
+        'the exact locally available FAIRSCAPE gitlink commit (recorded with its archive hash in `submodule.json`). '
+        'No dependency download, production change or test weakening was needed.', '',
         'Reviewed the final diff separately for coverage loss, lane outcome bypasses, aggregator omission, double scaling, '
         'provenance loss and protected-path changes. No unresolved implementation finding. '
         'No PR or GitHub issue action was performed because this task explicitly requires offline work. '
