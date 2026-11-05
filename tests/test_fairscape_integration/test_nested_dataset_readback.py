@@ -182,6 +182,9 @@ def test_real_readback_failure_preserves_exception_and_resets_evidence_on_reuse(
     assert 'previous' not in encoded(failed)
     assert current == before
     monkeypatch.undo()
+    # #5448: undoing this test's patches must not undo credential isolation.
+    from data_sheets_schema.api_runner import provider_identity
+    assert provider_identity() == {'provider': None, 'base_url': None, 'key_env': None}
     result = converter.convert(dataset())
     genuine_readback(result)
     complete = converter.route_evidence

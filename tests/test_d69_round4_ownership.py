@@ -173,6 +173,10 @@ def test_readonly_startup_checks_precede_every_write(tmp_path, monkeypatch, chec
     from data_sheets_schema import schema_sync, shared_generation
     from tests.test_evidence_generation_gate import specification
     from tests.test_shared_generation_selection import selected_spec, registration_for
+    if check == 'require_client':
+        # #5448: run this existing node with a dummy key in the parent shell.
+        # No local key clearing may mask the suite-wide autouse fixture.
+        assert api.provider_identity() == {'provider': None, 'base_url': None, 'key_env': None}
     selected = spec(project='P', out_dir=tmp_path / 'outputs')
     if check in ('shared_preflight', 'require_client'):
         base = specification(tmp_path)

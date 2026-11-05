@@ -1,9 +1,13 @@
 """Lane-wide hygiene for the tests/ collection: no test writes under notes/.
 
-Two parts, both scoped to this directory's collection. A repository-root
+Three parts, all scoped to this directory's collection. A repository-root
 conftest would also reach the ``pytest notes/matched_cborg_2026-09-13/...``
 jobs CI runs separately, and that environment is left as it is.
 
+* Each test starts without inherited provider credentials or SDK endpoint
+  overrides (#5448). Tests can install their own synthetic values after
+  autouse setup. This function-scoped isolation is not a network sandbox
+  and does not intercept collection-time or module-scoped setup.
 * Bytecode goes outside the checkout (#3771). Tests import and
   ``exec_module`` the dated execution tools under ``notes/``, which wrote
   ``__pycache__`` beside them, into pinned directories. ``sys.pycache_prefix``
@@ -36,7 +40,34 @@ NOTES = ROOT / "notes"
 
 
 @pytest.fixture(autouse=True)
-def prelock_refusal_diagnostics(request, monkeypatch):
+def isolated_provider_environment():
+    """Keep shell credentials out of tests while allowing explicit test values.
+
+    The API routes read ANTHROPIC/CBORG/OPENAI_API_KEY. Also clear native
+    authentication and SDK endpoint settings; all conventional *_API_KEY
+    names are covered so dynamic key selection cannot inherit one.
+    """
+    auth_and_endpoints = {
+        "ANTHROPIC_AUTH_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN",
+        "ANTHROPIC_BASE_URL", "OPENAI_BASE_URL",
+    }
+    # A test's monkeypatch.undo() must not restore its parent's credentials.
+    with pytest.MonkeyPatch.context() as isolation:
+        for name in tuple(os.environ):
+            if name.endswith("_API_KEY") or name in auth_and_endpoints:
+                isolation.delenv(name, raising=False)
+        yield
+
+
+@pytest.fixture
+def monkeypatch(isolated_provider_environment):
+    """Keep normal MonkeyPatch behavior, with test cleanup before isolation ends."""
+    with pytest.MonkeyPatch.context() as patch:
+        yield patch
+
+
+@pytest.fixture(autouse=True)
+def prelock_refusal_diagnostics(request, monkeypatch, isolated_provider_environment):
     """Apply one hash assertion to every #5212 round-3–7 pre-lock refusal.
 
     Observe diagnostics without replacing any existing expected exception or
