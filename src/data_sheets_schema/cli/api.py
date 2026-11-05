@@ -300,6 +300,15 @@ def _shared_current(specs, roster=None, *, batch_label_prefix=None, canary_basel
 
 
 def _shared_plan_line(plan):
+    if 'bounded_carry' in plan:
+        bounded = plan['bounded_carry']
+        click.echo(f"   bounded-carry version {bounded['version']}; fan-in {bounded['fan_in']}")
+        click.echo('   registered maximum roster: '
+                   + json.dumps(plan['registered_maximum_roster'], sort_keys=True))
+        click.echo('dynamic total unavailable; explicit audit allowances: '
+                   + json.dumps(plan['registered_audit_allowances'], sort_keys=True))
+        click.echo('   full-request estimate unavailable for BC1 plans until the full record exists')
+        return
     click.echo('dynamic total unavailable; explicit audit allowances: '
                + json.dumps(plan['registered_audit_allowances'], sort_keys=True))
     click.echo(f"   full request ~{plan['full_request_approx_input_tokens']:,} input tokens")
@@ -747,7 +756,7 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
     if spec.shared_generation_version:
         click.echo(f"📋 {spec.project} / {spec.arm} / {spec.condition}")
         _shared_plan_line(p)
-        for key, value in p['outputs'].items():
+        for key, value in p.get('outputs', {}).items():
             click.echo(f"   -> {key:6} {value}")
         return
     click.echo(f"📋 {p['project']} / {arm} / {p['condition']}")
