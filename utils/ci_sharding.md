@@ -26,8 +26,8 @@ compare complete PR/main timings and total runner time before claiming a speedup
 
 Each shard uses `-n logical --maxprocesses=4 --dist load --maxschedchunk=1`: up to four
 workers on the standard public Linux runner, rather than the two physical
-cores selected by `-n auto`. The subprocess coverage proof exercises this
-worker configuration and both partition sizes. Every collected test remains included.
+cores selected by `-n auto`. The subprocess coverage proof uses two workers with this scheduling policy and
+both partition sizes. Every collected test remains included.
 
 Within a shard, files with the largest estimated time per collected case run
 first. A stable sort keeps the existing order within each file. Small xdist

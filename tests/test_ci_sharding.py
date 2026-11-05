@@ -23,7 +23,7 @@ def _run(root, *args):
     env = os.environ.copy()
     env["PYTHONPATH"] = os.pathsep.join((str(ROOT), str(ROOT / "src")))
     return subprocess.run(
-        [sys.executable, "-m", "pytest", "-p", "xdist.plugin", "-p", "utils.pytest_shard", "-q",
+        [sys.executable, "-m", "pytest", "-p", "xdist", "-p", "utils.pytest_shard", "-q",
          "-p", "no:cacheprovider", *args], cwd=root, env=env,
         capture_output=True, text=True, timeout=90,
     )

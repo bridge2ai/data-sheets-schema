@@ -136,11 +136,18 @@ def prediction(tree, nodes, output):
     for file, node, seconds in historical:
         if node in ordinary:
             historical_by_file[file].append((float(seconds) * 2.1, node, 'local x 2.1'))
+    prior_path = ROOT.parent / 'scratch-5212fix/r8-final2-timing/evidence.json'
+    assert sha(prior_path) == 'c0ebe0f24107cc6473f8443a424455ae4a427fa797a09665a79d5c333cd70e80'
+    prior_by_file = defaultdict(list)
+    for row in json.loads(prior_path.read_text())['cases']:
+        if row['nodeid'] in ordinary and row['file'] not in local:
+            prior_by_file[row['file']].append((row['seconds'] * .92, row['nodeid'],
+                                             'prior CI estimate x 0.92'))
     paths = {n.split('::', 1)[0] for n in lanes['ordinary']}
     estimates = plugin._estimates(paths, weights)
     risks = {}
     for file in paths:
-        candidates = observed.get(file) or historical_by_file.get(file)
+        candidates = observed.get(file) or historical_by_file.get(file) or prior_by_file.get(file)
         risks[file] = max(candidates) if candidates else (
             estimates[file] * (1 if file in local else .92), file,
             'unmeasured file-total upper bound, not an observed case')
@@ -160,6 +167,8 @@ def prediction(tree, nodes, output):
                          'risk_node': risk[1], 'risk_basis': risk[2],
                          'over_30': max(adjusted, risk[0] / 60) > 30})
     value = {'collection': len(nodes), 'ordinary': len(lanes['ordinary']),
+             'prior_case_evidence': {'path': str(prior_path), 'sha256': sha(prior_path)},
+             'unmeasured_risk_files': sorted(f for f in risks if 'upper bound' in risks[f][2]),
              'dedicated': {k: v for k, v in lanes.items() if k != 'ordinary'}, 'predictions': rows}
     (output / 'prediction.json').write_text(json.dumps(value, indent=2) + '\n')
     return value
@@ -216,7 +225,7 @@ def validate(output, python):
         print(json.dumps(result), flush=True)
         assert code == expected, f'{name}: {code}, see retained log'
 
-    common = ['-m', 'pytest', '-p', 'xdist.plugin', '-p', 'no:cacheprovider', '-q']
+    common = ['-m', 'pytest', '-p', 'xdist', '-p', 'no:cacheprovider', '-q']
     run('canary', common + ['tests/test_ci_sharding.py::test_lane_partition_is_complete_order_preserving_and_strict',
                            '--junitxml=' + str(output / 'canary.xml')])
     assert list(ET.parse(output / 'canary.xml').iter('testcase'))
@@ -247,13 +256,90 @@ def validate(output, python):
     assert not subprocess.check_output(['git', '-C', str(tree), 'diff', 'HEAD', '--'])
 
 
+def report(output, destination):
+    """Render tables from persisted evidence, never from hand-transcribed numbers."""
+    validation = json.loads((output / 'validation.json').read_text())
+    proof = json.loads((output / 'prediction.json').read_text())
+    equality = json.loads((output / 'scanner-equality.json').read_text())
+    data = json.loads((output / 'source' / TIMING).read_text())
+    assert validation['commit'] == git('rev-parse', 'HEAD').decode().strip()
+    assert all(r['returncode'] == r['expected'] for r in validation['results'])
+    cases = list(ET.parse(output / 'contracts.xml').iter('testcase'))
+    assert cases and not any(c.find('failure') is not None or c.find('error') is not None for c in cases)
+    lines = ['# PR #5213 round 7 CI — 2026-11-05', '',
+        'Tasks 1–5 completed offline; stopped without push, fetch, gh, network or provider calls.', '',
+        '## Commits and scope', '',
+        'Base: `' + BASE + '`. Final validated head: `' + validation['commit'] + '`.',
+        'Linear commits (no merge or rebase):', '',
+        '```text', git('log', '--format=%h %s', BASE + '..HEAD').decode().strip(), '```', '',
+        '- `utils/pytest_shard.py`: retain the four API nodes; add three exact SG2 nodes to a combined seven-case roster. Ordinary shards exclude them; each dedicated lane requires passed setup/call/teardown and rejects skip, xfail and collection-only.',
+        '- `.github/workflows/main.yaml`: add the SG2 matrix with the API setup, untouched-path check and artifact retention; require it in the aggregator. D81 8/6 ordinary shards, CI four-worker cap and D75 45/60-minute limits unchanged.',
+        '- Sharding/timing/planner contracts: cover all seven lanes, singleton outcomes, aggregate dependency outcomes and weight provenance. Local contract subprocesses use at most two workers.',
+        '- `utils/ci_test_durations.json`: replace only the 25 local-override file weights. All 635 other weights and existing provenance values are unchanged; retain historical local values in `local_overrides`.',
+        '- Workflow README and `utils/ci_sharding.md`: document lanes, required jobs and estimation rules.',
+        '- One producer: `scripts/adhoc/refresh_5213_weights_ci_20261105.py`; refresh, pinned archive validation, coverage, prediction and this report.', '',
+        '## Weights (seconds)', '',
+        'The instruction’s 14 measured files are the >1-second subset used to calculate the ratio. '
+        'Artifacts contain 18 measured override files, including four subsecond files; all 18 use their CI JUnit sums. '
+        'Seven missing files use local × 2.1033. Registration subtracts 749.198 + 747.858 + 729.254 = 2226.310 local SG2 seconds from 2245.206 before scaling: 18.896 × 2.1033 = 39.744 seconds after rounding. '
+        'The cancelled shard remains incomplete evidence. All artifact SHA-256 values are recorded in `ci_refresh_5213_20261105`.', '',
+        '| File | Before | After | Basis |', '|---|---:|---:|---|']
+    for row in data['ci_refresh_5213_20261105']['weights']:
+        lines.append(f"| `{row['file']}` | {row['before']:.3f} | {row['after']:.3f} | {row['basis']} |")
+    lines += ['', '## Predictions', '',
+        'Assignments reproduce `balanced_files` on the pinned full collection after removing all seven dedicated nodes. '
+        'Load is estimated case-seconds / four workers / 60. The sensitivity column multiplies historical main weights by 0.92; '
+        'new CI measurements and already-scaled local estimates are not scaled a second time. '
+        'Case risk prefers this run’s observed CI case duration, then local × 2.1, then retained prior CI case estimates × 0.92. '
+        'Where no case observation exists, the entire file estimate is a conservative upper bound, explicitly labelled below. '
+        'These are idealized work/risk estimates, excluding setup, fixture reuse and scheduling overhead, not CI completion guarantees.', '',
+        '| Layout | Shard | Load / 4 (min) | Ratio sensitivity (min) | Largest case risk (min) | Risk basis and node |',
+        '|---|---:|---:|---:|---:|---|']
+    for row in proof['predictions']:
+        lines.append(f"| {row['shards']} | {row['shard']} | {row['load_minutes']:.2f} | {row['ratio_adjusted_minutes']:.2f} | {row['largest_case_minutes']:.2f} | {row['risk_basis']}: `{row['risk_node']}` |")
+    above = [str(r['shard']) for r in proof['predictions'] if r['shards'] == 8 and r['over_30']]
+    lines += ['', 'PR shards predicted above 30 minutes by the larger of adjusted load and case risk: '
+              + (', '.join(above) if above else '**none**') + '.', '',
+        'SG2 lanes retain the observed roughly 26-minute CI single-case risk; this task did not execute those cases.', '',
+        '## Validation', '',
+        f"Pinned archive SHA-256: `{validation['archive_sha256']}`. Interpreter: `{validation['interpreter']}` (Python 3.13.12, local macOS; CI targets Python 3.12).",
+        f"- Canary: 1 passed; its persisted JUnit was checked before the full contract batch.",
+        f"- Sharding, timing, refresh and planner contracts: {len(cases)} cases; no failures/errors/skips.",
+        f"- Full `pytest tests --collect-only -q`: {proof['collection']} occurrences; {proof['ordinary']} ordinary plus seven singleton dedicated lanes.",
+        '- Full-collection partition proof: exact occurrence Counter equality for both 8 and 6 ordinary shards plus all seven dedicated lanes. Legitimate duplicate labels are preserved.',
+        '- Each real `sg2-*` lane collected exactly its one required node. Exit 1 is expected: collection alone must not pass the dedicated execution gate. No SG2 body ran.',
+        f"- Specificity scanner: {equality['findings']} findings, equal field for field and in order to round 6; listed-not-derived modules also equal. Scanner exit 1 means existing findings, not a failed scan.",
+        '- Every pytest command had a 3600-second process-group deadline. Top-level contracts ran serially; fixture shard subprocesses used at most `-n 2`.', '',
+        '| Check | Exit | Expected | Seconds |', '|---|---:|---:|---:|']
+    for row in validation['results']:
+        lines.append(f"| {row['name']} | {row['returncode']} | {row['expected']} | {row['seconds']:.2f} |")
+    lines += ['', 'Evidence: `' + str(output) + '` (commands, logs, XML, node lists, prediction and scanner equality).', '',
+        '## Read-only review and limits', '',
+        'Local review finding R7-1 (resolved): the fixture helper initially loaded `xdist.plugin` explicitly, '
+        'which can conflict with normal entry-point autoloading. It now loads the `xdist` entry-point name; '
+        'final archive validation exercises that correction. This finding is retained here as an offline '
+        'issue record; GitHub filing was prohibited by the task.', '',
+        'Reviewed the final diff separately for coverage loss, lane outcome bypasses, aggregator omission, double scaling, '
+        'provenance loss and protected-path changes. No unresolved implementation finding. '
+        'No PR or GitHub issue action was performed because this task explicitly requires offline work. '
+        'No `src/`, prompts, protected files, run directories or `data/ATTIC/` were edited in the worktree. '
+        'Archive source bytes were checked unchanged after validation. Actual new CI runtime remains unmeasured.', '']
+    destination.write_text('\n'.join(lines))
+    assert destination.stat().st_size > 0
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--install', action='store_true')
     parser.add_argument('--validate', type=Path)
     parser.add_argument('--python', type=Path)
+    parser.add_argument('--report', type=Path)
+    parser.add_argument('--evidence', type=Path)
     args = parser.parse_args()
-    if args.validate:
+    if args.report:
+        assert args.evidence and not args.validate and not args.install
+        report(args.evidence, args.report)
+    elif args.validate:
         assert args.python and not args.install
         validate(args.validate.resolve(), args.python.absolute())
     else:
