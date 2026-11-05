@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.9.0
+  version: 1.9.1
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -162,6 +162,28 @@ and the names a file uses. What is left by hand, and why:
   rather than the path they are called on.
 - The `shared_schema` files `profiles.py`, `registry.py`, the vocabulary pin
   and the study manifest, each with the reason it reaches a model.
+- Package-local text assets read by already model-facing package modules
+  (#5494): stable module bindings anchored at an authenticated
+  `pathlib.Path(__file__)`, with `parent`, literal `parents[N]`, `with_name`,
+  `joinpath` or `/` path components, used by a `read_text`/`read_bytes`
+  receiver. Every Markdown, text, JSON or YAML member of that local bundle
+  is scanned raw, including hidden and untracked members and validation-only
+  schemas. Static read receivers and direct literal calls to a local loader
+  (positional or keyword-only arguments) also declare required
+  members: a missing member refuses the scan. Binding ambiguity, an
+  unresolved anchored location, filesystem aliases and nonregular members
+  refuse rather than silently reducing coverage. Renamed loaders and bundle
+  variables need no filename list. The report retains owner, binding and
+  read-site evidence under `model_facing_assets`, and each asset inherits
+  the owner's model-facing approaches.
+
+  At the #5494 base this adds three files under
+  `src/data_sheets_schema/omission_inventory_v1/`: `policy.md`,
+  `response.schema.json` and `context.schema.json`. The first two enter the
+  request payload; the third validates input and is conservatively covered
+  as part of the same bundle. This is loader-derived coverage, not a proof
+  that each asset reaches a request. It does not change the own-sentence
+  criterion or the seven listed-but-not-derived modules.
 - The pre-runner helpers in `src/download` that write prompts without calling
   a model (`process_*.py`, `*d4d*`, `prompt_loader`): a name glob.
 - What Claude Code itself loads into a session: `CLAUDE.md`,
@@ -591,6 +613,16 @@ owner's approval before anything is billed.
   hook's stderr), environment variables a launcher sets in code, files a
   run reads that no text names, network responses, and the model's own
   earlier turns.
+- The package-local asset channel is bounded by the syntax above. It does
+  not interpret dynamic filenames, resource-loader calls, imported path
+  bindings, arbitrary wrappers, `.open()` handles or runtime-selected paths.
+  It covers all existing supported text members of a discovered bundle,
+  even when their use is dynamic, but only static receivers and literal local loader calls prove
+  a missing member is required. Repository-wide path roots are outside this
+  channel and retain existing prompt/schema discovery. The conservative
+  bundle scan does not authenticate loader purity, hash pins or runtime
+  execution, and does not promote the loader module into the independent
+  own-sentence dataflow derivation.
 - A token list finds what it names. A project fact phrased without any listed
   token, such as a participant count or a site name, is invisible. Add
   tokens when a review finds one.

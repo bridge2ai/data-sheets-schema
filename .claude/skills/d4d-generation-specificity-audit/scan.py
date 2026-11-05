@@ -10774,6 +10774,173 @@ def derive_model_facing(wrote: dict[str, list[str]]) -> dict[str, list[str]]:
     return out
 
 
+def discover_model_facing_assets(root: Path, parsed: dict, surfaces: Surfaces) -> dict:
+    """Cover text bundles read by already model-facing package modules (#5494).
+
+    This is a conservative loader channel, not a request-dataflow proof. A
+    stable module binding must resolve statically from an authenticated pathlib
+    Path(__file__), and a read_text/read_bytes receiver must use that binding.
+    Only files/directories below that module's directory are in this channel;
+    repository-wide roots and dynamic/runtime input paths retain other rules.
+    """
+    found = {}
+    for source, (_, tree) in sorted(parsed.items()):
+        rel = _rel(root, source)
+        surface = surfaces.files.get(rel)
+        approaches = sorted(a for a, role in (surface.roles.items() if surface else ())
+                            if role == "model_facing")
+        if not approaches or not rel.startswith("src/data_sheets_schema/"):
+            continue
+        bindings, binding_values, writes, path_names, path_modules = {}, {}, {}, set(), set()
+        for node in ast.walk(tree):
+            names = []
+            if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+                names = [node.id]
+            elif isinstance(node, ast.arg):
+                names = [node.arg]
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                names = [node.name]
+            elif isinstance(node, (ast.Global, ast.Nonlocal)):
+                names = node.names
+            elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                names = [a.asname or (a.name.split('.')[0] if isinstance(node, ast.Import) else a.name)
+                         for a in node.names]
+            for name in names:
+                writes[name] = writes.get(name, 0) + 1
+        for node in tree.body:
+            if isinstance(node, ast.ImportFrom) and node.module == "pathlib" and not node.level:
+                path_names.update(a.asname or a.name for a in node.names if a.name == "Path")
+            elif isinstance(node, ast.Import):
+                path_modules.update(a.asname or a.name for a in node.names if a.name == "pathlib")
+            elif isinstance(node, (ast.Assign, ast.AnnAssign)):
+                targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                for target in targets:
+                    if isinstance(target, ast.Name) and node.value is not None:
+                        bindings[target.id] = node.value
+                        binding_values.setdefault(target.id, []).append(node.value)
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Attribute) and isinstance(node.ctx, (ast.Store, ast.Del))
+                    and isinstance(node.value, ast.Name) and node.value.id in path_modules):
+                writes[node.value.id] = writes.get(node.value.id, 0) + 1
+
+        def anchored(node, seen=frozenset()):
+            if isinstance(node, ast.Name):
+                return node.id == "__file__" or (node.id in bindings and node.id not in seen
+                    and any(anchored(value, seen | {node.id}) for value in binding_values[node.id]))
+            return any(anchored(child, seen) for child in ast.iter_child_nodes(node))
+
+        def path_value(node, seen=frozenset()):
+            if isinstance(node, ast.Name) and node.id in bindings and node.id not in seen:
+                if writes.get(node.id) != 1:
+                    raise ConfigError(f"model-facing asset binding is ambiguous: {rel}:{node.id}")
+                return path_value(bindings[node.id], seen | {node.id})
+            if isinstance(node, ast.Call):
+                func = node.func
+                constructor = ((isinstance(func, ast.Name) and func.id in path_names
+                                and writes.get(func.id) == 1)
+                    or (isinstance(func, ast.Attribute) and func.attr == "Path"
+                        and isinstance(func.value, ast.Name) and func.value.id in path_modules
+                        and writes.get(func.value.id) == 1))
+                if (constructor and not node.keywords and len(node.args) == 1
+                        and isinstance(node.args[0], ast.Name) and node.args[0].id == "__file__"
+                        and not writes.get("__file__")):
+                    return source
+                if isinstance(func, ast.Attribute) and not node.keywords:
+                    parent = path_value(func.value, seen)
+                    if parent is not None:
+                        if func.attr == "resolve" and not node.args:
+                            return parent  # filesystem aliases are refused below, not normalized away
+                        parts = [a.value for a in node.args if isinstance(a, ast.Constant)
+                                 and isinstance(a.value, str)]
+                        if len(parts) == len(node.args):
+                            if func.attr == "with_name" and len(parts) == 1:
+                                return parent.with_name(parts[0])
+                            if func.attr == "joinpath" and parts:
+                                return parent.joinpath(*parts)
+            if isinstance(node, ast.Attribute) and node.attr == "parent":
+                parent = path_value(node.value, seen)
+                return parent.parent if parent is not None else None
+            if (isinstance(node, ast.Subscript) and isinstance(node.value, ast.Attribute)
+                    and node.value.attr == "parents" and isinstance(node.slice, ast.Constant)
+                    and type(node.slice.value) is int and 0 <= node.slice.value < 32):
+                parent = path_value(node.value.value, seen)
+                return parent.parents[node.slice.value] if parent is not None else None
+            if (isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div)
+                    and isinstance(node.right, ast.Constant) and isinstance(node.right.value, str)):
+                parent = path_value(node.left, seen)
+                return parent / node.right.value if parent is not None else None
+            return None
+
+        reads = [n for n in ast.walk(tree) if isinstance(n, ast.Call)
+                 and isinstance(n.func, ast.Attribute) and n.func.attr in {"read_text", "read_bytes"}]
+        for name, expression in sorted(bindings.items()):
+            consumers = [read for read in reads if any(isinstance(n, ast.Name) and n.id == name
+                         for n in ast.walk(read.func.value))]
+            if not consumers or not any(anchored(value) for value in binding_values[name]):
+                continue
+            location = path_value(ast.Name(id=name, ctx=ast.Load()))
+            if location is None:
+                raise ConfigError(f"model-facing asset location is not derived: {rel}:{name}")
+            if ".." in location.parts:
+                raise ConfigError(f"model-facing asset location has parent traversal: {rel}:{name}")
+            if location == source.parent or source.parent not in location.parents:
+                continue  # repository roots are not package-local asset bundles
+            if location.is_symlink() or location.resolve() != location.absolute():
+                raise ConfigError(f"model-facing asset location is a filesystem alias: {rel}:{name}")
+            if not location.exists():
+                raise ConfigError(f"model-facing asset location is missing: {rel}:{name}")
+            members = sorted(location.rglob("*")) if location.is_dir() else [location]
+            if any(p.is_symlink() or (not p.is_file() and not p.is_dir()) for p in members):
+                raise ConfigError(f"model-facing asset bundle has an alias or nonregular member: {rel}:{name}")
+            files = [p for p in members if p.is_file() and p.suffix.lower() in NAMED_TEXT]
+            if not files:
+                raise ConfigError(f"model-facing asset bundle has no supported text: {rel}:{name}")
+            # Static read receivers and literal local-loader calls declare required members;
+            # deleting one cannot turn the scan into a smaller successful scan.
+            expected = set()
+            if location.is_dir():
+                for read in consumers:
+                    candidate = path_value(read.func.value)
+                    if candidate is not None:
+                        try:
+                            expected.add(candidate.relative_to(location).as_posix())
+                        except ValueError:
+                            raise ConfigError(f"model-facing literal asset is missing or unsafe: {rel}:{name}")
+                for fn in (n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))):
+                    body = set(ast.walk(fn))
+                    local_reads = [read for read in consumers if read in body]
+                    if not local_reads:
+                        continue
+                    positional = [a.arg for a in fn.args.posonlyargs + fn.args.args]
+                    parameters = positional + [a.arg for a in fn.args.kwonlyargs]
+                    used = {n.id for read in local_reads for n in ast.walk(read.func.value)
+                            if isinstance(n, ast.Name) and n.id in parameters}
+                    for call in (n for n in ast.walk(tree) if isinstance(n, ast.Call)
+                                 and isinstance(n.func, ast.Name) and n.func.id == fn.name):
+                        for parameter in used:
+                            index = positional.index(parameter) if parameter in positional else None
+                            args = ([call.args[index]] if index is not None and index < len(call.args) else [])
+                            args += [k.value for k in call.keywords if k.arg == parameter]
+                            expected.update(a.value for a in args if isinstance(a, ast.Constant)
+                                            and isinstance(a.value, str))
+                for member in expected:
+                    candidate = location / member
+                    if (Path(member).is_absolute() or ".." in Path(member).parts
+                            or not candidate.is_file() or candidate.is_symlink()):
+                        raise ConfigError(f"model-facing literal asset is missing or unsafe: {rel}:{member}")
+            evidence = {"owner": rel, "binding": name, "binding_line": expression.lineno,
+                        "location": _rel(root, location), "read_lines": sorted({n.lineno for n in consumers}),
+                        "literal_members": sorted(expected), "approaches": approaches}
+            for path in files:
+                asset = _rel(root, path)
+                found.setdefault(asset, []).append(evidence)
+                for approach in approaches:
+                    surfaces.add(asset, approach, "model_facing", surface.status,
+                        f"package-local text asset read by {rel}:{name}; conservative whole-bundle coverage",
+                        raw=True, runs=False)
+    return {key: value for key, value in sorted(found.items())}
+
+
 def discover(root: Path) -> tuple[Surfaces, dict]:
     root = _resolved(root)
     s = Surfaces()
@@ -11255,6 +11422,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         "listed": sorted(MODEL_FACING_MODULES),
         "derived_not_listed": sorted(name for name in derived if name in live and name not in MODEL_FACING_MODULES),
         "listed_not_derived": sorted(name for name in MODEL_FACING_MODULES if name not in derived)}
+    facts["model_facing_assets"] = discover_model_facing_assets(root, parsed, s)
     return s, facts
 
 
@@ -15107,6 +15275,11 @@ def render_markdown(result: dict) -> str:
           "writes (below), where the module is not model-facing as a whole: "
           + ("; ".join(f"`{k}`: " + ", ".join(v) for k, v in f["model_text"].items()) or "none") + ".",
           _model_facing_statement(f),
+          "- Package-local model-facing text assets (conservative loader-bundle coverage, not a request-flow proof): "
+          + ("; ".join(f"`{asset}` (" + ", ".join(
+              f"`{row['owner']}`:{row['binding_line']} `{row['binding']}`"
+              for row in evidence) + ")" for asset, evidence in f.get("model_facing_assets", {}).items())
+             or "none") + ".",
           "- Playbooks and agents a playbook, a live prompt, a controller or an assistant instruction names "
           "(path, bare name or slash command): " + ", ".join(f"`{r}`" for r in f["native_referenced"]) + ".",
           "- Assistant instruction files, a surface only where the `@d4dassistant` workflow, a playbook or a "
