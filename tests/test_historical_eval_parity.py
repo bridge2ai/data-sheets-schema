@@ -83,7 +83,15 @@ def equivalent_historical_inputs(shared_inputs, historical_inputs):
 @pytest.mark.parametrize("rubric,version", INSTRUMENTS)
 def test_historical_and_shared_adapters_have_identical_model_facing_bytes(
         registration, historical_inputs, rubric, version):
-    shared_inputs = {**registration, "rubric": rubric, "instrument_version": version, "repeat_count": 1}
+    # The older shared fixture deliberately permits an unknown replicate. Make
+    # a separate, explicitly declared synthetic counterpart for the historical
+    # contract, which requires a positive replicate; never restamp the fixture.
+    shared_prior = yaml.safe_load(registration["provenance"].read_bytes())
+    shared_prior["run"]["replicate"] = 17
+    shared_provenance = historical_inputs["record"].parent / "shared-counterpart-provenance.yaml"
+    shared_provenance.write_text(yaml.safe_dump(shared_prior))
+    shared_inputs = {**registration, "rubric": rubric, "instrument_version": version, "repeat_count": 1,
+                     "provenance": shared_provenance, "provenance_sha256": sha(shared_provenance.read_bytes())}
     historical_options = equivalent_historical_inputs(shared_inputs, historical_inputs)
     historical_paths = [Path(pin["path"]) for name, pin in binding_document(historical_options).items()
                         if name in {"record", "provenance", "cohort", "decision"}]
