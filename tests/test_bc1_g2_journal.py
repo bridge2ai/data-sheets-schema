@@ -14,6 +14,7 @@ from tests.test_bc1_selection import simulated_hooks, registered as base_registe
 from tests.test_bc1_pipeline import test_public_bc1_pipeline_multiple_groups_final_and_completed_replay as pipeline
 from tests.test_shared_generation_runtime import scripted_client
 from tests.test_d68_legacy_readonly import tree
+from tests.bc1_catalog_fixture import catalog_bytes, immutable_catalogs  # noqa: F401
 
 
 @pytest.fixture
@@ -41,6 +42,7 @@ def registered(base_registered):
                    shared_generation_registration=raw.decode())
 
 
+@pytest.mark.usefixtures('immutable_catalogs')
 def test_every_bc1_response_is_journaled_before_parse(registered, journal_launch_monitor, tmp_path, monkeypatch):
     observed = {}
     active = []

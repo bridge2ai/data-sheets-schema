@@ -11,6 +11,7 @@ import pytest
 from click.testing import CliRunner
 
 from tests.test_bc1_context import fixture as context_fixture
+from tests.bc1_catalog_fixture import catalog_bytes, immutable_catalogs  # noqa: F401
 from data_sheets_schema import bc1_registration as reg, bc1_selection as selected
 from scripts import build_api_registrations as builder
 
@@ -251,6 +252,7 @@ def completed_chorus(tmp_path):
     return intermediate
 
 
+@pytest.mark.usefixtures('immutable_catalogs')
 def test_completed_run_cli_sizing_uses_exact_effective_receipt_and_check_revalidates(completed_chorus, tmp_path):
     output = tmp_path / 'registrations'
     args = ['-p', 'CHORUS', '-l', 'completed', '--partition', 'chorus',
@@ -273,6 +275,7 @@ def test_completed_run_cli_sizing_uses_exact_effective_receipt_and_check_revalid
         builder.SizingRecord.in_directory(completed_chorus, 'CHORUS', effective_receipt=True)
 
 
+@pytest.mark.usefixtures('immutable_catalogs')
 @pytest.mark.parametrize('limit,message', [
     ('aggregate_input_tokens', 'over allowance'),
     ('max_input_tokens_per_call', 'over per-call room'),
