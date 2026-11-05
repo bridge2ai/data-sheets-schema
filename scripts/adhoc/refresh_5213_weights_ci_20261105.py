@@ -226,7 +226,7 @@ def validate(output, python):
         assert code == expected, f'{name}: {code}, see retained log'
 
     common = ['-m', 'pytest', '-p', 'xdist', '-p', 'no:cacheprovider', '-q']
-    run('canary', common + ['tests/test_ci_sharding.py::test_lane_partition_is_complete_order_preserving_and_strict',
+    run('canary', common + ['tests/test_ci_sharding.py::test_aggregate_check_rejects_failed_cancelled_and_skipped_dependencies',
                            '--junitxml=' + str(output / 'canary.xml')])
     assert list(ET.parse(output / 'canary.xml').iter('testcase'))
     run('contracts', common + ['tests/test_ci_sharding.py', 'tests/test_ci_timing_update.py',
@@ -265,7 +265,7 @@ def report(output, destination):
     assert validation['commit'] == git('rev-parse', 'HEAD').decode().strip()
     assert all(r['returncode'] == r['expected'] for r in validation['results'])
     cases = list(ET.parse(output / 'contracts.xml').iter('testcase'))
-    assert cases and not any(c.find('failure') is not None or c.find('error') is not None for c in cases)
+    assert cases and not any(any(c.find(tag) is not None for tag in ('failure', 'error', 'skipped')) for c in cases)
     lines = ['# PR #5213 round 7 CI — 2026-11-05', '',
         'Tasks 1–5 completed offline; stopped without push, fetch, gh, network or provider calls.', '',
         '## Commits and scope', '',
@@ -319,6 +319,12 @@ def report(output, destination):
         'which can conflict with normal entry-point autoloading. It now loads the `xdist` entry-point name; '
         'final archive validation exercises that correction. This finding is retained here as an offline '
         'issue record; GitHub filing was prohibited by the task.', '',
+        'Local review finding R7-2 (resolved): extending the exhaustive aggregate truth table to seven dependencies '
+        'would quadruple external shell startups and distort the unchanged timing weight. The test retains all '
+        '49,152 event/outcome combinations but streams each event’s bindings through one shell, executing the '
+        'actual gate in unconditional errexit subshells. The canary exercises this complete gate test. '
+        'Earlier superseded archive runs were intentionally stopped during the old gate test; their partial '
+        'logs remain in the sibling `_evidence` and `_final` directories and are not counted as passing contracts.', '',
         'Reviewed the final diff separately for coverage loss, lane outcome bypasses, aggregator omission, double scaling, '
         'provenance loss and protected-path changes. No unresolved implementation finding. '
         'No PR or GitHub issue action was performed because this task explicitly requires offline work. '

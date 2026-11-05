@@ -174,6 +174,7 @@ def test_aggregate_check_rejects_failed_cancelled_and_skipped_dependencies(tmp_p
     step = gate["steps"][0]
     statuses = ("success", "failure", "cancelled", "skipped")
     for event in ("pull_request", "push", "workflow_dispatch"):
+        inputs, expected, combinations = [], [], []
         for outcomes in product(statuses, repeat=len(gate["needs"])):
             results = dict(zip(gate["needs"], outcomes))
             expressions = {"${{ github.event_name }}": event}
@@ -181,17 +182,31 @@ def test_aggregate_check_rejects_failed_cancelled_and_skipped_dependencies(tmp_p
                                 for job, result in results.items()})
             # Exercise the actual workflow bindings; a duplicated needs source
             # must fail even when the shell script itself is correct.
-            env = {key: value for key, value in os.environ.items()
-                   if not key.endswith("_RESULT") and key != "EVENT_NAME"}
-            env.update({name: expressions[value] for name, value in step["env"].items()})
-            result = subprocess.run(["bash", "-e", "-c", step["run"]], cwd=tmp_path,
-                                    env=env, capture_output=True, timeout=10)
+            bindings = {name: expressions[value] for name, value in step["env"].items()}
+            inputs.append("export " + " ".join(f"{name}={shlex.quote(value)}"
+                                               for name, value in bindings.items()))
             expected_build = "skipped" if event == "pull_request" else "success"
-            assert (result.returncode == 0) == (
+            expected.append(
                 all(results[job] == "success" for job in
                     ("python-tests", "api-completion", "sg2-completion", "offline-canary", "offline-audit", "offline-evaluation"))
                 and results["schema-examples"] == expected_build
-            ), (event, results)
+            )
+            combinations.append(results)
+        # Preserve the exhaustive truth table without 49,152 shell startups.
+        # The subshell is an unconditional command: placing it in `if` or `||`
+        # would disable errexit inside the very gate we intend to exercise.
+        harness = ('while IFS= read -r bindings; do\n(\neval "$bindings"\nset -e\n'
+                   + step["run"] + '\n) >/dev/null 2>&1\nprintf "%s\\n" "$?"\ndone\n')
+        env = {key: value for key, value in os.environ.items()
+               if not key.endswith("_RESULT") and key != "EVENT_NAME"}
+        result = subprocess.run(["bash", "-c", harness], cwd=tmp_path, env=env,
+                                input="\n".join(inputs) + "\n", capture_output=True,
+                                text=True, timeout=900)
+        assert result.returncode == 0, result.stderr
+        actual = result.stdout.splitlines()
+        assert len(actual) == len(expected)
+        for code, passed, combination in zip(actual, expected, combinations):
+            assert (code == "0") == passed, (event, combination, code)
 
 
 def test_offline_canary_retains_complete_commands_and_independent_job_budget():
