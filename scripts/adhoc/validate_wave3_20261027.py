@@ -54,6 +54,8 @@ def child(options):
     args = ['-q', '-p', 'no:cacheprovider', '--basetemp', str(options.output / 'cases'),
             '--junitxml', str(options.output / 'pytest.xml'),
             *('tests/' + module.replace('.', '/') + '.py' for module in options.module)]
+    if options.mark:
+        args += ['-m', options.mark]
     common.save(options.output / 'pytest-command.json', {'args': args, 'cwd': str(ROOT)})
     try:
         return int(pytest.main(args))
@@ -85,8 +87,10 @@ def run(options):
     command = [sys.executable, '-S', '-P', '-B', str(Path(__file__).resolve()), '--child', '--output', str(output)]
     for module in options.module:
         command += ['--module', module]
+    if options.mark:
+        command += ['--mark', options.mark]
     common.save(output / 'plan.json', {'command': command, 'head': options.expect_head, 'base': options.base,
-        'modules': options.module, 'credential_names_removed': removed, 'changed_paths': changed,
+        'modules': options.module, 'mark': options.mark, 'credential_names_removed': removed, 'changed_paths': changed,
         'scope': 'Offline selected modules; Python audit guard does not isolate arbitrary child binaries.'})
     start = time.monotonic()
     with (output / 'pytest.log').open('xb') as log:
@@ -120,6 +124,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--module', action='append', required=True)
+    parser.add_argument('--mark', help='Explicit pytest marker selection; deselections remain in pytest log.')
     parser.add_argument('--expect-head')
     parser.add_argument('--base')
     parser.add_argument('--child', action='store_true')

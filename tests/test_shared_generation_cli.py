@@ -139,7 +139,7 @@ def roster(base,reg,*,count=2,pending=False):
         if not pending:current['receipt']['coverage_floor']={'state':'registered','numerator':1,'denominator':2}
         path.write_bytes(sg.canonical(current))
         rows.append({'project':base.project,'label':current['run']['label'],'registration_path':str(path)})
-    path=base.bundle.parent/'roster.json';path.write_bytes(sg.canonical({'format':'shared_generation_batch_roster_v1','registrations':rows}))
+    path=Path(base.bundle).absolute().parent/'roster.json';path.write_bytes(sg.canonical({'format':'shared_generation_batch_roster_v1','registrations':rows}))
     return path,rows
 
 

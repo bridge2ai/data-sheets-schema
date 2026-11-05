@@ -48,6 +48,12 @@ def authorizations(raw, value, *, review_path, ci_path, launch_word_path):
 
     The artifacts are caller-supplied review/CI/owner evidence, not signatures.
     A matching hash does not authenticate their author or GitHub's service.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller has verified raw and its matching value with
+    registration.verified; selected composition is reconstructed as part of the exact
+    authority checks.
     """
     inputs = {name: str(Path(path).absolute()) for name, path in {
         'review': review_path, 'ci': ci_path, 'launch_word': launch_word_path}.items()}
@@ -187,6 +193,12 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
 
     This method can invoke the selected native executable. Calling it is a
     separate action from preparation; there is no inferred model or live value.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The launch path restores selection through registration.verified
+    and separately enforces authority, freshness and publication gates; verified state must
+    remain unchanged before use.
     """
     value = registration.verified(registration_raw)
     authorization = authorizations(registration_raw, value, review_path=review_path,
@@ -389,7 +401,13 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
 
 
 def read_final(registration_raw):
-    """Check complete publication and immutable saved identities; never resume."""
+    """Check complete publication and immutable saved identities; never resume.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The final reader restores selection through registration.verified
+    and checks its selected final evidence; this read does not authorize another launch.
+    """
     value = registration.verified(registration_raw)
     evidence, attempt = Path(value['evidence_directory']), Path(value['attempt_directory'])
     final_raw = _file(evidence/'final.json', 'final result')
@@ -487,6 +505,12 @@ def read_final(registration_raw):
 
 
 def main(argv=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The CLI restores its selection through registration.verified and
+    retains the separate authority/freshness/publication rules; no caller-supplied mutable
+    RunSpec is accepted.
+    """
     import argparse
     import json
     parser = argparse.ArgumentParser(description=__doc__)

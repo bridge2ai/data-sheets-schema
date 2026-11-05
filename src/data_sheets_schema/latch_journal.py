@@ -184,10 +184,22 @@ def _fail(message):
 
 
 def journal_path(spec) -> Path:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the selected run identity during construction,
+    validated inspection or an admitted launch; this path formatter does not validate input
+    binding or authorize a journal write.
+    """
     return spec.metadata_dir / f"{spec.project}_latch_journal.jsonl"
 
 
 def override_path(spec) -> Path:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the selected run identity during construction,
+    validated inspection or an admitted launch; this path formatter does not authorize an
+    override or a new request.
+    """
     return spec.metadata_dir / f"{spec.project}_latch_override.json"
 
 
@@ -531,6 +543,13 @@ def owned_artifacts(spec, *, directories=None):
     The default scope is metadata, its immediate intermediate directory, and
     every selected output parent. Consumers may narrow the returned scope
     (e.g. provenance intermediates), but use the same attribution evidence.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: For live execution/startup, the caller has checked the selected
+    RunSpec before artifact inventory. The read-only verify_completed_legacy path instead
+    supplies its validated record/root-derived identity projection; neither inventory route
+    authorizes continuation.
     """
     import yaml
     folders = {spec.metadata_dir, spec.metadata_dir / "intermediate",
@@ -809,6 +828,12 @@ def start_launch(spec):
 
     A failed launch without a ledger remains a launch, never a generation.
     launch_record prints its head even if the following initialization fails.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: guarded_launch/launch_record has checked the selected spec and
+    retained the expected external head while holding all output locks; this step
+    establishes durable launch ownership before accounting initialization.
     """
     events = _events(spec)
     locks = [path for _, path in ledger.output_locks((spec.full_path, spec.core_path,
@@ -860,7 +885,14 @@ def start_launch(spec):
 
 
 def pending_launch_paths(spec, events=None):
-    """Only current, bound coordination files of a launch without accounting."""
+    """Only current, bound coordination files of a launch without accounting.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The ownership/startup caller has checked the selected RunSpec
+    before inspecting unfinished launch evidence; returned paths are only the existing bound
+    coordination exemption, not new launch authority.
+    """
     if ledger.ledger_path(spec).exists() or ledger.ledger_path(spec).is_symlink():
         return set()
     if events is None:
@@ -1059,7 +1091,14 @@ def _carry_guard_fields(spec, data, previous, mine):
 
 
 def before_ledger_write(spec, data, *, snapshot=None):
-    """Validate persisted state before accepting a caller's proposed mutation."""
+    """Validate persisted state before accepting a caller's proposed mutation.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: usage_ledger supplies a proposed mutation for the same admitted
+    run and generation; post-delivery writes preserve that owner and prior admission even if
+    input file bytes changed, while this helper verifies immutable journal transitions.
+    """
     explicit_fresh = data.get("accept_legacy") is False and data.get("rows") == []
     previous, events, mine = _validated(spec, allow_new=explicit_fresh, mutation=True)
     ledger._validate_data(spec, data, ledger.ledger_path(spec))
@@ -1110,7 +1149,14 @@ def before_ledger_write(spec, data, *, snapshot=None):
 
 
 def remember_snapshot(spec, entry, *, index_path):
-    """Pin before the mutable index; a failed second write is a visible stop."""
+    """Pin before the mutable index; a failed second write is a visible stop.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: snapshot_store.record supplies the exact already-delivered bytes
+    and usage identity for the admitted run; preserve that same owner when pinning evidence
+    before the mutable index, without treating this as fresh input admission.
+    """
     if entry.get("usage_id") is None:
         return
     _validated(spec)
@@ -1142,7 +1188,14 @@ def _metadata(spec, events, mine):
 
 
 def check(spec, *, spending=True, startup=False):
-    """Check startup and immediately before each physical provider attempt."""
+    """Check startup and immediately before each physical provider attempt.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The startup or physical-attempt caller has already checked the
+    selected RunSpec; this check adds journal/spending validation and must not replace the
+    D76, selected-owner or request-admission gates.
+    """
     # An intact terminal account reaches the runner's detailed refusal at
     # startup; the physical-call boundary always retains the spending check.
     _, events, mine = _validated(spec, spending=spending and not startup,
@@ -1151,12 +1204,25 @@ def check(spec, *, spending=True, startup=False):
 
 
 def head_sha256(spec):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the selected validated or admitted run for
+    journal inspection; reading a head does not establish that it was externally retained or
+    authorize using it as the expected launch anchor.
+    """
     events = _events(spec)
     return events[-1]['sha256'] if events else None
 
 
 def require_launch_head(spec, expected):
-    """Read-only D57 check, both before locks and again while holding them."""
+    """Read-only D57 check, both before locks and again while holding them.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The entry caller has checked the selected RunSpec and supplies an
+    independently retained expected head; preserve this comparison both before acquiring
+    output locks and while holding them.
+    """
     try:
         found = head_sha256(spec)
         if expected is not None and (not isinstance(expected, str) or not _HEX.fullmatch(expected)):
@@ -1181,7 +1247,14 @@ def require_launch_head(spec, expected):
 
 @contextmanager
 def guarded_launch(spec, expected, acquire):
-    """Recover ordinary acquisition failures before releasing any held inode."""
+    """Recover ordinary acquisition failures before releasing any held inode.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: execute supplies the entry-validated selection, retained expected
+    head and its output-lock acquisition function after startup admission; the same
+    selection must remain unchanged during acquisition and launch recovery.
+    """
     def recover():
         with launch_record(spec, expected, initialize=True):
             pass
@@ -1195,7 +1268,14 @@ def guarded_launch(spec, expected, acquire):
 
 
 def failure_advice(spec, exc):
-    """Use only an anchor retained by this admitted launch, never reread for advice."""
+    """Use only an anchor retained by this admitted launch, never reread for advice.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller reports a failure for the same selected or admitted
+    run; only an anchor retained on that launch exception may authorize suggested resume
+    syntax, never a newly read or refused head.
+    """
     if getattr(exc, '_d4d_unbound_launch', False):
         return ('stopping; startup ownership could not be persisted; keep the sidecars for inspection; '
                 + _fresh_location(spec))
@@ -1218,6 +1298,12 @@ def launch_record(spec, expected, *, initialize=False):
 
     This never derives the caller's expectation from the mutable run directory.
     The journal remains locally hashed, not cryptographically authenticated.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller has checked the selected spec and supplies a retained
+    expected head; initialize=True additionally requires all output locks, while stop
+    logging must preserve the admitted launch even on failure.
     """
     def display(boundary):
         try:
@@ -1264,7 +1350,14 @@ def launch_record(spec, expected, *, initialize=False):
 
 
 def provenance(spec):
-    """Expose qualified history without granting permission to continue spending."""
+    """Expose qualified history without granting permission to continue spending.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The provenance caller supplies the same admitted run or validated
+    inspection selection; qualified journal history is evidence only and does not grant
+    permission for another request.
+    """
     _, events, mine = _validated(spec)
     return _metadata(spec, events, mine)
 
@@ -1283,6 +1376,12 @@ def verify_completed_legacy(record_path, *, evidence_root, recorded_root):
     or usage initializer is reachable. Shared/receipt controllers require their
     own future verifier.
     Returns a separate evidence-only envelope; never restamps the old record.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies explicit saved-record/evidence roots for the
+    narrow legacy verifier; locally restored RunSpecs remain literal inspection data, with
+    no execution, lock, repair or usage initialization allowed.
     """
     import yaml
     from data_sheets_schema import api_runner as api

@@ -128,6 +128,13 @@ def resource_paths(specs) -> tuple[Path, ...]:
 
     Optional current observations remain optional. Discovery protects their
     existing bytes; content validation and request identities remain unchanged.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Construction/capture callers supply the selected specs whose
+    resource names are being discovered; existing-spec consumers must check their entry
+    invariants first. This reads protected resource paths, not a provider or writer
+    admission.
     """
     from . import audit_omissions, bc1_selection, provenance, prompt_registry, shared_generation
     from .evidence_assertions import protocol_for_renderer

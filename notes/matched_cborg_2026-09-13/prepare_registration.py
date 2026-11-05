@@ -52,7 +52,8 @@ def spec_for(job):
         # A job registered with the key renders its recorder line with
         # `--prompt-text-env` (#2282); every registration made before this
         # carries no key and re-derives exactly as it was registered (#2307).
-        prompt_text_env=job.get("prompt_text_env") is True)
+        prompt_text_env=job.get("prompt_text_env") is True,
+        registered_input_paths=True)
 
 
 def positive_seconds(text):
@@ -177,6 +178,9 @@ def main():
     jobs = []
     for case in cases:
         for key in ("manifest", "bundle", "chunks"):
+            # Freeze discovery's relative spellings before registering either
+            # their pins or the render/input identities of new jobs (D76).
+            case[key] = str(Path(case[key]).absolute())
             pins[case[key]] = sha(case[key])
         mapping = chunking.load_manifest(Path(case["chunks"]))
         chunking.validate_manifest_mapping(mapping, Path(case["bundle"]).read_bytes(), mapping["bundle"])

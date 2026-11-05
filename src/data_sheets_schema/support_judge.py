@@ -251,7 +251,13 @@ def _dump(data: Any) -> str:
 
 
 def render_request(slot: str, value: Any, spec: str, context: ValueContext) -> str:
-    """The per-value text sent after the cached documents block."""
+    """The per-value text sent after the cached documents block.
+
+    RunSpec boundary: unrelated
+
+    RunSpec precondition: The spec parameter is the already rendered field-specification
+    string, not a RunSpec.
+    """
     parts = [f"# Field specification\n\n{spec}"]
     if context.entity is not None:
         parts.append(

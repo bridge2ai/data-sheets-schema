@@ -246,7 +246,7 @@ def test_safe_batch_preserves_shared_read_only_authorities(registered, monkeypat
     assert seen == {'plan': ['shared_rep1', 'shared_rep2'], 'lock': [], 'execute': []}
     captured = [sg.capture(s) for s in specs_for(rows)]
     common = set(dict(captured[0].files)) & set(dict(captured[1].files))
-    assert str(base.bundle) in common and reg['inputs']['context']['path'] in common
+    assert str(Path(base.bundle).absolute()) in common and reg['inputs']['context']['path'] in common
     assert {p: p.read_bytes() for p in before} == before
 
 

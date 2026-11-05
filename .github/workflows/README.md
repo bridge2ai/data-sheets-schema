@@ -50,10 +50,10 @@ README is [preserved with its historical context](../../docs/agent-instructions-
 [main.yaml](main.yaml) runs the complete collected `tests/` suite, including corpus
 checks, on Python 3.12: eight shards for PRs, six for main/manual runs (D81), with
 at most four xdist workers per shard. D75's ordinary-shard limits remain 45
-minutes for PRs and 60 for main/manual runs. Four dedicated API case jobs and
+minutes for PRs and 60 for main/manual runs. Four dedicated API case jobs, three dedicated SG2 case jobs and
 separate canary, audit/finalization and evaluation jobs run for all these events.
 Main/manual runs also build schema products and examples in a separate checkout.
-There are 15 Python jobs on PRs and 14 on main/manual runs, plus the aggregate
+There are 18 Python jobs on PRs and 17 on main/manual runs, plus the aggregate
 `test` job. This check fails when an applicable required job fails, is cancelled
 or is skipped.
 

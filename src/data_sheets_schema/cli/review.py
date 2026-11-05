@@ -61,7 +61,16 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
     receipt marked nothing_relevant, a seeded sample of receipted slots with
     their cited passage, the receiptless and reshaped slots, and the
     instruction's rules as a checklist — each item with its pointer and its
-    question, and a closed verdict vocabulary per kind."""
+    question, and a closed verdict vocabulary per kind.
+
+    \f
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The command selects a saved provenance record and delegates to
+    review_pack.write_pack; any reconstructed RunSpec is literal inspection data and must
+    not authorize generation.
+    """
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d review pack")          # a corpus write lands under the cwd (#1685)
     from data_sheets_schema.cli.method import resolve_method
@@ -351,6 +360,14 @@ def disposition(method, label, project, item, disposition, note, slot_path, old,
 
     Evaluations that predate an amendment are not re-attributed: the entry
     names them as predating it.
+
+    \f
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The command selects the saved review/provenance artifacts and
+    rebuilds inspection evidence through review_pack; reviewed edits do not turn any
+    reconstructed replay spec into launch authority.
     """
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d review disposition")          # a corpus write lands under the cwd (#1685)

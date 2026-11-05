@@ -475,6 +475,13 @@ def find_worktree_root(worktree_arg: str | Path | None = None) -> Path:
             f"Worktree directory {target} does not contain valid src/data_sheets_schema. "
             "Specify a valid path with --worktree <path>."
         )
+    from data_sheets_schema.resources import checkout_at
+    repo_root = checkout_at(target)
+    if repo_root is not None and repo_root.resolve() != target:
+        raise LauncherError(
+            f"Worktree directory {target} is not the checkout root ({repo_root.resolve()}). "
+            "Specify the checkout root with --worktree <path>."
+        )
     return target
 
 

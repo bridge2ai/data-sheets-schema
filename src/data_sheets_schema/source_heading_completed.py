@@ -218,7 +218,14 @@ FORM_KEY = 'source_heading_form_measurement'
 
 
 def measure_form(spec):
-    """Persist the instrument actually consumed by this selected measurement."""
+    """Persist the instrument actually consumed by this selected measurement.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The selected API completion caller has checked the live v2 RunSpec
+    and its final outputs before this measurement writes instrument evidence into that run's
+    ledger; it is not a launch or provider-admission gate.
+    """
     from . import grounding, usage_ledger as ledger
     if type(spec) is not api.RunSpec or spec._replay_only or spec.shared_generation_version != 2:
         raise ValueError('form capture requires live selected v2')
@@ -434,7 +441,14 @@ def _roster(selection, reader):
 
 
 def capture_completed(spec):
-    """Export only a newly rechecked terminal v2 closure, without new calls."""
+    """Export only a newly rechecked terminal v2 closure, without new calls.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The completion/inspection caller has checked the live selected v2
+    RunSpec before rechecking terminal registration, accounting and artifact closure;
+    capturing that closure must not initiate new provider calls.
+    """
     from . import receipt_completion as rc, typed_audit_runtime as typed, usage_ledger as ledger, snapshot_store, provenance
     if type(spec) is not api.RunSpec or spec._replay_only or spec.shared_generation_version != 2:
         raise ValueError('capture requires a live selected v2 specification')
@@ -865,7 +879,14 @@ def _final_checks(spec, selection):
 
 
 def recheck_completed(raw):
-    """Reconstruct a complete selected v2 run from its immutable byte closure."""
+    """Reconstruct a complete selected v2 run from its immutable byte closure.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the immutable completed-byte closure; decode
+    and exact roster checks precede private replay reconstruction, whose captured context is
+    used only for independent evidence checks and never live admission.
+    """
     selection, reader = _decode(raw)
     if set(name for name, _ in reader.files) != _roster(selection, reader):
         raise ValueError('completed logical file roster is incomplete or contains extra files')
@@ -888,10 +909,23 @@ def recheck_completed(raw):
 
 
 def completed_path(spec):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the selected run during construction or
+    validated completion inspection; this path formatter alone does not admit completed-
+    capture publication.
+    """
     return spec.metadata_dir / (spec.project + '_routing_completed.json')
 
 def publish_completed(spec):
-    """Write only after the complete captured closure independently passes."""
+    """Write only after the complete captured closure independently passes.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API completion caller has checked the same live v2 RunSpec
+    before capture_completed rechecks its terminal closure; preserve the final
+    authority/alias checks immediately before publication.
+    """
     raw = capture_completed(spec)
     destination = completed_path(spec)
     # metadata is already inside shared_write_footprint; recheck authority and

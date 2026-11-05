@@ -37,6 +37,12 @@ def policy_identity():
 
 
 def command_args(spec):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The guarded rendering/native-registration caller supplies an
+    unchanged constructed or literal-verified spec after the shared input invariant; this
+    helper validates policy axes but not the input binding independently.
+    """
     from data_sheets_schema.evidence_assertions import protocol_for_renderer
     validate(spec.native_source_attribution_version, native=spec.runtime in NATIVE_RUNTIMES,
              renderer=spec.render_version, max_checks=spec.native_source_attribution_max_checks)
@@ -55,6 +61,12 @@ def command_args(spec):
 
 
 def instructions(spec):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The guarded rendering/native-registration caller supplies an
+    unchanged constructed or literal-verified spec after the shared input invariant;
+    generated policy instructions are not execution authority.
+    """
     return ('\n\n## Native source-attribution draft preflight v1\n\n' + policy_text()
             + '\n\nRegistered maximum draft checks: '
             + str(spec.native_source_attribution_max_checks)

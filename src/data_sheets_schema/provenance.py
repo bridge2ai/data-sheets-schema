@@ -1611,9 +1611,32 @@ def _condition_claim(label: str, stated: str | None,
             "condition_basis": "no runner stated it, no prompt file names one, and the label names no registered condition"}
 
 
+def registered_input_paths(selection: dict[str, Any] | None) -> bool:
+    """Whether the selected protocol binds input spellings in a registration.
+
+    This is a spelling policy, not validation or permission to execute. The
+    protocol's ordinary registration/policy checks still validate its complete
+    authority. Native attribution prepares its registration from the selected
+    spec; native execution and the neutral supervisor replay that registration.
+    Older registration builders select the explicit registered_input_paths
+    flag. Standalone receipt-completion v1 pins only policy/limits, not input paths;
+    receipt v2/v3 get input authority from shared generation v1/v2.
+    """
+    if not isinstance(selection, dict):
+        return False
+    shared = selection.get("shared_generation_version")
+    native = selection.get("native_source_attribution_version")
+    return (selection.get("registered_input_paths") is True
+            or (type(shared) is int and shared != 0
+             and selection.get("shared_generation_registration") is not None)
+            or (type(native) is int and native != 0))
+
+
 def build_record(project: str, method: str, label: str, *, mode: str,
                  input_bundle: Path | None = None,
                  input_verified: bool = False,
+                 input_asserted: bool = False,
+                 input_sidecars_asserted: bool = False,
                  concat_dir: Path = CONCAT_DIR,
                  prompt_paths: list[Path] | None = None,
                  prompt_request: str | None = None,
@@ -1637,6 +1660,13 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     ``mode`` is ``live`` or ``reconstructed``. ``input_verified`` must be True
     only when the input bundle on disk is known to be the same bytes the run
     consumed; otherwise the input hash is withheld as unrecoverable.
+    ``input_asserted`` is the live recorder's explicit alternative: hash the
+    caller-selected files, but qualify their relationship to the consumed
+    inputs under ``hash_basis`` and ``unverified``. It grants no verification.
+    ``hash_basis`` describes the bundle digest. ``input_sidecars_asserted``
+    separately marks chunk/source-manifest bytes as unverified when the live
+    recorder has evidence for the bundle but not those sidecars' consumption.
+    It does not change the explicit verification contract of other callers.
 
     ``manifest`` is the source manifest the run *consulted*: a path, or
     ``None`` for a run that selected none, or ``registry.AUTO`` to decide by
@@ -1656,6 +1686,12 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     names while declaring its manifest context unused. Omitted, it follows
     ``manifest`` for compatibility with direct callers.
     """
+    if input_asserted and (input_verified or mode != "live"):
+        raise ValueError("asserted input capture requires live, unverified provenance")
+    hash_inputs = input_verified or input_asserted
+    if input_sidecars_asserted and (mode != "live" or not hash_inputs):
+        raise ValueError("asserted sidecar capture requires live input hashing")
+    sidecars_unverified = input_asserted or input_sidecars_asserted
     # Taken from the caller when it knows, reconstructed only when it does not.
     # A run with `--out-dir` writes flat into that directory, and rebuilding the
     # standard layout here made the record name output and companion files that
@@ -1689,7 +1725,10 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # A flat record's absolute address does not encode its launch directory.
     # Capture input addresses now, while their caller base is still known.
     output_owner = artifact_root(Path(core).absolute().with_name(f"{project}_provenance.yaml"))
-    freeze_inputs = (owner != Path.cwd().resolve() or output_owner is None
+    # D76: registered input identities remain absolute in the record as well
+    # as in RunSpec, even when publication runs at the corpus root.
+    freeze_inputs = (registered_input_paths(prompt_request_spec)
+                     or owner != Path.cwd().resolve() or output_owner is None
                      or output_owner.resolve() != Path.cwd().resolve())
 
     header = parse_header(full)
@@ -1702,12 +1741,28 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     notes = list(extra_notes or [])
 
     # ---- inputs -------------------------------------------------------
+    def _rel_if_owned(p: Path | None) -> Path | None:
+        if p is None or freeze_inputs or not Path(p).is_absolute():
+            return p
+        # Lexical collapse before resolving symlinks can select different bytes.
+        if ".." in Path(p).parts:
+            return p
+        try:
+            lex = Path(os.path.abspath(p))
+            rel = lex.relative_to(owner)
+            lex.resolve().relative_to(owner)
+            return rel
+        except (OSError, RuntimeError, ValueError):
+            return p
+
     bundle = input_bundle
     if bundle is None:
         declared = header.get("Source bundle") or header.get("Source")
         bundle = relative_to_root(Path(declared), owner) if declared else None
     if bundle is not None and freeze_inputs:
         bundle = Path(bundle).absolute()
+    elif bundle is not None:
+        bundle = _rel_if_owned(Path(bundle))
     if automatic_namespace and input_bundle is None:
         namespace = select_manifest(project, bundle) if bundle is not None else None
 
@@ -1718,10 +1773,16 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                               # gate reads to tell an absent receipt from one
                               # that was never part of the procedure.
                               "receipt_expected": bool(receipt_expected)}
-    if bundle and bundle.exists() and input_verified:
+    if bundle and bundle.exists() and hash_inputs:
         inputs.update({"bundle_md5": _md5(bundle),
                        "bundle_bytes": bundle.stat().st_size,
-                       "hash_basis": "verified identical to the bytes consumed"})
+                       "hash_basis": ("verified identical to the bytes consumed" if input_verified
+                                      else "asserted by the recorder caller; consumed bytes not independently verified")})
+        if input_asserted:
+            unverified.append({"field": "inputs.bundle_md5",
+                               "reason": "the selected file was hashed, but no admitted matching bundle digest "
+                                         "establishes the bytes consumed; absolute input paths alone are not byte evidence; "
+                                         "this recorder does not consult usage ledgers or progress journals"})
         # The chunk manifest that anchors a coverage receipt's ids to these
         # bytes (#707) — only when one exists for exactly this md5; a manifest
         # of some other version of the bundle would attest the wrong file.
@@ -1730,6 +1791,16 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                                          source_manifest=SOURCE_MANIFEST_AUTO if namespace is AUTO else namespace)
         if freeze_inputs and inputs["chunks"] is not None:
             inputs["chunks"]["path"] = str(Path(inputs["chunks"]["path"]).absolute())
+        elif inputs["chunks"] is not None and inputs["chunks"].get("path"):
+            inputs["chunks"]["path"] = str(_rel_if_owned(Path(inputs["chunks"]["path"])))
+        if sidecars_unverified:
+            unverified.append({"field": "inputs.chunks.sha256",
+                               "reason": (
+                                   "the selected chunk manifest matches the caller's bundle, but its earlier bytes "
+                                   "and consumption by the run are not independently verified"
+                                   if inputs["chunks"] is not None else
+                                   "no valid chunk manifest attests the selected bundle; "
+                                   "the chunk bytes consumed by the run are not independently verified")})
     elif bundle:
         inputs["bundle_md5"] = None
         inputs["chunks"] = None      # nothing anchors chunk ids to unverified bytes (#716)
@@ -1770,12 +1841,18 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         manifest = Path(manifest)
         if freeze_inputs:
             manifest = manifest.absolute()
+        else:
+            manifest = _rel_if_owned(manifest)
         try:
             manifest_md5 = _md5(manifest)
         except OSError:
             manifest_md5 = None
-        if input_verified and manifest_md5 is not None:
+        if hash_inputs and manifest_md5 is not None:
             inputs["source_manifest"] = {"path": str(manifest), "md5": manifest_md5}
+            if sidecars_unverified:
+                unverified.append({"field": "inputs.source_manifest.md5",
+                                   "reason": "the caller-selected source manifest was hashed; "
+                                             "the bytes consumed by the run are not independently verified"})
         else:
             inputs["source_manifest"] = {"path": str(manifest), "md5": None}
             unrecoverable.append({

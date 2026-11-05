@@ -54,6 +54,12 @@ def policy_identity(*, version: int = 1) -> dict:
 
 
 def registration(spec) -> dict:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: RunSpec.__post_init__ calls this parser during fresh construction,
+    before origin binding exists; other callers must validate the completed same spec first.
+    It validates selected receipt JSON and condition, without provider delivery.
+    """
     from data_sheets_schema.receipt_completion_policy import parse_registration
     if not isinstance(spec.receipt_completion_registration, str):
         raise ValueError('receipt completion requires immutable registration JSON')
@@ -65,12 +71,24 @@ def registration(spec) -> dict:
 
 
 def registration_identity(spec) -> dict:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies populated receipt selection fields from
+    construction or the same literal completed selection being inspected; this hashes parsed
+    receipt policy and does not admit a request.
+    """
     from data_sheets_schema.receipt_completion_policy import registration_identity as identify
     registration(spec)
     return identify(spec.receipt_completion_registration.encode('utf-8'), version=spec.receipt_completion_version)
 
 
 def schema_capture(spec=None) -> dict:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: With spec=None this captures the current schema; otherwise
+    input_identity supplies the unchanged selected shared spec whose authority is checked
+    here before returning captured schema bytes. No generation is admitted.
+    """
     from data_sheets_schema import api_runner as api
     from data_sheets_schema.schema_snapshot import capture_schema
     if spec is not None and getattr(spec, 'shared_generation_version', 0):
@@ -83,11 +101,23 @@ def schema_capture(spec=None) -> dict:
 
 
 def schema_identity(spec=None) -> dict:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller satisfies schema_capture's selected shared-spec or
+    spec=None preconditions; returning schema identity is evidence capture, not provider
+    admission.
+    """
     return {'sources': [{k: v for k, v in row.items() if k != 'text'}
                         for row in schema_capture(spec)['sources']]}
 
 
 def preflight(spec, settings: dict) -> dict:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: bind_api_header_values or receipt run supplies the same entry-
+    validated selection and resolved settings before route/policy/output-limit checks; this
+    helper does not dispatch.
+    """
     from data_sheets_schema import api_runner as api
     reg = registration(spec)
     if not spec.writes_receipt:
@@ -138,7 +168,14 @@ def _load(pin: dict) -> dict:
 
 
 def remember_exchange(spec, req, response: str, usage_id: str) -> None:
-    """Keep exact exchange after usage, before receipt parsing or re-addressing."""
+    """Keep exact exchange after usage, before receipt parsing or re-addressing.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The phase-delivery caller retains the exact already-admitted
+    request, response and usage identity under the same run/ledger owner; save paid evidence
+    before parsing even if input bytes have since drifted.
+    """
     from data_sheets_schema import usage_ledger as ledger
     state = _state(spec)
     if state is not None:
@@ -526,7 +563,15 @@ def _checked_result(inputs, response, result):
 
 
 def recover(spec, *, allow_unfinished=False) -> dict | None:
-    """Recover only pinned outcomes; missing progress can never restart full."""
+    """Recover only pinned outcomes; missing progress can never restart full.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The recovery caller supplies the same selected owner/registration
+    and any matching historical record; reconstruction verifies pinned inputs, accounted
+    response and current identity before writing recovered results, without making a
+    provider call.
+    """
     from .latch_journal import refuse_legacy_execution
     refuse_legacy_execution(spec)
     from data_sheets_schema import usage_ledger as ledger
@@ -579,6 +624,12 @@ def recover(spec, *, allow_unfinished=False) -> dict | None:
 
 
 def audit_carry(spec) -> str:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: Guarded build_phase or typed request construction supplies the
+    same selected owner with its accepted one-use receipt result; only that complete exact
+    carry may be reused.
+    """
     outcome = recover(spec)
     if outcome is None:
         raise ValueError('audit requires completed receipt continuation')
@@ -633,7 +684,14 @@ def _audit_carry(outcome):
 
 
 def run(spec, client, settings: dict, usage: list) -> dict:
-    """Called after full progress publication, before any core/audit continuation."""
+    """Called after full progress publication, before any core/audit continuation.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API execution caller supplies a D76-admitted selected spec,
+    current full/receipt evidence and the same settings, client and usage ledger; new calls
+    require current admission, while delivered evidence is saved before later validation.
+    """
     from .latch_journal import refuse_legacy_execution
     refuse_legacy_execution(spec)
     import time
@@ -722,7 +780,14 @@ def run(spec, client, settings: dict, usage: list) -> dict:
 
 
 def seal_full(spec) -> None:
-    """Independent durable boundary: lost progress cannot repurchase full."""
+    """Independent durable boundary: lost progress cannot repurchase full.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API full-completion caller retains the admitted run after full
+    and receipt outputs are durably published; bind those outputs to their saved transcript
+    without treating sealing as a new request gate.
+    """
     import os
     from data_sheets_schema import api_runner as api, usage_ledger as ledger
     data = ledger._read(spec)
@@ -740,6 +805,12 @@ def seal_full(spec) -> None:
 
 
 def resume_guard(spec, progress: dict) -> None:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API continuation caller supplies the entry-validated same
+    owner and authentic progress or matching completed provenance; a missing durable full
+    boundary must not authorize restarting paid phases.
+    """
     from data_sheets_schema import api_runner as api, usage_ledger as ledger
     if not ledger.ledger_path(spec).exists():
         return
@@ -770,6 +841,12 @@ def resume_guard(spec, progress: dict) -> None:
 
 
 def require_admission(spec, phase: str) -> None:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: usage_ledger.begin_call supplies its same entry-validated spec and
+    durable receipt intent/seal inside the admission transaction; purchased or restarted
+    phases remain refused.
+    """
     from data_sheets_schema import usage_ledger as ledger
     if not getattr(spec, 'receipt_completion_version', 0):
         return
@@ -794,7 +871,14 @@ def require_admission(spec, phase: str) -> None:
 
 
 def require_audit_carry(spec, req) -> None:
-    """Do not admit an audit if the complete bound candidate block was dropped."""
+    """Do not admit an audit if the complete bound candidate block was dropped.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The guarded typed/build-phase caller supplies the accepted one-use
+    result and proposed carry for the same selected run; exact carry validation does not
+    independently admit dispatch.
+    """
     from data_sheets_schema.usage_ledger import UsageLedgerError
     expected = audit_carry(spec)
     blocks = [p.get('text') for m in req.messages if isinstance(m.get('content'), list)
@@ -808,6 +892,12 @@ def recover_delivered(spec) -> None:
 
     Released v1 retains its existing recovery boundary. No incomplete response,
     unknown count or merely asserted result can purchase or authorize a retry.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The API resume caller supplies the same admitted owner and saved
+    response with exact pending usage identity and complete counters; settle that delivery
+    before recovery without turning it into permission for a fresh generation.
     """
     if spec.receipt_completion_version not in (2, 3):
         return

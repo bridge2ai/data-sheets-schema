@@ -202,6 +202,10 @@ def build(args):
             "chunks": str(generation.chunking.manifest_for(bundle, source_manifest=registry.path)),
             "profile": "bridge2ai", "replicates": 1, "purpose": "direct_arm_canary",
             "shared_source_project": registry.shared_source_project(project)}
+    # A registered input path is an absolute identity even when discovery
+    # returns the conventional corpus-relative chunk-manifest spelling.
+    for key in ("manifest", "bundle", "chunks"):
+        case[key] = str(Path(case[key]).absolute())
     mapping = generation.chunking.load_manifest(Path(case["chunks"]))
     generation.chunking.validate_manifest_mapping(mapping, Path(case["bundle"]).read_bytes(), mapping["bundle"])
     job = {**case, "id": identifier, "execution_arm": EXECUTION_ARM, "runtime": RUNTIME, "method": METHOD,
@@ -213,7 +217,8 @@ def build(args):
             condition=args.condition, manifest=Path(case["manifest"]), chunk_manifest=Path(case["chunks"]),
             profile=case["profile"], profile_basis="stated by the registered caller",
             render_version=args.render_version, run_date=args.run_date,
-            runtime=RUNTIME, provider=PROVIDER, reasoning_effort=EFFORT, prompt_text_env=True)
+            runtime=RUNTIME, provider=PROVIDER, reasoning_effort=EFFORT, prompt_text_env=True,
+            registered_input_paths=True)
     except ValueError as error:
         # Includes the key's refusal outside agentic renderers 9 and later
         # (#2313), which is how a non-agentic rendering is refused (#2324).

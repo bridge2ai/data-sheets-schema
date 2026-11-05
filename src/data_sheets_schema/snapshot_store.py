@@ -61,6 +61,12 @@ def predecessor_generation(spec) -> str | None:
 
     Its own identity survives a missing or malformed usage journal. Only this
     index is selected; unrelated archives are not accepted as predecessors.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: prepare_usage supplies the entry-validated selected owner before
+    an explicit fresh generation; only that owner's current index may be considered as the
+    predecessor.
     """
     try:
         data = _load(spec.metadata_dir, spec.project, check_account=False)
@@ -72,7 +78,14 @@ def predecessor_generation(spec) -> str | None:
 
 
 def activation_intent(spec) -> dict:
-    """Capture the exact predecessor before publishing a fresh usage ledger."""
+    """Capture the exact predecessor before publishing a fresh usage ledger.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: prepare_usage supplies the entry-validated selected owner before
+    replacing the ledger; capture its exact predecessor bytes before publishing the fresh
+    accounting boundary.
+    """
     path = index_path(spec.metadata_dir, spec.project)
     raw = path.read_bytes() if path.exists() else None
     try:
@@ -88,7 +101,14 @@ def activation_intent(spec) -> dict:
 
 
 def finish_activation(spec) -> None:
-    """Finish only the recorded initialization, including after publication."""
+    """Finish only the recorded initialization, including after publication.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the same admitted run whose ledger contains
+    the durable activation intent; this recovery finishes that recorded initialization and
+    must not invent a new selection or admission.
+    """
     account = ledger._read(spec)
     pending = account.get("pending_snapshot_activation")
     if pending is None:
@@ -167,7 +187,14 @@ def _verified(entry: dict) -> Path:
 
 
 def activate(spec, *, fresh: bool, completed: bool, prior_record: dict) -> None:
-    """Establish the snapshot owner before reading or writing any phase."""
+    """Establish the snapshot owner before reading or writing any phase.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The generation/recovery caller supplies the same admitted owner
+    and accounting generation, plus its matching prior record; activation establishes that
+    owner's snapshot index before phase evidence is published.
+    """
     finish_activation(spec)
     directory = spec.provenance_path.parent
     path = index_path(directory, spec.project)
@@ -243,7 +270,15 @@ def activate(spec, *, fresh: bool, completed: bool, prior_record: dict) -> None:
 
 
 def record(spec, name: str, path: Path, *, usage_id: str | None = None) -> None:
-    """Register delivered evidence even when its inputs changed mid-call."""
+    """Register delivered evidence even when its inputs changed mid-call.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The response-saving caller supplies delivered bytes and the usage
+    identity from the already-admitted request, retaining its same run/ledger owner;
+    evidence must still be preserved if input file bytes changed during delivery, without
+    authorizing another request.
+    """
     if ledger.generation_id(spec) is None:
         return  # standalone historical helpers have no active generation
     directory = spec.provenance_path.parent
@@ -324,6 +359,12 @@ def read_latest(directory: Path, project: str, name: str, *, spec=None,
     helpers. A modern record without an index never falls back to filenames.
     Opting into metadata adds a fresh copy of the selected, byte-verified entry
     to the inner tuple; the default return and authority precedence are unchanged.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: When spec is supplied, the inspection/recovery caller has
+    validated the selected RunSpec and matching record before reading snapshots; spec=None
+    uses portable byte attestation only, and neither route admits a provider call.
     """
     def selected(entry):
         observed = _read_verified(entry)
@@ -372,12 +413,25 @@ def read_latest(directory: Path, project: str, name: str, *, spec=None,
 
 def latest(directory: Path, project: str, name: str, *, spec=None,
            record: dict | None = None) -> tuple[bool, Path | None]:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller satisfies read_latest's selected-spec or portable-
+    record preconditions; returning a verified snapshot path does not independently admit
+    input selection or a request.
+    """
     indexed, snapshot = read_latest(directory, project, name, spec=spec, record=record)
     return indexed, snapshot[0] if snapshot is not None else None
 
 
 def require_accounted(spec, prior_record: dict) -> None:
-    """Do not let a completed record hide a later delivered attempt (#1416)."""
+    """Do not let a completed record hide a later delivered attempt (#1416).
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The resume/completion caller supplies the validated selected run
+    and its matching prior record; surviving snapshot attempts must remain associated with
+    that owner's complete accounting.
+    """
     generation = ledger.generation_id(spec)
     run = prior_record.get("run") or {}
     known = set(ledger.prior_generation_ids(spec) if generation else run.get("prior_generation_ids") or [])
@@ -405,13 +459,26 @@ def require_accounted(spec, prior_record: dict) -> None:
 
 
 def require_completed_accounted(spec, record: dict) -> None:
-    """A completed return must include every surviving call of this generation."""
+    """A completed return must include every surviving call of this generation.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The completion caller supplies the same validated run and
+    completed record; every surviving call must remain accounted before returning
+    completion, without granting new call authority.
+    """
     if ledger.generation_id(spec) is None:
         return
     ledger.require_matching_usage(spec, record.get("api_usage") or [], complete=True)
 
 
 def entries(spec) -> list[dict] | None:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The provenance publisher supplies the same admitted owner whose
+    snapshot index is being reported; retain its generation and verified evidence bytes
+    rather than substituting another run or granting fresh admission.
+    """
     data = _load(spec.provenance_path.parent, spec.project)
     if data is None:
         return None

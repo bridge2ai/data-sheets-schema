@@ -362,7 +362,11 @@ class TestTheThreadingHolds(_Clean):
         line = next(l for l in resolve_prompt(crate).splitlines() if " provenance record --project " in l)
         import shlex
         command = shlex.split(line)
-        self.assertEqual(Path(command[command.index('--manifest') + 1]).resolve(), STUDY_MANIFEST.resolve())
+        self.assertEqual(command.count("--manifest"), 1)
+        selected = command[command.index("--manifest") + 1]
+        self.assertNotEqual(selected, "none")
+        self.assertEqual(Path(selected).absolute(), STUDY_MANIFEST.absolute())
+        self.assertEqual(Path(selected).resolve(), STUDY_MANIFEST.resolve())
         self.assertNotIn("--manifest none", line)
         with tempfile.TemporaryDirectory() as d:
             ext = Path(d) / "clinic_preprocessed.txt"; ext.write_text("FILE: a\nhi\n", encoding="utf-8")
@@ -1105,8 +1109,10 @@ class TestRoundEight(_Clean):
     """The Codex round-5 findings (#1606–#1611)."""
 
     def _recorder(self, args, env):
-        """The recorder from the checkout root with its writes captured —
-        the record's `build_record` keywords and nothing on disk."""
+        """Build real input identities and capture publication writes.
+
+        Keep the builder spy's keywords available to the profile assertions.
+        """
         import click.testing
         from data_sheets_schema import provenance as pv
         from data_sheets_schema.cli import provenance as prov_cli
@@ -1114,8 +1120,9 @@ class TestRoundEight(_Clean):
             for k in ("D4D_PROFILE",):
                 if k not in env:
                     os.environ.pop(k, None)
-            rec = mock.Mock(data={}, validation_carried=None)
-            with mock.patch.object(pv, "build_record", return_value=rec) as build, \
+            with mock.patch.object(pv, "build_record", wraps=pv.build_record) as build, \
+                    mock.patch.object(pv.ProvenanceRecord, "write", autospec=True,
+                                      side_effect=lambda _record, path: path), \
                     mock.patch.object(prov_cli, "_inline_checks"):
                 r = click.testing.CliRunner().invoke(prov_cli.provenance, ["record", *args])
         return r, (build.call_args.kwargs if build.call_args else None)
@@ -1171,7 +1178,7 @@ class TestRoundEight(_Clean):
             self.assertFalse(spec.manifest_used); self.assertIsNotNone(spec.manifest)   # selected, not consumed
             record = {"record_generated_at": "2026-09-13T12:00:00Z", "model": {"provider": "Anthropic"},
                       "schema": {"profile": spec.profile, "profile_basis": spec.profile_basis},
-                      "inputs": {"bundle_path": str(bundle), "source_manifest": {"path": None},
+                      "inputs": {"bundle_path": str(spec.bundle), "source_manifest": {"path": None},
                                  **({"chunks": {"path": str(spec.chunk_manifest)}} if spec.chunk_manifest else {})},
                       "prompts": {"request": {"sha256": hashlib.sha256(resolve_prompt(spec).encode()).hexdigest()}}}
             with tempfile.TemporaryDirectory() as d:
@@ -1353,7 +1360,7 @@ class TestRoundTen(_Clean):
                        runtime="Claude Code", provider="Anthropic", run_date="2026-09-13")
         record = {"record_generated_at": "2026-09-13T12:00:00Z", "model": {"provider": "Anthropic"},
                   "schema": {"profile": spec.profile, "profile_basis": spec.profile_basis},
-                  "inputs": {"bundle_path": str(bundle), "source_manifest": {"path": None},
+                  "inputs": {"bundle_path": str(spec.bundle), "source_manifest": {"path": None},
                              **({"chunks": {"path": str(spec.chunk_manifest)}} if spec.chunk_manifest else {})},
                   "prompts": {"request": {"sha256": hashlib.sha256(resolve_prompt(spec).encode()).hexdigest()}}}
         with tempfile.TemporaryDirectory() as d:

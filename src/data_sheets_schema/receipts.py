@@ -928,7 +928,14 @@ def phase1_snapshot_state(receipt: Path, *, spec=None, record: dict | None = Non
     UTF-8, a file that cannot be opened, an empty document, or a document
     that is a list or a scalar (#1124 Codex review, SF2: the two-valued
     reading returned None for all of these and a truthy list as if it were
-    a record)."""
+    a record).
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The evidence-inspection caller selects the receipt path with its
+    same-run spec or explicit provenance record; classify the verified snapshot bytes and
+    decoding outcome without treating evidence lookup as launch admission.
+    """
     try:
         snapshot = phase1_snapshot_read(receipt, spec=spec, record=record)
     except OSError as exc:
@@ -948,7 +955,14 @@ def phase1_snapshot_state(receipt: Path, *, spec=None, record: dict | None = Non
 
 
 def phase1_snapshot_read(receipt: Path, *, spec=None, record: dict | None = None) -> tuple[Path, bytes] | None:
-    """Read the phase evidence under its run identity and hash in one operation."""
+    """Read the phase evidence under its run identity and hash in one operation.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The evidence-inspection caller supplies the receipt path and
+    optional same-run spec or explicit provenance record; retain generation/hash checks and
+    allow historical filename fallback only when no indexed identity exists.
+    """
     from data_sheets_schema.snapshot_store import read_latest
     project = receipt.name.removesuffix("_coverage_receipt.yaml")
     indexed, snapshot = read_latest(receipt.parent, project, f"{project}_full.yaml", spec=spec, record=record)
@@ -964,7 +978,14 @@ def phase1_snapshot_read(receipt: Path, *, spec=None, record: dict | None = None
 
 
 def phase1_snapshot_path(receipt: Path, *, spec=None, record: dict | None = None) -> Path | None:
-    """The verified evidence path; parsers use phase1_snapshot_read directly."""
+    """The verified evidence path; parsers use phase1_snapshot_read directly.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller satisfies phase1_snapshot_read's owner/record
+    preconditions; the returned verified path is an inspection result, and consumers needing
+    exact bytes must use the read operation.
+    """
     snapshot = phase1_snapshot_read(receipt, spec=spec, record=record)
     return snapshot[0] if snapshot is not None else None
 

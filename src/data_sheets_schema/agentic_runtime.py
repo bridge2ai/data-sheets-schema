@@ -103,6 +103,12 @@ def playbook_text(environment: dict | None = None) -> str:
 
 
 def instruction_adapter(spec) -> str:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: resolve_prompt supplies an unchanged, entry-validated RunSpec
+    before this adapter derives installed-agent command text; formatting commands does not
+    admit a process launch.
+    """
     env = spec._agentic_toolchain
     py = env["python"]
     paths = spec._agentic_artifact_paths

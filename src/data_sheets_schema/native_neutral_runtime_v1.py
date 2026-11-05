@@ -16,6 +16,12 @@ import uuid
 
 
 def main(argv=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: Exact supervisor registration and pinned composition/fixture bytes
+    are verified before locally restoring literal replay; the CLI never accepts a mutable
+    RunSpec object.
+    """
     from data_sheets_schema import native_attempt_supervisor as supervisor
     from data_sheets_schema import native_attribution_registration as draft
     from data_sheets_schema.api_runner import RunSpec

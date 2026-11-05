@@ -591,6 +591,14 @@ def check_cmd(method, label, project, strict):
 
     Use `--strict` after a generation run so a missing record fails the step
     rather than being noticed later.
+
+    \f
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The command selects saved runs and invokes request verification;
+    reconstructed RunSpecs are literal historical inspection objects, not generation
+    requests.
     """
     from data_sheets_schema.runs import (canonical_prompt_status,
                                          check_provenance,

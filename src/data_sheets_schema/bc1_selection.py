@@ -58,6 +58,12 @@ def _canonical(value):
 
 
 def enabled(spec) -> bool:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The constructor supplies a new selection before origin
+    capture; reuse callers supply the same D76-admitted selection or a replay view
+    restricted to inspection. Reading this selector grants no execution authority.
+    """
     value = getattr(spec, "bounded_carry_version", 0)
     if type(value) is not int or value not in (0, VERSION):
         raise ValueError("bounded_carry_version must be the integer 0 or 1")
@@ -162,6 +168,13 @@ def validate_spec_mode(spec) -> None:
 
     Legacy malformed-registration diagnostics remain the existing parser's
     responsibility. An escaped spelling of the BC1 key cannot evade this check.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The constructor supplies a new selection before D76
+    origin capture; reuse callers retain the same admitted selection, while replay
+    inspection remains non-executing. Checking the closed mode/registration tuple
+    does not establish an input-origin binding or authorize a call.
     """
     selected = enabled(spec)
     raw = getattr(spec, "shared_generation_registration", None)
@@ -193,6 +206,12 @@ def validate_spec_mode(spec) -> None:
 
 
 def identity(spec) -> dict | None:
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The serializer supplies the same admitted selection, or
+    the replay constructor supplies a view restricted to genuine-record inspection.
+    The returned contract identity cannot authorize execution of that inspection view.
+    """
     validate_spec_mode(spec)
     if not enabled(spec):
         return None

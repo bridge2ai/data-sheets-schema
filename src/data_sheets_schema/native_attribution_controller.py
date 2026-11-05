@@ -21,7 +21,7 @@ KIND = 'd4d_native_attribution_callback_composition'
 VERSION = 1
 EXECUTION = 'offline_composition_only_no_production_launcher'
 SOURCES_PATH = Path('src/data_sheets_schema/native_controller_sources_v1.json')
-SOURCES_SHA256 = '8f70144857d2aa8c63240dd157dcfaf3fe3234b43ebf647449c1013348f63beb'
+SOURCES_SHA256 = 'e55f332b2cc4d679c2ffa9cba5d40acb8a333fd821e3b6d0f2746b8cba7f3971'
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -70,7 +70,14 @@ def _classify(command, python, programs, policy, controls):
 
 
 def command_policy(spec, instruction_path, controls=None):
-    """Build from the explicit spec; never call the frozen CBORG spec resolver."""
+    """Build from the explicit spec; never call the frozen CBORG spec resolver.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: composition supplies the unchanged literal spec returned by
+    draft.verified and its matching selected instruction file; deriving a command policy
+    does not admit execution.
+    """
     controls = load_controls() if controls is None else controls
     grammar = controls['native_command_policy']
     phase = controls['native_phase_history']
@@ -156,7 +163,14 @@ def command_policy(spec, instruction_path, controls=None):
 
 
 def composition(registration_raw, instruction_path):
-    """Capture an offline composition, without authorizing or starting a child."""
+    """Capture an offline composition, without authorizing or starting a child.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Explicit registration/instruction inputs are verified through
+    draft.verified before constructing composition; no caller-supplied mutable RunSpec is
+    accepted.
+    """
     spec, registration = draft.verified(registration_raw)
     controls = load_controls()
     path = Path(instruction_path).resolve()
@@ -180,6 +194,11 @@ def composition(registration_raw, instruction_path):
 
 
 def verified_composition(raw):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies exact composition bytes; reconstruction and
+    complete re-encoding verify the draft registration before its spec is consumed.
+    """
     if type(raw) is not bytes:
         raise ValueError('controller composition must be captured bytes')
     value = draft._json(raw)
@@ -195,6 +214,11 @@ def verified_composition(raw):
 
 
 def write_composition(registration_raw, instruction_path, destination):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The selected draft registration is verified and the complete
+    composition re-encoded before publication; no unvalidated mutable RunSpec is accepted.
+    """
     raw = draft._encoded(composition(registration_raw, instruction_path))
     verified_composition(raw)
     target = Path(destination).resolve()
@@ -261,6 +285,12 @@ class CallbackAdapter:
                 raise ValueError('completed recorder metadata changed')
 
     def observe(self, event):
+        """RunSpec boundary: validated-caller
+
+        RunSpec precondition: The adapter was initialized from verified composition and callers
+        have kept its spec/state and captured policy unchanged; observe additionally re-verifies
+        the raw composition before processing the event.
+        """
         if self.failure is not None:
             self._stop(self.failure)
         try:
@@ -354,6 +384,12 @@ class CallbackAdapter:
         return _classify(command, python, programs, policy, self.controls)
 
     def report(self, *, complete=False):
+        """RunSpec boundary: validated-caller
+
+        RunSpec precondition: The adapter was initialized from verified composition and callers
+        have kept its spec/state and captured policy unchanged; report re-verifies composition
+        only for a complete result, not unconditionally.
+        """
         if complete and self.failure is None:
             try:
                 verified_composition(self.raw)

@@ -1,4 +1,5 @@
 """Finite source-only selector proofs; no generation/package import (#4503)."""
+import ast
 import importlib.util
 from pathlib import Path
 import sys
@@ -15,6 +16,7 @@ RUNNER = 'src/data_sheets_schema/api_runner.py'
 SHARED = 'src/data_sheets_schema/shared_generation.py'
 MODES = 'src/data_sheets_schema/source_heading_runtime.py'
 FILES = (RUNNER, SHARED, MODES, 'src/data_sheets_schema/receipt_completion.py',
+         'src/data_sheets_schema/removal_repair.py',
          'src/data_sheets_schema/bc1_selection.py',
          'src/data_sheets_schema/bc1_registration.py',
          'src/data_sheets_schema/bc1_runtime.py',
@@ -57,6 +59,81 @@ def test_actual_delegated_families_and_description_are_derived():
     assert any('source_heading_runtime.py:' in path for path in receipt['evidence'])
     assert {name for name in sys.modules if name == 'data_sheets_schema'
             or name.startswith('data_sheets_schema.')} == existing_modules
+
+
+def _enabled_contract_parts(root):
+    """Retain the actual selector body while isolating its initial docstring."""
+    path = root / 'src/data_sheets_schema/bc1_selection.py'
+    source = path.read_text()
+    function = next(node for node in ast.parse(source).body
+                    if isinstance(node, ast.FunctionDef) and node.name == 'enabled')
+    docstring = function.body[0]
+    assert isinstance(docstring, ast.Expr) and isinstance(docstring.value, ast.Constant)
+    assert type(docstring.value.value) is str
+    assert 'RunSpec boundary: validated-caller' in docstring.value.value
+    lines = source.splitlines(keepends=True)
+    signature = lines[function.lineno - 1]
+    assert source.count(signature) == 1
+    doc = ''.join(lines[docstring.lineno - 1:docstring.end_lineno])
+    executable = function.body[1]
+    first_statement = ''.join(lines[executable.lineno - 1:executable.end_lineno])
+    without_doc = ''.join(lines[:docstring.lineno - 1] + lines[docstring.end_lineno:])
+    return path, without_doc, signature, doc, first_statement
+
+
+@pytest.mark.parametrize('documented', [True, False], ids=['d76_contract', 'no_docstring'])
+def test_bc1_enabled_initial_docstring_preserves_selectors_and_dispatch(tmp_path, documented):
+    root = fixture_root(tmp_path)
+    path, without_doc, _signature, _doc, _first = _enabled_contract_parts(root)
+    if not documented:
+        path.write_text(without_doc)
+    consts = scan._module_constants(root / RUNNER)
+    result = scan.derive_followups(scan._tree(root / RUNNER), list(consts['PHASES']),
+                                  consts, root=root)
+    typed = 'src/data_sheets_schema/typed_audit_runtime.py'
+    functions = {node.name: node for node in ast.parse((root / typed).read_text()).body
+                 if isinstance(node, ast.FunctionDef)}
+    dispatches = [node for node in functions['run'].body
+                  if isinstance(node, ast.If) and isinstance(node.test, ast.NamedExpr)
+                  and ast.unparse(node.test.value) == '_bc1(spec)']
+    assert len(dispatches) == 1
+    citations = [f"{typed}:{functions['_bc1'].lineno}", f'{typed}:{dispatches[0].lineno}']
+    for phase in ('typed_audit_worker', 'typed_audit_omission', 'typed_audit_integration'):
+        selected = result[phase]
+        assert selected['selection']['renderers'] == [25, 27]
+        assert selected['conditions'] == ['generic_v10', 'generic_v10_source_heading_routing_v1',
+                                          'generic_v10_source_heading_span_v1']
+        routes = [row for row in selected['via'] if row.get('bounded_carry_version') == 1]
+        assert routes
+        assert all(row['dispatch_evidence'] == citations for row in routes)
+        assert all(row['replacement']['phase'] == 'audit' for row in routes)
+
+
+@pytest.mark.parametrize('mutation', ['second_initial_string', 'later_string', 'fstring_prefix',
+                                    'bytes_prefix', 'call_prefix', 'assignment_before_docstring'])
+def test_bc1_enabled_non_docstring_statements_are_refused(tmp_path, mutation):
+    root = fixture_root(tmp_path)
+    path, without_doc, signature, doc, first = _enabled_contract_parts(root)
+    # Prove this exact copied executable body is accepted before adding the
+    # hostile statement; a different failure must not satisfy the refusal.
+    path.write_text(without_doc)
+    assert scopes(root)['typed_audit_worker']['selection']['renderers'] == [25, 27]
+    prefixes = {
+        'second_initial_string': doc + '    "second string is not a docstring"\n',
+        'later_string': doc,
+        'fstring_prefix': '    f"selector {spec}"\n',
+        'bytes_prefix': '    b"not a string docstring"\n',
+        'call_prefix': '    str("not a docstring")\n',
+        'assignment_before_docstring': '    local = None\n' + doc,
+    }
+    changed = without_doc.replace(signature, signature + prefixes[mutation], 1)
+    if mutation == 'later_string':
+        assert changed.count(first) == 1
+        changed = changed.replace(first, first + '    "later string is not a docstring"\n', 1)
+    path.write_text(changed)
+    with pytest.raises(scan.ConfigError,
+                       match='BC1 selector domain or read-only enabled helper changed'):
+        scopes(root)
 
 
 @pytest.mark.parametrize('name,before,after', [

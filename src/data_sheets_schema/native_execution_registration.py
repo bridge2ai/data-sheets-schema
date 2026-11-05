@@ -141,7 +141,14 @@ def validate_runtime(value):
 
 
 def environment(runtime, selected, spec, config_directory):
-    """No inherited environment, secrets or historical live configuration."""
+    """No inherited environment, secrets or historical live configuration.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the unchanged spec and selected composition
+    returned together by _selection/draft.verified, with its validated runtime; environment
+    derivation does not admit a launch.
+    """
     return {**runtime['environment'], **POLICY_ENV,
             'CLAUDE_CONFIG_DIR': str(config_directory),
             'PYTHONPATH': str(authority.ROOT / 'src'), 'VIRTUAL_ENV': sys.prefix,
@@ -176,7 +183,14 @@ def _selection(composition_path, runtime):
 
 
 def permission_expectation(runtime, selected, spec, effective_system, config_directory):
-    """Authority comes from the selected composition, never the saved probe."""
+    """Authority comes from the selected composition, never the saved probe.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the unchanged spec and matching composition
+    from _selection/draft.verified before this helper reads bundle bytes to derive the
+    permission expectation.
+    """
     commands = draft._commands(spec)
     expected_commands = {}
     for kind in ('draft', 'final_evidence'):
@@ -222,7 +236,14 @@ def _paths(value, selected, *, fresh, extra_protected=()):
 
 def registration(composition_path, system_path, *, permission_probe_path, attempt_id,
                  attempt_directory, evidence_directory, runtime, receipt_origin_version=0):
-    """Capture an offline proposal, not permission to invoke any native command."""
+    """Capture an offline proposal, not permission to invoke any native command.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Explicit selection is reconstructed through _selection and the
+    exact saved permission probe is validated before a registration is returned; no mutable
+    RunSpec argument is adopted.
+    """
     if type(receipt_origin_version) is not int or receipt_origin_version not in (0, 1):
         raise ValueError('receipt_origin_version must be exactly integer 0 or 1')
     if not isinstance(attempt_id, str) or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', attempt_id) is None:
@@ -280,6 +301,11 @@ def registration(composition_path, system_path, *, permission_probe_path, attemp
 
 
 def verified(raw):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies exact registration bytes; this verifier
+    rederives selection and checks the entire registration before returning it for use.
+    """
     if type(raw) is not bytes or len(raw) > 8 * 1024 * 1024:
         raise ValueError('native execution registration must be bounded exact bytes')
     value = draft._json(raw)
@@ -299,6 +325,11 @@ def verified(raw):
 
 
 def write_registration(destination, **kwargs):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The selected registration is rederived and verified before
+    publication; callers must retain the existing destination and exclusive-write checks.
+    """
     value = registration(**kwargs)
     raw = draft._encoded(value)
     verified(raw)

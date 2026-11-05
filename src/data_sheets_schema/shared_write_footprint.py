@@ -21,7 +21,14 @@ class Footprint:
 
 
 def for_run(spec) -> Footprint:
-    """Use the same output/lock/resource derivations as the actual writers."""
+    """Use the same output/lock/resource derivations as the actual writers.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller is validating populated RunSpec fields during
+    construction or has checked the completed spec before deriving its output footprint; a
+    footprint alone does not authorize writes.
+    """
     from .usage_ledger import output_locks
     from .schema_digest import INVENTORY_LEDGER
     from .resources import resource_path

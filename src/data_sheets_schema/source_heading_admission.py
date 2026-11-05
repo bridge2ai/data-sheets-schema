@@ -20,6 +20,12 @@ MAX_CALLS = 512
 
 
 def selected(spec):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller is constructing selected fields or operating on an
+    entry-validated/admitted spec; this version predicate only classifies stored selection
+    and does not check the binding.
+    """
     return getattr(spec, 'shared_generation_version', 0) == 2
 
 
@@ -174,7 +180,14 @@ def _recheck(spec, data, *, allow_prepared=False, allow_pending=False, allow_res
 
 
 def prepare(spec, phase, attempt, client, kwargs):
-    """Count and save before the existing usage transaction admits the call."""
+    """Count and save before the existing usage transaction admits the call.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The phase caller has checked the selected RunSpec and established
+    its ledger before passing the exact proposed wire; counting/persisting that proposal
+    still precedes begin_call admission and provider delivery.
+    """
     if not selected(spec) or not ordinary(phase):
         return client, kwargs
     ledger.require_resolved(spec)
@@ -206,7 +219,14 @@ def prepare(spec, phase, attempt, client, kwargs):
 
 
 def bind_admission(spec, phase, attempt, *, data, usage_id):
-    """Called only by begin_call, before its single pending-call atomic write."""
+    """Called only by begin_call, before its single pending-call atomic write.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: usage_ledger.begin_call supplies the entry-validated selected run,
+    prepared phase/attempt and current ledger transaction; bind only that counted request
+    before the single pending-call write.
+    """
     if not selected(spec) or not ordinary(phase):
         return
     state, _ = _recheck(spec, data, allow_prepared=True)
@@ -219,6 +239,12 @@ def bind_admission(spec, phase, attempt, *, data, usage_id):
 
 
 def require_wire(spec, phase, usage_id, kwargs):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The physical-attempt caller supplies the same admitted run, usage
+    identity and exact wire prepared for that request; this association check supplements
+    the existing entry and journal gates.
+    """
     if not selected(spec) or not ordinary(phase):
         return
     data = ledger._read(spec)
@@ -228,6 +254,12 @@ def require_wire(spec, phase, usage_id, kwargs):
 
 
 def remember_response(spec, phase, usage_id, response):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The delivery caller supplies the exact response and usage identity
+    of the already-admitted request under the same run/ledger owner; saving paid evidence is
+    not a fresh input-binding check or permission for another request.
+    """
     if not selected(spec) or not ordinary(phase):
         return
     from . import reasoning
@@ -260,6 +292,12 @@ def remember_response(spec, phase, usage_id, response):
 
 
 def completion_check(spec):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The completion/recovery caller supplies the same validated
+    selected run and settled accounting; verifying saved count/request associations does not
+    itself admit another provider call.
+    """
     return _completion_check(spec, ledger._read(spec))
 
 

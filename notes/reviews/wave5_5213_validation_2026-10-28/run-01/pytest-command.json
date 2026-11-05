@@ -1,0 +1,21 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave5-5213-validation-20261028/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave5-5213-validation-20261028/pytest.xml",
+    "tests/test_5139_relative_paths.py",
+    "tests/test_arm_comparison.py",
+    "tests/test_api_launcher.py",
+    "tests/test_wave3_5139_review.py",
+    "tests/test_wave3_5139_paths.py",
+    "tests/test_preflight_resource_authority.py",
+    "tests/test_wave4_5095_review.py",
+    "-m",
+    "not corpus"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave5-5213-20261028"
+}

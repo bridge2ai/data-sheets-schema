@@ -3,7 +3,7 @@
 Opt in with ``python -m pytest -p utils.pytest_shard --ci-shard=1/4``.
 Every collected file belongs to exactly one shard; new tests need no CI edit.
 Keeping a file together avoids multiplying its module/class fixture setup.
-Explicit ``--ci-lane`` isolates four slow offline API cases while retaining
+Explicit ``--ci-lane`` isolates seven slow offline API/SG2 cases while retaining
 the complete collected suite across the ordinary shards and case lanes.
 """
 
@@ -24,27 +24,34 @@ API_CASE_LANES = {
     "routing-default-layout": "tests/test_source_heading_runtime_api.py::test_actual_default_layout_completed_capture",
 }
 
+SG2_CASE_LANES = {
+    f"sg2-{mode}": "tests/test_wave7_5213_d76_registration.py::"
+    f"test_sg2_root_launch_completes_and_records_registered_paths[{mode}]"
+    for mode in ("none", "conventional", "explicit")
+}
+DEDICATED_CASE_LANES = {**API_CASE_LANES, **SG2_CASE_LANES}
+
 
 def partition_lanes(nodeids):
     """Partition the entire actual collection, never a test allowlist."""
     nodeids = list(nodeids)
     counts = Counter(nodeids)
-    if len(set(API_CASE_LANES.values())) != len(API_CASE_LANES):
+    if len(set(DEDICATED_CASE_LANES.values())) != len(DEDICATED_CASE_LANES):
         raise pytest.UsageError("--ci-lane has duplicate dedicated targets")
-    invalid = [node for node in API_CASE_LANES.values() if counts[node] != 1]
+    invalid = [node for node in DEDICATED_CASE_LANES.values() if counts[node] != 1]
     if invalid:
         raise pytest.UsageError("--ci-lane requires the complete collection with each "
                                 "dedicated target exactly once: " + ", ".join(invalid))
-    dedicated = set(API_CASE_LANES.values())
+    dedicated = set(DEDICATED_CASE_LANES.values())
     return {"ordinary": [node for node in nodeids if node not in dedicated],
-            **{lane: [node] for lane, node in API_CASE_LANES.items()}}
+            **{lane: [node] for lane, node in DEDICATED_CASE_LANES.items()}}
 
 
 class _DedicatedCaseOutcome:
     """A required case cannot pass by skipping, xfail or collection alone."""
 
     def __init__(self, lane):
-        self.expected = API_CASE_LANES[lane]
+        self.expected = DEDICATED_CASE_LANES[lane]
         self.collection_matches = False
         self.reports = []
 
@@ -70,8 +77,8 @@ class _DedicatedCaseOutcome:
 
 
 def pytest_addoption(parser):
-    parser.addoption("--ci-lane", choices=("ordinary", *API_CASE_LANES), default=None,
-                     help="Opt into ordinary shards or one required offline API case")
+    parser.addoption("--ci-lane", choices=("ordinary", *DEDICATED_CASE_LANES), default=None,
+                     help="Opt into ordinary shards or one required offline case")
     parser.addoption("--ci-shard", metavar="INDEX/TOTAL", default=None,
                      help="Run one deterministic, one-based shard of collected tests")
     parser.addoption("--ci-shard-timings", metavar="JSON", default=None,
@@ -96,7 +103,7 @@ def pytest_configure(config):
     timing_path = config.getoption("--ci-shard-timings")
     if lane == "ordinary" and value is None:
         raise pytest.UsageError("--ci-lane=ordinary requires --ci-shard")
-    if lane in API_CASE_LANES:
+    if lane in DEDICATED_CASE_LANES:
         if value is not None or timing_path is not None:
             raise pytest.UsageError("dedicated --ci-lane forbids shard/timing options")
         if config.getoption("numprocesses", default=None) not in (None, 0):
@@ -171,7 +178,7 @@ def pytest_collection_modifyitems(config, items):
         eligible = set(partition[lane])
         lane_deselected = [item for item in items if item.nodeid not in eligible]
         items[:] = [item for item in items if item.nodeid in eligible]
-        if lane in API_CASE_LANES:
+        if lane in DEDICATED_CASE_LANES:
             config.hook.pytest_deselected(items=lane_deselected)
             return
     index, total = _coordinates(value)
@@ -199,10 +206,10 @@ def pytest_collection_modifyitems(config, items):
 
 def pytest_report_header(config):
     lane = config.getoption("--ci-lane")
-    if lane in API_CASE_LANES:
-        return f"CI dedicated case {lane}: {API_CASE_LANES[lane]}"
+    if lane in DEDICATED_CASE_LANES:
+        return f"CI dedicated case {lane}: {DEDICATED_CASE_LANES[lane]}"
     if lane == "ordinary":
-        return f"CI ordinary shard {config.getoption('--ci-shard')}: four required cases run separately"
+        return f"CI ordinary shard {config.getoption('--ci-shard')}: seven required cases run separately"
     value = config.getoption("--ci-shard")
     if value is not None:
         if config.getoption("--ci-shard-timings") is not None:

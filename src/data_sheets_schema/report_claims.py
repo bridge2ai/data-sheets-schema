@@ -1530,7 +1530,14 @@ def phase1_snapshot_for(core_path: Path) -> dict | None:
 
 
 def phase1_snapshot_with_pin_for(core_path: Path, *, spec=None, record: dict | None = None) -> tuple[dict | None, dict | None]:
-    """Read the snapshot once and pin the exact bytes being judged (#1194)."""
+    """Read the snapshot once and pin the exact bytes being judged (#1194).
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: When a RunSpec is supplied, the report-check caller has validated
+    that selected spec and matching record before reading its phase-one snapshot; spec=None
+    retains artifact-only inspection and neither mode admits a launch.
+    """
     import yaml
     from data_sheets_schema.receipts import phase1_snapshot_read
     receipt = core_path.parent / core_path.name.replace("_d4d_core.yaml", "_coverage_receipt.yaml")

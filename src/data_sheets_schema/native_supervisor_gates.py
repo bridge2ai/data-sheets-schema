@@ -46,6 +46,12 @@ def receipt_binding(snapshot, spec, record, registered, helper):
 
     A private function-global dictionary substitutes only Path. No global
     module or filesystem monkeypatch is installed, and no live read survives.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The spec, record, registered input mapping and frozen helper
+    belong to the same already verified prepared snapshot; sealed CapturePath access
+    supplies its reads.
     """
     globals_copy = {**helper.__globals__, 'Path': lambda path: CapturedPath(path, snapshot)}
     bound = types.FunctionType(helper.__code__, globals_copy, helper.__name__, helper.__defaults__)
@@ -116,7 +122,14 @@ def receipt_gate(prepared, record, schema_paths, original, controls):
 
 
 def capture(composition_path, attempt, controls):
-    """Extend the reviewed capture before sealing the supervisor's one basis."""
+    """Extend the reviewed capture before sealing the supervisor's one basis.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The caller supplies the selected attempt/authority; replay.capture
+    establishes the verified state and snapshot, which must remain unchanged before sealing
+    supervisor-gate evidence.
+    """
     from data_sheets_schema import api_runner as api, receipts
     prepared = replay.capture(composition_path, Path(attempt)/'transcript.jsonl', Path(attempt)/'control.jsonl')
     snap, spec = prepared['snapshot'], prepared['state'].spec

@@ -13222,8 +13222,15 @@ def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
         raise ValueError("bounded_carry_version must be the integer 0 or 1")
     return value == VERSION
 ''').body[0].body
+        # A genuine initial docstring changes metadata, not the selector body.
+        # Retain every other statement, including later string expressions.
+        enabled_statements = enabled.body
+        if (enabled_statements and isinstance(enabled_statements[0], ast.Expr)
+                and isinstance(enabled_statements[0].value, ast.Constant)
+                and type(enabled_statements[0].value.value) is str):
+            enabled_statements = enabled_statements[1:]
         if (_params(enabled) != ['spec'] or _params(validator) != ['spec']
-                or [dump(n) for n in enabled.body] != [dump(n) for n in enabled_body]
+                or [dump(n) for n in enabled_statements] != [dump(n) for n in enabled_body]
                 or _module_constants(bc1_path).get('VERSION') != 1):
             raise fail('BC1 selector domain or read-only enabled helper changed')
         for name in ('getattr', 'type', 'int', 'str', 'VERSION'):
