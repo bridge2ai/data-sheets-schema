@@ -52,12 +52,13 @@ def main():
                   'tests/test_native_recorder_thread_cpu_20261106.py',
                   'tests/test_native_u0_parser_event_treatment_20261106.py',
                   'tests/test_native_u0_causal_pair_20261106.py',
-                  'tests/test_analyze_native_u0_causal_pair_20261106.py']
+                  'tests/test_analyze_native_u0_causal_pair_20261106.py',
+                  'tests/test_compare_native_u0_phase_local_20261106.py']
     if args.pair_tests:
         nodes += pair_nodes
     if args.node:
         if args.node.split('::')[0] not in pair_nodes:
-            raise SystemExit('--node accepts only the five causal-pair tooling test modules')
+            raise SystemExit('--node accepts only the listed causal-pair tooling test modules')
         nodes = [args.node]
     command = ['-q', '-p', 'no:cacheprovider', '--basetemp', str(out / 'cases'),
                '--junitxml', str(out / 'pytest.xml'), *nodes]
