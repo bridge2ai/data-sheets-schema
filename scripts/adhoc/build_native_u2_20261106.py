@@ -111,3 +111,6 @@ path.write_text(text)
 path = ROOT/'notes/claudecode_direct/prepare_direct_v2.py'
 text = path.read_text().replace('import prepare_registration as generation', 'import prepare_registration_v2 as generation')
 path.write_text(text)
+# The direct registration must pin the helper it actually imports (U2-R1).
+path = ROOT/'notes/claudecode_direct/prepare_direct_v2.py'
+path.write_text(path.read_text().replace('CONTROLS / "prepare_registration.py",', 'CONTROLS / "prepare_registration_v2.py",'))

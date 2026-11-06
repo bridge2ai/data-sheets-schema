@@ -294,7 +294,7 @@ def build(args):
         for path in sorted(directory.rglob("*")):
             if path.is_file() and path.suffix in suffixes:
                 pins[str(path)] = sha(path)
-    for path in [repository / "pyproject.toml", repository / "poetry.lock", CONTROLS / "prepare_registration.py",
+    for path in [repository / "pyproject.toml", repository / "poetry.lock", CONTROLS / "prepare_registration_v2.py",
                  CONTROLS / "run_api_canary.py", CONTROLS / "budgeted_cborg.py",
                  *sorted((CONTROLS / "native_controls").glob("*.py")), CONTROLS / "native_controls" / "system.md",
                  Path(__file__), HERE / "run_direct_canary.py", HERE / "bind_direct_launch.py",
