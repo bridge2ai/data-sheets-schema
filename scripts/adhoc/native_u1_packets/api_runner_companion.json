@@ -1,5 +1,5 @@
 {
-  "status": "proposal_only_not_applied_or_tested",
+  "status": "proposal_only_not_applied_to_worktree",
   "target": "src/data_sheets_schema/api_runner.py",
   "base": "8bc90e93d736d464f98e9eedffee45f0ad8e5d3f",
   "preimage_sha256": "db9a0f67ba7ace06bc8b39f90a00a3fe98ee72a34e553be6d48f97bff5e6d848",

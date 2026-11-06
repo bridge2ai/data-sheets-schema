@@ -1,5 +1,5 @@
 {
-  "status": "proposal_only_not_applied_or_tested",
+  "status": "proposal_only_not_applied_to_worktree",
   "target": "src/data_sheets_schema/shared_generation.py",
   "base": "8bc90e93d736d464f98e9eedffee45f0ad8e5d3f",
   "preimage_sha256": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",

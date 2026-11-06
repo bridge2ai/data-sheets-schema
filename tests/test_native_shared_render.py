@@ -149,18 +149,26 @@ def test_no_runtime_or_draft_allowance_means_no_instruction(native_spec):
         api.resolve_prompt(native_spec)
 
 
-def test_native_construction_and_replay_do_not_enter_api_selector(native_spec, monkeypatch):
+def test_native_construction_and_replay_use_validated_shared_admission(native_spec, monkeypatch):
     recorded = native_spec.render_spec()
-    monkeypatch.setattr(shared_generation, 'select',
-                        lambda *a, **k: pytest.fail('native route entered API-only selector'))
+    calls = []
+    original = shared_generation.select
+    def admitted(spec):
+        calls.append(spec.native_shared_generation_version)
+        result = original(spec)
+        assert result is None  # Native admission never selects an API mode.
+        return result
+    monkeypatch.setattr(shared_generation, 'select', admitted)
     current = replace(native_spec)
     assert current.native_shared_generation_version == 1
     restored = api.RunSpec.from_render_spec(recorded, project=native_spec.project,
         method=native_spec.method, label=native_spec.label)
     assert restored.render_spec() == recorded
+    assert calls == [1, 1]
     # Mixed axes must fail the native validator before the API boundary cut.
     with pytest.raises(ValueError, match='cannot mix old/API axes'):
         replace(native_spec, shared_generation_version=1)
+    assert calls == [1, 1]
 
 
 def test_non_native_construction_still_enters_api_selector(native_spec, monkeypatch):

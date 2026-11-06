@@ -16,7 +16,7 @@ def packet(name, target, old, new, rationale):
     assert old != new
     patch = ''.join(difflib.unified_diff(old.decode().splitlines(True), new.decode().splitlines(True), fromfile='a/' + target, tofile='b/' + target)).encode()
     (OUT / (name + '.patch')).write_bytes(patch)
-    info = {'status': 'proposal_only_not_applied_or_tested', 'target': target,
+    info = {'status': 'proposal_only_not_applied_to_worktree', 'target': target,
             'base': BASE, 'preimage_sha256': hashlib.sha256(old).hexdigest(),
             'postimage_sha256': hashlib.sha256(new).hexdigest(),
             'patch_sha256': hashlib.sha256(patch).hexdigest(), 'rationale': rationale}

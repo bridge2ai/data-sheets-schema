@@ -1,0 +1,717 @@
+{
+  "u1_source_commit": "41b7169f6296c69201fc46389082c441e7d7165c",
+  "base": "8bc90e93d736d464f98e9eedffee45f0ad8e5d3f",
+  "composed": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+  "protected_unchanged": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u1/src/data_sheets_schema/shared_generation.py",
+      "bytes": 57877,
+      "sha256": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u1/tests/utils/run_spec_boundary_contracts.json",
+      "bytes": 32986,
+      "sha256": "a7f96a253a37e994f0c62c7d9b2ab21b0a94d4f342975f84103cd274ef11af72"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u1/tests/utils/run_spec_boundaries.py",
+      "bytes": 19334,
+      "sha256": "a379e93a0065dc927835b1417cabcb926e33eeb333416c768237bc50d2dc6237"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u1/src/download/prompts/canonical_hashes.yaml",
+      "bytes": 37510,
+      "sha256": "39b93c009457681a1d8d8b8afee5a869bbd6f5e70b6f4332522db5d7e22d0584"
+    }
+  ],
+  "packets": [
+    {
+      "status": "proposal_only_not_applied_to_worktree",
+      "target": "src/data_sheets_schema/shared_generation.py",
+      "base": "8bc90e93d736d464f98e9eedffee45f0ad8e5d3f",
+      "preimage_sha256": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",
+      "postimage_sha256": "2ec18e60316423035f88a2a30263c56385bfbbc587303e84e805a8349ab4f781",
+      "patch_sha256": "22b81b6cd63a708d82bfbd038b7e1d9aaf340bf1d86828f138b56dd9ef4756c5",
+      "rationale": "Keep the existing BC1 validation and all API v1/v2 refusals. Only a separately validated native selection may return from the disabled API branch. M7 scanner already recognizes this exact dispatch; caller must restore unconditional shared admission. No runtime/provider is called."
+    },
+    {
+      "status": "proposal_only_not_applied_to_worktree",
+      "target": "src/data_sheets_schema/api_runner.py",
+      "base": "8bc90e93d736d464f98e9eedffee45f0ad8e5d3f",
+      "preimage_sha256": "db9a0f67ba7ace06bc8b39f90a00a3fe98ee72a34e553be6d48f97bff5e6d848",
+      "postimage_sha256": "3e8b7e5d3cc13c5ebc508e33f865e9ac484056fde16126118719d740656a4fb7",
+      "patch_sha256": "996bd9bce74d509033a1daf340ea2a6edfc2a820316e798459892738a989475f",
+      "rationale": "Restore unconditional final shared selector call, as required by M7 scanner admission proof. Apply only together with the separately approved protected shared-generation patch; without it native selections refuse. Preserve early native validation and existing D76 binding/replay code."
+    },
+    {
+      "status": "proposal_only_scratch_validation_not_worktree_approval",
+      "target": "src/download/prompts/canonical_hashes.yaml",
+      "base": "8bc90e93d736d464f98e9eedffee45f0ad8e5d3f",
+      "u1_prompt_commit": "41b7169f6296c69201fc46389082c441e7d7165c",
+      "preimage_sha256": "39b93c009457681a1d8d8b8afee5a869bbd6f5e70b6f4332522db5d7e22d0584",
+      "postimage_sha256": "9efd980d77415a6a33f26928f01ff787855dfc1654356a96e5e76560b200fb99",
+      "patch_sha256": "f26d093b88eeb04bdd984d859554b47b78894c53739dc18ba81cbebae1e9f85e",
+      "producer": "d4d api prompts pin in private scratch archive",
+      "existing_pins_unchanged": true
+    },
+    {
+      "status": "proposal only; scratch testing is not protected-file approval",
+      "target": "tests/utils/run_spec_boundary_contracts.json",
+      "base": "8bc90e93d736d464f98e9eedffee45f0ad8e5d3f",
+      "u1_prompt_commit": "41b7169f6296c69201fc46389082c441e7d7165c",
+      "preimage_sha256": "a7f96a253a37e994f0c62c7d9b2ab21b0a94d4f342975f84103cd274ef11af72",
+      "postimage_sha256": "b1e0cbd14c533a51b88eacb84b974cb93963e18d8f1fb71ae4ed3228f784d1ce",
+      "patch_sha256": "dc58e99f73fe5de1a4f6179639dd2cfd2215c0dd665319e8d15b148b1824509f",
+      "baseline_sidecar_sha256": "a7f96a253a37e994f0c62c7d9b2ab21b0a94d4f342975f84103cd274ef11af72",
+      "checker_sha256": "a379e93a0065dc927835b1417cabcb926e33eeb333416c768237bc50d2dc6237",
+      "helper_path": "scripts/adhoc/native_u1_round2_20261106.py",
+      "helper_sha256": "ba27089846a7bfa6af3ac9fd8baf667d0a42af7ab704febc062ec21247e070e3",
+      "u1_commit": "41b7169f6296c69201fc46389082c441e7d7165c",
+      "function_pin_updates": [
+        {
+          "identity": "data_sheets_schema.latch_journal.refuse_legacy_execution",
+          "before": {
+            "function_start_line": 132,
+            "function_end_line": 141,
+            "function_bytes": 566,
+            "function_sha256": "192d8d24e7a36478c987b4168c260ba0d7312a74cc26ff28fdb822dedaea0dcd"
+          },
+          "after": {
+            "function_start_line": 132,
+            "function_end_line": 141,
+            "function_bytes": 566,
+            "function_sha256": "192d8d24e7a36478c987b4168c260ba0d7312a74cc26ff28fdb822dedaea0dcd"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.assert_current",
+          "before": {
+            "function_start_line": 633,
+            "function_end_line": 640,
+            "function_bytes": 395,
+            "function_sha256": "2298c8d0249741c5f4ba937004c177b34e6e463a0ac7d42eef7273b69be3a3e9"
+          },
+          "after": {
+            "function_start_line": 637,
+            "function_end_line": 644,
+            "function_bytes": 395,
+            "function_sha256": "2298c8d0249741c5f4ba937004c177b34e6e463a0ac7d42eef7273b69be3a3e9"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.capture",
+          "before": {
+            "function_start_line": 511,
+            "function_end_line": 565,
+            "function_bytes": 3350,
+            "function_sha256": "1e05645afa0e7c9c54d5d51d79554ce052f865c50334d107e965821adb63d2b7"
+          },
+          "after": {
+            "function_start_line": 515,
+            "function_end_line": 569,
+            "function_bytes": 3350,
+            "function_sha256": "1e05645afa0e7c9c54d5d51d79554ce052f865c50334d107e965821adb63d2b7"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.core_inventory",
+          "before": {
+            "function_start_line": 981,
+            "function_end_line": 988,
+            "function_bytes": 434,
+            "function_sha256": "ff7172da041bb3546977b0f5d31bb4448b2cfda030087d4de89e28f93235156e"
+          },
+          "after": {
+            "function_start_line": 985,
+            "function_end_line": 992,
+            "function_bytes": 434,
+            "function_sha256": "ff7172da041bb3546977b0f5d31bb4448b2cfda030087d4de89e28f93235156e"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.core_text",
+          "before": {
+            "function_start_line": 991,
+            "function_end_line": 999,
+            "function_bytes": 409,
+            "function_sha256": "2335da9f9f51ca5198a0b8e97993efce771a016039b504c7fe7989b45b939316"
+          },
+          "after": {
+            "function_start_line": 995,
+            "function_end_line": 1003,
+            "function_bytes": 409,
+            "function_sha256": "2335da9f9f51ca5198a0b8e97993efce771a016039b504c7fe7989b45b939316"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.digest_text",
+          "before": {
+            "function_start_line": 947,
+            "function_end_line": 958,
+            "function_bytes": 818,
+            "function_sha256": "80c6558997cb36b58cf94c162caad9533ca63ace431b8599f78f301de5de2aa0"
+          },
+          "after": {
+            "function_start_line": 951,
+            "function_end_line": 962,
+            "function_bytes": 818,
+            "function_sha256": "80c6558997cb36b58cf94c162caad9533ca63ace431b8599f78f301de5de2aa0"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.generation_context",
+          "before": {
+            "function_start_line": 704,
+            "function_end_line": 723,
+            "function_bytes": 1088,
+            "function_sha256": "b975d659c3e05871e786f4fde706c0bd0dbc8acf76438b31b6e20ac73a887690"
+          },
+          "after": {
+            "function_start_line": 708,
+            "function_end_line": 727,
+            "function_bytes": 1088,
+            "function_sha256": "b975d659c3e05871e786f4fde706c0bd0dbc8acf76438b31b6e20ac73a887690"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.identity",
+          "before": {
+            "function_start_line": 629,
+            "function_end_line": 630,
+            "function_bytes": 64,
+            "function_sha256": "ea97e6e1c0bcf64e91f141f68df1fa73714b1e6b4b2cbe5501efb6d625beee71"
+          },
+          "after": {
+            "function_start_line": 633,
+            "function_end_line": 634,
+            "function_bytes": 64,
+            "function_sha256": "ea97e6e1c0bcf64e91f141f68df1fa73714b1e6b4b2cbe5501efb6d625beee71"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.marked_bundle",
+          "before": {
+            "function_start_line": 961,
+            "function_end_line": 978,
+            "function_bytes": 965,
+            "function_sha256": "256a11cc502a6dec9c8ea2cd00d5d1bdb70379769d235e0a826c37e0aa0d2820"
+          },
+          "after": {
+            "function_start_line": 965,
+            "function_end_line": 982,
+            "function_bytes": 965,
+            "function_sha256": "256a11cc502a6dec9c8ea2cd00d5d1bdb70379769d235e0a826c37e0aa0d2820"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.memo",
+          "before": {
+            "function_start_line": 908,
+            "function_end_line": 923,
+            "function_bytes": 762,
+            "function_sha256": "232322a43878bcc95a9743513d618bdcd2e1401798d019a0ea5c996fac1dea8d"
+          },
+          "after": {
+            "function_start_line": 912,
+            "function_end_line": 927,
+            "function_bytes": 762,
+            "function_sha256": "232322a43878bcc95a9743513d618bdcd2e1401798d019a0ea5c996fac1dea8d"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.plan",
+          "before": {
+            "function_start_line": 863,
+            "function_end_line": 899,
+            "function_bytes": 3229,
+            "function_sha256": "b47ce82a2548d992131d7257b8e2845a70a11f37aa8fcbe19c658497310c6717"
+          },
+          "after": {
+            "function_start_line": 867,
+            "function_end_line": 903,
+            "function_bytes": 3229,
+            "function_sha256": "b47ce82a2548d992131d7257b8e2845a70a11f37aa8fcbe19c658497310c6717"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.preflight",
+          "before": {
+            "function_start_line": 649,
+            "function_end_line": 689,
+            "function_bytes": 2535,
+            "function_sha256": "126c3f4061d55233197c3b9950184dbbc957cde504ea4765f527cee0d74db438"
+          },
+          "after": {
+            "function_start_line": 653,
+            "function_end_line": 693,
+            "function_bytes": 2535,
+            "function_sha256": "126c3f4061d55233197c3b9950184dbbc957cde504ea4765f527cee0d74db438"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.require_client",
+          "before": {
+            "function_start_line": 855,
+            "function_end_line": 860,
+            "function_bytes": 376,
+            "function_sha256": "4426e4aa34ea959b32997a501175bdb64240a0c8697b1884ea4438bf9c562b24"
+          },
+          "after": {
+            "function_start_line": 859,
+            "function_end_line": 864,
+            "function_bytes": 376,
+            "function_sha256": "4426e4aa34ea959b32997a501175bdb64240a0c8697b1884ea4438bf9c562b24"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.require_generation_context",
+          "before": {
+            "function_start_line": 726,
+            "function_end_line": 736,
+            "function_bytes": 748,
+            "function_sha256": "f4920b7e4fdc0bc71600447fe924f72a40a66ca658c0a313be37f8dfef099fd7"
+          },
+          "after": {
+            "function_start_line": 730,
+            "function_end_line": 740,
+            "function_bytes": 748,
+            "function_sha256": "f4920b7e4fdc0bc71600447fe924f72a40a66ca658c0a313be37f8dfef099fd7"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.require_routing_context",
+          "before": {
+            "function_start_line": 1043,
+            "function_end_line": 1053,
+            "function_bytes": 679,
+            "function_sha256": "e868972c26c30573d8b5d8aefb97faae21ddc20fed5854343a4693592144e647"
+          },
+          "after": {
+            "function_start_line": 1047,
+            "function_end_line": 1057,
+            "function_bytes": 679,
+            "function_sha256": "e868972c26c30573d8b5d8aefb97faae21ddc20fed5854343a4693592144e647"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.routing_context",
+          "before": {
+            "function_start_line": 1030,
+            "function_end_line": 1040,
+            "function_bytes": 598,
+            "function_sha256": "e453c93f3140b5a92cabe38544fa67397fda4c1eba147a849add0d6d31dc376a"
+          },
+          "after": {
+            "function_start_line": 1034,
+            "function_end_line": 1044,
+            "function_bytes": 598,
+            "function_sha256": "e453c93f3140b5a92cabe38544fa67397fda4c1eba147a849add0d6d31dc376a"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.schema_context",
+          "before": {
+            "function_start_line": 739,
+            "function_end_line": 759,
+            "function_bytes": 1400,
+            "function_sha256": "bccf7936e222e6328c3b20679c7708eece109bdc78bb5f3d62827de2dd1f0a45"
+          },
+          "after": {
+            "function_start_line": 743,
+            "function_end_line": 763,
+            "function_bytes": 1400,
+            "function_sha256": "bccf7936e222e6328c3b20679c7708eece109bdc78bb5f3d62827de2dd1f0a45"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.select",
+          "before": {
+            "function_start_line": 261,
+            "function_end_line": 293,
+            "function_bytes": 2242,
+            "function_sha256": "5db1c42cf69227e278988020bf07636fd24a9b60e9147d1aa4d869b71c2211d2"
+          },
+          "after": {
+            "function_start_line": 261,
+            "function_end_line": 297,
+            "function_bytes": 2423,
+            "function_sha256": "7c9fe28bf00c4a9a8029fdfea95576c8470bb84c7cb1f9c7de8162e1b8887c1c"
+          },
+          "body_changed": true
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.source_chunks",
+          "before": {
+            "function_start_line": 1022,
+            "function_end_line": 1027,
+            "function_bytes": 327,
+            "function_sha256": "6384d8ab776028f3aed4bf8786c3ca23b22a8ad2690e91065b127537dae82404"
+          },
+          "after": {
+            "function_start_line": 1026,
+            "function_end_line": 1031,
+            "function_bytes": 327,
+            "function_sha256": "6384d8ab776028f3aed4bf8786c3ca23b22a8ad2690e91065b127537dae82404"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.source_raw",
+          "before": {
+            "function_start_line": 926,
+            "function_end_line": 929,
+            "function_bytes": 173,
+            "function_sha256": "f6985449abf06843595c711cf88498bccad87674b62fef2ff21fadde7b53e25d"
+          },
+          "after": {
+            "function_start_line": 930,
+            "function_end_line": 933,
+            "function_bytes": 173,
+            "function_sha256": "f6985449abf06843595c711cf88498bccad87674b62fef2ff21fadde7b53e25d"
+          },
+          "body_changed": false
+        },
+        {
+          "identity": "data_sheets_schema.shared_generation.source_registry",
+          "before": {
+            "function_start_line": 932,
+            "function_end_line": 944,
+            "function_bytes": 539,
+            "function_sha256": "7e9f9cc9e31cdb098d6944b4483d454e10650757930bfa2ab5078a00ddf8ddae"
+          },
+          "after": {
+            "function_start_line": 936,
+            "function_end_line": 948,
+            "function_bytes": 539,
+            "function_sha256": "7e9f9cc9e31cdb098d6944b4483d454e10650757930bfa2ab5078a00ddf8ddae"
+          },
+          "body_changed": false
+        }
+      ],
+      "limits": "All 21 identities, modes, preconditions and original approval retained; only select body changes; offsets recomputed; checker unchanged."
+    }
+  ],
+  "logs": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-api-regressions-retry1.log",
+      "bytes": 588,
+      "sha256": "ab88a56f3989bb2b948b69e040d1a64083cb07c91115035bcda658e25476b6fe",
+      "tail": [
+        "........................................................................ [ 13%]",
+        "........................................................................ [ 18%]",
+        "........................................................................ [ 22%]",
+        "...............................................................F........ [ 27%]",
+        "......EEEEEEEEEEEE.EEE...x....................",
+        "U1_CHECK_EXIT=-15"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-api-regressions-retry2.log",
+      "bytes": 312100,
+      "sha256": "37a60e8f28a3b21ccdfb9b4955cf080382ff4b391cd71802a512776d0ec45597",
+      "tail": [
+        "tests/test_wave7_5213_d76_registration.py::test_sg2_root_launch_completes_and_records_registered_paths[none] ",
+        "[gw0] [ 82%] PASSED tests/test_source_heading_runtime_api.py::test_strict_selected_request_and_crossed_mode_refusal ",
+        "tests/test_source_heading_runtime_api.py::test_completed_sdk_usage_survives_routing_response_save_failure ",
+        "[gw0] [ 82%] PASSED tests/test_source_heading_runtime_api.py::test_completed_sdk_usage_survives_routing_response_save_failure ",
+        "tests/test_source_heading_runtime_api.py::test_actual_completed_capture_is_portable_and_refuses_changed_bytes ",
+        "U1_CHECK_EXIT=124"
+      ],
+      "terminal_test_event_counts": {
+        "PASSED": 1280,
+        "FAILED": 1,
+        "ERROR": 16,
+        "XFAIL": 1
+      },
+      "failed_or_error_events": [
+        [
+          "FAILED",
+          "tests/test_bc1_selection.py::test_proposal_is_exact_and_does_not_modify_protected_source "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_integrated_dispatch_derives_and_cites_its_actual_line[integrated] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_integrated_dispatch_derives_and_cites_its_actual_line[guard_prefix] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    local = None\\n-prefix Assign] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    return None\\n-prefix Return] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    refuse_legacy_execution((local := spec))\\n-prefix.*NamedExpr] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    if spec:\\n        return None\\n-prefix If] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    from .foreign import other as spec\\n-dispatch name.*spec.*rebound] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    from .foreign import other as _bc1\\n-dispatch.*changed|dispatch name.*_bc1.*rebound] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_duplicated_dispatch_refuses "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[spec] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[carry] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[client] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[settings] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[usage] "
+        ],
+        [
+          "ERROR",
+          "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[selected] "
+        ],
+        [
+          "ERROR",
+          "tests/test_wave7_5213_d76_binding_records.py::test_direct_preparation_records_absolute_registered_inputs "
+        ]
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-api-regressions.log",
+      "bytes": 465,
+      "sha256": "5be6af2dcfc22bcaaaec245504c3bfee30c0d9603977a926fef9a9b62901361b",
+      "tail": [
+        "........................................................................ [  9%]",
+        "........................................................................ [ 13%]",
+        "........................................................................ [ 18%]",
+        "........................................................................ [ 22%]",
+        "...",
+        "U1_CHECK_EXIT=-15"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-canary.log",
+      "bytes": 903,
+      "sha256": "5923ca98a18d72acf6e7daac82e92cacb29345b223d7a6b6d8ad405d041f1b00",
+      "tail": [
+        "    EPOCH = datetime.datetime.utcfromtimestamp(0)",
+        "",
+        "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+        "1 passed, 2 warnings in 1.25s",
+        "",
+        "U1_CHECK_EXIT=0"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-collection-with-submodule.log",
+      "bytes": 3456456,
+      "sha256": "74d230dd4b9e9d036a76d88a1ffd708263a60b28baf44454feaac3c0f9f6922e",
+      "tail": [
+        "    EPOCH = datetime.datetime.utcfromtimestamp(0)",
+        "",
+        "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+        "23196 tests collected in 27.42s",
+        "",
+        "U1_CHECK_EXIT=0"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-collection.log",
+      "bytes": 3392104,
+      "sha256": "131e03c50780e76e6f5de1049390e684f402aa76738e91b165c37fe4a1e88ef3",
+      "tail": [
+        "ERROR tests/test_fairscape_integration/test_forward_typed_projections.py",
+        "ERROR tests/test_fairscape_integration/test_nested_dataset_readback.py",
+        "!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!",
+        "22770 tests collected, 3 errors in 40.62s",
+        "",
+        "U1_CHECK_EXIT=2"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-d76-inventory.log",
+      "bytes": 2847,
+      "sha256": "ab2e44e0fdf22cc7d467c3763448ddff10e40c2cecdd75bb5129c15ba0d423ab",
+      "tail": [
+        "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+        "=========================== short test summary info ============================",
+        "FAILED tests/test_wave7_5213_d76_round4_inventory.py::test_every_public_runspec_boundary_has_an_explicit_contract",
+        "1 failed, 27 passed, 2 warnings in 9.39s",
+        "",
+        "U1_CHECK_EXIT=1"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-native-focused-corrected.log",
+      "bytes": 1066,
+      "sha256": "889bcc8585ecd9771b924ccfb3015e18042755871484dcc5030bc0be6698b2e1",
+      "tail": [
+        "    EPOCH = datetime.datetime.utcfromtimestamp(0)",
+        "",
+        "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+        "194 passed, 2 warnings in 19.32s",
+        "",
+        "U1_CHECK_EXIT=0"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-native-focused.log",
+      "bytes": 3196,
+      "sha256": "33712b32a53b07fbcfeb0970bab102e0af8814fd175255a5d44aad343aa722b4",
+      "tail": [
+        "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+        "=========================== short test summary info ============================",
+        "FAILED tests/test_native_shared_render.py::test_native_construction_and_replay_do_not_enter_api_selector",
+        "1 failed, 193 passed, 2 warnings in 18.77s",
+        "",
+        "U1_CHECK_EXIT=1"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-parity-after.log",
+      "bytes": 777,
+      "sha256": "ad2d365e0f681a728615270a6f789ae0fffd3bec83f88f47f28eb3f08121e2cf",
+      "tail": [
+        "    EPOCH = datetime.datetime.utcfromtimestamp(0)",
+        "",
+        "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+        "14 passed, 1 warning in 41.28s",
+        "",
+        "U1_CHECK_EXIT=0"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-parity-before.log",
+      "bytes": 777,
+      "sha256": "a7867b7e4c54680a5a44e7fcc9230da309ef02be7b42eb31cc50ed5ea9232131",
+      "tail": [
+        "    EPOCH = datetime.datetime.utcfromtimestamp(0)",
+        "",
+        "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+        "14 passed, 1 warning in 42.73s",
+        "",
+        "U1_CHECK_EXIT=0"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-pin-generation.log",
+      "bytes": 82,
+      "sha256": "40faca19b8b3e83ff2428142d605ccbfe64ef19947ad4f8fbc70b19af01b2a52",
+      "tail": [
+        "\u2713 src/download/prompts/native_shared_generation_v1.md pinned at ff679e9a6a76\u2026"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-pin-receipt_policy.log",
+      "bytes": 86,
+      "sha256": "003d187c42ac541ce4c7d681a61eb12c8f41bc73f44200b5c9270b447e4db2b1",
+      "tail": [
+        "\u2713 src/download/prompts/native_shared_receipt_policy_v1.md pinned at de90df8ec781\u2026"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-prompt-check.log",
+      "bytes": 1848,
+      "sha256": "ff421d2569a9bfa450105bbe852a6078e9a65fa289944383bc8d42782e9bd289",
+      "tail": [
+        " \u2713 canonical    src/download/prompts/removal_repair_v1.md",
+        " \u2713 canonical    src/download/prompts/shared_generation_v1.md",
+        "",
+        "28 prompt file(s), 0 not at their pin",
+        "",
+        "U1_CHECK_EXIT=0"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-scanner.log",
+      "bytes": 289,
+      "sha256": "9ba12561ce56c7de619f25f171a7868e45a574229ed629d603656751c0278583",
+      "tail": [
+        "configuration error (exit 2, the scan did not happen): api meaning not derived: separate native shared render route (unsupported delegated admission prefix). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+        "",
+        "U1_CHECK_EXIT=2"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-specificity-guards.log",
+      "bytes": 202752,
+      "sha256": "fba7b29f564fbcafe06d435d88cf522a18ade07504464102c10d4aa1cce8803a",
+      "tail": [
+        "ERROR tests/test_generation_specificity_skill.py::TestApiMeaning::test_the_github_assistant_condition_follows_the_workflow",
+        "ERROR tests/test_generation_specificity_skill.py::TestApiMeaning::test_the_shape_follows_the_runner_phase_tables",
+        "ERROR tests/test_generation_specificity_skill.py::TestApiMeaning::test_the_tuned_condition_inserts_its_component_and_never_its_prompt",
+        "9 failed, 463 passed, 29 warnings, 21 errors in 403.21s (0:06:43)",
+        "",
+        "U1_CHECK_EXIT=1"
+      ]
+    }
+  ],
+  "scanner_comparison": null,
+  "composed_tracked_diff": [
+    "src/data_sheets_schema/api_runner.py",
+    "src/data_sheets_schema/shared_generation.py",
+    "src/download/prompts/canonical_hashes.yaml",
+    "tests/test_native_shared_render.py",
+    "tests/test_native_u1_selector_refusals.py",
+    "tests/utils/run_spec_boundary_contracts.json"
+  ],
+  "test_overlays": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u1/tests/test_native_shared_render.py",
+      "bytes": 14858,
+      "sha256": "d7e666a2854042f5274c09dd5290f88b307b576951e6a62fa88cfd55abc37a29"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u1/tests/test_native_u1_selector_refusals.py",
+      "bytes": 3663,
+      "sha256": "2dc90d82c527a3f149c82745457d26030ed995fc0380f2a362c42a58ddfab753"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-api-render-parity.json",
+      "bytes": 4039,
+      "sha256": "51efaeb4f26038689c29fef87c7c45ea0756fb54fda259dea292ad2873383a7e"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r2-fairscape-submodule.json",
+      "bytes": 401,
+      "sha256": "e6b0fa909f491200a549e5cbb3062acbcee21b227c361bcedd8eebb4fc7d2c9b"
+    }
+  ]
+}
