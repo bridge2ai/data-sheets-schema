@@ -144,3 +144,41 @@ replacement objects and require committed helper blobs and an exact parent.
 Frozen-source eligibility audit: 42 ordinary targets, none missing/invalid.
 Synthetic profiling canary: one pass with parsed saved partial/final profiles
 and preserved return/refusal behavior. Focused tooling suite: 115 passed.
+
+### Completed CPU diagnostic: attribution limitations remain open
+
+The exact-source-pin suite subsequently passed 119 tooling tests. The single
+authorized `cpu-neutral-01` recorder diagnostic used instrumentation-only head
+`794901899b9cf4172f0af2cdde9fa62aa330edce` and launch tooling
+`36bf17d80afbd3d0d8cc4aa2cfe52c75bb9717d5`. Its original helper timeout fired;
+the software test failed, with partial profiles retained. This is not a
+quiet-host performance verdict or a successful neutral canary. The wrapper
+verified cleanup and unchanged source, and released its lock.
+
+Two findings prevent treating that profile as clean causal evidence:
+
+- **U0-R7: recorder namespace isolation.** Its initial namespace includes both
+  the diagnostic and primary source directories; every counter snapshot has
+  `valid:false`. Worker-origin and unchanged-source checks do not prove the
+  recorder child's source closure. Fail closed on this state before future
+  measurements; do not clear or reinterpret the saved flag.
+- **U0-R8: multithreaded cProfile attribution.** Saved profiles contain
+  impossible production/PyYAML-to-checkpoint caller edges. The profiler's
+  recorder-thread-only description is not upheld by the real run. Do not use
+  cumulative function timings as clean costs or subtract them as overhead.
+  Validate a thread-isolated profiling/checkpoint design before another pair.
+
+Inclusive phase process/thread CPU localizes the largest observed region to
+native provenance reconstruction, but includes instrumentation overhead and
+inherits the source-isolation limitation. Preserve the distinction between
+the last profile cut and later logged events. No final profile/readback or
+completed recorder acceptance is established. No production treatment has
+been applied, and no paired comparison has run.
+
+`summarize_native_u0_cpu_20261106.py` and
+`inspect_native_u0_cpu_cost_20261106.py` read the retained files without
+re-running the recorder. The latter's corrected `cpu-cost-detail-v2.json`
+reconciles phase events newer than the last counter snapshot; the original
+detail remains preserved. See the external U0 report for hashes, CPU tables,
+the single proposed U3 parser-event reuse treatment and its comparison plan.
+Findings remain local because this task forbids GitHub operations.
