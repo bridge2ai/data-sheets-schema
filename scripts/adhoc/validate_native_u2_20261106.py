@@ -15,7 +15,7 @@ PYTHON = '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.v
 
 def main():
     name, *paths = sys.argv[1:]
-    source = OUT/'baseline' if name in ('replay', 'baseline-scan', 'baseline-tests') else ROOT
+    source = OUT/'baseline' if name in ('replay', 'replay-final', 'baseline-scan', 'baseline-tests') else ROOT
     if LOCK.exists():
         print('Quiet window active; no work started: '+LOCK.read_text(), flush=True)
         return 75
@@ -30,17 +30,24 @@ def main():
         env['PYTHONPATH'] += os.pathsep + os.pathsep.join(str(source/path) for path in (
             'notes/matched_cborg_2026-09-13', 'notes/matched_cborg_2026-09-13/native_controls',
             'notes/claudecode_direct'))
-    if name == 'replay':
-        env['NATIVE_U2_V1_REPLAY'] = str(OUT/'v1-replay')
+    if name in ('replay', 'replay-final'):
+        env['NATIVE_U2_V1_REPLAY'] = str(OUT/('v1-replay-final' if name == 'replay-final' else 'v1-replay'))
     command = [PYTHON, '-B', '-m', 'pytest', '-o', 'addopts=', '-p', 'no:cacheprovider', '-q']
     if name == 'collect':
         command += ['tests', '--collect-only']
     elif name in ('scan', 'baseline-scan'):
         command = [PYTHON, '-B', '.claude/skills/d4d-generation-specificity-audit/scan.py', '--root', str(source), '--report', str(OUT/(name+'.md')), '--json', str(OUT/(name+'.json'))]
-    elif name == 'replay-check':
+    elif name in ('replay-check', 'replay-check-final'):
+        if name == 'replay-check-final':
+            env['NATIVE_U2_REPLAY_EVIDENCE'] = str(OUT/'v1-replay-final')
         command = [PYTHON, '-B', 'scripts/adhoc/check_native_u2_replay_20261106.py']
     else:
         command += ['-p', 'xdist.plugin', '-n', '2', *paths, '--junitxml='+str(OUT/(name+'.xml'))]
+    if command[2:4] == ['-m', 'pytest']:
+        basetemp = OUT/(name+'-pytest')
+        if basetemp.exists():
+            raise SystemExit('refusing to overwrite retained pytest evidence: '+str(basetemp))
+        command += ['--basetemp='+str(basetemp)]
     start = time.monotonic()
     source_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=source, text=True).strip()
     with (OUT/(name+'.log')).open('w') as stream:
