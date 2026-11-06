@@ -15,7 +15,7 @@ from data_sheets_schema.resources import git_env
 ROOT = composition.ROOT
 ADDITIONAL = {
     'prepare_direct': {'path': 'notes/claudecode_direct/prepare_direct_v2.py',
-        'sha256': 'fdc65be06350d24277553e442a2e65bbf9f51b11118700ffa8da6aa9d4dcc50f'},
+        'sha256': '4b72d5552d9d81ad84329ee35af18c8b1642a42233392a0711fe13633611cca0'},
     'run_direct_canary': {'path': 'notes/claudecode_direct/run_direct_canary.py',
         'sha256': '41c16b195638c2e46b8f7f8d3d1c65db062e6b2115d8e51f603c392fdce92a3a'},
 }

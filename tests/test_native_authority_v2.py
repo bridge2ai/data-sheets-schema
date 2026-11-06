@@ -3,6 +3,7 @@ from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import sys
 
 import pytest
@@ -68,12 +69,14 @@ def test_v2_registration_cannot_name_v1(isolated):
         new.verified(new._encoded(value))
 
 
-def test_package_and_supervisor_mutation_refuse(isolated, monkeypatch):
+@pytest.mark.parametrize('changed_source', [
+    'native_attribution_controller_v2.py', 'native_supervisor_authority_v2.py', 'api_runner.py'])
+def test_package_and_supervisor_mutation_refuse(isolated, monkeypatch, changed_source):
     spec = isolated[0]
     raw = new._encoded(new.registration(spec))
     identity = authority.dependency_identity()
     pins = new._code_pins()
-    pins['src/data_sheets_schema/native_supervisor_authority_v2.py'] = '0'*64
+    pins['src/data_sheets_schema/' + changed_source] = '0'*64
     monkeypatch.setattr(new, '_code_pins', lambda: pins)
     with pytest.raises(ValueError, match='checker identity'):
         new.verified(raw)
@@ -134,3 +137,9 @@ def test_direct_preparation_pins_selected_version(isolated, tmp_path, monkeypatc
         assert pins[str(helper)] == new._sha(helper.read_bytes())
         assert str(helper.with_name('prepare_registration.py')) not in pins
         assert str(v2.ROOT/'notes/claudecode_direct/prepare_direct_v2.py') in pins
+
+
+@pytest.mark.parametrize('mode', ['standalone', 'mixed'])
+def test_standalone_direct_cli_selects_only_v2(mode):
+    subprocess.run([sys.executable, '-B', str(v2.ROOT/'tests/fixtures/native_authority_v2_import.py'),
+                    str(v2.ROOT), mode], check=True, timeout=30)

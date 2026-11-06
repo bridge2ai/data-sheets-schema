@@ -30,9 +30,12 @@ def main():
         command += ['tests', '--collect-only']
     elif name in ('scan', 'baseline-scan'):
         command = [PYTHON, '-B', '.claude/skills/d4d-generation-specificity-audit/scan.py', '--root', str(source), '--report', str(OUT/(name+'.md')), '--json', str(OUT/(name+'.json'))]
+    elif name == 'replay-check':
+        command = [PYTHON, '-B', 'scripts/adhoc/check_native_u2_replay_20261106.py']
     else:
         command += ['-p', 'xdist.plugin', '-n', '2', *paths, '--junitxml='+str(OUT/(name+'.xml'))]
     start = time.monotonic()
+    source_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=source, text=True).strip()
     with (OUT/(name+'.log')).open('w') as stream:
         child = subprocess.Popen(command, cwd=source, env=env, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
         (OUT/(name+'.pid')).write_text(str(child.pid)+'\n')
@@ -50,9 +53,12 @@ def main():
                         os.killpg(child.pid, signal.SIGSTOP)
                         print('Paused for quiet window: '+LOCK.read_text(), flush=True)
                         while True:
+                            remaining = 3600 - (time.monotonic() - start)
+                            if remaining <= 0:
+                                raise subprocess.TimeoutExpired(command, 3600)
+                            time.sleep(min(60, remaining))
                             if time.monotonic() - start >= 3600:
                                 raise subprocess.TimeoutExpired(command, 3600)
-                            time.sleep(60)
                             if not LOCK.exists():
                                 break
                         os.killpg(child.pid, signal.SIGCONT)
@@ -60,7 +66,8 @@ def main():
             os.killpg(child.pid, signal.SIGKILL)
             child.wait()
             code = 124
-    result = {'command': command, 'exit_code': code, 'seconds': time.monotonic()-start, 'deadline_seconds': 3600}
+    result = {'command': command, 'source_commit': source_commit, 'exit_code': code,
+              'seconds': time.monotonic()-start, 'deadline_seconds': 3600}
     (OUT/(name+'.execution.json')).write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps(result), flush=True)
     return code
