@@ -68,10 +68,11 @@ def test_allowlisted_environment_removes_unknown_provider_secrets(tmp_path, monk
     assert env['GIT_CONFIG_GLOBAL'] == os.devnull
 
 
-def test_command_preserves_isolation_gate_and_limits(tmp_path):
+@pytest.mark.parametrize('mode', ['idle', 'load-diagnostic', 'cpu-profile'])
+def test_command_preserves_isolation_gate_and_limits(tmp_path, mode):
     args = argparse.Namespace(tree=tmp_path / 'tree', python=Path('/python'),
         driver=tmp_path / 'driver.py', output=tmp_path / 'evidence', trial='canary',
-        target='current', driver_seconds=1800, mode='idle', idle_only=False)
+        target='current', driver_seconds=1800, mode=mode, idle_only=False)
     command = wrapper.driver_command(args, tmp_path / 'sandbox.sb', 98765)
     assert command[:7] == ['/usr/bin/sandbox-exec', '-D', 'FROZEN_TREE=' + str(args.tree),
         '-D', 'HOST_SAMPLES=' + str(tmp_path / 'host-samples.jsonl'), '-f', str(tmp_path / 'sandbox.sb')]
@@ -79,6 +80,7 @@ def test_command_preserves_isolation_gate_and_limits(tmp_path):
     assert command[command.index('--host-samples') + 1] == str(tmp_path / 'host-samples.jsonl')
     assert command[command.index('--host-observer-pid') + 1] == '98765'
     assert command[command.index('--idle-seconds') + 1] == '60'
+    assert command[command.index('--mode') + 1] == mode
     assert command[command.index('--plugin-autoload') + 1] == 'disabled'
     assert '--worker' not in command
     assert '--helper-timeout' not in command
@@ -333,6 +335,57 @@ def test_completed_gate_unlocks_only_with_verified_cleanup_and_source(tmp_path, 
     assert 'Lead ruling 2026-11-06 after U0-R2' in plan['protocol_amendment']
     assert plan['host_samples'] == str(args.output / 'canary.wrapper/host-samples.jsonl')
     assert plan['observer_cleanup_reserve_seconds'] == 30
+    assert plan['quiet_gate_required'] is True
+    assert plan['protocol_amendment_2'] is None
+
+
+@pytest.mark.parametrize('cleanup_verified', [True, False])
+def test_cpu_profile_skips_settling_but_keeps_lock_and_cleanup_proof(
+        tmp_path, monkeypatch, cleanup_verified):
+    args = run_args(tmp_path, monkeypatch)
+    args.mode = 'cpu-profile'
+    mock_network_check(monkeypatch)
+    monkeypatch.setattr(wrapper.time, 'sleep', lambda _: pytest.fail('CPU profile waited for quiet'))
+    class Child:
+        pid, returncode = 123456, 0
+        def wait(self, timeout):
+            assert wrapper.LOCK_PATH.exists()
+            write_driver_proof(args, cleanup_verified=cleanup_verified)
+            return 0
+        def poll(self):
+            return 0
+    launched = mock_children(monkeypatch, Child())
+    assert wrapper.run(args) == (0 if cleanup_verified else 1)
+    assert wrapper.LOCK_PATH.exists() is (not cleanup_verified)
+    assert launched == ['observer', 'driver']
+    plan = json.loads((args.output / 'canary.wrapper/plan.json').read_bytes())
+    outcome = json.loads((args.output / 'canary.wrapper/outcome.json').read_bytes())
+    assert plan['command'][plan['command'].index('--mode') + 1] == 'cpu-profile'
+    assert plan['cooperative_settling_seconds'] == outcome['quiet_settling_seconds'] == 0
+    assert outcome['quiet_settling_skipped'] is True
+    assert outcome['network_bind_denied'] is True
+    assert outcome['helper_limit_seconds'] == 180
+    assert outcome['attempt_limit_seconds'] == 900
+    assert plan['quiet_gate_required'] is outcome['quiet_gate_required'] is False
+    assert plan['protocol_amendment_2'] == outcome['protocol_amendment_2']
+    assert 'Lead ruling 2, 2026-11-06' in outcome['protocol_amendment_2']
+    assert 'Wall time is contended' in outcome['protocol_amendment_2']
+
+
+def test_cpu_profile_refuses_idle_only_combination(tmp_path, monkeypatch):
+    args = run_args(tmp_path, monkeypatch)
+    args.mode, args.idle_only = 'cpu-profile', True
+    with pytest.raises(ValueError, match='not an idle-only gate'):
+        wrapper.resolve_arguments(args)
+
+
+@pytest.mark.parametrize('mode_option, expected', [([], 'idle'), (['--mode', 'cpu-profile'], 'cpu-profile')])
+def test_cli_cpu_profile_is_explicit_and_idle_stays_default(monkeypatch, mode_option, expected):
+    parsed = []
+    monkeypatch.setattr(wrapper, 'run', lambda args: parsed.append(args) or 0)
+    assert wrapper.main(['--python', '/python', '--driver', '/driver.py', '--tree', '/tree',
+        '--output', '/output', '--trial', 'neutral', *mode_option]) == 0
+    assert parsed[0].mode == expected
 
 
 def test_forced_driver_stop_retains_lock_even_with_saved_proof(tmp_path, monkeypatch):

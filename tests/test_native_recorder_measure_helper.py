@@ -303,12 +303,12 @@ class DriverSafetyTests(unittest.TestCase):
                 driver.junit(path)
 
     def fake_run(self, parent, *, samples=None, after_changed=False, hang=False, idle_only=False,
-                 worker_exit=0, survivor=False, observation_error=False):
+                 worker_exit=0, survivor=False, observation_error=False, mode='idle'):
         tree = parent / 'tree'; tree.mkdir()
         before = {'head': driver.HEADS['current'], 'pristine': True, 'files': {}, 'tree': 'fixture'}
         after = {**before, 'tree': 'changed'} if after_changed else before
         args = SimpleNamespace(tree=tree, python=Path(sys.executable), output=parent,
-            trial='trial', target='current', idle_seconds=5, mode='idle', idle_only=idle_only,
+            trial='trial', target='current', idle_seconds=5, mode=mode, idle_only=idle_only,
             host_samples=parent / 'observer.jsonl', host_observer_pid=777_777,
             plugin_autoload='enabled',
             driver_seconds=1800, max_mean_cpu=15, max_peak_cpu=35,
@@ -424,6 +424,80 @@ class DriverSafetyTests(unittest.TestCase):
                 outcome = json.loads((parent / 'trial/outcome.json').read_bytes())
                 self.assertTrue(outcome['cleanup_verified'])
                 self.assertEqual(outcome['cleanup_reason'], 'no_child_launched')
+
+    def test_cpu_profile_busy_host_skips_gate_preserves_software_verdict_and_cleanup(self):
+        for worker_exit in (0, 1):
+            with self.subTest(worker_exit=worker_exit), tempfile.TemporaryDirectory() as directory:
+                parent = Path(directory)
+                # One host sample is consumed only after launch; a gate would exhaust it.
+                args, launches, signals, stack = self.fake_run(parent, mode='cpu-profile',
+                    samples=[host(cpu=99, foreign=99)], worker_exit=worker_exit)
+                with stack, mock.patch.object(driver, 'idle_decision',
+                        side_effect=AssertionError('CPU profiling must not evaluate the quiet gate')):
+                    self.assertEqual(driver.run(args), worker_exit)
+                self.assertEqual(len(launches), 1)
+                self.assertEqual(signals, [])
+                decision = json.loads((parent / 'trial/idle-decision.json').read_bytes())
+                self.assertEqual(decision['status'], 'deferred_cpu_profiling')
+                self.assertIsNone(decision['idle'])
+                self.assertEqual(decision['samples'], 0)
+                self.assertTrue(decision['quiet_gate_required_for_wall_claims'])
+                self.assertNotIn('elapsed_seconds', decision)
+                rows = [json.loads(line) for line in (parent / 'trial/host.jsonl').read_text().splitlines()]
+                self.assertEqual([row['stage'] for row in rows], ['test'])
+                self.assertEqual(rows[0]['cpu_percent'], 99)
+                outcome = json.loads((parent / 'trial/outcome.json').read_bytes())
+                plan = json.loads((parent / 'trial/plan.json').read_bytes())
+                for document in (plan, outcome):
+                    self.assertFalse(document['idle_trial_qualified'])
+                    self.assertEqual(document['walltime_scope'], 'contended_diagnostic_not_threshold_evidence')
+                    self.assertEqual(document['timing_verdict'], 'not_assessed')
+                    self.assertTrue(document['quiet_gate_required_for_wall_claims'])
+                    self.assertIn('Lead ruling 2, 2026-11-06', document['protocol_amendment_2'])
+                self.assertEqual(outcome['status'],
+                    'software_test_passed' if worker_exit == 0 else 'software_test_failed')
+                self.assertTrue(outcome['during_test_competing_process_observations'])
+                self.assertTrue(outcome['network_self_check']['network_bind_denied'])
+                self.assertTrue(outcome['read_only_host_samples']['write_open_denied'])
+                self.assertTrue(outcome['source_unchanged'])
+                self.assertTrue(outcome['cleanup_verified'])
+                self.assertEqual(plan['outer_driver_watchdog_seconds'], 1800)
+
+    def test_idle_mode_still_blocks_same_busy_host_before_worker(self):
+        with tempfile.TemporaryDirectory() as directory:
+            parent = Path(directory)
+            args, launches, _, stack = self.fake_run(parent,
+                samples=[host(cpu=99, foreign=99)] * 5)
+            with stack:
+                self.assertEqual(driver.run(args), 3)
+            self.assertEqual(launches, [])
+            decision = json.loads((parent / 'trial/idle-decision.json').read_bytes())
+            self.assertFalse(decision['idle'])
+            self.assertEqual(decision['samples'], 5)
+            self.assertEqual(decision['elapsed_seconds'], 5)
+            outcome = json.loads((parent / 'trial/outcome.json').read_bytes())
+            self.assertEqual(outcome['status'], 'blocked_host_busy')
+            self.assertTrue(outcome['cleanup_verified'])
+
+    def test_cpu_profile_idle_only_refused_before_driver_setup(self):
+        with mock.patch.object(driver, 'initialize_dependencies') as bootstrap:
+            with self.assertRaisesRegex(ValueError, 'not an idle-only gate'):
+                driver.run(SimpleNamespace(mode='cpu-profile', idle_only=True))
+        bootstrap.assert_not_called()
+        with mock.patch.object(driver, 'run') as run, self.assertRaises(SystemExit) as error:
+            driver.main(['--tree', '/tree', '--target', 'current', '--output', '/evidence',
+                '--mode', 'cpu-profile', '--idle-only'])
+        self.assertEqual(error.exception.code, 2)
+        run.assert_not_called()
+
+    def test_cpu_profile_parser_is_explicit_and_idle_remains_default(self):
+        for option, expected in (([], 'idle'), (['--mode', 'cpu-profile'], 'cpu-profile')):
+            with self.subTest(expected=expected), mock.patch.object(driver, 'run', return_value=0) as run:
+                self.assertEqual(driver.main(['--tree', '/tree', '--target', 'current',
+                    '--output', '/evidence', '--trial', 'neutral', '--python', '/python',
+                    '--host-samples', '/samples.jsonl', '--host-observer-pid', '123',
+                    '--driver-seconds', '1800', *option]), 0)
+            self.assertEqual(run.call_args.args[0].mode, expected)
 
     def test_normal_test_failure_can_verify_cleanup_without_claiming_test_success(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -39,6 +39,13 @@ PROTOCOL_AMENDMENT = (
     'notes/coordination/2026-11-06-codex-native-u0.md: the unchanged /bin/ps '
     'host observer runs separately without a sandbox; the driver and every '
     'descendant retain deny network*. Gate thresholds and 180/900s limits are unchanged.')
+PROTOCOL_AMENDMENT_2 = (
+    'Lead ruling 2, 2026-11-06 in notes/coordination/2026-11-06-codex-native-u0.md: '
+    'one unchanged neutral recorder run on the diagnostic-only copy may bypass '
+    'quiet-host qualification for CPU-time attribution. The quiet-window lock, '
+    'network denial, credential removal and 180/900s limits remain mandatory. '
+    'Wall time is contended and establishes no helper timing pass or fail; the '
+    'strict quiet-host gate is deferred, not waived for timing claims.')
 
 
 def utc_now():
@@ -332,6 +339,8 @@ def driver_cleanup_proof(path):
 
 
 def resolve_arguments(args):
+    if args.mode == 'cpu-profile' and args.idle_only:
+        raise ValueError('cpu-profile is a diagnostic recorder run, not an idle-only gate')
     args.tree = args.tree.resolve(strict=True)
     args.output = args.output.resolve(strict=True)
     args.driver = args.driver.resolve(strict=True)
@@ -374,8 +383,10 @@ def run(args):
     env = clean_environment(home, temporary)
     selfcheck = sandbox_prefix(profile, args.tree, args.python) + [
         str(Path(__file__).resolve()), '--network-self-check', str(wrapper / 'network-self-check.json')]
-    # Grace + sampled gate + watchdog + driver/observer cleanup + preflight/source.
-    budget = (SETTLING_SECONDS + IDLE_GATE_SECONDS + CLEANUP_SECONDS
+    settling_seconds = 0 if args.mode == 'cpu-profile' else SETTLING_SECONDS
+    # Grace + configured gate allowance + watchdog + cleanup + preflight/source.
+    # The gate allowance remains conservative when CPU profiling bypasses the gate.
+    budget = (settling_seconds + IDLE_GATE_SECONDS + CLEANUP_SECONDS
               + 2 * OBSERVER_STOP_SECONDS + 60
               + (0 if args.idle_only else args.driver_seconds))
     started_monotonic = time.monotonic()
@@ -395,6 +406,8 @@ def run(args):
         'command': None, 'driver_pid': None, 'observer_pid': None,
         'observer_command': None, 'host_samples': str(wrapper / 'host-samples.jsonl'),
         'protocol_amendment': PROTOCOL_AMENDMENT,
+        'protocol_amendment_2': PROTOCOL_AMENDMENT_2 if args.mode == 'cpu-profile' else None,
+        'mode': args.mode, 'quiet_gate_required': args.mode != 'cpu-profile',
         'observer_helper_sha256': hashlib.sha256(OBSERVER.read_bytes()).hexdigest(),
         'host_ps_path': str(HOST_PS), 'host_ps_sha256': hashlib.sha256(HOST_PS.read_bytes()).hexdigest(),
         'network_self_check_command': selfcheck,
@@ -403,7 +416,7 @@ def run(args):
         'wrapper_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         'retained_environment_names': sorted(env),
         'home': str(home), 'temporary': str(temporary), 'lock': lock.document,
-        'lock_budget_seconds': budget, 'cooperative_settling_seconds': SETTLING_SECONDS,
+        'lock_budget_seconds': budget, 'cooperative_settling_seconds': settling_seconds,
         'idle_gate_seconds': IDLE_GATE_SECONDS, 'cleanup_reserve_seconds': CLEANUP_SECONDS,
         'observer_cleanup_reserve_seconds': 2 * OBSERVER_STOP_SECONDS,
         'scope': 'synthetic peer only; exact native-binary exclusion audited separately',
@@ -426,8 +439,10 @@ def run(args):
         if profile.read_bytes() != profile_raw:
             raise RuntimeError('sandbox profile changed before driver launch')
         result['quiet_settling_started_at'] = utc_now().isoformat()
-        result['quiet_settling_seconds'] = SETTLING_SECONDS
-        time.sleep(SETTLING_SECONDS)
+        result['quiet_settling_seconds'] = settling_seconds
+        result['quiet_settling_skipped'] = args.mode == 'cpu-profile'
+        if settling_seconds:
+            time.sleep(settling_seconds)
         result['quiet_settling_finished_at'] = utc_now().isoformat()
         driver_wait = (budget - (time.monotonic() - started_monotonic)
                        - CLEANUP_SECONDS - 2 * OBSERVER_STOP_SECONDS)
@@ -525,7 +540,8 @@ def run(args):
         result['finished_at'] = utc_now().isoformat()
         for key in ('observer_pid', 'observer_command', 'observer_helper_sha256',
                     'host_ps_path', 'host_ps_sha256', 'sandbox_profile_sha256',
-                    'protocol_amendment', 'host_samples'):
+                    'protocol_amendment', 'protocol_amendment_2', 'mode',
+                    'quiet_gate_required', 'host_samples'):
             result[key] = plan[key]
         write_new(wrapper / 'plan.json', plan)
         write_new(wrapper / 'outcome.json', result)
@@ -545,7 +561,7 @@ def main(argv=None):
     parser.add_argument('--trial')
     parser.add_argument('--target', choices=('current', 'original', 'delivery'), default='current')
     parser.add_argument('--driver-seconds', type=int, default=1800)
-    parser.add_argument('--mode', choices=('idle', 'load-diagnostic'), default='idle')
+    parser.add_argument('--mode', choices=('idle', 'load-diagnostic', 'cpu-profile'), default='idle')
     parser.add_argument('--idle-only', action='store_true')
     parser.add_argument('--sandbox-profile', type=Path, default=PROFILE)
     args = parser.parse_args(argv)

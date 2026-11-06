@@ -18,6 +18,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--out', type=Path, required=True)
     p.add_argument('--canary', action='store_true')
+    p.add_argument('--cpu-canary', action='store_true')
     args = p.parse_args()
     root = Path(__file__).resolve().parents[2]
     lock = root.parent / 'plans/native_quiet_window.lock'
@@ -39,10 +40,12 @@ def main():
     (out / 'bootstrap.json').write_text(json.dumps(bootstrap, indent=2) + '\n')
     os.chdir(root)
     import pytest
-    nodes = (['tests/test_native_u0_run_20261106.py::test_exclusive_lock_records_owner_and_does_not_replace']
+    nodes = (['tests/test_native_recorder_cpu_profile_20261106.py::test_cpu_pstats_counts_partial_checkpoint_and_refusal_are_preserved']
+        if args.cpu_canary else ['tests/test_native_u0_run_20261106.py::test_exclusive_lock_records_owner_and_does_not_replace']
         if args.canary else ['tests/test_native_recorder_measure_helper.py',
             'tests/test_native_recorder_observer_20261026.py', 'tests/test_native_u0_run_20261106.py',
-            'tests/test_native_u0_host_observer_20261106.py'])
+            'tests/test_native_u0_host_observer_20261106.py',
+            'tests/test_native_recorder_cpu_profile_20261106.py'])
     command = ['-q', '-p', 'no:cacheprovider', '--basetemp', str(out / 'cases'),
                '--junitxml', str(out / 'pytest.xml'), *nodes]
     (out / 'command.json').write_text(json.dumps({'arguments': command, 'python': sys.executable,

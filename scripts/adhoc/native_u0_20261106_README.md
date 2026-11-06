@@ -108,3 +108,39 @@ SIGTERM targets the observer only, letting a bounded active sample finish.
 Unexpected/forced termination or missing proof retains the lock. The amended
 tooling suite passes 92 tests; the standalone observer smoke check persisted
 three samples. These are tooling checks, not a neutral recorder canary.
+
+## Protocol amendment 2: one CPU-profile diagnostic
+
+The second appended ruling permits one unchanged neutral path with recorder
+CPU profiling without waiting for the quiet-host gate. Explicit `cpu-profile`
+mode retains the lock, sandbox, minimal environment, source proofs, observer
+and cleanup. It records the gate as deferred and all wall timing as contended;
+software test outcomes are separate from timing eligibility. The strict gate
+remains required for any later 180-second timing claim.
+
+`prepare_native_u0_cpu_copy_20261106.py` creates a separate committed diagnostic
+descendant of the failed head. It inserts a hash-bound profiler bootstrap into
+`cli/__init__.py` after its docstring and before eager command imports, keeping
+every original byte in order. This placement captures imports that the original
+`__main__.py` proposal missed. Fresh fixture registrations bind the diagnostic
+HEAD naturally; no source-identity guard or release pin is changed. Both helper
+files and the closed config are bound by hashes in the package bootstrap and
+the driver's complete source inventory. The original frozen trees stay intact.
+
+`native_recorder_cpu_profile_20261106.py` uses CPU-timed cProfile plus per-phase
+getrusage, peak RSS, existing cache counters and the 170-second stack watchdog.
+It saves atomic rolling profiles every five seconds and retained initial,
+150/170-second and final profiles. Full phase-boundary dumps are throttled;
+all selected phase resource events remain. Inclusive CPU totals overlap and
+include observer/checkpoint overhead. A GIL-held C call can delay checkpoints;
+active-phase rusage and checkpoint age must be checked before interpreting a
+partial profile. Recorder-local readback is observed; final parent-process
+readback is outside this bootstrap.
+
+Review findings before the run: U0-R4 removed two generator functions from
+phase monitoring (they remain cProfile-visible, with resumption-count caveats);
+U0-R5 bounded phase checkpoint cost; U0-R6 made preparation reject Git
+replacement objects and require committed helper blobs and an exact parent.
+Frozen-source eligibility audit: 42 ordinary targets, none missing/invalid.
+Synthetic profiling canary: one pass with parsed saved partial/final profiles
+and preserved return/refusal behavior. Focused tooling suite: 115 passed.

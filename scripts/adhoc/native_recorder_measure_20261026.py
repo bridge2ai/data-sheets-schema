@@ -38,6 +38,13 @@ OFFLINE = {'PYTHONDONTWRITEBYTECODE': '1', 'PYTEST_ADDOPTS': '',
            'PIP_NO_INDEX': '1', 'PIP_DISABLE_PIP_VERSION_CHECK': '1',
            'UV_OFFLINE': '1', 'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1',
            'GIT_NO_LAZY_FETCH': '1'}
+PROTOCOL_AMENDMENT_2 = (
+    'Lead ruling 2, 2026-11-06 in notes/coordination/2026-11-06-codex-native-u0.md: '
+    'one unchanged neutral recorder run on the diagnostic-only copy may bypass '
+    'quiet-host qualification for CPU-time attribution. The quiet-window lock, '
+    'network denial, credential removal and 180/900s limits remain mandatory. '
+    'Wall time is contended and establishes no helper timing pass or fail; the '
+    'strict quiet-host gate is deferred, not waived for timing claims.')
 
 
 def now():
@@ -567,6 +574,8 @@ def reserve_output(parent, trial, tree):
 
 
 def run(args):
+    if args.mode == 'cpu-profile' and args.idle_only:
+        raise ValueError('cpu-profile is a diagnostic recorder run, not an idle-only gate')
     bootstrap = initialize_dependencies()
     tree = args.tree.resolve(strict=True)
     python = (args.python or Path(sys.executable)).absolute()  # preserve venv spelling
@@ -584,6 +593,10 @@ def run(args):
     env, removed = environment(tree, output, plugin_autoload=args.plugin_autoload)
     command = [str(python), '-S', '-P', '-B', str(Path(__file__).resolve()), '--worker',
                '--tree', str(tree), '--target', args.target, '--output', str(output)]
+    diagnostic_metadata = ({'protocol_amendment_2': PROTOCOL_AMENDMENT_2,
+        'idle_trial_qualified': False, 'quiet_gate_required_for_wall_claims': True,
+        'walltime_scope': 'contended_diagnostic_not_threshold_evidence',
+        'timing_verdict': 'not_assessed'} if args.mode == 'cpu-profile' else {})
     write_new(output / 'plan.json', {'format': 'd4d_recorder_baseline_v1', 'started_at': now(),
         'trial': args.trial, 'target': args.target, 'command': command, 'cwd': str(tree), 'node': NODE,
         'helper': {'path': str(Path(__file__).resolve()), 'sha256': sha(Path(__file__).read_bytes())},
@@ -599,10 +612,11 @@ def run(args):
         'environment_comparison': 'U0 uses explicit no-site physical venv dependencies and disables plugin autoload by default; this differs from the historical baseline driver defaults',
         'PYTEST_DISABLE_PLUGIN_AUTOLOAD': env.get('PYTEST_DISABLE_PLUGIN_AUTOLOAD'),
         'watchdog_scope': 'separate measurement censoring; never changes helper 180 s or registered test 900 s',
-        'scientific_acceptance': 'not_assessed',
+        'scientific_acceptance': 'not_assessed', **diagnostic_metadata,
         'network_scope': 'parent wrapper attests OS sandbox deny network* and stripped credentials; driver independently requires loopback-bind EPERM before the gate; read-only host observer is outside the sandbox'})
     import psutil
-    result = {'status': 'not_started', 'returncode': None, 'scientific_acceptance': 'not_assessed'}
+    result = {'status': 'not_started', 'returncode': None,
+              'scientific_acceptance': 'not_assessed', **diagnostic_metadata}
     child = None
     owned = None
     worker_evidence_complete = False
@@ -622,19 +636,25 @@ def run(args):
                 host.write(json.dumps(row, sort_keys=True) + '\n')
                 host.flush()
                 return row
-            preflight = []
-            gate_started = time.monotonic()
-            for _ in range(args.idle_seconds):
-                time.sleep(1)
-                preflight.append(sample('before'))
-            gate_elapsed = time.monotonic() - gate_started
-            if gate_elapsed < args.idle_seconds:
-                raise ValueError('host-idleness gate elapsed less than the declared window')
-            decision = idle_decision(preflight, max_mean_cpu=args.max_mean_cpu,
-                max_peak_cpu=args.max_peak_cpu, max_load_per_cpu=args.max_load_per_cpu,
-                max_foreign_process_cpu=args.max_foreign_process_cpu,
-                owned_roots={os.getpid(), args.host_observer_pid})
-            decision['elapsed_seconds'] = gate_elapsed
+            if args.mode == 'cpu-profile':
+                decision = {'status': 'deferred_cpu_profiling', 'idle': None, 'samples': 0,
+                    'quiet_gate_required_for_wall_claims': True,
+                    'protocol_amendment_2': PROTOCOL_AMENDMENT_2,
+                    'scope': 'no quiet-host gate run; post-launch host samples are diagnostic context'}
+            else:
+                preflight = []
+                gate_started = time.monotonic()
+                for _ in range(args.idle_seconds):
+                    time.sleep(1)
+                    preflight.append(sample('before'))
+                gate_elapsed = time.monotonic() - gate_started
+                if gate_elapsed < args.idle_seconds:
+                    raise ValueError('host-idleness gate elapsed less than the declared window')
+                decision = idle_decision(preflight, max_mean_cpu=args.max_mean_cpu,
+                    max_peak_cpu=args.max_peak_cpu, max_load_per_cpu=args.max_load_per_cpu,
+                    max_foreign_process_cpu=args.max_foreign_process_cpu,
+                    owned_roots={os.getpid(), args.host_observer_pid})
+                decision['elapsed_seconds'] = gate_elapsed
             write_new(output / 'idle-decision.json', decision)
             if args.idle_only:
                 result['status'] = 'host_idle' if decision['idle'] else 'blocked_host_busy'
@@ -756,7 +776,7 @@ def main(argv=None):
     parser.add_argument('--worker', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument('--idle-only', action='store_true', help='retain host/source evidence without launching pytest')
     parser.add_argument('--driver-seconds', type=int, help='required outer measurement watchdog; not a test/runtime limit')
-    parser.add_argument('--mode', choices=('idle', 'load-diagnostic'), default='idle')
+    parser.add_argument('--mode', choices=('idle', 'load-diagnostic', 'cpu-profile'), default='idle')
     parser.add_argument('--plugin-autoload', choices=('enabled', 'disabled'), default='disabled',
                         help='explicit identical choice for both heads; U0 default disables autoload, unlike the historical driver default')
     parser.add_argument('--idle-seconds', type=int, default=30)
@@ -765,6 +785,8 @@ def main(argv=None):
     parser.add_argument('--max-load-per-cpu', type=float, default=0.5)
     parser.add_argument('--max-foreign-process-cpu', type=float, default=5)
     args = parser.parse_args(argv)
+    if args.mode == 'cpu-profile' and args.idle_only:
+        parser.error('cpu-profile is a diagnostic recorder run, not an idle-only gate')
     if args.worker:
         return worker(args)
     if args.host_samples is None or args.host_observer_pid is None or args.host_observer_pid <= 0:
