@@ -129,10 +129,12 @@ def envelope(registration):
 def require_envelope(value):
     """Admission interface for U3; this does not grant permission to launch."""
     from data_sheets_schema.native_attribution_controller_v2 import SOURCES_SHA256
-    if (set(value) != {"authority_version", "controller_sources_sha256", "registration"}
+    if (not isinstance(value, dict)
+            or set(value) != {"authority_version", "controller_sources_sha256", "registration"}
             or type(value["authority_version"]) is not int or value["authority_version"] != 2
             or value["controller_sources_sha256"] != SOURCES_SHA256
             or not isinstance(value["registration"], dict)
+            or type(value["registration"].get("schema_version")) is not int
             or value["registration"].get("schema_version") != 2):
         raise ValueError("v2 launch requires an exact v2 authority envelope")
     return value["registration"]
@@ -182,6 +184,8 @@ def main():
                  for arm in ("api", "agentic") for rep in range(1, case["replicates"] + 1)}
     if not set(canary_order) <= available:
         parser.error("canary order names jobs outside the selected registered roster")
+    if any(not external.is_dir() for external in args.external_sources):
+        parser.error("every external evidence directory must exist")
     pins = {}
     # Full package implementation, schemas and shipped instructions are inputs.
     # Explicit rglob includes ignored files; compiled/cache files are not code.

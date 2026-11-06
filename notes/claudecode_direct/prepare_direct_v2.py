@@ -44,9 +44,6 @@ PROVIDER = "Anthropic (Claude subscription, direct)"
 MODEL = "claude-opus-5"
 EFFORT = "max"
 EXECUTION_ARM = "direct"
-#: The cohort a production registration carries unless one is given; the
-#: fixture tests use another, so their label can never collide with a real
-#: record's (#2218, #2228).
 #: The playbooks the instruction reaches; the transcript observer and the
 #: record gates need nothing else from the toolchain.
 CLI_FLAGS = ["--print", "--safe-mode", "--restricted", "--strict-mcp-config", "--disable-slash-commands",
