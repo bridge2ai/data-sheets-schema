@@ -209,6 +209,19 @@ def summarize_recorder(directory, root, source):
             errors.append('monitored source differs from saved committed inventory: ' + rel)
     if not project_pins:
         errors.append('no monitored project source pins')
+    if 'second_observer' in start:
+        try:
+            extension = start['second_observer']
+            extension_path = 'scripts/adhoc/native_recorder_second_cpu_20261106.py'
+            if relative(extension['path'], root) != extension_path:
+                raise ValueError('second observer path differs from declared extension')
+            expected = source['files'][extension_path]
+            if (extension.get('sha256') != expected.get('sha256')
+                    or extension.get('bytes') != expected.get('bytes')
+                    or expected.get('committed_exact') is not True):
+                raise ValueError('second observer SHA/size/committed identity differs')
+        except Exception as exc:
+            errors.append('second observer source inventory: ' + str(exc))
     phases = phase_summary(rows)
     errors.extend(phases['errors'])
     checkpoint = phases['latest_thread_cpu_checkpoint'] or {}
@@ -481,7 +494,9 @@ def compare(control, treatment):
         start = (recorder or {}).get('observer_start', {})
         closure = start.get('source_closure', {})
         shared = [start.get('helper', {}), closure.get('helper', {}), closure.get('package_bootstrap', {})]
-        if not all(isinstance(row.get('sha256'), str) and len(row['sha256']) == 64
+        if 'second_observer' in start:
+            shared.append(start['second_observer'])
+        if not all(isinstance(row, dict) and isinstance(row.get('sha256'), str) and len(row['sha256']) == 64
                    and type(row.get('bytes')) is int and row['bytes'] > 0 for row in shared):
             return None
         python = start.get('python', {})

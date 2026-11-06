@@ -32,10 +32,12 @@ HEADS = {
     'cpu-profile': '794901899b9cf4172f0af2cdde9fa62aa330edce',
     'pair-control': 'ac95994ae49741c71cc923d0a546b8544fd6debc',
     'pair-treatment': '2747e86c3f0521c1ef5c455d9be82428e4ca5be7',
+    'second-control': 'pending-frozen-second-control',
+    'second-treatment': 'pending-frozen-second-treatment',
 }
 CPU_MODES = ('cpu-profile', 'cpu-pair')
 CPU_TARGETS = {'cpu-profile': ('cpu-profile',),
-               'cpu-pair': ('pair-control', 'pair-treatment')}
+               'cpu-pair': ('pair-control', 'pair-treatment', 'second-control', 'second-treatment')}
 NODE = 'tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion'
 SCOPE = ('src', 'scripts', 'tests', 'utils', '.claude', 'notes')
 INITIAL_MODULES = ('native_shared_selection', 'native_shared_receipts',
@@ -55,6 +57,11 @@ CAUSAL_PAIR_AUTHORITY = (
     'Next step, 2026-11-06 in the U0 brief: repair source isolation and '
     'thread-bound phase accounting, then exactly one control/treatment CPU '
     'pair on diagnostic copies. No N=10, production fix or timing acceptance.')
+SECOND_PAIR_AUTHORITY = (
+    'Next step 2, 2026-11-06 in the U0 brief: attribute remaining treatment-1 '
+    'CPU and eligibility, then exactly one treatment-1 versus treatment-1+2 '
+    'pair on frozen diagnostic copies. Same sandbox/180/900 limits and lock; '
+    'no N=10, production fix or contended wall-time acceptance.')
 
 
 def require_mode_target(mode, target, idle_only=False):
@@ -614,7 +621,8 @@ def run(args):
         'idle_trial_qualified': False, 'quiet_gate_required_for_wall_claims': True,
         'walltime_scope': 'contended_diagnostic_not_threshold_evidence',
         'timing_verdict': 'not_assessed',
-        'causal_pair_authority': CAUSAL_PAIR_AUTHORITY if args.mode == 'cpu-pair' else None}
+        'causal_pair_authority': (SECOND_PAIR_AUTHORITY if args.target.startswith('second-')
+            else CAUSAL_PAIR_AUTHORITY) if args.mode == 'cpu-pair' else None}
         if args.mode in CPU_MODES else {})
     write_new(output / 'plan.json', {'format': 'd4d_recorder_baseline_v1', 'started_at': now(),
         'trial': args.trial, 'target': args.target, 'command': command, 'cwd': str(tree), 'node': NODE,

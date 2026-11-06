@@ -19,6 +19,7 @@ def main():
     parser.add_argument('--tree', type=Path, required=True)
     parser.add_argument('--python', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--observer', choices=('thread', 'second'), default='thread')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
     spec = importlib.util.spec_from_file_location('u0_preflight_wrapper',
@@ -37,7 +38,9 @@ def main():
     env = wrapper.clean_environment(home, temporary)
     env['PYTHONPATH'] = os.pathsep.join(str(tree / path) for path in ('src', 'scripts', '.'))
     env['PYTHONPYCACHEPREFIX'] = str(out / 'pycache')
-    observer = tree / 'scripts/adhoc/native_recorder_thread_cpu_20261106.py'
+    observer_name = ('native_recorder_second_cpu_20261106.py' if args.observer == 'second'
+                     else 'native_recorder_thread_cpu_20261106.py')
+    observer = tree / 'scripts/adhoc' / observer_name
     command = [str(wrapper.SANDBOX), '-D', 'FROZEN_TREE=' + str(tree),
         '-D', 'HOST_SAMPLES=' + str(out / 'unused-host-samples.jsonl'), '-f', str(wrapper.PROFILE),
         str(args.python.absolute()), '-P', '-B', str(observer),

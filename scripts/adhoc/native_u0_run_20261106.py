@@ -48,11 +48,16 @@ PROTOCOL_AMENDMENT_2 = (
     'strict quiet-host gate is deferred, not waived for timing claims.')
 CPU_MODES = ('cpu-profile', 'cpu-pair')
 CPU_TARGETS = {'cpu-profile': ('cpu-profile',),
-               'cpu-pair': ('pair-control', 'pair-treatment')}
+               'cpu-pair': ('pair-control', 'pair-treatment', 'second-control', 'second-treatment')}
 CAUSAL_PAIR_AUTHORITY = (
     'Next step, 2026-11-06 in the U0 brief: repaired source isolation and '
     'thread-bound accounting; one control/treatment diagnostic CPU pair; '
     'no N=10, production fix or wall-time acceptance.')
+SECOND_PAIR_AUTHORITY = (
+    'Next step 2, 2026-11-06 in the U0 brief: attribute remaining treatment-1 '
+    'CPU and eligibility, then exactly one treatment-1 versus treatment-1+2 '
+    'pair on frozen diagnostic copies. Same sandbox/180/900 limits and lock; '
+    'no N=10, production fix or contended wall-time acceptance.')
 
 
 def utc_now():
@@ -417,7 +422,8 @@ def run(args):
         'observer_command': None, 'host_samples': str(wrapper / 'host-samples.jsonl'),
         'protocol_amendment': PROTOCOL_AMENDMENT,
         'protocol_amendment_2': PROTOCOL_AMENDMENT_2 if args.mode in CPU_MODES else None,
-        'causal_pair_authority': CAUSAL_PAIR_AUTHORITY if args.mode == 'cpu-pair' else None,
+        'causal_pair_authority': (SECOND_PAIR_AUTHORITY if args.target.startswith('second-')
+            else CAUSAL_PAIR_AUTHORITY) if args.mode == 'cpu-pair' else None,
         'mode': args.mode, 'quiet_gate_required': args.mode not in CPU_MODES,
         'observer_helper_sha256': hashlib.sha256(OBSERVER.read_bytes()).hexdigest(),
         'host_ps_path': str(HOST_PS), 'host_ps_sha256': hashlib.sha256(HOST_PS.read_bytes()).hexdigest(),
@@ -571,7 +577,8 @@ def main(argv=None):
     parser.add_argument('--output', type=Path)
     parser.add_argument('--trial')
     parser.add_argument('--target', choices=('current', 'original', 'delivery', 'cpu-profile',
-                                           'pair-control', 'pair-treatment'), default='current')
+                                           'pair-control', 'pair-treatment',
+                                           'second-control', 'second-treatment'), default='current')
     parser.add_argument('--driver-seconds', type=int, default=1800)
     parser.add_argument('--mode', choices=('idle', 'load-diagnostic', *CPU_MODES), default='idle')
     parser.add_argument('--idle-only', action='store_true')

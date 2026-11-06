@@ -114,6 +114,66 @@ def write_rows(recorder, rows):
     (recorder / 'observer.jsonl').write_text(''.join(json.dumps(row) + '\n' for row in rows))
 
 
+def add_second_observer(trial, recorder, rows, raw=b'common second observer\n'):
+    relative = 'scripts/adhoc/native_recorder_second_cpu_20261106.py'
+    root = Path(rows[0]['root'])
+    extension = pin(root / relative, raw)
+    rows[0]['second_observer'] = extension
+    for name in ('source-before.json', 'source-after.json'):
+        path = trial / name
+        source = json.loads(path.read_bytes())
+        source['files'][relative] = {**extension, 'committed_exact': True}
+        saved(path, source)
+    write_rows(recorder, rows)
+
+
+@pytest.mark.parametrize('historical', [True, False])
+def test_extension_instrumentation_mismatch_blocks_historical_or_changed_helper_comparison(tmp_path, historical):
+    control, parent, c_recorder, c_rows = fixture(tmp_path)
+    treatment, _, t_recorder, t_rows = fixture(tmp_path, 'treatment', cpu=30)
+    if not historical:
+        add_second_observer(control, c_recorder, c_rows, b'older extension bytes\n')
+    add_second_observer(treatment, t_recorder, t_rows)
+    a, b = analysis.analyze_trial(control, parent), analysis.analyze_trial(treatment, parent)
+    assert a['observed_measurement_prefix_valid'] and b['observed_measurement_prefix_valid']
+    result = analysis.compare(a, b)
+    assert result['matching_native_schema_member_work']
+    assert not result['matching_common_instrumentation_and_external_monitored_pins']
+    assert not result['matched_completed_phase_observations']
+
+
+def test_equal_extensions_in_distinct_roots_allow_comparison(tmp_path):
+    control, parent, c_recorder, c_rows = fixture(tmp_path)
+    treatment, _, t_recorder, t_rows = fixture(tmp_path, 'treatment', cpu=30)
+    add_second_observer(control, c_recorder, c_rows)
+    add_second_observer(treatment, t_recorder, t_rows)
+    result = analysis.compare(analysis.analyze_trial(control, parent), analysis.analyze_trial(treatment, parent))
+    assert result['matching_common_instrumentation_and_external_monitored_pins']
+    assert result['matched_completed_phase_observations']
+
+
+@pytest.mark.parametrize('mutation', ['sha', 'size', 'path', 'uncommitted'])
+def test_extension_pin_must_match_its_committed_source_inventory(tmp_path, mutation):
+    trial, parent, recorder, rows = fixture(tmp_path)
+    add_second_observer(trial, recorder, rows)
+    if mutation == 'sha':
+        rows[0]['second_observer']['sha256'] = 'f' * 64
+    elif mutation == 'size':
+        rows[0]['second_observer']['bytes'] += 1
+    elif mutation == 'path':
+        rows[0]['second_observer']['path'] = str(Path(rows[0]['root']) / 'scripts/adhoc/other.py')
+    else:
+        for name in ('source-before.json', 'source-after.json'):
+            path = trial / name
+            source = json.loads(path.read_bytes())
+            source['files']['scripts/adhoc/native_recorder_second_cpu_20261106.py']['committed_exact'] = False
+            saved(path, source)
+    write_rows(recorder, rows)
+    result = analysis.analyze_trial(trial, parent)
+    assert not result['observed_measurement_prefix_valid']
+    assert any('second observer source inventory' in error for error in result['recorder']['errors'])
+
+
 def test_one_saved_arm_canary_verifies_source_peer_record_and_counter_cutoffs(tmp_path):
     trial, parent, _, _ = fixture(tmp_path)
     result = analysis.analyze_trial(trial, parent)
