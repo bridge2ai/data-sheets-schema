@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import errno
+import hashlib
 import importlib.util
 import json
 import os
@@ -71,9 +72,12 @@ def test_command_preserves_isolation_gate_and_limits(tmp_path):
     args = argparse.Namespace(tree=tmp_path / 'tree', python=Path('/python'),
         driver=tmp_path / 'driver.py', output=tmp_path / 'evidence', trial='canary',
         target='current', driver_seconds=1800, mode='idle', idle_only=False)
-    command = wrapper.driver_command(args, tmp_path / 'sandbox.sb')
-    assert command[:4] == ['/usr/bin/sandbox-exec', '-D', 'FROZEN_TREE=' + str(args.tree), '-f']
-    assert command[6:9] == ['-S', '-P', '-B']
+    command = wrapper.driver_command(args, tmp_path / 'sandbox.sb', 98765)
+    assert command[:7] == ['/usr/bin/sandbox-exec', '-D', 'FROZEN_TREE=' + str(args.tree),
+        '-D', 'HOST_SAMPLES=' + str(tmp_path / 'host-samples.jsonl'), '-f', str(tmp_path / 'sandbox.sb')]
+    assert command[8:11] == ['-S', '-P', '-B']
+    assert command[command.index('--host-samples') + 1] == str(tmp_path / 'host-samples.jsonl')
+    assert command[command.index('--host-observer-pid') + 1] == '98765'
     assert command[command.index('--idle-seconds') + 1] == '60'
     assert command[command.index('--plugin-autoload') + 1] == 'disabled'
     assert '--worker' not in command
@@ -103,6 +107,7 @@ def test_profile_denies_network_and_frozen_source_writes():
     text = wrapper.PROFILE.read_text()
     assert '(deny network*)' in text
     assert '(deny file-write* (subpath (param "FROZEN_TREE")))' in text
+    assert '(deny file-write* (literal (param "HOST_SAMPLES")))' in text
 
 
 def run_args(tmp_path, monkeypatch):
@@ -112,6 +117,9 @@ def run_args(tmp_path, monkeypatch):
     monkeypatch.setattr(wrapper, 'EXEC_ROOT', tmp_path)
     monkeypatch.setattr(wrapper, 'LOCK_PATH', tmp_path / 'quiet.lock')
     monkeypatch.setattr(wrapper.time, 'sleep', lambda seconds: None)
+    observer = tmp_path / 'observer.py'
+    observer.write_text('# Non-executed mock observer fixture.\n')
+    monkeypatch.setattr(wrapper, 'OBSERVER', observer)
     return argparse.Namespace(tree=tree, output=output, driver=SCRIPT,
         python=Path(sys.executable), trial='canary', target='current',
         driver_seconds=1800, mode='idle', idle_only=False,
@@ -130,6 +138,58 @@ def write_driver_proof(args, **changes):
     target.parent.mkdir(exist_ok=True)
     wrapper.write_new(target, {'cleanup_verified': True, 'source_unchanged': True,
                               'returncode': 0, **changes})
+
+
+class MockObserver:
+    pid, returncode = 123455, None
+    signals = None
+
+    def poll(self):
+        return self.returncode
+
+    def wait(self, timeout):
+        assert wrapper.LOCK_PATH.exists()
+        assert timeout == wrapper.OBSERVER_STOP_SECONDS
+        with self.samples.open('a') as stream:
+            stream.write(json.dumps({'kind': 'observer_end', 'observer_pid': self.pid,
+                'samples': 0, 'ps_unchanged': True, 'reason': 'signal'}) + '\n')
+        self.returncode = 0
+        return 0
+
+    def send_signal(self, signum):
+        if self.signals is not None:
+            self.signals.append((self.pid, signum))
+
+
+def mock_children(monkeypatch, driver, observer=None, signals=None):
+    """Exercise real wrapper lifecycle with two independently owned fake sessions."""
+    observer = observer or MockObserver()
+    observer.signals = signals
+    launched = []
+    def launch(command, **kwargs):
+        assert kwargs['start_new_session'] is True
+        assert kwargs['env']['PATH'] == '/usr/bin:/bin:/usr/sbin:/sbin'
+        assert 'ANTHROPIC_API_KEY' not in kwargs['env']
+        if not launched:
+            assert command[1:5] == ['-S', '-P', '-B', str(wrapper.OBSERVER)]
+            assert kwargs['stdout'] == wrapper.subprocess.DEVNULL
+            assert command[command.index('--samples') + 1] == str(kwargs['cwd'] / 'host-samples.jsonl')
+            assert int(command[command.index('--max-seconds') + 1]) > 0
+            samples = Path(command[command.index('--samples') + 1])
+            observer.samples = samples
+            samples.write_text(json.dumps({'kind': 'observer_start', 'observer_pid': observer.pid,
+                'ps_sha256': hashlib.sha256(wrapper.HOST_PS.read_bytes()).hexdigest()}) + '\n')
+            launched.append('observer')
+            return observer
+        assert launched == ['observer']
+        assert command[0] == str(wrapper.SANDBOX)
+        assert command[command.index('--host-observer-pid') + 1] == str(observer.pid)
+        launched.append('driver')
+        return driver
+    monkeypatch.setattr(wrapper.subprocess, 'Popen', launch)
+    monkeypatch.setattr(wrapper.os, 'killpg',
+        lambda pid, sig: signals.append((pid, sig)) if signals is not None else None)
+    return launched
 
 
 def test_failed_network_preflight_releases_lock_without_driver(tmp_path, monkeypatch):
@@ -155,7 +215,7 @@ def test_successful_driver_cannot_hide_foreign_lock_replacement(tmp_path, monkey
             return 0
         def poll(self):
             return 0
-    monkeypatch.setattr(wrapper.subprocess, 'Popen', lambda *a, **k: Child())
+    mock_children(monkeypatch, Child())
     assert wrapper.run(args) == 1
     assert wrapper.LOCK_PATH.read_bytes() == b'foreign owner'
     outcome = json.loads((args.output / 'canary.wrapper/outcome.json').read_bytes())
@@ -180,10 +240,9 @@ def test_interruption_allows_driver_cleanup_before_releasing_lock(tmp_path, monk
             return 0
         def poll(self):
             return self.returncode
-    monkeypatch.setattr(wrapper.subprocess, 'Popen', lambda *a, **k: Child())
-    monkeypatch.setattr(wrapper.os, 'killpg', lambda pid, sig: actions.append((pid, sig)))
+    mock_children(monkeypatch, Child(), signals=actions)
     assert wrapper.run(args) == 128 + signal.SIGTERM
-    assert actions == [(123456, signal.SIGINT), 'reaped']
+    assert actions == [(123456, signal.SIGINT), 'reaped', (123455, signal.SIGTERM)]
     assert not wrapper.LOCK_PATH.exists()
 
 
@@ -221,7 +280,7 @@ def test_positive_driver_exit_without_strict_cleanup_proof_retains_lock(tmp_path
             return self.returncode
         def poll(self):
             return self.returncode
-    monkeypatch.setattr(wrapper.subprocess, 'Popen', lambda *a, **k: Child())
+    mock_children(monkeypatch, Child())
     assert wrapper.run(args) == 1
     assert wrapper.LOCK_PATH.exists()
     outcome = json.loads((args.output / 'canary.wrapper/outcome.json').read_bytes())
@@ -249,7 +308,7 @@ def test_completed_gate_unlocks_only_with_verified_cleanup_and_source(tmp_path, 
             return 0
         def poll(self):
             return 0
-    monkeypatch.setattr(wrapper.subprocess, 'Popen', lambda *a, **k: Child())
+    launched = mock_children(monkeypatch, Child())
     assert wrapper.run(args) == 0
     assert not wrapper.LOCK_PATH.exists()
     outcome = json.loads((args.output / 'canary.wrapper/outcome.json').read_bytes())
@@ -258,6 +317,22 @@ def test_completed_gate_unlocks_only_with_verified_cleanup_and_source(tmp_path, 
     assert outcome['driver_cleanup_proof']['source_unchanged'] is True
     assert outcome['quiet_settling_started_at'] <= outcome['quiet_settling_finished_at']
     assert outcome['quiet_settling_seconds'] == 60
+    assert launched == ['observer', 'driver']
+    assert outcome['observer_cleanup']['process_stopped'] is True
+    assert outcome['observer_cleanup']['forced'] is False
+    assert outcome['observer_cleanup_completed'] is True
+    assert outcome['observer_cleanup_proof']['samples'] == 0
+    assert outcome['network_bind_denied'] is True
+    plan = json.loads((args.output / 'canary.wrapper/plan.json').read_bytes())
+    assert plan['driver_pid'] == 123456
+    assert plan['observer_pid'] == outcome['observer_pid'] == 123455
+    assert plan['observer_command'] == outcome['observer_command']
+    for key in ('observer_helper_sha256', 'host_ps_sha256', 'sandbox_profile_sha256'):
+        assert len(plan[key]) == 64
+        assert outcome[key] == plan[key]
+    assert 'Lead ruling 2026-11-06 after U0-R2' in plan['protocol_amendment']
+    assert plan['host_samples'] == str(args.output / 'canary.wrapper/host-samples.jsonl')
+    assert plan['observer_cleanup_reserve_seconds'] == 30
 
 
 def test_forced_driver_stop_retains_lock_even_with_saved_proof(tmp_path, monkeypatch):
@@ -270,10 +345,146 @@ def test_forced_driver_stop_retains_lock_even_with_saved_proof(tmp_path, monkeyp
             return -9
         def poll(self):
             return -9
-    monkeypatch.setattr(wrapper.subprocess, 'Popen', lambda *a, **k: Child())
+    mock_children(monkeypatch, Child())
     assert wrapper.run(args) == 1
     assert wrapper.LOCK_PATH.exists()
     outcome = json.loads((args.output / 'canary.wrapper/outcome.json').read_bytes())
     assert outcome['driver_cleanup_proof']['cleanup_verified'] is True
     assert outcome['driver_cleanup_completed'] is False
     assert 'forced termination' in outcome['lock_retained_reason']
+
+
+def test_observer_that_cannot_be_reaped_keeps_lock_despite_driver_proof(tmp_path, monkeypatch):
+    args = run_args(tmp_path, monkeypatch)
+    mock_network_check(monkeypatch)
+    actions = []
+    class Child:
+        pid, returncode = 123456, 0
+        def wait(self, timeout):
+            write_driver_proof(args)
+            return 0
+        def poll(self):
+            return 0
+    class StuckObserver(MockObserver):
+        def wait(self, timeout):
+            assert wrapper.LOCK_PATH.exists()
+            raise wrapper.subprocess.TimeoutExpired('observer', timeout)
+    mock_children(monkeypatch, Child(), StuckObserver(), signals=actions)
+    assert wrapper.run(args) == 1
+    assert wrapper.LOCK_PATH.exists()
+    outcome = json.loads((args.output / 'canary.wrapper/outcome.json').read_bytes())
+    assert outcome['driver_cleanup_completed'] is True
+    assert outcome['observer_cleanup']['process_stopped'] is False
+    assert 'TimeoutExpired' in outcome['lock_retained_reason']
+    assert actions == [(123455, signal.SIGTERM), (123455, signal.SIGKILL)]
+
+
+def test_early_observer_exit_is_nonzero_even_when_driver_attests_cleanup(tmp_path, monkeypatch):
+    args = run_args(tmp_path, monkeypatch)
+    mock_network_check(monkeypatch)
+    class Child:
+        pid, returncode = 123456, 0
+        def wait(self, timeout):
+            write_driver_proof(args)
+            observer.returncode = 0
+            return 0
+        def poll(self):
+            return 0
+    observer = MockObserver()
+    mock_children(monkeypatch, Child(), observer)
+    assert wrapper.run(args) == 1
+    assert wrapper.LOCK_PATH.exists()
+    outcome = json.loads((args.output / 'canary.wrapper/outcome.json').read_bytes())
+    assert outcome['observer_cleanup']['exited_before_stop'] is True
+    assert outcome['observer_cleanup_completed'] is False
+
+
+def test_forced_observer_cleanup_records_kill_and_requires_terminal_state(tmp_path, monkeypatch):
+    args = run_args(tmp_path, monkeypatch)
+    mock_network_check(monkeypatch)
+    class Child:
+        pid, returncode = 123456, 0
+        def wait(self, timeout):
+            write_driver_proof(args)
+            return 0
+        def poll(self):
+            return 0
+    class StubbornObserver(MockObserver):
+        attempts = 0
+        def wait(self, timeout):
+            assert wrapper.LOCK_PATH.exists()
+            self.attempts += 1
+            if self.attempts == 1:
+                raise wrapper.subprocess.TimeoutExpired('observer', timeout)
+            self.returncode = -9
+            return -9
+    mock_children(monkeypatch, Child(), StubbornObserver())
+    assert wrapper.run(args) == 1
+    assert wrapper.LOCK_PATH.exists()
+    outcome = json.loads((args.output / 'canary.wrapper/outcome.json').read_bytes())
+    assert outcome['observer_cleanup']['forced'] is True
+    assert outcome['observer_cleanup']['process_stopped'] is True
+    assert outcome['observer_cleanup']['returncode'] == -9
+    assert outcome['observer_cleanup_completed'] is False
+
+
+@pytest.mark.parametrize('failure', ['missing-end', 'wrong-count', 'changed-ps', 'killed'])
+def test_observer_terminal_proof_required_before_unlock(tmp_path, monkeypatch, failure):
+    args = run_args(tmp_path, monkeypatch)
+    mock_network_check(monkeypatch)
+    class Child:
+        pid, returncode = 123456, 0
+        def wait(self, timeout):
+            write_driver_proof(args)
+            if failure == 'killed':
+                observer.returncode = -9
+            return 0
+        def poll(self):
+            return 0
+    class UnprovenObserver(MockObserver):
+        def wait(self, timeout):
+            self.returncode = 0
+            if failure != 'missing-end':
+                with self.samples.open('a') as stream:
+                    stream.write(json.dumps({'kind': 'observer_end', 'observer_pid': self.pid,
+                        'samples': 1 if failure == 'wrong-count' else 0,
+                        'ps_unchanged': failure != 'changed-ps', 'reason': 'signal'}) + '\n')
+            return 0
+    observer = UnprovenObserver()
+    mock_children(monkeypatch, Child(), observer)
+    assert wrapper.run(args) == 1
+    assert wrapper.LOCK_PATH.exists()
+    outcome = json.loads((args.output / 'canary.wrapper/outcome.json').read_bytes())
+    assert outcome['driver_cleanup_completed'] is True
+    assert outcome['observer_cleanup_completed'] is False
+    assert outcome['lock_retained_reason'] == outcome['observer_cleanup_error']
+
+
+@pytest.mark.parametrize('failure', ['wrong-pid', 'wrong-ps', 'symlink', 'exited'])
+def test_observer_readiness_requires_exact_matching_metadata(tmp_path, failure):
+    observer = MockObserver()
+    samples = tmp_path / 'samples.jsonl'
+    document = {'kind': 'observer_start', 'observer_pid': observer.pid, 'ps_sha256': 'a' * 64}
+    if failure == 'wrong-pid':
+        document['observer_pid'] += 1
+    elif failure == 'wrong-ps':
+        document['ps_sha256'] = 'b' * 64
+    elif failure == 'exited':
+        observer.returncode = 1
+    raw = json.dumps(document) + '\n'
+    if failure == 'symlink':
+        other = tmp_path / 'other.jsonl'
+        other.write_text(raw)
+        samples.symlink_to(other)
+    else:
+        samples.write_text(raw)
+    with pytest.raises((ValueError, RuntimeError)):
+        wrapper.wait_observer_ready(observer, samples, 'a' * 64)
+
+
+def test_observer_readiness_timeout_is_bounded(tmp_path, monkeypatch):
+    moments = iter([0, wrapper.OBSERVER_READY_SECONDS])
+    monkeypatch.setattr(wrapper.time, 'monotonic', lambda: next(moments))
+    monkeypatch.setattr(wrapper.time, 'sleep', lambda _: pytest.fail('wait exceeded bound'))
+    with pytest.raises(TimeoutError, match='within 15 seconds'):
+        wrapper.wait_observer_ready(MockObserver(), tmp_path / 'missing.jsonl', 'a' * 64)

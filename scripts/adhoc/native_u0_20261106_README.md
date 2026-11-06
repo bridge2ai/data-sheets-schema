@@ -79,3 +79,32 @@ the same network denial. Neither probe is a formal gate, and neither fallback
 is installed in the driver. The next tooling repair must establish a complete
 host observation path under unchanged network denial before repeating the
 unchanged neutral canary. No timing, phase, stack or cache evidence was obtained.
+
+## Protocol amendment: separate host observer
+
+The appended ruling in `notes/coordination/2026-11-06-codex-native-u0.md`
+authorizes the unchanged `/bin/ps` plus `sysctl` host observer outside the
+sandbox. `native_u0_host_observer_20261106.py` is a separate wrapper-owned
+process using the same minimal environment. It reads host counters and writes
+only an exclusive JSONL sample file; it makes no network calls. Driver and
+all test descendants stay in the network-denied sandbox. Both wrapper and
+driver check EPERM on local bind. The profile also denies test-side writes to
+the host file, and the driver verifies write-open refusal without writing.
+Plans retain both PIDs, commands, sampler and profile hashes and this ruling.
+
+CPU is primed before observations. The driver validates file identity, PID,
+sequence, timestamp, freshness and bounded rows, and takes 60 distinct samples
+over at least 60 seconds. Samples before reader startup do not count. The host
+observer and its visible sampling children are excluded as measurement
+instrumentation; all gate thresholds remain unchanged. Original `/bin/ps`
+fields are retained; `sysctl vm.loadavg` supplies the load text at its native
+precision. No fallback, copied/signed binary or partial process roster is used.
+
+Local review finding **U0-R3**, fixed before launch: an abnormal observer exit
+could leave a sampling child while allowing unlock. Release now additionally
+requires normal requested observer termination and same-inode terminal
+evidence with matching PID/sample count and unchanged `/bin/ps` hash. Normal
+SIGTERM targets the observer only, letting a bounded active sample finish.
+Unexpected/forced termination or missing proof retains the lock. The amended
+tooling suite passes 92 tests; the standalone observer smoke check persisted
+three samples. These are tooling checks, not a neutral recorder canary.

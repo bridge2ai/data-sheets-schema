@@ -41,7 +41,8 @@ def main():
     import pytest
     nodes = (['tests/test_native_u0_run_20261106.py::test_exclusive_lock_records_owner_and_does_not_replace']
         if args.canary else ['tests/test_native_recorder_measure_helper.py',
-            'tests/test_native_recorder_observer_20261026.py', 'tests/test_native_u0_run_20261106.py'])
+            'tests/test_native_recorder_observer_20261026.py', 'tests/test_native_u0_run_20261106.py',
+            'tests/test_native_u0_host_observer_20261106.py'])
     command = ['-q', '-p', 'no:cacheprovider', '--basetemp', str(out / 'cases'),
                '--junitxml', str(out / 'pytest.xml'), *nodes]
     (out / 'command.json').write_text(json.dumps({'arguments': command, 'python': sys.executable,

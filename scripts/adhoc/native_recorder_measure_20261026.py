@@ -8,14 +8,17 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import errno
 import hashlib
 import importlib
 import importlib.metadata
 import json
+import math
 import os
 from pathlib import Path
 import re
 import signal
+import socket
 import stat
 import subprocess
 import sys
@@ -285,13 +288,160 @@ def environment(tree, output, *, plugin_autoload='disabled'):
     return env, removed
 
 
-def host_sample(psutil):
-    # Names only, never command arguments or environment/credentials.
-    process = subprocess.run(['ps', '-A', '-o', 'pid=,ppid=,pcpu=,comm='],
-        capture_output=True, text=True, check=True, timeout=10)
-    return {'at': now(), 'monotonic': time.monotonic(), 'load': list(os.getloadavg()),
-            'logical_cpus': os.cpu_count(), 'cpu_percent': psutil.cpu_percent(interval=None),
-            'processes': parse_ps(process.stdout)}
+def network_self_check(output):
+    """The driver itself must observe the sandbox's loopback-bind EPERM."""
+    result = {'at': now(), 'operation': 'AF_INET/SOCK_STREAM bind 127.0.0.1:0',
+              'expected_errno': errno.EPERM, 'network_denied': False,
+              'network_bind_denied': False, 'pid': os.getpid(), 'phase': 'socket'}
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+            result['phase'] = 'bind'
+            probe.bind(('127.0.0.1', 0))
+            result['bind_succeeded'] = True
+    except OSError as exc:
+        result.update(errno=exc.errno, error=type(exc).__name__,
+                      network_denied=result['phase'] == 'bind' and exc.errno == errno.EPERM,
+                      network_bind_denied=result['phase'] == 'bind' and exc.errno == errno.EPERM)
+    finally:
+        write_new(output / 'network-self-check-driver.json', result)
+    if not result['network_denied']:
+        raise RuntimeError('driver loopback-bind self-check did not receive EPERM')
+    return result
+
+
+def host_samples_write_denial(path):
+    """Check write-open refusal without truncating or writing observer evidence."""
+    proof = {'path': str(Path(path).absolute()), 'pid': os.getpid(),
+             'operation': 'open O_WRONLY|O_NOFOLLOW; no truncation or writes',
+             'expected_errno': errno.EPERM, 'write_open_denied': False}
+    try:
+        descriptor = os.open(path, os.O_WRONLY | os.O_NOFOLLOW)
+    except OSError as exc:
+        proof.update(errno=exc.errno, error=type(exc).__name__,
+                     write_open_denied=exc.errno == errno.EPERM)
+    else:
+        os.close(descriptor)
+        proof['write_open_succeeded'] = True
+    return proof
+
+
+class HostSampleReader:
+    """Consume bounded, fresh, unique external observations; never execute ps."""
+
+    MAX_READ = 8 * 1024 * 1024
+    MAX_LINE = 2 * 1024 * 1024
+    MAX_AGE = 5.0
+
+    def __init__(self, path, observer_pid):
+        self.minimum_monotonic = time.monotonic()
+        self.path = Path(path).absolute()
+        if type(observer_pid) is not int or observer_pid <= 0:
+            raise ValueError('host observer PID must be a positive integer')
+        self.observer_pid = observer_pid
+        self.fd = os.open(self.path, os.O_RDONLY | os.O_NOFOLLOW)
+        state = os.fstat(self.fd)
+        if not stat.S_ISREG(state.st_mode):
+            os.close(self.fd)
+            raise ValueError('host samples must be a regular file')
+        self.identity = (state.st_dev, state.st_ino)
+        self.offset, self.pending = 0, b''
+        self.started, self.sequence, self.delivered = False, 0, 0
+        self.last_monotonic = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *unused):
+        os.close(self.fd)
+
+    def _state(self):
+        state = self.path.lstat()
+        if (not stat.S_ISREG(state.st_mode)
+                or (state.st_dev, state.st_ino) != self.identity or state.st_size < self.offset):
+            raise ValueError('host samples changed inode, type, or were truncated')
+        return state
+
+    @staticmethod
+    def _number(value):
+        return type(value) in (int, float) and math.isfinite(value) and value >= 0
+
+    def _row(self, raw):
+        row = json.loads(raw)
+        if not isinstance(row, dict) or type(row.get('observer_pid')) is not int or row['observer_pid'] != self.observer_pid:
+            raise ValueError('host observation has wrong observer PID or malformed row')
+        if row.get('kind') == 'observer_error':
+            raise ValueError('external host observer reported an error')
+        if not self.started:
+            if row.get('kind') != 'observer_start':
+                raise ValueError('host observations must begin with observer_start')
+            self.started = True
+            return None
+        if row.get('kind') != 'sample' or type(row.get('sequence')) is not int or row['sequence'] != self.sequence + 1:
+            raise ValueError('host sample sequence is missing, repeated, or reordered')
+        try:
+            timestamp = datetime.fromisoformat(row['at'])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError('host sample requires an ISO timestamp') from exc
+        if timestamp.tzinfo is None:
+            raise ValueError('host sample timestamp requires a timezone')
+        if timestamp > datetime.now(timezone.utc):
+            raise ValueError('host sample has a future ISO timestamp')
+        monotonic = row.get('monotonic')
+        if (not self._number(monotonic)
+                or self.last_monotonic is not None and monotonic <= self.last_monotonic):
+            raise ValueError('host sample monotonic time is invalid or reordered')
+        if (type(row.get('logical_cpus')) is not int or row['logical_cpus'] <= 0
+                or not self._number(row.get('cpu_percent')) or row['cpu_percent'] > 100
+                or not isinstance(row.get('load'), list) or len(row['load']) != 3
+                or not all(self._number(value) for value in row['load'])):
+            raise ValueError('host CPU/load sample is malformed')
+        processes = row.get('processes')
+        if not isinstance(processes, list) or not processes:
+            raise ValueError('host process sample must be nonempty')
+        pids = set()
+        for process in processes:
+            if (not isinstance(process, dict) or type(process.get('pid')) is not int or process['pid'] < 0
+                    or process['pid'] in pids or type(process.get('ppid')) is not int or process['ppid'] < 0
+                    or not self._number(process.get('cpu_percent'))
+                    or not isinstance(process.get('name'), str) or not process['name'].strip()):
+                raise ValueError('host process row is malformed')
+            pids.add(process['pid'])
+        if self.observer_pid not in pids:
+            raise ValueError('host observer is absent from its own process sample')
+        self.sequence, self.last_monotonic = row['sequence'], monotonic
+        return row
+
+    def sample(self):
+        deadline = time.monotonic() + self.MAX_AGE
+        consumed = 0
+        while True:
+            available = self._state().st_size - self.offset
+            if consumed + available > self.MAX_READ:
+                raise ValueError('host observation read exceeds bounded byte budget')
+            raw = os.read(self.fd, available) if available else b''
+            consumed += len(raw)
+            self.offset += len(raw)
+            self._state()
+            lines = (self.pending + raw).split(b'\n')
+            self.pending = lines.pop()
+            if any(len(line) > self.MAX_LINE for line in [*lines, self.pending]):
+                raise ValueError('host observation line exceeds bounded byte budget')
+            latest = None
+            for line in lines:
+                candidate = self._row(line)
+                if candidate is not None:
+                    latest = candidate
+            current = time.monotonic()
+            if latest is not None and latest['monotonic'] >= self.minimum_monotonic:
+                if not 0 <= current - latest['monotonic'] <= self.MAX_AGE:
+                    raise ValueError('host sample is stale or has a future monotonic timestamp')
+                if latest['sequence'] <= self.delivered:
+                    raise ValueError('host sample was already consumed')
+                self.delivered = latest['sequence']
+                return latest
+            if current >= deadline:
+                raise ValueError('missing fresh unique host sample within five seconds')
+            time.sleep(min(0.05, deadline - current))
 
 
 def parse_ps(text):
@@ -441,15 +591,17 @@ def run(args):
         'environment_overrides': {key: env[key] for key in (*OFFLINE, 'PYTHONPATH', 'PYTHONPYCACHEPREFIX')},
         'idle_window_seconds': args.idle_seconds, 'mode': args.mode,
         'idle_only': args.idle_only, 'outer_driver_watchdog_seconds': args.driver_seconds,
+        'host_observation': {'samples_path': str(args.host_samples.absolute()),
+            'observer_pid': args.host_observer_pid,
+            'scope': 'read-only unsandboxed host observer; excluded with its visible descendants from competing-process classification; driver and test descendants remain sandboxed'},
         'pytest_plugin_autoload': args.plugin_autoload,
         'dependency_bootstrap': bootstrap,
         'environment_comparison': 'U0 uses explicit no-site physical venv dependencies and disables plugin autoload by default; this differs from the historical baseline driver defaults',
         'PYTEST_DISABLE_PLUGIN_AUTOLOAD': env.get('PYTEST_DISABLE_PLUGIN_AUTOLOAD'),
         'watchdog_scope': 'separate measurement censoring; never changes helper 180 s or registered test 900 s',
         'scientific_acceptance': 'not_assessed',
-        'network_scope': 'this driver does not establish network denial; the required parent U0 wrapper must attest OS sandbox deny network* and its credential-sanitized environment separately'})
+        'network_scope': 'parent wrapper attests OS sandbox deny network* and stripped credentials; driver independently requires loopback-bind EPERM before the gate; read-only host observer is outside the sandbox'})
     import psutil
-    psutil.cpu_percent(interval=None)  # prime the first measured interval
     result = {'status': 'not_started', 'returncode': None, 'scientific_acceptance': 'not_assessed'}
     child = None
     owned = None
@@ -457,19 +609,32 @@ def run(args):
     cleanup_forced = False
     started = time.monotonic()
     try:
-        with (output / 'host.jsonl').open('x', encoding='utf-8') as host:
+        result['network_self_check'] = network_self_check(output)
+        result['read_only_host_samples'] = host_samples_write_denial(args.host_samples)
+        if not result['read_only_host_samples']['write_open_denied']:
+            raise ValueError('host samples write-open self-check did not receive EPERM')
+        with HostSampleReader(args.host_samples, args.host_observer_pid) as reader, \
+                (output / 'host.jsonl').open('x', encoding='utf-8') as host:
+            result['host_observer_identity'] = {'pid': args.host_observer_pid,
+                'path': str(reader.path), 'device': reader.identity[0], 'inode': reader.identity[1]}
             def sample(stage):
-                row = {**host_sample(psutil), 'stage': stage}
+                row = {**reader.sample(), 'stage': stage}
                 host.write(json.dumps(row, sort_keys=True) + '\n')
                 host.flush()
                 return row
             preflight = []
+            gate_started = time.monotonic()
             for _ in range(args.idle_seconds):
                 time.sleep(1)
                 preflight.append(sample('before'))
+            gate_elapsed = time.monotonic() - gate_started
+            if gate_elapsed < args.idle_seconds:
+                raise ValueError('host-idleness gate elapsed less than the declared window')
             decision = idle_decision(preflight, max_mean_cpu=args.max_mean_cpu,
                 max_peak_cpu=args.max_peak_cpu, max_load_per_cpu=args.max_load_per_cpu,
-                max_foreign_process_cpu=args.max_foreign_process_cpu, owned_roots={os.getpid()})
+                max_foreign_process_cpu=args.max_foreign_process_cpu,
+                owned_roots={os.getpid(), args.host_observer_pid})
+            decision['elapsed_seconds'] = gate_elapsed
             write_new(output / 'idle-decision.json', decision)
             if args.idle_only:
                 result['status'] = 'host_idle' if decision['idle'] else 'blocked_host_busy'
@@ -489,7 +654,8 @@ def run(args):
                 while child.poll() is None:
                     observed = sample('test')
                     owned.observe()
-                    competing = competing_processes(observed, {os.getpid(), child.pid}, args.max_foreign_process_cpu)
+                    competing = competing_processes(observed,
+                        {os.getpid(), child.pid, args.host_observer_pid}, args.max_foreign_process_cpu)
                     if competing:
                         contamination.append({'at': observed['at'], 'processes': competing})
                     if time.monotonic() - child_started >= args.driver_seconds:
@@ -585,6 +751,8 @@ def main(argv=None):
     parser.add_argument('--output', type=Path, required=True, help='existing external parent; worker uses its reserved trial directory')
     parser.add_argument('--trial', help='required unique trial name; existing evidence is never reused')
     parser.add_argument('--python', type=Path)
+    parser.add_argument('--host-samples', type=Path, help='external read-only observer JSONL')
+    parser.add_argument('--host-observer-pid', type=int, help='PID of the dedicated host observer')
     parser.add_argument('--worker', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument('--idle-only', action='store_true', help='retain host/source evidence without launching pytest')
     parser.add_argument('--driver-seconds', type=int, help='required outer measurement watchdog; not a test/runtime limit')
@@ -599,6 +767,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.worker:
         return worker(args)
+    if args.host_samples is None or args.host_observer_pid is None or args.host_observer_pid <= 0:
+        parser.error('--host-samples and a positive --host-observer-pid are required')
     if not args.trial or (not args.idle_only and not args.python):
         parser.error('--trial is required; test runs also require --python')
     if not args.idle_only and (args.driver_seconds is None or not 900 <= args.driver_seconds <= 7200):

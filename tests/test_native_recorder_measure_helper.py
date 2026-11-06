@@ -1,5 +1,6 @@
 """Offline safety tests for the recorder baseline driver; no acceptance test runs."""
 from contextlib import ExitStack
+import errno
 import importlib.util
 import itertools
 import json
@@ -308,6 +309,7 @@ class DriverSafetyTests(unittest.TestCase):
         after = {**before, 'tree': 'changed'} if after_changed else before
         args = SimpleNamespace(tree=tree, python=Path(sys.executable), output=parent,
             trial='trial', target='current', idle_seconds=5, mode='idle', idle_only=idle_only,
+            host_samples=parent / 'observer.jsonl', host_observer_pid=777_777,
             plugin_autoload='enabled',
             driver_seconds=1800, max_mean_cpu=15, max_peak_cpu=35,
             max_load_per_cpu=0.5, max_foreign_process_cpu=5)
@@ -358,9 +360,24 @@ class DriverSafetyTests(unittest.TestCase):
         stack.enter_context(mock.patch.object(driver, 'initialize_dependencies', return_value={
             'site_startup': 'disabled', 'pth_execution': 'disabled', 'site_packages': '/fixture/site-packages'}))
         stack.enter_context(mock.patch.object(driver, 'source_identity', side_effect=[before, before, after] if not idle_only else [before, after]))
-        stack.enter_context(mock.patch.object(driver, 'host_sample', side_effect=samples if samples is not None else lambda _: host()))
+        reader = SimpleNamespace(path=args.host_samples, identity=(1, 2),
+            sample=mock.Mock(side_effect=samples if samples is not None else lambda: host()))
+        reader_factory = stack.enter_context(mock.patch.object(driver, 'HostSampleReader'))
+        reader_factory.return_value.__enter__.return_value = reader
+        def denied_network(output):
+            evidence = {'network_denied': True, 'network_bind_denied': True,
+                        'pid': os.getpid(), 'errno': errno.EPERM, 'phase': 'bind'}
+            driver.write_new(output / 'network-self-check-driver.json', evidence)
+            return evidence
+        stack.enter_context(mock.patch.object(driver, 'network_self_check', side_effect=denied_network))
+        stack.enter_context(mock.patch.object(driver, 'host_samples_write_denial', return_value={
+            'write_open_denied': True, 'errno': errno.EPERM, 'pid': os.getpid()}))
         stack.enter_context(mock.patch.object(driver.subprocess, 'Popen', side_effect=launch))
-        stack.enter_context(mock.patch.object(driver.time, 'sleep', return_value=None))
+        elapsed = [0.0]
+        def advance(seconds):
+            elapsed[0] += seconds
+        stack.enter_context(mock.patch.object(driver.time, 'sleep', side_effect=advance))
+        stack.enter_context(mock.patch.object(driver.time, 'monotonic', side_effect=lambda: elapsed[0]))
         stack.enter_context(mock.patch.dict(sys.modules, {'psutil': SimpleNamespace(
             cpu_percent=lambda **kw: 0, Process=ObservedProcess,
             Error=InspectionError, NoSuchProcess=NoSuchProcess)}))
@@ -386,6 +403,9 @@ class DriverSafetyTests(unittest.TestCase):
             self.assertTrue(outcome['source_unchanged'])
             self.assertTrue(outcome['idle_trial_qualified'])
             self.assertEqual(outcome['junit']['tests'], 1)
+            self.assertEqual(outcome['host_observer_identity']['pid'], 777_777)
+            self.assertTrue(json.loads((parent / 'trial/network-self-check-driver.json').read_bytes())['network_denied'])
+            self.assertTrue(outcome['read_only_host_samples']['write_open_denied'])
             self.assertTrue(outcome['cleanup_verified'])
             self.assertEqual(outcome['observed_owned_processes'], [
                 {'pid': 123_456, 'create_time': 123_456.0},
@@ -471,6 +491,70 @@ class DriverSafetyTests(unittest.TestCase):
             self.assertEqual(outcome['status'], 'software_test_passed')
             self.assertFalse(outcome['idle_trial_qualified'])
 
+    def test_host_observer_and_its_children_are_excluded_during_gate_and_test(self):
+        observed = host()
+        observed['processes'].extend([
+            {'pid': 777_777, 'ppid': 1, 'cpu_percent': 80, 'name': 'host-observer'},
+            {'pid': 777_778, 'ppid': 777_777, 'cpu_percent': 80, 'name': 'ps'},
+        ])
+        with tempfile.TemporaryDirectory() as directory:
+            parent = Path(directory)
+            args, _, _, stack = self.fake_run(parent, samples=[observed] * 6)
+            with stack:
+                self.assertEqual(driver.run(args), 0)
+            outcome = json.loads((parent / 'trial/outcome.json').read_bytes())
+            self.assertTrue(outcome['idle_trial_qualified'])
+
+    def test_local_bind_must_receive_eperm_and_always_persists_evidence(self):
+        for failure, accepted in ((PermissionError(errno.EPERM, 'denied'), True),
+                                  (PermissionError(errno.EACCES, 'wrong refusal'), False),
+                                  (None, False)):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as directory:
+                output = Path(directory)
+                with mock.patch.object(driver.socket, 'socket') as factory:
+                    factory.return_value.__enter__.return_value.bind.side_effect = failure
+                    if accepted:
+                        self.assertTrue(driver.network_self_check(output)['network_denied'])
+                    else:
+                        with self.assertRaisesRegex(RuntimeError, 'did not receive EPERM'):
+                            driver.network_self_check(output)
+                    factory.return_value.__enter__.return_value.bind.assert_called_once_with(('127.0.0.1', 0))
+                evidence = json.loads((output / 'network-self-check-driver.json').read_bytes())
+                self.assertEqual(evidence['network_denied'], accepted)
+                self.assertEqual(evidence['network_bind_denied'], accepted)
+                self.assertEqual(evidence['pid'], os.getpid())
+
+    def test_host_sample_write_open_check_never_truncates_or_writes_and_requires_eperm(self):
+        for failure, expected in ((PermissionError(errno.EPERM, 'denied'), True),
+                                  (PermissionError(errno.EACCES, 'wrong refusal'), False),
+                                  (None, False)):
+            with self.subTest(failure=failure), \
+                    mock.patch.object(driver.os, 'open', return_value=456, side_effect=failure) as opened, \
+                    mock.patch.object(driver.os, 'close') as closed, \
+                    mock.patch.object(driver.os, 'write') as written:
+                proof = driver.host_samples_write_denial(Path('/fixture/observer.jsonl'))
+                self.assertEqual(proof['write_open_denied'], expected)
+                opened.assert_called_once_with(Path('/fixture/observer.jsonl'), os.O_WRONLY | os.O_NOFOLLOW)
+                written.assert_not_called()
+                if failure is None:
+                    closed.assert_called_once_with(456)
+                else:
+                    closed.assert_not_called()
+
+    def test_writable_host_samples_refuse_before_gate_or_worker_and_persist_proof(self):
+        with tempfile.TemporaryDirectory() as directory:
+            parent = Path(directory)
+            args, launches, _, stack = self.fake_run(parent)
+            with stack, mock.patch.object(driver, 'host_samples_write_denial', return_value={
+                    'write_open_denied': False, 'write_open_succeeded': True}), \
+                    self.assertRaisesRegex(ValueError, 'write-open self-check'):
+                driver.run(args)
+            self.assertEqual(launches, [])
+            self.assertFalse((parent / 'trial/idle-decision.json').exists())
+            outcome = json.loads((parent / 'trial/outcome.json').read_bytes())
+            self.assertFalse(outcome['read_only_host_samples']['write_open_denied'])
+            self.assertTrue(outcome['cleanup_verified'])
+
     def test_source_change_cannot_exit_success_after_passing_junit(self):
         with tempfile.TemporaryDirectory() as directory:
             parent = Path(directory)
@@ -491,6 +575,125 @@ class DriverSafetyTests(unittest.TestCase):
             self.assertTrue(outcome['source_unchanged'])
             self.assertTrue(outcome['cleanup_forced'])
             self.assertFalse(outcome['cleanup_verified'])
+
+
+class ExternalHostReaderTests(unittest.TestCase):
+    PID = 777_777
+
+    def row(self, sequence=1, monotonic=100.0, **updates):
+        row = {**host(), 'kind': 'sample', 'observer_pid': self.PID,
+               'sequence': sequence, 'monotonic': monotonic, 'at': driver.now()}
+        row['processes'].append({'pid': self.PID, 'ppid': 1, 'cpu_percent': 0, 'name': 'observer'})
+        return {**row, **updates}
+
+    def write(self, path, rows, *, append=False):
+        with path.open('a' if append else 'w', encoding='utf-8') as stream:
+            if not append:
+                stream.write(json.dumps({'kind': 'observer_start', 'observer_pid': self.PID}) + '\n')
+            for row in rows:
+                stream.write(json.dumps(row) + '\n')
+
+    def test_latest_fresh_sample_is_unique_and_sequence_history_is_retained(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'samples.jsonl'
+            self.write(path, [self.row(1, 90), self.row(2, 100)])
+            with mock.patch.object(driver.time, 'monotonic', return_value=100) as clock, \
+                    driver.HostSampleReader(path, self.PID) as reader:
+                self.assertEqual(reader.sample()['sequence'], 2)
+                self.write(path, [self.row(3, 101)], append=True)
+                clock.return_value = 101
+                self.assertEqual(reader.sample()['sequence'], 3)
+                with mock.patch.object(driver.time, 'monotonic', side_effect=itertools.count(100)), \
+                        mock.patch.object(driver.time, 'sleep'):
+                    with self.assertRaisesRegex(ValueError, 'missing fresh unique'):
+                        reader.sample()
+
+    def test_fresh_prestartup_row_is_history_until_a_poststartup_sample_arrives(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'samples.jsonl'
+            self.write(path, [self.row(1, 99.9)])
+            elapsed = [100.0]
+            def publish_new_sample(seconds):
+                elapsed[0] += seconds
+                self.write(path, [self.row(2, elapsed[0])], append=True)
+            with mock.patch.object(driver.time, 'monotonic', side_effect=lambda: elapsed[0]), \
+                    mock.patch.object(driver.time, 'sleep', side_effect=publish_new_sample) as sleep, \
+                    driver.HostSampleReader(path, self.PID) as reader:
+                observed = reader.sample()
+                self.assertEqual(observed['sequence'], 2)
+                self.assertGreaterEqual(observed['monotonic'], reader.minimum_monotonic)
+                sleep.assert_called_once()
+
+    def test_malformed_stale_future_wrong_pid_and_unordered_samples_fail_closed(self):
+        cases = [
+            [self.row(monotonic=94)], [self.row(monotonic=101)],
+            [self.row(observer_pid=self.PID + 1)], [self.row(sequence=2)],
+            [self.row(), self.row(sequence=1, monotonic=100.1)],
+            [self.row(monotonic=99), self.row(sequence=2, monotonic=98)],
+            [self.row(at='not-an-iso-time')], [self.row(at='2026-01-01T00:00:00')],
+            [self.row(at='9999-01-01T00:00:00+00:00')], [self.row(processes=[])],
+            [self.row(cpu_percent=float('nan'))], [self.row(logical_cpus=True)],
+            [{'kind': 'observer_error', 'observer_pid': self.PID, 'error': 'ps failed'}],
+        ]
+        for rows in cases:
+            with self.subTest(rows=rows), tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / 'samples.jsonl'
+                self.write(path, rows)
+                with mock.patch.object(driver.time, 'monotonic', side_effect=itertools.chain([90], itertools.repeat(100))), \
+                        driver.HostSampleReader(path, self.PID) as reader:
+                    with self.assertRaises(ValueError):
+                        reader.sample()
+
+    def test_missing_replaced_and_truncated_files_fail_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'samples.jsonl'
+            with self.assertRaises(FileNotFoundError):
+                driver.HostSampleReader(path, self.PID)
+            self.write(path, [self.row()])
+            with mock.patch.object(driver.time, 'monotonic', return_value=100), \
+                    driver.HostSampleReader(path, self.PID) as reader:
+                reader.sample()
+                replacement = Path(directory) / 'replacement.jsonl'
+                self.write(replacement, [self.row(2)])
+                replacement.replace(path)
+                with self.assertRaisesRegex(ValueError, 'changed inode'):
+                    reader.sample()
+            self.write(path, [self.row()])
+            with mock.patch.object(driver.time, 'monotonic', return_value=100), \
+                    driver.HostSampleReader(path, self.PID) as reader:
+                reader.sample()
+                path.write_text('')
+                with self.assertRaisesRegex(ValueError, 'truncated'):
+                    reader.sample()
+
+    def test_read_and_line_sizes_are_bounded(self):
+        for limit in ('MAX_READ', 'MAX_LINE'):
+            with self.subTest(limit=limit), tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / 'samples.jsonl'
+                self.write(path, [self.row()])
+                with mock.patch.object(driver.time, 'monotonic', return_value=100), \
+                        driver.HostSampleReader(path, self.PID) as reader:
+                    setattr(reader, limit, 16)
+                    with self.assertRaisesRegex(ValueError, 'bounded byte budget'):
+                        reader.sample()
+
+    def test_incomplete_line_is_not_a_sample_and_malformed_json_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'samples.jsonl'
+            self.write(path, [])
+            with path.open('a') as stream:
+                stream.write(json.dumps(self.row()))
+            with mock.patch.object(driver.time, 'monotonic', side_effect=itertools.count(100)), \
+                    mock.patch.object(driver.time, 'sleep'), \
+                    driver.HostSampleReader(path, self.PID) as reader:
+                with self.assertRaisesRegex(ValueError, 'missing fresh unique'):
+                    reader.sample()
+            self.write(path, [])
+            with path.open('a') as stream:
+                stream.write('{broken json}\n')
+            with driver.HostSampleReader(path, self.PID) as reader:
+                with self.assertRaises(ValueError):
+                    reader.sample()
 
 
 if __name__ == '__main__':
