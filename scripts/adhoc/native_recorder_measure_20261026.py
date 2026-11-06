@@ -32,8 +32,8 @@ HEADS = {
     'cpu-profile': '794901899b9cf4172f0af2cdde9fa62aa330edce',
     'pair-control': 'ac95994ae49741c71cc923d0a546b8544fd6debc',
     'pair-treatment': '2747e86c3f0521c1ef5c455d9be82428e4ca5be7',
-    'second-control': 'pending-frozen-second-control',
-    'second-treatment': 'pending-frozen-second-treatment',
+    'second-control': 'b3285903de8d6ca9389627a3515c6de430216338',
+    'second-treatment': 'b1b50887068ca2672961833d7a4029c4e7ad2e4e',
 }
 CPU_MODES = ('cpu-profile', 'cpu-pair')
 CPU_TARGETS = {'cpu-profile': ('cpu-profile',),

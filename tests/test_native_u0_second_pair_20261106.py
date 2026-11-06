@@ -97,3 +97,14 @@ def test_second_bootstrap_preserves_original_cli_bytes_and_exact_helper_binding(
     compile(patched, '<diagnostic-bootstrap>', 'exec')
     assert helper.FIRST_TREATMENT == '2747e86c3f0521c1ef5c455d9be82428e4ca5be7'
     assert 'src/download/prompts/canonical_hashes.yaml' in helper.PROTECTED
+
+
+@pytest.mark.parametrize('target,head', [
+    ('second-control', 'b3285903de8d6ca9389627a3515c6de430216338'),
+    ('second-treatment', 'b1b50887068ca2672961833d7a4029c4e7ad2e4e')])
+def test_second_pair_requires_frozen_clean_head(target, head):
+    driver = load('native_recorder_measure_20261026')
+    assert driver.HEADS[target] == head
+    driver.require_source({'head': head, 'pristine': True}, target)
+    with pytest.raises(ValueError, match='pristine at its exact declared commit'):
+        driver.require_source({'head': head, 'pristine': False}, target)
