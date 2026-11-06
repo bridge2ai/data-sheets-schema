@@ -341,6 +341,8 @@ def driver_cleanup_proof(path):
 def resolve_arguments(args):
     if args.mode == 'cpu-profile' and args.idle_only:
         raise ValueError('cpu-profile is a diagnostic recorder run, not an idle-only gate')
+    if (args.mode == 'cpu-profile') != (args.target == 'cpu-profile'):
+        raise ValueError('CPU profiling requires its exact diagnostic target; baseline modes exclude it')
     args.tree = args.tree.resolve(strict=True)
     args.output = args.output.resolve(strict=True)
     args.driver = args.driver.resolve(strict=True)
@@ -559,7 +561,7 @@ def main(argv=None):
     parser.add_argument('--tree', type=Path)
     parser.add_argument('--output', type=Path)
     parser.add_argument('--trial')
-    parser.add_argument('--target', choices=('current', 'original', 'delivery'), default='current')
+    parser.add_argument('--target', choices=('current', 'original', 'delivery', 'cpu-profile'), default='current')
     parser.add_argument('--driver-seconds', type=int, default=1800)
     parser.add_argument('--mode', choices=('idle', 'load-diagnostic', 'cpu-profile'), default='idle')
     parser.add_argument('--idle-only', action='store_true')

@@ -29,6 +29,7 @@ HEADS = {
     'current': '01969cbed8eed93f420c640c1f1c306e5f58b033',
     'original': 'd41282871394dd8abe74e11afb0e80c95d149305',
     'delivery': 'be0bd05821256212e89e4d011ba6b30a780e299b',
+    'cpu-profile': '794901899b9cf4172f0af2cdde9fa62aa330edce',
 }
 NODE = 'tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion'
 SCOPE = ('src', 'scripts', 'tests', 'utils', '.claude', 'notes')
@@ -576,6 +577,8 @@ def reserve_output(parent, trial, tree):
 def run(args):
     if args.mode == 'cpu-profile' and args.idle_only:
         raise ValueError('cpu-profile is a diagnostic recorder run, not an idle-only gate')
+    if (args.mode == 'cpu-profile') != (args.target == 'cpu-profile'):
+        raise ValueError('CPU profiling requires its exact diagnostic target; baseline modes exclude it')
     bootstrap = initialize_dependencies()
     tree = args.tree.resolve(strict=True)
     python = (args.python or Path(sys.executable)).absolute()  # preserve venv spelling

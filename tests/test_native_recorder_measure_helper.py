@@ -305,10 +305,11 @@ class DriverSafetyTests(unittest.TestCase):
     def fake_run(self, parent, *, samples=None, after_changed=False, hang=False, idle_only=False,
                  worker_exit=0, survivor=False, observation_error=False, mode='idle'):
         tree = parent / 'tree'; tree.mkdir()
-        before = {'head': driver.HEADS['current'], 'pristine': True, 'files': {}, 'tree': 'fixture'}
+        target = 'cpu-profile' if mode == 'cpu-profile' else 'current'
+        before = {'head': driver.HEADS[target], 'pristine': True, 'files': {}, 'tree': 'fixture'}
         after = {**before, 'tree': 'changed'} if after_changed else before
         args = SimpleNamespace(tree=tree, python=Path(sys.executable), output=parent,
-            trial='trial', target='current', idle_seconds=5, mode=mode, idle_only=idle_only,
+            trial='trial', target=target, idle_seconds=5, mode=mode, idle_only=idle_only,
             host_samples=parent / 'observer.jsonl', host_observer_pid=777_777,
             plugin_autoload='enabled',
             driver_seconds=1800, max_mean_cpu=15, max_peak_cpu=35,
@@ -498,6 +499,15 @@ class DriverSafetyTests(unittest.TestCase):
                     '--host-samples', '/samples.jsonl', '--host-observer-pid', '123',
                     '--driver-seconds', '1800', *option]), 0)
             self.assertEqual(run.call_args.args[0].mode, expected)
+
+    def test_cpu_profiling_is_pinned_and_cannot_label_diagnostic_source_as_baseline(self):
+        self.assertEqual(driver.HEADS['cpu-profile'], '794901899b9cf4172f0af2cdde9fa62aa330edce')
+        for mode, target in [('cpu-profile', 'current'), ('idle', 'cpu-profile'),
+                             ('load-diagnostic', 'cpu-profile')]:
+            with self.subTest(mode=mode, target=target), mock.patch.object(driver, 'initialize_dependencies') as setup:
+                with self.assertRaisesRegex(ValueError, 'exact diagnostic target'):
+                    driver.run(SimpleNamespace(mode=mode, target=target, idle_only=False))
+                setup.assert_not_called()
 
     def test_normal_test_failure_can_verify_cleanup_without_claiming_test_success(self):
         with tempfile.TemporaryDirectory() as directory:

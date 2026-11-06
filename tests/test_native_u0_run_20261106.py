@@ -344,6 +344,7 @@ def test_cpu_profile_skips_settling_but_keeps_lock_and_cleanup_proof(
         tmp_path, monkeypatch, cleanup_verified):
     args = run_args(tmp_path, monkeypatch)
     args.mode = 'cpu-profile'
+    args.target = 'cpu-profile'
     mock_network_check(monkeypatch)
     monkeypatch.setattr(wrapper.time, 'sleep', lambda _: pytest.fail('CPU profile waited for quiet'))
     class Child:
@@ -376,6 +377,15 @@ def test_cpu_profile_refuses_idle_only_combination(tmp_path, monkeypatch):
     args = run_args(tmp_path, monkeypatch)
     args.mode, args.idle_only = 'cpu-profile', True
     with pytest.raises(ValueError, match='not an idle-only gate'):
+        wrapper.resolve_arguments(args)
+
+
+@pytest.mark.parametrize('mode,target', [('cpu-profile', 'current'), ('idle', 'cpu-profile'),
+                                        ('load-diagnostic', 'cpu-profile')])
+def test_cpu_mode_requires_its_diagnostic_target(tmp_path, monkeypatch, mode, target):
+    args = run_args(tmp_path, monkeypatch)
+    args.mode, args.target = mode, target
+    with pytest.raises(ValueError, match='exact diagnostic target'):
         wrapper.resolve_arguments(args)
 
 
