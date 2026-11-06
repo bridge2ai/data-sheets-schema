@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "source_commit": "139c8c847df308b34325af5509f725aeda75ecf3",
+  "source_commit": "9f05bcf1d16c3d62bc250b14b0d8b7a3a2fe1d45",
   "modules": {
     "budget_amendment": {
       "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
@@ -40,7 +40,7 @@
     },
     "prepare_registration": {
       "path": "notes/matched_cborg_2026-09-13/prepare_registration_v2.py",
-      "sha256": "b502db0b70a574764c10cadc8e04dfdb596bb4e77a274134f8db51dfa368ff24"
+      "sha256": "6cb0a4a1b234cbe63272b48ea117a42efc9dfac04992d41050848b4412d2bbb7"
     },
     "run_api_canary": {
       "path": "notes/matched_cborg_2026-09-13/run_api_canary.py",
@@ -52,7 +52,7 @@
     },
     "prepare_registration_v2": {
       "path": "notes/matched_cborg_2026-09-13/prepare_registration_v2.py",
-      "sha256": "b502db0b70a574764c10cadc8e04dfdb596bb4e77a274134f8db51dfa368ff24"
+      "sha256": "6cb0a4a1b234cbe63272b48ea117a42efc9dfac04992d41050848b4412d2bbb7"
     }
   }
 }

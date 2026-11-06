@@ -1,3 +1,6 @@
+# Purpose: generate the exact-M7 saved fixture for #5508, 2026-11-06.
+# Inputs: exported M7 source and pytest fixtures. Outputs: saved registration/composition.
+
 """Replay frozen v1 authority in its original exported source environment."""
 import json
 import os

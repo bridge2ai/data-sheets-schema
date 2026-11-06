@@ -12,12 +12,13 @@ import subprocess
 import sys
 import tarfile
 import time
-R=Path(__file__).resolve().parents[2]; OUT=R.parent/'scratch-native-u2/r3-mutations'
+R=Path(__file__).resolve().parents[2]; OUT=R.parent/'scratch-native-u2/r3-mutations3'
 LOCK=R.parent/'plans/native_quiet_window.lock'
 PY='/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python'
 D=runpy.run_path(str(R.parent/'scratch-review-u2-probes/mutation_probe.py'))
 PREP,CTRL,SUP=D['PREP'],D['CTRL'],D['SUP']
 M=D['MUTATIONS']
+M['M0_control']=([],[D['EQ'],D['V2'],'tests/test_native_preparer_v2_boundaries.py'])
 M['M9_v2_drops_external_pins']=([(PREP,'    for external in args.external_sources:\n        for path in sorted(external.resolve().rglob("*")):\n            if path.is_file() and "__pycache__" not in path.parts:\n                pins[str(path)] = sha(path)\n','')],[D['EQ']])
 names=sys.argv[1:]
 assert names
@@ -34,6 +35,7 @@ if not S.exists():
     common=subprocess.check_output(['git','rev-parse','--path-format=absolute','--git-common-dir'],cwd=R,text=True).strip()
     (S/'.git/objects/info/alternates').write_text(str(Path(common)/'objects')+'\n')
     (S/'.git/HEAD').write_text(commit+'\n')
+subprocess.run(['git','read-tree','HEAD'],cwd=S,check=True)
 for name in names:
     if LOCK.exists():
         raise SystemExit('quiet window: next mutation not started')
@@ -76,8 +78,9 @@ for name in names:
                                 time.sleep(60)
                                 if time.monotonic()-start>=3600: raise TimeoutError()
                             os.killpg(child.pid,signal.SIGCONT)
-            except TimeoutError:
+            except BaseException:
                 os.killpg(child.pid,signal.SIGKILL);child.wait()
+                raise
         result={'mutation':name,'returncode':child.returncode,'seconds':time.monotonic()-start,'tests':tests,'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=S,text=True).strip()}
         (OUT/(name+'.json')).write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result),flush=True)
     finally:

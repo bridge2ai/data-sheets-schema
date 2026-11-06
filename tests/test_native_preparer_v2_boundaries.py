@@ -21,6 +21,7 @@ def test_source_commit_bytes(isolated):
     (['--projects', 'CHORUS,CHORUS'], 'projects must name unique'),
     (['--canary-order', 'missing'], 'outside the selected registered roster'),
     (['--canary-order', 'a,a'], 'canary order must name unique'),
+    (['--external-sources', '/nonexistent-u2-evidence'], 'external evidence directory must exist'),
 ])
 def test_preparer_refusals(isolated, monkeypatch, tmp_path, capsys, change, reason):
     with authority.loaded_dependencies(authority.dependency_identity()) as modules:
@@ -54,12 +55,36 @@ def test_direct_declares(isolated, monkeypatch, tmp_path):
         assert not (tmp_path/'out').exists()
 
 
+def test_api_preparation_serializes_envelope(isolated, monkeypatch, tmp_path):
+    with authority.loaded_dependencies(authority.dependency_identity()) as modules:
+        prep = modules['prepare_registration']
+        (tmp_path/'api_initial_admission.json').write_text('{}')
+        original = subprocess.check_output
+        def offline(command, *args, **kwargs):
+            if command == ['/unused', '--version']:
+                return 'synthetic offline version'
+            assert command[0] == 'git'
+            return original(command, *args, **kwargs)
+        monkeypatch.setattr(subprocess, 'check_output', offline)
+        monkeypatch.setattr(sys, 'argv', ['prepare', '--output', str(tmp_path), '--projects', 'CHORUS', '--canary-order', 'CHORUS_api_rep1', *API_ARGS])
+        prep.main()
+        path = tmp_path/'registration.json'
+        value = json.loads(path.read_bytes())
+        inner = prep.require_envelope(value)
+        assert inner['status'] == 'awaiting_preflight_review'
+        assert inner['budget']['authorization'] == 'user: +$200, 2026-09-13'
+        assert inner['pinned_files'][str(Path(prep.__file__))] == prep.sha(prep.__file__)
+        with pytest.raises(KeyError) as error:
+            modules['run_api_canary'].verify(value, path, prep.sha(path))
+        assert error.value.args == ('repository',)
+
+
 def test_frozen_verifiers_and_launchers_refuse_envelope(isolated, monkeypatch, tmp_path):
     with authority.loaded_dependencies(authority.dependency_identity()) as modules:
         prep=modules['prepare_registration']
         record=prep.envelope({'schema_version': 2})
         assert prep.require_envelope(record) == {'schema_version': 2}
-        for invalid in ({'schema_version': 1}, {**record, 'authority_version': 1}, {**record, 'controller_sources_sha256': '0'*64}):
+        for invalid in (None, [], {'schema_version': 1}, {**record, 'authority_version': 1}, {**record, 'registration': {'schema_version': 2.0}}, {**record, 'controller_sources_sha256': '0'*64}):
             with pytest.raises(ValueError, match='exact v2 authority envelope'):
                 prep.require_envelope(invalid)
         path=tmp_path/'registration.json'; path.write_text(json.dumps(record))

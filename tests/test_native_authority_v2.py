@@ -134,6 +134,8 @@ def test_direct_preparation_pins_selected_version(isolated, tmp_path, monkeypatc
         args = direct.parser().parse_args(['--project', 'CHORUS', '--output', str(tmp_path/'direct'),
             *DIRECT_ARGS, '--claude-executable', str(fake)])
         value = json.loads(direct.build(args).read_bytes())
+        with pytest.raises(modules['run_direct_canary'].BudgetStop, match='not a direct-arm registration'):
+            modules['run_direct_canary'].verify_registration(value, tmp_path/'direct/registration.json')
         assert value['authority_version'] == 2
         assert value['controller_sources_sha256'] == v2.SOURCES_SHA256
         value = direct.generation.require_envelope(value)

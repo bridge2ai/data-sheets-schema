@@ -82,3 +82,27 @@ without recreating that original environment or rewriting historical bytes.
 The retained local replay probe tests that refusal; the CI test explicitly does
 not claim portable v1 replay. The old environment-gated generator is retained in
 `scripts/adhoc/generate_native_u2_m7_fixture_20261106.py`, outside test discovery.
+
+### Round 3 offline review ledger
+
+GitHub issue publication is deferred by the explicit offline instruction. These
+review findings are retained for owner publication, rather than silently dropped:
+
+- R3-T1 (fixed): isolate source-commit tests from previously imported v1 modules.
+- R3-T2 (fixed): compare separate output trees and explicitly account for the
+  truthful profile-basis correction; old output reuse had hidden omissions.
+- R3-H1 (fixed): initialize the scratch Git index before mutation testing.
+  An empty index made unchanged agent definitions appear deleted and invalidated
+  the first mutation canary. Those early runs are excluded from kill claims.
+- R3-R1 (documented residual): exact saved-v1 checker-identity refusal needs the
+  original absolute-path environment, as described above. CI exercises saved-v1
+  bytes against v2 without skipping.
+- R3-R2 (documented residual): standalone imports of frozen v1 modules after v2
+  can alias generation utilities. Use separate processes; the supervisor path
+  checks origins and shares the v2 object. No frozen v1 import hook was changed.
+- R3-R3 (integration requirement): preserve the named helper commit when this
+  branch is published/merged, or re-freeze and revalidate after integration.
+- R3-R4 (fixed): an explicitly named missing external directory previously
+  yielded no pins. Preparation now refuses it before output creation; a negative
+  test asserts the specific error. Envelope admission also refuses non-object
+  input and non-integer schema versions.

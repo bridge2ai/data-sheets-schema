@@ -33,9 +33,9 @@ def main():
     if name in ('replay', 'replay-final'):
         env['NATIVE_U2_V1_REPLAY'] = str(OUT/('v1-replay-final' if name == 'replay-final' else 'v1-replay'))
     command = [PYTHON, '-B', '-m', 'pytest', '-o', 'addopts=', '-p', 'no:cacheprovider', '-q']
-    if name == 'collect':
+    if name in ('collect', 'r3-collect'):
         command += ['tests', '--collect-only']
-    elif name in ('scan', 'baseline-scan'):
+    elif name in ('scan', 'baseline-scan', 'r3-scan'):
         command = [PYTHON, '-B', '.claude/skills/d4d-generation-specificity-audit/scan.py', '--root', str(source), '--report', str(OUT/(name+'.md')), '--json', str(OUT/(name+'.json'))]
     elif name in ('replay-check', 'replay-check-final'):
         if name == 'replay-check-final':
