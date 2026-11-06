@@ -179,6 +179,33 @@ def phase_summary(rows):
         'phase_detail_note': 'Targets beyond the observer phase-detail cap cannot qualify for matched completed-phase totals.'}
 
 
+def recorder_artifact(path):
+    """Only the preopened optional 170-second stack may legitimately be empty.
+
+    A recorder that finishes before its stack deadline leaves this regular file
+    empty. Preserve its empty-byte SHA/size while retaining no-follow and stable
+    identity checks. All other files keep the original nonempty reader.
+    """
+    path = Path(path).absolute()
+    if path.name == 'stack-170s.txt':
+        descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        try:
+            before = os.fstat(descriptor)
+            if not stat.S_ISREG(before.st_mode):
+                raise ValueError('optional stack must be a regular file')
+            if before.st_size == 0:
+                after, current = os.fstat(descriptor), path.lstat()
+                keys = ('st_dev', 'st_ino', 'st_size', 'st_mtime_ns', 'st_ctime_ns')
+                if (not stat.S_ISREG(current.st_mode) or any(
+                        getattr(before, key) != getattr(after, key)
+                        or getattr(after, key) != getattr(current, key) for key in keys)):
+                    raise ValueError('optional empty stack changed during read')
+                return b'', {'path': str(path), 'bytes': 0, 'sha256': reader.digest(b'')}
+        finally:
+            os.close(descriptor)
+    return reader.read_regular(path)
+
+
 def summarize_recorder(directory, root, source):
     rows, evidence = reader.observer_events(directory / 'observer.jsonl')
     starts = [row for row in rows if row['event'] == 'observer_start']
@@ -230,7 +257,7 @@ def summarize_recorder(directory, root, source):
         if child.name == 'observer.jsonl' or not child.is_file():
             continue
         try:
-            _, pin = reader.read_regular(child)
+            _, pin = recorder_artifact(child)
             checkpoint_paths.append(pin)
         except Exception as exc:
             errors.append(reader.failure(child, exc))

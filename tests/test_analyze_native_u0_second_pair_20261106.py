@@ -191,3 +191,52 @@ def test_exclusive_cli_output_contains_hashes_and_cannot_be_overwritten(tmp_path
     assert value['analyzer_pin']['sha256'] and value['artifact_pins'][str(manifest)]['bytes'] > 0
     with pytest.raises(SystemExit): analysis.main(args)
     assert out.read_bytes() == before
+
+
+def test_empty_optional_stack_canary_preserves_valid_completed_recorder_and_empty_pin(tmp_path):
+    c, t, manifest = make_pair(tmp_path)
+    stack = t[2] / 'stack-170s.txt'
+    stack.touch()
+    result = run_pair(c, t, manifest)
+    assert result['valid'], result
+    assert result['treatment']['recorder']['complete_observer_valid']
+    assert result['treatment']['same_run_readback_verified']
+    pins = result['treatment']['recorder']['other_artifact_pins']
+    assert {'path': str(stack), 'bytes': 0, 'sha256': hashlib.sha256(b'').hexdigest()} in pins
+
+
+@pytest.mark.parametrize('name', ['checkpoint.json', 'stack-other.txt', 'observer.jsonl'])
+def test_other_empty_artifacts_still_refuse(tmp_path, name):
+    artifact = tmp_path / name
+    artifact.touch()
+    with pytest.raises(ValueError, match='nonempty'):
+        analysis.base.recorder_artifact(artifact)
+
+
+def test_optional_stack_symlink_still_refuses(tmp_path):
+    c, t, manifest = make_pair(tmp_path)
+    target = tmp_path / 'empty-target.txt'; target.touch()
+    (t[2] / 'stack-170s.txt').symlink_to(target)
+    result = run_pair(c, t, manifest)
+    assert not result['valid']
+    assert result['treatment']['recorder']['errors']
+
+
+def test_nonempty_optional_stack_keeps_original_bytes_and_pin(tmp_path):
+    stack = tmp_path / 'stack-170s.txt'; raw = b'Thread trace\n'; stack.write_bytes(raw)
+    assert analysis.base.recorder_artifact(stack) == (
+        raw, {'path': str(stack), 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()})
+
+
+def test_empty_optional_stack_identity_change_refuses(tmp_path, monkeypatch):
+    stack = tmp_path / 'stack-170s.txt'; stack.touch()
+    original = analysis.base.os.fstat
+    calls = []
+    def changed(descriptor):
+        calls.append(descriptor)
+        if len(calls) == 2:
+            stack.write_bytes(b'changed')
+        return original(descriptor)
+    monkeypatch.setattr(analysis.base.os, 'fstat', changed)
+    with pytest.raises(ValueError, match='changed during read'):
+        analysis.base.recorder_artifact(stack)
