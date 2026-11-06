@@ -1,0 +1,356 @@
+"""Prepare a reviewed, hash-bound experiment manifest without model calls."""
+from datetime import datetime, timezone
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+import yaml
+
+from data_sheets_schema import api_runner, agent_pin, chunking, evidence_score, profiles, schema_digest
+from data_sheets_schema.evaluation.evaluate_d4d_llm import D4DLLMEvaluator, LLMEvaluationConfig
+from data_sheets_schema.registry import load_registry
+
+ROOT = Path(__file__).resolve().parents[2]
+HERE = Path(__file__).resolve().parent
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def save(path, value):
+    keep(path, json.dumps(value, indent=2) + "\n")
+
+
+def keep(path, text):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        if path.read_text(encoding="utf-8") != text:
+            raise ValueError(f"refusing to replace changed registration artifact: {path}")
+        return
+    with path.open("x", encoding="utf-8") as stream:
+        stream.write(text)
+
+
+def spec_for(job):
+    if "prompt_text_env" in job and job["prompt_text_env"] is not True:
+        # Recorded only as true, like the render specification's key (#2315, #2343).
+        raise ValueError(f"job prompt_text_env is recorded only as true: {job['prompt_text_env']!r}")
+    return api_runner.RunSpec(project=job["project"], arm="baseline", method=job["method"],
+        bundle=Path(job["bundle"]), label=job["label"], condition="generic_v9",
+        manifest=Path(job["manifest"]), chunk_manifest=Path(job["chunks"]),
+        profile=job["profile"], profile_basis="declared by source manifest",
+        render_version=job.get("render_version", job.get("render_spec", {}).get("render_version", 9)),
+        run_date=job["run_date"],
+        runtime=job["runtime"], provider="LBL CBORG (proxy to Anthropic)",
+        # A job registered with the key renders its recorder line with
+        # `--prompt-text-env` (#2282); every registration made before this
+        # carries no key and re-derives exactly as it was registered (#2307).
+        prompt_text_env=job.get("prompt_text_env") is True,
+        registered_input_paths=True)
+
+
+def positive_seconds(text):
+    """A wall-clock limit in whole seconds, above zero (#2020): a zero or
+    negative deadline would start the child and stop it at once, consuming
+    the attempt identity."""
+    try:
+        value = int(text)
+    except (TypeError, ValueError):
+        raise argparse.ArgumentTypeError(f"not a whole number of seconds: {text!r}")
+    if value <= 0:
+        raise argparse.ArgumentTypeError(f"the attempt deadline must be positive, got {value}")
+    return value
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=HERE)
+    parser.add_argument("--cohort", required=True)
+    parser.add_argument("--label-date", required=True)
+    parser.add_argument("--run-date", required=True)
+    parser.add_argument("--render-version", type=int, choices=(9, 10, 11, 12, 13, 14, 15, 16, 17), default=9,
+                        help="Explicit generation renderer; existing registrations retain renderer 9")
+    parser.add_argument("--prior-billing", type=Path)
+    parser.add_argument("--prior-cost-usd")
+    parser.add_argument("--previous-attempt-audit", type=Path)
+    parser.add_argument("--per-job-attempt-caps", type=Path,
+                        help="JSON mapping of explicitly approved job IDs to whole-attempt USD caps; preparation grants no launch approval")
+    parser.add_argument("--series", required=True)
+    parser.add_argument("--authorization", required=True)
+    parser.add_argument("--additional-usd", type=float, required=True)
+    parser.add_argument("--per-attempt-usd", type=float, required=True)
+    parser.add_argument("--claude-executable", required=True)
+    parser.add_argument("--render-only", action="store_true")
+    parser.add_argument("--agentic-deadline-seconds", type=positive_seconds, default=1800,
+                        help="wall-clock limit of one native attempt; 1800 is what v10q and v10r "
+                             "registered, and it stopped the v10r CHORUS attempt in Phase 3 (#2010)")
+    parser.add_argument("--external-canary", type=Path, help="JSON external case metadata, with project, source_manifest, chunks and profile")
+    parser.add_argument("--external-sources", type=Path, action="append", default=[], help="Optional external capture directory to pin")
+    parser.add_argument("--projects", required=True, help="Comma-separated registry project identifiers")
+    parser.add_argument("--canary-order", required=True,
+                        help="Comma-separated canary job ids in launch order; each later canary requires "
+                             "independent acceptance of every earlier one. Existing registrations keep "
+                             "their saved order; new registrations must select an explicit sequence.")
+    return parser
+
+
+def new_job(case, identifier, arm, runtime, method, replicate, args):
+    """One registered job. Every agentic job renders its recorder line with
+    `--prompt-text-env D4D_LAUNCH_INSTRUCTION` (#2307): the expansion form is
+    refused by the pinned runtime under dontAsk (#2282), and the launcher
+    refuses an agentic job without the key (#2341). API jobs carry no
+    recorder line and no key."""
+    job = {**case, "id": identifier, "execution_arm": arm, "runtime": runtime,
+           "method": method, "replicate": replicate,
+           "canary": identifier in {name.strip() for name in args.canary_order.split(",")},
+           "run_date": args.run_date, "render_version": args.render_version,
+           "label": f"{args.label_date}_claude-opus-5-{arm}-{args.cohort.replace('_','-')}-{case['project'].lower()}_rep{replicate}"}
+    if arm == "agentic":
+        job["prompt_text_env"] = True
+    return job
+
+
+def generation_deadline(args):
+    """The registered wall-clock limit of one native attempt (#2010)."""
+    return args.agentic_deadline_seconds
+
+
+def envelope(registration):
+    """V2 wire shape: frozen v1 consumers cannot read required top-level fields."""
+    from data_sheets_schema.native_attribution_controller_v2 import SOURCES_SHA256
+    return {"authority_version": 2, "controller_sources_sha256": SOURCES_SHA256,
+            "registration": registration}
+
+
+def require_envelope(value):
+    """Admission interface for U3; this does not grant permission to launch."""
+    from data_sheets_schema.native_attribution_controller_v2 import SOURCES_SHA256
+    if (not isinstance(value, dict)
+            or set(value) != {"authority_version", "controller_sources_sha256", "registration"}
+            or type(value["authority_version"]) is not int or value["authority_version"] != 2
+            or value["controller_sources_sha256"] != SOURCES_SHA256
+            or not isinstance(value["registration"], dict)
+            or type(value["registration"].get("schema_version")) is not int
+            or value["registration"].get("schema_version") != 2):
+        raise ValueError("v2 launch requires an exact v2 authority envelope")
+    return value["registration"]
+
+
+def main():
+    parser = build_parser()
+    args = parser.parse_args()
+    import math
+    if any(not math.isfinite(v) or v <= 0 for v in (args.additional_usd, args.per_attempt_usd)) or not args.authorization.strip():
+        parser.error("positive finite budgets and explicit authorization are required")
+    canary_order = [name.strip() for name in args.canary_order.split(",") if name.strip()]
+    if not canary_order or len(set(canary_order)) != len(canary_order):
+        parser.error("canary order must name unique job identifiers")
+    projects = [name.strip() for name in args.projects.split(",") if name.strip()]
+    if not projects or len(set(projects)) != len(projects):
+        parser.error("projects must name unique registry identifiers")
+    output = args.output.resolve()
+    if (args.prior_billing is None) != (args.prior_cost_usd is None):
+        parser.error("prior billing and its registered total must be supplied together")
+    registry = load_registry(ROOT / "data/preprocessed/source_manifest.yaml")
+    if any(not registry.declares(p) for p in projects):
+        parser.error("every project must be declared by the source registry")
+    cases = [{"project": p, "manifest": str(registry.path),
+              "bundle": str(registry.bundle(p)),
+              "chunks": str(chunking.manifest_for(registry.bundle(p), source_manifest=registry.path)),
+              "profile": profiles.declared_profile(registry.path) or "neutral", "replicates": 3, "purpose": "manuscript_cohort",
+              "shared_source_project": registry.shared_source_project(p)}
+             for p in projects]
+    external_metadata = None
+    external_status = "awaiting_source_registration"
+    if args.external_canary:
+        external_metadata = json.loads(args.external_canary.read_bytes())
+        external_registry = load_registry(Path(external_metadata["source_manifest"]))
+        project = external_metadata["project"]
+        if not external_registry.declares(project) or project in projects:
+            parser.error("external project must be declared and distinct from the primary roster")
+        declared = profiles.declared_profile(external_registry.path) or "neutral"
+        if external_metadata.get("profile", declared) != declared:
+            parser.error("external profile differs from source manifest")
+        cases.append({"project": project, "manifest": str(external_registry.path),
+                      "bundle": str(external_registry.bundle(project)),
+                      "chunks": external_metadata.pop("chunks"), "profile": declared,
+                      "replicates": 1, "purpose": "external_general_user_canary"})
+        external_status = "registered"
+    available = {f"{case['project']}_{arm}_rep{rep}" for case in cases
+                 for arm in ("api", "agentic") for rep in range(1, case["replicates"] + 1)}
+    if not set(canary_order) <= available:
+        parser.error("canary order names jobs outside the selected registered roster")
+    if any(not external.is_dir() for external in args.external_sources):
+        parser.error("every external evidence directory must exist")
+    pins = {}
+    # Full package implementation, schemas and shipped instructions are inputs.
+    # Explicit rglob includes ignored files; compiled/cache files are not code.
+    for directory, suffixes in [(ROOT / "src/data_sheets_schema", {".py", ".yaml", ".json"}),
+                                (ROOT / ".claude/agents", {".md"}),
+                                (ROOT / ".claude/commands", {".md"}),
+                                (ROOT / "src/download/prompts", {".md", ".json"})]:
+        for path in sorted(directory.rglob("*")):
+            if path.is_file() and path.suffix in suffixes:
+                pins[str(path)] = sha(path)
+    for path in [ROOT / "pyproject.toml", ROOT / "poetry.lock",
+                 ROOT / ".github/workflows/d4d_assistant_deterministic.config",
+                 ROOT / "data/rubric/rubric10.txt", ROOT / "data/rubric/rubric20.txt",
+                 HERE / "model_catalogue.json", HERE / "token_count_probe.json",
+                 HERE / "budgeted_cborg.py", HERE / "run_api_canary.py", Path(__file__)]:
+        pins[str(path)] = sha(path)
+    if not args.render_only:
+        pins[str(output / "api_initial_admission.json")] = sha(output / "api_initial_admission.json")
+    if args.prior_billing:
+        pins[str(args.prior_billing.resolve())] = sha(args.prior_billing)
+    if args.previous_attempt_audit:
+        pins[str(args.previous_attempt_audit.resolve())] = sha(args.previous_attempt_audit)
+    if args.per_job_attempt_caps:
+        cap_policy_bytes = args.per_job_attempt_caps.read_bytes()
+        pins[str(args.per_job_attempt_caps.resolve())] = hashlib.sha256(cap_policy_bytes).hexdigest()
+        per_job_attempt_caps = json.loads(cap_policy_bytes)
+    if args.external_canary:
+        pins[str(args.external_canary.resolve())] = sha(args.external_canary)
+    for external in args.external_sources:
+        for path in sorted(external.resolve().rglob("*")):
+            if path.is_file() and "__pycache__" not in path.parts:
+                pins[str(path)] = sha(path)
+    if external_metadata:
+        for key in ("source_manifest", "applicability_context"):
+            if external_metadata.get(key):
+                path = Path(external_metadata[key]).resolve()
+                pins[str(path)] = sha(path)
+    jobs = []
+    for case in cases:
+        for key in ("manifest", "bundle", "chunks"):
+            # Freeze discovery's relative spellings before registering either
+            # their pins or the render/input identities of new jobs (D76).
+            case[key] = str(Path(case[key]).absolute())
+            pins[case[key]] = sha(case[key])
+        mapping = chunking.load_manifest(Path(case["chunks"]))
+        chunking.validate_manifest_mapping(mapping, Path(case["bundle"]).read_bytes(), mapping["bundle"])
+        for replicate in range(1, case["replicates"] + 1):
+            for arm, runtime, method in [("api", "Claude API (direct)", "claudecode_api"),
+                                         ("agentic", "Claude Code", "claudecode_agent")]:
+                identifier = f"{case['project']}_{arm}_rep{replicate}"
+                job = new_job(case, identifier, arm, runtime, method, replicate, args)
+                spec = spec_for(job)
+                # Use the public CLI's corpus layout so provenance/receipt
+                # helpers resolve the same full/core files as generation.
+                # Dataset-qualified labels isolate each attempt's directories.
+                job["output_directory"] = str(spec.metadata_dir)
+                job["output_directories"] = sorted({str(spec.full_path.parent), str(spec.core_path.parent)})
+                instruction = output / "prompts" / f"{identifier}.md"
+                instruction.parent.mkdir(parents=True, exist_ok=True)
+                keep(instruction, spec.instruction)
+                pins[str(instruction)] = sha(instruction)
+                job.update(render_spec=spec.render_spec(), input_identity=spec.input_identity(),
+                           instruction=str(instruction), instruction_sha256=sha(instruction),
+                           outputs={"full": str(spec.full_path), "core": str(spec.core_path),
+                                    "provenance": str(spec.provenance_path), "report": str(spec.report_path)})
+                if arm == "api":
+                    job["offline_plan"] = api_runner.plan(spec)
+                    request = api_runner.build_phase(spec, "full", carry={})
+                    initial = output / "initial_requests" / f"{identifier}.json"
+                    settings = api_runner._model_settings()
+                    save(initial, {"model": settings["name"], "system": request.system,
+                         "messages": request.messages, "thinking": settings.get("thinking"),
+                         "max_tokens": api_runner.phase_max_tokens(spec, "full", settings["max_tokens"], model=settings["name"])})
+                    pins[str(initial)] = sha(initial)
+                    job["initial_request"] = str(initial)
+                if any(Path(p).exists() for p in job["output_directories"]):
+                    raise ValueError(f"planned output directory already exists: {identifier}")
+                jobs.append(job)
+    instruments = {}
+    evaluator = D4DLLMEvaluator(LLMEvaluationConfig(model="claude-opus-5", max_tokens=32000), client=object())
+    for n in (10, 20):
+        for suffix in ("", "-semantic"):
+            name = f"d4d-rubric{n}{suffix}"
+            path = agent_pin.agent_path(name)
+            instruments[name] = {"definition": str(path), "definition_sha256": sha(path),
+                "preamble": agent_pin.spawn_preamble(name), "challenge": agent_pin.challenge(name),
+                "rubric": str(ROOT / f"data/rubric/rubric{n}.txt"), "quoted_definition_sha256": None,
+                "observed_runtime_model": None, "canary_status": "not_run"}
+        text = evaluator._build_system_prompt(f"rubric{n}")
+        path = output / "prompts" / f"rubric{n}_api_system.md"
+        keep(path, text)
+        pins[str(path)] = sha(path)
+        instruments[f"rubric{n}_api_quality"] = {"system_prompt": str(path), "system_prompt_sha256": sha(path),
+                                                  "max_tokens": 32000, "temperature": None, "canary_status": "not_run"}
+    fitness = []
+    for profile_name in sorted({"neutral", *(case["profile"] for case in cases)}):
+        profile = profiles.profile_named(profile_name)
+        for class_name in ("Dataset", "CoreDataset"):
+            schema_path = ROOT / (api_runner.CORE_SCHEMA_PATH if class_name == "CoreDataset" else api_runner.FULL_SCHEMA_PATH)
+            snapshot = evidence_score.slot_specification_snapshot(class_name, schema_path, profile=profile)
+            fitness.append({"profile": profile_name, "class": class_name,
+                            "generation_digest_md5": snapshot[0], "specification_sha256": snapshot[3]})
+    catalogue = json.loads((HERE / "model_catalogue.json").read_bytes())
+    selected_model = next(row for row in catalogue["models"] if row["model"] == "claude-opus-5")
+    manifest = {"schema_version": 2, "series": args.series, "registered_at": datetime.now(timezone.utc).isoformat(),
+        "status": "awaiting_preflight_review", "repository": str(ROOT),
+        "code_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        "code_commit_basis": "source implementation base; experiment controllers and inputs are identified by pinned_files; the actual launch commit is retained in the attempt receipt",
+        "python": sys.executable, "python_version": sys.version,
+        "model": selected_model, "provider_base_url": "https://api.cborg.lbl.gov",
+        "provider_context_policy": "headroom_bypass_v1",
+        "claude_version": None if args.render_only else subprocess.check_output([args.claude_executable, "--version"], text=True).strip(),
+        "budget": {"additional_usd": args.additional_usd, "per_attempt_usd": args.per_attempt_usd, "authorization": args.authorization,
+                   "ledger_path": str(output / "billing.json"),
+                   "prices_per_token": {"input": 0.000005, "output": 0.000025, "cache_write": 0.00000625, "cache_read": 0.0000005},
+                   "unknown_charge_policy": "retain reservation and stop", "automatic_whole_attempt_retries": 0,
+                   "funding": "cap-limited staged sequence; the proposed full matrix is not assumed fully funded"},
+        "generation": {"template_condition": "generic_v9", "cohort_version": args.cohort,
+                       "api_max_attempts": 1, "sdk_max_retries": 0,
+                       "api_phase_deadline_seconds": api_runner.PHASE_WALL_CLOCK_SECONDS,
+                       "agentic_attempt_deadline_seconds": generation_deadline(args),
+                       "agentic_cli_budget_flag_default_usd": args.per_attempt_usd,
+                       "agentic_cli_budget_flag_basis": "The CLI and transport both use the registration-qualified attempt's effective ledger cap, including any approved per-job exception.",
+                       "effort_policy": "API adaptive provider default; agentic runtime default, observed separately. No claim of matched realized reasoning effort.",
+                       "external_canary": external_metadata,
+                       "synthetic_fixture": "offline software checks only; excluded from the scientific canary/cohort",
+                       "canary_order": canary_order,
+                       "rep1_canaries_count_in_cohort_if_unchanged": True,
+                       "jobs": jobs},
+        "evaluations": {"instruments": instruments, "fitness_specifications": fitness,
+                        "presence_rubrics": [10, 20], "semantic_rubrics": [10, 20],
+                        "proposed_production_semantic_primary_ratings": 120,
+                        "proposed_production_semantic_extra_repeat_ratings": 80,
+                        "expansion_gate": "current full/core inputs, applicability, job-level outputs and budget registered after generation acceptance; no implicit cohort launch",
+                        "historical_adjudication": "separate from new ratings and original historical verdicts"},
+        "preservation_inventory": str(HERE / "historical_inventory.json"),
+        "preservation_inventory_sha256": sha(HERE / "historical_inventory.json"),
+        "pinned_files": pins}
+    if args.per_job_attempt_caps:
+        from budgeted_cborg import Ledger, registered_attempt_caps
+        manifest["budget"]["per_job_attempt_usd"] = per_job_attempt_caps
+        # Validate the roster and amounts without opening or seeding a ledger.
+        # The actual attempt prefixes use the final registration hash at launch.
+        Ledger(output / "billing.json", manifest_sha256="preparation-validation-only",
+               total_cap=manifest["budget"]["additional_usd"],
+               attempt_cap=manifest["budget"]["per_attempt_usd"],
+               attempt_caps_usd=registered_attempt_caps(manifest, "preparation-validation-only"))
+    if args.prior_billing:
+        manifest["budget"]["continuation"] = {
+            "checkpoint": str(args.prior_billing.resolve()), "sha256": sha(args.prior_billing),
+            "cost_usd": args.prior_cost_usd,
+            "basis": "Settled charges from the rejected prior condition; same additional allocation, new attempt identities."}
+    if args.previous_attempt_audit:
+        audit = json.loads(args.previous_attempt_audit.read_bytes())
+        manifest["prior_attempt_artifacts"] = [
+            {"path": value["original_path"], "sha256": value["sha256"]}
+            for value in audit["copies"].values()]
+    if not args.render_only:
+        save(output / "registration.json", envelope(manifest))
+    else:
+        save(output / "rendered_jobs.json", {"generation": manifest["generation"], "budget": manifest["budget"]})
+    print(json.dumps({"generation_jobs": len(jobs), "registered_canaries": sum(j["canary"] for j in jobs),
+                      "required_canaries": len(canary_order), "external_status": external_status,
+                      "input_pins": len(pins), "additional_budget_usd": args.additional_usd}))
+
+
+if __name__ == "__main__":
+    main()
