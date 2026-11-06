@@ -250,13 +250,13 @@ def status():
     assert not dirty, 'Commit the non-protected worktree result before final status.'
     report = ROOT.parent/'plans/reviews/native_u1_2026-11-06.md'
     assert '\n## Round 3 —' in report.read_text()
-    with report.open('a') as stream:
-        stream.write(f'\nRound-three local commit: `{head}`. Work stops at this handoff.\n')
     path = ROOT.parent.parent/'data-sheets-schema/notes/coordination/STATUS.md'
     prior = path.read_text()
     marker = 'Native U1 round 3 local handoff'
     assert marker not in prior
-    section = prior.index('### codex')
+    sections = list(re.finditer(r'^### codex\s*$', prior, re.MULTILINE))
+    assert len(sections) == 1, 'Require one actual codex heading, not a prose reference.'
+    section = sections[0].start()
     next_section = prior.find('\n### ', section + 1)
     assert next_section == -1, 'Codex must remain the final section for a safe append.'
     timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -271,6 +271,8 @@ def status():
              'Protected worktree bytes unchanged, packets scratch-only, '
              'offline/no native executable. Quiet-window interruption and overlap disclosed. '
              'Next: lead resolves staged scanner acceptance and reviews remaining evidence. Stopped.\n')
+    with report.open('a') as stream:
+        stream.write(f'\nRound-three local commit: `{head}`. Work stops at this handoff.\n')
     with path.open('a') as stream:
         stream.write(entry)
     assert path.read_text().count(marker) == 1 and head in report.read_text()
