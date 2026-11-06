@@ -114,3 +114,11 @@ path.write_text(text)
 # The direct registration must pin the helper it actually imports (U2-R1).
 path = ROOT/'notes/claudecode_direct/prepare_direct_v2.py'
 path.write_text(path.read_text().replace('CONTROLS / "prepare_registration.py",', 'CONTROLS / "prepare_registration_v2.py",'))
+# Standalone v2 preparation must bind transitive frozen bare imports too (U2-R3).
+path = ROOT/'notes/claudecode_direct/prepare_direct_v2.py'
+text = path.read_text().replace('from native_command_policy import build_command_policy', '''previous_generation = sys.modules.get("prepare_registration")
+if previous_generation is not None and Path(previous_generation.__file__).resolve() != Path(generation.__file__).resolve():
+    raise ImportError("v2 direct preparation refuses a preloaded different preparer")
+sys.modules.setdefault("prepare_registration", generation)
+from native_command_policy import build_command_policy''')
+path.write_text(text)

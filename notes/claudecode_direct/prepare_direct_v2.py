@@ -31,6 +31,10 @@ CONTROLS = ROOT / "notes" / "matched_cborg_2026-09-13"
 sys.path[:0] = [str(ROOT / "src"), str(CONTROLS), str(CONTROLS / "native_controls")]
 
 import prepare_registration_v2 as generation           # noqa: E402  the shared job renderer
+previous_generation = sys.modules.get("prepare_registration")
+if previous_generation is not None and Path(previous_generation.__file__).resolve() != Path(generation.__file__).resolve():
+    raise ImportError("v2 direct preparation refuses a preloaded different preparer")
+sys.modules.setdefault("prepare_registration", generation)
 from native_command_policy import build_command_policy  # noqa: E402
 from run_api_canary import sha                       # noqa: E402
 
