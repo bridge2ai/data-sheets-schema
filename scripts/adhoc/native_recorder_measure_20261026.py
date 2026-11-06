@@ -30,6 +30,8 @@ HEADS = {
     'original': 'd41282871394dd8abe74e11afb0e80c95d149305',
     'delivery': 'be0bd05821256212e89e4d011ba6b30a780e299b',
     'cpu-profile': '794901899b9cf4172f0af2cdde9fa62aa330edce',
+    'pair-control': 'ac95994ae49741c71cc923d0a546b8544fd6debc',
+    'pair-treatment': '2747e86c3f0521c1ef5c455d9be82428e4ca5be7',
 }
 CPU_MODES = ('cpu-profile', 'cpu-pair')
 CPU_TARGETS = {'cpu-profile': ('cpu-profile',),

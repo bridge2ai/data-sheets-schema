@@ -43,3 +43,16 @@ def test_pair_authority_does_not_authorize_campaign_or_wall_acceptance():
         assert 'no n=10' in module.CAUSAL_PAIR_AUTHORITY.lower()
         assert 'production fix' in module.CAUSAL_PAIR_AUTHORITY
     assert driver.NODE.endswith('test_actual_public_correction_three_workers_and_saved_completion')
+
+
+@pytest.mark.parametrize('target,head', [
+    ('pair-control', 'ac95994ae49741c71cc923d0a546b8544fd6debc'),
+    ('pair-treatment', '2747e86c3f0521c1ef5c455d9be82428e4ca5be7')])
+def test_pair_requires_exact_clean_prepared_head(target, head):
+    driver = load('native_recorder_measure_20261026')
+    assert driver.HEADS[target] == head
+    driver.require_source({'head': head, 'pristine': True}, target)
+    for identity in ({'head': head, 'pristine': False},
+                     {'head': driver.HEADS['current'], 'pristine': True}):
+        with pytest.raises(ValueError, match='pristine at its exact declared commit'):
+            driver.require_source(identity, target)
