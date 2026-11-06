@@ -47,7 +47,6 @@ EXECUTION_ARM = "direct"
 #: The cohort a production registration carries unless one is given; the
 #: fixture tests use another, so their label can never collide with a real
 #: record's (#2218, #2228).
-DEFAULT_COHORT = "generalized_direct_v1"
 #: The playbooks the instruction reaches; the transcript observer and the
 #: record gates need nothing else from the toolchain.
 CLI_FLAGS = ["--print", "--safe-mode", "--restricted", "--strict-mcp-config", "--disable-slash-commands",
@@ -201,10 +200,12 @@ def build(args):
     if not JOB_ID.fullmatch(identifier):
         raise DirectStop(f"the job id minted for project {project!r} is not a single path component")
     registry = generation.load_registry(repository / "data/preprocessed/source_manifest.yaml")
+    if not registry.declares(project):
+        raise DirectStop("project must be declared by the source registry")
     bundle = registry.bundle(project)
     case = {"project": project, "manifest": str(registry.path), "bundle": str(bundle),
             "chunks": str(generation.chunking.manifest_for(bundle, source_manifest=registry.path)),
-            "profile": "bridge2ai", "replicates": 1, "purpose": "direct_arm_canary",
+            "profile": generation.profiles.declared_profile(registry.path) or "neutral", "replicates": 1, "purpose": "direct_arm_canary",
             "shared_source_project": registry.shared_source_project(project)}
     # A registered input path is an absolute identity even when discovery
     # returns the conventional corpus-relative chunk-manifest spelling.
@@ -219,7 +220,7 @@ def build(args):
         spec = generation.api_runner.RunSpec(
             project=project, arm="baseline", method=METHOD, bundle=Path(case["bundle"]), label=job["label"],
             condition=args.condition, manifest=Path(case["manifest"]), chunk_manifest=Path(case["chunks"]),
-            profile=case["profile"], profile_basis="stated by the registered caller",
+            profile=case["profile"], profile_basis="declared by source manifest",
             render_version=args.render_version, run_date=args.run_date,
             runtime=RUNTIME, provider=PROVIDER, reasoning_effort=EFFORT, prompt_text_env=True,
             registered_input_paths=True)
@@ -306,7 +307,7 @@ def build(args):
                  Path(case["manifest"]), Path(case["bundle"]), Path(case["chunks"]), executable]:
         pins[str(path)] = sha(path)
     registration = {
-        "kind": "d4d_direct_arm_registration", "schema_version": 1,
+        "kind": "d4d_direct_arm_registration_v2", "schema_version": 2,
         "registered_at": datetime.now(timezone.utc).isoformat(), "status": "prepared_awaiting_review_ci_and_launch_word",
         "arm": {"method": METHOD, "runtime": RUNTIME, "provider": PROVIDER, "execution_arm": EXECUTION_ARM,
                 "transport": "the runtime's own connection to Anthropic; no proxy, no CBORG endpoint, no ledger",
@@ -339,7 +340,7 @@ def build(args):
         "pinned_files": pins,
     }
     path = output / "registration.json"
-    save(path, registration)
+    save(path, generation.envelope(registration))
     print(json.dumps({"registration": str(path), "sha256": sha(path), "job": identifier, "label": job["label"],
                       "instruction_bytes": len(spec.instruction.encode()), "pins": len(pins), "auth": auth}, indent=2))
     return path
@@ -350,14 +351,14 @@ def parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="a fresh registration directory")
     parser.add_argument("--project", required=True)
-    parser.add_argument("--claude-executable", default=str(Path.home() / ".local/share/claude/versions/2.1.272"))
+    parser.add_argument("--claude-executable", required=True)
     parser.add_argument("--condition", default="generic_v9")
     parser.add_argument("--render-version", type=int, default=17)
-    parser.add_argument("--cohort", default=DEFAULT_COHORT)
-    parser.add_argument("--label-date", default=datetime.now(timezone.utc).date().isoformat())
-    parser.add_argument("--run-date", default=datetime.now(timezone.utc).date().isoformat())
+    parser.add_argument("--cohort", required=True)
+    parser.add_argument("--label-date", required=True)
+    parser.add_argument("--run-date", required=True)
     parser.add_argument("--deadline-seconds", type=int, default=21600)
-    parser.add_argument("--runaway-guard-usd", default="60")
+    parser.add_argument("--runaway-guard-usd", required=True)
     parser.add_argument("--context-window", type=int, default=EXPECTED_LIMITS["contextWindow"],
                         help="the context window the runtime is expected to report for the registered model (#2246)")
     parser.add_argument("--max-output-tokens", type=int, default=EXPECTED_LIMITS["maxOutputTokens"])

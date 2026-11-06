@@ -15,7 +15,6 @@ from data_sheets_schema.registry import load_registry
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
-SERIES = "generalized_v10_2026-09-13"
 
 
 def sha(path):
@@ -43,9 +42,9 @@ def spec_for(job):
     return api_runner.RunSpec(project=job["project"], arm="baseline", method=job["method"],
         bundle=Path(job["bundle"]), label=job["label"], condition="generic_v9",
         manifest=Path(job["manifest"]), chunk_manifest=Path(job["chunks"]),
-        profile=job["profile"], profile_basis="stated by the registered caller",
+        profile=job["profile"], profile_basis="declared by source manifest",
         render_version=job.get("render_version", job.get("render_spec", {}).get("render_version", 9)),
-        run_date=job.get("run_date", "2026-09-14"),
+        run_date=job["run_date"],
         runtime=job["runtime"], provider="LBL CBORG (proxy to Anthropic)",
         # A job registered with the key renders its recorder line with
         # `--prompt-text-env` (#2282); every registration made before this
@@ -70,9 +69,9 @@ def positive_seconds(text):
 def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=HERE)
-    parser.add_argument("--cohort", default="generalized_v10")
-    parser.add_argument("--label-date", default="2026-09-13")
-    parser.add_argument("--run-date", default="2026-09-14")
+    parser.add_argument("--cohort", required=True)
+    parser.add_argument("--label-date", required=True)
+    parser.add_argument("--run-date", required=True)
     parser.add_argument("--render-version", type=int, choices=(9, 10, 11, 12, 13, 14, 15, 16, 17), default=9,
                         help="Explicit generation renderer; existing registrations retain renderer 9")
     parser.add_argument("--prior-billing", type=Path)
@@ -80,12 +79,17 @@ def build_parser():
     parser.add_argument("--previous-attempt-audit", type=Path)
     parser.add_argument("--per-job-attempt-caps", type=Path,
                         help="JSON mapping of explicitly approved job IDs to whole-attempt USD caps; preparation grants no launch approval")
+    parser.add_argument("--series", required=True)
+    parser.add_argument("--authorization", required=True)
+    parser.add_argument("--additional-usd", type=float, required=True)
+    parser.add_argument("--per-attempt-usd", type=float, required=True)
+    parser.add_argument("--claude-executable", required=True)
     parser.add_argument("--render-only", action="store_true")
     parser.add_argument("--agentic-deadline-seconds", type=positive_seconds, default=1800,
                         help="wall-clock limit of one native attempt; 1800 is what v10q and v10r "
                              "registered, and it stopped the v10r CHORUS attempt in Phase 3 (#2010)")
     parser.add_argument("--external-canary", type=Path, help="JSON external case metadata, with project, source_manifest, chunks and profile")
-    parser.add_argument("--external-sources", type=Path, help="Optional external capture directory to pin")
+    parser.add_argument("--external-sources", type=Path, action="append", default=[], help="Optional external capture directory to pin")
     parser.add_argument("--projects", required=True, help="Comma-separated registry project identifiers")
     parser.add_argument("--canary-order", required=True,
                         help="Comma-separated canary job ids in launch order; each later canary requires "
@@ -115,9 +119,31 @@ def generation_deadline(args):
     return args.agentic_deadline_seconds
 
 
+def envelope(registration):
+    """V2 wire shape: frozen v1 consumers cannot read required top-level fields."""
+    from data_sheets_schema.native_attribution_controller_v2 import SOURCES_SHA256
+    return {"authority_version": 2, "controller_sources_sha256": SOURCES_SHA256,
+            "registration": registration}
+
+
+def require_envelope(value):
+    """Admission interface for U3; this does not grant permission to launch."""
+    from data_sheets_schema.native_attribution_controller_v2 import SOURCES_SHA256
+    if (set(value) != {"authority_version", "controller_sources_sha256", "registration"}
+            or type(value["authority_version"]) is not int or value["authority_version"] != 2
+            or value["controller_sources_sha256"] != SOURCES_SHA256
+            or not isinstance(value["registration"], dict)
+            or value["registration"].get("schema_version") != 2):
+        raise ValueError("v2 launch requires an exact v2 authority envelope")
+    return value["registration"]
+
+
 def main():
     parser = build_parser()
     args = parser.parse_args()
+    import math
+    if any(not math.isfinite(v) or v <= 0 for v in (args.additional_usd, args.per_attempt_usd)) or not args.authorization.strip():
+        parser.error("positive finite budgets and explicit authorization are required")
     canary_order = [name.strip() for name in args.canary_order.split(",") if name.strip()]
     if not canary_order or len(set(canary_order)) != len(canary_order):
         parser.error("canary order must name unique job identifiers")
@@ -133,10 +159,9 @@ def main():
     cases = [{"project": p, "manifest": str(registry.path),
               "bundle": str(registry.bundle(p)),
               "chunks": str(chunking.manifest_for(registry.bundle(p), source_manifest=registry.path)),
-              "profile": "bridge2ai", "replicates": 3, "purpose": "manuscript_cohort",
+              "profile": profiles.declared_profile(registry.path) or "neutral", "replicates": 3, "purpose": "manuscript_cohort",
               "shared_source_project": registry.shared_source_project(p)}
              for p in projects]
-    external = args.external_sources
     external_metadata = None
     external_status = "awaiting_source_registration"
     if args.external_canary:
@@ -145,9 +170,12 @@ def main():
         project = external_metadata["project"]
         if not external_registry.declares(project) or project in projects:
             parser.error("external project must be declared and distinct from the primary roster")
+        declared = profiles.declared_profile(external_registry.path) or "neutral"
+        if external_metadata.get("profile", declared) != declared:
+            parser.error("external profile differs from source manifest")
         cases.append({"project": project, "manifest": str(external_registry.path),
                       "bundle": str(external_registry.bundle(project)),
-                      "chunks": external_metadata.pop("chunks"), "profile": external_metadata["profile"],
+                      "chunks": external_metadata.pop("chunks"), "profile": declared,
                       "replicates": 1, "purpose": "external_general_user_canary"})
         external_status = "registered"
     available = {f"{case['project']}_{arm}_rep{rep}" for case in cases
@@ -182,9 +210,14 @@ def main():
         per_job_attempt_caps = json.loads(cap_policy_bytes)
     if args.external_canary:
         pins[str(args.external_canary.resolve())] = sha(args.external_canary)
-    if external:
-        for path in sorted(external.rglob("*")):
+    for external in args.external_sources:
+        for path in sorted(external.resolve().rglob("*")):
             if path.is_file() and "__pycache__" not in path.parts:
+                pins[str(path)] = sha(path)
+    if external_metadata:
+        for key in ("source_manifest", "applicability_context"):
+            if external_metadata.get(key):
+                path = Path(external_metadata[key]).resolve()
                 pins[str(path)] = sha(path)
     jobs = []
     for case in cases:
@@ -244,7 +277,7 @@ def main():
         instruments[f"rubric{n}_api_quality"] = {"system_prompt": str(path), "system_prompt_sha256": sha(path),
                                                   "max_tokens": 32000, "temperature": None, "canary_status": "not_run"}
     fitness = []
-    for profile_name in ("neutral", "bridge2ai"):
+    for profile_name in sorted({"neutral", *(case["profile"] for case in cases)}):
         profile = profiles.profile_named(profile_name)
         for class_name in ("Dataset", "CoreDataset"):
             schema_path = ROOT / (api_runner.CORE_SCHEMA_PATH if class_name == "CoreDataset" else api_runner.FULL_SCHEMA_PATH)
@@ -253,15 +286,15 @@ def main():
                             "generation_digest_md5": snapshot[0], "specification_sha256": snapshot[3]})
     catalogue = json.loads((HERE / "model_catalogue.json").read_bytes())
     selected_model = next(row for row in catalogue["models"] if row["model"] == "claude-opus-5")
-    manifest = {"schema_version": 1, "series": f"{args.cohort}_{args.label_date}", "registered_at": datetime.now(timezone.utc).isoformat(),
-        "status": "awaiting_preflight_review" if external_status == "registered" else "draft_external_sources_pending", "repository": str(ROOT),
+    manifest = {"schema_version": 2, "series": args.series, "registered_at": datetime.now(timezone.utc).isoformat(),
+        "status": "awaiting_preflight_review", "repository": str(ROOT),
         "code_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "code_commit_basis": "source implementation base; experiment controllers and inputs are identified by pinned_files; the actual launch commit is retained in the attempt receipt",
         "python": sys.executable, "python_version": sys.version,
         "model": selected_model, "provider_base_url": "https://api.cborg.lbl.gov",
         "provider_context_policy": "headroom_bypass_v1",
-        "claude_version": None if args.render_only else subprocess.check_output(["/Users/marcin/.local/bin/claude", "--version"], text=True).strip(),
-        "budget": {"additional_usd": 200, "per_attempt_usd": 5, "authorization": "user: +$200, 2026-09-13",
+        "claude_version": None if args.render_only else subprocess.check_output([args.claude_executable, "--version"], text=True).strip(),
+        "budget": {"additional_usd": args.additional_usd, "per_attempt_usd": args.per_attempt_usd, "authorization": args.authorization,
                    "ledger_path": str(output / "billing.json"),
                    "prices_per_token": {"input": 0.000005, "output": 0.000025, "cache_write": 0.00000625, "cache_read": 0.0000005},
                    "unknown_charge_policy": "retain reservation and stop", "automatic_whole_attempt_retries": 0,
@@ -270,7 +303,7 @@ def main():
                        "api_max_attempts": 1, "sdk_max_retries": 0,
                        "api_phase_deadline_seconds": api_runner.PHASE_WALL_CLOCK_SECONDS,
                        "agentic_attempt_deadline_seconds": generation_deadline(args),
-                       "agentic_cli_budget_flag_default_usd": 5,
+                       "agentic_cli_budget_flag_default_usd": args.per_attempt_usd,
                        "agentic_cli_budget_flag_basis": "The CLI and transport both use the registration-qualified attempt's effective ledger cap, including any approved per-job exception.",
                        "effort_policy": "API adaptive provider default; agentic runtime default, observed separately. No claim of matched realized reasoning effort.",
                        "external_canary": external_metadata,
@@ -307,12 +340,12 @@ def main():
             {"path": value["original_path"], "sha256": value["sha256"]}
             for value in audit["copies"].values()]
     if not args.render_only:
-        save(output / "registration.json", manifest)
+        save(output / "registration.json", envelope(manifest))
     else:
         save(output / "rendered_jobs.json", {"generation": manifest["generation"], "budget": manifest["budget"]})
     print(json.dumps({"generation_jobs": len(jobs), "registered_canaries": sum(j["canary"] for j in jobs),
                       "required_canaries": len(canary_order), "external_status": external_status,
-                      "input_pins": len(pins), "additional_budget_usd": 200}))
+                      "input_pins": len(pins), "additional_budget_usd": args.additional_usd}))
 
 
 if __name__ == "__main__":
