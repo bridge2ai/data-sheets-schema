@@ -1,7 +1,7 @@
 # Purpose: summarize #5508 validation without rerunning tests.
 # Inputs: scratch XML/JSON and local Git sources. Output: scratch summary.json.
 # Date: 2026-11-06.
-from collections import Counter
+from collections import Counter, defaultdict
 import hashlib
 import json
 from pathlib import Path
@@ -25,6 +25,13 @@ for path in sorted(OUT.glob('*.execution.json')):
             else 'passed' for c in cases))
         row['failed_nodes'] = [c.attrib.get('classname', '')+'::'+c.attrib['name'] for c in cases
                                if c.find('failure') is not None or c.find('error') is not None]
+        grouped = defaultdict(Counter)
+        for case in cases:
+            status = ('failed' if case.find('failure') is not None else
+                      'error' if case.find('error') is not None else
+                      'skipped' if case.find('skipped') is not None else 'passed')
+            grouped[case.attrib.get('classname', '')][status] += 1
+        row['by_file'] = {key: dict(value) for key, value in grouped.items()}
     summary['runs'][path.name.removesuffix('.execution.json')] = row
 v1 = ['src/data_sheets_schema/native_controller_sources_v1.json',
       'src/data_sheets_schema/native_attribution_controller.py',
@@ -54,5 +61,9 @@ if (OUT/'scan.json').exists() and (OUT/'baseline-scan.json').exists():
         if key in before and key in after:
             summary['scanner_'+key] = {'equal': before[key] == after[key],
                                       'before': before[key], 'after': after[key]}
+    before_modules = before['facts']['model_facing_modules']
+    after_modules = after['facts']['model_facing_modules']
+    summary['scanner_model_facing_modules'] = {'equal': before_modules == after_modules,
+        'before': before_modules, 'after': after_modules}
 (OUT/'summary.json').write_text(json.dumps(summary, indent=2)+'\n')
 print(json.dumps({'head': summary['head'], 'counts': {k:v.get('counts', {}) for k,v in summary['runs'].items()}}, indent=2))

@@ -20,9 +20,16 @@ def main():
         print('Quiet window active; no work started: '+LOCK.read_text(), flush=True)
         return 75
     env = {k: v for k, v in os.environ.items() if not (k.startswith(('ANTHROPIC_', 'OPENAI_', 'CBORG_', 'CLAUDE_')) or k.endswith(('_API_KEY', '_AUTH_TOKEN', '_ACCESS_TOKEN')))}
+    # The notes/ transport suite rejects cache prefixes; tests/conftest.py sets
+    # one for tests/ only. Run these lanes separately, as CI does.
+    env.pop('PYTHONPYCACHEPREFIX', None)
     env.update(PYTHONDONTWRITEBYTECODE='1', PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', PYTEST_ADDOPTS='',
                UV_OFFLINE='1', PIP_NO_INDEX='1', GIT_NO_LAZY_FETCH='1', TMPDIR=str(OUT),
                PYTHONPATH=os.pathsep.join([str(source/'src'), str(source), '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/fairscape_models']))
+    if paths and all(path.startswith('notes/') for path in paths):
+        env['PYTHONPATH'] += os.pathsep + os.pathsep.join(str(source/path) for path in (
+            'notes/matched_cborg_2026-09-13', 'notes/matched_cborg_2026-09-13/native_controls',
+            'notes/claudecode_direct'))
     if name == 'replay':
         env['NATIVE_U2_V1_REPLAY'] = str(OUT/'v1-replay')
     command = [PYTHON, '-B', '-m', 'pytest', '-o', 'addopts=', '-p', 'no:cacheprovider', '-q']
