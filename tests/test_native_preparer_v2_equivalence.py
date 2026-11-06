@@ -1,6 +1,7 @@
 """Actual render-only legacy/explicit-v2 output equivalence, without native probes."""
 import hashlib
 import importlib.util
+import inspect
 import json
 from pathlib import Path
 import subprocess
@@ -45,6 +46,20 @@ def test_explicit_old_values_render_identical_files(tmp_path, monkeypatch):
         return value
     monkeypatch.setattr(old, 'sha', lambda path: capture(old_pins, old_sha, path))
     monkeypatch.setattr(new, 'sha', lambda path: capture(new_pins, new_sha, path))
+    # Observe the actual final pin maps, not the superset of sha() calls.
+    def capture_save(target, original, path, value):
+        if path.name == 'rendered_jobs.json':
+            frame = inspect.currentframe()
+            try:
+                manifest = frame.f_back.f_back.f_locals['manifest']
+                target.clear()
+                target.update(manifest['pinned_files'])
+            finally:
+                del frame
+        original(path, value)
+    old_save, new_save = old.save, new.save
+    monkeypatch.setattr(old, 'save', lambda path, value: capture_save(old_pins, old_save, path, value))
+    monkeypatch.setattr(new, 'save', lambda path, value: capture_save(new_pins, new_save, path, value))
     old.main()
     before = {str(p.relative_to(destination)): hashlib.sha256(p.read_bytes()).hexdigest()
               for p in destination.rglob('*') if p.is_file()}

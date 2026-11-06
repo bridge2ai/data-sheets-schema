@@ -12,7 +12,7 @@ import subprocess
 import sys
 import tarfile
 import time
-R=Path(__file__).resolve().parents[2]; OUT=R.parent/'scratch-native-u2/r3-mutations3'
+R=Path(__file__).resolve().parents[2]; OUT=R.parent/'scratch-native-u2'/os.environ.get('NATIVE_U2_MUTATION_OUTPUT', 'r3-mutations3')
 LOCK=R.parent/'plans/native_quiet_window.lock'
 PY='/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python'
 D=runpy.run_path(str(R.parent/'scratch-review-u2-probes/mutation_probe.py'))
@@ -20,6 +20,7 @@ PREP,CTRL,SUP=D['PREP'],D['CTRL'],D['SUP']
 M=D['MUTATIONS']
 M['M0_control']=([],[D['EQ'],D['V2'],'tests/test_native_preparer_v2_boundaries.py'])
 M['M9_v2_drops_external_pins']=([(PREP,'    for external in args.external_sources:\n        for path in sorted(external.resolve().rglob("*")):\n            if path.is_file() and "__pycache__" not in path.parts:\n                pins[str(path)] = sha(path)\n','')],[D['EQ']])
+M['M9b_hash_without_pin']=([(PREP, M['M9_v2_drops_external_pins'][0][0][1], M['M9_v2_drops_external_pins'][0][0][1].replace('pins[str(path)] = sha(path)', 'sha(path)'))], [D['EQ']])
 names=sys.argv[1:]
 assert names
 if LOCK.exists():
