@@ -15,7 +15,7 @@ PYTHON = '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.v
 
 def main():
     name, *paths = sys.argv[1:]
-    source = OUT/'baseline' if name in ('replay', 'replay-final', 'baseline-scan', 'baseline-tests') else ROOT
+    source = OUT/'baseline' if name in ('replay', 'replay-final', 'baseline-scan', 'baseline-tests', 'r3-baseline-native-control') else ROOT
     if LOCK.exists():
         print('Quiet window active; no work started: '+LOCK.read_text(), flush=True)
         return 75

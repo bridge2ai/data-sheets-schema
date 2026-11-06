@@ -33,6 +33,10 @@ out['changed_paths']=changed
 if (S/'r3-scan.json').exists():
     before=json.loads((S/'baseline-scan.json').read_bytes()); after=json.loads((S/'r3-scan.json').read_bytes())
     out['scanner']={'baseline_summary':before.get('summary'),'round3_summary':after.get('summary'),'violations_equal':before['violations']==after['violations']}
+    initial=json.loads((S/'scan.json').read_bytes())
+    out['scanner']['tracked_without_reason']={name:len(value['tracked_without_reason']) for name,value in [('M7',before),('round1',initial),('round3',after)]}
+    assert out['scanner']['tracked_without_reason']=={'M7':110,'round1':113,'round3':110}
+    print(json.dumps(out['scanner'],indent=2))
     assert out['scanner']['violations_equal']
 (S/'r3-summary.json').write_text(json.dumps(out,indent=2)+'\n')
 print(json.dumps({'head':out['head'],'runs':{k:v.get('counts',v['exit_code']) for k,v in out['runs'].items()},'mutations':{k:v['returncode'] for k,v in out['mutations'].items()}},indent=2))
