@@ -222,20 +222,29 @@ def _schema_yaml(text):
 
 
 def _read(raw: bytes, label: str, *, json_only: bool = False, limit: int = MAX_INPUT_BYTES,
-          _schema_events: bool = False):
+          _schema_events: bool = False, _native_events=None):
     if type(raw) is not bytes or not raw or len(raw) > limit:
         raise ValueError(f"{label} must be nonempty bytes within the {limit}-byte bound")
     try:
         text = raw.decode("utf-8")
+        native_candidate = None
         if _schema_events and not json_only:
             value = _schema_yaml(text)
         elif json_only:
             if nesting_exceeds(text, yaml.SafeLoader, MAX_DEPTH):
                 raise ValueError("depth bound exceeded")
             value = evidence.load_json(text)
+        elif _native_events is not None:
+            if _native_events is not True:
+                raise ValueError("native parser replay must be explicit true")
+            from .native_schema_event_reuse import load_native
+            value, native_candidate = load_native(text, limit=limit)
         else:
             value = _load_yaml(text)
         _validate_json(value, max_nodes=MAX_NODES, max_depth=MAX_DEPTH)
+        if native_candidate is not None and isinstance(value, dict):
+            from .native_schema_event_reuse import retain_native
+            retain_native(native_candidate, limit=limit)
         return value
     except (ValueError, TypeError, KeyError, AttributeError, RecursionError, yaml.YAMLError) as exc:
         raise ValueError(f"{label} cannot be read safely ({type(exc).__name__})") from exc

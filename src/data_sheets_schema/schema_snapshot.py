@@ -97,7 +97,7 @@ def _capture_native_schema(path: Path, members: tuple[tuple[Path, bytes], ...],
     from .audit_omissions import _mapping
     fields, frozen = {}, {}
     for source, raw in members:
-        doc = _mapping(raw, 'native schema', limit=member_bytes)
+        doc = _mapping(raw, 'native schema', limit=member_bytes, _native_events=True)
         fields[raw] = {key: doc[key] for key in
                        ('id', 'name', 'imports', 'prefixes', 'default_curi_maps') if key in doc}
         frozen[source] = raw
