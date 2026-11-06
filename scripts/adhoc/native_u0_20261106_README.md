@@ -182,3 +182,63 @@ reconciles phase events newer than the last counter snapshot; the original
 detail remains preserved. See the external U0 report for hashes, CPU tables,
 the single proposed U3 parser-event reuse treatment and its comparison plan.
 Findings remain local because this task forbids GitHub operations.
+
+## Authorized causal pair: R7/R8 repair and diagnostic treatment
+
+The U0 brief's appended "Next step, 2026-11-06" authorizes exactly one
+control/treatment CPU pair after instrumentation repairs, with no N=10
+campaign or production fix. `cpu-pair` mode admits only the two exact pinned
+pair heads; neither can enter baseline modes or reuse `cpu-profile` admission.
+The lock, OS network denial, credential allowlist and 180/900 limits are shared
+with earlier modes. Contended wall time remains ineligible for timing claims.
+
+`prepare_native_u0_causal_pair_20261106.py` builds a fresh control from frozen
+01969cbed and a treatment descendant. Both have identical hash-bound CLI
+instrumentation and an ordinary project-package bootstrap. The latter installs
+`native_u0_source_closure_20261106.py` before child imports: loaded mixed origins
+are refused without pruning; missing children cannot fall through to editable
+finders. Observer start/end inventories bind loaded project files to that root.
+Ordinary site/.pth processing and external dependency bytes remain explicitly
+outside this project-import proof; registered commands are unchanged.
+
+`native_recorder_thread_cpu_20261106.py` uses exact local monitoring targets,
+owner-thread `thread_time_ns`/rusage and main-thread SIGALRM checkpoints. There
+is no cProfile or background accounting thread. An exec audit hook binds exact
+source code without eager production imports; global unwind events require
+the bound code object's identity and source coordinates. Other-thread events
+cannot update owner phase totals. Parser generator starts are counted once;
+resumptions are not document counts. Synthetic checks exercise background CPU,
+late imports, recursion, exceptions, timer ownership and partial checkpoints.
+`run_native_u0_pair_preflight_20261106.py` then verifies real prepared-source
+bindings in a separate credential-stripped, network-denied import-only child.
+
+The treatment is applied from the saved parser-event payload to only three
+diagnostic source paths: `audit_omissions.py`, `schema_snapshot.py`, and a new
+`native_schema_event_reuse.py`. A private explicit native opt-in keeps the
+original `_mapping`/`_read` validation envelope, fresh constructors and views.
+Only complete immutable parser events are retained; changed/unsupported state,
+failed input and overflow fall back. Bounds are four entries, 131072 events
+per entry, 262144 events total, 8M event characters and 40M accounted payload
+bytes; the payload accounting is an estimate, not an RSS limit. M7 commit
+5c952d210 already reuses checked events within one admission; this diagnostic
+extends reuse across repeated equal-byte native reads. Existing guards are
+untouched; a parity test verifies runtime_token remains ready.
+
+Pre-run review findings were addressed before measuring: the first parser
+guard unnecessarily rejected LinkML's supported construction wrapper (fresh
+construction is not cached); per-mark full-schema comparisons were replaced
+by a single content check followed by buffer-identity checks; and the saved
+completion reader now binds exact synthetic peer bytes and the runtime marker
+instead of looking for that marker inside the peer. Prior failed canary outputs
+are retained. A production U3 follow-up still needs full dependency hardening
+review; this diagnostic does not establish arbitrary forged pre-import code
+as safe. The old metadata test's literal kwargs expectation will need to
+acknowledge the private opt-in; its fresh mapping/validation count is preserved.
+
+`analyze_native_u0_causal_pair_20261106.py` supports a single-arm artifact check
+and paired saved-evidence analysis. It imports no production code and reruns
+no acceptance check. It requires exact source inventories, valid observer
+prefixes, matching interpreter/common instrumentation/monitored dependency
+pins and complete identical schema-member work before comparing completed
+phase CPU. It retains incomplete cutoffs and all invalid flags. The separately
+reviewed preparation manifest establishes the sole treatment tree delta.

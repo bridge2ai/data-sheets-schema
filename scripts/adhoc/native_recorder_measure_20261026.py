@@ -31,6 +31,9 @@ HEADS = {
     'delivery': 'be0bd05821256212e89e4d011ba6b30a780e299b',
     'cpu-profile': '794901899b9cf4172f0af2cdde9fa62aa330edce',
 }
+CPU_MODES = ('cpu-profile', 'cpu-pair')
+CPU_TARGETS = {'cpu-profile': ('cpu-profile',),
+               'cpu-pair': ('pair-control', 'pair-treatment')}
 NODE = 'tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion'
 SCOPE = ('src', 'scripts', 'tests', 'utils', '.claude', 'notes')
 INITIAL_MODULES = ('native_shared_selection', 'native_shared_receipts',
@@ -46,6 +49,18 @@ PROTOCOL_AMENDMENT_2 = (
     'network denial, credential removal and 180/900s limits remain mandatory. '
     'Wall time is contended and establishes no helper timing pass or fail; the '
     'strict quiet-host gate is deferred, not waived for timing claims.')
+CAUSAL_PAIR_AUTHORITY = (
+    'Next step, 2026-11-06 in the U0 brief: repair source isolation and '
+    'thread-bound phase accounting, then exactly one control/treatment CPU '
+    'pair on diagnostic copies. No N=10, production fix or timing acceptance.')
+
+
+def require_mode_target(mode, target, idle_only=False):
+    if mode in CPU_MODES and idle_only:
+        raise ValueError('cpu-profile/cpu-pair is a diagnostic recorder run, not an idle-only gate')
+    if ((mode in CPU_MODES and target not in CPU_TARGETS[mode])
+            or (mode not in CPU_MODES and target in sum(CPU_TARGETS.values(), ()))):
+        raise ValueError('CPU profiling requires its exact diagnostic target; baseline modes exclude it')
 
 
 def now():
@@ -575,10 +590,7 @@ def reserve_output(parent, trial, tree):
 
 
 def run(args):
-    if args.mode == 'cpu-profile' and args.idle_only:
-        raise ValueError('cpu-profile is a diagnostic recorder run, not an idle-only gate')
-    if (args.mode == 'cpu-profile') != (args.target == 'cpu-profile'):
-        raise ValueError('CPU profiling requires its exact diagnostic target; baseline modes exclude it')
+    require_mode_target(args.mode, getattr(args, 'target', None), args.idle_only)
     bootstrap = initialize_dependencies()
     tree = args.tree.resolve(strict=True)
     python = (args.python or Path(sys.executable)).absolute()  # preserve venv spelling
@@ -599,7 +611,9 @@ def run(args):
     diagnostic_metadata = ({'protocol_amendment_2': PROTOCOL_AMENDMENT_2,
         'idle_trial_qualified': False, 'quiet_gate_required_for_wall_claims': True,
         'walltime_scope': 'contended_diagnostic_not_threshold_evidence',
-        'timing_verdict': 'not_assessed'} if args.mode == 'cpu-profile' else {})
+        'timing_verdict': 'not_assessed',
+        'causal_pair_authority': CAUSAL_PAIR_AUTHORITY if args.mode == 'cpu-pair' else None}
+        if args.mode in CPU_MODES else {})
     write_new(output / 'plan.json', {'format': 'd4d_recorder_baseline_v1', 'started_at': now(),
         'trial': args.trial, 'target': args.target, 'command': command, 'cwd': str(tree), 'node': NODE,
         'helper': {'path': str(Path(__file__).resolve()), 'sha256': sha(Path(__file__).read_bytes())},
@@ -639,7 +653,7 @@ def run(args):
                 host.write(json.dumps(row, sort_keys=True) + '\n')
                 host.flush()
                 return row
-            if args.mode == 'cpu-profile':
+            if args.mode in CPU_MODES:
                 decision = {'status': 'deferred_cpu_profiling', 'idle': None, 'samples': 0,
                     'quiet_gate_required_for_wall_claims': True,
                     'protocol_amendment_2': PROTOCOL_AMENDMENT_2,
@@ -779,7 +793,7 @@ def main(argv=None):
     parser.add_argument('--worker', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument('--idle-only', action='store_true', help='retain host/source evidence without launching pytest')
     parser.add_argument('--driver-seconds', type=int, help='required outer measurement watchdog; not a test/runtime limit')
-    parser.add_argument('--mode', choices=('idle', 'load-diagnostic', 'cpu-profile'), default='idle')
+    parser.add_argument('--mode', choices=('idle', 'load-diagnostic', *CPU_MODES), default='idle')
     parser.add_argument('--plugin-autoload', choices=('enabled', 'disabled'), default='disabled',
                         help='explicit identical choice for both heads; U0 default disables autoload, unlike the historical driver default')
     parser.add_argument('--idle-seconds', type=int, default=30)
@@ -788,7 +802,7 @@ def main(argv=None):
     parser.add_argument('--max-load-per-cpu', type=float, default=0.5)
     parser.add_argument('--max-foreign-process-cpu', type=float, default=5)
     args = parser.parse_args(argv)
-    if args.mode == 'cpu-profile' and args.idle_only:
+    if args.mode in CPU_MODES and args.idle_only:
         parser.error('cpu-profile is a diagnostic recorder run, not an idle-only gate')
     if args.worker:
         return worker(args)

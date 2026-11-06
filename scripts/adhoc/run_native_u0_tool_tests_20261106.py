@@ -19,6 +19,8 @@ def main():
     p.add_argument('--out', type=Path, required=True)
     p.add_argument('--canary', action='store_true')
     p.add_argument('--cpu-canary', action='store_true')
+    p.add_argument('--pair-tests', action='store_true')
+    p.add_argument('--node', help='one explicit tooling-only node for a synthetic canary')
     args = p.parse_args()
     root = Path(__file__).resolve().parents[2]
     lock = root.parent / 'plans/native_quiet_window.lock'
@@ -46,6 +48,17 @@ def main():
             'tests/test_native_recorder_observer_20261026.py', 'tests/test_native_u0_run_20261106.py',
             'tests/test_native_u0_host_observer_20261106.py',
             'tests/test_native_recorder_cpu_profile_20261106.py'])
+    pair_nodes = ['tests/test_native_u0_source_closure_20261106.py',
+                  'tests/test_native_recorder_thread_cpu_20261106.py',
+                  'tests/test_native_u0_parser_event_treatment_20261106.py',
+                  'tests/test_native_u0_causal_pair_20261106.py',
+                  'tests/test_analyze_native_u0_causal_pair_20261106.py']
+    if args.pair_tests:
+        nodes += pair_nodes
+    if args.node:
+        if args.node.split('::')[0] not in pair_nodes:
+            raise SystemExit('--node accepts only the five causal-pair tooling test modules')
+        nodes = [args.node]
     command = ['-q', '-p', 'no:cacheprovider', '--basetemp', str(out / 'cases'),
                '--junitxml', str(out / 'pytest.xml'), *nodes]
     (out / 'command.json').write_text(json.dumps({'arguments': command, 'python': sys.executable,

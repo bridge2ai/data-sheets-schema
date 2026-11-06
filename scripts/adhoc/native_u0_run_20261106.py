@@ -46,6 +46,13 @@ PROTOCOL_AMENDMENT_2 = (
     'network denial, credential removal and 180/900s limits remain mandatory. '
     'Wall time is contended and establishes no helper timing pass or fail; the '
     'strict quiet-host gate is deferred, not waived for timing claims.')
+CPU_MODES = ('cpu-profile', 'cpu-pair')
+CPU_TARGETS = {'cpu-profile': ('cpu-profile',),
+               'cpu-pair': ('pair-control', 'pair-treatment')}
+CAUSAL_PAIR_AUTHORITY = (
+    'Next step, 2026-11-06 in the U0 brief: repaired source isolation and '
+    'thread-bound accounting; one control/treatment diagnostic CPU pair; '
+    'no N=10, production fix or wall-time acceptance.')
 
 
 def utc_now():
@@ -339,9 +346,10 @@ def driver_cleanup_proof(path):
 
 
 def resolve_arguments(args):
-    if args.mode == 'cpu-profile' and args.idle_only:
+    if args.mode in CPU_MODES and args.idle_only:
         raise ValueError('cpu-profile is a diagnostic recorder run, not an idle-only gate')
-    if (args.mode == 'cpu-profile') != (args.target == 'cpu-profile'):
+    if ((args.mode in CPU_MODES and args.target not in CPU_TARGETS[args.mode])
+            or (args.mode not in CPU_MODES and args.target in sum(CPU_TARGETS.values(), ()))):
         raise ValueError('CPU profiling requires its exact diagnostic target; baseline modes exclude it')
     args.tree = args.tree.resolve(strict=True)
     args.output = args.output.resolve(strict=True)
@@ -385,7 +393,7 @@ def run(args):
     env = clean_environment(home, temporary)
     selfcheck = sandbox_prefix(profile, args.tree, args.python) + [
         str(Path(__file__).resolve()), '--network-self-check', str(wrapper / 'network-self-check.json')]
-    settling_seconds = 0 if args.mode == 'cpu-profile' else SETTLING_SECONDS
+    settling_seconds = 0 if args.mode in CPU_MODES else SETTLING_SECONDS
     # Grace + configured gate allowance + watchdog + cleanup + preflight/source.
     # The gate allowance remains conservative when CPU profiling bypasses the gate.
     budget = (settling_seconds + IDLE_GATE_SECONDS + CLEANUP_SECONDS
@@ -408,8 +416,9 @@ def run(args):
         'command': None, 'driver_pid': None, 'observer_pid': None,
         'observer_command': None, 'host_samples': str(wrapper / 'host-samples.jsonl'),
         'protocol_amendment': PROTOCOL_AMENDMENT,
-        'protocol_amendment_2': PROTOCOL_AMENDMENT_2 if args.mode == 'cpu-profile' else None,
-        'mode': args.mode, 'quiet_gate_required': args.mode != 'cpu-profile',
+        'protocol_amendment_2': PROTOCOL_AMENDMENT_2 if args.mode in CPU_MODES else None,
+        'causal_pair_authority': CAUSAL_PAIR_AUTHORITY if args.mode == 'cpu-pair' else None,
+        'mode': args.mode, 'quiet_gate_required': args.mode not in CPU_MODES,
         'observer_helper_sha256': hashlib.sha256(OBSERVER.read_bytes()).hexdigest(),
         'host_ps_path': str(HOST_PS), 'host_ps_sha256': hashlib.sha256(HOST_PS.read_bytes()).hexdigest(),
         'network_self_check_command': selfcheck,
@@ -442,7 +451,7 @@ def run(args):
             raise RuntimeError('sandbox profile changed before driver launch')
         result['quiet_settling_started_at'] = utc_now().isoformat()
         result['quiet_settling_seconds'] = settling_seconds
-        result['quiet_settling_skipped'] = args.mode == 'cpu-profile'
+        result['quiet_settling_skipped'] = args.mode in CPU_MODES
         if settling_seconds:
             time.sleep(settling_seconds)
         result['quiet_settling_finished_at'] = utc_now().isoformat()
@@ -542,7 +551,7 @@ def run(args):
         result['finished_at'] = utc_now().isoformat()
         for key in ('observer_pid', 'observer_command', 'observer_helper_sha256',
                     'host_ps_path', 'host_ps_sha256', 'sandbox_profile_sha256',
-                    'protocol_amendment', 'protocol_amendment_2', 'mode',
+                    'protocol_amendment', 'protocol_amendment_2', 'causal_pair_authority', 'mode',
                     'quiet_gate_required', 'host_samples'):
             result[key] = plan[key]
         write_new(wrapper / 'plan.json', plan)
@@ -561,9 +570,10 @@ def main(argv=None):
     parser.add_argument('--tree', type=Path)
     parser.add_argument('--output', type=Path)
     parser.add_argument('--trial')
-    parser.add_argument('--target', choices=('current', 'original', 'delivery', 'cpu-profile'), default='current')
+    parser.add_argument('--target', choices=('current', 'original', 'delivery', 'cpu-profile',
+                                           'pair-control', 'pair-treatment'), default='current')
     parser.add_argument('--driver-seconds', type=int, default=1800)
-    parser.add_argument('--mode', choices=('idle', 'load-diagnostic', 'cpu-profile'), default='idle')
+    parser.add_argument('--mode', choices=('idle', 'load-diagnostic', *CPU_MODES), default='idle')
     parser.add_argument('--idle-only', action='store_true')
     parser.add_argument('--sandbox-profile', type=Path, default=PROFILE)
     args = parser.parse_args(argv)

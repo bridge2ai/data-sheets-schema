@@ -340,11 +340,13 @@ def test_completed_gate_unlocks_only_with_verified_cleanup_and_source(tmp_path, 
 
 
 @pytest.mark.parametrize('cleanup_verified', [True, False])
+@pytest.mark.parametrize('mode,target', [('cpu-profile', 'cpu-profile'),
+    ('cpu-pair', 'pair-control'), ('cpu-pair', 'pair-treatment')])
 def test_cpu_profile_skips_settling_but_keeps_lock_and_cleanup_proof(
-        tmp_path, monkeypatch, cleanup_verified):
+        tmp_path, monkeypatch, cleanup_verified, mode, target):
     args = run_args(tmp_path, monkeypatch)
-    args.mode = 'cpu-profile'
-    args.target = 'cpu-profile'
+    args.mode = mode
+    args.target = target
     mock_network_check(monkeypatch)
     monkeypatch.setattr(wrapper.time, 'sleep', lambda _: pytest.fail('CPU profile waited for quiet'))
     class Child:
@@ -361,7 +363,7 @@ def test_cpu_profile_skips_settling_but_keeps_lock_and_cleanup_proof(
     assert launched == ['observer', 'driver']
     plan = json.loads((args.output / 'canary.wrapper/plan.json').read_bytes())
     outcome = json.loads((args.output / 'canary.wrapper/outcome.json').read_bytes())
-    assert plan['command'][plan['command'].index('--mode') + 1] == 'cpu-profile'
+    assert plan['command'][plan['command'].index('--mode') + 1] == mode
     assert plan['cooperative_settling_seconds'] == outcome['quiet_settling_seconds'] == 0
     assert outcome['quiet_settling_skipped'] is True
     assert outcome['network_bind_denied'] is True
@@ -371,6 +373,9 @@ def test_cpu_profile_skips_settling_but_keeps_lock_and_cleanup_proof(
     assert plan['protocol_amendment_2'] == outcome['protocol_amendment_2']
     assert 'Lead ruling 2, 2026-11-06' in outcome['protocol_amendment_2']
     assert 'Wall time is contended' in outcome['protocol_amendment_2']
+    if mode == 'cpu-pair':
+        assert plan['causal_pair_authority'] == outcome['causal_pair_authority']
+        assert 'one control/treatment' in outcome['causal_pair_authority']
 
 
 def test_cpu_profile_refuses_idle_only_combination(tmp_path, monkeypatch):

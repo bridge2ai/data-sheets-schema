@@ -305,7 +305,7 @@ class DriverSafetyTests(unittest.TestCase):
     def fake_run(self, parent, *, samples=None, after_changed=False, hang=False, idle_only=False,
                  worker_exit=0, survivor=False, observation_error=False, mode='idle'):
         tree = parent / 'tree'; tree.mkdir()
-        target = 'cpu-profile' if mode == 'cpu-profile' else 'current'
+        target = 'pair-control' if mode == 'cpu-pair' else 'cpu-profile' if mode == 'cpu-profile' else 'current'
         before = {'head': driver.HEADS[target], 'pristine': True, 'files': {}, 'tree': 'fixture'}
         after = {**before, 'tree': 'changed'} if after_changed else before
         args = SimpleNamespace(tree=tree, python=Path(sys.executable), output=parent,
@@ -463,6 +463,23 @@ class DriverSafetyTests(unittest.TestCase):
                 self.assertTrue(outcome['source_unchanged'])
                 self.assertTrue(outcome['cleanup_verified'])
                 self.assertEqual(plan['outer_driver_watchdog_seconds'], 1800)
+
+    def test_causal_pair_mode_retains_original_limits_and_explicit_authority(self):
+        with tempfile.TemporaryDirectory() as directory, mock.patch.dict(
+                driver.HEADS, {'pair-control': 'f' * 40}):
+            parent = Path(directory)
+            args, launches, signals, stack = self.fake_run(parent, mode='cpu-pair',
+                samples=[host(cpu=99, foreign=99)])
+            with stack, mock.patch.object(driver, 'idle_decision',
+                    side_effect=AssertionError('CPU pair must not claim an idle gate')):
+                self.assertEqual(driver.run(args), 0)
+            self.assertEqual(len(launches), 1)
+            self.assertEqual(signals, [])
+            outcome = json.loads((parent / 'trial/outcome.json').read_bytes())
+            self.assertTrue(outcome['cleanup_verified'])
+            self.assertFalse(outcome['idle_trial_qualified'])
+            self.assertIn('exactly one control/treatment', outcome['causal_pair_authority'])
+            self.assertEqual(outcome['timing_verdict'], 'not_assessed')
 
     def test_idle_mode_still_blocks_same_busy_host_before_worker(self):
         with tempfile.TemporaryDirectory() as directory:
