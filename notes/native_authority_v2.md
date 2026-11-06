@@ -41,3 +41,44 @@ they are development provenance, not live launch entrypoints.
 
 Historical sources remain visible to the specificity scanner. No scanner
 exception, discovery change or existing finding waiver was added by U2.
+
+## Round 3 wire interface for U3
+
+Both v2 preparers serialize exactly `authority_version: 2`,
+`controller_sources_sha256: <the v2 manifest digest>`, and `registration: {...}`.
+The inner registration has schema 2; direct also uses
+`kind: d4d_direct_arm_registration_v2`. No v1 repository, generation, or pins
+are present at the envelope top level. Never unwrap a record for a v1 launcher.
+U3 must call `prepare_registration_v2.require_envelope` before any launch side
+effect, then validate the inner preparer pins and all admission, review, budget,
+and execution gates through a separately versioned route. This function checks
+wire identity only; no v2 live launcher is delivered by U2.
+
+Standalone bare imports remain process-global: importing frozen `prepare_direct`
+after v2 preparation can bind its generation utility to v2. Run standalone versioned
+CLIs in separate processes; do not mix them. The supervisor checks origins and
+restores module state. Its two preparation names now share one module object.
+Frozen v1 code cannot be hardened against later imports without owner migration.
+
+The source commit named in the v2 manifest must be published with this branch's
+history and retained with a merge commit (not squash/rebase), or the closure must
+be re-frozen and revalidated after integration. Offline delivery cannot make a
+commit remotely reachable. A regression checks every manifest source against the
+named local Git commit. No publication or merge is performed here.
+
+Explicit-old-values equivalence permits one semantic correction: profile basis is
+now `declared by source manifest`, replacing the false caller claim. Recorder
+instructions and their derived hashes therefore differ. Tests compare separate
+output trees, normalize only this exact text and derived hashes, compare JSON
+numbers by value, and compare all evidence pin paths and contents. Both external
+capture directories must be supplied with repeated `--external-sources` options.
+
+The saved M7 fixture is byte-exact and CI tests its v2 refusal and hash identity.
+V1's `native_attribution_registration.verified` reconstructs `RunSpec` and calls
+`registration(spec)` before testing checker identity. The saved record contains
+absolute input, interpreter and resource paths in the retained M7 scratch export;
+therefore its exact v1 checker-identity refusal cannot be portable to arbitrary CI
+without recreating that original environment or rewriting historical bytes.
+The retained local replay probe tests that refusal; the CI test explicitly does
+not claim portable v1 replay. The old environment-gated generator is retained in
+`scripts/adhoc/generate_native_u2_m7_fixture_20261106.py`, outside test discovery.

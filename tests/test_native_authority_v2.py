@@ -37,6 +37,7 @@ def test_v2_registration_composition_and_supervisor(isolated):
     spec, old_raw, _, instruction, _ = isolated
     raw = new._encoded(new.registration(spec))
     assert new.verified(raw)[1]['schema_version'] == 2
+    assert json.loads(raw)['controller_authority'] == {'version': 2, 'manifest': str(v2.SOURCES_PATH), 'sha256': v2.SOURCES_SHA256, 'sources': v2.controller_sources()}
     composition = v2.composition(raw, instruction)
     assert v2.verified_composition(new._encoded(composition)) == composition
     identity = authority.dependency_identity()
@@ -44,6 +45,7 @@ def test_v2_registration_composition_and_supervisor(isolated):
     assert identity['package_sources'] == new._code_pins()
     with authority.loaded_dependencies(identity) as modules:
         assert modules['prepare_registration'].__file__.endswith('prepare_registration_v2.py')
+        assert modules['prepare_registration'] is modules['prepare_registration_v2']
         assert modules['prepare_direct'].__file__.endswith('prepare_direct_v2.py')
     with pytest.raises(ValueError):
         new.verified(old_raw)
@@ -105,11 +107,11 @@ def test_explicit_preparer_arguments(isolated):
         direct = modules['prepare_direct'].parser()
         with pytest.raises(SystemExit):
             direct.parse_args(['--output', '/unused'])
-        assert direct.parse_args(['--output', '/unused', '--project', 'NEUTRAL']).project == 'NEUTRAL'
+        assert direct.parse_args(['--output', '/unused', '--project', 'NEUTRAL', *DIRECT_ARGS]).project == 'NEUTRAL'
         parser = modules['prepare_registration'].build_parser()
         with pytest.raises(SystemExit):
             parser.parse_args([])
-        args = parser.parse_args(['--projects', 'NEUTRAL', '--canary-order', 'NEUTRAL_agentic_rep2'])
+        args = parser.parse_args(['--projects', 'NEUTRAL', '--canary-order', 'NEUTRAL_agentic_rep2', *API_ARGS])
         job = modules['prepare_registration'].new_job({'project': 'NEUTRAL'}, 'NEUTRAL_agentic_rep2',
             'agentic', 'Claude Code', 'claudecode_agent', 2, args)
         assert job['canary'] is True
@@ -130,8 +132,12 @@ def test_direct_preparation_pins_selected_version(isolated, tmp_path, monkeypatc
             'loggedIn': True, 'authMethod': 'claude.ai', 'apiProvider': 'firstParty',
             'subscriptionType': 'synthetic-fixture'})
         args = direct.parser().parse_args(['--project', 'CHORUS', '--output', str(tmp_path/'direct'),
-            '--claude-executable', str(fake), '--cohort', 'authority_v2_offline_test'])
+            *DIRECT_ARGS, '--claude-executable', str(fake)])
         value = json.loads(direct.build(args).read_bytes())
+        assert value['authority_version'] == 2
+        assert value['controller_sources_sha256'] == v2.SOURCES_SHA256
+        value = direct.generation.require_envelope(value)
+        assert value['kind'] == 'd4d_direct_arm_registration_v2'
         pins = value['pinned_files']
         helper = v2.ROOT/'notes/matched_cborg_2026-09-13/prepare_registration_v2.py'
         assert pins[str(helper)] == new._sha(helper.read_bytes())
@@ -143,3 +149,7 @@ def test_direct_preparation_pins_selected_version(isolated, tmp_path, monkeypatc
 def test_standalone_direct_cli_selects_only_v2(mode):
     subprocess.run([sys.executable, '-B', str(v2.ROOT/'tests/fixtures/native_authority_v2_import.py'),
                     str(v2.ROOT), mode], check=True, timeout=30)
+
+
+DIRECT_ARGS = ['--claude-executable', '/unused', '--cohort', 'offline', '--label-date', '2026-09-13', '--run-date', '2026-09-14', '--runaway-guard-usd', '60']
+API_ARGS = ['--cohort', 'generalized_v10', '--label-date', '2026-09-13', '--run-date', '2026-09-14', '--series', 'generalized_v10_2026-09-13', '--authorization', 'user: +$200, 2026-09-13', '--additional-usd', '200', '--per-attempt-usd', '5', '--claude-executable', '/unused']
