@@ -1,0 +1,9 @@
+{
+  "status": "proposal_only_not_applied",
+  "target": "src/download/prompts/canonical_hashes.yaml",
+  "base": "8bc90e93d736d464f98e9eedffee45f0ad8e5d3f",
+  "preimage_sha256": "39b93c009457681a1d8d8b8afee5a869bbd6f5e70b6f4332522db5d7e22d0584",
+  "postimage_sha256": "acd2fd01d2f2296f28cdae35ae37958122c3b4ff30d98b8e0919167b2f889ccf",
+  "patch_sha256": "2f819e891cad6229a446ae3ff9d7ebeddcbb4f6669a115678666aa4b1f30bff8",
+  "rationale": "Add exactly two native-only prompt pins. Existing API pins and protected source remain unchanged. AGY/owner approval and application required."
+}

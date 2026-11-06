@@ -1,0 +1,21 @@
+--- a/src/download/prompts/canonical_hashes.yaml
++++ b/src/download/prompts/canonical_hashes.yaml
+@@ -597,4 +597,18 @@
+     reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every released
+       condition.
+     sha256: 34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450
++  src/download/prompts/native_shared_generation_v1.md:
++    bytes: 4084
++    pinned_at_commit: 5d87ea67660e00affcbc6dbae0d35172d85209d7
++    pinned_blob_path: src/download/prompts/native_shared_generation_v1.md
++    pinned_on: '2026-11-06'
++    reason: Native U1 shared-v1 declared-difference assets; no API asset rotation (#4354).
++    sha256: ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c
++  src/download/prompts/native_shared_receipt_policy_v1.md:
++    bytes: 2336
++    pinned_at_commit: 5d87ea67660e00affcbc6dbae0d35172d85209d7
++    pinned_blob_path: src/download/prompts/native_shared_receipt_policy_v1.md
++    pinned_on: '2026-11-06'
++    reason: Native U1 shared-v1 declared-difference assets; no API asset rotation (#4354).
++    sha256: de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a
+ hash_algorithm: sha256

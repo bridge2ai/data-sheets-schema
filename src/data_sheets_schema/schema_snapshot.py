@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from collections.abc import Callable
+from copy import deepcopy
 import functools
 import hashlib
 import json
@@ -32,6 +33,10 @@ class SchemaSnapshot:
 @functools.lru_cache(maxsize=128)
 def _metadata(content: bytes) -> tuple:
     doc = yaml.safe_load(content) or {}
+    return _metadata_document(doc)
+
+
+def _metadata_document(doc) -> tuple:
     # Let the installed metamodel normalize its supported mapping/list forms.
     fields = {k: doc[k] for k in
         ("id", "name", "imports", "prefixes", "default_curi_maps") if k in doc}
@@ -58,7 +63,7 @@ def resolve_import_path(name, source: Path, namespaces) -> Path:
 def capture_schema(path: str | Path, *, content: bytes | None = None,
                    read_bytes: Callable[[Path], bytes] | None = None,
                    namespace_orders: tuple[bool, ...] | None = None,
-                   strict: bool = False) -> SchemaSnapshot:
+                   strict: bool = False, logical_paths: bool = False) -> SchemaSnapshot:
     """Capture both supported namespace-initialization orders (#1273).
 
     Callers can initialize namespaces before loading imports, or allow the first
@@ -68,6 +73,11 @@ def capture_schema(path: str | Path, *, content: bytes | None = None,
     The source preflight supplies its existing byte capture and requests the
     generator's default traversal alone, with errors raised before generation.
     """
+    if type(logical_paths) is not bool:
+        raise ValueError("logical_paths must be an explicit boolean")
+    if logical_paths:
+        return _capture_schema(path, read_bytes, content=content, namespace_orders=namespace_orders,
+                               strict=strict, logical_paths=True)
     from data_sheets_schema.resources import resource_path
     read = read_bytes or Path.read_bytes
     from data_sheets_schema.resources import physical
@@ -76,15 +86,63 @@ def capture_schema(path: str | Path, *, content: bytes | None = None,
                            strict=strict, physical_identity=True)
 
 
-def _capture_schema(root, read, *, content=None, namespace_orders=None,
-                    strict=False, physical_identity=False):
-    """Shared import traversal; captured readers supply an already logical root.
+def _capture_native_schema(path: Path, members: tuple[tuple[Path, bytes], ...],
+                           *, member_bytes: int) -> SchemaSnapshot:
+    """Strict-check every native member, then reuse only its private metadata.
 
-    The live wrapper alone resolves filesystem aliases. A saved closure never
-    probes a logical original path, including while building its cache key.
+    All occurrences are checked before traversal, including replaced paths.
+    Normalization remains lazy in traversal order. No caller supplies parsed
+    data, a validator or a cached validation result.
     """
+    from .audit_omissions import _mapping
+    fields, frozen = {}, {}
+    for source, raw in members:
+        doc = _mapping(raw, 'native schema', limit=member_bytes)
+        fields[raw] = {key: doc[key] for key in
+                       ('id', 'name', 'imports', 'prefixes', 'default_curi_maps') if key in doc}
+        frozen[source] = raw
+
+    def read(source):
+        if source not in frozen:
+            raise ValueError('selected schema import is outside the complete captured closure')
+        return frozen[source]
+
+    normalized = {}
+
+    def metadata(raw):
+        if raw not in normalized:
+            # The metamodel may normalize mutable inlined values. Its input
+            # belongs to this call and cannot mutate another source's fields.
+            normalized[raw] = _metadata_document(deepcopy(fields[raw]))
+        return normalized[raw]
+
+    return _capture_schema(path, read, strict=True, logical_paths=True,
+                           metadata_reader=metadata)
+
+
+def _capture_schema(root, read, *, content=None, namespace_orders=None,
+                    strict=False, physical_identity=False, logical_paths=False,
+                    metadata_reader=None):
+    """Shared traversal with unchanged positional saved-reader identities.
+
+    The live wrapper alone resolves filesystem aliases. Ordinary saved replay
+    retains its existing nonphysical identity; explicitly selected native
+    logical replay has its own domain and strict canonical-path validation.
+    """
+    if type(logical_paths) is not bool:
+        raise ValueError("logical_paths must be an explicit boolean")
+    if logical_paths:
+        # An already captured closure has canonical lexical identities. Never
+        # consult today's aliases, resource installation or filesystem metadata.
+        path, root = root, Path(root)
+        if (read is None or not strict or physical_identity or not root.is_absolute()
+                or str(root) != str(path) or '..' in root.parts
+                or os.path.normpath(str(root)) != str(root)):
+            raise ValueError("logical schema replay requires a strict captured reader and canonical absolute root")
+    if metadata_reader is None:
+        metadata_reader = _metadata
     files = {root: read(root) if content is None else content}
-    root_meta = _metadata(files[root])
+    root_meta = metadata_reader(files[root])
     names = {root: root_meta[0]}
     orders = namespace_orders if namespace_orders is not None else ((False, True) if root_meta[1] else (False,))
     for early in orders:
@@ -119,7 +177,7 @@ def _capture_schema(root, read, *, content=None, namespace_orders=None,
                 data = files[source]
                 if isinstance(data, OSError):
                     raise data
-                meta = metadata[name] = _metadata(data)
+                meta = metadata[name] = metadata_reader(data)
                 for imp in meta[1]:
                     if imp == name:
                         continue
@@ -145,5 +203,6 @@ def _capture_schema(root, read, *, content=None, namespace_orders=None,
     # Distinct logical aliases may resolve imports differently. Keep each
     # stable alias cached rather than evicting views by their shared target.
     key = (str(root), hashlib.blake2b(
-        json.dumps(identity, ensure_ascii=False).encode("utf-8"), digest_size=16).hexdigest())
+        json.dumps({'domain': 'captured_logical_schema_v1', 'sources': identity}
+                   if logical_paths else identity, ensure_ascii=False).encode("utf-8"), digest_size=16).hexdigest())
     return SchemaSnapshot(tuple((names[p], p, data) for p, data in files.items()), key)

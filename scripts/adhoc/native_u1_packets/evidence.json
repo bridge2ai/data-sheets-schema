@@ -1,0 +1,174 @@
+{
+  "status": "BLOCKED_PROTECTED_ADMISSION_PACKET_REQUIRED",
+  "base": "8bc90e93d736d464f98e9eedffee45f0ad8e5d3f",
+  "python": "3.13.12",
+  "packages": {
+    "pytest": "7.4.4",
+    "pytest-xdist": "3.8.0",
+    "linkml": "1.9.3",
+    "linkml-runtime": "1.9.4",
+    "PyYAML": "6.0.2",
+    "jsonschema": "4.25.1",
+    "referencing": "0.31.1"
+  },
+  "protected_unchanged": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u1/src/data_sheets_schema/shared_generation.py",
+      "bytes": 57877,
+      "sha256": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u1/src/download/prompts/canonical_hashes.yaml",
+      "bytes": 37510,
+      "sha256": "39b93c009457681a1d8d8b8afee5a869bbd6f5e70b6f4332522db5d7e22d0584"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/failing-first.log",
+      "bytes": 1811,
+      "sha256": "60547097fcf455adaa301a4dd30c09491620092e6d8d8b65cc3b0d88813a1cc7"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/refusals-before.log",
+      "bytes": 10561,
+      "sha256": "1ad33ca7c740c2cb01a65910af0f62ecc85bdb9f11a185f613797d13cc070e2c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/refusals-before-corrected.log",
+      "bytes": 9126,
+      "sha256": "97ce1edeee5a8a5384441d462675629a3dbd3a67d14117ae59951d33f86e6243"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/scanner-before.log",
+      "bytes": 257,
+      "sha256": "3a75a4868a3771f196e4d3c2f972d1cfee761e7f9ebf1f4ae2ab2580a2af5188"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/scanner-before.json",
+      "bytes": 1252172,
+      "sha256": "4031fc39aa4ed57d13ca3d4bfd0a5d792e53641698be19dc52c2f1ee83848814"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/scanner-before.md",
+      "bytes": 131840,
+      "sha256": "f0a5199f106cb97c9a66a6dcac6fcfd17827999978e0368171a8025044904ca4"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/scanner-after.log",
+      "bytes": 295,
+      "sha256": "04fe1fe64dc2bbe81f530c4fbfe1f107020d393361eaa9887500faf45942aeb2"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before.log",
+      "bytes": 1760,
+      "sha256": "809eb08de6428b7799eecab9924c3c74b21b9201ddaa8196a1fc4e19f242a6a4"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before-fixed.log",
+      "bytes": 3020,
+      "sha256": "9e4ea4cefe85be6474d29f8cbfc21c30b748e487e5cd1d616fb88b6a07fde285"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/native-canary.log",
+      "bytes": 772,
+      "sha256": "48810cbca7e90b31742cc0cfba29a4d4ca7cfe79201018bd0ea9651fb5470b77"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/native-focused.log",
+      "bytes": 1060,
+      "sha256": "915241c0b72bfcfa462373b85ca61e2d30a54ea72beafac055ed1fb93439732d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/api-regressions.log",
+      "bytes": 525,
+      "sha256": "3f56ca6698f7fba26bad2bf73aae882a842a68abe266f8ba7276350eee54f8e6"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/regression-roster.txt",
+      "bytes": 2515,
+      "sha256": "e00d7f8c6a16a4ea20bb75a9254d524a5fd0f4a05291918f081d6e3cdc2ef493"
+    }
+  ],
+  "baseline_render_artifacts": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/bc1.txt",
+      "bytes": 88490,
+      "sha256": "f1f8e8af1b2b23c01b3cb826f31d2174d75c6e4f8b735172d371d677c6a2868b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/captured_json_values_v1.txt",
+      "bytes": 87070,
+      "sha256": "2038fe65b33a862dc120c4b22bc6d5c899c03e47acee50730d5e2c14d6f55b5d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/declared_heading_spans_v1.txt",
+      "bytes": 87067,
+      "sha256": "4a6c9ceb2c5504737ec6004b30a7bd88747a7cb95bc9ace14409030ecd9b68e1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/generic.txt",
+      "bytes": 7155,
+      "sha256": "ebbdf452569c62e763a2bb316873575b03d180edb9e58f527a79157c60f0a685"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/generic_v10.txt",
+      "bytes": 86844,
+      "sha256": "349beea328ec50b63bfc7fe29281806af8eba4853bf3a3b8f0ed90dd8bf35117"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/generic_v2.txt",
+      "bytes": 8030,
+      "sha256": "4eacfa875dae4db6e8680e0c234d90c5e8920e87f7e497e78fd52cfec122296d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/generic_v3.txt",
+      "bytes": 8513,
+      "sha256": "fa16e3cecda99c95d36b7a24e1f824e7444d791adb13b9701e2146ec5a86d65d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/generic_v4.txt",
+      "bytes": 8869,
+      "sha256": "91d21c2a63bb02034104e9f8c276fa07c235c7571f20c07dcb4614b2a7df7ba1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/generic_v5.txt",
+      "bytes": 12530,
+      "sha256": "92916227dae1d7b342243ba39dcbca34a60fccf6b562b429f2973755f255d80a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/generic_v6.txt",
+      "bytes": 13003,
+      "sha256": "bd2ede713d2e00ca61cc83d828dd6f2326d9389fb0693d5a3b3c1e5f8f4d0bb7"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/generic_v7.txt",
+      "bytes": 14212,
+      "sha256": "547fa27ca64aeeaeba2d6d2b169c0eb48d127cb7909810cbcfb60e5da01d3c5f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/generic_v8.txt",
+      "bytes": 17794,
+      "sha256": "75b39cbfab2e00a67939509589f5c2817587edeada376a9fcc0cf152a25ba5dc"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/parity-before/generic_v9.txt",
+      "bytes": 28445,
+      "sha256": "6be604ffe0648f69ccea4f09c2457fd7c6ad60e3f0c0b09cfebb96c47342c26a"
+    }
+  ],
+  "dependency_lock": {
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u1/poetry.lock",
+    "bytes": 592155,
+    "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21"
+  },
+  "tests": {
+    "native_focused": "168 passed; 20.13s; -n 2",
+    "native_canary": "1 passed; 0.76s",
+    "api_regressions": "interrupted at protected-boundary stop; progress 27%, no final summary",
+    "api_parity": "13 before renders retained; tuned fixture failed; no after comparison",
+    "collection": "not run: protected-boundary stop",
+    "specificity_before": "9 violations, exit 1",
+    "specificity_after": "exit 2: shared selector call guards/order changed; no completed scan"
+  }
+}
