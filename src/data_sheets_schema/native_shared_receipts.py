@@ -82,6 +82,7 @@ class _ReceiptCatalogContext:
     """One bounded immutable derivation, owned by one capture or live attempt."""
     def __init__(self):
         self._entry = None
+        self._entry_marker = None
         self._typed_marker = None
         self._derivations = None
         self._derivations_marker = None
@@ -117,27 +118,38 @@ class _ReceiptCatalogContext:
 
     def schema_data(self, selection, snapshot):
         key = _catalog_key(selection, snapshot)
+        current_marker = catalog_reuse.runtime_token()
         with self._lock:
-            entry = self._entry if self._entry is not None and self._entry[0] == key else None
+            entry = (self._entry if current_marker is not None
+                     and self._entry_marker is current_marker
+                     and self._entry is not None and self._entry[0] == key else None)
         if entry is None:
-            # Root-only prefixes are intentional: an explicit empty tuple must
-            # never inherit imported or current-installation identifier bases.
-            before = catalog_reuse.runtime_token()
-            bases, catalog = omissions._schema_with_root_bases(snapshot.sources[0][1], schema_snapshot=snapshot)
-            # LinkML URIorCURIE names have the same released JSON meaning.
-            raw = omissions._json(catalog).encode('utf-8')
-            result = contract.strict_json(raw, 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
-            bases_bytes = json.dumps(bases, ensure_ascii=True, separators=(',', ':')).encode('ascii')
-            after = catalog_reuse.runtime_token()
-            marker = (before if before is not None and before is after
-                      and catalog_reuse.supported_snapshot(snapshot) else None)
-            size = len(key[0]) + sum(len(item) for item in key[1]) + len(raw) + len(bases_bytes)
-            if size <= _CATALOG_PAYLOAD_BYTES:
-                with self._lock:
-                    self._entry, self._bytes = (key, raw, bases), size
-                    self._typed_marker = marker
-            return bases, result
-        return entry[2], contract.strict_json(entry[1], 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
+            return self._fresh_schema_data(selection, snapshot, key)
+        result = contract.strict_json(entry[1], 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
+        if catalog_reuse.runtime_token() is not current_marker:
+            # A changing dependency cannot authorize a prior successful catalog.
+            return self._fresh_schema_data(selection, snapshot, key)
+        return entry[2], result
+
+    def _fresh_schema_data(self, selection, snapshot, key):
+        # Root-only prefixes are intentional: an explicit empty tuple must
+        # never inherit imported or current-installation identifier bases.
+        before = catalog_reuse.runtime_token()
+        bases, catalog = omissions._schema_with_root_bases(snapshot.sources[0][1], schema_snapshot=snapshot)
+        # LinkML URIorCURIE names have the same released JSON meaning.
+        raw = omissions._json(catalog).encode('utf-8')
+        result = contract.strict_json(raw, 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
+        bases_bytes = json.dumps(bases, ensure_ascii=True, separators=(',', ':')).encode('ascii')
+        after = catalog_reuse.runtime_token()
+        marker = (before if before is not None and before is after
+                  and catalog_reuse.supported_snapshot(snapshot) else None)
+        size = len(key[0]) + sum(len(item) for item in key[1]) + len(raw) + len(bases_bytes)
+        if size <= _CATALOG_PAYLOAD_BYTES:
+            with self._lock:
+                self._entry, self._bytes = (key, raw, bases), size
+                self._typed_marker = marker
+                self._entry_marker = marker
+        return bases, result
 
     def _typed_catalog(self, selection, path, snapshot):
         """Only an existing, exactly associated catalog may skip construction."""

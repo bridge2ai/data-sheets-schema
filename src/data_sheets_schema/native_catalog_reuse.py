@@ -21,6 +21,7 @@ from linkml_runtime.utils.namespaces import Namespaces
 import jsonasobj2._jsonobj as jsonobj
 
 from . import audit_omissions as omissions
+from . import native_catalog_initialization as initialization
 from . import native_shared_contract as contract
 from . import duplicate_keys, grounding, schema_snapshot as snapshots, schema_view as views, support_targets
 from .cache_dependencies import FunctionBindings, _methods_key, _schema_state, constructor_key, setting_key
@@ -59,13 +60,15 @@ _YAML_NAMES = frozenset(name for module in _YAML_DEFINITIONS for name, cls in va
                         'Reader', 'Scanner', 'Parser', 'Composer', 'CParser', 'SafeConstructor',
                         'BaseConstructor', 'Resolver', 'BaseResolver', 'SafeLoader', 'CSafeLoader',
                         'DupCheckYamlLoader', 'YAMLMark', 'TypedNode',
-                        'extended_str', 'extended_int', 'extended_float'})
+                        'extended_str', 'extended_int', 'extended_float', 'Mark'})
 
 
 def _yaml_constructor_state():
     classes = tuple((module.__name__, name, constructor_key(cls, _FUNCTIONS),
                      _methods_key(cls, _FUNCTIONS, views), setting_key(getattr(cls, 'id', None)))
-                    for module in _YAML_DEFINITIONS for name, cls in sorted(vars(module).items())
+                    for module in _YAML_DEFINITIONS for name, cls in sorted(
+                         (dict(vars(module), Mark=initialization.ORIGINAL_MARK)
+                          if module is yaml.error else vars(module)).items())
                     if isinstance(cls, type) and cls.__module__ == module.__name__)
     extra = tuple((module.__name__, name, constructor_key(getattr(module, name), _FUNCTIONS),
                    _methods_key(getattr(module, name), _FUNCTIONS, views))
@@ -74,7 +77,9 @@ def _yaml_constructor_state():
                yaml.composer, yaml.constructor, yaml.loader, yaml.resolver, yamlutils, views)
     if hasattr(yaml, 'cyaml'):
         modules += (yaml.cyaml,)
-    aliases = tuple((module.__name__, tuple((name, vars(module)[name]) for name in sorted(_YAML_NAMES)
+    aliases = tuple((module.__name__, tuple((name, initialization.ORIGINAL_MARK
+                                            if module is yaml.error and name == 'Mark' else vars(module)[name])
+                                            for name in sorted(_YAML_NAMES)
                                             if name in vars(module))) for module in modules)
     extended = tuple((constructor_key(cls, _FUNCTIONS), _methods_key(cls, _FUNCTIONS, views))
                      for cls in (yamlutils.YAMLMark, yamlutils.TypedNode,
@@ -327,6 +332,7 @@ def _state():
 
 def _bind():
     global _STATE, _INITIALIZED_STATE
+    initialization.phase()
     _STATE = _state()
     _INITIALIZED_STATE = (*_STATE[:2], _initialized_schema_state(_STATE[2]), *_STATE[3:])
 
@@ -338,9 +344,11 @@ def runtime_token():
     """A constant-size marker only for the still-supported bound implementation."""
     try:
         if _FUNCTIONS.ready:
+            marker = initialization.marker()
             actual = _state()
             if actual == _STATE or actual == _INITIALIZED_STATE:
-                return _READY
+                if initialization.marker() is marker:
+                    return marker
     except Exception:
         pass
     return None
