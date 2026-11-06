@@ -131,6 +131,10 @@ def test_explicit_binding_cannot_be_disabled_after_mutating_a_locator(external, 
 # Every version/registration axis needs an explicit input-authority disposition.
 # A newly introduced field fails this closed roster until its behavior is reviewed.
 REGISTRATION_AXES = {
+    'native_shared_generation_version': ('native capture pins inputs independently; the legacy provenance predicate does not select it',
+                                         {'native_shared_generation_version': 1}, False),
+    'native_shared_generation_registration': ('native capture validates its own input registration; not a legacy provenance selector',
+                                              {'native_shared_generation_version': 1, 'native_shared_generation_registration': '{}'}, False),
     'render_version': ('not input-pinning: prompt renderer only', {'render_version': 27}, False),
     'api_playbook_version': ('not input-pinning: enclosing shared-generation selection owns inputs',
                              {'api_playbook_version': 3}, False),
@@ -155,6 +159,12 @@ REGISTRATION_AXES = {
 # input locator, a registration selector or retained input identity; it does not
 # mean that the field alone grants execution authority.
 RUNSPEC_FIELDS = {
+    'native_shared_generation_version': (True, 'native captured-input registration selector'),
+    'native_shared_generation_registration': (True, 'native registration binds declared input paths and bytes'),
+    '_native_shared_generation_capture': (True, 'immutable captured native input authority'),
+    '_native_shared_generation_metadata': (True, 'recorded native input identities for non-executing replay'),
+    '_native_shared_runtime_capture': (False, 'runtime declaration, not source-input authority'),
+    '_native_shared_max_draft_checks': (False, 'draft-check limit, not source-input authority'),
     'project': (False, 'dataset identifier; a shared registration independently binds it'),
     'arm': (False, 'display/method selection, not an input registration'),
     'method': (False, 'output and runtime method, not input authority'),

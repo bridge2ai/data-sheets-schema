@@ -17,6 +17,12 @@ METADATA_KEYS = frozenset({
 
 
 def validate_spec(spec):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The constructor supplies a new selection before D76 origin capture;
+    reuse callers supply the same admitted selection or a non-executing replay
+    view. This checks selector consistency, not input origin or execution authority.
+    """
     version = getattr(spec, 'native_shared_generation_version', 0)
     registration = getattr(spec, 'native_shared_generation_registration', None)
     if type(version) is not int or version not in (0, 1):
@@ -54,6 +60,12 @@ def validate_spec(spec):
 
 
 def bind_selection(spec):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The constructor supplies the validated native selection before D76
+    origin capture. Live capture must match the declared input paths and bytes;
+    replay skips live capture and grants no execution authority.
+    """
     doc = validate_spec(spec)
     if doc is None or spec._replay_only:
         return
@@ -171,6 +183,12 @@ def validate_metadata(recorded):
 
 
 def metadata(spec):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The serializer supplies the same admitted native selection with its
+    immutable input and runtime captures, or a replay view holding validated
+    recorded metadata. Serialization grants no execution authority.
+    """
     validate_spec(spec)
     saved = getattr(spec, '_native_shared_generation_metadata', None)
     if spec._replay_only:
@@ -197,6 +215,12 @@ def metadata(spec):
 
 
 def restore(spec, recorded):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The replay constructor supplies a non-executing replay view and its
+    recorded metadata. Captured input spellings must match before metadata is
+    restored; restoration cannot authorize execution or live input fallback.
+    """
     doc = validate_metadata(recorded)
     # Path construction in the ordinary loader can collapse dots or repeated
     # separators. Check the captured spellings themselves before accepting the
@@ -213,7 +237,12 @@ def restore(spec, recorded):
 
 
 def commands(spec):
-    """Exact helper spellings shared by rendering and the native controller."""
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The renderer supplies the same admitted native selection and captured
+    toolchain/artifact paths, or a non-executing replay view. Returned command
+    text is descriptive and does not execute helpers or authorize a launch.
+    """
     doc = validate_spec(spec)
     paths, toolchain = spec._agentic_artifact_paths, spec._agentic_toolchain
     if type(paths) is not dict or type(toolchain) is not dict:
@@ -288,6 +317,12 @@ def _scientific_evidence(assets):
 
 
 def instruction(spec):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: The renderer supplies the same admitted native selection with captured
+    input/runtime authority, or a validated non-executing replay view. Rendering
+    does not establish helper availability or authorize native execution.
+    """
     from . import api_runner as api
     doc = validate_spec(spec)
     data = metadata(spec)

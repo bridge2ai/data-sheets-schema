@@ -28,6 +28,9 @@ def _job(spec, runtime, method):
 ])
 def test_registered_legacy_builder_keeps_paths_at_corpus_root(external, monkeypatch, builder, runtime, method):
     checkout = Path(__file__).resolve().parents[1]
+    # run_path does not install the script's directory as a normal CLI would.
+    # Do not borrow sys.path pollution from another collected test module.
+    monkeypatch.syspath_prepend(str((checkout / builder).parent))
     namespace = runpy.run_path(str(checkout / builder))
     job = _job(external, runtime, method)
     monkeypatch.chdir(external.bundle.parent)
