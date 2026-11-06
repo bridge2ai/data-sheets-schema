@@ -1,0 +1,6 @@
+; Purpose: OS network and frozen-source write denial for U0/#4354, 2026-11-06.
+; Input: FROZEN_TREE parameter. Output: inherited restrictions for all helpers.
+(version 1)
+(allow default)
+(deny network*)
+(deny file-write* (subpath (param "FROZEN_TREE")))
