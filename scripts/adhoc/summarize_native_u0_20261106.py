@@ -5,7 +5,7 @@ Inputs: one external trial directory and its wrapper sibling. Output: new JSON
 summary; no tests, source imports, native executable or provider operations.
 """
 import argparse
-from collections import defaultdict
+from collections import Counter, defaultdict
 import hashlib
 import json
 from pathlib import Path
@@ -23,6 +23,8 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--trial', type=Path, required=True)
     p.add_argument('--out', type=Path, required=True)
+    p.add_argument('--visibility', type=Path, help='Optional process-visibility probe JSON')
+    p.add_argument('--ps-probe', type=Path, help='Optional copied-ps probe result JSON')
     args = p.parse_args()
     trial = args.trial.absolute()
     wrapper = trial.with_name(trial.name + '.wrapper')
@@ -54,6 +56,16 @@ def main():
         'trial_launched': bool(outcome and outcome.get('child_pid')),
         'inputs': inputs, 'canary_artifacts_verified': False,
         'scope': 'saved evidence identity/flags; no fresh native/runtime/scientific acceptance'}
+    if args.visibility:
+        visible = read(args.visibility)
+        result['visibility_probe'] = {
+            'path': str(args.visibility), 'sha256': digest(args.visibility),
+            'enumerated': visible['enumerated'], 'observed': len(visible['rows']),
+            'errors': dict(Counter(row['stage'] + ':' + row['error'] for row in visible['errors'])),
+            'not_a_gate': visible['not_a_gate']}
+    if args.ps_probe:
+        result['ps_probe'] = {'path': str(args.ps_probe), 'sha256': digest(args.ps_probe),
+                              'result': read(args.ps_probe)}
     if outcome and outcome.get('status') == 'software_test_passed':
         candidates = list((trial / 'cases').glob('**/native26/actual-result.json'))
         if len(candidates) != 1:
@@ -87,7 +99,8 @@ def main():
         json.dump(result, stream, indent=2, sort_keys=True)
         stream.write('\n')
     print(json.dumps({key: result[key] for key in ('trial_launched', 'source_inventories_equal',
-        'source_head', 'source_pristine', 'source_file_count', 'canary_artifacts_verified', 'gate', 'competitors')}, sort_keys=True))
+        'source_head', 'source_pristine', 'source_file_count', 'canary_artifacts_verified', 'gate', 'competitors')}
+        | {key: result[key] for key in ('visibility_probe', 'ps_probe') if key in result}, sort_keys=True))
 
 
 if __name__ == '__main__':

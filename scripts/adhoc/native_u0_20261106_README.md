@@ -65,3 +65,17 @@ Diagnostic observer injection remains separate from unchanged baseline mode.
 The native authority requires committed consumed source; do not inject the
 bootstrap into a frozen baseline or bypass that check. No production fix is
 part of this tooling delivery.
+
+Actual launch `canary-neutral-01` stopped before its first host sample: executing
+the setuid `/bin/ps` from inside the sandbox raised `PermissionError(EPERM)`.
+No pytest worker or synthetic peer launched. Source inventories matched and the
+wrapper released its own lock after explicit no-child cleanup evidence.
+
+Measurement blocker **U0-R2** remains open. `probe_native_u0_ps_20261106.py`
+retains an exact unprivileged copy of `/bin/ps` and its sandbox result; this copy
+was killed with return code -9, with no rows. The signal's cause is unproven.
+`probe_native_u0_psutil_20261106.py` recorded incomplete process visibility under
+the same network denial. Neither probe is a formal gate, and neither fallback
+is installed in the driver. The next tooling repair must establish a complete
+host observation path under unchanged network denial before repeating the
+unchanged neutral canary. No timing, phase, stack or cache evidence was obtained.
