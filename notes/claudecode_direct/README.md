@@ -173,6 +173,12 @@ controller's own stop state.
 
 ## Running one canary
 
+The commands below describe the historical v1 route. New authority-v2
+preparation uses `prepare_direct_v2.py --project <PROJECT>` and the explicit
+versioned registration/consumer APIs documented in
+[native authority v2](../native_authority_v2.md). The v1 entrypoints and their
+source pins remain unchanged for replay; this section does not launch v2.
+
 ```bash
 cd <checkout>
 poetry run python notes/claudecode_direct/prepare_direct.py --output <fresh dir>   # offline; no model call
