@@ -36,7 +36,7 @@ def execution_root(source_root):
 
 
 EXECUTIONS = execution_root(ROOT)
-SCRATCH = EXECUTIONS / "scratch-native-u3a-r4"
+SCRATCH = EXECUTIONS / "scratch-native-u3a-r5"
 LOCK = EXECUTIONS / "plans/native_quiet_window.lock"
 DEADLINE = 3600
 PROFILE = "(version 1)\n(allow default)\n(deny network*)\n"
