@@ -6,9 +6,9 @@ import sys
 import pytest
 
 from data_sheets_schema import native_execution as old
-from data_sheets_schema import native_execution_engine as engine
+from data_sheets_schema import native_execution_orchestration as engine
 from data_sheets_schema import native_execution_authority_v2 as authority
-from data_sheets_schema import native_shared_execution as native
+from data_sheets_schema import native_shared_execution_orchestration as native
 
 
 def legacy_contract():
@@ -77,9 +77,9 @@ def test_new_transport_requires_truthful_axis_and_mandatory_policy_observer():
 
 def test_engine_in_actual_source_closure_and_foreign_loaded_origin_refused(monkeypatch):
     identity=authority.dependency_identity()
-    assert 'src/data_sheets_schema/native_execution_engine.py' in identity['base']['package_sources']
-    foreign=ModuleType('data_sheets_schema.native_execution_engine')
-    foreign.__file__='/outside-selected-package/native_execution_engine.py'
+    assert 'src/data_sheets_schema/native_execution_orchestration.py' in identity['base']['package_sources']
+    foreign=ModuleType('data_sheets_schema.native_execution_orchestration')
+    foreign.__file__='/outside-selected-package/native_execution_orchestration.py'
     monkeypatch.setitem(sys.modules, foreign.__name__, foreign)
     with pytest.raises(ValueError,match='another origin'):
         authority.dependency_identity()

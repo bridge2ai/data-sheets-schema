@@ -9,7 +9,7 @@ from __future__ import annotations
 from copy import deepcopy
 
 from . import native_shared_contract as c
-from .native_execution_gates import GATES
+from .native_shared_gate_primitives import GATES
 
 
 def _run(prepared):
@@ -139,7 +139,7 @@ def saved_gate(prepared):
 
 
 def tool_history(prepared):
-    from .native_execution_gates import tool_history as settled_results
+    from .native_shared_gate_primitives import tool_history as settled_results
     phase = phase_gate(prepared)
     if phase['passed'] is not True:
         return {'passed': False, 'phase': phase, 'reason': 'native ordered helper obligations are incomplete'}
@@ -175,13 +175,6 @@ def receipt_gate(prepared):
             'original_receipt': c.pin_dict(original.pin), 'effective_receipt': c.pin_dict(effective.pin),
             'snapshot_basis': {'state': 'usable', 'path': run.phase1.full.pin.path,
                                'sha256': run.phase1.full.pin.sha256}}
-
-
-def capture(value, controls, *, authority_inputs, registration_raw):
-    from .native_shared_results import capture as selected_capture
-    return selected_capture(value, controls, authority_inputs=authority_inputs, registration_raw=registration_raw)
-
-
 def check(prepared, projections, runtime, controls, *, exit_code, shutdown, live,
           first_stop, runtime_authority, keep_awake, keep_awake_raw=None, runtime_authority_expected=None):
     from .native_gate_engine import check as common_check

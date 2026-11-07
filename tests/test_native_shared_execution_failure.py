@@ -6,7 +6,7 @@ import socket
 import subprocess
 import pytest
 from tests.test_native_shared_execution import make_case
-from data_sheets_schema import native_shared_execution as execute
+from data_sheets_schema import native_shared_execution_orchestration as execute
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_execution_authority_v2 as authority
 

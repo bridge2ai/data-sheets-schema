@@ -18,8 +18,8 @@ from tests.test_native_shared_permissions import fabricated_manifest
 from tests.test_native_execution import fake_observation
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_controller as composition
-from data_sheets_schema import native_shared_registration as registration
-from data_sheets_schema import native_shared_execution as execute
+from data_sheets_schema import native_shared_registration_orchestration as registration
+from data_sheets_schema import native_shared_execution_orchestration as execute
 from data_sheets_schema import native_shared_policy as policy
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_execution_registration_v2 as preparation

@@ -1,10 +1,10 @@
-"""Closed offline E joining one S/C/R and checked saved permission evidence.
+"""Input-only D reconstruction from verified preparation and explicit C inputs.
 
-No executable discovery, native invocation, auth lookup or provider request.
-The shared lifetime separately requires exact review, CI and owner authority.
+Proposal/envelope verification belongs to native_shared_registration_orchestration.
+The fixed A entry keeps its exact signature and refuses the unresolved explicit
+projection handoff; it never borrows ambient modules or invents C authority.
 """
 from __future__ import annotations
-
 from pathlib import Path
 import re
 import sys
@@ -12,19 +12,17 @@ import sys
 from . import native_shared_contract as c
 from . import native_shared_controller as composition
 from . import native_shared_policy as policy
-from . import native_execution_registration_v2 as execution_v2
-from . import native_execution_authority_v2 as authority
-# Closed runtime validators/constants only; no historical envelope, verifier,
-# permission loader, authorization or launcher is invoked.
-from .native_execution_registration import (
-    validate_runtime, executable_identity, POLICY_ENV, FLAGS, _closed, _text,
-)
+from . import native_shared_controls as pure_controls
+from .native_shared_runtime_values import validate_runtime, POLICY_ENV, FLAGS
 from .native_shared_evidence import read_regular
+from .native_execution_engine import GATES
 
+ROOT = Path(__file__).resolve().parents[2]
 AUTHORITY_VERSION = 2
-KIND = execution_v2.EXECUTION_KIND
+KIND = 'd4d_native_shared_execution_registration_v2'
 VERSION = 2
-EXECUTION = execution_v2.EXECUTION_SCOPE
+EXECUTION = 'requires_exact_independent_review_ci_permission_and_owner_launch_evidence'
+
 
 
 def environment(runtime, selected, spec, config_directory):
@@ -36,17 +34,19 @@ def environment(runtime, selected, spec, config_directory):
     _require_registered_input_spellings(spec)
     return {**runtime['environment'], **POLICY_ENV,
         'CLAUDE_CONFIG_DIR': str(config_directory),
-        'PYTHONPATH': str(authority.ROOT / 'src'), 'VIRTUAL_ENV': sys.prefix,
+        'PYTHONPATH': str(ROOT / 'src'), 'VIRTUAL_ENV': sys.prefix,
         'D4D_LAUNCH_INSTRUCTION': selected['instruction_path'],
         'D4D_MANIFEST': str(spec.manifest), 'D4D_PROFILE': spec.profile}
 
 
-def command(runtime, selected, effective_system, attempt_id, controls):
+def command(runtime, selected, effective_system, attempt_id):
     """Compose argv only; the execution engine owns independently gated dispatch."""
+    from .native_shared_permissions import _permission_protocol
+    protocol = _permission_protocol()
     return [runtime['executable']['path'], *FLAGS, '--effort', runtime['effort'],
         '--model', runtime['model'], '--name', attempt_id,
         '--max-budget-usd', runtime['budget_guard_usd'],
-        *controls['native_command_policy'].permission_arguments(selected['policy']),
+        *protocol.permission_arguments(selected['policy']),
         '--system-prompt', effective_system]
 
 
@@ -72,7 +72,7 @@ def _production_sources(dependencies):
     for relative, digest in sorted(dependencies['base']['package_sources'].items()):
         if not relative.endswith('.py'):
             continue
-        path = authority.ROOT / relative
+        path = ROOT / relative
         raw = _read(str(path), 'production source', c.HARD_LIMITS['input_bytes'])
         if c.sha(raw) != digest:
             raise ValueError('production source changed while preparing permission authority')
@@ -111,7 +111,7 @@ def _paths(value, selected, *, fresh, extra_protected=()):
     protected = [Path(value[k]) for k in ('composition', 'system_path', 'permission_probe')]
     protected += [Path(selected['runtime_path']), Path(value['runtime']['executable']['path'])]
     protected += [Path(p) for p in selected['policy']['readonly_lookups']['inputs']]
-    protected += [authority.ROOT / p for p in ('src', 'notes', 'scripts', 'tests', 'project', '.git', '.github', '.claude')]
+    protected += [ROOT / p for p in ('src', 'notes', 'scripts', 'tests', 'project', '.git', '.github', '.claude')]
     protected += [Path(p).resolve() for p in extra_protected]
     if Path(doc['stage_root']) not in outputs:
         raise ValueError('new execution requires its exact stage reservation')
@@ -133,8 +133,9 @@ def _paths(value, selected, *, fresh, extra_protected=()):
 
 
 def _registration_body(composition_path, system_path, *, permission_probe_path, attempt_id,
-                 attempt_directory, evidence_directory, max_draft_checks, receipt_origin_version=0):
+                 attempt_directory, evidence_directory, max_draft_checks, preparation_raw, controls, controller_sources, receipt_origin_version=0):
     """Prepare E, without consuming an attempt or asserting actual permission."""
+    pure_controls.require_controls(controls)
     if type(receipt_origin_version) is not int or receipt_origin_version not in (0, 1):
         raise ValueError('receipt_origin_version must be exact integer 0 or 1')
     if type(attempt_id) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', attempt_id) is None:
@@ -154,26 +155,26 @@ def _registration_body(composition_path, system_path, *, permission_probe_path, 
     system = _read(paths['system_path'], 'system', c.HARD_LIMITS['input_bytes'])
     if not system.decode('utf-8').strip():
         raise ValueError('system instructions must be explicit nonblank UTF-8')
-    preparation_raw = selected['preparation_raw_json'].encode('utf-8')
-    preparation = execution_v2.verify_preparer(
-        preparation_raw, job_id=composition.captured_preparation_body(preparation_raw)['job_id'])
-    dependencies = authority.dependency_identity()
-    if dependencies != preparation['dependencies'] or dependencies != selected['dependencies']:
+    if selected['preparation_raw_json'].encode('utf-8') != preparation_raw:
+        raise ValueError('composition differs from caller-verified preparation bytes')
+    preparation = composition.captured_preparation_body(preparation_raw)
+    dependencies = preparation['dependencies']
+    if dependencies != selected['dependencies']:
         raise ValueError('execution preparation differs from current v2 authority')
     effective = system.decode('utf-8') + policy.command_guidance(selected['policy'])
     config = Path(paths['attempt_directory']) / 'cli_config'
     expected = permission_expectation(runtime, selected, spec, effective, config, dependencies)
     probe = _read(paths['permission_probe'], 'saved permission', c.HARD_LIMITS['permission_wire_bytes'])
     from .native_shared_permissions import verify_saved_probe
-    checked = verify_saved_probe(probe, expected=expected)
+    checked = verify_saved_probe(probe, expected=expected, controls=controls,
+        controller_sources=controller_sources)
     if checked.get('checked') is not True or checked.get('passed') is not True:
         raise ValueError('native shared saved permission observations are not complete and passing')
-    with authority.loaded_dependencies(dependencies) as controls:
-        argv = command(runtime, selected, effective, attempt_id, controls)
+    argv = command(runtime, selected, effective, attempt_id)
     value = {'kind': KIND, 'schema_version': VERSION, 'execution': EXECUTION, 'attempt_id': attempt_id, **paths,
         'job_id': preparation['job_id'], 'preparation_raw_json': preparation_raw.decode('utf-8'),
         'preparation_sha256': c.sha(preparation_raw),
-        'execution_gates': list(execution_v2.EXECUTION_GATES),
+        'execution_gates': list(GATES),
         'runtime': runtime, 'max_draft_checks': max_draft_checks, 'selection_sha256': selected['selection_sha256'],
         'runtime_declaration_sha256': selected['runtime_sha256'], 'working_directory': selected['working_directory'],
         'dependencies': dependencies, 'composition_raw_json': raw.decode('utf-8'), 'composition_sha256': c.sha(raw),
@@ -191,44 +192,16 @@ def _registration_body(composition_path, system_path, *, permission_probe_path, 
     if (raw != _read(paths['composition'], 'composition', c.HARD_LIMITS['request_bytes'])
             or system != _read(paths['system_path'], 'system', c.HARD_LIMITS['input_bytes'])
             or probe != _read(paths['permission_probe'], 'saved permission', c.HARD_LIMITS['permission_wire_bytes'])
-            or c.canonical(dependencies) != c.canonical(authority.dependency_identity())
-            or preparation != execution_v2.verify_preparer(preparation_raw, job_id=preparation['job_id'])):
+            or preparation != composition.captured_preparation_body(preparation_raw)):
         raise ValueError('execution authority changed during capture')
-    return value
-
-
-def registration(composition_path, system_path, **kwargs):
-    """Produce a closed v2 proposal; never reserve an attempt or grant admission."""
-    body = _registration_body(composition_path, system_path, **kwargs)
-    with authority.loaded_dependencies(body['dependencies']) as controls:
-        value = controls['prepare_registration_v2'].envelope(body)
-        controls['prepare_registration_v2'].require_envelope(value)
-    if len(c.canonical(value)) > c.HARD_LIMITS['request_bytes']:
-        raise ValueError('v2 shared execution exceeds its wire bound')
+    pure_controls.require_controls(controls)
     return value
 
 
 def _require_integrated_gate_implementation():
-    """An offline proposal is not admission to an incomplete installed chain.
-
-    Load only the fixed package implementation, without constructing a run,
-    reading authority inputs or executing any runtime/probe. U3-A has already
-    bound the complete committed package before calling this consumer.
-    """
     try:
-        from .native_shared_execution import _engine_bindings
-        contract, _ = _engine_bindings()
-        contract.require_fixed()
-        # These semantic gates are lazily imported by the runtime path. Check
-        # their fixed implementation now, before admission can reserve/probe.
-        from .native_gate_engine import check as gate_check
-        from .native_shared_schema_gates import check_schemas, check_pair
-        from .native_shared_receipts import schema_snapshot, _catalog_context
-        from .native_subscription_guard import load_guard, validate_saved_observations
-        if not all(callable(function) for function in (gate_check, check_schemas,
-                check_pair, schema_snapshot, _catalog_context, load_guard,
-                validate_saved_observations)):
-            raise ValueError('native shared execution gate implementation is incomplete')
+        from .native_shared_execution import require_gate_implementations
+        require_gate_implementations()
     except (ImportError, AttributeError) as exc:
         raise ValueError('native shared execution gate implementation is incomplete') from exc
 
@@ -238,67 +211,23 @@ def rebuild_v2_body(*, preparation_raw, composition_path, system_path,
                     evidence_directory, max_draft_checks, receipt_origin_version):
     """Fresh input-only reconstruction for A's exact consumer interface.
 
-    No submitted execution body or derived verdict is accepted. This interface
-    alignment does not remove the current consumer graph's forbidden imports:
-    A's source guard still refuses that graph before loading this implementation.
+    No submitted execution body or derived verdict is accepted. A's fixed nine
+    inputs contain no live C classifier projection. That explicit handoff
+    remains an unmet integration requirement, separate from graph acceptance.
     Ordinary proposal reconstruction remains distinct from execution admission.
     """
     if (type(preparation_raw) is not bytes or not preparation_raw
             or len(preparation_raw) > c.HARD_LIMITS['request_bytes']):
         raise ValueError('v2 consumer preparation requires bounded nonempty bytes')
     try:
-        preparation_text = preparation_raw.decode('utf-8')
+        preparation_raw.decode('utf-8')
     except UnicodeDecodeError as exc:
         raise ValueError('v2 consumer preparation requires UTF-8 bytes') from exc
-    _require_integrated_gate_implementation()
-    expected = _registration_body(composition_path, system_path,
-        permission_probe_path=permission_probe_path, attempt_id=attempt_id,
-        attempt_directory=attempt_directory, evidence_directory=evidence_directory,
-        max_draft_checks=max_draft_checks, receipt_origin_version=receipt_origin_version)
-    if (type(expected) is not dict
-            or expected.get('preparation_raw_json') != preparation_text
-            or expected.get('preparation_sha256') != c.sha(preparation_raw)):
-        raise ValueError('v2 consumer preparation binding differs from fresh reconstruction')
-    return expected
+    # A has verified preparation_raw before this fixed entry, but supplies no
+    # live C classifier projection. Never deserialize a carrier, consult hidden
+    # process state or weaken permission reconstruction to manufacture one.
+    raise ValueError('fixed A3 rebuild has no explicit C classifier projection handoff')
 
-
-def verified_v2_body(body_raw, *, preparation_raw):
-    """Compare a proposal with fresh reconstruction; not A's consumer entry.
-
-    A calls the separate input-only rebuild_v2_body and owns the outer body
-    comparison. This retained helper does not bypass A's source/import guard.
-    """
-    value = c.strict_json(body_raw, 'native shared v2 execution body', c.HARD_LIMITS['request_bytes'])
-    if (type(value) is not dict or value.get('kind') != KIND
-            or type(value.get('schema_version')) is not int or value['schema_version'] != VERSION
-            or value.get('execution') != EXECUTION
-            or value.get('execution_gates') != list(execution_v2.EXECUTION_GATES)):
-        raise ValueError('not the selected native shared v2 execution registration')
-    if (type(preparation_raw) is not bytes
-            or value.get('preparation_raw_json') != preparation_raw.decode('utf-8')
-            or value.get('preparation_sha256') != c.sha(preparation_raw)):
-        raise ValueError('v2 consumer preparation binding differs')
-    origin_version = 0
-    if 'receipt_origin_reporting' in value:
-        from .native_receipt_origin import version
-        origin_version = version(value)
-    try:
-        expected = rebuild_v2_body(preparation_raw=preparation_raw,
-            composition_path=value['composition'], system_path=value['system_path'],
-            permission_probe_path=value['permission_probe'],
-            attempt_id=value['attempt_id'], attempt_directory=value['attempt_directory'],
-            evidence_directory=value['evidence_directory'], max_draft_checks=value['max_draft_checks'],
-            receipt_origin_version=origin_version)
-    except (KeyError, TypeError) as exc:
-        raise ValueError('incomplete native shared execution registration') from exc
-    if c.canonical(value) != c.canonical(expected):
-        raise ValueError('execution registration differs from its selected authorities')
-    return value
-
-
-def verified(raw):
-    """Explicit v2 outer-envelope verifier; no historical fallback."""
-    return execution_v2.verified(raw)
 
 
 def execution_paths_v2(body, *, fresh, extra_protected):

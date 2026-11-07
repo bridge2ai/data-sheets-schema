@@ -1,7 +1,7 @@
 """Private fixed gate orchestration for the shared v2 execution route.
 
-Legacy call-time module fault seams and ordinary result/error fields remain
-unchanged. The new fixed consumer supplies captured S schema/receipt/stage
+Fixed neutral checks retain ordinary result/error fields. The fixed consumer
+supplies captured S schema/receipt/stage
 semantics; neither callers nor serialized evidence can choose Python hooks.
 """
 from __future__ import annotations
@@ -12,13 +12,12 @@ from pathlib import Path
 def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown, live,
           first_stop, runtime_authority, keep_awake, keep_awake_raw=None, runtime_authority_expected=None):
     """Run the fixed obligations; only selected semantic readers differ."""
-    from data_sheets_schema import native_execution_gates as legacy
+    from data_sheets_schema import native_shared_gate_primitives as neutral
     if kind != 'native_shared':
         raise ValueError('unknown private native gate contract')
     from data_sheets_schema import native_shared_gates as native
-    draft = legacy.draft
-    runtime_observation_result = legacy.runtime_observation_result
-    cleanup_result = legacy.cleanup_result
+    runtime_observation_result = neutral.runtime_observation_result
+    cleanup_result = neutral.cleanup_result
     from data_sheets_schema import agentic_observed
     snap, spec = prepared['snapshot'], prepared['state'].spec
     events, policy = prepared['events'], prepared['policy']
@@ -92,7 +91,7 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
                 raise ValueError('per-model usage is incomplete or not nonnegative integers')
         limits = {key: own.get(key) for key in direct.LIMIT_KEYS}
         if (any(type(v) is not int for v in limits.values())
-                or draft._encoded(limits) != draft._encoded(runtime['limits'])):
+                or neutral._encoded(limits) != neutral._encoded(runtime['limits'])):
             raise ValueError('observed runtime limits differ from the registered assertions')
         efforts = direct.observed_efforts(projected(Path(runtime['attempt_directory']) / 'control.jsonl'))
         if efforts != [runtime['effort']]:

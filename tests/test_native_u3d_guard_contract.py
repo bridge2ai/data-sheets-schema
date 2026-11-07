@@ -1,8 +1,11 @@
-"""U3-D round 6 interface alignment and remaining A3 refusal, 2026-11-07.
+"""U3-D fixed A interface and remaining handoff requirements, 2026-11-07.
 
 Synthetic builder tests check only argument forwarding and preparation binding.
 They cannot establish C/D admission. Existing positive integration requirements
 remain unchanged; the real current consumer graph is independently refused.
+The six earlier builder-forwarding/binding assertions stay executable and fail
+in round eight: the fixed A inputs cannot supply C's live classifier projection.
+They are not replaced with a fabricated projection or a passing skip.
 """
 from copy import deepcopy
 import os
@@ -135,9 +138,18 @@ def test_reservations_require_explicit_extra_protected():
         registration.execution_paths_v2({}, fresh=True)
 
 
+def test_fixed_a_entry_refuses_missing_projection_before_builder_or_effects(synthetic_reconstruction):
+    inputs, events, supplied, _ = synthetic_reconstruction
+    with pytest.raises(ValueError, match='no explicit C classifier projection handoff'):
+        registration.rebuild_v2_body(**inputs)
+    assert events == supplied == []
+    assert not inputs['attempt_directory'].exists()
+    assert not inputs['evidence_directory'].exists()
+
+
 def test_execution_facade_requires_the_current_explicit_ci_event():
-    from data_sheets_schema import native_shared_execution as execution
-    from data_sheets_schema import native_execution_engine as engine
+    from data_sheets_schema import native_shared_execution_orchestration as execution
+    from data_sheets_schema import native_execution_orchestration as engine
 
     assert execution.required_checks is admission.required_checks
     assert engine.admission is admission

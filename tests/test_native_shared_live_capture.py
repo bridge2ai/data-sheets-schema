@@ -12,7 +12,7 @@ from tests.test_native_shared_registration import execution, bound, native_spec,
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema.native_shared_controller import captured_execution_body
 from data_sheets_schema import native_shared_capture as capture
-from data_sheets_schema import native_shared_registration as registration
+from data_sheets_schema import native_shared_registration_orchestration as registration
 from data_sheets_schema import native_shared_selection as selection
 
 

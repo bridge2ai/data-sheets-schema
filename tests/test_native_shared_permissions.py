@@ -18,6 +18,7 @@ import uuid
 import pytest
 
 from data_sheets_schema import native_shared_permissions as p
+from data_sheets_schema import native_shared_permission_orchestration as permission_orchestration
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_effects as effects
 from data_sheets_schema import native_shared_policy as command_policy
@@ -25,8 +26,7 @@ from data_sheets_schema import native_attribution_controller_v2 as composition
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_execution_registration_v2 as execution_v2
 from data_sheets_schema import native_shared_controller as shared_controller
-from data_sheets_schema import native_shared_registration as shared_registration
-from data_sheets_schema import native_execution_registration as registration
+from data_sheets_schema import native_shared_registration_orchestration as shared_registration
 from tests.test_native_execution_registration_v2 import inputs, isolated_modules
 from tests.test_native_shared_render import native_spec
 from tests.test_native_shared_selection import declaration
@@ -62,12 +62,12 @@ def rows(value, name):
 
 def fabricated_manifest(expected, selected, neutral_root, source_raw):
     """Reusable TEST-ONLY forged observation, not a launch permission proof."""
-    with authority.loaded_dependencies(authority.dependency_identity()) as controls:
+    with permission_orchestration.loaded_permission_inputs() as (controls, _controller_sources):
         return _fabricated_manifest(expected, selected, neutral_root, source_raw, controls)
 
 
 def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls):
-    native = controls['native_control']
+    native = p._permission_protocol()
     files = {name: text.encode() for name,text in p.recipe_sources().items()}
     files.update({'policy.json': encoded(expected['policy']), 'selection.json': encoded(selected),
                   'source.before': source_raw, 'source.after': source_raw,
@@ -93,13 +93,13 @@ def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls)
             files['cases.json'] = encoded([{k:v for k,v in case.items() if k != 'input'} for case in all_cases])
         cases = [x for x in all_cases if x['mode'] != 'observer_stopped'] if trace == 'settled' else [
             x for x in all_cases if x['id'] == trace[5:]]
-        ack = {'type':'control_response','response':{'subtype':'success','request_id':native.INIT_ID}}
+        ack = {'type':'control_response','response':{'subtype':'success','request_id':native.initialization_id()}}
         init = {'type':'system','subtype':'init','model':expected['runtime']['model'],
                 'claude_code_version':expected['runtime']['executable']['init_version'],
                 'cwd':launch['cwd'],'tools':['Read','Write','Bash'], 'apiKeySource':'ANTHROPIC_API_KEY',
                 'permissionMode':'dontAsk','session_id':session}
         events = [ack,init]
-        control = [{'kind':'initialize_sent','policy_sha256':native.digest(probe_policy),
+        control = [{'kind':'initialize_sent','policy_sha256':native.policy_digest(probe_policy),
                     'frame':native.initialize_frame(probe_policy['pretool_control'])},
                    {'kind':'initialize_ack','frame':ack}]
         for case in cases:
@@ -209,7 +209,7 @@ def prohibit_real_transports(monkeypatch):
 
 
 def verify(value, expected):
-    return p.verify_saved_probe(encoded(value), expected=expected)
+    return permission_orchestration.verify_saved_probe(encoded(value), expected=expected)
 
 
 def test_complete_seven_trace_observation_is_only_software_verification(fixture):
@@ -358,12 +358,13 @@ def test_strict_raw_parser_rejects_ambiguous_unbounded_or_non_utf8(raw):
 @pytest.mark.parametrize('budget', ['0','0.0','1e2','NaN','-1','+1',' 1',1,True,1.0])
 def test_budget_spelling_is_not_normalized(fixture,budget):
     expected=deepcopy(fixture['expected']);expected['runtime']['budget_guard_usd']=budget
-    with pytest.raises(ValueError):p.probe_argv(expected,expected['policy'])
+    with pytest.raises(ValueError):permission_orchestration.probe_argv(expected,expected['policy'])
 
 
 def test_budget_spelling_and_absent_null_file_map_are_preserved(fixture):
     expected=deepcopy(fixture['expected']);selected=fixture['selection']
-    assert p.probe_argv(expected,expected['policy'])[p.probe_argv(expected,expected['policy']).index('--max-budget-usd')+1]=='01.50'
+    argv = permission_orchestration.probe_argv(expected,expected['policy'])
+    assert argv[argv.index('--max-budget-usd')+1]=='01.50'
     for absent in (True,False):
         if absent:expected['policy']['readonly_lookups'].pop('write_paths',None)
         else:expected['policy']['readonly_lookups']['write_paths']=None
@@ -450,9 +451,9 @@ def test_recorder_mapping_pins_actual_module_execution_entrypoint(fixture):
 
 def test_wrapper_encodings_preserve_members_and_exact_metadata_bound(fixture):
     raw=json.dumps(fixture['manifest'],sort_keys=True,separators=(',',':'),ensure_ascii=True).encode()
-    assert p.verify_saved_probe(raw,expected=fixture['expected'])['passed'] is True
+    assert permission_orchestration.verify_saved_probe(raw,expected=fixture['expected'])['passed'] is True
     with pytest.raises(ValueError,match='canonical JSON'):
-        p.verify_saved_probe(json.dumps(fixture['manifest'],indent=2).encode(),expected=fixture['expected'])
+        permission_orchestration.verify_saved_probe(json.dumps(fixture['manifest'],indent=2).encode(),expected=fixture['expected'])
 
 
 def test_member_size_and_aggregate_bounds_precede_parsing_member_content(fixture):

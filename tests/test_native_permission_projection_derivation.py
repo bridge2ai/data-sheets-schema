@@ -13,6 +13,7 @@ import pytest
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_effects as effects
 from data_sheets_schema import native_shared_permissions as p
+from data_sheets_schema import native_shared_permission_orchestration as permission_orchestration
 from tests.test_native_shared_permissions import fixture, get, prohibit_real_transports
 
 
@@ -489,5 +490,5 @@ def test_derived_factory_is_fresh_after_mutation_and_keeps_first_refusal(inputs,
 
 @pytest.fixture
 def controls():
-    with p.authority.loaded_dependencies(p.authority.dependency_identity()) as loaded:
+    with permission_orchestration.loaded_permission_inputs() as (loaded, _controller_sources):
         yield loaded

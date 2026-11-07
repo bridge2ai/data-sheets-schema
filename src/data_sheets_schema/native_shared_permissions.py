@@ -17,10 +17,9 @@ import re
 import shlex
 from urllib.parse import urlsplit
 
-from data_sheets_schema import native_attribution_controller_v2 as composition
-from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_shared_contract as contract
 from data_sheets_schema import native_shared_policy as command_policy
+from data_sheets_schema import native_shared_runtime_values as runtime_values
 
 KIND = contract.KINDS['permission']
 EXPECTED_KIND = contract.KINDS['permission_expected']
@@ -117,9 +116,8 @@ def _runtime(value):
     Current executable identity and actual auth observation remain the caller's
     pre-dispatch gates. This saved-observation parser never probes either one.
     """
-    from data_sheets_schema import native_execution_registration as registration
-    _object(value, registration.RUNTIME_KEYS, 'runtime declaration')
-    _need(value['route'] == registration.ROUTE, 'unsupported direct route')
+    _object(value, runtime_values.RUNTIME_KEYS, 'runtime declaration')
+    _need(value['route'] == runtime_values.ROUTE, 'unsupported direct route')
     exe = _object(value['executable'], {'path','sha256','version','init_version'}, 'executable')
     _path(exe['path']); _hash(exe['sha256'])
     _text(exe['version'], 'version'); _text(exe['init_version'], 'init version')
@@ -141,8 +139,8 @@ def _runtime(value):
           and auth['expected_api_key_source'] == 'none', 'unsupported selected auth declaration')
     _text(auth['subscriptionType'], 'subscription type')
     env = value['environment']
-    _need(type(env) is dict and not set(env) - registration.BASE_ENV_KEYS
-          and registration.ENV_REQUIRED <= set(env), 'runtime environment shape differs')
+    _need(type(env) is dict and not set(env) - runtime_values.BASE_ENV_KEYS
+          and runtime_values.ENV_REQUIRED <= set(env), 'runtime environment shape differs')
     for key,text in env.items():
         _need(type(text) is str and len(text) <= 16384 and not any(ch in text for ch in ('\0','\n','\r'))
               and (bool(text.strip()) or key == 'CLAUDE_SECURESTORAGE_CONFIG_DIR'), 'invalid runtime environment text')
@@ -165,6 +163,18 @@ def _dependencies():
     from data_sheets_schema import native_shared_contract as contract
     from data_sheets_schema import native_shared_effects as effects
     return contract, effects
+
+
+def _permission_protocol():
+    """Fixed C-owned pure protocol seam; absence is an integration refusal.
+
+    C supplies the six approved functions. D neither copies those functions
+    nor falls back to historical modules or a caller-selected implementation.
+    A's consumer loader binds this package dependency to its recorded source.
+    Ordinary entry points obtain the same source binding through orchestration.
+    """
+    from data_sheets_schema import native_shared_permission_protocol
+    return native_shared_permission_protocol
 
 
 def stub_files():
@@ -239,7 +249,9 @@ def _source_closure(expected):
     for module, file in [('data_sheets_schema.native_shared_permissions', __file__),
                          ('data_sheets_schema.native_shared_contract', contract.__file__),
                          ('data_sheets_schema.native_shared_effects', effects.__file__),
-                         ('data_sheets_schema.native_shared_policy', command_policy.__file__)]:
+                         ('data_sheets_schema.native_shared_policy', command_policy.__file__),
+                         ('data_sheets_schema.native_shared_runtime_values', runtime_values.__file__),
+                         ('data_sheets_schema.native_shared_permission_protocol', _permission_protocol().__file__)]:
         raw = Path(file).read_bytes()
         wanted = {'module': module, 'path': str(Path(file).resolve()), 'bytes': len(raw), 'sha256': _sha(raw)}
         _need(_same(by_module.get(module), wanted), 'loaded fixed source differs: ' + module)
@@ -249,14 +261,14 @@ def _source_closure(expected):
     _need(_same(expected['probe_recipe'], recipe(expected)), 'probe recipe is not the fixed reviewed closure')
 
 
-def _authority(expected, selection, controls):
+def _authority(expected, selection, controller_sources):
     _object(expected, EXPECTED_KEYS, 'expected')
     _need(expected['kind'] == EXPECTED_KIND and type(expected['version']) is int
           and expected['version'] == VERSION, 'unknown expected protocol')
     _pin(expected['selection']); _pin(expected['source'])
     for name in ('instruction_sha256', 'system_sha256'):
         _hash(expected[name])
-    _need(_same(expected['controller_sources'], composition.controller_sources()), 'controller closure differs')
+    _need(_same(expected['controller_sources'], controller_sources), 'controller closure differs')
     _need(selection['registration_path'] == expected['selection']['path'], 'selected path differs')
     _need(_same(selection['inputs']['bundle'], expected['source']), 'selected bundle identity differs')
     _need(selection['kind'] == 'd4d_native_shared_selection' and type(selection['version']) is int
@@ -271,7 +283,7 @@ def _authority(expected, selection, controls):
     for value in (exe['version'], exe['init_version'], runtime['model'], runtime['effort']):
         _text(value, 'runtime identity')
     _budget(runtime['budget_guard_usd'])
-    _need(_same(policy['pretool_control'], controls['native_control'].HISTORY_CONTRACT), 'unrecognized native control')
+    _need(_same(policy['pretool_control'], _permission_protocol().history_contract()), 'unrecognized native control')
     _path(policy['python']); _path(policy['readonly_lookups']['repository'])
     _need(selection['stage_root'] in policy['readonly_lookups']['output_directories'], 'exact stage root absent')
     _need(expected['source']['path'] in policy['readonly_lookups']['inputs'], 'source is not registered')
@@ -290,11 +302,10 @@ def _authority(expected, selection, controls):
           'environment is not an exact string mapping')
     _need(not any(k in env for k in ('ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'OPENAI_API_KEY', 'CBORG_API_KEY')),
           'permission authority must not contain credentials')
-    from data_sheets_schema import native_execution_registration as registration
     derived_names = {'CLAUDE_CONFIG_DIR','PYTHONPATH','VIRTUAL_ENV','D4D_LAUNCH_INSTRUCTION','D4D_MANIFEST','D4D_PROFILE'}
-    _need(set(env) == set(runtime['environment']) | set(registration.POLICY_ENV) | derived_names,
+    _need(set(env) == set(runtime['environment']) | set(runtime_values.POLICY_ENV) | derived_names,
           'production environment has missing or extra fields')
-    _need(all(env[key] == value for key,value in {**runtime['environment'], **registration.POLICY_ENV}.items()),
+    _need(all(env[key] == value for key,value in {**runtime['environment'], **runtime_values.POLICY_ENV}.items()),
           'fixed or selected environment differs')
     _need(env['D4D_PROFILE'] == selection['inputs']['profile']['name'], 'environment profile differs')
     manifest = selection['inputs']['source_manifest']
@@ -393,19 +404,14 @@ def _roots(expected, selection, launch):
 
 
 def probe_argv(expected, probe_policy):
-    """Exact recorded argv, never executed here."""
-    with authority.loaded_dependencies(authority.dependency_identity()) as controls:
-        return _probe_argv(expected, probe_policy, controls)
-
-
-def _probe_argv(expected, probe_policy, controls):
+    """Exact recorded argv from C's pure protocol; never executed here."""
     runtime = expected['runtime']
     return [runtime['executable']['path'], '--print', '--safe-mode', '--restricted',
             '--strict-mcp-config', '--no-session-persistence', '--model', runtime['model'],
             '--effort', runtime['effort'], '--disable-slash-commands', '--max-budget-usd',
             _budget(runtime['budget_guard_usd']), '--prompt-suggestions', 'false', '--output-format',
             'stream-json', '--verbose', '--permission-mode', 'dontAsk', '--tools', 'Read,Write,Bash',
-            *controls['native_command_policy'].permission_arguments(probe_policy), '--system-prompt', SYSTEM]
+            *_permission_protocol().permission_arguments(probe_policy), '--system-prompt', SYSTEM]
 
 
 def _artifact(role, path, raw):
@@ -828,9 +834,10 @@ def _trace_body(expected, selection, trace, raw, controls):
     events = _rows(raw[prefix + 'transcript.jsonl'], 'transcript')
     records = _rows(raw[prefix + 'control.jsonl'], 'control')
     clean = [{k:v for k,v in row.items() if k != 'at'} for row in records]
-    native = controls['native_control']; model = expected['runtime']['model']
-    ack = {'type': 'control_response', 'response': {'subtype': 'success', 'request_id': native.INIT_ID}}
-    _need(_same(clean[0], {'kind': 'initialize_sent', 'policy_sha256': native.digest(policy),
+    native = _permission_protocol(); model = expected['runtime']['model']
+    init_id = native.initialization_id()
+    ack = {'type': 'control_response', 'response': {'subtype': 'success', 'request_id': init_id}}
+    _need(_same(clean[0], {'kind': 'initialize_sent', 'policy_sha256': native.policy_digest(policy),
                           'frame': native.initialize_frame(policy['pretool_control'])}), 'initialization sent differs')
     _need(_same(events[0], ack) and _same(clean[1], {'kind': 'initialize_ack', 'frame': ack}), 'initialization ack differs')
     init = events[1]
@@ -866,7 +873,7 @@ def _trace_body(expected, selection, trace, raw, controls):
         wanted_block = {'type': 'tool_use', 'id': case['id'], 'name': case['tool'], 'input': case['input']}
         _need(_same(call.get('message', {}).get('content'), [wanted_block]), 'call differs from required case')
         request_id = callback.get('request_id')
-        _need(type(request_id) is str and request_id and request_id not in request_ids and request_id != native.INIT_ID,
+        _need(type(request_id) is str and request_id and request_id not in request_ids and request_id != init_id,
               'duplicate or missing callback identity')
         request_ids.add(request_id)
         wanted = {'type': 'control_request', 'request_id': request_id, 'request': {'subtype': 'hook_callback',
@@ -976,28 +983,25 @@ def _derived_controls(expected, selection, launch, session, *, policy=None, reci
     return checks
 
 
-def verify_saved_probe(raw_manifest: bytes, *, expected: dict) -> dict:
+def verify_saved_probe(raw_manifest: bytes, *, expected: dict, controls, controller_sources) -> dict:
     """Recompute all recorded cases; malformed/unsupported evidence refuses.
 
     There is no mock flag or execution entrypoint. Fixed local source files are
     checked, but no path supplied by the manifest is opened. Authenticity of a
     saved observation and actual filesystem metadata remain separate reviews.
+    The orchestrator supplies a live C-minted classifier projection and the
+    independently recaptured controller sources. Neither is inferred from the
+    manifest, and this consumer performs no loading or admission through A.
     """
     try:
-        return _verify(raw_manifest, expected)
+        command_policy.pure_controls.require_controls(controls)
+        return _verify_bound(raw_manifest, expected, controls, controller_sources)
     except (KeyError, TypeError, IndexError, AttributeError, UnicodeError, OverflowError,
             RecursionError, OSError) as exc:
         raise ValueError('native shared permission evidence is malformed, unavailable or incomplete') from exc
 
 
-def _verify(raw_manifest, expected):
-    # Fixed v2 controls are fresh for every verification. No saved verdict,
-    # caller-selected classifier or bare historical loader can grant effects.
-    with authority.loaded_dependencies(authority.dependency_identity()) as controls:
-        return _verify_bound(raw_manifest, expected, controls)
-
-
-def _verify_bound(raw_manifest, expected, controls):
+def _verify_bound(raw_manifest, expected, controls, controller_sources):
     value = _object(_json(raw_manifest, MAX_WIRE), {'kind','version','origin','binding','members'}, 'manifest')
     _need(value['kind'] == KIND and type(value['version']) is int and value['version'] == VERSION
           and value['origin'] == ORIGIN, 'unknown native shared observation protocol/origin')
@@ -1022,7 +1026,7 @@ def _verify_bound(raw_manifest, expected, controls):
     contract, _ = _dependencies()
     selection = contract.parse_selection(raw['selection.json'])
     _pin(expected['selection'], raw['selection.json']); _pin(expected['source'], raw['source.before'])
-    _authority(expected, selection, controls)
+    _authority(expected, selection, controller_sources)
     _need(_same(_json(raw['policy.json']), expected['policy']), 'common production policy differs')
     _need(raw['source.before'] == raw['source.after'], 'selected source changed')
     traces, cases, all_roots, sessions = [], [], [], set()

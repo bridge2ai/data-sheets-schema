@@ -10,7 +10,7 @@ import shlex
 import pytest
 
 from data_sheets_schema import native_shared_contract as c
-from data_sheets_schema import native_shared_publication as pub
+from data_sheets_schema import native_shared_publication_orchestration as pub
 from data_sheets_schema import native_shared_stage as stage
 from data_sheets_schema.native_shared_evidence import read_regular
 from tests.test_native_shared_stages import case, artifact, append, supplied
