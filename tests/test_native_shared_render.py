@@ -269,3 +269,49 @@ def test_command_roster_uses_stage_originals_and_complete_recorded_context(nativ
     import json
     recorded = json.loads(commands['recorder'][commands['recorder'].index('--render-spec-json') + 1])
     assert recorded == native_spec.render_spec()
+
+
+def test_initial_and_final_receipt_commands_are_exact(native_spec, tmp_path):
+    import hashlib
+    import json
+    import shlex
+    import subprocess
+    import types
+
+    commands = native.commands(native_spec)
+    initial, final = commands['phase1_receipts'], commands['final_receipts']
+    assert initial[-1] == '--initial-structure' and '--strict' not in initial
+    assert final == (*initial[:-1], '--strict')
+    text = native.instruction(native_spec)
+    for command in (initial, final):
+        assert text.count(shlex.join(command)) == 1
+    assert 'phase1_receipts is structural only: floors remain pending' in text
+    assert 'run final_receipts with strict floor acceptance' in text
+    # Same captured synthetic selection and runtime, old/new renderers. This is
+    # an instruction identity witness, not a native registration or execution.
+    old_source = subprocess.check_output(['git', 'show',
+        '96adabfb3:src/data_sheets_schema/native_shared_render.py'])
+    old = types.ModuleType('data_sheets_schema._old_native_render')
+    old.__package__ = 'data_sheets_schema'
+    exec(compile(old_source, '<old-native-render>', 'exec'), old.__dict__)
+    old_text = old.instruction(native_spec)
+    witness = {'old_instruction_sha256': hashlib.sha256(old_text.encode()).hexdigest(),
+               'new_instruction_sha256': hashlib.sha256(text.encode()).hexdigest(),
+               'old_source_sha256': hashlib.sha256(old_source).hexdigest(),
+               'new_source_sha256': hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest(),
+               'scope': 'same synthetic captured selection; not a registered native run'}
+    assert witness['old_instruction_sha256'] != witness['new_instruction_sha256']
+    (tmp_path / 'render-digests.json').write_text(json.dumps(witness, indent=2) + '\n')
+    (tmp_path / 'old-instruction.txt').write_text(old_text)
+    (tmp_path / 'new-instruction.txt').write_text(text)
+
+
+def test_split_receipt_commands_match_native_consumers(native_spec):
+    """Integration requirement: consumers must admit the initial/final split.
+
+    U3D-R9: currently fails because consumer modules are outside round-2 scope.
+    Keep this as an executable requirement for the next authorized repair.
+    """
+    from data_sheets_schema import native_shared_phase as phase
+    from data_sheets_schema import native_shared_policy as policy
+    assert set(native.commands(native_spec)) == phase.COMMAND_NAMES == policy.HELPERS

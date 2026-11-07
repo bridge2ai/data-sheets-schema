@@ -2587,6 +2587,29 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
 
 
 # ---------------------------------------------------------------- on disk
+def initial_structure_result(block: dict[str, Any]) -> dict[str, Any]:
+    """Report a reconstructed native initial assessment without accepting floors.
+
+    Call only after block_for has checked the selection/registration binding.
+    Keep the existing structural and snippet predicates; never reinterpret a
+    final assessment or an unchecked reconstruction as initial success.
+    """
+    structural = block.get('structural_receipt_floors')
+    passed = (block.get('checked') is True
+              and block.get('native_receipt_stage') == 'phase1_initial'
+              and block.get('final_stage_complete') is False
+              and block.get('passed') is True
+              and isinstance(structural, dict) and bool(structural)
+              and all(type(value) is int and value == 0 for value in structural.values()))
+    return {'mode': 'initial_structure', 'structure_passed': bool(passed),
+            'floors': 'pending', 'floor_acceptance_claimed': False,
+            'summary': block.get('summary'), 'reason': block.get('reason'),
+            'findings': block.get('findings', []),
+            'structural_checks': structural,
+            'native_initial_inputs': block.get('native_initial_inputs'),
+            'receipt_completion_policy': block.get('receipt_completion_policy')}
+
+
 def receipt_path(core_dir: Path, project: str) -> Path:
     return core_dir / f"{project}_coverage_receipt.yaml"
 

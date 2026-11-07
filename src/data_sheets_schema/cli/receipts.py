@@ -31,6 +31,8 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
                    "claim-receipt sidecar beside it")
 @click.option("--strict", is_flag=True,
               help="exit 1 when a registered receipt floor fails; reported diagnostics are not all gated")
+@click.option("--initial-structure", is_flag=True,
+              help="check initial native receipt structure; emit JSON with pending floors and no floor acceptance")
 @click.option("--bundle", "bundle_opt", default=None, type=click.Path(exists=True, dir_okay=False),
               help="the bundle the run read; needed only before the provenance record "
                    "exists and the full record's header does not name it")
@@ -49,7 +51,7 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
 @click.option("--full-at-run", type=click.Path(dir_okay=False, path_type=Path),
               help="with --transcript: the full record's path as the transcript spelled it, where it has moved since the run")
 def check(method, label, project, write, strict, bundle_opt, chunk_manifest, receipt_completion_registration,
-          transcripts, receipt_at_run, full_at_run, native_shared_selection=None):
+          transcripts, receipt_at_run, full_at_run, native_shared_selection=None, initial_structure=False):
     """Validate `{PROJECT}_coverage_receipt.yaml` against the chunk manifest,
     the bundle and the full record, with affirmative counts.
 
@@ -67,6 +69,10 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     sha256 it was measured on, and otherwise the origin is `unknown`, never
     `contemporaneous`. Reported, never gated: `--strict` does not read it.
     """
+    if initial_structure and strict:
+        raise click.UsageError('--initial-structure and --strict are mutually exclusive')
+    if initial_structure and (native_shared_selection is None or write):
+        raise click.UsageError('--initial-structure requires --native-shared-selection and cannot use --write')
     if (receipt_at_run or full_at_run) and not transcripts:
         raise click.UsageError("--receipt-at-run and --full-at-run name the files as a --transcript spelled them; "
                                "pass the transcript")
@@ -140,7 +146,8 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             md5 = _md5(bundle) if bundle.exists() else None
         expected = True
         recovery = {}
-        click.echo(f"   · no provenance record yet; checking against {bundle} as on disk")
+        if not initial_structure:
+            click.echo(f"   · no provenance record yet; checking against {bundle} as on disk")
     # The same recovery the backfill makes (#1140, #1187 review M2): the gate
     # on attestation must not say "unchecked" of a record the backfill checked.
     chunks = recovery.get("record_chunks") if isinstance(recovery.get("record_chunks"), dict) else None
@@ -178,6 +185,13 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             raise click.ClickException(f"receipt completion registration refused: {exc}") from exc
         recovery["receipt_render_spec"] = declaration
     assessment_block = rc.block_for(p["full"], receipt_file, bundle, md5, expected, **recovery)
+    if initial_structure:
+        import json
+        result = rc.initial_structure_result(assessment_block)
+        click.echo(json.dumps(result, sort_keys=True))
+        if not result['structure_passed']:
+            sys.exit(1)
+        return
     from data_sheets_schema import receipt_origin_record as ror
     prior = record["receipts"].get("origin") if isinstance(record, dict) and isinstance(record.get("receipts"), dict) else None
     # Claims compare the exact owner assessment, before reporting-only metadata.
@@ -259,7 +273,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
         sys.exit(1)
     if strict and block.get("checked") and strict_failure(block):
         # An initial structural check cannot certify a pending coverage floor.
-        # A separate initial-check contract requires an explicit amendment.
+        # Only --initial-structure reports structural success separately.
         sys.exit(1)
     if strict and block.get('native_receipt_stage') == 'phase1_initial' and (
             block.get('final_stage_complete') is not False or block.get('passed') is not True):
