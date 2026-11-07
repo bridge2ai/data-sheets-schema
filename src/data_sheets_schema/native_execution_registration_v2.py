@@ -411,7 +411,7 @@ def verified(raw, *, classifier_projection):
                 raise ValueError('v2 composition ' + key + ' mismatch')
     except (KeyError, TypeError, AttributeError) as exc:
         raise ValueError('incomplete v2 shared execution binding') from exc
-    pass  # ME: deliberately skipped committed closure
+    authority.require_committed(dependencies)
     with _consumer(dependencies) as consumer:
         result = consumer.rebuild_v2_body(**_rebuild_inputs(body, preparation_raw),
                                          classifier_projection=classifier_projection)
