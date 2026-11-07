@@ -12,7 +12,7 @@ import pytest
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_evidence as evidence
 from data_sheets_schema import native_shared_streams as streams
-from data_sheets_schema.native_shared_controller import CallbackAdapter
+from data_sheets_schema.native_shared_controller_orchestration import CallbackAdapter
 from data_sheets_schema.native_shared_receipts import _ReceiptCatalogContext
 
 

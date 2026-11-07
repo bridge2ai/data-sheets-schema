@@ -16,6 +16,7 @@ from data_sheets_schema import native_shared_attribution as attribution
 from data_sheets_schema import native_shared_attribution_orchestration as live_attribution
 from data_sheets_schema import native_shared_controller_orchestration as controller
 from data_sheets_schema import native_shared_contract as c
+from data_sheets_schema import native_shared_evidence as evidence
 from data_sheets_schema import native_execution_registration_v2 as registration
 from data_sheets_schema.native_shared_evidence import read_regular
 from data_sheets_schema import source_attribution_preflight as preflight
@@ -186,7 +187,8 @@ def test_saved_replay_uses_captured_bytes_and_defers_superseded_passes(case, mon
     monkeypatch.setattr(Path, 'read_bytes', blocked)
     monkeypatch.setattr(Path, 'read_text', blocked)
     monkeypatch.setattr(Path, 'resolve', blocked)
-    monkeypatch.setattr(attribution, 'read_regular', blocked)
+    monkeypatch.setattr(live_attribution, 'read_regular', blocked)
+    monkeypatch.setattr(evidence, 'read_regular', blocked)
     for key in ('Popen', 'run', 'check_output'):
         monkeypatch.setattr(subprocess, key, blocked)
     state = construct(case, saved=True)
@@ -288,7 +290,10 @@ def test_saved_attribution_refuses_non_v2_wire_before_any_live_read(case, monkey
 
     monkeypatch.setattr(controller, 'reconstruct_composition', blocked)
     monkeypatch.setattr(registration, 'verify_preparer', blocked)
-    monkeypatch.setattr(attribution, 'read_regular', blocked)
+    monkeypatch.setattr(live_attribution, 'read_regular', blocked)
+    monkeypatch.setattr(evidence, 'read_regular', blocked)
+    for name in ('read_bytes', 'read_text', 'open'):
+        monkeypatch.setattr(Path, name, blocked)
     with pytest.raises(ValueError):
         attribution.saved(cap, execution_raw=c.canonical(value), spec=spec,
             composition_raw=c.canonical(composition),

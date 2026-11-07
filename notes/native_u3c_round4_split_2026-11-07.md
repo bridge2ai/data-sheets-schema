@@ -71,6 +71,16 @@ execution admission. The protected U1 hook remains pending.
   scanner test whose synthetic fixture still creates a `.py` module. Restored
   that original assertion and removed the unnecessary migration; its existing
   closure helper already understands both modules and package initializers.
+- **C4-R8 — addressed after the first full C suite.** Two stream test modules
+  still imported the moved callback class from the consumer. Two saved-attribution
+  tests (six cases) still patched the moved live reader there. The test imports
+  and reader traps now target orchestration; all adversarial assertions remain.
+- **C4-U1-HOOK — inherited, pending protected integration.** The unchanged
+  `test_native_construction_and_replay_use_validated_shared_admission` expects
+  two native calls to `shared_generation.select`; the unchanged RunSpec entry
+  deliberately skips that selector for the native route. `api_runner.py`,
+  `shared_generation.py` and this test are identical to the requested C4 base.
+  Its assertion remains unchanged; this task does not authorize that hook.
 
 GitHub issue publication is deferred under the explicit offline/no-GitHub rule.
 Detailed test results, graph census and remaining failures belong in the Round 4
