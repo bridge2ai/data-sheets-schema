@@ -275,6 +275,9 @@ Round-2 review records, retained offline for the later issue workflow:
   checking; compare that fresh capture with the preparation pin before using it.
 - R2-B: ordinary field `getattr` must not be mistaken for dynamic import; keep
   actual loading/evaluation refusal without excluding normal pure helpers.
+- R2-C: a read may update access time without changing source. Compare device,
+  inode, mode, size, modification time and change time across the read; retain
+  physical-path and digest checks. Access time is not source identity.
 
 ### U3-A offline review ledger
 

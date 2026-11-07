@@ -6,7 +6,7 @@ import importlib._bootstrap_external
 from pathlib import Path
 import sys
 import threading
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
 
 import pytest
 
@@ -15,6 +15,56 @@ from data_sheets_schema import native_execution_authority_v2 as authority
 
 def pin(raw):
     return hashlib.sha256(raw).hexdigest()
+
+
+def _source_stat_sequence(monkeypatch, path, *, change=None):
+    """Inject observation metadata only; read and hash the actual source file."""
+    original = Path.lstat
+    observed = original(path)
+    fields = ('st_dev', 'st_ino', 'st_mode', 'st_size', 'st_mtime_ns', 'st_ctime_ns',
+              'st_atime', 'st_atime_ns')
+    before = {key: getattr(observed, key) for key in fields}
+    after = {**before, 'st_atime': before['st_atime'] + 1,
+             'st_atime_ns': before['st_atime_ns'] + 1_000_000_000}
+    if change is not None:
+        after[change] += 1
+    observations = []
+    def read_stat(value, *args, **kwargs):
+        if value != path:
+            return original(value, *args, **kwargs)
+        observations.append(value)
+        if len(observations) > 2:
+            pytest.fail('unexpected source metadata observation')
+        return SimpleNamespace(**(before if len(observations) == 1 else after))
+    monkeypatch.setattr(Path, 'lstat', read_stat)
+    return observations
+
+
+def test_verified_source_read_allows_only_access_time_to_change(tmp_path, monkeypatch):
+    raw = b'VALUE = "unchanged pinned source"\n'
+    path = tmp_path / 'source.py'; path.write_bytes(raw)
+    visits = _source_stat_sequence(monkeypatch, path)
+    assert authority._verified_source_bytes(path, pin(raw)) == raw
+    assert visits == [path, path]
+
+
+@pytest.mark.parametrize('field', ['st_dev', 'st_ino', 'st_mode', 'st_size', 'st_mtime_ns', 'st_ctime_ns'])
+def test_verified_source_read_still_refuses_identity_or_mutation_metadata(tmp_path, monkeypatch, field):
+    raw = b'VALUE = "same bytes do not excuse changed file identity"\n'
+    path = tmp_path / 'source.py'; path.write_bytes(raw)
+    visits = _source_stat_sequence(monkeypatch, path, change=field)
+    with pytest.raises(ValueError, match='source bytes differ from their pin'):
+        authority._verified_source_bytes(path, pin(raw))
+    assert visits == [path, path]
+
+
+def test_access_time_only_change_does_not_excuse_wrong_source_digest(tmp_path, monkeypatch):
+    raw = b'VALUE = "source still requires its exact digest"\n'
+    path = tmp_path / 'source.py'; path.write_bytes(raw)
+    visits = _source_stat_sequence(monkeypatch, path)
+    with pytest.raises(ValueError, match='source bytes differ from their pin'):
+        authority._verified_source_bytes(path, '0' * 64)
+    assert visits == [path, path]
 
 
 def forged_cache(path):

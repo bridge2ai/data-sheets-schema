@@ -262,7 +262,11 @@ def _verified_source_bytes(path, digest):
         raise ValueError('verified source must be an exact regular physical file')
     raw = target.read_bytes()
     after = target.lstat()
-    if (before != after or hashlib.sha256(raw).hexdigest() != digest):
+    # A read may legitimately update atime. Compare only source identity and
+    # mutation metadata; the exact captured bytes must still match their pin.
+    fields = ('st_dev', 'st_ino', 'st_mode', 'st_size', 'st_mtime_ns', 'st_ctime_ns')
+    if (tuple(getattr(before, key) for key in fields) != tuple(getattr(after, key) for key in fields)
+            or hashlib.sha256(raw).hexdigest() != digest):
         raise ValueError('verified module source bytes differ from their pin')
     return raw
 
