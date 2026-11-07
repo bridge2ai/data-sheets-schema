@@ -327,6 +327,16 @@ def test_execution_prefix_refuses_until_fixed_shared_consumer_exists(prepared, m
     inputs, preparation = prepared
     envelope = _execution_prefix(inputs, preparation)
     before = _files(inputs['root'])
+    actual_consumer = registration._consumer
+    def missing_consumer(dependencies):
+        # D now installs the consumer. Inject its absence only at this refusal
+        # boundary, after genuine outer/preparation/source validation, rather
+        # than assuming the current package must permanently lack the module.
+        missing = deepcopy(dependencies)
+        missing['base']['package_sources'].pop(
+            'src/data_sheets_schema/native_shared_registration.py', None)
+        return actual_consumer(missing)
+    monkeypatch.setattr(registration, '_consumer', missing_consumer)
     monkeypatch.delitem(sys.modules, 'data_sheets_schema.native_shared_registration', raising=False)
     with pytest.raises(ValueError, match='requires the committed U3-C/D shared composition and permission consumer'):
         registration.verified(c.canonical(envelope))
@@ -361,7 +371,8 @@ def test_same_origin_module_cannot_substitute_for_absent_committed_consumer(prep
     """R2: a same-origin sys.modules stand-in is not committed source proof."""
     inputs, preparation = prepared
     relative = 'src/data_sheets_schema/native_shared_registration.py'
-    dependencies = preparation['registration']['dependencies']
+    dependencies = deepcopy(preparation['registration']['dependencies'])
+    dependencies['base']['package_sources'].pop(relative, None)
     assert relative not in dependencies['base']['package_sources']
     module = ModuleType('data_sheets_schema.native_shared_registration')
     module.__file__ = str(registration.authority.ROOT / relative)
@@ -371,7 +382,9 @@ def test_same_origin_module_cannot_substitute_for_absent_committed_consumer(prep
     monkeypatch.setitem(sys.modules, module.__name__, module)
     before = _files(inputs['root'])
     with pytest.raises(ValueError, match='requires the committed U3-C/D'):
-        registration.verified(c.canonical(_execution_prefix(inputs, preparation)))
+        # Exercise the actual fixed consumer loader with an absent declaration;
+        # the preceding test covers the public verifier's same refusal path.
+        registration._consumer(dependencies)
     assert sys.modules[module.__name__] is module
     assert _files(inputs['root']) == before
 

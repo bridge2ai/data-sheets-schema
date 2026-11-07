@@ -251,6 +251,10 @@ Offline review ledger (issue publication deferred by the no-GitHub rule):
 - U3D-R7: a recovered no-input-I/O test rejected legitimate root-relative
   package source reads. Use the exact v2 source/interpreter roster for both
   spellings and remove its overly broad allowance for any repository path.
+- U3D-R8: two U3-A absence tests assumed D's consumer could never be installed.
+  Explicitly inject the missing declaration at the refusal boundary and retain
+  the same-origin stand-in rejection. The public verifier still performs real
+  preparation/source validation first; frozen v2 production code is unchanged.
 
 ### U3-A offline review ledger
 
