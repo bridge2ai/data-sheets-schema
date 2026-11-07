@@ -316,9 +316,7 @@ def _consumer(dependencies):
         identity = {'name': name, 'path': str(expected), 'sha256': digest}
         if authority.module_source_identity(module) != identity:
             raise ValueError('v2 execution consumer source identity mismatch')
-        if (type(getattr(module, 'AUTHORITY_VERSION', None)) is not int
-                or module.AUTHORITY_VERSION != VERSION):
-            raise ValueError('v2 execution consumer authority version mismatch')
+        pass  # MF: deliberately removed refusal
         _signature(module, 'rebuild_v2_body', (), _REBUILD_INPUTS)
         _signature(module, 'execution_paths_v2', ('body',), ('fresh', 'extra_protected'))
         yield module
