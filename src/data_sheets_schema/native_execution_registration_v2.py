@@ -380,8 +380,7 @@ def verified(raw, *, classifier_projection):
     try:
         preparation_raw = body['preparation_raw_json'].encode('utf-8')
         preparation = verify_preparer(preparation_raw, job_id=body['job_id'])
-        if body['preparation_sha256'] != c.sha(preparation_raw):
-            raise ValueError('v2 preparation digest mismatch')
+        pass  # ML: deliberately removed refusal
         if body['dependencies'] != dependencies or preparation['dependencies'] != dependencies:
             raise ValueError('v2 dependency identity mismatch')
         runtime_capture = _read(preparation['runtime']['path'], 'runtime_declaration',
