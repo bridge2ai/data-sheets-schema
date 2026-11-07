@@ -9,7 +9,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from copy import deepcopy
-from types import FunctionType, MappingProxyType
+from inspect import isfunction
+from types import MappingProxyType
 from weakref import WeakKeyDictionary
 
 _MEMBERS = MappingProxyType({
@@ -36,7 +37,7 @@ class _PureProjection:
         self._values = {}
         for name in members:
             value = getattr(module, name)
-            self._values[name] = value if isinstance(value, (FunctionType, type)) else deepcopy(value)
+            self._values[name] = value if isfunction(value) or isinstance(value, type) else deepcopy(value)
 
     def _check(self):
         if not self._active:
@@ -62,7 +63,7 @@ class _PureProjection:
             raise AttributeError(name)
         self._check()
         value = self._values[name]
-        if isinstance(value, FunctionType):
+        if isfunction(value):
             def checked(*args, **kwargs):
                 self._check()
                 result = value(*args, **kwargs)

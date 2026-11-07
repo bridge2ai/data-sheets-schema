@@ -48,7 +48,7 @@ def plan(python):
             raise ValueError('missing or empty suite: ' + name)
         command = [str(python), '-S', '-P', '-B',
                    str(ROOT / 'scripts/adhoc/run_native_u3c_round4_20261107.py'),
-                   '--out', str(SCRATCH / name), '--workers', '0' if name == 'collect' else '2']
+                   '--out', str(SCRATCH / name), '--workers', '0' if name in ('collect', 'census') else '2']
         if name == 'collect':
             command.append('--collect-only')
         rows[name] = {'nodes': nodes, 'selected_files': len({n.split('::', 1)[0] for n in nodes}),

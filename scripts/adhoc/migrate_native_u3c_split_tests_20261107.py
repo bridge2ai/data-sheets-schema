@@ -1,6 +1,6 @@
 """Migrate C4 test call sites to the explicit orchestration boundary (2026-11-07).
 
-Inputs: the C4 worktree's existing controls, attribution, fixture and scanner
+Inputs: the C4 worktree's existing controls, attribution and fixture
 tests. Outputs: import/call spelling changes only; assertions remain intact.
 Serves native U3-C round 4. This is idempotent and never edits another worktree.
 """
@@ -35,9 +35,6 @@ def main():
         ('attribution.live(', 'live_attribution.live(')])
     replace('tests/native_shared_captured_fixture.py', [
         ('controller.inherited.SOURCES_SHA256', 'controller.wire.CONTROLLER_SOURCES_SHA256')])
-    replace('tests/test_generation_specificity_skill.py', [
-        ('src/data_sheets_schema/native_shared_stage.py',
-         'src/data_sheets_schema/native_shared_stage/__init__.py')])
 
 
 if __name__ == '__main__':

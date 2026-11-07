@@ -23,6 +23,10 @@ INHERITED = ROOT / 'scripts/adhoc/run_native_u3a_tests_20261107.py'
 spec = importlib.util.spec_from_file_location('u3c4_inherited_runner', INHERITED)
 runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
+HYDRATOR = ROOT / 'scripts/adhoc/hydrate_native_u3c_round4_fairscape_20261107.py'
+_dependency_spec = importlib.util.spec_from_file_location('u3c4_fairscape_dependency', HYDRATOR)
+dependency = importlib.util.module_from_spec(_dependency_spec)
+_dependency_spec.loader.exec_module(dependency)
 SCRATCH = runner.EXECUTIONS / 'scratch-native-u3c-r4'
 NATIVE_PATHS = (
     '/Users/marcin/.local/bin/claude', '/Users/marcin/.local/bin/agy',
@@ -75,7 +79,8 @@ def git_state():
                                        cwd=ROOT, env=env, text=True).strip()
     return {'head': git('rev-parse', 'HEAD'),
             'status': git('status', '--porcelain', '--untracked-files=normal'),
-            'wrapper_sha256': digest(Path(__file__)), 'inherited_sha256': digest(INHERITED)}
+            'wrapper_sha256': digest(Path(__file__)), 'inherited_sha256': digest(INHERITED),
+            'fairscape_dependency': dependency.dependency_evidence()}
 
 
 class DeadlineClock:
@@ -99,12 +104,53 @@ runner.__file__ = str(Path(__file__).resolve())
 runner.PROFILE = sandbox_profile()
 _save = runner.save
 _parent = runner.parent
+_origin_witness = runner.origin_witness
+
+
+def origin_witness():
+    result = _origin_witness()
+    evidence = dependency.dependency_evidence()
+    origins = {}
+    for name, module in tuple(sys.modules.items()):
+        if name != 'fairscape_models' and not name.startswith('fairscape_models.'):
+            continue
+        if not evidence['available']:
+            raise RuntimeError('FAIRSCAPE loaded without the exact scratch dependency')
+        package = Path(evidence['package_root']) / 'fairscape_models'
+        path = getattr(module, '__file__', None)
+        if path is not None:
+            resolved = Path(path).resolve(strict=True)
+            if not resolved.is_relative_to(package):
+                raise RuntimeError('foreign FAIRSCAPE module: ' + name)
+            origins[name] = str(resolved)
+        for item in getattr(module, '__path__', ()):
+            if not Path(item).resolve(strict=True).is_relative_to(package):
+                raise RuntimeError('foreign FAIRSCAPE package namespace: ' + name)
+    return {**result, 'fairscape_dependency': evidence, 'fairscape_module_origins': origins}
 
 
 def save(path, value):
+    if path.name == 'bootstrap.json':
+        evidence = dependency.dependency_evidence()
+        value = {**value, 'fairscape_dependency': evidence}
+        if evidence['available']:
+            paths = list(value['paths'])
+            paths.insert(len(paths) - 1, evidence['package_root'])
+            pth_paths = [Path(name) for name in value['files'] if name.endswith('/u3a_paths.pth')]
+            if len(pth_paths) != 1:
+                raise RuntimeError('inherited bootstrap .pth identity changed')
+            pth = pth_paths[0]
+            if pth.read_text() != ''.join(item + '\n' for item in value['paths']):
+                raise RuntimeError('inherited bootstrap .pth contents changed')
+            if any('\n' in item or '\r' in item for item in paths):
+                raise RuntimeError('newline in dependency path')
+            pth.write_text(''.join(item + '\n' for item in paths), encoding='utf-8')
+            value = {**value, 'paths': paths, 'files': {**value['files'], str(pth): digest(pth)}}
     if path.name == 'plan.json':
         value = {**value, 'inherited_runner': str(INHERITED),
                  'inherited_runner_sha256': digest(INHERITED),
+                 'fairscape_hydrator_sha256': digest(HYDRATOR),
+                 'fairscape_dependency': dependency.dependency_evidence(),
                  'b_smoke_artifact_policy': smoke_evidence(),
                  'file_write_scope': str(SCRATCH) + ' plus /dev/null and /dev/tty',
                  'native_execution_policy': 'known literal/physical targets and native command-name regex denied'}
@@ -130,6 +176,7 @@ def parent(args):
 
 runner.save = save
 runner.parent = parent
+runner.origin_witness = origin_witness
 
 
 if __name__ == '__main__':

@@ -62,6 +62,15 @@ execution admission. The protected U1 hook remains pending.
   found the old stage-module path and an incomplete consumer list. The helper
   resolves module/package paths and includes the new pure C/D modules; this is
   diagnostic plumbing, not a change to A's guard.
+- **C4-R6 — addressed after the first census.** Full-body lint correctly rejects
+  an imported `FunctionType` constructor in a consumer, even when this file only
+  used it as a type predicate. The consumer now uses the standard-library
+  `inspect.isfunction` predicate for that exact test; it neither constructs code
+  nor imports a constructor under another spelling. A's guard stays unchanged.
+- **C4-R7 — addressed before suite execution.** A path migration had changed a
+  scanner test whose synthetic fixture still creates a `.py` module. Restored
+  that original assertion and removed the unnecessary migration; its existing
+  closure helper already understands both modules and package initializers.
 
 GitHub issue publication is deferred under the explicit offline/no-GitHub rule.
 Detailed test results, graph census and remaining failures belong in the Round 4
