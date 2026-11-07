@@ -463,6 +463,9 @@ Round-2 findings retained for the later issue workflow:
 - U3C-R2-6: a direct constructor could create a lookalike private control map.
   Require loader-created provenance plus the exact key/member/type/source roster,
   and check guarded helper state after calls as well as before them.
+- U3C-R2-7: the first saved-reader canary compared captured and proposed artifact
+  classes directly. Compare their exact pin and raw bytes; the different carrier
+  classes correctly distinguish observed bytes from a proposed publication.
 
 The report records actual test results and remaining gates. No declaration here
 authorizes dispatch, changes the shared-v1/native26 procedure, or substitutes for

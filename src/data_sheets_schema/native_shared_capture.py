@@ -1372,7 +1372,9 @@ def _check_advance_acknowledgement(run, actual, result, *, before_history_sha256
     if result['after_history_sha256'] != after.pin.sha256:
         raise ValueError('advance acknowledgement differs from reconstructed resulting journal')
     after_history = _history_prefix(run, after.pin.sha256)
-    if after_history.journal != after:
+    # The observed journal is CapturedArtifact; the derived effect is
+    # ProposedArtifact. Require exact pin and bytes, not carrier-class equality.
+    if after_history.journal.pin != after.pin or after_history.journal.raw != after.raw:
         raise ValueError('advance acknowledgement journal bytes differ from captured history')
     if result['state'] != _decision_at(run, after.pin.sha256).state:
         raise ValueError('advance acknowledgement differs from reconstructed resulting state')
