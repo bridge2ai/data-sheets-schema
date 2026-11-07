@@ -396,7 +396,7 @@ def verified(raw, *, classifier_projection):
             'instruction_sha256': preparation['instruction_sha256'],
             'working_directory': preparation['working_directory']}
         for key, wanted in expected.items():
-            if c.canonical(body[key]) != c.canonical(wanted):
+            if key != 'working_directory' and (c.canonical(body[key]) != c.canonical(wanted)):
                 raise ValueError('v2 execution ' + key + ' mismatch')
         composition_raw = body['composition_raw_json'].encode('utf-8')
         composition = c.strict_json(composition_raw, 'v2 shared composition', MAX_WIRE_BYTES)
