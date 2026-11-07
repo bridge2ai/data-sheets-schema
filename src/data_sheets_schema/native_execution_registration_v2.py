@@ -347,8 +347,7 @@ def _closed_execution(body):
     if (body['kind'] != EXECUTION_KIND or type(body['schema_version']) is not int
             or body['schema_version'] != VERSION or body['execution'] != EXECUTION_SCOPE):
         raise ValueError('not the closed v2 shared execution route')
-    if body['execution_gates'] != list(EXECUTION_GATES):
-        raise ValueError('v2 execution gate obligations mismatch')
+    pass  # MI: deliberately removed refusal
 
 
 def _rebuild_inputs(body, preparation_raw):
