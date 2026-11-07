@@ -62,6 +62,30 @@ def test_package_guard_census_admits_shared_and_u2_dependencies(record_property)
         assert outcomes['data_sheets_schema.' + name] == 'accepted'
 
 
+def test_real_shared_and_u2_imports_are_source_loaded_and_restored():
+    pins = deepcopy(authority.dependency_identity()['base']['package_sources'])
+    source = (b'from .api_runner import RunSpec\n'
+              b'from . import native_shared_selection as selection\n'
+              b'from .native_supervisor_authority_v2 import dependency_identity\n')
+    relative = 'src/data_sheets_schema/native_shared_registration.py'
+    # Supply fixture consumer bytes even after C/D integration. This exercises
+    # the source loader, not admission or committed proof for a real consumer.
+    pins[relative] = pin(source)
+    names = ('api_runner', 'native_shared_selection', 'native_supervisor_authority_v2',
+             'native_attribution_controller_v2', 'native_attribution_registration_v2')
+    previous = {name: sys.modules.get('data_sheets_schema.' + name) for name in names}
+    with authority.verified_source_module(NAME, path=authority.ROOT / relative,
+            raw=source, sha256=pin(source), package_sources=pins) as module:
+        assert module.RunSpec.__module__ == 'data_sheets_schema.api_runner'
+        for name in names:
+            loaded = sys.modules['data_sheets_schema.' + name]
+            assert loaded is not previous[name]
+            assert authority.module_source_identity(loaded)['sha256'] == pins[
+                'src/data_sheets_schema/' + name + '.py']
+    for name, old in previous.items():
+        assert sys.modules.get('data_sheets_schema.' + name) is old
+
+
 @pytest.mark.parametrize('source', [
     b'from .native_execution_registration_v2 import selection\n',
     b'import data_sheets_schema.native_execution_registration_v2 as boundary\n',
@@ -103,21 +127,39 @@ def test_deep_v1_import_refuses_before_loading(tmp_path, monkeypatch):
         authority.refuse_legacy_consumer_imports(source, name=NAME, package_sources=pins)
 
 
-@pytest.mark.parametrize('target', ['synthetic_dynamic', 'native_execution_registration'])
+def test_deferred_dependency_v1_import_refuses_when_called(tmp_path, monkeypatch):
+    source = b'from .first import deferred\n'
+    legacy = 'data_sheets_schema.native_execution_registration'
+    pins = graph_fixture(tmp_path, monkeypatch, {NAME: source,
+        'data_sheets_schema.first': b'def deferred():\n    from .native_execution_registration import verified\n    return verified\n',
+        legacy: b'def verified(): pass\n'})
+    monkeypatch.setitem(sys.modules, legacy, ModuleType(legacy))
+    with authority.verified_source_module(NAME,
+            path=tmp_path / 'src/data_sheets_schema/native_shared_registration.py',
+            raw=source, sha256=pin(source), package_sources=pins) as module:
+        with pytest.raises(ValueError, match='forbidden v1 execution authority'):
+            module.deferred()
+
+
+@pytest.mark.parametrize('target', ['synthetic_dynamic', 'synthetic_unpinned', 'native_execution_registration'])
 def test_dependency_runtime_import_is_source_loaded_or_v1_refused(tmp_path, monkeypatch, target):
     source = b'from .first import result\n'
     child = 'data_sheets_schema.' + target
     dependency = ('import importlib\nresult = importlib.import_module(' + repr(child) + ')\n').encode()
     pins = graph_fixture(tmp_path, monkeypatch, {NAME: source,
         'data_sheets_schema.first': dependency, child: b'value = "pinned dynamic dependency"\n'})
+    if target == 'synthetic_unpinned':
+        del pins['src/' + child.replace('.', '/') + '.py']
     cached = ModuleType(child)
     monkeypatch.setitem(sys.modules, child, cached)
     context = authority.verified_source_module(NAME,
         path=tmp_path / 'src/data_sheets_schema/native_shared_registration.py',
         raw=source, sha256=pin(source), package_sources=pins)
-    if target == 'native_execution_registration':
-        with pytest.raises(ValueError, match='forbidden v1 execution authority'), context:
-            pytest.fail('runtime v1 import was admitted')
+    if target in ('native_execution_registration', 'synthetic_unpinned'):
+        refusal = ('forbidden v1 execution authority' if target == 'native_execution_registration'
+                   else 'consumer package import is not pinned')
+        with pytest.raises(ValueError, match=refusal), context:
+            pytest.fail('runtime forbidden import was admitted')
     else:
         with context as module:
             assert module.result.value == 'pinned dynamic dependency'
