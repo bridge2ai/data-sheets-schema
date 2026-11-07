@@ -71,4 +71,3 @@ def test_live_capture_forwards_projection_and_refuses_before_effects(monkeypatch
     with pytest.raises(ExpectedRefusal, match="deliberate A refusal"):
         invoke()
     assert calls == ["scope opened", "verification refused", "scope closed"]
-

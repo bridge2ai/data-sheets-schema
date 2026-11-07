@@ -89,6 +89,10 @@ execution admission. The protected U1 hook remains pending.
   tree while it ran. The runner returned 125 on source stability. Production
   bytes did not change; repeat the canary on the committed frozen helper state.
 
+- **C4-R10 — addressed at handoff.** Final whitespace review found one surplus
+  EOF blank line in the saved split helper and one in its split regression test.
+  Removed only those blank lines; no executable statement or assertion changed.
+
 GitHub issue publication is deferred under the explicit offline/no-GitHub rule.
 Detailed test results, graph census and remaining failures belong in the Round 4
 section of the external review report after validation.
