@@ -203,7 +203,8 @@ the closed `CONSUMER_OWNED_MODULES` list: `native_shared_attribution`,
 `native_shared_streams`, `native_shared_execution`, `native_shared_gates`,
 `native_shared_permissions`, `native_shared_publication`,
 `native_shared_registration`, `native_shared_results`, and
-`native_shared_schema_gates` (all under `data_sheets_schema`). Legitimate dynamic
+`native_shared_schema_gates`, `native_execution_engine`, `native_gate_engine`, and
+`native_subscription_guard` (all under `data_sheets_schema`). Legitimate dynamic
 constructs in reviewed dependencies, including U2, are allowed. Implicit
 parent package initializers below `data_sheets_schema` are part of this graph
 and are compiled from pinned bytes too, including empty initializers. A missing
@@ -214,6 +215,12 @@ reviewed dependencies; cached package bindings are temporarily replaced and
 restored. Imports of either U3-A verifier boundary module refuse, including
 `from .native_execution_registration_v2 import selection` and function imports.
 Consumers must use direct package dependencies, not bootstrap re-exports.
+Dependency function bodies may define deferred legacy routes (for example,
+`api_runner → native_shared_render`); they are not executed by importing the
+module. The static dependency traversal covers import-time code; the finder
+source-loads deferred imports when reached and refuses v1 authority then, even
+when already cached. Consumer-owned modules are linted in full, including their
+deferred bodies. This admits shared utilities without authorizing their v1 routes.
 The guard is **lint**; independent source review plus digest pins are enforcement.
 Assigned `__signature__`, `sys._getframe`, `inspect.currentframe`, and `sys.modules`
 are refused in consumer-owned source as cheap hardening, not a sandbox against

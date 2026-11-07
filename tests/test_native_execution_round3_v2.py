@@ -103,6 +103,20 @@ def test_deep_v1_import_refuses_before_loading(tmp_path, monkeypatch):
         authority.refuse_legacy_consumer_imports(source, name=NAME, package_sources=pins)
 
 
+def test_deferred_dependency_v1_import_refuses_when_called(tmp_path, monkeypatch):
+    source = b'from .first import deferred\n'
+    legacy = 'data_sheets_schema.native_execution_registration'
+    pins = graph_fixture(tmp_path, monkeypatch, {NAME: source,
+        'data_sheets_schema.first': b'def deferred():\n    from .native_execution_registration import verified\n    return verified\n',
+        legacy: b'def verified(): pass\n'})
+    monkeypatch.setitem(sys.modules, legacy, ModuleType(legacy))
+    with authority.verified_source_module(NAME,
+            path=tmp_path / 'src/data_sheets_schema/native_shared_registration.py',
+            raw=source, sha256=pin(source), package_sources=pins) as module:
+        with pytest.raises(ValueError, match='forbidden v1 execution authority'):
+            module.deferred()
+
+
 @pytest.mark.parametrize('target', ['synthetic_dynamic', 'native_execution_registration'])
 def test_dependency_runtime_import_is_source_loaded_or_v1_refused(tmp_path, monkeypatch, target):
     source = b'from .first import result\n'

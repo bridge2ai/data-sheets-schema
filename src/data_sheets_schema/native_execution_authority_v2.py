@@ -51,7 +51,21 @@ CONSUMER_OWNED_MODULES = frozenset('data_sheets_schema.' + name for name in (
     'native_shared_phase', 'native_shared_policy', 'native_shared_receipts',
     'native_shared_stage', 'native_shared_streams', 'native_shared_execution',
     'native_shared_gates', 'native_shared_permissions', 'native_shared_publication',
-    'native_shared_registration', 'native_shared_results', 'native_shared_schema_gates'))
+    'native_shared_registration', 'native_shared_results', 'native_shared_schema_gates',
+    'native_execution_engine', 'native_gate_engine', 'native_subscription_guard'))
+
+
+def _import_time_nodes(tree):
+    """Dependency function bodies are checked when their imports are reached.
+
+    Existing shared utilities contain deferred v1 routes. Merely defining those
+    functions does not import v1. The consumer finder refuses their use if called.
+    Consumer-owned source is linted in full instead, including deferred bodies.
+    """
+    yield tree
+    if not isinstance(tree, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+        for child in ast.iter_child_nodes(tree):
+            yield from _import_time_nodes(child)
 
 
 def refuse_legacy_consumer_imports(raw, *, name, package_sources):
@@ -59,7 +73,7 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
 
     This is lint, enforced by review and digest pins, not a Python sandbox.
     Dynamic constructs and star imports are linted only in the closed C/D-owned
-    list. Static v1 imports refuse throughout the graph. U3-A boundary imports
+    list. Reached v1 imports refuse throughout the graph. U3-A boundary imports
     refuse rather than exposing their normally imported bootstrap attributes.
     Every package dependency and implicit parent initializer below the trusted
     top-level package is read from its declared pin. Nested namespace parents
@@ -120,7 +134,8 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
         package = module if relative.endswith('/__init__.py') else module.rpartition('.')[0]
         targets = []
         aliases = {'__builtins__': 'builtins'}
-        for node in ast.walk(tree):
+        nodes = list(ast.walk(tree) if owned else _import_time_nodes(tree))
+        for node in nodes:
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     aliases[alias.asname or alias.name.split('.')[0]] = (
@@ -139,7 +154,7 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
         def import_machinery(node):
             return qualified(node).split('.')[0] in {'importlib', 'builtins', 'runpy'}
 
-        for node in ast.walk(tree):
+        for node in nodes:
             dynamic = (isinstance(node, ast.Name) and
                        (node.id in dynamic_names or qualified(node).split('.')[-1] in dynamic_names)
                        or isinstance(node, ast.Attribute) and
@@ -279,9 +294,10 @@ class _VerifiedBytesLoader(importlib.abc.Loader):
 
 
 class _VerifiedBytesFinder(importlib.abc.MetaPathFinder):
-    def __init__(self, sources, *, consumer=False):
+    def __init__(self, sources, *, consumer=False, checked=()):
         self.sources = sources
         self.consumer = consumer
+        self.checked = set(checked)
 
     def find_spec(self, fullname, path=None, target=None):
         if self.consumer and fullname in _LEGACY_CONSUMER_MODULES:
@@ -296,9 +312,9 @@ class _VerifiedBytesFinder(importlib.abc.MetaPathFinder):
         filename, raw, digest, package = source
         if raw is None:
             raw = _verified_source_bytes(filename, digest)
-        if self.consumer and raw:
+        if self.consumer and raw and fullname not in self.checked:
             pins = {str(item[0].relative_to(ROOT)): item[2] for item in self.sources.values()}
-            refuse_legacy_consumer_imports(raw, name=fullname, package_sources=pins)
+            self.checked.update(refuse_legacy_consumer_imports(raw, name=fullname, package_sources=pins))
         loader = _VerifiedBytesLoader(fullname, filename, raw, digest, package=package)
         return importlib.util.spec_from_loader(fullname, loader, origin=str(filename), is_package=package)
 
@@ -333,6 +349,7 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
     _main_thread()
     _source_identity(name, path, raw, sha256)
     sources = {name: (Path(path), raw, sha256, False)}
+    graph = {}
     if package_sources is not None:
         graph = refuse_legacy_consumer_imports(raw, name=name, package_sources=package_sources)
         for imported, digest in graph.items():
@@ -368,7 +385,7 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
     old_bytecode = sys.dont_write_bytecode
     old_path = list(sys.path)
     old_meta = list(sys.meta_path)
-    finder = _VerifiedBytesFinder(sources, consumer=package_sources is not None)
+    finder = _VerifiedBytesFinder(sources, consumer=package_sources is not None, checked=graph)
     try:
         sys.dont_write_bytecode = True
         sys.meta_path.insert(0, finder)
