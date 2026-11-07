@@ -20,7 +20,8 @@ from data_sheets_schema import native_shared_evidence as evidence
 from data_sheets_schema import native_execution_registration_v2 as registration
 from data_sheets_schema.native_shared_evidence import read_regular
 from data_sheets_schema import source_attribution_preflight as preflight
-from tests.test_native_shared_selection import declaration, pin, save, artifact
+from tests.test_native_shared_selection import pin, save, artifact
+from tests.test_native_shared_controller import declaration, synthetic_declaration
 from tests.test_native_shared_render import native_spec
 from tests.test_native_execution_registration_v2 import inputs as execution_inputs, isolated_modules
 from tests.test_source_attribution_preflight import inputs as attribution_inputs, edited, claim

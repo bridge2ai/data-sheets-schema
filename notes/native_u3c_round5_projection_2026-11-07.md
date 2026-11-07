@@ -53,3 +53,10 @@ GitHub issue publication remains deferred by the explicit offline restriction.
   full/core paths. A's source-only reload correctly discards those patches. C's
   composition tests must use the committed full/core schemas, not inject test
   overrides into verified modules or relax the selection check.
+- **C5-R3 — same fixture migration in attribution.** The first broad C attempt
+  reached 15 passes and 14 setup errors at the same actual-schema check in the
+  attribution fixture. Stopped its task-owned pytest worker with SIGINT; retained
+  the partial JUnit/log and verified source stability and descendant cleanup.
+  Attribution now imports the same real-schema declaration fixture as controller
+  tests. No production check or test assertion changed; canary this route before
+  restarting the broad suite.
