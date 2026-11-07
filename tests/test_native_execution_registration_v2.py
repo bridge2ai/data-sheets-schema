@@ -83,6 +83,14 @@ def _files(root):
             for path in root.rglob('*') if path.is_file()}
 
 
+def _entries(root):
+    """Retain empty directories and links as well as regular-file names."""
+    return {(str(path.relative_to(root)),
+             'symlink' if path.is_symlink() else 'directory' if path.is_dir()
+             else 'file' if path.is_file() else 'other')
+            for path in root.rglob('*')}
+
+
 def _prepare(inputs):
     return registration.prepare(inputs['selection'], inputs['runtime_path'], **inputs['kwargs'])
 
@@ -224,6 +232,63 @@ def test_v1_execution_and_v2_envelope_cross_refuse(prepared):
     assert not (inputs['root'] / 'absent-review').exists()
 
 
+def test_complete_valid_v1_execution_refused_by_v2_without_reservation(
+        isolated_modules, tmp_path, monkeypatch):
+    """Actual v1 registration verification first; no native/runtime invocation."""
+    from tests.test_native_execution import make_native_case
+
+    monkeypatch.chdir(registration.authority.ROOT)
+    v1_manifest = json.loads((legacy.authority.ROOT / legacy.composition.SOURCES_PATH).read_bytes())
+    names = (set(isolated_modules) | set(v1_manifest['modules'])
+             | set(legacy.authority.neutral.ADDITIONAL) | set(legacy.authority.ADDITIONAL))
+    absent = object()
+    previous = {name: sys.modules.pop(name, absent) for name in names}
+    old_path = list(sys.path)
+    original = subprocess.Popen
+    calls = []
+
+    def local_git_only(argv, *args, **kwargs):
+        assert not kwargs.get('shell'), 'cross-version verification must not launch a shell'
+        assert isinstance(argv, (list, tuple)) and Path(argv[0]).name == 'git', (
+            'cross-version verification must not invoke the synthetic CLI, native, auth or provider')
+        calls.append(tuple(argv))
+        return original(argv, *args, **kwargs)
+
+    monkeypatch.setattr(subprocess, 'Popen', local_git_only)
+    try:
+        case = make_native_case(tmp_path.resolve() / 'complete-v1')
+        assert legacy.verified(case['raw']) == case['value']
+        reservations = [Path(case['value'][name])
+                        for name in ('attempt_directory', 'evidence_directory')]
+        assert all(not path.exists() and not path.is_symlink() for path in reservations)
+        before_files, before_entries = _files(tmp_path), _entries(tmp_path)
+        assert sys.path == old_path
+
+        # The successful v1 constructor loads its frozen bare aliases. This is
+        # test-owned isolation, not a production fallback that hides origins.
+        # The following refusal must be the actual wire/version boundary.
+        for name in names:
+            sys.modules.pop(name, None)
+        with pytest.raises(ValueError, match='v2 launch requires an exact v2 authority envelope'):
+            registration.verified(case['raw'])
+        assert _files(tmp_path) == before_files
+        assert _entries(tmp_path) == before_entries
+        with pytest.raises(ValueError, match='v2 launch requires an exact v2 authority envelope'):
+            registration.admit(case['raw'], **case['kwargs'])
+        assert _files(tmp_path) == before_files
+        assert _entries(tmp_path) == before_entries
+        assert all(not path.exists() and not path.is_symlink() for path in reservations)
+        assert sys.path == old_path
+        assert not names.intersection(sys.modules)
+        assert calls and all(Path(call[0]).name == 'git' for call in calls)
+    finally:
+        sys.path[:] = old_path
+        for name, module in previous.items():
+            sys.modules.pop(name, None)
+            if module is not absent:
+                sys.modules[name] = module
+
+
 def _execution_prefix(inputs, preparation):
     """Fabricated join prefix ONLY: deliberately no real C/permission consumer."""
     prepared_raw = c.canonical(preparation)
@@ -241,6 +306,21 @@ def _execution_prefix(inputs, preparation):
             'selection_sha256': body['selection']['sha256'], 'max_draft_checks': body['max_draft_checks'],
             'instruction_sha256': body['instruction_sha256'], 'working_directory': body['working_directory'],
             'composition_raw_json': composition_raw.decode(), 'composition_sha256': c.sha(composition_raw)}}
+
+
+def test_v1_refuses_v2_execution_envelope_and_inner_join_prefix(prepared):
+    """Wire rejection only: this prefix lacks the real U3-C/D C/permission proof."""
+    inputs, preparation = prepared
+    envelope = _execution_prefix(inputs, preparation)
+    assert envelope['registration']['kind'] == registration.EXECUTION_KIND
+    assert envelope['registration']['schema_version'] == 2
+    before_files, before_entries = _files(inputs['root']), _entries(inputs['root'])
+    for value in (envelope, envelope['registration']):
+        with pytest.raises(ValueError, match='not a supported explicit native execution registration'):
+            legacy.verified(c.canonical(value))
+        assert _files(inputs['root']) == before_files
+        assert _entries(inputs['root']) == before_entries
+    assert not Path(selection.capture(inputs['selection']).document()['stage_root']).exists()
 
 
 def test_execution_prefix_refuses_until_fixed_shared_consumer_exists(prepared, monkeypatch):

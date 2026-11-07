@@ -66,8 +66,12 @@ def dependency_site():
 def origin_witness():
     import data_sheets_schema
     package = ROOT / "src/data_sheets_schema"
-    paths = [str(Path(path).resolve()) for path in data_sheets_schema.__path__]
-    if paths != [str(package)]:
+    raw_paths = [str(path) for path in data_sheets_schema.__path__]
+    paths = [str(Path(path).resolve()) for path in raw_paths]
+    # Collection may repeat this checkout's src on sys.path; namespace packages
+    # then repeat the same location. Preserve that evidence without admitting
+    # an empty namespace or even one foreign location.
+    if not paths or any(path != str(package) for path in paths):
         raise RuntimeError("mixed project namespace: " + repr(paths))
     editable = [repr(finder) for finder in sys.meta_path
                 if "__editable__" in repr(finder)]
@@ -87,6 +91,7 @@ def origin_witness():
             if not Path(item).resolve().is_relative_to(package):
                 raise RuntimeError("foreign project subpackage: " + name)
     return {"python": sys.executable, "prefix": sys.prefix,
+            "package_paths_raw": raw_paths,
             "package_paths": paths, "module_origins": origins,
             "sys_path": list(sys.path), "editable_finders": editable,
             "no_user_site": bool(sys.flags.no_user_site),

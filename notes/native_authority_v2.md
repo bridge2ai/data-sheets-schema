@@ -224,3 +224,19 @@ findings for the later issue/review workflow:
   PR or main evidence. V2 now binds the event and committed workflow bytes and
   requires the complete applicable roster, independently tested against the
   current workflows. Frozen v1 evidence rules remain unchanged.
+- U3A-R5 (coverage strengthened; integrated acceptance pending): initial
+  cross-version tests used a minimal v1 header and a genuine v2 preparation.
+  The added test constructs a complete synthetic v1 execution registration,
+  verifies it through v1, then requires envelope-specific v2 refusals without
+  reservations. V1 also refuses a v2 execution wire/join prefix. A complete
+  valid v2 E and positive execution admission still require the C/D consumer;
+  wire rejection must not be described as that integrated acceptance.
+- U3A-R6 (test-driver correction): full collection produced repeated identical
+  own-package namespace entries, which the driver's single-entry comparison
+  incorrectly called a mixed origin. Accept only a nonempty namespace whose
+  every resolved member is exactly the own package directory, retaining the
+  raw/resolved lists with duplicates. Empty, mixed, foreign and subdirectory
+  roots still refuse, as do foreign loaded modules/subpackages and editable
+  finders. No production authority rule or namespace is altered. The initial
+  23,343-node collection's wrapper failure is retained; its later origin checks
+  were not reached and cannot be claimed passed.
