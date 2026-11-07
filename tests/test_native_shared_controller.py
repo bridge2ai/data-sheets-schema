@@ -69,6 +69,8 @@ def test_exact_eighteen_helpers_and_readonly_grammar(bound, monkeypatch):
     assert '--strict' in shlex.split(commands['final_receipts'])
     monkeypatch.setattr(legacy, 'load_controls', lambda: pytest.fail('v1 loader used'))
     with controller.authority.loaded_dependencies(value['dependencies']) as controls:
+        assert policy.classify_bash(commands['final_receipts'] + ' --write',
+            value['policy']['python'], set(), value['policy'], controls)[0] == 'not_prescribed'
         for name, command in commands.items():
             assert policy.classify_bash(command, value['policy']['python'], set(), value['policy'], controls)[0] == 'prescribed', name
             assert policy.classify_bash(command + ' --unregistered', value['policy']['python'], set(), value['policy'], controls)[0] == 'not_prescribed', name

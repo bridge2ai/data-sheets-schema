@@ -188,7 +188,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     if initial_structure:
         import json
         result = rc.initial_structure_result(assessment_block)
-        click.echo(json.dumps(result, sort_keys=True))
+        click.echo(json.dumps(result, sort_keys=True, default=str))
         if not result['structure_passed']:
             sys.exit(1)
         return
@@ -275,9 +275,20 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
         # An initial structural check cannot certify a pending coverage floor.
         # Only --initial-structure reports structural success separately.
         sys.exit(1)
-    if strict and block.get('native_receipt_stage') == 'phase1_initial' and (
-            block.get('final_stage_complete') is not False or block.get('passed') is not True):
-        sys.exit(1)
+    if strict:
+        from data_sheets_schema import receipt_completion_policy as cp
+        try:
+            selected = cp.policy_from_block(block)
+        except ValueError:
+            sys.exit(1)
+        native_selected = native_capture is not None or (selected is not None and
+            selected['registration'].get('kind') == 'd4d_native_shared_receipt_policy')
+        if native_selected:
+            click.echo(f"· native receipt stage: {block.get('native_receipt_stage', 'unknown')}")
+        if (block.get('native_receipt_stage') == 'phase1_initial'
+                or (native_selected and block.get('final_stage_complete') is not True)
+                or (block.get('coverage_floor') or {}).get('state') == 'pending'):
+            sys.exit(1)
 
 
 def strict_failure(block: dict) -> bool:

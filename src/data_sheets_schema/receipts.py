@@ -2703,7 +2703,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
             result = {**base, **checked}
             selected_receipts.policy_from_block(result, policy=policy)
             return result
-        except (ValueError, OSError) as exc:
+        except (ValueError, OSError, TypeError, KeyError) as exc:
             return {**base, 'checked': False, 'reason': f'native receipt reconstruction refused: {exc}'}
     if not receipt.exists():
         return {**base, "checked": False, "reason": f"no coverage receipt at {receipt}"}

@@ -8,6 +8,7 @@ The same observer is used live and when replaying captured native events.
 from __future__ import annotations
 
 from copy import deepcopy
+import json
 import os
 import re
 import shlex
@@ -246,6 +247,9 @@ class PhaseState:
         value = c.strict_json(raw.encode('utf-8'), 'settled ' + kind, c.HARD_LIMITS['request_bytes'])
         _require(type(value) is dict, 'helper JSON result must be an object')
         if kind == 'phase1_receipts':
+            c.exact(value, {'mode', 'structure_passed', 'floors', 'floor_acceptance_claimed',
+                'summary', 'reason', 'findings', 'structural_checks', 'native_initial_inputs',
+                'receipt_completion_policy'}, 'initial receipt result')
             _require(value.get('mode') == 'initial_structure'
                      and type(value.get('structure_passed')) is bool
                      and value['structure_passed'] is success
@@ -321,17 +325,29 @@ class PhaseState:
                 'Bash result is contradictory, interrupted or pending')
             _require(type(item.get('content')) is str and type(meta.get('stdout')) is str,
                      'Bash result must retain explicit stdout and tool content')
-            if kind in _JSON_HELPERS:
+            if kind == 'phase1_receipts' and not success:
+                # Nonzero initial checks are retryable, whatever their stdout.
+                pass
+            elif kind in _JSON_HELPERS:
                 left = c.strict_json(item['content'].encode('utf-8'), 'tool content', c.HARD_LIMITS['request_bytes'])
                 right = c.strict_json(meta['stdout'].encode('utf-8'), 'helper stdout', c.HARD_LIMITS['request_bytes'])
                 _require(c.canonical(left) == c.canonical(right), 'helper stdout and tool content disagree')
                 self._json_success(kind, meta['stdout'], success, row, identity, decision)
             else:
                 _require(item['content'] == meta['stdout'], 'helper stdout and tool content disagree')
-                if kind == 'final_receipts':
-                    # Strict receipts emit text. Structural JSON must never earn
-                    # final credit, including when a saved call is relabelled.
-                    _require(not meta['stdout'].lstrip().startswith('{'),
+                if kind == 'final_receipts' and success:
+                    # Misassociation tripwire; command identity and independent
+                    # floor reconstruction remain the acceptance boundaries.
+                    raw = meta['stdout']
+                    try:
+                        json.loads(raw)
+                    except ValueError:
+                        is_json = False
+                    else:
+                        is_json = True
+                    _require(not is_json and 'initial_structure' not in raw
+                             and 'floor_acceptance_claimed' not in raw
+                             and '· native receipt stage: final' in raw.splitlines(),
                              'final receipts require strict output, not structural JSON')
             if kind == 'draft':
                 _require(codes[0] in (0, 1), 'draft checker returned an unusable exit')

@@ -269,7 +269,11 @@ def parent(args):
     command += args.nodes
     commit = subprocess.check_output(["git", "--no-replace-objects", "rev-parse", "HEAD"],
                                      cwd=ROOT, env=env, text=True).strip()
+    tested_diff = subprocess.check_output(
+        ['git', 'diff', '--binary', 'HEAD'], cwd=ROOT, env=env)
+    (out / 'tested.diff').write_bytes(tested_diff)
     save(out / "plan.json", {"command": command, "source_root": str(ROOT),
+         "tested_diff_sha256": hashlib.sha256(tested_diff).hexdigest(),
          "source_commit": commit, "runner_sha256": digest(Path(__file__)),
          "sandbox_sha256": digest(profile), "environment": env,
          "deadline_seconds": DEADLINE, "workers": args.workers,
@@ -299,7 +303,7 @@ def parent(args):
                     owned.signal(signal.SIGSTOP); paused = True
                 elif paused and not requested:
                     owned.signal(signal.SIGCONT); paused = False
-                time.sleep(0.25)
+                time.sleep(60 if paused else 0.25)
         except BaseException as exc:
             interrupted = type(exc).__name__
         finally:

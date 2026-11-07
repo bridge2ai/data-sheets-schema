@@ -85,7 +85,10 @@ def test_actual_cli_refuses_pending_initial_floor(tmp_path, monkeypatch, declara
         'native_receipt_stage': 'phase1_initial', 'final_stage_complete': False,
         'slots': counts, policy.BLOCK_KEY: policy.block_identity(chosen),
         'coverage_floor': floor, 'summary': 'initial structural check only',
-        'findings': [], 'non_checks': []}
+        'findings': [], 'non_checks': [],
+        'instrument': receipt_lib.RERECEIPTS_INSTRUMENT, 'findings_gated': 0,
+        'chunks': {'total': 1, 'reviewed': 1},
+        'snippets': {'total': 1, 'verified': 1, 'mismatched': 0, 'unchecked': 0}}
     root = tmp_path / 'cli'; root.mkdir()
     full = root / 'full.yaml'; full.write_text('id: test\n')
     bundle = root / 'bundle.md'; bundle.write_text('source\n')
@@ -98,3 +101,31 @@ def test_actual_cli_refuses_pending_initial_floor(tmp_path, monkeypatch, declara
     assert 'registered receipt coverage: pending' in result.output
     assert isinstance(result.exception, SystemExit)
     assert not paths['provenance'].exists()
+
+
+@pytest.mark.parametrize('change,exit_code', [({}, 0),
+    ({'final_stage_complete': False}, 1), ({'final_stage_complete': None}, 1),
+    ({'coverage_floor': {'state': 'pending', 'passed': False}}, 1),
+    ({'native_receipt_stage': 'phase1_initial'}, 1)])
+def test_strict_native_final_requires_completion_and_nonpending_floor(
+        tmp_path, monkeypatch, declaration, change, exit_code):
+    from click.testing import CliRunner
+    from data_sheets_schema import receipts as rc
+    from data_sheets_schema.cli import receipts as cli
+    from tests.test_native_initial_structure_mode import assessment
+    chosen = policy.select_policy(selected(declaration, registered=True))
+    block = assessment()
+    block.update(native_receipt_stage='final', final_stage_complete=True,
+        coverage_floor=policy.evaluate_floor(block['slots'], chosen))
+    block[policy.BLOCK_KEY] = policy.block_identity(chosen)
+    block.update(change)
+    full = tmp_path / 'full.yaml'; full.write_text('id: test\n')
+    bundle = tmp_path / 'bundle.md'; bundle.write_text('source\n')
+    monkeypatch.setattr(cli, '_run_paths', lambda *_: {
+        'core_dir': tmp_path, 'full': full, 'provenance': tmp_path / 'absent.yaml'})
+    monkeypatch.setattr(rc, 'block_for', lambda *a, **k: deepcopy(block))
+    result = CliRunner().invoke(cli.receipts, ['check', '--method', 'native-test',
+        '--label', 'local', '--project', 'NEUTRAL', '--bundle', str(bundle), '--strict'])
+    assert result.exit_code == exit_code, result.output
+    if not exit_code:
+        assert '· native receipt stage: final' in result.output.splitlines()

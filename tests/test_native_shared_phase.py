@@ -73,7 +73,9 @@ class Trace:
             value = {'checked': True, 'passed': not code, 'protocol_version': 7}
         elif value is None and name == 'phase1_receipts':
             value = {'mode': 'initial_structure', 'structure_passed': not code,
-                     'floors': 'pending', 'floor_acceptance_claimed': False}
+                     'floors': 'pending', 'floor_acceptance_claimed': False,
+                     'summary': None, 'reason': None, 'findings': [], 'structural_checks': {},
+                     'native_initial_inputs': None, 'receipt_completion_policy': None}
         elif value is None and name == 'advance':
             after = after or decision(number=self.number)
             value = {'kind': c.KINDS['advance_result'], 'version': 1,
@@ -81,7 +83,8 @@ class Trace:
                 'attempt_id': 'attempt', 'session_id': 'session', 'advance_tool_use_id': identity,
                 'before_history_sha256': before.history_sha256,
                 'after_history_sha256': after.history_sha256, 'state': after.state, 'publications': []}
-        return self.result(identity, code=code, text=json.dumps(value) if value is not None else 'checked',
+        return self.result(identity, code=code, text=json.dumps(value) if value is not None else (
+            '· native receipt stage: final' if name == 'final_receipts' else 'checked'),
                            after=after, mutation=mutation)
 
     def write(self, role, *, path=None, code=0):
@@ -134,14 +137,14 @@ def test_complete_ordered_chain_and_detached_replay():
     assert trace.state.report()['checks']
 
 
-@pytest.mark.parametrize('relabel', [False, True])
+@pytest.mark.parametrize('relabel', [None, '', '\ufeff', 'x', '\x1b[0m'])
 def test_saved_receipt_results_replay_both_roles_and_refuse_structural_as_final(tmp_path, relabel):
     """Replay serialized event bytes; decisions are separately reconstructed fixtures."""
     trace = Trace(); trace.assembly(); trace.final_checks(); trace.finish()
     events = [event for event, _ in trace.events]
     structural = next(event for event in events if event.get('tool_use_result', {}).get(
         'stdout', '').startswith('{"mode": "initial_structure"'))
-    if relabel:
+    if relabel is not None:
         final_call = next(event for event in events if event.get('type') == 'assistant'
             and event['message']['content'][0]['input'].get('command') == shlex.join(trace.commands['final_receipts']))
         identity = final_call['message']['content'][0]['id']
@@ -149,15 +152,15 @@ def test_saved_receipt_results_replay_both_roles_and_refuse_structural_as_final(
             and event['message']['content'][0]['tool_use_id'] == identity)
         # Keep the exact strict call and successful exit; substitute only the
         # initial structural payload in both independently compared channels.
-        result['tool_use_result']['stdout'] = structural['tool_use_result']['stdout']
-        result['message']['content'][0]['content'] = structural['message']['content'][0]['content']
+        result['tool_use_result']['stdout'] = relabel + structural['tool_use_result']['stdout']
+        result['message']['content'][0]['content'] = relabel + structural['message']['content'][0]['content']
     path = tmp_path / 'receipt-events.json'
     path.write_text(json.dumps(events))
     clone = Trace()
     def replay():
         for event, (_, current) in zip(json.loads(path.read_text()), trace.events, strict=True):
             clone.state.observe(event, stage_decision=current)
-    if relabel:
+    if relabel is not None:
         with pytest.raises(ValueError, match='strict output, not structural JSON'):
             replay()
         assert not clone.state.report(complete=True)['passed']
@@ -505,3 +508,67 @@ def test_bash_error_flag_remains_explicit_and_boolean(flag):
             item['is_error'] = flag
     with pytest.raises(ValueError, match='boolean outcome'):
         trace.result(identity, mutation=change)
+
+
+def _initial_check_ready():
+    trace = Trace()
+    trace.helper('chunk_check'); trace.helper('source_scope')
+    trace.write('full'); trace.write('receipt')
+    trace.helper('full_schema'); trace.helper('full_terms')
+    return trace
+
+
+@pytest.mark.parametrize('change', [{'floor_acceptance_claimed': True}, {'floors': 'passed'},
+    {'mode': 'final'}, {'mode': None}, {'structure_passed': False},
+    {'coverage_floor': {'state': 'passed', 'passed': True}}])
+def test_initial_json_contract_violations_are_sticky(change):
+    from data_sheets_schema import receipts as rc
+    from tests.test_native_initial_structure_mode import assessment
+    trace = _initial_check_ready()
+    value = {**rc.initial_structure_result(assessment()), **change}
+    with pytest.raises(ValueError, match='initial receipt result'):
+        trace.helper('phase1_receipts', value=value)
+    with pytest.raises(ValueError, match='already failed'):
+        trace.write('receipt')
+
+
+@pytest.mark.parametrize('mutation', [None, 'missing'])
+def test_initial_producer_json_joins_observer(mutation):
+    from data_sheets_schema import receipts as rc
+    from tests.test_native_initial_structure_mode import assessment
+    trace = _initial_check_ready()
+    raw = json.dumps(rc.initial_structure_result(assessment(mutation)), sort_keys=True)
+    identity = trace.call('Bash', {'command': shlex.join(trace.commands['phase1_receipts'])})
+    assert trace.result(identity, code=int(mutation is not None), text=raw) == (
+        ('seal_phase1',) if mutation is None else ())
+    assert not trace.state.report()['problems']
+
+
+@pytest.mark.parametrize('raw', ['', 'traceback', '{}', '{"floors":"passed"}'])
+@pytest.mark.parametrize('code', [0, 1])
+def test_initial_stdout_terminality_depends_on_exit(raw, code):
+    trace = _initial_check_ready()
+    identity = trace.call('Bash', {'command': shlex.join(trace.commands['phase1_receipts'])})
+    if code:
+        assert trace.result(identity, code=code, text=raw) == ()
+        assert not trace.state.report()['problems']
+        trace.write('receipt')
+        assert trace.helper('phase1_receipts') == ('seal_phase1',)
+    else:
+        with pytest.raises(ValueError):
+            trace.result(identity, text=raw)
+        with pytest.raises(ValueError, match='already failed'):
+            trace.write('receipt')
+
+
+@pytest.mark.parametrize('raw', ['null', 'true', '0', '[]', '{}',
+    '"· native receipt stage: final"', 'checked',
+    '· native receipt stage: final\ninitial_structure',
+    '· native receipt stage: final\nfloor_acceptance_claimed'])
+def test_final_stdout_requires_positive_stage_and_refuses_any_json(raw):
+    trace = Trace(); trace.assembly()
+    trace.helper('full_schema'); trace.helper('full_terms')
+    identity = trace.call('Bash', {'command': shlex.join(trace.commands['final_receipts'])})
+    with pytest.raises(ValueError, match='strict output, not structural JSON'):
+        trace.result(identity, text=raw)
+    assert 'final_receipts' not in trace.state.report()['current_checks']

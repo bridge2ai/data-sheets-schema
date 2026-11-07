@@ -360,6 +360,8 @@ def instruction(spec):
         + '\n\nRun full_schema, full_terms and phase1_receipts on the current originals before advance. '
           'phase1_receipts is structural only: floors remain pending and no floor acceptance is claimed. '
           'Fix initial source-grounded full/receipt defects and repeat their checks before sealing. '
+          'A nonzero phase1_receipts exit is retryable whatever its stdout; exit 0 with unparseable '
+          'or contract-violating stdout is a sticky contract violation. '
           'After sealing, keep the original receipt at its model_files receipt path unchanged. '
           'The helper owns the completed effective receipt at the effective_receipt role; '
           'do not copy it over the original receipt. The selected final receipt check verifies the original '

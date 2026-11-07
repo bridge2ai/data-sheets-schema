@@ -275,8 +275,6 @@ def test_initial_and_final_receipt_commands_are_exact(native_spec, tmp_path):
     import hashlib
     import json
     import shlex
-    import subprocess
-    import types
 
     commands = native.commands(native_spec)
     initial, final = commands['phase1_receipts'], commands['final_receipts']
@@ -289,28 +287,21 @@ def test_initial_and_final_receipt_commands_are_exact(native_spec, tmp_path):
     assert 'run final_receipts with strict floor acceptance' in text
     # Same captured synthetic selection and runtime, old/new renderers. This is
     # an instruction identity witness, not a native registration or execution.
-    old_source = subprocess.check_output(['git', 'show',
-        '96adabfb3:src/data_sheets_schema/native_shared_render.py'])
-    old = types.ModuleType('data_sheets_schema._old_native_render')
-    old.__package__ = 'data_sheets_schema'
-    exec(compile(old_source, '<old-native-render>', 'exec'), old.__dict__)
-    old_text = old.instruction(native_spec)
-    witness = {'old_instruction_sha256': hashlib.sha256(old_text.encode()).hexdigest(),
+    # Recorded Round 2 witness; independent of local Git object availability.
+    witness = {'old_instruction_sha256': 'c9076aee1a6c6c4a0293aa4a54436e150c04e46ad6dc21fe85496a1ce10f4e1c',
                'new_instruction_sha256': hashlib.sha256(text.encode()).hexdigest(),
-               'old_source_sha256': hashlib.sha256(old_source).hexdigest(),
+               'old_source_sha256': 'f39b4597472cb7601502680f0ddeb112ecd905d8f65cbdb65cfa5fe28aa44731',
                'new_source_sha256': hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest(),
                'scope': 'same synthetic captured selection; not a registered native run'}
     assert witness['old_instruction_sha256'] != witness['new_instruction_sha256']
     (tmp_path / 'render-digests.json').write_text(json.dumps(witness, indent=2) + '\n')
-    (tmp_path / 'old-instruction.txt').write_text(old_text)
     (tmp_path / 'new-instruction.txt').write_text(text)
 
 
 def test_split_receipt_commands_match_native_consumers(native_spec):
     """Integration requirement: consumers must admit the initial/final split.
 
-    U3D-R9: currently fails because consumer modules are outside round-2 scope.
-    Keep this as an executable requirement for the next authorized repair.
+    U3D-R9: retain the repaired exact eighteen-name consumer contract.
     """
     from data_sheets_schema import native_shared_phase as phase
     from data_sheets_schema import native_shared_policy as policy
