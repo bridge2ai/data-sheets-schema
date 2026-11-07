@@ -5,7 +5,8 @@ node IDs, outcomes and failure text. Observation only; no test monkeypatching.
 """
 import json
 import os
-from pathlib import Path
+
+_OPEN = open  # Test-time Path.open/builtins.open monkeypatches must not break observation.
 
 _WORKER = False
 
@@ -21,5 +22,5 @@ def pytest_runtest_logreport(report):
            'duration': report.duration}
     if report.failed:
         row['failure'] = report.longreprtext
-    with Path(path).open('a') as stream:
+    with _OPEN(path, 'a') as stream:
         stream.write(json.dumps(row) + '\n')
