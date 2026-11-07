@@ -45,6 +45,10 @@ Round 5 read-only review ledger (GitHub filing deferred by the offline brief):
   Fixed by binding aliases to the canonical source-only object, preserving its
   canonical spec and recording alias bindings for validation/restoration. A nested
   carrier test verifies identity through the alias too.
+- R5-C: the first evidence audit did not refuse an uncommitted auditor after a
+  sandbox-denied index write. Its output is retained as a superseded precommit
+  summary. The auditor now requires a clean worktree before producing a final
+  summary; final evidence is regenerated after the successful local commit.
 
 V2 is selected explicitly. Prepare offline attribution registrations with
 `python -m data_sheets_schema.native_attribution_registration_v2 prepare` and

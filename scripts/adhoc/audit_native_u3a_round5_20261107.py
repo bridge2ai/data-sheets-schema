@@ -26,7 +26,7 @@ def sha(path):
 def git(*args):
     return subprocess.check_output(['/usr/bin/git', '--no-replace-objects', *args], cwd=ROOT,
         env={'PATH': '/usr/bin:/bin', 'GIT_NO_LAZY_FETCH': '1', 'GIT_CONFIG_GLOBAL': '/dev/null',
-             'GIT_CONFIG_SYSTEM': '/dev/null'}, timeout=30).decode().strip()
+             'GIT_CONFIG_SYSTEM': '/dev/null', 'TMPDIR': str(SCRATCH)}, timeout=30).decode().strip()
 
 
 def run(directory):
@@ -57,6 +57,7 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--final-run', required=True)
     args = parser.parse_args()
+    assert not git('status', '--porcelain'), 'audit requires committed, clean inputs'
     assert args.out.parent == SCRATCH and not args.out.exists()
     final = run(SCRATCH / args.final_run)
     assert final['returncode'] == 0
@@ -67,6 +68,7 @@ def main():
     properties = {node.get('name'): node.get('value') for node in
                   ET.parse(SCRATCH / 'bytecode/pytest.xml').getroot().iter('property')}
     assert properties['executed_forged_bytecode'] == 'False'
+    assert sha(SCRATCH / 'bytecode/forged-helper.pyc') == properties['forged_cache_sha256']
     source = 'src/data_sheets_schema/native_execution_authority_v2.py'
     assert git('rev-parse', final['source_commit'] + ':' + source) == git('rev-parse', 'HEAD:' + source)
     result = {'head': git('rev-parse', 'HEAD'), 'final': final, 'bytecode': bytecode,
@@ -80,18 +82,25 @@ def main():
         assert mutant['returncode'] == 1 and mutant['counts']['failures']
         for entry in (control, mutant):
             assert not entry['counts']['errors'] and not entry['counts']['skipped']
+        for phase, entry in (('baseline', control), ('mutant', mutant)):
+            assert entry['sha256']['outcome.json'] == value[phase]['outcome_sha256']
+            assert entry['sha256']['pytest.xml'] == value[phase]['junit_sha256']
+            assert all(entry['counts'][key] == value[phase][key] for key in entry['counts'])
         assert mutant['source_commit'] == value['mutant_commit']
         assert git('rev-parse', control['source_commit'] + '^{tree}') == git('rev-parse', value['base'] + '^{tree}')
         assert git('rev-parse', value['restored_commit'] + '^{tree}') == git('rev-parse', value['base'] + '^{tree}')
         result['mutations'].append({'case': case, 'result_sha256': sha(directory / 'result.json'),
                                     'baseline': control, 'mutant': mutant})
+    result['mutation_totals'] = {phase: {key: sum(row[phase]['counts'][key] for row in result['mutations'])
+                                       for key in ('tests', 'failures', 'errors', 'skipped')}
+                                 for phase in ('baseline', 'mutant')}
     result['changed_paths'] = git('diff', '--name-only', '26a8632d9', 'HEAD').splitlines()
     result['source_sha256'] = {path: sha(ROOT / path) for path in result['changed_paths']}
     with args.out.open('x') as stream:
         json.dump(result, stream, indent=2, sort_keys=True)
         stream.write('\n')
     print(json.dumps({'summary': str(args.out), 'sha256': sha(args.out), 'final': final['counts'],
-                      'mutations': len(result['mutations'])}, sort_keys=True))
+                      'mutations': len(result['mutations']), 'mutation_totals': result['mutation_totals']}, sort_keys=True))
 
 
 if __name__ == '__main__':
