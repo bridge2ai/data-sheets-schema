@@ -17,6 +17,7 @@ from . import native_shared_selection as selection
 from . import native_shared_policy as policy
 from . import native_attribution_controller_v2 as inherited
 from . import native_execution_registration_v2 as registration
+from . import native_execution_authority_v2 as authority
 from . import native_shared_controller as consumer
 from .native_shared_evidence import read_regular
 from . import native_shared_streams as live_streams
@@ -69,17 +70,42 @@ def _compose(preparation_raw, instruction_path, *, submitted_raw=None):
     output_directories = tuple(str(Path(artifacts[key]).parent.resolve())
                                for key in ('full', 'core', 'report'))
     dependencies = prepared['dependencies']
-    with control_loading.loaded_controls(dependencies) as controls, protocol_loading.loaded_protocol(dependencies) as protocol:
+    with control_loading.loaded_controls(dependencies) as controls, protocol_loading.loaded_protocol(dependencies) as protocol, \
+            authority.loaded_verified_package_module('data_sheets_schema.native_shared_selection',
+                package_sources=dependencies['base']['package_sources']) as verified_selection, \
+            authority.loaded_verified_package_module('data_sheets_schema.native_shared_evidence',
+                package_sources=dependencies['base']['package_sources']) as verified_evidence, \
+            authority.loaded_verified_package_module('data_sheets_schema.native_shared_controller',
+                package_sources=dependencies['base']['package_sources']) as verified_consumer:
         controller_sources = inherited.controller_sources()
-        captures = dict(prepared=prepared, spec=spec, current=current, runtime=runtime,
-            instruction=instruction, controller_sources=controller_sources, command_argv=command_argv,
+        # Exact carrier classes belong to the verified package lifetime too.
+        # Recapture through those real source-loaded producers and compare every
+        # nested captured value before handing them to the pure consumer. Keep
+        # the caller's ordinary captures intact after this bounded scope.
+        verified_current = verified_selection.capture(prepared['selection']['path'])
+        verified_runtime = verified_evidence.read_regular(runtime.pin.path, 'runtime_declaration',
+            max_bytes=c.HARD_LIMITS['input_bytes']).captured
+        verified_instruction = verified_evidence.read_regular(instruction.pin.path, 'instruction',
+            max_bytes=c.HARD_LIMITS['request_bytes']).captured
+        if any(asdict(before) != asdict(after) for before, after in (
+                (current, verified_current), (runtime, verified_runtime),
+                (instruction, verified_instruction))):
+            raise ValueError('composition capture changed across verified source handoff')
+        captures = dict(prepared=prepared, spec=spec, current=verified_current, runtime=verified_runtime,
+            instruction=verified_instruction, controller_sources=controller_sources, command_argv=command_argv,
             repository=repository, output_directories=output_directories,
             python=sys.executable, python_version=sys.version)
-        if submitted_raw is None:
-            value = consumer.compose(preparation_raw, classifier_projection=controls, **captures)
-        else:
-            value, _, _ = consumer.reconstruct_composition(
-                submitted_raw, classifier_projection=controls, **captures)
+        spec._native_shared_generation_capture = verified_current
+        spec._native_shared_runtime_capture = verified_runtime
+        try:
+            if submitted_raw is None:
+                value = verified_consumer.compose(preparation_raw, classifier_projection=controls, **captures)
+            else:
+                value, _, _ = verified_consumer.reconstruct_composition(
+                    submitted_raw, classifier_projection=controls, **captures)
+        finally:
+            spec._native_shared_generation_capture = current
+            spec._native_shared_runtime_capture = runtime
         # Consume the real six-function protocol at the policy boundary. The
         # selected contract must have its exact recognized initialization frame.
         contract = protocol.history_contract()
@@ -417,8 +443,11 @@ class CallbackAdapter:
             self._stop(self.failure)
         if c.canonical(selected_policy) != c.canonical(self.policy):
             self._stop('native callback command policy differs from its exact composition')
-        with control_loading.loaded_controls(self.value['dependencies']) as controls:
-            return policy.classify_bash(command, python, programs, selected_policy,
+        dependencies = self.value['dependencies']
+        with control_loading.loaded_controls(dependencies) as controls, \
+                authority.loaded_verified_package_module('data_sheets_schema.native_shared_policy',
+                    package_sources=dependencies['base']['package_sources']) as verified_policy:
+            return verified_policy.classify_bash(command, python, programs, selected_policy,
                                        classifier_projection=controls)
 
     def report(self, *, complete=False):

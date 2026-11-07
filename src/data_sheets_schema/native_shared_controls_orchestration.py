@@ -10,17 +10,23 @@ from contextlib import contextmanager
 import sys
 
 from . import native_execution_authority_v2 as authority
-from . import native_shared_controls as consumer
 
 
 @contextmanager
 def loaded_controls(dependencies=None):
-    """Mint a revocable projection inside A's exact source-loader lifetime."""
+    """Mint in A's verified package module and keep its scope open through use.
+
+    Consumers must use the same source-loaded module set. An ordinarily imported
+    copy intentionally has a different class and mint ledger and cannot admit
+    this carrier. Revoke the carrier before either loader scope closes.
+    """
     if dependencies is None:
         dependencies = authority.dependency_identity()
     projected = {}
     controls = None
-    with authority.loaded_dependencies(dependencies):
+    with authority.loaded_dependencies(dependencies), authority.loaded_verified_package_module(
+            'data_sheets_schema.native_shared_controls',
+            package_sources=dependencies['base']['package_sources']) as consumer:
         try:
             for name, members in consumer._MEMBERS.items():
                 pin = dependencies['base']['modules'][name]

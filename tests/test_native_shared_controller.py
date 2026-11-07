@@ -1,5 +1,7 @@
 """U3-C v2 composition and closed live entry; no native/provider execution."""
 from copy import deepcopy
+from contextlib import contextmanager
+from dataclasses import asdict, replace
 from pathlib import Path
 import shlex
 import sys
@@ -10,7 +12,6 @@ from data_sheets_schema import native_attribution_controller as legacy
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_controller as controller
 from data_sheets_schema import native_shared_controller_orchestration as orchestration
-from data_sheets_schema import native_shared_controls as pure_controls
 from data_sheets_schema import native_shared_controls_orchestration as control_loading
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_attribution_controller_v2 as inherited_v2
@@ -72,18 +73,22 @@ def test_exact_seventeen_helpers_and_readonly_grammar(bound, monkeypatch):
     commands = policy.helper_commands(value['policy'])
     assert set(commands) == policy.HELPERS and len(commands) == 17
     monkeypatch.setattr(legacy, 'load_controls', lambda: pytest.fail('v1 loader used'))
-    with control_loading.loaded_controls(value['dependencies']) as controls:
+    with control_loading.loaded_controls(value['dependencies']) as controls, \
+            authority.loaded_verified_package_module('data_sheets_schema.native_shared_policy',
+                package_sources=value['dependencies']['base']['package_sources']) as verified_policy:
         for name, command in commands.items():
-            assert policy.classify_bash(command, value['policy']['python'], set(), value['policy'], classifier_projection=controls)[0] == 'prescribed', name
-            assert policy.classify_bash(command + ' --unregistered', value['policy']['python'], set(), value['policy'], classifier_projection=controls)[0] == 'not_prescribed', name
+            assert verified_policy.classify_bash(command, value['policy']['python'], set(), value['policy'], classifier_projection=controls)[0] == 'prescribed', name
+            assert verified_policy.classify_bash(command + ' --unregistered', value['policy']['python'], set(), value['policy'], classifier_projection=controls)[0] == 'not_prescribed', name
         bundle = c.parse_selection(value['selection_raw_json'].encode())['inputs']['bundle']['path']
         for command, expected in ((shlex.join(['cat', bundle]), 'prescribed'),
                 ('cat /unregistered/path', 'not_prescribed'),
                 (shlex.join([value['policy']['python'], '-c', 'print(1)']), 'not_prescribed')):
-            assert policy.classify_bash(command, value['policy']['python'], set(), value['policy'], classifier_projection=controls)[0] == expected
+            assert verified_policy.classify_bash(command, value['policy']['python'], set(), value['policy'], classifier_projection=controls)[0] == expected
     old_path = list(sys.path)
-    with control_loading.loaded_controls(value['dependencies']) as controls:
-        guidance = policy.command_guidance(value['policy'], classifier_projection=controls)
+    with control_loading.loaded_controls(value['dependencies']) as controls, \
+            authority.loaded_verified_package_module('data_sheets_schema.native_shared_policy',
+                package_sources=value['dependencies']['base']['package_sources']) as verified_policy:
+        guidance = verified_policy.command_guidance(value['policy'], classifier_projection=controls)
     assert all(command in guidance for command in commands.values())
     assert sys.path == old_path
 
@@ -188,7 +193,9 @@ def test_callback_requires_fresh_full_outer_admission_before_any_live_dependency
     raw = c.canonical(_execution_wire())
     calls = []
     def refuse(value, *, classifier_projection):
-        assert pure_controls.require_controls(classifier_projection) is classifier_projection
+        with authority.loaded_verified_package_module('data_sheets_schema.native_shared_controls',
+                package_sources=authority.dependency_identity()['base']['package_sources']) as source_controls:
+            assert source_controls.require_controls(classifier_projection) is classifier_projection
         calls.append(value)
         raise ValueError('full U3-D execution consumer remains absent')
     monkeypatch.setattr(registration, 'verified', refuse)
@@ -244,28 +251,110 @@ def test_input_only_composition_matches_complete_verified_live_body_without_io(b
     def forbidden(*args, **kwargs):
         pytest.fail('input-only composition rediscovered live authority')
 
-    with control_loading.loaded_controls(value['dependencies']) as controls:
+    # Source loading and its final pin checks are orchestration I/O. Keep them
+    # outside the trapped interval; only the actual pure calls run inside it.
+    with control_loading.loaded_controls(value['dependencies']) as controls, \
+            authority.loaded_verified_package_module('data_sheets_schema.native_shared_controller',
+                package_sources=value['dependencies']['base']['package_sources']) as verified_controller, \
+            authority.loaded_verified_package_module('data_sheets_schema.native_shared_selection',
+                package_sources=value['dependencies']['base']['package_sources']) as verified_selection, \
+            authority.loaded_verified_package_module('data_sheets_schema.native_shared_evidence',
+                package_sources=value['dependencies']['base']['package_sources']) as verified_evidence:
+        # Exact capture classes belong to the same verified package scope as
+        # the consumer. Fresh capture must preserve every field and byte.
+        scoped_current = verified_selection.capture(preparation['registration']['selection']['path'])
+        scoped_runtime = verified_evidence.read_regular(
+            captured['runtime'].pin.path, 'runtime_declaration',
+            max_bytes=c.HARD_LIMITS['input_bytes']).captured
+        scoped_instruction = verified_evidence.read_regular(
+            captured['instruction'].pin.path, 'instruction',
+            max_bytes=c.HARD_LIMITS['request_bytes']).captured
+        assert asdict(scoped_current) == asdict(current)
+        assert asdict(scoped_runtime) == asdict(captured['runtime'])
+        assert asdict(scoped_instruction) == asdict(captured['instruction'])
+        original_runtime = spec._native_shared_runtime_capture
+        scoped_captured = dict(captured, current=scoped_current, runtime=scoped_runtime,
+                               instruction=scoped_instruction)
         with monkeypatch.context() as patch:
+            patch.setattr(spec, '_native_shared_generation_capture', scoped_current)
+            patch.setattr(spec, '_native_shared_runtime_capture', scoped_runtime)
             patch.setattr(registration, 'verify_preparer', forbidden)
             patch.setattr(registration, 'verified', forbidden)
             patch.setattr(authority, 'dependency_identity', forbidden)
             for name in ('read_bytes', 'read_text', 'open', 'resolve', 'cwd', 'absolute'):
                 patch.setattr(Path, name, forbidden)
-            assert controller.compose(preparation_raw, classifier_projection=controls, **captured) == value
-            rebuilt, returned_spec, returned_current = controller.reconstruct_composition(
-                raw, classifier_projection=controls, **captured)
-            assert rebuilt == value and returned_spec is spec and returned_current is current
-            assert controller.verified_composition(raw, classifier_projection=controls, **captured) == value
+            assert verified_controller.compose(preparation_raw, classifier_projection=controls, **scoped_captured) == value
+            rebuilt, returned_spec, returned_current = verified_controller.reconstruct_composition(
+                raw, classifier_projection=controls, **scoped_captured)
+            assert rebuilt == value and returned_spec is spec and returned_current is scoped_current
+            assert verified_controller.verified_composition(raw, classifier_projection=controls, **scoped_captured) == value
             with pytest.raises(TypeError, match='classifier_projection'):
-                controller.reconstruct_composition(raw, **captured)
+                verified_controller.reconstruct_composition(raw, **scoped_captured)
             for forged in (None, {}, dict(controls), object()):
                 with pytest.raises(ValueError, match='projection'):
-                    controller.reconstruct_composition(raw, classifier_projection=forged, **captured)
+                    verified_controller.reconstruct_composition(raw, classifier_projection=forged, **scoped_captured)
                 with pytest.raises(ValueError, match='projection'):
-                    policy.classify_bash('cat', value['policy']['python'], set(), value['policy'],
+                    verified_controller.policy.classify_bash('cat', value['policy']['python'], set(), value['policy'],
                                          classifier_projection=forged)
+        assert spec._native_shared_generation_capture is current
+        assert spec._native_shared_runtime_capture is original_runtime
     with pytest.raises(ValueError, match='scope is closed|not minted by the active loader'):
-        controller.reconstruct_composition(raw, classifier_projection=controls, **captured)
+        verified_controller.reconstruct_composition(raw, classifier_projection=controls, **captured)
+
+
+@pytest.mark.parametrize('failure', ['changed_capture', 'consumer_exception'])
+def test_verified_handoff_refuses_changed_capture_and_restores_spec(bound, monkeypatch, failure):
+    """Negative orchestration seams; real producers run before fault injection."""
+    _, _, raw, instruction = bound
+    positive = orchestration.compose(raw, instruction_path=instruction)
+    assert orchestration.verified_composition(c.canonical(positive)) == positive
+    original_loader = authority.loaded_verified_package_module
+    original_commands = orchestration.render.commands
+    before = []
+    injected = []
+
+    def commands(spec):
+        before.append((spec, spec._native_shared_generation_capture,
+                       spec._native_shared_runtime_capture))
+        return original_commands(spec)
+
+    @contextmanager
+    def injected_loader(name, *, package_sources):
+        with original_loader(name, package_sources=package_sources) as module:
+            if failure == 'changed_capture' and name == 'data_sheets_schema.native_shared_selection':
+                class ChangedCapture:
+                    @staticmethod
+                    def capture(path):
+                        captured = module.capture(path)
+                        assert len(captured.authority) > 1
+                        changed = replace(captured, authority=tuple(reversed(captured.authority)))
+                        assert asdict(changed) != asdict(captured)
+                        injected.append('changed_capture')
+                        return changed
+                yield ChangedCapture
+            elif failure == 'consumer_exception' and name == 'data_sheets_schema.native_shared_controller':
+                class FailingConsumer:
+                    @staticmethod
+                    def compose(preparation_raw, **captures):
+                        assert preparation_raw == raw
+                        assert captures['spec']._native_shared_generation_capture is captures['current']
+                        assert captures['spec']._native_shared_runtime_capture is captures['runtime']
+                        injected.append('consumer_exception')
+                        raise ValueError('deliberate pure consumer exception')
+                yield FailingConsumer
+            else:
+                yield module
+
+    monkeypatch.setattr(orchestration.render, 'commands', commands)
+    monkeypatch.setattr(authority, 'loaded_verified_package_module', injected_loader)
+    expected = ('capture changed across verified source handoff' if failure == 'changed_capture'
+                else 'deliberate pure consumer exception')
+    with pytest.raises(ValueError, match=expected):
+        orchestration.compose(raw, instruction_path=instruction)
+    assert injected == [failure] and before
+    for spec, original_current, original_runtime in before:
+        assert spec._native_shared_generation_capture is original_current
+        assert spec._native_shared_runtime_capture is original_runtime
 
 
 def test_neutral_captured_wire_vocabulary_equals_unchanged_a_contract():

@@ -1,13 +1,15 @@
 """Read-only C4 basetemp preflight that never opens FIFO fixtures, 2026-11-07.
 
-Inputs: nine completed, explicitly named C4 test runs. Output: a new scratch
+Inputs: completed, explicitly named C4 test runs (historical nine by default). Output: a new scratch
 inventory of handles, links, special files and regular-file references. No
 deletion, Git mutation, network or worktree write. Hidden files are included.
 """
+import argparse
 import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import stat
 import subprocess
 
@@ -31,10 +33,28 @@ def regular_bytes(path):
         return stream.read(16 * 1024 * 1024 + 1)
 
 
+def run_name(value):
+    if re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', value) is None:
+        raise argparse.ArgumentTypeError('run names must be single safe components of letters, digits, underscores or hyphens')
+    return value
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--runs', nargs='+', type=run_name, default=RUNS,
+                        help='explicit completed run directory names; defaults to historical C4 runs')
+    parser.add_argument('--out', type=Path, default=SCRATCH / 'cleanup-inventory.json',
+                        help='new literal inventory file under C4 scratch')
+    args = parser.parse_args()
+    if len(set(args.runs)) != len(args.runs):
+        parser.error('run names must be unique')
+    output = args.out.absolute()
+    if (output != output.resolve() or output == SCRATCH or not output.is_relative_to(SCRATCH)
+            or not output.parent.is_dir() or os.path.lexists(output)):
+        parser.error('output must be a new literal file below C4 scratch, with an existing parent')
     all_links = [path for path in files(SCRATCH) if path.is_symlink()]
     rows = []
-    for run in RUNS:
+    for run in args.runs:
         parent, target = SCRATCH / run, SCRATCH / run / 'cases'
         if target != target.resolve(strict=True) or not stat.S_ISDIR(target.lstat().st_mode):
             raise ValueError('not an exact basetemp directory: ' + str(target))
@@ -79,8 +99,8 @@ def main():
             'allocated_bytes_not_exclusive': allocated, 'hardlinked_files': hardlinked,
             'regular_file_references': references, 'large_reference_files_skipped': skipped,
             'reference_scope': str(parent), 'hidden_and_ignored_files_included': True})
-    result = {'targets': rows, 'scope': 'Completed synthetic basetemps only; no deletion performed.'}
-    output = SCRATCH / 'cleanup-inventory.json'
+    result = {'targets': rows, 'runs': list(args.runs),
+              'scope': 'Completed synthetic basetemps only; no deletion performed.'}
     raw = (json.dumps(result, indent=2, sort_keys=True) + '\n').encode()
     with output.open('xb') as stream: stream.write(raw)
     assert output.read_bytes() == raw
