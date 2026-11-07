@@ -130,6 +130,37 @@ def test_runtime_dependency_enters_verified_set(tmp_path, monkeypatch):
             assert consumer.check(projection.mint())
 
 
+def test_alias_reuses_verified_carrier_object(tmp_path, monkeypatch):
+    raw = b'import synthetic_projection as projection\n'
+    pins = graph_fixture(tmp_path, monkeypatch, {NAME: raw, CARRIER: PROJECTION})
+    monkeypatch.syspath_prepend(str(tmp_path / 'src/data_sheets_schema'))
+    with authority.loaded_verified_package_module(CARRIER, package_sources=pins) as projection:
+        original_spec = projection.__spec__
+        with authority.loaded_verified_package_module(NAME, package_sources=pins) as consumer:
+            assert consumer.projection is projection
+            assert consumer.projection.check(projection.mint())
+            assert projection.__spec__ is original_spec
+        assert 'synthetic_projection' not in sys.modules
+
+
+@pytest.mark.parametrize('target', ['native_execution', 'native_execution_registration_v2',
+                                  'native_shared_contract'])
+def test_from_src_namespace_gets_canonical_treatment(target):
+    pins = dict(authority.dependency_identity()['base']['package_sources'])
+    relative = 'src/data_sheets_schema/native_shared_registration.py'
+    raw = f'from src.data_sheets_schema import {target} as imported\n'.encode()
+    pins[relative] = pin(raw)
+    context = authority.verified_source_module(NAME, path=authority.ROOT / relative,
+                raw=raw, sha256=pin(raw), package_sources=pins)
+    if target != 'native_shared_contract':
+        with pytest.raises(ValueError, match='forbidden v1|bootstrap boundary'), context:
+            pytest.fail('namespace alias bypass')
+    else:
+        with context as consumer:
+            assert consumer.imported is sys.modules['data_sheets_schema.' + target]
+            assert consumer.imported.__cached__ is None
+
+
 @pytest.mark.parametrize('statement', [
     'import sys; value = sys.meta_path', 'import sys; value = sys.path_hooks',
     'import sys; value = sys.path_importer_cache', 'import os; value = os.sys.modules',

@@ -108,12 +108,26 @@ def _canonical_import(name):
     if name == 'data_sheets_schema' or name.startswith('data_sheets_schema.'):
         return name
     spec = _resolved_import(name)
-    canonical = _package_name(spec.origin) if spec and spec.origin else None
+    canonical = _spec_package_name(spec)
     if canonical:
         return canonical
     if name.split('.')[0] in {'src', 'tests', 'scripts', 'notes'}:
         raise ValueError('consumer import crosses an unverified checkout namespace: ' + name)
     return name
+
+
+def _spec_package_name(spec):
+    if spec is None:
+        return None
+    if spec.origin:
+        return _package_name(spec.origin)
+    locations = [Path(item).resolve() for item in (spec.submodule_search_locations or ())]
+    root = (ROOT / PACKAGE).resolve()
+    if root in locations:
+        if any(item != root for item in locations):
+            raise ValueError('consumer package namespace has mixed physical origins')
+        return 'data_sheets_schema'
+    return None
 
 
 def refuse_legacy_consumer_imports(raw, *, name, package_sources):
@@ -359,16 +373,19 @@ class _VerifiedBytesFinder(importlib.abc.MetaPathFinder):
         canonical = fullname
         if self.consumer and not fullname.startswith('data_sheets_schema.'):
             spec = importlib.machinery.PathFinder.find_spec(fullname, path)
-            canonical = _package_name(spec.origin) if spec and spec.origin else None
+            canonical = _spec_package_name(spec)
             canonical = canonical or fullname
             if canonical != fullname:
+                if canonical == 'data_sheets_schema' and spec.origin is None:
+                    return None  # The root namespace has no executable initializer.
                 relative = str(Path(spec.origin).resolve().relative_to(ROOT))
                 pinned = next((item for item in self.sources.values()
                                if str(item[0].relative_to(ROOT)) == relative), None)
                 if pinned is None:
                     raise ValueError('consumer package import is not pinned: ' + fullname)
                 self.sources[fullname] = pinned
-            elif fullname.split('.')[0] in {'tests', 'scripts', 'notes'}:
+            elif (fullname.split('.')[0] in {'tests', 'scripts', 'notes'} or
+                  fullname == 'src' and spec and spec.origin is not None):
                 raise ValueError('consumer import crosses an unverified checkout namespace: ' + fullname)
         if self.consumer and canonical in _LEGACY_CONSUMER_MODULES:
             raise ValueError('consumer imports forbidden v1 execution authority: ' + fullname)
@@ -380,6 +397,9 @@ class _VerifiedBytesFinder(importlib.abc.MetaPathFinder):
                 raise ValueError('consumer package import is not pinned: ' + fullname)
             return None
         filename, raw, digest, package = source
+        if self.consumer and canonical != fullname:
+            loader = _VerifiedAliasLoader(canonical)
+            return importlib.util.spec_from_loader(fullname, loader, origin=str(filename), is_package=package)
         if raw is None:
             raw = _verified_source_bytes(filename, digest)
         if self.consumer and raw and canonical not in self.checked and canonical != 'data_sheets_schema':
@@ -388,6 +408,23 @@ class _VerifiedBytesFinder(importlib.abc.MetaPathFinder):
         loader = _VerifiedBytesLoader(fullname, filename, raw, digest, package=package,
                                       verified_package=self.consumer and fullname == canonical)
         return importlib.util.spec_from_loader(fullname, loader, origin=str(filename), is_package=package)
+
+
+class _VerifiedAliasLoader(importlib.abc.Loader):
+    """Bind another spelling to the same source-only canonical object."""
+    def __init__(self, canonical):
+        self.canonical = canonical
+
+    def create_module(self, spec):
+        module = importlib.import_module(self.canonical)
+        module_source_identity(module)
+        self.canonical_spec = module.__spec__
+        return module
+
+    def exec_module(self, module):
+        # Import machinery assigns the alias spec even to a preexisting object.
+        module.__spec__ = self.canonical_spec
+        module_source_identity(module)
 
 
 def _verified_source_bytes(path, digest):
@@ -493,7 +530,8 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
         initial_modules = {key: sys.modules[key] for key in sources
                            if key != 'data_sheets_schema' and key in sys.modules}
         if package_sources is not None:
-            _VERIFIED_PACKAGE_MODULES.update(initial_modules)
+            _VERIFIED_PACKAGE_MODULES.update({key: loaded for key, loaded in initial_modules.items()
+                                              if key == loaded.__name__})
         yield module
         for key in sources:
             if key == 'data_sheets_schema':
@@ -504,7 +542,8 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
             if loaded is not None:
                 actual = module_source_identity(loaded)
                 filename, _, digest, _ = sources[key]
-                if (actual['name'], actual['path'], actual['sha256']) != (key, str(filename), digest):
+                expected_name = _package_name(filename) if package_sources is not None else key
+                if (actual['name'], actual['path'], actual['sha256']) != (expected_name, str(filename), digest):
                     raise ValueError('consumer graph module differs from its captured source identity')
     finally:
         _VERIFIED_PACKAGE_MODULES.clear()

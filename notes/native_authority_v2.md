@@ -37,6 +37,15 @@ edit those files or claim real C-carrier integration in this round.
 Offline delivery defers GitHub PR/issue creation and publication. Local regression
 evidence and any review findings are retained for the lead's later online review.
 
+Round 5 read-only review ledger (GitHub filing deferred by the offline brief):
+- R5-A: namespace-parent `from src.data_sheets_schema import X` refused before
+  canonical child classification, including allowed X. Fixed by physical namespace
+  origin classification; v1, boundary and allowed-child regressions cover it.
+- R5-B: a resolved alias of a verified projection recompiled a new class identity.
+  Fixed by binding aliases to the canonical source-only object, preserving its
+  canonical spec and recording alias bindings for validation/restoration. A nested
+  carrier test verifies identity through the alias too.
+
 V2 is selected explicitly. Prepare offline attribution registrations with
 `python -m data_sheets_schema.native_attribution_registration_v2 prepare` and
 its required arguments. Construct/check compositions through
