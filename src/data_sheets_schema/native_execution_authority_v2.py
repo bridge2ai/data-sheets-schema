@@ -375,9 +375,12 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
                 if imported != 'data_sheets_schema' and imported not in sources:
                     sources[imported] = (ROOT / relative, None, digest, package)
     absent = object()
-    previous = {key: sys.modules.get(key, absent) for key in sources}
+    bindings = set(sources)
+    if package_sources is not None:
+        bindings.update(key for key in sys.modules if key.startswith('data_sheets_schema.'))
+    previous = {key: sys.modules.get(key, absent) for key in bindings}
     parents = {}
-    for key in sources:
+    for key in bindings:
         parent_name, _, child = key.rpartition('.')
         parent = sys.modules.get(parent_name)
         if parent is not None:
@@ -389,7 +392,7 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
     try:
         sys.dont_write_bytecode = True
         sys.meta_path.insert(0, finder)
-        for key in sources:
+        for key in bindings:
             sys.modules.pop(key, None)
             if key in parents:
                 parent, child, _ = parents[key]

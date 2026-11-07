@@ -202,7 +202,7 @@ the closed `CONSUMER_OWNED_MODULES` list: `native_shared_attribution`,
 `native_shared_policy`, `native_shared_receipts`, `native_shared_stage`,
 `native_shared_streams`, `native_shared_execution`, `native_shared_gates`,
 `native_shared_permissions`, `native_shared_publication`,
-`native_shared_registration`, `native_shared_results`, and
+`native_shared_registration`, `native_shared_results`,
 `native_shared_schema_gates`, `native_execution_engine`, `native_gate_engine`, and
 `native_subscription_guard` (all under `data_sheets_schema`). Legitimate dynamic
 constructs in reviewed dependencies, including U2, are allowed. Implicit
@@ -292,6 +292,14 @@ After pure envelope checks, `_wire` proves the captured closure committed before
 loading any preparer helpers. The byte-only loader proves
 the bytes of the scoped helper/consumer graph it executes, not every object
 already resident in Python or the authenticity of review/CI declarations.
+
+Round-3 local review ledger (GitHub filing deferred by the offline ruling):
+
+- **R3-A, addressed:** a cached package module absent from the source roster
+  could bypass the finder during a dependency's deferred import. The consumer
+  context now temporarily removes all resident package-module bindings, including
+  unpinned names; the finder refuses missing pins. The regression checks both
+  refusal and restoration of the preexisting cached module.
 
 Round-2 review records, retained offline for the later issue workflow:
 
