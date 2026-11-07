@@ -11,6 +11,7 @@ from dataclasses import dataclass
 import importlib
 from pathlib import Path
 import re
+import subprocess
 import sys
 import threading
 
@@ -18,6 +19,7 @@ from . import native_execution_authority_v2 as authority
 from . import native_shared_contract as c
 from . import native_shared_selection as selection
 from .native_shared_evidence import read_regular
+from .resources import git_env
 # Reuse only pure runtime validation/fingerprinting. No legacy registration,
 # verification, composition, loader or execution entrypoint is called.
 from .native_execution_registration import validate_runtime, executable_identity
@@ -28,9 +30,11 @@ EXECUTION_KIND = 'd4d_native_shared_execution_registration_v2'
 PREPARATION_SCOPE = 'offline_inputs_only_not_permission_or_launch_authority'
 EXECUTION_SCOPE = 'requires_exact_independent_review_ci_permission_and_owner_launch_evidence'
 MAX_WIRE_BYTES = c.HARD_LIMITS['request_bytes']
-REQUIRED_CHECKS = tuple(f'Python 3.12 / shard {n}' for n in range(1, 7)) + (
-    'Python 3.12 / offline audit and finalization', 'Python 3.12 / offline evaluation',
-    'test', 'large-files')
+_COMMON_CHECKS = tuple('Python 3.12 / API case ' + name for name in (
+    'routing-dispatch', 'routing-portable', 'routing-regate', 'routing-default-layout')) + tuple(
+    'Python 3.12 / SG2 case ' + name for name in ('sg2-none', 'sg2-conventional', 'sg2-explicit')) + (
+    'Python 3.12 / offline canary controls', 'Python 3.12 / offline audit and finalization',
+    'Python 3.12 / offline evaluation', 'test')
 EXECUTION_GATES = ('terminal', 'shutdown', 'first_stop', 'live_attribution',
     'saved_attribution', 'phase_history', 'tool_history', 'schema', 'pair',
     'receipts', 'evidence', 'observation', 'accounting', 'runtime_authority', 'keep_awake')
@@ -38,6 +42,33 @@ _PREPARATION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'job_id',
     'working_directory', 'dependencies', 'selection', 'runtime', 'run_date',
     'max_draft_checks', 'render_spec', 'input_identity', 'instruction',
     'instruction_sha256', 'outputs', 'pinned_files'))
+
+
+def required_checks(event):
+    """Explicit current workflow profiles; a future roster needs review/tests."""
+    if type(event) is not str or event not in ('pull_request', 'push', 'workflow_dispatch'):
+        raise ValueError('CI workflow event must be pull_request, push or workflow_dispatch')
+    pull = event == 'pull_request'
+    return (tuple(f'Python 3.12 / shard {n}' for n in range(1, 9 if pull else 7))
+            + _COMMON_CHECKS + (('large-files',) if pull else ('schema-examples (3.12)',)))
+
+
+REQUIRED_CHECKS = required_checks('pull_request')
+
+
+def _workflow_sha(source_commit):
+    if type(source_commit) is not str or re.fullmatch(r'[0-9a-f]{40}|[0-9a-f]{64}', source_commit) is None:
+        raise ValueError('CI source commit must be an exact local Git object identity')
+    relative = '.github/workflows/main.yaml'
+    current = _read(str(authority.ROOT / relative), 'CI workflow', c.HARD_LIMITS['input_bytes'])
+    try:
+        committed = subprocess.run(['git', '--no-replace-objects', 'show', source_commit + ':' + relative],
+            cwd=authority.ROOT, env=git_env(), capture_output=True, timeout=30, check=True).stdout
+    except subprocess.CalledProcessError as exc:
+        raise ValueError('CI workflow is absent from the named local source commit') from exc
+    if committed != current.raw:
+        raise ValueError('CI workflow differs from its exact source commit')
+    return current.pin.sha256
 
 
 def _read(path, label, maximum=MAX_WIRE_BYTES):
@@ -269,8 +300,10 @@ def _authorizations(raw, value, *, review_path, ci_path, launch_word_path):
     for key in ('reviewer', 'author', 'reviewed_at', 'evidence'):
         _text(review[key], key)
     ci = records['ci']
-    c.exact(ci, set(binding) | {'kind', 'version', 'checks'}, 'v2 CI evidence')
-    if ci['kind'] != 'd4d_native_execution_ci_v2' or type(ci['checks']) is not dict or set(ci['checks']) != set(REQUIRED_CHECKS):
+    c.exact(ci, set(binding) | {'kind', 'version', 'checks', 'workflow_event', 'workflow_sha256'}, 'v2 CI evidence')
+    if (ci['kind'] != 'd4d_native_execution_ci_v2' or type(ci['checks']) is not dict
+            or set(ci['checks']) != set(required_checks(ci['workflow_event']))
+            or ci['workflow_sha256'] != _workflow_sha(binding['source_commit'])):
         raise ValueError('exact full v2 required CI evidence is missing')
     for row in ci['checks'].values():
         c.exact(row, {'head_sha', 'status', 'conclusion', 'details_url'}, 'v2 CI check')

@@ -323,17 +323,20 @@ def test_execution_prefix_must_match_rederived_preparation_before_consumer(prepa
 def fabricated_authorizations(tmp_path):
     """Isolated approval-parser unit data, never a valid full E or real approval."""
     raw = b'FABRICATED approval parser unit; not an execution registration\n'
+    source_commit = registration.authority.neutral.head()
     value = {'attempt_id': 'synthetic-attempt', 'permission_probe_sha256': 'b' * 64,
-             'dependencies': {'base': {'source_commit': 'a' * 40}}}
+             'dependencies': {'base': {'source_commit': source_commit}}}
     binding = {'registration_sha256': c.sha(raw), 'attempt_id': value['attempt_id'],
-        'source_commit': 'a' * 40, 'dependencies_sha256': c.sha(c.canonical(value['dependencies']))}
+        'source_commit': source_commit, 'dependencies_sha256': c.sha(c.canonical(value['dependencies']))}
     review = {**binding, 'kind': 'd4d_native_execution_review_v2', 'version': 2,
         'reviewer': 'synthetic-reviewer', 'author': 'synthetic-author', 'independent': True,
         'decision': 'approved', 'reviewed_at': 'synthetic-time', 'evidence': 'Fabricated unit test only'}
     ci = {**binding, 'kind': 'd4d_native_execution_ci_v2', 'version': 2,
-        'checks': {name: {'head_sha': 'a' * 40, 'status': 'completed', 'conclusion': 'success',
+        'workflow_event': 'pull_request',
+        'workflow_sha256': c.sha((registration.authority.ROOT / '.github/workflows/main.yaml').read_bytes()),
+        'checks': {name: {'head_sha': source_commit, 'status': 'completed', 'conclusion': 'success',
             'details_url': 'https://github.com/bridge2ai/data-sheets-schema/actions/SYNTHETIC-NOT-A-RUN'}
-            for name in registration.REQUIRED_CHECKS}}
+            for name in registration.required_checks('pull_request')}}
     word = {**binding, 'kind': 'd4d_native_execution_launch_authorization_v2', 'version': 2,
         'owner': 'synthetic-owner', 'authorized_at': 'synthetic-time', 'word': 'AUTHORIZE_ONE_NATIVE_ATTEMPT',
         'review_sha256': c.sha(c.canonical(review)), 'ci_sha256': c.sha(c.canonical(ci)),

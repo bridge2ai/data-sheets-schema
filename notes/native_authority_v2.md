@@ -181,6 +181,16 @@ hashes. These are supplied declarations, not cryptographic authentication or
 permission to contact a service. Budget is the runtime's declared positive
 decimal guard, not measured provider billing.
 
+CI evidence explicitly names `workflow_event` and `workflow_sha256`. The latter
+must match both the current main workflow file and its blob at the bound source
+commit. `required_checks(event)` requires all named lanes: PR means eight
+shards, four API cases, three SG2 cases, three offline lanes, aggregate `test`
+and `large-files`; push/manual means six shards, the same API/SG2/offline lanes,
+`test` and `schema-examples (3.12)`. The PR-only large-files check is not invented
+at a merged-main commit. No event is inferred; every applicable check must
+report completed/success at the exact source. An independent workflow-derived
+test guards this frozen interface against roster drift.
+
 An `Admission` is only an observation. U3-D must call `admit` freshly immediately
 before its first reservation/probe/dispatch effect, enforce durable one-use
 reservation, and retain post-dispatch/saved-readback gates independently. It
@@ -210,3 +220,7 @@ findings for the later issue/review workflow:
   pin including `role`, while its verifier required the three-field file-pin
   contract. Preparation and the runtime reread now use the same exact
   path/bytes/SHA-256 representation. The failed canary is retained.
+- U3A-R4 (fixed): copying the legacy six-shard CI list did not describe current
+  PR or main evidence. V2 now binds the event and committed workflow bytes and
+  requires the complete applicable roster, independently tested against the
+  current workflows. Frozen v1 evidence rules remain unchanged.
