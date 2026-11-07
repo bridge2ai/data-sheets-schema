@@ -471,8 +471,17 @@ def test_complete_verification_does_not_write_or_open_recorded_paths(fixture,mon
     before=encoded(fixture['manifest']);expected_before=encoded(fixture['expected'])
     original_read=Path.read_bytes
     fixed=set(Path(x['path']) for x in fixture['expected']['production_sources'] if Path(x['path']).is_file())
+    dependencies = authority.dependency_identity()
+    base = dependencies['base']
+    fixed.update(composition.ROOT / path for path in base['package_sources'])
+    fixed.update(composition.ROOT / row['path'] for row in base['modules'].values())
+    fixed.update(composition.ROOT / row['path'] for row in dependencies['additional_modules'].values())
+    fixed.add(Path(base['python']))
+    fixed = {path.absolute() for path in fixed}
     def read(path,*args,**kwargs):
-        assert path in fixed or path.is_relative_to(composition.ROOT), 'manifest-supplied path opened'
+        # The fixed v2 source roster uses both root-relative and absolute
+        # spellings. Admit exactly those files, never arbitrary repo inputs.
+        assert path.absolute() in fixed, 'manifest-supplied path opened'
         return original_read(path,*args,**kwargs)
     monkeypatch.setattr(Path,'read_bytes',read)
     monkeypatch.setattr(Path,'write_bytes',lambda *a,**k:pytest.fail('verifier wrote bytes'))

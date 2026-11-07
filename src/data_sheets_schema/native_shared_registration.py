@@ -219,6 +219,16 @@ def _require_integrated_gate_implementation():
         from .native_shared_execution import _engine_bindings
         contract, _ = _engine_bindings()
         contract.require_fixed()
+        # These semantic gates are lazily imported by the runtime path. Check
+        # their fixed implementation now, before admission can reserve/probe.
+        from .native_gate_engine import check as gate_check
+        from .native_shared_schema_gates import check_schemas, check_pair
+        from .native_shared_receipts import schema_snapshot, _catalog_context
+        from .native_subscription_guard import load_guard, validate_saved_observations
+        if not all(callable(function) for function in (gate_check, check_schemas,
+                check_pair, schema_snapshot, _catalog_context, load_guard,
+                validate_saved_observations)):
+            raise ValueError('native shared execution gate implementation is incomplete')
     except (ImportError, AttributeError) as exc:
         raise ValueError('native shared execution gate implementation is incomplete') from exc
 

@@ -145,18 +145,21 @@ def test_outer_route_refuses_bare_and_v1_envelopes(execution):
             registration.verified(c.canonical(bad))
 
 
-def test_outer_verifier_refuses_missing_fixed_gate_implementation_before_effects(execution, monkeypatch):
+@pytest.mark.parametrize('missing_module', [
+    'native_shared_execution', 'native_gate_engine', 'native_shared_schema_gates'])
+def test_outer_verifier_refuses_missing_fixed_gate_implementation_before_effects(execution, monkeypatch, missing_module):
     import builtins
     args, selected, _ = execution
     raw = c.canonical(registration.registration(**args))
     original = builtins.__import__
     def missing_gate(name, globals=None, locals=None, fromlist=(), level=0):
-        if name == 'native_shared_execution' and level == 1:
-            raise ImportError('deliberately unavailable fixed gate implementation')
+        if name == missing_module and level == 1:
+            raise ImportError('deliberately unavailable fixed gate: ' + missing_module)
         return original(name, globals, locals, fromlist, level)
     monkeypatch.setattr(builtins, '__import__', missing_gate)
-    with pytest.raises(ValueError, match='gate implementation is incomplete'):
+    with pytest.raises(ValueError, match='gate implementation is incomplete') as refused:
         registration.verified(raw)
+    assert str(refused.value.__cause__) == 'deliberately unavailable fixed gate: ' + missing_module
     assert not args['attempt_directory'].exists()
     assert not args['evidence_directory'].exists()
     assert not Path(c.parse_selection(selected['selection_raw_json'].encode())['stage_root']).exists()

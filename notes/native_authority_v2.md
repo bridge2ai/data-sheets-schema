@@ -248,6 +248,9 @@ Offline review ledger (issue publication deferred by the no-GitHub rule):
   implementation could import. Keep proposal construction available, but
   refuse outer verification/admission until that implementation loads and its
   fixed gate roster checks. Missing U3-B remains a refusal, not admission.
+- U3D-R7: a recovered no-input-I/O test rejected legitimate root-relative
+  package source reads. Use the exact v2 source/interpreter roster for both
+  spellings and remove its overly broad allowance for any repository path.
 
 ### U3-A offline review ledger
 

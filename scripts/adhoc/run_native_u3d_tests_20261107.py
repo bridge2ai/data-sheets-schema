@@ -42,6 +42,10 @@ NATIVE_PATHS = (
 )
 
 
+def locked():
+    return os.path.lexists(LOCK)
+
+
 def sandbox_profile():
     # Read-only path resolution does not invoke or authenticate any executable.
     # Deny both named routes and physical targets. Synthetic Python test peers
@@ -242,7 +246,7 @@ class OwnedProcesses:
 
 
 def parent(args):
-    if LOCK.exists():
+    if locked():
         raise SystemExit("quiet window active; no tests started")
     dependencies = dependency_site()
     out = args.out.absolute()
@@ -274,7 +278,7 @@ def parent(args):
     # Load only the physical dependency path, never site.addsitedir/.pth hooks.
     sys.path.append(str(dependencies))
     import psutil
-    if LOCK.exists():
+    if locked():
         save(out / "outcome.json", {"status": "blocked_quiet_window", "launched": False})
         return 75
     started = time.monotonic()
@@ -290,7 +294,7 @@ def parent(args):
                 if time.monotonic() - started >= DEADLINE:
                     interrupted = "deadline"
                     break
-                requested = LOCK.exists()
+                requested = locked()
                 if requested and not paused:
                     owned.signal(signal.SIGSTOP); paused = True
                 elif paused and not requested:
