@@ -171,7 +171,8 @@ fixed module, `data_sheets_schema.native_shared_registration`, declaring integer
 ```python
 rebuild_v2_body(*, preparation_raw: bytes, composition_path, system_path,
                permission_probe_path, attempt_id, attempt_directory,
-               evidence_directory, max_draft_checks, receipt_origin_version) -> dict
+               evidence_directory, max_draft_checks, receipt_origin_version,
+               classifier_projection) -> dict
 execution_paths_v2(body: dict, *, fresh: bool, extra_protected) -> list[Path]
 ```
 
@@ -184,6 +185,18 @@ does not reconstruct E; the permanent echo test returns preparation, not E.
 This comparison does not prevent deliberate access to interpreter state. Both
 function signatures are exact (no defaults, variadic forwarding or wrappers).
 It must not call the outer `verified` recursively.
+`verified(raw, *, classifier_projection)` and
+`admit(raw, *, review_path, ci_path, launch_word_path, classifier_projection)`
+require that explicit live argument. Missing arguments or `None` refuse before
+input reads or effects. A passes the same object to reconstruction on every
+verification, including both admission checks. It never inspects, constructs,
+copies, serializes or globally stores the carrier. C owns constructor, lifetime
+and source-pin validation; A neither upgrades mappings nor authenticates
+look-alikes. The carrier is not a field of E or `Admission`. Its lifetime must
+work across the unchanged source-loader boundary; A forwarding tests alone
+do not establish genuine C acceptance. The consumer's updated source must be
+committed and its current SHA-256 included in the package-source closure; an old
+nine-argument consumer is refused by the exact signature contract.
 The second rechecks canonical, disjoint, protected-input-safe and unspent
 reservations without creating them. It must include native stage reservations.
 The returned list contains distinct physical `Path` objects for the attempt,
@@ -369,6 +382,12 @@ findings for the later issue/review workflow:
   finders. No production authority rule or namespace is altered. The initial
   23,343-node collection's wrapper failure is retained; its later origin checks
   were not reached and cannot be claimed passed.
+- R4-A (fixed, offline review record): the new round-4 evidence auditor initially
+  hashed origin witnesses without requiring the worker's source-origin success,
+  and accepted an early bytecode-probe result without checking the final process
+  outcome. It now requires the origin success, exact global lock/scratch paths,
+  successful bounded probe completion, cleanup, no observed survivors/errors and
+  matching final result digest. GitHub filing is deferred by the offline brief.
 
 ### U3-C captured controller and delivery
 

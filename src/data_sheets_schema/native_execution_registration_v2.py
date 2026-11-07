@@ -54,7 +54,8 @@ EXECUTION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'attempt_id',
     'permission_observations', 'argv', 'environment', 'selection', 'scope'))
 _REBUILD_INPUTS = ('preparation_raw', 'composition_path', 'system_path',
     'permission_probe_path', 'attempt_id', 'attempt_directory',
-    'evidence_directory', 'max_draft_checks', 'receipt_origin_version')
+    'evidence_directory', 'max_draft_checks', 'receipt_origin_version',
+    'classifier_projection')
 
 
 def required_checks(event):
@@ -364,13 +365,16 @@ def _rebuild_inputs(body, preparation_raw):
         receipt_origin_version=origin_version)
 
 
-def verified(raw):
+def verified(raw, *, classifier_projection):
     """Reconstruct v2 E through its fixed consumer; no reservation or dispatch.
 
     C/D must check the full closed E, genuine C/policy/saved permission recipe,
     and original/effective receipt authority from inputs only. The submitted
     body's derived fields are never passed to the reconstruction consumer.
+    The live classifier projection is forwarded unchanged; C owns its validation.
     """
+    if classifier_projection is None:
+        raise ValueError('v2 execution requires an explicit classifier projection')
     body, dependencies = _wire(raw)
     _closed_execution(body)
     try:
@@ -409,7 +413,8 @@ def verified(raw):
         raise ValueError('incomplete v2 shared execution binding') from exc
     authority.require_committed(dependencies)
     with _consumer(dependencies) as consumer:
-        result = consumer.rebuild_v2_body(**_rebuild_inputs(body, preparation_raw))
+        result = consumer.rebuild_v2_body(**_rebuild_inputs(body, preparation_raw),
+                                         classifier_projection=classifier_projection)
     _closed_execution(result)
     if c.canonical(result) != c.canonical(body):
         raise ValueError('v2 execution consumer did not reconstruct the complete registration')
@@ -528,11 +533,13 @@ def _checked_reservations(result, value, evidence):
     return tuple(sorted(result))
 
 
-def admit(raw, *, review_path, ci_path, launch_word_path):
+def admit(raw, *, review_path, ci_path, launch_word_path, classifier_projection):
     """Fresh pre-effect checks. U3-D must call again immediately before effects."""
+    if classifier_projection is None:
+        raise ValueError('v2 execution requires an explicit classifier projection')
     if threading.current_thread() is not threading.main_thread():
         raise ValueError('v2 execution admission requires the main thread')
-    value = verified(raw)
+    value = verified(raw, classifier_projection=classifier_projection)
     evidence = _authorizations(raw, value, review_path=review_path, ci_path=ci_path,
                                launch_word_path=launch_word_path)
     runtime = validate_runtime(value['runtime'])
@@ -545,7 +552,7 @@ def admit(raw, *, review_path, ci_path, launch_word_path):
     reservations = _checked_reservations(result, value, evidence)
     # Admission is fresh on every call, including after a successful earlier
     # check. The future actuator owns durable reservation and one-use semantics.
-    if verified(raw) != value:
+    if verified(raw, classifier_projection=classifier_projection) != value:
         raise ValueError('v2 execution changed during admission')
     for role, item in evidence.items():
         if _read(item.pin.path, role + ' evidence') != item:
