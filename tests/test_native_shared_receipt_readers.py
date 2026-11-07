@@ -33,11 +33,15 @@ def _member(item, number):
 
 
 @pytest.fixture
-def completed_reader(case, declaration, supplied, tmp_path):
+def completed_reader(case, declaration, supplied, tmp_path, monkeypatch):
     """Actual selected assets and real stage computation; invented delivery frames."""
     for name, source in (('bundle', 'bundle'), ('chunk_manifest', 'manifest'), ('context', 'context')):
         update_input(declaration, name, supplied[source])
     root_schema = supplied['schema_path']
+    # This fixture selects its real imported schema closure; keep the configured
+    # validation root aligned with that selection instead of bypassing capture.
+    from data_sheets_schema import api_runner
+    monkeypatch.setattr(api_runner, 'FULL_SCHEMA_PATH', root_schema)
     root_schema.write_bytes(root_schema.read_bytes() + b'prefixes:\n  selected: https://selected.example/\n')
     child_schema = root_schema.with_name('child.yaml')
     child_schema.write_bytes(child_schema.read_bytes().replace(

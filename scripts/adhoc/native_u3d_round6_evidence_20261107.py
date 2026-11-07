@@ -105,14 +105,14 @@ def nodes(mode):
     raise ValueError(mode)
 
 
-def run(mode):
+def run(mode, label):
     selected = nodes(mode)
     assert FORBIDDEN_TEST not in selected and 'tests/test_native_u3b_reuse.py' not in selected
     for node in selected:
         assert (ROOT / node.split('::', 1)[0]).exists(), node
     command = [str(PYTHON), '-S', '-P', '-B',
         str(ROOT / 'scripts/adhoc/run_native_u3d_tests_20261107.py'),
-        '--out', str(BASE / ('round6-' + mode)), '--workers', '0' if mode == 'collection' else '2']
+        '--out', str(BASE / ('round6-' + label)), '--workers', '0' if mode == 'collection' else '2']
     if mode == 'collection':
         command.append('--collect-only')
     command += selected
@@ -165,7 +165,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=('hydrate', 'canary', 'reader-canary', 'guard-canary',
         'ca', 'd', 'compatibility', 'collection', 'collect'))
-    mode = parser.parse_args().mode
+    parser.add_argument('--label', help='unique evidence suffix for a retained rerun')
+    args = parser.parse_args()
+    mode = args.mode
+    label = args.label or mode
+    assert label and all(ch.isalnum() or ch == '-' for ch in label), 'literal evidence label required'
     assert not os.path.lexists(EXEC / 'plans/native_quiet_window.lock'), 'quiet window active'
     assert git('branch', '--show-current').decode().strip() == 'codex/native-u3d-integration-20261107'
     if mode == 'hydrate':
@@ -173,7 +177,7 @@ def main():
     elif mode == 'collect':
         collect()
     else:
-        raise SystemExit(run(mode))
+        raise SystemExit(run(mode, label))
 
 
 if __name__ == '__main__':
