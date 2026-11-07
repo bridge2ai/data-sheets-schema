@@ -12,6 +12,7 @@ import ast
 import hashlib
 import importlib
 import importlib.abc
+import importlib.machinery
 import importlib.util
 from pathlib import Path
 import re
@@ -38,6 +39,7 @@ PACKAGE = 'src/data_sheets_schema'
 SOURCE_SUFFIXES = frozenset(('.py', '.yaml', '.json'))
 EXPOSED_CONTROLS = frozenset(('prepare_registration_v2', 'run_direct_canary_awake'))
 _SOURCE_MODULES = WeakKeyDictionary()
+_VERIFIED_PACKAGE_MODULES = {}
 _LEGACY_CONSUMER_MODULES = frozenset('data_sheets_schema.' + name for name in (
     'native_execution', 'native_execution_registration', 'native_execution_authority',
     'native_supervisor', 'native_attempt_supervisor', 'native_supervisor_authority', 'native_attribution_registration',
@@ -68,6 +70,52 @@ def _import_time_nodes(tree):
             yield from _import_time_nodes(child)
 
 
+def _package_name(path):
+    """Classify physical package sources independently of their import spelling."""
+    if not path:
+        return None
+    resolved = Path(path).resolve()
+    root = (ROOT / PACKAGE).resolve()
+    if not resolved.is_relative_to(root):
+        return None
+    if resolved.suffix != '.py':
+        raise ValueError('consumer package import is not Python source')
+    parts = resolved.relative_to(root).with_suffix('').parts
+    if parts[-1] == '__init__':
+        parts = parts[:-1]
+    return '.'.join(('data_sheets_schema', *parts))
+
+
+def _resolved_import(name):
+    """Find an import origin without importing or executing parent packages."""
+    search = None
+    spec = None
+    parts = name.split('.')
+    for index in range(len(parts)):
+        # Resolve each leaf against the captured parent search path. A dotted
+        # namespace spec would consult sys.modules for unexecuted parents.
+        spec = importlib.machinery.PathFinder.find_spec(parts[index], search)
+        if spec is None:
+            return None
+        search = (list(spec.submodule_search_locations)
+                  if spec.submodule_search_locations is not None else None)
+        if index < len(parts) - 1 and search is None:
+            return None
+    return spec
+
+
+def _canonical_import(name):
+    if name == 'data_sheets_schema' or name.startswith('data_sheets_schema.'):
+        return name
+    spec = _resolved_import(name)
+    canonical = _package_name(spec.origin) if spec and spec.origin else None
+    if canonical:
+        return canonical
+    if name.split('.')[0] in {'src', 'tests', 'scripts', 'notes'}:
+        raise ValueError('consumer import crosses an unverified checkout namespace: ' + name)
+    return name
+
+
 def refuse_legacy_consumer_imports(raw, *, name, package_sources):
     """Check the fixed consumer's explicit, pinned package import graph.
 
@@ -86,7 +134,10 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
     dynamic_attributes = {'import_module', 'exec_module', 'load_module',
         'spec_from_file_location', 'spec_from_loader', 'module_from_spec',
         'SourceFileLoader', 'SourcelessFileLoader', 'ExtensionFileLoader', 'run_path', 'run_module',
-        '__import__'}
+        '__import__', 'resolve_name'}
+    introspection = {'modules', 'meta_path', 'path_hooks', 'path_importer_cache',
+        '_getframe', 'currentframe', 'stack', 'tb_frame', 'f_back', 'f_locals',
+        'f_globals', 'gi_frame', 'cr_frame'}
 
     def source_path(module):
         stem = 'src/' + module.replace('.', '/')
@@ -152,7 +203,8 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
             return ''
 
         def import_machinery(node):
-            return qualified(node).split('.')[0] in {'importlib', 'builtins', 'runpy'}
+            return qualified(node).split('.')[0] in {'importlib', 'builtins', 'runpy',
+                'pkgutil', 'pydoc', 'zipimport'}
 
         for node in nodes:
             dynamic = (isinstance(node, ast.Name) and
@@ -165,19 +217,18 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
                 if operation in {'getattr', 'hasattr'} and len(node.args) >= 2:
                     attribute = node.args[1]
                     dynamic |= (isinstance(attribute, ast.Constant) and
-                                attribute.value in dynamic_names | dynamic_attributes)
+                                attribute.value in dynamic_names | dynamic_attributes | introspection)
                     dynamic |= import_machinery(node.args[0])
                 elif operation == 'vars' and node.args:
                     dynamic |= import_machinery(node.args[0])
             if owned and isinstance(node, ast.Attribute):
-                if (qualified(node) in {'sys._getframe', 'inspect.currentframe', 'sys.modules'}
+                if (node.attr in introspection
                         or node.attr == '__signature__' and isinstance(node.ctx, ast.Store)):
                     raise ValueError('consumer lint forbids introspection or signature assignment: ' + module)
                 if any(qualified(node) == legacy or qualified(node).startswith(legacy + '.')
                        for legacy in _LEGACY_CONSUMER_MODULES):
                     raise ValueError('consumer imports forbidden v1 execution authority: ' + module)
-            if owned and isinstance(node, ast.Name) and qualified(node) in {
-                    'sys._getframe', 'inspect.currentframe', 'sys.modules'}:
+            if owned and isinstance(node, ast.Name) and qualified(node).split('.')[-1] in introspection:
                 raise ValueError('consumer lint forbids introspection or signature assignment: ' + module)
             if owned and dynamic:
                 raise ValueError('consumer import graph contains dynamic loading or evaluation: ' + module)
@@ -194,6 +245,7 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
                         imported = importlib.util.resolve_name('.' * node.level + imported, package)
                     except (ImportError, ValueError) as exc:
                         raise ValueError('consumer import graph has invalid relative import: ' + module) from exc
+                imported = _canonical_import(imported)
                 if imported == 'data_sheets_schema':
                     targets.extend(imported + '.' + alias.name for alias in node.names)
                 else:
@@ -206,6 +258,7 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
                         if stem + '.py' in package_sources or stem + '/__init__.py' in package_sources:
                             targets.append(child)
         for target in sorted(set(targets), reverse=True):
+            target = _canonical_import(target)
             if target == 'data_sheets_schema':
                 raise ValueError('consumer import graph imports an ambiguous package namespace')
             if target.startswith('data_sheets_schema.'):
@@ -273,9 +326,10 @@ def module_source_identity(module):
 
 class _VerifiedBytesLoader(importlib.abc.Loader):
     """A deliberately source-only loader: no SourceFileLoader/cache operations."""
-    def __init__(self, name, path, raw, digest, *, package=False):
+    def __init__(self, name, path, raw, digest, *, package=False, verified_package=False):
         self.identity = _source_identity(name, path, raw, digest, allow_empty_package=package)
         self.raw, self.package = raw, package
+        self.verified_package = verified_package
 
     def create_module(self, spec):
         return None
@@ -291,6 +345,8 @@ class _VerifiedBytesLoader(importlib.abc.Loader):
         code = compile(self.raw, self.identity['path'], 'exec', dont_inherit=True)
         exec(code, module.__dict__)
         _SOURCE_MODULES[module] = (dict(self.identity), self, _own_callables(module))
+        if self.verified_package:
+            _VERIFIED_PACKAGE_MODULES[module.__name__] = module
 
 
 class _VerifiedBytesFinder(importlib.abc.MetaPathFinder):
@@ -300,9 +356,23 @@ class _VerifiedBytesFinder(importlib.abc.MetaPathFinder):
         self.checked = set(checked)
 
     def find_spec(self, fullname, path=None, target=None):
-        if self.consumer and fullname in _LEGACY_CONSUMER_MODULES:
+        canonical = fullname
+        if self.consumer and not fullname.startswith('data_sheets_schema.'):
+            spec = importlib.machinery.PathFinder.find_spec(fullname, path)
+            canonical = _package_name(spec.origin) if spec and spec.origin else None
+            canonical = canonical or fullname
+            if canonical != fullname:
+                relative = str(Path(spec.origin).resolve().relative_to(ROOT))
+                pinned = next((item for item in self.sources.values()
+                               if str(item[0].relative_to(ROOT)) == relative), None)
+                if pinned is None:
+                    raise ValueError('consumer package import is not pinned: ' + fullname)
+                self.sources[fullname] = pinned
+            elif fullname.split('.')[0] in {'tests', 'scripts', 'notes'}:
+                raise ValueError('consumer import crosses an unverified checkout namespace: ' + fullname)
+        if self.consumer and canonical in _LEGACY_CONSUMER_MODULES:
             raise ValueError('consumer imports forbidden v1 execution authority: ' + fullname)
-        if self.consumer and fullname in _TRUSTED_CONSUMER_BOUNDARIES:
+        if self.consumer and canonical in _TRUSTED_CONSUMER_BOUNDARIES:
             raise ValueError('consumer cannot import verifier bootstrap boundary: ' + fullname)
         source = self.sources.get(fullname)
         if source is None:
@@ -312,10 +382,11 @@ class _VerifiedBytesFinder(importlib.abc.MetaPathFinder):
         filename, raw, digest, package = source
         if raw is None:
             raw = _verified_source_bytes(filename, digest)
-        if self.consumer and raw and fullname not in self.checked:
+        if self.consumer and raw and canonical not in self.checked and canonical != 'data_sheets_schema':
             pins = {str(item[0].relative_to(ROOT)): item[2] for item in self.sources.values()}
-            self.checked.update(refuse_legacy_consumer_imports(raw, name=fullname, package_sources=pins))
-        loader = _VerifiedBytesLoader(fullname, filename, raw, digest, package=package)
+            self.checked.update(refuse_legacy_consumer_imports(raw, name=canonical, package_sources=pins))
+        loader = _VerifiedBytesLoader(fullname, filename, raw, digest, package=package,
+                                      verified_package=self.consumer and fullname == canonical)
         return importlib.util.spec_from_loader(fullname, loader, origin=str(filename), is_package=package)
 
 
@@ -342,8 +413,9 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
     The fixed caller supplies the name/path/pin; serialized input cannot choose
     them. Existing bindings are restored, never trusted as executable proof.
     No bytecode is read or written for this module. With package_sources, all
-    package dependencies are freshly compiled, including dynamic imports in
-    reviewed dependencies, replacing cached bindings only within this context.
+    package dependencies are freshly compiled unless held in this loader's
+    verified set by an enclosing context. Eviction remains process-wide: callers
+    must ensure no other thread imports or uses package modules during the scope.
     Verifier boundaries refuse; external libraries remain outside this scope.
     """
     _main_thread()
@@ -372,12 +444,25 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
                 parts = Path(relative).relative_to('src').with_suffix('').parts
                 package = parts[-1] == '__init__'
                 imported = '.'.join(parts[:-1] if package else parts)
-                if imported != 'data_sheets_schema' and imported not in sources:
+                if imported not in sources:
                     sources[imported] = (ROOT / relative, None, digest, package)
-    absent = object()
-    bindings = set(sources)
+    reused = {}
     if package_sources is not None:
-        bindings.update(key for key in sys.modules if key.startswith('data_sheets_schema.'))
+        for key, loaded in _VERIFIED_PACKAGE_MODULES.items():
+            if key not in sources or key in _LEGACY_CONSUMER_MODULES | _TRUSTED_CONSUMER_BOUNDARIES:
+                continue
+            actual = module_source_identity(loaded)
+            filename, _, digest, _ = sources[key]
+            if actual != {'name': key, 'path': str(filename), 'sha256': digest}:
+                raise ValueError('verified module differs from consumer source pin')
+            _verified_source_bytes(filename, digest)
+            reused[key] = loaded
+    absent = object()
+    bindings = set(sources) - {'data_sheets_schema'}
+    if package_sources is not None:
+        bindings.update(key for key, loaded in list(sys.modules.items())
+                        if key.startswith('data_sheets_schema.') or
+                        key != 'data_sheets_schema' and _package_name(getattr(loaded, '__file__', None)))
     previous = {key: sys.modules.get(key, absent) for key in bindings}
     parents = {}
     for key in bindings:
@@ -388,6 +473,7 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
     old_bytecode = sys.dont_write_bytecode
     old_path = list(sys.path)
     old_meta = list(sys.meta_path)
+    old_verified = dict(_VERIFIED_PACKAGE_MODULES)
     finder = _VerifiedBytesFinder(sources, consumer=package_sources is not None, checked=graph)
     try:
         sys.dont_write_bytecode = True
@@ -397,11 +483,21 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
             if key in parents:
                 parent, child, _ = parents[key]
                 vars(parent).pop(child, None)
+        for key, loaded in reused.items():
+            sys.modules[key] = loaded
+            parent_name, _, child = key.rpartition('.')
+            if parent_name in sys.modules:
+                setattr(sys.modules[parent_name], child, loaded)
         module = importlib.import_module(name)
         module_source_identity(module)
-        initial_modules = {key: sys.modules[key] for key in sources if key in sys.modules}
+        initial_modules = {key: sys.modules[key] for key in sources
+                           if key != 'data_sheets_schema' and key in sys.modules}
+        if package_sources is not None:
+            _VERIFIED_PACKAGE_MODULES.update(initial_modules)
         yield module
         for key in sources:
+            if key == 'data_sheets_schema':
+                continue
             loaded = sys.modules.get(key)
             if key in initial_modules and loaded is not initial_modules[key]:
                 raise ValueError('verified consumer graph module binding changed')
@@ -411,9 +507,17 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
                 if (actual['name'], actual['path'], actual['sha256']) != (key, str(filename), digest):
                     raise ValueError('consumer graph module differs from its captured source identity')
     finally:
+        _VERIFIED_PACKAGE_MODULES.clear()
+        _VERIFIED_PACKAGE_MODULES.update(old_verified)
         sys.path[:] = old_path
         sys.meta_path[:] = old_meta
         sys.dont_write_bytecode = old_bytecode
+        for key in set(sources) - set(previous) - {'data_sheets_schema'}:
+            loaded = sys.modules.pop(key, None)
+            parent_name, _, child = key.rpartition('.')
+            parent = sys.modules.get(parent_name)
+            if parent is not None and vars(parent).get(child) is loaded:
+                vars(parent).pop(child, None)
         for key, prior in previous.items():
             if prior is absent:
                 sys.modules.pop(key, None)
@@ -424,6 +528,27 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
                 vars(parent).pop(child, None)
             else:
                 setattr(parent, child, prior)
+
+
+@contextmanager
+def loaded_verified_package_module(name, *, package_sources):
+    """Orchestration entry for C's projection; keep open through consumer use.
+
+    The supplied source closure must already be verified by orchestration.
+    Only A-compiled objects enter the scoped verified set, never ordinary imports.
+    """
+    if not name.startswith('data_sheets_schema.'):
+        raise ValueError('verified package entry requires a canonical module name')
+    stem = 'src/' + name.replace('.', '/')
+    candidates = [item for item in (stem + '.py', stem + '/__init__.py') if item in package_sources]
+    if len(candidates) != 1:
+        raise ValueError('verified package entry requires one pinned source')
+    path = ROOT / candidates[0]
+    digest = package_sources[candidates[0]]
+    raw = _verified_source_bytes(path, digest)
+    with verified_source_module(name, path=path, raw=raw, sha256=digest,
+                                package_sources=package_sources) as module:
+        yield module
 
 
 def _require_v2(identity):

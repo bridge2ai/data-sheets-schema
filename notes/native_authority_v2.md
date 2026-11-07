@@ -1,5 +1,42 @@
 # Native authority v2 (#5508)
 
+## U3-A Round 5 loader handoff (2026-11-07)
+
+Orchestration opens `authority.loaded_verified_package_module(name,
+package_sources=verified_package_sources)` for C's canonical projection module,
+mints the carrier from that yielded module, and keeps the context open through
+the fixed reconstruction entry. The closure must already have been verified by
+orchestration. A's scoped verified module set contains only A's source-compiled
+objects and their recorded digests, including dependencies loaded later within
+the scope. A nested consumer reuses those exact objects after checking callable
+identity, the consumer pin and the physical source bytes again. Ordinary imports
+are evicted and recompiled; they cannot seed this set. Closing the orchestration
+scope releases its set and restores the preceding interpreter bindings.
+
+Package imports are classified by resolved physical origin, including `src.`
+and bare aliases. The canonical name determines lint and boundary/v1 refusal;
+allowed aliases execute captured source without bytecode. The top-level namespace
+package remains bootstrap; it contains no initializer here. Other checkout
+namespaces (`tests`, `scripts`, `notes`) refuse rather than becoming unverified
+consumer dependencies. This remains lint plus reviewed source pins, not a Python
+sandbox or protection against hostile interpreter machinery.
+
+Eviction **remains process-wide**. Callers must ensure that no other thread imports
+or uses package modules during a loader scope. The main-thread entry check is not
+a proof of that precondition. No lock or multithreaded safety claim is introduced.
+
+Review dispositions: P2-1 and P2-2 are handled by this loader change. P3-2 adds
+import-hook/cache, `os.sys`, frame and `pkgutil.resolve_name` lint refusals, with
+`pkgutil`, `pydoc` and `zipimport` treated as import machinery. P3-8 is documented
+as the process-wide precondition above. P3-1, P3-3 through P3-7 belong to D round 9
+(argument order, full edge census, protocol seam, capability narrowing, tightened
+parity wording and unmasked constants). The lead's 22:25Z ruling assigns P2-3
+through P2-6 and consumer-roster migration to C round 4 / D round 9; A does not
+edit those files or claim real C-carrier integration in this round.
+
+Offline delivery defers GitHub PR/issue creation and publication. Local regression
+evidence and any review findings are retained for the lead's later online review.
+
 V2 is selected explicitly. Prepare offline attribution registrations with
 `python -m data_sheets_schema.native_attribution_registration_v2 prepare` and
 its required arguments. Construct/check compositions through
