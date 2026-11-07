@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -25,6 +26,8 @@ NEW = ('native_shared_runtime_values', 'native_shared_gate_primitives',
 
 
 def roster(mode):
+    if mode == 'contract':
+        return ['tests/test_native_execution_engine.py::test_wrong_engine_layer_refuses_before_input_reads_or_c_loading']
     if mode == 'canary':
         return ['tests/test_native_shared_gate_primitives.py::test_neutral_gate_primitive_is_accepted_by_the_unchanged_guard']
     if mode == 'd':
@@ -68,6 +71,15 @@ def collect():
         counts = {state: sum(row['state'] == state for row in cases)
                   for state in ('passed', 'failure', 'error', 'skipped')}
         collected = re.findall(r'(\d+) tests? collected', (directory / 'pytest.log').read_text())
+        retained = directory / 'retained'
+        for witness in sorted((directory / 'cases').rglob('render-digests.json')):
+            dest = retained / witness.parent.relative_to(directory / 'cases')
+            dest.mkdir(parents=True, exist_ok=True)
+            for name in ('render-digests.json', 'normalized-receipt-render.json', 'new-instruction.txt'):
+                source = witness.parent / name
+                if source.is_file():
+                    shutil.copy2(source, dest / name)
+                    assert prior.sha(source) == prior.sha(dest / name)
         result['runs'][directory.name] = {'source_commit': doc['source_commit'],
             'seconds': outcome['seconds'], 'returncode': outcome['returncode'],
             'counts': counts, 'junit': [dict(item.attrib) for item in xml.iter('testsuite')],
@@ -75,7 +87,9 @@ def collect():
             'artifacts': {name: prior.sha(directory / name) for name in (
                 'plan.json', 'outcome.json', 'pytest-command.json', 'pytest.log', 'pytest.xml',
                 'tested.diff', 'tested.status', 'tested-untracked.json', 'network.json',
-                'origins-before.json', 'origins-after.json', 'subprocess-origins.json')}}
+                'origins-before.json', 'origins-after.json', 'subprocess-origins.json')},
+            'retained': {str(path.relative_to(directory)): prior.sha(path)
+                         for path in retained.rglob('*') if path.is_file()}}
     prior.save(BASE / 'round8-evidence.json', result)
     print(json.dumps({name: {key: row[key] for key in ('counts', 'collected', 'returncode')}
         for name, row in result['runs'].items()}, indent=2))
@@ -83,7 +97,7 @@ def collect():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=('canary', 'd', 'b', 'ca', 'collection', 'collect'))
+    parser.add_argument('mode', choices=('canary', 'contract', 'd', 'b', 'ca', 'collection', 'collect'))
     parser.add_argument('--label')
     args = parser.parse_args()
     assert not os.path.lexists(EXEC / 'plans/native_quiet_window.lock'), 'quiet window active'
@@ -98,7 +112,7 @@ def main():
     command = [str(prior.PYTHON), '-S', '-P', '-B',
         str(ROOT / 'scripts/adhoc/run_native_u3d_tests_20261107.py'),
         '--out', str(BASE / ('round8-' + label)), '--workers',
-        '0' if args.mode in ('collection', 'canary') else '2']
+        '0' if args.mode in ('collection', 'canary', 'contract') else '2']
     if args.mode == 'collection':
         command += ['--collect-only']
     raise SystemExit(subprocess.call(command + nodes, cwd=ROOT, env=prior.ENV))

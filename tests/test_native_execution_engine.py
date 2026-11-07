@@ -49,6 +49,29 @@ def test_fixed_contract_cannot_select_foreign_semantic_module():
         replace(contract, kind='caller_chosen_kind').require_fixed()
 
 
+def test_proposal_gate_census_uses_the_real_fixed_engine_contract():
+    from data_sheets_schema import native_shared_registration_orchestration as proposal
+    assert proposal._require_integrated_gate_implementation() is None
+
+
+def test_wrong_engine_layer_refuses_before_input_reads_or_c_loading(monkeypatch):
+    from data_sheets_schema import native_shared_registration as consumer
+    from data_sheets_schema import native_shared_registration_orchestration as proposal
+    touched = []
+
+    def forbidden(*args, **kwargs):
+        touched.append(True)
+        pytest.fail('wrong engine contract reached input reads or C loading')
+
+    # A real module from the wrong layer, never a fake classifier carrier.
+    monkeypatch.setattr(native, 'registration', consumer)
+    monkeypatch.setattr(consumer, '_read', forbidden)
+    monkeypatch.setattr(proposal.permission_inputs, 'loaded_permission_inputs', forbidden)
+    with pytest.raises(ValueError, match='fixed package execution contract'):
+        proposal._registration_body('/unused/composition', '/unused/system')
+    assert touched == []
+
+
 def test_new_engine_does_not_accept_the_frozen_legacy_contract():
     contract = legacy_contract()
     with pytest.raises(ValueError, match='fixed package'):

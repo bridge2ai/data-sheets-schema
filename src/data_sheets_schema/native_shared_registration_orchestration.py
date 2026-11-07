@@ -15,7 +15,19 @@ from .native_shared_registration import (
 )
 
 
+def _require_integrated_gate_implementation():
+    """Keep the engine-contract check outside the input-only consumer graph."""
+    try:
+        from .native_shared_execution_orchestration import _engine_bindings
+        contract, _ = _engine_bindings()
+        contract.require_fixed()
+        consumer._require_integrated_gate_implementation()
+    except (ImportError, AttributeError) as exc:
+        raise ValueError('native shared execution gate implementation is incomplete') from exc
+
+
 def _registration_body(composition_path, system_path, **kwargs):
+    _require_integrated_gate_implementation()
     raw = consumer._read(composition_path, 'composition', c.HARD_LIMITS['request_bytes'])
     selected, _, _ = composition.reconstruct_composition(raw)
     preparation_raw = selected['preparation_raw_json'].encode('utf-8')
@@ -24,7 +36,6 @@ def _registration_body(composition_path, system_path, **kwargs):
     dependencies = authority.dependency_identity()
     if prepared['dependencies'] != dependencies or selected['dependencies'] != dependencies:
         raise ValueError('execution preparation differs from current v2 authority')
-    consumer._require_integrated_gate_implementation()
     with permission_inputs.loaded_permission_inputs() as (controls, controller_sources):
         value = consumer._registration_body(composition_path, system_path,
             preparation_raw=preparation_raw, controls=controls,
