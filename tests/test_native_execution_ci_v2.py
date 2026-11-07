@@ -156,7 +156,7 @@ def _event_records(records, event, local):
     paths = WORKFLOWS if event == 'pull_request' else (WORKFLOW,)
     ci['workflow_sha256'] = {path: c.sha((local['root'] / path).read_bytes()) for path in paths}
     row = deepcopy(next(iter(ci['checks'].values())))
-    row['head_sha'] = ci['tested_commit']
+    row['head_sha'] = local['source']
     row['details_url'] = REPOSITORY_URL + '/actions/runs/1/job/2'
     ci['checks'] = {name: deepcopy(row) for name in _checks_from_workflows(event)}
     return records
@@ -287,7 +287,7 @@ def test_pr_workflow_map_cannot_hide_different_tested_merge_bytes(ci_evidence, r
     ('head_ref', 'requires the tested pull-request merge ref'),
     ('unknown_commit', 'local CI Git object or configuration is unavailable'),
     ('short_commit', 'CI tested commit must be an exact local Git commit identity'),
-    ('source_in_rows', 'CI check source differs from tested commit')])
+    ('merge_in_rows', 'CI check source differs from source commit')])
 def test_pr_ci_binds_tested_merge_and_exact_source_parent(ci_evidence, mutation, refusal):
     raw, value, original, paths, local = ci_evidence
     records = _event_records(original, 'pull_request', local)
@@ -309,7 +309,7 @@ def test_pr_ci_binds_tested_merge_and_exact_source_parent(ci_evidence, mutation,
         ci['tested_commit'] = local['merge'][:12]
     else:
         for row in ci['checks'].values():
-            row['head_sha'] = local['source']
+            row['head_sha'] = local['merge']
     _write(records, paths)
     with pytest.raises(ValueError, match=refusal):
         registration._authorizations(raw, value, **_authorization_kwargs(paths))
