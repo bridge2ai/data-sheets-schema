@@ -54,7 +54,9 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
     U3-A's two reviewed v2 boundaries (which themselves use a pure v1 runtime
     validator); external libraries and the caller's bootstrap are out of this
     graph. Dynamic loading/evaluation refuses instead of guessing its target.
-    Every package dependency inspected here is read from its declared pin.
+    Every package dependency and implicit parent initializer below the trusted
+    top-level package is read from its declared pin. Nested namespace parents
+    are not supported here: an absent or ambiguous initializer refuses.
     """
     if (type(raw) is not bytes or not raw or type(name) is not str
             or not name.startswith('data_sheets_schema.') or type(package_sources) is not dict):
@@ -82,6 +84,18 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
             continue
         if len(visited) >= 256:
             raise ValueError('consumer package import graph exceeds its fixed bound')
+        # Importing pkg.child executes pkg.__init__ even if the child's source
+        # never names pkg. Close that implicit import edge before any loading.
+        parts = module.split('.')
+        for length in range(2, len(parts)):
+            parent = '.'.join(parts[:length])
+            stem = 'src/' + parent.replace('.', '/')
+            if stem + '/__init__.py' not in package_sources:
+                raise ValueError('consumer parent package initializer is not pinned: ' + parent)
+            if stem + '.py' in package_sources:
+                raise ValueError('consumer parent package initializer is ambiguous: ' + parent)
+            if parent not in visited:
+                pending.append((parent, None))
         relative = source_path(module)
         digest = package_sources[relative]
         if source is None:
@@ -172,12 +186,13 @@ def _main_thread():
         raise ValueError('native source loading requires the main thread')
 
 
-def _source_identity(name, path, raw, sha256):
+def _source_identity(name, path, raw, sha256, *, allow_empty_package=False):
     """Validate a caller-captured source before compilation; never read a pyc."""
     path = Path(path)
     if (type(name) is not str or not name or any(not part.isidentifier() for part in name.split('.'))
             or not path.is_absolute() or path.suffix != '.py'
-            or type(raw) is not bytes or not raw
+            or type(raw) is not bytes
+            or not raw and not (allow_empty_package and path.name == '__init__.py')
             or type(sha256) is not str or re.fullmatch('[0-9a-f]{64}', sha256) is None
             or hashlib.sha256(raw).hexdigest() != sha256):
         raise ValueError('invalid verified Python source identity')
@@ -221,7 +236,7 @@ def module_source_identity(module):
 class _VerifiedBytesLoader(importlib.abc.Loader):
     """A deliberately source-only loader: no SourceFileLoader/cache operations."""
     def __init__(self, name, path, raw, digest, *, package=False):
-        self.identity = _source_identity(name, path, raw, digest)
+        self.identity = _source_identity(name, path, raw, digest, allow_empty_package=package)
         self.raw, self.package = raw, package
 
     def create_module(self, spec):

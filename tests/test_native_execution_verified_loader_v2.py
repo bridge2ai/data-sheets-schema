@@ -309,3 +309,128 @@ def test_consumer_context_recompiles_cached_transitive_graph_and_restores_bindin
     assert sys.modules[child] is prior and package.synthetic_dependency is prior
     assert sys.meta_path == old_meta
     assert {cache: cache.read_bytes() for cache in caches} == before
+
+
+def _nested_consumer_fixture(tmp_path, monkeypatch, request, initializer):
+    """The parent is implicit: neither child nor consumer explicitly imports it."""
+    import data_sheets_schema as package
+    name = 'data_sheets_schema.synthetic_parent_consumer'
+    parent_name = 'data_sheets_schema.synthetic_parent_package'
+    child_name = parent_name + '.child'
+    absent = object()
+    previous = {key: sys.modules.get(key, absent) for key in (name, parent_name, child_name)}
+    attributes = {key: vars(package).get(key, absent)
+                  for key in ('synthetic_parent_consumer', 'synthetic_parent_package')}
+    def restore_after_failed_regression():
+        # The unfixed implementation can leak an implicit parent even when a
+        # test fails. Keep the red demonstration isolated from later tests.
+        for key, value in previous.items():
+            if value is absent:
+                sys.modules.pop(key, None)
+            else:
+                sys.modules[key] = value
+        for key, value in attributes.items():
+            if value is absent:
+                vars(package).pop(key, None)
+            else:
+                setattr(package, key, value)
+    request.addfinalizer(restore_after_failed_regression)
+    source = (b'from .synthetic_parent_package.child import value\n'
+              b'def read():\n    return value()\n')
+    child = b'def value():\n    return "pinned child"\n'
+    pins = graph_fixture(tmp_path, monkeypatch, {name: source, child_name: child})
+    root = tmp_path/'src/data_sheets_schema'
+    init_path = root/'synthetic_parent_package/__init__.py'
+    init_path.write_bytes(initializer)
+    init_relative = str(init_path.relative_to(tmp_path))
+    pins[init_relative] = pin(initializer)
+    # Make ordinary import's fallback point at this synthetic fixture too.
+    # Otherwise missing parent closure could merely produce ModuleNotFoundError
+    # instead of exposing the exact cached-bytecode hole being exercised.
+    monkeypatch.setattr(package, '__path__', [str(root)])
+    for module_name in (name, parent_name, child_name):
+        monkeypatch.delitem(sys.modules, module_name, raising=False)
+    for attribute in ('synthetic_parent_consumer', 'synthetic_parent_package'):
+        monkeypatch.delattr(package, attribute, raising=False)
+    return {'name': name, 'parent': parent_name, 'child': child_name,
+            'source': source, 'initializer': initializer, 'pins': pins,
+            'path': root/'synthetic_parent_consumer.py', 'init_path': init_path,
+            'init_relative': init_relative, 'package': package}
+
+
+def test_implicit_parent_initializer_cannot_import_legacy_authority(tmp_path, monkeypatch, request):
+    fixture = _nested_consumer_fixture(tmp_path, monkeypatch, request,
+        b'from data_sheets_schema.native_execution_authority import dependency_identity\n')
+    with pytest.raises(ValueError, match='forbidden v1 execution authority'):
+        authority.refuse_legacy_consumer_imports(fixture['source'], name=fixture['name'],
+                                                package_sources=fixture['pins'])
+    assert not {fixture['name'], fixture['parent'], fixture['child']}.intersection(sys.modules)
+
+
+@pytest.mark.parametrize('cached_parent', [False, True], ids=['forged-pyc', 'cached-parent-and-forged-pyc'])
+def test_implicit_parent_is_source_compiled_and_all_bindings_restore(tmp_path, monkeypatch, request, cached_parent):
+    fixture = _nested_consumer_fixture(tmp_path, monkeypatch, request, b'MARKER = "verified parent"\n')
+    cache = forged_cache(fixture['init_path'])
+    cache_before = cache.read_bytes()
+    previous_parent = previous_child = None
+    if cached_parent:
+        previous_parent = ModuleType(fixture['parent'])
+        previous_parent.__file__ = str(fixture['init_path'])
+        previous_parent.__path__ = [str(fixture['init_path'].parent)]
+        previous_parent.MARKER = 'cached foreign parent'
+        previous_child = ModuleType(fixture['child'])
+        previous_child.__file__ = str(fixture['init_path'].with_name('child.py'))
+        previous_child.value = lambda: 'cached foreign child'
+        previous_parent.child = previous_child
+        monkeypatch.setitem(sys.modules, fixture['parent'], previous_parent)
+        monkeypatch.setitem(sys.modules, fixture['child'], previous_child)
+        monkeypatch.setattr(fixture['package'], 'synthetic_parent_package', previous_parent, raising=False)
+    with authority.verified_source_module(fixture['name'], path=fixture['path'], raw=fixture['source'],
+            sha256=pin(fixture['source']), package_sources=fixture['pins']) as module:
+        assert module.read() == 'pinned child'
+        parent = sys.modules[fixture['parent']]
+        assert parent.MARKER == 'verified parent'
+        assert parent is not previous_parent
+        assert not hasattr(parent, 'FORGED_CACHE_EXECUTED')
+        assert parent.__cached__ is None
+        assert authority.module_source_identity(parent) == {
+            'name': fixture['parent'], 'path': str(fixture['init_path']),
+            'sha256': pin(fixture['initializer'])}
+        assert fixture['package'].synthetic_parent_package is parent
+        assert parent.child is sys.modules[fixture['child']]
+    assert fixture['name'] not in sys.modules
+    assert not hasattr(fixture['package'], 'synthetic_parent_consumer')
+    if cached_parent:
+        assert sys.modules[fixture['parent']] is previous_parent
+        assert sys.modules[fixture['child']] is previous_child
+        assert fixture['package'].synthetic_parent_package is previous_parent
+        assert previous_parent.child is previous_child
+    else:
+        assert fixture['parent'] not in sys.modules and fixture['child'] not in sys.modules
+        assert not hasattr(fixture['package'], 'synthetic_parent_package')
+    assert cache.read_bytes() == cache_before
+
+
+def test_implicit_parent_without_initializer_pin_refuses_before_import(tmp_path, monkeypatch, request):
+    fixture = _nested_consumer_fixture(tmp_path, monkeypatch, request,
+        b'raise AssertionError("an unpinned parent must never execute")\n')
+    fixture['pins'].pop(fixture['init_relative'])
+    with pytest.raises(ValueError, match='parent package initializer is not pinned'):
+        with authority.verified_source_module(fixture['name'], path=fixture['path'], raw=fixture['source'],
+                sha256=pin(fixture['source']), package_sources=fixture['pins']):
+            pytest.fail('consumer with unpinned implicit parent was admitted')
+    assert not {fixture['name'], fixture['parent'], fixture['child']}.intersection(sys.modules)
+
+
+def test_implicit_parent_with_pinned_empty_initializer_is_verified(tmp_path, monkeypatch, request):
+    fixture = _nested_consumer_fixture(tmp_path, monkeypatch, request, b'')
+    graph = authority.refuse_legacy_consumer_imports(fixture['source'], name=fixture['name'],
+                                                   package_sources=fixture['pins'])
+    assert graph[fixture['parent']] == pin(b'')
+    with authority.verified_source_module(fixture['name'], path=fixture['path'], raw=fixture['source'],
+            sha256=pin(fixture['source']), package_sources=fixture['pins']) as module:
+        assert module.read() == 'pinned child'
+        parent = sys.modules[fixture['parent']]
+        assert parent.__cached__ is None
+        assert authority.module_source_identity(parent)['sha256'] == pin(b'')
+    assert not {fixture['name'], fixture['parent'], fixture['child']}.intersection(sys.modules)

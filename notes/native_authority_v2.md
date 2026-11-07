@@ -194,7 +194,11 @@ No input may select a module or callback; another origin, interface or version
 refuses. The module is compiled from captured bytes whose digest matches the
 committed package source map, with loader-recorded identity checked before and
 after its functions run. Its static package import graph must not import frozen
-v1 execution authority; dynamic imports/exec in that graph refuse. The existing
+v1 execution authority; dynamic imports/exec in that graph refuse. Implicit
+parent package initializers below `data_sheets_schema` are part of this graph
+and are compiled from pinned bytes too, including empty initializers. A missing
+or ambiguous initializer pin refuses; nested namespace packages are not supported
+by this closed consumer interface. The existing
 U3-A boundary modules are explicit trusted leaves of this inspection because the
 bridge itself deliberately reuses the pure runtime validator. This is not a
 general sandbox against hostile Python, external dependencies or arbitrary
@@ -278,6 +282,10 @@ Round-2 review records, retained offline for the later issue workflow:
 - R2-C: a read may update access time without changing source. Compare device,
   inode, mode, size, modification time and change time across the read; retain
   physical-path and digest checks. Access time is not source identity.
+- R2-D: importing a child implicitly executes its package initializers. Include
+  those parents in import inspection, source-only loading and binding restoration;
+  refuse an unpinned or ambiguous parent before import. An unchanged regression
+  failed before this repair because a legacy import only in the parent was missed.
 
 ### U3-A offline review ledger
 
