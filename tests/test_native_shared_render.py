@@ -274,6 +274,7 @@ def test_command_roster_uses_stage_originals_and_complete_recorded_context(nativ
 def test_initial_and_final_receipt_commands_are_exact(native_spec, tmp_path):
     import hashlib
     import json
+    import re
     import shlex
 
     commands = native.commands(native_spec)
@@ -285,17 +286,85 @@ def test_initial_and_final_receipt_commands_are_exact(native_spec, tmp_path):
         assert text.count(shlex.join(command)) == 1
     assert 'phase1_receipts is structural only: floors remain pending' in text
     assert 'run final_receipts with strict floor acceptance' in text
-    # Same captured synthetic selection and runtime, old/new renderers. This is
-    # an instruction identity witness, not a native registration or execution.
-    # Recorded Round 2 witness; independent of local Git object availability.
-    witness = {'old_instruction_sha256': 'c9076aee1a6c6c4a0293aa4a54436e150c04e46ad6dc21fe85496a1ce10f4e1c',
-               'new_instruction_sha256': hashlib.sha256(text.encode()).hexdigest(),
-               'old_source_sha256': 'f39b4597472cb7601502680f0ddeb112ecd905d8f65cbdb65cfa5fe28aa44731',
-               'new_source_sha256': hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest(),
-               'scope': 'same synthetic captured selection; not a registered native run'}
-    assert witness['old_instruction_sha256'] != witness['new_instruction_sha256']
+
+    # Freeze the receipt-stage render, not a digest containing temporary paths.
+    # These are independently stated expected bytes; neither expected prose nor
+    # expected command spelling is obtained from the renderer under test.
+    # The witness covers this paragraph and these two command blocks, not the
+    # entire instruction, registration/admission, or a native execution.
+    expected_paragraph = (
+        'Run full_schema, full_terms and phase1_receipts on the current originals before advance. '
+        'phase1_receipts is structural only: floors remain pending and no floor acceptance is claimed. '
+        'Fix initial source-grounded full/receipt defects and repeat their checks before sealing. '
+        'A nonzero phase1_receipts exit is retryable whatever its stdout; exit 0 with unparseable '
+        'or contract-violating stdout is a sticky contract violation. '
+        'After sealing, keep the original receipt at its model_files receipt path unchanged. '
+        'The helper owns the completed effective receipt at the effective_receipt role; '
+        'do not copy it over the original receipt. The selected final receipt check verifies the original '
+        'against its seal and assesses the helper-owned effective receipt against the reconciled full record. '
+        'After the receipt stage reports await_core, run derive_core, core_schema and pair; advance then binds the genuine core. '
+        'Read original_source_inventory before completing typed audit stages. After assembly_complete, run audit_evidence '
+        'before applying recommendations. Reconcile full, derive_final_core, validate full/core and pair, '
+        'run final_receipts with strict floor acceptance and final_scope, and read final_source_inventory before each report rewrite. '
+        'Run draft before final_evidence; run recorder last. Never use a stage or helper success as overall completion.'
+    )
+    paragraph_start = '\n\nRun full_schema, full_terms '
+    paragraph_end = '\n\nRegistered maximum draft checks: '
+    assert text.count(paragraph_start) == text.count(paragraph_end) == 1
+    paragraph = 'Run full_schema, full_terms ' + text.split(paragraph_start, 1)[1].split(paragraph_end, 1)[0]
+
+    paths = {
+        native_spec._agentic_toolchain['python']: 'PYTHON',
+        str(native_spec.manifest): 'SOURCE_MANIFEST',
+        str(native_spec.bundle): 'BUNDLE',
+        str(native_spec.chunk_manifest): 'CHUNK_MANIFEST',
+        native_spec._native_shared_generation_capture.registration.pin.path: 'SELECTION',
+    }
+    assert len(paths) == 5
+
+    def normalized_command_block(name):
+        marker = '\n\n' + name + ':\n\n```bash\n'
+        assert text.count(marker) == 1
+        command, fence, _ = text.split(marker, 1)[1].partition('\n```\n\n')
+        assert fence
+        # Replace exactly one complete shell-quoted path token per input.
+        # No prefix, substring, whitespace or arbitrary-absolute-path stripping:
+        # a changed path, suffix, flag, quoting or prose byte remains visible.
+        for path, token in paths.items():
+            command, count = re.subn(
+                r'(?<!\S)' + re.escape(shlex.quote(path)) + r'(?!\S)',
+                token, command,
+            )
+            assert count == 1, (name, token, count)
+        return name + ':\n\n```bash\n' + command + '\n```\n\n'
+
+    common_command = (
+        'PYTHON -m data_sheets_schema.cli --manifest SOURCE_MANIFEST receipts check '
+        '--method claudecode_direct --label offline-test --project SYNTHETIC '
+        '--bundle BUNDLE --chunk-manifest CHUNK_MANIFEST --native-shared-selection SELECTION '
+    )
+    expected = {
+        'receipt_stage_contract': expected_paragraph,
+        'phase1_receipts': 'phase1_receipts:\n\n```bash\n' + common_command + '--initial-structure\n```\n\n',
+        'final_receipts': 'final_receipts:\n\n```bash\n' + common_command + '--strict\n```\n\n',
+    }
+    observed = {
+        'receipt_stage_contract': paragraph,
+        'phase1_receipts': normalized_command_block('phase1_receipts'),
+        'final_receipts': normalized_command_block('final_receipts'),
+    }
+    witness = {
+        'expected_normalized_sha256': hashlib.sha256(c.canonical(expected)).hexdigest(),
+        'observed_normalized_sha256': hashlib.sha256(c.canonical(observed)).hexdigest(),
+        'instruction_sha256': hashlib.sha256(text.encode()).hexdigest(),
+        'source_sha256': hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest(),
+        'scope': 'normalized receipt-stage paragraph and two command blocks; synthetic rendering only',
+    }
     (tmp_path / 'render-digests.json').write_text(json.dumps(witness, indent=2) + '\n')
     (tmp_path / 'new-instruction.txt').write_text(text)
+    (tmp_path / 'normalized-receipt-render.json').write_bytes(c.canonical(observed))
+    assert observed == expected
+    assert witness['observed_normalized_sha256'] == witness['expected_normalized_sha256']
 
 
 def test_split_receipt_commands_match_native_consumers(native_spec):

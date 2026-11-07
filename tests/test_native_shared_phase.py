@@ -6,6 +6,7 @@ import pytest
 
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema.native_shared_phase import COMMAND_NAMES, PhaseState
+from tests.test_native_shared_selection import declaration  # noqa: F401 (fixture)
 
 
 def artifact(role):
@@ -177,6 +178,64 @@ def test_live_structural_result_cannot_satisfy_final_receipts():
         trace.helper('final_receipts', value={'mode': 'initial_structure',
             'structure_passed': True, 'floors': 'pending', 'floor_acceptance_claimed': False})
     assert 'final_receipts' not in trace.state.report()['current_checks']
+
+
+@pytest.mark.parametrize('kind', [
+    'snippet_adjacent_chunk', 'snippet_elsewhere_chunk', 'snippet_spans_boundary'])
+def test_honest_final_cli_finding_markers_join_observer_and_saved_replay(
+        declaration, tmp_path, monkeypatch, kind):
+    """Actual strict printing of a supplied assessment must not reject its quote.
+
+    The real receipt predicates and registered policy establish strict success;
+    supplying the assessment isolates this CLI/observer join from the unavailable
+    full native capture path. It does not claim native execution admission.
+    """
+    from copy import deepcopy
+    from click.testing import CliRunner
+    from data_sheets_schema import receipt_completion_policy as policy
+    from data_sheets_schema import receipts as rc
+    from data_sheets_schema.cli import receipts as cli
+    from tests.test_native_initial_structure_mode import assessment
+    from tests.test_native_u3d_receipt_policy import selected
+
+    chosen = policy.select_policy(selected(declaration, registered=True))
+    block = assessment()
+    block.update(native_receipt_stage='final', final_stage_complete=True,
+                 coverage_floor=policy.evaluate_floor(block['slots'], chosen))
+    block[policy.BLOCK_KEY] = policy.block_identity(chosen)
+    snippet = 'initial_structure and floor_acceptance_claimed'
+    assert len(snippet) <= 60
+    block['findings'] = [*block['findings'], {
+        'kind': kind, 'chunk': 'c002', 'found_in': ['c003'],
+        'slot': 'description', 'snippet': snippet}]
+    assert cli.strict_failure(block) is False
+    full = tmp_path / 'full.yaml'; full.write_text('id: test\n')
+    bundle = tmp_path / 'bundle.md'; bundle.write_text('source\n')
+    provenance = tmp_path / 'absent.yaml'
+    monkeypatch.setattr(cli, '_run_paths', lambda *_: {
+        'core_dir': tmp_path, 'full': full, 'provenance': provenance})
+    monkeypatch.setattr(rc, 'block_for', lambda *a, **k: deepcopy(block))
+    result = CliRunner().invoke(cli.receipts, ['check', '--method', 'native-test',
+        '--label', 'local', '--project', 'NEUTRAL', '--bundle', str(bundle), '--strict'])
+    assert result.exit_code == 0 and result.exception is None, result.output
+    assert '· native receipt stage: final' in result.stdout.splitlines()
+    assert any(line.startswith('   ❌ ') and f'snippet={snippet}' in line
+               for line in result.stdout.splitlines())
+    assert not provenance.exists()
+
+    trace = Trace(); trace.assembly()
+    trace.helper('derive_final_core'); trace.helper('full_schema'); trace.helper('full_terms')
+    trace.helper('core_schema'); trace.helper('pair')
+    identity = trace.call('Bash', {'command': shlex.join(trace.commands['final_receipts'])})
+    assert trace.result(identity, code=result.exit_code, text=result.stdout) == ()
+    assert 'final_receipts' in trace.state.report()['current_checks']
+    trace.helper('final_scope'); trace.finish()
+    report = trace.state.report(complete=True)
+    assert report['passed'] and not report['problems']
+    clone = Trace()
+    for event, current in trace.events:
+        clone.state.observe(json.loads(json.dumps(event)), stage_decision=current)
+    assert clone.state.report(complete=True) == report
 
 
 @pytest.mark.parametrize('saved', [False, True])

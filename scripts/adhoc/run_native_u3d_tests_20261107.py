@@ -72,6 +72,7 @@ def clean_environment(out, interpreter_directory):
         "HOME": str(out / "home"), "TMPDIR": str(out / "tmp"),
         "LANG": "en_US.UTF-8", "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1", "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONPATH": str(ROOT / "src") + os.pathsep + str(ROOT),
         "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1", "PYTEST_ADDOPTS": "",
         "UV_OFFLINE": "1", "PIP_NO_INDEX": "1", "GIT_NO_LAZY_FETCH": "1",
         "GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_SYSTEM": "/dev/null",
@@ -86,6 +87,46 @@ def dependency_site():
     if not (prefix / "pyvenv.cfg").is_file() or not site.is_dir() or site.resolve() != site:
         raise RuntimeError("expected physical venv dependency directory")
     return site
+
+
+def source_evidence(root, out, env):
+    """Bind tracked edits and nonignored untracked bytes to the test launch.
+
+    This is a prelaunch snapshot, not a claim that concurrent source edits are
+    safe. Status retains Git's filename quoting; the NUL-delimited inventory
+    separately handles names containing newlines. Symlinks bind link text and
+    are never followed into a different checkout.
+    """
+    def git(*args):
+        return subprocess.check_output(['git', *args], cwd=root, env=env)
+
+    tracked = git('diff', '--binary', 'HEAD')
+    status = git('status', '--porcelain', '--untracked-files=all')
+    names = git('ls-files', '--others', '--exclude-standard', '-z')
+    files = []
+    for raw_name in names.split(b'\0'):
+        if not raw_name:
+            continue
+        name = os.fsdecode(raw_name)
+        path = root / name
+        if path.is_symlink():
+            content = os.fsencode(os.readlink(path))
+            kind = 'symlink'
+        elif path.is_file():
+            content = path.read_bytes()
+            kind = 'file'
+        else:
+            raise RuntimeError('cannot snapshot untracked path: ' + name)
+        files.append({'path': name, 'kind': kind, 'size': len(content),
+                      'sha256': hashlib.sha256(content).hexdigest()})
+    (out / 'tested.diff').write_bytes(tracked)
+    (out / 'tested.status').write_bytes(status)
+    save(out / 'tested-untracked.json', {
+        'scope': 'git ls-files --others --exclude-standard; ignored caches excluded',
+        'files': files})
+    return {'tested_diff_sha256': digest(out / 'tested.diff'),
+            'tested_status_sha256': digest(out / 'tested.status'),
+            'tested_untracked_sha256': digest(out / 'tested-untracked.json')}
 
 
 def origin_witness():
@@ -269,11 +310,9 @@ def parent(args):
     command += args.nodes
     commit = subprocess.check_output(["git", "--no-replace-objects", "rev-parse", "HEAD"],
                                      cwd=ROOT, env=env, text=True).strip()
-    tested_diff = subprocess.check_output(
-        ['git', 'diff', '--binary', 'HEAD'], cwd=ROOT, env=env)
-    (out / 'tested.diff').write_bytes(tested_diff)
+    evidence = source_evidence(ROOT, out, env)
     save(out / "plan.json", {"command": command, "source_root": str(ROOT),
-         "tested_diff_sha256": hashlib.sha256(tested_diff).hexdigest(),
+         **evidence,
          "source_commit": commit, "runner_sha256": digest(Path(__file__)),
          "sandbox_sha256": digest(profile), "environment": env,
          "deadline_seconds": DEADLINE, "workers": args.workers,

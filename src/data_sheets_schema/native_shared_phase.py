@@ -345,9 +345,13 @@ class PhaseState:
                         is_json = False
                     else:
                         is_json = True
-                    _require(not is_json and 'initial_structure' not in raw
-                             and 'floor_acceptance_claimed' not in raw
-                             and '· native receipt stage: final' in raw.splitlines(),
+                    # Strict findings can quote these words from source snippets.
+                    # Only standalone marker lines identify structural output;
+                    # a substring in an otherwise valid finding does not.
+                    lines = raw.splitlines()
+                    _require(not is_json and 'initial_structure' not in lines
+                             and 'floor_acceptance_claimed' not in lines
+                             and '· native receipt stage: final' in lines,
                              'final receipts require strict output, not structural JSON')
             if kind == 'draft':
                 _require(codes[0] in (0, 1), 'draft checker returned an unusable exit')
