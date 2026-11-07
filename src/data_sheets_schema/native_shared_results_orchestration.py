@@ -364,7 +364,3 @@ def require_saved_basis(value, result):
         if evidence.read_regular(str(projected), 'saved_projection',
                 max_bytes=max(1, len(snapshot.raw[original]))).captured.raw != snapshot.raw[original]:
             raise ValueError('saved projection changed during independent gate reconstruction')
-
-
-
-

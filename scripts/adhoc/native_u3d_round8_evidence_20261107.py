@@ -26,6 +26,9 @@ NEW = ('native_shared_runtime_values', 'native_shared_gate_primitives',
 
 
 def roster(mode):
+    if mode == 'boundaries':
+        return [f'tests/test_{name}.py' for name in (
+            'native_shared_gate_primitives', 'native_shared_layer_split', 'native_execution_engine')]
     if mode == 'contract':
         return ['tests/test_native_execution_engine.py::test_wrong_engine_layer_refuses_before_input_reads_or_c_loading']
     if mode == 'canary':
@@ -49,6 +52,20 @@ def collect():
     result = {'head': prior.git('rev-parse', 'HEAD').decode().strip(),
         'excluded_execution_node': prior.FORBIDDEN_TEST,
         'scope': 'offline synthetic checks; no C stand-in or native launch', 'runs': {}}
+    reviewed = '0b2e86bcb2fa2e97a94c408cb22d8b8003b81c94'
+    changed = prior.git('diff', '--name-only', reviewed, 'HEAD', '--', 'src').decode().splitlines()
+    assert changed == [
+        'src/data_sheets_schema/native_shared_gate_primitives.py',
+        'src/data_sheets_schema/native_shared_results_orchestration.py'], changed
+    result['final_source_changes_from_full_suite_commit'] = {}
+    for name in changed:
+        before = prior.git('show', reviewed + ':' + name)
+        after = (ROOT / name).read_bytes()
+        assert before.rstrip() + b'\n' == after
+        assert ast.dump(ast.parse(before)) == ast.dump(ast.parse(after))
+        result['final_source_changes_from_full_suite_commit'][name] = {
+            'fully_tested_commit': reviewed, 'only_trailing_blank_lines_removed': True,
+            'ast_equal': True, 'final_sha256': prior.sha(ROOT / name)}
     for plan in sorted(BASE.glob('round8-*/plan.json')):
         directory = plan.parent
         doc = json.loads(plan.read_bytes())
@@ -97,7 +114,7 @@ def collect():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=('canary', 'contract', 'd', 'b', 'ca', 'collection', 'collect'))
+    parser.add_argument('mode', choices=('canary', 'contract', 'boundaries', 'd', 'b', 'ca', 'collection', 'collect'))
     parser.add_argument('--label')
     args = parser.parse_args()
     assert not os.path.lexists(EXEC / 'plans/native_quiet_window.lock'), 'quiet window active'

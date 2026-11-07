@@ -198,5 +198,3 @@ def cleanup_result(raw, observed, registered_policy):
             'registered_policy': deepcopy(registered_policy), 'policy_matches': policy_matches,
             'outcome_matches': outcome_matches, 'matches_observed': matches,
             'observed_sha256': _sha(expected_raw), 'captured_sha256': _sha(raw)}
-
-
