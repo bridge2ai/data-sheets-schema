@@ -154,6 +154,9 @@ def test_bad_authority_envelope_refuses_before_input_capture(isolated_modules, m
     elif mutation == 'inner_bool': value['registration']['schema_version'] = True
     else: value = []
     monkeypatch.setattr(selection, 'capture', lambda *a, **k: pytest.fail('invalid envelope reached S'))
+    monkeypatch.setattr(subprocess, 'Popen', lambda *a, **k: pytest.fail('invalid envelope spawned a process'))
+    monkeypatch.setattr(registration.authority, 'loaded_dependencies',
+                        lambda *a, **k: pytest.fail('invalid envelope compiled or loaded helpers'))
     with pytest.raises(ValueError, match='v2 authority envelope'):
         registration.verify_preparer(c.canonical(value), job_id='synthetic')
 
@@ -220,16 +223,19 @@ def test_preparation_does_not_cache_admission_after_live_drift(prepared, changed
 
 def test_v1_execution_and_v2_envelope_cross_refuse(prepared):
     inputs, envelope = prepared
+    before_files, before_entries = _files(inputs['root']), _entries(inputs['root'])
     v1 = {'kind': legacy.KIND, 'version': 1, 'execution': legacy.EXECUTION}
     with pytest.raises(ValueError, match='v2 authority envelope'):
         registration.verified(c.canonical(v1))
     with pytest.raises(ValueError, match='not a supported explicit native execution registration'):
         legacy.verified(c.canonical(envelope))
     # A genuine preparation is still not a complete execution registration.
-    with pytest.raises(ValueError, match='closed v2 shared execution route'):
+    with pytest.raises(ValueError, match='v2 execution body keys mismatch'):
         registration.admit(c.canonical(envelope), review_path=inputs['root'] / 'absent-review',
             ci_path=inputs['root'] / 'absent-ci', launch_word_path=inputs['root'] / 'absent-owner')
-    assert not (inputs['root'] / 'absent-review').exists()
+    assert _files(inputs['root']) == before_files
+    assert _entries(inputs['root']) == before_entries
+    assert all(not Path(path).exists() for path in envelope['registration']['outputs'].values())
 
 
 def test_complete_valid_v1_execution_refused_by_v2_without_reservation(
@@ -290,7 +296,7 @@ def test_complete_valid_v1_execution_refused_by_v2_without_reservation(
 
 
 def _execution_prefix(inputs, preparation):
-    """Fabricated join prefix ONLY: deliberately no real C/permission consumer."""
+    """Closed-shape synthetic joins, deliberately no real C/permission proof."""
     prepared_raw = c.canonical(preparation)
     body = preparation['registration']
     composition = {'render_spec': body['render_spec'],
@@ -305,7 +311,19 @@ def _execution_prefix(inputs, preparation):
             'runtime': inputs['runtime'], 'runtime_declaration_sha256': body['runtime']['sha256'],
             'selection_sha256': body['selection']['sha256'], 'max_draft_checks': body['max_draft_checks'],
             'instruction_sha256': body['instruction_sha256'], 'working_directory': body['working_directory'],
-            'composition_raw_json': composition_raw.decode(), 'composition_sha256': c.sha(composition_raw)}}
+            'composition_raw_json': composition_raw.decode(), 'composition_sha256': c.sha(composition_raw),
+            'attempt_id': 'synthetic-attempt',
+            'composition': str(inputs['root'] / 'synthetic-composition.json'),
+            'system_path': str(inputs['root'] / 'synthetic-system.md'),
+            'permission_probe': str(inputs['root'] / 'synthetic-permission.json'),
+            'attempt_directory': str(inputs['root'] / 'synthetic-attempt'),
+            'evidence_directory': str(inputs['root'] / 'synthetic-evidence'),
+            'system_sha256': 'a' * 64, 'effective_system': 'Synthetic test only.',
+            'effective_system_sha256': c.sha(b'Synthetic test only.'),
+            'permission_probe_sha256': 'b' * 64, 'permission_expected_sha256': 'c' * 64,
+            'permission_observations': {'synthetic': True}, 'argv': ['not-executed'],
+            'environment': {}, 'selection': {'synthetic': True},
+            'scope': 'Fabricated bridge test, never a C/D or admission verdict.'}}
 
 
 def test_v1_refuses_v2_execution_envelope_and_inner_join_prefix(prepared):
@@ -376,31 +394,64 @@ def test_same_origin_module_cannot_substitute_for_absent_committed_consumer(prep
     assert _files(inputs['root']) == before
 
 
-@pytest.mark.parametrize('mutation', ['budget', 'draft_bool', 'selection', 'instruction', 'composition'])
-def test_execution_prefix_must_match_rederived_preparation_before_consumer(prepared, monkeypatch, mutation):
+@pytest.mark.parametrize('mutation,diagnostic', [
+    ('gates', 'v2 execution gate obligations mismatch'),
+    ('preparation_digest', 'v2 preparation digest mismatch'),
+    ('dependencies', 'v2 dependency identity mismatch'),
+    ('budget', 'v2 execution runtime mismatch'),
+    ('runtime_digest', 'v2 execution runtime_declaration_sha256 mismatch'),
+    ('draft_bool', 'v2 execution max_draft_checks mismatch'),
+    ('draft_count', 'v2 execution max_draft_checks mismatch'),
+    ('selection', 'v2 execution selection_sha256 mismatch'),
+    ('instruction', 'v2 execution instruction_sha256 mismatch'),
+    ('working_directory', 'v2 execution working_directory mismatch'),
+    ('composition_digest', 'v2 composition digest mismatch'),
+    ('composition', 'v2 composition render_spec mismatch'),
+    ('composition_instruction', 'v2 composition instruction_sha256 mismatch'),
+    ('composition_selection', 'v2 composition selection_sha256 mismatch'),
+    ('composition_runtime', 'v2 composition runtime_sha256 mismatch'),
+], ids=['gates', 'preparation_digest', 'dependencies', 'budget', 'runtime_digest',
+        'draft_bool', 'draft_count', 'selection', 'instruction', 'working_directory',
+        'composition_digest', 'composition', 'composition_instruction',
+        'composition_selection', 'composition_runtime'])
+def test_execution_prefix_must_match_rederived_preparation_before_consumer(prepared, monkeypatch, mutation, diagnostic):
     inputs, preparation = prepared
     envelope = _execution_prefix(inputs, preparation)
     body = envelope['registration']
-    if mutation == 'budget':
+    if mutation == 'gates': body['execution_gates'].pop()
+    elif mutation == 'preparation_digest': body['preparation_sha256'] = '0' * 64
+    elif mutation == 'dependencies':
+        body['dependencies'] = deepcopy(body['dependencies'])
+        body['dependencies']['base']['source_commit'] = 'f' * 40
+    elif mutation == 'budget':
         body['runtime'] = deepcopy(body['runtime'])
         body['runtime']['budget_guard_usd'] = '999'
+    elif mutation == 'runtime_digest': body['runtime_declaration_sha256'] = '0' * 64
     elif mutation == 'draft_bool': body['max_draft_checks'] = True
+    elif mutation == 'draft_count': body['max_draft_checks'] += 1
     elif mutation == 'selection': body['selection_sha256'] = '0' * 64
     elif mutation == 'instruction': body['instruction_sha256'] = '0' * 64
+    elif mutation == 'working_directory': body['working_directory'] = str(inputs['root'])
+    elif mutation == 'composition_digest': body['composition_sha256'] = '0' * 64
     else:
         composition = c.strict_json(body['composition_raw_json'].encode())
-        composition['render_spec']['reasoning_effort'] = 'low'
+        if mutation == 'composition': composition['render_spec']['reasoning_effort'] = 'low'
+        else:
+            field = {'composition_instruction': 'instruction_sha256',
+                     'composition_selection': 'selection_sha256',
+                     'composition_runtime': 'runtime_sha256'}[mutation]
+            composition[field] = '0' * 64
         composition_raw = c.canonical(composition)
         body['composition_raw_json'] = composition_raw.decode()
         body['composition_sha256'] = c.sha(composition_raw)
     monkeypatch.setattr(registration, '_consumer',
                         lambda *a: pytest.fail('mismatched E/C reached consumer'))
-    with pytest.raises(ValueError, match='differ'):
+    with pytest.raises(ValueError, match=diagnostic):
         registration.verified(c.canonical(envelope))
 
 
 @pytest.fixture
-def fabricated_authorizations(tmp_path):
+def fabricated_authorizations(tmp_path, monkeypatch):
     """Isolated approval-parser unit data, never a valid full E or real approval."""
     raw = b'FABRICATED approval parser unit; not an execution registration\n'
     source_commit = registration.authority.neutral.head()
@@ -411,12 +462,16 @@ def fabricated_authorizations(tmp_path):
     review = {**binding, 'kind': 'd4d_native_execution_review_v2', 'version': 2,
         'reviewer': 'synthetic-reviewer', 'author': 'synthetic-author', 'independent': True,
         'decision': 'approved', 'reviewed_at': 'synthetic-time', 'evidence': 'Fabricated unit test only'}
+    repository = 'https://github.com/synthetic/native-u3a-tests'
+    monkeypatch.setattr(registration, '_ci_repository_url', lambda: repository)
     ci = {**binding, 'kind': 'd4d_native_execution_ci_v2', 'version': 2,
-        'workflow_event': 'pull_request',
-        'workflow_sha256': c.sha((registration.authority.ROOT / '.github/workflows/main.yaml').read_bytes()),
+        'workflow_event': 'workflow_dispatch', 'workflow_ref': 'refs/heads/main',
+        'tested_commit': source_commit,
+        'workflow_sha256': {'.github/workflows/main.yaml':
+            c.sha((registration.authority.ROOT / '.github/workflows/main.yaml').read_bytes())},
         'checks': {name: {'head_sha': source_commit, 'status': 'completed', 'conclusion': 'success',
-            'details_url': 'https://github.com/bridge2ai/data-sheets-schema/actions/SYNTHETIC-NOT-A-RUN'}
-            for name in registration.required_checks('pull_request')}}
+            'details_url': repository + '/actions/runs/1'}
+            for name in registration.required_checks('workflow_dispatch')}}
     word = {**binding, 'kind': 'd4d_native_execution_launch_authorization_v2', 'version': 2,
         'owner': 'synthetic-owner', 'authorized_at': 'synthetic-time', 'word': 'AUTHORIZE_ONE_NATIVE_ATTEMPT',
         'review_sha256': c.sha(c.canonical(review)), 'ci_sha256': c.sha(c.canonical(ci)),
@@ -443,27 +498,51 @@ def test_approval_parser_captures_exact_fabricated_bytes_without_writes(fabricat
         assert paths[key].read_bytes() == before[key]
 
 
-@pytest.mark.parametrize('mutation', ['self_review', 'not_independent', 'review_v1', 'review_bool',
-    'extra_review', 'ci_head', 'missing_check', 'failed_ci', 'owner_registration', 'owner_review',
-    'owner_permission', 'owner_word'])
-def test_approval_parser_refuses_each_fabricated_authority_mismatch(fabricated_authorizations, mutation):
+@pytest.mark.parametrize('mutation,diagnostic', [
+    ('self_review', 'v2 review cannot approve its own author'),
+    ('not_independent', 'v2 review independence must be explicit'),
+    ('review_decision', 'v2 review decision must be approved'),
+    ('review_v1', 'review must bind this exact v2 execution'),
+    ('review_bool', 'review must bind this exact v2 execution'),
+    ('extra_review', 'v2 independent review'),
+    ('ci_head', 'v2 CI check source differs from tested commit'),
+    ('ci_status', 'v2 CI check status must be completed'),
+    ('missing_check', 'v2 CI check roster differs from the exact required event roster'),
+    ('failed_ci', 'v2 CI check conclusion must be success'),
+    ('owner_registration', 'launch_word must bind this exact v2 execution'),
+    ('owner_review', 'v2 owner review hash differs'),
+    ('owner_ci', 'v2 owner CI hash differs'),
+    ('owner_permission', 'v2 owner permission probe hash differs'),
+    ('owner_word', 'v2 owner word must authorize exactly one native attempt'),
+], ids=['self_review', 'not_independent', 'review_decision', 'review_v1', 'review_bool',
+        'extra_review', 'ci_head', 'ci_status', 'missing_check', 'failed_ci',
+        'owner_registration', 'owner_review', 'owner_ci', 'owner_permission', 'owner_word'])
+def test_approval_parser_refuses_each_fabricated_authority_mismatch(fabricated_authorizations, mutation, diagnostic):
     raw, value, records, paths = fabricated_authorizations
     review, ci, word = records['review'], records['ci'], records['launch_word']
     if mutation == 'self_review': review['reviewer'] = review['author']
     elif mutation == 'not_independent': review['independent'] = False
+    elif mutation == 'review_decision': review['decision'] = 'changes_requested'
     elif mutation == 'review_v1': review['version'] = 1
     elif mutation == 'review_bool': review['version'] = True
     elif mutation == 'extra_review': review['override'] = True
     elif mutation == 'ci_head': next(iter(ci['checks'].values()))['head_sha'] = 'c' * 40
+    elif mutation == 'ci_status': next(iter(ci['checks'].values()))['status'] = 'in_progress'
     elif mutation == 'missing_check': ci['checks'].pop(next(iter(ci['checks'])))
     elif mutation == 'failed_ci': next(iter(ci['checks'].values()))['conclusion'] = 'failure'
     elif mutation == 'owner_registration': word['registration_sha256'] = '0' * 64
     elif mutation == 'owner_review': word['review_sha256'] = '0' * 64
+    elif mutation == 'owner_ci': word['ci_sha256'] = '0' * 64
     elif mutation == 'owner_permission': word['permission_probe_sha256'] = '0' * 64
     else: word['word'] = 'ALLOW_ANY_ATTEMPT'
+    if not mutation.startswith('owner_'):
+        # Owner evidence must endorse the changed bytes. Otherwise its stale
+        # hash masks removal of the review/CI check this case is meant to kill.
+        word['review_sha256'] = c.sha(c.canonical(review))
+        word['ci_sha256'] = c.sha(c.canonical(ci))
     for key, record in records.items():
         paths[key].write_bytes(c.canonical(record))
     before = {key: path.read_bytes() for key, path in paths.items()}
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=diagnostic):
         registration._authorizations(raw, value, **_authorization_kwargs(paths))
     assert {key: path.read_bytes() for key, path in paths.items()} == before
