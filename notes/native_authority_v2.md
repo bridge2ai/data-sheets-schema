@@ -240,3 +240,77 @@ findings for the later issue/review workflow:
   finders. No production authority rule or namespace is altered. The initial
   23,343-node collection's wrapper failure is retained; its later origin checks
   were not reached and cannot be claimed passed.
+
+### U3-C captured controller and delivery
+
+U3-C consumes the U3-A preparation wire through these interfaces in
+`native_shared_controller`:
+
+```python
+compose(preparation_raw: bytes, *, instruction_path) -> dict
+verified_composition(raw: bytes) -> dict
+reconstruct_composition(raw: bytes) -> tuple  # C, replay RunSpec, captured S
+captured_execution_body(raw: bytes) -> dict
+captured_preparation_body(raw: bytes) -> dict
+```
+
+Composition and reconstruction freshly verify the complete preparation, then
+bind the exact instruction, S, R, render specification, dependency identity,
+v2 control policy and working directory. The scientific procedure remains
+native-shared **version 1 / renderer 26**; the authority wire is **version 2**.
+The two captured parsers only check wire identity. They neither authorize
+effects nor replace current-source verification. Live callback construction,
+activation and capture entry freshly call the full U3-A execution verifier.
+There is no U3-D consumer here, so those entries remain closed.
+
+The stage engine reconstructs receipt completion, every typed worker, source
+omission review, integration and assembly from original captured bytes. Original
+receipts remain separate from effective receipts. Request/response observation
+joins require complete Read bytes, the first settled Write, ordered callbacks,
+matching sessions and durable stream prefixes. Stage and receipt result caches
+from the donor are removed. Only U3-B's bounded schema/catalog and typed pure
+derivation interfaces may be reused; a prior accepted replay is never authority.
+This conservative recovery makes no performance claim.
+
+The U3-B owner context is intentionally absent from the pre-integration C
+receipt fragment. Integrate **committed** U3-B using a merge commit, preserving
+its owner section exactly and appending the C delivery section. Do not replace
+that dependency with a mock owner, copy an uncommitted owner implementation or
+declare criterion 3 complete from the independent observer suites alone.
+
+Saved attribution now requires `captured_instruction` as a separate immutable
+artifact. It joins that artifact to C and the preparation without host reads.
+Its caller must independently verify canonical C/E; the saved attribution
+result only establishes its own identity/observation checks. It does not
+establish canonical instruction rendering, execution admission, permission,
+publication, final record acceptance or scientific correctness. U3-D owns those
+remaining gates, durable publication and the complete execution lifetime.
+
+### U3-C offline review ledger
+
+These local findings are retained for later issue publication; this task
+forbids GitHub operations. Test execution status belongs in the U3-C report.
+
+- U3C-R1: saved attribution compared instruction hashes only within E/C/the
+  preparation. Require the independently captured instruction's exact
+  role/path/bytes/hash and a consistently rehashed substitution refusal.
+- U3C-R2: donor record/journal acceptance caches reused verdicts, and shallow
+  copies exposed nested payloads. Remove both caches; add mutation and warm
+  validator-refusal regressions. Preserve bounded pure derivation reuse only.
+- U3C-R3: preliminary suite collection found that the donor imports
+  `coverage_counts`, which current API policy does not expose. Keep the
+  released counter checks locally in native receipt delivery; do not change
+  the API policy route or invent an API registration. The failed collection is
+  retained, and B-dependent imports remain pending the real B merge.
+- U3C-R4: the first integration fixture restarted synthetic streams at each
+  stage. Retain cumulative same-attempt streams and resolve every observation
+  against one final immutable pool, including monotonic endpoint checks.
+- U3C-R5: a draft comment claimed a fresh final receipt context while reusing
+  the live context. Final reconstruction now constructs a fresh owner context
+  and rechecks the complete stage/assembly lineage before receipt assessment.
+
+The fixture's execution wire is explicitly synthetic and grants no admission.
+Its typed helpers and raw Read/Write/chronology joins are real computation;
+successful execution of that test would establish this captured boundary,
+not a real native run, provider accounting or a published receipt-to-record
+path. U3-D and combined U3-E retain those acceptance obligations.
