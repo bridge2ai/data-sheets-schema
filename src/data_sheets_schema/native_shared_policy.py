@@ -14,7 +14,7 @@ from pathlib import Path
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_execution_authority_v2 as authority
 
-HELPERS = frozenset(('chunk_check','source_scope','full_schema','full_terms','phase1_receipts',
+HELPERS = frozenset(('chunk_check','source_scope','full_schema','full_terms','phase1_receipts','final_receipts',
     'advance','derive_core','core_schema','pair','original_source_inventory','final_source_inventory',
     'draft','audit_evidence','final_evidence','derive_final_core','final_scope','recorder'))
 

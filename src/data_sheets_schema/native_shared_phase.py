@@ -16,13 +16,13 @@ from . import native_shared_contract as c
 
 
 COMMAND_NAMES = frozenset((
-    'chunk_check', 'source_scope', 'full_schema', 'full_terms', 'phase1_receipts',
+    'chunk_check', 'source_scope', 'full_schema', 'full_terms', 'phase1_receipts', 'final_receipts',
     'advance', 'derive_core', 'core_schema', 'pair', 'original_source_inventory',
     'final_source_inventory', 'draft', 'audit_evidence', 'final_evidence',
     'derive_final_core', 'final_scope', 'recorder'))
 _TERMINAL_HELPERS = frozenset((
     'original_source_inventory', 'final_source_inventory', 'audit_evidence', 'final_evidence'))
-_JSON_HELPERS = _TERMINAL_HELPERS | {'draft', 'advance'}
+_JSON_HELPERS = _TERMINAL_HELPERS | {'draft', 'advance', 'phase1_receipts'}
 _ADVANCE_KEYS = frozenset((
     'kind', 'version', 'selection_sha256', 'execution_sha256', 'attempt_id', 'session_id',
     'advance_tool_use_id', 'before_history_sha256', 'after_history_sha256', 'state', 'publications'))
@@ -49,7 +49,7 @@ class PhaseState:
     def __init__(self, commands, *, full_path, core_path, report_path, receipt_path,
                  working_directory):
         _require(type(commands) is dict and set(commands) == COMMAND_NAMES,
-                 'native phase requires the exact seventeen helper names')
+                 'native phase requires the exact eighteen helper names')
         self.commands = {}
         for name, argv in commands.items():
             _require(type(argv) is tuple and argv and all(type(x) is str and x for x in argv),
@@ -87,6 +87,7 @@ class PhaseState:
         roles = {
             'full_schema': ('full',), 'full_terms': ('full',),
             'phase1_receipts': ('full', 'receipt'), 'derive_core': ('full', 'core'),
+            'final_receipts': ('full', 'receipt'),
             'derive_final_core': ('full', 'core'), 'core_schema': ('core',),
             'pair': ('full', 'core'), 'final_scope': ('full', 'core'),
             'final_source_inventory': ('full',), 'draft': ('full', 'report'),
@@ -108,7 +109,7 @@ class PhaseState:
 
     def _final_checks(self):
         return self._all('derive_final_core', 'full_schema', 'full_terms', 'core_schema',
-                         'pair', 'phase1_receipts', 'final_scope')
+                         'pair', 'final_receipts', 'final_scope')
 
     def _kind(self, name, inputs):
         _require(type(inputs) is dict, 'native tool inputs must be an object')
@@ -166,6 +167,7 @@ class PhaseState:
             _require('full' in self._written and self._all('chunk_check', 'source_scope'),
                      'full validation precedes initial generation')
             if kind == 'phase1_receipts':
+                _require(not self._phase1_sealed, 'structural receipt check follows phase1 seal')
                 _require('receipt' in self._written and self._all('full_schema', 'full_terms'),
                          'receipt check requires current full validation and an original receipt')
             if self._phase1_sealed:
@@ -189,11 +191,14 @@ class PhaseState:
                      'original inventory requires the actual sealed original pair')
         elif kind == 'audit_evidence':
             _require(self._assembly_complete, 'audit evidence precedes observed assembly completion')
-        elif kind in ('derive_final_core', 'core_schema', 'pair', 'final_scope', 'final_source_inventory'):
+        elif kind in ('derive_final_core', 'core_schema', 'pair', 'final_scope', 'final_source_inventory', 'final_receipts'):
             _require(self._assembly_complete and self._has('audit_evidence'),
                      'final helper precedes checked audit and assembly')
             if kind in ('core_schema', 'pair', 'final_scope'):
                 _require(self._has('derive_final_core'), 'final core check requires current final derivation')
+            if kind == 'final_receipts':
+                _require(self._all('full_schema', 'full_terms'),
+                         'final receipt check requires current full validation')
             if kind == 'final_source_inventory':
                 _require(self._final_checks(), 'final source inventory precedes current final checks')
         elif kind == 'derive_core':
@@ -240,7 +245,14 @@ class PhaseState:
     def _json_success(self, kind, raw, success, row, identity, decision):
         value = c.strict_json(raw.encode('utf-8'), 'settled ' + kind, c.HARD_LIMITS['request_bytes'])
         _require(type(value) is dict, 'helper JSON result must be an object')
-        if kind == 'advance':
+        if kind == 'phase1_receipts':
+            _require(value.get('mode') == 'initial_structure'
+                     and type(value.get('structure_passed')) is bool
+                     and value['structure_passed'] is success
+                     and value.get('floors') == 'pending'
+                     and value.get('floor_acceptance_claimed') is False,
+                     'initial receipt result must be structural with no floor acceptance')
+        elif kind == 'advance':
             c.exact(value, _ADVANCE_KEYS, 'advance result')
             _require(value['kind'] == c.KINDS['advance_result'] and type(value['version']) is int
                      and value['version'] == 1, 'advance result has another protocol')
@@ -316,6 +328,11 @@ class PhaseState:
                 self._json_success(kind, meta['stdout'], success, row, identity, decision)
             else:
                 _require(item['content'] == meta['stdout'], 'helper stdout and tool content disagree')
+                if kind == 'final_receipts':
+                    # Strict receipts emit text. Structural JSON must never earn
+                    # final credit, including when a saved call is relabelled.
+                    _require(not meta['stdout'].lstrip().startswith('{'),
+                             'final receipts require strict output, not structural JSON')
             if kind == 'draft':
                 _require(codes[0] in (0, 1), 'draft checker returned an unusable exit')
             self._checks.append({'tool_use_id': identity, 'helper': kind, 'exit_code': codes[0],

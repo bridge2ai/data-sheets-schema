@@ -60,11 +60,13 @@ def test_real_v2_composition_roundtrip_joins_preparation_and_preserves_loader(bo
     assert not isolated_modules.intersection(sys.modules)
 
 
-def test_exact_seventeen_helpers_and_readonly_grammar(bound, monkeypatch):
+def test_exact_eighteen_helpers_and_readonly_grammar(bound, monkeypatch):
     _, _, raw, instruction = bound
     value = controller.compose(raw, instruction_path=instruction)
     commands = policy.helper_commands(value['policy'])
-    assert set(commands) == policy.HELPERS and len(commands) == 17
+    assert set(commands) == policy.HELPERS and len(commands) == 18
+    assert '--initial-structure' in shlex.split(commands['phase1_receipts'])
+    assert '--strict' in shlex.split(commands['final_receipts'])
     monkeypatch.setattr(legacy, 'load_controls', lambda: pytest.fail('v1 loader used'))
     with controller.authority.loaded_dependencies(value['dependencies']) as controls:
         for name, command in commands.items():
@@ -79,6 +81,28 @@ def test_exact_seventeen_helpers_and_readonly_grammar(bound, monkeypatch):
     guidance = policy.command_guidance(value['policy'])
     assert all(command in guidance for command in commands.values())
     assert sys.path == old_path
+
+
+@pytest.mark.parametrize('change', ['none', 'missing_initial', 'missing_final', 'prefix', 'extra'])
+def test_receipt_helper_table_requires_both_exact_names(native_spec, change):
+    from data_sheets_schema import native_shared_render as render
+    commands = {name: shlex.join(argv) for name, argv in render.commands(native_spec).items()}
+    value = {'native_shared_generation_version': 1, 'attribution_composition_version': 2,
+             'python': shlex.split(commands['draft'])[0], 'native_shared_helpers': commands,
+             'attribution_command': commands['draft'], 'post_final_recorder': {'command': commands['recorder']}}
+    if change == 'missing_initial':
+        del commands['phase1_receipts']
+    elif change == 'missing_final':
+        del commands['final_receipts']
+    elif change == 'prefix':
+        commands['final_receipts_extra'] = commands.pop('final_receipts')
+    elif change == 'extra':
+        commands['receipt_anything'] = commands['final_receipts']
+    if change == 'none':
+        assert policy.helper_commands(value) == commands
+    else:
+        with pytest.raises(ValueError, match='helper command table'):
+            policy.helper_commands(value)
 
 
 @pytest.mark.parametrize('change', ['extra', 'authority', 'version', 'preparation_hash',

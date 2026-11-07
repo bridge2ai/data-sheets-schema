@@ -71,6 +71,9 @@ class Trace:
             value = {'checked': True, 'findings': [] if not code else [{'message': 'unfounded'}]}
         elif value is None and name == 'draft':
             value = {'checked': True, 'passed': not code, 'protocol_version': 7}
+        elif value is None and name == 'phase1_receipts':
+            value = {'mode': 'initial_structure', 'structure_passed': not code,
+                     'floors': 'pending', 'floor_acceptance_claimed': False}
         elif value is None and name == 'advance':
             after = after or decision(number=self.number)
             value = {'kind': c.KINDS['advance_result'], 'version': 1,
@@ -107,7 +110,7 @@ class Trace:
         self.helper('derive_final_core')
         self.helper('full_schema'); self.helper('full_terms')
         self.helper('core_schema'); self.helper('pair')
-        self.helper('phase1_receipts'); self.helper('final_scope')
+        self.helper('final_receipts'); self.helper('final_scope')
 
     def finish(self):
         self.helper('final_source_inventory'); self.write('report')
@@ -122,12 +125,89 @@ def test_complete_ordered_chain_and_detached_replay():
     trace.assembly(); trace.write('full'); trace.final_checks(); trace.finish()
     report = trace.state.report(complete=True)
     assert report['passed'] and not report['problems'] and report['assembly_complete']
+    assert {'phase1_receipts', 'final_receipts'} <= {row['helper'] for row in report['checks']}
     clone = Trace()
     for event, current in trace.events:
         clone.state.observe(event, stage_decision=current)
     assert clone.state.report(complete=True) == report
     report['checks'].clear()
     assert trace.state.report()['checks']
+
+
+@pytest.mark.parametrize('relabel', [False, True])
+def test_saved_receipt_results_replay_both_roles_and_refuse_structural_as_final(tmp_path, relabel):
+    """Replay serialized event bytes; decisions are separately reconstructed fixtures."""
+    trace = Trace(); trace.assembly(); trace.final_checks(); trace.finish()
+    events = [event for event, _ in trace.events]
+    structural = next(event for event in events if event.get('tool_use_result', {}).get(
+        'stdout', '').startswith('{"mode": "initial_structure"'))
+    if relabel:
+        final_call = next(event for event in events if event.get('type') == 'assistant'
+            and event['message']['content'][0]['input'].get('command') == shlex.join(trace.commands['final_receipts']))
+        identity = final_call['message']['content'][0]['id']
+        result = next(event for event in events if event.get('type') == 'user'
+            and event['message']['content'][0]['tool_use_id'] == identity)
+        # Keep the exact strict call and successful exit; substitute only the
+        # initial structural payload in both independently compared channels.
+        result['tool_use_result']['stdout'] = structural['tool_use_result']['stdout']
+        result['message']['content'][0]['content'] = structural['message']['content'][0]['content']
+    path = tmp_path / 'receipt-events.json'
+    path.write_text(json.dumps(events))
+    clone = Trace()
+    def replay():
+        for event, (_, current) in zip(json.loads(path.read_text()), trace.events, strict=True):
+            clone.state.observe(event, stage_decision=current)
+    if relabel:
+        with pytest.raises(ValueError, match='strict output, not structural JSON'):
+            replay()
+        assert not clone.state.report(complete=True)['passed']
+        assert 'final_receipts' not in clone.state.report()['current_checks']
+    else:
+        replay()
+        assert clone.state.report(complete=True) == trace.state.report(complete=True)
+
+
+def test_live_structural_result_cannot_satisfy_final_receipts():
+    trace = Trace(); trace.assembly()
+    trace.helper('full_schema'); trace.helper('full_terms')
+    with pytest.raises(ValueError, match='strict output, not structural JSON'):
+        trace.helper('final_receipts', value={'mode': 'initial_structure',
+            'structure_passed': True, 'floors': 'pending', 'floor_acceptance_claimed': False})
+    assert 'final_receipts' not in trace.state.report()['current_checks']
+
+
+@pytest.mark.parametrize('saved', [False, True])
+def test_final_receipt_success_before_last_full_edit_is_stale(saved):
+    trace = Trace(); trace.assembly(); trace.final_checks()
+    trace.write('full')
+    trace.helper('derive_final_core'); trace.helper('full_schema'); trace.helper('full_terms')
+    trace.helper('core_schema'); trace.helper('pair'); trace.helper('final_scope')
+    target = trace
+    if saved:
+        target = Trace()
+        for event, current in trace.events:
+            target.state.observe(json.loads(json.dumps(event)), stage_decision=current)
+        target.current = trace.current
+    assert 'final_receipts' not in target.state.report()['current_checks']
+    with pytest.raises(ValueError, match='current final checks'):
+        target.state.before('Bash', {'command': shlex.join(target.commands['final_source_inventory'])},
+                            stage_decision=target.current)
+    trace.helper('final_receipts'); trace.finish()
+    assert trace.state.report(complete=True)['passed']
+
+
+def test_structural_command_is_not_a_final_helper():
+    trace = Trace(); trace.assembly()
+    with pytest.raises(ValueError, match='structural receipt check follows phase1 seal'):
+        trace.helper('phase1_receipts')
+
+
+def test_failed_strict_receipt_result_never_earns_final_credit():
+    trace = Trace(); trace.assembly(); trace.final_checks()
+    trace.helper('final_receipts', code=1)
+    with pytest.raises(ValueError, match='current final checks'):
+        trace.helper('final_source_inventory')
+    assert 'final_receipts' not in trace.state.report()['current_checks']
 
 
 @pytest.mark.parametrize('through_callback', [True, False])
@@ -177,7 +257,7 @@ def test_sealed_original_and_direct_core_mutations_refuse(role):
 
 
 @pytest.mark.parametrize('helper', ['derive_core', 'advance', 'original_source_inventory', 'audit_evidence',
-                                   'draft', 'final_evidence', 'derive_final_core', 'recorder'])
+                                   'draft', 'final_evidence', 'derive_final_core', 'final_receipts', 'recorder'])
 def test_early_helpers_cannot_satisfy_future_boundaries(helper):
     trace = Trace()
     with pytest.raises(ValueError):
@@ -338,9 +418,9 @@ def test_final_checks_are_repeated_even_when_full_record_is_unchanged():
     trace = Trace(); trace.assembly()
     trace.helper('derive_final_core'); trace.helper('core_schema'); trace.helper('pair')
     with pytest.raises(ValueError, match='current full validation'):
-        trace.helper('phase1_receipts')
+        trace.helper('final_receipts')
     trace.helper('full_schema'); trace.helper('full_terms')
-    trace.helper('phase1_receipts'); trace.helper('final_scope')
+    trace.helper('final_receipts'); trace.helper('final_scope')
     trace.finish()
     assert trace.state.report(complete=True)['passed']
 

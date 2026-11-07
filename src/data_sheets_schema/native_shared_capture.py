@@ -1460,7 +1460,7 @@ def _provenance_block(run):
 def live_provenance_block(selection_registration_path):
     run = _load_live(str(selection_registration_path))
     phase, _ = phase_replay(run)
-    required = {'draft', 'final_evidence', 'final_source_inventory', 'phase1_receipts', 'final_scope',
+    required = {'draft', 'final_evidence', 'final_source_inventory', 'final_receipts', 'final_scope',
                 'derive_final_core', 'core_schema', 'pair', 'full_schema', 'full_terms', 'audit_evidence'}
     if not required <= set(phase['current_checks']) or not phase['passed']:
         raise ValueError('recorder precedes actual current final helper obligations')
