@@ -10,6 +10,7 @@ from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_streams as streams
 from data_sheets_schema import native_shared_evidence as evidence
 from data_sheets_schema import native_shared_capture as capture
+from data_sheets_schema import native_shared_capture_orchestration as capture_orchestration
 from data_sheets_schema.native_shared_controller_orchestration import CallbackAdapter
 from data_sheets_schema.native_shared_receipts import _ReceiptCatalogContext
 
@@ -241,8 +242,8 @@ def test_complete_report_run_remains_strict_and_live_recapture_rechecks_prefixes
     adapter = endpoint({'attempt_directory': str(tmp_path)})
     adapter.selection = SimpleNamespace(registration=SimpleNamespace(pin=SimpleNamespace(path='/selected/S')))
     strict = object(); calls = []
-    monkeypatch.setattr(capture, '_load', lambda path: calls.append(path) or strict)
-    monkeypatch.setattr(capture, '_load_live', lambda *a, **k: pytest.fail('strict complete route used live reader'))
+    monkeypatch.setattr(capture_orchestration, '_load', lambda path: calls.append(path) or strict)
+    monkeypatch.setattr(capture_orchestration, '_load_live', lambda *a, **k: pytest.fail('strict complete route used live reader'))
     assert adapter._run() is strict and calls == ['/selected/S']
     native, control = files(tmp_path)
     adapter._observed_endpoint({'first': 1})
@@ -251,7 +252,7 @@ def test_complete_report_run_remains_strict_and_live_recapture_rechecks_prefixes
     def live(*args, **kwargs):
         assert kwargs['_catalogs'] is adapter._receipt_catalogs
         return wrong
-    monkeypatch.setattr(capture, '_load_live', live)
+    monkeypatch.setattr(capture_orchestration, '_load_live', live)
     with pytest.raises(ValueError, match='parent-observed'): adapter._run((adapter._stream_prefixes['transcript'].bytes,
         adapter._stream_prefixes['control'].bytes))
 

@@ -75,6 +75,8 @@ execution admission. The protected U1 hook remains pending.
   still imported the moved callback class from the consumer. Two saved-attribution
   tests (six cases) still patched the moved live reader there. The test imports
   and reader traps now target orchestration; all adversarial assertions remain.
+  The newly collectable stream suite exposed one further stale `_load`/`_load_live`
+  patch target; its three patches now address capture orchestration too.
 - **C4-U1-HOOK — inherited, pending protected integration.** The unchanged
   `test_native_construction_and_replay_use_validated_shared_admission` expects
   two native calls to `shared_generation.select`; the unchanged RunSpec entry
