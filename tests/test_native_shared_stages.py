@@ -37,6 +37,8 @@ def case(supplied, request):
     for name in om.ASSET_SHA256:
         item = authority('omission_' + name, om._asset(name))
         assets['src/data_sheets_schema/omission_inventory_v1/' + name] = plain(item)
+    if 'schema_raw' in options:
+        supplied['schema_path'].write_bytes(options['schema_raw'])
     snapshot = capture_schema(supplied['schema_path'], strict=True)
     schemas, declarations = [], {}
     for kind, root_class in (('full', 'Dataset'), ('core', 'CoreDataset')):
@@ -421,6 +423,25 @@ def test_replayed_history_has_no_mutable_payload_alias_from_an_earlier_check(cas
     fresh, _ = stage._history(selection, execution, history)
     assert fresh == [c.strict_json(raw) for raw in before]
     assert tuple(item.raw for item in history.records) == before
+
+
+def test_history_rejects_a_consistently_rehashed_foreign_session(case):
+    selection, execution, _, history = case
+    rows, _ = stage._history(selection, execution, history)
+    assert rows[0]['session_id'] is None
+    assert all(row['session_id'] == execution.session_id for row in rows[1:])
+    records = []
+    for item, row in zip(history.records, rows):
+        if row['sequence']:
+            row['session_id'] = 'another-observed-session'
+        row['previous_record_sha256'] = records[-1].pin.sha256 if records else None
+        records.append(artifact('record', item.pin.path, c.canonical(row)))
+    journal = artifact('journal', history.journal.pin.path, stage.journal_bytes(
+        selection_sha256=selection.registration.pin.sha256,
+        execution_sha256=execution.execution.pin.sha256, attempt_id=execution.attempt_id,
+        records=tuple(item.pin for item in records)))
+    with pytest.raises(ValueError, match='chronology/identity'):
+        stage._history(selection, execution, replace(history, records=tuple(records), journal=journal))
 
 
 @pytest.mark.parametrize('validator', ['record_bytes', 'journal_bytes'])

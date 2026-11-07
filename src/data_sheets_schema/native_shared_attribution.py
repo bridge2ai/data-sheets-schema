@@ -12,7 +12,7 @@ import shlex
 
 import yaml
 
-from . import native_attribution_registration as inherited
+from . import native_attribution_registration_v2 as inherited
 from . import native_shared_contract as c
 from . import native_shared_policy as policy
 from . import native_shared_render as render

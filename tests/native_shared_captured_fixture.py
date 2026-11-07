@@ -1,7 +1,7 @@
 """Synthetic immutable U3-C carriers with real stage and tool-observation joins.
 
 These invented streams are not native execution or admitted execution authority.
-The execution wire contains only the fields required by the pure captured parser;
+The execution wire has the closed field roster, with explicitly synthetic values;
 U3-D's verification, permission and runtime gates are deliberately not exercised.
 """
 from copy import deepcopy
@@ -17,15 +17,13 @@ from data_sheets_schema import typed_audit as typed
 from tests import test_native_shared_stages as stages
 from tests.test_native_shared_observations import SESSION, POLICY, events, initial, prefix
 from tests.test_typed_audit import replies
+from tests.utils.native_execution_carrier_v2 import execution_body
 
 
 def v2_case(case):
     """Rebind the synthetic stage fixture to the explicit outer-v2 wire."""
     selection, execution, phase1, history = case
-    body = {'kind': controller.registration.EXECUTION_KIND, 'schema_version': 2,
-        'execution': controller.registration.EXECUTION_SCOPE,
-        'execution_gates': list(controller.registration.EXECUTION_GATES),
-        'attempt_directory': '/neutral/attempt'}
+    body = execution_body(attempt_directory='/neutral/attempt')
     raw = c.canonical({'authority_version': 2,
         'controller_sources_sha256': controller.inherited.SOURCES_SHA256,
         'registration': body})

@@ -54,7 +54,7 @@ def adapter(tmp_path):
     selected._activated = selected._initialized = True
     selected._stream_prefixes, selected._stream_files = {}, {}
     selected._receipt_catalogs = _ReceiptCatalogContext()
-    selected.controls = {'budgeted_cborg': SimpleNamespace(BudgetStop=Stopped)}
+    selected._budget_stop = Stopped
     selected.state = SimpleNamespace(report=lambda **kw: {'draft_gate_passed': True, 'problems': []})
     selected.phase = SimpleNamespace(report=lambda **kw: {'synthetic_phase': 'unchanged'})
     return selected

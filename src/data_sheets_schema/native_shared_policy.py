@@ -12,7 +12,7 @@ from copy import deepcopy
 from pathlib import Path
 
 from data_sheets_schema import native_shared_contract as c
-from data_sheets_schema import native_execution_authority_v2 as authority
+from . import native_shared_controls as pure_controls
 
 HELPERS = frozenset(('chunk_check','source_scope','full_schema','full_terms','phase1_receipts',
     'advance','derive_core','core_schema','pair','original_source_inventory','final_source_inventory',
@@ -33,8 +33,9 @@ def command_policy(spec, instruction_path, controls=None):
     from . import native_shared_render as render
     from .agentic_runtime import validate_toolchain
     if controls is None:
-        with authority.loaded_dependencies(authority.dependency_identity()) as loaded:
+        with pure_controls.loaded_controls() as loaded:
             return command_policy(spec, instruction_path, loaded)
+    pure_controls.require_controls(controls)
     grammar = controls['native_command_policy']
     cap = spec._native_shared_generation_capture
     if type(cap) is not c.NativeSelectionCapture:
@@ -126,8 +127,9 @@ def classify_bash(command,python,programs,policy,controls=None):
     if python!=policy['python'] or type(command) is not str:
         return 'not_prescribed','native command differs from selected interpreter/text'
     if controls is None:
-        with authority.loaded_dependencies(authority.dependency_identity()) as loaded:
+        with pure_controls.loaded_controls() as loaded:
             return classify_bash(command, python, programs, policy, loaded)
+    pure_controls.require_controls(controls)
     roles=sorted(name for name,text in commands.items() if command==text)
     if roles:
         problem=controls['native_command_policy'].runtime_literal_problem(command,policy)
@@ -141,7 +143,7 @@ def classify_bash(command,python,programs,policy,controls=None):
         selected_programs={shlex.split(text)[2] for text in commands.values() if shlex.split(text)[1]=='-c'}
         if words[1]=='-c' and words[2] in selected_programs:
             return 'not_prescribed','native shared inline helper differs from its exact selected arguments'
-    return controls['run_native_canary']._classify_command(command,python,programs,policy)
+    return pure_controls.classify_ordinary(command,python,programs,policy,controls)
 
 
 # One exact-byte digest, only during a saved trace's synchronous replay. This
@@ -201,7 +203,7 @@ def stage_overlay_governs(view, *, tool_name, tool_input, policy):
 def command_guidance(policy):
     """Truthful new helper guidance, without the old copy/freeze instruction."""
     commands = helper_commands(policy)
-    with authority.loaded_dependencies(authority.dependency_identity()) as controls:
+    with pure_controls.loaded_controls() as controls:
         readonly_guidance = controls['native_readonly'].lookup_guidance()
     return ('\n\n## Exact native shared helper spellings\n\n'
         'Use each command exactly as written, only when its selected phase permits it. '

@@ -400,3 +400,70 @@ Its typed helpers and raw Read/Write/chronology joins are real computation;
 successful execution of that test would establish this captured boundary,
 not a real native run, provider accounting or a published receipt-to-record
 path. U3-D and combined U3-E retain those acceptance obligations.
+
+### U3-C round-2 integration contract
+
+U3-C now merges the committed U3-B owner context and U3-A round-2 bridge in
+separate merge commits. The B owner prefix in `native_shared_receipts.py` is
+preserved byte-for-byte; C's marked delivery section follows it. Typed replay
+threads B's private catalog association through every worker/index/assembly
+call. Each history, response and final verdict is still reconstructed; final
+assembly uses a new derivation cache and final receipt assessment uses a fresh
+owner context.
+
+Captured E parsing applies A's exact closed execution-key contract. This is a
+pure shape check, not a call to `verified` or evidence that its values are
+admissible. Synthetic test carriers now have the explicit closed roster and
+remain clearly marked as non-admitted fixtures. The actual U3-D consumer's
+`rebuild_v2_body` and `execution_paths_v2` implementations do not belong to C.
+
+`native_shared_controls.loaded_controls` is C's fixed policy projection during
+A's verified-byte loader lifetime. It binds the fixed helper source identities
+and exposes only enumerated pure grammar/lookup functions, copied constants and
+the BudgetStop exception type. No historical launcher or caller-selected module
+is exposed. Pure function wrappers refuse after the scope closes; constants are
+copied and source identity is checked before use. The ordinary classifier recipe
+is compared with the source-pinned implementation in offline tests. Callback
+classification opens a fresh scope instead of retaining historical modules.
+A's public two-helper map and source/consumer refusal rules are unchanged.
+Read-only lookup helpers may inspect declared filesystem paths; "pure" here
+does not mean byte-only or free of filesystem reads. It means no launch,
+publication or admission side effect.
+
+The inherited attribution observer now comes from the existing v2 module;
+its observe/report implementation is the same, without importing the v1
+registration route directly from C's attribution adapter.
+
+Complete recursive consumer-graph compatibility remains an explicit integration
+gate. A scans lazy imports too: frozen `native_shared_render._runtime` imports
+v1 runtime constants, and the frozen U2 controller contains dynamic source
+loading. C's publication helpers also reuse existing durable effect primitives.
+No trusted-boundary expansion, protected edit or U3-D fallback was made to bypass
+those refusals. A separately scoped dependency/interface decision is required
+before the full C/D graph can enter A's consumer loader. This does not prevent
+offline composition and typed captured computation; it does prevent a claim of
+complete execution admission on this C branch.
+
+Round-2 findings retained for the later issue workflow:
+
+- U3C-R2-1: history replay referenced an undefined session variable. Bind it
+  from the captured execution and reject consistently rehashed foreign sessions.
+- U3C-R2-2: only packet preparation and final checking received B's private
+  owner association. Thread it through all typed replay calls; verify real
+  parser reuse against a fresh control, initialization invalidation, and fresh
+  valid/invalid response and final-verdict checks.
+- U3C-R2-3: saved advance acknowledgements did not repeat the live path's complete
+  identity/publication checks. Use one pure validator for both paths, retaining
+  ordered Read/Write/callback joins and reconstruction from immutable history.
+- U3C-R2-4: round-1 policy code indexed helpers no longer exposed by A. The fixed
+  pure projection replaces those accesses, without restoring launcher exports.
+- U3C-R2-5: C's captured E parser and synthetic fixtures had only a partial body.
+  Apply the closed A roster, preserving the separation between parsing and
+  admission and testing missing/unknown fields without live I/O.
+- U3C-R2-6: a direct constructor could create a lookalike private control map.
+  Require loader-created provenance plus the exact key/member/type/source roster,
+  and check guarded helper state after calls as well as before them.
+
+The report records actual test results and remaining gates. No declaration here
+authorizes dispatch, changes the shared-v1/native26 procedure, or substitutes for
+combined U3-E acceptance.

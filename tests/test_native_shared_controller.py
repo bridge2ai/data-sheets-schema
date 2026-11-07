@@ -14,6 +14,7 @@ from data_sheets_schema import native_execution_registration_v2 as registration
 from tests.test_native_execution_registration_v2 import inputs, isolated_modules
 from tests.test_native_shared_render import native_spec
 from tests.test_native_shared_selection import declaration
+from tests.utils.native_execution_carrier_v2 import execution_body
 
 
 @pytest.fixture
@@ -66,7 +67,7 @@ def test_exact_seventeen_helpers_and_readonly_grammar(bound, monkeypatch):
     commands = policy.helper_commands(value['policy'])
     assert set(commands) == policy.HELPERS and len(commands) == 17
     monkeypatch.setattr(legacy, 'load_controls', lambda: pytest.fail('v1 loader used'))
-    with controller.authority.loaded_dependencies(value['dependencies']) as controls:
+    with controller.pure_controls.loaded_controls(value['dependencies']) as controls:
         for name, command in commands.items():
             assert policy.classify_bash(command, value['policy']['python'], set(), value['policy'], controls)[0] == 'prescribed', name
             assert policy.classify_bash(command + ' --unregistered', value['policy']['python'], set(), value['policy'], controls)[0] == 'not_prescribed', name
@@ -125,9 +126,7 @@ def test_composition_reconstruction_rechecks_current_authorities(bound, change):
 def _execution_wire():
     """Only a parser fixture; deliberately not a valid execution registration."""
     return {'authority_version': 2, 'controller_sources_sha256': controller.inherited.SOURCES_SHA256,
-            'registration': {'schema_version': 2, 'kind': registration.EXECUTION_KIND,
-                'execution': registration.EXECUTION_SCOPE,
-                'execution_gates': list(registration.EXECUTION_GATES)}}
+            'registration': execution_body()}
 
 
 def test_captured_parsers_are_pure_and_do_not_grant_verification(bound, monkeypatch):
@@ -146,7 +145,7 @@ def test_captured_parsers_are_pure_and_do_not_grant_verification(bound, monkeypa
 
 
 @pytest.mark.parametrize('change', ['outer_version', 'bool', 'manifest', 'extra', 'inner_version',
-                                  'kind', 'scope', 'gates', 'unwrapped'])
+                                  'kind', 'scope', 'gates', 'unwrapped', 'missing', 'inner_extra'])
 def test_captured_execution_parser_refuses_foreign_wire(change):
     value = _execution_wire()
     if change == 'outer_version': value['authority_version'] = 1
@@ -157,9 +156,26 @@ def test_captured_execution_parser_refuses_foreign_wire(change):
     elif change == 'kind': value['registration']['kind'] = 'd4d_native_attribution_execution_registration'
     elif change == 'scope': value['registration']['execution'] = 'approved'
     elif change == 'gates': value['registration']['execution_gates'].pop()
+    elif change == 'missing': value['registration'].pop('permission_observations')
+    elif change == 'inner_extra': value['registration']['accepted'] = True
     else: value = value['registration']
     with pytest.raises(ValueError):
         controller.captured_execution_body(c.canonical(value))
+
+
+def test_captured_execution_allows_only_named_optional_origin_field_without_io(monkeypatch):
+    value = _execution_wire()
+    # Pure shape parsing is deliberately not validation of this declaration.
+    value['registration']['receipt_origin_reporting'] = {'version': 1}
+    raw = c.canonical(value)
+    def forbidden(*args, **kwargs):
+        pytest.fail('captured optional-field parsing performed live verification')
+    monkeypatch.setattr(registration, 'verified', forbidden)
+    monkeypatch.setattr(registration, 'verify_preparer', forbidden)
+    monkeypatch.setattr(controller.authority, 'dependency_identity', forbidden)
+    for name in ('read_bytes', 'read_text', 'open', 'resolve', 'cwd', 'absolute'):
+        monkeypatch.setattr(Path, name, forbidden)
+    assert controller.captured_execution_body(raw) == value['registration']
 
 
 def test_callback_requires_fresh_full_outer_admission_before_any_live_dependency(monkeypatch):
