@@ -9,13 +9,14 @@ import pytest
 
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_shared_controls as controls
+from data_sheets_schema import native_shared_controls_orchestration as orchestration
 from tests.test_native_execution_authority_v2 import isolated_modules
 
 
 def test_real_pinned_pure_projection_excludes_launchers_and_restores_aliases(isolated_modules):
     identity = authority.dependency_identity()
     old_path, old_meta = list(sys.path), list(sys.meta_path)
-    with controls.loaded_controls(identity) as projected:
+    with orchestration.loaded_controls(identity) as projected:
         assert set(projected) == {'native_command_policy', 'native_readonly',
             'native_phase_history', 'native_control', 'budgeted_cborg'}
         for name in ('run_native_canary', 'run_api_canary', 'prepare_registration_v2',
@@ -59,7 +60,7 @@ def test_ordinary_classifier_matches_independent_pinned_oracle(isolated_modules,
         shlex.join([python, '-c', 'print(1)']), shlex.join([python, '-c', 'print(2)']),
         shlex.join([python, '-c', 'print(1)', '--help']),
         shlex.join([python, '-m', 'unregistered.module']), '', 'cat a; echo b']
-    with controls.loaded_controls(identity) as projected:
+    with orchestration.loaded_controls(identity) as projected:
         oracle = sys.modules['run_native_canary']
         pin = identity['base']['modules']['run_native_canary']
         assert authority.module_source_identity(oracle)['sha256'] == pin['sha256']
@@ -73,7 +74,7 @@ def test_ordinary_classifier_matches_independent_pinned_oracle(isolated_modules,
 @pytest.mark.parametrize('change', ['function', 'nested_constant'])
 def test_projection_refuses_mutated_helper_before_use(isolated_modules, change):
     identity = authority.dependency_identity()
-    with controls.loaded_controls(identity) as projected:
+    with orchestration.loaded_controls(identity) as projected:
         name = 'native_readonly' if change == 'function' else 'native_control'
         module = sys.modules[name]
         original = module.lookup_guidance if change == 'function' else deepcopy(module.HISTORY_CONTRACT)
@@ -98,7 +99,7 @@ def test_caller_module_map_cannot_replace_fixed_projection():
 
 
 def test_constructed_carrier_cannot_claim_loader_provenance(isolated_modules):
-    with controls.loaded_controls() as projected:
+    with orchestration.loaded_controls() as projected:
         assert controls.require_controls(projected) is projected
         assert projected['native_readonly'].lookup_guidance()
         # Even an exact copy of the genuine mapping is a different lifetime.
@@ -120,7 +121,7 @@ def test_constructed_carrier_cannot_claim_loader_provenance(isolated_modules):
 @pytest.mark.parametrize('change', ['missing_module', 'extra_module', 'value_type',
     'replacement_projection', 'members', 'name', 'path', 'sha256'])
 def test_minted_projection_requires_exact_rosters_and_source_pins(isolated_modules, change):
-    with controls.loaded_controls() as projected:
+    with orchestration.loaded_controls() as projected:
         assert controls.require_controls(projected) is projected
         original_map = projected._modules
         member = projected['native_readonly']
@@ -153,7 +154,7 @@ def test_minted_projection_requires_exact_rosters_and_source_pins(isolated_modul
 
 
 def test_successful_helper_call_rechecks_midcall_member_mutation(isolated_modules):
-    with controls.loaded_controls() as projected:
+    with orchestration.loaded_controls() as projected:
         grammar = projected['native_command_policy']
         literal_rule = grammar._literal_rule
         assert literal_rule('printf') == 'Bash(printf)'

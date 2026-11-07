@@ -13,7 +13,8 @@ import pytest
 from data_sheets_schema import api_runner as api
 from data_sheets_schema import native_attribution_registration_v2 as inherited
 from data_sheets_schema import native_shared_attribution as attribution
-from data_sheets_schema import native_shared_controller as controller
+from data_sheets_schema import native_shared_attribution_orchestration as live_attribution
+from data_sheets_schema import native_shared_controller_orchestration as controller
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_execution_registration_v2 as registration
 from data_sheets_schema.native_shared_evidence import read_regular
@@ -89,7 +90,7 @@ def construct(case, *, saved=False, full=None, report=None):
             captured_instruction=captured_instruction,
             final_full=artifact('final_full', spec._agentic_artifact_paths['full'], full or data['record_raw']),
             final_report=artifact('final_report', spec._agentic_artifact_paths['report'], report or data['report_raw']))
-    return attribution.live(cap, **kwargs)
+    return live_attribution.live(cap, **kwargs)
 
 
 def checked(state, composition, payload, identity='draft', status=0):
@@ -258,7 +259,7 @@ def test_mismatched_captured_selection_execution_or_policy_refuses(case, mutatio
         body.update(composition_raw_json=c.canonical(composition).decode(),
                     composition_sha256=c.sha(c.canonical(composition)))
     with pytest.raises(ValueError):
-        attribution.live(cap, execution_raw=c.canonical(execution), spec=spec, composition_raw=c.canonical(composition))
+        live_attribution.live(cap, execution_raw=c.canonical(execution), spec=spec, composition_raw=c.canonical(composition))
 
 
 @pytest.mark.parametrize('change', ['role', 'path'])

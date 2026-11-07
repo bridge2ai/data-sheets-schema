@@ -9,6 +9,11 @@ import pytest
 from data_sheets_schema import native_attribution_controller as legacy
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_controller as controller
+from data_sheets_schema import native_shared_controller_orchestration as orchestration
+from data_sheets_schema import native_shared_controls as pure_controls
+from data_sheets_schema import native_shared_controls_orchestration as control_loading
+from data_sheets_schema import native_execution_authority_v2 as authority
+from data_sheets_schema import native_attribution_controller_v2 as inherited_v2
 from data_sheets_schema import native_shared_policy as policy
 from data_sheets_schema import native_execution_registration_v2 as registration
 from tests.test_native_execution_registration_v2 import inputs, isolated_modules
@@ -36,10 +41,10 @@ def test_real_v2_composition_roundtrip_joins_preparation_and_preserves_loader(bo
     before = _files(inputs['root'])
     old_path = list(sys.path)
     monkeypatch.setattr(legacy, 'load_controls', lambda: pytest.fail('v1 loader used'))
-    value = controller.compose(raw, instruction_path=instruction)
-    rebuilt, spec, selected = controller.reconstruct_composition(c.canonical(value))
+    value = orchestration.compose(raw, instruction_path=instruction)
+    rebuilt, spec, selected = orchestration.reconstruct_composition(c.canonical(value))
     assert rebuilt == value
-    assert controller.verified_composition(c.canonical(value)) == value
+    assert orchestration.verified_composition(c.canonical(value)) == value
     assert value['authority_version'] == 2 and value['version'] == 1
     assert value['preparation_raw_json'].encode() == raw
     assert value['preparation_sha256'] == c.sha(raw)
@@ -63,21 +68,22 @@ def test_real_v2_composition_roundtrip_joins_preparation_and_preserves_loader(bo
 
 def test_exact_seventeen_helpers_and_readonly_grammar(bound, monkeypatch):
     _, _, raw, instruction = bound
-    value = controller.compose(raw, instruction_path=instruction)
+    value = orchestration.compose(raw, instruction_path=instruction)
     commands = policy.helper_commands(value['policy'])
     assert set(commands) == policy.HELPERS and len(commands) == 17
     monkeypatch.setattr(legacy, 'load_controls', lambda: pytest.fail('v1 loader used'))
-    with controller.pure_controls.loaded_controls(value['dependencies']) as controls:
+    with control_loading.loaded_controls(value['dependencies']) as controls:
         for name, command in commands.items():
-            assert policy.classify_bash(command, value['policy']['python'], set(), value['policy'], controls)[0] == 'prescribed', name
-            assert policy.classify_bash(command + ' --unregistered', value['policy']['python'], set(), value['policy'], controls)[0] == 'not_prescribed', name
+            assert policy.classify_bash(command, value['policy']['python'], set(), value['policy'], classifier_projection=controls)[0] == 'prescribed', name
+            assert policy.classify_bash(command + ' --unregistered', value['policy']['python'], set(), value['policy'], classifier_projection=controls)[0] == 'not_prescribed', name
         bundle = c.parse_selection(value['selection_raw_json'].encode())['inputs']['bundle']['path']
         for command, expected in ((shlex.join(['cat', bundle]), 'prescribed'),
                 ('cat /unregistered/path', 'not_prescribed'),
                 (shlex.join([value['policy']['python'], '-c', 'print(1)']), 'not_prescribed')):
-            assert policy.classify_bash(command, value['policy']['python'], set(), value['policy'], controls)[0] == expected
+            assert policy.classify_bash(command, value['policy']['python'], set(), value['policy'], classifier_projection=controls)[0] == expected
     old_path = list(sys.path)
-    guidance = policy.command_guidance(value['policy'])
+    with control_loading.loaded_controls(value['dependencies']) as controls:
+        guidance = policy.command_guidance(value['policy'], classifier_projection=controls)
     assert all(command in guidance for command in commands.values())
     assert sys.path == old_path
 
@@ -86,7 +92,7 @@ def test_exact_seventeen_helpers_and_readonly_grammar(bound, monkeypatch):
                                   'runtime_hash', 'render', 'policy', 'instruction'])
 def test_rehashed_or_mutated_composition_refuses(bound, change):
     inputs, _, raw, instruction = bound
-    value = controller.compose(raw, instruction_path=instruction)
+    value = orchestration.compose(raw, instruction_path=instruction)
     if change == 'extra': value['accepted'] = True
     elif change == 'authority': value['authority_version'] = True
     elif change == 'version': value['version'] = 2
@@ -99,14 +105,14 @@ def test_rehashed_or_mutated_composition_refuses(bound, change):
     else: instruction.write_bytes(instruction.read_bytes() + b'\nchanged\n')
     before = _files(inputs['root'])
     with pytest.raises(ValueError):
-        controller.verified_composition(c.canonical(value))
+        orchestration.verified_composition(c.canonical(value))
     assert _files(inputs['root']) == before
 
 
 @pytest.mark.parametrize('change', ['selection', 'runtime', 'executable'])
 def test_composition_reconstruction_rechecks_current_authorities(bound, change):
     inputs, _, raw, instruction = bound
-    value = controller.compose(raw, instruction_path=instruction)
+    value = orchestration.compose(raw, instruction_path=instruction)
     if change == 'selection':
         doc = c.strict_json(inputs['selection'].read_bytes())
         doc['run']['label'] = 'changed-selection'
@@ -119,13 +125,13 @@ def test_composition_reconstruction_rechecks_current_authorities(bound, change):
         inputs['executable'].write_bytes(b'changed fingerprint')
     before = _files(inputs['root'])
     with pytest.raises(ValueError):
-        controller.reconstruct_composition(c.canonical(value))
+        orchestration.reconstruct_composition(c.canonical(value))
     assert _files(inputs['root']) == before
 
 
 def _execution_wire():
     """Only a parser fixture; deliberately not a valid execution registration."""
-    return {'authority_version': 2, 'controller_sources_sha256': controller.inherited.SOURCES_SHA256,
+    return {'authority_version': 2, 'controller_sources_sha256': controller.wire.CONTROLLER_SOURCES_SHA256,
             'registration': execution_body()}
 
 
@@ -137,7 +143,7 @@ def test_captured_parsers_are_pure_and_do_not_grant_verification(bound, monkeypa
         pytest.fail('captured parser performed live I/O or verification')
     monkeypatch.setattr(registration, 'verify_preparer', forbidden)
     monkeypatch.setattr(registration, 'verified', forbidden)
-    monkeypatch.setattr(controller.authority, 'dependency_identity', forbidden)
+    monkeypatch.setattr(authority, 'dependency_identity', forbidden)
     for name in ('read_bytes', 'read_text', 'open', 'resolve', 'cwd', 'absolute'):
         monkeypatch.setattr(Path, name, forbidden)
     assert controller.captured_preparation_body(raw) == preparation['registration']
@@ -172,37 +178,38 @@ def test_captured_execution_allows_only_named_optional_origin_field_without_io(m
         pytest.fail('captured optional-field parsing performed live verification')
     monkeypatch.setattr(registration, 'verified', forbidden)
     monkeypatch.setattr(registration, 'verify_preparer', forbidden)
-    monkeypatch.setattr(controller.authority, 'dependency_identity', forbidden)
+    monkeypatch.setattr(authority, 'dependency_identity', forbidden)
     for name in ('read_bytes', 'read_text', 'open', 'resolve', 'cwd', 'absolute'):
         monkeypatch.setattr(Path, name, forbidden)
     assert controller.captured_execution_body(raw) == value['registration']
 
 
-def test_callback_requires_fresh_full_outer_admission_before_any_live_dependency(monkeypatch):
+def test_callback_requires_fresh_full_outer_admission_before_any_live_dependency(monkeypatch, isolated_modules):
     raw = c.canonical(_execution_wire())
     calls = []
-    def refuse(value):
+    def refuse(value, *, classifier_projection):
+        assert pure_controls.require_controls(classifier_projection) is classifier_projection
         calls.append(value)
         raise ValueError('full U3-D execution consumer remains absent')
     monkeypatch.setattr(registration, 'verified', refuse)
-    monkeypatch.setattr(controller, 'reconstruct_composition',
+    monkeypatch.setattr(orchestration, 'reconstruct_composition',
                         lambda *a: pytest.fail('live construction preceded full E verification'))
     with pytest.raises(ValueError, match='U3-D execution consumer remains absent'):
-        controller.CallbackAdapter(b'not reached', execution={}, registration_raw=raw)
+        orchestration.CallbackAdapter(b'not reached', execution={}, registration_raw=raw)
     assert calls == [raw]
 
 
 def test_pure_execution_prefix_cannot_open_real_callback_route(bound):
     _, _, raw, instruction = bound
-    composition = controller.compose(raw, instruction_path=instruction)
+    composition = orchestration.compose(raw, instruction_path=instruction)
     wire = _execution_wire()
     with pytest.raises(ValueError):
-        controller.CallbackAdapter(c.canonical(composition), execution=wire['registration'],
+        orchestration.CallbackAdapter(c.canonical(composition), execution=wire['registration'],
                                    registration_raw=c.canonical(wire))
 
 
 def test_live_phase_decision_is_reconstructed_on_every_observation():
-    adapter = object.__new__(controller.CallbackAdapter)
+    adapter = object.__new__(orchestration.CallbackAdapter)
     calls = []
     class Run:
         def decision(self):
@@ -216,3 +223,81 @@ def test_live_phase_decision_is_reconstructed_on_every_observation():
     second = adapter._phase_state((1, 2))
     assert calls == [(1, 2), 'decision', (1, 2), 'decision']
     assert first[0] is not second[0] and first[1] is not second[1]
+
+
+def test_input_only_composition_matches_complete_verified_live_body_without_io(bound, monkeypatch):
+    """Real preparation and captures; the pure replay never rediscovers authority."""
+    _, preparation, preparation_raw, instruction_path = bound
+    value = orchestration.compose(preparation_raw, instruction_path=instruction_path)
+    _, spec, current = orchestration.reconstruct_composition(c.canonical(value))
+    captured = dict(prepared=preparation['registration'], spec=spec, current=current,
+        runtime=spec._native_shared_runtime_capture,
+        instruction=orchestration.read_regular(str(instruction_path), 'instruction',
+            max_bytes=c.HARD_LIMITS['request_bytes']).captured,
+        controller_sources=value['controller_sources'], command_argv=orchestration.render.commands(spec),
+        repository=value['working_directory'],
+        output_directories=tuple(str(Path(spec._agentic_artifact_paths[key]).parent.resolve())
+                                 for key in ('full', 'core', 'report')),
+        python=value['python'], python_version=value['python_version'])
+    raw = c.canonical(value)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail('input-only composition rediscovered live authority')
+
+    with control_loading.loaded_controls(value['dependencies']) as controls:
+        with monkeypatch.context() as patch:
+            patch.setattr(registration, 'verify_preparer', forbidden)
+            patch.setattr(registration, 'verified', forbidden)
+            patch.setattr(authority, 'dependency_identity', forbidden)
+            for name in ('read_bytes', 'read_text', 'open', 'resolve', 'cwd', 'absolute'):
+                patch.setattr(Path, name, forbidden)
+            assert controller.compose(preparation_raw, classifier_projection=controls, **captured) == value
+            rebuilt, returned_spec, returned_current = controller.reconstruct_composition(
+                raw, classifier_projection=controls, **captured)
+            assert rebuilt == value and returned_spec is spec and returned_current is current
+            assert controller.verified_composition(raw, classifier_projection=controls, **captured) == value
+            with pytest.raises(TypeError, match='classifier_projection'):
+                controller.reconstruct_composition(raw, **captured)
+            for forged in (None, {}, dict(controls), object()):
+                with pytest.raises(ValueError, match='projection'):
+                    controller.reconstruct_composition(raw, classifier_projection=forged, **captured)
+                with pytest.raises(ValueError, match='projection'):
+                    policy.classify_bash('cat', value['policy']['python'], set(), value['policy'],
+                                         classifier_projection=forged)
+    with pytest.raises(ValueError, match='scope is closed|not minted by the active loader'):
+        controller.reconstruct_composition(raw, classifier_projection=controls, **captured)
+
+
+def test_neutral_captured_wire_vocabulary_equals_unchanged_a_contract():
+    wire = controller.wire
+    assert wire.VERSION == registration.VERSION
+    assert wire.CONTROLLER_SOURCES_SHA256 == inherited_v2.SOURCES_SHA256
+    assert wire.PREPARATION_KIND == registration.PREPARATION_KIND
+    assert wire.PREPARATION_SCOPE == registration.PREPARATION_SCOPE
+    assert wire.PREPARATION_KEYS == registration._PREPARATION_KEYS
+    assert wire.EXECUTION_KIND == registration.EXECUTION_KIND
+    assert wire.EXECUTION_SCOPE == registration.EXECUTION_SCOPE
+    assert wire.EXECUTION_KEYS == registration.EXECUTION_KEYS
+    assert wire.EXECUTION_GATES == registration.EXECUTION_GATES
+
+
+@pytest.mark.parametrize('change', ['valid', 'optional', 'missing', 'extra', 'bool_version',
+                                  'foreign_kind', 'foreign_scope', 'gate_order', 'missing_gate'])
+def test_neutral_execution_shape_matches_a_acceptance_and_refusal_messages(change):
+    body = _execution_wire()['registration']
+    if change == 'optional': body['receipt_origin_reporting'] = {'version': 1}
+    elif change == 'missing': body.pop('permission_observations')
+    elif change == 'extra': body['accepted'] = True
+    elif change == 'bool_version': body['schema_version'] = True
+    elif change == 'foreign_kind': body['kind'] = 'foreign'
+    elif change == 'foreign_scope': body['execution'] = 'approved'
+    elif change == 'gate_order': body['execution_gates'].reverse()
+    elif change == 'missing_gate': body['execution_gates'].pop()
+    outcomes = []
+    for check in (registration._closed_execution, controller.wire.closed_execution):
+        try:
+            outcomes.append(('accepted', check(deepcopy(body))))
+        except ValueError as exc:
+            outcomes.append(('refused', str(exc)))
+    assert outcomes[0] == outcomes[1]
+    assert outcomes[0][0] == ('accepted' if change in ('valid', 'optional') else 'refused')

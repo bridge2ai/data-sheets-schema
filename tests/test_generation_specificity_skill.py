@@ -933,7 +933,7 @@ class TestModelFacingClosureCoverage(unittest.TestCase):
             closure = {f"src/data_sheets_schema/{name}.py"
                        for name in scan.MODEL_FACING_MODULES | _OPTIONAL_NATIVE_MODEL_FACING}
             self.assertEqual(_missing_model_facing_modules(root, closure), set())
-            closure.remove("src/data_sheets_schema/native_shared_stage.py")
+            closure.remove("src/data_sheets_schema/native_shared_stage/__init__.py")
             self.assertEqual(_missing_model_facing_modules(root, closure), {"native_shared_stage"})
 
     def test_a_dangling_native_module_entry_is_not_absence(self):

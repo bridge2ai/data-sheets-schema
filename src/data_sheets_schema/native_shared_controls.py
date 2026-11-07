@@ -8,14 +8,9 @@ This is a source contract, not a sandbox for arbitrary Python introspection.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from contextlib import contextmanager
 from copy import deepcopy
-import sys
 from types import FunctionType, MappingProxyType
 from weakref import WeakKeyDictionary
-
-from . import native_execution_authority_v2 as authority
-
 
 _MEMBERS = MappingProxyType({
     'native_command_policy': frozenset(('POLICY_VERSION', 'LITERAL_ADMISSION',
@@ -27,10 +22,13 @@ _MEMBERS = MappingProxyType({
     'budgeted_cborg': frozenset(('BudgetStop',)),
 })
 _LOADER_CONTROLS = WeakKeyDictionary()
+# Populated only by C's trusted orchestration after A has source-loaded the
+# historical helper. A carrier cannot supply its own identity checker.
+_PROJECTION_ATTESTORS = WeakKeyDictionary()
 
 
 class _PureProjection:
-    __slots__ = ('_module', '_identity', '_values', '_active')
+    __slots__ = ('_module', '_identity', '_values', '_active', '__weakref__')
 
     def __init__(self, module, identity, members):
         self._module, self._identity = module, dict(identity)
@@ -39,7 +37,6 @@ class _PureProjection:
         for name in members:
             value = getattr(module, name)
             self._values[name] = value if isinstance(value, (FunctionType, type)) else deepcopy(value)
-        self._check()
 
     def _check(self):
         if not self._active:
@@ -50,7 +47,10 @@ class _PureProjection:
                 or type(self._values) is not dict
                 or set(self._values) != _MEMBERS[self._identity['name']]):
             raise ValueError('native shared pure helper member roster changed')
-        if authority.module_source_identity(self._module) != self._identity:
+        attestor = _PROJECTION_ATTESTORS.get(self)
+        if attestor is None:
+            raise ValueError('native shared pure helper was not minted by the active loader')
+        if attestor(self._module) != self._identity:
             raise ValueError('native shared pure helper source identity changed')
         for name, value in self._values.items():
             current = getattr(self._module, name)
@@ -113,38 +113,6 @@ def require_controls(value):
             raise ValueError('native shared pure control source pin changed: ' + name)
         module._check()
     return value
-
-
-@contextmanager
-def loaded_controls(dependencies=None):
-    """Use already source-compiled helpers only inside A's exact loader scope."""
-    if dependencies is None:
-        dependencies = authority.dependency_identity()
-    with authority.loaded_dependencies(dependencies):
-        projected = {}
-        for name, members in _MEMBERS.items():
-            pin = dependencies['base']['modules'][name]
-            path = authority.ROOT / pin['path']
-            # Recheck the current regular physical bytes as well as the exact
-            # source the A loader executed. No path loader or pyc is consulted.
-            authority._verified_source_bytes(path, pin['sha256'])
-            module = sys.modules.get(name)
-            identity = {'name': name, 'path': str(path), 'sha256': pin['sha256']}
-            if authority.module_source_identity(module) != identity:
-                raise ValueError('native shared pure helper differs from its selected source')
-            projected[name] = _PureProjection(module, identity, members)
-        controls = _PureControls(projected)
-        _LOADER_CONTROLS[controls] = tuple(
-            (name, module, tuple(sorted(module._identity.items())))
-            for name, module in sorted(projected.items()))
-        try:
-            require_controls(controls)
-            yield controls
-            require_controls(controls)
-        finally:
-            _LOADER_CONTROLS.pop(controls, None)
-            for module in projected.values():
-                module._active = False
 
 
 def classify_ordinary(command, python, programs, command_policy, controls):

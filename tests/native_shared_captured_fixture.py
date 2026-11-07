@@ -25,7 +25,7 @@ def v2_case(case):
     selection, execution, phase1, history = case
     body = execution_body(attempt_directory='/neutral/attempt')
     raw = c.canonical({'authority_version': 2,
-        'controller_sources_sha256': controller.inherited.SOURCES_SHA256,
+        'controller_sources_sha256': controller.wire.CONTROLLER_SOURCES_SHA256,
         'registration': body})
     execution = replace(execution, session_id=SESSION,
         execution=stages.artifact('execution_capture', execution.execution.pin.path, raw))

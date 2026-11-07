@@ -19,23 +19,23 @@ HELPERS = frozenset(('chunk_check','source_scope','full_schema','full_terms','ph
     'draft','audit_evidence','final_evidence','derive_final_core','final_scope','recorder'))
 
 
-def command_policy(spec, instruction_path, controls=None):
+def command_policy(spec, instruction_path, *, command_argv, repository,
+                   output_directories, classifier_projection):
     """Derive every new helper from the selected renderer, without old guards.
 
     The fixed inherited file controller still enforces the static envelope.
     The new observer separately restricts stage paths to the current cursor.
-    No caller-supplied command or file-write allowlist is accepted here.
+    The trusted orchestration caller supplies the independently derived command
+    argv and output directories; serialized policy claims are not those inputs.
 
-    RunSpec boundary: guarded
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: the orchestrator checked registered input spellings,
+    current instruction bytes and the complete preparation, then derived this
+    command argv and canonical directory inventory from the same verified spec.
     """
-    from .api_runner import _require_registered_input_spellings
-    _require_registered_input_spellings(spec)
-    from . import native_shared_render as render
     from .agentic_runtime import validate_toolchain
-    if controls is None:
-        with pure_controls.loaded_controls() as loaded:
-            return command_policy(spec, instruction_path, loaded)
-    pure_controls.require_controls(controls)
+    controls = pure_controls.require_controls(classifier_projection)
     grammar = controls['native_command_policy']
     cap = spec._native_shared_generation_capture
     if type(cap) is not c.NativeSelectionCapture:
@@ -43,17 +43,17 @@ def command_policy(spec, instruction_path, controls=None):
     environment = validate_toolchain(spec._agentic_toolchain)
     python = environment['python']
     path = c.canonical_path(str(instruction_path), 'instruction path')
-    from .native_shared_evidence import read_regular
-    if read_regular(path, 'instruction', max_bytes=c.HARD_LIMITS['request_bytes']).captured.raw != spec.instruction.encode('utf-8'):
-        raise ValueError('selected instruction differs from the exact native request')
-    commands = {name: shlex.join(argv) for name, argv in render.commands(spec).items()}
+    c.exact(command_argv, HELPERS, 'source-derived native helper argv')
+    commands = {name: shlex.join(argv) for name, argv in command_argv.items()}
     c.exact(commands, HELPERS, 'source-derived native helper table')
     artifacts = spec._agentic_artifact_paths
     inputs = {a.pin.path for a in (cap.registration, cap.receipt_policy, *cap.authority,
               *(source for schema in cap.schemas for source in schema.sources),
               spec._native_shared_runtime_capture)} | {path}
-    repository = str(Path.cwd().resolve())
-    outputs = {str(Path(artifacts[k]).parent.resolve()) for k in ('full', 'core', 'report')}
+    repository = c.canonical_path(repository, 'verified policy repository')
+    if type(output_directories) not in (tuple, list) or len(output_directories) != 3:
+        raise ValueError('native policy requires three verified output directories')
+    outputs = {c.canonical_path(path, 'verified output directory') for path in output_directories}
     outputs.add(cap.role('stage_root'))
     destination = str(Path(artifacts['core']).parent / (spec.project + '_provenance.yaml'))
     if destination in inputs or destination in artifacts.values():
@@ -81,8 +81,9 @@ def command_policy(spec, instruction_path, controls=None):
         'post_final_recorder': {'command': commands['recorder'], 'destination': destination,
             'scope': 'Only the exact selected provenance record after final evidence; no dataset/report mutation'}}
     for command in commands.values():
-        if classify_bash(command, python, set(), policy, controls)[0] != 'prescribed':
+        if classify_bash(command, python, set(), policy, classifier_projection=controls)[0] != 'prescribed':
             raise ValueError('source-derived native helper is not admitted by its literal policy')
+    pure_controls.require_controls(controls)
     return policy
 
 
@@ -117,19 +118,16 @@ def helper_commands(policy):
     return dict(commands)
 
 
-def classify_bash(command,python,programs,policy,controls=None):
+def classify_bash(command,python,programs,policy,*,classifier_projection):
     """Same fixed function for production callbacks and saved probe replay.
 
     Only exact source-derived new helper spellings bypass the old helper-path
     parser. All other commands still use the pinned old ordinary classifier.
     """
+    controls = pure_controls.require_controls(classifier_projection)
     commands=helper_commands(policy)
     if python!=policy['python'] or type(command) is not str:
         return 'not_prescribed','native command differs from selected interpreter/text'
-    if controls is None:
-        with pure_controls.loaded_controls() as loaded:
-            return classify_bash(command, python, programs, policy, loaded)
-    pure_controls.require_controls(controls)
     roles=sorted(name for name,text in commands.items() if command==text)
     if roles:
         problem=controls['native_command_policy'].runtime_literal_problem(command,policy)
@@ -200,11 +198,11 @@ def stage_overlay_governs(view, *, tool_name, tool_input, policy):
     return governed
 
 
-def command_guidance(policy):
+def command_guidance(policy, *, classifier_projection):
     """Truthful new helper guidance, without the old copy/freeze instruction."""
     commands = helper_commands(policy)
-    with pure_controls.loaded_controls() as controls:
-        readonly_guidance = controls['native_readonly'].lookup_guidance()
+    controls = pure_controls.require_controls(classifier_projection)
+    readonly_guidance = controls['native_readonly'].lookup_guidance()
     return ('\n\n## Exact native shared helper spellings\n\n'
         'Use each command exactly as written, only when its selected phase permits it. '
         'The fixed advance helper alone publishes stage requests, first-response records, '

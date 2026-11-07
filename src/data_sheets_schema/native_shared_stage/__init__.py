@@ -1,20 +1,19 @@
 """Pure ordered native receipt/typed stages and the fixed advance command.
 
 No stage function reads files, clients, environment or runtime state. The CLI
-delegates all observation and durable publication to native_shared_capture.
+lives in __main__ and delegates to native_shared_capture_orchestration.
 Scientific conclusions remain declarations checked by the released consumers.
 """
 from __future__ import annotations
 
-import argparse
 import base64
 from dataclasses import asdict
 from pathlib import PurePosixPath
 
-from . import native_shared_contract as c
-from . import native_shared_receipts as nr
-from . import typed_audit as typed
-from . import native_catalog_reuse as catalog_reuse
+from .. import native_shared_contract as c
+from .. import native_shared_receipts as nr
+from .. import typed_audit as typed
+from .. import native_catalog_reuse as catalog_reuse
 
 
 PAYLOAD_KEYS = {
@@ -653,27 +652,3 @@ def _check_assembly(selection, execution, phase1, history, assembly_raw, catalog
     if c.canonical(replay.assembly) != assembly_raw:
         raise ValueError('native assembly differs from exact current captured history')
     return _complete(replay)
-
-
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    commands = parser.add_subparsers(dest='command', required=True)
-    advance = commands.add_parser('advance')
-    advance.add_argument('--registration', required=True)
-    args = parser.parse_args()
-    from .native_shared_capture import capture_stage, publish_stage
-    catalogs = nr._catalog_context()
-    invocation = capture_stage(args.registration, _catalogs=catalogs)
-    selected = (invocation.selection, invocation.execution, invocation.phase1, invocation.history)
-    replay = _Replay(*selected, _catalogs=catalogs).run()
-    if replay.pending is not None and replay.pending[-1] is not None:
-        response, _ = replay.pending[-1]
-        proposal = _check_response(*selected, replay.pending[2].raw, response.raw, catalogs)
-    else:
-        proposal = _prepare_next(*selected, catalogs)
-    result = publish_stage(invocation, proposal, _catalogs=catalogs)
-    print(c.canonical(result).decode('utf-8'))
-
-
-if __name__ == '__main__':
-    main()
