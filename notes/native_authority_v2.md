@@ -449,7 +449,7 @@ is exposed. Pure function wrappers refuse after the scope closes; constants are
 copied and source identity is checked before use. The ordinary classifier recipe
 is compared with the source-pinned implementation in offline tests. Callback
 classification opens a fresh scope instead of retaining historical modules.
-A's public two-helper map and source/consumer refusal rules are unchanged.
+C makes no change to A's public two-helper map or source/consumer refusal rules.
 Read-only lookup helpers may inspect declared filesystem paths; "pure" here
 does not mean byte-only or free of filesystem reads. It means no launch,
 publication or admission side effect.
@@ -460,10 +460,16 @@ registration route directly from C's attribution adapter.
 
 Complete recursive consumer-graph compatibility remains an explicit integration
 gate. A scans lazy imports too: frozen `native_shared_render._runtime` imports
-v1 runtime constants, and the frozen U2 controller contains dynamic source
-loading. C's publication helpers also reuse existing durable effect primitives.
-No trusted-boundary expansion, protected edit or U3-D fallback was made to bypass
-those refusals. A separately scoped dependency/interface decision is required
+v1 runtime constants, and C's publication helpers reuse frozen execution effect
+primitives. A's later source/CI review repair allows legitimate dynamic loading
+inside reviewed dependencies, including U2, but now refuses both verifier
+bootstrap boundaries throughout a consumer graph. C's ordinary controller,
+capture and control-projection entry points still call those boundaries; they
+cannot be placed inside D's pure consumer closure. `native_shared_controls` is
+not in A's closed consumer-owned lint roster, but its authority import still
+refuses; omission from that roster is not an admission workaround.
+No C trusted-boundary expansion, protected edit or U3-D fallback bypasses these
+refusals. A separately scoped dependency/interface decision is required
 before the full C/D graph can enter A's consumer loader. This does not prevent
 offline composition and typed captured computation; it does prevent a claim of
 complete execution admission on this C branch.
@@ -490,6 +496,11 @@ Round-2 findings retained for the later issue workflow:
 - U3C-R2-7: the first saved-reader canary compared captured and proposed artifact
   classes directly. Compare their exact pin and raw bytes; the different carrier
   classes correctly distinguish observed bytes from a proposed publication.
+- U3C-R2-8: the later A runner change polled lock acquisition only once per
+  minute. Restore detection on each active runner tick; once paused, poll for
+  removal at most once per minute. Synthetic tests cover acquisition, held-lock
+  polling, release/reacquisition and slow filesystem observations. No generation
+  or execution authority changes are part of this runner repair.
 
 The report records actual test results and remaining gates. No declaration here
 authorizes dispatch, changes the shared-v1/native26 procedure, or substitutes for

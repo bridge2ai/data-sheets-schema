@@ -190,6 +190,29 @@ class OwnedProcesses:
                 self.errors.append(type(exc).__name__)
 
 
+class QuietWindow:
+    """Detect acquisition each runner tick; poll a held lock at most each 60 s."""
+    def __init__(self, lock, clock=None):
+        self.lock = lock
+        self.clock = time.monotonic if clock is None else clock
+        self.paused = False
+        self.next_removal_check = 0.0
+
+    def update(self, owned):
+        if self.paused and self.clock() < self.next_removal_check:
+            return
+        requested = self.lock.exists()
+        if requested:
+            # Start the interval after the actual filesystem observation.
+            self.next_removal_check = self.clock() + 60
+        if requested and not self.paused:
+            owned.signal(signal.SIGSTOP)
+            self.paused = True
+        elif self.paused and not requested:
+            owned.signal(signal.SIGCONT)
+            self.paused = False
+
+
 def parent(args):
     if LOCK.exists():
         raise SystemExit("quiet window active; no tests started")
@@ -227,9 +250,9 @@ def parent(args):
         save(out / "outcome.json", {"status": "blocked_quiet_window", "launched": False})
         return 75
     started = time.monotonic()
-    child = None; owned = None; interrupted = None; paused = False
+    child = None; owned = None; interrupted = None
     forced_cleanup = False
-    next_lock_check = 0.0
+    quiet = QuietWindow(LOCK)
     with (out / "pytest.log").open("xb") as log:
         try:
             child = subprocess.Popen(command, cwd=ROOT, env=env, stdout=log,
@@ -240,22 +263,14 @@ def parent(args):
                 if time.monotonic() - started >= DEADLINE:
                     interrupted = "deadline"
                     break
-                if time.monotonic() >= next_lock_check:
-                    requested = LOCK.exists()
-                    next_lock_check = time.monotonic() + 60
-                else:
-                    requested = paused
-                if requested and not paused:
-                    owned.signal(signal.SIGSTOP); paused = True
-                elif paused and not requested:
-                    owned.signal(signal.SIGCONT); paused = False
+                quiet.update(owned)
                 time.sleep(0.25)
         except BaseException as exc:
             interrupted = type(exc).__name__
         finally:
             if owned is not None:
                 owned.observe()
-                if paused:
+                if quiet.paused:
                     owned.signal(signal.SIGCONT)
                 survivors = owned.live()
                 if survivors:
