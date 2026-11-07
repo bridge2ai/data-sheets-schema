@@ -131,7 +131,7 @@ def main():
     for name in ('derive_core', 'core_schema', 'pair', 'original_source_inventory'): helper(name)
     advance_to('assembly_complete')
     helper('audit_evidence')
-    for name in ('derive_final_core', 'full_schema', 'full_terms', 'core_schema', 'pair', 'phase1_receipts', 'final_scope', 'final_source_inventory'):
+    for name in ('derive_final_core', 'full_schema', 'full_terms', 'core_schema', 'pair', 'final_receipts', 'final_scope', 'final_source_inventory'):
         helper(name)
     inventory = source_review.inventory(fixture['full'], 'final_full')
     review = {'artifact': 'final_full', 'sha256': inventory['sha256'], 'values': [

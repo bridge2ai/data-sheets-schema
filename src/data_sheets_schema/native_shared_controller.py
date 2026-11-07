@@ -20,6 +20,7 @@ from . import native_execution_authority_v2 as authority
 from . import native_execution_registration_v2 as registration
 from .native_shared_evidence import read_regular
 from . import native_shared_streams as live_streams
+from . import native_shared_controls as pure_controls
 
 KIND = 'd4d_native_shared_callback_composition'
 VERSION = 1
@@ -59,14 +60,11 @@ def captured_execution_body(raw):
     """Pure captured-E parser, never verification or authorization.
 
     Saved replay separately joins complete E/C/preparation/S/R evidence. This
-    parser proves only wire, kind and declared gate identity; it grants no
+    parser proves only closed wire, kind and declared gate identity; it grants no
     callbacks, filesystem effects, current-source proof or native dispatch.
     """
     body = _captured_wire(raw)
-    if (body.get('kind') != registration.EXECUTION_KIND
-            or body.get('execution') != registration.EXECUTION_SCOPE
-            or body.get('execution_gates') != list(registration.EXECUTION_GATES)):
-        raise ValueError('captured record is not the shared v2 execution wire')
+    registration._closed_execution(body)
     return body
 
 
@@ -111,7 +109,7 @@ def _compose(preparation_raw, instruction_path):
             or instruction.pin.sha256 != prepared['instruction_sha256']):
         raise ValueError('composition instruction differs from the exact prepared rendering')
     dependencies = prepared['dependencies']
-    with authority.loaded_dependencies(dependencies) as controls:
+    with pure_controls.loaded_controls(dependencies) as controls:
         selected_policy = policy.command_policy(spec, instruction.pin.path, controls)
         controller_sources = inherited.controller_sources()
     value = {'kind': KIND, 'version': VERSION, 'authority_version': AUTHORITY_VERSION,
@@ -190,8 +188,8 @@ class CallbackAdapter:
                 or execution['max_draft_checks'] != self.value['max_draft_checks']):
             raise ValueError('callback adapter differs from its exact verified execution composition')
         self.execution, self.registration_raw = deepcopy(execution), registration_raw
-        with authority.loaded_dependencies(self.value['dependencies']) as controls:
-            self.controls = dict(controls)
+        with pure_controls.loaded_controls(self.value['dependencies']) as controls:
+            self._budget_stop = controls['budgeted_cborg'].BudgetStop
         self.policy = deepcopy(self.value['policy'])
         paths = self.spec._agentic_artifact_paths
         self.phase = PhaseState(render.commands(self.spec), full_path=paths['full'], core_path=paths['core'],
@@ -225,7 +223,7 @@ class CallbackAdapter:
     def _stop(self, reason):
         if self.failure is None:
             self.failure = str(reason)
-        raise self.controls['budgeted_cborg'].BudgetStop(self.failure)
+        raise self._budget_stop(self.failure)
 
     def _failure_detail(self, exc):
         # Preserve the historical first-stop text, not the private subclass
@@ -400,8 +398,9 @@ class CallbackAdapter:
                                 raise ValueError('recorder requires exactly one settled final pass')
                             self.recorder_call = block['id']; preserved.add(command)
                         elif self.state.checks and self.state._command_kind(command) is None:
-                            readonly = self.controls['native_readonly'].lookup_command(command,
-                                self.policy['readonly_lookups'], self.controls['native_command_policy']._simple_command)
+                            with pure_controls.loaded_controls(self.value['dependencies']) as controls:
+                                readonly = controls['native_readonly'].lookup_command(command,
+                                    self.policy['readonly_lookups'], controls['native_command_policy']._simple_command)
                             if not readonly:
                                 raise ValueError('draft correction permits only report Writes and registered read-only checks')
                             preserved.add(command)
@@ -452,7 +451,8 @@ class CallbackAdapter:
             self._stop(self.failure)
         if c.canonical(selected_policy) != c.canonical(self.policy):
             self._stop('native callback command policy differs from its exact composition')
-        return policy.classify_bash(command, python, programs, selected_policy, controls=self.controls)
+        with pure_controls.loaded_controls(self.value['dependencies']) as controls:
+            return policy.classify_bash(command, python, programs, selected_policy, controls=controls)
 
     def report(self, *, complete=False):
         if complete and self.failure is None:

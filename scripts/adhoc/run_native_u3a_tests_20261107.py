@@ -47,6 +47,7 @@ def clean_environment(out, interpreter_directory):
         "HOME": str(out / "home"), "TMPDIR": str(out / "tmp"),
         "LANG": "en_US.UTF-8", "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1", "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONPATH": str(ROOT / "src") + ":" + str(ROOT),
         "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1", "PYTEST_ADDOPTS": "",
         "UV_OFFLINE": "1", "PIP_NO_INDEX": "1", "GIT_NO_LAZY_FETCH": "1",
         "GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_SYSTEM": "/dev/null",
@@ -64,39 +65,8 @@ def dependency_site():
 
 
 def origin_witness():
-    import data_sheets_schema
-    package = ROOT / "src/data_sheets_schema"
-    raw_paths = [str(path) for path in data_sheets_schema.__path__]
-    paths = [str(Path(path).resolve()) for path in raw_paths]
-    # Collection may repeat this checkout's src on sys.path; namespace packages
-    # then repeat the same location. Preserve that evidence without admitting
-    # an empty namespace or even one foreign location.
-    if not paths or any(path != str(package) for path in paths):
-        raise RuntimeError("mixed project namespace: " + repr(paths))
-    editable = [repr(finder) for finder in sys.meta_path
-                if "__editable__" in repr(finder)]
-    if editable:
-        raise RuntimeError("editable-install import finder is active")
-    origins = {}
-    for name, module in tuple(sys.modules.items()):
-        if name != "data_sheets_schema" and not name.startswith("data_sheets_schema."):
-            continue
-        path = getattr(module, "__file__", None)
-        if path is not None:
-            resolved = Path(path).resolve()
-            if not resolved.is_relative_to(package):
-                raise RuntimeError("foreign project module: " + name + " " + str(resolved))
-            origins[name] = str(resolved)
-        for item in getattr(module, "__path__", ()):
-            if not Path(item).resolve().is_relative_to(package):
-                raise RuntimeError("foreign project subpackage: " + name)
-    return {"python": sys.executable, "prefix": sys.prefix,
-            "package_paths_raw": raw_paths,
-            "package_paths": paths, "module_origins": origins,
-            "sys_path": list(sys.path), "editable_finders": editable,
-            "no_user_site": bool(sys.flags.no_user_site),
-            "safe_path": bool(sys.flags.safe_path),
-            "dont_write_bytecode": sys.dont_write_bytecode}
+    from tests.utils.native_test_environment import origin_witness as witness
+    return witness(ROOT)
 
 
 def network_witness():
@@ -220,6 +190,29 @@ class OwnedProcesses:
                 self.errors.append(type(exc).__name__)
 
 
+class QuietWindow:
+    """Detect acquisition each runner tick; poll a held lock at most each 60 s."""
+    def __init__(self, lock, clock=None):
+        self.lock = lock
+        self.clock = time.monotonic if clock is None else clock
+        self.paused = False
+        self.next_removal_check = 0.0
+
+    def update(self, owned):
+        if self.paused and self.clock() < self.next_removal_check:
+            return
+        requested = self.lock.exists()
+        if requested:
+            # Start the interval after the actual filesystem observation.
+            self.next_removal_check = self.clock() + 60
+        if requested and not self.paused:
+            owned.signal(signal.SIGSTOP)
+            self.paused = True
+        elif self.paused and not requested:
+            owned.signal(signal.SIGCONT)
+            self.paused = False
+
+
 def parent(args):
     if LOCK.exists():
         raise SystemExit("quiet window active; no tests started")
@@ -257,8 +250,9 @@ def parent(args):
         save(out / "outcome.json", {"status": "blocked_quiet_window", "launched": False})
         return 75
     started = time.monotonic()
-    child = None; owned = None; interrupted = None; paused = False
+    child = None; owned = None; interrupted = None
     forced_cleanup = False
+    quiet = QuietWindow(LOCK)
     with (out / "pytest.log").open("xb") as log:
         try:
             child = subprocess.Popen(command, cwd=ROOT, env=env, stdout=log,
@@ -269,18 +263,14 @@ def parent(args):
                 if time.monotonic() - started >= DEADLINE:
                     interrupted = "deadline"
                     break
-                requested = LOCK.exists()
-                if requested and not paused:
-                    owned.signal(signal.SIGSTOP); paused = True
-                elif paused and not requested:
-                    owned.signal(signal.SIGCONT); paused = False
+                quiet.update(owned)
                 time.sleep(0.25)
         except BaseException as exc:
             interrupted = type(exc).__name__
         finally:
             if owned is not None:
                 owned.observe()
-                if paused:
+                if quiet.paused:
                     owned.signal(signal.SIGCONT)
                 survivors = owned.live()
                 if survivors:

@@ -123,6 +123,7 @@ def _history(selection, execution, history):
     sel_sha = selection.registration.pin.sha256
     exe_sha = execution.execution.pin.sha256
     att_id = execution.attempt_id
+    sess_id = execution.session_id
     limit_bytes = c.HARD_LIMITS['metadata_record_bytes']
     rows, previous = [], None
     for sequence, artifact in enumerate(history.records):
@@ -218,7 +219,8 @@ class _Replay:
         self.receipt = self.packet = self.index = self.assembly = None
         self.workers, self.omission, self.origins = {}, None, []
         self.cache = self.catalogs.derivations()
-        self.options = {'captured_assets': nr.omission_assets(selection), 'derivations': self.cache}
+        self.options = {'captured_assets': nr.omission_assets(selection), 'derivations': self.cache,
+                        '_catalog_lookup': catalog_reuse._CatalogLookup(self.catalogs, selection)}
         self.pending = None
         self.pending_predecessor = None
         self.pending_request_hash = None
@@ -287,8 +289,7 @@ class _Replay:
             schema_path=schema.sources[0][1], schema_snapshot=schema,
             max_output_tokens=nr.output_ceiling(self.e), max_paths=limits['max_paths_per_worker'],
             max_inventory_bytes=limits['max_inventory_bytes'], max_workers=limits['max_workers'],
-            max_request_bytes=limits['max_request_bytes'],
-            _catalog_lookup=catalog_reuse._CatalogLookup(self.catalogs, self.s), **self.options)
+            max_request_bytes=limits['max_request_bytes'], **self.options)
         if len(packet['plan']['inventory']['values']) > limits['max_populated_paths']:
             raise ValueError('native global populated path bound exceeded')
         return packet

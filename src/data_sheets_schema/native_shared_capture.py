@@ -839,7 +839,8 @@ def _prefix_trace(base, transcript, control, init_lines=None, settled_cache=None
 def _checked_observations(run):
     """Validate raw joins and current-request chronology, not saved success flags."""
     previous = {'transcript': 0, 'control': 0}
-    seen_reads, seen_intents, seen_writes, seen_advances = {}, {}, set(), set()
+    seen_reads, seen_intents, seen_writes, seen_advances = {}, {}, set(), {}
+    settled_advances = set()
     checked = []
     previous_decision = None
     base_trace = None
@@ -921,20 +922,12 @@ def _checked_observations(run):
                 seen_writes.add(response.pin.path)
             else:
                 result = payload['advance_result']
-                if result.get('advance_tool_use_id') != call.tool_use_id or call.tool_use_id not in seen_advances:
+                if call.tool_use_id not in seen_advances or call.tool_use_id in settled_advances:
                     raise ValueError('advance settlement lacks actual earlier selected admission')
                 observed.helper_result(trace, actual, result)
-                _history_prefix(run, result['before_history_sha256'])
-                after = decision_at(result['after_history_sha256'])
-                if after.state != result['state']:
-                    raise ValueError('advance settlement differs from actual post-publication state')
-                for pin in result['publications']:
-                    if pin.get('role') == 'journal':
-                        actual = _history_prefix(run, pin['sha256']).journal
-                        if c.pin_dict(actual.pin) != pin:
-                            raise ValueError('advance acknowledgement names another journal version')
-                    else:
-                        run.reader.pinned(pin)
+                _check_advance_acknowledgement(run, actual, result,
+                    before_history_sha256=seen_advances[call.tool_use_id])
+                settled_advances.add(call.tool_use_id)
         elif kind == 'response_intent':
             current = decision_at(payload['history_sha256'])
             request = trace.request(payload['tool_use_id'])
@@ -960,7 +953,7 @@ def _checked_observations(run):
             if actual != call or call.tool_use_id in seen_advances:
                 raise ValueError('advance admission repeats or differs from the actual pending callback')
             _history_prefix(run, payload['before_history_sha256'])
-            seen_advances.add(call.tool_use_id)
+            seen_advances[call.tool_use_id] = payload['before_history_sha256']
         elif kind in ('phase1_sealed', 'core_sealed'):
             if type(payload['helper_calls']) is not list or not payload['helper_calls']:
                 raise ValueError('seal lacks actual settled helper identities')
@@ -1345,20 +1338,21 @@ def observe_response_written(run, identity):
         'read_observation': payload['read_observation'], 'response_observation': c.pin_dict(obs.pin)})
 
 
-def observe_advance_settled(run, identity):
-    trace = run.trace(); actual = trace.settled(identity)
-    frame = evidence.event(run.transcript, actual.result_event)
-    result = _document(frame.get('tool_use_result', {}).get('stdout', '').encode('utf-8'), 'advance stdout')
-    observed.helper_result(trace, actual, result)
+def _check_advance_acknowledgement(run, actual, result, *, before_history_sha256):
+    """Reconstruct one acknowledgement from captured inputs in live and saved reads.
+
+    Earlier saved acknowledgements name their own journal version, not the
+    final run journal. No saved verdict or claimed publication list is reused.
+    """
     c.exact(result, {'kind', 'version', 'selection_sha256', 'execution_sha256', 'attempt_id', 'session_id',
         'advance_tool_use_id', 'before_history_sha256', 'after_history_sha256', 'state', 'publications'}, 'advance acknowledgement')
     expected = {'kind': c.KINDS['advance_result'], 'version': 1,
         'selection_sha256': run.selection.registration.pin.sha256, 'execution_sha256': run.binding.execution.pin.sha256,
-        'attempt_id': run.binding.attempt_id, 'session_id': run.binding.session_id, 'advance_tool_use_id': identity,
-        'after_history_sha256': run.history.journal.pin.sha256, 'state': run.decision().state}
+        'attempt_id': run.binding.attempt_id, 'session_id': run.binding.session_id,
+        'advance_tool_use_id': actual.call.tool_use_id, 'before_history_sha256': before_history_sha256}
     if any(type(result[key]) is not type(value) or result[key] != value for key, value in expected.items()):
-        raise ValueError('advance result differs from actual current selected publication')
-    before = _history_prefix(run, result['before_history_sha256'])
+        raise ValueError('advance acknowledgement identity differs from selected admission')
+    before = _history_prefix(run, before_history_sha256)
     phase1 = _phase1(run.selection, run.binding, before, run.reader)
     replay = stage._Replay(run.selection, run.binding, phase1, before, _catalogs=run._catalogs).run()
     if replay.pending is not None and replay.pending[-1] is not None:
@@ -1368,12 +1362,44 @@ def observe_advance_settled(run, identity):
             c.HelperPublication('replace_journal_from_exact_predecessor', proposal.predicted_journal, before.journal.pin.sha256))
     else:
         publications = stage._prepare_next(run.selection, run.binding, phase1, before, run._catalogs).publications
-    if result['publications'] != [c.pin_dict(item.artifact.pin) for item in publications]:
+    expected_publications = [c.pin_dict(item.artifact.pin) for item in publications]
+    if type(result['publications']) is not list or c.canonical(result['publications']) != c.canonical(expected_publications):
         raise ValueError('advance result does not describe every freshly derived actual effect')
+    journals = [item.artifact for item in publications if item.artifact.pin.role == 'journal']
+    if len(journals) > 1:
+        raise ValueError('advance reconstruction has more than one resulting journal')
+    after = journals[0] if journals else before.journal
+    if result['after_history_sha256'] != after.pin.sha256:
+        raise ValueError('advance acknowledgement differs from reconstructed resulting journal')
+    after_history = _history_prefix(run, after.pin.sha256)
+    # The observed journal is CapturedArtifact; the derived effect is
+    # ProposedArtifact. Require exact pin and bytes, not carrier-class equality.
+    if after_history.journal.pin != after.pin or after_history.journal.raw != after.raw:
+        raise ValueError('advance acknowledgement journal bytes differ from captured history')
+    if result['state'] != _decision_at(run, after.pin.sha256).state:
+        raise ValueError('advance acknowledgement differs from reconstructed resulting state')
     for item in publications:
-        actual_file = run.reader.read(item.artifact.pin.role, item.artifact.pin.path, item.artifact.pin)
+        actual_file = (after_history.journal if item.artifact.pin.role == 'journal' else
+            run.reader.read(item.artifact.pin.role, item.artifact.pin.path, item.artifact.pin))
         if actual_file.raw != item.artifact.raw:
             raise ValueError('advance published bytes differ from fresh pure reconstruction')
+
+
+def observe_advance_settled(run, identity):
+    trace = run.trace(); actual = trace.settled(identity)
+    frame = evidence.event(run.transcript, actual.result_event)
+    result = _document(frame.get('tool_use_result', {}).get('stdout', '').encode('utf-8'), 'advance stdout')
+    observed.helper_result(trace, actual, result)
+    admissions = [doc['payload'] for item in run.observations
+        for doc in (_document(item.raw, 'advance admission'),)
+        if doc['observation_type'] == 'advance_admitted'
+        and doc['payload']['call']['tool_use_id'] == identity]
+    if len(admissions) != 1:
+        raise ValueError('advance settlement lacks one actual selected admission')
+    _check_advance_acknowledgement(run, actual, result,
+        before_history_sha256=admissions[0]['before_history_sha256'])
+    if result['after_history_sha256'] != run.history.journal.pin.sha256:
+        raise ValueError('advance result differs from actual current selected publication')
     _persist_observation(run, 'advance_settled', {'call': call_document(actual.call),
         'result': asdict(actual.result), 'result_event': asdict(actual.result_event), 'advance_result': result})
 

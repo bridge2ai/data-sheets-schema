@@ -11,7 +11,7 @@ import subprocess
 import pytest
 
 from data_sheets_schema import api_runner as api
-from data_sheets_schema import native_attribution_registration as inherited
+from data_sheets_schema import native_attribution_registration_v2 as inherited
 from data_sheets_schema import native_shared_attribution as attribution
 from data_sheets_schema import native_shared_controller as controller
 from data_sheets_schema import native_shared_contract as c
@@ -23,6 +23,7 @@ from tests.test_native_shared_render import native_spec
 from tests.test_native_execution_registration_v2 import inputs as execution_inputs, isolated_modules
 from tests.test_source_attribution_preflight import inputs as attribution_inputs, edited, claim
 from tests.test_native_source_attribution import call, result, write
+from tests.utils.native_execution_carrier_v2 import execution_body
 
 
 @pytest.fixture
@@ -56,9 +57,7 @@ def case(execution_inputs, attribution_inputs, tmp_path, monkeypatch):
         Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(spec._agentic_artifact_paths['full']).write_bytes(data['record_raw'])
     Path(spec._agentic_artifact_paths['report']).write_bytes(data['report_raw'])
-    body = {'kind': registration.EXECUTION_KIND, 'schema_version': 2,
-        'execution': registration.EXECUTION_SCOPE,
-        'execution_gates': list(registration.EXECUTION_GATES),
+    body = execution_body(**{
         'preparation_raw_json': preparation_raw.decode('utf-8'),
         'preparation_sha256': c.sha(preparation_raw),
         'job_id': prepared['job_id'], 'dependencies': prepared['dependencies'],
@@ -69,7 +68,7 @@ def case(execution_inputs, attribution_inputs, tmp_path, monkeypatch):
         'composition_raw_json': composition_raw.decode('utf-8'),
         'composition_sha256': c.sha(composition_raw),
         'instruction_sha256': composition['instruction_sha256'],
-        'working_directory': composition['working_directory']}
+        'working_directory': composition['working_directory']})
     execution = {'authority_version': 2,
         'controller_sources_sha256': preparation['controller_sources_sha256'],
         'registration': body}

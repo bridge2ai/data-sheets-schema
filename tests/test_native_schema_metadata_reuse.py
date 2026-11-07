@@ -234,7 +234,8 @@ def test_native_reconstruction_eliminates_only_metadata_yaml_reparse(tmp_path, m
     assert len(selected._schemas(doc, artifacts)) == 2
     assert calls == []
     assert strict_calls == [(artifacts[kind + '_schema:0'].raw, 'native schema',
-                             {'limit': c.HARD_LIMITS['schema_member_bytes']}) for kind in ('full', 'core')]
+                             {'limit': c.HARD_LIMITS['schema_member_bytes'],
+                              '_native_events': True}) for kind in ('full', 'core')]
 
 
 @pytest.mark.parametrize('extra', [b'', b'prefixes: {ex: https://example.org/}\n',
