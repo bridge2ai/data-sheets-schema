@@ -39,3 +39,11 @@ The protected U1 shared-admission hook is outside this round and stays pending.
 No integration into D, native execution or admission is claimed. Detailed
 validation and any review findings belong in the external Round 5 report.
 GitHub issue publication remains deferred by the explicit offline restriction.
+
+## Local review and validation findings
+
+- **C5-R1 — addressed before repeating the canary.** A5's expanded lint rejects
+  an `ast.Name` whose spelling ends in `modules`. The first genuine canary
+  stopped at the inert `_PureControls.__init__(modules)` parameter, before minting.
+  Renamed that plain mapping parameter to `projections`; no import, reflective
+  operation, consumer check or guard changed. The failed invocation is retained.

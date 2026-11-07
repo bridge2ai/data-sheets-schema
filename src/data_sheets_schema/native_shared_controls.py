@@ -82,8 +82,8 @@ class _PureControls(Mapping):
     __eq__ = object.__eq__
     __hash__ = object.__hash__
 
-    def __init__(self, modules):
-        self._modules = MappingProxyType(dict(modules))
+    def __init__(self, projections):
+        self._modules = MappingProxyType(dict(projections))
 
     def __getitem__(self, name):
         require_controls(self)
