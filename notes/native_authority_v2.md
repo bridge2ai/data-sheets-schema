@@ -286,6 +286,9 @@ Round-2 review records, retained offline for the later issue workflow:
   those parents in import inspection, source-only loading and binding restoration;
   refuse an unpinned or ambiguous parent before import. An unchanged regression
   failed before this repair because a legacy import only in the parent was missed.
+- R2-E (test fixture only): give synthetic import bindings one cleanup owner.
+  Overlapping finalizer/monkeypatch cleanup raised after passing loader assertions
+  and left the test namespace unrestored; retain that failed driver evidence.
 
 ### U3-A offline review ledger
 

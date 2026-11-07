@@ -348,10 +348,12 @@ def _nested_consumer_fixture(tmp_path, monkeypatch, request, initializer):
     # Otherwise missing parent closure could merely produce ModuleNotFoundError
     # instead of exposing the exact cached-bytecode hole being exercised.
     monkeypatch.setattr(package, '__path__', [str(root)])
+    # The explicit finalizer owns these bindings; do not also register them
+    # with MonkeyPatch, whose teardown runs after that finalizer.
     for module_name in (name, parent_name, child_name):
-        monkeypatch.delitem(sys.modules, module_name, raising=False)
+        sys.modules.pop(module_name, None)
     for attribute in ('synthetic_parent_consumer', 'synthetic_parent_package'):
-        monkeypatch.delattr(package, attribute, raising=False)
+        vars(package).pop(attribute, None)
     return {'name': name, 'parent': parent_name, 'child': child_name,
             'source': source, 'initializer': initializer, 'pins': pins,
             'path': root/'synthetic_parent_consumer.py', 'init_path': init_path,
@@ -382,9 +384,9 @@ def test_implicit_parent_is_source_compiled_and_all_bindings_restore(tmp_path, m
         previous_child.__file__ = str(fixture['init_path'].with_name('child.py'))
         previous_child.value = lambda: 'cached foreign child'
         previous_parent.child = previous_child
-        monkeypatch.setitem(sys.modules, fixture['parent'], previous_parent)
-        monkeypatch.setitem(sys.modules, fixture['child'], previous_child)
-        monkeypatch.setattr(fixture['package'], 'synthetic_parent_package', previous_parent, raising=False)
+        sys.modules[fixture['parent']] = previous_parent
+        sys.modules[fixture['child']] = previous_child
+        fixture['package'].synthetic_parent_package = previous_parent
     with authority.verified_source_module(fixture['name'], path=fixture['path'], raw=fixture['source'],
             sha256=pin(fixture['source']), package_sources=fixture['pins']) as module:
         assert module.read() == 'pinned child'
