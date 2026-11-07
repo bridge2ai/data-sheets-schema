@@ -179,8 +179,9 @@ The first must rederive the **entire closed E** (not a subset or a prior passed
 flag): genuine C, policy, saved permission recipe/observations, sole runtime,
 budget/deadline, receipt authority, input/output/path identities and hashes. It
 returns that exact body. The bridge passes only the named reconstruction inputs,
-never the submitted body's derived fields or serialized body. Echoing the input
-cannot satisfy the independently compared complete-body postcondition. Both
+never the submitted body's derived fields or serialized body. Argument echo
+does not reconstruct E; the permanent echo test returns preparation, not E.
+This comparison does not prevent deliberate access to interpreter state. Both
 function signatures are exact (no defaults, variadic forwarding or wrappers).
 It must not call the outer `verified` recursively.
 The second rechecks canonical, disjoint, protected-input-safe and unspent
@@ -194,15 +195,30 @@ No input may select a module or callback; another origin, interface or version
 refuses. The module is compiled from captured bytes whose digest matches the
 committed package source map, with loader-recorded identity checked before and
 after its functions run. Its static package import graph must not import frozen
-v1 execution authority; dynamic imports/exec in that graph refuse. Implicit
+v1 execution authority. Dynamic constructs and star imports are linted only in
+the closed `CONSUMER_OWNED_MODULES` list: `native_shared_attribution`,
+`native_shared_capture`, `native_shared_controller`, `native_shared_current`,
+`native_shared_effects`, `native_shared_observations`, `native_shared_phase`,
+`native_shared_policy`, `native_shared_receipts`, `native_shared_stage`,
+`native_shared_streams`, `native_shared_execution`, `native_shared_gates`,
+`native_shared_permissions`, `native_shared_publication`,
+`native_shared_registration`, `native_shared_results`, and
+`native_shared_schema_gates` (all under `data_sheets_schema`). Legitimate dynamic
+constructs in reviewed dependencies, including U2, are allowed. Implicit
 parent package initializers below `data_sheets_schema` are part of this graph
 and are compiled from pinned bytes too, including empty initializers. A missing
 or ambiguous initializer pin refuses; nested namespace packages are not supported
-by this closed consumer interface. The existing
-U3-A boundary modules are explicit trusted leaves of this inspection because the
-bridge itself deliberately reuses the pure runtime validator. This is not a
-general sandbox against hostile Python, external dependencies or arbitrary
-preexisting interpreter references. The consumer is absent at U3-A, so complete execution admission is
+by this closed consumer interface. Every reached package module is source-loaded
+with a recorded digest, including attribute imports and runtime imports from
+reviewed dependencies; cached package bindings are temporarily replaced and
+restored. Imports of either U3-A verifier boundary module refuse, including
+`from .native_execution_registration_v2 import selection` and function imports.
+Consumers must use direct package dependencies, not bootstrap re-exports.
+The guard is **lint**; independent source review plus digest pins are enforcement.
+Assigned `__signature__`, `sys._getframe`, `inspect.currentframe`, and `sys.modules`
+are refused in consumer-owned source as cheap hardening, not a sandbox against
+hostile Python, external dependencies or arbitrary preexisting references.
+The consumer is absent at U3-A, so complete execution admission is
 intentionally closed until C/D implement and test these contracts.
 
 Review, CI and owner evidence use version 2 and kinds suffixed `_v2`, binding
@@ -227,7 +243,9 @@ shards, four API cases, three SG2 cases, three offline lanes, aggregate `test`
 and `large-files`; push/manual means six shards, the same API/SG2/offline lanes,
 `test` and `schema-examples (3.12)`. The PR-only large-files check is not invented
 at a merged-main commit. No event is inferred; every applicable check must
-report completed/success at the exact **tested** commit. Actions run URLs are
+report completed/success with `head_sha` equal to the exact **source** commit
+for every event. For PRs this is the PR head; `tested_commit` separately declares
+the merge tested by Actions. Actions run URLs are
 bound to local `d4d.ciRepositoryUrl` configuration or `remote.origin.url`, never
 to a built-in repository. An independent workflow-derived
 test guards this frozen interface against roster drift.
@@ -258,7 +276,13 @@ Malformed envelope shapes, versions and manifest digest values refuse using
 already imported constants before Git or helper loading. `admit` refuses a
 non-main-thread call before verification. Valid envelopes still need local Git
 and verified source compilation; ordinary initial interpreter/package imports
-and external dependencies are the trusted bootstrap. The byte-only loader proves
+and external dependencies are the trusted bootstrap. In particular the verifier's
+own modules (`native_execution_registration_v2`, `native_execution_authority_v2`)
+and their ordinary imports, including the U2 v2 authority modules and pure v1
+runtime validator, load through the **normal import system**, with its usual
+bytecode behavior. They are the trust base, not source-attested by this guard.
+After pure envelope checks, `_wire` proves the captured closure committed before
+loading any preparer helpers. The byte-only loader proves
 the bytes of the scoped helper/consumer graph it executes, not every object
 already resident in Python or the authenticity of review/CI declarations.
 

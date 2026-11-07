@@ -505,7 +505,7 @@ def test_approval_parser_captures_exact_fabricated_bytes_without_writes(fabricat
     ('review_v1', 'review must bind this exact v2 execution'),
     ('review_bool', 'review must bind this exact v2 execution'),
     ('extra_review', 'v2 independent review'),
-    ('ci_head', 'v2 CI check source differs from tested commit'),
+    ('ci_head', 'v2 CI check source differs from source commit'),
     ('ci_status', 'v2 CI check status must be completed'),
     ('missing_check', 'v2 CI check roster differs from the exact required event roster'),
     ('failed_ci', 'v2 CI check conclusion must be success'),

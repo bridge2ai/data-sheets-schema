@@ -45,15 +45,22 @@ _LEGACY_CONSUMER_MODULES = frozenset('data_sheets_schema.' + name for name in (
 _TRUSTED_CONSUMER_BOUNDARIES = frozenset((
     'data_sheets_schema.native_execution_registration_v2',
     'data_sheets_schema.native_execution_authority_v2'))
+CONSUMER_OWNED_MODULES = frozenset('data_sheets_schema.' + name for name in (
+    'native_shared_attribution', 'native_shared_capture', 'native_shared_controller',
+    'native_shared_current', 'native_shared_effects', 'native_shared_observations',
+    'native_shared_phase', 'native_shared_policy', 'native_shared_receipts',
+    'native_shared_stage', 'native_shared_streams', 'native_shared_execution',
+    'native_shared_gates', 'native_shared_permissions', 'native_shared_publication',
+    'native_shared_registration', 'native_shared_results', 'native_shared_schema_gates'))
 
 
 def refuse_legacy_consumer_imports(raw, *, name, package_sources):
     """Check the fixed consumer's explicit, pinned package import graph.
 
-    This is a conservative source contract, not a Python sandbox. It stops at
-    U3-A's two reviewed v2 boundaries (which themselves use a pure v1 runtime
-    validator); external libraries and the caller's bootstrap are out of this
-    graph. Dynamic loading/evaluation refuses instead of guessing its target.
+    This is lint, enforced by review and digest pins, not a Python sandbox.
+    Dynamic constructs and star imports are linted only in the closed C/D-owned
+    list. Static v1 imports refuse throughout the graph. U3-A boundary imports
+    refuse rather than exposing their normally imported bootstrap attributes.
     Every package dependency and implicit parent initializer below the trusted
     top-level package is read from its declared pin. Nested namespace parents
     are not supported here: an absent or ambiguous initializer refuses.
@@ -80,7 +87,9 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
         module, source = pending.pop()
         if module in _LEGACY_CONSUMER_MODULES:
             raise ValueError('consumer imports forbidden v1 execution authority: ' + module)
-        if module in _TRUSTED_CONSUMER_BOUNDARIES or module in visited:
+        if module in _TRUSTED_CONSUMER_BOUNDARIES:
+            raise ValueError('consumer cannot import verifier bootstrap boundary: ' + module)
+        if module in visited:
             continue
         if len(visited) >= 256:
             raise ValueError('consumer package import graph exceeds its fixed bound')
@@ -103,6 +112,7 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
         if hashlib.sha256(source).hexdigest() != digest:
             raise ValueError('consumer import graph source differs from its pin: ' + module)
         visited[module] = digest
+        owned = module in CONSUMER_OWNED_MODULES
         try:
             tree = ast.parse(source, filename=str(ROOT / relative))
         except (SyntaxError, ValueError) as exc:
@@ -113,7 +123,8 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
-                    aliases[alias.asname or alias.name.split('.')[0]] = alias.name
+                    aliases[alias.asname or alias.name.split('.')[0]] = (
+                        alias.name if alias.asname else alias.name.split('.')[0])
             elif isinstance(node, ast.ImportFrom) and node.level == 0:
                 for alias in node.names:
                     aliases[alias.asname or alias.name] = (node.module or '') + '.' + alias.name
@@ -143,14 +154,24 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
                     dynamic |= import_machinery(node.args[0])
                 elif operation == 'vars' and node.args:
                     dynamic |= import_machinery(node.args[0])
-            if dynamic:
+            if owned and isinstance(node, ast.Attribute):
+                if (qualified(node) in {'sys._getframe', 'inspect.currentframe', 'sys.modules'}
+                        or node.attr == '__signature__' and isinstance(node.ctx, ast.Store)):
+                    raise ValueError('consumer lint forbids introspection or signature assignment: ' + module)
+                if any(qualified(node) == legacy or qualified(node).startswith(legacy + '.')
+                       for legacy in _LEGACY_CONSUMER_MODULES):
+                    raise ValueError('consumer imports forbidden v1 execution authority: ' + module)
+            if owned and isinstance(node, ast.Name) and qualified(node) in {
+                    'sys._getframe', 'inspect.currentframe', 'sys.modules'}:
+                raise ValueError('consumer lint forbids introspection or signature assignment: ' + module)
+            if owned and dynamic:
                 raise ValueError('consumer import graph contains dynamic loading or evaluation: ' + module)
             if isinstance(node, ast.Import):
                 targets.extend(alias.name for alias in node.names)
             elif isinstance(node, ast.ImportFrom):
-                if any(alias.name == '*' for alias in node.names):
+                if owned and any(alias.name == '*' for alias in node.names):
                     raise ValueError('consumer import graph contains an ambiguous star import: ' + module)
-                if any(alias.name in dynamic_names | dynamic_attributes for alias in node.names):
+                if owned and any(alias.name in dynamic_names | dynamic_attributes for alias in node.names):
                     raise ValueError('consumer import graph contains dynamic loading or evaluation: ' + module)
                 imported = node.module or ''
                 if node.level:
@@ -175,7 +196,9 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
             if target.startswith('data_sheets_schema.'):
                 if target in _LEGACY_CONSUMER_MODULES:
                     raise ValueError('consumer imports forbidden v1 execution authority: ' + target)
-                if target not in visited and target not in _TRUSTED_CONSUMER_BOUNDARIES:
+                if target in _TRUSTED_CONSUMER_BOUNDARIES:
+                    raise ValueError('consumer cannot import verifier bootstrap boundary: ' + target)
+                if target not in visited:
                     source_path(target)
                     pending.append((target, None))
     return dict(sorted(visited.items()))
@@ -256,16 +279,26 @@ class _VerifiedBytesLoader(importlib.abc.Loader):
 
 
 class _VerifiedBytesFinder(importlib.abc.MetaPathFinder):
-    def __init__(self, sources):
+    def __init__(self, sources, *, consumer=False):
         self.sources = sources
+        self.consumer = consumer
 
     def find_spec(self, fullname, path=None, target=None):
+        if self.consumer and fullname in _LEGACY_CONSUMER_MODULES:
+            raise ValueError('consumer imports forbidden v1 execution authority: ' + fullname)
+        if self.consumer and fullname in _TRUSTED_CONSUMER_BOUNDARIES:
+            raise ValueError('consumer cannot import verifier bootstrap boundary: ' + fullname)
         source = self.sources.get(fullname)
         if source is None:
+            if self.consumer and fullname.startswith('data_sheets_schema.'):
+                raise ValueError('consumer package import is not pinned: ' + fullname)
             return None
         filename, raw, digest, package = source
         if raw is None:
             raw = _verified_source_bytes(filename, digest)
+        if self.consumer and raw:
+            pins = {str(item[0].relative_to(ROOT)): item[2] for item in self.sources.values()}
+            refuse_legacy_consumer_imports(raw, name=fullname, package_sources=pins)
         loader = _VerifiedBytesLoader(fullname, filename, raw, digest, package=package)
         return importlib.util.spec_from_loader(fullname, loader, origin=str(filename), is_package=package)
 
@@ -293,9 +326,9 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
     The fixed caller supplies the name/path/pin; serialized input cannot choose
     them. Existing bindings are restored, never trusted as executable proof.
     No bytecode is read or written for this module. With package_sources, all
-    inspected package dependencies are also freshly compiled, replacing cached
-    bindings only within this context. Trusted U3-A boundaries and external
-    libraries remain the declared bootstrap residual.
+    package dependencies are freshly compiled, including dynamic imports in
+    reviewed dependencies, replacing cached bindings only within this context.
+    Verifier boundaries refuse; external libraries remain outside this scope.
     """
     _main_thread()
     _source_identity(name, path, raw, sha256)
@@ -314,6 +347,16 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
             else:
                 source = _verified_source_bytes(source_path, digest)
             sources[imported] = (source_path, source, digest, relative.endswith('/__init__.py'))
+        # Cover runtime imports as well as the statically inspected graph. Drop
+        # every pinned cached package binding so no import spelling can reuse
+        # ordinary bytecode. The finder checks each newly reached module.
+        for relative, digest in package_sources.items():
+            if relative.endswith('.py'):
+                parts = Path(relative).relative_to('src').with_suffix('').parts
+                package = parts[-1] == '__init__'
+                imported = '.'.join(parts[:-1] if package else parts)
+                if imported != 'data_sheets_schema' and imported not in sources:
+                    sources[imported] = (ROOT / relative, None, digest, package)
     absent = object()
     previous = {key: sys.modules.get(key, absent) for key in sources}
     parents = {}
@@ -325,7 +368,7 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
     old_bytecode = sys.dont_write_bytecode
     old_path = list(sys.path)
     old_meta = list(sys.meta_path)
-    finder = _VerifiedBytesFinder(sources)
+    finder = _VerifiedBytesFinder(sources, consumer=package_sources is not None)
     try:
         sys.dont_write_bytecode = True
         sys.meta_path.insert(0, finder)

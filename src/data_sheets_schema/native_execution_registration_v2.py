@@ -185,6 +185,7 @@ def _wire(raw):
             or value['registration']['schema_version'] != VERSION):
         raise ValueError('v2 launch requires an exact v2 authority envelope')
     identity = authority.dependency_identity()
+    authority.require_committed(identity)
     with authority.loaded_dependencies(identity) as controls:
         inner = controls['prepare_registration_v2'].require_envelope(value)
     return inner, identity
@@ -326,7 +327,8 @@ def _consumer(dependencies):
 
 def _signature(module, name, positional, keywords):
     function = getattr(module, name, None)
-    if not inspect.isfunction(function) or function.__module__ != module.__name__:
+    if (not inspect.isfunction(function) or function.__module__ != module.__name__
+            or hasattr(function, '__signature__')):
         raise ValueError('v2 execution consumer interface mismatch: ' + name)
     actual = tuple((p.name, p.kind, p.default) for p in
                    inspect.signature(function, follow_wrapped=False).parameters.values())
@@ -461,8 +463,8 @@ def _authorizations(raw, value, *, review_path, ci_path, launch_word_path):
     action_url = re.escape(_ci_repository_url()) + r'/actions/runs/[1-9][0-9]*(?:/job/[1-9][0-9]*)?'
     for row in ci['checks'].values():
         c.exact(row, {'head_sha', 'status', 'conclusion', 'details_url'}, 'v2 CI check')
-        if row['head_sha'] != ci['tested_commit']:
-            raise ValueError('v2 CI check source differs from tested commit')
+        if row['head_sha'] != binding['source_commit']:
+            raise ValueError('v2 CI check source differs from source commit')
         if row['status'] != 'completed':
             raise ValueError('v2 CI check status must be completed')
         if row['conclusion'] != 'success':

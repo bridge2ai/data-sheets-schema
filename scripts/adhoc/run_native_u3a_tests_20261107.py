@@ -47,6 +47,7 @@ def clean_environment(out, interpreter_directory):
         "HOME": str(out / "home"), "TMPDIR": str(out / "tmp"),
         "LANG": "en_US.UTF-8", "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1", "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONPATH": str(ROOT / "src") + ":" + str(ROOT),
         "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1", "PYTEST_ADDOPTS": "",
         "UV_OFFLINE": "1", "PIP_NO_INDEX": "1", "GIT_NO_LAZY_FETCH": "1",
         "GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_SYSTEM": "/dev/null",
@@ -228,6 +229,7 @@ def parent(args):
     started = time.monotonic()
     child = None; owned = None; interrupted = None; paused = False
     forced_cleanup = False
+    next_lock_check = 0.0
     with (out / "pytest.log").open("xb") as log:
         try:
             child = subprocess.Popen(command, cwd=ROOT, env=env, stdout=log,
@@ -238,7 +240,11 @@ def parent(args):
                 if time.monotonic() - started >= DEADLINE:
                     interrupted = "deadline"
                     break
-                requested = LOCK.exists()
+                if time.monotonic() >= next_lock_check:
+                    requested = LOCK.exists()
+                    next_lock_check = time.monotonic() + 60
+                else:
+                    requested = paused
                 if requested and not paused:
                     owned.signal(signal.SIGSTOP); paused = True
                 elif paused and not requested:

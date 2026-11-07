@@ -257,15 +257,15 @@ def test_consumer_graph_refuses_transitive_legacy_import_and_changed_dependency(
     b'getattr(__builtins__, "__import__")("foreign")\n',
 ])
 def test_consumer_graph_refuses_dynamic_loading(tmp_path, monkeypatch, source):
-    name = 'data_sheets_schema.synthetic_consumer'
+    name = 'data_sheets_schema.native_shared_registration'
     pins = graph_fixture(tmp_path, monkeypatch, {name: source})
     with pytest.raises(ValueError, match='dynamic loading or evaluation'):
         authority.refuse_legacy_consumer_imports(source, name=name, package_sources=pins)
 
 
-def test_consumer_graph_accepts_explicit_pinned_helpers_and_stops_at_reviewed_v2_boundary(tmp_path, monkeypatch):
+def test_consumer_graph_accepts_explicit_pinned_helpers(tmp_path, monkeypatch):
     name = 'data_sheets_schema.synthetic_consumer'
-    source = b'import json\nfrom . import synthetic_dependency\nfrom .native_execution_registration_v2 import verified\n'
+    source = b'import json\nfrom . import synthetic_dependency\n'
     dependency = b'def value():\n    return 1\n'
     pins = graph_fixture(tmp_path, monkeypatch, {name: source, 'data_sheets_schema.synthetic_dependency': dependency})
     result = authority.refuse_legacy_consumer_imports(source, name=name, package_sources=pins)
