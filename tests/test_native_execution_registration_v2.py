@@ -395,14 +395,15 @@ def test_same_origin_module_cannot_substitute_for_absent_committed_consumer(prep
     module = ModuleType('data_sheets_schema.native_shared_registration')
     module.__file__ = str(registration.authority.ROOT / relative)
     module.AUTHORITY_VERSION = 2
-    module.verified_v2_body = lambda *a, **k: pytest.fail('uncommitted consumer called')
+    module.rebuild_v2_body = lambda *a, **k: pytest.fail('uncommitted consumer called')
     module.execution_paths_v2 = lambda *a, **k: pytest.fail('uncommitted path consumer called')
     monkeypatch.setitem(sys.modules, module.__name__, module)
     before = _files(inputs['root'])
     with pytest.raises(ValueError, match='requires the committed U3-C/D'):
         # Exercise the actual fixed consumer loader with an absent declaration;
         # the preceding test covers the public verifier's same refusal path.
-        registration._consumer(dependencies)
+        with registration._consumer(dependencies):
+            pytest.fail('absent committed consumer was admitted')
     assert sys.modules[module.__name__] is module
     assert _files(inputs['root']) == before
 

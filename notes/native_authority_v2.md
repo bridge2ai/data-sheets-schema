@@ -273,7 +273,7 @@ remain separate approval work. No protected packet is applied by U3-A.
 ### U3-D integration checkpoint (D95)
 
 The fixed v2 consumer and shared execution modules now reconstruct the full
-execution registration, obtain fresh U3-A admission immediately before the
+execution registration, require fresh U3-A admission immediately before the
 first reservation, and retain the fifteen post-dispatch gates. This checkpoint
 does not establish integrated acceptance. Round 6 merges U3-C and the initial
 U3-B owner-context handoff; B's review repair and genuine admission through the
@@ -546,7 +546,8 @@ its observe/report implementation is the same, without importing the v1
 registration route directly from C's attribution adapter.
 
 Complete recursive consumer-graph compatibility remains an explicit integration
-gate. A scans lazy imports too: frozen `native_shared_render._runtime` imports
+gate. A lints owned modules in full and guards dependency imports when reached:
+the deferred route in frozen `native_shared_render._runtime` imports
 v1 runtime constants, and C's publication helpers reuse frozen execution effect
 primitives. A's later source/CI review repair allows legitimate dynamic loading
 inside reviewed dependencies, including U2, but now refuses both verifier
