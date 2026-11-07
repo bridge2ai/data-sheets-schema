@@ -32,6 +32,10 @@ _SCHEMA_PARSER_SUPPORTED = (
 # explicitly estimated 128 bytes/event allowance. It is neither a serialized
 # size nor a measurement of retained Python-object memory; exact event-count,
 # source-byte and semantic-character limits independently bound retention.
+# Review probe (2026-11-07): 63,484 merged-schema events accounted for
+# 11,926,094 bytes but retained 53,403,073 traced bytes (4.48x). At the
+# 262,144-event ceiling, similar objects would occupy about 220 MB, not
+# 40 MB. This is an observed extrapolation, not a universal RSS bound.
 MAX_ENTRIES = 4
 MAX_EVENTS_PER_ENTRY = 131_072
 MAX_TOTAL_EVENTS = 262_144
@@ -154,7 +158,7 @@ def _token(limit):
                 or _SCHEMA_PARSER.__code__ is not _SCHEMA_PARSER_CODE):
             return None
         return (marker, limit, omissions.MAX_SCHEMA_EVENT_CHARS, omissions.MAX_DEPTH, omissions.MAX_NODES,
-                omissions.MAX_SCHEMA_EVENTS, MAX_PAYLOAD_BYTES,
+                omissions.MAX_SCHEMA_EVENTS,
                 MAX_ENTRIES, MAX_EVENTS_PER_ENTRY, MAX_TOTAL_EVENTS,
                 MAX_EVENT_CHARS, MAX_PAYLOAD_BYTES, MAX_INPUT_BYTES)
     except (TypeError, ValueError, AttributeError, RecursionError):
@@ -276,6 +280,8 @@ def load_native(text, *, limit):
                 name = type(event).__name__
                 if name not in _EVENT_FIELDS or type(event) is not getattr(yaml.events, name):
                     break
+                if set(vars(event)) != set(_EVENT_FIELDS[name]) | {'start_mark', 'end_mark'}:
+                    break
                 if isinstance(event, (yaml.MappingStartEvent, yaml.SequenceStartEvent)):
                     depth += 1
                 elif isinstance(event, (yaml.MappingEndEvent, yaml.SequenceEndEvent)):
@@ -291,7 +297,7 @@ def load_native(text, *, limit):
                 payload_bytes += 128 + sum(len(value.encode('utf-8')) for value in strings if isinstance(value, str))
                 if (len(records) >= min(MAX_EVENTS_PER_ENTRY, omissions.MAX_SCHEMA_EVENTS)
                         or chars > min(MAX_EVENT_CHARS, omissions.MAX_SCHEMA_EVENT_CHARS)
-                        or payload_bytes > min(MAX_PAYLOAD_BYTES, MAX_PAYLOAD_BYTES)):
+                        or payload_bytes > MAX_PAYLOAD_BYTES):
                     break
                 records.append((name, _mark(event.start_mark, buffer, checked_buffer),
                                 _mark(event.end_mark, buffer, checked_buffer), fields))

@@ -32,7 +32,7 @@ def test_supported_bindings():
 def test_optional_libyaml_import_preserves_m8_fallback(tmp_path):
     root = Path(__file__).resolve().parents[1]
     output = tmp_path / 'optional-libyaml.json'
-    result = subprocess.run([sys.executable, str(root / 'scripts/adhoc/native_u3b_no_libyaml_probe.py'),
+    result = subprocess.run([sys.executable, str(root / 'tests/utils/native_u3b_no_libyaml_probe.py'),
         '--source', str(root), '--output', str(output)], capture_output=True, text=True, timeout=60)
     assert result.returncode == 0, result.stderr
     observed = json.loads(output.read_bytes())
@@ -43,7 +43,7 @@ def test_optional_libyaml_import_preserves_m8_fallback(tmp_path):
 
 
 def test_lazy_initialization_and_within_state_refusal_parity():
-    script = Path(__file__).resolve().parents[1] / 'scripts/adhoc/native_u3b_lazy_probe.py'
+    script = Path(__file__).resolve().parents[1] / 'tests/utils/native_u3b_lazy_probe.py'
     result = subprocess.run([sys.executable, str(script)], capture_output=True, text=True, timeout=60)
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)['within_state_parity'] is True
@@ -51,6 +51,31 @@ def test_lazy_initialization_and_within_state_refusal_parity():
 
 @pytest.fixture
 def captured(declaration):
+    path = Path(declaration['inputs']['full_schema']['root'])
+    raw = b'''id: https://example.org/full
+name: full
+prefixes: {ex: 'https://example.org/', xsd: 'http://www.w3.org/2001/XMLSchema#'}
+imports: [linkml:types]
+enums:
+  Status:
+    permissible_values: {active: {}, archived: {}}
+slots:
+  name: {range: string, description: 'Display name'}
+  status: {range: Status}
+classes:
+  Dataset:
+    slots: [name, status]
+    attributes:
+      contributors: {range: Person, multivalued: true}
+  Person:
+    slots: [name]
+'''
+    path.write_bytes(raw)
+    from data_sheets_schema.schema_snapshot import capture_schema
+    snapshot = capture_schema(path, strict=True)
+    declaration['inputs']['full_schema']['sources'] = [
+        {'name': str(name), **pin(p, data)} for name, p, data in snapshot.sources]
+    save(declaration)
     selected = selection.capture(declaration['registration_path'])
     return selected, receipts.schema_snapshot(selected)
 
@@ -59,7 +84,9 @@ def test_catalog_cold_warm_private_objects(captured):
     selected, snapshot = captured
     context = receipts._ReceiptCatalogContext()
     first = context.schema_data(selected, snapshot)
-    assert first[0] == ()  # Empty root bases do not inherit ambient defaults.
+    assert ('https://example.org/', 'ex') in first[0]
+    assert set(first[1]['classes']) >= {'Dataset', 'Person'}
+    assert first[1]['classes']['Dataset'] != first[1]['classes']['Person']
     assert context._entry_marker is catalog.runtime_token() is not None
     stored = context._entry
     second = context.schema_data(selected, snapshot)
@@ -69,7 +96,7 @@ def test_catalog_cold_warm_private_objects(captured):
     assert context.schema_data(selected, snapshot) == first
 
 
-@pytest.mark.parametrize('mutation', ['parser', 'parser_code', 'loader', 'events', 'characters'])
+@pytest.mark.parametrize('mutation', ['parser', 'parser_code', 'loader', 'loader_class', 'events', 'characters'])
 def test_target_parser_guard_refuses_warm_catalog(captured, monkeypatch, mutation):
     selected, snapshot = captured
     context = receipts._ReceiptCatalogContext()
@@ -83,13 +110,127 @@ def test_target_parser_guard_refuses_warm_catalog(captured, monkeypatch, mutatio
         monkeypatch.setattr(om._schema_yaml, '__code__', refuse.__code__)
     elif mutation == 'loader':
         monkeypatch.setattr(om._SchemaEventLoader, 'get_event', refuse)
+    elif mutation == 'loader_class':
+        class RefusingLoader(om._SchemaEventLoader):
+            get_event = refuse
+        monkeypatch.setattr(om, '_SchemaEventLoader', RefusingLoader)
     else:
         monkeypatch.setattr(om, 'MAX_SCHEMA_EVENTS' if mutation == 'events' else 'MAX_SCHEMA_EVENT_CHARS', 0)
     assert catalog.runtime_token() is None
     assert context._typed_catalog(selected, snapshot.sources[0][1], snapshot) is None
-    if mutation in ('parser', 'parser_code', 'loader'):
-        with pytest.raises(ValueError):
-            context.schema_data(selected, snapshot)
+    def original():
+        bases, value = om._schema_with_root_bases(snapshot.sources[0][1], schema_snapshot=snapshot)
+        return bases, json.loads(om._json(value))
+    if mutation in ('parser', 'parser_code', 'loader', 'loader_class'):
+        expected = error_signature(original)
+        assert 'current schema-event refusal' in str(expected)
+        assert error_signature(lambda: context.schema_data(selected, snapshot)) == expected
+    else:
+        expected = original()
+        calls = []
+        constructor = om._schema_with_root_bases
+        def counted(*args, **kwargs):
+            calls.append(1)
+            return constructor(*args, **kwargs)
+        monkeypatch.setattr(om, '_schema_with_root_bases', counted)
+        assert context.schema_data(selected, snapshot) == expected
+        assert calls == [1]
+
+
+def error_signature(call):
+    with pytest.raises(Exception) as caught:
+        call()
+    chain = []
+    exc = caught.value
+    while exc is not None:
+        chain.append((type(exc), str(exc)))
+        exc = exc.__cause__
+    return chain
+
+
+def test_empty_root_bases_ignore_imported_prefixes(declaration):
+    from data_sheets_schema.schema_snapshot import capture_schema
+    path = Path(declaration['inputs']['full_schema']['root'])
+    imported = path.with_name('imported.yaml')
+    imported.write_text('''id: https://example.org/imported
+name: imported
+prefixes: {ambient: 'https://ambient.example/'}
+classes:
+  Person:
+    attributes:
+      friend: {range: Person}
+''')
+    path.write_text('''id: https://example.org/full
+name: full
+prefixes: {}
+imports: [imported]
+classes:
+  Dataset:
+    attributes:
+      creator: {range: Person}
+''')
+    snapshot = capture_schema(path, strict=True)
+    declaration['inputs']['full_schema']['sources'] = [
+        {'name': str(name), **pin(p, raw)} for name, p, raw in snapshot.sources]
+    save(declaration)
+    selected = selection.capture(declaration['registration_path'])
+    snapshot = receipts.schema_snapshot(selected)
+    assert len(snapshot.sources) > 1
+    context = receipts._ReceiptCatalogContext()
+    bases, value = context.schema_data(selected, snapshot)
+    assert bases == ()
+    assert set(value['classes']) >= {'Dataset', 'Person'}
+    assert context.schema_data(selected, snapshot) == (bases, value)
+
+
+def test_merged_schema_owner_cold_warm_bytes(declaration, monkeypatch):
+    from data_sheets_schema import api_runner
+    from data_sheets_schema.schema_snapshot import capture_schema
+    path = Path(__file__).resolve().parents[1] / 'src/data_sheets_schema/schema/data_sheets_schema_all.yaml'
+    monkeypatch.setattr(api_runner, 'FULL_SCHEMA_PATH', path)
+    snapshot = capture_schema(path, strict=True)
+    declaration['inputs']['full_schema']['root'] = str(path)
+    declaration['inputs']['full_schema']['sources'] = [
+        {'name': str(name), **pin(p, raw)} for name, p, raw in snapshot.sources]
+    save(declaration)
+    selected = selection.capture(declaration['registration_path'])
+    snapshot = receipts.schema_snapshot(selected)
+    expected = om._json(om._schema(path, schema_snapshot=snapshot, logical_paths=True))
+    context = receipts._ReceiptCatalogContext()
+    cold = context.schema_data(selected, snapshot)
+    entry = context._entry
+    warm = context.schema_data(selected, snapshot)
+    assert context._entry is entry and context._entry_marker is not None
+    assert cold[0] == warm[0] and len(cold[0]) > 1
+    assert om._json(cold[1]) == om._json(warm[1]) == expected
+
+
+def test_metamodel_callback_override_disables_warm_reuse(captured, monkeypatch):
+    selected, snapshot = captured
+    context = receipts._ReceiptCatalogContext()
+    context.schema_data(selected, snapshot)
+    monkeypatch.setattr(init.meta.SlotDefinition, 'MissingRequiredField',
+                        lambda *args: None, raising=False)
+    with pytest.raises(TypeError, match='metamodel callback ownership'):
+        init.phase()
+    assert catalog.runtime_token() is None
+    assert context._typed_catalog(selected, snapshot.sources[0][1], snapshot) is None
+    assert context._entry is None
+
+
+def test_event_fields_match_live_pyyaml_and_unknown_field_falls_back(monkeypatch):
+    raw = b'%TAG !e! tag:example.org,2000:\n---\nfield_guard: &a [one, two]\nagain: *a\n...\n'
+    seen = set()
+    for event in yaml.parse(raw.decode(), Loader=yaml.SafeLoader):
+        seen.add(type(event).__name__)
+        assert set(vars(event)) == set(events._EVENT_FIELDS[type(event).__name__]) | {'start_mark', 'end_mark'}
+    assert seen == set(events._EVENT_FIELDS)
+    # Alter the retained schema rather than the parser binding so capture itself
+    # must reject the mismatch and use the original fresh constructor.
+    monkeypatch.setitem(events._EVENT_FIELDS, 'ScalarEvent', ('anchor', 'tag', 'implicit', 'value'))
+    value, candidate = events.load_native(raw.decode(), limit=om.MAX_INPUT_BYTES)
+    assert value == om._mapping(raw, 'schema', _schema_events=True)
+    assert candidate is None
 
 
 def test_catalog_identity_and_size_bounds(captured, monkeypatch):
@@ -242,6 +383,8 @@ def test_exact_event_budget_and_overflow(monkeypatch):
         with monkeypatch.context() as patch:
             patch.setattr(events, name, exact)
             assert om._mapping(raw, 'schema', _native_events=True) == expected
+            key = raw, events._token(om.MAX_INPUT_BYTES)
+            assert key in events._CACHE
             before = events.counters()['stored']
             patch.setattr(events, name, exact - 1)
             assert om._mapping(raw, 'schema', _native_events=True) == expected
@@ -252,31 +395,98 @@ def test_exact_event_budget_and_overflow(monkeypatch):
     assert counts['entries'] <= 4 and counts['events'] <= 262144 and counts['payload_bytes'] <= 40000000
 
 
-def test_native_typed_capture_and_receipt_reconstruction_smoke(supplied):
+@pytest.mark.parametrize('raw', [
+    b'%TAG !e! tag:example.com,2000:\n---\na: &x [1, 2.5, true, null, 2001-12-14]\nb: *x\nc: !!str 3\nd: !!binary aGk=\n...\n',
+    b'a: \xff\xfe\n',
+    b'a: ' + b'[' * 70 + b']' * 70 + b'\n',
+    b'a: &x 1\nb: &x 2\nc: ' + b'[' * 70 + b']' * 70 + b'\n',
+    b'a: &x 1\nb: &x 2\n', b'a:\n  b: 1\n  b: 2\n',
+    b'base: &b {x: 1}\nderived:\n  <<: *b\n  y: 2\n',
+    b'a: 1\n---\nb: 2\n', b'a: 1\n---\nb: [\n', b'a: \x07\n',
+    ('a: [' + ','.join(['1'] * 200_001) + ']\n').encode(),
+], ids=['tags-anchors', 'utf8', 'depth', 'depth-precedence', 'duplicate-anchor', 'nested-key',
+        'merge-key', 'documents', 'second-parse', 'nonprintable', 'nodes'])
+def test_review_probe_ordinary_event_native_refusal_parity(raw):
+    ordinary = error_signature(lambda: om._mapping(raw, 'schema'))
+    assert error_signature(lambda: om._mapping(raw, 'schema', _schema_events=True)) == ordinary
+    before = events.counters()['stored']
+    for _ in range(2):
+        assert error_signature(lambda: om._mapping(raw, 'schema', _native_events=True)) == ordinary
+    assert events.counters()['stored'] == before
+
+
+def test_review_probe_bom_and_input_size_parity():
+    raw = b'\xef\xbb\xbfa: 1\n'
+    expected = om._mapping(raw, 'schema')
+    assert expected == {'a': 1}
+    for options in ({'_schema_events': True}, {'_native_events': True}, {'_native_events': True}):
+        assert om._mapping(raw, 'schema', **options) == expected
+    ordinary = error_signature(lambda: om._mapping(raw, 'schema', limit=len(raw) - 1))
+    for options in ({'_schema_events': True}, {'_native_events': True}):
+        assert error_signature(lambda: om._mapping(raw, 'schema', limit=len(raw) - 1, **options)) == ordinary
+
+
+def test_native_typed_capture_and_receipt_reconstruction_smoke(supplied, declaration, tmp_path):
     # One synthetic receipt -> typed record reconstruction, owner-thread CPU.
     # This is functional smoke only; no speedup or timing acceptance assertion.
-    snapshot = typed._snapshot(typed._snapshot_rows(typed._capture(supplied['schema_path'])))
+    path = Path(declaration['inputs']['full_schema']['root'])
+    raw = b'''id: https://example.org/full
+name: full
+prefixes: {linkml: 'https://w3id.org/linkml/'}
+imports: [linkml:types]
+default_range: string
+classes:
+  Dataset:
+    attributes:
+      name: {}
+      description: {}
+      issued: {range: date}
+'''
+    path.write_bytes(raw)
+    from data_sheets_schema.schema_snapshot import capture_schema
+    snapshot = capture_schema(path, strict=True)
+    declaration['inputs']['full_schema']['sources'] = [
+        {'name': str(name), **pin(p, data)} for name, p, data in snapshot.sources]
+    save(declaration)
+    selected = selection.capture(declaration['registration_path'])
+    snapshot = receipts.schema_snapshot(selected)
+    context = receipts._ReceiptCatalogContext()
+    lookup = catalog._CatalogLookup(context, selected)
+    supplied = {**supplied, 'schema_path': path}
     assets = tuple((name, om._asset(name)) for name in om.ASSET_SHA256)
-    cache = typed.DerivationCache()
+    cache = context.derivations()
+    options = {'captured_assets': assets, 'derivations': cache, '_catalog_lookup': lookup}
+    def native_roundtrip(packet):
+        from data_sheets_schema import audit_batches as batches
+        workers, omission, delta, _ = replies(packet, 2)
+        saved = {key: typed.capture_response(typed.worker_request(packet, key, **options), response)
+                 for key, response in workers.items()}
+        raw_omission = batches.canonical_bytes(omission)
+        index = typed.index(packet, saved, raw_omission, **options)
+        return typed.assemble(packet, saved, raw_omission,
+            typed.capture_response(index, batches.canonical_bytes(delta)), **options)
     started = time.thread_time()
-    packet = typed.prepare(**supplied, schema_snapshot=snapshot, captured_assets=assets, derivations=cache)
-    assembled = roundtrip(packet, cache)
-    checked = typed.check(assembled, captured_assets=assets, derivations=cache)
+    context.schema_data(selected, snapshot)
+    assert context._typed_catalog(selected, path, snapshot) is not None
+    packet = typed._prepare(**supplied, schema_snapshot=snapshot, **options)
+    assembled = native_roundtrip(packet)
+    checked = typed.check(assembled, **options)
     cold = time.thread_time() - started
     started = time.thread_time()
-    again = typed.prepare(**supplied, schema_snapshot=snapshot, captured_assets=assets, derivations=cache)
-    repeated = roundtrip(again, cache)
-    assert typed.check(repeated, captured_assets=assets, derivations=cache) == checked
+    context.schema_data(selected, snapshot)
+    again = typed._prepare(**supplied, schema_snapshot=snapshot, **options)
+    repeated = native_roundtrip(again)
+    assert typed.check(repeated, **options) == checked
     warm = time.thread_time() - started
     assert packet == again
     assert assembled == repeated
-    out = Path(__file__).resolve().parents[2] / 'scratch-native-u3b/cpu-smoke.json'
+    out = tmp_path / 'cpu-smoke.json'
     artifact = out.with_name('cpu-smoke-assembly.json')
     artifact.write_bytes(typed._json(assembled))
     assert artifact.stat().st_size
     assert typed.check(json.loads(artifact.read_bytes()), captured_assets=assets,
                        derivations=typed.DerivationCache())['passed']
-    out.write_text(json.dumps({'scope': 'synthetic typed receipt-to-record preparation and reconstruction smoke; not timing evidence',
+    out.write_text(json.dumps({'scope': 'owner-context synthetic typed receipt-to-record preparation and reconstruction smoke; not timing evidence',
                                'cold_owner_thread_cpu_s': cold, 'warm_owner_thread_cpu_s': warm,
                                'independent_reconstruction_passed': True}, indent=2) + '\n')
 
