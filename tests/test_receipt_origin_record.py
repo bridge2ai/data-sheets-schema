@@ -55,6 +55,22 @@ def _receipts_block(origin, receipt):
 
 
 # ---------------------------------------------------------------- the block
+def test_native_final_assessment_does_not_relabel_original_receipt_history(tmp_path):
+    r, transcript = _three_origins(tmp_path)
+    original = ror.for_record(None, r.receipt, r.full, transcripts=[transcript])
+    assessment = {'checked': True, 'native_receipt_stage': 'final',
+        'native_receipt_inputs': {'original_sha256': _sha(r.receipt),
+                                  'effective_sha256': _sha(r.receipt)}}
+    before = deepcopy(assessment)
+    result = ror.for_assessment(assessment, original, r.receipt, r.full)
+    assert result['status'] == 'unknown'
+    assert 'origin' not in result
+    assert result['original_receipt_origin'] == original
+    assert result['native_receipt_inputs'] == assessment['native_receipt_inputs']
+    assert assessment == before
+    assert ror.for_assessment({'checked': True}, original, r.receipt, r.full) == original
+
+
 def test_each_origin_is_recorded_with_the_instrument_and_its_non_checks(tmp_path):
     r, transcript = _three_origins(tmp_path)
     block = ror.for_record(None, r.receipt, r.full, transcripts=[transcript], recorded_by="d4d receipts check")
