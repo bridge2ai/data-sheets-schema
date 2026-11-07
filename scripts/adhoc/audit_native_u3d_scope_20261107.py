@@ -21,6 +21,9 @@ ADAPTERS = {'derive_core.py', 'receipt_completion_policy.py', 'receipts.py',
     'backfill_checks.py', 'cli/derive.py', 'cli/prompt.py', 'cli/provenance.py',
     'cli/receipts.py', 'native_receipt_origin.py', 'receipt_origin_record.py',
     'schema/d4d_generation_record.yaml'}
+FROZEN = ('src/data_sheets_schema/shared_generation.py',
+    'src/data_sheets_schema/api_runner.py', 'src/download/prompts/canonical_hashes.yaml',
+    'tests/utils/run_spec_boundary_contracts.json')
 ENV = {'PATH': '/usr/bin:/bin', 'GIT_NO_LAZY_FETCH': '1',
        'GIT_CONFIG_GLOBAL': '/dev/null', 'GIT_CONFIG_SYSTEM': '/dev/null'}
 
@@ -62,10 +65,17 @@ def main():
                 ast.parse(raw, filename=name)
     if not {prefix + p for p in NEW} <= set(changed):
         raise RuntimeError('required new modules absent')
+    frozen = {}
+    for name in FROZEN:
+        raw = (ROOT / name).read_bytes()
+        if raw != git('show', BASE + ':' + name):
+            raise RuntimeError('protected/packet-only implementation target changed: ' + name)
+        frozen[name] = sha(raw)
     result = {'base': BASE, 'head': git('rev-parse', 'HEAD').decode().strip(),
         'phase': 'pre-B source scope; not integrated acceptance', 'changed': changed,
         'unchanged_source_files': len(actual) - len(changed),
         'provenance_py_unchanged': prefix + 'provenance.py' not in changed,
+        'frozen_implementation_targets_sha256': frozen,
         'ignored_source_files_included': True,
         'notes': 'Allowed source roster only. Frozen v1/U2 and protected source bytes unchanged.'}
     with args.out.open('x') as stream:

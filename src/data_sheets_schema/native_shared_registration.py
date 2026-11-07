@@ -208,6 +208,21 @@ def registration(composition_path, system_path, **kwargs):
     return value
 
 
+def _require_integrated_gate_implementation():
+    """An offline proposal is not admission to an incomplete installed chain.
+
+    Load only the fixed package implementation, without constructing a run,
+    reading authority inputs or executing any runtime/probe. U3-A has already
+    bound the complete committed package before calling this consumer.
+    """
+    try:
+        from .native_shared_execution import _engine_bindings
+        contract, _ = _engine_bindings()
+        contract.require_fixed()
+    except (ImportError, AttributeError) as exc:
+        raise ValueError('native shared execution gate implementation is incomplete') from exc
+
+
 def verified_v2_body(body_raw, *, preparation_raw):
     """Rebuild the entire v2 body; called by U3-A without recursive admission."""
     value = c.strict_json(body_raw, 'native shared v2 execution body', c.HARD_LIMITS['request_bytes'])
@@ -220,6 +235,7 @@ def verified_v2_body(body_raw, *, preparation_raw):
             or value.get('preparation_raw_json') != preparation_raw.decode('utf-8')
             or value.get('preparation_sha256') != c.sha(preparation_raw)):
         raise ValueError('v2 consumer preparation binding differs')
+    _require_integrated_gate_implementation()
     origin_version = 0
     if 'receipt_origin_reporting' in value:
         from .native_receipt_origin import version

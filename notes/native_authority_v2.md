@@ -204,6 +204,51 @@ registrations on the final reviewed integrated commit. Preserve historical
 source environments and records; U1/U3 land together and the protected packets
 remain separate approval work. No protected packet is applied by U3-A.
 
+### U3-D integration checkpoint (D95)
+
+The fixed v2 consumer and shared execution modules now reconstruct the full
+execution registration, obtain fresh U3-A admission immediately before the
+first reservation, and retain the fifteen post-dispatch gates. This checkpoint
+does not establish integrated acceptance: U3-B's committed owner-context
+handoff and the completed U3-C merge remain required. No native executable is
+authorized by this engineering checkpoint.
+
+Saved readback revalidates the consumed review, CI and owner artifacts and
+their original path/byte identities. It independently replays completed
+subscription event streams. A failed attempt's buffered transcript can extend
+beyond callbacks actually delivered, so its saved observer count and stop
+remain explicitly unverified rather than being certified by that suffix.
+
+Native shared-v1 intentionally retains its pinned native receipt-v1 policy
+and receipt instrument 4 under D91. The ordinary/API receipt-v5 path remains
+unchanged; authority version 2 does not upgrade the native receipt instrument.
+
+One inherited contract conflict remains: the native prompt prescribes an
+initial `receipts check --strict`, while its assessment explicitly retains a
+pending floor until completion. U3-D refuses strict success for that state,
+including when the threshold itself is registered. A separate initial
+structural-check mode requires a prompt/phase contract amendment beyond the
+listed U3-D adapters. The current checkpoint must not be presented as a
+successful end-to-end native route.
+
+Offline review ledger (issue publication deferred by the no-GitHub rule):
+
+- U3D-R1: completed saved subscription counts/stops were trusted. Recompute
+  them from all ordered captured events; disclose failed-prefix uncertainty.
+- U3D-R2: saved readback did not revalidate consumed v2 review/CI/owner bytes
+  or bind started/final authority maps. Revalidate both and captured roles.
+- U3D-R3: a new transformation test incorrectly expected an arbitrary selected
+  schema to be supported by the fixed transformation specification. Preserve
+  that refusal; separately test supported default-schema receipt opt-in.
+- U3D-R4: Write success text accepted a conflicting path suffix. Require exact
+  success text/path agreement and test rehashed contradictory observations.
+- U3D-R5: the initial strict-check exemption accepted a pending floor. Remove
+  the exemption and retain the contract amendment as an unmet integration gate.
+- U3D-R6: the offline E proposal could verify before its complete fixed gate
+  implementation could import. Keep proposal construction available, but
+  refuse outer verification/admission until that implementation loads and its
+  fixed gate roster checks. Missing U3-B remains a refusal, not admission.
+
 ### U3-A offline review ledger
 
 Issue publication is deferred by the offline instruction. Preserve these

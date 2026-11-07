@@ -143,3 +143,20 @@ def test_outer_route_refuses_bare_and_v1_envelopes(execution):
                 {**envelope, 'authority_version': True}):
         with pytest.raises(ValueError):
             registration.verified(c.canonical(bad))
+
+
+def test_outer_verifier_refuses_missing_fixed_gate_implementation_before_effects(execution, monkeypatch):
+    import builtins
+    args, selected, _ = execution
+    raw = c.canonical(registration.registration(**args))
+    original = builtins.__import__
+    def missing_gate(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == 'native_shared_execution' and level == 1:
+            raise ImportError('deliberately unavailable fixed gate implementation')
+        return original(name, globals, locals, fromlist, level)
+    monkeypatch.setattr(builtins, '__import__', missing_gate)
+    with pytest.raises(ValueError, match='gate implementation is incomplete'):
+        registration.verified(raw)
+    assert not args['attempt_directory'].exists()
+    assert not args['evidence_directory'].exists()
+    assert not Path(c.parse_selection(selected['selection_raw_json'].encode())['stage_root']).exists()
