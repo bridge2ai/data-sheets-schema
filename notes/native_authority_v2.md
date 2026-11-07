@@ -206,3 +206,7 @@ findings for the later issue/review workflow:
   an absent future C/D source file. The fixed consumer must be present in the
   committed package map and its actual regular-file bytes must match that pin
   before import/interface use.
+- U3A-R3 (fixed, found by preparation canary): the producer emitted a carrier
+  pin including `role`, while its verifier required the three-field file-pin
+  contract. Preparation and the runtime reread now use the same exact
+  path/bytes/SHA-256 representation. The failed canary is retained.

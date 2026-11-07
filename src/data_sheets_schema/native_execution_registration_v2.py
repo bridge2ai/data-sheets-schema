@@ -44,6 +44,10 @@ def _read(path, label, maximum=MAX_WIRE_BYTES):
     return read_regular(str(path), label, max_bytes=maximum).captured
 
 
+def _file_pin(artifact):
+    return {'path': artifact.pin.path, 'bytes': artifact.pin.bytes, 'sha256': artifact.pin.sha256}
+
+
 def _job_id(value):
     if type(value) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', value) is None:
         raise ValueError('job_id must be an explicit bounded single path component')
@@ -124,7 +128,7 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks)
     pins[runtime['executable']['path']] = runtime['executable']['sha256']
     body = {'kind': PREPARATION_KIND, 'schema_version': VERSION, 'execution': PREPARATION_SCOPE,
         'job_id': job_id, 'working_directory': str(authority.ROOT), 'dependencies': dependencies,
-        'selection': c.pin_dict(captured.registration.pin), 'runtime': c.pin_dict(runtime_capture.pin),
+        'selection': _file_pin(captured.registration), 'runtime': _file_pin(runtime_capture),
         'run_date': run_date, 'max_draft_checks': max_draft_checks, 'render_spec': spec.render_spec(),
         'input_identity': spec.input_identity(), 'instruction': instruction,
         'instruction_sha256': c.sha(instruction.encode('utf-8')),
@@ -209,7 +213,7 @@ def verified(raw):
             raise ValueError('execution differs from its prepared v2 source identity')
         runtime_capture = _read(preparation['runtime']['path'], 'runtime_declaration',
                                 c.HARD_LIMITS['input_bytes'])
-        if c.pin_dict(runtime_capture.pin) != preparation['runtime']:
+        if _file_pin(runtime_capture) != preparation['runtime']:
             raise ValueError('v2 prepared runtime changed before execution binding')
         runtime = c.strict_json(runtime_capture.raw)
         if (body['runtime'] != runtime
