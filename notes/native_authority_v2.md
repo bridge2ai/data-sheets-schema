@@ -478,10 +478,12 @@ its observe/report implementation is the same, without importing the v1
 registration route directly from C's attribution adapter.
 
 Complete recursive consumer-graph compatibility remains an explicit integration
-gate. A scans lazy imports too: frozen `native_shared_render._runtime` imports
-v1 runtime constants, and C's publication helpers reuse frozen execution effect
-primitives. A's later source/CI review repair allows legitimate dynamic loading
-inside reviewed dependencies, including U2, but now refuses both verifier
+gate. A fully lints C/D-owned bodies; dependency traversal checks import-time
+code and verifies later imports when reached. Frozen `native_shared_render._runtime`
+still reaches a forbidden v1 runtime import when called inside a consumer scope,
+and C's publication helpers reuse frozen execution effect primitives. A's later
+source/CI review repair allows legitimate dynamic loading inside reviewed
+dependencies, including U2, but refuses both verifier
 bootstrap boundaries throughout a consumer graph. C's ordinary controller,
 capture and control-projection entry points still call those boundaries; they
 cannot be placed inside D's pure consumer closure. `native_shared_controls` is
@@ -520,6 +522,12 @@ Round-2 findings retained for the later issue workflow:
   removal at most once per minute. Synthetic tests cover acquisition, held-lock
   polling, release/reacquisition and slow filesystem observations. No generation
   or execution authority changes are part of this runner repair.
+- U3C-R2-9: the intermediate A census rejected shared utilities because their
+  deferred function bodies define v1 routes. Retain the failed integration test;
+  merge A's completed round-three repair, which permits definitions while
+  guarding reached imports and displacing cached unpinned modules. C/D-owned
+  source remains fully linted, and execution admission is still closed. The
+  report identifies the red snapshot and the subsequent validation separately.
 
 The report records actual test results and remaining gates. No declaration here
 authorizes dispatch, changes the shared-v1/native26 procedure, or substitutes for
