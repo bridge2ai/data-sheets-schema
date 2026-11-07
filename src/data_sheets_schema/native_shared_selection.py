@@ -263,7 +263,13 @@ def _schema_metadata(schemas):
 
 
 def _cached_schemas(doc, artifacts):
+    from . import native_catalog_initialization as initialization
+    try:
+        phase = initialization.phase()
+    except (TypeError, ValueError, AttributeError):
+        return _schemas(doc, artifacts)
     key = _schema_cache_key(doc, artifacts)
+    key = (key[0] + b'\ninitialization:' + str(phase).encode('ascii'), key[1])
     metadata = _SCHEMA_DERIVATIONS.get(key)
     if metadata is None:
         # Derive outside the lock. Concurrent misses may safely repeat work.
@@ -271,6 +277,11 @@ def _cached_schemas(doc, artifacts):
     result = _declared_schemas(doc, artifacts)
     if _schema_metadata(result) != metadata:
         raise ValueError('schema derivation metadata differs from the current captured carriers')
+    try:
+        if initialization.phase() != phase:
+            return _schemas(doc, artifacts)
+    except (TypeError, ValueError, AttributeError):
+        return _schemas(doc, artifacts)
     _SCHEMA_DERIVATIONS.put(key, metadata)
     return result
 

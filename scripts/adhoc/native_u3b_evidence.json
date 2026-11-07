@@ -1,0 +1,898 @@
+{
+  "base": "f101652f53f23d9be83a213b6d5850bd6e9341fc",
+  "render_control": "cf50d9a1c059f3b5030103378ccef33619475dde",
+  "protected_unchanged": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/data_sheets_schema/shared_generation.py",
+      "bytes": 57877,
+      "sha256": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/download/prompts/canonical_hashes.yaml",
+      "bytes": 37510,
+      "sha256": "39b93c009457681a1d8d8b8afee5a869bbd6f5e70b6f4332522db5d7e22d0584"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/tests/utils/run_spec_boundaries.py",
+      "bytes": 19334,
+      "sha256": "a379e93a0065dc927835b1417cabcb926e33eeb333416c768237bc50d2dc6237"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/tests/utils/run_spec_boundary_contracts.json",
+      "bytes": 32986,
+      "sha256": "a7f96a253a37e994f0c62c7d9b2ab21b0a94d4f342975f84103cd274ef11af72"
+    }
+  ],
+  "collection_baseline_comparison": {
+    "runs": {
+      "collect-final": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/collect-final.log",
+        "bytes": 3400834,
+        "sha256": "6dd22bebc9afb4d2a1a334a53c94abeb4a6d27c9163cf47c73ba017b562b0385",
+        "error_modules": [
+          "tests/test_fairscape_integration/test_canonical_routes.py",
+          "tests/test_fairscape_integration/test_forward_typed_projections.py",
+          "tests/test_fairscape_integration/test_nested_dataset_readback.py"
+        ],
+        "import_errors": [
+          "No module named 'fairscape_models.rocrate'",
+          "No module named 'fairscape_models.rocrate'",
+          "No module named 'fairscape_models.rocrate'"
+        ],
+        "collected_nodes": 22849
+      },
+      "collect-base": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/collect-base.log",
+        "bytes": 3397071,
+        "sha256": "df2fd139f29b1e64465227b031d5e1a85ed066b2b1d1c61cf02bbb97dbd60e22",
+        "error_modules": [
+          "tests/test_fairscape_integration/test_canonical_routes.py",
+          "tests/test_fairscape_integration/test_forward_typed_projections.py",
+          "tests/test_fairscape_integration/test_nested_dataset_readback.py"
+        ],
+        "import_errors": [
+          "No module named 'fairscape_models.rocrate'",
+          "No module named 'fairscape_models.rocrate'",
+          "No module named 'fairscape_models.rocrate'"
+        ],
+        "collected_nodes": 22807
+      }
+    },
+    "added_nodes": [
+      "tests/test_native_u3b_reuse.py::test_api_and_native_derivations_share_one_budget",
+      "tests/test_native_u3b_reuse.py::test_catalog_cold_warm_private_objects",
+      "tests/test_native_u3b_reuse.py::test_catalog_identity_and_size_bounds",
+      "tests/test_native_u3b_reuse.py::test_exact_event_budget_and_overflow",
+      "tests/test_native_u3b_reuse.py::test_fresh_catalog_content_participates_in_native_derivation_identity",
+      "tests/test_native_u3b_reuse.py::test_fresh_mapping_and_constructor_on_event_hit",
+      "tests/test_native_u3b_reuse.py::test_initialization_transition_and_callback_semantics",
+      "tests/test_native_u3b_reuse.py::test_lazy_initialization_and_within_state_refusal_parity",
+      "tests/test_native_u3b_reuse.py::test_marker_change_during_hit_decoding_forces_fresh",
+      "tests/test_native_u3b_reuse.py::test_native_typed_capture_and_receipt_reconstruction_smoke",
+      "tests/test_native_u3b_reuse.py::test_optional_libyaml_import_preserves_m8_fallback",
+      "tests/test_native_u3b_reuse.py::test_owner_association_reuses_catalog_through_real_typed_prepare",
+      "tests/test_native_u3b_reuse.py::test_refusal_parity_no_retention[- x\\n]",
+      "tests/test_native_u3b_reuse.py::test_refusal_parity_no_retention[[]",
+      "tests/test_native_u3b_reuse.py::test_refusal_parity_no_retention[a: !!python/object:unknown {}\\n]",
+      "tests/test_native_u3b_reuse.py::test_refusal_parity_no_retention[a: *absent\\n]",
+      "tests/test_native_u3b_reuse.py::test_refusal_parity_no_retention[a: .nan\\n]",
+      "tests/test_native_u3b_reuse.py::test_refusal_parity_no_retention[a: 1\\na: 2\\n]",
+      "tests/test_native_u3b_reuse.py::test_supported_bindings",
+      "tests/test_native_u3b_reuse.py::test_target_parser_guard_refuses_warm_catalog[characters]",
+      "tests/test_native_u3b_reuse.py::test_target_parser_guard_refuses_warm_catalog[events]",
+      "tests/test_native_u3b_reuse.py::test_target_parser_guard_refuses_warm_catalog[loader]",
+      "tests/test_native_u3b_reuse.py::test_target_parser_guard_refuses_warm_catalog[parser]",
+      "tests/test_native_u3b_reuse.py::test_target_parser_guard_refuses_warm_catalog[parser_code]",
+      "tests/test_native_u3b_reuse.py::test_unknown_initialization_is_never_learned[callback_code]",
+      "tests/test_native_u3b_reuse.py::test_unknown_initialization_is_never_learned[callback_defaults]",
+      "tests/test_native_u3b_reuse.py::test_unknown_initialization_is_never_learned[callback_global]",
+      "tests/test_native_u3b_reuse.py::test_unknown_initialization_is_never_learned[mark_alias]",
+      "tests/test_native_u3b_reuse.py::test_unknown_initialization_is_never_learned[module_identity]",
+      "tests/test_native_u3b_reuse.py::test_unknown_state_rebuilds_every_time",
+      "tests/test_native_u3b_reuse.py::test_unknown_typed_lookup_cannot_revive_old_entry",
+      "tests/test_typed_audit_captured_assets.py::test_capture_refuses_inexact_roster_even_after_cache_hit[bytearray]",
+      "tests/test_typed_audit_captured_assets.py::test_capture_refuses_inexact_roster_even_after_cache_hit[duplicate]",
+      "tests/test_typed_audit_captured_assets.py::test_capture_refuses_inexact_roster_even_after_cache_hit[list]",
+      "tests/test_typed_audit_captured_assets.py::test_capture_refuses_inexact_roster_even_after_cache_hit[missing]",
+      "tests/test_typed_audit_captured_assets.py::test_capture_refuses_inexact_roster_even_after_cache_hit[mutated]",
+      "tests/test_typed_audit_captured_assets.py::test_capture_refuses_inexact_roster_even_after_cache_hit[unknown]",
+      "tests/test_typed_audit_captured_assets.py::test_captured_roundtrip_is_byte_identical_without_live_assets",
+      "tests/test_typed_audit_captured_assets.py::test_changed_saved_response_is_rechecked_with_captured_assets",
+      "tests/test_typed_audit_captured_assets.py::test_logical_replay_never_falls_back_and_separates_cache_identity",
+      "tests/test_typed_audit_captured_assets.py::test_unassociated_native_mode_revalidates_and_separates_api_cache[False]",
+      "tests/test_typed_audit_captured_assets.py::test_unassociated_native_mode_revalidates_and_separates_api_cache[True]"
+    ],
+    "all_collection_errors_reproduced_on_base": true
+  },
+  "optional_libyaml_import_probes": {
+    "m8_control": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/no-libyaml-m8-corrected.json",
+      "bytes": 434,
+      "sha256": "3269cad05affba690bd92ab85e0aecf8dcd1f7fe5cf67903d8ac73a7531ddf54",
+      "result": {
+        "source": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/m8",
+        "source_sha256": "25b9b110878b643a9bcb56f94f2a4123d51896e0559313958f45f1c35fb0336d",
+        "import_error": null,
+        "module_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/m8/src/data_sheets_schema/cache_dependencies.py",
+        "default_binding_ready": false,
+        "blocked_extension_imports": 1
+      }
+    },
+    "candidate_before_correction": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/no-libyaml-before.json",
+      "bytes": 359,
+      "sha256": "9fcdb02a97f3c9be12ff6c4dc4230b3164185fad00f041636a0a163429527e01",
+      "result": {
+        "source": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+        "source_sha256": "6177656b072619aca2d2ca63158c527871456a9c475fb059e7c1ac5b52bc20ea",
+        "import_error": "ImportError: simulated unavailable optional LibYAML extension",
+        "module_path": null,
+        "default_binding_ready": null,
+        "blocked_extension_imports": 1
+      }
+    },
+    "candidate_after_correction": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/no-libyaml-after.json",
+      "bytes": 424,
+      "sha256": "3893ba7b2264695c63ac0c7cd4a47fb7910852236593a507165f3e208bd50a75",
+      "result": {
+        "source": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+        "source_sha256": "d0f3afcd857a7bc7e28dafeedd96fb7388e9ae2de85298818e542f64d78fe3c6",
+        "import_error": null,
+        "module_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/data_sheets_schema/cache_dependencies.py",
+        "default_binding_ready": false,
+        "blocked_extension_imports": 1
+      }
+    }
+  },
+  "scanner_and_runner_unchanged_from_base": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/data_sheets_schema/api_runner.py",
+      "bytes": 491062,
+      "sha256": "db9a0f67ba7ace06bc8b39f90a00a3fe98ee72a34e553be6d48f97bff5e6d848"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/.claude/skills/d4d-generation-specificity-audit/scan.py",
+      "bytes": 891554,
+      "sha256": "cb1dd50be9763f44937af8ca9512a6096e65ac0f99de3174f3a8ed7df10b9370"
+    }
+  ],
+  "existing_api_shared_bc1_tests_unchanged": [
+    "tests/test_api_batch_cost.py",
+    "tests/test_api_dollar_readout.py",
+    "tests/test_api_header_instructions.py",
+    "tests/test_api_latch_guard.py",
+    "tests/test_api_launcher.py",
+    "tests/test_api_playbook_context.py",
+    "tests/test_audit_omissions.py",
+    "tests/test_bc1_api_rendering.py",
+    "tests/test_bc1_audit.py",
+    "tests/test_bc1_catalog_fixture.py",
+    "tests/test_bc1_codec.py",
+    "tests/test_bc1_context.py",
+    "tests/test_bc1_derivation_cache.py",
+    "tests/test_bc1_g2_integration.py",
+    "tests/test_bc1_g2_journal.py",
+    "tests/test_bc1_g2_round2.py",
+    "tests/test_bc1_generality.py",
+    "tests/test_bc1_pipeline.py",
+    "tests/test_bc1_planline_cli.py",
+    "tests/test_bc1_registration.py",
+    "tests/test_bc1_resources.py",
+    "tests/test_bc1_runtime.py",
+    "tests/test_bc1_selection.py",
+    "tests/test_bc1_specificity.py",
+    "tests/test_download/test_api_runner.py",
+    "tests/test_renderer_contract_captures.py",
+    "tests/test_shared_generation_assets.py",
+    "tests/test_shared_generation_batch_authority.py",
+    "tests/test_shared_generation_capture.py",
+    "tests/test_shared_generation_cli.py",
+    "tests/test_shared_generation_completed_replay.py",
+    "tests/test_shared_generation_condition_compatibility.py",
+    "tests/test_shared_generation_provenance.py",
+    "tests/test_shared_generation_resources.py",
+    "tests/test_shared_generation_runtime.py",
+    "tests/test_shared_generation_scope_context.py",
+    "tests/test_shared_generation_selection.py",
+    "tests/test_source_heading_authority.py",
+    "tests/test_source_heading_completed.py",
+    "tests/test_source_heading_output_layout.py",
+    "tests/test_source_heading_routing.py",
+    "tests/test_source_heading_runtime.py",
+    "tests/test_source_heading_runtime_api.py",
+    "tests/test_typed_audit.py",
+    "tests/test_typed_audit_derivations.py",
+    "tests/test_typed_audit_figure.py",
+    "tests/test_typed_audit_omission_wire.py",
+    "tests/test_typed_audit_report.py",
+    "tests/test_wave7_bc1_d63_calibration.py",
+    "tests/test_wave7_bc1_formatter_cache.py"
+  ],
+  "bc1_baseline_comparison": {
+    "base": "f101652f53f23d9be83a213b6d5850bd6e9341fc",
+    "candidate_nodes_attempted": 273,
+    "initial_nodes": 126,
+    "continuation_nodes": 147,
+    "all_failures_reproduced_on_base": true,
+    "failures": [
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[carry]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[client]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[selected]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[settings]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[spec]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[usage]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_duplicated_dispatch_refuses",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_integrated_dispatch_derives_and_cites_its_actual_line[guard_prefix]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_integrated_dispatch_derives_and_cites_its_actual_line[integrated]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    from .foreign import other as _bc1\\n-dispatch.*changed|dispatch name.*_bc1.*rebound]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    from .foreign import other as spec\\n-dispatch name.*spec.*rebound]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    if spec:\\n        return None\\n-prefix If]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    local = None\\n-prefix Assign]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    refuse_legacy_execution((local := spec))\\n-prefix.*NamedExpr]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      },
+      {
+        "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    return None\\n-prefix Return]",
+        "phase": "setup",
+        "message": "E   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+      }
+    ]
+  },
+  "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+  "dependencies": {
+    "PyYAML": "6.0.2",
+    "linkml": "1.9.3",
+    "linkml-runtime": "1.9.4",
+    "jsonasobj2": "1.0.4",
+    "pytest": "7.4.4",
+    "pytest-xdist": "3.8.0"
+  },
+  "source_files": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/data_sheets_schema/audit_omissions.py",
+      "bytes": 30535,
+      "sha256": "5d15617b39bd45e320c7daf7aa03bcb2e1b5d7e394d0a181760f0dbb2bff4d65"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/data_sheets_schema/cache_dependencies.py",
+      "bytes": 18184,
+      "sha256": "d0f3afcd857a7bc7e28dafeedd96fb7388e9ae2de85298818e542f64d78fe3c6"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/data_sheets_schema/schema_snapshot.py",
+      "bytes": 9652,
+      "sha256": "98c135752c77164dc91a5086c423cc2a1161c3d8511a31122333e8870aa4bec4"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/data_sheets_schema/typed_audit.py",
+      "bytes": 45055,
+      "sha256": "2a34e92938817aaeba26c997702aaa0e5f4ef4443a25dccea66ec2f2937226bf"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/data_sheets_schema/native_shared_selection.py",
+      "bytes": 24324,
+      "sha256": "a98ce046c7ba19e797bf2456e1f916477fccd147a60e8223bfe5ca602426eb3c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/data_sheets_schema/native_catalog_reuse.py",
+      "bytes": 21981,
+      "sha256": "24486e41c27e267b6357dab2577e13bc6230b9ac28c7694e28bc4d5e1d7f1d83"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/data_sheets_schema/native_catalog_initialization.py",
+      "bytes": 7161,
+      "sha256": "abdae3066b8afe60def92d6a420576408efa455ba602ac41673a840b26321a49"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/data_sheets_schema/native_schema_event_reuse.py",
+      "bytes": 16230,
+      "sha256": "5bfbb0ab1c8c4b138140dbc75e1fcdbe08fd2060f2d1e8c622ff5cf2957df10e"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b/src/data_sheets_schema/native_shared_receipts.py",
+      "bytes": 9013,
+      "sha256": "ece396c2df502b707998a01cfee4802b4a3d60f4e8d52247adfabe76f94e2bc6"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/api-portable.log",
+      "bytes": 2935,
+      "sha256": "387e34c07bbb7203e69a05e3bd5508d874323587b1e6d8bc41834ba0d32808da",
+      "summary": [
+        "1 passed, 14 warnings in 1557.73s (0:25:57)"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 1558.282,
+      "incremental_outcomes": {
+        "passed": 1
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/api-routing.log",
+      "bytes": 2945,
+      "sha256": "af59b6e253a38d9c9b5f94ca88ea2ddb35a4f62da375e6fd39052a6b17433a37",
+      "summary": [
+        "17 passed, 26 warnings in 1513.06s (0:25:13)"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 1513.643,
+      "incremental_outcomes": {
+        "passed": 17
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/api-short.log",
+      "bytes": 3846,
+      "sha256": "c7e8b9725bdfad00fd3456d7506da25da7fa6398d94fa23b4cd2ef765384f3be",
+      "summary": [
+        "504 passed, 26 warnings in 2114.35s (0:35:14)"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 2114.903,
+      "incremental_outcomes": {
+        "passed": 504
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/api.log",
+      "bytes": 614,
+      "sha256": "1f1c5278610b2d254c75a6b62383aa5945c4aa78b5844a1882b9c8cc2ad49e88",
+      "summary": [],
+      "exit": null,
+      "elapsed_seconds": null,
+      "incremental_outcomes": {},
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/bc1-base-canary.log",
+      "bytes": 4591,
+      "sha256": "13ae34d36f071110a81b9449e183b2fed16fc305b1cff9ce6339e0ad2f577e2f",
+      "summary": [
+        "1 error in 15.43s"
+      ],
+      "exit": 1,
+      "elapsed_seconds": 17.446,
+      "incremental_outcomes": {
+        "failed": 1
+      },
+      "failed_nodes": [
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[selected]"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/bc1-base-failures.log",
+      "bytes": 49377,
+      "sha256": "d35a5ba1fea69d26b477e9565f130d2df60230b66edda6ee98660aaca574a26c",
+      "summary": [
+        "15 errors in 22.73s"
+      ],
+      "exit": 1,
+      "elapsed_seconds": 24.121,
+      "incremental_outcomes": {
+        "failed": 15
+      },
+      "failed_nodes": [
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[carry]",
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[selected]",
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[client]",
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[settings]",
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[spec]",
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[usage]",
+        "tests/test_bc1_g2_round2.py::test_duplicated_dispatch_refuses",
+        "tests/test_bc1_g2_round2.py::test_integrated_dispatch_derives_and_cites_its_actual_line[guard_prefix]",
+        "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    from .foreign import other as _bc1\\n-dispatch.*changed|dispatch name.*_bc1.*rebound]",
+        "tests/test_bc1_g2_round2.py::test_integrated_dispatch_derives_and_cites_its_actual_line[integrated]",
+        "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    from .foreign import other as spec\\n-dispatch name.*spec.*rebound]",
+        "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    if spec:\\n        return None\\n-prefix If]",
+        "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    local = None\\n-prefix Assign]",
+        "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    refuse_legacy_execution((local := spec))\\n-prefix.*NamedExpr]",
+        "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    return None\\n-prefix Return]"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/bc1-final.log",
+      "bytes": 43252,
+      "sha256": "d0e3c3260e1117f6cebf2228819089f1c15eb5c3b566762de3551d525b5e8d15",
+      "summary": [
+        "133 passed, 1 xfailed, 2 warnings, 13 errors in 326.26s (0:05:26)"
+      ],
+      "exit": 1,
+      "elapsed_seconds": 326.851,
+      "incremental_outcomes": {
+        "failed": 13,
+        "passed": 133,
+        "skipped": 1
+      },
+      "failed_nodes": [
+        "tests/test_bc1_g2_round2.py::test_integrated_dispatch_derives_and_cites_its_actual_line[guard_prefix]",
+        "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    local = None\\n-prefix Assign]",
+        "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    return None\\n-prefix Return]",
+        "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    refuse_legacy_execution((local := spec))\\n-prefix.*NamedExpr]",
+        "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    if spec:\\n        return None\\n-prefix If]",
+        "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    from .foreign import other as spec\\n-dispatch name.*spec.*rebound]",
+        "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    from .foreign import other as _bc1\\n-dispatch.*changed|dispatch name.*_bc1.*rebound]",
+        "tests/test_bc1_g2_round2.py::test_duplicated_dispatch_refuses",
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[spec]",
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[carry]",
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[client]",
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[settings]",
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[usage]"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/bc1-pending-collect.log",
+      "bytes": 21149,
+      "sha256": "41150b101d3b5b5afe0686520323e7627800e974473fa1abc7eecc2c1957e0bb",
+      "summary": [
+        "147/273 tests collected (126 deselected) in 3.42s"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 4.547,
+      "incremental_outcomes": {},
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/bc1.log",
+      "bytes": 9887,
+      "sha256": "20d31ed159c1f22ca439b6b94b6595f1c6cd92cfd1b0223ce0ec6da980fcf5f8",
+      "summary": [
+        "124 passed, 14 warnings, 2 errors in 754.80s (0:12:34)"
+      ],
+      "exit": 2,
+      "elapsed_seconds": 755.705,
+      "incremental_outcomes": {
+        "passed": 124,
+        "failed": 2
+      },
+      "failed_nodes": [
+        "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[selected]",
+        "tests/test_bc1_g2_round2.py::test_integrated_dispatch_derives_and_cites_its_actual_line[integrated]"
+      ]
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/bindings-canary.log",
+      "bytes": 880,
+      "sha256": "58330e9d4af0c08c80dd0dbab06ec5b51441849c752e98aeadf49dff738bf398",
+      "summary": [
+        "1 passed, 2 warnings in 2.22s"
+      ],
+      "exit": null,
+      "elapsed_seconds": null,
+      "incremental_outcomes": {},
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/cache-consumers-final.log",
+      "bytes": 2466,
+      "sha256": "99ccaaad1ee60fb623b385477f646806b59ab05643eef8a682d3ef104759ab62",
+      "summary": [
+        "170 passed, 2 warnings in 76.90s (0:01:16)"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 77.683,
+      "incremental_outcomes": {
+        "passed": 170
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/canary-fixed.log",
+      "bytes": 880,
+      "sha256": "43c44947d10eb030fffa5cd4ab62079b89d40debff3e8f587a17e43c037c5cf9",
+      "summary": [
+        "1 passed, 2 warnings in 3.21s"
+      ],
+      "exit": null,
+      "elapsed_seconds": null,
+      "incremental_outcomes": {},
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/canary.log",
+      "bytes": 5662,
+      "sha256": "d78d70c1dd043662344d1e6ddbb5bbd9ea533b4fad9362999a60e4d5669c6947",
+      "summary": [
+        "1 failed, 2 warnings in 2.25s"
+      ],
+      "exit": null,
+      "elapsed_seconds": null,
+      "incremental_outcomes": {},
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/collect-base.log",
+      "bytes": 3397071,
+      "sha256": "df2fd139f29b1e64465227b031d5e1a85ed066b2b1d1c61cf02bbb97dbd60e22",
+      "summary": [
+        "22808 tests collected, 3 errors in 37.49s"
+      ],
+      "exit": 2,
+      "elapsed_seconds": 39.901,
+      "incremental_outcomes": {},
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/collect-final.log",
+      "bytes": 3400834,
+      "sha256": "6dd22bebc9afb4d2a1a334a53c94abeb4a6d27c9163cf47c73ba017b562b0385",
+      "summary": [
+        "22850 tests collected, 3 errors in 42.46s"
+      ],
+      "exit": 2,
+      "elapsed_seconds": 45.448,
+      "incremental_outcomes": {},
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/final-canary.log",
+      "bytes": 2095,
+      "sha256": "b509ae4c7e1c5a184cc6d9a86b424c640a976f9c8be007c344bd7450825389e2",
+      "summary": [
+        "1 passed, 2 warnings in 2.41s"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 3.0,
+      "incremental_outcomes": {
+        "passed": 1
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/focused.log",
+      "bytes": 2117,
+      "sha256": "c5bf51f640c1a181fa696958ed478c5f57d56bc1993d940f5673b8b969d2c452",
+      "summary": [
+        "1 failed, 180 passed, 2 warnings in 49.28s"
+      ],
+      "exit": null,
+      "elapsed_seconds": null,
+      "incremental_outcomes": {},
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/m8-render-canary.log",
+      "bytes": 2148,
+      "sha256": "a613a28a303c7238766e8687d93d5bcb6f04be2460242917eed3b3379855a73f",
+      "summary": [
+        "1 passed, 2 warnings in 10.98s"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 12.141,
+      "incremental_outcomes": {
+        "passed": 1
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/native-final.log",
+      "bytes": 2124,
+      "sha256": "1e9b425522468158e66f4b4c0f5a9b996ee4520cbebc744f708175bc28b1eb39",
+      "summary": [
+        "41 passed, 2 warnings in 8.23s"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 8.742,
+      "incremental_outcomes": {
+        "passed": 41
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/optional-libyaml-canary.log",
+      "bytes": 2128,
+      "sha256": "6c8b409b30d29828bf782e60918bda82b6a2aaad0ab0729cb385cabfec0a39af",
+      "summary": [
+        "2 passed, 2 warnings in 4.74s"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 5.645,
+      "incremental_outcomes": {
+        "passed": 2
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/owner-canary.log",
+      "bytes": 2144,
+      "sha256": "8400a563f8678dbbcf53ce50cde2b112ae206d66a24527d3d53d93f4c50e187a",
+      "summary": [
+        "1 passed, 2 warnings in 3.40s"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 4.165,
+      "incremental_outcomes": {
+        "passed": 1
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/parity-m8.log",
+      "bytes": 2126,
+      "sha256": "ef0fca4b142a947e75f2bd1e6b45bfaf081e31f159083854c621fd4c4e99f361",
+      "summary": [
+        "14 passed, 2 warnings in 41.44s"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 42.554,
+      "incremental_outcomes": {
+        "passed": 14
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/parity-u3b.log",
+      "bytes": 2116,
+      "sha256": "5c13cd6240da1ef0a5f6412582ee519ade823e39e0f32e3addb208370d4a7c94",
+      "summary": [
+        "14 passed, 2 warnings in 40.61s"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 41.639,
+      "incremental_outcomes": {
+        "passed": 14
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/schema-final.log",
+      "bytes": 3018,
+      "sha256": "9659dfc0ca3338b519f1c0d8204fd20220e9d9243ecb3203444b6a34dce23319",
+      "summary": [
+        "221 passed, 11 skipped, 2 warnings in 43.87s"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 44.527,
+      "incremental_outcomes": {
+        "passed": 221,
+        "skipped": 11
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/schema.log",
+      "bytes": 3000,
+      "sha256": "1a8e9d93dc33e49e8f8f6bfd1e5bbc782893ed8b00d6ae2ac00a665e81194077",
+      "summary": [
+        "218 passed, 11 skipped, 2 warnings in 31.36s"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 31.857,
+      "incremental_outcomes": {
+        "passed": 218,
+        "skipped": 11
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/shared.log",
+      "bytes": 4359,
+      "sha256": "a694a30278a7328f502c06d1a86209fbaab5c36b8575ec9f51c78b6265c97ad1",
+      "summary": [
+        "677 passed, 26 warnings in 1726.16s (0:28:46)"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 1726.718,
+      "incremental_outcomes": {
+        "passed": 677
+      },
+      "failed_nodes": []
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/u3b-render-canary.log",
+      "bytes": 2138,
+      "sha256": "4f3bda1a7c4aa79c68e368193225d8f9402a85ca63776bdb066ead0f1596b4e7",
+      "summary": [
+        "1 passed, 2 warnings in 12.01s"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 13.323,
+      "incremental_outcomes": {
+        "passed": 1
+      },
+      "failed_nodes": []
+    }
+  ],
+  "api_render_parity": [
+    {
+      "condition": "bc1",
+      "m8_sha256": "c62ed6f8ae405793bd475a6985ae29086dd58d96394544c53d592dbb3c484473",
+      "u3b_sha256": "c62ed6f8ae405793bd475a6985ae29086dd58d96394544c53d592dbb3c484473",
+      "m8_bytes": 88514,
+      "u3b_bytes": 88514,
+      "equal": true
+    },
+    {
+      "condition": "captured_json_values_v1",
+      "m8_sha256": "734f1f98b33804ac70d83f7371a2e4d400f92b5fae76a6c94c6f69e0595502e8",
+      "u3b_sha256": "734f1f98b33804ac70d83f7371a2e4d400f92b5fae76a6c94c6f69e0595502e8",
+      "m8_bytes": 87042,
+      "u3b_bytes": 87042,
+      "equal": true
+    },
+    {
+      "condition": "declared_heading_spans_v1",
+      "m8_sha256": "9e0b53f140924957069eb20112bed9f01e4fa87d1adf985069e067a92e5f201e",
+      "u3b_sha256": "9e0b53f140924957069eb20112bed9f01e4fa87d1adf985069e067a92e5f201e",
+      "m8_bytes": 87039,
+      "u3b_bytes": 87039,
+      "equal": true
+    },
+    {
+      "condition": "generic",
+      "m8_sha256": "a8d2bc2ecbc0f0dbeb23e1ba921c8b0cc048fd2675a3033261994ec8c3b145fc",
+      "u3b_sha256": "a8d2bc2ecbc0f0dbeb23e1ba921c8b0cc048fd2675a3033261994ec8c3b145fc",
+      "m8_bytes": 7029,
+      "u3b_bytes": 7029,
+      "equal": true
+    },
+    {
+      "condition": "generic_v10",
+      "m8_sha256": "dfe188aba2818de0eea5a8ec1dca01f571d81a3819e12d0bbf453f50a5e8a7bb",
+      "u3b_sha256": "dfe188aba2818de0eea5a8ec1dca01f571d81a3819e12d0bbf453f50a5e8a7bb",
+      "m8_bytes": 86850,
+      "u3b_bytes": 86850,
+      "equal": true
+    },
+    {
+      "condition": "generic_v2",
+      "m8_sha256": "d53300883d4a7ad8b7ea8f3684217fd1160bdc418d0f40454617154fa3445826",
+      "u3b_sha256": "d53300883d4a7ad8b7ea8f3684217fd1160bdc418d0f40454617154fa3445826",
+      "m8_bytes": 7904,
+      "u3b_bytes": 7904,
+      "equal": true
+    },
+    {
+      "condition": "generic_v3",
+      "m8_sha256": "0f4ee2c0a506b245de9c056b4cc7616244c73a039a9b7d468c7b7546ab725747",
+      "u3b_sha256": "0f4ee2c0a506b245de9c056b4cc7616244c73a039a9b7d468c7b7546ab725747",
+      "m8_bytes": 8387,
+      "u3b_bytes": 8387,
+      "equal": true
+    },
+    {
+      "condition": "generic_v4",
+      "m8_sha256": "1bc0910eb8303e954dbc33d4f1fc49fa9fb18d9006fd54ae3d8b9789f78f67f9",
+      "u3b_sha256": "1bc0910eb8303e954dbc33d4f1fc49fa9fb18d9006fd54ae3d8b9789f78f67f9",
+      "m8_bytes": 8743,
+      "u3b_bytes": 8743,
+      "equal": true
+    },
+    {
+      "condition": "generic_v5",
+      "m8_sha256": "8b712613ecade363c2a574755fe883a091adf199ba9439f0c09c69ca9227221e",
+      "u3b_sha256": "8b712613ecade363c2a574755fe883a091adf199ba9439f0c09c69ca9227221e",
+      "m8_bytes": 12404,
+      "u3b_bytes": 12404,
+      "equal": true
+    },
+    {
+      "condition": "generic_v6",
+      "m8_sha256": "d7c089c63a3ccbd65bf0ca7394bcbf6ad20d6806996a0796a6ed17a3236826a1",
+      "u3b_sha256": "d7c089c63a3ccbd65bf0ca7394bcbf6ad20d6806996a0796a6ed17a3236826a1",
+      "m8_bytes": 12891,
+      "u3b_bytes": 12891,
+      "equal": true
+    },
+    {
+      "condition": "generic_v7",
+      "m8_sha256": "a8be2f8ba8d38aab612679f5b92f8f41d958a7e1804c370167c39745d3a8f63d",
+      "u3b_sha256": "a8be2f8ba8d38aab612679f5b92f8f41d958a7e1804c370167c39745d3a8f63d",
+      "m8_bytes": 14100,
+      "u3b_bytes": 14100,
+      "equal": true
+    },
+    {
+      "condition": "generic_v8",
+      "m8_sha256": "fffcda2a4ef7f2488b7c8308650a2ef27a195e05ed8bf59c7de15696440c3f38",
+      "u3b_sha256": "fffcda2a4ef7f2488b7c8308650a2ef27a195e05ed8bf59c7de15696440c3f38",
+      "m8_bytes": 17682,
+      "u3b_bytes": 17682,
+      "equal": true
+    },
+    {
+      "condition": "generic_v9",
+      "m8_sha256": "48b3864d6b22598a3dc4e1d15e352fb7c775f559119e97e52fb1a1b953a534ab",
+      "u3b_sha256": "48b3864d6b22598a3dc4e1d15e352fb7c775f559119e97e52fb1a1b953a534ab",
+      "m8_bytes": 28333,
+      "u3b_bytes": 28333,
+      "equal": true
+    },
+    {
+      "condition": "tuned",
+      "m8_sha256": "df6f669dee750f519e28461d03cad8f6f8f83a45e7c64dc2c7780f87bf0c8671",
+      "u3b_sha256": "df6f669dee750f519e28461d03cad8f6f8f83a45e7c64dc2c7780f87bf0c8671",
+      "m8_bytes": 7369,
+      "u3b_bytes": 7369,
+      "equal": true
+    }
+  ],
+  "source_origin_artifacts": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/parity-m8/source-origin-gw0.json",
+      "bytes": 1319,
+      "sha256": "95994a346203b720ee4a4d94b835da199b023160bfecf24abfdce235c7e564eb"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/parity-m8/source-origin-gw1.json",
+      "bytes": 1319,
+      "sha256": "95994a346203b720ee4a4d94b835da199b023160bfecf24abfdce235c7e564eb"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/parity-u3b/source-origin-gw0.json",
+      "bytes": 1294,
+      "sha256": "89a0637ffcf14c690e50ca4d3e79b5ba49df0cd6f0ee18257c2ac0a9a1cac62a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/parity-u3b/source-origin-gw1.json",
+      "bytes": 1294,
+      "sha256": "89a0637ffcf14c690e50ca4d3e79b5ba49df0cd6f0ee18257c2ac0a9a1cac62a"
+    }
+  ],
+  "cpu_smoke": {
+    "scope": "synthetic typed receipt-to-record preparation and reconstruction smoke; not timing evidence",
+    "cold_owner_thread_cpu_s": 0.6951419579999998,
+    "warm_owner_thread_cpu_s": 0.6155908339999998,
+    "independent_reconstruction_passed": true
+  },
+  "cpu_scope": "Synthetic typed receipt preparation, assembly and independent reconstruction; not a native recorder timing trial.",
+  "native_executable_or_provider_calls": false
+}
