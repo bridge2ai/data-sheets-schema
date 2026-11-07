@@ -326,6 +326,20 @@ Offline review ledger (issue publication deferred by the no-GitHub rule):
   preparation/source validation first; frozen v2 production code is unchanged.
 ### Round 2 migration and trust boundary
 
+Round-6 D implements the exact required `rebuild_v2_body` signature, accepts
+only its nine input keywords, checks fresh preparation byte/hash binding, and
+requires explicit `execution_paths_v2.extra_protected`. This is partial
+interface alignment, not admission. The genuine consumer graph still imports
+A's verifier/bootstrap boundary, v1 runtime validators and lifecycle helpers;
+inherited C composition/control paths also reach those boundaries. A3 refuses
+this graph before loading it. No import exemption, dynamic loader, roster
+removal or alternate trusted module path is introduced to admit it. The
+positive execution tests remain integration requirements. D's offline command
+builder also still needs a reviewed pure permission-argument interface: A's
+narrowed control map does not expose `native_command_policy`, and C's current
+pure projection does not expose `permission_arguments`. These boundaries
+must be resolved together before claiming a runnable integrated native route.
+
 The round-1 U3-C/D checkpoints are not consumers of this revised interface.
 Their later integration must supply `rebuild_v2_body` with the exact signature,
 remove the default on `execution_paths_v2.extra_protected`, separate their pure

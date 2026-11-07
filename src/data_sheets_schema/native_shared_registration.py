@@ -233,8 +233,41 @@ def _require_integrated_gate_implementation():
         raise ValueError('native shared execution gate implementation is incomplete') from exc
 
 
+def rebuild_v2_body(*, preparation_raw, composition_path, system_path,
+                    permission_probe_path, attempt_id, attempt_directory,
+                    evidence_directory, max_draft_checks, receipt_origin_version):
+    """Fresh input-only reconstruction for A's exact consumer interface.
+
+    No submitted execution body or derived verdict is accepted. This interface
+    alignment does not remove the current consumer graph's forbidden imports:
+    A's source guard still refuses that graph before loading this implementation.
+    Ordinary proposal reconstruction remains distinct from execution admission.
+    """
+    if (type(preparation_raw) is not bytes or not preparation_raw
+            or len(preparation_raw) > c.HARD_LIMITS['request_bytes']):
+        raise ValueError('v2 consumer preparation requires bounded nonempty bytes')
+    try:
+        preparation_text = preparation_raw.decode('utf-8')
+    except UnicodeDecodeError as exc:
+        raise ValueError('v2 consumer preparation requires UTF-8 bytes') from exc
+    _require_integrated_gate_implementation()
+    expected = _registration_body(composition_path, system_path,
+        permission_probe_path=permission_probe_path, attempt_id=attempt_id,
+        attempt_directory=attempt_directory, evidence_directory=evidence_directory,
+        max_draft_checks=max_draft_checks, receipt_origin_version=receipt_origin_version)
+    if (type(expected) is not dict
+            or expected.get('preparation_raw_json') != preparation_text
+            or expected.get('preparation_sha256') != c.sha(preparation_raw)):
+        raise ValueError('v2 consumer preparation binding differs from fresh reconstruction')
+    return expected
+
+
 def verified_v2_body(body_raw, *, preparation_raw):
-    """Rebuild the entire v2 body; called by U3-A without recursive admission."""
+    """Compare a proposal with fresh reconstruction; not A's consumer entry.
+
+    A calls the separate input-only rebuild_v2_body and owns the outer body
+    comparison. This retained helper does not bypass A's source/import guard.
+    """
     value = c.strict_json(body_raw, 'native shared v2 execution body', c.HARD_LIMITS['request_bytes'])
     if (type(value) is not dict or value.get('kind') != KIND
             or type(value.get('schema_version')) is not int or value['schema_version'] != VERSION
@@ -245,13 +278,14 @@ def verified_v2_body(body_raw, *, preparation_raw):
             or value.get('preparation_raw_json') != preparation_raw.decode('utf-8')
             or value.get('preparation_sha256') != c.sha(preparation_raw)):
         raise ValueError('v2 consumer preparation binding differs')
-    _require_integrated_gate_implementation()
     origin_version = 0
     if 'receipt_origin_reporting' in value:
         from .native_receipt_origin import version
         origin_version = version(value)
     try:
-        expected = _registration_body(value['composition'], value['system_path'], permission_probe_path=value['permission_probe'],
+        expected = rebuild_v2_body(preparation_raw=preparation_raw,
+            composition_path=value['composition'], system_path=value['system_path'],
+            permission_probe_path=value['permission_probe'],
             attempt_id=value['attempt_id'], attempt_directory=value['attempt_directory'],
             evidence_directory=value['evidence_directory'], max_draft_checks=value['max_draft_checks'],
             receipt_origin_version=origin_version)
@@ -267,7 +301,7 @@ def verified(raw):
     return execution_v2.verified(raw)
 
 
-def execution_paths_v2(body, *, fresh, extra_protected=()):
+def execution_paths_v2(body, *, fresh, extra_protected):
     """Recheck physical identities and all unspent native stage reservations."""
     if type(fresh) is not bool:
         raise ValueError('fresh reservation selection must be a boolean')

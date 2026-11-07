@@ -126,14 +126,14 @@ def test_consumer_does_not_cache_permission_acceptance(execution, monkeypatch):
 def test_paths_include_stage_and_refuse_spent_or_overlapping_reservations(execution):
     args, selected, _ = execution
     body = registration.registration(**args)['registration']
-    paths = registration.execution_paths_v2(body, fresh=True)
+    paths = registration.execution_paths_v2(body, fresh=True, extra_protected=())
     stage_root = Path(c.parse_selection(selected['selection_raw_json'].encode())['stage_root'])
     assert stage_root in paths and args['attempt_directory'] in paths
     with pytest.raises(ValueError, match='overlaps'):
         registration.execution_paths_v2(body, fresh=True, extra_protected=[str(stage_root / 'input')])
     args['attempt_directory'].mkdir()
     with pytest.raises(ValueError, match='spent'):
-        registration.execution_paths_v2(body, fresh=True)
+        registration.execution_paths_v2(body, fresh=True, extra_protected=())
 
 
 def test_outer_route_refuses_bare_and_v1_envelopes(execution):
