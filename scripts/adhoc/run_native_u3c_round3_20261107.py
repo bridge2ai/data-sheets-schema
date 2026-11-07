@@ -16,6 +16,31 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 runner.PROFILE += '(deny process-exec (regex #"/(claude|codex|gemini|agy)(/|$)"))\n'
 
+original_make_venv = runner.make_test_venv
+
+
+def nested_dependency_venv(out, dependencies):
+    """Make installed dependencies visible to test-created nested venvs.
+
+    Those fixtures append this site directory without processing its .pth
+    paths. Link dependency entries, excluding startup hooks and project code;
+    never execute dependency editable-install hooks or change the dependency venv.
+    """
+    python = original_make_venv(out, dependencies)
+    site = out / 'venv/lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages'
+    links = {}
+    for item in sorted(dependencies.iterdir()):
+        if (item.name.endswith('.pth') or item.name.startswith('__editable__')
+                or item.name in {'__pycache__', 'sitecustomize.py', 'usercustomize.py', 'data_sheets_schema'}):
+            continue
+        target = site / item.name
+        if target.exists():
+            continue
+        target.symlink_to(item, target_is_directory=item.is_dir())
+        links[item.name] = str(item)
+    runner.save(out / 'dependency-links.json', links)
+    return python
+
 
 class DeadlineClock:
     """Count elapsed suspend time as well as monotonic elapsed time."""
@@ -30,6 +55,9 @@ class DeadlineClock:
 
 
 if __name__ == '__main__':
+    if '--nested-dependencies' in sys.argv:
+        sys.argv.remove('--nested-dependencies')
+        runner.make_test_venv = nested_dependency_venv
     if '--out' not in sys.argv:
         raise SystemExit('--out required')
     output = Path(sys.argv[sys.argv.index('--out') + 1]).absolute()
