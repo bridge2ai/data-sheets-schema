@@ -62,6 +62,29 @@ def test_package_guard_census_admits_shared_and_u2_dependencies(record_property)
         assert outcomes['data_sheets_schema.' + name] == 'accepted'
 
 
+def test_real_shared_and_u2_imports_are_source_loaded_and_restored():
+    pins = deepcopy(authority.dependency_identity()['base']['package_sources'])
+    source = (b'from .api_runner import RunSpec\n'
+              b'from . import native_shared_selection as selection\n'
+              b'from .native_supervisor_authority_v2 import dependency_identity\n')
+    relative = 'src/data_sheets_schema/native_shared_registration.py'
+    assert relative not in pins, 'U3-C/D integration needs its own consumer tests'
+    pins[relative] = pin(source)
+    names = ('api_runner', 'native_shared_selection', 'native_supervisor_authority_v2',
+             'native_attribution_controller_v2', 'native_attribution_registration_v2')
+    previous = {name: sys.modules.get('data_sheets_schema.' + name) for name in names}
+    with authority.verified_source_module(NAME, path=authority.ROOT / relative,
+            raw=source, sha256=pin(source), package_sources=pins) as module:
+        assert module.RunSpec.__module__ == 'data_sheets_schema.api_runner'
+        for name in names:
+            loaded = sys.modules['data_sheets_schema.' + name]
+            assert loaded is not previous[name]
+            assert authority.module_source_identity(loaded)['sha256'] == pins[
+                'src/data_sheets_schema/' + name + '.py']
+    for name, old in previous.items():
+        assert sys.modules.get('data_sheets_schema.' + name) is old
+
+
 @pytest.mark.parametrize('source', [
     b'from .native_execution_registration_v2 import selection\n',
     b'import data_sheets_schema.native_execution_registration_v2 as boundary\n',
