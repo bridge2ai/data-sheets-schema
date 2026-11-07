@@ -68,7 +68,8 @@ def test_real_shared_and_u2_imports_are_source_loaded_and_restored():
               b'from . import native_shared_selection as selection\n'
               b'from .native_supervisor_authority_v2 import dependency_identity\n')
     relative = 'src/data_sheets_schema/native_shared_registration.py'
-    assert relative not in pins, 'U3-C/D integration needs its own consumer tests'
+    # Supply fixture consumer bytes even after C/D integration. This exercises
+    # the source loader, not admission or committed proof for a real consumer.
     pins[relative] = pin(source)
     names = ('api_runner', 'native_shared_selection', 'native_supervisor_authority_v2',
              'native_attribution_controller_v2', 'native_attribution_registration_v2')

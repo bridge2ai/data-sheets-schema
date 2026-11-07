@@ -300,6 +300,10 @@ Round-3 local review ledger (GitHub filing deferred by the offline ruling):
   context now temporarily removes all resident package-module bindings, including
   unpinned names; the finder refuses missing pins. The regression checks both
   refusal and restoration of the preexisting cached module.
+- **R3-B, addressed:** the real-dependency loader fixture initially asserted the
+  C/D consumer was absent, which would break later integration. It now supplies
+  its own fixture consumer bytes regardless of whether C/D has been merged;
+  the test does not claim admission or committed proof for that synthetic root.
 
 Round-2 review records, retained offline for the later issue workflow:
 
