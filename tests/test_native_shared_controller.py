@@ -8,6 +8,7 @@ import sys
 
 import pytest
 
+from data_sheets_schema import api_runner
 from data_sheets_schema import native_attribution_controller as legacy
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_controller as controller
@@ -17,10 +18,41 @@ from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_attribution_controller_v2 as inherited_v2
 from data_sheets_schema import native_shared_policy as policy
 from data_sheets_schema import native_execution_registration_v2 as registration
+from data_sheets_schema.schema_snapshot import capture_schema
 from tests.test_native_execution_registration_v2 import inputs, isolated_modules
 from tests.test_native_shared_render import native_spec
-from tests.test_native_shared_selection import declaration
+from tests.test_native_shared_selection import declaration as synthetic_declaration, pin, save
 from tests.utils.native_execution_carrier_v2 import execution_body
+
+
+@pytest.fixture
+def declaration(synthetic_declaration, monkeypatch):
+    """Use committed schema roots across the real source-loader boundary.
+
+    Other suites keep their small schema fixture. Here the ordinary bootstrap
+    and freshly compiled api_runner must select the same installed schemas;
+    no verified module or its constants are patched.
+    """
+    doc = synthetic_declaration
+    roots = (
+        ('full', 'Dataset', 'FULL_SCHEMA_PATH',
+         'src/data_sheets_schema/schema/data_sheets_schema_all.yaml'),
+        ('core', 'CoreDataset', 'CORE_SCHEMA_PATH',
+         'src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml'),
+    )
+    for kind, root_class, constant, relative in roots:
+        # Undo this local synthetic fixture's tiny-schema bootstrap override.
+        # These strings are the committed api_runner declarations.
+        monkeypatch.setattr(api_runner, constant, relative)
+        schema_path = (authority.ROOT / relative).resolve(strict=True)
+        snapshot = capture_schema(schema_path, strict=True)
+        doc['inputs'][kind + '_schema'] = {
+            'root': str(schema_path), 'root_class': root_class,
+            'sources': [{'name': str(name), **pin(path, raw)}
+                        for name, path, raw in snapshot.sources],
+        }
+    save(doc)
+    return doc
 
 
 @pytest.fixture
@@ -259,7 +291,12 @@ def test_input_only_composition_matches_complete_verified_live_body_without_io(b
             authority.loaded_verified_package_module('data_sheets_schema.native_shared_selection',
                 package_sources=value['dependencies']['base']['package_sources']) as verified_selection, \
             authority.loaded_verified_package_module('data_sheets_schema.native_shared_evidence',
-                package_sources=value['dependencies']['base']['package_sources']) as verified_evidence:
+                package_sources=value['dependencies']['base']['package_sources']) as verified_evidence, \
+            authority.loaded_verified_package_module('data_sheets_schema.agentic_runtime',
+                package_sources=value['dependencies']['base']['package_sources']) as verified_toolchain:
+        # command_policy imports this dependency lazily. Its real verified
+        # source load belongs before the no-I/O interval, just like controller.
+        assert authority.module_source_identity(verified_toolchain)['name'] == 'data_sheets_schema.agentic_runtime'
         # Exact capture classes belong to the same verified package scope as
         # the consumer. Fresh capture must preserve every field and byte.
         scoped_current = verified_selection.capture(preparation['registration']['selection']['path'])

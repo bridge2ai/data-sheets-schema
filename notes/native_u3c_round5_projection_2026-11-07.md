@@ -47,3 +47,9 @@ GitHub issue publication remains deferred by the explicit offline restriction.
   stopped at the inert `_PureControls.__init__(modules)` parameter, before minting.
   Renamed that plain mapping parameter to `projections`; no import, reflective
   operation, consumer check or guard changed. The failed invocation is retained.
+- **C5-R2 — fixture migration.** The focused run passed 44 cases but 17 controller
+  cases stopped at the verified selection producer's actual schema-root check.
+  Their shared synthetic declaration patches only the ordinary API module's
+  full/core paths. A's source-only reload correctly discards those patches. C's
+  composition tests must use the committed full/core schemas, not inject test
+  overrides into verified modules or relax the selection check.
