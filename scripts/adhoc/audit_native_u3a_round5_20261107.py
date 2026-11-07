@@ -61,7 +61,16 @@ def main():
     final = run(SCRATCH / args.final_run)
     assert final['returncode'] == 0
     assert not any(final['counts'][key] for key in ('failures', 'errors', 'skipped'))
-    result = {'head': git('rev-parse', 'HEAD'), 'final': final, 'mutations': []}
+    bytecode = run(SCRATCH / 'bytecode')
+    assert bytecode['returncode'] == 0 and bytecode['counts'] == {
+        'tests': 1, 'failures': 0, 'errors': 0, 'skipped': 0}
+    properties = {node.get('name'): node.get('value') for node in
+                  ET.parse(SCRATCH / 'bytecode/pytest.xml').getroot().iter('property')}
+    assert properties['executed_forged_bytecode'] == 'False'
+    source = 'src/data_sheets_schema/native_execution_authority_v2.py'
+    assert git('rev-parse', final['source_commit'] + ':' + source) == git('rev-parse', 'HEAD:' + source)
+    result = {'head': git('rev-parse', 'HEAD'), 'final': final, 'bytecode': bytecode,
+              'bytecode_properties': properties, 'mutations': []}
     for case in CASES:
         directory = SCRATCH / 'mutations' / case
         value = json.loads((directory / 'result.json').read_bytes())

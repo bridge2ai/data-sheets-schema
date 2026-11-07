@@ -1,5 +1,6 @@
 """U3-A Round 5 review regressions; synthetic carrier, offline, 2026-11-07."""
 import importlib
+from pathlib import Path
 import sys
 
 import pytest
@@ -174,3 +175,37 @@ def test_cheap_lint_gaps_refuse(tmp_path, monkeypatch, statement):
     pins = graph_fixture(tmp_path, monkeypatch, {NAME: raw})
     with pytest.raises(ValueError, match='lint forbids|dynamic loading'):
         authority.refuse_legacy_consumer_imports(raw, name=NAME, package_sources=pins)
+
+
+def test_actual_pinned_helper_ignores_scratch_forged_cache(tmp_path, monkeypatch, record_property):
+    """The real pinned helper is only imported; no native command is invoked."""
+    import importlib._bootstrap_external as bytecode
+    declaration = authority.ADDITIONAL['run_direct_canary_awake']
+    source = authority.ROOT / declaration['path']
+    original = source.read_bytes()
+    assert pin(original) == declaration['sha256']
+    monkeypatch.setattr(sys, 'pycache_prefix', str(tmp_path / 'forged-cache'))
+    cache = Path(importlib.util.cache_from_source(str(source)))
+    assert cache.is_relative_to(tmp_path)
+    cache.parent.mkdir(parents=True)
+    forged = compile(original + b'\nFORGED_R5_CACHE_EXECUTED = True\n', str(source), 'exec')
+    info = source.stat()
+    raw = bytecode._code_to_timestamp_pyc(forged, int(info.st_mtime), info.st_size)
+    cache.write_bytes(raw)
+    identity = authority.dependency_identity()
+    absent = object()
+    names = set(identity['base']['modules']) | set(identity['additional_modules'])
+    previous = {name: sys.modules.get(name, absent) for name in names}
+    old_path, old_meta, old_policy = list(sys.path), list(sys.meta_path), sys.dont_write_bytecode
+    with authority.loaded_dependencies(identity) as controls:
+        assert set(controls) == {'prepare_registration_v2', 'run_direct_canary_awake'}
+        loaded = controls['run_direct_canary_awake']
+        assert not hasattr(loaded, 'FORGED_R5_CACHE_EXECUTED')
+        assert loaded.__cached__ is None
+        assert authority.module_source_identity(loaded)['sha256'] == declaration['sha256']
+    assert all(sys.modules.get(name, absent) is prior for name, prior in previous.items())
+    assert (sys.path, sys.meta_path, sys.dont_write_bytecode) == (old_path, old_meta, old_policy)
+    assert source.read_bytes() == original and cache.read_bytes() == raw
+    record_property('actual_helper_sha256', pin(original))
+    record_property('forged_cache_sha256', pin(raw))
+    record_property('executed_forged_bytecode', False)
