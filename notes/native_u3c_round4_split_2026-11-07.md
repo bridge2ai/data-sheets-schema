@@ -40,7 +40,8 @@ execution admission. The protected U1 hook remains pending.
 
 ## Offline review ledger
 
-- **C4-PROJECTION-LIFETIME — pending ruling.** Real source reload invalidates the
+- **C4-PROJECTION-LIFETIME — pending gate by explicit ruling.** The decision
+  received during validation is to keep A's loader unchanged. Real source reload invalidates the
   original class and private mint ledger. Keep the strict refusal; do not accept
   look-alike mappings, carrier-provided validators or ordinary cached modules.
 - **C4-R1 — reviewed, no new finding.** Independent read-only inspection of the

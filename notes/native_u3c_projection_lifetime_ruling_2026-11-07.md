@@ -1,6 +1,8 @@
 # U3-C R4: projection lifetime requires a narrow A-loader ruling
 
-Status: **proposal only; not approved or implemented**. Date: 2026-11-07.
+Status: **retained proposal; no implementation authorized**. Date: 2026-11-07.
+Decision received during C4 validation: **keep the loader unchanged and report
+the gate pending**. The exception below is not approved or implemented.
 Finding: **C4-PROJECTION-LIFETIME**. Worktree: `codex-native-u3c-r4`, branch
 `codex/native-u3c-interface-20261107`. No production or test changes accompany
 this note. Independent C splitting and the six-function protocol can continue;
