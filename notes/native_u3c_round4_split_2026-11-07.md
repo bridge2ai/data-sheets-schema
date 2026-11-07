@@ -81,6 +81,10 @@ execution admission. The protected U1 hook remains pending.
   deliberately skips that selector for the native route. `api_runner.py`,
   `shared_generation.py` and this test are identical to the requested C4 base.
   Its assertion remains unchanged; this task does not authorize that hook.
+- **C4-R9 — validation attempt retained, not accepted.** The first migration
+  canary passed its test, but an evidence-helper-only edit changed the working
+  tree while it ran. The runner returned 125 on source stability. Production
+  bytes did not change; repeat the canary on the committed frozen helper state.
 
 GitHub issue publication is deferred under the explicit offline/no-GitHub rule.
 Detailed test results, graph census and remaining failures belong in the Round 4
