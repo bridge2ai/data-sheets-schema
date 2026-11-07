@@ -21,7 +21,7 @@ from .native_attempt_supervisor import durable_new, _sync_directory
 
 KIND = c.KINDS['attempt']
 VERSION = 1
-REQUIRED_CHECKS = admission.REQUIRED_CHECKS
+required_checks = admission.required_checks
 UNASSESSED = legacy.UNASSESSED
 _signals, _mkdir_durable = legacy._signals, legacy._mkdir_durable
 _now, _platform = legacy._now, legacy._platform

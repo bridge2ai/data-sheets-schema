@@ -12,6 +12,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tarfile
@@ -137,6 +138,17 @@ def collect():
                      'message': failed.get('message'), 'detail': failed.text}
                     for case in suites.iter('testcase') for failed in case
                     if failed.tag in ('failure', 'error')]
+        cases = []
+        modules = {}
+        for case in suites.iter('testcase'):
+            state = next((child.tag for child in case
+                          if child.tag in ('failure', 'error', 'skipped')), 'passed')
+            module = case.get('classname', '') or case.get('name', '')
+            counts = modules.setdefault(module, {})
+            counts[state] = counts.get(state, 0) + 1
+            cases.append({'node': case.get('classname', '') + '::' + case.get('name', ''),
+                          'state': state, 'seconds': case.get('time')})
+        collected = re.findall(r'(\d+) tests? collected', (directory / 'pytest.log').read_text())
         retained = directory / 'retained'
         for source in sorted((directory / 'cases').rglob('render-digests.json')):
             dest = retained / source.parent.name
@@ -149,6 +161,8 @@ def collect():
         result['runs'][directory.name] = {
             'source_commit': doc['source_commit'], 'returncode': outcome['returncode'],
             'seconds': outcome['seconds'], 'failures': failures,
+            'module_results': modules, 'testcases': cases,
+            'collected_tests': int(collected[-1]) if collected else None,
             'junit': [dict(item.attrib) for item in suites.iter('testsuite')],
             'artifacts': {name: sha(directory / name) for name in (
                 'plan.json', 'outcome.json', 'pytest-command.json', 'pytest.log', 'pytest.xml',

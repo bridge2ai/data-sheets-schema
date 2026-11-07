@@ -79,11 +79,21 @@ def make_case(root, *, fixture='neutral', receipt_origin_version=0):
         'reviewer': 'invented-independent-reviewer', 'author': 'invented-author',
         'independent': True, 'decision': 'approved', 'reviewed_at': 'synthetic-time',
         'evidence': 'Fabricated software test only; no actual review authority.'}
+    # Fabricated offline CI declaration only: no workflow or Actions run was
+    # requested or observed. Manual CI tests the exact source commit without
+    # inventing a PR merge object; separate A3 tests cover real PR Git topology.
+    workflow_event = 'workflow_dispatch'
+    source_commit = binding['source_commit']
+    # The canonical URL is schema-conforming synthetic data, never fetched and
+    # never evidence that run 1 exists or ran these tests.
+    details_url = preparation._ci_repository_url() + '/actions/runs/1'
     ci = {**binding, 'kind': 'd4d_native_execution_ci_v2', 'version': 2,
-        'workflow_event': 'pull_request', 'workflow_sha256': preparation._workflow_sha(binding['source_commit']), 'checks': {
+        'workflow_event': workflow_event, 'workflow_ref': 'refs/heads/synthetic-native-software-test',
+        'tested_commit': source_commit,
+        'workflow_sha256': preparation._workflow_sha(source_commit, source_commit, workflow_event), 'checks': {
         name: {'head_sha': binding['source_commit'], 'status': 'completed', 'conclusion': 'success',
-            'details_url': 'https://github.com/bridge2ai/data-sheets-schema/actions/SYNTHETIC-NOT-A-RUN'}
-        for name in execute.REQUIRED_CHECKS}}
+            'details_url': details_url}
+        for name in preparation.required_checks(workflow_event)}}
     review_path = parent / 'invented-review.json'; review_path.write_bytes(c.canonical(review))
     ci_path = parent / 'invented-ci.json'; ci_path.write_bytes(c.canonical(ci))
     word = {**binding, 'kind': 'd4d_native_execution_launch_authorization_v2', 'version': 2,

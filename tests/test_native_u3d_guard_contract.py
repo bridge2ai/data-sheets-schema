@@ -15,6 +15,7 @@ from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_execution_registration_v2 as admission
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_registration as registration
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: F401 (fixture)
 
 
 REBUILD_INPUTS = (
@@ -30,7 +31,7 @@ def test_actual_consumer_signatures_match_a3_input_only_contract():
                          ('fresh', 'extra_protected'))
 
 
-def test_actual_consumer_graph_refuses_before_loading_or_effects(tmp_path, monkeypatch):
+def test_actual_consumer_graph_refuses_before_loading_or_effects(tmp_path, monkeypatch, isolated_modules):
     # Capture real local package pins before installing effect traps. No graph,
     # source bytes, refusal verdict or loader result is replaced by a fixture.
     dependencies = authority.dependency_identity()
@@ -132,3 +133,23 @@ def test_input_only_rebuild_refuses_invalid_preparation_before_builder(synthetic
 def test_reservations_require_explicit_extra_protected():
     with pytest.raises(TypeError, match='extra_protected'):
         registration.execution_paths_v2({}, fresh=True)
+
+
+def test_execution_facade_requires_the_current_explicit_ci_event():
+    from data_sheets_schema import native_shared_execution as execution
+    from data_sheets_schema import native_execution_engine as engine
+
+    assert execution.required_checks is admission.required_checks
+    assert engine.admission is admission
+    pull = execution.required_checks('pull_request')
+    push = execution.required_checks('push')
+    manual = execution.required_checks('workflow_dispatch')
+    assert manual == push
+    assert set(pull) - set(push) == {
+        'Python 3.12 / shard 7', 'Python 3.12 / shard 8', 'large-files'}
+    assert set(push) - set(pull) == {'schema-examples (3.12)'}
+    with pytest.raises(TypeError):
+        execution.required_checks()
+    for invalid in (None, True, '', 'unknown'):
+        with pytest.raises(ValueError, match='CI workflow event'):
+            execution.required_checks(invalid)

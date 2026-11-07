@@ -25,8 +25,6 @@ UNASSESSED = {'scientific_acceptance': 'not_assessed', 'provider_billing': 'not_
               'evidence_authentication': 'not_cryptographically_authenticated'}
 
 
-REQUIRED_CHECKS = admission.REQUIRED_CHECKS
-
 @dataclass(frozen=True)
 class ExecutionContract:
     kind: str
