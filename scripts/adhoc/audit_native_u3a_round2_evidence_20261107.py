@@ -307,4 +307,3 @@ if __name__ == "__main__":
     except (Refusal, OSError, ValueError) as error:
         print(type(error).__name__ + ": " + str(error), file=sys.stderr)
         raise SystemExit(2)
-
