@@ -3,21 +3,17 @@
 Synthetic import metadata only: no recorder, native binary, network or test
 subprocess. Duplicate own paths must not hide a foreign module or finder.
 """
-import importlib.util
+from functools import partial
 from pathlib import Path
 import sys
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
 
 import pytest
+from tests.utils.native_test_environment import origin_witness
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location(
-    "_native_u3a_test_driver",
-    ROOT / "scripts/adhoc/run_native_u3a_tests_20261107.py",
-)
-driver = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(driver)
+driver = SimpleNamespace(origin_witness=partial(origin_witness, ROOT))
 PACKAGE = ROOT / "src/data_sheets_schema"
 
 

@@ -47,12 +47,14 @@ def test_committed_v2_closure_loads_exact_origins_and_preserves_v1(isolated_modu
     authority.require_committed(identity)
     old_path = list(sys.path)
     with authority.loaded_dependencies(identity) as modules:
-        assert set(modules) == isolated_modules
-        assert modules['prepare_registration'] is modules['prepare_registration_v2']
+        assert set(modules) == authority.EXPOSED_CONTROLS
+        assert sys.modules['prepare_registration'] is modules['prepare_registration_v2']
         pins = {**identity['base']['modules'], **identity['additional_modules']}
         for name, pin in pins.items():
-            assert Path(modules[name].__file__).resolve() == (authority.ROOT / pin['path']).resolve()
-        assert callable(modules['prepare_registration'].require_envelope)
+            loaded = sys.modules[name]
+            assert Path(loaded.__file__).resolve() == (authority.ROOT / pin['path']).resolve()
+            assert authority.module_source_identity(loaded)['sha256'] == pin['sha256']
+        assert callable(modules['prepare_registration_v2'].require_envelope)
         assert callable(modules['run_direct_canary_awake'].KeepAwake)
     assert sys.path == old_path
     assert not isolated_modules.intersection(sys.modules)

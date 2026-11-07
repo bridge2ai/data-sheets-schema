@@ -129,11 +129,11 @@ U2 three-field envelope. Other preparer kinds refuse at this execution route.
 |---|---|---|
 | `native_execution_authority_v2.dependency_identity()` | fresh identity mapping | V2 supervisor/preparer closure, complete package source map, interpreter and fixed keep-awake primitive. |
 | `require_committed(identity)` | no return on success | Exact local Git tree roster and every source blob; no omitted files, v1 identity or uncommitted source acceptance. |
-| `loaded_dependencies(expected)` | context yielding fixed modules | Verify bytes/origins before and after imports; restore named bare aliases and path state on every exit. Never invoke a historical launcher. |
+| `loaded_dependencies(expected)` | context yielding only `prepare_registration_v2` and `run_direct_canary_awake` | Compile captured, verified source bytes; no bytecode-cache reads/writes. Restore aliases and loader state on every exit. Historical transitive helpers remain private. |
 | `native_execution_registration_v2.prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks)` | v2 envelope mapping | Read-only producer using current U1 capture, explicit valid runtime and fresh native26 rendering; no instruction-file publication or attempt reservation. |
 | `verify_preparer(raw, *, job_id)` | fresh inner preparation mapping | Pinned `prepare_registration_v2.require_envelope` first, then closed kind, selected job, exact current S/R, render/input/output identity and complete pins. No launch grant. |
 | `verified(raw)` | complete current execution body | Envelope first, exact preparation/runtime/composition joins and committed closure, then the fixed U3-D consumer below. Missing consumer refuses. |
-| `admit(raw, *, review_path, ci_path, launch_word_path)` | frozen `Admission` observation | Fresh complete verification, v2 review/CI/owner evidence, runtime/budget/host/main-thread validation, fresh disjoint paths and rechecked evidence. No writes or dispatch. |
+| `admit(raw, *, review_path, ci_path, launch_word_path)` | frozen `Admission(registration_raw, evidence, reservations)` observation | Main-thread refusal first; fresh complete verification, v2 review/CI/owner evidence, runtime/budget/host validation, independently checked disjoint reservations and rechecked evidence. No writes or dispatch. |
 
 `prepare` binds exact S and R file pins, job id, run date, draft allowance,
 render spec, input identity, instruction bytes/hash, all four outputs and the
@@ -145,10 +145,20 @@ registration module; its v1 verifier/selection/launcher is never called.
 The execution envelope's body is explicitly
 `kind: d4d_native_shared_execution_registration_v2`, `schema_version: 2`, and
 `execution: requires_exact_independent_review_ci_permission_and_owner_launch_evidence`.
-It binds `preparation_raw_json`, `preparation_sha256`, `job_id`, `dependencies`,
-`runtime`, `runtime_declaration_sha256`, `selection_sha256`, `max_draft_checks`,
-`instruction_sha256`, `working_directory`, `composition_raw_json` and
-`composition_sha256`. Its `execution_gates` list must equal the fixed fifteen
+The **exact required key set** is:
+
+```text
+kind schema_version execution attempt_id composition system_path permission_probe
+attempt_directory evidence_directory job_id preparation_raw_json preparation_sha256
+execution_gates runtime max_draft_checks selection_sha256 runtime_declaration_sha256
+working_directory dependencies composition_raw_json composition_sha256 system_sha256
+effective_system effective_system_sha256 instruction_sha256 permission_probe_sha256
+permission_expected_sha256 permission_observations argv environment selection scope
+```
+
+The only optional key is `receipt_origin_reporting`, whose version must be the
+exact integer 1 and whose entire declaration is reconstructed by the consumer.
+No unknown or missing required key is accepted. Its `execution_gates` list must equal the fixed fifteen
 obligations, in order: terminal, shutdown, first stop, live/saved attribution,
 phase/tool history, schema, pair, receipts, evidence, observation, accounting,
 runtime authority and keep-awake. These are obligations, not asserted passes.
@@ -159,18 +169,40 @@ fixed module, `data_sheets_schema.native_shared_registration`, declaring integer
 `AUTHORITY_VERSION = 2` and these interfaces:
 
 ```python
-verified_v2_body(body_raw: bytes, *, preparation_raw: bytes) -> dict
-execution_paths_v2(body: dict, *, fresh: bool, extra_protected) -> object
+rebuild_v2_body(*, preparation_raw: bytes, composition_path, system_path,
+               permission_probe_path, attempt_id, attempt_directory,
+               evidence_directory, max_draft_checks, receipt_origin_version) -> dict
+execution_paths_v2(body: dict, *, fresh: bool, extra_protected) -> list[Path]
 ```
 
 The first must rederive the **entire closed E** (not a subset or a prior passed
 flag): genuine C, policy, saved permission recipe/observations, sole runtime,
 budget/deadline, receipt authority, input/output/path identities and hashes. It
-returns that exact body. It must not call the outer `verified` recursively.
+returns that exact body. The bridge passes only the named reconstruction inputs,
+never the submitted body's derived fields or serialized body. Echoing the input
+cannot satisfy the independently compared complete-body postcondition. Both
+function signatures are exact (no defaults, variadic forwarding or wrappers).
+It must not call the outer `verified` recursively.
 The second rechecks canonical, disjoint, protected-input-safe and unspent
 reservations without creating them. It must include native stage reservations.
+The returned list contains distinct physical `Path` objects for the attempt,
+evidence, selected output-parent directories and selected stage root. The bridge
+independently reconstructs this set from the preparation, checks freshness,
+disjointness and protected-input overlap, then retains the sorted tuple in
+`Admission.reservations`. A `None`, boolean, incomplete or duplicate result refuses.
 No input may select a module or callback; another origin, interface or version
-refuses. The consumer is absent at U3-A, so complete execution admission is
+refuses. The module is compiled from captured bytes whose digest matches the
+committed package source map, with loader-recorded identity checked before and
+after its functions run. Its static package import graph must not import frozen
+v1 execution authority; dynamic imports/exec in that graph refuse. Implicit
+parent package initializers below `data_sheets_schema` are part of this graph
+and are compiled from pinned bytes too, including empty initializers. A missing
+or ambiguous initializer pin refuses; nested namespace packages are not supported
+by this closed consumer interface. The existing
+U3-A boundary modules are explicit trusted leaves of this inspection because the
+bridge itself deliberately reuses the pure runtime validator. This is not a
+general sandbox against hostile Python, external dependencies or arbitrary
+preexisting interpreter references. The consumer is absent at U3-A, so complete execution admission is
 intentionally closed until C/D implement and test these contracts.
 
 Review, CI and owner evidence use version 2 and kinds suffixed `_v2`, binding
@@ -181,14 +213,23 @@ hashes. These are supplied declarations, not cryptographic authentication or
 permission to contact a service. Budget is the runtime's declared positive
 decimal guard, not measured provider billing.
 
-CI evidence explicitly names `workflow_event` and `workflow_sha256`. The latter
-must match both the current main workflow file and its blob at the bound source
-commit. `required_checks(event)` requires all named lanes: PR means eight
+CI evidence explicitly names `workflow_event`, `workflow_ref`, `tested_commit`
+and `workflow_sha256`. The digest field is an exact path-to-digest map:
+`.github/workflows/main.yaml` for every event, plus
+`.github/workflows/large-files.yaml` for pull requests. Each must match current
+bytes and both the reviewed source commit and tested commit. For a PR,
+`workflow_ref` is `refs/pull/<positive-number>/merge`; the locally available tested
+commit has exactly two parents with the reviewed source as its second parent.
+For push/manual events, tested commit equals source; the ref is respectively
+`refs/heads/main` or an explicit branch ref. This checks declaration consistency,
+not a remote service's attestation. `required_checks(event)` requires all named lanes: PR means eight
 shards, four API cases, three SG2 cases, three offline lanes, aggregate `test`
 and `large-files`; push/manual means six shards, the same API/SG2/offline lanes,
 `test` and `schema-examples (3.12)`. The PR-only large-files check is not invented
 at a merged-main commit. No event is inferred; every applicable check must
-report completed/success at the exact source. An independent workflow-derived
+report completed/success at the exact **tested** commit. Actions run URLs are
+bound to local `d4d.ciRepositoryUrl` configuration or `remote.origin.url`, never
+to a built-in repository. An independent workflow-derived
 test guards this frozen interface against roster drift.
 
 An `Admission` is only an observation. U3-D must call `admit` freshly immediately
@@ -203,6 +244,51 @@ All source additions change the complete package identity. Use fresh
 registrations on the final reviewed integrated commit. Preserve historical
 source environments and records; U1/U3 land together and the protected packets
 remain separate approval work. No protected packet is applied by U3-A.
+
+### Round 2 migration and trust boundary
+
+The round-1 U3-C/D checkpoints are not consumers of this revised interface.
+Their later integration must supply `rebuild_v2_body` with the exact signature,
+remove the default on `execution_paths_v2.extra_protected`, separate their pure
+runtime utilities from imports of frozen execution authority, and obtain command
+policy through a separately reviewed interface rather than the narrowed U3-A
+control mapping. U3-A does not modify those branches or reopen live admission.
+
+Malformed envelope shapes, versions and manifest digest values refuse using
+already imported constants before Git or helper loading. `admit` refuses a
+non-main-thread call before verification. Valid envelopes still need local Git
+and verified source compilation; ordinary initial interpreter/package imports
+and external dependencies are the trusted bootstrap. The byte-only loader proves
+the bytes of the scoped helper/consumer graph it executes, not every object
+already resident in Python or the authenticity of review/CI declarations.
+
+Round-2 review records, retained offline for the later issue workflow:
+
+- P2-1: closed execution keys, exact consumer signatures and source identity,
+  input-only reconstruction, legacy-import refusal and checked path return.
+- P2-2: independent named refusals with owner evidence hashes re-bound in tests;
+  the report records each mutation probe and its actual result.
+- P2-3: compile verified source bytes rather than path/bytecode imports at the
+  U3-A boundary; unchanged U2 code is not edited or used as a path loader here.
+- P3-1/P3-2/P3-3: early structural refusal, workflow/merge identity and generic
+  origin binding, and a narrowed exposed control mapping.
+- P3-4/P3-5: meaningful absence assertion, reusable test utility outside dated
+  scripts, isolated test Git settings, dead-import removal and accurate Git
+  environment documentation.
+- R2-A: independent review identified an unpinned selection reread in reservation
+  checking; compare that fresh capture with the preparation pin before using it.
+- R2-B: ordinary field `getattr` must not be mistaken for dynamic import; keep
+  actual loading/evaluation refusal without excluding normal pure helpers.
+- R2-C: a read may update access time without changing source. Compare device,
+  inode, mode, size, modification time and change time across the read; retain
+  physical-path and digest checks. Access time is not source identity.
+- R2-D: importing a child implicitly executes its package initializers. Include
+  those parents in import inspection, source-only loading and binding restoration;
+  refuse an unpinned or ambiguous parent before import. An unchanged regression
+  failed before this repair because a legacy import only in the parent was missed.
+- R2-E (test fixture only): give synthetic import bindings one cleanup owner.
+  Overlapping finalizer/monkeypatch cleanup raised after passing loader assertions
+  and left the test namespace unrestored; retain that failed driver evidence.
 
 ### U3-A offline review ledger
 
