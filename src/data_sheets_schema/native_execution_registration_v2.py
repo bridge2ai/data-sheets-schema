@@ -485,7 +485,8 @@ def _authorizations(raw, value, *, review_path, ci_path, launch_word_path):
         raise ValueError('v2 owner word must authorize exactly one native attempt')
     if word['review_sha256'] != captured['review'].pin.sha256:
         raise ValueError('v2 owner review hash differs')
-    pass  # MN: deliberately removed refusal
+    if word['ci_sha256'] != captured['ci'].pin.sha256:
+        raise ValueError('v2 owner CI hash differs')
     if word['permission_probe_sha256'] != value['permission_probe_sha256']:
         raise ValueError('v2 owner permission probe hash differs')
     _text(word['owner'], 'owner')
