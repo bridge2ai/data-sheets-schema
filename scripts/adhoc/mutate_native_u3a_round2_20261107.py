@@ -3,7 +3,8 @@
 
 Inputs: a local reviewed base commit, one of the fifteen reviewer probe intents,
 and the physical dependency venv Python. Default is read-only planning. --run
-creates a NEW sibling source copy and external evidence; it never resets or
+creates a NEW source copy and matched evidence below one round-4 case folder;
+it never resets or
 cleans an existing tree. The unchanged targeted tests must pass before the
 single source mutation is committed and tested. MA is the required first
 end-to-end canary; later cases require its saved, successful result. All tests
@@ -25,7 +26,19 @@ import tarfile
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
-EXECUTIONS = ROOT.parent
+
+
+def execution_root(source_root):
+    """Resolve the global quiet window independently of archive depth."""
+    candidates = [path for path in source_root.parents if path.name == 'd4d-executions']
+    if (len(candidates) != 1 or candidates[0] != candidates[0].resolve(strict=True)
+            or not (candidates[0] / 'plans').is_dir()):
+        raise RuntimeError('source must be below the canonical d4d-executions root')
+    return candidates[0]
+
+
+EXECUTIONS = execution_root(ROOT)
+SCRATCH = EXECUTIONS / 'scratch-native-u3a-r4'
 LOCK = EXECUTIONS / 'plans/native_quiet_window.lock'
 SOURCE = 'src/data_sheets_schema/native_execution_registration_v2.py'
 SELF = 'scripts/adhoc/mutate_native_u3a_round2_20261107.py'
@@ -38,9 +51,9 @@ JOIN = REG + 'test_execution_prefix_must_match_rederived_preparation_before_cons
 CASES = {
     'MA': ('guard', '_authorizations', 'v2 review cannot approve its own author', APPROVAL + '[self_review]'),
     'MB': ('guard', '_authorizations', 'v2 review independence must be explicit', APPROVAL + '[not_independent]'),
-    'MC': ('guard', '_authorizations', 'v2 CI check source differs from tested commit', APPROVAL + '[ci_head]'),
+    'MC': ('guard', '_authorizations', 'v2 CI check source differs from source commit', APPROVAL + '[ci_head]'),
     'MD': ('guard', '_authorizations', 'v2 CI check conclusion must be success', APPROVAL + '[failed_ci]'),
-    'ME': ('commit_call', 'verified', '', BRIDGE + 'test_verified_routes_dirty_closure_through_actual_committed_proof'),
+    'ME': ('commit_call', 'verified', '', BRIDGE + 'test_verified_rechecks_committed_sources_after_preparation'),
     'MF': ('guard', '_consumer', 'v2 execution consumer authority version mismatch',
            BRIDGE + 'test_committed_consumer_rejects_wrong_version_or_interface[version]'),
     'MG': ('envelope_call', '_wire', '', BRIDGE + 'test_wire_still_invokes_pinned_envelope_check_after_structural_precheck'),
@@ -137,6 +150,12 @@ def mutate(raw, case):
 def new_copy(base, directory):
     """Archive into a fresh repo borrowing existing objects read-only."""
     quiet()
+    if (directory != directory.absolute() or directory != directory.resolve()
+            or directory == SCRATCH or not directory.is_relative_to(SCRATCH)):
+        raise ValueError('source archive must be a new canonical round-4 scratch path')
+    if any((parent / '.git').exists() for parent in (directory, *directory.parents)
+           if parent.is_relative_to(EXECUTIONS)):
+        raise ValueError('source archive must not be nested inside another checkout')
     directory.mkdir(mode=0o700, exist_ok=False)
     process = subprocess.Popen(['/usr/bin/git', '--no-replace-objects', 'archive', '--format=tar', base],
         cwd=ROOT, env=environment(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -209,6 +228,7 @@ def main():
     plan = {'case': args.case, 'base': base, 'source': SOURCE, 'source_sha256': sha(raw),
         'mutated_source_sha256': sha(changed), 'edit': edit, 'test_node': CASES[args.case][3],
         'harness_sha256': sha(Path(__file__).read_bytes()),
+        'scratch_root': str(SCRATCH), 'quiet_window_lock': str(LOCK),
         'scope': 'guard regression evidence; synthetic software tests, not native admission'}
     if not args.run:
         print(json.dumps(plan, sort_keys=True)); return 0
@@ -219,18 +239,25 @@ def main():
     if args.case != 'MA':
         if args.canary is None:
             raise ValueError('run MA end to end first; provide its --canary result.json')
+        canary_path = args.canary.absolute()
+        if canary_path != canary_path.resolve() or not canary_path.is_relative_to(SCRATCH):
+            raise ValueError('canary must be this round-4 campaign\'s canonical saved evidence')
         canary = json.loads(args.canary.read_bytes())
         if (canary.get('case') != 'MA' or canary.get('status') != 'killed'
                 or canary.get('base') != base or canary.get('harness_sha256') != plan['harness_sha256']):
             raise ValueError('canary does not prove this exact baseline and harness')
     out = args.out.absolute()
-    if out.parent != EXECUTIONS or out != out.resolve() or not re.fullmatch(r'[A-Za-z0-9_-]+', out.name):
-        raise ValueError('output must be a fresh literal direct child of d4d-executions')
-    tree = EXECUTIONS / (out.name + '-source')
+    if (out == SCRATCH or not out.is_relative_to(SCRATCH) or out != out.resolve()
+            or not re.fullmatch(r'[A-Za-z0-9_-]+', out.name)):
+        raise ValueError('output must be a fresh literal case folder under scratch-native-u3a-r4')
+    if any((parent / '.git').exists() for parent in (out, *out.parents)
+           if parent.is_relative_to(EXECUTIONS)):
+        raise ValueError('mutation evidence must be outside every source checkout')
+    tree = out / 'source'
     quiet(); out.mkdir(mode=0o700, exist_ok=False)
     save(out / 'plan.json', plan)
     new_copy(base, tree)
-    baseline = run_tests(tree, EXECUTIONS / (out.name + '-baseline'), args.python, plan['test_node'])
+    baseline = run_tests(tree, out / 'baseline', args.python, plan['test_node'])
     result = {**plan, 'tree': str(tree), 'baseline': baseline}
     if baseline['returncode'] != 0 or baseline['failures']:
         result['status'] = 'invalid_baseline'
@@ -243,7 +270,7 @@ def main():
     result['mutant_commit'] = git(tree, 'rev-parse', 'HEAD').decode().strip()
     if git(tree, 'status', '--porcelain') or git(tree, 'show', 'HEAD:' + SOURCE) != changed:
         raise RuntimeError('mutation must be the exact committed, clean source closure')
-    tested = run_tests(tree, EXECUTIONS / (out.name + '-mutant'), args.python, plan['test_node'])
+    tested = run_tests(tree, out / 'mutant', args.python, plan['test_node'])
     result['mutant'] = tested
     result['status'] = ('killed' if tested['returncode'] == 1 and tested['failures']
                         else 'survived' if tested['returncode'] == 0 else 'invalid_run')

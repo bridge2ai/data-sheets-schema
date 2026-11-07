@@ -27,7 +27,19 @@ from types import ModuleType
 
 
 ROOT = Path(__file__).resolve().parents[2]
-EXECUTIONS = ROOT.parent
+
+
+def execution_root(source_root):
+    """Keep the actual global quiet-window location for nested source copies."""
+    candidates = [path for path in source_root.parents if path.name == 'd4d-executions']
+    if (len(candidates) != 1 or candidates[0] != candidates[0].resolve(strict=True)
+            or not (candidates[0] / 'plans').is_dir()):
+        raise RuntimeError('source must be below the canonical d4d-executions root')
+    return candidates[0]
+
+
+EXECUTIONS = execution_root(ROOT)
+SCRATCH = EXECUTIONS / 'scratch-native-u3a-r4'
 LOCK = EXECUTIONS / 'plans/native_quiet_window.lock'
 HELPER = 'notes/claudecode_direct/run_direct_canary_awake.py'
 PROFILE = '(version 1)\n(allow default)\n(deny network*)\n'
@@ -103,6 +115,8 @@ def origins(root):
 
 def worker(args):
     root, out = args.source_root.resolve(strict=True), args.out.resolve(strict=True)
+    if out == SCRATCH or not out.is_relative_to(SCRATCH):
+        raise RuntimeError('probe output must stay under round-4 scratch')
     if root != out/'source' or not (root/'.git').is_dir():
         raise RuntimeError('probe must use its own fresh archived source repository')
     prefix = args.expected_prefix.resolve(strict=True)
@@ -245,6 +259,7 @@ def main():
     out, python = args.out.absolute(), args.python.absolute()
     plan = {'source_commit': args.source_commit, 'out': str(out), 'python': str(python),
             'deadline_seconds': LIMIT, 'fresh_archive': str(out/'source'),
+            'scratch_root': str(SCRATCH), 'quiet_window_lock': str(LOCK),
             'network': 'OS deny network*', 'native_executable': 'never invoked',
             'forged_cache': 'preserved only inside the new archived source'}
     if not args.run:
@@ -254,8 +269,8 @@ def main():
         raise RuntimeError('invoke the probe parent with Python -S -P -B')
     if LOCK.exists():
         raise RuntimeError('quiet-window lock exists; no probe started')
-    if out != out.resolve() or not out.is_relative_to(EXECUTIONS) or out.exists():
-        raise RuntimeError('output must be a new canonical evidence path under d4d-executions')
+    if out != out.resolve() or out == SCRATCH or not out.is_relative_to(SCRATCH) or out.exists():
+        raise RuntimeError('output must be a new canonical evidence path under scratch-native-u3a-r4')
     if any((parent/'.git').exists() for parent in (out.parent, *out.parents)
            if parent.is_relative_to(EXECUTIONS)):
         raise RuntimeError('output must not be inside an existing source checkout')
