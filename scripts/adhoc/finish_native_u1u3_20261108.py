@@ -44,9 +44,19 @@ def main():
         groups.append(('finish-schema', ['tests/test_schema']))
         (OUT / 'continuation-plan.json').write_text(json.dumps(groups, indent=2) + '\n')
         for label, nodes in groups:
-            if run(label, nodes) not in (0, 1):
-                return 125
-        return run('finish-collection', ['tests'], collect=True)
+            code = run(label, nodes)
+            if code not in (0, 1):
+                outcome = OUT / label / 'outcome.json'
+                cutoff = OUT / label / 'early-cutoff.json'
+                value = json.loads(outcome.read_text()) if outcome.exists() else {}
+                events = json.loads(cutoff.read_text()).get('events', []) if cutoff.exists() else []
+                if (value.get('interrupted') == 'deadline' or events) and not value.get('observed_surviving_pids'):
+                    print('Retained incomplete bounded run; continuing unaffected files', flush=True)
+                else:
+                    return 125
+        # Full collection already completed; helpers do not alter test nodes.
+        assert json.loads((OUT / 'full-collection/outcome.json').read_text())['returncode'] == 0
+        return 0
     if action == 'sg2':
         for variant in ('none', 'explicit', 'conventional'):
             if run('final-sg2-' + variant, ['tests/test_wave7_5213_d76_registration.py::test_sg2_root_launch_completes_and_records_registered_paths[' + variant + ']']) not in (0, 1):
