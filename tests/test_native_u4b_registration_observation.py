@@ -46,13 +46,21 @@ def corrupt_thinking(body, arguments, mutation):
         basis['thinking']['observed'] = {'state': 'not_emitted', 'field': None, 'value': None}
     elif mutation == 'missing_registration_field':
         del basis['thinking']['declared']
+    elif mutation == 'missing_kind':
+        del basis['kind']
+    elif mutation == 'changed_kind':
+        basis['kind'] = 'invented-historical-discriminator'
+    elif mutation == 'legacy_basis':
+        body['runtime']['limits_basis'] = 'historical declared basis'
+        return
     else:
         basis['thinking']['declared'] = False
     body['runtime']['limits_basis'] = runtime._canonical(basis)
 
 
 @pytest.mark.parametrize('entry', ['proposal', 'outer_readback', 'body_readback'])
-@pytest.mark.parametrize('mutation', ['missing_observation', 'missing_registration_field', 'mismatch'])
+@pytest.mark.parametrize('mutation', ['missing_observation', 'missing_registration_field', 'mismatch',
+                                    'missing_kind', 'changed_kind', 'legacy_basis'])
 def test_public_registration_refuses_unobserved_or_contradictory_thinking(
         tmp_path, monkeypatch, entry, mutation):
     body, arguments, preparation = registration_body(tmp_path)
@@ -80,14 +88,21 @@ def test_public_registration_refuses_unobserved_or_contradictory_thinking(
         monkeypatch.setattr(subject.control_loading, 'loaded_controls', isolated_controls)
         monkeypatch.setattr(subject.execution_v2, 'verified', isolated_reconstruction)
         call = lambda: subject.verified(b'explicit upstream fixture')
-    with pytest.raises(ValueError, match='thinking'):
+    diagnostic = ('U4b runtime basis' if mutation in ('missing_kind', 'changed_kind')
+                  else 'Expecting value' if mutation == 'legacy_basis' else 'thinking')
+    with pytest.raises(ValueError, match=diagnostic):
         call()
     assert not Path(body['attempt_directory']).exists()
     assert not Path(body['evidence_directory']).exists()
 
 
-def test_legacy_profile_is_not_reinterpreted_as_u4b_observation():
-    body = {'runtime': {'limits_basis': 'historical declared basis'}}
+@pytest.mark.parametrize('context_mode', ['0', '1'])
+def test_historical_other_model_profile_keeps_its_validator(tmp_path, context_mode):
+    historical, _ = runtime_inputs(tmp_path)
+    historical['model'] = 'claude-opus-4-6'
+    historical['environment']['CLAUDE_CODE_DISABLE_1M_CONTEXT'] = context_mode
+    historical['limits_basis'] = 'historical declared basis'
+    body = {'runtime': historical}
     assert subject._require_runtime_observation(body) is body
 
 

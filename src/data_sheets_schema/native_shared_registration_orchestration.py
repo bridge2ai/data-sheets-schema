@@ -106,11 +106,13 @@ def _require_runtime_observation(value):
     """Require U4b's observed registration fields at the host-reading boundary.
 
     The fixed input-only reconstruction graph remains unchanged. Historical
-    runtime profiles retain their own validators; current U4b proposals and
-    readback must also recheck the explicitly pinned observation evidence.
+    other-model runtime profiles retain their own validators. The current
+    model identity independently requires U4b evidence, so removing its basis
+    discriminator cannot downgrade a proposal or readback to historical rules.
     """
-    from .native_u4b_runtime import is_prepared_runtime, validate_prepared_runtime
+    from .native_u4b_runtime import MODEL, is_prepared_runtime, validate_prepared_runtime
     runtime = value['runtime']
-    if is_prepared_runtime(runtime):
+    if ((type(runtime) is dict and runtime.get('model') == MODEL)
+            or is_prepared_runtime(runtime)):
         validate_prepared_runtime(runtime)
     return value
