@@ -36,11 +36,16 @@ def observe_consumer_calls(targets, *, refuse=None, forbid=False):
     """
     calls = []
     previous = sys.getprofile()
+    names = frozenset(name for _, name in targets)
 
     def observe(frame, event, argument):
         if previous is not None:
             previous(frame, event, argument)
         if event != 'call':
+            return
+        # Most calls cannot match. Avoid parsing every unrelated filename while
+        # the genuine source checks and historical callbacks are running.
+        if frame.f_code.co_name not in names:
             return
         key = (frame.f_code.co_filename.rsplit('/', 1)[-1].removesuffix('.py'),
                frame.f_code.co_name)

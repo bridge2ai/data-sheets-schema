@@ -58,3 +58,13 @@ unadmitted classifier before loading, with `native callback requires
 main-thread preloading at admission`. Update the negative test's name,
 description and exact error; preserve its actual historical worker and
 ValueError assertion. The independent positive worker cases pass in this run.
+
+## R10-5: synthetic public lifetime exhausts its runtime allowance
+
+At 52cc1354a both public variants reach real deferred source callbacks, then
+stop at the selected 900-second attempt deadline. The supervised run finishes
+with two assertion failures in 1769.11 seconds; cleanup and source checks pass.
+The non-mutating test profiler was parsing a module filename on every Python
+function call. Reject non-target function names first, retaining the exact
+module/name match, previous profiler chaining, and entry refusal semantics.
+No production deadline or guard is changed. Re-canary before running variants.
