@@ -117,6 +117,27 @@ def test_worker_late_package_import_is_refused_by_capture_guard(isolated_modules
             'data_sheets_schema.not_preloaded_r7_probe; preload on the main thread at admission')
 
 
+@pytest.mark.parametrize('kind', ['observer', 'classifier'])
+def test_historical_worker_uses_deferred_source_utilities_without_loading(kind, isolated_modules):
+    dependencies = authority.dependency_identity()
+    pins = dependencies['base']['package_sources']
+    raw = b'projects:\n  TEST:\n    sources:\n      - id: s1\n        processed_file: source.txt\n        source_type: article\n'
+    with ExitStack() as stack:
+        stack.enter_context(preload.preloaded_classifier(dependencies))
+        utilities = stack.enter_context(preload.preloaded_callback_utilities(dependencies))
+        typed = stack.enter_context(authority.loaded_verified_package_module(
+            'data_sheets_schema.typed_audit', package_sources=pins))
+        historical = sys.modules['native_control']
+        # Invoke first on the real worker, so an expected-value calculation
+        # cannot accidentally warm a missing import on the main thread.
+        result = work(historical, kind, lambda: (
+            typed._source_authority(raw, 'TEST'),
+            utilities['source_review'].inventory('id: urn:synthetic:record\n', 'original_full')))
+        assert not isinstance(result, BaseException), repr(result)
+        assert result == (typed._source_authority(raw, 'TEST'),
+            utilities['source_review'].inventory('id: urn:synthetic:record\n', 'original_full'))
+
+
 def test_captured_input_pin_is_rechecked_before_reconstruction(tmp_path):
     path = tmp_path / 'input'
     path.write_bytes(b'admitted')

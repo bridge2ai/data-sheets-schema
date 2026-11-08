@@ -185,6 +185,24 @@ class Callbacks:
 
 
 @contextmanager
+def preloaded_callback_utilities(dependencies):
+    """Warm reviewed deferred utility imports, without widening A's graph rule.
+
+    Typed source authority, source-review/preflight and omission schema checks
+    call these pure utilities from deferred bodies that A deliberately does
+    not traverse for utility modules. Keep their verified objects alive across
+    worker use, exactly like the directly reached callback dependencies.
+    """
+    require_main_thread()
+    pins = dependencies['base']['package_sources']
+    with ExitStack() as stack:
+        modules = {name: stack.enter_context(authority.loaded_verified_package_module(
+            'data_sheets_schema.' + name, package_sources=pins)) for name in (
+                'source_metadata', 'source_review', 'duplicate_keys', 'bc1_context', 'grounding')}
+        yield modules
+
+
+@contextmanager
 def preloaded_callbacks(composition, spec, selected, execution, registration_raw, command_argv):
     """Main-thread source loading, then a closed worker interface.
 
@@ -204,7 +222,7 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
     lock = RLock()
     with _locked_stack(lock) as stack:
         classifier = stack.enter_context(preloaded_classifier(dependencies, _lock=lock))
-        modules = {}
+        modules = stack.enter_context(preloaded_callback_utilities(dependencies))
         for short in ('native_shared_callback_capture', 'native_shared_callback_io', 'native_shared_capture',
                       'native_shared_selection', 'native_shared_streams', 'native_shared_effects',
                       'native_shared_evidence', 'native_shared_phase', 'native_shared_receipts',

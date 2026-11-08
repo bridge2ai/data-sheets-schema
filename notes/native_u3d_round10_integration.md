@@ -8,7 +8,7 @@ with Round 9 completion and fixture repairs already recorded. Both descendants
 were preserved. C7 was merged first (177ee0da3), then A6 (c41fc684c), both
 with `--no-ff`. No manual conflict resolutions were needed. The capture
 orchestration overlap retains D's `final_receipts` requirement alongside C's
-preloading. The A runner overlap retains D's enclosing-execution-root lookup
+preloading. The A runner overlap retains D's quiet-window pause/resume logic
 and adopts A6's default scratch/error labels; D's wrapper overrides the scratch
 root before execution. Protected files are unchanged.
 
@@ -32,3 +32,20 @@ and no-ambient-I/O assertions remain unchanged.
 
 The failing baseline is retained in `scratch-native-u3d/round10-lifecycle-1`.
 Neither fix is considered validated until its actual assertion runs.
+
+## R10-3: callback deferred utility dependency was not preloaded
+
+The public correction canary at 89f700641 crosses admission and dispatch, then
+fails at a real observer callback with `native callback cannot load module
+data_sheets_schema.source_metadata`. The guard correctly refuses; R9-4 is not
+fully closed by the C7 classifier-only canary. Retained run: round10-public-canary,
+1 failure in 1427.01 supervised seconds, source/origin/cleanup checks passing.
+
+Preload the reviewed deferred pure utility dependencies on the main thread and
+include them in the existing source-identity checks. A's loader and graph rule
+remain unchanged. A focused regression invokes typed source authority and
+source-review inventory first in each real historical worker, before computing
+an expected result on the main thread. Public execution still needs rechecking.
+
+The initial merge-overlap wording above was corrected on read-only review:
+the A-runner overlap is D's quiet-window logic, not its already-shared root lookup.
