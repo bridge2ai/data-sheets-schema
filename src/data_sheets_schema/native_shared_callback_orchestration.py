@@ -7,6 +7,7 @@ This is a source contract, not a sandbox against arbitrary Python reflection.
 from contextlib import contextmanager, ExitStack
 from dataclasses import asdict, dataclass
 from inspect import isfunction
+import sys
 from threading import current_thread, main_thread
 
 from . import native_execution_authority_v2 as authority
@@ -19,6 +20,32 @@ from .native_shared_callback_capture import FrozenSpec
 def require_main_thread():
     if current_thread() is not main_thread():
         raise ValueError('native callback cannot load captures; preload on the main thread at admission')
+
+
+@dataclass(frozen=True, slots=True)
+class _WorkerLoadRefusal:
+    historical_names: frozenset
+
+    def find_spec(self, fullname, path=None, target=None):
+        if current_thread() is not main_thread() and (
+                fullname.startswith(('data_sheets_schema.', 'src.data_sheets_schema.'))
+                or fullname in self.historical_names):
+            raise ValueError('native callback cannot load module ' + fullname
+                             + '; preload on the main thread at admission')
+        return None
+
+
+@contextmanager
+def _worker_load_guard(dependencies):
+    require_main_thread()
+    guard = _WorkerLoadRefusal(frozenset(dependencies['base']['modules'])
+                              | frozenset(dependencies['additional_modules']))
+    sys.meta_path.insert(0, guard)
+    try:
+        yield
+    finally:
+        require_main_thread()
+        sys.meta_path.remove(guard)
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,7 +106,8 @@ def preloaded_classifier(dependencies):
             _function(pure, 'require_controls'), controls,
             controls['native_readonly'].lookup_command,
             controls['native_command_policy']._simple_command)
-        yield selected
+        with _worker_load_guard(dependencies):
+            yield selected
         require_main_thread()
         selected._require(controls)
 
@@ -163,6 +191,20 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
             modules[short] = stack.enter_context(authority.loaded_verified_package_module(
                 'data_sheets_schema.' + short, package_sources=pins))
         rebuild = stack.enter_context(registration._consumer(dependencies))
+        # A's graph includes deferred imports in its consumer-owned modules.
+        # Warm those dependencies on the main thread rather than letting the
+        # installed source finder compile one in a callback worker.
+        graph = {}
+        for module in (*modules.values(), rebuild):
+            identity = authority.module_source_identity(module)
+            raw = authority._verified_source_bytes(identity['path'], identity['sha256'])
+            graph.update(authority.refuse_legacy_consumer_imports(raw,
+                name=identity['name'], package_sources=pins))
+        graph_modules = []
+        for name in sorted(graph):
+            if name.startswith('data_sheets_schema.'):
+                graph_modules.append(stack.enter_context(authority.loaded_verified_package_module(
+                    name, package_sources=pins)))
         # Orchestrators may import A in their main-thread-only entry points.
         # Their callback entries use the explicit Admission and no loader.
         for short in ('native_shared_capture_orchestration', 'native_shared_attribution_orchestration'):
@@ -186,7 +228,7 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
         source_pins.update(prepared['pinned_files'])
         source_check = _SourceCheck(tuple(sorted(source_pins.items())), tuple(
             (module, tuple(sorted(authority.module_source_identity(module).items())))
-            for module in (*modules.values(), rebuild)))
+            for module in (*modules.values(), *graph_modules, rebuild)))
         source_check()
         composition_raw = execution['composition_raw_json'].encode('utf-8')
         admitted = capture_inputs.Admission(registration_raw, c.canonical(execution),
@@ -200,7 +242,7 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
             receipt_path=paths['receipt'], working_directory=composition['working_directory'])
         state = modules['native_shared_attribution_orchestration']._LiveAttribution(
             current, execution_raw=registration_raw, spec=frozen, composition_raw=composition_raw)
-        yield Callbacks(classifier, admitted,
+        callbacks = Callbacks(classifier, admitted,
             _module(modules['native_shared_capture_orchestration'], (
                 '_load', '_load_live', 'initialize', 'activate_admitted', 'durable_new',
                 'observe_advance_settled', 'observe_response_intent', 'observe_request_read',
@@ -215,5 +257,7 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
             _module(modules['native_shared_policy'], ('stage_overlay_governs',)),
             _function(modules['audit_omissions'], '_mapping'), state, phase,
             modules['native_shared_receipts']._ReceiptCatalogContext())
+        with _worker_load_guard(dependencies):
+            yield callbacks
         require_main_thread()
         source_check()

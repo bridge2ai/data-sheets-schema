@@ -5,7 +5,7 @@ classifier body. This deliberately does not claim full observer admission.
 """
 from dataclasses import FrozenInstanceError
 from contextlib import ExitStack
-from pathlib import Path
+import importlib
 import queue
 import sys
 import threading
@@ -105,6 +105,26 @@ def test_callback_journal_cas_checks_actual_bytes_before_replacement(tmp_path):
     with pytest.raises(ValueError, match='journal changed before'):
         io._replace_journal(target, before, after)
     assert target.read_bytes() == raw
+
+
+def test_worker_late_package_import_is_refused_by_capture_guard(isolated_modules):
+    dependencies = authority.dependency_identity()
+    with preload.preloaded_classifier(dependencies):
+        result = work(sys.modules['native_control'], 'observer',
+            lambda: importlib.import_module('data_sheets_schema.not_preloaded_r7_probe'))
+        assert type(result) is ValueError
+        assert str(result) == ('native callback cannot load module '
+            'data_sheets_schema.not_preloaded_r7_probe; preload on the main thread at admission')
+
+
+def test_captured_input_pin_is_rechecked_before_reconstruction(tmp_path):
+    path = tmp_path / 'input'
+    path.write_bytes(b'admitted')
+    check = preload._SourceCheck(((str(path), controller.c.sha(b'admitted')),), ())
+    check()
+    path.write_bytes(b'changed')
+    with pytest.raises(ValueError, match='differ from their pin'):
+        check()
 
 
 def work(historical, kind, callback):

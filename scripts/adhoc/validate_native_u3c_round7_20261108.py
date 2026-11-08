@@ -17,7 +17,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[2]
 SCRATCH = ROOT.parent / 'scratch-native-u3c-r4'
 RUNNER = ROOT / 'scripts/adhoc/run_native_u3c_round4_20261107.py'
-PREFIX = 'r7-final-'
+PREFIX = 'r7-validated-'
 
 
 def pin(path):
