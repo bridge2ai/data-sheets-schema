@@ -30,17 +30,25 @@ def _need(value, message):
         raise ValueError(message)
 
 
-def _joined(selection, execution_raw, spec, composition_raw):
+def _joined(selection, execution_raw, spec, composition_raw, *, _admission=None):
     """Join exact v2 carriers; saved replay never rediscovers live authority.
 
     These joins observe attribution identity, not execution admission. The
     orchestration caller verifies current preparation/C for live construction;
     the outer lifetime must still obtain U3-D's complete admission separately.
     """
-    from .api_runner import RunSpec
     from . import native_shared_controller as controller
-    _need(type(selection) is c.NativeSelectionCapture and type(spec) is RunSpec,
-          'attribution requires captured S and the exact selected RunSpec')
+    if _admission is None:
+        from .api_runner import RunSpec
+        _need(type(selection) is c.NativeSelectionCapture and type(spec) is RunSpec,
+              'attribution requires captured S and the exact selected RunSpec')
+    else:
+        from .native_shared_callback_capture import require_admission
+        admitted = require_admission(_admission)
+        _need(selection is admitted.selection and spec is admitted.spec
+              and execution_raw == admitted.registration_raw
+              and composition_raw == admitted.composition_json,
+              'attribution differs from its loader-minted callback admission')
     rebuilt = selected.rebuild(selection.registration, selection.authority,
                                selection.schemas, selection.receipt_policy)
     _need(rebuilt == selection, 'attribution selection differs from its captured authority')
@@ -149,9 +157,9 @@ def _joined(selection, execution_raw, spec, composition_raw):
 class _Attribution(inherited.NativeAttributionState):
     """Fixed initializer; inherited observe and report implementations remain intact."""
 
-    def __init__(self, selection, *, execution_raw, spec, composition_raw):
+    def __init__(self, selection, *, execution_raw, spec, composition_raw, _admission=None):
         doc, commands, directory, paths, inputs, maximum = _joined(
-            selection, execution_raw, spec, composition_raw)
+            selection, execution_raw, spec, composition_raw, _admission=_admission)
         self.spec = spec
         self.reg = {'max_draft_checks': maximum, 'inputs': inputs, 'working_directory': directory}
         self.registration_raw = execution_raw
