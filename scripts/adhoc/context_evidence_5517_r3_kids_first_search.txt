@@ -2,7 +2,9 @@
 # Scope: complete declared bundle; ignored/hidden files included.
 # Bundle: notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt
 # SHA256: cc45c89548158a7a909699fbf1f75e6cc88c32ac8486d5518c5d4e46cdc9447c
-# Command (JSON argv): ["rg", "--hidden", "--no-ignore", "-n", "-i", "machine learning|training|\\bAI\\b|model|artificial intelligence|deep learning|AI-ready|AI/ML|predictive|benchmark|split", "notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt"]
+# Original command (JSON argv): ["rg", "--hidden", "--no-ignore", "-n", "-i", "machine learning|training|\\bAI\\b|model|artificial intelligence|deep learning|AI-ready|AI/ML|predictive|benchmark|split", "notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt"]
+# Equivalent: Python re.IGNORECASE, direct whole-file read including ignored/hidden files.
+# Command (JSON argv): ["python", "scripts/adhoc/context_evidence_5517_search.py", "machine learning|training|\\bAI\\b|model|artificial intelligence|deep learning|AI-ready|AI/ML|predictive|benchmark|split", "notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt"]
 # Matching lines: 32
 173:Validate discoveries in model organisms to human health
 380:takes aligned cram input and performs somatic variant calling using Strelka2, Mutect2, Lancet, and VarDict Java, CNV estimation using Control-FREEC, CNVkit, and GATK, and SV calls using Manta. For whole genome sequencing data, the workflow will also predict extra chromosomal DNA (ecDNA) using AmpliconArchitect Somatic variant call results are annotated with hotspots, assigned population frequencies using gnomAD AF, calculated gene models using Variant Effect Predictor (VEP), then added an additional MAF output using a modified version of Memorial Sloan Kettering Cancer Center’s (MSKCC) vcf2maf.

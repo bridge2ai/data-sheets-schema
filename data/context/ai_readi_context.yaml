@@ -25,13 +25,13 @@ data_collection:
 
 data_processing:
   value: true
-  # chunks: [c015]
-  evidence: "[chunks: c015] \"Each CSV file in this directory is a one-to-one mapping to the OMOP CDM tables.\""
+  # chunks: [c015, c019]
+  evidence: "[search_notes] \"D120: c019 supplies contextual file-format standards and automated + custom processing evidence; it does not identify processing software. D104 direct software evidence remains in c018.\" [chunks: c015] \"Each CSV file in this directory is a one-to-one mapping to the OMOP CDM tables.\" [chunks: c019] \"| environment               | This directory contains data collected through an environmental sensor device custom built for the AI-READI project.                                                                             | [Earth Science Data Systems (ESDS) format](https://www.earthdata.nasa.gov/esdis/esco/standards-and-practices/ascii-file-format-guidelines-for-earth-science-data) |\" [chunks: c019] \"| wearable_activity_monitor | This directory contains data collected through a wearable fitness tracker.                                                                                                                       | [Open mHealth](https://www.openmhealth.org/documentation/#/schema-docs/schema-library)                                                                            |\" [chunks: c019] \"| Processing   | custom / ad hoc | automated + custom |automated + custom | automated + custom |\""
 
 processing_software:
   value: true
-  # chunks: [c018]
-  evidence: "[chunks: c018] \"clinical data outside of expected min/max ranges were flagged in REDCap, which was visible in reports viewed by clinical research coordinators (CRCs) and Data Managers\""
+  # chunks: [c018, c019]
+  evidence: "[search_notes] \"D120: c019 supplies contextual file-format standards and automated + custom processing evidence; it does not identify processing software. D104 direct software evidence remains in c018.\" [chunks: c018] \"clinical data outside of expected min/max ranges were flagged in REDCap, which was visible in reports viewed by clinical research coordinators (CRCs) and Data Managers\" [chunks: c019] \"| environment               | This directory contains data collected through an environmental sensor device custom built for the AI-READI project.                                                                             | [Earth Science Data Systems (ESDS) format](https://www.earthdata.nasa.gov/esdis/esco/standards-and-practices/ascii-file-format-guidelines-for-earth-science-data) |\" [chunks: c019] \"| wearable_activity_monitor | This directory contains data collected through a wearable fitness tracker.                                                                                                                       | [Open mHealth](https://www.openmhealth.org/documentation/#/schema-docs/schema-library)                                                                            |\" [chunks: c019] \"| Processing   | custom / ad hoc | automated + custom |automated + custom | automated + custom |\""
 
 ml_training_dataset:
   value: true

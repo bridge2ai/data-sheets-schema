@@ -163,6 +163,7 @@ def test_every_evidence_string_occurs_verbatim_in_its_bundle(path, predicate):
 
 def test_absence_supported_search_is_reproducible():
     import subprocess
+    import sys
     path = ROOT / 'data/context/kids_first_context.yaml'
     entry = yaml.safe_load(path.read_text())['ml_training_dataset']
     state, notes, _, _ = parse_evidence(entry['evidence'])
@@ -170,14 +171,17 @@ def test_absence_supported_search_is_reproducible():
     record = (ROOT / 'scripts/adhoc/context_evidence_5517_r3_kids_first_search.txt').read_text()
     command = json.loads(next(l.removeprefix('# Command (JSON argv): ') for l in record.splitlines()
                               if l.startswith('# Command (JSON argv): ')))
-    assert command[:5] == ['rg', '--hidden', '--no-ignore', '-n', '-i']
+    assert command[:2] == ['python', 'scripts/adhoc/context_evidence_5517_search.py']
+    pattern = command[2]
     assert command[-1] == 'notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt'
     for term in ('artificial intelligence', 'deep learning', 'AI-ready', 'AI/ML'):
-        assert term in command[5]
-    assert 'research|resource' not in command[5]
+        assert term in pattern
+    assert 'research|resource' not in pattern
     digest = hashlib.sha256((ROOT / command[-1]).read_bytes()).hexdigest()
-    assert digest in record and digest in notes and command[5] in notes
-    result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True)
+    assert digest in record and digest in notes and pattern in notes
+    # Use this test's interpreter; no ripgrep installation or skip required.
+    result = subprocess.run([sys.executable, *command[1:]], cwd=ROOT,
+                            text=True, capture_output=True, timeout=60)
     assert result.returncode == 0
     assert record.split('# Matching lines: ', 1)[1].split('\n', 1)[1] == result.stdout
     assert '1440:' in result.stdout and '1440' in notes and 'downstream use' in notes

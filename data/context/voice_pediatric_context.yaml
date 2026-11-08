@@ -5,8 +5,8 @@
 
 human_subjects:
   value: true
-  # chunks: [c002]
-  evidence: "[chunks: c002] \"Patients/healthy volunteers at the Hospital for Sick Children were considered for enrollment in the study.\" [chunks: c002] \"Following confirmation of eligibility, parental or participant consent was obtained prior to data collection and data sharing.\""
+  # chunks: [c002, c003, c005]
+  evidence: "[chunks: c002] \"Patients/healthy volunteers at the Hospital for Sick Children were considered for enrollment in the study.\" [chunks: c002] \"Following confirmation of eligibility, parental or participant consent was obtained prior to data collection and data sharing.\" [chunks: c003] \"Data collection and sharing was approved by the Research Ethics Board at the Hospital for Sick Children.\" [chunks: c005] \"When children will be participating in the research, parents or guardians will provide consent, and children will provide verbal assent where appropriate.\""
 
 regulated_access:
   value: true
@@ -25,8 +25,8 @@ data_collection:
 
 data_processing:
   value: true
-  # chunks: [c002]
-  evidence: "[chunks: c002] \"torchaudio_mfcc.parquet (n=23533) contains Mel-frequency cepstrum coefficients of dimension 60xT using the same parameters as the mel spectrograms.\""
+  # chunks: [c002, c003]
+  evidence: "[search_notes] \"Release qualification for v1.1.0: manual checking is documented by the c003 release note quoted below; retained c002 describes feature derivation.\" [chunks: c002] \"torchaudio_mfcc.parquet (n=23533) contains Mel-frequency cepstrum coefficients of dimension 60xT using the same parameters as the mel spectrograms.\" [chunks: c003] \"b2ai-voice-pediatric v1.1: No new participants released in this minor update, but releasing audio features for all free speech tasks that were manually checked for presence of unconsented speakers and PII.\""
 
 processing_software:
   value: true
