@@ -1,7 +1,7 @@
 """#4354 U1 scanner admission controls; offline source copies, 2026-11-06.
 
-The foundation has no public CLI/controller yet. That boundary must still fail
-explicitly after the validated dispatch has been derived successfully.
+The installed offline CLI is source-derived separately from execution admission.
+A copied source fixture without that consumer must still fail explicitly.
 """
 import ast
 
@@ -33,9 +33,30 @@ def test_executable_validator_prefix_is_not_ignored(tmp_path, statement):
         scopes(root)
 
 
-def test_native_route_requires_later_cli_consumer():
+def test_native_route_derives_actual_offline_v2_cli_consumer():
+    result = scan.derive_native_shared_route(ROOT, scan._tree(ROOT / RUNNER))
+    assert result['cli'] == 'd4d prompt render-native-shared'
+    assert result['enabled_values'] == [1] and result['renderer'] == 26
+    assert result['runtime_binding']['path'].endswith('/native_execution_registration_v2.py')
+    assert 'separate acceptance gates' in result['runtime_binding']['basis']
+    assert any(row.startswith('src/data_sheets_schema/cli/prompt.py:') for row in result['evidence'])
+    assert any(row.startswith('src/data_sheets_schema/native_execution_registration_v2.py:')
+               for row in result['evidence'])
+
+
+def test_native_route_refuses_explicit_missing_cli_consumer(tmp_path):
+    root = fixture_root(tmp_path)
+    relative = 'src/data_sheets_schema/cli/prompt.py'
+    tree = ast.parse((ROOT / relative).read_text())
+    matches = [node for node in tree.body if isinstance(node, ast.FunctionDef)
+               and node.name == 'render_native_shared']
+    assert len(matches) == 1
+    tree.body.remove(matches[0])
+    path = root / relative
+    path.parent.mkdir(parents=True)
+    path.write_text(ast.unparse(tree))
     with pytest.raises(scan.ConfigError, match='missing offline render CLI consumer'):
-        scan.derive_native_shared_route(ROOT, scan._tree(ROOT / RUNNER))
+        scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
 
 
 def test_native_route_cannot_omit_bc1_exclusion(tmp_path):
