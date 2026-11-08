@@ -133,7 +133,17 @@ def test_round7_refresh_preserves_history_and_excludes_dedicated_sg2():
     proof = data['ci_refresh_5213_20261105']
     local = {f: v for block in data['local_overrides'] for f, v in block['file_seconds'].items()}
     assert len(local) == len(proof['weights']) == 25
-    assert len(set(data['file_seconds']) - set(local)) == 635
+    # PR5531 fix C adds one measured file without changing the historical
+    # round-7 population or its local/CI provenance distinction.
+    additions = {'tests/test_pr5531_regressions.py'}
+    assert len(set(data['file_seconds']) - set(local) - additions) == 635
+    refresh = data['source']['pr5531_fix_c_local_20261108']
+    assert set(refresh['file_seconds']) == additions | {'tests/test_bc1_pipeline.py'}
+    assert refresh['previous_file_seconds'] == {
+        'tests/test_pr5531_regressions.py': None, 'tests/test_bc1_pipeline.py': 47.963}
+    for name, seconds in refresh['file_seconds'].items():
+        assert seconds > 0
+        assert data['file_seconds'][name] == seconds
     assert proof['run_id'] == 41990198212
     assert len(proof['sg2_local_seconds']) == 3
     assert Counter(row['basis'] for row in proof['weights']) == {
