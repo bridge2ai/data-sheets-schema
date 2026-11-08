@@ -201,7 +201,12 @@ def test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read(exe
         execute.read_final(case['raw'])
 
 
-@pytest.mark.parametrize('role,expected', [('review', 'independent v2 approval'), ('ci', 'full v2 required CI')])
+@pytest.mark.parametrize('role,expected', [
+    pytest.param('review', 'v2 review decision must be approved',
+                 id='review-independent v2 approval'),
+    pytest.param('ci', 'v2 CI check roster differs from the exact required event roster',
+                 id='ci-full v2 required CI'),
+])
 def test_saved_readback_revalidates_consumed_v2_approvals(execution_case, monkeypatch, role, expected):
     """A partial capture cannot omit its consumed independent approval checks."""
     case = execution_case

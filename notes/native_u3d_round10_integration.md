@@ -68,3 +68,18 @@ The non-mutating test profiler was parsing a module filename on every Python
 function call. Reject non-target function names first, retaining the exact
 module/name match, previous profiler chaining, and entry refusal semantics.
 No production deadline or guard is changed. Re-canary before running variants.
+
+The optimized-observer canary at 1d83ecad0 still stops at the selected attempt
+deadline (1 failure, 1570.92 supervised seconds). The real deferred utility
+callbacks have run, but full public completion remains an additional blocker.
+The selected runtime limit is retained; no timing or native acceptance is claimed.
+
+## R10-6: saved-approval tests expect obsolete refusal messages
+
+At 1d83ecad0 both tampering cases first read the saved result successfully, then
+the real A6 authorization verifier rejects the modified consumed approval.
+Only the old expected-message regex fails: A6 reports `v2 review decision must
+be approved` and `v2 CI check roster differs from the exact required event roster`.
+Update those two exact expectations, retaining stable explicit pytest IDs and
+all successful-read, artifact-mutation and ValueError assertions. No production
+authorization behavior changes. Recheck each original node before counting it.
