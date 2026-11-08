@@ -49,11 +49,11 @@ def prepare():
         (tree / relative).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / relative, tree / relative)
     c.git('init', cwd=tree)
-    c.git('add', '--all', cwd=tree)
-    # git archive omits Gitlink entries; restore the exact index identity.
-    pin = c.git('ls-tree', 'cf50d9a1c059f3b5030103378ccef33619475dde', 'fairscape_models').decode().split()
-    assert pin[:2] == ['160000', 'commit']
-    c.git('update-index', '--add', '--cacheinfo', '160000', pin[2], 'fairscape_models', cwd=tree)
+    objects = c.git('rev-parse', '--path-format=absolute', '--git-path', 'objects').decode().strip()
+    (tree / '.git/objects/info/alternates').write_text(objects + '\n')
+    # Preserve all tracked-but-ignored files and every Gitlink, not a fresh add.
+    c.git('read-tree', 'cf50d9a1c059f3b5030103378ccef33619475dde', cwd=tree)
+    c.git('add', '--', *paths, cwd=tree)
     c.git('commit', '-m', 'Offline saved-main parity with identical test harness', cwd=tree)
     manifest = {'baseline': 'cf50d9a1c059f3b5030103378ccef33619475dde',
                 'private_commit': c.git('rev-parse', 'HEAD', cwd=tree).decode().strip(),
@@ -67,13 +67,14 @@ def repair_baseline():
     assert not c.git('status', '--porcelain', cwd=tree).strip()
     pin = c.git('ls-tree', base, 'fairscape_models').decode().split()
     assert pin[:2] == ['160000', 'commit']
-    assert not c.git('ls-tree', 'HEAD', 'fairscape_models', cwd=tree).strip()
-    c.git('update-index', '--add', '--cacheinfo', '160000', pin[2], 'fairscape_models', cwd=tree)
-    c.git('commit', '-m', 'Restore exact saved-main Gitlink in private parity harness', cwd=tree)
     objects = c.git('rev-parse', '--path-format=absolute', '--git-path', 'objects').decode().strip()
     (tree / '.git/objects/info/alternates').write_text(objects + '\n')
-    delta = c.git('diff', '--name-only', base, 'HEAD', cwd=tree).decode().splitlines()
     expected = ['scripts/adhoc/u3e_parity_plugin_20261108.py', 'tests/test_native_u1_api_parity.py']
+    c.git('read-tree', base, cwd=tree)
+    c.git('add', '--', *expected, cwd=tree)
+    assert sorted(c.git('diff', '--cached', '--name-only', base, cwd=tree).decode().splitlines()) == expected
+    c.git('commit', '-m', 'Restore complete saved-main index including ignored tracked evidence', cwd=tree)
+    delta = c.git('diff', '--name-only', base, 'HEAD', cwd=tree).decode().splitlines()
     assert sorted(delta) == expected
     assert not c.git('status', '--porcelain', cwd=tree).strip()
     manifest = {'baseline': base, 'previous_private_commit': before,
