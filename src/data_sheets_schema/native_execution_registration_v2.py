@@ -464,7 +464,10 @@ def _authorizations(raw, value, *, review_path, ci_path, launch_word_path):
     if type(ci['checks']) is not dict or set(ci['checks']) != set(required_checks(ci['workflow_event'])):
         raise ValueError('v2 CI check roster differs from the exact required event roster')
     _ci_tested_commit(binding['source_commit'], ci['tested_commit'], ci['workflow_event'], ci['workflow_ref'])
-    pass  # MP: deliberately removed refusal
+    if (type(ci['workflow_sha256']) is not dict
+            or ci['workflow_sha256'] != _workflow_sha(
+                binding['source_commit'], ci['tested_commit'], ci['workflow_event'])):
+        raise ValueError('v2 CI workflow map differs from exact reviewed and tested workflow bytes')
     action_url = re.escape(_ci_repository_url()) + r'/actions/runs/[1-9][0-9]*(?:/job/[1-9][0-9]*)?'
     for row in ci['checks'].values():
         c.exact(row, {'head_sha', 'status', 'conclusion', 'details_url'}, 'v2 CI check')
