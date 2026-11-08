@@ -55,7 +55,9 @@ def classify(run, node, message, trace):
         return 'corrected_U4b_R8_receipt_fixture_capability_map'
     if run == 'u4-cohort' and "KeyError: 'runtime'" in text:
         return 'corrected_U4b_R9_legacy_parser_lookup'
-    if run == 'u5-core' and 'render source must be assigned candidate or pinned baseline' in text:
+    if (run == 'u5-core'
+            and node == 'tests.test_native_u5_external_schema::test_same_external_320_api_instruction_before_after'
+            and 'render source must be the assigned candidate or pinned baseline' in text):
         return 'corrected_U4b_R12_API_helper_scratch_root'
     return 'UNCLASSIFIED'
 
