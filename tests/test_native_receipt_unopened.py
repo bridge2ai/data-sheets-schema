@@ -25,9 +25,10 @@ def test_native_receipt_and_manifest_are_actually_consumed(tmp_path, tool, faile
     assert result['receipt_chunks_unopened_basis'] == {
         'mode': 'reported_only', 'receipt': 'original_phase1_receipt',
         'reads': 'successful_file_tool_windows', 'permitted_shell_reads_count_as_unopened': True}
-    from data_sheets_schema.native_execution_authority_v2 import loaded_dependencies, dependency_identity
-    with loaded_dependencies(dependency_identity()) as controls:
-        assert controls['run_native_canary'].observation_problems(result) == []
+    from data_sheets_schema.native_execution_authority_v2 import dependency_identity
+    from data_sheets_schema.native_execution_capabilities import loaded_capabilities
+    with loaded_capabilities(dependency_identity()) as controls:
+        assert controls.gate_members['observation_problems'](result) == []
 
 
 def test_native_gate_passes_both_captured_receipt_and_manifest():

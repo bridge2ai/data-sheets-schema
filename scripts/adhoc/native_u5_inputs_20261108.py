@@ -20,7 +20,7 @@ import subprocess
 import tarfile
 
 ROOT = Path(__file__).resolve().parents[2]
-SCRATCH = ROOT.parent / 'scratch-native-u5-prep'
+SCRATCH = Path(os.environ.get('D4D_U5_INPUT_ROOT', str(ROOT.parent / 'scratch-native-u5-prep')))
 BASE = 'd258611c5381bd7cf973817ebd2b6a04f65818b3'
 SCHEMA = '5e382f0c423fa8b0a331340adcdfac5a328bd6b3'
 ENV = {'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'GIT_NO_LAZY_FETCH': '1',

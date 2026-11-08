@@ -23,6 +23,18 @@ wrapper.runner.__file__ = __file__
 wrapper.runner.PROFILE = wrapper.sandbox_profile()
 wrapper.dependency.SCRATCH = SCRATCH
 wrapper.dependency.DESTINATION = SCRATCH / 'dependencies' / ('fairscape-' + wrapper.dependency.PIN)
+_environment = wrapper.runner.clean_environment
+
+
+def clean_environment(out, interpreter_directory):
+    env = _environment(out, interpreter_directory)
+    # Retest U5's exact cohorts with new immutable exports in this task's
+    # scratch, never replacing the retained U5 inputs/evidence.
+    env['D4D_U5_INPUT_ROOT'] = str(SCRATCH)
+    return env
+
+
+wrapper.runner.clean_environment = clean_environment
 
 if __name__ == '__main__':
     if sys.argv[1:] == ['--hydrate-local-dependency']:

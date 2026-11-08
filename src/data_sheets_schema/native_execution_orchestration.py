@@ -133,6 +133,8 @@ def _join_subscription_authority(guard, raw, value, authorization, *, current_la
             validate_prepared_runtime(value['runtime'])
             if type(guard) is not SubscriptionGuard or module.VERSION != 2:
                 raise ValueError('current native engine requires the exact v2 subscription guard')
+            if guard._clock is not module._now:
+                raise ValueError('current native engine requires the actual dispatch clock')
         module.SubscriptionGuard(guard.raw, expected_sha256=module.sha(guard.raw),
             registration_raw=raw, runtime=value['runtime'],
             launch_word_raw=authorization['raw']['launch_word'], check_freshness=current_launch, **extra)

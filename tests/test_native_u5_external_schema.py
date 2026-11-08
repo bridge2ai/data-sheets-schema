@@ -17,7 +17,7 @@ from data_sheets_schema.schema_snapshot import capture_schema
 from tests.test_native_shared_selection import declaration, pin, save
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRATCH = ROOT.parent / 'scratch-native-u5-prep'
+SCRATCH = Path(os.environ.get('D4D_U5_INPUT_ROOT', str(ROOT.parent / 'scratch-native-u5-prep')))
 SCHEMA_COMMIT = '5e382f0c423fa8b0a331340adcdfac5a328bd6b3'
 BASE_COMMIT = 'd258611c5381bd7cf973817ebd2b6a04f65818b3'
 

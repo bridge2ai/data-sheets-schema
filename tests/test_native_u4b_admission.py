@@ -105,3 +105,15 @@ def test_lower_engine_join_cannot_downgrade_to_legacy_admission():
         engine._join_subscription_authority(SimpleNamespace(raw=b'{"version":1}'), b'old',
             {'runtime': {'limits_basis': 'historical'}},
             {'raw': {'launch_word': b'old', 'review': b'old'}}, current_launch=True)
+
+
+def test_current_engine_refuses_same_class_injected_clock(tmp_path, monkeypatch):
+    args, value, paths, raw = prepared(tmp_path, monkeypatch)
+    instance = admission.load_current(paths['guard'], guard.sha(raw),
+        registration_raw=args['registration_raw'], runtime=value['runtime'],
+        launch_word_path=paths['word'], review_path=paths['review'])
+    instance._clock = lambda: 0
+    with pytest.raises(ValueError, match='actual dispatch clock'):
+        engine._join_subscription_authority(instance, args['registration_raw'], value,
+            {'raw': {'launch_word': args['launch_word_raw'], 'review': args['review_bundle_raw']}},
+            current_launch=True)
