@@ -56,6 +56,33 @@ def _path(value):
     return path
 
 
+def _physical_overlap(directory, protected):
+    """Check existing identities without folding case or creating a path.
+
+    PosixPath.resolve() preserves case aliases on macOS. Prospective leaves
+    may be absent, but the protected source/executable must exist. Other stat
+    errors refuse admission rather than treating an unreadable path as new.
+    """
+    def identity(path):
+        info = path.stat()
+        return info.st_dev, info.st_ino
+
+    protected_identity = identity(protected)
+    directory_identity = None
+    for candidate in (directory, *directory.parents):
+        try:
+            current = identity(candidate)
+        except FileNotFoundError:
+            continue
+        if candidate == directory:
+            directory_identity = current
+        if current == protected_identity:
+            return True
+    if directory_identity is not None:
+        return any(identity(parent) == directory_identity for parent in protected.parents)
+    return False
+
+
 def _pin(path, raw):
     return {'path': str(path), 'sha256': sha(raw), 'bytes': len(raw)}
 
@@ -107,7 +134,8 @@ def authorization(raw, provisional):
     runtime = validate_provisional_runtime(provisional)
     directory = _path(value['directory'])
     for protected in (ROOT, _path(runtime['executable']['path'])):
-        if directory == protected or directory in protected.parents or protected in directory.parents:
+        if (directory == protected or directory in protected.parents or protected in directory.parents
+                or _physical_overlap(directory, protected)):
             raise ValueError('probe sequence directory overlaps source or the selected executable')
     if value['provisional_runtime_sha256'] != sha(canonical(runtime)):
         raise ValueError('probe authorization names another provisional runtime')

@@ -79,6 +79,8 @@ def file_identity(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('--compare', type=Path,
+                        help='Prior retained manifest: compare exact nonpassing node/state/group identities')
     parser.add_argument('runs', nargs='+')
     args = parser.parse_args()
     output = args.output.absolute()
@@ -148,6 +150,29 @@ def main():
     for row in failures:
         row['latest_state'] = latest[row['node']]['state']
         row['latest_run'] = latest[row['node']]['run']
+    prior_comparison = None
+    if args.compare is not None:
+        prior_path = args.compare.absolute()
+        if prior_path.parent != SCRATCH or prior_path.resolve() != prior_path:
+            raise ValueError('comparison manifest must be a literal file in assigned scratch')
+        with prior_path.open('rb') as stream:
+            prior_raw = stream.read(16_000_001)
+        if not 0 < len(prior_raw) <= 16_000_000:
+            raise ValueError('comparison manifest exceeds its byte bound')
+        prior = json.loads(prior_raw)
+        old = {row['node']: {'state': row['state'], 'group': row['group']}
+               for row in prior['latest_nonpassing']}
+        current = {row['node']: {'state': row['state'], 'group': row['group']}
+                   for row in latest.values() if row['state'] != 'passed'}
+        prior_comparison = {
+            'prior_manifest': {'path': str(prior_path), 'bytes': len(prior_raw),
+                               'sha256': hashlib.sha256(prior_raw).hexdigest()},
+            'same_nonpassing_node_state_group': old == current,
+            'prior_count': len(old), 'current_count': len(current),
+            'new_or_changed': [{'node': node, 'prior': old.get(node), 'current': row}
+                               for node, row in sorted(current.items()) if old.get(node) != row],
+            'no_longer_nonpassing': sorted(set(old) - set(current)),
+            'scope': 'Exact node/state/classification identities, not byte-equal traces or native acceptance.'}
     result = {'kind': 'native_u4b_validation_evidence', 'version': 1,
         'base': BASE, 'head': base.git('rev-parse', 'HEAD'),
         'status': base.git('status', '--porcelain', '--untracked-files=all'),
@@ -157,6 +182,7 @@ def main():
         'latest_nonpassing': [row for row in latest.values() if row['state'] != 'passed'],
         'unchanged_files': unchanged, 'export_manifests': exports, 'api_instruction_parity_inputs': api,
         'fresh_comparison_artifacts': fresh_comparisons,
+        'prior_nonpassing_comparison': prior_comparison,
         'scope': 'Offline preparation; overlapping cohorts, not native acceptance. '
                  'Bootstrap origin witnesses do not enumerate every xdist worker import. '
                  'Cleanup is limited to observed PID/creation-time descendants.'}
@@ -166,6 +192,7 @@ def main():
     summary = {'path': str(output), 'sha256': hashlib.sha256(encoded).hexdigest(),
         'head': result['head'], 'latest_named_counts': result['latest_named_counts'],
         'failure_occurrence_groups': dict(groups),
+        'prior_nonpassing_comparison': prior_comparison,
         'runs': [{'name': run['name'], 'counts': run['counts'], 'checks': run['evidence_checks']}
                  for run in runs]}
     print(json.dumps(summary, sort_keys=True))

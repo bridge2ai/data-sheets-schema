@@ -10,6 +10,7 @@ import io
 import json
 from pathlib import Path
 import socket
+import sys
 import time
 from types import SimpleNamespace
 
@@ -136,6 +137,63 @@ def test_observation_cannot_write_source_or_executable_envelope(prepared, monkey
     monkeypatch.setattr(producer, '_identity', lambda *a: pytest.fail('overlap reached binary identity'))
     monkeypatch.setattr(provider, 'local_provider', lambda **k: pytest.fail('overlap reached transport'))
     with pytest.raises(ValueError, match='overlaps'):
+        sequence.produce_observation(sequence.canonical(selected), prepared['provisional'])
+
+
+def _existing_case_alias(path):
+    """Find a real case alias by identity; never create or rename a source."""
+    for index in range(len(path.parts) - 1, 0, -1):
+        parts = list(path.parts)
+        parts[index] = parts[index].swapcase()
+        alias = Path(*parts)
+        if alias == path:
+            continue
+        try:
+            if alias.samefile(path):
+                return alias
+        except FileNotFoundError:
+            continue
+    pytest.skip('filesystem has no case alias for this protected path')
+
+
+@pytest.mark.skipif(sys.platform != 'darwin', reason='real macOS case-alias regression')
+@pytest.mark.parametrize('location', ['source_child', 'source_parent', 'binary_parent'])
+def test_real_case_alias_overlap_refuses_before_effects(prepared, monkeypatch, location, tmp_path):
+    selected = sequence.strict_json(prepared['authorization'])
+    binary = Path(prepared['provisional']['executable']['path'])
+    if location == 'source_child':
+        target = _existing_case_alias(sequence.ROOT) / ('not-created-' + tmp_path.name)
+        assert not target.exists()
+    else:
+        target = _existing_case_alias(sequence.ROOT.parent if location == 'source_parent' else binary.parent)
+    selected['directory'] = str(target)
+    monkeypatch.setattr(producer, '_identity', lambda *a: pytest.fail('case overlap reached binary identity'))
+    monkeypatch.setattr(provider, 'local_provider', lambda **k: pytest.fail('case overlap reached transport'))
+    monkeypatch.setattr(sequence, '_new', lambda *a: pytest.fail('case overlap wrote an artifact'))
+    monkeypatch.setattr(Path, 'mkdir', lambda *a, **k: pytest.fail('case overlap created a directory'))
+    with pytest.raises(ValueError, match='overlaps'):
+        sequence.produce_observation(sequence.canonical(selected), prepared['provisional'])
+    if location == 'source_child':
+        assert not target.exists()
+
+
+def test_ordinary_prospective_sibling_is_disjoint_and_not_created(prepared):
+    selected = sequence.strict_json(prepared['authorization'])
+    target = prepared['root'].parent / 'ordinary-sibling'
+    selected['directory'] = str(target)
+    assert sequence.authorization(sequence.canonical(selected), prepared['provisional']) == selected
+    assert not target.exists()
+
+
+def test_source_symlink_alias_still_refuses_before_effects(prepared, monkeypatch, tmp_path):
+    link = tmp_path / 'source-alias'
+    link.symlink_to(sequence.ROOT, target_is_directory=True)
+    selected = sequence.strict_json(prepared['authorization'])
+    selected['directory'] = str(link / 'not-created')
+    monkeypatch.setattr(producer, '_identity', lambda *a: pytest.fail('symlink overlap reached binary identity'))
+    monkeypatch.setattr(provider, 'local_provider', lambda **k: pytest.fail('symlink overlap reached transport'))
+    monkeypatch.setattr(Path, 'mkdir', lambda *a, **k: pytest.fail('symlink overlap created a directory'))
+    with pytest.raises(ValueError, match='canonical and unaliased'):
         sequence.produce_observation(sequence.canonical(selected), prepared['provisional'])
 
 
