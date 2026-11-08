@@ -24,6 +24,74 @@ def receipt_observation(transcript, bundle, receipt, manifest):
     return out
 
 
+def audit_counts(prepared):
+    """Compare captured report totals with a freshly reconstructed typed audit.
+
+    This row never borrows a successful receipt, phase or evidence verdict.
+    Missing inputs remain an explicit unchecked refusal, including when the
+    shared report instrument merely reports that no total was stated.
+    """
+    from . import native_shared_contract as c
+    from . import native_shared_gates as native
+    from . import native_shared_stage as stage
+    from .report_audit_totals import check_report_audit_totals
+    row = {'checked': False, 'passed': False, 'compared_artifacts': {},
+           'comparison': None, 'reason': None}
+    try:
+        final = prepared.get('final_result')
+        if (type(final) is not dict or type(final.get('checked')) is not bool
+                or type(final.get('findings')) is not list):
+            raise ValueError('native final evidence is missing or malformed')
+        run = native._run(prepared)
+        if run.phase1 is None or run.phase1.core is None:
+            raise ValueError('audit counts precede the sealed originals')
+        if run.reader.pool is None:
+            raise ValueError('audit counts require captured artifacts, not live fallback')
+        assembly = run.reader.read('typed_assembly', run.selection.role('typed_assembly'))
+        row['compared_artifacts']['typed_assembly'] = c.pin_dict(assembly.pin)
+        completion = stage.check_assembly(run.selection, run.binding, run.phase1,
+                                          run.history, assembly.raw)
+        audit = run.reader.read('audit', run.selection.role('audit'))
+        row['compared_artifacts']['derived_audit'] = c.pin_dict(completion.audit.pin)
+        if audit != completion.audit:
+            raise ValueError('captured audit differs from the freshly derived assembly audit')
+        report = native._current(run, 'final_report')
+        row['compared_artifacts']['final_report'] = c.pin_dict(report.pin)
+        for item in (assembly, audit, report):
+            if prepared['snapshot'].read(item.pin.path, item.pin.role) != item.raw:
+                raise ValueError('audit-count artifacts differ between captured views')
+        audit_document = c.strict_json(audit.raw, 'derived native audit',
+                                       c.HARD_LIMITS['assembly_bytes'])
+        # The shared instrument accepts strings or paths. A trailing newline
+        # forces its text branch even if a one-line report spells a live path.
+        compared = check_report_audit_totals(report.raw.decode('utf-8') + '\n', audit_document)
+        row['comparison'] = compared
+        typed_totals = (type(compared.get('stated_total')) is int
+                        and type(compared.get('computed_total')) is int
+                        and compared['stated_total'] >= 0 and compared['computed_total'] >= 0)
+        row['checked'] = compared.get('checked') is True and typed_totals
+        row['passed'] = (row['checked'] and compared.get('status') == 'consistent'
+                         and compared['stated_total'] == compared['computed_total']
+                         and compared.get('mismatches') == [] and compared.get('findings') == [])
+        if not row['passed']:
+            row['reason'] = (compared.get('reason') or
+                             'report audit totals are missing, contradictory or unequal')
+    except (ValueError, TypeError, KeyError, AttributeError, UnicodeError) as exc:
+        row['checked'] = row['passed'] = False
+        row['reason'] = type(exc).__name__ + ': ' + str(exc)
+    return row
+
+
+def evidence_gate(prepared):
+    """Retain the evidence obligation and its independent audit-count row."""
+    counts = audit_counts(prepared)
+    final = prepared.get('final_result')
+    checked = type(final) is dict and final.get('checked') is True and counts['checked'] is True
+    return {'checked': checked,
+            'passed': checked and final.get('findings') == [] and counts['passed'] is True,
+            'result': deepcopy(final), 'audit_counts': counts}
+
+
 def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown, live,
           first_stop, runtime_authority, keep_awake, keep_awake_raw=None, runtime_authority_expected=None):
     """Run the fixed obligations; only selected semantic readers differ."""
@@ -167,8 +235,7 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
     run('schema', schemas)
     run('pair', paired)
     run('receipts', lambda: native.receipt_gate(prepared))
-    run('evidence', lambda: {'passed': prepared['final_result'].get('checked') is True
-        and prepared['final_result'].get('findings') == [], 'result': deepcopy(prepared['final_result'])})
+    run('evidence', lambda: evidence_gate(prepared))
     run('observation', observed)
     run('accounting', accounting)
     run('runtime_authority', lambda: runtime_observation_result(

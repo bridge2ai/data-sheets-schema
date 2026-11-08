@@ -53,7 +53,7 @@ def _registration_body(composition_path, system_path, **kwargs):
 
 def registration(composition_path, system_path, **kwargs):
     """Produce a closed v2 proposal; never reserve an attempt or grant admission."""
-    body = _registration_body(composition_path, system_path, **kwargs)
+    body = _require_runtime_observation(_registration_body(composition_path, system_path, **kwargs))
     with authority.loaded_dependencies(body['dependencies']) as controls:
         value = controls['prepare_registration_v2'].envelope(body)
         controls['prepare_registration_v2'].require_envelope(value)
@@ -92,10 +92,25 @@ def verified_v2_body(body_raw, *, preparation_raw):
         raise ValueError('incomplete native shared execution registration') from exc
     if c.canonical(value) != c.canonical(expected):
         raise ValueError('execution registration differs from its selected authorities')
-    return value
+    return _require_runtime_observation(value)
 
 def verified(raw):
     """Explicit v2 outer-envelope verifier; no historical fallback."""
     dependencies = authority.dependency_identity()
     with control_loading.loaded_controls(dependencies) as controls:
-        return execution_v2.verified(raw, classifier_projection=controls)
+        value = execution_v2.verified(raw, classifier_projection=controls)
+    return _require_runtime_observation(value)
+
+
+def _require_runtime_observation(value):
+    """Require U4b's observed registration fields at the host-reading boundary.
+
+    The fixed input-only reconstruction graph remains unchanged. Historical
+    runtime profiles retain their own validators; current U4b proposals and
+    readback must also recheck the explicitly pinned observation evidence.
+    """
+    from .native_u4b_runtime import is_prepared_runtime, validate_prepared_runtime
+    runtime = value['runtime']
+    if is_prepared_runtime(runtime):
+        validate_prepared_runtime(runtime)
+    return value

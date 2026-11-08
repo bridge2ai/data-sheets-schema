@@ -118,16 +118,100 @@ def test_declared_and_observed_identity_must_agree(inputs, mutation):
         prepared(inputs)
 
 
-def test_missing_thinking_stays_unobserved_and_preserves_explicit_basis(inputs):
+@pytest.mark.parametrize('declared', [False, {'type': 'adaptive'}])
+def test_missing_thinking_refuses_even_with_an_explicit_declared_setting(inputs, declared):
     _, arguments = inputs
     path = Path(arguments['probe_init_path'])
     init = json.loads(path.read_text())
     del init['thinking']
     path.write_text(json.dumps(init) + '\n')
+    arguments['thinking_setting'] = declared
+    with pytest.raises(ValueError, match='must expose an observed thinking setting'):
+        prepared(inputs)
+
+
+def test_observed_false_is_preserved_and_is_not_missing_thinking(inputs):
+    _, arguments = inputs
+    path = Path(arguments['probe_init_path'])
+    init = json.loads(path.read_text())
+    init['thinking'] = False
+    path.write_text(json.dumps(init) + '\n')
+    arguments['thinking_setting'] = False
     result = prepared(inputs)
     thinking = json.loads(result['limits_basis'])['thinking']
-    assert thinking == {'declared': arguments['thinking_setting'], 'basis': arguments['thinking_basis'],
-                        'observed': {'state': 'not_emitted', 'field': None, 'value': None}}
+    assert thinking == {'declared': False, 'basis': arguments['thinking_basis'],
+                        'observed': {'state': 'observed', 'field': 'thinking', 'value': False}}
+    assert subject.validate_prepared_runtime(result) == result
+
+
+@pytest.mark.parametrize('change', ['absent', 'null'])
+def test_revalidation_refuses_unobserved_thinking_even_when_evidence_is_repinned(inputs, change):
+    runtime = prepared(inputs)
+    path = Path(inputs[1]['probe_init_path'])
+    init = json.loads(path.read_text())
+    if change == 'absent':
+        del init['thinking']
+    else:
+        init['thinking'] = None
+    raw = (json.dumps(init) + '\n').encode('utf-8')
+    path.write_bytes(raw)
+
+    def repin(basis):
+        basis['probe'].update(sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw),
+                              init_sha256=hashlib.sha256(raw.splitlines()[0]).hexdigest())
+        basis['thinking']['observed'] = {'state': 'not_emitted', 'field': None, 'value': None}
+
+    with pytest.raises(ValueError, match='observed thinking setting|explicit boolean'):
+        subject.validate_prepared_runtime(mutate_basis(runtime, repin))
+
+
+@pytest.mark.parametrize('field', ['thinking', 'declared', 'basis', 'observed'])
+def test_registered_thinking_fields_are_required(inputs, field):
+    runtime = prepared(inputs)
+
+    def remove(basis):
+        del (basis if field == 'thinking' else basis['thinking'])[field]
+
+    with pytest.raises(ValueError, match='U4b runtime basis|thinking basis'):
+        subject.validate_prepared_runtime(mutate_basis(runtime, remove))
+
+
+@pytest.mark.parametrize('field', ['thinking', 'declared', 'basis', 'observed'])
+def test_registered_thinking_fields_cannot_be_null(inputs, field):
+    runtime = prepared(inputs)
+
+    def clear(basis):
+        (basis if field == 'thinking' else basis['thinking'])[field] = None
+
+    with pytest.raises(ValueError):
+        subject.validate_prepared_runtime(mutate_basis(runtime, clear))
+
+
+def test_registered_not_emitted_state_cannot_replace_observed_probe_thinking(inputs):
+    runtime = prepared(inputs)
+    changed = mutate_basis(runtime, lambda basis: basis['thinking'].update(
+        observed={'state': 'not_emitted', 'field': None, 'value': None}))
+    with pytest.raises(ValueError, match='saved probe differs'):
+        subject.validate_prepared_runtime(changed)
+
+
+def test_preparation_requires_an_explicit_registered_thinking_setting(inputs):
+    runtime, arguments = inputs
+    del arguments['thinking_setting']
+    with pytest.raises(TypeError, match='thinking_setting'):
+        subject.prepare_runtime(runtime, **arguments)
+
+
+@pytest.mark.parametrize('declared', [True, 'false', {'enabled': False}])
+def test_observed_false_must_equal_the_registered_thinking_value(inputs, declared):
+    _, arguments = inputs
+    path = Path(arguments['probe_init_path'])
+    init = json.loads(path.read_text())
+    init['thinking'] = False
+    path.write_text(json.dumps(init) + '\n')
+    arguments['thinking_setting'] = declared
+    with pytest.raises(ValueError, match='observed thinking differs'):
+        prepared(inputs)
 
 
 @pytest.mark.parametrize('change', ['missing_limits', 'duplicate_init', 'no_init', 'duplicate_key',

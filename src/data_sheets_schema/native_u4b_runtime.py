@@ -5,6 +5,8 @@ copies a binary, discovers account state, or creates launch authority. The
 versioned evidence lives in the existing limits_basis string, preserving the
 historical closed runtime schema. Source-copy evidence is a local observation,
 not authenticated history; a later updater change does not invalidate the copy.
+The addendum's required thinking registration field is the decoded
+limits_basis.thinking object: both its declared and observed values are required.
 """
 from __future__ import annotations
 
@@ -104,9 +106,9 @@ def _saved_init(path):
     # Recognize one explicit field; ambiguous aliases cannot become "missing".
     if any(name in init for name in ('thinkingEnabled', 'thinking_enabled', 'alwaysThinkingEnabled')):
         raise ValueError('unsupported saved init thinking field; explicit adaptation required')
-    thinking = {'state': 'not_emitted', 'field': None, 'value': None}
-    if 'thinking' in init:
-        thinking = {'state': 'observed', 'field': 'thinking', 'value': _thinking(init['thinking'])}
+    if 'thinking' not in init:
+        raise ValueError('saved init must expose an observed thinking setting')
+    thinking = {'state': 'observed', 'field': 'thinking', 'value': _thinking(init['thinking'])}
     return pin, observation, thinking
 
 
@@ -156,7 +158,7 @@ def _copy_evidence(value):
 
 def prepare_runtime(runtime, *, probe_init_path, updater_source, updater_root,
                     thinking_setting, thinking_basis):
-    """Bind existing local evidence, with no copy, process or authority creation."""
+    """Bind existing evidence, including required observed thinking; no execution."""
     result = _profile(runtime)
     root = _physical(updater_root, 'updater root')
     if not root.is_dir():
@@ -167,7 +169,7 @@ def prepare_runtime(runtime, *, probe_init_path, updater_source, updater_root,
     probe, observed, thinking = _saved_init(probe_init_path)
     values._text(thinking_basis, 'declared thinking basis', 512)
     setting = _thinking(thinking_setting)
-    if thinking['state'] == 'observed' and _canonical(thinking['value']) != _canonical(setting):
+    if _canonical(thinking['value']) != _canonical(setting):
         raise ValueError('observed thinking differs from the registered setting')
     basis = {'kind': KIND, 'version': 1, 'probe': probe, 'observed': observed,
              'thinking': {'declared': setting, 'basis': thinking_basis, 'observed': thinking},
@@ -177,7 +179,11 @@ def prepare_runtime(runtime, *, probe_init_path, updater_source, updater_root,
 
 
 def validate_prepared_runtime(runtime):
-    """Recheck pinned evidence; updater-source history is recorded, not reread."""
+    """Recheck pins and required thinking observation; never infer missing values.
+
+    The thinking field lives inside decoded limits_basis, not a new top-level
+    runtime key. Updater-source history is recorded, not reread.
+    """
     result = _profile(runtime)
     raw = result['limits_basis']
     if len(raw.encode('utf-8')) > 4096:
@@ -204,7 +210,7 @@ def validate_prepared_runtime(runtime):
         raise ValueError('runtime declarations differ from the saved init observations')
     values._text(basis['thinking']['basis'], 'declared thinking basis', 512)
     declared = _thinking(basis['thinking']['declared'])
-    if thinking['state'] == 'observed' and _canonical(thinking['value']) != _canonical(declared):
+    if _canonical(thinking['value']) != _canonical(declared):
         raise ValueError('observed thinking differs from the registered setting')
     return result
 
