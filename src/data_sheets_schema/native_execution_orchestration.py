@@ -487,7 +487,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 subscription_observation_verification = validate_saved_observations(
                     launch_guard.raw, guard_snapshot, registration_raw=registration_raw,
                     runtime=value['runtime'], launch_word_raw=authorization['raw']['launch_word'],
-                    transcript_raw=None, complete=False, **guard_extra)
+                    transcript_raw=transcript_raw, complete=False, **guard_extra)
             final = {'kind': KIND, 'version': VERSION, 'attempt_id': value['attempt_id'],
                 'state': 'completed_pending_independent_review' if completed else 'failed',
                 'runtime_gates_passed': completed, **UNASSESSED, 'first_stop': first_stop,
@@ -527,6 +527,36 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 raise first_error from publication_error
             raise
 
+
+
+def _subscription_transcript(result, attempt):
+    """Replay only the fixed transcript member of the captured final basis.
+
+    Failed v2 runs may retain diagnostics for buffered, undelivered events.
+    Their captured bytes remain evidence, never proof of a delivered prefix.
+    Selecting by the file catalog also preserves the no-capture fallback and
+    avoids making an editable diagnostic marker decide whether replay occurs.
+    """
+    files = result.get('captured_files')
+    if type(files) is not dict:
+        raise ValueError('saved subscription transcript lacks a captured file map')
+    path = str(Path(attempt) / 'transcript.jsonl')
+    if path not in files:
+        if result.get('runtime_gates_passed') is True:
+            raise ValueError('completed subscription replay lacks a captured transcript')
+        return None
+    pin = c.exact(files[path], {'bytes', 'sha256', 'roles'}, 'saved subscription transcript pin')
+    size = pin['bytes']
+    if (type(size) is not int or not 0 <= size <= c.HARD_LIMITS['stream_bytes']
+            or type(pin['roles']) is not list or not pin['roles']
+            or any(type(role) is not str or not role for role in pin['roles'])
+            or sorted(set(pin['roles'])) != pin['roles']):
+        raise ValueError('saved subscription transcript pin is untyped or oversized')
+    from .native_shared_evidence import read_regular
+    artifact = read_regular(path, 'subscription_transcript', max_bytes=max(1, size)).captured
+    if artifact.pin.bytes != size or artifact.pin.sha256 != pin['sha256']:
+        raise ValueError('saved subscription transcript differs from its captured pin')
+    return artifact.raw
 
 
 def read_final(registration_raw, *, contract: ExecutionContract,
@@ -590,11 +620,7 @@ def read_final(registration_raw, *, contract: ExecutionContract,
             raise ValueError('saved subscription dispatch state differs')
         if result.get('runtime_gates_passed') is True and guard_reading['dispatched'] is not True:
             raise ValueError('completed native attempt lacks consumed subscription dispatch')
-        transcript_raw = None
-        if result.get('runtime_gates_passed') is True:
-            from .native_shared_evidence import read_regular
-            transcript_raw = read_regular(str(attempt/'transcript.jsonl'), 'subscription_transcript',
-                max_bytes=c.HARD_LIMITS['stream_bytes']).captured.raw
+        transcript_raw = _subscription_transcript(result, attempt)
         observation_verification = validate_saved_observations(guard_raw, guard_reading,
             registration_raw=registration_raw, runtime=value['runtime'],
             launch_word_raw=_file(attempt/'launch_word.json', 'consumed owner word'),

@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+"""Summarize U4b offline validation and failure evidence, 2026-11-08.
+
+Inputs: explicit retained run directories and this committed checkout. Output:
+one new JSON manifest in assigned U4b scratch, with every nonpassing node,
+original trace, artifact digest, source head and latest-node disposition.
+No tests, native programs, providers or network operations are executed.
+"""
+import argparse
+from collections import Counter
+import hashlib
+import importlib.util
+import json
+import os
+from pathlib import Path
+import subprocess
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parents[2]
+SCRATCH = ROOT.parent / 'scratch-native-u4b'
+BASE = '8ac918c603b2172c014b112affdce26a6c8899f6'
+spec = importlib.util.spec_from_file_location('u4b_evidence_base',
+    ROOT / 'scripts/adhoc/summarize_native_u5_prep_20261108.py')
+base = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(base)
+base.SCRATCH = SCRATCH
+UNCHANGED = (
+    'src/data_sheets_schema/shared_generation.py',
+    'src/data_sheets_schema/api_runner.py',
+    'src/download/prompts/canonical_hashes.yaml',
+    'tests/utils/run_spec_boundary_contracts.json',
+    'src/data_sheets_schema/native_subscription_guard.py',
+    'src/data_sheets_schema/native_execution.py',
+    'src/data_sheets_schema/native_execution_registration.py',
+)
+
+
+def classify(run, node, message, trace):
+    text = message + '\n' + trace
+    if 'native renderer requires the sole captured runtime declaration before composition' in text:
+        return 'inherited_R9_3_captured_runtime_class_identity'
+    if 'shared selector call guards/order changed' in text:
+        return 'protected_shared_selector_constructor_proof'
+    if (node == 'tests.test_native_shared_render::test_native_construction_and_replay_use_validated_shared_admission'
+            and 'assert [] == [1, 1]' in text):
+        return 'protected_native_constructor_admission_hook'
+    alias = 'typed_audit.py:311' in text and 'nested or copied receiver alias' in text
+    if node.startswith('tests.test_native_u5_scanner_comparison::'):
+        if alias and '"before":' in text and '"after":' in text and '"returncode": 2' in text:
+            return 'complete_input_comparison_blocked_by_incomplete_derivation'
+        return 'UNCLASSIFIED'
+    if alias:
+        return 'typed_audit_container_alias_proof'
+    if run == 'u4b-components-1' and "KeyError: 'run_native_canary'" in text:
+        return 'corrected_U4b_R8_receipt_fixture_capability_map'
+    if run == 'u4-cohort' and "KeyError: 'runtime'" in text:
+        return 'corrected_U4b_R9_legacy_parser_lookup'
+    if run == 'u5-core' and 'render source must be assigned candidate or pinned baseline' in text:
+        return 'corrected_U4b_R12_API_helper_scratch_root'
+    return 'UNCLASSIFIED'
+
+
+def file_identity(path):
+    return {'path': str(path), 'bytes': path.stat().st_size, 'sha256': base.sha(path)}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('runs', nargs='+')
+    args = parser.parse_args()
+    output = args.output.absolute()
+    if (output.parent != SCRATCH or output.resolve() != output or os.path.lexists(output)
+            or len(set(args.runs)) != len(args.runs)):
+        raise ValueError('require new literal output and unique explicit runs in assigned scratch')
+    runs, latest, failures, groups = [], {}, [], Counter()
+    for name in args.runs:
+        run = base.summarize(name)
+        junit = SCRATCH / name / 'pytest.xml'
+        if not junit.is_file():
+            raise ValueError('missing completed JUnit evidence: ' + name)
+        for case in ET.parse(junit).getroot().iter('testcase'):
+            node = case.get('classname', '') + '::' + case.get('name', '')
+            state, detail = 'passed', None
+            for tag, label in (('failure', 'failed'), ('error', 'errors'), ('skipped', 'skipped')):
+                detail = case.find(tag)
+                if detail is not None:
+                    state = label
+                    break
+            row = {'node': node, 'state': state, 'run': name,
+                   'head': run['source_stability']['before']['head']}
+            if detail is not None:
+                message, trace = detail.get('message', ''), detail.text or ''
+                group = classify(name, node, message, trace)
+                row.update(group=group, message=message, trace=trace)
+                failures.append(row)
+                groups[group] += 1
+            latest[node] = row
+        run['evidence_checks'] = {
+            'source_unchanged_and_clean': run['source_stability']['unchanged'] is True
+                and run['source_stability']['before']['status'] == ''
+                and run['source_stability']['after']['status'] == '',
+            'observed_cleanup': run['outcome']['cleanup_verified'] is True
+                and not run['outcome']['forced_cleanup']
+                and not run['outcome']['interrupted']
+                and not run['outcome']['observation_errors']
+                and not run['outcome']['observed_surviving_pids'],
+            'bootstrap_origin_checks': json.loads((SCRATCH / name / 'worker-outcome.json').read_bytes())
+                ['source_origin_checks_passed'] is True,
+            'network_denied': json.loads((SCRATCH / name / 'network.json').read_bytes())
+                ['network_bind_denied'] is True,
+            'under_3600_seconds': run['outcome']['seconds'] < 3600,
+        }
+        runs.append(run)
+    unchanged = {}
+    for path in UNCHANGED:
+        old = subprocess.check_output(['/usr/bin/git', '--no-replace-objects', 'show', BASE + ':' + path],
+            cwd=ROOT, env=base.ENV, timeout=30)
+        current = (ROOT / path).read_bytes()
+        unchanged[path] = {'base_sha256': hashlib.sha256(old).hexdigest(),
+            'current_sha256': hashlib.sha256(current).hexdigest(), 'equal': old == current}
+    exports = {str(path.relative_to(SCRATCH)): file_identity(path)
+               for path in sorted(SCRATCH.glob('*/manifest.json')) if path.is_file()}
+    api = {str(path.relative_to(SCRATCH)): file_identity(path)
+           for path in sorted((SCRATCH / 'api-comparison-canary/cases').glob('**/instruction.txt'))}
+    for row in failures:
+        row['latest_state'] = latest[row['node']]['state']
+        row['latest_run'] = latest[row['node']]['run']
+    result = {'kind': 'native_u4b_validation_evidence', 'version': 1,
+        'base': BASE, 'head': base.git('rev-parse', 'HEAD'),
+        'status': base.git('status', '--porcelain', '--untracked-files=all'),
+        'generator': file_identity(Path(__file__)), 'runs': runs,
+        'failure_occurrence_groups': dict(groups), 'nonpassing_history': failures,
+        'latest_named_counts': dict(Counter(row['state'] for row in latest.values())),
+        'latest_nonpassing': [row for row in latest.values() if row['state'] != 'passed'],
+        'unchanged_files': unchanged, 'export_manifests': exports, 'api_instruction_parity_inputs': api,
+        'scope': 'Offline preparation; overlapping cohorts, not native acceptance. '
+                 'Bootstrap origin witnesses do not enumerate every xdist worker import. '
+                 'Cleanup is limited to observed PID/creation-time descendants.'}
+    encoded = (json.dumps(result, sort_keys=True, indent=2) + '\n').encode()
+    with output.open('xb') as stream:
+        stream.write(encoded)
+    summary = {'path': str(output), 'sha256': hashlib.sha256(encoded).hexdigest(),
+        'head': result['head'], 'latest_named_counts': result['latest_named_counts'],
+        'failure_occurrence_groups': dict(groups),
+        'runs': [{'name': run['name'], 'counts': run['counts'], 'checks': run['evidence_checks']}
+                 for run in runs]}
+    print(json.dumps(summary, sort_keys=True))
+    if ('UNCLASSIFIED' in groups or result['status'] or not all(x['equal'] for x in unchanged.values())
+            or not all(all(run['evidence_checks'].values()) for run in runs)):
+        raise SystemExit('evidence retained; unresolved classification/scope/witness check')
+
+
+if __name__ == '__main__':
+    main()
