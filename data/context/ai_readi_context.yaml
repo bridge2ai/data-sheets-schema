@@ -6,7 +6,7 @@
 human_subjects:
   value: true
   # chunks: [c002, c010, c011, c015, c019]
-  evidence: "[chunks: c002, c010, c011, c015, c019] AI-READI recruits and collects multi-domain human participant data from adults with and without Type 2 Diabetes Mellitus (T2DM) across three clinical sites (2,280 participants collected between 2023-07-19 and 2025-05-01 in v3.0.0, doi:10.60775/fairhub.3, c015, c019; protocol and IRB-approved human cohort described in c002, c010, c011)."
+  evidence: "[chunks: c002, c010, c011, c015, c019] AI-READI recruits and collects multi-domain human participant data from adults with and without Type 2 Diabetes Mellitus (T2DM) across three clinical sites (2,280 participants collected between 2023-07-19 and 2025-05-01 in v3.0.0, doi:10.60775/fairhub.3, c015, c019; protocol and human cohort with IRB approval described in c002, c010, c011)."
 
 regulated_access:
   value: true
@@ -20,8 +20,8 @@ shared_dataset:
 
 data_collection:
   value: true
-  # chunks: [c002, c004, c010, c011, c015]
-  evidence: "[chunks: c002, c004, c010, c011, c015] AI-READI executes a harmonized multi-site clinical data acquisition protocol across three sites capturing survey responses (REDCap), physical measurements, blood and urine laboratory panels, retinal imaging, 12-lead ECG, continuous glucose monitoring (Dexcom G6), wearable fitness activity (Garmin Vivosmart 5), cognitive and monofilament testing, and home environmental monitoring (c002, c004, c010, c011, c015)."
+  # chunks: [c002, c004, c007, c010, c011, c015]
+  evidence: "[chunks: c002, c004, c007, c010, c011, c015] AI-READI executes a harmonized multi-site clinical data acquisition protocol across three sites capturing survey responses (REDCap), physical measurements, blood and urine laboratory panels, retinal imaging, 12-lead ECG, continuous glucose monitoring (Dexcom G6), wearable fitness activity (Garmin Vivosmart 5), cognitive and monofilament testing, and home environmental monitoring (c002, c004, c010, c011, c015)."
 
 data_processing:
   value: true

@@ -16,7 +16,7 @@ regulated_access:
 shared_dataset:
   value: true
   # chunks: [c002, c003]
-  evidence: "[chunks: c002, c003] Bridge2AI-Voice Pediatric Dataset v1.1.0 is publicly shared with credentialed researchers on PhysioNet (https://physionet.org/content/b2ai-voice-pediatric/1.1.0/, doi:10.13026/mf9s-5r03, c002, c003) as Parquet feature bundles, static acoustic feature TSVs, and pediatric phenotype TSV/JSON files."
+  evidence: "[chunks: c002, c003] Bridge2AI-Voice Pediatric Dataset v1.1.0 is publicly shared with credentialed researchers on PhysioNet (https://physionet.org/content/b2ai-voice-pediatric/1.1.0/, doi:10.13026/mf9s-5r03, c002, c003) as Parquet feature bundles, static_features.tsv, and pediatric phenotype TSV/JSON files."
 
 data_collection:
   value: true
@@ -26,7 +26,7 @@ data_collection:
 data_processing:
   value: true
   # chunks: [c002, c003, c007]
-  evidence: "[chunks: c002, c003, c007] Raw pediatric audio recordings are transformed into 400-point FFT spectrograms, Mel-filterbanks, 60 MFCCs, pitch, and openSMILE and Praat/Parselmouth acoustic features under HIPAA de-identification rules; in v1.1.0, audio features are released for all free speech tasks after manual checking for unconsented speakers and PII (c002, c003, c007)."
+  evidence: "[chunks: c002, c003, c007] Raw pediatric audio recordings are transformed into 400-point FFT spectrograms, Mel spectrograms, Mel-frequency cepstrum coefficients of dimension 60xT, pitch, and openSMILE and Praat/Parselmouth acoustic features under HIPAA de-identification rules; in v1.1.0, audio features are released for all free speech tasks after manual checking for unconsented speakers and PII (c002, c003, c007)."
 
 processing_software:
   value: true

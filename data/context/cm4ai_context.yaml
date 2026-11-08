@@ -26,7 +26,7 @@ data_collection:
 data_processing:
   value: true
   # chunks: [c002, c010, c011]
-  evidence: "[chunks: c002, c010, c011] Raw proteomics, IF imaging, and CRISPR perturbation streams undergo dimensionality reduction (node2vec PPI embeddings and Human Protein Atlas image embeddings), contrastive co-embedding, multiscale community detection to construct hierarchical DAG cell maps, LLM-assisted assembly naming, and FAIRSCAPE RO-Crate provenance graph packaging (c002, c010, c011)."
+  evidence: "[chunks: c002, c010, c011] Raw proteomics, IF imaging, and CRISPR perturbation streams undergo dimensionality reduction (node2vec PPI embeddings and Human Protein Atlas image embeddings), contrastive co-embedding, multiscale community detection to construct hierarchical DAG cell maps, assembly naming using large language models, and FAIRSCAPE RO-Crate provenance graph packaging (c002, c010, c011)."
 
 processing_software:
   value: true

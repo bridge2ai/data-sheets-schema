@@ -27,12 +27,12 @@ data_collection:
 data_processing:
   value: true
   # chunks: [c002, c003, c007, c008]
-  evidence: "[chunks: c002, c003, c007, c008] Collected hospital data are standardized to the OMOP Common Data Model, clinical notes are extracted and tokenized using the OHNLP toolkit, imaging and waveforms are converted to DICOM, WFDB, and EDF+/Persyst formats with de-identification in process, and SDOH location entities are geocoded via DeGauss (c002, c003, c007, c008)."
+  evidence: "[chunks: c002, c003, c007, c008] Collected hospital data are standardized to the OMOP Common Data Model, clinical notes are extracted and tokenized using the OHNLP toolkit, imaging and waveforms are converted to DICOM, WFDB, and EDF+/Persyst formats with de-identification in process, and OMOP location entities are geocoded via DeGauss (c002, c003, c007, c008)."
 
 processing_software:
   value: true
-  # chunks: [c002, c003, c007, c008]
-  evidence: "[chunks: c002, c003, c007, c008] CHoRUS develops and documents open-source software and processing toolchains in the chorus-ai GitHub organization and cloud enclave, including privacy_scan_tool, CTP-deid, UF-Geocoding (DeGauss), chorus_waveform conversion scripts, chorus-mapping semantic mappings, OHNLP toolkit, and the OHDSI/OMOP tool stack (c002, c003, c007, c008)."
+  # chunks: [c003, c004, c007, c008]
+  evidence: "[chunks: c003, c004, c007, c008] CHoRUS develops and documents open-source software and processing toolchains in the chorus-ai GitHub organization and cloud enclave, including privacy_scan_tool, CTP-deid, UF-Geocoding (DeGauss), chorus_waveform conversion scripts, chorus-mapping semantic mappings, OHNLP toolkit, and the OHDSI/OMOP tool stack (c003, c007, c008)."
 
 ml_training_dataset:
   value: true

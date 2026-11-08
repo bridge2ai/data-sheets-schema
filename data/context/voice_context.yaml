@@ -5,8 +5,8 @@
 
 human_subjects:
   value: true
-  # chunks: [c002, c006, c015, c016, c018, c019]
-  evidence: "[chunks: c002, c006, c015, c016, c018, c019] Bridge2AI-Voice enrolls and collects voice recordings, clinical histories, and validated questionnaires from human participants across multi-institutional specialty clinics under University of South Florida central IRB approval (306 adult participants in v1.1 c015; 833 participants across five North American sites in v3.0.0/v3.1.0 c016, c018, c019; protocol in c002, c006)."
+  # chunks: [c002, c006, c009, c015, c016, c018, c019]
+  evidence: "[chunks: c002, c006, c009, c015, c016, c018, c019] Bridge2AI-Voice enrolls and collects voice recordings, clinical histories, and validated questionnaires from human participants across multi-institutional specialty clinics under University of South Florida central IRB approval (306 adult participants in v1.1 c015; 833 participants across five recording sites in v3.0.0/v3.1.0 c016, c018, c019; protocol in c002, c006)."
 
 regulated_access:
   value: true
@@ -16,7 +16,7 @@ regulated_access:
 shared_dataset:
   value: true
   # chunks: [c015, c016, c017, c018, c019]
-  evidence: "[chunks: c015, c016, c017, c018, c019] Bridge2AI-Voice Adult Dataset is publicly distributed to credentialed researchers on PhysioNet (v1.1 c015; v3.0.0 c016, c017; v3.1.0 doi:10.13026/8xbn-nq66 and canonical doi:10.13026/37yb-1t42 c018, c019) containing derived audio feature Parquet files, static acoustic features, and phenotype TSVs with JSON data dictionaries."
+  evidence: "[chunks: c015, c016, c017, c018, c019] Bridge2AI-Voice Adult Dataset is publicly distributed to credentialed researchers on PhysioNet (v1.1 c015; v3.0.0 c016, c017; v3.1.0 doi:10.13026/8xbn-nq66 and canonical doi:10.13026/37yb-1t42 c018, c019) containing derived audio feature Parquet files, static acoustic features, and phenotype TSV files with JSON data dictionaries."
 
 data_collection:
   value: true
