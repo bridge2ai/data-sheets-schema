@@ -186,7 +186,7 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
         for short in ('native_shared_callback_capture', 'native_shared_callback_io', 'native_shared_capture',
                       'native_shared_selection', 'native_shared_streams', 'native_shared_effects',
                       'native_shared_evidence', 'native_shared_phase', 'native_shared_receipts',
-                      'native_shared_render', 'native_shared_policy', 'native_shared_gates',
+                      'native_shared_render', 'native_shared_policy', 'native_shared_attribution', 'native_shared_gates',
                       'audit_omissions'):
             modules[short] = stack.enter_context(authority.loaded_verified_package_module(
                 'data_sheets_schema.' + short, package_sources=pins))
@@ -244,7 +244,8 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
             full_path=paths['full'], core_path=paths['core'], report_path=paths['report'],
             receipt_path=paths['receipt'], working_directory=composition['working_directory'])
         state = modules['native_shared_attribution_orchestration']._LiveAttribution(
-            current, execution_raw=registration_raw, spec=frozen, composition_raw=composition_raw)
+            current, execution_raw=registration_raw, spec=frozen, composition_raw=composition_raw,
+            _admission=admitted)
         callbacks = Callbacks(classifier, admitted,
             _module(modules['native_shared_capture_orchestration'], (
                 '_load', '_load_live', 'initialize', 'activate_admitted', 'durable_new',
