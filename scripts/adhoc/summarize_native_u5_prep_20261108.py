@@ -85,12 +85,32 @@ def main():
             latest[(node['classname'], node['name'])] = node['state']
     unique_counts = {state: list(latest.values()).count(state)
                      for state in ('passed', 'failed', 'errors', 'skipped')}
+    # U5-R3 split the incorrect unparameterized cache assertion into two
+    # explicit schema shapes. Keep its failed identity in the raw history;
+    # don't misreport that removed node as an additional current blocker.
+    old = ('tests.test_native_u5_external_schema',
+           'test_external_320_capture_rebuild_and_cold_warm_catalog')
+    replacements = [(old[0], old[1] + '[' + shape + ']')
+                    for shape in ('modular', 'merged')]
+    current = dict(latest)
+    superseded = []
+    if old in latest and all(latest.get(node) == 'passed' for node in replacements):
+        superseded.append({'classname': old[0], 'name': old[1],
+                           'historical_state': latest[old],
+                           'reason': 'U5-R3: incorrect cache assumption split by schema eligibility',
+                           'replacements': [{'classname': node[0], 'name': node[1],
+                                             'state': latest[node]} for node in replacements]})
+        del current[old]
+    current_counts = {state: list(current.values()).count(state)
+                      for state in ('passed', 'failed', 'errors', 'skipped')}
     result = {'kind': 'native_u5_preparation_validation', 'version': 1,
               'base': BASE, 'head': git('rev-parse', 'HEAD'),
               'status': git('status', '--porcelain', '--untracked-files=all'),
               'changed_paths': git('diff', '--name-only', BASE, 'HEAD').splitlines(),
               'generator_sha256': sha(Path(__file__)),
               'runs': runs, 'unique_counts_latest': unique_counts,
+              'superseded_nodes': superseded,
+              'current_named_counts': current_counts,
               'validation_heads': sorted({run['source_stability']['before']['head'] for run in runs}),
               'scope': 'offline preparation; counts overlap; no native acceptance or timing claim'}
     with output.open('x', encoding='utf-8') as stream:
@@ -98,6 +118,7 @@ def main():
         stream.write('\n')
     print(json.dumps({'path': str(output), 'sha256': sha(output),
                       'unique_counts_latest': unique_counts,
+                      'current_named_counts': current_counts,
                       'runs': [{'name': run['name'], 'counts': run['counts'],
                                 'collected': run['collected'],
                                 'returncode': run['outcome']['returncode']}
