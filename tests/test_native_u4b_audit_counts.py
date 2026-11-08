@@ -124,11 +124,20 @@ def test_no_stated_total_is_unavailable_without_weakening_other_evidence(prepare
 
 
 def test_stated_severity_mismatch_refuses_without_a_stated_total(prepared_counts):
-    changed = _replace_artifact(prepared_counts, 'final_report', b'Findings: 2 high.\n')
+    changed = _replace_artifact(prepared_counts, 'final_report', b'Audit severity summary: 2 high.\n')
     result = engine.evidence_gate(changed)
     assert result['passed'] is False
     assert result['audit_counts']['status'] == 'refused'
     assert result['audit_counts']['comparison']['mismatches']
+
+
+def test_unrecognized_narrative_is_unavailable_not_verified_consistency(prepared_counts):
+    # The unchanged v3 instrument requires an explicit global summary label
+    # for severity-only readings. Do not silently broaden the scoring grammar.
+    changed = _replace_artifact(prepared_counts, 'final_report', b'Findings: 2 high.\n')
+    row = engine.evidence_gate(changed)['audit_counts']
+    assert row['status'] == 'unavailable' and row['checked'] is False and row['passed'] is None
+    assert row['comparison']['stated_by_severity'] == {}
 
 
 @pytest.mark.parametrize('missing', ['typed_assembly', 'audit', 'final_report', 'final_result', 'phase1'])

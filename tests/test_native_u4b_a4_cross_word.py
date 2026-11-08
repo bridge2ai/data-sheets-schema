@@ -38,8 +38,15 @@ def test_saved_word_a_guard_refuses_recorded_word_b_before_dispatch(tmp_path, mo
     word_b.write_bytes(renewed['launch_word_raw'])
     terms_b = review.validate_bundle(arguments['registration_raw'], arguments['review_bundle_raw'],
                                     renewed['launch_word_raw'])
-    monkeypatch.setattr(capture.subprocess, 'Popen',
-                        lambda *a, **k: pytest.fail('cross-word refusal started another process'))
+    original_popen = capture.subprocess.Popen
+    def only_local_review_git(command, **kwargs):
+        # Review validation now rechecks immutable registration commit objects.
+        # Permit exactly that read path while still trapping capture/dispatch.
+        assert command[:2] == ['/usr/bin/git', '--no-replace-objects']
+        assert 'protocol.allow=never' in command
+        assert kwargs['env']['GIT_NO_LAZY_FETCH'] == '1'
+        return original_popen(command, **kwargs)
+    monkeypatch.setattr(capture.subprocess, 'Popen', only_local_review_git)
 
     # Direct guard admission proves the immutable word digest check itself;
     # removing it must not be hidden by the outer capture-history refusal.

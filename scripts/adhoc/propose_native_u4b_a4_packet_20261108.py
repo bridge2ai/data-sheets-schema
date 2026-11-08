@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Propose D114 as a revision of the frozen U1 API packet, 2026-11-08.
+"""Retain the rejected D114 one-line API-packet proposal, 2026-11-08.
 
 Inputs: current protected API bytes, immutable packet metadata and saved owner
 bundle postimage. Outputs: new scratch diffs/metadata only. Never edits the
 protected source, packet files or sidecar; never imports/executes API code.
+Independent review found that this discriminates shared-v1, not U4b. It must
+not be installed; a runtime-aware producer hook requires a lead scope ruling.
 """
 import ast
 import difflib
@@ -15,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 EXEC = ROOT.parent
 TARGET = 'src/data_sheets_schema/api_runner.py'
-OUT = EXEC / 'scratch-native-u4b/a4-packet-proposal'
+OUT = EXEC / 'scratch-native-u4b/a4-packet-proposal-reviewed'
 OWNER_PACKET = EXEC / 'scratch-native-u1u3/owner-packets/postimages/api_runner.py'
 
 
@@ -62,16 +64,18 @@ def main():
     delta, combined = patch(packet, proposed), patch(original, proposed)
     (OUT / 'api_runner_packet_delta.diff').write_bytes(delta)
     (OUT / 'api_runner_companion_with_d114.diff').write_bytes(combined)
-    result = {'status': 'proposal_only_not_applied', 'target': TARGET,
+    result = {'status': 'rejected_after_independent_review_not_for_installation', 'target': TARGET,
         'frozen_metadata': {'path': str(metadata_path), 'sha256': sha(metadata_raw)},
         'current_packet_postimage': {'path': str(OWNER_PACKET), 'sha256': sha(packet)},
         'protected_preimage_sha256': sha(original), 'proposed_postimage_sha256': sha(proposed),
         'packet_delta_sha256': sha(delta), 'combined_proposal_sha256': sha(combined),
         'syntax_and_single_ast_call_change_verified': True,
         'selection': 'native_shared_generation_version == 1; zero retains historical toolchain',
+        'blocker': 'A4-F1: historical shared-v1 also selects the narrowed set, contradicting native_shared_registration; constructor has no runtime input at this point',
         'resource_rule': 'selected generation playbooks + their two schemas + agents explicitly referenced by those playbooks; provenance-guard and validator only',
-        'approval_required': 'revision of the api_runner.py owner packet; no installation or registration readiness claimed',
-        'integration_remaining': 'recompute/check D76 sidecar bindings and full frozen four-packet composition after owner approval; existing packet bytes unchanged'}
+        'approval_required': 'lead scope ruling for a runtime-aware producer-hook proposal; this rejected API revision is not offered for approval or installation',
+        'preferred_design': 'native_execution_registration_v2.prepare already binds validated runtime before first instruction rendering; select using exact limits_basis.kind there, with historical shared-v1 and recorded replay regressions',
+        'integration_remaining': 'correct route proposal, owner packet scope approval, D76 bindings and full frozen four-packet composition remain pending; existing packet bytes unchanged'}
     (OUT / 'proposal.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
     if (ROOT / TARGET).read_bytes() != original or OWNER_PACKET.read_bytes() != packet:
         raise RuntimeError('protected or current packet bytes changed while preparing proposal')

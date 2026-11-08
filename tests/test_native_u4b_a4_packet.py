@@ -10,7 +10,7 @@ helper = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(helper)
 
 
-def test_proposal_preserves_packet_changes_and_selects_only_native_one():
+def test_rejected_proposal_preserves_packet_bytes_but_also_changes_historical_shared_one():
     packet = b'class Spec:\n    def build(self):\n        if True:\n            self._agentic_toolchain = toolchain()\n'
     original = packet + b'# prior unpatched marker\n'
     proposed = helper.prepare(original, packet,
@@ -18,9 +18,11 @@ def test_proposal_preserves_packet_changes_and_selects_only_native_one():
     assert b'prior unpatched marker' not in proposed
     namespace = {'toolchain': lambda **kwargs: kwargs}
     exec(compile(proposed, 'synthetic-packet-fixture', 'exec'), namespace)
-    for version, expected in ((0, False), (1, True)):
+    for version, basis, expected in ((0, 'historical', False),
+                                     (1, 'historical', True), (1, 'u4b', True)):
         value = namespace['Spec']()
         value.native_shared_generation_version = version
+        value.runtime_basis = basis  # Not consulted: the reason this proposal is rejected.
         value.build()
         assert value._agentic_toolchain == {'native_shared': expected}
 
