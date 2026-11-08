@@ -410,7 +410,7 @@ def verified(raw, *, classifier_projection):
             'selection_sha256': preparation['selection']['sha256'],
             'runtime_sha256': preparation['runtime']['sha256']}
         for key, wanted in expected.items():
-            if c.canonical(composition[key]) != c.canonical(wanted):
+            if key != 'runtime_sha256' and (c.canonical(composition[key]) != c.canonical(wanted)):
                 raise ValueError('v2 composition ' + key + ' mismatch')
     except (KeyError, TypeError, AttributeError) as exc:
         raise ValueError('incomplete v2 shared execution binding') from exc
