@@ -24,7 +24,7 @@ def main():
     groups, cases = {}, []
     for case in ET.fromstring(raw).iter('testcase'):
         state, detail = 'passed', None
-        for tag, name in (('failure', 'failed'), ('error', 'errors'), ('skipped', 'skipped'):
+        for tag, name in (('failure', 'failed'), ('error', 'errors'), ('skipped', 'skipped')):
             detail = case.find(tag)
             if detail is not None:
                 state = name
