@@ -346,7 +346,7 @@ def test_real_schema_substrate_and_topic_identifier_forms_accept_and_reject(fixt
     (json.dumps({"version": 1, "sources": [{"id": "custom", "label": "CUSTOM", "curies": [], "iri_bases": []}]}), "nonempty curies or iri_bases"),
     (json.dumps({"version": 1, "sources": [{"id": "custom", "label": "CUSTOM", "curies": [{"prefix": "http", "local_prefix": ""}], "iri_bases": []}]}), "invalid CURIE prefix"),
     (json.dumps({"version": 1, "sources": [{"id": "custom", "label": "CUSTOM", "curies": [{"prefix": "CUSTOM", "local_prefix": "a:b"}], "iri_bases": []}]}), "invalid CURIE local_prefix"),
-    (json.dumps({"version": 1, "sources": [{"id": "custom", "label": "CUSTOM", "curies": [], "iri_bases": ["https://example.test/"]}]}), "invalid IRI base"),
+    (json.dumps({"version": 1, "sources": [{"id": "custom", "label": "CUSTOM", "curies": [], "iri_bases": ["://example.test/"]}]}), "invalid IRI base"),
     (json.dumps({"version": 1, "sources": [
         {"id": "one", "label": "CUSTOM", "curies": [{"prefix": "CUSTOM", "local_prefix": ""}], "iri_bases": []},
         {"id": "two", "label": "OTHER", "curies": [{"prefix": "CUSTOM", "local_prefix": "sub_"}], "iri_bases": []},

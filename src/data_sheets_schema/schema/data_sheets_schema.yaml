@@ -21,6 +21,9 @@ title: data-sheets-schema
 # GO/MESH/MeSH/EFO/NCIT prefix consistency checks in D4D_Base_import.yaml)
 # and restores multivalued: true on LicenseAndUseTerms.data_use_permission
 # so records can state one primary DUO permission plus modifiers.
+# A 3.1.0 record with scalar data_use_permission is invalid under 3.2.0:
+# migrate it to a one-element list. The API write-time normaliser wraps scalars;
+# BC1 sizing requires migrated lists and refuses scalar owner cardinality.
 version: 3.2.0
 description: |-
   A LinkML schema for Datasheets for Datasets.

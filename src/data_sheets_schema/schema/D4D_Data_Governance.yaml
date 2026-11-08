@@ -1,4 +1,4 @@
-id: "https://w3id.org/bridge2ai/data-sheets-schema/data-governance"
+﻿id: "https://w3id.org/bridge2ai/data-sheets-schema/data-governance"
 name: "data-sheets-schema-data-governance"
 title: "Datasheets for Datasets – Data Governance Module"
 description: >
@@ -71,7 +71,7 @@ classes:
         exact_mappings:
           - DUO:0000001
         annotations:
-          "d4d:docExample": "health_medical_biomedical_research, no_commercial_use"
+          "d4d:docExample": "health_medical_biomedical_research"
       contact_person:
         description: >-
           Contact person for licensing questions, as a Person object — an

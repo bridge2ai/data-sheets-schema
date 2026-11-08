@@ -38331,7 +38331,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: health_medical_biomedical_research, no_commercial_use
+            value: health_medical_biomedical_research
         description: 'Structured data use permissions using the Data Use Ontology
           (DUO): one primary permission (e.g., general research, health/medical research,
           disease-specific research) plus any applicable modifiers (e.g., non-commercial

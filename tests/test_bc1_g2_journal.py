@@ -19,8 +19,8 @@ from tests.bc1_catalog_fixture import catalog_bytes, immutable_catalogs  # noqa:
 
 @pytest.fixture
 def registered(base_registered):
-    # A separate positive-control profile, leaving the neutral pipeline's
-    # G1 term-label failure visible in its original, unchanged test.
+    # Exercise journal ordering under the pinned bridge2ai profile as well as
+    # the separate neutral pipeline; pinned profiles have no neutral term policy.
     from data_sheets_schema import profiles, shared_generation as sg
     spec = base_registered
     reg = json.loads(spec.shared_generation_registration)

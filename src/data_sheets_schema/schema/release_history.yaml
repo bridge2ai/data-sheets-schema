@@ -51,10 +51,10 @@ releases:
       Historical schema hashes stay unchanged.
   - version: 3.2.0
     declared: 2026-11-08
-    full_source_sha256: dbc56694364eaa7f61eed4853839ac0991ac83b0b6c83aad651a03ee9ff094b8
-    full_merged_sha256: 37d8cb5f0cc5518214740f8a6f7670932613c5df09d170cbf459860d9ce9520b
+    full_source_sha256: b37f37552375b05c1685ffe52649df5e1f17ed0da46d6dd82ca4f1b49b4d549a
+    full_merged_sha256: 2711ef06a0b0d1c695f7f9ec69672868d4863c73119c5adb6f9f8a812f8dfe53
     core_source_sha256: cf48f77652bcf6b937e7c0e8d78eb9472d76980aae02f03a5581e15920bfe8e8
-    core_merged_sha256: ba50cd2dd3154c4753ff3256c67f3ce8917ad3ff3a7494133b66dcbf05d4b8dd
+    core_merged_sha256: 82d84f8a20e8042ab0bc3f908235e94efce5f27d0e7ba9db067ed0488f725ba2
     note: >-
       D98 (#5471, Option A) declares d4d:termSourceIdentifierForms on
       Instance.data_substrate and Instance.data_topic (plus d4d:termSources on
@@ -62,4 +62,9 @@ releases:
       D4D_Base_import.yaml. D99 restores multivalued: true on
       LicenseAndUseTerms.data_use_permission (one primary DUO permission plus
       applicable modifiers) and aligns D4D_Core.yaml version: 3.2.0.
+      A 3.0.0 or 3.1.0 record with scalar data_use_permission is invalid under
+      3.2.0; migrate that scalar to a one-element list. The API write-time
+      normaliser wraps scalar multivalued slots, including enum ranges.
+      BC1 sizing does not migrate historical inputs: scalar cardinality is
+      refused during owner traversal, so migrate the sizing record first.
       Historical schema hashes stay unchanged.

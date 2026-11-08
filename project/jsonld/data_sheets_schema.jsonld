@@ -8046,7 +8046,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "health_medical_biomedical_research, no_commercial_use",
+          "value": "health_medical_biomedical_research",
           "@type": "Annotation"
         }
       ],
@@ -13737,7 +13737,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "health_medical_biomedical_research, no_commercial_use",
+              "value": "health_medical_biomedical_research",
               "@type": "Annotation"
             }
           ],
@@ -14386,9 +14386,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-11-07T18:42:05",
-  "source_file_size": 35674,
-  "generation_date": "2026-11-07T18:54:40",
+  "source_file_date": "2026-11-07T21:43:57",
+  "source_file_size": 35903,
+  "generation_date": "2026-11-07T21:45:06",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
