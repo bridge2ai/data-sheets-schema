@@ -65,7 +65,7 @@ def test_rehashed_guard_cannot_substitute_owner_or_capture(tmp_path, monkeypatch
         event['rate_limit_info']['unifiedWindows']['seven_day']['utilization'] = 0.01
         doc['event_json'] = guard.canonical(event).decode(); doc['event_sha256'] = guard.sha(doc['event_json'].encode())
     elif mutation == 'capture_manifest':
-        path = args['directory'] / 'capture.json'
+        path = args['directory'] / 'capture-1' / 'capture.json'
         manifest = capture.strict_json(path.read_bytes()); manifest['lifecycle']['spawn_count'] = 0
         path.write_bytes(capture.canonical(manifest))
     else: doc['version'] = 1

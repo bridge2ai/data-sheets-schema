@@ -37,6 +37,10 @@ UNCHANGED = (
 
 def classify(run, node, message, trace):
     text = message + '\n' + trace
+    if (run == 'a2-focused-c3088487c'
+            and node == 'tests.test_native_u4b_admission::test_rehashed_guard_cannot_substitute_owner_or_capture[capture_manifest]'
+            and 'FileNotFoundError' in text and '/one-capture/capture.json' in text):
+        return 'corrected_A2_numbered_capture_manifest_test_path'
     if 'native renderer requires the sole captured runtime declaration before composition' in text:
         return 'inherited_R9_3_captured_runtime_class_identity'
     if 'shared selector call guards/order changed' in text:
