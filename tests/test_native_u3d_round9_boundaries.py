@@ -19,6 +19,23 @@ from tests.test_native_execution_registration_v2 import isolated_modules  # noqa
 PACKAGE = 'data_sheets_schema'
 
 
+def test_all_28_actual_merged_consumers_pass_the_unmodified_guard(isolated_modules, record_property):
+    pins = authority.dependency_identity()['base']['package_sources']
+    roster = _source_roster(pins)
+    outcomes, refused = {}, {}
+    for name in sorted(authority.CONSUMER_OWNED_MODULES):
+        raw = (authority.ROOT / roster[name]).read_bytes()
+        assert hashlib.sha256(raw).hexdigest() == pins[roster[name]]
+        try:
+            outcomes[name] = authority.refuse_legacy_consumer_imports(raw, name=name, package_sources=pins)
+        except ValueError as error:
+            refused[name] = str(error)
+    record_property('actual_merged_28_graphs', json.dumps({'accepted': outcomes, 'refused': refused}, sort_keys=True))
+    assert len(authority.CONSUMER_OWNED_MODULES) == 28
+    assert refused == {}
+    assert set(outcomes) == set(authority.CONSUMER_OWNED_MODULES)
+
+
 def _import_nodes(tree, *, owned):
     """Owned modules include deferred bodies; utility dependencies do not."""
     yield tree

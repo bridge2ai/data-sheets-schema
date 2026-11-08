@@ -17,6 +17,7 @@ from data_sheets_schema import native_shared_registration_orchestration as regis
 from data_sheets_schema import native_shared_policy as policy
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_execution_registration_v2 as execution_v2
+from data_sheets_schema import native_shared_controls_orchestration as control_loading
 from tests.test_native_execution_registration_v2 import inputs, isolated_modules
 from tests.utils.native_shared_consumer_scope import command_guidance, observe_consumer_calls
 
@@ -48,7 +49,7 @@ def execution(bound, tmp_path, monkeypatch):
     return args, selected, expected
 
 
-def test_closed_registration_checks_actual_selected_policy_and_does_not_reserve(execution):
+def test_closed_registration_checks_actual_selected_policy_and_does_not_reserve(execution, record_property):
     args, selected, expected = execution
     targets = {('native_shared_registration', name): ()
                for name in ('_registration_body', 'command')}
@@ -60,6 +61,26 @@ def test_closed_registration_checks_actual_selected_policy_and_does_not_reserve(
     assert value['authority_version'] == 2
     assert registration.verified_v2_body(c.canonical(body),
         preparation_raw=body['preparation_raw_json'].encode()) == body
+    prepared_raw = body['preparation_raw_json'].encode()
+    prepared = execution_v2.verify_preparer(prepared_raw, job_id=body['job_id'])
+    assert prepared['dependencies'] == body['dependencies']
+    targets = {('native_shared_registration', name): () for name in (
+        'rebuild_v2_body', '_require_integrated_gate_implementation', '_registration_body', 'command')}
+    targets[('native_shared_execution', 'require_gate_implementations')] = ()
+    with observe_consumer_calls(targets) as calls, \
+            control_loading.loaded_controls(body['dependencies']) as projection, \
+            authority.loaded_verified_package_module('data_sheets_schema.native_shared_registration',
+                package_sources=body['dependencies']['base']['package_sources']) as consumer:
+        assert consumer.rebuild_v2_body.__code__.co_filename == str(
+            authority.ROOT / 'src/data_sheets_schema/native_shared_registration.py')
+        rebuilt = consumer.rebuild_v2_body(**args, preparation_raw=prepared_raw,
+            receipt_origin_version=0, classifier_projection=projection)
+        assert c.canonical(rebuilt) == c.canonical(body)
+    assert set(targets) <= {key for key, _ in calls}
+    record_property('genuine_fixed_entry_equal', True)
+    record_property('genuine_fixed_entry_body_sha256', c.sha(c.canonical(rebuilt)))
+    record_property('genuine_fixed_entry_source_sha256',
+        body['dependencies']['base']['package_sources']['src/data_sheets_schema/native_shared_registration.py'])
     assert registration.verified(raw) == body
     value = body
     assert value['kind'] == execution_v2.EXECUTION_KIND

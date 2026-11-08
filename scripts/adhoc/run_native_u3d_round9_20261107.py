@@ -26,6 +26,15 @@ wrapper.dependency.SOURCE = wrapper.runner.EXECUTIONS.parent / 'data-sheets-sche
 wrapper.dependency.DESTINATION = SCRATCH / 'dependencies' / ('fairscape-' + wrapper.dependency.PIN)
 
 _save = wrapper.runner.save
+_origin_witness = wrapper.runner.origin_witness
+
+
+def origin_witness():
+    # Some integration modules prepend their preserved checkout dependency at
+    # import time. Load the regular pinned package before pytest imports them;
+    # its namespace then remains the exact scratch package, checked below.
+    importlib.import_module('fairscape_models')
+    return _origin_witness()
 
 
 def save(path, value):
@@ -47,6 +56,7 @@ def save(path, value):
 
 
 wrapper.runner.save = save
+wrapper.runner.origin_witness = origin_witness
 
 if __name__ == '__main__':
     if sys.argv[1:] == ['--hydrate-local-dependency']:

@@ -17,6 +17,16 @@ witness. D's preserved worktree FAIRSCAPE copy preceded the exact scratch
 gitlink. The D wrapper now removes only that path from the disposable test
 bootstrap before inserting the independently verified scratch dependency.
 The existing worktree and the strict origin assertion are unchanged.
+Collection also imports integration modules that prepend their own preserved
+dependency path. The runner now imports the exact scratch regular package
+before pytest, preventing that later path insertion from changing its namespace.
+Both earlier rejected attempts remain recorded; they are not accepted source
+origin evidence.
+
+The inherited C overlay-census helper only permits C's scratch root. D now
+checks all 28 actual merged consumer graphs directly, with no overlay or pin
+filter. The historical C helper remains unchanged; its D-scratch refusal is
+retained as harness evidence, not a production-graph failure.
 
 ## R9-3: A preparation has a stale captured-runtime class
 

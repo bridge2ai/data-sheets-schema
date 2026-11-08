@@ -46,7 +46,7 @@ def groups():
         'test_historical_digest_cache.py', 'test_imported_schema_snapshot.py',
         'test_schema_digest_cache.py', 'test_schema_view.py')]
     result['census'] = ['tests/test_native_shared_consumer_census.py',
-        'tests/test_native_u3d_round9_boundaries.py', 'tests/test_native_u3c_round4_helpers.py']
+        'tests/test_native_u3d_round9_boundaries.py']
     result['collection'] = ['tests']
     if set().union(*(set(result[key]) for key in ('permission', 'registration', 'lifecycle-1', 'lifecycle-2', 'dc-1', 'dc-2'))) != all_dc:
         raise RuntimeError('D/C cohort partition dropped a file')
@@ -64,7 +64,7 @@ def main():
     args = parser.parse_args()
     roster = groups()
     if args.action == 'plan':
-        target = SCRATCH / 'round9-final-plan.json'
+        target = SCRATCH / 'round9-merged-plan.json'
         with target.open('x') as handle:
             json.dump(roster, handle, indent=2, sort_keys=True)
             handle.write('\n')
@@ -72,7 +72,7 @@ def main():
         return 0
     if args.group not in roster:
         parser.error('select one explicit group')
-    if json.loads((SCRATCH / 'round9-final-plan.json').read_text()) != roster:
+    if json.loads((SCRATCH / 'round9-merged-plan.json').read_text()) != roster:
         raise RuntimeError('saved roster differs from current source')
     label = args.label or args.group
     if not label or any(not (letter.isalnum() or letter == '-') for letter in label):
