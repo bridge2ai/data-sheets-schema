@@ -31,3 +31,25 @@ not grant execution admission, and the protected U1 hook remains pending.
 Final run counts, head identity, source/artifact digests, cleanup and the final C
 head for D belong in the appended Round 6 review and single STATUS entry after
 validation. No edits to the old controller worktree or D integration are made.
+
+## R6-F1: retain the interrupted C attempt and partition its full roster
+
+The first C run on `7633d003e53fc016685dc81471dc623ddc00b1b6` reached the
+clock/suspend-aware deadline guard. The recorded effective elapsed time was
+3979.165591 s at termination; this is not a within-limit pass. The worker was
+terminated and produced neither final JUnit nor a worker completion record.
+The supervisor recorded no observed surviving descendants, no observation
+errors, unchanged source/head and forced cleanup; `cleanup_verified` remains
+false. A separate read-only process/open-handle check found no active worker
+or open fixture handles. Do not overwrite that outcome or infer passing counts
+from its progress dots. The precise cause of the elapsed-clock discontinuity
+is not established by these artifacts.
+
+Recovery changes only validation scheduling. A fresh one-unit canary precedes
+current-head collection, then six disjoint C cohorts are generated from that
+collection and the exact original C file roster. Historical R5 XML supplies
+scheduling weights only; equality of full node identities is mandatory, no
+test is dropped, and the original tests and 3600 s/two-worker controls remain
+unchanged. Every cohort is recorded independently. The failed attempt and its
+basetemp are retained because ordinary successful-cleanup evidence is absent.
+GitHub issue publication remains deferred by the explicit offline rule.
