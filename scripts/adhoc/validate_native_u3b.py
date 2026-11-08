@@ -1,7 +1,8 @@
 """Offline U3-B test launcher, 2026-11-07.
 
 Inputs: pytest arguments; outputs: scratch logs. Enforces the quiet lock,
-network denial, credential removal, at most two workers and a 3600 s deadline.
+network denial, credential removal, at most two workers and a 3600 s deadline
+(7200 s only for the authorized serial api-round3-ordered invocation).
 No native agent executable is launched. Serves the U3-B review packet.
 """
 import os
@@ -37,6 +38,12 @@ if args[:1] == ['--tree']:
     args = args[2:]
 if any(arg.startswith('-n') or arg.startswith('--numprocesses') for arg in args):
     raise SystemExit('Worker count is fixed by this launcher')
+deadline = 3600
+if name == 'api-round3-ordered':
+    # One-run exception authorized by the 2026-11-07T20:50Z lead ruling.
+    if workers != '0' or test_root != ROOT:
+        raise SystemExit('Round 3 exception requires the assigned tree and serial order')
+    deadline = 7200
 env = {k: v for k, v in os.environ.items() if not k.endswith('_API_KEY') and k not in
        {'ANTHROPIC_AUTH_TOKEN', 'CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_BASE_URL', 'OPENAI_BASE_URL'}}
 env.update(PYTHONPATH=os.pathsep.join((str(test_root / 'src'), str(test_root), str(ROOT / 'scripts/adhoc'))),
@@ -62,23 +69,23 @@ with (SCRATCH / (name + '.log')).open('w') as log:
     wall_started = time.time()
     log.write(json.dumps({'command': cmd, 'cwd': str(test_root),
                           'start_utc': datetime.now(timezone.utc).isoformat(),
-                          'deadline_seconds': 3600, 'network': 'OS denied',
+                          'deadline_seconds': deadline, 'network': 'OS denied',
                           'source_sha256': {str(p.relative_to(test_root)): hashlib.sha256(p.read_bytes()).hexdigest()
                               for p in sorted((test_root / 'src/data_sheets_schema').glob('*.py'))}}) + '\n')
     log.flush()
     child = subprocess.Popen(cmd, cwd=test_root, env=env, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
     try:
         while child.poll() is None:
-            remaining = min(3600 - (time.monotonic() - started),
-                            3600 - (time.time() - wall_started))
+            remaining = min(deadline - (time.monotonic() - started),
+                            deadline - (time.time() - wall_started))
             if remaining <= 0:
-                raise subprocess.TimeoutExpired(cmd, 3600)
+                raise subprocess.TimeoutExpired(cmd, deadline)
             try:
                 child.wait(timeout=min(1, remaining))
             except subprocess.TimeoutExpired:
                 continue
         result = child.returncode
-        if time.time() - wall_started >= 3600:
+        if time.time() - wall_started >= deadline:
             result = 124  # A child finishing during suspend is not a bounded pass.
     except subprocess.TimeoutExpired:
         os.killpg(child.pid, signal.SIGTERM)
