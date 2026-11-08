@@ -24,6 +24,15 @@ are retained here for later filing; none is silently discarded.
   fixture paths to the freshly loaded API module; retain all loader, rendering,
   capture-class and source checks. The first attempt is not acceptance evidence.
 
+The corrected real C probe passed. All fifteen mutations were detected, with
+24 passing matched controls and 18 expected mutant failures / 6 surviving
+assertions, no errors or skips. Every restoration tree equals the mutation
+baseline `825c03b7c`; the last restoration is `24c735965`. The final read-only
+production review confirmed the proposal reverses cleanly, with no adaptation,
+and the C snapshot's only differences from final C are A registration, the test
+runner and the probe. Final audit also checks saved bytecode/C properties and
+identical production source hashes across the suite, C snapshot and mutations.
+
 ## Reproduction and limits
 
 `run_native_u3a_tests_20261107.py` now restricts outputs to the single Round 6

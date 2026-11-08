@@ -57,25 +57,39 @@ def main():
     assert not git('status', '--porcelain'), 'committed clean source required'
     final = run(SCRATCH / args.final_run)
     assert final['source_commit'] == git('rev-parse', 'HEAD')
+    assert final['counts']['tests'] == 308
     c_run = run(SCRATCH / 'c-real-r2', SCRATCH / 'c-source')
     for item in (final, c_run):
         assert item['returncode'] == 0
         assert not any(item['counts'][k] for k in ('failures', 'errors', 'skipped'))
+    final_nodes = list(ET.parse(SCRATCH / args.final_run / 'pytest.xml').getroot().iter('testcase'))
+    bytecode = next(n for n in final_nodes if n.get('name') == 'test_actual_pinned_helper_ignores_scratch_forged_cache')
+    properties = {p.get('name'): p.get('value') for p in bytecode.iter('property')}
+    assert properties['executed_forged_bytecode'] == 'False'
+    c_properties = {p.get('name'): p.get('value') for p in ET.parse(
+        SCRATCH / 'c-real-r2/pytest.xml').getroot().iter('property')}
+    assert c_properties['verified_capture_exact_class'] == 'True'
+    assert c_properties['verify_preparer_prepare_instruction'] == 'True'
+    snapshot = json.loads((SCRATCH / 'c-snapshot-r2.json').read_bytes())
+    assert c_run['source_commit'] == snapshot['commit']
+    source = 'src/data_sheets_schema/native_execution_registration_v2.py'
+    assert snapshot['files'][source] == sha(ROOT / source)
     mutations = {}
     for case in CASES:
         directory = SCRATCH / 'mutations' / case
         result = json.loads((directory / 'result.json').read_bytes())
         assert result['status'] == 'killed'
+        assert result['source_sha256'] == sha(ROOT / source)
         baseline, mutant = run(directory / 'baseline'), run(directory / 'mutant')
         assert baseline['returncode'] == 0 and mutant['returncode'] == 1
         assert mutant['counts']['failures'] and not mutant['counts']['errors']
         assert not baseline['counts']['errors'] and not baseline['counts']['failures']
         assert git('rev-parse', result['base'] + '^{tree}') == git('rev-parse', result['restored_commit'] + '^{tree}')
         mutations[case] = {'baseline': baseline, 'mutant': mutant, 'result_sha256': sha(directory / 'result.json')}
-    source = 'src/data_sheets_schema/native_execution_registration_v2.py'
     assert git('diff', '--name-only', 'a6edb1c2d', 'HEAD', '--', 'src') == source
     summary = {'head': git('rev-parse', 'HEAD'), 'source_sha256': sha(ROOT / source),
         'final': final, 'c_integration': c_run, 'mutations': mutations,
+        'bytecode_properties': properties, 'c_properties': c_properties,
         'c_snapshot_sha256': sha(SCRATCH / 'c-snapshot-r2.json'),
         'scope': 'R9-3 runtime capture identity; not native or full C/D admission'}
     with (SCRATCH / 'final-summary.json').open('x') as stream:
