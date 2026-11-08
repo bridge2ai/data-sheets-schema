@@ -5,6 +5,7 @@ Neither an earlier replay verdict nor a mutable RunSpec is worker authority.
 """
 from dataclasses import dataclass
 from pathlib import Path
+from weakref import WeakKeyDictionary
 
 from . import native_shared_contract as c
 from . import native_shared_capture as captured
@@ -47,7 +48,23 @@ class FrozenSpec:
         return c.strict_json(self.rendered_json, max_bytes=c.HARD_LIMITS['request_bytes'])
 
 
-@dataclass(frozen=True, slots=True)
+_ADMISSIONS = WeakKeyDictionary()
+_ADMISSION_MEMBERS = ('registration_raw', 'execution_json', 'composition_json',
+    'preparation_raw', 'rebuild_arguments_json', 'selection', 'spec', 'rebuild',
+    'controls', 'check_sources')
+
+
+def require_admission(value):
+    if type(value) is not Admission or value not in _ADMISSIONS:
+        raise ValueError('callback capture was not minted by the active admission loader')
+    if (type(value.selection) is not c.NativeSelectionCapture or type(value.spec) is not FrozenSpec
+            or any(getattr(value, name) is not original
+                   for name, original in _ADMISSIONS[value])):
+        raise ValueError('captured callback admission reference changed')
+    return value
+
+
+@dataclass(frozen=True, slots=True, weakref_slot=True, eq=False)
 class Admission:
     registration_raw: bytes
     execution_json: bytes
@@ -61,6 +78,7 @@ class Admission:
     check_sources: object
 
     def reconstruct(self):
+        require_admission(self)
         self.check_sources()
         arguments = c.strict_json(self.rebuild_arguments_json)
         value = self.rebuild(preparation_raw=self.preparation_raw,
@@ -68,6 +86,7 @@ class Admission:
         if c.canonical(value) != self.execution_json:
             raise ValueError('callback execution changed after admission')
         self.check_sources()
+        require_admission(self)
         return value
 
     def base(self, selection_path):
@@ -78,6 +97,7 @@ class Admission:
         D's consumer still independently reconstructs the entire E body; no
         submitted derived body or cached verdict is passed to that consumer.
         """
+        require_admission(self)
         if selection_path != self.selection.registration.pin.path:
             raise ValueError('callback selection differs from its admitted capture')
         value = self.reconstruct()

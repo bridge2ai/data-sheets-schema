@@ -45,8 +45,8 @@ def test_immutable_render_view_matches_real_composition(bound):
             captured.fields_json = b'{}'
 
 
-def test_source_loaded_capture_worker_reaches_captured_reconstruction_without_loading(isolated_modules):
-    """A deliberately refusing reconstruction tests scheduling, not admission."""
+def test_source_loaded_capture_worker_refuses_unminted_interface_without_loading(isolated_modules):
+    """A caller-created interface cannot supply even a refusing reconstruction."""
     dependencies = authority.dependency_identity()
     pins = dependencies['base']['package_sources']
     seen = []
@@ -70,8 +70,8 @@ def test_source_loaded_capture_worker_reaches_captured_reconstruction_without_lo
         historical = sys.modules['native_control']
         result = work(historical, 'observer', lambda: loaded._base('/never/read', _admission=admitted))
         assert type(result) is ValueError
-        assert str(result) == 'captured reconstruction deliberately refused'
-        assert seen == [True]
+        assert str(result) == 'callback capture was not minted by the active admission loader'
+        assert seen == []
         with pytest.raises(FrozenInstanceError):
             admitted.rebuild = lambda **kwargs: {}
 

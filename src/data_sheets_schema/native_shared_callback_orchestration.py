@@ -234,6 +234,9 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
         admitted = capture_inputs.Admission(registration_raw, c.canonical(execution),
             composition_raw, preparation_raw, c.canonical(arguments), current, frozen,
             _function(rebuild, 'rebuild_v2_body'), classifier._controls, source_check)
+        capture_inputs._ADMISSIONS[admitted] = tuple(
+            (name, getattr(admitted, name)) for name in capture_inputs._ADMISSION_MEMBERS)
+        stack.callback(capture_inputs._ADMISSIONS.pop, admitted, None)
         # Reconstruct once before the first possible publication, too.
         admitted.reconstruct()
         paths = frozen._agentic_artifact_paths
