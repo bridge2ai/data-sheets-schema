@@ -17,7 +17,8 @@ from . import native_shared_evidence as evidence
 from . import native_shared_streams as live_streams
 from . import native_shared_observations as observed
 from . import native_shared_stage as stage
-from . import native_shared_controls_orchestration as controls_orchestration
+from .native_shared_callback_capture import Admission
+from .native_shared_callback_io import durable_new, _mkdir_durable, _replace_journal
 from .native_shared_capture import (
     _Reader,
     _binding,
@@ -46,8 +47,6 @@ from .native_shared_capture import (
 
 def _create(selection, role, raw, *, ordinal=None):
     """Sole parent/helper create-once primitive for explicitly derived S roles."""
-    from .native_attempt_supervisor import durable_new
-    from .native_execution import _mkdir_durable
     if role == 'observation':
         paths = _observation_paths(selection)
         if ordinal is not None and ordinal != len(paths):
@@ -75,7 +74,6 @@ def _create(selection, role, raw, *, ordinal=None):
 
 def _append(selection, execution, history, kind, payload):
     """Parent record publication shares C's exact serializer and journal CAS."""
-    from .native_shared_publication_orchestration import _replace_journal
     records, journal = stage.append_records(selection, execution, history, ((kind, c.canonical(payload)),))
     for record in records:
         _create(selection, 'record', record.raw, ordinal=len(history.records))
@@ -89,6 +87,7 @@ def activate(selection, execution_raw, started_raw):
     from actual initialized native/control streams.
     """
     from . import native_execution_registration_v2 as registration
+    from . import native_shared_controls_orchestration as controls_orchestration
     from .native_shared_controller_orchestration import reconstruct_composition
     with controls_orchestration.loaded_controls() as controls:
         value = registration.verified(execution_raw, classifier_projection=controls)
@@ -97,6 +96,19 @@ def activate(selection, execution_raw, started_raw):
     if (captured_selection != selection
             or composition['selection_raw_json'].encode('utf-8') != selection.registration.raw):
         raise ValueError('activation E does not capture this exact selected S')
+    return _activate_bound(selection, value, execution_raw, started_raw)
+
+
+def activate_admitted(admission, started_raw):
+    if threading.current_thread() is not threading.main_thread():
+        raise ValueError('native callback activation requires main-thread admission')
+    if type(admission) is not Admission:
+        raise ValueError('callback activation requires its fixed admitted interface')
+    value = admission.reconstruct()
+    return _activate_bound(admission.selection, value, admission.registration_raw, started_raw)
+
+
+def _activate_bound(selection, value, execution_raw, started_raw):
     started = _document(started_raw, 'started identity')
     if (started.get('state') != 'started' or started.get('attempt_id') != value['attempt_id']
             or started.get('registration_sha256') != c.sha(execution_raw)
@@ -121,11 +133,16 @@ def activate(selection, execution_raw, started_raw):
         execution_sha256=e.pin.sha256, attempt_id=value['attempt_id'], records=(record.pin,)))
 
 
-def _base(selection_path, *, _catalogs=None):
+def _base(selection_path, *, _catalogs=None, _admission=None):
+    if _admission is not None:
+        if type(_admission) is not Admission:
+            raise ValueError('callback capture requires its fixed admitted interface')
+        return _admission.base(selection_path)
     if threading.current_thread() is not threading.main_thread():
         raise ValueError('native callback cannot load captures; preload on the main thread at admission')
     from . import native_shared_selection as selected
     from . import native_execution_registration_v2 as registration
+    from . import native_shared_controls_orchestration as controls_orchestration
     from .native_shared_controller_orchestration import reconstruct_composition
     selection = selected.capture(selection_path)
     reader = _Reader(selection)
@@ -156,9 +173,9 @@ def _base(selection_path, *, _catalogs=None):
     return selection, reader, value, composition, spec
 
 
-def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files, observed_prefixes):
+def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files, observed_prefixes, _admission=None):
     """Bind the actual parent-observed initialization, never owner summary flags."""
-    selection, reader, value, composition, _ = _base(selection_path)
+    selection, reader, value, composition, _ = _base(selection_path, _admission=_admission)
     streams, (transcript, control) = _live_streams(value, stream_files=stream_files, transcript_bytes=transcript_bytes, control_bytes=control_bytes)
     c.exact(observed_prefixes, {'transcript', 'control'}, 'parent observed prefixes')
     if observed_prefixes != {'transcript': transcript, 'control': control}:
@@ -183,16 +200,16 @@ def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files,
         {'binding': c.pin_dict(binding.binding_artifact.pin), 'init_observation': c.pin_dict(item.pin)})
 
 
-def _load(selection_path, *, transcript_bytes=None, control_bytes=None, _catalogs=None):
+def _load(selection_path, *, transcript_bytes=None, control_bytes=None, _catalogs=None, _admission=None):
     """Strict complete-file route for final and recorded consumers."""
-    base = _base(selection_path, _catalogs=_catalogs)
+    base = _base(selection_path, _catalogs=_catalogs, _admission=_admission)
     streams, prefixes = _streams(base[2], transcript_bytes=transcript_bytes, control_bytes=control_bytes)
     return _loaded(base, streams, prefixes, _catalogs=_catalogs)
 
 
-def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, stream_files=None, _catalogs=None):
+def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, stream_files=None, _catalogs=None, _admission=None):
     """Fresh live authority, optionally with owner-reused pure catalog storage."""
-    base = _base(selection_path, _catalogs=_catalogs)
+    base = _base(selection_path, _catalogs=_catalogs, _admission=_admission)
     anchors = _declared_stream_files(base[0], base[1])
     if stream_files is not None and live_streams.identities(stream_files) != anchors:
         raise ValueError('observed stream identities differ from initialized authority')

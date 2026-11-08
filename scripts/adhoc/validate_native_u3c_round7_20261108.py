@@ -17,6 +17,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[2]
 SCRATCH = ROOT.parent / 'scratch-native-u3c-r4'
 RUNNER = ROOT / 'scripts/adhoc/run_native_u3c_round4_20261107.py'
+PREFIX = 'r7-final-'
 
 
 def pin(path):
@@ -30,9 +31,10 @@ def plan():
     groups = {name: old[name]['nodes'] for name in
               ('a-core', 'b-focused', 'b-schema-remaining', 'census', 'collect')}
     groups['focused'] = ['tests/test_native_shared_callback_preloading.py']
+    groups['canary'] = ['tests/test_native_shared_callback_preloading.py::test_historical_worker_runs_preloaded_c_classifier[classifier]']
     groups.update({name.replace('r6-', ''): row['nodes'] for name, row in parts.items()})
     return {name: {'nodes': nodes, 'command': [sys.executable, '-S', '-P', '-B', str(RUNNER),
-        '--out', str(SCRATCH / ('r7-' + name)), '--workers', '0' if name in ('collect', 'census') else '2',
+        '--out', str(SCRATCH / (PREFIX + name)), '--workers', '0' if name in ('collect', 'census') else '2',
         *(['--collect-only'] if name == 'collect' else []), *nodes]} for name, nodes in groups.items()}
 
 
@@ -55,7 +57,7 @@ def summary():
                 'reason': ''.join(child.text or '' for child in case if child.tag in ('failure', 'error'))}
                 for case in cases if case.find('failure') is not None or case.find('error') is not None]
         result[directory.name] = row
-    collection = SCRATCH / 'r7-collect/pytest.log'
+    collection = SCRATCH / (PREFIX + 'collect/pytest.log')
     if collection.is_file():
         current = {line.strip() for line in collection.read_text().splitlines()
                    if line.startswith('tests/') and '::' in line}
@@ -78,7 +80,7 @@ def main():
         parser.error('use physical dependency Python -S -P -B')
     if args.action in ('plan', 'summary'):
         value = plan() if args.action == 'plan' else summary()
-        path = SCRATCH / ('r7-' + args.action + '.json')
+        path = SCRATCH / (PREFIX + args.action + '.json')
         raw = (json.dumps(value, indent=2, sort_keys=True) + '\n').encode()
         with path.open('xb') as stream:
             stream.write(raw)
@@ -86,7 +88,7 @@ def main():
         print(json.dumps(pin(path)))
         return
     roster = plan()
-    if json.loads((SCRATCH / 'r7-plan.json').read_bytes()) != roster:
+    if json.loads((SCRATCH / (PREFIX + 'plan.json')).read_bytes()) != roster:
         raise RuntimeError('saved R7 roster differs')
     if not args.groups or any(group not in roster for group in args.groups):
         parser.error('name explicit saved groups')
@@ -94,6 +96,10 @@ def main():
         print('START ' + group, flush=True)
         code = subprocess.call(roster[group]['command'], cwd=ROOT)
         print('END ' + group + ': ' + str(code), flush=True)
+        if not (SCRATCH / (PREFIX + group) / 'outcome.json').is_file():
+            # In particular, do not repoll a quiet-window refusal by starting
+            # successive groups. Leave the lock and resume only after 60 s.
+            raise SystemExit(code or 125)
         if code not in (0, 1):
             raise SystemExit(code)
 

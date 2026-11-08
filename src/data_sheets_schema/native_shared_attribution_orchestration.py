@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from . import native_shared_attribution as consumer
 from . import native_shared_contract as c
-from . import native_shared_controller_orchestration as controller
 from .native_shared_evidence import read_regular
 
 
@@ -24,6 +23,7 @@ class _LiveAttribution(consumer._Attribution):
 
 def live(selection, *, execution_raw, spec, composition_raw):
     """Verify current preparation/C, then hand captured inputs to the observer."""
+    from . import native_shared_controller_orchestration as controller
     consumer._joined(selection, execution_raw, spec, composition_raw)
     composition = c.strict_json(composition_raw, 'attribution composition', c.HARD_LIMITS['request_bytes'])
     fresh, fresh_spec, fresh_selection = controller.reconstruct_composition(composition_raw)

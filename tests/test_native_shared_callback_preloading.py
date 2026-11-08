@@ -4,6 +4,8 @@ The observer/classifier worker is real; minimal adapter state isolates C's
 classifier body. This deliberately does not claim full observer admission.
 """
 from dataclasses import FrozenInstanceError
+from contextlib import ExitStack
+from pathlib import Path
 import queue
 import sys
 import threading
@@ -19,6 +21,90 @@ from data_sheets_schema import native_shared_controller_orchestration as control
 from tests.test_native_shared_controller import (
     bound, declaration, inputs, isolated_modules, native_spec, synthetic_declaration,
 )
+
+
+def test_immutable_render_view_matches_real_composition(bound):
+    from data_sheets_schema.native_shared_callback_capture import FrozenSpec
+    _, _, raw, instruction = bound
+    composition = controller.compose(raw, instruction_path=instruction)
+    _, spec, _ = controller.reconstruct_composition(controller.c.canonical(composition))
+    frozen = FrozenSpec.capture(spec)
+    expected = controller.render.commands(spec)
+    with authority.loaded_verified_package_module('data_sheets_schema.native_shared_callback_capture',
+            package_sources=composition['dependencies']['base']['package_sources']) as verified:
+        captured = verified.FrozenSpec(frozen.fields_json, frozen.rendered_json)
+        # Deferred pure imports are loaded on the main thread, too.
+        with authority.loaded_verified_package_module('data_sheets_schema.native_shared_render',
+                package_sources=composition['dependencies']['base']['package_sources']) as render:
+            assert render.commands(captured) == expected
+        assert captured.render_spec() == composition['render_spec']
+        copied = captured._agentic_artifact_paths
+        copied['full'] = '/forged'
+        assert captured._agentic_artifact_paths != copied
+        with pytest.raises(FrozenInstanceError):
+            captured.fields_json = b'{}'
+
+
+def test_source_loaded_capture_worker_reaches_captured_reconstruction_without_loading(isolated_modules):
+    """A deliberately refusing reconstruction tests scheduling, not admission."""
+    dependencies = authority.dependency_identity()
+    pins = dependencies['base']['package_sources']
+    seen = []
+    def refuse(**kwargs):
+        seen.append(threading.current_thread() is not threading.main_thread())
+        raise ValueError('captured reconstruction deliberately refused')
+    with ExitStack() as stack:
+        stack.enter_context(preload.preloaded_classifier(dependencies))
+        pure = stack.enter_context(authority.loaded_verified_package_module(
+            'data_sheets_schema.native_shared_callback_capture', package_sources=pins))
+        name = 'data_sheets_schema.native_shared_capture_orchestration'
+        relative = 'src/' + name.replace('.', '/') + '.py'
+        path = authority.ROOT / relative
+        loaded = stack.enter_context(authority.verified_source_module(name, path=path,
+            raw=authority._verified_source_bytes(path, pins[relative]), sha256=pins[relative]))
+        # Frozen synthetic selection identity only: refusal precedes all reads.
+        from types import SimpleNamespace
+        selected = SimpleNamespace(registration=SimpleNamespace(pin=SimpleNamespace(path='/never/read')))
+        admitted = pure.Admission(b'', b'', b'', b'', b'{}', selected,
+            pure.FrozenSpec(b'{}', b'{}'), refuse, object(), lambda: None)
+        historical = sys.modules['native_control']
+        result = work(historical, 'observer', lambda: loaded._base('/never/read', _admission=admitted))
+        assert type(result) is ValueError
+        assert str(result) == 'captured reconstruction deliberately refused'
+        assert seen == [True]
+        with pytest.raises(FrozenInstanceError):
+            admitted.rebuild = lambda **kwargs: {}
+
+
+def test_callback_create_once_matches_existing_writer_and_never_overwrites(tmp_path):
+    from data_sheets_schema import native_shared_callback_io as current
+    from data_sheets_schema.native_attempt_supervisor import durable_new
+    from data_sheets_schema.native_execution import _mkdir_durable
+    for name, mkdir, write in (('old', _mkdir_durable, durable_new),
+                               ('new', current._mkdir_durable, current.durable_new)):
+        folder = tmp_path / name / 'nested'
+        mkdir(folder)
+        target = folder / 'evidence.json'
+        write(target, b'{"fixed":true}')
+        with pytest.raises(FileExistsError):
+            write(target, b'changed')
+        assert target.read_bytes() == b'{"fixed":true}'
+        assert folder.stat().st_mode & 0o777 == 0o700
+
+
+def test_callback_journal_cas_checks_actual_bytes_before_replacement(tmp_path):
+    from data_sheets_schema import native_shared_callback_io as io
+    from data_sheets_schema import native_shared_contract as c
+    from data_sheets_schema.native_shared_evidence import read_regular
+    target = tmp_path / 'journal.json'
+    target.write_bytes(b'old')
+    before = read_regular(str(target), 'journal', max_bytes=100).captured
+    raw = b'new'
+    after = c.CapturedArtifact(c.ArtifactPin('journal', str(target), len(raw), c.sha(raw)), raw)
+    assert io._replace_journal(target, before, after).captured == after
+    with pytest.raises(ValueError, match='journal changed before'):
+        io._replace_journal(target, before, after)
+    assert target.read_bytes() == raw
 
 
 def work(historical, kind, callback):

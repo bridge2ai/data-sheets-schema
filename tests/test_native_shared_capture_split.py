@@ -16,6 +16,7 @@ def test_live_capture_forwards_projection_and_refuses_before_effects(monkeypatch
     from data_sheets_schema import native_shared_capture_orchestration as orchestration
     from data_sheets_schema import native_shared_controller_orchestration as controller
     from data_sheets_schema import native_shared_selection as selection
+    from data_sheets_schema import native_shared_controls_orchestration as controls_orchestration
 
     class ExpectedRefusal(ValueError):
         pass
@@ -43,7 +44,7 @@ def test_live_capture_forwards_projection_and_refuses_before_effects(monkeypatch
     def forbidden(*args, **kwargs):
         pytest.fail("refused execution reached reconstruction or a writer")
 
-    monkeypatch.setattr(orchestration.controls_orchestration, "loaded_controls", opened_scope)
+    monkeypatch.setattr(controls_orchestration, "loaded_controls", opened_scope)
     monkeypatch.setattr(authority, "verified", refuse)
     monkeypatch.setattr(controller, "reconstruct_composition", forbidden)
     monkeypatch.setattr(orchestration, "_create", forbidden)

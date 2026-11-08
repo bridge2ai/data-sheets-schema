@@ -161,12 +161,12 @@ class CallbackAdapter:
     command classification remains the exact selected fixed policy.
     """
     def __setattr__(self, name, value):
-        if name == '_classifier' and name in self.__dict__:
+        if name in ('_classifier', '_callbacks') and name in self.__dict__:
             raise AttributeError('preloaded callback reference cannot be replaced')
         super().__setattr__(name, value)
 
     def __delattr__(self, name):
-        if name == '_classifier':
+        if name in ('_classifier', '_callbacks'):
             raise AttributeError('preloaded callback reference cannot be removed')
         super().__delattr__(name)
 
@@ -211,23 +211,45 @@ class CallbackAdapter:
             raise ValueError('native26 requires its actual fixed phase observer and selected policy')
 
     def activate_before_dispatch(self, started_raw):
-        from . import native_shared_capture_orchestration as capture
         if self._activated:
             raise ValueError('native shared callback identity is already spent')
         with control_loading.loaded_controls(self.value['dependencies']) as controls:
             if c.canonical(registration.verified(self.registration_raw,
                     classifier_projection=controls)) != c.canonical(self.execution):
                 raise ValueError('callback execution changed before activation')
-        scope = callback_loading.preloaded_classifier(self.value['dependencies'])
-        self._classifier = scope.__enter__()
+        scope = callback_loading.preloaded_callbacks(self.value, self.spec, self.selection,
+            self.execution, self.registration_raw, render.commands(self.spec))
+        self._callbacks = scope.__enter__()
+        self._classifier = self._callbacks.classifier
         self._classifier_scope = scope
+        self.state, self.phase = self._callbacks.state, self._callbacks.phase
+        self._receipt_catalogs = self._callbacks.catalogs
         # Latch before any fallible write: partial activation cannot redispatch.
         self._activated = True
         try:
-            capture.activate(self.selection, self.registration_raw, started_raw)
+            self._callbacks.capture.activate_admitted(self._callbacks.admission, started_raw)
         except BaseException:
             scope.__exit__(*sys.exc_info())
             raise
+
+    def _callback_resources(self):
+        resources = getattr(self, '_callbacks', None)
+        if resources is None:
+            # The main-thread diagnostic helpers also exercise this body
+            # without admission. A worker never takes that loading route.
+            callback_loading.require_main_thread()
+            return None
+        if (self.state is not resources.state or self.phase is not resources.phase
+                or self._receipt_catalogs is not resources.catalogs
+                or self._classifier is not resources.classifier):
+            raise ValueError('preloaded callback state reference changed')
+        if (self.raw != resources.admission.composition_json
+                or c.canonical(self.execution) != resources.admission.execution_json
+                or self.selection.registration.raw != resources.admission.selection.registration.raw
+                or c.canonical(self.policy) != c.canonical(c.strict_json(
+                    resources.admission.composition_json, max_bytes=c.HARD_LIMITS['request_bytes'])['policy'])):
+            raise ValueError('preloaded callback authority changed')
+        return resources
 
     def _stop(self, reason):
         if self.failure is None:
@@ -237,11 +259,13 @@ class CallbackAdapter:
     def _failure_detail(self, exc):
         # Preserve the historical first-stop text, not the private subclass
         # name. The first failure alone may contribute optional diagnostics.
-        is_stream = isinstance(exc, live_streams._LiveStreamRefusal)
+        resources = getattr(self, '_callbacks', None)
+        streams = resources.streams if resources is not None else live_streams
+        is_stream = isinstance(exc, streams._LiveStreamRefusal)
         if self.failure is None and is_stream:
             try:
                 raw = exc.diagnostic_json
-                live_streams.diagnostic_document(raw)
+                streams.diagnostic_document(raw)
                 if getattr(self, '_stream_diagnostic_json', None) is None:
                     self._stream_diagnostic_json = raw
             except Exception:
@@ -249,11 +273,13 @@ class CallbackAdapter:
         return ('ValueError' if is_stream else type(exc).__name__) + ': ' + str(exc)
 
     def _observed_endpoint(self, event):
+        resources = self._callback_resources()
+        streams = resources.streams if resources is not None else live_streams
         members, prefixes = [], {}
-        for role in live_streams.ROLES:
+        for role in streams.ROLES:
             path = str(Path(self.execution['attempt_directory']) / (role + '.jsonl'))
             previous = self._stream_prefixes.get(role)
-            member = live_streams.read_live_stream(path, role,
+            member = streams.read_live_stream(path, role,
                 max_bytes=c.HARD_LIMITS['stream_bytes'], previous=previous,
                 identity=self._stream_files.get(role))
             members.append(member)
@@ -265,22 +291,28 @@ class CallbackAdapter:
                 actual = c.strict_json(member.captured.raw[start:end + 1], 'observed native frame', 16 * 1024 * 1024)
                 if c.canonical(actual) != c.canonical(event):
                     raise ValueError('observer event differs from its next exact raw native frame')
-                prefixes[role] = live_streams.prefix(member, end + 1)
+                prefixes[role] = streams.prefix(member, end + 1)
             else:
-                prefixes[role] = live_streams.prefix(member)
+                prefixes[role] = streams.prefix(member)
         # Neither cursor advances if either acquisition or the event fails.
-        anchors = live_streams.stream_files(tuple(members))
+        anchors = streams.stream_files(tuple(members))
         self._stream_prefixes, self._stream_files = prefixes, anchors
         self._stream_members = tuple(members)
         return prefixes['transcript'].bytes, prefixes['control'].bytes
 
     def _run(self, endpoints=None):
-        from . import native_shared_capture_orchestration as capture
+        resources = self._callback_resources()
+        if resources is not None:
+            capture = resources.capture
+            admission = {'_admission': resources.admission}
+        else:
+            from . import native_shared_capture_orchestration as capture
+            admission = {}
         if endpoints is None:
-            return capture._load(self.selection.registration.pin.path)
+            return capture._load(self.selection.registration.pin.path, **admission)
         run = capture._load_live(self.selection.registration.pin.path,
             transcript_bytes=endpoints[0], control_bytes=endpoints[1], stream_files=self._stream_files,
-            _catalogs=self._receipt_catalogs)
+            _catalogs=self._receipt_catalogs, **admission)
         if self._stream_prefixes != {'transcript': run.transcript, 'control': run.control}:
             raise ValueError('recaptured streams differ from exact parent-observed prefixes')
         return run
@@ -293,7 +325,11 @@ class CallbackAdapter:
         return run, run.decision()
 
     def _current_final(self, run):
-        from .native_shared_gates import current_evidence
+        resources = self._callback_resources()
+        if resources is not None:
+            current_evidence = resources.gates.current_evidence
+        else:
+            from .native_shared_gates import current_evidence
         result = current_evidence(run)
         if result.get('checked') is not True or result.get('findings') != []:
             raise ValueError('current selected final evidence did not pass')
@@ -303,13 +339,19 @@ class CallbackAdapter:
         if self.final_evidence is not None and c.canonical(self._current_final(run)) != c.canonical(self.final_evidence):
             raise ValueError('final evidence changed after its actual successful check')
         if self.recorder_identity is not None:
-            item = read_regular(self.recorder_identity['path'], 'provenance', max_bytes=c.HARD_LIMITS['request_bytes']).captured
+            resources = self._callback_resources()
+            read = resources.evidence.read_regular if resources is not None else read_regular
+            item = read(self.recorder_identity['path'], 'provenance', max_bytes=c.HARD_LIMITS['request_bytes']).captured
             if item.pin.sha256 != self.recorder_identity['sha256']:
                 raise ValueError('completed selected provenance record changed')
 
     def _effect_stop(self, run, event, classification, basis):
         """Persist exact observer restriction before the frozen callback grant."""
-        from .native_attempt_supervisor import durable_new
+        resources = self._callback_resources()
+        if resources is not None:
+            durable_new = resources.capture.durable_new
+        else:
+            from .native_shared_callback_io import durable_new
         data = event['request']['input']
         trace = run.trace(); request = trace.request(data['tool_use_id'])
         view = self._view(run, exclude_pending=data['tool_use_id'])
@@ -324,14 +366,27 @@ class CallbackAdapter:
         self._stop('native shared observer restriction: ' + basis)
 
     def _view(self, run, *, exclude_pending=None):
-        from .native_shared_capture import current_effect_view
+        resources = self._callback_resources()
+        if resources is not None:
+            current_effect_view = resources.captured.current_effect_view
+        else:
+            from .native_shared_capture import current_effect_view
         return current_effect_view(run, correction_window=bool(self.state.checks), exclude_pending=exclude_pending)
 
     def observe(self, event):
-        from . import native_shared_capture_orchestration as capture
-        from . import native_shared_capture as captured
-        from . import native_shared_effects as effects
-        from . import native_shared_evidence as evidence
+        resources = self._callback_resources()
+        if resources is not None:
+            capture, captured = resources.capture, resources.captured
+            effects, evidence = resources.effects, resources.evidence
+            selected_policy = resources.policy
+            admission = {'_admission': resources.admission}
+        else:
+            from . import native_shared_capture_orchestration as capture
+            from . import native_shared_capture as captured
+            from . import native_shared_effects as effects
+            from . import native_shared_evidence as evidence
+            selected_policy = policy
+            admission = {}
         if self.failure is not None:
             self._stop(self.failure)
         try:
@@ -343,7 +398,7 @@ class CallbackAdapter:
                     raise ValueError('native initialization repeated')
                 capture.initialize(self.selection.registration.pin.path,
                     transcript_bytes=endpoints[0], control_bytes=endpoints[1], stream_files=self._stream_files,
-                    observed_prefixes=self._stream_prefixes)
+                    observed_prefixes=self._stream_prefixes, **admission)
                 self._initialized = True
             if not self._initialized:
                 if event.get('type') != 'control_response':
@@ -371,7 +426,7 @@ class CallbackAdapter:
                 self.phase.before(name, inputs, stage_decision=decision)
                 view = captured._effect_view_from_decision(run, decision,
                     correction_window=bool(self.state.checks), exclude_pending=data.get('tool_use_id'))
-                if policy.stage_overlay_governs(view, tool_name=name, tool_input=inputs, policy=self.policy):
+                if selected_policy.stage_overlay_governs(view, tool_name=name, tool_input=inputs, policy=self.policy):
                     classification, basis = effects.classify_effect(view, tool_name=name, tool_input=inputs)
                     if classification != 'prescribed':
                         if name in ('Read', 'Write', 'Edit', 'MultiEdit'):
@@ -435,8 +490,11 @@ class CallbackAdapter:
                         codes = [metadata[k] for k in ('exitCode', 'exit_code') if k in metadata]
                         if not codes or any(type(code) is not int or code != 0 for code in codes) or block.get('is_error') is not False:
                             raise ValueError('selected final recorder did not settle successfully')
-                        item = read_regular(self.policy['post_final_recorder']['destination'], 'provenance', max_bytes=c.HARD_LIMITS['request_bytes']).captured
-                        from .audit_omissions import _mapping
+                        item = evidence.read_regular(self.policy['post_final_recorder']['destination'], 'provenance', max_bytes=c.HARD_LIMITS['request_bytes']).captured
+                        if resources is not None:
+                            _mapping = resources.mapping
+                        else:
+                            from .audit_omissions import _mapping
                         record = _mapping(item.raw, 'native provenance')
                         if c.canonical(record.get('native_shared_generation')) != c.canonical(captured._provenance_block(run)):
                             raise ValueError('recorder did not preserve exact native selected stage lineage')
@@ -455,6 +513,8 @@ class CallbackAdapter:
             self._stop('native shared observation failed: ' + self._failure_detail(exc))
 
     def classify(self, command, python, programs, selected_policy):
+        if hasattr(self, '_callbacks'):
+            self._callback_resources()
         if self.failure is not None:
             self._stop(self.failure)
         if c.canonical(selected_policy) != c.canonical(self.policy):
@@ -477,7 +537,9 @@ class CallbackAdapter:
         if complete and self.failure is None:
             try:
                 run = self._run()
-                phase, _ = capture_phase(run, complete=True)
+                resources = self._callback_resources()
+                phase, _ = (resources.captured.phase_replay(run, complete=True) if resources is not None
+                            else capture_phase(run, complete=True))
                 if not phase['passed']:
                     raise ValueError('; '.join(phase['problems']))
                 self._final_unchanged(run)
