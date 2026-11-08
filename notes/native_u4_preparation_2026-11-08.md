@@ -118,6 +118,30 @@ the execution report rather than inferred from the presence of a patch.
 | ID | Finding | Disposition |
 |---|---|---|
 | U4P-R1 | Initial front-door port tried to serialize the producer's `Path` return value directly as JSON, which would fail after a successful future probe. | Changed to an explicit string `probe_manifest` result. No probe was run. |
-| U4P-R2 | Donor local-provider startup bound a listener and started its thread outside the cleanup guard; thread-start failure leaked the listener. | In scope for the provider port; require guarded startup and a fake-server cleanup regression. |
-| U4P-R3 | Donor provider body reads could exceed the absolute deadline under continuous trickling; synchronous shutdown could then wait without a bound. | In scope for the provider port; require absolute-deadline reads and bounded cleanup with in-memory/fake-server tests. No real listener is used for validation. |
+| U4P-R2 | Donor local-provider startup bound a listener and started its thread outside the cleanup guard; thread-start failure leaked the listener. | Fixed with guarded startup; fake-server/thread regression `test_provider_listener_cleanup_is_bounded_even_on_start_failure` passes. |
+| U4P-R3 | Donor provider body reads could exceed the absolute deadline under continuous trickling; synchronous shutdown could then wait without a bound. | Fixed with absolute-deadline `read1` loops, a stop-event request loop, active-connection close and bounded join. `test_provider_body_uses_absolute_deadline_without_socket` and cleanup regressions pass without a real listener. |
 | U4P-R4 | Saved-probe output could imply that D105's v4 choice was a newly verified receipt-policy result. | Output now says `selected_receipt_instrument`, with command-specific proof limits. The account-choice schema is unchanged; producer/registration paths retain genuine receipt-policy checks. |
+
+## Validation checkpoint
+
+Code/test commit `126e54a1891e9444004846abcf0e88e4071340b1` passed the single
+genuine saved-probe canary, **103 new-module tests**, **230 permission/guard/path
+regressions**, and **237 v2 authority/registration/loader/CI/D9-boundary
+regressions**. The latter three cohorts are disjoint: **570 distinct passed
+tests**, zero failures, errors or skips. The canary is included in those 570.
+Full repository collection found **24,898 tests** with zero collection errors;
+the full repository suite was not executed. All five invocations retained
+source stability, origin, network-denial and observed-process cleanup evidence.
+
+These are software preparation results on D9. The D9 test asserting a worker
+loader refusal is a diagnostic pass, not C7 integration acceptance. The fake
+producer-event test verifies capture/consumer behavior without a native process
+or listener. Independent read-only review found and rechecked U4P-R2/R3; no
+remaining new-port source finding was reported. A6/C7, the protected installed
+bundle and full native acceptance remain the later gates listed above.
+
+The follow-up documentation/evidence-helper commit changes no production or
+test bytes. Run evidence stays under `scratch-native-u4-prep/{canary-1,port-1,
+permissions-1,authority-1,collection-1}`. The checked-in summary helper retains
+per-run counts, source heads, exact JUnit identities and artifact hashes, so
+overlapping canaries cannot inflate the distinct-test total.

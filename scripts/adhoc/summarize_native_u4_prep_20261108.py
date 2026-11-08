@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import xml.etree.ElementTree as ET
 
@@ -60,9 +61,10 @@ def summarize(name):
             detail = case.find({'failed': 'failure', 'errors': 'error', 'skipped': 'skipped'}.get(state, '_none'))
             nodes.append({'classname': case.get('classname'), 'name': case.get('name'),
                           'state': state, 'message': None if detail is None else detail.get('message')})
+    collected = re.findall(r'(?m)^(\d+) tests collected in ', (run / 'pytest.log').read_text())
     return {'name': name, 'path': str(run), 'outcome': outcome,
             'source_stability': stability, 'counts': counts, 'nodes': nodes,
-            'artifacts': artifacts}
+            'collected': None if not collected else int(collected[-1]), 'artifacts': artifacts}
 
 
 def main():
@@ -76,18 +78,28 @@ def main():
     if (output.parent != SCRATCH or output.resolve() != output
             or os.path.lexists(output)):
         raise ValueError('output must be a new literal file directly in assigned scratch')
+    runs = [summarize(name) for name in args.runs]
+    latest = {}
+    for run in runs:
+        for node in run['nodes']:
+            latest[(node['classname'], node['name'])] = node['state']
+    unique_counts = {state: list(latest.values()).count(state)
+                     for state in ('passed', 'failed', 'errors', 'skipped')}
     result = {'kind': 'native_u4_preparation_validation', 'version': 1,
               'base': BASE, 'head': git('rev-parse', 'HEAD'),
               'status': git('status', '--porcelain', '--untracked-files=all'),
               'changed_paths': git('diff', '--name-only', BASE, 'HEAD').splitlines(),
               'generator_sha256': sha(Path(__file__)),
-              'runs': [summarize(name) for name in args.runs],
+              'runs': runs, 'unique_counts_latest': unique_counts,
+              'validation_heads': sorted({run['source_stability']['before']['head'] for run in runs}),
               'scope': 'offline preparation; counts overlap; no native acceptance or timing claim'}
     with output.open('x', encoding='utf-8') as stream:
         json.dump(result, stream, indent=2, sort_keys=True)
         stream.write('\n')
     print(json.dumps({'path': str(output), 'sha256': sha(output),
+                      'unique_counts_latest': unique_counts,
                       'runs': [{'name': run['name'], 'counts': run['counts'],
+                                'collected': run['collected'],
                                 'returncode': run['outcome']['returncode']}
                                for run in result['runs']]}, sort_keys=True))
 
