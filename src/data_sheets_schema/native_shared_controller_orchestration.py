@@ -23,6 +23,7 @@ from .native_shared_evidence import read_regular
 from . import native_shared_streams as live_streams
 from . import native_shared_controls_orchestration as control_loading
 from . import native_shared_permission_protocol_orchestration as protocol_loading
+from . import native_shared_callback_orchestration as callback_loading
 
 EXECUTION = consumer.EXECUTION
 
@@ -159,6 +160,16 @@ class CallbackAdapter:
     Stage Read/Write evidence is recorded at the real ordered observer barrier;
     command classification remains the exact selected fixed policy.
     """
+    def __setattr__(self, name, value):
+        if name == '_classifier' and name in self.__dict__:
+            raise AttributeError('preloaded callback reference cannot be replaced')
+        super().__setattr__(name, value)
+
+    def __delattr__(self, name):
+        if name == '_classifier':
+            raise AttributeError('preloaded callback reference cannot be removed')
+        super().__delattr__(name)
+
     def __init__(self, composition_raw, *, execution, registration_raw):
         # The first live boundary is full U3-A verification of OUTER v2 E.
         # A captured parser, offline C or invented prefix cannot activate it.
@@ -207,9 +218,16 @@ class CallbackAdapter:
             if c.canonical(registration.verified(self.registration_raw,
                     classifier_projection=controls)) != c.canonical(self.execution):
                 raise ValueError('callback execution changed before activation')
+        scope = callback_loading.preloaded_classifier(self.value['dependencies'])
+        self._classifier = scope.__enter__()
+        self._classifier_scope = scope
         # Latch before any fallible write: partial activation cannot redispatch.
         self._activated = True
-        capture.activate(self.selection, self.registration_raw, started_raw)
+        try:
+            capture.activate(self.selection, self.registration_raw, started_raw)
+        except BaseException:
+            scope.__exit__(*sys.exc_info())
+            raise
 
     def _stop(self, reason):
         if self.failure is None:
@@ -390,9 +408,7 @@ class CallbackAdapter:
                                 raise ValueError('recorder requires exactly one settled final pass')
                             self.recorder_call = block['id']; preserved.add(command)
                         elif self.state.checks and self.state._command_kind(command) is None:
-                            with control_loading.loaded_controls(self.value['dependencies']) as controls:
-                                readonly = controls['native_readonly'].lookup_command(command,
-                                    self.policy['readonly_lookups'], controls['native_command_policy']._simple_command)
+                            readonly = self._classifier.readonly(command, self.policy['readonly_lookups'])
                             if not readonly:
                                 raise ValueError('draft correction permits only report Writes and registered read-only checks')
                             preserved.add(command)
@@ -443,14 +459,21 @@ class CallbackAdapter:
             self._stop(self.failure)
         if c.canonical(selected_policy) != c.canonical(self.policy):
             self._stop('native callback command policy differs from its exact composition')
-        dependencies = self.value['dependencies']
-        with control_loading.loaded_controls(dependencies) as controls, \
-                authority.loaded_verified_package_module('data_sheets_schema.native_shared_policy',
-                    package_sources=dependencies['base']['package_sources']) as verified_policy:
-            return verified_policy.classify_bash(command, python, programs, selected_policy,
-                                       classifier_projection=controls)
+        if not hasattr(self, '_classifier'):
+            raise ValueError('native callback requires main-thread preloading at admission')
+        return self._classifier.classify(command, python, programs, selected_policy)
 
     def report(self, *, complete=False):
+        try:
+            return self._report(complete=complete)
+        finally:
+            if complete and hasattr(self, '_classifier_scope'):
+                callback_loading.require_main_thread()
+                scope = self._classifier_scope
+                del self._classifier_scope
+                scope.__exit__(None, None, None)
+
+    def _report(self, *, complete=False):
         if complete and self.failure is None:
             try:
                 run = self._run()

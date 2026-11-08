@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import asdict, replace
 from pathlib import Path, PurePosixPath
 import shlex
+import threading
 
 from . import native_shared_contract as c
 from . import native_shared_evidence as evidence
@@ -121,6 +122,8 @@ def activate(selection, execution_raw, started_raw):
 
 
 def _base(selection_path, *, _catalogs=None):
+    if threading.current_thread() is not threading.main_thread():
+        raise ValueError('native callback cannot load captures; preload on the main thread at admission')
     from . import native_shared_selection as selected
     from . import native_execution_registration_v2 as registration
     from .native_shared_controller_orchestration import reconstruct_composition

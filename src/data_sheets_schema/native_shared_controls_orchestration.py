@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 import sys
+import threading
 
 from . import native_execution_authority_v2 as authority
 
@@ -20,6 +21,8 @@ def loaded_controls(dependencies=None):
     copy intentionally has a different class and mint ledger and cannot admit
     this carrier. Revoke the carrier before either loader scope closes.
     """
+    if threading.current_thread() is not threading.main_thread():
+        raise ValueError('native callback cannot load controls; preload on the main thread at admission')
     if dependencies is None:
         dependencies = authority.dependency_identity()
     projected = {}
