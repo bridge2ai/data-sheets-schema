@@ -262,6 +262,14 @@ def bound_case(prepared, fixture):
 def test_bound_phase_runs_genuine_saved_verifier_after_mocked_child_boundary(prepared, fixture, monkeypatch):
     expected = bound_case(prepared, fixture)
     calls = []
+    reads = []
+    actual_read = sequence._read
+    def bounded_read(path, limit):
+        if Path(path).name == 'permission-probe.json':
+            reads.append(limit)
+            assert limit == sequence.HARD_LIMITS['permission_wire_bytes']
+        return actual_read(path, limit)
+    monkeypatch.setattr(sequence, '_read', bounded_read)
     def saved_transport(submitted, directory, *, deadline_seconds):
         assert submitted == expected
         assert (prepared['root'] / 'bound-claim.json').is_file()
@@ -279,6 +287,7 @@ def test_bound_phase_runs_genuine_saved_verifier_after_mocked_child_boundary(pre
     assert targets.keys() <= {key for key, _ in observed}
     assert result['checked'] is result['passed'] is True
     assert len(calls) == 1
+    assert len(reads) >= 3 and set(reads) == {196_000_000}
     assert result['permission']['sha256'] == sequence.sha(output.read_bytes())
     with pytest.raises(FileExistsError):
         sequence.produce_bound_probe(prepared['authorization'], expected)

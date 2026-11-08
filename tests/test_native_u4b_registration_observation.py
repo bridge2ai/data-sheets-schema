@@ -29,7 +29,22 @@ def registration_body(tmp_path):
         'permission_probe': str(tmp_path / 'permission'), 'attempt_id': 'invented-boundary',
         'attempt_directory': str(tmp_path / 'attempt'), 'evidence_directory': str(tmp_path / 'evidence'),
         'max_draft_checks': 1, 'dependencies': {'scope': 'isolated upstream source prerequisite'}}
+    path = Path(body['permission_probe'])
+    path.write_bytes(b'{"scope":"invented upstream permission snapshot A"}')
+    body['permission_probe_sha256'] = subject.c.sha(path.read_bytes())
     return body, arguments, preparation
+
+
+def isolated_bound_result(path):
+    """A readback-boundary fixture, not an actual permission verdict.
+
+    The genuine saved consumer is independently exercised by the A3 sequence
+    tests. Here only its reported pin is varied to test the final body join.
+    """
+    raw = Path(path).read_bytes()
+    return {'checked': True, 'passed': True,
+            'permission': {'path': path, 'sha256': subject.c.sha(raw), 'bytes': len(raw)},
+            'scope': 'explicitly isolated bound-probe prerequisite; not acceptance'}
 
 
 def corrupt_thinking(body, arguments, mutation):
@@ -66,8 +81,7 @@ def test_public_registration_refuses_unobserved_or_contradictory_thinking(
     # This cohort isolates complete bound-probe verification, like the other
     # upstream prerequisites. A3 sequence tests exercise its real reader.
     from data_sheets_schema import native_u4b_probe_sequence as sequence
-    monkeypatch.setattr(sequence, 'validate_bound_probe', lambda selected, path: {
-        'scope': 'explicitly isolated bound-probe prerequisite; not an acceptance result'})
+    monkeypatch.setattr(sequence, 'validate_bound_probe', lambda selected, path: isolated_bound_result(path))
     assert subject._require_runtime_observation(body) is body
     corrupt_thinking(body, arguments, mutation)
     monkeypatch.setattr(subject, '_registration_body', lambda *a, **k: deepcopy(body))
@@ -98,6 +112,75 @@ def test_public_registration_refuses_unobserved_or_contradictory_thinking(
         call()
     assert not Path(body['attempt_directory']).exists()
     assert not Path(body['evidence_directory']).exists()
+
+
+@pytest.mark.parametrize('entry', ['proposal', 'outer_readback', 'body_readback'])
+def test_public_boundary_rejects_replaced_and_rehashed_bound_permission(tmp_path, monkeypatch, entry):
+    body, _, preparation = registration_body(tmp_path)
+    from data_sheets_schema import native_u4b_probe_sequence as sequence
+    monkeypatch.setattr(sequence, 'validate_bound_probe', lambda selected, path: isolated_bound_result(path))
+    assert subject._require_runtime_observation(body) is body
+    # Upstream reconstruction captured A. The later reader now reports B's
+    # freshly recomputed digest; neither a passing flag nor rehash permits the
+    # public boundary to return A's registration with B's permission evidence.
+    Path(body['permission_probe']).write_bytes(b'{"scope":"invented replacement permission snapshot B"}')
+    assert isolated_bound_result(body['permission_probe'])['permission']['sha256'] != body['permission_probe_sha256']
+    monkeypatch.setattr(subject, '_registration_body', lambda *a, **k: deepcopy(body))
+    monkeypatch.setattr(subject.authority, 'loaded_dependencies',
+                        lambda *a, **k: pytest.fail('replaced permission reached envelope publication'))
+    if entry == 'proposal':
+        call = lambda: subject.registration(body['composition'], body['system_path'])
+    elif entry == 'body_readback':
+        call = lambda: subject.verified_v2_body(subject.c.canonical(body), preparation_raw=preparation)
+    else:
+        projection = object()
+        @contextmanager
+        def isolated_controls(dependencies):
+            assert dependencies == body['dependencies']
+            yield projection
+        monkeypatch.setattr(subject.authority, 'dependency_identity', lambda: body['dependencies'])
+        monkeypatch.setattr(subject.control_loading, 'loaded_controls', isolated_controls)
+        def reconstruction(raw, *, classifier_projection):
+            assert raw == b'isolated captured registration A' and classifier_projection is projection
+            return deepcopy(body)
+        monkeypatch.setattr(subject.execution_v2, 'verified', reconstruction)
+        call = lambda: subject.verified(b'isolated captured registration A')
+    with pytest.raises(ValueError, match='bound permission result differs'):
+        call()
+    assert not Path(body['attempt_directory']).exists()
+    assert not Path(body['evidence_directory']).exists()
+
+
+def test_matching_bound_pin_passes_isolated_public_body_readback(tmp_path, monkeypatch):
+    body, _, preparation = registration_body(tmp_path)
+    from data_sheets_schema import native_u4b_probe_sequence as sequence
+    calls = []
+    def readback(selected, path):
+        assert selected == body['runtime'] and path == body['permission_probe']
+        calls.append(path)
+        return isolated_bound_result(path)
+    monkeypatch.setattr(sequence, 'validate_bound_probe', readback)
+    monkeypatch.setattr(subject, '_registration_body', lambda *a, **k: deepcopy(body))
+    assert subject.verified_v2_body(subject.c.canonical(body), preparation_raw=preparation) == body
+    assert calls == [body['permission_probe']]
+
+
+@pytest.mark.parametrize('mutation', ['unchecked', 'unpassed', 'missing_pin', 'wrong_path',
+                                     'bool_bytes', 'zero_bytes', 'missing_registered_hash'])
+def test_final_join_requires_explicit_matching_bound_result(tmp_path, monkeypatch, mutation):
+    body, _, _ = registration_body(tmp_path)
+    from data_sheets_schema import native_u4b_probe_sequence as sequence
+    returned = isolated_bound_result(body['permission_probe'])
+    if mutation == 'unchecked': returned['checked'] = False
+    elif mutation == 'unpassed': returned['passed'] = False
+    elif mutation == 'missing_pin': del returned['permission']
+    elif mutation == 'wrong_path': returned['permission']['path'] += '-other'
+    elif mutation == 'bool_bytes': returned['permission']['bytes'] = True
+    elif mutation == 'zero_bytes': returned['permission']['bytes'] = 0
+    else: del body['permission_probe_sha256']
+    monkeypatch.setattr(sequence, 'validate_bound_probe', lambda *a: deepcopy(returned))
+    with pytest.raises(ValueError, match='permission'):
+        subject._require_runtime_observation(body)
 
 
 @pytest.mark.parametrize('context_mode', ['0', '1'])

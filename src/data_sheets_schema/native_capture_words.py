@@ -93,13 +93,17 @@ def require_unspent(value):
         raise ValueError('capture word cannot renew a spent generation reservation')
 
 
-def observed_limits(terminal_raw, runtime):
-    """Extract exact observed integer limits; missing data is not a mismatch."""
+def observed_primary_limits(terminal_raw, runtime):
+    """Extract refusal evidence; extra model entries cannot hide a mismatch.
+
+    This does not establish terminal success. Missing or malformed limits for
+    the exact registered model are not evidence of a numerical mismatch.
+    """
     event = strict_json(terminal_raw, limit=MAX_BYTES)
     if type(event) is not dict or event.get('type') != 'result':
         raise ValueError('capture requires an explicit terminal result')
     usage = event.get('modelUsage')
-    if type(usage) is not dict or set(usage) != {runtime['model']}:
+    if type(usage) is not dict or runtime['model'] not in usage:
         raise ValueError('capture terminal modelUsage differs from registered model')
     own = usage[runtime['model']]
     if type(own) is not dict:
@@ -107,6 +111,14 @@ def observed_limits(terminal_raw, runtime):
     limits = {key: own.get(key) for key in ('contextWindow', 'maxOutputTokens')}
     if any(type(value) is not int or value <= 0 for value in limits.values()):
         raise ValueError('capture terminal limits must be explicit positive integers')
+    return event, usage, limits
+
+
+def observed_limits(terminal_raw, runtime):
+    """Extract exact singleton-model limits for strict terminal success."""
+    event, usage, limits = observed_primary_limits(terminal_raw, runtime)
+    if set(usage) != {runtime['model']}:
+        raise ValueError('capture terminal modelUsage differs from registered model')
     return event, usage, limits
 
 
@@ -164,7 +176,7 @@ class Journal:
                 if not events or events[-1]['word_sha256'] != value['word_sha256']:
                     raise ValueError('capture limits refusal lacks its active word')
                 terminal_raw = value['terminal_raw_json'].encode()
-                _, _, limits = observed_limits(terminal_raw, self.runtime)
+                _, _, limits = observed_primary_limits(terminal_raw, self.runtime)
                 expected_root = self.root / 'captures' / value['word_sha256']
                 path = _path(value['capture_path'])
                 if (value['terminal_sha256'] != sha(terminal_raw)
@@ -226,7 +238,7 @@ class Journal:
 
     def refuse_limits(self, word_raw, terminal_raw, capture_path, now=None):
         self.require(word_raw, now, current=False)
-        _, _, limits = observed_limits(terminal_raw, self.runtime)
+        _, _, limits = observed_primary_limits(terminal_raw, self.runtime)
         if canonical(limits) == canonical(self.runtime['limits']):
             raise ValueError('equal capture limits cannot invalidate a registration')
         return self._append({'type': 'limits_refusal', 'word_sha256': sha(word_raw),

@@ -161,9 +161,12 @@ def main(argv=None):
             _unchanged(*captures)
             if args.command == 'observation-probe':
                 output = sequence.produce_observation(authorization_raw, runtime)
+                output_limit = sequence.MAX_BYTES
             else:
+                from .native_shared_contract import HARD_LIMITS
                 output = sequence.produce_bound_probe(authorization_raw, subject)
-            result = {'manifest': str(output), 'sha256': guard.sha(_read(output))}
+                output_limit = HARD_LIMITS['permission_wire_bytes']
+            result = {'manifest': str(output), 'sha256': guard.sha(_read(output, output_limit))}
         _unchanged(*captures)
         _emit(result, choice_raw, command=args.command)
         return 0

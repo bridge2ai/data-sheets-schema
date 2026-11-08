@@ -455,10 +455,10 @@ def _observed_limits_mismatch(raw, runtime):
     object can permanently refuse the registration even in an otherwise failed
     or ambiguous transcript. This scan never establishes capture success.
     """
-    from .native_capture_words import observed_limits
+    from .native_capture_words import observed_primary_limits
     for index, line in enumerate(raw.splitlines(), 1):
         try:
-            event, usage, limits = observed_limits(line, runtime)
+            event, usage, limits = observed_primary_limits(line, runtime)
         except ValueError:
             continue
         if canonical(limits) != canonical(runtime['limits']):

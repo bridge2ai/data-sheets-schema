@@ -118,5 +118,14 @@ def _require_runtime_observation(value):
         from .native_u4b_probe_sequence import validate_bound_probe
         if type(value.get('permission_probe')) is not str:
             raise ValueError('A3 registration requires its bound permission probe')
-        validate_bound_probe(runtime, value['permission_probe'])
+        c._hash(value.get('permission_probe_sha256'), 'registered permission probe sha256')
+        bound = validate_bound_probe(runtime, value['permission_probe'])
+        pin = bound.get('permission') if type(bound) is dict else None
+        if (type(bound) is not dict or bound.get('checked') is not True or bound.get('passed') is not True
+                or type(pin) is not dict or set(pin) != {'path', 'sha256', 'bytes'}
+                or type(pin.get('bytes')) is not int
+                or not 0 < pin['bytes'] <= c.HARD_LIMITS['permission_wire_bytes']
+                or pin.get('path') != value['permission_probe']
+                or pin.get('sha256') != value['permission_probe_sha256']):
+            raise ValueError('bound permission result differs from the registered path and bytes')
     return value

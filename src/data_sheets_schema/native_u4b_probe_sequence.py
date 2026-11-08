@@ -22,6 +22,7 @@ from . import native_shared_runtime_values as values
 from .native_subscription_guard import canonical, sha, strict_json
 from .native_subscription_guard_v2 import _timestamp
 from .native_subscription_capture import _read, _new, _sync, _cleanup, _signals, ISOLATION_FLAGS
+from .native_shared_contract import HARD_LIMITS
 
 AUTH_KIND = 'd4d_native_u4b_probe_authorization_v1'
 OBSERVATION_KIND = 'd4d_native_u4b_observation_v1'
@@ -29,6 +30,7 @@ COMPLETION_KIND = 'd4d_native_u4b_probe_sequence_v1'
 PROVIDER = 'scripted_loopback_only'
 PERMISSION_PROTOCOL = 'shared_seven_trace_v1_plus_version_check'
 MAX_BYTES = 4_000_000
+PERMISSION_BYTES = HARD_LIMITS['permission_wire_bytes']
 ROOT = Path(__file__).resolve().parents[2]
 PROMPT = 'Reply with OK.'
 BASIS = 'Retained local scripted observations; not authenticated human/account authority or native acceptance.'
@@ -405,7 +407,7 @@ def produce_bound_probe(authorization_raw, expected, directory=None):
     _new(root / 'expectation.json', expected_raw)
     output = producer.produce_saved_probe(expected, root / 'permission',
                                           deadline_seconds=authorized['permission_deadline_seconds'])
-    raw = _read(output, 100_000_000)
+    raw = _read(output, PERMISSION_BYTES)
     completion = {'kind': COMPLETION_KIND, 'version': 1,
         'authorization_sha256': sha(authorization_raw), 'observation': observed['pin'],
         'runtime_sha256': sha(canonical(runtime)), 'expectation': _pin(root / 'expectation.json', expected_raw),
@@ -447,7 +449,7 @@ def validate_bound_probe(runtime, permission_probe_path):
     claim_raw = _read_pin(value['claim'], root / 'bound-claim.json', limit=16384)
     if claim_raw != canonical(_bound_claim(auth_raw, observed, runtime, expected_raw)):
         raise ValueError('bound phase claim differs from its exact inputs')
-    permission_raw = _read_pin(value['permission'], path, limit=100_000_000)
+    permission_raw = _read_pin(value['permission'], path, limit=PERMISSION_BYTES)
     if sha(permission_raw) in {observed[key]['sha256'] for key in ('pin', 'transcript', 'request')}:
         raise ValueError('observation evidence cannot be the bound permission result')
     result = permission.verify_saved_probe(permission_raw, expected=expected)

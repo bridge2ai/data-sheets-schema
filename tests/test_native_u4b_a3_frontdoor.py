@@ -42,6 +42,15 @@ def test_two_phase_cli_binds_supplied_inputs_before_producer(tmp_path, monkeypat
     authorization_path = root / 'authorization.json'
     authorization_raw = authorization_path.read_bytes()
     calls = []
+    output_reads = []
+    original_read = cli._read
+
+    def observed_read(path, limit=cli.SUBJECT_LIMIT):
+        if Path(path) == tmp_path / 'isolated-result.json':
+            output_reads.append(limit)
+        return original_read(path, limit)
+
+    monkeypatch.setattr(cli, '_read', observed_read)
 
     def boundary(raw, document):
         assert raw == authorization_raw and document == subject
@@ -59,11 +68,15 @@ def test_two_phase_cli_binds_supplied_inputs_before_producer(tmp_path, monkeypat
         with pytest.raises(ValueError, match='account choice'):
             cli.main(argv)
         assert calls == []
+        assert output_reads == []
         assert not (tmp_path / 'isolated-result.json').exists()
     else:
         assert cli.main(argv) == 0
         result = json.loads(capsys.readouterr().out)
         assert calls == [command]
+        from data_sheets_schema.native_shared_contract import HARD_LIMITS
+        assert output_reads == [sequence.MAX_BYTES if command == 'observation-probe'
+                                else HARD_LIMITS['permission_wire_bytes']]
         assert result['command'] == command
         assert result['result']['sha256'] == cli.guard.sha((tmp_path / 'isolated-result.json').read_bytes())
         assert 'not account or launch acceptance' in result['verification_scope']

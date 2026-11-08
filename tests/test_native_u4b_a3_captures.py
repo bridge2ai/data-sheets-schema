@@ -147,6 +147,50 @@ def test_refusal_scan_does_not_admit_malformed_stream_with_matching_limits(tmp_p
         capture.read_capture(path, **read_arguments(arguments))
 
 
+@pytest.mark.parametrize('mismatch', [True, False])
+def test_auxiliary_usage_cannot_hide_primary_mismatch_or_enable_success(tmp_path, monkeypatch, mismatch):
+    """Isolate retained delivery; real terminal and journal validators execute."""
+    arguments, value = component(tmp_path, monkeypatch)
+    limits = dict(value['runtime']['limits'])
+    if mismatch:
+        limits['contextWindow'] = 200000
+    terminal = capture.canonical({'type': 'result', 'subtype': 'success', 'is_error': False,
+        'modelUsage': {value['runtime']['model']: limits, 'unregistered-auxiliary': 'malformed sibling'}})
+
+    def failed_delivery(invocation, deadline, outputs, observations, lifecycle):
+        outputs['stdout'].extend(terminal + b'\n')
+        raise ValueError('isolated auxiliary stream delivery')
+
+    monkeypatch.setattr(capture, '_supervise', failed_delivery)
+    with pytest.raises(ValueError, match='isolated auxiliary stream'):
+        capture.capture_subscription(**arguments)
+    path = word_directory(arguments) / 'capture-1' / 'capture.json'
+    saved = json.loads(path.read_bytes())
+    assert saved['status'] == 'failed'
+    assert (path.parent / 'stdout.jsonl').read_bytes() == terminal + b'\n'
+    with pytest.raises(ValueError, match='modelUsage differs'):
+        capture._terminal(terminal + b'\n', value['runtime'])
+    with pytest.raises(ValueError):
+        capture.read_capture(path, **read_arguments(arguments))
+    if mismatch:
+        assert saved['terminal']['limits_match'] is False
+        assert saved['terminal']['modelUsage']['unregistered-auxiliary'] == 'malformed sibling'
+        refusal = journal_rows(arguments)[-1]
+        assert refusal['type'] == 'limits_refusal'
+        assert refusal['terminal_raw_json'].encode() == terminal
+        assert refusal['observed_limits'] == limits
+        # Genuine journal reconstruction must retain the refusal across words.
+        for selected in (arguments, newer(arguments)):
+            with pytest.raises(ValueError, match='permanently refused'):
+                capture.activate_capture_word(**read_arguments(selected))
+    else:
+        assert saved['terminal'] is None and len(journal_rows(arguments)) == 1
+        assert 'modelUsage differs' in saved['terminal_error']['message']
+        capture.activate_capture_word(**read_arguments(newer(arguments)))
+        assert len(journal_rows(arguments)) == 2
+    assert not Path(value['attempt_directory']).exists()
+
+
 def test_new_word_restores_three_capture_slots_without_consuming_attempt(tmp_path, monkeypatch):
     arguments, value = component(tmp_path, monkeypatch, mode='nonzero')
     for _ in range(3):
