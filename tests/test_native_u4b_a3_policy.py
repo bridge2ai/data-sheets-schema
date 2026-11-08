@@ -120,7 +120,7 @@ def test_even_owner_agreement_cannot_replace_registered_policy(case, key):
 
 def test_guard_runtime_is_exactly_the_runtime_in_registration_bytes(case):
     runtime, statement = deepcopy(case['runtime']), deepcopy(case['owner'])
-    runtime['deadline_seconds'] = statement['deadline_seconds'] = 901
+    runtime['keep_awake']['basis'] = statement['keep_awake']['basis'] = 'A different explicit basis.'
     # These supplied values agree with each other but not with the registration.
     review.validate_terms(statement, runtime, word_owner=statement['owner'])
     document = {**case['document'], 'runtime_sha256': guard.sha(guard.canonical(runtime)),

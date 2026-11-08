@@ -54,8 +54,8 @@ def runtime_inputs(tmp_path, *, binary_bytes=b'Inert fingerprint fixture; never 
                  'subscriptionType': 'max', 'expected_api_key_source': 'none'},
         'environment': {'PATH': '/usr/bin:/bin', 'HOME': str(root),
                         'CLAUDE_SECURESTORAGE_CONFIG_DIR': '', 'CLAUDE_CODE_DISABLE_1M_CONTEXT': '0'},
-        'deadline_seconds': 180, 'budget_guard_usd': '90',
-        'keep_awake': {'policy': 'not_applicable', 'host_platform': 'synthetic-host',
+        'deadline_seconds': 21600, 'budget_guard_usd': '90',
+        'keep_awake': {'policy': 'macos_iokit_ims_v1', 'host_platform': 'darwin',
                        'basis': 'Offline evidence test, not launch authority'}}
     from tests.utils.native_u4b_observation import mint_observation
     from tests.utils.native_u4b_fixtures import admission_policy

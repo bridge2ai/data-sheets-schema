@@ -96,7 +96,6 @@ def test_actual_derived_audit_and_captured_report_emit_equality(prepared_counts,
     (b'The audit identified 2 findings against the record: 1 medium.\n', 'mismatch'),
     (b'The audit identified 1 findings against the record: 1 high.\n', 'mismatch'),
     (REPORT + b'The audit identified 2 findings.\n', 'mismatch'),
-    (b'A reconciliation narrative without a finding total.\n', 'no_total_stated'),
 ])
 def test_report_totals_cannot_borrow_unrelated_evidence_success(prepared_counts, report, status):
     assert engine.evidence_gate(prepared_counts)['passed'] is True
@@ -108,6 +107,28 @@ def test_report_totals_cannot_borrow_unrelated_evidence_success(prepared_counts,
     assert row['passed'] is False and row['reason']
     assert row['comparison']['status'] == status
     assert row['checked'] is (status != 'no_total_stated')
+
+
+def test_no_stated_total_is_unavailable_without_weakening_other_evidence(prepared_counts):
+    changed = _replace_artifact(prepared_counts, 'final_report',
+                                b'A reconciliation narrative without a finding total.\n')
+    result = engine.evidence_gate(changed)
+    assert result['checked'] is result['passed'] is True
+    row = result['audit_counts']
+    assert row['status'] == 'unavailable' and row['checked'] is False and row['passed'] is None
+    assert row['comparison']['status'] == 'no_total_stated'
+    assert row['comparison']['computed_total'] == 1
+    assert row['reason'] and set(row['compared_artifacts']) == {'typed_assembly', 'derived_audit', 'final_report'}
+    for final in ({'checked': False, 'findings': []}, {'checked': True, 'findings': ['unresolved']}):
+        assert engine.evidence_gate({**changed, 'final_result': final})['passed'] is False
+
+
+def test_stated_severity_mismatch_refuses_without_a_stated_total(prepared_counts):
+    changed = _replace_artifact(prepared_counts, 'final_report', b'Findings: 2 high.\n')
+    result = engine.evidence_gate(changed)
+    assert result['passed'] is False
+    assert result['audit_counts']['status'] == 'refused'
+    assert result['audit_counts']['comparison']['mismatches']
 
 
 @pytest.mark.parametrize('missing', ['typed_assembly', 'audit', 'final_report', 'final_result', 'phase1'])
@@ -183,7 +204,9 @@ def test_report_text_cannot_be_interpreted_as_an_ambient_path(prepared_counts, t
         trapped.setattr(Path, 'is_file', forbidden)
         trapped.setattr(Path, 'read_text', forbidden)
         result = engine.evidence_gate(changed)
-    assert result['passed'] is False
+    assert result['passed'] is True
+    assert result['audit_counts']['status'] == 'unavailable'
+    assert result['audit_counts']['passed'] is None
     assert result['audit_counts']['comparison']['status'] == 'no_total_stated'
 
 

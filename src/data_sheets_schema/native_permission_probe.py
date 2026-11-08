@@ -24,6 +24,7 @@ import time
 
 from .native_subscription_guard import canonical, read_regular, sha, strict_json
 from .native_probe_provider import local_provider
+from .native_path_identity import overlaps
 
 MAX_STREAM = 8 * 1024 * 1024
 MAX_PROBE_SECONDS = 600
@@ -667,8 +668,7 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
                   if key in ("CLAUDE_CONFIG_DIR", "D4D_LAUNCH_INSTRUCTION") and value.startswith("/")]
     protected += [expected["selection"]["path"], selected["stage_root"]]
     for value in protected:
-        path = Path(value).resolve()
-        if directory == path or directory in path.parents or path in directory.parents:
+        if overlaps(directory, value):
             raise ValueError("permission evidence directory overlaps protected authority")
     _remaining(deadline)
     directory.mkdir(mode=0o700)

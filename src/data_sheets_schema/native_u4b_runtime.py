@@ -20,6 +20,7 @@ import stat
 
 from . import native_shared_runtime_values as values
 from .native_shared_evidence import read_regular
+from .native_path_identity import contains
 
 KIND = 'd4d_native_u4b_runtime_basis'
 MODEL = 'claude-opus-5[1m]'
@@ -185,7 +186,7 @@ def _copy_evidence(value):
     source, copied = value['source'], value['copy']
     _check_pin(source)
     _check_pin(copied)
-    if (not Path(source['path']).is_relative_to(root) or Path(copied['path']).is_relative_to(root)
+    if (not contains(root, source['path']) or contains(root, copied['path'])
             or source['path'] == copied['path']
             or (source['device'], source['inode']) == (copied['device'], copied['inode'])
             or (source['sha256'], source['bytes']) != (copied['sha256'], copied['bytes'])):

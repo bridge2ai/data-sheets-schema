@@ -81,7 +81,7 @@ def test_real_v2_reader_refuses_rehashed_bad_review_or_post_word_edit(
     _, _, records, paths, persist = bundle_reader_case
     bundle, word = records['review'], records['launch_word']
     if mutation == 'late_bundle':
-        bundle['reviews'][0]['evidence'] += ' Edited after word.'
+        bundle['reviews'][0]['document']['sha256'] = '0' * 64
     elif mutation == 'late_review':
         later = datetime.fromisoformat(word['authorized_at'].replace('Z', '+00:00')) + timedelta(seconds=1)
         bundle['reviews'][0]['reviewed_at'] = later.isoformat().replace('+00:00', 'Z')

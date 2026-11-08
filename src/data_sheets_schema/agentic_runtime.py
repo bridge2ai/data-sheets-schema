@@ -24,12 +24,15 @@ SELECTED_SHARED_PLAYBOOKS = frozenset({
 })
 SCHEMAS = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
            "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
-# D114 is an explicit successor selection. Historical renderers retain their
-# enumerated resources; a new agent file cannot silently enter this allowlist.
+# D114 is an explicit successor selection. Expose the selected generation
+# playbooks, their two schemas, and only agents those playbooks reference:
+# d4d-agent.md names provenance-guard and validator. Neither selected full-core
+# nor uniform-rules names another agent. Keep this closed roster reviewable;
+# discovering a new ambient agent must not change the instruction surface.
+# Historical renderers retain their enumerated resources.
 NATIVE_SHARED_RESOURCES = (*SCHEMAS, PLAYBOOK,
     ".claude/commands/d4d-agent.md", ".claude/commands/d4d-uniform-rules.md",
-    ".claude/agents/d4d-provenance-guard.md", ".claude/agents/d4d-mapper.md",
-    ".claude/agents/d4d-schema-expert.md", ".claude/agents/d4d-validator.md")
+    ".claude/agents/d4d-provenance-guard.md", ".claude/agents/d4d-validator.md")
 UNOBSERVED_TEMPERATURE = "unknown (not observed from the agent runtime)"
 
 

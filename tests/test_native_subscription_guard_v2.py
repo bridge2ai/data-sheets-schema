@@ -23,8 +23,8 @@ def case(tmp_path):
     runtime = {'auth': {'loggedIn': True, 'authMethod': 'claude.ai', 'apiProvider': 'firstParty',
                        'expected_api_key_source': 'none'},
                'model': 'claude-opus-5[1m]', 'environment': {'CLAUDE_CODE_DISABLE_1M_CONTEXT': '0'},
-               'budget_guard_usd': '90', 'deadline_seconds': 900,
-               'keep_awake': {'policy': 'not_applicable', 'host_platform': 'linux',
+               'budget_guard_usd': '90', 'deadline_seconds': 21600,
+               'keep_awake': {'policy': 'macos_iokit_ims_v1', 'host_platform': 'darwin',
                              'basis': 'Invented guard component fixture; no host assertion.'}}
     # Minimal declared policy for this parser component; not a prepared runtime
     # or proof of the complete executable/observation admission chain.
@@ -34,7 +34,7 @@ def case(tmp_path):
             'max_starting_five_hour_utilization': 0.25,
             'max_age_seconds': 300, 'pre_reservation_margin_seconds': 90,
             'capture_state_directory': str(tmp_path.resolve() / 'unused-capture'),
-            'valid_from': timestamp(now - 60), 'valid_until': timestamp(now + 86400)}}).decode()
+            'valid_from': timestamp(now - 60), 'valid_until': timestamp(now - 60 + 14 * 86400)}}).decode()
     value = {'attempt_id': 'invented-guard-component', 'runtime': runtime,
         'dependencies': {'base': {'source_commit': 'a' * 40}}, 'permission_probe_sha256': 'b' * 64}
     registration = guard.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,

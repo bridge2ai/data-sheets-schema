@@ -20,6 +20,7 @@ import subprocess
 import time
 
 from .native_subscription_guard import canonical, sha, strict_json, _timestamp
+from .native_path_identity import overlaps
 
 
 CAPTURE_PROMPT = 'Reply with OK.'
@@ -131,7 +132,7 @@ def _authority(registration_raw, review_bundle_raw, launch_word_raw, directory):
     protected.extend(_path(path) for path in composition['policy']['readonly_lookups']['inputs'])
     protected.extend(_path(path) for path in composition['policy']['readonly_lookups']['output_directories'])
     for other in protected:
-        if directory == other or directory.is_relative_to(other) or other.is_relative_to(directory):
+        if overlaps(directory, other):
             raise ValueError('capture directory overlaps source, input or attempt reservations')
     binding = {'registration_sha256': sha(registration_raw), 'review_bundle_sha256': sha(review_bundle_raw),
                'launch_word_sha256': sha(launch_word_raw), 'runtime_sha256': sha(canonical(runtime)),

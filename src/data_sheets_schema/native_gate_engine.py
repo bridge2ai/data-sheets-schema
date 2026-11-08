@@ -28,14 +28,15 @@ def audit_counts(prepared):
     """Compare captured report totals with a freshly reconstructed typed audit.
 
     This row never borrows a successful receipt, phase or evidence verdict.
-    Missing inputs remain an explicit unchecked refusal, including when the
-    shared report instrument merely reports that no total was stated.
+    Missing inputs remain an explicit unchecked refusal. A valid report with
+    no stated total has no numerical claim to compare: retain an unavailable
+    row after independently checking its captured inputs and typed audit.
     """
     from . import native_shared_contract as c
     from . import native_shared_gates as native
     from . import native_shared_stage as stage
     from .report_audit_totals import check_report_audit_totals
-    row = {'checked': False, 'passed': False, 'compared_artifacts': {},
+    row = {'checked': False, 'passed': False, 'status': 'refused', 'compared_artifacts': {},
            'comparison': None, 'reason': None}
     try:
         final = prepared.get('final_result')
@@ -66,6 +67,13 @@ def audit_counts(prepared):
         # forces its text branch even if a one-line report spells a live path.
         compared = check_report_audit_totals(report.raw.decode('utf-8') + '\n', audit_document)
         row['comparison'] = compared
+        if (compared.get('checked') is True and compared.get('status') == 'no_total_stated'
+                and compared.get('stated_total') is None and compared.get('stated_totals') == []
+                and type(compared.get('computed_total')) is int and compared['computed_total'] >= 0
+                and compared.get('mismatches') == [] and compared.get('findings') == []):
+            row.update(status='unavailable', checked=False, passed=None,
+                       reason='report states no finding total; numerical comparison unavailable')
+            return row
         typed_totals = (type(compared.get('stated_total')) is int
                         and type(compared.get('computed_total')) is int
                         and compared['stated_total'] >= 0 and compared['computed_total'] >= 0)
@@ -73,6 +81,7 @@ def audit_counts(prepared):
         row['passed'] = (row['checked'] and compared.get('status') == 'consistent'
                          and compared['stated_total'] == compared['computed_total']
                          and compared.get('mismatches') == [] and compared.get('findings') == [])
+        row['status'] = 'consistent' if row['passed'] else 'refused'
         if not row['passed']:
             row['reason'] = (compared.get('reason') or
                              'report audit totals are missing, contradictory or unequal')
@@ -86,9 +95,12 @@ def evidence_gate(prepared):
     """Retain the evidence obligation and its independent audit-count row."""
     counts = audit_counts(prepared)
     final = prepared.get('final_result')
-    checked = type(final) is dict and final.get('checked') is True and counts['checked'] is True
+    counts_available = counts['status'] != 'unavailable'
+    checked = (type(final) is dict and final.get('checked') is True
+               and (not counts_available or counts['checked'] is True))
     return {'checked': checked,
-            'passed': checked and final.get('findings') == [] and counts['passed'] is True,
+            'passed': checked and final.get('findings') == []
+                      and (not counts_available or counts['passed'] is True),
             'result': deepcopy(final), 'audit_counts': counts}
 
 

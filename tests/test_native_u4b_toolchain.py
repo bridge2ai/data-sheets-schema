@@ -24,10 +24,9 @@ def test_native_selection_is_closed_and_never_enumerates_future_agents(monkeypat
     monkeypatch.setattr(subject, 'resource_names', forbidden)
     actual = subject.toolchain(native_shared=True)
     assert set(actual['resources']) == set(subject.NATIVE_SHARED_RESOURCES)
-    assert len(actual['resources']) == 9
+    assert len(actual['resources']) == 7
     assert {name for name in actual['resources'] if name.startswith('.claude/agents/')} == {
-        '.claude/agents/d4d-provenance-guard.md', '.claude/agents/d4d-mapper.md',
-        '.claude/agents/d4d-schema-expert.md', '.claude/agents/d4d-validator.md'}
+        '.claude/agents/d4d-provenance-guard.md', '.claude/agents/d4d-validator.md'}
     assert all(Path(value).is_file() for value in actual['resources'].values())
     assert subject.validate_toolchain(actual) == actual
 
@@ -43,7 +42,7 @@ def test_specificity_scanner_checks_every_exposed_native_markdown(tmp_path):
     exposed = subject.toolchain(native_shared=True)['resources']
     hits = []
     paths = sorted(path for path in exposed if path.endswith('.md'))
-    assert len(paths) == 7
+    assert len(paths) == 5
     for relative in paths:
         surface = scan.Surface(relative, ['native_agentic'], 'model_facing', 'live', 'D114 exposed text')
         hits.extend(scan.scan_file(ROOT, surface, tokens))

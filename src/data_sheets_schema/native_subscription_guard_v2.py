@@ -166,9 +166,19 @@ def _inspect(event, *, require_both):
         errors.append("subscription top-level status is rejected or unknown")
     if info.get("isUsingOverage") is not False:
         errors.append("subscription overage must be explicitly false")
-    allowed = {"status", "isUsingOverage", "rateLimitType", "utilization", "resetsAt", "unifiedWindows"}
+    allowed = {"status", "isUsingOverage", "rateLimitType", "utilization", "resetsAt", "unifiedWindows",
+               "overageStatus", "overageDisabledReason"}
     if set(info) - allowed:
         errors.append("subscription information has unknown fields")
+    # First-party allowed events may report disabled overage even when their
+    # numerical reading appears only in unifiedWindows. This is evidence of
+    # refusal, never permission to use overage or infer subscription headroom.
+    if "overageStatus" in info and info["overageStatus"] != "rejected":
+        errors.append("subscription overage status must be rejected when present")
+    if "overageDisabledReason" in info and (
+            info["overageDisabledReason"] != "out_of_credits"
+            or info.get("overageStatus") != "rejected"):
+        errors.append("subscription overage disabled reason is unknown or inconsistent")
     windows = info.get("unifiedWindows", {})
     if type(windows) is not dict:
         errors.append("subscription windows are malformed")
@@ -202,7 +212,20 @@ def _inspect(event, *, require_both):
             continue
         values = []
         try:
-            values = [_reading(row, info, name) for row in rows]
+            for row in rows:
+                if row is info and "utilization" not in row:
+                    nested = windows.get(name)
+                    if type(nested) is not dict or "utilization" not in nested:
+                        raise ValueError(name + " subscription alias lacks its nested numerical reading")
+                    # A missing top-level utilization is an alias pointer, not
+                    # zero. Only the named nested row supplies that number;
+                    # reset, status and overage must still agree exactly.
+                    pointer = {key: row[key] for key in (
+                        "resetsAt", "status", "isUsingOverage", "rateLimitType") if key in row}
+                    pointer["utilization"] = nested["utilization"]
+                    values.append(_reading(pointer, info, name))
+                else:
+                    values.append(_reading(row, info, name))
             if any(value != values[0] for value in values[1:]):
                 raise ValueError(name + " subscription aliases conflict")
         except ValueError as exc:

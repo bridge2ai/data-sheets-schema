@@ -5,7 +5,10 @@ CI or registration reconstruction. Callers still run those independent gates.
 """
 from __future__ import annotations
 
-from pathlib import Path
+from datetime import datetime, timezone
+from pathlib import Path, PurePosixPath
+import re
+import subprocess
 
 from . import native_subscription_guard as wire
 
@@ -22,6 +25,112 @@ TERMS_KEYS = {'kind', 'version', 'owner', 'budget_guard_usd', 'deadline_seconds'
               'max_starting_weekly_utilization', 'max_starting_five_hour_utilization',
               'max_age_seconds', 'pre_reservation_margin_seconds', 'overage',
               'keep_awake', 'context_mode', 'quota_capture'}
+MAX_REVIEW_DOCUMENT_BYTES = 16 * 1024 * 1024
+
+
+def _review_document(document):
+    """Re-read the declared review, including on saved-result validation."""
+    _exact(document, {'path', 'bytes', 'sha256'}, 'review document')
+    _text(document['path'], 'review document path')
+    if (type(document['bytes']) is not int
+            or not 0 < document['bytes'] <= MAX_REVIEW_DOCUMENT_BYTES
+            or type(document['sha256']) is not str
+            or re.fullmatch('[0-9a-f]{64}', document['sha256']) is None):
+        raise ValueError('review document requires bounded bytes and lowercase sha256')
+    try:
+        raw = wire.read_regular(document['path'], limit=MAX_REVIEW_DOCUMENT_BYTES)
+    except (OSError, ValueError) as exc:
+        raise ValueError('review document is missing or is not a stable regular file') from exc
+    if len(raw) != document['bytes'] or wire.sha(raw) != document['sha256']:
+        raise ValueError('review document differs from its pinned bytes')
+
+
+def _git_read(repository, *arguments):
+    """Read local Git objects without replacements, hooks, lazy fetch or prompts."""
+    env = {'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'HOME': '/nonexistent',
+           'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': '/dev/null',
+           'GIT_NO_LAZY_FETCH': '1', 'GIT_TERMINAL_PROMPT': '0',
+           'GIT_OPTIONAL_LOCKS': '0', 'GIT_NO_REPLACE_OBJECTS': '1',
+           'GIT_LITERAL_PATHSPECS': '1', 'GIT_ALLOW_PROTOCOL': ''}
+    try:
+        result = subprocess.run(['/usr/bin/git', '--no-replace-objects',
+                                 '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null',
+                                 '-c', 'protocol.allow=never', '-C', str(repository),
+                                 *arguments], env=env, capture_output=True, timeout=10)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise ValueError('registration commit local object read failed') from exc
+    if result.returncode:
+        raise ValueError('registration commit local object is unavailable')
+    return result.stdout
+
+
+def _registration_commit(evidence, registration_raw, runtime):
+    """Bind N1.8 validity to the commit that adds these registration bytes.
+
+    The commit pin belongs to the later review bundle, avoiding a registration
+    self-reference. The local repository and objects must remain for readback.
+    """
+    _exact(evidence, {'repository', 'path', 'commit'}, 'registration commit evidence')
+    _text(evidence['repository'], 'registration commit repository')
+    _text(evidence['path'], 'registration commit path')
+    repository = Path(evidence['repository'])
+    relative = PurePosixPath(evidence['path'])
+    commit = evidence['commit']
+    try:
+        physical = repository.resolve(strict=True)
+    except OSError as exc:
+        raise ValueError('registration commit repository is unavailable') from exc
+    if (not repository.is_absolute() or physical != repository
+            or not repository.is_dir() or str(repository) != evidence['repository']
+            or relative.is_absolute() or str(relative) != evidence['path']
+            or any(part in ('.', '..', '.git') for part in relative.parts)
+            or '\\' in evidence['path'] or ':' in evidence['path']
+            or type(commit) is not str or re.fullmatch('[0-9a-f]{40}', commit) is None):
+        raise ValueError('registration commit requires an exact local repository, relative path and full SHA')
+    if _git_read(repository, 'rev-parse', '--show-toplevel').decode().strip() != str(repository):
+        raise ValueError('registration commit repository must be its exact Git root')
+    if _git_read(repository, 'cat-file', '-t', commit).strip() != b'commit':
+        raise ValueError('registration commit must name a commit object')
+    size = _git_read(repository, 'cat-file', '-s', commit).strip()
+    if not size.isdigit() or not 0 < int(size) <= 1024 * 1024:
+        raise ValueError('registration commit object exceeds its bound')
+    headers = _git_read(repository, 'cat-file', 'commit', commit).split(b'\n\n', 1)[0].splitlines()
+    authors = [line for line in headers if line.startswith(b'author ')]
+    parents = [line.removeprefix(b'parent ') for line in headers if line.startswith(b'parent ')]
+    if len(authors) != 1 or len(parents) > 1:
+        raise ValueError('registration commit requires one author and an unambiguous non-merge addition')
+    author = re.fullmatch(rb'author .+ ([0-9]+) ([+-])([0-9]{2})([0-9]{2})', authors[0])
+    if author is None or int(author[3]) > 23 or int(author[4]) > 59:
+        raise ValueError('registration commit has a malformed author date')
+    try:
+        author_time = datetime.fromtimestamp(int(author[1]), timezone.utc).timestamp()
+    except (OverflowError, ValueError, OSError) as exc:
+        raise ValueError('registration commit author date is outside the supported range') from exc
+    entry = _git_read(repository, 'ls-tree', '-z', commit, '--', str(relative))
+    if entry.count(b'\x00') != 1 or b'\t' not in entry:
+        raise ValueError('registration commit path must be one regular file')
+    header, named_path = entry[:-1].split(b'\t', 1)
+    fields = header.split(b' ')
+    if (len(fields) != 3 or fields[0] not in (b'100644', b'100755')
+            or fields[1] != b'blob' or re.fullmatch(rb'[0-9a-f]{40}', fields[2]) is None
+            or named_path != str(relative).encode()):
+        raise ValueError('registration commit path must be one regular file')
+    blob = fields[2].decode()
+    if _git_read(repository, 'cat-file', '-s', blob).strip() != str(len(registration_raw)).encode():
+        raise ValueError('registration commit does not contain these registration bytes')
+    if _git_read(repository, 'cat-file', 'blob', blob) != registration_raw:
+        raise ValueError('registration commit does not contain these registration bytes')
+    for parent in parents:
+        if re.fullmatch(rb'[0-9a-f]{40}', parent) is None:
+            raise ValueError('registration commit has a malformed parent')
+        # ls-tree succeeds with no rows only when this path was absent; an
+        # unavailable parent is an error, not proof of a newly added file.
+        if _git_read(repository, 'ls-tree', '-z', parent.decode(), '--', str(relative)):
+            raise ValueError('registration commit must add the reviewed registration path')
+    from .native_u4b_policy import registered_policy, timestamp
+    policy = registered_policy(runtime)
+    if timestamp(policy['valid_from'], 'valid_from') != author_time:
+        raise ValueError('registered validity must start at the registration commit author date')
 
 
 def _exact(value, keys, label):
@@ -50,7 +159,7 @@ def validate_terms(statement, runtime, *, word_owner):
     if statement['budget_guard_usd'] != '90' or runtime.get('budget_guard_usd') != '90':
         raise ValueError('owner/runtime budget must equal the D110 string 90')
     deadline = statement['deadline_seconds']
-    if (type(deadline) is not int or not 1 <= deadline <= 86400
+    if (type(deadline) is not int or deadline != 21600
             or type(runtime.get('deadline_seconds')) is not int
             or runtime['deadline_seconds'] != deadline):
         raise ValueError('owner/runtime deadline differs')
@@ -69,8 +178,7 @@ def validate_terms(statement, runtime, *, word_owner):
     _exact(awake, {'policy', 'host_platform', 'basis'}, 'owner keep-awake')
     for key in awake:
         _text(awake[key], 'keep-awake ' + key)
-    if (awake['policy'] not in ('macos_iokit_ims_v1', 'not_applicable')
-            or (awake['policy'] == 'macos_iokit_ims_v1' and awake['host_platform'] != 'darwin')
+    if (awake['policy'] != 'macos_iokit_ims_v1' or awake['host_platform'] != 'darwin'
             or wire.canonical(awake) != wire.canonical(runtime.get('keep_awake'))):
         raise ValueError('owner/runtime keep-awake policy differs')
     if (statement['context_mode'] != '1m'
@@ -140,7 +248,7 @@ def validate_bundle(registration_raw, review_bundle_raw, launch_word_raw):
             or any(ch not in '0123456789abcdef' for ch in word['ci_sha256'])):
         raise ValueError('coded word requires its separately validated CI digest')
     _exact(bundle, BINDING_KEYS | {'kind', 'version', 'author', 'operator', 'reviews',
-                                 'owner_statement'}, 'review bundle')
+                                 'owner_statement', 'registration_commit'}, 'review bundle')
     _version(bundle, KIND, 2)
     if any(bundle[key] != expected for key, expected in binding.items()):
         raise ValueError('review bundle differs from exact registration/source')
@@ -152,11 +260,11 @@ def validate_bundle(registration_raw, review_bundle_raw, launch_word_raw):
     if type(reviews) is not list or len(reviews) != 2:
         raise ValueError('bundle requires exactly two independent reviews')
     excluded = {bundle['author'].casefold(), bundle['operator'].casefold()}
-    seen = set()
+    seen, kinds = set(), set()
     for review in reviews:
-        _exact(review, {'reviewer', 'author', 'operator', 'independent', 'decision',
-                        'reviewed_at', 'evidence'}, 'independent review')
-        for key in ('reviewer', 'author', 'operator', 'reviewed_at', 'evidence'):
+        _exact(review, {'reviewer', 'reviewer_kind', 'author', 'operator', 'independent', 'decision',
+                        'reviewed_at', 'document'}, 'independent review')
+        for key in ('reviewer', 'author', 'operator'):
             _text(review[key], 'review ' + key)
         if (review['author'] != bundle['author'] or review['operator'] != bundle['operator']
                 or review['independent'] is not True or review['decision'] != 'approved'):
@@ -165,14 +273,22 @@ def validate_bundle(registration_raw, review_bundle_raw, launch_word_raw):
         if identity in excluded or identity in seen:
             raise ValueError('reviewers must differ from author, operator and each other')
         seen.add(identity)
-        if wire._timestamp(review['reviewed_at']) > authorized_at:
+        if (type(review['reviewer_kind']) is not str
+                or review['reviewer_kind'] not in ('claude', 'codex_cli')
+                or review['reviewer_kind'] in kinds):
+            raise ValueError('reviews require exactly one claude and one codex_cli reviewer_kind')
+        kinds.add(review['reviewer_kind'])
+        if _timestamp(review['reviewed_at'], 'review reviewed_at') > authorized_at:
             raise ValueError('owner word precedes an independent review')
+        _review_document(review['document'])
     statement = validate_terms(bundle['owner_statement'], runtime, word_owner=word['owner'])
+    _registration_commit(bundle['registration_commit'], registration_raw, runtime)
     capture = Path(statement['quota_capture']['directory'])
     for key in ('attempt_directory', 'evidence_directory'):
         if key in value:
             other = Path(value[key]).resolve()
-            if capture == other or capture in other.parents or other in capture.parents:
+            from .native_path_identity import overlaps
+            if overlaps(capture, other):
                 raise ValueError('quota capture must be separate from attempt/evidence directories')
     return statement
 
