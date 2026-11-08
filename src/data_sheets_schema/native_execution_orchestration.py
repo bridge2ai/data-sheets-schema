@@ -300,8 +300,10 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     with capture_admission_lease(registration_raw=registration_raw,
             review_bundle_raw=authorization['raw']['review'],
             launch_word_raw=authorization['raw']['launch_word']):
-        launch_guard.before_reservation()
         controls.require_complete()
+        # Source recapture can be slow: measure the preparation margin only
+        # after it, immediately before the attempt identity is consumed.
+        launch_guard.before_reservation()
         attempt.mkdir(mode=0o700)  # Even a partial reservation consumes the identity.
         _sync_directory(attempt.parent)
     durable_new(attempt/'registration.json', registration_raw)

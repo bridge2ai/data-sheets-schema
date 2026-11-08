@@ -37,6 +37,12 @@ UNCHANGED = (
 
 def classify(run, node, message, trace):
     text = message + '\n' + trace
+    if (run == 'a3-u4-final' and node in {
+            'tests.test_native_u4b_addendum_authority::test_saved_guard_readback_rechecks_context_even_after_hashes_are_rebound[runtime]',
+            'tests.test_native_u4b_addendum_authority::test_saved_guard_readback_rechecks_context_even_after_hashes_are_rebound[both]'}
+            and 'Regex pattern did not match' in text
+            and 'subscription runtime differs from registered runtime bytes' in text):
+        return 'corrected_A3_stronger_registered_runtime_refusal_diagnostic'
     if (run == 'a2-focused-c3088487c'
             and node == 'tests.test_native_u4b_admission::test_rehashed_guard_cannot_substitute_owner_or_capture[capture_manifest]'
             and 'FileNotFoundError' in text and '/one-capture/capture.json' in text):
@@ -129,6 +135,16 @@ def main():
                for path in sorted(SCRATCH.glob('*/manifest.json')) if path.is_file()}
     api = {str(path.relative_to(SCRATCH)): file_identity(path)
            for path in sorted((SCRATCH / 'api-comparison-canary/cases').glob('**/instruction.txt'))}
+    fresh_comparisons = {}
+    for name in args.runs:
+        cases = SCRATCH / name / 'cases'
+        # Exact test roles, numeric pytest instances only; do not follow the
+        # sibling "current" aliases or confuse historical comparison inputs.
+        paths = list(cases.glob('popen-*/test_scanner_before_after_reta[0-9]*/scanner-comparison.json'))
+        for side in ('before', 'after'):
+            paths.extend(cases.glob('popen-*/test_same_external_320_api_ins[0-9]*/'
+                                    + side + '/instruction.txt'))
+        fresh_comparisons[name] = [file_identity(path) for path in sorted(paths)]
     for row in failures:
         row['latest_state'] = latest[row['node']]['state']
         row['latest_run'] = latest[row['node']]['run']
@@ -140,6 +156,7 @@ def main():
         'latest_named_counts': dict(Counter(row['state'] for row in latest.values())),
         'latest_nonpassing': [row for row in latest.values() if row['state'] != 'passed'],
         'unchanged_files': unchanged, 'export_manifests': exports, 'api_instruction_parity_inputs': api,
+        'fresh_comparison_artifacts': fresh_comparisons,
         'scope': 'Offline preparation; overlapping cohorts, not native acceptance. '
                  'Bootstrap origin witnesses do not enumerate every xdist worker import. '
                  'Cleanup is limited to observed PID/creation-time descendants.'}

@@ -32,7 +32,8 @@ class FirstReservationObserved(RuntimeError):
     """Expected stop after actual mkdir/fsync; no native dispatch permitted."""
 
 
-def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None):
+def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
+                     source_check_seconds=0):
     arguments, value = component(tmp_path, monkeypatch,
         mode='second_mismatch' if change_at_admit == 'poison' else 'success')
     raw = arguments['registration_raw']
@@ -44,8 +45,8 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None):
     recorded = capture.read_capture(manifest, **read_arguments(arguments))
     selected = recorded['selected_event']
     owner = review.validate_bundle(**read_arguments(arguments))
-    clock = guard._timestamp(selected['captured_at'], 'captured_at') + 300 - remaining
-    monkeypatch.setattr(guard, '_now', lambda: clock)
+    clock = [guard._timestamp(selected['captured_at'], 'captured_at') + 300 - remaining]
+    monkeypatch.setattr(guard, '_now', lambda: clock[0])
     guard_raw = guard.prepare_guard(registration_raw=raw, runtime=value['runtime'],
         launch_word_raw=arguments['launch_word_raw'], owner_statement=owner,
         event_raw=selected['event_json'].encode(), captured_at=selected['captured_at'],
@@ -75,6 +76,9 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None):
         """Unavailable source capability prerequisite; no execution interface."""
         def require_complete(self):
             trace.append('isolated-source-check')
+            if active[0]:
+                trace.append('in-lease-source-check')
+                clock[0] += source_check_seconds
 
         @contextmanager
         def loaded_classifier(self):
@@ -197,7 +201,7 @@ def test_registered_90_second_margin_permits_first_real_reservation_only(tmp_pat
     assert Path(value['attempt_directory']).is_dir()
     assert not Path(value['evidence_directory']).exists()
     assert not watched.dispatched and not active[0]
-    ordered = ['isolated-admit', 'lease-enter', 'lease-held', 'margin-enter',
+    ordered = ['isolated-admit', 'lease-enter', 'lease-held', 'in-lease-source-check', 'margin-enter',
                'margin-passed', 'first-mkdir-fsynced', 'lease-exit']
     assert [item for item in trace if item in ordered] == ordered
     # The genuine flock is released even when the deliberate stop propagates.
@@ -215,6 +219,29 @@ def test_registered_89_second_margin_refuses_before_any_attempt_directory(tmp_pa
     assert not watched.dispatched and not active[0]
     assert 'lease-held' in trace and 'margin-enter' in trace and trace[-1] == 'lease-exit'
     assert 'margin-passed' not in trace and 'first-mkdir-fsynced' not in trace
+
+
+@pytest.mark.parametrize('remaining,permits_reservation', [(90, False), (91, True)])
+def test_source_recapture_time_is_charged_before_measuring_reservation_margin(
+        tmp_path, monkeypatch, remaining, permits_reservation):
+    """One synthetic second models source recapture; no sleeping or native call."""
+    invoke, _, value, watched, trace, active = reservation_case(
+        tmp_path, monkeypatch, remaining=remaining, source_check_seconds=1)
+    if permits_reservation:
+        with pytest.raises(FirstReservationObserved):
+            invoke()
+        assert Path(value['attempt_directory']).is_dir()
+        assert 'margin-passed' in trace and 'first-mkdir-fsynced' in trace
+    else:
+        with pytest.raises(ValueError, match='pre-reservation freshness margin'):
+            invoke()
+        assert not Path(value['attempt_directory']).exists()
+        assert 'margin-passed' not in trace and 'first-mkdir-fsynced' not in trace
+    assert not Path(value['evidence_directory']).exists()
+    assert not watched.dispatched and not active[0]
+    assert trace.count('in-lease-source-check') == 1
+    assert trace.index('in-lease-source-check') < trace.index('margin-enter')
+    assert trace[-1] == 'lease-exit'
 
 
 @pytest.mark.parametrize('change,reason', [('superseded', 'superseded'),

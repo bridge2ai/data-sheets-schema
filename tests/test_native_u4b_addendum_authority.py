@@ -158,7 +158,10 @@ def test_saved_guard_readback_rechecks_context_even_after_hashes_are_rebound(gua
     document = {**case['document'], 'runtime_sha256': guard.sha(guard.canonical(runtime)),
         'launch_word_sha256': guard.sha(word_raw),
         'owner_statement_sha256': guard.sha(guard.canonical(bundle['owner_statement']))}
-    with pytest.raises(ValueError, match='context mode differs'):
+    # Changing the runtime now fails its exact registration-byte join before
+    # the owner/context check; changing only the statement still reaches it.
+    reason = 'context mode differs' if mutation == 'statement' else 'registered runtime bytes'
+    with pytest.raises(ValueError, match=reason):
         guard.validate_saved_observations(guard.canonical(document), instance.snapshot(),
             registration_raw=case['registration'], runtime=runtime, launch_word_raw=word_raw,
             owner_statement=bundle['owner_statement'], transcript_raw=b'{"type":"system"}\n', complete=True)
