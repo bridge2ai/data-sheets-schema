@@ -4,7 +4,7 @@ U4 preparation, 2026-11-08. D105 retains receipts v4; D106 selects explicit
 high effort and the LBL work first-party Max account. The separately supplied
 account-choice document binds that intent to exact input/runtime bytes. It is
 not an account observation, permission proof, CI/review or launch authority.
-Only the explicitly named permission-probe and launch commands can invoke the
+Only permission-probe, capture-subscription-event and launch can invoke the
 registered executable. Saved validation/preparation never invokes a producer.
 """
 from __future__ import annotations
@@ -65,6 +65,8 @@ def _emit(result, choice_raw, *, command):
         "validate-probe": "Saved permission observations only; receipt-policy bytes, account identity and launch authorization are not established.",
         "permission-probe": "Saved local-provider permission observations; not production generation, account identity or launch authorization.",
         "prepare-subscription-guard": "Bound saved subscription observation and selected intent; not authenticated account state or launch authorization.",
+        "prepare-subscription-guard-v2": "Bound registered capture and exact owner terms; not authenticated account state or authorization to launch.",
+        "capture-subscription-event": "One explicitly authorized fixed-prompt quota capture; not a generation attempt or authenticated account evidence.",
         "launch": "The execution result defines completion and acceptance; selected account intent is not authenticated account identity.",
         "read-final": "Independent saved execution readback; not authorization to resume or launch, or fresh account evidence.",
     }[command]
@@ -96,6 +98,14 @@ def parser():
     prepare.add_argument("--max-starting-weekly-utilization", type=float, required=True)
     prepare.add_argument("--max-age-seconds", type=int, required=True)
     prepare.add_argument("--output", required=True)
+    capture = commands.add_parser("capture-subscription-event", allow_abbrev=False,
+        help="LIVE one fixed-prompt pinned-binary capture, only after its exact owner word")
+    for name in ("registration", "review", "launch-word", "output-directory"):
+        capture.add_argument("--" + name, required=True)
+    prepare_v2 = commands.add_parser("prepare-subscription-guard-v2", allow_abbrev=False,
+        help="Offline guard v2 from the one registered capture and exact owner terms")
+    for name in ("registration", "review", "launch-word", "capture", "output"):
+        prepare_v2.add_argument("--" + name, required=True)
     launch = commands.add_parser("launch", allow_abbrev=False,
         help="LIVE one registered attempt; requires the complete admission chain")
     for name in ("registration", "review", "ci", "launch-word", "subscription-guard",
@@ -104,7 +114,7 @@ def parser():
     readback = commands.add_parser("read-final", allow_abbrev=False,
         help="Offline independent saved execution readback; never resumes an attempt")
     readback.add_argument("--registration", required=True)
-    for command in (probe, validate, prepare, launch, readback):
+    for command in (probe, validate, prepare, capture, prepare_v2, launch, readback):
         command.add_argument("--account-choice", required=True,
             help="Closed D105/D106 selected-intent document bound to exact subject/runtime bytes")
     return result
@@ -147,7 +157,35 @@ def main(argv=None):
     choice_raw = _account_choice(args.account_choice, subject_raw, value["runtime"])
     captures = [(args.registration, subject_raw, SUBJECT_LIMIT),
                 (args.account_choice, choice_raw, CHOICE_LIMIT)]
-    if args.command == "prepare-subscription-guard":
+    if args.command in ("capture-subscription-event", "prepare-subscription-guard-v2"):
+        from . import native_launch_review as review
+        from . import native_subscription_capture as capture
+        from . import native_subscription_guard_v2 as guard_v2
+        from .native_u4b_runtime import validate_prepared_runtime
+        validate_prepared_runtime(value['runtime'])
+        bundle_raw, word_raw = _read(args.review), _read(args.launch_word)
+        terms = review.validate_bundle(subject_raw, bundle_raw, word_raw)
+        captures.extend([(args.review, bundle_raw, SUBJECT_LIMIT),
+                         (args.launch_word, word_raw, SUBJECT_LIMIT)])
+        _unchanged(*captures)
+        if args.command == "capture-subscription-event":
+            path = capture.capture_subscription(registration_raw=subject_raw,
+                review_bundle_raw=bundle_raw, launch_word_raw=word_raw, directory=args.output_directory)
+            result = {"capture_manifest": str(path), "sha256": guard.sha(_read(path))}
+        else:
+            saved = capture.read_capture(args.capture, registration_raw=subject_raw,
+                review_bundle_raw=bundle_raw, launch_word_raw=word_raw)
+            event = saved['selected_event']
+            raw = guard_v2.prepare_guard(registration_raw=subject_raw, runtime=value['runtime'],
+                launch_word_raw=word_raw, event_raw=event['event_json'].encode(),
+                captured_at=event['captured_at'], owner_statement=terms,
+                maximum_starting_utilization=terms['max_starting_weekly_utilization'],
+                max_age_seconds=terms['max_age_seconds'])
+            _unchanged(*captures)
+            _new_file(args.output, raw)
+            result = {"guard_sha256": guard.sha(raw), "path": args.output}
+        _emit(result, choice_raw, command=args.command)
+    elif args.command == "prepare-subscription-guard":
         word_raw, event_raw = _read(args.launch_word), _read(args.event)
         raw = guard.prepare_guard(registration_raw=subject_raw, runtime=value["runtime"],
             launch_word_raw=word_raw, event_raw=event_raw, captured_at=args.captured_at,

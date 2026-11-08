@@ -121,13 +121,21 @@ def authorizations(raw, value, *, review_path, ci_path, launch_word_path, contra
             'identity': {name: {'path': inputs[name], 'sha256': draft._sha(body)} for name, body in captured.items()}}
 
 
-def _join_subscription_authority(guard, raw, value, authorization):
+def _join_subscription_authority(guard, raw, value, authorization, *, current_launch=False):
     """Join admission to the engine's independently recaptured authority."""
     if guard is not None:
-        from .native_subscription_guard import SubscriptionGuard, sha
-        SubscriptionGuard(guard.raw, expected_sha256=sha(guard.raw),
+        from .native_subscription_admission import context
+        module, extra = context(guard.raw, registration_raw=raw, runtime=value['runtime'],
+            launch_word_raw=authorization['raw']['launch_word'], review_bundle_raw=authorization['raw']['review'])
+        if current_launch:
+            from .native_u4b_runtime import validate_prepared_runtime
+            from .native_subscription_guard_v2 import SubscriptionGuard
+            validate_prepared_runtime(value['runtime'])
+            if type(guard) is not SubscriptionGuard or module.VERSION != 2:
+                raise ValueError('current native engine requires the exact v2 subscription guard')
+        module.SubscriptionGuard(guard.raw, expected_sha256=module.sha(guard.raw),
             registration_raw=raw, runtime=value['runtime'],
-            launch_word_raw=authorization['raw']['launch_word'], check_freshness=False)
+            launch_word_raw=authorization['raw']['launch_word'], check_freshness=current_launch, **extra)
 
 
 def _saved_authorizations(raw, value, started_raw, result, *, contract, file):
@@ -261,7 +269,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     value = registration.verified(registration_raw)
     authorization = authorizations(registration_raw, value, review_path=review_path,
                                   ci_path=ci_path, launch_word_path=launch_word_path)
-    _join_subscription_authority(launch_guard, registration_raw, value, authorization)
+    _join_subscription_authority(launch_guard, registration_raw, value, authorization, current_launch=True)
     _unchanged(value, registration_raw, authorization)
     runtime_identity = expected_runtime_observation(value)
     selected = composition.verified_composition(value['composition_raw_json'].encode())
@@ -330,6 +338,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 durable_new(attempt/'runtime-observation.json', draft._encoded(observation))
                 def launch_check():
                     _unchanged(value, registration_raw, authorization)
+                    _join_subscription_authority(launch_guard, registration_raw, value, authorization, current_launch=True)
                     if (_file(attempt/'registration.json', 'consumed registration') != registration_raw
                             or _file(attempt/'started.json', 'started identity') != started_raw
                             or _file(attempt/'runtime-observation.json', 'runtime observation') != draft._encoded(observation)
@@ -454,7 +463,11 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 raise ValueError('consumed subscription guard changed before publication')
             completed = (set(results) == set(GATES)
                 and all(row.get('checked') is True and row.get('passed') is True for row in results.values()))
-            from .native_subscription_guard import validate_saved_observations
+            from .native_subscription_admission import context
+            guard_module, guard_extra = context(launch_guard.raw, registration_raw=registration_raw,
+                runtime=value['runtime'], launch_word_raw=authorization['raw']['launch_word'],
+                review_bundle_raw=authorization['raw']['review'])
+            validate_saved_observations = guard_module.validate_saved_observations
             guard_snapshot = launch_guard.snapshot()
             transcript_raw = (prepared['snapshot'].raw.get(str(attempt/'transcript.jsonl'))
                               if prepared is not None else None)
@@ -462,7 +475,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 subscription_observation_verification = validate_saved_observations(
                     launch_guard.raw, guard_snapshot, registration_raw=registration_raw,
                     runtime=value['runtime'], launch_word_raw=authorization['raw']['launch_word'],
-                    transcript_raw=transcript_raw, complete=completed)
+                    transcript_raw=transcript_raw, complete=completed, **guard_extra)
             except ValueError as exc:
                 if first_error is None:
                     first_error = exc
@@ -472,7 +485,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 subscription_observation_verification = validate_saved_observations(
                     launch_guard.raw, guard_snapshot, registration_raw=registration_raw,
                     runtime=value['runtime'], launch_word_raw=authorization['raw']['launch_word'],
-                    transcript_raw=None, complete=False)
+                    transcript_raw=None, complete=False, **guard_extra)
             final = {'kind': KIND, 'version': VERSION, 'attempt_id': value['attempt_id'],
                 'state': 'completed_pending_independent_review' if completed else 'failed',
                 'runtime_gates_passed': completed, **UNASSESSED, 'first_stop': first_stop,
@@ -548,16 +561,21 @@ def read_final(registration_raw, *, contract: ExecutionContract,
     if 'subscription_guard' not in result:
         raise ValueError('shared v2 result requires its saved subscription snapshot')
     if 'subscription_guard' in result:
-        from .native_subscription_guard import validate_saved_snapshot, validate_saved_observations
+        from .native_subscription_admission import context
         guard_reading = result['subscription_guard']
         guard_raw = _file(attempt/'subscription-guard.json', 'saved subscription guard')
+        guard_module, guard_extra = context(guard_raw, registration_raw=registration_raw,
+            runtime=value['runtime'], launch_word_raw=_file(attempt/'launch_word.json', 'consumed owner word'),
+            review_bundle_raw=_file(attempt/'review.json', 'consumed review'))
+        validate_saved_snapshot = guard_module.validate_saved_snapshot
+        validate_saved_observations = guard_module.validate_saved_observations
         if (type(guard_reading) is not dict
                 or guard_reading.get('guard_sha256') != draft._sha(guard_raw)
                 or guard_reading.get('registration_sha256') != expected['registration_sha256']):
             raise ValueError('saved subscription guard identity differs')
         validate_saved_snapshot(guard_raw, guard_reading,
             registration_raw=registration_raw, runtime=value['runtime'],
-            launch_word_raw=_file(attempt/'launch_word.json', 'consumed owner word'))
+            launch_word_raw=_file(attempt/'launch_word.json', 'consumed owner word'), **guard_extra)
         dispatch_path = attempt/'subscription-dispatched.json'
         if dispatch_path.exists() or dispatch_path.is_symlink():
             dispatch = draft._json(_file(dispatch_path, 'saved subscription dispatch'))
@@ -578,7 +596,7 @@ def read_final(registration_raw, *, contract: ExecutionContract,
         observation_verification = validate_saved_observations(guard_raw, guard_reading,
             registration_raw=registration_raw, runtime=value['runtime'],
             launch_word_raw=_file(attempt/'launch_word.json', 'consumed owner word'),
-            transcript_raw=transcript_raw, complete=result.get('runtime_gates_passed') is True)
+            transcript_raw=transcript_raw, complete=result.get('runtime_gates_passed') is True, **guard_extra)
         if result.get('subscription_observation_verification') != observation_verification:
             raise ValueError('saved subscription observation verification differs from replay')
     checks = result.get('gates')

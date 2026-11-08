@@ -9,6 +9,21 @@ from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
 
+
+def receipt_observation(transcript, bundle, receipt, manifest):
+    """Report original receipt claims against successful file-tool windows only.
+
+    A permitted shell read is intentionally counted as unopened by this
+    instrument. Neither its count nor that limitation is an acceptance floor.
+    """
+    from data_sheets_schema import agentic_observed
+    out = agentic_observed.observe([transcript], bundle, receipt=receipt, manifest=manifest)
+    out['receipt_chunks_unopened_basis'] = {
+        'mode': 'reported_only', 'receipt': 'original_phase1_receipt',
+        'reads': 'successful_file_tool_windows', 'permitted_shell_reads_count_as_unopened': True}
+    return out
+
+
 def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown, live,
           first_stop, runtime_authority, keep_awake, keep_awake_raw=None, runtime_authority_expected=None):
     """Run the fixed obligations; only selected semantic readers differ."""
@@ -126,7 +141,9 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
         return native.pair_gate(prepared, projections)
 
     def observed():
-        out = agentic_observed.observe([projected(Path(runtime['attempt_directory']) / 'transcript.jsonl')], projected(spec.bundle))
+        out = receipt_observation(projected(Path(runtime['attempt_directory']) / 'transcript.jsonl'),
+            projected(spec.bundle), projected(spec._agentic_artifact_paths['receipt']),
+            projected(spec.chunk_manifest))
         problems = controls['observation_problems'](out)
         return {'passed': not problems, 'observation': out, 'problems': problems}
 

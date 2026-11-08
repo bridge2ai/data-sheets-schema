@@ -20,6 +20,14 @@ from . import native_supervisor_gates as shared
 from .native_shared_results import (Snapshot, _member, _captured_selection, rebuild,
     validate_file_basis, _read_pool, POOL_NAME, REPORT_KIND)
 
+
+def _require_reported_receipts(old, recomputed, runtime):
+    """Select the new reporting obligation from registration, not a saved flag."""
+    from .native_u4b_runtime import is_prepared_runtime
+    if (is_prepared_runtime(runtime) or 'receipt_chunks_unopened_basis' in old.get('observation', {})):
+        if c.canonical(old) != c.canonical(recomputed):
+            raise ValueError('saved receipt/read-window observation differs from captured reconstruction')
+
 def _capture_member(snapshot, path, role, limit, expected=None):
     member = evidence.read_regular(str(path), role, max_bytes=limit)
     if expected is not None and member.captured.raw != expected:
@@ -363,6 +371,8 @@ def require_saved_basis(value, result):
             fresh = attach_prepared(value, fresh, prepared)
     for name, recomputed in fresh.items():
         old = result['gates'][name]
+        if name == 'observation':
+            _require_reported_receipts(old, recomputed, value['runtime'])
         if old['passed'] and (recomputed.get('checked') is not True or recomputed.get('passed') is not True):
             raise ValueError('saved passing native gate contradicts fresh reconstruction: ' + name)
         if name in ('saved_attribution', 'phase_history', 'tool_history', 'schema', 'pair', 'receipts', 'evidence'):
