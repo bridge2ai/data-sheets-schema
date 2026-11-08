@@ -33,7 +33,7 @@ def require_scanner_inventory(manifest):
 
 def scanner_inputs(candidate_head):
     before, old = inputs.checked_scanner_input('scanner-baseline-' + BASE_COMMIT[:9], BASE_COMMIT)
-    after, new = inputs.checked_scanner_input('scanner-candidate', candidate_head)
+    after, new = inputs.checked_scanner_input('scanner-candidate-' + candidate_head[:9], candidate_head)
     require_scanner_inventory(old)
     require_scanner_inventory(new)
     if old['path_mask'] != new['path_mask']:

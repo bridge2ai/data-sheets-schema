@@ -446,7 +446,10 @@ def _authorizations(raw, value, *, review_path, ci_path, launch_word_path):
     if review.get('kind') == launch_review.KIND:
         launch_review.validate_bundle(raw, captured['review'].raw, captured['launch_word'].raw)
     else:
-        if is_prepared_runtime(value['runtime']):
+        # Historical approval-only parser callers supply binding fields.
+        # Current execution independently requires its complete U4b runtime
+        # before admission; this does not make a partial body executable.
+        if is_prepared_runtime(value.get('runtime')):
             raise ValueError('U4b requires its two-review owner-terms bundle')
         c.exact(review, set(binding) | {'kind', 'version', 'reviewer', 'author', 'independent',
             'decision', 'reviewed_at', 'evidence'}, 'v2 independent review')

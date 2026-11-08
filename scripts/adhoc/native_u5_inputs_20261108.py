@@ -140,7 +140,8 @@ def materialize(label, commit, paths):
 
 def checked_scanner_input(label, expected_commit):
     """Check exact committed inventory and physical export, not just its claims."""
-    if label not in ('scanner-baseline-' + BASE[:9], 'scanner-candidate'):
+    if label not in ('scanner-baseline-' + BASE[:9], 'scanner-candidate',
+                     'scanner-candidate-' + expected_commit[:9]):
         raise ValueError('unknown scanner export label')
     directory = SCRATCH / label
     if directory.resolve() != directory:
@@ -203,7 +204,7 @@ def main():
         materialize('scanner-baseline-' + BASE[:9], BASE, BASE_SCAN_PATHS)
     else:
         candidate = git('rev-parse', '--verify', 'HEAD^{commit}').decode().strip()
-        materialize('scanner-candidate', candidate, BASE_SCAN_PATHS)
+        materialize('scanner-candidate-' + candidate[:9], candidate, BASE_SCAN_PATHS)
 
 
 if __name__ == '__main__':
