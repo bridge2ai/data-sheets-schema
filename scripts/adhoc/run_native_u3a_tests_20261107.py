@@ -24,7 +24,19 @@ import venv
 
 
 ROOT = Path(__file__).resolve().parents[2]
-EXECUTIONS = ROOT.parent
+
+
+def execution_root(source_root):
+    """Keep the real quiet-window location when a source archive is nested."""
+    candidates = [path for path in source_root.parents if path.name == "d4d-executions"]
+    if (len(candidates) != 1 or candidates[0] != candidates[0].resolve(strict=True)
+            or not (candidates[0] / "plans").is_dir()):
+        raise RuntimeError("source must be below the canonical d4d-executions root")
+    return candidates[0]
+
+
+EXECUTIONS = execution_root(ROOT)
+SCRATCH = EXECUTIONS / "scratch-native-u3a-r5"
 LOCK = EXECUTIONS / "plans/native_quiet_window.lock"
 DEADLINE = 3600
 PROFILE = "(version 1)\n(allow default)\n(deny network*)\n"
@@ -86,6 +98,8 @@ def network_witness():
 
 def worker(args):
     out = args.out.resolve(strict=True)
+    if out == SCRATCH or not out.is_relative_to(SCRATCH):
+        raise RuntimeError("test output must stay under round-4 scratch")
     if not (sys.flags.no_user_site and sys.flags.safe_path and sys.dont_write_bytecode):
         raise RuntimeError("test child requires no-user-site, safe-path and no-bytecode")
     if Path(sys.prefix).resolve() != out / "venv":
@@ -218,8 +232,8 @@ def parent(args):
         raise SystemExit("quiet window active; no tests started")
     dependencies = dependency_site()
     out = args.out.absolute()
-    if out != out.resolve() or not out.is_relative_to(EXECUTIONS):
-        raise ValueError("output must be a new literal path under d4d-executions")
+    if out != out.resolve() or out == SCRATCH or not out.is_relative_to(SCRATCH):
+        raise ValueError("output must be a new literal path under scratch-native-u3a-r4")
     if any((parent / ".git").exists() for parent in (out, *out.parents)
            if parent.is_relative_to(EXECUTIONS)):
         raise ValueError("evidence must be outside every source worktree")
@@ -239,6 +253,7 @@ def parent(args):
                                      cwd=ROOT, env=env, text=True).strip()
     save(out / "plan.json", {"command": command, "source_root": str(ROOT),
          "source_commit": commit, "runner_sha256": digest(Path(__file__)),
+         "scratch_root": str(SCRATCH), "quiet_window_lock": str(LOCK),
          "sandbox_sha256": digest(profile), "environment": env,
          "deadline_seconds": DEADLINE, "workers": args.workers,
          "scope": "offline synthetic validation; no native binary/provider permission"})

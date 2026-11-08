@@ -1,0 +1,42 @@
+{
+  "identity": {
+    "base": "f101652f53f23d9be83a213b6d5850bd6e9341fc",
+    "head": "ea2c9728c88f1ac5ae9b17b719f068c79eaf5d62",
+    "node": "tests/test_source_heading_runtime_api.py::test_actual_completed_capture_is_portable_and_refuses_changed_bytes",
+    "archive_sha256": "1bca52d075046e74dd8e4d0b5e3af62ee72db9474f87faec46abd9f5ae9a56c1",
+    "test_sha256": "eb80605d40055d86ac1f71962b86e7519e3da53b09ffeff283d8aecc849e7546"
+  },
+  "runs": {
+    "base": {
+      "revision": "f101652f53f23d9be83a213b6d5850bd6e9341fc",
+      "call_seconds": 1513.718085499946,
+      "junit_seconds": 1534.177,
+      "supervisor_wall_seconds": 1550.298,
+      "start_utc": "2026-11-07T22:48:26.554411+00:00",
+      "outcome": "passed",
+      "source_hashes_verified": 190,
+      "artifacts": {
+        ".log": "0f918112ee63839e6cff3a22f3177e2cb9c63c5dd51cb37422e69b1fa1c3e6e7",
+        ".events.jsonl": "e0613e89a6d77ce6ec4f4235470f33959c1813407713c5e399a637018662032b",
+        ".xml": "006966c1ad65c82907a37bf23a8ace0d1ee3bd65a46fb176476c75de54bff63c"
+      }
+    },
+    "head": {
+      "revision": "ea2c9728c88f1ac5ae9b17b719f068c79eaf5d62",
+      "call_seconds": 1626.2299719169969,
+      "junit_seconds": 1634.65,
+      "supervisor_wall_seconds": 1646.814,
+      "start_utc": "2026-11-07T23:14:29.691765+00:00",
+      "outcome": "passed",
+      "source_hashes_verified": 194,
+      "artifacts": {
+        ".log": "001a8e4356560f6ee52620a027aef9616b8c968baeeb1d3573d7cdf474357378",
+        ".events.jsonl": "e18ef4569e4cec243c17d0ba58efecb9b9e8983274df40e78356874bdfc18d4f",
+        ".xml": "528cd3d8eef8fd9168508e086f14179783472870c1754c02a06223f3a2b79a36"
+      }
+    }
+  },
+  "head_over_base_call_ratio": 1.0743281642036342,
+  "materially_slower": false,
+  "limits": "One base-first/head-second observation, not replicated or host-normalized; serial distribution only."
+}

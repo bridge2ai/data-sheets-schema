@@ -226,13 +226,14 @@ def test_v1_execution_and_v2_envelope_cross_refuse(prepared):
     before_files, before_entries = _files(inputs['root']), _entries(inputs['root'])
     v1 = {'kind': legacy.KIND, 'version': 1, 'execution': legacy.EXECUTION}
     with pytest.raises(ValueError, match='v2 authority envelope'):
-        registration.verified(c.canonical(v1))
+        registration.verified(c.canonical(v1), classifier_projection=object())
     with pytest.raises(ValueError, match='not a supported explicit native execution registration'):
         legacy.verified(c.canonical(envelope))
     # A genuine preparation is still not a complete execution registration.
     with pytest.raises(ValueError, match='v2 execution body keys mismatch'):
         registration.admit(c.canonical(envelope), review_path=inputs['root'] / 'absent-review',
-            ci_path=inputs['root'] / 'absent-ci', launch_word_path=inputs['root'] / 'absent-owner')
+            ci_path=inputs['root'] / 'absent-ci', launch_word_path=inputs['root'] / 'absent-owner',
+            classifier_projection=object())
     assert _files(inputs['root']) == before_files
     assert _entries(inputs['root']) == before_entries
     assert all(not Path(path).exists() for path in envelope['registration']['outputs'].values())
@@ -276,11 +277,11 @@ def test_complete_valid_v1_execution_refused_by_v2_without_reservation(
         for name in names:
             sys.modules.pop(name, None)
         with pytest.raises(ValueError, match='v2 launch requires an exact v2 authority envelope'):
-            registration.verified(case['raw'])
+            registration.verified(case['raw'], classifier_projection=object())
         assert _files(tmp_path) == before_files
         assert _entries(tmp_path) == before_entries
         with pytest.raises(ValueError, match='v2 launch requires an exact v2 authority envelope'):
-            registration.admit(case['raw'], **case['kwargs'])
+            registration.admit(case['raw'], classifier_projection=object(), **case['kwargs'])
         assert _files(tmp_path) == before_files
         assert _entries(tmp_path) == before_entries
         assert all(not path.exists() and not path.is_symlink() for path in reservations)
@@ -357,7 +358,7 @@ def test_execution_prefix_refuses_until_fixed_shared_consumer_exists(prepared, m
     monkeypatch.setattr(registration, '_consumer', missing_consumer)
     monkeypatch.delitem(sys.modules, 'data_sheets_schema.native_shared_registration', raising=False)
     with pytest.raises(ValueError, match='requires the committed U3-C/D shared composition and permission consumer'):
-        registration.verified(c.canonical(envelope))
+        registration.verified(c.canonical(envelope), classifier_projection=object())
     assert _files(inputs['root']) == before
 
 
@@ -381,7 +382,7 @@ def test_runtime_changed_after_preparer_verification_refuses_before_consumer(pre
     monkeypatch.setattr(registration, '_consumer',
                         lambda *a: pytest.fail('changed R reached execution consumer'))
     with pytest.raises(ValueError, match='prepared runtime changed before execution binding'):
-        registration.verified(c.canonical(envelope))
+        registration.verified(c.canonical(envelope), classifier_projection=object())
     assert visits == [inputs['kwargs']['job_id']]
 
 
@@ -461,7 +462,7 @@ def test_execution_prefix_must_match_rederived_preparation_before_consumer(prepa
     monkeypatch.setattr(registration, '_consumer',
                         lambda *a: pytest.fail('mismatched E/C reached consumer'))
     with pytest.raises(ValueError, match=diagnostic):
-        registration.verified(c.canonical(envelope))
+        registration.verified(c.canonical(envelope), classifier_projection=object())
 
 
 @pytest.fixture

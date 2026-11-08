@@ -13,12 +13,15 @@ import pytest
 from data_sheets_schema import api_runner as api
 from data_sheets_schema import native_attribution_registration_v2 as inherited
 from data_sheets_schema import native_shared_attribution as attribution
-from data_sheets_schema import native_shared_controller as controller
+from data_sheets_schema import native_shared_attribution_orchestration as live_attribution
+from data_sheets_schema import native_shared_controller_orchestration as controller
 from data_sheets_schema import native_shared_contract as c
+from data_sheets_schema import native_shared_evidence as evidence
 from data_sheets_schema import native_execution_registration_v2 as registration
 from data_sheets_schema.native_shared_evidence import read_regular
 from data_sheets_schema import source_attribution_preflight as preflight
-from tests.test_native_shared_selection import declaration, pin, save, artifact
+from tests.test_native_shared_selection import pin, save, artifact
+from tests.test_native_shared_controller import declaration, synthetic_declaration
 from tests.test_native_shared_render import native_spec
 from tests.test_native_execution_registration_v2 import inputs as execution_inputs, isolated_modules
 from tests.test_source_attribution_preflight import inputs as attribution_inputs, edited, claim
@@ -89,7 +92,7 @@ def construct(case, *, saved=False, full=None, report=None):
             captured_instruction=captured_instruction,
             final_full=artifact('final_full', spec._agentic_artifact_paths['full'], full or data['record_raw']),
             final_report=artifact('final_report', spec._agentic_artifact_paths['report'], report or data['report_raw']))
-    return attribution.live(cap, **kwargs)
+    return live_attribution.live(cap, **kwargs)
 
 
 def checked(state, composition, payload, identity='draft', status=0):
@@ -185,7 +188,8 @@ def test_saved_replay_uses_captured_bytes_and_defers_superseded_passes(case, mon
     monkeypatch.setattr(Path, 'read_bytes', blocked)
     monkeypatch.setattr(Path, 'read_text', blocked)
     monkeypatch.setattr(Path, 'resolve', blocked)
-    monkeypatch.setattr(attribution, 'read_regular', blocked)
+    monkeypatch.setattr(live_attribution, 'read_regular', blocked)
+    monkeypatch.setattr(evidence, 'read_regular', blocked)
     for key in ('Popen', 'run', 'check_output'):
         monkeypatch.setattr(subprocess, key, blocked)
     state = construct(case, saved=True)
@@ -258,7 +262,7 @@ def test_mismatched_captured_selection_execution_or_policy_refuses(case, mutatio
         body.update(composition_raw_json=c.canonical(composition).decode(),
                     composition_sha256=c.sha(c.canonical(composition)))
     with pytest.raises(ValueError):
-        attribution.live(cap, execution_raw=c.canonical(execution), spec=spec, composition_raw=c.canonical(composition))
+        live_attribution.live(cap, execution_raw=c.canonical(execution), spec=spec, composition_raw=c.canonical(composition))
 
 
 @pytest.mark.parametrize('change', ['role', 'path'])
@@ -287,7 +291,10 @@ def test_saved_attribution_refuses_non_v2_wire_before_any_live_read(case, monkey
 
     monkeypatch.setattr(controller, 'reconstruct_composition', blocked)
     monkeypatch.setattr(registration, 'verify_preparer', blocked)
-    monkeypatch.setattr(attribution, 'read_regular', blocked)
+    monkeypatch.setattr(live_attribution, 'read_regular', blocked)
+    monkeypatch.setattr(evidence, 'read_regular', blocked)
+    for name in ('read_bytes', 'read_text', 'open'):
+        monkeypatch.setattr(Path, name, blocked)
     with pytest.raises(ValueError):
         attribution.saved(cap, execution_raw=c.canonical(value), spec=spec,
             composition_raw=c.canonical(composition),

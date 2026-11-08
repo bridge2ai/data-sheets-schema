@@ -18,7 +18,6 @@ from . import native_shared_policy as policy
 from . import native_shared_render as render
 from . import native_shared_selection as selected
 from . import source_attribution_preflight as preflight
-from .native_shared_evidence import read_regular
 
 
 _KINDS = {'draft': 'draft', 'audit_evidence': 'evidence',
@@ -31,11 +30,11 @@ def _need(value, message):
         raise ValueError(message)
 
 
-def _joined(selection, execution_raw, spec, composition_raw, *, captured_only=False):
+def _joined(selection, execution_raw, spec, composition_raw):
     """Join exact v2 carriers; saved replay never rediscovers live authority.
 
-    These joins observe attribution identity, not execution admission. Live
-    construction additionally rechecks the genuine current preparation and C;
+    These joins observe attribution identity, not execution admission. The
+    orchestration caller verifies current preparation/C for live construction;
     the outer lifetime must still obtain U3-D's complete admission separately.
     """
     from .api_runner import RunSpec
@@ -94,12 +93,6 @@ def _joined(selection, execution_raw, spec, composition_raw, *, captured_only=Fa
     _need(c.canonical(composition.get('render_spec')) == c.canonical(rendered)
           and c.canonical(preparation['render_spec']) == c.canonical(rendered),
           'attribution execution/composition differs from exact selected spec')
-    if not captured_only:
-        fresh, fresh_spec, fresh_selection = controller.reconstruct_composition(composition_raw)
-        _need(c.canonical(fresh) == c.canonical(composition)
-              and fresh_selection == selection
-              and c.canonical(fresh_spec.render_spec()) == c.canonical(rendered),
-              'attribution current preparation differs from the supplied captured authority')
     maximum = c.positive_int(execution.get('max_draft_checks'), 'execution draft allowance')
     _need(type(composition.get('max_draft_checks')) is int
           and type(preparation['max_draft_checks']) is int
@@ -156,9 +149,9 @@ def _joined(selection, execution_raw, spec, composition_raw, *, captured_only=Fa
 class _Attribution(inherited.NativeAttributionState):
     """Fixed initializer; inherited observe and report implementations remain intact."""
 
-    def __init__(self, selection, *, execution_raw, spec, composition_raw, _captured_only=False):
+    def __init__(self, selection, *, execution_raw, spec, composition_raw):
         doc, commands, directory, paths, inputs, maximum = _joined(
-            selection, execution_raw, spec, composition_raw, captured_only=_captured_only)
+            selection, execution_raw, spec, composition_raw)
         self.spec = spec
         self.reg = {'max_draft_checks': maximum, 'inputs': inputs, 'working_directory': directory}
         self.registration_raw = execution_raw
@@ -211,13 +204,7 @@ class _Attribution(inherited.NativeAttributionState):
             problems.append('current draft cannot be verified: ' + str(exc))
 
     def _check_current(self, problems):
-        try:
-            full = read_regular(self._paths['full'], 'final_full', max_bytes=self._input_limit).captured
-            report = read_regular(self._paths['report'], 'final_report', max_bytes=self._input_limit).captured
-        except (TypeError, ValueError, KeyError, OSError) as exc:
-            problems.append('current draft cannot be verified: ' + str(exc))
-            return
-        self._compare(problems, full.raw, report.raw, 'current captured')
+        raise ValueError('attribution requires explicit saved evidence or the live orchestration boundary')
 
 
 class _SavedAttribution(_Attribution):
@@ -241,7 +228,7 @@ class _SavedAttribution(_Attribution):
               and captured_instruction.pin.sha256 == composition.get('instruction_sha256'),
               'saved attribution instruction differs from its independent captured artifact')
         super().__init__(selection, execution_raw=execution_raw, spec=spec,
-                         composition_raw=composition_raw, _captured_only=True)
+                         composition_raw=composition_raw)
         for artifact, role, path in ((final_full, 'final_full', self._paths['full']),
                                      (final_report, 'final_report', self._paths['report'])):
             _need(type(artifact) is c.CapturedArtifact and artifact.pin.role == role
@@ -259,11 +246,6 @@ class _SavedAttribution(_Attribution):
     def finish(self):
         self._finishing = True
         return self.report(complete=True)
-
-
-def live(selection, *, execution_raw, spec, composition_raw):
-    """Create the live extra observer after the outer boundary has verified E."""
-    return _Attribution(selection, execution_raw=execution_raw, spec=spec, composition_raw=composition_raw)
 
 
 def saved(selection, *, execution_raw, spec, composition_raw, captured_instruction,

@@ -109,7 +109,7 @@ def _read_identity(value, label):
 
 
 def _runtime(raw, provider, effort):
-    from .native_execution_registration import RUNTIME_KEYS, ROUTE
+    from .native_shared_runtime_constants import RUNTIME_KEYS, ROUTE
     value = c.strict_json(raw, 'sole runtime declaration', c.HARD_LIMITS['input_bytes'])
     c.exact(value, RUNTIME_KEYS, 'sole runtime declaration')
     if value['route'] != ROUTE:

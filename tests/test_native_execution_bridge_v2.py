@@ -29,7 +29,8 @@ AUTHORITY_VERSION = 2
 
 def rebuild_v2_body(*, preparation_raw, composition_path, system_path,
                    permission_probe_path, attempt_id, attempt_directory,
-                   evidence_directory, max_draft_checks, receipt_origin_version):
+                   evidence_directory, max_draft_checks, receipt_origin_version,
+                   classifier_projection):
     return {'fixture': 'not an admitted execution'}
 
 def execution_paths_v2(body, *, fresh, extra_protected):
@@ -90,7 +91,7 @@ def test_execution_key_set_refuses_before_preparation_or_consumer(prepared, monk
     monkeypatch.setattr(registration, '_consumer',
                         lambda *a, **k: pytest.fail('bad execution shape reached consumer'))
     with pytest.raises(ValueError, match='v2 execution body keys mismatch'):
-        registration.verified(c.canonical(envelope))
+        registration.verified(c.canonical(envelope), classifier_projection=object())
 
 
 def test_verified_routes_dirty_closure_through_actual_committed_proof(prepared, consumer_source, monkeypatch):
@@ -113,9 +114,175 @@ def test_verified_routes_dirty_closure_through_actual_committed_proof(prepared, 
     monkeypatch.setattr(registration, '_consumer',
                         lambda *a, **k: pytest.fail('dirty closure reached consumer'))
     with pytest.raises(ValueError, match='consumed source differs from the reviewed commit'):
-        registration.verified(c.canonical(envelope))
+        registration.verified(c.canonical(envelope), classifier_projection=object())
     assert visits == [preparation['registration']['dependencies']]
     assert source.read_bytes().endswith(b'# uncommitted source change\n')
+
+
+def test_verified_rechecks_committed_sources_after_preparation(prepared, consumer_source, monkeypatch):
+    """ME guard test: the first proof passes; the real second proof must refuse.
+
+    The tiny committed closure is a software fixture, not a C execution consumer.
+    Preparation still takes its ordinary path. Only the proof's local source
+    location and identity are substituted, as in the earlier first-proof test.
+    """
+    data, preparation = prepared
+    envelope = _execution_prefix(data, preparation)
+    root, identity = consumer_source()
+    source = root / CONSUMER_PATH
+    real_proof = registration.authority.require_committed
+    real_verify_preparer = registration.verify_preparer
+    proofs, preparations = [], []
+
+    def prove(dependencies):
+        assert dependencies == preparation['registration']['dependencies']
+        proofs.append('after preparation' if preparations else 'before preparation')
+        with source_context(monkeypatch, root, identity):
+            real_proof(identity)
+
+    def prepare_then_dirty(raw, *, job_id):
+        result = real_verify_preparer(raw, job_id=job_id)
+        preparations.append(job_id)
+        source.write_bytes(source.read_bytes() + b'\n# changed after preparation proof\n')
+        identity['base']['package_sources'][CONSUMER_PATH] = c.sha(source.read_bytes())
+        return result
+
+    monkeypatch.setattr(registration.authority, 'require_committed', prove)
+    monkeypatch.setattr(registration, 'verify_preparer', prepare_then_dirty)
+    monkeypatch.setattr(registration, '_consumer',
+                        lambda *a, **k: pytest.fail('post-preparation dirty closure reached consumer'))
+    with pytest.raises(ValueError, match='consumed source differs from the reviewed commit'):
+        registration.verified(c.canonical(envelope), classifier_projection=object())
+    assert preparations == [preparation['registration']['job_id']]
+    assert proofs[0] == 'before preparation'
+    assert proofs.count('before preparation') >= 2
+    assert proofs.count('after preparation') == 1
+    assert proofs[-1] == 'after preparation'
+    assert source.read_bytes().endswith(b'# changed after preparation proof\n')
+
+
+@pytest.mark.parametrize('entry', ['verified', 'admit'])
+@pytest.mark.parametrize('projection', ['omitted', 'none'])
+def test_projection_is_required_before_any_authority_effect(tmp_path, monkeypatch, entry, projection):
+    """Missing input cannot reach wire decoding, source loads, or authority reads."""
+    def forbidden(*args, **kwargs):
+        pytest.fail('missing projection reached an authority operation')
+
+    for name in ('_wire', '_consumer', '_authorizations', '_read', 'validate_runtime'):
+        monkeypatch.setattr(registration, name, forbidden)
+    for name in ('dependency_identity', 'require_committed', 'loaded_dependencies'):
+        monkeypatch.setattr(registration.authority, name, forbidden)
+    kwargs = {} if entry == 'verified' else {
+        'review_path': tmp_path / 'review', 'ci_path': tmp_path / 'ci',
+        'launch_word_path': tmp_path / 'owner'}
+    if projection == 'none':
+        kwargs['classifier_projection'] = None
+    expected = TypeError if projection == 'omitted' else ValueError
+    diagnostic = 'classifier_projection' if projection == 'omitted' else 'explicit classifier projection'
+    with pytest.raises(expected, match=diagnostic):
+        getattr(registration, entry)(b'not decoded or opened', **kwargs)
+    assert list(tmp_path.iterdir()) == []
+
+
+class _OpaqueProjectionLookalike:
+    """A forwarding sentinel; it is deliberately not a valid C projection."""
+    def __bool__(self):
+        raise AssertionError('A must not test projection truthiness')
+
+    def __iter__(self):
+        raise AssertionError('A must not enumerate a projection')
+
+    def __deepcopy__(self, memo):
+        raise AssertionError('A must not copy a projection')
+
+    def __getattr__(self, name):
+        raise AssertionError('A must not inspect projection attributes: ' + name)
+
+
+def _projection(kind):
+    return {'opaque': object, 'mapping': dict, 'lookalike': _OpaqueProjectionLookalike}[kind]()
+
+
+@pytest.mark.parametrize('kind', ['opaque', 'mapping', 'lookalike'])
+def test_verified_forwards_exact_projection_to_source_compiled_consumer(
+        prepared, consumer_source, monkeypatch, kind):
+    """Only A's forwarding is accepted here, using an explicit software consumer.
+
+    This tiny source-compiled consumer records the supplied object and returns a
+    declared body. It does not validate C authority, and no execution is admitted.
+    """
+    data, preparation = prepared
+    envelope = _execution_prefix(data, preparation)
+    expected = envelope['registration']
+    source = CONSUMER_SOURCE.replace(b'AUTHORITY_VERSION = 2',
+                                    b'AUTHORITY_VERSION = 2\nRECEIVED = []')
+    source = source.replace(b"return {'fixture': 'not an admitted execution'}",
+        ('RECEIVED.append(classifier_projection)\n    return ' + repr(expected)).encode())
+    root, identity = consumer_source(source)
+    real_consumer = registration._consumer
+    received = []
+    projection = _projection(kind)
+
+    @contextmanager
+    def fixture_consumer(dependencies):
+        assert dependencies == preparation['registration']['dependencies']
+        with source_context(monkeypatch, root, identity):
+            registration.authority.require_committed(identity)
+            with real_consumer(identity) as module:
+                yield module
+                received.extend(module.RECEIVED)
+
+    monkeypatch.setattr(registration, '_consumer', fixture_consumer)
+    result = registration.verified(c.canonical(envelope), classifier_projection=projection)
+    assert result == expected
+    assert len(received) == 1 and received[0] is projection
+    assert 'classifier_projection' not in result
+    assert 'classifier_projection' not in registration._rebuild_inputs(
+        expected, expected['preparation_raw_json'].encode('utf-8'))
+
+
+@pytest.mark.parametrize('kind', ['opaque', 'mapping', 'lookalike'])
+def test_admit_forwards_same_projection_to_both_verifications(monkeypatch, kind):
+    """Isolated A orchestration unit; fabricated gate outputs are not C admission."""
+    projection = _projection(kind)
+    raw = b'isolated admission forwarding fixture'
+    value = {'runtime': {'fixture': 'not a real runtime'}, 'dependencies': {'fixture': True}}
+    evidence = {role: SimpleNamespace(pin=SimpleNamespace(path='fixture-' + role))
+                for role in ('review', 'ci', 'launch_word')}
+    verified_calls, path_calls, rereads = [], [], []
+
+    def verified(given_raw, *, classifier_projection):
+        assert given_raw is raw
+        verified_calls.append(classifier_projection)
+        return deepcopy(value)
+
+    def execution_paths(body, *, fresh, extra_protected):
+        path_calls.append((body, fresh, extra_protected))
+        return []
+
+    @contextmanager
+    def consumer(dependencies):
+        assert dependencies == value['dependencies']
+        yield SimpleNamespace(execution_paths_v2=execution_paths)
+
+    def read(path, label):
+        rereads.append((path, label))
+        return next(item for item in evidence.values() if item.pin.path == path)
+
+    monkeypatch.setattr(registration, 'verified', verified)
+    monkeypatch.setattr(registration, '_authorizations', lambda *a, **k: evidence)
+    monkeypatch.setattr(registration, 'validate_runtime',
+                        lambda runtime: {'keep_awake': {'host_platform': sys.platform}})
+    monkeypatch.setattr(registration, '_consumer', consumer)
+    monkeypatch.setattr(registration, '_checked_reservations', lambda *a, **k: ())
+    monkeypatch.setattr(registration, '_read', read)
+    result = registration.admit(raw, review_path='unused-review', ci_path='unused-ci',
+        launch_word_path='unused-owner', classifier_projection=projection)
+    assert len(verified_calls) == 2 and all(item is projection for item in verified_calls)
+    assert path_calls == [(value, True, tuple(item.pin.path for item in evidence.values()))]
+    assert len(rereads) == 3
+    assert result == registration.Admission(raw, tuple(evidence.values()), ())
+    assert 'classifier_projection' not in vars(result)
 
 
 def test_consumer_loads_real_committed_bytes_without_ambient_module(consumer_source, monkeypatch):
@@ -133,7 +300,8 @@ def test_consumer_loads_real_committed_bytes_without_ambient_module(consumer_sou
 
 
 @pytest.mark.parametrize('change', ['version', 'bool_version', 'varargs', 'positional',
-                                  'default', 'path_default', 'missing_rebuilder', 'missing_paths'])
+                                  'default', 'projection_default', 'projection_missing',
+                                  'path_default', 'missing_rebuilder', 'missing_paths'])
 def test_committed_consumer_rejects_wrong_version_or_interface(consumer_source, monkeypatch, change):
     source = CONSUMER_SOURCE
     if change == 'version': source = source.replace(b'AUTHORITY_VERSION = 2', b'AUTHORITY_VERSION = 1')
@@ -145,10 +313,13 @@ def execution_paths_v2(body, *, fresh, extra_protected):
     return []
 '''
     elif change == 'positional': source = source.replace(b'def rebuild_v2_body(*, preparation_raw,', b'def rebuild_v2_body(preparation_raw, *,')
-    elif change == 'default': source = source.replace(b'receipt_origin_version):', b'receipt_origin_version=0):')
+    elif change == 'default': source = source.replace(b'receipt_origin_version,', b'receipt_origin_version=0,')
+    elif change == 'projection_default': source = source.replace(b'classifier_projection):', b'classifier_projection=None):')
+    elif change == 'projection_missing': source = source.replace(b'receipt_origin_version,\n                   classifier_projection):', b'receipt_origin_version):')
     elif change == 'path_default': source = source.replace(b'fresh, extra_protected):', b'fresh, extra_protected=()):')
     elif change == 'missing_rebuilder': source = source.replace(b'def rebuild_v2_body(', b'def verified_v2_body(')
     else: source = source.replace(b'def execution_paths_v2(', b'def arbitrary_paths(')
+    assert source != CONSUMER_SOURCE, 'the named interface mutation must change the source'
     root, identity = consumer_source(source)
     with source_context(monkeypatch, root, identity):
         diagnostic = ('v2 execution consumer authority version mismatch'
@@ -196,7 +367,7 @@ def test_verified_refuses_echo_or_different_reconstruction(prepared, consumer_so
 
     monkeypatch.setattr(registration, '_consumer', fixture_consumer)
     with pytest.raises(ValueError, match=diagnostic):
-        registration.verified(c.canonical(envelope))
+        registration.verified(c.canonical(envelope), classifier_projection=object())
     assert received == [preparation['registration']['dependencies']]
 
 
@@ -267,7 +438,8 @@ def test_worker_thread_admission_refuses_before_verification_or_evidence(monkeyp
     def attempt():
         try:
             registration.admit(b'not an envelope', review_path='not-read-review',
-                ci_path='not-read-ci', launch_word_path='not-read-owner')
+                ci_path='not-read-ci', launch_word_path='not-read-owner',
+                classifier_projection=object())
         except BaseException as exc:
             observed.append(exc)
 

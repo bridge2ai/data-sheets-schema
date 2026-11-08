@@ -11,6 +11,7 @@ import json
 import pytest
 
 from data_sheets_schema import native_shared_capture as capture
+from data_sheets_schema import native_shared_capture_orchestration as capture_orchestration
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_evidence as evidence
 from data_sheets_schema import native_shared_observations as observed
@@ -177,7 +178,7 @@ def test_rehashed_foreign_advance_result_refuses_before_publication(advance, cha
         if saved:
             capture._checked_observations(run)
         else:
-            capture.observe_advance_settled(run, 'tool-1')
+            capture_orchestration.observe_advance_settled(run, 'tool-1')
 
 
 def test_saved_advance_settlement_cannot_be_repeated(advance):

@@ -1,5 +1,55 @@
 # Native authority v2 (#5508)
 
+## U3-A Round 5 loader handoff (2026-11-07)
+
+Orchestration opens `authority.loaded_verified_package_module(name,
+package_sources=verified_package_sources)` for C's canonical projection module,
+mints the carrier from that yielded module, and keeps the context open through
+the fixed reconstruction entry. The closure must already have been verified by
+orchestration. A's scoped verified module set contains only A's source-compiled
+objects and their recorded digests, including dependencies loaded later within
+the scope. A nested consumer reuses those exact objects after checking callable
+identity, the consumer pin and the physical source bytes again. Ordinary imports
+are evicted and recompiled; they cannot seed this set. Closing the orchestration
+scope releases its set and restores the preceding interpreter bindings.
+
+Package imports are classified by resolved physical origin, including `src.`
+and bare aliases. The canonical name determines lint and boundary/v1 refusal;
+allowed aliases execute captured source without bytecode. The top-level namespace
+package remains bootstrap; it contains no initializer here. Other checkout
+namespaces (`tests`, `scripts`, `notes`) refuse rather than becoming unverified
+consumer dependencies. This remains lint plus reviewed source pins, not a Python
+sandbox or protection against hostile interpreter machinery.
+
+Eviction **remains process-wide**. Callers must ensure that no other thread imports
+or uses package modules during a loader scope. The main-thread entry check is not
+a proof of that precondition. No lock or multithreaded safety claim is introduced.
+
+Review dispositions: P2-1 and P2-2 are handled by this loader change. P3-2 adds
+import-hook/cache, `os.sys`, frame and `pkgutil.resolve_name` lint refusals, with
+`pkgutil`, `pydoc` and `zipimport` treated as import machinery. P3-8 is documented
+as the process-wide precondition above. P3-1, P3-3 through P3-7 belong to D round 9
+(argument order, full edge census, protocol seam, capability narrowing, tightened
+parity wording and unmasked constants). The lead's 22:25Z ruling assigns P2-3
+through P2-6 and consumer-roster migration to C round 4 / D round 9; A does not
+edit those files or claim real C-carrier integration in this round.
+
+Offline delivery defers GitHub PR/issue creation and publication. Local regression
+evidence and any review findings are retained for the lead's later online review.
+
+Round 5 read-only review ledger (GitHub filing deferred by the offline brief):
+- R5-A: namespace-parent `from src.data_sheets_schema import X` refused before
+  canonical child classification, including allowed X. Fixed by physical namespace
+  origin classification; v1, boundary and allowed-child regressions cover it.
+- R5-B: a resolved alias of a verified projection recompiled a new class identity.
+  Fixed by binding aliases to the canonical source-only object, preserving its
+  canonical spec and recording alias bindings for validation/restoration. A nested
+  carrier test verifies identity through the alias too.
+- R5-C: the first evidence audit did not refuse an uncommitted auditor after a
+  sandbox-denied index write. Its output is retained as a superseded precommit
+  summary. The auditor now requires a clean worktree before producing a final
+  summary; final evidence is regenerated after the successful local commit.
+
 V2 is selected explicitly. Prepare offline attribution registrations with
 `python -m data_sheets_schema.native_attribution_registration_v2 prepare` and
 its required arguments. Construct/check compositions through
@@ -171,7 +221,8 @@ fixed module, `data_sheets_schema.native_shared_registration`, declaring integer
 ```python
 rebuild_v2_body(*, preparation_raw: bytes, composition_path, system_path,
                permission_probe_path, attempt_id, attempt_directory,
-               evidence_directory, max_draft_checks, receipt_origin_version) -> dict
+               evidence_directory, max_draft_checks, receipt_origin_version,
+               classifier_projection) -> dict
 execution_paths_v2(body: dict, *, fresh: bool, extra_protected) -> list[Path]
 ```
 
@@ -184,6 +235,18 @@ does not reconstruct E; the permanent echo test returns preparation, not E.
 This comparison does not prevent deliberate access to interpreter state. Both
 function signatures are exact (no defaults, variadic forwarding or wrappers).
 It must not call the outer `verified` recursively.
+`verified(raw, *, classifier_projection)` and
+`admit(raw, *, review_path, ci_path, launch_word_path, classifier_projection)`
+require that explicit live argument. Missing arguments or `None` refuse before
+input reads or effects. A passes the same object to reconstruction on every
+verification, including both admission checks. It never inspects, constructs,
+copies, serializes or globally stores the carrier. C owns constructor, lifetime
+and source-pin validation; A neither upgrades mappings nor authenticates
+look-alikes. The carrier is not a field of E or `Admission`. Its lifetime must
+work across the unchanged source-loader boundary; A forwarding tests alone
+do not establish genuine C acceptance. The consumer's updated source must be
+committed and its current SHA-256 included in the package-source closure; an old
+nine-argument consumer is refused by the exact signature contract.
 The second rechecks canonical, disjoint, protected-input-safe and unspent
 reservations without creating them. It must include native stage reservations.
 The returned list contains distinct physical `Path` objects for the attempt,
@@ -437,6 +500,12 @@ findings for the later issue/review workflow:
   finders. No production authority rule or namespace is altered. The initial
   23,343-node collection's wrapper failure is retained; its later origin checks
   were not reached and cannot be claimed passed.
+- R4-A (fixed, offline review record): the new round-4 evidence auditor initially
+  hashed origin witnesses without requiring the worker's source-origin success,
+  and accepted an early bytecode-probe result without checking the final process
+  outcome. It now requires the origin success, exact global lock/scratch paths,
+  successful bounded probe completion, cleanup, no observed survivors/errors and
+  matching final result digest. GitHub filing is deferred by the offline brief.
 
 ### U3-C captured controller and delivery
 
@@ -546,11 +615,12 @@ its observe/report implementation is the same, without importing the v1
 registration route directly from C's attribution adapter.
 
 Complete recursive consumer-graph compatibility remains an explicit integration
-gate. A lints owned modules in full and guards dependency imports when reached:
-the deferred route in frozen `native_shared_render._runtime` imports
-v1 runtime constants, and C's publication helpers reuse frozen execution effect
-primitives. A's later source/CI review repair allows legitimate dynamic loading
-inside reviewed dependencies, including U2, but now refuses both verifier
+gate. A fully lints C/D-owned bodies; dependency traversal checks import-time
+code and verifies later imports when reached. Frozen `native_shared_render._runtime`
+still reaches a forbidden v1 runtime import when called inside a consumer scope,
+and C's publication helpers reuse frozen execution effect primitives. A's later
+source/CI review repair allows legitimate dynamic loading inside reviewed
+dependencies, including U2, but refuses both verifier
 bootstrap boundaries throughout a consumer graph. C's ordinary controller,
 capture and control-projection entry points still call those boundaries; they
 cannot be placed inside D's pure consumer closure. `native_shared_controls` is
@@ -589,6 +659,12 @@ Round-2 findings retained for the later issue workflow:
   removal at most once per minute. Synthetic tests cover acquisition, held-lock
   polling, release/reacquisition and slow filesystem observations. No generation
   or execution authority changes are part of this runner repair.
+- U3C-R2-9: the intermediate A census rejected shared utilities because their
+  deferred function bodies define v1 routes. Retain the failed integration test;
+  merge A's completed round-three repair, which permits definitions while
+  guarding reached imports and displacing cached unpinned modules. C/D-owned
+  source remains fully linted, and execution admission is still closed. The
+  report identifies the red snapshot and the subsequent validation separately.
 
 The report records actual test results and remaining gates. No declaration here
 authorizes dispatch, changes the shared-v1/native26 procedure, or substitutes for

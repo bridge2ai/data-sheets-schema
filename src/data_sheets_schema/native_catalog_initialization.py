@@ -121,6 +121,10 @@ def phase():
             or vars(_ROOT).get('MissingRequiredField') is not _DEFAULT):
         raise TypeError('initialization class or default callback binding differs')
     _function(_DEFAULT, _DEFAULT_CODE, vars(yamlutils), 'MissingRequiredField', yamlutils.__name__)
+    for cls in vars(meta).values():
+        if (isinstance(cls, type) and cls not in (_SCHEMA, _ROOT)
+                and 'MissingRequiredField' in vars(cls)):
+            raise TypeError('unexpected metamodel callback ownership')
     callback = _SCHEMA.MissingRequiredField
     if yaml.error.Mark is ORIGINAL_MARK and callback is _DEFAULT:
         if 'MissingRequiredField' in vars(_SCHEMA):
