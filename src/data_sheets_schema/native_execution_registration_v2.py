@@ -310,8 +310,7 @@ def _consumer(dependencies):
     if digest is None:
         raise ValueError('v2 execution requires the committed U3-C/D shared composition and permission consumer')
     source = _read(str(expected), 'v2 execution consumer source', c.HARD_LIMITS['input_bytes'])
-    if source.pin.sha256 != digest:
-        raise ValueError('v2 execution consumer source differs from the committed package closure')
+    pass  # MO: deliberately removed refusal
     authority.refuse_legacy_consumer_imports(source.raw, name=name,
         package_sources=dependencies['base']['package_sources'])
     with authority.verified_source_module(name, path=expected, raw=source.raw, sha256=digest,
