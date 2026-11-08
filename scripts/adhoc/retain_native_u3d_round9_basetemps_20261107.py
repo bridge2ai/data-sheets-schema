@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Retain U3-D9 synthetic witnesses before transient cleanup, 2026-11-07.
+"""Retain U3-D9/D10 synthetic witnesses before transient cleanup, updated 2026-11-08.
 
 Inputs: explicitly named completed runs under scratch-native-u3d. Outputs:
 verified relative-path witness copies and a new direct-child JSON inventory.
@@ -186,8 +186,8 @@ def main():
     if os.path.lexists(LOCK):
         parser.error('quiet-window lock exists')
     if (len(set(args.runs)) != len(args.runs)
-            or any(re.fullmatch(r'round9-[a-z0-9-]+', name) is None for name in args.runs)):
-        parser.error('runs must be unique literal round9 names')
+            or any(re.fullmatch(r'round(?:9|10)-[a-z0-9-]+', name) is None for name in args.runs)):
+        parser.error('runs must be unique literal round9 or round10 names')
     output = args.out.absolute()
     if (output.parent != SCRATCH or output.parent.resolve(strict=True) != SCRATCH
             or os.path.lexists(output)):
