@@ -56,6 +56,29 @@ def _asset(name: str) -> bytes:
     return raw
 
 
+def captured_asset_bytes(captured_assets=None) -> dict[str, bytes]:
+    """Verify the fixed contract from immutable bytes, or use the legacy reader.
+
+    Explicit captures never fall back to installed files. Returning a new map
+    keeps caller-owned tuples immutable and does not retain a global loader.
+    """
+    if captured_assets is None:
+        return {name: _asset(name) for name in ASSET_SHA256}
+    if type(captured_assets) is not tuple or len(captured_assets) != len(ASSET_SHA256):
+        raise ValueError("captured omission assets require the exact immutable roster")
+    result = {}
+    for row in captured_assets:
+        if type(row) is not tuple or len(row) != 2:
+            raise ValueError("invalid captured omission asset row")
+        name, raw = row
+        if (type(name) is not str or name not in ASSET_SHA256 or name in result
+                or type(raw) is not bytes or not raw or len(raw) > MAX_INPUT_BYTES
+                or _sha(raw) != ASSET_SHA256[name]):
+            raise ValueError("captured omission asset name/bytes/hash mismatch")
+        result[name] = raw
+    return result
+
+
 class _SchemaEventLoader(_UniqueLoader):
     """Use the existing composer/constructors with a completed checked stream."""
     def __init__(self, events):
@@ -135,7 +158,10 @@ def _read(raw: bytes, label: str, *, json_only: bool = False, limit: int = MAX_I
         raise ValueError(f"{label} cannot be read safely ({type(exc).__name__})") from exc
 
 
-def _mapping(raw, label, **kwargs):
+def _mapping(raw, label, *, _native_events=False, **kwargs):
+    if _native_events:
+        from .native_schema_event_reuse import mapping
+        return mapping(raw, label, **kwargs)
     value = _read(raw, label, **kwargs)
     if not isinstance(value, dict):
         raise ValueError(f"{label} must be a mapping")
@@ -146,8 +172,26 @@ def _shape(value, schema):
     return list(Draft202012Validator(schema).iter_errors(value))
 
 
-def _schema(path: Path, *, schema_snapshot=None) -> dict:
+def _schema(path: Path, *, schema_snapshot=None, logical_paths=False) -> dict:
     """Capture and validate each file once before constructing a schema view."""
+    return _schema_product(path, schema_snapshot=schema_snapshot,
+                           logical_paths=logical_paths, with_root_bases=False)[0]
+
+
+def _schema_with_root_bases(path: Path, *, schema_snapshot):
+    """Derive native root-only bases and the catalog from the same strict parse."""
+    catalog, bases = _schema_product(path, schema_snapshot=schema_snapshot,
+                                    logical_paths=True, with_root_bases=True)
+    return bases, catalog
+
+
+def _schema_product(path, *, schema_snapshot, logical_paths, with_root_bases):
+    bases = None
+    if with_root_bases:
+        from .grounding import declared_bases_of
+        # Preserve native root parsing/projection before closure validation.
+        # No caller supplies a parsed mapping or a prior validation verdict.
+        bases = tuple(declared_bases_of(_mapping(schema_snapshot.sources[0][2], 'captured schema', _native_events=True)))
     from linkml_runtime.dumpers import json_dumper
     from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema, _capture_schema
     from data_sheets_schema.schema_view import captured_view
@@ -162,6 +206,8 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
         _mapping(raw, "schema", _schema_events=True)
         return raw
 
+    if logical_paths and schema_snapshot is None:
+        raise ValueError("logical schema replay requires captured schema bytes")
     if schema_snapshot is None:
         captured = capture_schema(path.absolute(), read_bytes=read, strict=True)
     else:
@@ -170,7 +216,7 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
         if type(schema_snapshot) is not SchemaSnapshot or type(schema_snapshot.sources) is not tuple or not schema_snapshot.sources:
             raise ValueError("schema_snapshot must be a nonempty immutable SchemaSnapshot")
         frozen = {}
-        for row in schema_snapshot.sources:
+        for ordinal, row in enumerate(schema_snapshot.sources):
             if type(row) is not tuple or len(row) != 3:
                 raise ValueError("invalid captured schema source")
             name, selected, raw = row
@@ -181,7 +227,10 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
             total += len(raw)
             if total > MAX_SCHEMA_BYTES:
                 raise ValueError("schema closure exceeds byte bound")
-            _mapping(raw, "schema", _schema_events=True)
+            # Only native ordinal zero has already passed this strict reader
+            # in this call. Imports retain their independent validation.
+            if not with_root_bases or ordinal != 0:
+                _mapping(raw, "schema", _schema_events=True, _native_events=logical_paths)
             frozen[selected] = raw
         root = schema_snapshot.sources[0][1]
         if path.absolute() != root:
@@ -192,7 +241,7 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
                 raise ValueError("schema import is outside the captured closure")
             return frozen[selected]
 
-        replay = _capture_schema(root, frozen_read, strict=True)
+        replay = _capture_schema(root, frozen_read, strict=True, logical_paths=logical_paths)
         if replay.sources != schema_snapshot.sources:
             raise ValueError("schema snapshot is not the exact declared import closure")
         captured = replay
@@ -220,7 +269,7 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
                 if enum:
                     enums[str(slot.range)] = json.loads(json_dumper.dumps(enum))
     return {"root_class": "Dataset", "classes": classes, "enums": enums,
-            "sources": [{"name": name, "sha256": _sha(raw)} for name, _path, raw in captured.sources]}
+            "sources": [{"name": name, "sha256": _sha(raw)} for name, _path, raw in captured.sources]}, bases
 
 
 def _class(catalog, name):
@@ -401,12 +450,22 @@ class Prepared:
 
 def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
             context: bytes, schema_path: Path, max_output_tokens: int, schema_snapshot=None,
-            max_request_bytes: int = 32_000_000, term_policy=None) -> Prepared:
+            max_request_bytes: int = 32_000_000, term_policy=None, captured_assets=None) -> Prepared:
+    return _prepare(record=record, bundle=bundle, manifest=manifest, receipt=receipt,
+        context=context, schema_path=schema_path, max_output_tokens=max_output_tokens,
+        schema_snapshot=schema_snapshot, max_request_bytes=max_request_bytes,
+        term_policy=term_policy, captured_assets=captured_assets)
+
+
+def _prepare(*, record, bundle, manifest, receipt, context, schema_path, max_output_tokens,
+             schema_snapshot=None, max_request_bytes=32_000_000, term_policy=None,
+             captured_assets=None, _catalog=None):
     """Read schema once, capture input bytes, render no transport-specific call."""
     if any(type(n) is not int or n < 1 for n in (max_output_tokens, max_request_bytes)):
         raise ValueError("request/output limits must be explicit positive integers")
-    response_schema = json.loads(_asset("response.schema.json"))
-    context_schema = json.loads(_asset("context.schema.json"))
+    assets = captured_asset_bytes(captured_assets) if captured_assets is not None else None
+    response_schema = json.loads(_asset("response.schema.json") if assets is None else assets["response.schema.json"])
+    context_schema = json.loads(_asset("context.schema.json") if assets is None else assets["context.schema.json"])
     document = _mapping(record, "record")
     receipt_doc = _mapping(receipt, "receipt")
     _mapping(manifest, "manifest")
@@ -438,7 +497,9 @@ def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
             raise ValueError("receipt contains an unknown chunk status")
         prior[key] = status
     try:
-        catalog = _schema(Path(schema_path), schema_snapshot=schema_snapshot)
+        catalog = (_catalog if _catalog is not None else
+                   _schema(Path(schema_path), schema_snapshot=schema_snapshot,
+                           **({"logical_paths": True} if captured_assets is not None else {})))
     except (KeyError, TypeError, AttributeError, RecursionError, yaml.YAMLError) as exc:
         raise ValueError("selected schema cannot be captured unambiguously") from exc
     if term_policy is not None:
@@ -452,22 +513,24 @@ def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
         raise ValueError("scopes must include root once and name distinct existing typed owners")
     prepared = _render_prepared(record=record, bundle=bundle, manifest=manifest, receipt=receipt,
         context=context, context_doc=context_doc, catalog=catalog, owners=owners, chunks=chunks, prior=prior,
-        max_output_tokens=max_output_tokens, max_request_bytes=max_request_bytes, term_policy=term_policy)
+        max_output_tokens=max_output_tokens, max_request_bytes=max_request_bytes, term_policy=term_policy,
+        **({"captured_assets": captured_assets} if captured_assets is not None else {}))
     if len(_json(prepared.request()).encode()) > max_request_bytes:
         raise ValueError("complete request exceeds max_request_bytes; no partial request returned")
     return prepared
 
 
 def _render_prepared(*, record, bundle, manifest, receipt, context, context_doc, catalog, owners,
-                     chunks, prior, max_output_tokens, max_request_bytes, term_policy=None):
+                     chunks, prior, max_output_tokens, max_request_bytes, term_policy=None, captured_assets=None):
     """Format bytes only; execution must enter through validating ``prepare``.
 
     The registration sizer also uses this formatter for explicitly historical
     records/receipts, which need not belong to the new registration's bundle.
     Formatting such an estimate grants no packet or execution authority.
     """
-    payload = {"policy": _asset("policy.md").decode("utf-8"),
-               "response_schema": json.loads(_asset("response.schema.json")),
+    assets = captured_asset_bytes(captured_assets) if captured_assets is not None else None
+    payload = {"policy": (_asset("policy.md") if assets is None else assets["policy.md"]).decode("utf-8"),
+               "response_schema": json.loads(_asset("response.schema.json") if assets is None else assets["response.schema.json"]),
                "contract_sha256": dict(ASSET_SHA256), "context": context_doc,
                "record_yaml": record.decode("utf-8"), "receipt_yaml": receipt.decode("utf-8"),
                "schema": catalog, "owner_classes": owners,

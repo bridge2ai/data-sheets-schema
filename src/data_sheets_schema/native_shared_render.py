@@ -109,7 +109,7 @@ def _read_identity(value, label):
 
 
 def _runtime(raw, provider, effort):
-    from .native_execution_registration import RUNTIME_KEYS, ROUTE
+    from .native_shared_runtime_constants import RUNTIME_KEYS, ROUTE
     value = c.strict_json(raw, 'sole runtime declaration', c.HARD_LIMITS['input_bytes'])
     c.exact(value, RUNTIME_KEYS, 'sole runtime declaration')
     if value['route'] != ROUTE:
@@ -268,7 +268,7 @@ def commands(spec):
         'phase1_receipts': (*cli, '--manifest', str(spec.manifest), 'receipts', 'check',
             '--method', spec.method, '--label', spec.label, '--project', spec.project,
             '--bundle', str(spec.bundle), '--chunk-manifest', str(spec.chunk_manifest),
-            '--native-shared-selection', doc['registration_path'], '--strict'),
+            '--native-shared-selection', doc['registration_path'], '--initial-structure'),
         'advance': (py, '-m', 'data_sheets_schema.native_shared_stage', 'advance', '--registration', doc['registration_path']),
         'derive_core': (*cli, 'derive', 'core', '--full', paths['full'], '--out', paths['core'], *pair_schemas),
         'core_schema': (py, '-c', 'from linkml.validator.cli import cli; cli()', '-s', core_schema, '-C', 'CoreDataset', paths['core']),
@@ -285,6 +285,7 @@ def commands(spec):
         'final_scope': (*cli, 'download', 'scope', '--manifest', str(spec.manifest), '--project', spec.project,
             '--check', '--record', paths['full'], '--record', paths['core'], '--strict'),
     }
+    result['final_receipts'] = (*result['phase1_receipts'][:-1], '--strict')
     result['recorder'] = (*cli, 'provenance', 'record', '--project', spec.project, '--method', spec.method,
         '--label', spec.label, '--input-bundle', str(spec.bundle), '--manifest', str(spec.manifest),
         '--profile', spec.profile, '--chunk-manifest', str(spec.chunk_manifest),
@@ -357,7 +358,10 @@ def instruction(spec):
           'The full begins with this exact header:\n\n```yaml\n' + header + '\n```\n\n'
         + 'The separate original receipt has this shape: ' + receipt[1]
         + '\n\nRun full_schema, full_terms and phase1_receipts on the current originals before advance. '
+          'phase1_receipts is structural only: floors remain pending and no floor acceptance is claimed. '
           'Fix initial source-grounded full/receipt defects and repeat their checks before sealing. '
+          'A nonzero phase1_receipts exit is retryable whatever its stdout; exit 0 with unparseable '
+          'or contract-violating stdout is a sticky contract violation. '
           'After sealing, keep the original receipt at its model_files receipt path unchanged. '
           'The helper owns the completed effective receipt at the effective_receipt role; '
           'do not copy it over the original receipt. The selected final receipt check verifies the original '
@@ -365,7 +369,7 @@ def instruction(spec):
           'After the receipt stage reports await_core, run derive_core, core_schema and pair; advance then binds the genuine core. '
           'Read original_source_inventory before completing typed audit stages. After assembly_complete, run audit_evidence '
           'before applying recommendations. Reconcile full, derive_final_core, validate full/core and pair, '
-          'repeat the selected receipt check and final_scope, and read final_source_inventory before each report rewrite. '
+          'run final_receipts with strict floor acceptance and final_scope, and read final_source_inventory before each report rewrite. '
           'Run draft before final_evidence; run recorder last. Never use a stage or helper success as overall completion.\n\n'
         + f'Registered maximum draft checks: {data["native_shared_max_draft_checks"]}.\n\n'
         + '## Reconciliation and report contracts\n\n'

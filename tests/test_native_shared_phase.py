@@ -1,0 +1,633 @@
+"""Pure synthetic event ordering; no native process or permission claim."""
+import json
+import shlex
+
+import pytest
+
+from data_sheets_schema import native_shared_contract as c
+from data_sheets_schema.native_shared_phase import COMMAND_NAMES, PhaseState
+from tests.test_native_shared_selection import declaration  # noqa: F401 (fixture)
+
+
+def artifact(role):
+    raw = b'neutral observed artifact'
+    return c.CapturedArtifact(c.ArtifactPin(role, '/neutral/' + role, len(raw), c.sha(raw)), raw)
+
+
+def decision(state='await_core', number=1):
+    history = c.sha(str(number).encode())
+    completion = None
+    if state == 'assembly_complete':
+        completion = c.StageCompletion(assembly=artifact('typed_assembly'), audit=artifact('audit'),
+            packet=artifact('packet'), effective_receipt=artifact('effective_receipt'),
+            receipt_carry=artifact('receipt_carry'), receipt_result=artifact('receipt_result'),
+            typed_index=artifact('typed_index'), counts_json=b'{}', stage_origins_json=b'{}',
+            selection_sha256='a' * 64, execution_sha256='b' * 64, attempt_id='attempt',
+            session_id='session', history_sha256=history, core_seal_sha256='c' * 64,
+            phase1_seal_sha256='d' * 64)
+    return c.StageDecision(completion=completion, cursor=None, failure_json=None,
+        history_sha256=history, publications=(), request=None, response=None,
+        request_predecessor_history_sha256=None, sealed=(), state=state)
+
+
+class Trace:
+    def __init__(self):
+        self.commands = {name: ('/neutral/python', '-m', 'neutral.helper', name) for name in COMMAND_NAMES}
+        self.state = PhaseState(self.commands, full_path='/neutral/full', core_path='/neutral/core',
+            receipt_path='/neutral/receipt', report_path='/neutral/report', working_directory='/neutral')
+        self.state.observe({'type': 'system', 'subtype': 'init', 'session_id': 'session'})
+        self.current = None
+        self.number = 0
+        self.events = []
+
+    def call(self, name, inputs):
+        self.number += 1
+        identity = 'call-' + str(self.number)
+        self.state.before(name, inputs, stage_decision=self.current)
+        event = {'type': 'assistant', 'session_id': 'session', 'message': {'content': [
+            {'type': 'tool_use', 'id': identity, 'name': name, 'input': inputs}]}}
+        self.events.append((event, self.current))
+        self.state.observe(event, stage_decision=self.current)
+        return identity
+
+    def result(self, identity, *, code=0, text='', bash=True, mutation=None, after=None):
+        event = {'type': 'user', 'session_id': 'session', 'message': {'content': [
+            {'type': 'tool_result', 'tool_use_id': identity, 'is_error': bool(code), 'content': text}]}}
+        if bash:
+            event['tool_use_result'] = {'exitCode': code, 'stdout': text}
+        if mutation:
+            mutation(event)
+        if after is not None:
+            self.current = after
+        self.events.append((event, self.current))
+        return self.state.observe(event, stage_decision=self.current)
+
+    def helper(self, name, *, code=0, value=None, after=None, mutation=None):
+        before = self.current
+        identity = self.call('Bash', {'command': shlex.join(self.commands[name])})
+        if value is None and name.endswith('source_inventory'):
+            value = {'artifact': 'original_full' if name.startswith('original') else 'final_full',
+                     'sha256': 'e' * 64, 'values': []}
+        elif value is None and name in ('audit_evidence', 'final_evidence'):
+            value = {'checked': True, 'findings': [] if not code else [{'message': 'unfounded'}]}
+        elif value is None and name == 'draft':
+            value = {'checked': True, 'passed': not code, 'protocol_version': 7}
+        elif value is None and name == 'phase1_receipts':
+            value = {'mode': 'initial_structure', 'structure_passed': not code,
+                     'floors': 'pending', 'floor_acceptance_claimed': False,
+                     'summary': None, 'reason': None, 'findings': [], 'structural_checks': {},
+                     'native_initial_inputs': None, 'receipt_completion_policy': None}
+        elif value is None and name == 'advance':
+            after = after or decision(number=self.number)
+            value = {'kind': c.KINDS['advance_result'], 'version': 1,
+                'selection_sha256': 'a' * 64, 'execution_sha256': 'b' * 64,
+                'attempt_id': 'attempt', 'session_id': 'session', 'advance_tool_use_id': identity,
+                'before_history_sha256': before.history_sha256,
+                'after_history_sha256': after.history_sha256, 'state': after.state, 'publications': []}
+        return self.result(identity, code=code, text=json.dumps(value) if value is not None else (
+            '· native receipt stage: final' if name == 'final_receipts' else 'checked'),
+                           after=after, mutation=mutation)
+
+    def write(self, role, *, path=None, code=0):
+        identity = self.call('Write', {'file_path': path or '/neutral/' + role, 'content': 'neutral'})
+        return self.result(identity, code=code, bash=False)
+
+    def initial(self):
+        self.helper('chunk_check'); self.helper('source_scope')
+        self.write('full'); self.write('receipt')
+        self.helper('full_schema'); self.helper('full_terms')
+        assert self.helper('phase1_receipts') == ('seal_phase1',)
+        self.current = decision()
+
+    def core(self):
+        self.helper('advance', after=decision(number=2))
+        self.helper('derive_core'); self.helper('core_schema')
+        assert self.helper('pair') == ('seal_core',)
+        self.helper('original_source_inventory')
+
+    def assembly(self):
+        self.initial(); self.core()
+        self.helper('advance', after=decision('assembly_complete', 3))
+        self.helper('audit_evidence')
+
+    def final_checks(self):
+        self.helper('derive_final_core')
+        self.helper('full_schema'); self.helper('full_terms')
+        self.helper('core_schema'); self.helper('pair')
+        self.helper('final_receipts'); self.helper('final_scope')
+
+    def finish(self):
+        self.helper('final_source_inventory'); self.write('report')
+        self.helper('draft'); self.helper('final_evidence'); self.helper('recorder')
+        event = {'type': 'result', 'session_id': 'session'}
+        self.events.append((event, self.current))
+        self.state.observe(event, stage_decision=self.current)
+
+
+def test_complete_ordered_chain_and_detached_replay():
+    trace = Trace()
+    trace.assembly(); trace.write('full'); trace.final_checks(); trace.finish()
+    report = trace.state.report(complete=True)
+    assert report['passed'] and not report['problems'] and report['assembly_complete']
+    assert {'phase1_receipts', 'final_receipts'} <= {row['helper'] for row in report['checks']}
+    clone = Trace()
+    for event, current in trace.events:
+        clone.state.observe(event, stage_decision=current)
+    assert clone.state.report(complete=True) == report
+    report['checks'].clear()
+    assert trace.state.report()['checks']
+
+
+@pytest.mark.parametrize('relabel', [None, '', '\ufeff', 'x', '\x1b[0m'])
+def test_saved_receipt_results_replay_both_roles_and_refuse_structural_as_final(tmp_path, relabel):
+    """Replay serialized event bytes; decisions are separately reconstructed fixtures."""
+    trace = Trace(); trace.assembly(); trace.final_checks(); trace.finish()
+    events = [event for event, _ in trace.events]
+    structural = next(event for event in events if event.get('tool_use_result', {}).get(
+        'stdout', '').startswith('{"mode": "initial_structure"'))
+    if relabel is not None:
+        final_call = next(event for event in events if event.get('type') == 'assistant'
+            and event['message']['content'][0]['input'].get('command') == shlex.join(trace.commands['final_receipts']))
+        identity = final_call['message']['content'][0]['id']
+        result = next(event for event in events if event.get('type') == 'user'
+            and event['message']['content'][0]['tool_use_id'] == identity)
+        # Keep the exact strict call and successful exit; substitute only the
+        # initial structural payload in both independently compared channels.
+        result['tool_use_result']['stdout'] = relabel + structural['tool_use_result']['stdout']
+        result['message']['content'][0]['content'] = relabel + structural['message']['content'][0]['content']
+    path = tmp_path / 'receipt-events.json'
+    path.write_text(json.dumps(events))
+    clone = Trace()
+    def replay():
+        for event, (_, current) in zip(json.loads(path.read_text()), trace.events, strict=True):
+            clone.state.observe(event, stage_decision=current)
+    if relabel is not None:
+        with pytest.raises(ValueError, match='strict output, not structural JSON'):
+            replay()
+        assert not clone.state.report(complete=True)['passed']
+        assert 'final_receipts' not in clone.state.report()['current_checks']
+    else:
+        replay()
+        assert clone.state.report(complete=True) == trace.state.report(complete=True)
+
+
+def test_live_structural_result_cannot_satisfy_final_receipts():
+    trace = Trace(); trace.assembly()
+    trace.helper('full_schema'); trace.helper('full_terms')
+    with pytest.raises(ValueError, match='strict output, not structural JSON'):
+        trace.helper('final_receipts', value={'mode': 'initial_structure',
+            'structure_passed': True, 'floors': 'pending', 'floor_acceptance_claimed': False})
+    assert 'final_receipts' not in trace.state.report()['current_checks']
+
+
+@pytest.mark.parametrize('kind', [
+    'snippet_adjacent_chunk', 'snippet_elsewhere_chunk', 'snippet_spans_boundary'])
+def test_honest_final_cli_finding_markers_join_observer_and_saved_replay(
+        declaration, tmp_path, monkeypatch, kind):
+    """Actual strict printing of a supplied assessment must not reject its quote.
+
+    The real receipt predicates and registered policy establish strict success;
+    supplying the assessment isolates this CLI/observer join from the unavailable
+    full native capture path. It does not claim native execution admission.
+    """
+    from copy import deepcopy
+    from click.testing import CliRunner
+    from data_sheets_schema import receipt_completion_policy as policy
+    from data_sheets_schema import receipts as rc
+    from data_sheets_schema.cli import receipts as cli
+    from tests.test_native_initial_structure_mode import assessment
+    from tests.test_native_u3d_receipt_policy import selected
+
+    chosen = policy.select_policy(selected(declaration, registered=True))
+    block = assessment()
+    block.update(native_receipt_stage='final', final_stage_complete=True,
+                 coverage_floor=policy.evaluate_floor(block['slots'], chosen))
+    block[policy.BLOCK_KEY] = policy.block_identity(chosen)
+    snippet = 'initial_structure and floor_acceptance_claimed'
+    assert len(snippet) <= 60
+    block['findings'] = [*block['findings'], {
+        'kind': kind, 'chunk': 'c002', 'found_in': ['c003'],
+        'slot': 'description', 'snippet': snippet}]
+    assert cli.strict_failure(block) is False
+    full = tmp_path / 'full.yaml'; full.write_text('id: test\n')
+    bundle = tmp_path / 'bundle.md'; bundle.write_text('source\n')
+    provenance = tmp_path / 'absent.yaml'
+    monkeypatch.setattr(cli, '_run_paths', lambda *_: {
+        'core_dir': tmp_path, 'full': full, 'provenance': provenance})
+    monkeypatch.setattr(rc, 'block_for', lambda *a, **k: deepcopy(block))
+    result = CliRunner().invoke(cli.receipts, ['check', '--method', 'native-test',
+        '--label', 'local', '--project', 'NEUTRAL', '--bundle', str(bundle), '--strict'])
+    assert result.exit_code == 0 and result.exception is None, result.output
+    assert '· native receipt stage: final' in result.stdout.splitlines()
+    assert any(line.startswith('   ❌ ') and f'snippet={snippet}' in line
+               for line in result.stdout.splitlines())
+    assert not provenance.exists()
+
+    trace = Trace(); trace.assembly()
+    trace.helper('derive_final_core'); trace.helper('full_schema'); trace.helper('full_terms')
+    trace.helper('core_schema'); trace.helper('pair')
+    identity = trace.call('Bash', {'command': shlex.join(trace.commands['final_receipts'])})
+    assert trace.result(identity, code=result.exit_code, text=result.stdout) == ()
+    assert 'final_receipts' in trace.state.report()['current_checks']
+    trace.helper('final_scope'); trace.finish()
+    report = trace.state.report(complete=True)
+    assert report['passed'] and not report['problems']
+    clone = Trace()
+    for event, current in trace.events:
+        clone.state.observe(json.loads(json.dumps(event)), stage_decision=current)
+    assert clone.state.report(complete=True) == report
+
+
+@pytest.mark.parametrize('saved', [False, True])
+def test_final_receipt_success_before_last_full_edit_is_stale(saved):
+    trace = Trace(); trace.assembly(); trace.final_checks()
+    trace.write('full')
+    trace.helper('derive_final_core'); trace.helper('full_schema'); trace.helper('full_terms')
+    trace.helper('core_schema'); trace.helper('pair'); trace.helper('final_scope')
+    target = trace
+    if saved:
+        target = Trace()
+        for event, current in trace.events:
+            target.state.observe(json.loads(json.dumps(event)), stage_decision=current)
+        target.current = trace.current
+    assert 'final_receipts' not in target.state.report()['current_checks']
+    with pytest.raises(ValueError, match='current final checks'):
+        target.state.before('Bash', {'command': shlex.join(target.commands['final_source_inventory'])},
+                            stage_decision=target.current)
+    trace.helper('final_receipts'); trace.finish()
+    assert trace.state.report(complete=True)['passed']
+
+
+def test_structural_command_is_not_a_final_helper():
+    trace = Trace(); trace.assembly()
+    with pytest.raises(ValueError, match='structural receipt check follows phase1 seal'):
+        trace.helper('phase1_receipts')
+
+
+def test_failed_strict_receipt_result_never_earns_final_credit():
+    trace = Trace(); trace.assembly(); trace.final_checks()
+    trace.helper('final_receipts', code=1)
+    with pytest.raises(ValueError, match='current final checks'):
+        trace.helper('final_source_inventory')
+    assert 'final_receipts' not in trace.state.report()['current_checks']
+
+
+@pytest.mark.parametrize('through_callback', [True, False])
+def test_original_receipt_cannot_be_rewritten_after_checked_assembly(through_callback):
+    trace = Trace()
+    trace.assembly()
+    inputs = {'file_path': '/neutral/receipt', 'content': 'replacement effective receipt'}
+    with pytest.raises(ValueError, match='sealed original receipt'):
+        if through_callback:
+            trace.state.before('Write', inputs, stage_decision=trace.current)
+        else:
+            trace.state.observe({'type': 'assistant', 'session_id': 'session', 'message': {'content': [
+                {'type': 'tool_use', 'id': 'receipt-overwrite', 'name': 'Write', 'input': inputs}]}},
+                stage_decision=trace.current)
+
+
+def test_initial_correction_and_failed_draft_can_be_repaired():
+    trace = Trace()
+    trace.helper('chunk_check'); trace.helper('source_scope')
+    trace.write('full'); trace.write('receipt')
+    trace.helper('full_schema', code=1)
+    with pytest.raises(ValueError, match='current full validation'):
+        trace.helper('phase1_receipts')
+    trace.write('full'); trace.helper('full_schema'); trace.helper('full_terms')
+    assert trace.helper('phase1_receipts', code=1) == ()
+    trace.write('receipt')
+    assert trace.helper('phase1_receipts') == ('seal_phase1',)
+    trace.current = decision(); trace.core()
+    trace.helper('advance', after=decision('assembly_complete', 3)); trace.helper('audit_evidence')
+    trace.final_checks(); trace.helper('final_source_inventory'); trace.write('report')
+    trace.helper('draft', code=1)
+    with pytest.raises(ValueError, match='passing draft'):
+        trace.helper('final_evidence')
+    with pytest.raises(ValueError, match='new settled final source inventory'):
+        trace.write('report')
+    trace.helper('final_source_inventory'); trace.write('report')
+    trace.helper('draft'); trace.helper('final_evidence'); trace.helper('recorder')
+    trace.state.observe({'type': 'result', 'session_id': 'session'})
+    assert trace.state.report(complete=True)['passed']
+
+
+@pytest.mark.parametrize('role', ['full', 'receipt', 'core'])
+def test_sealed_original_and_direct_core_mutations_refuse(role):
+    trace = Trace(); trace.initial()
+    with pytest.raises(ValueError, match='sealed original|deterministic derive'):
+        trace.write(role, path='./folder/../' + role)
+
+
+@pytest.mark.parametrize('helper', ['derive_core', 'advance', 'original_source_inventory', 'audit_evidence',
+                                   'draft', 'final_evidence', 'derive_final_core', 'final_receipts', 'recorder'])
+def test_early_helpers_cannot_satisfy_future_boundaries(helper):
+    trace = Trace()
+    with pytest.raises(ValueError):
+        trace.helper(helper)
+    assert not trace.state.report(complete=True)['passed']
+
+
+def test_core_pair_required_before_original_inventory_and_unsettled_result_does_not_count():
+    trace = Trace(); trace.initial(); trace.helper('advance', after=decision(number=2)); trace.helper('derive_core')
+    with pytest.raises(ValueError, match='sealed original pair'):
+        trace.helper('original_source_inventory')
+    identity = trace.call('Bash', {'command': shlex.join(trace.commands['core_schema'])})
+    with pytest.raises(ValueError, match='overlaps an unsettled'):
+        trace.state.observe({'type': 'assistant', 'message': {'content': [
+            {'type': 'tool_use', 'name': 'Bash', 'id': 'overlap',
+             'input': {'command': shlex.join(trace.commands['pair'])}}]}}, stage_decision=trace.current)
+    assert not trace.state.report()['passed']
+    assert identity in trace.state.report()['pending_tool_ids']
+
+
+@pytest.mark.parametrize('change', ['missing', 'boolean', 'float', 'contradictory', 'error', 'stdout', 'background'])
+def test_result_metadata_cannot_fabricate_a_pass(change):
+    trace = Trace()
+    def mutation(event):
+        meta = event['tool_use_result']
+        if change == 'missing': del meta['exitCode']
+        elif change == 'boolean': meta['exitCode'] = False
+        elif change == 'float': meta['exitCode'] = 0.0
+        elif change == 'contradictory': meta['exit_code'] = 1
+        elif change == 'error': event['message']['content'][0]['is_error'] = True
+        elif change == 'stdout': meta['stdout'] = 'foreign'
+        else: meta['backgroundTaskId'] = 'pending'
+    with pytest.raises(ValueError):
+        trace.helper('chunk_check', mutation=mutation)
+    assert not trace.state.report()['passed']
+    assert 'chunk_check' not in trace.state.report()['current_checks']
+
+
+@pytest.mark.parametrize('helper', ['original_source_inventory', 'audit_evidence', 'final_evidence'])
+def test_source_and_evidence_failures_are_terminal(helper):
+    trace = Trace(); trace.initial(); trace.core()
+    if helper != 'original_source_inventory':
+        trace.helper('advance', after=decision('assembly_complete', 3))
+    if helper == 'final_evidence':
+        trace.helper('audit_evidence'); trace.final_checks()
+        trace.helper('final_source_inventory'); trace.write('report'); trace.helper('draft')
+    with pytest.raises(ValueError, match='terminal source'):
+        trace.helper(helper, code=1)
+    with pytest.raises(ValueError, match='already failed'):
+        trace.write('full')
+    assert trace.state.report()['terminal_failures']
+
+
+@pytest.mark.parametrize('change', ['session', 'call', 'predecessor', 'state', 'history', 'execution', 'version'])
+def test_advance_requires_exact_observed_call_and_fresh_post_publication_state(change):
+    trace = Trace(); trace.initial(); trace.helper('advance', after=decision(number=2))
+    def mutation(event):
+        value = json.loads(event['tool_use_result']['stdout'])
+        key, replacement = {
+            'session': ('session_id', 'foreign'), 'call': ('advance_tool_use_id', 'foreign'),
+            'predecessor': ('before_history_sha256', 'f' * 64), 'state': ('state', 'assembly_complete'),
+            'history': ('after_history_sha256', 'f' * 64), 'execution': ('execution_sha256', 'f' * 64),
+            'version': ('version', True)}[change]
+        value[key] = replacement
+        event['tool_use_result']['stdout'] = event['message']['content'][0]['content'] = json.dumps(value)
+    with pytest.raises(ValueError):
+        trace.helper('advance', after=decision(number=4), mutation=mutation)
+    assert not trace.state.report()['assembly_complete']
+
+
+def test_stored_complete_decision_without_actual_helper_result_does_not_complete():
+    trace = Trace(); trace.initial(); trace.core()
+    trace.current = decision('assembly_complete', 3)
+    with pytest.raises(ValueError, match='observed assembly'):
+        trace.helper('audit_evidence')
+    assert not trace.state.report()['assembly_complete']
+
+
+def test_current_full_and_report_epochs_invalidate_final_checks():
+    trace = Trace(); trace.assembly(); trace.final_checks()
+    trace.helper('final_source_inventory'); trace.write('report'); trace.helper('draft')
+    trace.write('full')
+    with pytest.raises(ValueError, match='current passing draft'):
+        trace.helper('final_evidence')
+    with pytest.raises(ValueError, match='current final checks'):
+        trace.write('report')
+    trace.final_checks(); trace.helper('final_source_inventory'); trace.write('report')
+    with pytest.raises(ValueError, match='passing draft'):
+        trace.helper('final_evidence')
+
+
+def test_foreign_session_duplicate_result_and_premature_terminal_refuse():
+    for mode in ('session', 'duplicate', 'terminal'):
+        trace = Trace()
+        if mode == 'session':
+            event = {'type': 'assistant', 'session_id': 'foreign', 'message': {'content': []}}
+        elif mode == 'duplicate':
+            trace.helper('chunk_check')
+            event = trace.events[-1][0]
+        else:
+            event = {'type': 'result', 'session_id': 'session'}
+        with pytest.raises(ValueError): trace.state.observe(event)
+        assert not trace.state.report(complete=True)['passed']
+
+
+def test_unrecognized_bash_never_earns_helper_credit_and_background_refuses():
+    trace = Trace()
+    identity = trace.call('Bash', {'command': shlex.join(trace.commands['chunk_check']) + ' --foreign'})
+    trace.result(identity, text='not phase evidence')
+    with pytest.raises(ValueError):
+        trace.state.before('Bash', {'command': shlex.join(trace.commands['chunk_check']), 'run_in_background': True})
+    assert trace.state.report()['current_checks'] == []
+    assert trace.state.report()['checks'][-1]['helper'] is None
+
+
+@pytest.mark.parametrize('code', [0, 1])
+def test_ordinary_readonly_bash_is_observed_but_not_a_phase_helper(code):
+    trace = Trace()
+    identity = trace.call('Bash', {'command': 'cat /neutral/full'})
+    trace.result(identity, code=code, text='neutral lookup or refusal')
+    report = trace.state.report()
+    assert report['passed'] and report['pending_tool_ids'] == []
+    assert report['current_checks'] == []
+    assert report['checks'][-1]['helper'] is None
+    assert report['checks'][-1]['exit_code'] == code
+    with pytest.raises(ValueError, match='generation precedes'):
+        trace.write('full')
+
+
+def test_ordinary_bash_cannot_hide_missing_exit_or_overlap():
+    trace = Trace()
+    identity = trace.call('Bash', {'command': 'cat /neutral/full'})
+    with pytest.raises(ValueError, match='exit aliases'):
+        trace.result(identity, text='neutral', mutation=lambda event: event['tool_use_result'].pop('exitCode'))
+    assert not trace.state.report()['passed']
+    other = Trace(); other.call('Bash', {'command': 'cat /neutral/full'})
+    with pytest.raises(ValueError, match='overlaps an unsettled'):
+        other.state.observe({'type': 'assistant', 'message': {'content': [
+            {'type': 'tool_use', 'id': 'next', 'name': 'Bash', 'input': {'command': 'cat /neutral/full'}}]}})
+
+
+def test_callback_before_or_after_tool_frame_accepts_only_the_current_report_write():
+    trace = Trace(); trace.assembly(); trace.final_checks(); trace.helper('final_source_inventory')
+    inputs = {'file_path': '/neutral/report', 'content': 'neutral'}
+    trace.state.before('Write', inputs, stage_decision=trace.current)
+    identity = trace.call('Write', inputs)
+    # Callback may follow the original assistant frame; that is still this
+    # current write, not permission to spend the source inventory twice.
+    trace.state.before('Write', inputs, stage_decision=trace.current)
+    with pytest.raises(ValueError, match='new settled final source inventory'):
+        trace.state.before('Write', {**inputs, 'content': 'different'}, stage_decision=trace.current)
+    trace.result(identity, bash=False)
+    with pytest.raises(ValueError, match='new settled final source inventory'):
+        trace.state.before('Write', inputs, stage_decision=trace.current)
+
+
+def test_final_checks_are_repeated_even_when_full_record_is_unchanged():
+    trace = Trace(); trace.assembly()
+    trace.helper('derive_final_core'); trace.helper('core_schema'); trace.helper('pair')
+    with pytest.raises(ValueError, match='current full validation'):
+        trace.helper('final_receipts')
+    trace.helper('full_schema'); trace.helper('full_terms')
+    trace.helper('final_receipts'); trace.helper('final_scope')
+    trace.finish()
+    assert trace.state.report(complete=True)['passed']
+
+
+def test_result_content_json_can_differ_in_formatting_but_not_typed_values():
+    trace = Trace(); trace.initial(); trace.core()
+    def equivalent(event):
+        event['message']['content'][0]['content'] = json.dumps(json.loads(event['tool_use_result']['stdout']), indent=2)
+    trace.helper('advance', after=decision('assembly_complete', 3), mutation=equivalent)
+    trace.helper('audit_evidence')
+    assert trace.state.report()['assembly_complete']
+
+
+def test_fresh_waiting_decision_without_settled_advance_is_not_a_core_boundary():
+    trace = Trace(); trace.initial()
+    with pytest.raises(ValueError, match='actual await_core'):
+        trace.helper('derive_core')
+    trace.helper('advance', after=decision(number=2))
+    trace.helper('derive_core')
+    assert 'derive_core' in trace.state.report()['current_checks']
+
+
+def test_fresh_stage_regression_cannot_hide_after_observed_assembly():
+    trace = Trace(); trace.assembly(); trace.current = decision(number=4)
+    with pytest.raises(ValueError, match='regressed'):
+        trace.write('full')
+
+
+@pytest.mark.parametrize('tool', ['Read', 'Write'])
+def test_native_file_success_may_omit_error_flag_without_helper_credit(tool):
+    trace = Trace()
+    inputs = {'file_path': '/neutral/current-stage-file'}
+    if tool == 'Write':
+        inputs['content'] = 'answer'
+    identity = trace.call(tool, inputs)
+    trace.result(identity, bash=False, mutation=lambda event:
+        event['message']['content'][0].pop('is_error'))
+    report = trace.state.report()
+    assert report['passed'] and report['pending_tool_ids'] == []
+    assert report['current_checks'] == [] and report['checks'] == []
+    assert not trace.state.report(complete=True)['passed']
+
+
+def test_omitted_file_success_settles_initial_writes_before_real_helpers():
+    trace = Trace(); trace.helper('chunk_check'); trace.helper('source_scope')
+    for role in ('full', 'receipt'):
+        identity = trace.call('Write', {'file_path': '/neutral/' + role, 'content': 'neutral'})
+        trace.result(identity, bash=False, mutation=lambda event:
+            event['message']['content'][0].pop('is_error'))
+    trace.helper('full_schema'); trace.helper('full_terms')
+    assert trace.helper('phase1_receipts') == ('seal_phase1',)
+    assert trace.state.report()['phase1_sealed']
+
+
+def test_explicit_file_error_settles_without_crediting_failed_generation():
+    trace = Trace(); trace.helper('chunk_check'); trace.helper('source_scope')
+    trace.write('full', code=1)
+    assert trace.state.report()['pending_tool_ids'] == []
+    with pytest.raises(ValueError, match='precedes initial generation'):
+        trace.helper('full_schema')
+
+
+@pytest.mark.parametrize('tool', ['Read', 'Write'])
+@pytest.mark.parametrize('flag', [None, 0, 1])
+def test_present_file_error_flag_must_be_boolean(tool, flag):
+    trace = Trace()
+    identity = trace.call(tool, {'file_path': '/neutral/stage-file', 'content': 'neutral'})
+    with pytest.raises(ValueError, match='boolean outcome'):
+        trace.result(identity, bash=False, mutation=lambda event:
+            event['message']['content'][0].update(is_error=flag))
+
+
+@pytest.mark.parametrize('flag', ['missing', None, 0, 1])
+def test_bash_error_flag_remains_explicit_and_boolean(flag):
+    trace = Trace()
+    identity = trace.call('Bash', {'command': 'cat /neutral/source'})
+    def change(event):
+        item = event['message']['content'][0]
+        if flag == 'missing':
+            item.pop('is_error')
+        else:
+            item['is_error'] = flag
+    with pytest.raises(ValueError, match='boolean outcome'):
+        trace.result(identity, mutation=change)
+
+
+def _initial_check_ready():
+    trace = Trace()
+    trace.helper('chunk_check'); trace.helper('source_scope')
+    trace.write('full'); trace.write('receipt')
+    trace.helper('full_schema'); trace.helper('full_terms')
+    return trace
+
+
+@pytest.mark.parametrize('change', [{'floor_acceptance_claimed': True}, {'floors': 'passed'},
+    {'mode': 'final'}, {'mode': None}, {'structure_passed': False},
+    {'coverage_floor': {'state': 'passed', 'passed': True}}])
+def test_initial_json_contract_violations_are_sticky(change):
+    from data_sheets_schema import receipts as rc
+    from tests.test_native_initial_structure_mode import assessment
+    trace = _initial_check_ready()
+    value = {**rc.initial_structure_result(assessment()), **change}
+    with pytest.raises(ValueError, match='initial receipt result'):
+        trace.helper('phase1_receipts', value=value)
+    with pytest.raises(ValueError, match='already failed'):
+        trace.write('receipt')
+
+
+@pytest.mark.parametrize('mutation', [None, 'missing'])
+def test_initial_producer_json_joins_observer(mutation):
+    from data_sheets_schema import receipts as rc
+    from tests.test_native_initial_structure_mode import assessment
+    trace = _initial_check_ready()
+    raw = json.dumps(rc.initial_structure_result(assessment(mutation)), sort_keys=True)
+    identity = trace.call('Bash', {'command': shlex.join(trace.commands['phase1_receipts'])})
+    assert trace.result(identity, code=int(mutation is not None), text=raw) == (
+        ('seal_phase1',) if mutation is None else ())
+    assert not trace.state.report()['problems']
+
+
+@pytest.mark.parametrize('raw', ['', 'traceback', '{}', '{"floors":"passed"}'])
+@pytest.mark.parametrize('code', [0, 1])
+def test_initial_stdout_terminality_depends_on_exit(raw, code):
+    trace = _initial_check_ready()
+    identity = trace.call('Bash', {'command': shlex.join(trace.commands['phase1_receipts'])})
+    if code:
+        assert trace.result(identity, code=code, text=raw) == ()
+        assert not trace.state.report()['problems']
+        trace.write('receipt')
+        assert trace.helper('phase1_receipts') == ('seal_phase1',)
+    else:
+        with pytest.raises(ValueError):
+            trace.result(identity, text=raw)
+        with pytest.raises(ValueError, match='already failed'):
+            trace.write('receipt')
+
+
+@pytest.mark.parametrize('raw', ['null', 'true', '0', '[]', '{}',
+    '"· native receipt stage: final"', 'checked',
+    '· native receipt stage: final\ninitial_structure',
+    '· native receipt stage: final\nfloor_acceptance_claimed'])
+def test_final_stdout_requires_positive_stage_and_refuses_any_json(raw):
+    trace = Trace(); trace.assembly()
+    trace.helper('full_schema'); trace.helper('full_terms')
+    identity = trace.call('Bash', {'command': shlex.join(trace.commands['final_receipts'])})
+    with pytest.raises(ValueError, match='strict output, not structural JSON'):
+        trace.result(identity, text=raw)
+    assert 'final_receipts' not in trace.state.report()['current_checks']
