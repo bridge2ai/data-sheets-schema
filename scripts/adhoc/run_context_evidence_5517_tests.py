@@ -15,13 +15,14 @@ SCRATCH = ROOT.parent / "scratch-codex-5517"
 LOCK = ROOT.parent / "plans/native_quiet_window.lock"
 assert not LOCK.exists(), "quiet-window lock exists; do not start pytest"
 mode = sys.argv[1]
-assert mode in {"canary", "focused", "literal"}
+assert mode in {"canary", "focused", "literal", "evaluation"}
 label = mode + ("-" + sys.argv[2] if len(sys.argv) > 2 else "")
 assert label.replace("-", "").isalnum()
 selection = {
     "canary": ["tests/test_context_evidence_verbatim.py::test_literal_check_does_not_accept_terms_or_casefolding"],
     "focused": ["tests/test_evaluation_context_files.py", "tests/test_context_evidence_verbatim.py::test_literal_check_does_not_accept_terms_or_casefolding"],
     "literal": ["tests/test_context_evidence_verbatim.py"],
+    "evaluation": ["tests/test_evaluation/test_general_context.py", "tests/test_evaluation/test_semantic_context_scope.py"],
 }[mode]
 env = dict(os.environ, PYTHONPATH=f"{ROOT}/src:{ROOT}", PYTHONDONTWRITEBYTECODE="1", TMPDIR=str(SCRATCH), TMP=str(SCRATCH), TEMP=str(SCRATCH))
 command = [sys.executable, "-m", "pytest", *selection, "-q", "-n", "2", "-p", "no:cacheprovider", "--basetemp", str(SCRATCH / f"pytest-{label}"), "--junitxml", str(SCRATCH / f"{label}.xml")]

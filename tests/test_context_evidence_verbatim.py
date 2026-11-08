@@ -1,58 +1,150 @@
-"""Strict bundle-literal acceptance gate requested by #5517.
+"""D101 exact quotations with cited-chunk provenance; explicit unresolved states.
 
-This deliberately does not accept shared vocabulary as proof of a whole claim.
-Existing narrative contexts need human authoring before this gate can pass.
-Citation and curator-decision metadata are not represented as source quotations.
+Quotation validation is lexical, not an automatic entailment judgment. The two
+needs_owner cases remain visible and counted; they are not skips or accepted
+negative-value proofs. No fuzzy, case-folded or whitespace-normalized matching.
 """
-from pathlib import Path
+from collections import Counter
+from functools import lru_cache
 import hashlib
+import json
+from pathlib import Path
 import re
 
 import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTEXTS = sorted((ROOT / "data/context").glob("*_context.yaml"))
+CONTEXTS = sorted((ROOT / 'data/context').glob('*_context.yaml'))
+PREDICATES = {'human_subjects', 'regulated_access', 'shared_dataset',
+              'data_collection', 'data_processing', 'processing_software', 'ml_training_dataset'}
+NEEDS_OWNER = {('cm4ai_context', 'regulated_access'), ('kids_first_context', 'ml_training_dataset')}
+OWNER_DECISIONS = {
+    ('chorus_context', 'regulated_access'): "[curator_assertion: true; accepted by the owner's human review, D52, 2026-10-27]",
+    ('kids_first_context', 'ml_training_dataset'): "[curator_assertion: true; set to false by the owner's human review, D52, 2026-10-27]",
+}
+
+
+def parse_evidence(evidence):
+    """Closed grammar: optional curator metadata, unresolved metadata, cited JSON strings."""
+    remaining = evidence
+    owner = None
+    if remaining.startswith('[curator_assertion:'):
+        match = re.match(r'\[curator_assertion: true; [^]\n]+\] ', remaining)
+        assert match, 'invalid curator metadata'
+        owner = match[0].rstrip()
+        remaining = remaining[match.end():]
+    state, notes = 'quoted', None
+    decoder = json.JSONDecoder()
+    if remaining.startswith('[needs_owner: true] [search_notes] '):
+        state = 'needs_owner'
+        remaining = remaining[len('[needs_owner: true] [search_notes] '):]
+        notes, end = decoder.raw_decode(remaining)
+        assert isinstance(notes, str) and len(notes.strip()) >= 40, 'substantive search notes required'
+        remaining = remaining[end:].lstrip()
+    quotations = []
+    while remaining:
+        match = re.match(r'\[chunks: (c\d{3}(?:, c\d{3})*)\] ', remaining)
+        assert match, 'uncited text or malformed evidence metadata'
+        ids = match[1].split(', ')
+        remaining = remaining[match.end():]
+        quote, end = decoder.raw_decode(remaining)
+        assert isinstance(quote, str) and quote.strip(), 'nonempty quotation required'
+        quotations.append((ids, quote))
+        remaining = remaining[end:].lstrip()
+    assert quotations, 'at least one cited quotation required, even for needs_owner context'
+    return state, notes, owner, quotations
+
+
+def validate_quotes(evidence, chunks):
+    state, notes, owner, quotations = parse_evidence(evidence)
+    for ids, quote in quotations:
+        assert len(ids) == len(set(ids)), 'duplicate citation'
+        for cid in ids:
+            assert cid in chunks, f'unknown chunk {cid}'
+            assert quote in chunks[cid], f'quotation not verbatim in cited chunk {cid}'
+    return state, notes, owner
+
+
+@lru_cache(maxsize=None)
+def source_chunks(path):
+    # Resolve the actual context declaration, not a silently inferred replacement bundle.
+    match = re.search(r'^# Bundle chunks: (\S+)', path.read_text(), re.M)
+    assert match
+    manifest_path = ROOT / match[1]
+    manifest = yaml.safe_load(manifest_path.read_text())
+    project = path.stem.removesuffix('_context')
+    if project == 'kids_first':
+        assert match[1] == 'notes/matched_cborg_2026-09-13/kids_first/chunks.yaml'
+        directory = manifest_path.parent
+    else:
+        source_manifest = yaml.safe_load((ROOT / 'data/preprocessed/source_manifest.yaml').read_text())
+        assert project.upper() in source_manifest['projects']
+        assert match[1] == f'data/preprocessed/chunks/{project.upper()}_chunks.yaml'
+        directory = ROOT / 'data/preprocessed/concatenated'
+    raw = (directory / manifest['bundle']).read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == manifest['bundle_sha256']
+    lines = raw.splitlines(keepends=True)
+    chunks = {}
+    for chunk in manifest['chunks']:
+        first, last = chunk['lines']
+        chunk_raw = b''.join(lines[first - 1:last])
+        assert hashlib.sha256(chunk_raw).hexdigest() == chunk['sha256']
+        chunks[chunk['id']] = chunk_raw.decode('utf-8')
+    return chunks
 
 
 def test_context_inventory_is_not_empty_or_partial():
     assert {path.stem for path in CONTEXTS} == {
-        "ai_readi_context", "chorus_context", "cm4ai_context", "kids_first_context",
-        "voice_context", "voice_pediatric_context",
+        'ai_readi_context', 'chorus_context', 'cm4ai_context', 'kids_first_context',
+        'voice_context', 'voice_pediatric_context',
     }
-
-
-def evidence_body(evidence):
-    return re.sub(r"^(?:\[(?:chunks:|curator_assertion:)[^]]+\]\s*)+", "", evidence)
+    counts = Counter()
+    unresolved = set()
+    for path in CONTEXTS:
+        context = yaml.safe_load(path.read_text())
+        assert set(context) == PREDICATES
+        for pred, entry in context.items():
+            state, _, _ = validate_quotes(entry['evidence'], source_chunks(path))
+            counts[state] += 1
+            if state == 'needs_owner':
+                unresolved.add((path.stem, pred))
+    assert unresolved == NEEDS_OWNER
+    assert counts == {'quoted': 40, 'needs_owner': 2}
+    assert sum(counts.values()) == 42
 
 
 def test_literal_check_does_not_accept_terms_or_casefolding():
-    bundle = "The resultant bam is de-dupped and base score recalibrated."
-    assert evidence_body("[chunks: c006] " + bundle) in bundle
-    assert evidence_body("[chunks: c006] GATK Base Quality Score Recalibration") not in bundle
-    assert evidence_body("[chunks: c006] " + bundle.upper()) not in bundle
-    assert evidence_body("[chunks: c006] " + bundle + " HMB") not in bundle
+    quote = 'The resultant bam is de-dupped and base score recalibrated.'
+    chunks = {'c006': quote, 'c007': 'Another document.'}
+    evidence = '[chunks: c006] ' + json.dumps(quote)
+    assert validate_quotes(evidence, chunks)[0] == 'quoted'
+    for changed in ('GATK Base Quality Score Recalibration', quote.upper(), quote + ' HMB', quote.replace(' ', '  ')):
+        with pytest.raises(AssertionError, match='not verbatim'):
+            validate_quotes('[chunks: c006] ' + json.dumps(changed), chunks)
+    for bad in (evidence.replace('c006', 'c007'), evidence.replace('c006', 'c999'),
+                evidence + ' fabricated extension', '[chunks: c006] ""',
+                '[needs_owner: true] ' + evidence,
+                '[needs_owner: true] [search_notes] "" ' + evidence,
+                '[needs_owner: true] [search_notes] "' + 'x' * 50 + '"'):
+        with pytest.raises(AssertionError):
+            validate_quotes(bad, chunks)
+    # Unresolved entries cannot hide fabricated quoted text either.
+    with pytest.raises(AssertionError, match='not verbatim'):
+        validate_quotes('[needs_owner: true] [search_notes] "' + 'x' * 50 + '" [chunks: c006] "invented"', chunks)
 
 
 @pytest.mark.corpus
-@pytest.mark.parametrize("path", CONTEXTS, ids=lambda p: p.stem)
-def test_every_evidence_string_occurs_verbatim_in_its_bundle(path):
-    project = path.stem.removesuffix("_context")
-    if project == "kids_first":
-        manifest_path = ROOT / "notes/matched_cborg_2026-09-13/kids_first/chunks.yaml"
-        bundle_directory = manifest_path.parent
-    else:
-        source_manifest = yaml.safe_load((ROOT / "data/preprocessed/source_manifest.yaml").read_text())
-        assert project.upper() in source_manifest["projects"]
-        manifest_path = ROOT / f"data/preprocessed/chunks/{project.upper()}_chunks.yaml"
-        bundle_directory = ROOT / "data/preprocessed/concatenated"
-    manifest = yaml.safe_load(manifest_path.read_text())
-    bundle_path = bundle_directory / manifest["bundle"]
-    assert hashlib.sha256(bundle_path.read_bytes()).hexdigest() == manifest["bundle_sha256"]
-    bundle = bundle_path.read_text()
-    context = yaml.safe_load(path.read_text())
-    assert set(context) == {"human_subjects", "regulated_access", "shared_dataset",
-                            "data_collection", "data_processing", "processing_software", "ml_training_dataset"}
-    unmatched = [predicate for predicate, entry in context.items()
-                 if not evidence_body(entry["evidence"]) or evidence_body(entry["evidence"]) not in bundle]
-    assert not unmatched, f"{path.name}: needs human authoring of literal evidence: {unmatched}"
+@pytest.mark.parametrize('path,predicate', [(p, pred) for p in CONTEXTS for pred in sorted(PREDICATES)],
+                         ids=[f'{p.stem}-{pred}' for p in CONTEXTS for pred in sorted(PREDICATES)])
+def test_every_evidence_string_occurs_verbatim_in_its_bundle(path, predicate):
+    entry = yaml.safe_load(path.read_text())[predicate]
+    state, notes, owner = validate_quotes(entry['evidence'], source_chunks(path))
+    key = (path.stem, predicate)
+    assert state == ('needs_owner' if key in NEEDS_OWNER else 'quoted')
+    assert owner == OWNER_DECISIONS.get(key)
+    if state == 'needs_owner':
+        assert notes and 'D52 value retained.' in notes
+    # Explicitly retain every applicability decision, including the D52 negatives.
+    expected = key in {('cm4ai_context', 'human_subjects'), *NEEDS_OWNER}
+    assert entry['value'] is (not expected)
