@@ -11862,6 +11862,15 @@ def _early_axis_refusal(tree: ast.Module) -> dict:
     return {'field': field, 'api_value': 0, 'renderer': renderer, 'line': guard.lineno}
 
 
+def _without_docstring(body):
+    """Ignore only Python's leading literal docstring, never executable work."""
+    if (body and isinstance(body[0], ast.Expr)
+            and isinstance(body[0].value, ast.Constant)
+            and type(body[0].value.value) is str):
+        return body[1:]
+    return body
+
+
 def derive_native_shared_route(root: Path, tree: ast.Module) -> dict | None:
     """Source proof of a separate native render selector, not launch approval.
 
@@ -11925,7 +11934,8 @@ def derive_native_shared_route(root: Path, tree: ast.Module) -> dict | None:
     def shape(nodes):
         return dump(RaisingShape().visit(ast.parse('\n'.join(ast.unparse(n) for n in nodes))))
     companions = ('native_source_attribution_version', 'shared_generation_version',
-                  'api_playbook_version', 'receipt_completion_version', 'removal_repair_version')
+                  'api_playbook_version', 'receipt_completion_version', 'removal_repair_version',
+                  'bounded_carry_version')
     prefix = ast.parse(f'''version = getattr(spec, {field!r}, 0)
 registration = getattr(spec, 'native_shared_generation_registration', None)
 if type(version) is not int or version not in (0, 1):
@@ -11943,7 +11953,8 @@ for key in {companions!r}:
     if type(getattr(spec, key)) is not int or getattr(spec, key) != 0:
         raise ValueError()
 ''').body
-    if shape(fn.body[:len(prefix)]) != shape(prefix):
+    validator_body = _without_docstring(fn.body)
+    if shape(validator_body[:len(prefix)]) != shape(prefix):
         raise fail('unsupported delegated admission prefix')
     if any((isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))
             and ast.unparse(n.value) == 'spec') or isinstance(n, ast.Name) and n.id == 'spec'
@@ -11974,6 +11985,24 @@ for key in {companions!r}:
         caller = _function(tree, name)
         body = caller.body if caller else []
         if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) and type(body[0].value.value) is str:
+            body = body[1:]
+        # D76 precedes phase assembly on M7. Accept only its exact same-spec
+        # guard call and a unique, unshadowed local definition, as a structural
+        # guard contract (not a general purity claim about called Python).
+        if name == 'build_phase':
+            invariant = '_require_registered_input_spellings'
+            expected_invariant = ast.parse(invariant + '(spec)').body[0]
+            definitions = [n for n in tree.body if isinstance(n, ast.FunctionDef)
+                           and n.name == invariant]
+            if (not body or dump(body[0]) != dump(expected_invariant)
+                    or len(definitions) != 1 or definitions[0].decorator_list
+                    or _params(definitions[0]) != ['spec']
+                    or any(_rebinding(n, invariant, caller)
+                           or isinstance(n, ast.Name) and n.id == invariant
+                           and isinstance(n.ctx, (ast.Store, ast.Del))
+                           for n in ast.walk(tree) if n is not definitions[0])):
+                raise fail('phase input invariant is not an exact bound guard')
+            evidence.append(f'{RUNNER}:{body[0].lineno}')
             body = body[1:]
         guard = body[0] if body else None
         if not isinstance(guard, ast.If) or dump(guard.test) != dump(guard_test) or guard.orelse:
@@ -13571,7 +13600,7 @@ def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
                     for n in ast.walk(native_tree)):
                 raise fail('native selector builtin identity is shadowed')
         native_axis = 'native_shared_generation_version'
-        prefix = native_fn.body[:6]
+        prefix = _without_docstring(native_fn.body)[:6]
         if (_params(native_fn) != ['spec'] or len(prefix) != 6
                 or not same(prefix[0], f'version = getattr(spec, {native_axis!r}, 0)')
                 or not same(prefix[1], 'registration = getattr(spec, "native_shared_generation_registration", None)')

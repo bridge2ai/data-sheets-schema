@@ -1,0 +1,27 @@
+--- a/src/download/prompts/canonical_hashes.yaml
++++ b/src/download/prompts/canonical_hashes.yaml
+@@ -556,6 +556,24 @@
+     reason: Bind evidence_protocol_v7.md in shared_generation_v1 ASSET_HASHES and canonical_hashes.yaml
+       (A14 R2 F1).
+     sha256: 72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6
++  src/download/prompts/native_shared_generation_v1.md:
++    body_sha256: c228c5c65d38b543ac4e731b6fe0425b7aa54991f27b400cdeb76cce940882d5
++    bytes: 4084
++    pinned_at_commit: 41b7169f6296c69201fc46389082c441e7d7165c
++    pinned_blob_path: src/download/prompts/native_shared_generation_v1.md
++    pinned_in_repository: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/pins-41b7169f6
++    pinned_on: '2026-11-05'
++    reason: Native U1 shared-v1 declared-difference asset (#4354); no API asset rotation.
++    sha256: ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c
++  src/download/prompts/native_shared_receipt_policy_v1.md:
++    body_sha256: a2a3247204b5ec0b019bbfb6574aedeb32c296a61da41d7090bca2f749645476
++    bytes: 2336
++    pinned_at_commit: 41b7169f6296c69201fc46389082c441e7d7165c
++    pinned_blob_path: src/download/prompts/native_shared_receipt_policy_v1.md
++    pinned_in_repository: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/pins-41b7169f6
++    pinned_on: '2026-11-05'
++    reason: Native U1 shared-v1 declared-difference asset (#4354); no API asset rotation.
++    sha256: de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a
+   src/download/prompts/native_source_attribution_v1.md:
+     body_sha256: 88bd24829813e0970b1a95ee85f9e86495b8898ff4c7efc39042abf21e63932a
+     bytes: 2047

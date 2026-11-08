@@ -1,0 +1,2319 @@
+{
+  "created_utc": "2026-11-06T10:42:01.145506+00:00",
+  "identities": {
+    "overlays": {
+      ".claude/skills/d4d-generation-specificity-audit/scan.py": "cb1dd50be9763f44937af8ca9512a6096e65ac0f99de3174f3a8ed7df10b9370",
+      "src/data_sheets_schema/native_shared_render.py": "f39b4597472cb7601502680f0ddeb112ecd905d8f65cbdb65cfa5fe28aa44731",
+      "tests/test_audit_recall_leak_rendered.py": "1310c43f2c596f8ffcdc3a8857b4fb28d8b84d309d4b6711065e217d1c0e14ea",
+      "tests/test_bc1_selection.py": "caf5c6cdcc924dac0df4c5313a7a02def84dcbf823d59f1da2c4a8ae37a0508b",
+      "tests/test_generation_specificity_delegated.py": "f968c81cd53589365487a4081f66b69a759af384fabd8b0444e57fdf69e81758",
+      "tests/test_wave7_5213_d76_round2_binding.py": "d7b9d720ca26803bddaccb74efca0c34859753cd32e3567af7c086b785e0aefe",
+      "tests/test_wave7_5213_d76_legacy_registration.py": "3574963725751fb5728688e227874185ae7b1f65ef0104dbe1207ad76f855473",
+      "tests/test_native_u1_scanner_contracts.py": "0342167f09204e58abeb9dd3ccfec5bc5d98d5393164f1b4350bacc055ceaeb9"
+    },
+    "protected": {
+      "src/data_sheets_schema/shared_generation.py": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",
+      "src/download/prompts/canonical_hashes.yaml": "39b93c009457681a1d8d8b8afee5a869bbd6f5e70b6f4332522db5d7e22d0584",
+      "tests/utils/run_spec_boundaries.py": "a379e93a0065dc927835b1417cabcb926e33eeb333416c768237bc50d2dc6237",
+      "tests/utils/run_spec_boundary_contracts.json": "a7f96a253a37e994f0c62c7d9b2ab21b0a94d4f342975f84103cd274ef11af72"
+    },
+    "packets": {
+      "shared_generation": "2ec18e60316423035f88a2a30263c56385bfbbc587303e84e805a8349ab4f781",
+      "api_runner_companion": "3e8b7e5d3cc13c5ebc508e33f865e9ac484056fde16126118719d740656a4fb7",
+      "canonical_hashes": "9efd980d77415a6a33f26928f01ff787855dfc1654356a96e5e76560b200fb99",
+      "run_spec_boundary_contracts": "b1e0cbd14c533a51b88eacb84b974cb93963e18d8f1fb71ae4ed3228f784d1ce"
+    },
+    "executable_ast": {
+      "path": "src/data_sheets_schema/native_shared_render.py",
+      "before_sha256": "72bb6aa74ff4822b0ab0acc5bac5913a1fb0ac56f68a4f6c3516dd926ce74591",
+      "after_sha256": "f39b4597472cb7601502680f0ddeb112ecd905d8f65cbdb65cfa5fe28aa44731",
+      "executable_ast_equal": true,
+      "executable_ast_sha256": "6d7f2cd32776a76b744c4fe52ce59daab685f2551514849e46cfca9f7bc01f92",
+      "functions": [
+        "validate_spec",
+        "bind_selection",
+        "metadata",
+        "restore",
+        "commands",
+        "instruction"
+      ]
+    }
+  },
+  "batches": [
+    {
+      "batch": 1,
+      "files": [
+        "tests/test_api_batch_cost.py",
+        "tests/test_api_dollar_readout.py",
+        "tests/test_api_header_instructions.py",
+        "tests/test_api_latch_guard.py",
+        "tests/test_api_launcher.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "190",
+          "time": "26.014",
+          "timestamp": "2026-11-05T22:37:53.701113",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 2,
+      "files": [
+        "tests/test_api_playbook_context.py",
+        "tests/test_bc1_api_rendering.py",
+        "tests/test_bc1_audit.py",
+        "tests/test_bc1_catalog_fixture.py",
+        "tests/test_bc1_codec.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "92",
+          "time": "27.241",
+          "timestamp": "2026-11-05T22:38:20.389979",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 3,
+      "files": [
+        "tests/test_bc1_context.py",
+        "tests/test_bc1_derivation_cache.py",
+        "tests/test_bc1_g2_integration.py",
+        "tests/test_bc1_g2_journal.py",
+        "tests/test_bc1_g2_round2.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "89",
+          "time": "542.668",
+          "timestamp": "2026-11-05T22:38:48.336320",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 4,
+      "files": [
+        "tests/test_bc1_generality.py",
+        "tests/test_bc1_pipeline.py",
+        "tests/test_bc1_planline_cli.py",
+        "tests/test_bc1_registration.py",
+        "tests/test_bc1_resources.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "1",
+          "tests": "43",
+          "time": "126.538",
+          "timestamp": "2026-11-05T22:47:51.543573",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 5,
+      "files": [
+        "tests/test_bc1_runtime.py",
+        "tests/test_bc1_selection.py",
+        "tests/test_bc1_specificity.py",
+        "tests/test_download/test_api_runner.py",
+        "tests/test_imported_schema_snapshot.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "227",
+          "time": "1762.141",
+          "timestamp": "2026-11-05T22:49:59.153787",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 6,
+      "files": [
+        "tests/test_renderer_contract_captures.py",
+        "tests/test_schema_snapshot_cache.py",
+        "tests/test_schema_snapshot_compatibility.py",
+        "tests/test_shared_generation_assets.py",
+        "tests/test_shared_generation_batch_authority.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "149",
+          "time": "77.059",
+          "timestamp": "2026-11-05T23:19:21.879569",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 7,
+      "files": [
+        "tests/test_shared_generation_capture.py",
+        "tests/test_shared_generation_cli.py",
+        "tests/test_shared_generation_completed_replay.py",
+        "tests/test_shared_generation_condition_compatibility.py",
+        "tests/test_shared_generation_provenance.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "144",
+          "time": "52.198",
+          "timestamp": "2026-11-05T23:20:39.543541",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 8,
+      "files": [
+        "tests/test_shared_generation_resources.py",
+        "tests/test_shared_generation_runtime.py",
+        "tests/test_shared_generation_scope_context.py",
+        "tests/test_shared_generation_selection.py",
+        "tests/test_source_heading_authority.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "completion_basis": "fresh individual-file retries; original failed/interrupted attempt retained and superseded",
+      "retry_logs": [
+        "r3-retry-batch-08-file-01-attempt-01.log",
+        "r3-retry-batch-08-file-02-attempt-01.log",
+        "r3-retry-batch-08-file-03-attempt-01.log",
+        "r3-retry-batch-08-file-04-attempt-01.log",
+        "r3-retry-batch-08-file-05-attempt-01.log"
+      ],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "47",
+          "time": "55.605",
+          "timestamp": "2026-11-06T00:36:07.976573",
+          "hostname": "marcins-MacBook-Pro.local"
+        },
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "10",
+          "time": "645.605",
+          "timestamp": "2026-11-06T00:37:03.953092",
+          "hostname": "marcins-MacBook-Pro.local"
+        },
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "13",
+          "time": "234.852",
+          "timestamp": "2026-11-06T00:47:49.984134",
+          "hostname": "marcins-MacBook-Pro.local"
+        },
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "39",
+          "time": "15.764",
+          "timestamp": "2026-11-06T00:51:45.261762",
+          "hostname": "marcins-MacBook-Pro.local"
+        },
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "4",
+          "time": "3.972",
+          "timestamp": "2026-11-06T00:52:01.445038",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 9,
+      "files": [
+        "tests/test_source_heading_completed.py",
+        "tests/test_source_heading_output_layout.py",
+        "tests/test_source_heading_routing.py",
+        "tests/test_source_heading_runtime.py",
+        "tests/test_source_heading_runtime_api.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "completion_basis": "fresh individual-file retries; original failed/interrupted attempt retained and superseded",
+      "retry_logs": [
+        "r3-retry-batch-09-file-01-attempt-01.log",
+        "r3-retry-batch-09-file-02-attempt-01.log",
+        "r3-retry-batch-09-file-02-attempt-02.log",
+        "r3-retry-batch-09-file-02-attempt-03.log",
+        "r3-retry-batch-09-file-03-attempt-01.log",
+        "r3-retry-batch-09-file-04-attempt-01.log",
+        "r3-retry-batch-09-file-05-attempt-01.log"
+      ],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "11",
+          "time": "9.194",
+          "timestamp": "2026-11-06T00:52:05.832288",
+          "hostname": "marcins-MacBook-Pro.local"
+        },
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "10",
+          "time": "99.208",
+          "timestamp": "2026-11-06T02:01:33.984620",
+          "hostname": "marcins-MacBook-Pro.local"
+        },
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "66",
+          "time": "13.365",
+          "timestamp": "2026-11-06T02:03:13.675500",
+          "hostname": "marcins-MacBook-Pro.local"
+        },
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "15",
+          "time": "70.749",
+          "timestamp": "2026-11-06T02:03:27.465940",
+          "hostname": "marcins-MacBook-Pro.local"
+        },
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "18",
+          "time": "1739.925",
+          "timestamp": "2026-11-06T02:04:38.660619",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 10,
+      "files": [
+        "tests/test_wave7_5213_d76_arm_paths.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "18",
+          "time": "0.421",
+          "timestamp": "2026-11-06T00:02:06.048238",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 11,
+      "files": [
+        "tests/test_wave7_5213_d76_binding_records.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "3",
+          "time": "4.232",
+          "timestamp": "2026-11-06T00:02:06.821885",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 12,
+      "files": [
+        "tests/test_wave7_5213_d76_integration_ordering.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "81",
+          "time": "45.504",
+          "timestamp": "2026-11-06T00:02:11.380482",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 13,
+      "files": [
+        "tests/test_wave7_5213_d76_legacy_registration.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "completion_basis": "fresh individual-file retries; original failed/interrupted attempt retained and superseded",
+      "retry_logs": [
+        "r3-retry-batch-13-file-01-attempt-01.log"
+      ],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "13",
+          "time": "1.321",
+          "timestamp": "2026-11-06T02:33:39.155171",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 14,
+      "files": [
+        "tests/test_wave7_5213_d76_recorder.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "23",
+          "time": "17.250",
+          "timestamp": "2026-11-06T00:02:58.787168",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 15,
+      "files": [
+        "tests/test_wave7_5213_d76_registration.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "13",
+          "time": "1522.060",
+          "timestamp": "2026-11-06T00:03:16.413375",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 16,
+      "files": [
+        "tests/test_wave7_5213_d76_relative_registration.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "13",
+          "time": "31.548",
+          "timestamp": "2026-11-06T00:28:39.082535",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 17,
+      "files": [
+        "tests/test_wave7_5213_d76_round2_binding.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "47",
+          "time": "166.364",
+          "timestamp": "2026-11-06T00:29:11.048978",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 18,
+      "files": [
+        "tests/test_wave7_5213_d76_round2_recorder.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "10",
+          "time": "15.496",
+          "timestamp": "2026-11-06T00:31:57.906377",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 19,
+      "files": [
+        "tests/test_wave7_5213_d76_round3_binding.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "42",
+          "time": "124.283",
+          "timestamp": "2026-11-06T00:32:13.843369",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 20,
+      "files": [
+        "tests/test_wave7_5213_d76_round3_copy_origin.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "25",
+          "time": "14.096",
+          "timestamp": "2026-11-06T00:34:18.567523",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 21,
+      "files": [
+        "tests/test_wave7_5213_d76_round3_recorder.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "9",
+          "time": "12.605",
+          "timestamp": "2026-11-06T00:34:33.076060",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 22,
+      "files": [
+        "tests/test_wave7_5213_d76_round3_replay_flag.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "6",
+          "time": "6.617",
+          "timestamp": "2026-11-06T00:34:46.087870",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 23,
+      "files": [
+        "tests/test_wave7_5213_d76_round4_boundaries.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "11",
+          "time": "4.965",
+          "timestamp": "2026-11-06T00:34:53.072485",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 24,
+      "files": [
+        "tests/test_wave7_5213_d76_round4_inventory.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "28",
+          "time": "7.869",
+          "timestamp": "2026-11-06T00:34:58.390291",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 25,
+      "files": [
+        "tests/test_wave7_5213_d76_round4_recorder.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "7",
+          "time": "15.256",
+          "timestamp": "2026-11-06T00:35:06.703530",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 26,
+      "files": [
+        "tests/test_wave7_5213_nf3.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "3",
+          "time": "3.702",
+          "timestamp": "2026-11-06T00:35:22.347294",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 27,
+      "files": [
+        "tests/test_wave7_5213_nf3_backfill.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "13",
+          "time": "1.931",
+          "timestamp": "2026-11-06T00:35:26.462364",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 28,
+      "files": [
+        "tests/test_wave7_5213_path_identity.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "6",
+          "time": "1.326",
+          "timestamp": "2026-11-06T00:35:28.790949",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 29,
+      "files": [
+        "tests/test_wave7_bc1_d63_calibration.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "31",
+          "time": "3.322",
+          "timestamp": "2026-11-06T00:35:30.491193",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    },
+    {
+      "batch": 30,
+      "files": [
+        "tests/test_wave7_bc1_formatter_cache.py"
+      ],
+      "completed_xml": true,
+      "failures": [],
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "1",
+          "time": "0.953",
+          "timestamp": "2026-11-06T00:35:34.236653",
+          "hostname": "marcins-MacBook-Pro.local"
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "log": "r3-batch-01.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=26.53",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_api_batch_cost.py",
+          "tests/test_api_dollar_readout.py",
+          "tests/test_api_header_instructions.py",
+          "tests/test_api_latch_guard.py",
+          "tests/test_api_launcher.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-01.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793947073.3594291
+      },
+      "summary": "190 passed, 14 warnings in 26.10s"
+    },
+    {
+      "log": "r3-batch-02.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=27.89",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_api_playbook_context.py",
+          "tests/test_bc1_api_rendering.py",
+          "tests/test_bc1_audit.py",
+          "tests/test_bc1_catalog_fixture.py",
+          "tests/test_bc1_codec.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-02.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793947099.895148
+      },
+      "summary": "92 passed, 14 warnings in 27.32s"
+    },
+    {
+      "log": "r3-batch-03.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=543.35",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_bc1_context.py",
+          "tests/test_bc1_derivation_cache.py",
+          "tests/test_bc1_g2_integration.py",
+          "tests/test_bc1_g2_journal.py",
+          "tests/test_bc1_g2_round2.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-03.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793947127.7930949
+      },
+      "summary": "89 passed, 14 warnings in 542.74s (0:09:02)"
+    },
+    {
+      "log": "r3-batch-04.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=127.35",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_bc1_generality.py",
+          "tests/test_bc1_pipeline.py",
+          "tests/test_bc1_planline_cli.py",
+          "tests/test_bc1_registration.py",
+          "tests/test_bc1_resources.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-04.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793947671.144811
+      },
+      "summary": "42 passed, 1 xfailed, 2 warnings in 126.67s (0:02:06)"
+    },
+    {
+      "log": "r3-batch-05.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=1762.93",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_bc1_runtime.py",
+          "tests/test_bc1_selection.py",
+          "tests/test_bc1_specificity.py",
+          "tests/test_download/test_api_runner.py",
+          "tests/test_imported_schema_snapshot.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-05.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793947798.5003111
+      },
+      "summary": "227 passed, 26 warnings in 1762.20s (0:29:22)"
+    },
+    {
+      "log": "r3-batch-06.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=77.70",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_renderer_contract_captures.py",
+          "tests/test_schema_snapshot_cache.py",
+          "tests/test_schema_snapshot_compatibility.py",
+          "tests/test_shared_generation_assets.py",
+          "tests/test_shared_generation_batch_authority.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-06.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793949561.437112
+      },
+      "summary": "149 passed, 14 warnings in 77.13s (0:01:17)"
+    },
+    {
+      "log": "r3-batch-07.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=52.72",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_shared_generation_capture.py",
+          "tests/test_shared_generation_cli.py",
+          "tests/test_shared_generation_completed_replay.py",
+          "tests/test_shared_generation_condition_compatibility.py",
+          "tests/test_shared_generation_provenance.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-07.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793949639.140809
+      },
+      "summary": "144 passed, 26 warnings in 52.23s"
+    },
+    {
+      "log": "r3-batch-08.log",
+      "exit": "U1_CHECK_EXIT=-15; reason=quiet-window interruption; elapsed=840.05",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_shared_generation_resources.py",
+          "tests/test_shared_generation_runtime.py",
+          "tests/test_shared_generation_scope_context.py",
+          "tests/test_shared_generation_selection.py",
+          "tests/test_source_heading_authority.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-08.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793949691.866366
+      },
+      "summary": null
+    },
+    {
+      "log": "r3-batch-09.log",
+      "exit": "U1_CHECK_EXIT=-15; reason=quiet-window interruption; elapsed=240.02",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_source_heading_completed.py",
+          "tests/test_source_heading_output_layout.py",
+          "tests/test_source_heading_routing.py",
+          "tests/test_source_heading_runtime.py",
+          "tests/test_source_heading_runtime_api.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-09.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793951191.9636
+      },
+      "summary": null
+    },
+    {
+      "log": "r3-batch-10.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=0.76",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_arm_paths.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-10.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793952125.778322
+      },
+      "summary": "18 passed in 0.45s"
+    },
+    {
+      "log": "r3-batch-11.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=4.57",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_binding_records.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-11.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793952126.545855
+      },
+      "summary": "3 passed, 2 warnings in 4.26s"
+    },
+    {
+      "log": "r3-batch-12.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=45.88",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_integration_ordering.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-12.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793952131.116723
+      },
+      "summary": "81 passed, 2 warnings in 45.54s"
+    },
+    {
+      "log": "r3-batch-13.log",
+      "exit": "U1_CHECK_EXIT=1; reason=None; elapsed=1.51",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_legacy_registration.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-13.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793952177.0031612
+      },
+      "summary": "1 failed, 12 passed, 2 warnings in 1.17s"
+    },
+    {
+      "log": "r3-batch-14.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=17.61",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_recorder.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-14.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793952178.515174
+      },
+      "summary": "23 passed, 26 warnings in 17.28s"
+    },
+    {
+      "log": "r3-batch-15.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=1522.49",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_registration.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-15.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793952196.1256928
+      },
+      "summary": "13 passed, 2 warnings in 1522.09s (0:25:22)"
+    },
+    {
+      "log": "r3-batch-16.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=32.11",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_relative_registration.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-16.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793953718.628074
+      },
+      "summary": "13 passed, 2 warnings in 31.58s"
+    },
+    {
+      "log": "r3-batch-17.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=166.80",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_round2_binding.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-17.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793953750.742166
+      },
+      "summary": "47 passed, 2 warnings in 166.42s (0:02:46)"
+    },
+    {
+      "log": "r3-batch-18.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=15.99",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_round2_recorder.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-18.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793953917.5460842
+      },
+      "summary": "10 passed, 26 warnings in 15.53s"
+    },
+    {
+      "log": "r3-batch-19.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=124.69",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_round3_binding.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-19.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793953933.543139
+      },
+      "summary": "42 passed, 2 warnings in 124.31s (0:02:04)"
+    },
+    {
+      "log": "r3-batch-20.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=14.51",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_round3_copy_origin.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-20.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954058.2412648
+      },
+      "summary": "25 passed, 2 warnings in 14.12s"
+    },
+    {
+      "log": "r3-batch-21.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=13.05",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_round3_recorder.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-21.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954072.755229
+      },
+      "summary": "9 passed, 26 warnings in 12.63s"
+    },
+    {
+      "log": "r3-batch-22.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=6.99",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_round3_replay_flag.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-22.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954085.802548
+      },
+      "summary": "6 passed, 2 warnings in 6.64s"
+    },
+    {
+      "log": "r3-batch-23.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=5.33",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_round4_boundaries.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-23.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954092.7940218
+      },
+      "summary": "11 passed, 2 warnings in 4.99s"
+    },
+    {
+      "log": "r3-batch-24.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=8.22",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_round4_inventory.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-24.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954098.121898
+      },
+      "summary": "28 passed, 2 warnings in 7.90s"
+    },
+    {
+      "log": "r3-batch-25.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=15.72",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_round4_recorder.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-25.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954106.347691
+      },
+      "summary": "7 passed, 26 warnings in 15.28s"
+    },
+    {
+      "log": "r3-batch-26.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=4.06",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_nf3.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-26.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954122.0672839
+      },
+      "summary": "3 passed, 2 warnings in 3.74s"
+    },
+    {
+      "log": "r3-batch-27.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=2.37",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_nf3_backfill.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-27.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954126.134511
+      },
+      "summary": "13 passed, 14 warnings in 1.96s"
+    },
+    {
+      "log": "r3-batch-28.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=1.70",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_path_identity.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-28.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954128.509207
+      },
+      "summary": "6 passed, 2 warnings in 1.35s"
+    },
+    {
+      "log": "r3-batch-29.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=3.71",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_bc1_d63_calibration.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-29.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954130.214983
+      },
+      "summary": "31 passed, 2 warnings in 3.36s"
+    },
+    {
+      "log": "r3-batch-30.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=1.37",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_bc1_formatter_cache.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-30.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954133.9270551
+      },
+      "summary": "1 passed, 2 warnings in 0.98s"
+    },
+    {
+      "log": "r3-batch-canary.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=1.84",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_native_shared_render.py::test_native_instruction_roundtrip_uses_only_sole_runtime",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-batch-canary.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793947071.514029
+      },
+      "summary": "1 passed, 2 warnings in 1.19s"
+    },
+    {
+      "log": "r3-canary.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=60.01",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_native_shared_render.py::test_native_instruction_roundtrip_uses_only_sole_runtime",
+          "-n",
+          "2",
+          "-q",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793945813.060558
+      },
+      "summary": "1 passed, 2 warnings in 1.31s"
+    },
+    {
+      "log": "r3-collection.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=25.97",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests",
+          "--collect-only",
+          "-q",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793961678.759875
+      },
+      "summary": "23206 tests collected in 24.65s"
+    },
+    {
+      "log": "r3-inventory.log",
+      "exit": "U1_CHECK_EXIT=1; reason=None; elapsed=60.00",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_round4_inventory.py",
+          "tests/test_wave7_5213_d76_round2_binding.py::test_all_runspec_registration_and_version_axes_have_a_binding_classification",
+          "tests/test_bc1_selection.py::test_proposal_is_exact_and_does_not_modify_protected_source",
+          "tests/test_bc1_g2_round2.py",
+          "tests/test_wave7_5213_d76_binding_records.py",
+          "-n",
+          "2",
+          "-q",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793945841.4053419
+      },
+      "summary": "47 passed, 2 warnings, 1 error in 51.70s"
+    },
+    {
+      "log": "r3-m7-discovery-control.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=41.48",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_generation_specificity_skill.py::TestDiscovery::test_the_deterministic_arms_are_derived_from_the_code",
+          "tests/test_generation_specificity_skill.py::TestDiscovery::test_every_model_facing_module_is_in_a_discovered_closure",
+          "-n",
+          "2",
+          "-q",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/baseline-8bc90e93d",
+        "started": 1793961586.805428
+      },
+      "summary": "2 passed, 2 warnings in 41.06s"
+    },
+    {
+      "log": "r3-m7-legacy-isolation-control.log",
+      "exit": "U1_CHECK_EXIT=1; reason=None; elapsed=1.54",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_legacy_registration.py",
+          "-n",
+          "2",
+          "-q",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/baseline-8bc90e93d",
+        "started": 1793961628.292459
+      },
+      "summary": "1 failed, 12 passed, 2 warnings in 1.19s"
+    },
+    {
+      "log": "r3-original-fixture-reproduction.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=0.83",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u1/scripts/adhoc/native_u1_round3_20261106.py",
+          "forensics"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793961228.779208
+      },
+      "summary": null
+    },
+    {
+      "log": "r3-postflight-canary.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=1.19",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_native_shared_render.py::test_native_instruction_roundtrip_uses_only_sole_runtime",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-postflight-canary.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954166.501943
+      },
+      "summary": "1 passed, 2 warnings in 0.85s"
+    },
+    {
+      "log": "r3-resume-canary.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=1.71",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_native_shared_render.py::test_native_instruction_roundtrip_uses_only_sole_runtime",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-resume-canary.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793952124.060961
+      },
+      "summary": "1 passed, 2 warnings in 0.92s"
+    },
+    {
+      "log": "r3-retry-batch-08-file-01-attempt-01.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=55.98",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_shared_generation_resources.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-08-file-01-attempt-01.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954167.701352
+      },
+      "summary": "47 passed, 14 warnings in 55.63s"
+    },
+    {
+      "log": "r3-retry-batch-08-file-02-attempt-01.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=645.98",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_shared_generation_runtime.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-08-file-02-attempt-01.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954223.681518
+      },
+      "summary": "10 passed, 26 warnings in 645.63s (0:10:45)"
+    },
+    {
+      "log": "r3-retry-batch-08-file-03-attempt-01.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=235.27",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_shared_generation_scope_context.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-08-file-03-attempt-01.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793954869.670775
+      },
+      "summary": "13 passed, 14 warnings in 234.88s (0:03:54)"
+    },
+    {
+      "log": "r3-retry-batch-08-file-04-attempt-01.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=16.21",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_shared_generation_selection.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-08-file-04-attempt-01.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793955104.947701
+      },
+      "summary": "39 passed, 2 warnings in 15.79s"
+    },
+    {
+      "log": "r3-retry-batch-08-file-05-attempt-01.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=4.39",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_source_heading_authority.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-08-file-05-attempt-01.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793955121.159359
+      },
+      "summary": "4 passed in 4.00s"
+    },
+    {
+      "log": "r3-retry-batch-09-file-01-attempt-01.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=9.55",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_source_heading_completed.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-09-file-01-attempt-01.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793955125.554027
+      },
+      "summary": "11 passed, 14 warnings in 9.23s"
+    },
+    {
+      "log": "r3-retry-batch-09-file-02-attempt-01.log",
+      "exit": "U1_CHECK_EXIT=-15; reason=quiet-window interruption; elapsed=55.30",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_source_heading_output_layout.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-09-file-02-attempt-01.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793955135.109856
+      },
+      "summary": null
+    },
+    {
+      "log": "r3-retry-batch-09-file-02-attempt-02.log",
+      "exit": "U1_CHECK_EXIT=-15; reason=quiet-window interruption; elapsed=2.02",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_source_heading_output_layout.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-09-file-02-attempt-02.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793955910.498734
+      },
+      "summary": null
+    },
+    {
+      "log": "r3-retry-batch-09-file-02-attempt-03.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=100.02",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_source_heading_output_layout.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-09-file-02-attempt-03.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793959293.328767
+      },
+      "summary": "10 passed, 2 warnings in 99.27s (0:01:39)"
+    },
+    {
+      "log": "r3-retry-batch-09-file-03-attempt-01.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=13.81",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_source_heading_routing.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-09-file-03-attempt-01.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793959393.353589
+      },
+      "summary": "66 passed, 2 warnings in 13.42s"
+    },
+    {
+      "log": "r3-retry-batch-09-file-04-attempt-01.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=71.18",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_source_heading_runtime.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-09-file-04-attempt-01.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793959407.170479
+      },
+      "summary": "15 passed, 2 warnings in 70.81s (0:01:10)"
+    },
+    {
+      "log": "r3-retry-batch-09-file-05-attempt-01.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=1740.41",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_source_heading_runtime_api.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-09-file-05-attempt-01.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793959478.354474
+      },
+      "summary": "18 passed, 26 warnings in 1739.99s (0:28:59)"
+    },
+    {
+      "log": "r3-retry-batch-13-file-01-attempt-01.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=1.83",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_wave7_5213_d76_legacy_registration.py",
+          "-n",
+          "2",
+          "-vv",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-retry-batch-13-file-01-attempt-01.xml"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793961218.751033
+      },
+      "summary": "13 passed, 2 warnings in 1.35s"
+    },
+    {
+      "log": "r3-scanner-controls-final.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=60.00",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_native_u1_scanner_contracts.py",
+          "-n",
+          "2",
+          "-q",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793946051.195928
+      },
+      "summary": "10 passed in 15.89s"
+    },
+    {
+      "log": "r3-scanner-controls-semantic.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=8.19",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_native_u1_scanner_contracts.py",
+          "-n",
+          "2",
+          "-q",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793961220.585649
+      },
+      "summary": "10 passed in 7.83s"
+    },
+    {
+      "log": "r3-scanner-controls-v2.log",
+      "exit": "U1_CHECK_EXIT=1; reason=None; elapsed=60.01",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_native_u1_scanner_contracts.py",
+          "-n",
+          "2",
+          "-q",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793945976.052842
+      },
+      "summary": "1 failed, 6 passed in 8.72s"
+    },
+    {
+      "log": "r3-scanner-controls-v3.log",
+      "exit": "U1_CHECK_EXIT=0; reason=None; elapsed=60.00",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_native_u1_scanner_contracts.py",
+          "-n",
+          "2",
+          "-q",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793946019.23896
+      },
+      "summary": "7 passed in 19.17s"
+    },
+    {
+      "log": "r3-scanner-controls.log",
+      "exit": "U1_CHECK_EXIT=1; reason=None; elapsed=60.00",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_native_u1_scanner_contracts.py",
+          "tests/test_wave7_5213_d76_binding_records.py",
+          "-n",
+          "2",
+          "-q",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793945910.9818828
+      },
+      "summary": "1 failed, 9 passed, 2 warnings in 7.83s"
+    },
+    {
+      "log": "r3-scanner.log",
+      "exit": "U1_CHECK_EXIT=2; reason=None; elapsed=180.01",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          ".claude/skills/d4d-generation-specificity-audit/scan.py",
+          "--report",
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-scanner.md",
+          "--json",
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-scanner.json"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793946111.204236
+      },
+      "summary": null
+    },
+    {
+      "log": "r3-specificity-guards-retry.log",
+      "exit": "U1_CHECK_EXIT=1; reason=None; elapsed=357.19",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_generation_specificity_skill.py",
+          "tests/test_neutral_generation_schema.py",
+          "tests/test_profiles.py",
+          "tests/test_external_dataset_onboarding.py",
+          "-n",
+          "2",
+          "-q",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793961229.6090271
+      },
+      "summary": "9 failed, 463 passed, 29 warnings, 21 errors in 356.70s (0:05:56)"
+    },
+    {
+      "log": "r3-specificity-guards.log",
+      "exit": "U1_CHECK_EXIT=-15; reason=quiet-window interruption; elapsed=60.01",
+      "launch": {
+        "command": [
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_generation_specificity_skill.py",
+          "tests/test_neutral_generation_schema.py",
+          "tests/test_profiles.py",
+          "tests/test_external_dataset_onboarding.py",
+          "-n",
+          "2",
+          "-q",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
+        "started": 1793946291.372818
+      },
+      "summary": null
+    }
+  ],
+  "quiet_windows": [
+    {
+      "source": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/native_quiet_window.lock",
+      "observed_utc": "2026-11-06T07:36:28Z",
+      "lock": {
+        "expected_end_utc": "2026-11-06T08:09:12.542300+00:00",
+        "format": "native_u0_quiet_window_v1",
+        "owner_nonce": "c0fef4b969ae9f7eed4ef28958ea282909ab8c9791b76492",
+        "pid": 2815,
+        "start_utc": "2026-11-06T07:34:42.542300+00:00",
+        "trial": "causal-control-01"
+      },
+      "interrupted_log": "r3-batch-08.log",
+      "check_start_epoch": 1793949691.866366,
+      "recorded_elapsed_seconds": 840.05,
+      "approximate_overlap_seconds": 49.37,
+      "disposition": "Own batch process group terminated at the next 60-second poll; incomplete batch, no pass credit. Lock preserved. Retry the interrupted group by individual file after the roster."
+    },
+    {
+      "source": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/native_quiet_window.lock",
+      "observed_utc": "2026-11-06T07:51:15Z",
+      "lock": {
+        "expected_end_utc": "2026-11-06T08:24:53.329584+00:00",
+        "format": "native_u0_quiet_window_v1",
+        "owner_nonce": "4798e86ea54468ef83bf2bfdae598c592694f7a2eba061db",
+        "pid": 49100,
+        "start_utc": "2026-11-06T07:50:23.329584+00:00",
+        "trial": "causal-treatment-01"
+      },
+      "interrupted_log": "r3-batch-09.log",
+      "check_start_epoch": 1793951191.9636,
+      "recorded_elapsed_seconds": 240.02,
+      "approximate_overlap_seconds": 8.65,
+      "disposition": "Batch stopped at the next original 60-second poll. Waiting controller PID 64091 verified as U1 with no children, then terminated to install one-second creation monitoring. Remaining original files split into individual batches; removal polling remains at least 60 seconds."
+    },
+    {
+      "source": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/native_quiet_window.lock",
+      "observed_utc": "2026-11-06T08:53:37Z",
+      "lock": {
+        "expected_end_utc": "2026-11-06T09:27:40.062887+00:00",
+        "format": "native_u0_quiet_window_v1",
+        "owner_nonce": "0c738e00f49e578b1f9475f1fc4264229239c42e06c318f3",
+        "pid": 5969,
+        "start_utc": "2026-11-06T08:53:10.062887+00:00",
+        "trial": "second-control-01"
+      },
+      "interrupted_log": "r3-retry-batch-09-file-02-attempt-01.log",
+      "check_start_epoch": 1793955135.109856,
+      "recorded_elapsed_seconds": 55.3,
+      "approximate_overlap_seconds": 0.35,
+      "disposition": "One-second creation monitor terminated only the active U1 process group. Incomplete attempt retained; same file will retry under a new log after 60-second removal polls. Completed preceding files retained."
+    },
+    {
+      "source": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/native_quiet_window.lock",
+      "observed_utc": "2026-11-06T09:06:08Z",
+      "lock": {
+        "expected_end_utc": "2026-11-06T09:39:42.008262+00:00",
+        "format": "native_u0_quiet_window_v1",
+        "owner_nonce": "245f79f4c702e22acb4632e9b44a4d720487925363b6f595",
+        "pid": 31793,
+        "start_utc": "2026-11-06T09:05:12.008262+00:00",
+        "trial": "second-treatment-01"
+      },
+      "interrupted_log": "r3-retry-batch-09-file-02-attempt-02.log",
+      "check_start_epoch": 1793955910.498734,
+      "recorded_elapsed_seconds": 2.02,
+      "approximate_overlap_seconds": 0.51,
+      "disposition": "Attempt began during the gap between locks and was stopped by the one-second creation monitor. Incomplete attempt retained; retry loop waits for removal without crediting its partial events."
+    },
+    {
+      "source": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/native_quiet_window.lock",
+      "observed_utc": "2026-11-06T06:27:11Z",
+      "lock": {
+        "expected_end_utc": "2026-11-06T07:00:01.563396+00:00",
+        "format": "native_u0_quiet_window_v1",
+        "owner_nonce": "2a7824134d3979d09cc90a439441b856c3434a287accece7",
+        "pid": 88163,
+        "start_utc": "2026-11-06T06:25:31.563396+00:00",
+        "trial": "cpu-neutral-01"
+      },
+      "interrupted_log": "r3-specificity-guards.log",
+      "check_start_epoch": 1793946291.372818,
+      "recorded_elapsed_seconds": 60.01,
+      "approximate_overlap_seconds": 19.82,
+      "disposition": "Own guard process group terminated at the next 60-second poll; no passing guard result. Lock preserved. Subsequent launches wait for removal."
+    }
+  ],
+  "original_fixture_reproduction": {
+    "scope": "Reproduced original fixture omission against the round-three composed selector/scanner; not an original retry-1 traceback.",
+    "original_fixture_sha256": "55baa2753f7f8459a8726fb1ff11eb9af32a04f7970a8d9d4389d463bce8e1fe",
+    "files": [
+      "src/data_sheets_schema/api_runner.py",
+      "src/data_sheets_schema/shared_generation.py",
+      "src/data_sheets_schema/source_heading_runtime.py",
+      "src/data_sheets_schema/receipt_completion.py",
+      "src/data_sheets_schema/removal_repair.py",
+      "src/data_sheets_schema/bc1_selection.py",
+      "src/data_sheets_schema/bc1_registration.py",
+      "src/data_sheets_schema/bc1_runtime.py",
+      "src/data_sheets_schema/bc1_context.py",
+      "src/data_sheets_schema/typed_audit_runtime.py"
+    ],
+    "error_type": "ConfigError",
+    "first_error": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-original-dispatch-fixture/src/data_sheets_schema/native_shared_render.py cannot be read or parsed",
+    "traceback": "Traceback (most recent call last):\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 13908, in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 13064, in _simple_optional_turn_selection\n    raise fail()\ndelegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 13911, in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 13173, in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\ndelegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u1/scripts/adhoc/native_u1_round3_20261106.py\", line 98, in forensics\n    scopes(target)\n    ~~~~~~^^^^^^^^\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/tests/test_generation_specificity_delegated.py\", line 38, in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 14140, in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 13972, in _local_plan_scopes\n    visit(value, None)\n    ~~~~~^^^^^^^^^^^^^\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 13966, in visit\n    visit(node.left, gate)\n    ~~~~~^^^^^^^^^^^^^^^^^\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 13967, in visit\n    visit(node.right, gate)\n    ~~~~~^^^^^^^^^^^^^^^^^^\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 13952, in visit\n    visit(node.body, gate_of(node.test))\n                     ~~~~~~~^^^^^^^^^^^\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 13945, in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 13918, in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 13594, in _delegated_turn_selection\n    native_tree = _tree(native_path)\n  File \"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6/.claude/skills/d4d-generation-specificity-audit/scan.py\", line 1342, in _tree\n    raise ConfigError(f\"{path} cannot be read or parsed\")\ndelegated_scanner.ConfigError: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/r3-original-dispatch-fixture/src/data_sheets_schema/native_shared_render.py cannot be read or parsed\n"
+  },
+  "retry_attempts": [
+    {
+      "batch": 8,
+      "file": "tests/test_shared_generation_resources.py",
+      "name": "r3-retry-batch-08-file-01-attempt-01",
+      "exit": 0
+    },
+    {
+      "batch": 8,
+      "file": "tests/test_shared_generation_runtime.py",
+      "name": "r3-retry-batch-08-file-02-attempt-01",
+      "exit": 0
+    },
+    {
+      "batch": 8,
+      "file": "tests/test_shared_generation_scope_context.py",
+      "name": "r3-retry-batch-08-file-03-attempt-01",
+      "exit": 0
+    },
+    {
+      "batch": 8,
+      "file": "tests/test_shared_generation_selection.py",
+      "name": "r3-retry-batch-08-file-04-attempt-01",
+      "exit": 0
+    },
+    {
+      "batch": 8,
+      "file": "tests/test_source_heading_authority.py",
+      "name": "r3-retry-batch-08-file-05-attempt-01",
+      "exit": 0
+    },
+    {
+      "batch": 9,
+      "file": "tests/test_source_heading_completed.py",
+      "name": "r3-retry-batch-09-file-01-attempt-01",
+      "exit": 0
+    },
+    {
+      "batch": 9,
+      "file": "tests/test_source_heading_output_layout.py",
+      "name": "r3-retry-batch-09-file-02-attempt-01",
+      "exit": -15
+    },
+    {
+      "batch": 9,
+      "file": "tests/test_source_heading_output_layout.py",
+      "name": "r3-retry-batch-09-file-02-attempt-02",
+      "exit": -15
+    },
+    {
+      "batch": 9,
+      "file": "tests/test_source_heading_output_layout.py",
+      "name": "r3-retry-batch-09-file-02-attempt-03",
+      "exit": 0
+    },
+    {
+      "batch": 9,
+      "file": "tests/test_source_heading_routing.py",
+      "name": "r3-retry-batch-09-file-03-attempt-01",
+      "exit": 0
+    },
+    {
+      "batch": 9,
+      "file": "tests/test_source_heading_runtime.py",
+      "name": "r3-retry-batch-09-file-04-attempt-01",
+      "exit": 0
+    },
+    {
+      "batch": 9,
+      "file": "tests/test_source_heading_runtime_api.py",
+      "name": "r3-retry-batch-09-file-05-attempt-01",
+      "exit": 0
+    },
+    {
+      "batch": 13,
+      "file": "tests/test_wave7_5213_d76_legacy_registration.py",
+      "name": "r3-retry-batch-13-file-01-attempt-01",
+      "exit": 0
+    }
+  ],
+  "roster_totals": {
+    "tests": 1570,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 1569,
+    "files": 66,
+    "completed_batches": 30
+  }
+}
