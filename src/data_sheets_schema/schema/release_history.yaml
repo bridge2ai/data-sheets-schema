@@ -49,3 +49,17 @@ releases:
       for Instance.data_substrate. The selected profile may additionally
       supply its pinned registry. N7 declares the EDAM CURIE prefix.
       Historical schema hashes stay unchanged.
+  - version: 3.2.0
+    declared: 2026-11-08
+    full_source_sha256: dbc56694364eaa7f61eed4853839ac0991ac83b0b6c83aad651a03ee9ff094b8
+    full_merged_sha256: 37d8cb5f0cc5518214740f8a6f7670932613c5df09d170cbf459860d9ce9520b
+    core_source_sha256: cf48f77652bcf6b937e7c0e8d78eb9472d76980aae02f03a5581e15920bfe8e8
+    core_merged_sha256: ba50cd2dd3154c4753ff3256c67f3ce8917ad3ff3a7494133b66dcbf05d4b8dd
+    note: >-
+      D98 (#5471, Option A) declares d4d:termSourceIdentifierForms on
+      Instance.data_substrate and Instance.data_topic (plus d4d:termSources on
+      Instance.data_topic) and GO, MESH/MeSH, EFO, and NCIT prefixes in
+      D4D_Base_import.yaml. D99 restores multivalued: true on
+      LicenseAndUseTerms.data_use_permission (one primary DUO permission plus
+      applicable modifiers) and aligns D4D_Core.yaml version: 3.2.0.
+      Historical schema hashes stay unchanged.
