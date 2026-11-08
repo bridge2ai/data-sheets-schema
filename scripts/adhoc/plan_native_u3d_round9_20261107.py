@@ -37,7 +37,8 @@ def groups():
     remainder = sorted(all_dc - permission - registration - lifecycle)
     # File-level partitions preserve fixture isolation, and no node is omitted.
     result = {'permission': sorted(permission), 'registration': sorted(registration),
-        'lifecycle': sorted(lifecycle), 'dc-1': remainder[::2], 'dc-2': remainder[1::2]}
+        'lifecycle-1': sorted(lifecycle)[::2], 'lifecycle-2': sorted(lifecycle)[1::2],
+        'dc-1': remainder[::2], 'dc-2': remainder[1::2]}
     base = module('plan_native_u3c_round4_20261107').plan(Path(sys.executable))['groups']
     for name in ('a-core', 'b-focused'):
         result[name] = base[name]['nodes']
@@ -47,7 +48,7 @@ def groups():
     result['census'] = ['tests/test_native_shared_consumer_census.py',
         'tests/test_native_u3d_round9_boundaries.py', 'tests/test_native_u3c_round4_helpers.py']
     result['collection'] = ['tests']
-    if set().union(*(set(result[key]) for key in ('permission', 'registration', 'lifecycle', 'dc-1', 'dc-2'))) != all_dc:
+    if set().union(*(set(result[key]) for key in ('permission', 'registration', 'lifecycle-1', 'lifecycle-2', 'dc-1', 'dc-2'))) != all_dc:
         raise RuntimeError('D/C cohort partition dropped a file')
     if any(not (ROOT / node.split('::')[0]).is_file() for name, nodes in result.items()
            if name != 'collection' for node in nodes):
@@ -63,7 +64,7 @@ def main():
     args = parser.parse_args()
     roster = groups()
     if args.action == 'plan':
-        target = SCRATCH / 'round9-plan.json'
+        target = SCRATCH / 'round9-final-plan.json'
         with target.open('x') as handle:
             json.dump(roster, handle, indent=2, sort_keys=True)
             handle.write('\n')
@@ -71,7 +72,7 @@ def main():
         return 0
     if args.group not in roster:
         parser.error('select one explicit group')
-    if json.loads((SCRATCH / 'round9-plan.json').read_text()) != roster:
+    if json.loads((SCRATCH / 'round9-final-plan.json').read_text()) != roster:
         raise RuntimeError('saved roster differs from current source')
     label = args.label or args.group
     if not label or any(not (letter.isalnum() or letter == '-') for letter in label):

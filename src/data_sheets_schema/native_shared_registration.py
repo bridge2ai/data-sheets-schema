@@ -300,6 +300,10 @@ def rebuild_v2_body(*, preparation_raw, composition_path, system_path,
         raise ValueError('v2 consumer preparation requires UTF-8 bytes') from exc
     if classifier_projection is None:
         raise ValueError('v2 execution requires an explicit classifier projection')
+    validate_arguments(composition_path, system_path,
+        permission_probe_path=permission_probe_path, attempt_id=attempt_id,
+        attempt_directory=attempt_directory, evidence_directory=evidence_directory,
+        max_draft_checks=max_draft_checks, receipt_origin_version=receipt_origin_version)
     _require_integrated_gate_implementation()
     value = _registration_body(composition_path, system_path,
         permission_probe_path=permission_probe_path, attempt_id=attempt_id,

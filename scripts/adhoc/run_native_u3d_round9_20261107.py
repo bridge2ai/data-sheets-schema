@@ -7,6 +7,7 @@ Retains the C4 credential/network/native-exec/write restrictions and deadline.
 """
 import importlib.util
 from pathlib import Path
+import hashlib
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -23,6 +24,29 @@ wrapper.runner.PROFILE = wrapper.sandbox_profile()
 wrapper.dependency.SCRATCH = SCRATCH
 wrapper.dependency.SOURCE = wrapper.runner.EXECUTIONS.parent / 'data-sheets-schema/fairscape_models'
 wrapper.dependency.DESTINATION = SCRATCH / 'dependencies' / ('fairscape-' + wrapper.dependency.PIN)
+
+_save = wrapper.runner.save
+
+
+def save(path, value):
+    if path.name == 'bootstrap.json':
+        # D has a preserved older local submodule tree. Keep it untouched but
+        # remove it from this disposable bootstrap before C inserts the exact
+        # scratch gitlink. The source-origin assertion stays unchanged.
+        paths = list(value['paths'])
+        local = str(ROOT / 'fairscape_models')
+        if local in paths:
+            pth = next(Path(item) for item in value['files'] if item.endswith('/u3a_paths.pth'))
+            if pth.read_text() != ''.join(item + '\n' for item in paths):
+                raise RuntimeError('unrecognized inherited bootstrap paths')
+            paths.remove(local)
+            pth.write_text(''.join(item + '\n' for item in paths))
+            value = {**value, 'paths': paths, 'files': {**value['files'],
+                str(pth): hashlib.sha256(pth.read_bytes()).hexdigest()}}
+    _save(path, value)
+
+
+wrapper.runner.save = save
 
 if __name__ == '__main__':
     if sys.argv[1:] == ['--hydrate-local-dependency']:

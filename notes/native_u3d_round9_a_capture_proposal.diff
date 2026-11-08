@@ -1,0 +1,31 @@
+diff --git a/src/data_sheets_schema/native_execution_registration_v2.py b/src/data_sheets_schema/native_execution_registration_v2.py
+--- a/src/data_sheets_schema/native_execution_registration_v2.py
++++ b/src/data_sheets_schema/native_execution_registration_v2.py
+@@ -228,6 +228,7 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
+     RunSpec boundary: guarded
+     """
+     from .api_runner import RunSpec, _require_registered_input_spellings
++    from .native_shared_evidence import read_regular as current_read_regular
+     _job_id(job_id)
+     c.positive_int(max_draft_checks, 'maximum draft checks')
+     if type(run_date) is not str or re.fullmatch(r'\d{4}-\d{2}-\d{2}', run_date) is None:
+@@ -238,7 +239,8 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
+     if Path.cwd().resolve() != authority.ROOT:
+         raise ValueError('v2 preparation requires its exact source checkout root')
+     captured = selection.capture(selection_path)
+-    runtime_capture = _read(runtime_path, 'runtime_declaration', c.HARD_LIMITS['input_bytes'])
++    runtime_capture = current_read_regular(str(runtime_path), 'runtime_declaration',
++        max_bytes=c.HARD_LIMITS['input_bytes']).captured
+     runtime = validate_runtime(c.strict_json(runtime_capture.raw, 'runtime declaration'))
+     doc = captured.document()
+     inputs = doc['inputs']
+@@ -268,7 +270,8 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
+     # Re-read every selected member, not a saved passed flag. Source identity is
+     # independently rechecked after rendering; source-commit proof is admission.
+     if (selection.capture(selection_path) != captured
+-            or _read(runtime_path, 'runtime_declaration', c.HARD_LIMITS['input_bytes']) != runtime_capture
++            or current_read_regular(str(runtime_path), 'runtime_declaration',
++                max_bytes=c.HARD_LIMITS['input_bytes']).captured != runtime_capture
+             or authority.dependency_identity() != dependencies):
+         raise ValueError('v2 preparation authority changed during capture')
+     return _envelope(body, dependencies)
