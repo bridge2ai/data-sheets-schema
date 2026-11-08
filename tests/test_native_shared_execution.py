@@ -121,8 +121,20 @@ def make_case(root, *, fixture='neutral', receipt_origin_version=0):
             'subscription_guard_path': guard_path, 'subscription_guard_sha256': c.sha(guard_raw)}}
 
 
+def synthetic_subscription_clock(case, monkeypatch):
+    """Bind invented subscription evidence to an explicit functional-test clock."""
+    from data_sheets_schema import native_subscription_guard as subscription
+    # The subscription observation is invented, as is its clock. Keep this
+    # functional test independent of host load during repeated source checks;
+    # stale/future observations retain separate real refusal regressions.
+    guard = c.strict_json(case['kwargs']['subscription_guard_path'].read_bytes())
+    captured_at = datetime.fromisoformat(guard['captured_at'].replace('Z', '+00:00')).timestamp()
+    monkeypatch.setattr(subscription, '_now', lambda: captured_at)
+
+
 def launch_case(case, monkeypatch):
     """Use the actual public lifetime; only runtime/review/provider data is synthetic."""
+    synthetic_subscription_clock(case, monkeypatch)
     monkeypatch.setattr(execute, '_probe_runtime', fake_observation)
     forbidden = {key: () for key in (
         ('prepare_direct', 'auth_evidence'), ('run_direct_canary', 'main'),

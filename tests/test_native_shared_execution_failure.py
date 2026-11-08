@@ -5,7 +5,7 @@ import signal
 import socket
 import subprocess
 import pytest
-from tests.test_native_shared_execution import make_case
+from tests.test_native_shared_execution import make_case, synthetic_subscription_clock
 from data_sheets_schema import native_shared_execution_orchestration as execute
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_execution_authority_v2 as authority
@@ -14,7 +14,9 @@ from data_sheets_schema import native_execution_authority_v2 as authority
 @pytest.fixture
 def execution_case(tmp_path, monkeypatch):
     monkeypatch.chdir(authority.ROOT)
-    return make_case(tmp_path / 'v2-lifecycle')
+    case = make_case(tmp_path / 'v2-lifecycle')
+    synthetic_subscription_clock(case, monkeypatch)
+    return case
 
 
 @pytest.mark.parametrize('missing', ['review_path', 'ci_path', 'launch_word_path'])

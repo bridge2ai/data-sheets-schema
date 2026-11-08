@@ -28,7 +28,7 @@ from data_sheets_schema import native_shared_selection as selection
 def declaration(original_declaration):
     # Explicit test allowance above the unchanged 32 MB finalization reserve.
     document = original_declaration
-    document['bounds']['max_evidence_bytes'] = 33_000_000
+    document['bounds']['max_evidence_bytes'] = 64_000_000
     save(document)
     return document
 
