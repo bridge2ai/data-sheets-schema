@@ -1,8 +1,8 @@
 """Reviewed host-side capabilities for native v2 execution and saved replay.
 
 A's public loader map stays unchanged.  This orchestration context projects
-only the historical members used below from A's source-attested modules, and
-holds C's genuine classifier projection in the same loader lifetime.  Consumers
+only the historical members used below from A's source-attested modules.
+C's genuine projection is scoped to each pure consumer call.  Consumers
 receive the four accounting/observation members, never a launcher module.
 """
 from __future__ import annotations
@@ -71,13 +71,12 @@ class _Members:
 
 
 class _Capabilities(Mapping):
-    """Orchestration-only closed historical projections and C classifier."""
-    __slots__ = ('_members', '_classifier_projection', '_package_sources', '_active')
+    """Orchestration-only historical projections, with bounded pure-call scopes."""
+    __slots__ = ('_members', '_dependencies', '_active')
 
-    def __init__(self, members, classifier_projection, package_sources):
+    def __init__(self, members, dependencies):
         self._members = MappingProxyType(dict(members))
-        self._classifier_projection = classifier_projection
-        self._package_sources = tuple(sorted(package_sources.items()))
+        self._dependencies = deepcopy(dependencies)
         self._active = True
 
     def require_complete(self):
@@ -99,15 +98,18 @@ class _Capabilities(Mapping):
     def __len__(self):
         return len(self._members)
 
-    @property
-    def classifier_projection(self):
+    @contextmanager
+    def loaded_classifier(self):
+        """Do not hold A's consumer package finder across live orchestration."""
         self.require_complete()
-        return self._classifier_projection
+        with classifier_loading.loaded_controls(self._dependencies) as projection:
+            yield projection
+        self.require_complete()
 
     @property
     def package_sources(self):
         self.require_complete()
-        return dict(self._package_sources)
+        return dict(self._dependencies['base']['package_sources'])
 
     @property
     def gate_members(self):
@@ -123,13 +125,13 @@ class _Capabilities(Mapping):
 def loaded_capabilities(dependencies):
     """Check every required capability before yielding to any reservation.
 
-The historical modules are read only while C holds A's source loader open.
-Their source identities are attested by A; a similarly named ordinary import
-cannot supply a capability.  Nothing is inserted in A's public control map.
-"""
+    The historical modules are read only while A's source loader is open.
+    Their source identities are attested by A; a similarly named ordinary import
+    cannot supply a capability. Nothing is inserted in A's public control map.
+    """
     members = {}
     capabilities = None
-    with classifier_loading.loaded_controls(dependencies) as classifier_projection:
+    with authority.loaded_dependencies(dependencies):
         try:
             pins = {**dependencies['base']['modules'], **dependencies['additional_modules']}
             for name, names in _MEMBERS.items():
@@ -142,8 +144,7 @@ cannot supply a capability.  Nothing is inserted in A's public control map.
                 if authority.module_source_identity(module) != expected:
                     raise ValueError('native execution capability differs from its source pin: ' + name)
                 members[name] = _Members(module, expected, names)
-            capabilities = _Capabilities(members, classifier_projection,
-                                         dependencies['base']['package_sources'])
+            capabilities = _Capabilities(members, dependencies)
             capabilities.require_complete()
             yield capabilities
             capabilities.require_complete()

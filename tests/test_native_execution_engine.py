@@ -68,7 +68,10 @@ def test_wrong_engine_layer_refuses_before_input_reads_or_c_loading(monkeypatch)
     monkeypatch.setattr(consumer, '_read', forbidden)
     monkeypatch.setattr(proposal.permission_inputs, 'loaded_permission_inputs', forbidden)
     with pytest.raises(ValueError, match='fixed package execution contract'):
-        proposal._registration_body('/unused/composition', '/unused/system')
+        proposal._registration_body('/unused/composition', '/unused/system',
+            permission_probe_path='/unused/probe', attempt_id='attempt',
+            attempt_directory='/unused/attempt', evidence_directory='/unused/evidence',
+            max_draft_checks=2)
     assert touched == []
 
 

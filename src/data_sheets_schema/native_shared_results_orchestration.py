@@ -133,10 +133,10 @@ def _classify_saved(command, policy, snapshot, controls):
     """Classify one occurrence afresh, resolving paths only in captured bytes."""
     if command in policy['native_shared_helpers'].values():
         from .native_execution_authority_v2 import loaded_verified_package_module
-        with loaded_verified_package_module('data_sheets_schema.native_shared_policy',
+        with controls.loaded_classifier() as classifier_projection, loaded_verified_package_module('data_sheets_schema.native_shared_policy',
                 package_sources=controls.package_sources) as policy_consumer:
             return policy_consumer.classify_bash(command, policy['python'], set(), policy,
-                                                controls.classifier_projection)
+                                                classifier_projection=classifier_projection)
     if not _readonly(command, policy, snapshot, controls):
         raise ValueError('saved history has an unsupported ordinary Bash command')
     native = controls['run_native_canary']

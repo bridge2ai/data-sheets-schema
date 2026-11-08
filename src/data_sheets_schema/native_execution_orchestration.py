@@ -200,8 +200,25 @@ def _guarded_observer(guard, adapter, budget_stop):
                 guard.observe(event)
             except ValueError as exc:
                 raise budget_stop('subscription guard: ' + str(exc)) from exc
-        adapter.observe(event)
+        _controller_call(adapter, 'observe', budget_stop, event)
     return observe
+
+
+def _controller_call(adapter, name, budget_stop, *args):
+    """Keep a C refusal's text across separately source-loaded exception types."""
+    try:
+        return getattr(adapter, name)(*args)
+    except BaseException as error:
+        if (isinstance(error, getattr(adapter, '_budget_stop', budget_stop))
+                and not isinstance(error, budget_stop)):
+            raise budget_stop(str(error)) from error
+        raise
+
+
+def _guarded_classifier(adapter, budget_stop):
+    def classify(*args):
+        return _controller_call(adapter, 'classify', budget_stop, *args)
+    return classify
 
 
 def launch(registration_raw, *, review_path, ci_path, launch_word_path,
@@ -254,9 +271,10 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         raise ValueError('native launch requires the main thread')
     # This is the last check before the first effect. A prior verified value,
     # permission recipe or Admission object is never a launch capability.
-    admitted = admission.admit(registration_raw, review_path=authorization['inputs']['review'],
-        ci_path=authorization['inputs']['ci'], launch_word_path=authorization['inputs']['launch_word'],
-        classifier_projection=controls.classifier_projection)
+    with controls.loaded_classifier() as classifier_projection:
+        admitted = admission.admit(registration_raw, review_path=authorization['inputs']['review'],
+            ci_path=authorization['inputs']['ci'], launch_word_path=authorization['inputs']['launch_word'],
+            classifier_projection=classifier_projection)
     if (admitted.registration_raw != registration_raw
             or tuple((item.pin.path, item.raw) for item in admitted.evidence) != tuple(
                 (authorization['inputs'][name], authorization['raw'][name])
@@ -325,7 +343,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                     cwd=value['working_directory'], env=value['environment'],
                     deadline_seconds=value['runtime']['deadline_seconds'], verify_launch=launch_check,
                     record_stop=stopped, command_policy=adapter.policy, phase_spec=contract.transport_phase_spec(adapter),
-                    command_classifier=adapter.classify, event_observer=observe)
+                    command_classifier=_guarded_classifier(adapter, controls['run_native_canary'].BudgetStop),
+                    event_observer=observe)
             except BaseException as exc:
                 first_error = exc
                 # Native auth command failures may contain credentials in captured
