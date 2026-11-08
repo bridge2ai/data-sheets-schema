@@ -1,9 +1,10 @@
-"""D100 / PR #5531 follow-up, 2026-11-08: refresh TSVs from repository stats.
+"""D100 / PR #5543 fix, 2026-11-08: refresh TSVs from repository stats.
 Input: level-4 JSON from d4d schema stats, current merged schema.
 Output: basic/extended data/schema_stats exports; curated RAI/property lists retained.
 """
 import csv
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -12,7 +13,11 @@ sys.path.insert(0, str(ROOT / '.claude/agents/scripts'))
 import schema_stats_extended as extended
 
 stats = json.loads(Path(sys.argv[1]).read_text())
-assert stats['schema_version'] == '3.2.0'
+schema_version = str(extended.SchemaView(str(extended.find_full_schema())).schema.version)
+if str(stats['schema_version']) != schema_version:
+    raise ValueError('Input statistics version differs from the repository schema')
+# The legacy extended exporter resolves its output relative to cwd.
+os.chdir(ROOT)
 out = ROOT / 'data/schema_stats'
 combined = []
 
@@ -41,12 +46,18 @@ write('level4_quality_metrics.tsv', ['Quality Check', 'Status', 'Count', 'Exampl
 # Preserve editorial recommendation wording, updating only measured counts.
 path = out / 'level4_recommendations.tsv'
 rows = list(csv.reader(path.open(), delimiter='\t'))
-for row, key in zip(rows[1:], ['slots_without_range', 'orphaned_classes', 'single_use_slots']):
-    row[0] = str(q[key]) + ' ' + row[0].split(' ', 1)[1]
+recommendation_keys = {
+    'slots without explicit range': 'slots_without_range',
+    'orphaned classes': 'orphaned_classes',
+    'single-use slots': 'single_use_slots',
+}
+for row in rows[1:]:
+    label = row[0].split(' ', 1)[1]
+    row[0] = str(q[recommendation_keys[label]]) + ' ' + label
 write(path.name, rows[0], rows[1:], 'Level 4 Recommendations')
 with (out / 'ALL_STATS_COMBINED.tsv').open('w', newline='') as handle:
     writer = csv.writer(handle, delimiter='\t', lineterminator='\n')
     writer.writerow(['SECTION', 'Metric', 'Value', 'Details'])
     writer.writerows(combined)
 extended.main()
-print('Refreshed basic and extended exports for schema', stats['schema_version'])
+print('Refreshed basic and extended exports for schema', schema_version)

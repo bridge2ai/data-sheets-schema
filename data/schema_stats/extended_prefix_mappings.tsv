@@ -7,11 +7,6 @@ B2AI_SUBSTRATE	https://w3id.org/bridge2ai/standards-datasubstrate-schema/
 B2AI_TOPIC	https://w3id.org/bridge2ai/standards-datatopic-schema/
 DUO	http://purl.obolibrary.org/obo/DUO_
 EDAM	http://edamontology.org/
-EFO	http://www.ebi.ac.uk/efo/EFO_
-GO	http://purl.obolibrary.org/obo/GO_
-MESH	http://id.nlm.nih.gov/mesh/
-MeSH	http://id.nlm.nih.gov/mesh/
-NCIT	http://purl.obolibrary.org/obo/NCIT_
 ORCID	https://orcid.org/
 ROR	https://ror.org/
 biolink	https://w3id.org/biolink/vocab/
