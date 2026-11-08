@@ -15,7 +15,10 @@ from data_sheets_schema import native_shared_callback_orchestration as preload
 from data_sheets_schema import native_shared_capture_orchestration as capture
 from data_sheets_schema import native_shared_controls_orchestration as controls
 from data_sheets_schema.native_shared_controller_orchestration import CallbackAdapter
-from tests.test_native_execution_authority_v2 import isolated_modules
+from data_sheets_schema import native_shared_controller_orchestration as controller
+from tests.test_native_shared_controller import (
+    bound, declaration, inputs, isolated_modules, native_spec, synthetic_declaration,
+)
 
 
 def work(historical, kind, callback):
@@ -32,19 +35,22 @@ def work(historical, kind, callback):
 
 
 @pytest.mark.parametrize('kind', ['observer', 'classifier'])
-def test_historical_worker_runs_preloaded_c_classifier(kind, isolated_modules):
-    dependencies = authority.dependency_identity()
+def test_historical_worker_runs_preloaded_c_classifier(kind, bound):
+    _, _, raw, instruction = bound
+    composition = controller.compose(raw, instruction_path=instruction)
+    dependencies = composition['dependencies']
     with preload.preloaded_classifier(dependencies) as selected:
         historical = sys.modules['native_control']
         adapter = object.__new__(CallbackAdapter)
         adapter.failure = None
-        adapter.policy = {'python': sys.executable}
+        adapter.policy = composition['policy']
         adapter._classifier = selected
         expected = adapter.classify('pwd', sys.executable, set(), adapter.policy)
         actual = work(historical, kind,
             lambda: adapter.classify('pwd', sys.executable, set(), adapter.policy))
         assert not isinstance(actual, BaseException), repr(actual)
         assert actual == expected
+        assert actual[0] == 'not_prescribed'
 
 
 @pytest.mark.parametrize('kind', ['observer', 'classifier'])
