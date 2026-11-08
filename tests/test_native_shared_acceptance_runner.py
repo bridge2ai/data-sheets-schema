@@ -172,6 +172,26 @@ def test_wrong_head_fails_before_child(case, monkeypatch):
     assert "exact selected source head" in json.loads((output / "outcome.json").read_text())["error"]
 
 
+def test_nonregular_source_is_refused_and_closed_before_wrapping_stream(tmp_path, monkeypatch):
+    directory = tmp_path / 'tracked-replaced-by-directory'
+    directory.mkdir()
+    closed = []
+    real_close = runner.os.close
+
+    def close(fd):
+        closed.append(fd)
+        return real_close(fd)
+
+    monkeypatch.setattr(runner.os, 'close', close)
+    monkeypatch.setattr(runner.os, 'fdopen', lambda *a, **k: pytest.fail('nonregular source reached stream wrapper'))
+    with pytest.raises(ValueError, match='source file type or size'):
+        runner._regular_pin(directory, directory.stat().st_size)
+    assert closed
+    # The last closed descriptor is the leaf; directory traversal FDs close first.
+    with pytest.raises(OSError):
+        runner.os.fstat(closed[-1])
+
+
 def test_finalizer_error_cannot_become_success(case, monkeypatch):
     repo, output, head = case
     monkeypatch.setattr(runner, "pytest_child", lambda repo, out, label, node, **kw: (fake_result(out, label, node), 0)[1])

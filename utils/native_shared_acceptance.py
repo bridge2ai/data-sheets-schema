@@ -96,10 +96,11 @@ def _regular_pin(path, size):
     sha, blob, total = hashlib.sha256(), hashlib.sha1(b"blob " + str(size).encode() + b"\0"), 0
     with directory(path.parent) as parent:
         fd = os.open(path.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=parent)
+    before = os.fstat(fd)
+    if not stat.S_ISREG(before.st_mode) or before.st_size != size:
+        os.close(fd)
+        raise ValueError("source file type or size changed before inspection")
     with os.fdopen(fd, "rb") as handle:
-        before = os.fstat(handle.fileno())
-        if not stat.S_ISREG(before.st_mode) or before.st_size != size:
-            raise ValueError("source file changed before inspection")
         while raw := handle.read(min(1024 * 1024, size - total + 1)):
             total += len(raw)
             if total > size:

@@ -6,8 +6,11 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pytest
+
 from data_sheets_schema import api_runner as api
 from data_sheets_schema import audit_omissions as omissions
+from data_sheets_schema import native_catalog_reuse as reuse
 from data_sheets_schema import native_shared_receipts as receipts
 from data_sheets_schema import native_shared_selection as selection
 from data_sheets_schema.schema_snapshot import capture_schema
@@ -32,12 +35,14 @@ def checked_input(label, expected_commit):
     return tree, manifest
 
 
-def test_external_320_capture_rebuild_and_cold_warm_catalog(declaration, monkeypatch, tmp_path):
+@pytest.mark.parametrize('shape', ['modular', 'merged'])
+def test_external_320_capture_rebuild_and_cold_warm_catalog(declaration, monkeypatch, tmp_path, shape):
     tree, manifest = checked_input('schema-' + SCHEMA_COMMIT[:9], SCHEMA_COMMIT)
     folder = tree / 'src/data_sheets_schema/schema'
+    suffix = '_all' if shape == 'merged' else ''
     for kind, constant, filename in (
-            ('full', 'FULL_SCHEMA_PATH', 'data_sheets_schema.yaml'),
-            ('core', 'CORE_SCHEMA_PATH', 'data_sheets_schema_core.yaml')):
+            ('full', 'FULL_SCHEMA_PATH', 'data_sheets_schema' + suffix + '.yaml'),
+            ('core', 'CORE_SCHEMA_PATH', 'data_sheets_schema_core' + suffix + '.yaml')):
         path = folder / filename
         monkeypatch.setattr(api, constant, path)
         snapshot = capture_schema(path, strict=True)
@@ -49,10 +54,23 @@ def test_external_320_capture_rebuild_and_cold_warm_catalog(declaration, monkeyp
     snapshot = receipts.schema_snapshot(captured)
     expected = omissions._json(omissions._schema(snapshot.sources[0][1], schema_snapshot=snapshot, logical_paths=True))
     context = receipts._ReceiptCatalogContext()
+    marker = reuse.runtime_token()
     cold = context.schema_data(captured, snapshot)
     entry = context._entry
+    if shape == 'modular':
+        assert context._entry_marker is None and context._typed_marker is None
     warm = context.schema_data(captured, snapshot)
-    assert context._entry is entry and entry is not None
+    assert entry is not None
+    eligible = reuse.supported_snapshot(snapshot)
+    if shape == 'merged':
+        assert eligible and marker is not None
+        assert context._entry_marker is marker and reuse.runtime_token() is marker
+        assert context._entry is entry
+    else:
+        # Modular imports are deliberately outside native catalog reuse's
+        # supported closure. Recompute identical bytes, with no warm-hit claim.
+        assert not eligible and context._entry_marker is None and context._typed_marker is None
+        assert context._entry is not entry
     assert cold[0] == warm[0]
     assert omissions._json(cold[1]) == omissions._json(warm[1]) == expected
     assert 'version: 3.2.0' in (folder / 'data_sheets_schema.yaml').read_text()
@@ -62,7 +80,8 @@ def test_external_320_capture_rebuild_and_cold_warm_catalog(declaration, monkeyp
     rebuilt = selection.rebuild(captured.registration, captured.authority, captured.schemas, captured.receipt_policy)
     assert rebuilt == captured
     checked_input('schema-' + SCHEMA_COMMIT[:9], SCHEMA_COMMIT)
-    witness = {'schema_commit': SCHEMA_COMMIT, 'schema_files': manifest['files'],
+    witness = {'schema_commit': SCHEMA_COMMIT, 'shape': shape,
+               'schema_files': manifest['files'], 'reuse_eligible': eligible,
                'catalog_sha256': hashlib.sha256(expected.encode()).hexdigest(),
                'catalog_bytes': len(expected.encode()), 'declared_bases': list(cold[0]),
                'same_capture_replay': True, 'cold_warm_equal': True,
