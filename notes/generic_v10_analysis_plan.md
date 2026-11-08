@@ -150,6 +150,7 @@ the requested condition, items 14–15 name the discrepancy before P4.
 | D64 | **The owner's answers to the 37 P4a questions** (P4 agenda items 1–37). The recommended answer to 36 of them; for item 7, the owner's own choice: agy, stop command only. Among them D02 (items 13–15 and 17–23), D03 (item 29), D04 and D16 (item 37: out of this matrix), D08 (item 8: the written risk acceptance; the CBORG follow-up still needs the owner's separate yes), D20 (item 28) and D21 (item 35). Item 7 amends D41 and D43 for A21. | Owner, P4a answers (D64), recorded by claude, answered by 2026-10-28T23:23Z. The P4a word, naming this file's final sha256 (item 12), is separate and has not been given. |
 | D15, D24, rubric20's version (#2911, E4), and D02's VOICE_PEDIATRIC count | **Pending: P4b questions** (items 38–41). | Decided at P4b, before any production registration. |
 | Remaining D09 choices, D11–D14, D18, D25 (and D29 above) | **Pending: the native amendment** (item 43). | Decided before native registration. |
+| Amendment N1 (D105–D107; D29, remaining D09 choices, D11–D14, D18, D25; item 43) | **drafted 2026-11-08; ratification pending.** Settles item 43 (D29 resolved by D106, remaining D09 choices, D11–D14, D18, D25, native acceptance rows, canary and stop rule; D105 keeps receipt checker v4 primary). | Amendment N1 below ("## Amendment N1 (dated 2026-11-08): the native agentic (direct) arm"); D105–D107 in `notes/coordination/STATUS.md` (2026-11-08T05:30Z). |
 
 The closing comments of October 11 that cited unpushed commits are not rulings; the
 appendix records them (A).
@@ -2557,3 +2558,80 @@ govern the revised draft; this section does not override them.
    `d4d-executions`. The coordination prompt put it in
    `/private/tmp/d4d-claude-track-p-20261020`. The branch ref and commits live in the
    main repository, so they survive a reboot even if that directory does not.
+
+## Amendment N1 (dated 2026-11-08): the native agentic (direct) arm
+
+**Status:** drafted by claude under the owner's D107. **Pending:** independent review, then the owner's ratification. It takes effect only at ratification; no earlier record is reinterpreted.
+
+**What it settles:** plan item 43, the native questions: D29 (resolved by D106), the pending D09 remainder, D11–D14, D18 and D25, plus the native acceptance rows, canary and stop rule.
+- **Unchanged:** API-arm registrations, the A21 registration or its packet, and any historical decision or record.
+- **Values marked [proposed]** are the lead's defaults within the owner's D107. Ratifying this amendment ratifies them.
+
+### N1.1 Scope and condition
+- **The arm:** native agentic, also called the direct arm (Track N, D26), written under `claudecode_direct{,_core}/<label>/` (D27).
+- **Protocol axes, kept separate:**
+  - native shared generation **v1**;
+  - native renderer **26**;
+  - native receipt policy **v1**;
+  - execution authority **v2**;
+  - receipt checker **v4**.
+
+  The first native canary uses the **declared shared-v1 differences** (D91), not BC1 parity; BC1 parity is a follow-up.
+- **Schema:** the released 3.2.0 (D98, D99), once it has merged and the native integration has been re-validated on it.
+- **The receipt instrument:** v4 is primary (D105). v5 is not activated. Its tool-receipt origin and the offline full→core transformation receipts are reported as **secondary, non-gating** measurements, never pooled into v4 results.
+
+### N1.2 Runtime and account (D29, resolved by D106)
+- **Runtime:** the Claude Code CLI, with **effort `high` set explicitly** (`--effort high`). The thinking setting is recorded as observed.
+- **Account:** the owner's **LBL work Claude Max** first-party account, the one the v6 agentic arm used. **No API key, no CBORG route, no provider fallback.**
+- **D11:** the Claude Code **version and binary sha256 are pinned at registration**. A different binary is a different registration.
+- **The declared confound:** effort differs from the API arm, which runs at the provider default (D09). It's recorded, not corrected.
+
+### N1.3 The remaining owner items
+| Item | Ruling |
+|---|---|
+| **D09 remainder** | The direct-arm pause applies **only to the old generic_v9 arm**. It does not apply to this arm. |
+| **D12** | **Operator:** the owner, who holds the account and gives the launch word. **Orchestrator:** claude. **Review pair** for the registration and its packet: an independent Claude review plus an independent codex review. |
+| **D13** | The registration pins: the tool exposure (the allow-list), the exact launch argv and flags, the runtime-closure fix, and receipt-origin measurement. Any change is a new registration. |
+| **D14** | **The budget is subscription usage, not dollars.** The old spend package is re-validated against current evidence before the registration is built. The figures in N1.5 apply. |
+| **D18** | **A two-week time box** from the registration's date. After that it expires, and a new registration is needed. |
+| **D25** | **No native canary counts as a replicate.** A canary is descriptive feasibility evidence only. |
+
+### N1.4 Acceptance rows (from #4354, proved offline at U3–U6 and live at the canary)
+An attempt is accepted only if all of these hold on its saved, independently reconstructed result:
+1. **The selector and captured identities:** the prompt, playbook, schema, profile, source, context, runtime limits and arm are bound. Anything missing or conflicting is refused before an attempt is consumed.
+2. **The instruction:** the selected neutral rules each appear once, and it describes the actual typed-helper phases.
+3. **The supervisor boundary:**
+   - the immutable original full, core and effective receipts;
+   - every registered chunk and worker completed, negatives included;
+   - a source-first omission check, integration and an independently checked assembly;
+   - the exact requests and replies, and the phase transitions, captured.
+4. **The derived audit** is carried into reconciliation, with the role-bearing owner context. The core is re-derived, and the existing schema, pair, removal, attribution, evidence and recorder gates are preserved. The saved result reconstructs the assembly and binds it to this attempt.
+5. **The permission, authority, one-use reservation, timeout, signal, first-error, cleanup and readback contracts hold.**
+   - Unavailable measurements stay explicitly unavailable.
+   - A pending receipt floor is never a strict success.
+6. **The public native adapter path is the one exercised,** offline, including a correction path and an exact failed readback.
+7. **The native policy-v1 receipt floor holds on the final record.** It's a different estimand from the API arm's D37 phase-1 floor, and no API threshold is copied over.
+
+### N1.5 The first canary, its slice and its stop rule
+- **What:** **CHORUS, n = 1,** descriptive feasibility. It isn't counted as a replicate (D25).
+- **Start admission** [proposed]:
+  - the account's **seven-day utilisation is at most 0.50**, observed **no more than 300 s** before dispatch, which is the subscription guard's freshness bound;
+  - the status is not unknown, unsafe, overage or exhausted.
+
+  The observation is caller-supplied evidence, not authenticated account state. The threshold is a start-admission rule, **not a mid-run allowance.**
+- **The host:** keep-awake (`caffeinate -i`) for the attempt's duration. A quiet-window lock is held.
+- **The deadline** [proposed]: **6 hours of wall time** from dispatch.
+- **Stop at the first** of these:
+  - any acceptance-row failure or refusal;
+  - a usage-limit, overage or unknown account status;
+  - the deadline;
+  - a host sleep or loss of the keep-awake.
+
+  **A stopped attempt is not retried without a new owner word.**
+- **The launch word:** `AUTHORIZE_ONE_NATIVE_ATTEMPT`, binding the registration, the independent reviews, CI, the real-binary probe hashes and these stop terms. The real-binary permission probe is authorized separately, and that authorization isn't a generation word.
+
+### N1.6 Recording and comparison
+- **What is recorded:** the arm `claudecode_direct`, the instrument string (receipt checker v4 plus the D105 secondary measures), the effort literal and its basis, the binary version and sha256, and the account kind (first party, not named in public records).
+- **The cross-arm contrast** against the API arm follows §5, with the effort confound declared.
+- **Native-arm ratings stay deferred** until the native canary is accepted. Their route is option (a) of `native_rating_route_design_2026-11-05`, under a separately ratified rating registration.
+- **Sequencing (D93, D35):** native integration lands first, then A21 is rebuilt on native-integrated main. D35's freeze starts at that rebuilt registration.
