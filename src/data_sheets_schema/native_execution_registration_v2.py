@@ -454,7 +454,8 @@ def _authorizations(raw, value, *, review_path, ci_path, launch_word_path):
         raise ValueError('v2 review independence must be explicit')
     if review['decision'] != 'approved':
         raise ValueError('v2 review decision must be approved')
-    pass  # MA: deliberately removed refusal
+    if review['reviewer'] == review['author']:
+        raise ValueError('v2 review cannot approve its own author')
     ci = records['ci']
     c.exact(ci, set(binding) | {'kind', 'version', 'checks', 'workflow_event', 'workflow_ref',
         'workflow_sha256', 'tested_commit'}, 'v2 CI evidence')
