@@ -26,12 +26,12 @@ data_collection:
 data_processing:
   value: true
   # chunks: [c015]
-  evidence: "[chunks: c015] \"Each CSV file in this directory is a one-to-one mapping to the OMOP CDM tables.\" [chunks: c015] \"WaveForm DataBase (WFDB)\""
+  evidence: "[chunks: c015] \"Each CSV file in this directory is a one-to-one mapping to the OMOP CDM tables.\""
 
 processing_software:
   value: true
-  # chunks: [c004]
-  evidence: "[chunks: c004] \"REDCap is used for collecting patient- reported data from\\nquestionnaires  and  the  following  clinical  data  from  the\\nvisit: medications assessment, vitals, visual acuity, contrast\\nsensitivity, monofilament test results and CBC test results.\""
+  # chunks: [c007, c018]
+  evidence: "[needs_owner: true] [search_notes] \"D52 value retained. Review of the declared bundle: REDCap at 1005-1008 describes collection, not processing; FAIRhub at 1930-1931 is still developing. The healthsheet at 4409 says N/A - no labeling was performed; this is limited to labeling and does not negate other processing. Neither excerpt establishes actual use of processing software. Owner disposition required; quotations provide context only.\" [chunks: c007] \"problem, we are developing a cloud-based data management, curation\\nand sharing platform called FAIRhub\" [chunks: c018] \"N/A - no labeling was performed\""
 
 ml_training_dataset:
   value: true

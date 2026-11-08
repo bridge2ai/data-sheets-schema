@@ -10,9 +10,9 @@ human_subjects:
 
 regulated_access:
   value: true
-  # chunks: [c003, c004]
+  # chunks: [c003]
   # curator_assertion: true
-  evidence: "[curator_assertion: true; accepted by the owner's human review, D52, 2026-10-27] [chunks: c003] \"All participants must sign a licensing agreement included in the registration form before gaining\" [chunks: c004] \"access to the dataset\""
+  evidence: "[curator_assertion: true; accepted by the owner's human review, D52, 2026-10-27] [chunks: c003] \"CHoRUS Dataset\\n\\n• Retrospective data collection\\n\\n• Controlled access\""
 
 shared_dataset:
   value: true
@@ -26,13 +26,13 @@ data_collection:
 
 data_processing:
   value: true
-  # chunks: [c002]
-  evidence: "[chunks: c002] \"acquire data, standardize data to the OMOP Common Data Model, transform data using approaches that limit re-identification\""
+  # chunks: [c006]
+  evidence: "[chunks: c006] \"Current Released Dataset\\n50,000\\nPatient admissions from ICU, PICU, and NICU\\n1.6 Billion\\nRows of EHR OMOP data\""
 
 processing_software:
   value: true
-  # chunks: [c008]
-  evidence: "[chunks: c008] \"Open source code to geocode OMOP Location entities via DeGauss\""
+  # chunks: [c007]
+  evidence: "[chunks: c007] \"who have produced powerful open-source tooling for transforming and interacting with\\n\\nclinical data.\""
 
 ml_training_dataset:
   value: true

@@ -110,8 +110,8 @@ def test_project_context_evidence_chunk_grounding(
         assert "Butterworth" not in ctx["data_processing"]["evidence"]
         assert "Whisper" not in ctx["processing_software"]["evidence"]
     if filename == "ai_readi_context.yaml":
-        # D101: use the bundle's literal standard name, not the old paraphrase.
-        assert "WaveForm DataBase (WFDB)" in ctx["data_processing"]["evidence"]
+        # Round 3: a bare format name contributes no processing evidence.
+        assert "WaveForm DataBase (WFDB)" not in ctx["data_processing"]["evidence"]
         assert "one-to-one mapping to the OMOP CDM tables" in ctx["data_processing"]["evidence"]
     if filename == "kids_first_context.yaml":
         assert "Six Bridges" not in ctx["data_processing"]["evidence"]

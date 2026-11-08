@@ -1,8 +1,8 @@
 """D101 exact quotations with cited-chunk provenance; explicit unresolved states.
 
-Quotation validation is lexical, not an automatic entailment judgment. The two
-needs_owner cases remain visible and counted; they are not skips or accepted
-negative-value proofs. No fuzzy, case-folded or whitespace-normalized matching.
+Quotation validation is lexical, not an automatic entailment judgment. D103
+absence support and unresolved evidence are separately counted, never skipped.
+No fuzzy, case-folded or whitespace-normalized matching.
 """
 from collections import Counter
 from functools import lru_cache
@@ -18,7 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTEXTS = sorted((ROOT / 'data/context').glob('*_context.yaml'))
 PREDICATES = {'human_subjects', 'regulated_access', 'shared_dataset',
               'data_collection', 'data_processing', 'processing_software', 'ml_training_dataset'}
-NEEDS_OWNER = {('cm4ai_context', 'regulated_access'), ('kids_first_context', 'ml_training_dataset')}
+NEEDS_OWNER = {('ai_readi_context', 'processing_software')}
+ABSENCE_SUPPORTED = {('kids_first_context', 'ml_training_dataset')}
 OWNER_DECISIONS = {
     ('chorus_context', 'regulated_access'): "[curator_assertion: true; accepted by the owner's human review, D52, 2026-10-27]",
     ('kids_first_context', 'ml_training_dataset'): "[curator_assertion: true; set to false by the owner's human review, D52, 2026-10-27]",
@@ -36,9 +37,15 @@ def parse_evidence(evidence):
         remaining = remaining[match.end():]
     state, notes = 'quoted', None
     decoder = json.JSONDecoder()
-    if remaining.startswith('[needs_owner: true] [search_notes] '):
-        state = 'needs_owner'
-        remaining = remaining[len('[needs_owner: true] [search_notes] '):]
+    for candidate in ('needs_owner', 'absence_supported'):
+        prefix = f'[{candidate}: true] '
+        if remaining.startswith(prefix):
+            state = candidate
+            remaining = remaining[len(prefix):]
+            assert remaining.startswith('[search_notes] '), 'state requires notes'
+            break
+    if remaining.startswith('[search_notes] '):
+        remaining = remaining[len('[search_notes] '):]
         notes, end = decoder.raw_decode(remaining)
         assert isinstance(notes, str) and len(notes.strip()) >= 40, 'substantive search notes required'
         remaining = remaining[end:].lstrip()
@@ -110,7 +117,9 @@ def test_context_inventory_is_not_empty_or_partial():
             if state == 'needs_owner':
                 unresolved.add((path.stem, pred))
     assert unresolved == NEEDS_OWNER
-    assert counts == {'quoted': 40, 'needs_owner': 2}
+    assert counts['quoted'] == 40
+    assert counts['absence_supported'] == 1
+    assert counts['needs_owner'] == 1
     assert sum(counts.values()) == 42
 
 
@@ -141,10 +150,46 @@ def test_every_evidence_string_occurs_verbatim_in_its_bundle(path, predicate):
     entry = yaml.safe_load(path.read_text())[predicate]
     state, notes, owner = validate_quotes(entry['evidence'], source_chunks(path))
     key = (path.stem, predicate)
-    assert state == ('needs_owner' if key in NEEDS_OWNER else 'quoted')
+    assert state == ('needs_owner' if key in NEEDS_OWNER else
+                     'absence_supported' if key in ABSENCE_SUPPORTED else 'quoted')
     assert owner == OWNER_DECISIONS.get(key)
-    if state == 'needs_owner':
+    if state != 'quoted':
         assert notes and 'D52 value retained.' in notes
     # Explicitly retain every applicability decision, including the D52 negatives.
-    expected = key in {('cm4ai_context', 'human_subjects'), *NEEDS_OWNER}
+    expected = key in {('cm4ai_context', 'human_subjects'),
+                      ('cm4ai_context', 'regulated_access'), *ABSENCE_SUPPORTED}
     assert entry['value'] is (not expected)
+
+
+def test_absence_supported_search_is_reproducible():
+    import subprocess
+    path = ROOT / 'data/context/kids_first_context.yaml'
+    entry = yaml.safe_load(path.read_text())['ml_training_dataset']
+    state, notes, _, _ = parse_evidence(entry['evidence'])
+    assert state == 'absence_supported' and entry['value'] is False
+    record = (ROOT / 'scripts/adhoc/context_evidence_5517_r3_kids_first_search.txt').read_text()
+    command = json.loads(next(l.removeprefix('# Command (JSON argv): ') for l in record.splitlines()
+                              if l.startswith('# Command (JSON argv): ')))
+    assert command[:5] == ['rg', '--hidden', '--no-ignore', '-n', '-i']
+    assert command[-1] == 'notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt'
+    for term in ('artificial intelligence', 'deep learning', 'AI-ready', 'AI/ML'):
+        assert term in command[5]
+    assert 'research|resource' not in command[5]
+    digest = hashlib.sha256((ROOT / command[-1]).read_bytes()).hexdigest()
+    assert digest in record and digest in notes and command[5] in notes
+    result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True)
+    assert result.returncode == 0
+    assert record.split('# Matching lines: ', 1)[1].split('\n', 1)[1] == result.stdout
+    assert '1440:' in result.stdout and '1440' in notes and 'downstream use' in notes
+
+
+@pytest.mark.parametrize('state', ['needs_owner', 'absence_supported'])
+def test_explicit_states_require_notes_and_verbatim_quotes(state):
+    prefix = f'[{state}: true] '
+    quote = '[chunks: c001] "exact source"'
+    chunks = {'c001': 'exact source'}
+    for bad in (prefix + quote, prefix + '[search_notes] "short" ' + quote,
+                prefix + '[search_notes] "' + 'x' * 50 + '" [chunks: c001] "invented"'):
+        with pytest.raises(AssertionError):
+            validate_quotes(bad, chunks)
+    assert validate_quotes(prefix + '[search_notes] "' + 'x' * 50 + '" ' + quote, chunks)[0] == state

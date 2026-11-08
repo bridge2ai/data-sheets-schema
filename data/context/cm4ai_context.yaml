@@ -10,8 +10,8 @@ human_subjects:
 
 regulated_access:
   value: false
-  # chunks: [c012]
-  evidence: "[needs_owner: true] [search_notes] \"Searched the complete declared CM4AI bundle for access, restricted, unrestricted, public, download, license and embargo; inspected licensing, Dataverse access text and release limitations. Licensing alone does not establish absence of access gates; generic Dataverse UI is not a release-specific access assertion. Some datasets are described as under temporary pre-publication embargo. No unambiguous quotation supporting false was identified. D52 value retained.\" [chunks: c012] \"Data packages are licensed under Creative\\nCommons CC-BY-NC-SA 4.0 license terms31\""
+  # chunks: [c026]
+  evidence: "[search_notes] \"Current June 2026 deposited files are public under CC BY-NC-SA 4.0 and FDA Regulated: No. Considered CM4AI:3773-3774: \\\"A Data Access Committee will supervise ethical matters related to dataset\\\\ndistribution and potential dual licensing for commercial use.\\\" This future ethics/commercial-licensing role does not require research-access review. Considered external Perturb-seq embargoes at 7061-7064 and temporary pre-publication embargo at 7088: temporary withholding is not credentialing, DUA or DAC review. Commercial license negotiation (3771-3772), governance contact (7082-7083), generic Dataverse Request Access modals, and cell-line MTA (3215-3216) do not establish a data access gate. D52 value retained.\" [chunks: c026] \"Access:\\nAll\\nAll\\nPublic (10)\" [chunks: c026] \"License/Data Use Agreement\\nCC BY-NC-SA 4.0\" [chunks: c026] \"FDA Regulated:\\nNo\""
 
 shared_dataset:
   value: true
@@ -20,8 +20,8 @@ shared_dataset:
 
 data_collection:
   value: true
-  # chunks: [c004]
-  evidence: "[chunks: c004] \"We collected a proteomic SEC–MS dataset in the U2OS cell line according to a previously described procedure\""
+  # chunks: [c016]
+  evidence: "[chunks: c016] \"We use a combination of mapping techniques such as proteomic mass spectrometry, cellular imaging, and genetic perturbation via CRISPR/Cas9 to create a library of large-scale maps of cellular structure and function.\""
 
 data_processing:
   value: true
@@ -35,5 +35,5 @@ processing_software:
 
 ml_training_dataset:
   value: true
-  # chunks: [c020]
-  evidence: "[chunks: c020] \"Intended Use\\nThis dataset is intended for:\\nAI-ready datasets to support research in functional genomics\\nAI model training\""
+  # chunks: [c026]
+  evidence: "[chunks: c026] \"Intended Use\\nThis dataset is intended for:\\nAI-ready datasets to support research in functional genomics\\nAI model training\""
