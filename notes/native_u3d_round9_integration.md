@@ -80,7 +80,38 @@ lifecycle success requirements remain unmarked. A C-owned scheduling/captured
 interface decision is required; do not relax A's process-wide loader guard or
 hold its consumer finder across concurrent callbacks.
 
-## Remaining P3 dispositions
+## Full-suite migration findings (recorded before repair)
+
+The six complete baseline D/C cohorts ran at their recorded clean heads through
+`7b56b9fb0421e39aad85d887cbc2291a5a441b11`. Independent traceback review found:
+
+- **R9-5:** the fifteen-gate completeness test still passed the removed launcher
+  carrier. The production four-pure-helper refusal is correct. Supply genuine
+  loaded gate helpers before installing the test's process/network blockers;
+  retain all fifteen verdict assertions and the malformed-carrier regressions.
+- **R9-6:** native receipt/provenance adapters still import orchestration writers
+  from pure `native_shared_capture`. The native branches in `receipts.py`,
+  `cli/receipts.py` and `cli/provenance.py` are explicitly in D's original scope.
+  Repoint only those imports and the two corresponding fixture patch targets.
+  Twelve CLI cases and two unchecked-receipt cases expose the stale targets.
+- **R9-7:** two permission derivation tests use ordinarily imported consumer
+  classes with a genuine A-loaded C projection. Migrate the test's module scope
+  to the verified consumer; retain all 25-classification, carrier-validation,
+  byte-parity and call-count assertions. Do not relax exact-class checks.
+- **R9-8:** ten capability tests fail before their bodies because another test
+  leaves a foreign bare `prepare_registration` alias. Use the existing explicit
+  test-isolation fixture; retain production's foreign-origin refusal.
+
+Repairs and focused verification are recorded at their exact heads in the
+external Round 9 report. Full baseline results are not relabeled as final-head
+runs. These findings are local issue records because GitHub writes are barred.
+
+The later `2026-11-08T03:50Z` ruling assigns the approved R9-3 two-reader patch
+to A round 6 and R9-4 main-thread callback preloading to C round 7. D round 10
+will merge those reviewed heads and complete integrated validation. Neither
+repair is applied on this Round 9 branch; A's loader and guard remain unchanged.
+
+## Remaining P3 dispositions (unchanged)
 
 P3-1/3/5/6/7 are D repairs and regressions. Incoming A5 addresses P3-2 and
 documents the P3-8 single-threaded precondition. P3-4 is partial: D's normal

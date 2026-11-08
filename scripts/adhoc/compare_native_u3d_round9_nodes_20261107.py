@@ -28,6 +28,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--before', type=Path, required=True)
     parser.add_argument('--after', type=Path, nargs='+', required=True)
+    parser.add_argument('--recheck', type=Path, nargs='+', default=[],
+                        help='Explicit later runs; archive every replaced baseline outcome.')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     before = read(args.before)
@@ -37,6 +39,16 @@ def main():
             if key in after and after[key] != status:
                 raise ValueError('conflicting final cohort results for: ' + key)
             after[key] = status
+    rechecked, replacements = {}, []
+    for path in args.recheck:
+        for key, status in read(path).items():
+            if key in rechecked and rechecked[key] != status:
+                raise ValueError('conflicting explicit recheck results for: ' + key)
+            rechecked[key] = status
+    for key, status in sorted(rechecked.items()):
+        replacements.append({'node': key, 'baseline': after.get(key, 'not_in_cohort'),
+                             'recheck': status})
+        after[key] = status
     groups = {
         'former_setup_errors': {key: status for key, status in before.items() if status == 'error'},
         'former_lifecycle_failures': {key: status for key, status in before.items()
@@ -46,7 +58,8 @@ def main():
     }
     result = {'kind': 'native_u3d_round9_node_identity_ledger', 'version': 1,
               'inputs': [{'path': str(path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
-                         for path in (args.before, *args.after)], 'groups': {}}
+                         for path in (args.before, *args.after, *args.recheck)],
+              'explicit_rechecks': replacements, 'groups': {}}
     for name, nodes in groups.items():
         rows = [{'node': key, 'before': nodes[key], 'after': after.get(key, 'missing')}
                 for key in sorted(nodes)]

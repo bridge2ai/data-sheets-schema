@@ -16,10 +16,11 @@ from data_sheets_schema import native_execution_capabilities as capabilities
 from data_sheets_schema import native_execution_orchestration as engine
 from data_sheets_schema import native_shared_execution_orchestration as execute
 from data_sheets_schema import native_gate_engine as gates
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: F401
 
 
 @pytest.fixture
-def dependencies():
+def dependencies(isolated_modules):
     return authority.dependency_identity()
 
 

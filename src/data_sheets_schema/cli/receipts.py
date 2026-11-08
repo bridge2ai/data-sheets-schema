@@ -106,7 +106,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     from data_sheets_schema import receipts as rc
 
     if native_capture is not None:
-        from data_sheets_schema import native_shared_capture
+        from data_sheets_schema import native_shared_capture_orchestration as native_shared_capture
         try:
             p = native_shared_capture.selected_receipt_paths(native_shared_selection)
         except (OSError, ValueError) as exc:
@@ -238,7 +238,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             # The ordinary path remains the sealed original. Native final
             # claims must use the same reconstructed effective receipt as the
             # checked block, before either output is changed.
-            from data_sheets_schema import native_shared_capture
+            from data_sheets_schema import native_shared_capture_orchestration as native_shared_capture
             try:
                 claims = native_shared_capture.recorded_receipt_claims(None, record=record,
                     full_path=p["full"], receipt_path=receipt_file,

@@ -48,10 +48,10 @@ def test_unchecked_or_final_assessment_refused(change):
 @pytest.mark.parametrize('mutation', [None, 'missing', 'open', 'duplicate', 'snippet', 'date'])
 def test_cli_initial_json(declaration, monkeypatch, registered, mutation):
     # Real selection/registration capture; supplied assessment tests the CLI
-    # exit/JSON boundary. Importing the real path owner still requires B, so
-    # these tests remain blocked until that merge. Real predicates run above.
+    # exit/JSON boundary. Patch the actual orchestration path owner; real
+    # receipt predicates run above, while this test isolates CLI routing.
     selected(declaration, registered=registered)
-    from data_sheets_schema import native_shared_capture
+    from data_sheets_schema import native_shared_capture_orchestration as native_shared_capture
     from pathlib import Path
     root = Path(declaration['stage_root']).parent
     paths = {'full': root / 'full.yaml', 'receipt': root / 'receipt.yaml',
@@ -105,8 +105,7 @@ def test_initial_structure_refuses_write_with_selection(tmp_path):
 
 
 def test_date_status_can_be_reported_as_failed_json():
-    # The actual CLI serialization is additionally exercised by its date case
-    # once the real B owner is available; no B stand-in is installed here.
+    # The actual CLI serialization is additionally exercised by its date case.
     result = rc.initial_structure_result(assessment('date'))
     assert not result['structure_passed']
     assert '2026-11-07' in json.dumps(result, sort_keys=True, default=str)
@@ -114,7 +113,7 @@ def test_date_status_can_be_reported_as_failed_json():
 
 @pytest.mark.parametrize('error', [TypeError('bad chunks'), KeyError('missing chunk')])
 def test_native_block_model_errors_are_unchecked(declaration, monkeypatch, tmp_path, error):
-    from data_sheets_schema import native_shared_capture
+    from data_sheets_schema import native_shared_capture_orchestration as native_shared_capture
     spec = selected(declaration, registered=True)
     def broken(*args, **kwargs):
         raise error

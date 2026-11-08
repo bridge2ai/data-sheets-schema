@@ -862,7 +862,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        selected_manifest=selected_manifest,
                        chunk_manifest=Path(chunk_manifest) if chunk_manifest else None)
     if registered is not None and registered.native_shared_generation_version:
-        from data_sheets_schema.native_shared_capture import live_provenance_block
+        from data_sheets_schema.native_shared_capture_orchestration import live_provenance_block
         from data_sheets_schema.native_shared_render import validate_spec
         native_selection = validate_spec(registered)
         rec.data["native_shared_generation"] = live_provenance_block(

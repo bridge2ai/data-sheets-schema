@@ -2691,7 +2691,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         # Native evidence is captured by its own observer. API snapshot-store
         # fallback would join different originals and must remain unreachable.
         try:
-            from . import native_shared_capture as native_capture
+            from . import native_shared_capture_orchestration as native_capture
             if snapshot_record is not None:
                 checked = native_capture.recorded_receipt_block(snapshot_spec, record=snapshot_record,
                     full_path=full_path, receipt_path=receipt)

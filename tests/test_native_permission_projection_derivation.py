@@ -15,6 +15,7 @@ from data_sheets_schema import native_shared_effects as effects
 from data_sheets_schema import native_shared_permissions as p
 from data_sheets_schema import native_shared_permission_orchestration as permission_orchestration
 from tests.test_native_shared_permissions import fixture, get, prohibit_real_transports
+from tests.utils.native_shared_consumer_scope import loaded_consumer
 
 
 def previous_view(expected, selection, launch, session, context, *, state='awaiting_response', read=False,
@@ -199,10 +200,6 @@ def test_actual_twenty_five_classifications_keep_independent_view_and_classifier
         counters['bash'] += 1
         return actual_bash(*args, **kwargs)
 
-    monkeypatch.setattr(p, '_recipe_data', recipe)
-    monkeypatch.setattr(effects, 'classify_effect', effect)
-    monkeypatch.setattr(p.command_policy, 'classify_bash', bash)
-
     def run(view_function):
         counters.clear()
         views, results = [], []
@@ -215,8 +212,14 @@ def test_actual_twenty_five_classifications_keep_independent_view_and_classifier
         assert len({id(view) for view in views}) == 25
         return c.canonical(results), counters.copy()
 
-    previous, old_counts = run(previous_view)
-    current, new_counts = run(actual_view)
+    # Restore delegating spies before A checks the source-loaded modules on
+    # scope exit; the assertions still observe the actual consumer bodies.
+    with monkeypatch.context() as patch:
+        patch.setattr(p, '_recipe_data', recipe)
+        patch.setattr(effects, 'classify_effect', effect)
+        patch.setattr(p.command_policy, 'classify_bash', bash)
+        previous, old_counts = run(previous_view)
+        current, new_counts = run(actual_view)
     assert current == previous and new_counts == old_counts
     assert new_counts['recipe'] == 25
     assert new_counts['effect'] > 0 and new_counts['bash'] > 0
@@ -489,6 +492,17 @@ def test_derived_factory_is_fresh_after_mutation_and_keeps_first_refusal(inputs,
 
 
 @pytest.fixture
-def controls():
-    with permission_orchestration.loaded_permission_inputs() as (loaded, _controller_sources):
-        yield loaded
+def controls(fixture):
+    # Complete the genuine saved-observation fixture before entering the
+    # loader scope. The two classifier tests must use the same verified
+    # contract/effect/policy classes as C's loader-minted projection; rebinding
+    # these test-module aliases never substitutes a production module or mint.
+    with permission_orchestration.loaded_permission_inputs() as (loaded, _controller_sources), \
+            loaded_consumer('native_shared_permissions') as consumer:
+        contract, effect_module = consumer._dependencies()
+        assert consumer.command_policy.pure_controls.require_controls(loaded) is loaded
+        with pytest.MonkeyPatch.context() as aliases:
+            aliases.setitem(globals(), 'p', consumer)
+            aliases.setitem(globals(), 'c', contract)
+            aliases.setitem(globals(), 'effects', effect_module)
+            yield loaded

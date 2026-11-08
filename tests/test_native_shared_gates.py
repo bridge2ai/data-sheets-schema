@@ -26,6 +26,7 @@ from data_sheets_schema.native_shared_capture import _CapturedRun, _Reader
 from tests.test_native_shared_selection import declaration, pin, save
 from tests.test_source_attribution_preflight import inputs
 from tests.test_native_shared_phase import Trace
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: F401
 
 
 def artifact(role, path, raw):
@@ -51,8 +52,20 @@ def replace_pool(run, items):
     return replace(run, pool=captured, reader=_Reader(run.selection, pool=captured))
 
 
+@pytest.fixture
+def pure_gate_members(isolated_modules):
+    from data_sheets_schema import native_execution_authority_v2 as authority
+    from data_sheets_schema import native_execution_capabilities as capabilities
+    with capabilities.loaded_capabilities(authority.dependency_identity()) as controls:
+        yield controls.gate_members
+
+
 @pytest.fixture(autouse=True)
-def no_execution(monkeypatch):
+def no_execution(monkeypatch, request):
+    # Local Git/source verification precedes the process guard. The actual
+    # consumer and all fifteen gates still execute with that guard installed.
+    if 'pure_gate_members' in request.fixturenames:
+        request.getfixturevalue('pure_gate_members')
     def refused(*args, **kwargs):
         pytest.fail('native gate adapter executed a process or transport')
     for name in ('run', 'Popen', 'check_output'):
@@ -213,12 +226,12 @@ def test_saved_gate_requires_every_fresh_replay_obligation(field):
     with pytest.raises(ValueError, match='complete native'): gates.saved_gate(prepared)
 
 
-def test_all_fifteen_gates_remain_present_on_incomplete_capture():
+def test_all_fifteen_gates_remain_present_on_incomplete_capture(pure_gate_members):
     from tests.test_native_execution_gates import selected as stream_fixture
     prepared, runtime = stream_fixture()
-    # Deliberately incomplete controls: all gates must be retained, and missing
+    # Deliberately incomplete evidence: all gates must be retained, and missing
     # authority must fail within its own gate rather than disappear.
-    result = gates.check(prepared, {}, runtime, {'run_direct_canary': None}, exit_code=0, shutdown=None,
+    result = gates.check(prepared, {}, runtime, pure_gate_members, exit_code=0, shutdown=None,
         live={}, first_stop=None, runtime_authority={'passed': False}, keep_awake={'passed': False})
     assert tuple(result) == gates.GATES and len(result) == 15
     assert result['terminal']['passed'] is True
