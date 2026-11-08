@@ -8,7 +8,7 @@ from contextlib import contextmanager, ExitStack
 from dataclasses import asdict, dataclass
 from inspect import isfunction
 import sys
-from threading import current_thread, main_thread
+from threading import current_thread, main_thread, RLock
 
 from . import native_execution_authority_v2 as authority
 from . import native_shared_controls_orchestration as loading
@@ -20,6 +20,17 @@ from .native_shared_callback_capture import FrozenSpec
 def require_main_thread():
     if current_thread() is not main_thread():
         raise ValueError('native callback cannot load captures; preload on the main thread at admission')
+
+
+@contextmanager
+def _locked_stack(lock):
+    """Never revoke a carrier or unwind a loader while a callback uses it."""
+    stack = ExitStack()
+    try:
+        yield stack
+    finally:
+        with lock:
+            stack.close()
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,15 +86,18 @@ class Classifier:
     _controls: object
     _lookup: object
     _simple_command: object
+    _lock: object
 
     def classify(self, command, python, programs, policy):
-        self._require(self._controls)
-        return self._classify(command, python, programs, policy,
-                              classifier_projection=self._controls)
+        with self._lock:
+            self._require(self._controls)
+            return self._classify(command, python, programs, policy,
+                                  classifier_projection=self._controls)
 
     def readonly(self, command, lookups):
-        self._require(self._controls)
-        return self._lookup(command, lookups, self._simple_command)
+        with self._lock:
+            self._require(self._controls)
+            return self._lookup(command, lookups, self._simple_command)
 
 
 def _function(module, name):
@@ -92,10 +106,11 @@ def _function(module, name):
 
 
 @contextmanager
-def preloaded_classifier(dependencies):
+def preloaded_classifier(dependencies, *, _lock=None):
     """Keep A's verified carrier alive until all callback workers have joined."""
     require_main_thread()
-    with ExitStack() as stack:
+    lock = RLock() if _lock is None else _lock
+    with _locked_stack(lock) as stack:
         controls = stack.enter_context(loading.loaded_controls(dependencies))
         pins = dependencies['base']['package_sources']
         pure = stack.enter_context(authority.loaded_verified_package_module(
@@ -105,9 +120,9 @@ def preloaded_classifier(dependencies):
         selected = Classifier(_function(policy, 'classify_bash'),
             _function(pure, 'require_controls'), controls,
             controls['native_readonly'].lookup_command,
-            controls['native_command_policy']._simple_command)
-        with _worker_load_guard(dependencies):
-            yield selected
+            controls['native_command_policy']._simple_command, lock)
+        stack.enter_context(_worker_load_guard(dependencies))
+        yield selected
         require_main_thread()
         selected._require(controls)
 
@@ -180,8 +195,9 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
     prepared = c.strict_json(preparation_raw, max_bytes=c.HARD_LIMITS['request_bytes'])['registration']
     arguments = registration._rebuild_inputs(execution, preparation_raw)
     arguments.pop('preparation_raw')
-    with ExitStack() as stack:
-        classifier = stack.enter_context(preloaded_classifier(dependencies))
+    lock = RLock()
+    with _locked_stack(lock) as stack:
+        classifier = stack.enter_context(preloaded_classifier(dependencies, _lock=lock))
         modules = {}
         for short in ('native_shared_callback_capture', 'native_shared_callback_io', 'native_shared_capture',
                       'native_shared_selection', 'native_shared_streams', 'native_shared_effects',
@@ -261,7 +277,7 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
             _module(modules['native_shared_policy'], ('stage_overlay_governs',)),
             _function(modules['audit_omissions'], '_mapping'), state, phase,
             modules['native_shared_receipts']._ReceiptCatalogContext())
-        with _worker_load_guard(dependencies):
-            yield callbacks
+        stack.enter_context(_worker_load_guard(dependencies))
+        yield callbacks
         require_main_thread()
         source_check()

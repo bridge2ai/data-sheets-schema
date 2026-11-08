@@ -77,6 +77,9 @@ class Admission:
     controls: object
     check_sources: object
 
+    def check_active(self):
+        require_admission(self)
+
     def reconstruct(self):
         require_admission(self)
         self.check_sources()

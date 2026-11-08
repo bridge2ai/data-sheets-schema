@@ -239,6 +239,7 @@ class CallbackAdapter:
             # without admission. A worker never takes that loading route.
             callback_loading.require_main_thread()
             return None
+        resources.admission.check_active()
         if (self.state is not resources.state or self.phase is not resources.phase
                 or self._receipt_catalogs is not resources.catalogs
                 or self._classifier is not resources.classifier):
@@ -374,6 +375,13 @@ class CallbackAdapter:
         return current_effect_view(run, correction_window=bool(self.state.checks), exclude_pending=exclude_pending)
 
     def observe(self, event):
+        resources = self._callback_resources()
+        if resources is None:
+            return self._observe(event)
+        with resources.classifier._lock:
+            return self._observe(event)
+
+    def _observe(self, event):
         resources = self._callback_resources()
         if resources is not None:
             capture, captured = resources.capture, resources.captured
@@ -524,6 +532,12 @@ class CallbackAdapter:
         return self._classifier.classify(command, python, programs, selected_policy)
 
     def report(self, *, complete=False):
+        if hasattr(self, '_classifier_scope'):
+            with self._classifier._lock:
+                return self._report_and_close(complete=complete)
+        return self._report(complete=complete)
+
+    def _report_and_close(self, *, complete=False):
         try:
             return self._report(complete=complete)
         finally:

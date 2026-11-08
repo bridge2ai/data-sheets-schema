@@ -127,13 +127,53 @@ def test_captured_input_pin_is_rechecked_before_reconstruction(tmp_path):
         check()
 
 
-def work(historical, kind, callback):
+def test_main_thread_teardown_waits_for_active_historical_worker(isolated_modules):
+    """Deterministic handshake: revocation cannot precede callback release."""
+    lock = threading.RLock()
+    inside, closing = threading.Event(), threading.Event()
+    order = []
+
+    class ObservedLock:
+        def __enter__(self):
+            if threading.current_thread() is threading.main_thread():
+                closing.set()
+            lock.acquire()
+        def __exit__(self, *exc):
+            lock.release()
+
+    def callback():
+        with lock:
+            inside.set()
+            assert closing.wait(5), 'teardown never acquired the callback lock'
+            assert order == [], 'loader was revoked while callback was active'
+            order.append('callback finished')
+        return 'finished'
+
+    with authority.loaded_dependencies(authority.dependency_identity()):
+        historical = sys.modules['native_control']
+        with preload._locked_stack(ObservedLock()) as stack:
+            stack.callback(lambda: order.append('loader closed'))
+            worker = start_work(historical, 'observer', callback)
+            assert inside.wait(5)
+        worker._work_thread.join(timeout=5)
+        assert not worker._work_thread.is_alive()
+        _, result = worker._work_replies.get_nowait()
+        assert result == 'finished'
+    assert order == ['callback finished', 'loader closed']
+
+
+def start_work(historical, kind, callback):
     worker = object.__new__(historical.NativeControl)
     worker._stopped = threading.Event()
     worker._publication_lock = threading.Lock()
     worker._active_work = None
     worker._work_replies = queue.Queue(maxsize=1)
     worker._start_work(kind, None, callback)
+    return worker
+
+
+def work(historical, kind, callback):
+    worker = start_work(historical, kind, callback)
     worker._work_thread.join(timeout=10)
     assert not worker._work_thread.is_alive()
     _, result = worker._work_replies.get_nowait()
