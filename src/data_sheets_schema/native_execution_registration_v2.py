@@ -188,7 +188,7 @@ def _wire(raw):
     identity = authority.dependency_identity()
     authority.require_committed(identity)
     with authority.loaded_dependencies(identity) as controls:
-        inner = value['registration']  # MG: skipped pinned wire check
+        inner = controls['prepare_registration_v2'].require_envelope(value)
     return inner, identity
 
 
