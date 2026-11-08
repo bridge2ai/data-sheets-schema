@@ -1,11 +1,9 @@
 """U3-D fixed A interface and remaining handoff requirements, 2026-11-07.
 
 Synthetic builder tests check only argument forwarding and preparation binding.
-They cannot establish C/D admission. Existing positive integration requirements
-remain unchanged; the real current consumer graph is independently refused.
-The six earlier builder-forwarding/binding assertions stay executable and fail
-in round eight: the fixed A inputs cannot supply C's live classifier projection.
-They are not replaced with a fabricated projection or a passing skip.
+They cannot establish C/D admission. Real consumer execution is independently
+required by the registration and permission integration tests. The six earlier
+forwarding/binding assertions retain their exact preparation-byte obligations.
 """
 from copy import deepcopy
 import os
@@ -24,7 +22,7 @@ from tests.test_native_execution_registration_v2 import isolated_modules  # noqa
 REBUILD_INPUTS = (
     'preparation_raw', 'composition_path', 'system_path', 'permission_probe_path',
     'attempt_id', 'attempt_directory', 'evidence_directory', 'max_draft_checks',
-    'receipt_origin_version',
+    'receipt_origin_version', 'classifier_projection',
 )
 
 
@@ -34,28 +32,27 @@ def test_actual_consumer_signatures_match_a3_input_only_contract():
                          ('fresh', 'extra_protected'))
 
 
-def test_actual_consumer_graph_refuses_before_loading_or_effects(tmp_path, monkeypatch, isolated_modules):
+def test_actual_consumer_graph_loads_without_reservation_or_effects(tmp_path, monkeypatch, isolated_modules):
     # Capture real local package pins before installing effect traps. No graph,
     # source bytes, refusal verdict or loader result is replaced by a fixture.
     dependencies = authority.dependency_identity()
     touched = []
 
     def forbidden(*args, **kwargs):
-        touched.append('effect or consumer compilation')
-        pytest.fail('current A3 graph refusal must precede effects and compilation')
+        touched.append('effect')
+        pytest.fail('consumer loading must not reserve or publish')
 
     with monkeypatch.context() as patch:
-        patch.setattr(authority, 'verified_source_module', forbidden)
-        patch.setattr(registration, '_registration_body', forbidden)
         for name in ('run', 'Popen', 'check_output', 'check_call', 'call'):
             patch.setattr(subprocess, name, forbidden)
         for name in ('mkdir', 'write_bytes', 'write_text'):
             patch.setattr(Path, name, forbidden)
         for name in ('mkdir', 'makedirs', 'rename', 'replace', 'unlink'):
             patch.setattr(os, name, forbidden)
-        with pytest.raises(ValueError, match='consumer cannot import verifier bootstrap boundary'):
-            with admission._consumer(dependencies):
-                pytest.fail('current consumer graph unexpectedly admitted')
+        with admission._consumer(dependencies) as loaded:
+            assert loaded.rebuild_v2_body.__code__.co_filename == str(
+                authority.ROOT / 'src/data_sheets_schema/native_shared_registration.py')
+            assert loaded.execution_paths_v2.__code__.co_filename == loaded.rebuild_v2_body.__code__.co_filename
     assert touched == []
     assert list(tmp_path.iterdir()) == []
 
@@ -71,7 +68,7 @@ def synthetic_reconstruction(tmp_path, monkeypatch):
         permission_probe_path=tmp_path / 'permission.json', attempt_id='one-attempt',
         attempt_directory=tmp_path / 'one-attempt',
         evidence_directory=tmp_path / 'evidence', max_draft_checks=2,
-        receipt_origin_version=1)
+        receipt_origin_version=1, classifier_projection=object())
     events = []
     supplied = []
     result = {'preparation_raw_json': preparation_raw.decode('utf-8'),
@@ -96,7 +93,8 @@ def test_input_only_rebuild_forwards_inputs_and_reconstructs_each_call(synthetic
     first = registration.rebuild_v2_body(**inputs)
     second = registration.rebuild_v2_body(**inputs)
     assert events == ['gates', 'builder', 'gates', 'builder']
-    wanted = {key: value for key, value in inputs.items() if key != 'preparation_raw'}
+    wanted = {key: value for key, value in inputs.items() if key != 'classifier_projection'}
+    wanted.update(controls=inputs['classifier_projection'], controller_sources=registration.controller_sources())
     assert supplied == [wanted, wanted]
     assert first == {**expected, 'synthetic_reconstruction_number': 1}
     assert second == {**expected, 'synthetic_reconstruction_number': 2}
@@ -140,7 +138,8 @@ def test_reservations_require_explicit_extra_protected():
 
 def test_fixed_a_entry_refuses_missing_projection_before_builder_or_effects(synthetic_reconstruction):
     inputs, events, supplied, _ = synthetic_reconstruction
-    with pytest.raises(ValueError, match='no explicit C classifier projection handoff'):
+    inputs['classifier_projection'] = None
+    with pytest.raises(ValueError, match='explicit classifier projection'):
         registration.rebuild_v2_body(**inputs)
     assert events == supplied == []
     assert not inputs['attempt_directory'].exists()

@@ -6,7 +6,9 @@ No authority is placed in serialized preparation or hidden process state.
 from . import native_execution_authority_v2 as authority
 from . import native_execution_registration_v2 as execution_v2
 from . import native_shared_contract as c
-from . import native_shared_controller as composition
+from . import native_shared_controller_orchestration as composition
+from . import native_shared_controller as captured_composition
+from . import native_shared_controls_orchestration as control_loading
 from . import native_shared_registration as consumer
 from . import native_shared_permission_orchestration as permission_inputs
 from .native_shared_registration import (
@@ -27,17 +29,20 @@ def _require_integrated_gate_implementation():
 
 
 def _registration_body(composition_path, system_path, **kwargs):
+    consumer.validate_arguments(composition_path, system_path, **kwargs)
     _require_integrated_gate_implementation()
     raw = consumer._read(composition_path, 'composition', c.HARD_LIMITS['request_bytes'])
     selected, _, _ = composition.reconstruct_composition(raw)
     preparation_raw = selected['preparation_raw_json'].encode('utf-8')
-    job_id = composition.captured_preparation_body(preparation_raw)['job_id']
+    job_id = captured_composition.captured_preparation_body(preparation_raw)['job_id']
     prepared = execution_v2.verify_preparer(preparation_raw, job_id=job_id)
     dependencies = authority.dependency_identity()
     if prepared['dependencies'] != dependencies or selected['dependencies'] != dependencies:
         raise ValueError('execution preparation differs from current v2 authority')
-    with permission_inputs.loaded_permission_inputs() as (controls, controller_sources):
-        value = consumer._registration_body(composition_path, system_path,
+    with permission_inputs.loaded_permission_inputs(dependencies) as (controls, controller_sources), \
+            authority.loaded_verified_package_module('data_sheets_schema.native_shared_registration',
+                package_sources=dependencies['base']['package_sources']) as verified_consumer:
+        value = verified_consumer._registration_body(composition_path, system_path,
             preparation_raw=preparation_raw, controls=controls,
             controller_sources=controller_sources, **kwargs)
     if (authority.dependency_identity() != dependencies
@@ -91,4 +96,6 @@ def verified_v2_body(body_raw, *, preparation_raw):
 
 def verified(raw):
     """Explicit v2 outer-envelope verifier; no historical fallback."""
-    return execution_v2.verified(raw)
+    dependencies = authority.dependency_identity()
+    with control_loading.loaded_controls(dependencies) as controls:
+        return execution_v2.verified(raw, classifier_projection=controls)

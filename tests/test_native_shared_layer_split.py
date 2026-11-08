@@ -1,4 +1,4 @@
-"""D-owned adapter edges stay separate from host orchestration (U3-D r8).
+"""D-owned adapter edges stay separate from host orchestration (U3-D r9).
 
 This source-level boundary covers deferred imports too. Transitive C acceptance
 is a separate, still executable integration requirement, not certified here.
@@ -21,7 +21,8 @@ FORBIDDEN = {
 
 
 @pytest.mark.parametrize('module', ['native_gate_engine', 'native_shared_gates',
-    'native_shared_gate_primitives', 'native_shared_results', 'native_shared_publication'])
+    'native_shared_gate_primitives', 'native_shared_runtime_values',
+    'native_shared_results', 'native_shared_publication'])
 def test_consumer_owns_no_deferred_verifier_legacy_or_orchestration_import(module):
     tree = ast.parse((PACKAGE / (module + '.py')).read_text())
     imported = set()

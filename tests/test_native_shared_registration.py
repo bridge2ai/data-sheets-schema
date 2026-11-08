@@ -9,15 +9,16 @@ from copy import deepcopy
 
 import pytest
 
-from tests.test_native_shared_controller import bound, native_spec, declaration
+from tests.test_native_shared_controller import bound, native_spec, declaration, synthetic_declaration
 from tests.test_native_shared_permissions import fabricated_manifest
 from data_sheets_schema import native_shared_contract as c
-from data_sheets_schema import native_shared_controller as composition
+from data_sheets_schema import native_shared_controller_orchestration as composition
 from data_sheets_schema import native_shared_registration_orchestration as registration
 from data_sheets_schema import native_shared_policy as policy
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_execution_registration_v2 as execution_v2
 from tests.test_native_execution_registration_v2 import inputs, isolated_modules
+from tests.utils.native_shared_consumer_scope import command_guidance, observe_consumer_calls
 
 _SUBPROCESS = {name: getattr(subprocess, name) for name in ('run', 'Popen', 'check_output')}
 
@@ -39,7 +40,7 @@ def execution(bound, tmp_path, monkeypatch):
     output = tmp_path.resolve() / 'evidence'
     dependencies = authority.dependency_identity()
     expected = registration.permission_expectation(c.strict_json(runtime.read_bytes()), selected, spec,
-        system.read_text() + policy.command_guidance(selected['policy']), attempt/'cli_config', dependencies)
+        system.read_text() + command_guidance(selected['policy']), attempt/'cli_config', dependencies)
     manifest = fabricated_manifest(expected, cap.document(), tmp_path.resolve()/'invented-probe', spec.bundle.read_bytes())
     probe = tmp_path.resolve() / 'fabricated-observations.json'; probe.write_bytes(c.canonical(manifest))
     args = {'composition_path': comp, 'system_path': system, 'permission_probe_path': probe,
@@ -49,7 +50,11 @@ def execution(bound, tmp_path, monkeypatch):
 
 def test_closed_registration_checks_actual_selected_policy_and_does_not_reserve(execution):
     args, selected, expected = execution
-    value = registration.registration(**args)
+    targets = {('native_shared_registration', name): ()
+               for name in ('_registration_body', 'command')}
+    with observe_consumer_calls(targets) as calls:
+        value = registration.registration(**args)
+    assert set(targets) <= {key for key, _ in calls}
     raw = c.canonical(value)
     body = value['registration']
     assert value['authority_version'] == 2
@@ -110,17 +115,17 @@ def test_consumer_rederives_every_closed_body_field(execution, change, monkeypat
 
 
 def test_consumer_does_not_cache_permission_acceptance(execution, monkeypatch):
-    from data_sheets_schema import native_shared_permissions as permissions
     args, _, _ = execution
     body = registration.registration(**args)['registration']
     raw = c.canonical(body)
     prepared = body['preparation_raw_json'].encode()
     assert registration.verified_v2_body(raw, preparation_raw=prepared) == body
-    def refuse(*args, **kwargs):
-        raise ValueError('fresh permission classification refused')
-    monkeypatch.setattr(permissions, 'verify_saved_probe', refuse)
-    with pytest.raises(ValueError, match='fresh permission'):
-        registration.verified_v2_body(raw, preparation_raw=prepared)
+    target = ('native_shared_permissions', 'verify_saved_probe')
+    with observe_consumer_calls({target: ()},
+            refuse=(target, ValueError('fresh permission classification refused'))) as calls:
+        with pytest.raises(ValueError, match='fresh permission'):
+            registration.verified_v2_body(raw, preparation_raw=prepared)
+    assert [key for key, _ in calls] == [target]
 
 
 def test_paths_include_stage_and_refuse_spent_or_overlapping_reservations(execution):

@@ -141,16 +141,16 @@ def test_v2_signal_is_sticky_and_previous_handlers_are_restored(execution_case, 
 def test_v2_injected_transport_timeout_keeps_registered_limit_and_failure(execution_case, monkeypatch):
     """Inject the transport timeout; no native or Python peer is dispatched."""
     from tests.test_native_execution import fake_observation
+    from data_sheets_schema import native_execution_orchestration as lifetime
     case = execution_case
     monkeypatch.setattr(execute, '_probe_runtime', fake_observation)
     calls = []
-    with authority.loaded_dependencies(case['value']['dependencies']) as controls:
-        def timeout(argv, **kwargs):
-            calls.append((argv, kwargs['deadline_seconds']))
-            assert kwargs['deadline_seconds'] == case['value']['runtime']['deadline_seconds'] == 900
-            raise subprocess.TimeoutExpired(argv, kwargs['deadline_seconds'])
-        monkeypatch.setattr(controls['run_native_canary'], 'execute_child', timeout)
-        result = execute.launch(case['raw'], **case['kwargs'])
+    def timeout(controls, argv, **kwargs):
+        calls.append((argv, kwargs['deadline_seconds']))
+        assert kwargs['deadline_seconds'] == case['value']['runtime']['deadline_seconds'] == 900
+        raise subprocess.TimeoutExpired(argv, kwargs['deadline_seconds'])
+    monkeypatch.setattr(lifetime, '_execute_child', timeout)
+    result = execute.launch(case['raw'], **case['kwargs'])
     assert calls == [(case['value']['argv'], 900)]
     assert result['state'] == 'failed' and result['runtime_gates_passed'] is False
     assert 'TimeoutExpired' in result['first_stop']

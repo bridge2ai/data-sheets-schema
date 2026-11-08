@@ -17,12 +17,13 @@ from tests.native_shared_fixture import build_native_fixture
 from tests.test_native_shared_permissions import fabricated_manifest
 from tests.test_native_execution import fake_observation
 from data_sheets_schema import native_shared_contract as c
-from data_sheets_schema import native_shared_controller as composition
+from data_sheets_schema import native_shared_controller_orchestration as composition
 from data_sheets_schema import native_shared_registration_orchestration as registration
 from data_sheets_schema import native_shared_execution_orchestration as execute
 from data_sheets_schema import native_shared_policy as policy
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_execution_registration_v2 as preparation
+from tests.utils.native_shared_consumer_scope import command_guidance, observe_consumer_calls
 
 
 def make_case(root, *, fixture='neutral', receipt_origin_version=0):
@@ -64,7 +65,7 @@ def make_case(root, *, fixture='neutral', receipt_origin_version=0):
     attempt = root / 'native-attempt'; output = root / 'native-evidence'
     dependencies = authority.dependency_identity()
     expected = registration.permission_expectation(runtime, selected, spec,
-        system.read_text() + policy.command_guidance(selected['policy']), attempt / 'cli_config', dependencies)
+        system.read_text() + command_guidance(selected['policy']), attempt / 'cli_config', dependencies)
     manifest = fabricated_manifest(expected, data['selection'].document(), root / 'invented-probe', spec.bundle.read_bytes())
     probe = parent / 'invented-permissions.json'; probe.write_bytes(c.canonical(manifest))
     envelope = registration.registration(comp, system, permission_probe_path=probe,
@@ -123,13 +124,10 @@ def make_case(root, *, fixture='neutral', receipt_origin_version=0):
 def launch_case(case, monkeypatch):
     """Use the actual public lifetime; only runtime/review/provider data is synthetic."""
     monkeypatch.setattr(execute, '_probe_runtime', fake_observation)
-    with authority.loaded_dependencies(case['value']['dependencies']) as modules:
-        def forbidden(*a, **k):
-            pytest.fail('historical launcher, auth or provider factory invoked')
-        for module, names in [('prepare_direct', ['auth_evidence']), ('run_direct_canary', ['main']),
-                              ('run_api_canary', ['main']), ('budgeted_cborg', ['cborg_client'])]:
-            for name in names:
-                if hasattr(modules[module], name): monkeypatch.setattr(modules[module], name, forbidden)
+    forbidden = {key: () for key in (
+        ('prepare_direct', 'auth_evidence'), ('run_direct_canary', 'main'),
+        ('run_api_canary', 'main'), ('budgeted_cborg', 'cborg_client'))}
+    with observe_consumer_calls(forbidden, forbid=True):
         result = execute.launch(case['raw'], **case['kwargs'])
     (case['root'] / 'actual-result.json').write_bytes(c.canonical(result))
     return result

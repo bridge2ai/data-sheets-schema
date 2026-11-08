@@ -12,7 +12,7 @@ from . import native_execution as legacy
 from . import native_execution_authority_v2 as authority
 from . import native_execution_registration_v2 as admission
 from . import native_shared_contract as c
-from . import native_shared_controller as composition
+from . import native_shared_controller_orchestration as composition
 from . import native_shared_registration_orchestration as registration
 from . import native_shared_gates as gates
 from . import native_shared_results_orchestration as results

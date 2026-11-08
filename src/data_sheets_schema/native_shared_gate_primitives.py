@@ -1,9 +1,11 @@
-"""Neutral fixed completion checks, copied from the released native gates.
+"""Neutral fixed completion checks with an explicit command-map contract.
 
 U3-D r8, 2026-11-07; source commit 9687dea189faa92cba1b30bdb0c6ee2f476ec747.
 Only already-bound command maps and captured values are accepted. This module
 does not load authority, reconstruct a launch, or import frozen execution code.
-Parity with the unedited originals is tested independently.
+Parity with the unedited originals is tested independently for explicit command
+maps. The command classifier deliberately tightens the historical entry by
+requiring the caller to supply its exact command map; it never builds policy.
 """
 from __future__ import annotations
 from copy import deepcopy
@@ -41,7 +43,12 @@ def _encoded(value):
 
 
 def command_kind(command, spec, *, expected):
-    """The extra adapter admits only exact bound helper spellings.
+    """Admit exact bound helper spellings from a required built-in dict.
+
+    This deliberately tightens the historical optional ``expected`` argument:
+    omission and ``None`` refuse rather than constructing a command policy.
+    With an explicit map, matching and malformed-command refusals retain the
+    historical behavior.
 
     RunSpec boundary: validated-caller
 

@@ -123,7 +123,7 @@ def build_native_fixture(root: Path, *, registered_python: str) -> dict:
     from data_sheets_schema import api_runner as api
     from data_sheets_schema import native_shared_contract as c
     from data_sheets_schema import native_shared_selection as selected
-    from data_sheets_schema import native_shared_controller as controller
+    from data_sheets_schema import native_shared_controller_orchestration as controller
     from data_sheets_schema import native_shared_receipts as nr
     from data_sheets_schema import native_execution_registration_v2 as preparation
     from data_sheets_schema.chunking import build_manifest

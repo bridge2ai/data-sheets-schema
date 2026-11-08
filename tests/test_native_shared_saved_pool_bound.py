@@ -14,11 +14,13 @@ import pytest
 from tests.test_native_shared_results import initial
 from tests.test_native_shared_live_capture import started
 from tests.test_native_shared_registration import execution, bound, native_spec, inputs, isolated_modules
-from tests.test_native_shared_selection import declaration as original_declaration, save
+from tests.test_native_shared_controller import declaration as original_declaration, synthetic_declaration
+from tests.test_native_shared_selection import save
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_evidence as evidence
 from data_sheets_schema import native_shared_results as results
 from data_sheets_schema import native_shared_capture as capture
+from data_sheets_schema import native_shared_capture_orchestration as live_capture
 from data_sheets_schema import native_shared_selection as selection
 
 
@@ -59,7 +61,7 @@ def test_saved_pool_selected_cap_counts_every_member_without_io(started, monkeyp
 
     with monkeypatch.context() as patch:
         for owner, name in ((evidence, 'read_regular'), (selection, 'capture'),
-                            (selection, 'capture_assets'), (capture, '_load')):
+                            (selection, 'capture_assets'), (live_capture, '_load')):
             patch.setattr(owner, name, forbidden)
         for name in ('cwd', 'absolute', 'resolve', 'read_bytes', 'read_text', 'open',
                      'stat', 'lstat', 'exists', 'is_file', 'is_dir'):

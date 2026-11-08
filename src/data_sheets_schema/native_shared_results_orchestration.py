@@ -11,6 +11,7 @@ from types import SimpleNamespace
 
 from . import native_shared_contract as c
 from . import native_shared_capture as capture_api
+from . import native_shared_capture_orchestration as capture_host
 from . import native_shared_evidence as evidence
 from . import native_shared_observations as observed
 from . import native_attribution_results as inherited
@@ -31,7 +32,8 @@ def capture(value, controls, *, authority_inputs, registration_raw):
     """One actual bounded capture, followed by the same saved-only reconstruction."""
     composition = c.strict_json(value['composition_raw_json'].encode(), 'captured C', c.HARD_LIMITS['request_bytes'])
     selected_doc = c.parse_selection(composition['selection_raw_json'].encode('utf-8'))
-    live = capture_api._load(selected_doc['registration_path'])
+    controls.require_complete()
+    live = capture_host._load(selected_doc['registration_path'])
     snapshot = Snapshot(value['working_directory'], live.pool.members)
     selection = live.selection
     for item in (selection.registration, selection.receipt_policy, *selection.authority,
@@ -129,9 +131,12 @@ class _CapturedReadonly:
 
 def _classify_saved(command, policy, snapshot, controls):
     """Classify one occurrence afresh, resolving paths only in captured bytes."""
-    from . import native_shared_policy
     if command in policy['native_shared_helpers'].values():
-        return native_shared_policy.classify_bash(command, policy['python'], set(), policy, controls)
+        from .native_execution_authority_v2 import loaded_verified_package_module
+        with loaded_verified_package_module('data_sheets_schema.native_shared_policy',
+                package_sources=controls.package_sources) as policy_consumer:
+            return policy_consumer.classify_bash(command, policy['python'], set(), policy,
+                                                controls.classifier_projection)
     if not _readonly(command, policy, snapshot, controls):
         raise ValueError('saved history has an unsupported ordinary Bash command')
     native = controls['run_native_canary']
@@ -152,6 +157,7 @@ def prepare(pool, value, controls, *, snapshot=None, _catalogs=None):
     from . import native_shared_attribution as attribution
     from . import native_shared_gates as gates
     from .audit_omissions import _mapping
+    controls.require_complete()
     run = rebuild(pool, value, _catalogs=_catalogs)
     if snapshot is None:
         snapshot = Snapshot(value['working_directory'], pool.members)
@@ -188,16 +194,17 @@ def prepare(pool, value, controls, *, snapshot=None, _catalogs=None):
         raise ValueError('saved native provenance differs from exact selected stage/render authority')
     prepared = {'run': run, 'pool': pool, 'value': value, 'snapshot': snapshot, 'state': state,
         'composition_raw': value['composition_raw_json'].encode(), 'composition': run.composition,
-        'events': events, 'records': records, 'policy': policy, 'controls': controls,
+        'events': events, 'records': records, 'policy': policy,
         'record': record, 'final_result': final_result, 'phase_report': phase,
-        'readonly': _CapturedReadonly(policy, snapshot, controls), 'replay_complete': True}
-    prepared['saved_result'] = check_capture(prepared)
+        'replay_complete': True}
+    prepared['saved_result'] = check_capture(prepared, controls=controls)
     return prepared
 
 
-def check_capture(prepared):
+def check_capture(prepared, *, controls):
     """Recompute control, phase, immutable-stage and attribution obligations."""
-    run, policy, controls = prepared['run'], prepared['policy'], prepared['controls']
+    controls.require_complete()
+    run, policy = prepared['run'], prepared['policy']
     def classify(command, python, programs, supplied):
         if python != policy['python'] or c.canonical(supplied) != c.canonical(policy):
             raise ValueError('saved classifier differs from exact selected policy')
@@ -205,7 +212,8 @@ def check_capture(prepared):
     files = inherited.CapturedFiles(prepared['snapshot'], policy, controls)
     control = inherited._control_history(prepared['events'], prepared['records'], policy, classify, files, controls)
     lifecycle = inherited._control_lifecycle(prepared['events'], prepared['records'], controls)
-    draft, final, recorder = inherited._saved_draft(prepared, classify)
+    draft, final, recorder = inherited._saved_draft(
+        {**prepared, 'readonly': _CapturedReadonly(policy, prepared['snapshot'], controls)}, classify)
     problems = [*control['problems'], *lifecycle['problems'], *draft['problems']]
     from . import native_shared_policy, native_shared_effects
     draft_seen = False
@@ -314,10 +322,10 @@ def require_saved_basis(value, result):
     raw = _read_pool(pin['path'], pin['bytes'])
     if len(raw) != pin['bytes'] or c.sha(raw) != pin['sha256']:
         raise ValueError('saved pool differs from its complete raw identity')
-    from .native_execution_authority_v2 import loaded_dependencies
+    from .native_execution_capabilities import loaded_capabilities
     from . import native_shared_gates as gates
     from .native_shared_execution_orchestration import expected_runtime_observation
-    with loaded_dependencies(value['dependencies']) as controls:
+    with loaded_capabilities(value['dependencies']) as controls:
         prepared = prepare(evidence.decode(raw), value, controls)
         if c.canonical(prepared['saved_result']) != c.canonical(summary['result']):
             raise ValueError('saved native result differs from fresh byte-only reconstruction')
@@ -345,7 +353,7 @@ def require_saved_basis(value, result):
         cleanup_raw = (evidence.read_regular(cleanup['path'], 'cleanup',
             max_bytes=c.HARD_LIMITS['input_bytes']).captured.raw if cleanup is not None else None)
         fresh = gates.check(prepared, projections,
-            {**value['runtime'], 'attempt_directory': value['attempt_directory']}, prepared['controls'],
+            {**value['runtime'], 'attempt_directory': value['attempt_directory']}, controls.gate_members,
             exit_code=result['child_exit_code'], shutdown=result['shutdown'], live=fresh_live,
             first_stop=result['first_stop'], runtime_authority=result['runtime_observation'],
             keep_awake=result['keep_awake'], keep_awake_raw=cleanup_raw,

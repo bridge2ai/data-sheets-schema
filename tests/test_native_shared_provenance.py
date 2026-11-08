@@ -10,10 +10,12 @@ from dataclasses import replace
 import pytest
 
 from data_sheets_schema import native_shared_capture as capture
+from data_sheets_schema import native_shared_capture_orchestration as live_capture
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_evidence as evidence
 from data_sheets_schema import provenance
-from tests.test_native_shared_receipt_readers import completed_reader, case, supplied, declaration, artifact
+from tests.test_native_shared_receipt_readers import completed_reader, case, supplied, artifact
+from tests.test_native_shared_controller import declaration, synthetic_declaration
 from tests.test_native_shared_results import initial
 from tests.test_native_shared_live_capture import started
 from tests.test_native_shared_registration import execution, bound, native_spec, inputs, isolated_modules
@@ -48,12 +50,12 @@ def test_public_recorded_readers_refuse_genuine_v2_init_without_completed_stages
     run, _ = initial(started)
     selection_path = run.selection.registration.pin.path
     with pytest.raises(ValueError, match='final helper obligations'):
-        capture.live_provenance_block(selection_path)
+        live_capture.live_provenance_block(selection_path)
     record = {'prompts': {'request': {'spec': deepcopy(run.composition['render_spec'])}},
               'native_shared_generation': {'runtime_acceptance': 'passed'}}
     paths = run.spec._agentic_artifact_paths
-    for reader, extra in ((capture.recorded_receipt_block, {}),
-                          (capture.recorded_receipt_claims, {'expected_block': {'passed': True}})):
+    for reader, extra in ((live_capture.recorded_receipt_block, {}),
+                          (live_capture.recorded_receipt_claims, {'expected_block': {'passed': True}})):
         with pytest.raises(ValueError, match='complete freshly reconstructed'):
             reader(None, record=record, full_path=paths['full'], receipt_path=paths['receipt'], **extra)
     # A stored native marker or passing block cannot substitute for observations.
@@ -66,5 +68,5 @@ def test_recorded_reader_refuses_render_substitution_before_recorded_verdict(sta
     record = {'prompts': {'request': {'spec': deepcopy(run.composition['render_spec'])}}}
     record['prompts']['request']['spec']['label'] = 'foreign-label'
     with pytest.raises(ValueError):
-        capture.recorded_receipt_block(None, record=record,
+        live_capture.recorded_receipt_block(None, record=record,
             full_path=paths['full'], receipt_path=paths['receipt'])

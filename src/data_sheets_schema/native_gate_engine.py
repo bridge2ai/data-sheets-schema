@@ -15,13 +15,24 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
     from data_sheets_schema import native_shared_gate_primitives as neutral
     if kind != 'native_shared':
         raise ValueError('unknown private native gate contract')
+    # This consumer gets only four reviewed accounting/observation members.
+    # In particular no launcher module or execute_child carrier is admitted.
+    if (type(controls) is not dict or set(controls) != {
+            'model_accounting', 'LIMIT_KEYS', 'observed_efforts', 'observation_problems'}
+            or any(not callable(controls[name]) for name in
+                   ('model_accounting', 'observed_efforts', 'observation_problems'))
+            or type(controls['LIMIT_KEYS']) is not tuple
+            or not controls['LIMIT_KEYS']
+            or any(type(key) is not str for key in controls['LIMIT_KEYS'])):
+        raise ValueError('native gates require exactly their four pure helper members')
+    if 'controls' in prepared or 'readonly' in prepared:
+        raise ValueError('native gates refuse orchestration capability carriers')
     from data_sheets_schema import native_shared_gates as native
     runtime_observation_result = neutral.runtime_observation_result
     cleanup_result = neutral.cleanup_result
     from data_sheets_schema import agentic_observed
     snap, spec = prepared['snapshot'], prepared['state'].spec
     events, policy = prepared['events'], prepared['policy']
-    direct = controls['run_direct_canary']
     results = {}
 
     def projected(path):
@@ -79,7 +90,7 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
         if len(finals) != 1:
             raise ValueError('native model accounting requires one terminal result')
         terminal = finals[0]
-        own, auxiliary = direct.model_accounting(terminal, {'model': {
+        own, auxiliary = controls['model_accounting'](terminal, {'model': {
             'model': runtime['model'], 'auxiliary_models_permitted': runtime['auxiliary_models']}})
         usage = terminal.get('usage')
         keys = ('input_tokens', 'output_tokens', 'cache_read_input_tokens', 'cache_creation_input_tokens')
@@ -89,11 +100,11 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
             if any(type(entry.get(k)) is not int or entry[k] < 0 for k in
                    ('inputTokens', 'outputTokens', 'cacheReadInputTokens', 'cacheCreationInputTokens')):
                 raise ValueError('per-model usage is incomplete or not nonnegative integers')
-        limits = {key: own.get(key) for key in direct.LIMIT_KEYS}
+        limits = {key: own.get(key) for key in controls['LIMIT_KEYS']}
         if (any(type(v) is not int for v in limits.values())
                 or neutral._encoded(limits) != neutral._encoded(runtime['limits'])):
             raise ValueError('observed runtime limits differ from the registered assertions')
-        efforts = direct.observed_efforts(projected(Path(runtime['attempt_directory']) / 'control.jsonl'))
+        efforts = controls['observed_efforts'](projected(Path(runtime['attempt_directory']) / 'control.jsonl'))
         if efforts != [runtime['effort']]:
             raise ValueError('observed effort differs from registration')
         cost = terminal.get('total_cost_usd')
@@ -116,7 +127,7 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
 
     def observed():
         out = agentic_observed.observe([projected(Path(runtime['attempt_directory']) / 'transcript.jsonl')], projected(spec.bundle))
-        problems = controls['run_native_canary'].observation_problems(out)
+        problems = controls['observation_problems'](out)
         return {'passed': not problems, 'observation': out, 'problems': problems}
 
     def phase():

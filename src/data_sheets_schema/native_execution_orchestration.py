@@ -34,7 +34,7 @@ class ExecutionContract:
     def require_fixed(self):
         names = {
             'd4d_native_shared_attempt': (
-                'native_shared_registration_orchestration', 'native_shared_controller',
+                'native_shared_registration_orchestration', 'native_shared_controller_orchestration',
                 'native_execution_authority_v2', 'native_shared_gates',
                 'native_shared_results_orchestration', 'native_shared_results_orchestration'),
         }.get(self.kind)
@@ -102,8 +102,10 @@ def authorizations(raw, value, *, review_path, ci_path, launch_word_path, contra
     contract.require_fixed()
     inputs = {name: str(Path(path).absolute()) for name, path in {
         'review': review_path, 'ci': ci_path, 'launch_word': launch_word_path}.items()}
-    if admission.verified(raw) != value:
-        raise ValueError('authorization caller differs from fresh v2 execution')
+    from .native_shared_controls_orchestration import loaded_controls
+    with loaded_controls(value['dependencies']) as classifier_projection:
+        if admission.verified(raw, classifier_projection=classifier_projection) != value:
+            raise ValueError('authorization caller differs from fresh v2 execution')
     evidence = admission._authorizations(raw, value, review_path=inputs['review'],
         ci_path=inputs['ci'], launch_word_path=inputs['launch_word'])
     captured = {name: item.raw for name, item in evidence.items()}
@@ -210,6 +212,25 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
     separate action from preparation; there is no inferred model or live value.
     """
     contract.require_fixed()
+    from .native_execution_capabilities import loaded_capabilities
+    value = contract.registration.verified(registration_raw)
+    # Resolve the complete reviewed execution/replay interface before entering
+    # the path that can reserve directories, write evidence or probe a runtime.
+    with loaded_capabilities(value['dependencies']) as controls:
+        return _launch(registration_raw, review_path=review_path, ci_path=ci_path,
+            launch_word_path=launch_word_path, contract=contract, effects=effects,
+            controls=controls)
+
+
+def _execute_child(controls, argv, **kwargs):
+    """The sole orchestration dispatch to the reviewed historical transport."""
+    controls.require_complete()
+    return controls['run_native_canary'].execute_child(argv, **kwargs)
+
+
+def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
+            contract, effects, controls):
+    controls.require_complete()
     registration, composition, authority = contract.registration, contract.composition, contract.authority
     gates, replay, shared = contract.gates, contract.replay, contract.shared
     KIND, VERSION = contract.kind, 1
@@ -234,7 +255,8 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
     # This is the last check before the first effect. A prior verified value,
     # permission recipe or Admission object is never a launch capability.
     admitted = admission.admit(registration_raw, review_path=authorization['inputs']['review'],
-        ci_path=authorization['inputs']['ci'], launch_word_path=authorization['inputs']['launch_word'])
+        ci_path=authorization['inputs']['ci'], launch_word_path=authorization['inputs']['launch_word'],
+        classifier_projection=controls.classifier_projection)
     if (admitted.registration_raw != registration_raw
             or tuple((item.pin.path, item.raw) for item in admitted.evidence) != tuple(
                 (authorization['inputs'][name], authorization['raw'][name])
@@ -244,6 +266,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
     # current file after those reads, before a stale observation can spend the
     # attempt identity. The actual dispatch still performs its one-use check.
     launch_guard.before_dispatch(check_only=True)
+    controls.require_complete()
     attempt.mkdir(mode=0o700)  # Even a partial reservation consumes the identity.
     _sync_directory(attempt.parent)
     durable_new(attempt/'registration.json', registration_raw)
@@ -270,7 +293,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
         nonlocal first_stop
         if first_stop is None:
             first_stop = str(message)
-    with authority.loaded_dependencies(value['dependencies']) as controls, _signals(signals):
+    with _signals(signals):
         proxy = controls['run_direct_canary'].NoProxy()
         guard = None
         try:
@@ -297,7 +320,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
                     _admit_subscription_guard(launch_guard, attempt, _file, durable_new)
                     contract.activate_before_dispatch(adapter, started_raw)
                 observe = _guarded_observer(launch_guard, adapter, controls['run_native_canary'].BudgetStop)
-                status = controls['run_native_canary'].execute_child(value['argv'], proxy=proxy,
+                status = _execute_child(controls, value['argv'], proxy=proxy,
                     instruction=Path(selected['instruction_path']), attempt=attempt,
                     cwd=value['working_directory'], env=value['environment'],
                     deadline_seconds=value['runtime']['deadline_seconds'], verify_launch=launch_check,
@@ -346,7 +369,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
                     stopped('keep-awake acquisition or release did not complete')
                 durable_new(attempt/'keep-awake.json', draft._encoded(awake))
                 results = gates.check(prepared, projections, {**value['runtime'], 'attempt_directory': str(attempt)},
-                    controls, exit_code=status, shutdown=getattr(proxy, 'control_shutdown', None),
+                    controls.gate_members, exit_code=status, shutdown=getattr(proxy, 'control_shutdown', None),
                     live=live, first_stop=first_stop, runtime_authority=observation, keep_awake=awake,
                     runtime_authority_expected=runtime_identity,
                     keep_awake_raw=_file(attempt/'keep-awake.json', 'observed cleanup'))

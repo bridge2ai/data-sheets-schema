@@ -5,8 +5,9 @@ from pathlib import Path
 import pytest
 
 from tests.test_native_shared_live_capture import started, native_init, stream_capture
-from tests.test_native_shared_registration import execution, bound, native_spec, declaration, inputs, isolated_modules
+from tests.test_native_shared_registration import execution, bound, native_spec, declaration, synthetic_declaration, inputs, isolated_modules
 from data_sheets_schema import native_shared_capture as cap
+from data_sheets_schema import native_shared_capture_orchestration as live_capture
 from data_sheets_schema import native_shared_results as results
 from data_sheets_schema import native_shared_evidence as evidence
 from data_sheets_schema import native_shared_contract as c
@@ -15,8 +16,8 @@ from data_sheets_schema import native_shared_contract as c
 def initial(started):
     selection, value, composition, raw, start = started
     transcript, control = native_init(selection, value, composition)
-    cap.initialize(selection.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control), **stream_capture(value))
-    live = cap._load(selection.registration.pin.path)
+    live_capture.initialize(selection.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control), **stream_capture(value))
+    live = live_capture._load(selection.registration.pin.path)
     members = {member.member_id: member for member in live.pool.members}
     for artifact in (selection.registration, selection.receipt_policy, *selection.authority,
                      *(a for s in selection.schemas for a in s.sources)):
@@ -53,7 +54,7 @@ def test_saved_observation_gap_and_foreign_execution_refuse(started):
 
 def test_actual_selected_receipt_paths_need_no_future_seal(started):
     selection, value, composition, raw, start = started
-    actual = cap.selected_receipt_paths(selection.registration.pin.path)
+    actual = live_capture.selected_receipt_paths(selection.registration.pin.path)
     paths = composition['render_spec']['agentic_artifact_paths']
     assert actual['full'] == Path(paths['full'])
     assert actual['receipt'] == Path(paths['receipt'])

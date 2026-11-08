@@ -8,10 +8,11 @@ import json
 
 import pytest
 
-from tests.test_native_shared_registration import execution, bound, native_spec, declaration, inputs, isolated_modules
+from tests.test_native_shared_registration import execution, bound, native_spec, declaration, synthetic_declaration, inputs, isolated_modules
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema.native_shared_controller import captured_execution_body
 from data_sheets_schema import native_shared_capture as capture
+from data_sheets_schema import native_shared_capture_orchestration as live_capture
 from data_sheets_schema import native_shared_registration_orchestration as registration
 from data_sheets_schema import native_shared_selection as selection
 
@@ -30,7 +31,7 @@ def started(execution):
         'composition_sha256': value['composition_sha256'], 'dispatch_limit': 1})
     (attempt / 'started.json').write_bytes(start)
     Path(cap.role('stage_root')).mkdir(parents=True)
-    capture.activate(cap, raw, start)
+    live_capture.activate(cap, raw, start)
     return cap, value, selected, raw, start
 
 
@@ -66,19 +67,19 @@ def test_actual_reserved_genesis_then_observed_init_and_no_premature_stage(start
     assert len(genesis['records']) == 1
     assert not Path(cap.role('session_binding')).exists()
     with pytest.raises(ValueError, match='spent'):
-        capture.activate(cap, raw, start)
+        live_capture.activate(cap, raw, start)
     transcript, control = native_init(cap, value, selected)
-    capture.initialize(cap.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control), **stream_capture(value))
-    actual = capture._load(cap.registration.pin.path)
+    live_capture.initialize(cap.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control), **stream_capture(value))
+    actual = live_capture._load(cap.registration.pin.path)
     assert actual.phase1 is None
     assert len(actual.history.records) == 2 and len(actual.observations) == 1
     assert actual.binding.execution.raw == raw and actual.binding.started.raw == start
     assert actual.binding.session_id == '00000000-0000-4000-8000-000000000010'
     assert actual.trace().pending() == ()
     with pytest.raises(ValueError, match='spent'):
-        capture.initialize(cap.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control), **stream_capture(value))
+        live_capture.initialize(cap.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control), **stream_capture(value))
     with pytest.raises(ValueError, match='sealed originals'):
-        capture.capture_stage(cap.registration.pin.path)
+        live_capture.capture_stage(cap.registration.pin.path)
 
 
 def test_binding_cannot_use_foreign_init_or_changed_actual_attempt(started):
@@ -88,12 +89,12 @@ def test_binding_cannot_use_foreign_init_or_changed_actual_attempt(started):
     changed = transcript.replace(value['runtime']['model'].encode(), b'foreign-model')
     (attempt / 'transcript.jsonl').write_bytes(changed)
     with pytest.raises(ValueError, match='runtime'):
-        capture.initialize(cap.registration.pin.path, transcript_bytes=len(changed), control_bytes=len(control), **stream_capture(value))
+        live_capture.initialize(cap.registration.pin.path, transcript_bytes=len(changed), control_bytes=len(control), **stream_capture(value))
     assert not Path(cap.role('session_binding')).exists()
     (attempt / 'transcript.jsonl').write_bytes(transcript)
     (attempt / 'started.json').write_bytes(start + b' ')
     with pytest.raises(ValueError, match='actual one-use'):
-        capture.initialize(cap.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control), **stream_capture(value))
+        live_capture.initialize(cap.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control), **stream_capture(value))
     assert not Path(cap.role('session_binding')).exists()
 
 

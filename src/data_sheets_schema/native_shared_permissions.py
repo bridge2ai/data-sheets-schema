@@ -224,7 +224,7 @@ def recipe(expected):
     for role, module in MODULES.items():
         name = 'data_sheets_schema.' + module
         member = 'stubs/data_sheets_schema/' + module + '.py'
-        entrypoint = name + '.__main__' if role == 'recorder' else name
+        entrypoint = name + '.__main__' if role in ('recorder', 'stage') else name
         mappings.append({'module': name, 'production_sha256': by_module[entrypoint]['sha256'],
                          'stub_member': member, 'stub_sha256': _sha(sources[member].encode())})
     descriptor = {'kind': RECIPE_KIND, 'version': VERSION,
@@ -256,7 +256,7 @@ def _source_closure(expected):
         wanted = {'module': module, 'path': str(Path(file).resolve()), 'bytes': len(raw), 'sha256': _sha(raw)}
         _need(_same(by_module.get(module), wanted), 'loaded fixed source differs: ' + module)
     for role,module in MODULES.items():
-        name = 'data_sheets_schema.' + module + ('.__main__' if role == 'recorder' else '')
+        name = 'data_sheets_schema.' + module + ('.__main__' if role in ('recorder', 'stage') else '')
         _need(name in names, 'missing mapped production helper entrypoint')
     _need(_same(expected['probe_recipe'], recipe(expected)), 'probe recipe is not the fixed reviewed closure')
 
@@ -638,7 +638,7 @@ def _classify_view(case, controls, policy, view):
     if effect is not None:
         _need(effect[0] == ('prescribed' if case['mode'] == 'allowed' else 'not_prescribed'), 'effect classification differs')
     if case['tool'] == 'Bash':
-        result = effect if governed else command_policy.classify_bash(case['input']['command'], policy['python'], set(), policy, controls)
+        result = effect if governed else command_policy.classify_bash(case['input']['command'], policy['python'], set(), policy, classifier_projection=controls)
     else:
         result = _file_classification(policy, case)
     _need(result[0] == ('prescribed' if case['mode'] == 'allowed' else 'not_prescribed'), 'required native classification differs')

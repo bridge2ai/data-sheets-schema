@@ -25,11 +25,12 @@ from data_sheets_schema import native_shared_policy as command_policy
 from data_sheets_schema import native_attribution_controller_v2 as composition
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_execution_registration_v2 as execution_v2
-from data_sheets_schema import native_shared_controller as shared_controller
+from data_sheets_schema import native_shared_controller_orchestration as shared_controller
 from data_sheets_schema import native_shared_registration_orchestration as shared_registration
 from tests.test_native_execution_registration_v2 import inputs, isolated_modules
 from tests.test_native_shared_render import native_spec
-from tests.test_native_shared_selection import declaration
+from tests.test_native_shared_controller import declaration, synthetic_declaration
+from tests.utils.native_shared_consumer_scope import loaded_consumer, command_guidance, observe_consumer_calls
 
 _REAL_POPEN = subprocess.Popen
 
@@ -63,10 +64,11 @@ def rows(value, name):
 def fabricated_manifest(expected, selected, neutral_root, source_raw):
     """Reusable TEST-ONLY forged observation, not a launch permission proof."""
     with permission_orchestration.loaded_permission_inputs() as (controls, _controller_sources):
-        return _fabricated_manifest(expected, selected, neutral_root, source_raw, controls)
+        with loaded_consumer('native_shared_permissions') as consumer:
+            return _fabricated_manifest(expected, selected, neutral_root, source_raw, controls, consumer)
 
 
-def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls):
+def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls, p):
     native = p._permission_protocol()
     files = {name: text.encode() for name,text in p.recipe_sources().items()}
     files.update({'policy.json': encoded(expected['policy']), 'selection.json': encoded(selected),
@@ -173,7 +175,8 @@ def fixture(tmp_path_factory):
         with pytest.MonkeyPatch.context() as patch:
             from data_sheets_schema import api_runner as api
             patch.setattr(api, 'CONCAT_DIR', root / 'outputs')
-            doc = declaration.__wrapped__(root, patch)
+            small_doc = synthetic_declaration.__wrapped__(root, patch)
+            doc = declaration.__wrapped__(small_doc, patch)
             spec = native_spec.__wrapped__(doc, root, patch)
             source = inputs.__wrapped__(spec, names, root, patch)
             runtime = c.strict_json(source['runtime_path'].read_bytes())
@@ -186,7 +189,7 @@ def fixture(tmp_path_factory):
             _, replay, capture = shared_controller.reconstruct_composition(c.canonical(composed))
             selected = capture.document()
             expected = shared_registration.permission_expectation(runtime, composed, replay,
-                'Synthetic saved observations only.' + command_policy.command_guidance(composed['policy']),
+                'Synthetic saved observations only.' + command_guidance(composed['policy']),
                 root / 'future-config', authority.dependency_identity())
             source_raw = capture.raw(selected['inputs']['bundle']['path'])
             value = fabricated_manifest(expected, selected, root / 'isolated-probes', source_raw)
@@ -213,7 +216,11 @@ def verify(value, expected):
 
 
 def test_complete_seven_trace_observation_is_only_software_verification(fixture):
-    result = verify(fixture['manifest'], fixture['expected'])
+    targets = {('native_shared_permissions', name): ()
+               for name in ('_authority', '_trace_body', 'probe_argv')}
+    with observe_consumer_calls(targets) as calls:
+        result = verify(fixture['manifest'], fixture['expected'])
+    assert set(targets) <= {key for key, _ in calls}
     assert result['checked'] is result['passed'] is True
     assert len(result['cases']) == 25 and len(result['traces']) == 7
     modes = [case['observed_mode'] for case in result['cases']]
@@ -521,22 +528,18 @@ def test_recipe_source_capture_preserves_raw_newline_bytes(monkeypatch):
 
 
 def test_saved_bash_replay_uses_same_fixed_native_classifier(fixture, monkeypatch):
-    calls = []
-    routing = []
-    actual = command_policy.classify_bash
-    actual_routing = command_policy.stage_overlay_governs
-    def observed(command, *args, **kwargs):
-        calls.append(command)
-        return actual(command, *args, **kwargs)
-    def obsolete(*args, **kwargs):
-        pytest.fail('saved native replay called the old attribution classifier')
-    def observed_routing(view, *, tool_name, tool_input, policy):
-        routing.append((tool_name, tool_input))
-        return actual_routing(view, tool_name=tool_name, tool_input=tool_input, policy=policy)
-    monkeypatch.setattr(command_policy, 'classify_bash', observed)
-    monkeypatch.setattr(command_policy, 'stage_overlay_governs', observed_routing)
-    monkeypatch.setattr(composition, '_classify', obsolete)
-    assert verify(fixture['manifest'], fixture['expected'])['passed'] is True
+    targets = {
+        ('native_shared_policy', 'classify_bash'): ('command',),
+        ('native_shared_policy', 'stage_overlay_governs'): ('tool_name', 'tool_input'),
+        ('native_attribution_controller_v2', '_classify'): (),
+    }
+    with observe_consumer_calls(targets) as observed:
+        assert verify(fixture['manifest'], fixture['expected'])['passed'] is True
+    assert not any(key == ('native_attribution_controller_v2', '_classify') for key, _ in observed)
+    calls = [values['command'] for key, values in observed
+             if key == ('native_shared_policy', 'classify_bash')]
+    routing = [(values['tool_name'], values['tool_input']) for key, values in observed
+               if key == ('native_shared_policy', 'stage_overlay_governs')]
     assert {fixture['expected']['commands'][name] for name in ('draft', 'final_evidence', 'recorder')} <= set(calls)
     assert {tool for tool, _ in routing} == {'Bash', 'Read', 'Write'}
     assert {fixture['expected']['commands'][name] for name in ('stage', 'draft', 'final_evidence', 'recorder')} <= {

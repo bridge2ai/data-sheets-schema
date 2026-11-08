@@ -1,8 +1,8 @@
 """Input-only D reconstruction from verified preparation and explicit C inputs.
 
 Proposal/envelope verification belongs to native_shared_registration_orchestration.
-The fixed A entry keeps its exact signature and refuses the unresolved explicit
-projection handoff; it never borrows ambient modules or invents C authority.
+The fixed A entry receives the live C projection explicitly. It reconstructs
+captured inputs through pure consumers and never calls A's verifier recursively.
 """
 from __future__ import annotations
 from pathlib import Path
@@ -54,8 +54,68 @@ def _read(path, label, limit):
     return read_regular(str(path), label, max_bytes=limit).captured.raw
 
 
-def _selection(raw):
-    selected, spec, captured = composition.reconstruct_composition(raw)
+def controller_sources():
+    """Read the fixed manifest bytes; source loading remains orchestration-owned."""
+    from .native_shared_authority_wire import CONTROLLER_SOURCES_SHA256
+    raw = _read(ROOT / 'src/data_sheets_schema/native_controller_sources_v2.json',
+                'controller source manifest', c.HARD_LIMITS['input_bytes'])
+    if c.sha(raw) != CONTROLLER_SOURCES_SHA256:
+        raise ValueError('native controller source manifest changed')
+    manifest = c.strict_json(raw, 'controller source manifest')
+    if type(manifest.get('version')) is not int or manifest['version'] != 2:
+        raise ValueError('v2 controller requires v2 source authority')
+    for pin in manifest['modules'].values():
+        if c.sha(_read(ROOT / pin['path'], 'controller source', c.HARD_LIMITS['input_bytes'])) != pin['sha256']:
+            raise ValueError('frozen native controller bytes changed')
+    return manifest
+
+
+def _selection(raw, *, preparation_raw, classifier_projection):
+    """Reconstruct C from A-verified preparation, with no verifier backedge.
+
+    RunSpec boundary: guarded
+    """
+    from .api_runner import RunSpec, _require_registered_input_spellings
+    from . import native_shared_selection as selection
+    from . import native_shared_render as render
+    pure_controls.require_controls(classifier_projection)
+    selected = composition.captured_composition(raw)
+    if selected['preparation_raw_json'].encode('utf-8') != preparation_raw:
+        raise ValueError('composition differs from caller-verified preparation bytes')
+    prepared = composition.captured_preparation_body(preparation_raw)
+    captured = selection.capture(prepared['selection']['path'])
+    if composition._file_pin(captured.registration) != prepared['selection']:
+        raise ValueError('composition selection changed after preparation verification')
+    doc = captured.document()
+    run = doc['run']
+    spec = RunSpec.from_render_spec(prepared['render_spec'], project=run['project'],
+        method=run['method'], label=run['label'])
+    if (render.validate_spec(spec) != doc
+            or captured.generation_context() != render.metadata(spec)['native_shared_generation_context']):
+        raise ValueError('composition selection differs from prepared rendering')
+    runtime_capture = read_regular(prepared['runtime']['path'], 'runtime_declaration',
+        max_bytes=c.HARD_LIMITS['input_bytes']).captured
+    instruction = read_regular(selected['instruction_path'], 'instruction',
+        max_bytes=c.HARD_LIMITS['request_bytes']).captured
+    if (composition._file_pin(runtime_capture) != prepared['runtime']
+            or instruction.raw != prepared['instruction'].encode('utf-8')
+            or instruction.raw != spec.instruction.encode('utf-8')
+            or instruction.pin.sha256 != prepared['instruction_sha256']):
+        raise ValueError('composition runtime or instruction differs from prepared rendering')
+    spec._native_shared_generation_capture = captured
+    spec._native_shared_runtime_capture = runtime_capture
+    _require_registered_input_spellings(spec)
+    if spec.render_spec() != prepared['render_spec']:
+        raise ValueError('composition rendering differs from the exact prepared rendering')
+    artifacts = spec._agentic_artifact_paths
+    selected, spec, captured = composition.reconstruct_composition(raw,
+        prepared=prepared, spec=spec, current=captured, runtime=runtime_capture,
+        instruction=instruction, controller_sources=controller_sources(),
+        command_argv=render.commands(spec), repository=str(Path.cwd().resolve()),
+        output_directories=tuple(str(Path(artifacts[key]).parent.resolve())
+            for key in ('full', 'core', 'report')),
+        python=sys.executable, python_version=sys.version,
+        classifier_projection=classifier_projection)
     doc = c.parse_selection(selected['selection_raw_json'].encode('utf-8'))
     runtime = validate_runtime(c.strict_json(selected['runtime_raw_json'].encode('utf-8'), 'sole R'))
     if (spec.provider, spec.reasoning_effort) != (runtime['provider'], runtime['effort']):
@@ -78,6 +138,8 @@ def _production_sources(dependencies):
             raise ValueError('production source changed while preparing permission authority')
         if raw:
             module = '.'.join(Path(relative).with_suffix('').parts[1:])
+            if module.endswith('.__init__'):
+                module = module.removesuffix('.__init__')
             rows.append({'module': module, 'path': str(path), 'sha256': digest, 'bytes': len(raw)})
     if not 0 < len(rows) <= c.HARD_LIMITS['authority_files']:
         raise ValueError('production source closure exceeds its bound')
@@ -132,10 +194,10 @@ def _paths(value, selected, *, fresh, extra_protected=()):
     return reserved
 
 
-def _registration_body(composition_path, system_path, *, permission_probe_path, attempt_id,
-                 attempt_directory, evidence_directory, max_draft_checks, preparation_raw, controls, controller_sources, receipt_origin_version=0):
-    """Prepare E, without consuming an attempt or asserting actual permission."""
-    pure_controls.require_controls(controls)
+def validate_arguments(composition_path, system_path, *, permission_probe_path, attempt_id,
+                       attempt_directory, evidence_directory, max_draft_checks,
+                       receipt_origin_version=0):
+    """Cheap argument refusals precede source verification and file reads."""
     if type(receipt_origin_version) is not int or receipt_origin_version not in (0, 1):
         raise ValueError('receipt_origin_version must be exact integer 0 or 1')
     if type(attempt_id) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', attempt_id) is None:
@@ -146,8 +208,21 @@ def _registration_body(composition_path, system_path, *, permission_probe_path, 
         'attempt_directory': attempt_directory, 'evidence_directory': evidence_directory}.items()}
     if Path(paths['attempt_directory']).name != attempt_id:
         raise ValueError('attempt basename must equal its one-use identity')
+    return paths
+
+
+def _registration_body(composition_path, system_path, *, permission_probe_path, attempt_id,
+                 attempt_directory, evidence_directory, max_draft_checks, preparation_raw,
+                 controls, controller_sources, receipt_origin_version=0):
+    """Prepare E, without consuming an attempt or asserting actual permission."""
+    paths = validate_arguments(composition_path, system_path,
+        permission_probe_path=permission_probe_path, attempt_id=attempt_id,
+        attempt_directory=attempt_directory, evidence_directory=evidence_directory,
+        max_draft_checks=max_draft_checks, receipt_origin_version=receipt_origin_version)
+    pure_controls.require_controls(controls)
     raw = _read(paths['composition'], 'composition', c.HARD_LIMITS['request_bytes'])
-    selected, spec, doc, runtime = _selection(raw)
+    selected, spec, doc, runtime = _selection(raw, preparation_raw=preparation_raw,
+        classifier_projection=controls)
     if max_draft_checks != selected['max_draft_checks']:
         raise ValueError('execution draft allowance differs from selected composition')
     if selected['working_directory'] != str(Path.cwd().resolve()):
@@ -161,7 +236,7 @@ def _registration_body(composition_path, system_path, *, permission_probe_path, 
     dependencies = preparation['dependencies']
     if dependencies != selected['dependencies']:
         raise ValueError('execution preparation differs from current v2 authority')
-    effective = system.decode('utf-8') + policy.command_guidance(selected['policy'])
+    effective = system.decode('utf-8') + policy.command_guidance(selected['policy'], classifier_projection=controls)
     config = Path(paths['attempt_directory']) / 'cli_config'
     expected = permission_expectation(runtime, selected, spec, effective, config, dependencies)
     probe = _read(paths['permission_probe'], 'saved permission', c.HARD_LIMITS['permission_wire_bytes'])
@@ -208,13 +283,13 @@ def _require_integrated_gate_implementation():
 
 def rebuild_v2_body(*, preparation_raw, composition_path, system_path,
                     permission_probe_path, attempt_id, attempt_directory,
-                    evidence_directory, max_draft_checks, receipt_origin_version):
+                    evidence_directory, max_draft_checks, receipt_origin_version,
+                    classifier_projection):
     """Fresh input-only reconstruction for A's exact consumer interface.
 
-    No submitted execution body or derived verdict is accepted. A's fixed nine
-    inputs contain no live C classifier projection. That explicit handoff
-    remains an unmet integration requirement, separate from graph acceptance.
-    Ordinary proposal reconstruction remains distinct from execution admission.
+    No submitted execution body or derived verdict is accepted. The live C
+    projection stays explicit and is checked inside the actual reconstruction.
+    A verifies preparation before this entry and compares the entire result.
     """
     if (type(preparation_raw) is not bytes or not preparation_raw
             or len(preparation_raw) > c.HARD_LIMITS['request_bytes']):
@@ -223,10 +298,19 @@ def rebuild_v2_body(*, preparation_raw, composition_path, system_path,
         preparation_raw.decode('utf-8')
     except UnicodeDecodeError as exc:
         raise ValueError('v2 consumer preparation requires UTF-8 bytes') from exc
-    # A has verified preparation_raw before this fixed entry, but supplies no
-    # live C classifier projection. Never deserialize a carrier, consult hidden
-    # process state or weaken permission reconstruction to manufacture one.
-    raise ValueError('fixed A3 rebuild has no explicit C classifier projection handoff')
+    if classifier_projection is None:
+        raise ValueError('v2 execution requires an explicit classifier projection')
+    _require_integrated_gate_implementation()
+    value = _registration_body(composition_path, system_path,
+        permission_probe_path=permission_probe_path, attempt_id=attempt_id,
+        attempt_directory=attempt_directory, evidence_directory=evidence_directory,
+        max_draft_checks=max_draft_checks, receipt_origin_version=receipt_origin_version,
+        preparation_raw=preparation_raw, controls=classifier_projection,
+        controller_sources=controller_sources())
+    if (value.get('preparation_raw_json') != preparation_raw.decode('utf-8')
+            or value.get('preparation_sha256') != c.sha(preparation_raw)):
+        raise ValueError('preparation binding differs from fresh reconstruction')
+    return value
 
 
 
@@ -238,7 +322,9 @@ def execution_paths_v2(body, *, fresh, extra_protected):
             or type(body.get('schema_version')) is not int or body['schema_version'] != VERSION):
         raise ValueError('reservation requires the v2 execution body')
     composition_raw = body['composition_raw_json'].encode('utf-8')
-    selected = composition.verified_composition(composition_raw)
+    # A calls this only after complete source-bound reconstruction. Parse the
+    # closed captured wire here; never recurse into orchestration verification.
+    selected = composition.captured_composition(composition_raw)
     if c.sha(composition_raw) != body['composition_sha256']:
         raise ValueError('reservation composition differs from execution')
     return _paths(body, selected, fresh=fresh, extra_protected=extra_protected)
