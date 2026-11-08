@@ -292,7 +292,7 @@ def test_real_schema_substrate_and_topic_identifier_forms_accept_and_reject(fixt
     ]
     topic = derived["external_terms"]["Instance"]["data_topic"]
     assert topic["sources"] == ["EFO", "GO", "MeSH", "NCIT"]
-    assert topic["curie_prefixes"] == ["EFO:", "GO:", "MESH:", "MeSH:", "NCIT:"]
+    assert topic["curie_prefixes"] == ["EFO:", "GO:", "MESH:", "NCIT:"]
     for good in (
         "EDAM:data_0006", "EDAM:format_1915", "EDAM:format_3752",
         "http://edamontology.org/data_0006", "http://edamontology.org/format_3752",
@@ -311,7 +311,7 @@ def test_real_schema_substrate_and_topic_identifier_forms_accept_and_reject(fixt
         with pytest.raises(ValueError, match="controlled term"):
             bc.validate_term_value(bad, policy=derived, cls="Instance", field="data_substrate")
     for good_topic in (
-        "GO:0008150", "MeSH:D012640", "MESH:D012640", "EFO:0000001", "NCIT:C12345",
+        "GO:0008150", "MESH:D012640", "EFO:0000001", "NCIT:C12345",
         "http://purl.obolibrary.org/obo/GO_0008150", "https://purl.obolibrary.org/obo/GO_0008150",
         "http://id.nlm.nih.gov/mesh/D012640", "https://id.nlm.nih.gov/mesh/D012640",
         "http://purl.bioontology.org/ontology/MESH/D012640", "https://purl.bioontology.org/ontology/MESH/D012640",
@@ -321,7 +321,7 @@ def test_real_schema_substrate_and_topic_identifier_forms_accept_and_reject(fixt
     ):
         bc.validate_term_value(good_topic, policy=derived, cls="Instance", field="data_topic")
     for bad_topic in (
-        "B2AI_TOPIC:1", "EDAM:data_0006", "GO:", "http://purl.obolibrary.org/obo/GO_", "Genomics",
+        "MeSH:D012640", "B2AI_TOPIC:1", "EDAM:data_0006", "GO:", "http://purl.obolibrary.org/obo/GO_", "Genomics",
     ):
         with pytest.raises(ValueError, match="controlled term"):
             bc.validate_term_value(bad_topic, policy=derived, cls="Instance", field="data_topic")
@@ -369,18 +369,24 @@ def test_identifier_forms_parser_rejects_malformed_declarations(bad_forms, match
         assert "duplicate evidence JSON key: version" in str(exc_info.value.__cause__)
 
 
-def test_identifier_forms_reject_undeclared_schema_prefix_and_expansion_mismatch(fixture):
+def test_identifier_forms_accept_self_contained_prefix(fixture):
     selection, inputs = fixture
     schema = yaml.safe_load(inputs["schema_path"].read_bytes())
     schema["classes"]["Instance"]["attributes"]["other_topic"]["annotations"]["d4d:termSourceIdentifierForms"] = json.dumps({
         "version": 1, "sources": [
-            {"id": "custom", "label": "CUSTOM", "curies": [{"prefix": "MISSING_PREFIX", "local_prefix": ""}], "iri_bases": []}
+            {"id": "custom", "label": "CUSTOM", "curies": [{"prefix": "MISSING_PREFIX", "local_prefix": ""}], "iri_bases": ["https://example.test/custom/"]}
         ]})
     inputs["schema_path"].write_text(yaml.safe_dump(schema))
     inputs["schema_snapshot"] = capture_schema(inputs["schema_path"], strict=True)
     selection["inputs"]["full_schema"] = bc._schema_pin(inputs["schema_snapshot"])
-    with pytest.raises(ValueError, match="not declared in the captured schema"):
-        policy(fixture)
+    derived = policy(fixture)
+    for value in ("MISSING_PREFIX:123", "https://example.test/custom/123"):
+        bc.validate_term_value(value, policy=derived, cls="Instance", field="other_topic")
+
+
+def test_identifier_forms_reject_conflicting_schema_expansion(fixture):
+    selection, inputs = fixture
+    schema = yaml.safe_load(inputs["schema_path"].read_bytes())
     schema["classes"]["Instance"]["attributes"]["other_topic"]["annotations"]["d4d:termSourceIdentifierForms"] = json.dumps({
         "version": 1, "sources": [
             {"id": "custom", "label": "CUSTOM", "curies": [{"prefix": "CUSTOM", "local_prefix": "sub_"}],

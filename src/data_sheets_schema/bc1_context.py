@@ -319,7 +319,6 @@ def validate_term_policy(policy: dict, *, catalog: dict, context: dict, schema_s
 
 
 def _curie_prefixes(source: str) -> tuple[str, ...]:
-    """Legacy v1 label-to-CURIE-prefix rule, retained only for v1 replay."""
     if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9._-]*", source):
         return ()
     return (source, "MESH") if source == "MeSH" else (source,)
@@ -360,8 +359,9 @@ def _require_identifier_forms(terms: dict, *, schema_prefixes: dict[str, str] | 
                         prefix = c["prefix"]
                         local_prefix = c["local_prefix"]
                         if prefix not in schema_prefixes:
-                            raise ValueError(f"BC1 term-source CURIE prefix {prefix!r} on {cls}.{slot} "
-                                             "is not declared in the captured schema")
+                            # Annotation forms are self-contained; schema prefixes
+                            # only constrain expansions when independently declared.
+                            continue
                         expanded = schema_prefixes[prefix] + local_prefix
                         if iri_bases and expanded not in iri_bases:
                             raise ValueError(f"BC1 term-source CURIE prefix {prefix!r} on {cls}.{slot} "

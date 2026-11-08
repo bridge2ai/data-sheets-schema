@@ -66,21 +66,6 @@ prefixes:
   EDAM:
     prefix_prefix: EDAM
     prefix_reference: http://edamontology.org/
-  EFO:
-    prefix_prefix: EFO
-    prefix_reference: http://www.ebi.ac.uk/efo/EFO_
-  GO:
-    prefix_prefix: GO
-    prefix_reference: http://purl.obolibrary.org/obo/GO_
-  MESH:
-    prefix_prefix: MESH
-    prefix_reference: http://id.nlm.nih.gov/mesh/
-  MeSH:
-    prefix_prefix: MeSH
-    prefix_reference: http://id.nlm.nih.gov/mesh/
-  NCIT:
-    prefix_prefix: NCIT
-    prefix_reference: http://purl.obolibrary.org/obo/NCIT_
   biolink:
     prefix_prefix: biolink
     prefix_reference: https://w3id.org/biolink/vocab/
@@ -7929,16 +7914,15 @@ classes:
               ,\"curies\":[{\"prefix\":\"GO\",\"local_prefix\":\"\"}],\"iri_bases\"\
               :[\"http://purl.obolibrary.org/obo/GO_\",\"https://purl.obolibrary.org/obo/GO_\"\
               ]},\n  {\"id\":\"mesh\",\"label\":\"MeSH\",\"curies\":[{\"prefix\":\"\
-              MeSH\",\"local_prefix\":\"\"},{\"prefix\":\"MESH\",\"local_prefix\"\
-              :\"\"}],\"iri_bases\":[\"http://id.nlm.nih.gov/mesh/\",\"https://id.nlm.nih.gov/mesh/\"\
-              ,\"http://purl.bioontology.org/ontology/MESH/\",\"https://purl.bioontology.org/ontology/MESH/\"\
-              ]},\n  {\"id\":\"efo\",\"label\":\"EFO\",\"curies\":[{\"prefix\":\"\
-              EFO\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://www.ebi.ac.uk/efo/EFO_\"\
-              ,\"https://www.ebi.ac.uk/efo/EFO_\",\"http://purl.obolibrary.org/obo/EFO_\"\
-              ,\"https://purl.obolibrary.org/obo/EFO_\"]},\n  {\"id\":\"ncit\",\"\
-              label\":\"NCIT\",\"curies\":[{\"prefix\":\"NCIT\",\"local_prefix\":\"\
-              \"}],\"iri_bases\":[\"http://purl.obolibrary.org/obo/NCIT_\",\"https://purl.obolibrary.org/obo/NCIT_\"\
-              ]}\n]}"
+              MESH\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://id.nlm.nih.gov/mesh/\"\
+              ,\"https://id.nlm.nih.gov/mesh/\",\"http://purl.bioontology.org/ontology/MESH/\"\
+              ,\"https://purl.bioontology.org/ontology/MESH/\"]},\n  {\"id\":\"efo\"\
+              ,\"label\":\"EFO\",\"curies\":[{\"prefix\":\"EFO\",\"local_prefix\"\
+              :\"\"}],\"iri_bases\":[\"http://www.ebi.ac.uk/efo/EFO_\",\"https://www.ebi.ac.uk/efo/EFO_\"\
+              ,\"http://purl.obolibrary.org/obo/EFO_\",\"https://purl.obolibrary.org/obo/EFO_\"\
+              ]},\n  {\"id\":\"ncit\",\"label\":\"NCIT\",\"curies\":[{\"prefix\":\"\
+              NCIT\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://purl.obolibrary.org/obo/NCIT_\"\
+              ,\"https://purl.obolibrary.org/obo/NCIT_\"]}\n]}"
         description: 'General topic of each instance, as an ontology term — records
           use GO, MeSH, EFO and NCIT IRIs and terms from a pinned standards registry.
           Where no term is found, prefer omission over a prose topic.

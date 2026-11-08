@@ -4914,7 +4914,7 @@
         },
         {
           "tag": "d4d:termSourceIdentifierForms",
-          "value": "{\"version\":1,\"sources\":[\n  {\"id\":\"go\",\"label\":\"GO\",\"curies\":[{\"prefix\":\"GO\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://purl.obolibrary.org/obo/GO_\",\"https://purl.obolibrary.org/obo/GO_\"]},\n  {\"id\":\"mesh\",\"label\":\"MeSH\",\"curies\":[{\"prefix\":\"MeSH\",\"local_prefix\":\"\"},{\"prefix\":\"MESH\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://id.nlm.nih.gov/mesh/\",\"https://id.nlm.nih.gov/mesh/\",\"http://purl.bioontology.org/ontology/MESH/\",\"https://purl.bioontology.org/ontology/MESH/\"]},\n  {\"id\":\"efo\",\"label\":\"EFO\",\"curies\":[{\"prefix\":\"EFO\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://www.ebi.ac.uk/efo/EFO_\",\"https://www.ebi.ac.uk/efo/EFO_\",\"http://purl.obolibrary.org/obo/EFO_\",\"https://purl.obolibrary.org/obo/EFO_\"]},\n  {\"id\":\"ncit\",\"label\":\"NCIT\",\"curies\":[{\"prefix\":\"NCIT\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://purl.obolibrary.org/obo/NCIT_\",\"https://purl.obolibrary.org/obo/NCIT_\"]}\n]}",
+          "value": "{\"version\":1,\"sources\":[\n  {\"id\":\"go\",\"label\":\"GO\",\"curies\":[{\"prefix\":\"GO\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://purl.obolibrary.org/obo/GO_\",\"https://purl.obolibrary.org/obo/GO_\"]},\n  {\"id\":\"mesh\",\"label\":\"MeSH\",\"curies\":[{\"prefix\":\"MESH\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://id.nlm.nih.gov/mesh/\",\"https://id.nlm.nih.gov/mesh/\",\"http://purl.bioontology.org/ontology/MESH/\",\"https://purl.bioontology.org/ontology/MESH/\"]},\n  {\"id\":\"efo\",\"label\":\"EFO\",\"curies\":[{\"prefix\":\"EFO\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://www.ebi.ac.uk/efo/EFO_\",\"https://www.ebi.ac.uk/efo/EFO_\",\"http://purl.obolibrary.org/obo/EFO_\",\"https://purl.obolibrary.org/obo/EFO_\"]},\n  {\"id\":\"ncit\",\"label\":\"NCIT\",\"curies\":[{\"prefix\":\"NCIT\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://purl.obolibrary.org/obo/NCIT_\",\"https://purl.obolibrary.org/obo/NCIT_\"]}\n]}",
           "@type": "Annotation"
         }
       ],
@@ -10666,7 +10666,7 @@
             },
             {
               "tag": "d4d:termSourceIdentifierForms",
-              "value": "{\"version\":1,\"sources\":[\n  {\"id\":\"go\",\"label\":\"GO\",\"curies\":[{\"prefix\":\"GO\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://purl.obolibrary.org/obo/GO_\",\"https://purl.obolibrary.org/obo/GO_\"]},\n  {\"id\":\"mesh\",\"label\":\"MeSH\",\"curies\":[{\"prefix\":\"MeSH\",\"local_prefix\":\"\"},{\"prefix\":\"MESH\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://id.nlm.nih.gov/mesh/\",\"https://id.nlm.nih.gov/mesh/\",\"http://purl.bioontology.org/ontology/MESH/\",\"https://purl.bioontology.org/ontology/MESH/\"]},\n  {\"id\":\"efo\",\"label\":\"EFO\",\"curies\":[{\"prefix\":\"EFO\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://www.ebi.ac.uk/efo/EFO_\",\"https://www.ebi.ac.uk/efo/EFO_\",\"http://purl.obolibrary.org/obo/EFO_\",\"https://purl.obolibrary.org/obo/EFO_\"]},\n  {\"id\":\"ncit\",\"label\":\"NCIT\",\"curies\":[{\"prefix\":\"NCIT\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://purl.obolibrary.org/obo/NCIT_\",\"https://purl.obolibrary.org/obo/NCIT_\"]}\n]}",
+              "value": "{\"version\":1,\"sources\":[\n  {\"id\":\"go\",\"label\":\"GO\",\"curies\":[{\"prefix\":\"GO\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://purl.obolibrary.org/obo/GO_\",\"https://purl.obolibrary.org/obo/GO_\"]},\n  {\"id\":\"mesh\",\"label\":\"MeSH\",\"curies\":[{\"prefix\":\"MESH\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://id.nlm.nih.gov/mesh/\",\"https://id.nlm.nih.gov/mesh/\",\"http://purl.bioontology.org/ontology/MESH/\",\"https://purl.bioontology.org/ontology/MESH/\"]},\n  {\"id\":\"efo\",\"label\":\"EFO\",\"curies\":[{\"prefix\":\"EFO\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://www.ebi.ac.uk/efo/EFO_\",\"https://www.ebi.ac.uk/efo/EFO_\",\"http://purl.obolibrary.org/obo/EFO_\",\"https://purl.obolibrary.org/obo/EFO_\"]},\n  {\"id\":\"ncit\",\"label\":\"NCIT\",\"curies\":[{\"prefix\":\"NCIT\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://purl.obolibrary.org/obo/NCIT_\",\"https://purl.obolibrary.org/obo/NCIT_\"]}\n]}",
               "@type": "Annotation"
             }
           ],
@@ -14388,7 +14388,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-11-07T21:43:57",
   "source_file_size": 35903,
-  "generation_date": "2026-11-07T21:45:06",
+  "generation_date": "2026-11-07T23:17:13",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
