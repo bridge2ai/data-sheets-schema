@@ -24,7 +24,9 @@ def test_two_reviews_and_exact_statement(evidence):
     raw, bundle, word = evidence
     result = review.validate_bundle(raw, bundle, word)
     assert result['budget_guard_usd'] == '90'
-    assert result['quota_capture']['count'] == 1
+    assert result['quota_capture']['count'] == 3
+    assert result['quota_capture']['kind'] == review.CAPTURE_KIND
+    assert result['quota_capture']['version'] == 2
     assert set(wire.strict_json(word)) == review.WORD_KEYS
 
 
@@ -66,7 +68,8 @@ def test_independence_and_word_refusals(evidence, mutation):
         review.validate_bundle(raw, changed, wire.canonical(token))
 
 
-@pytest.mark.parametrize('key,value', [('count', 2), ('count', True), ('directory', 'relative'),
+@pytest.mark.parametrize('key,value', [('count', 1), ('count', 2), ('count', 4), ('count', True),
+    ('version', True), ('version', 1), ('directory', 'relative'),
     ('deadline_seconds', 61), ('prompt_sha256', '0' * 64), ('max_stdout_bytes', 2000000)])
 def test_only_exactly_registered_capture(evidence, key, value):
     raw, bundle, word = evidence
@@ -75,3 +78,32 @@ def test_only_exactly_registered_capture(evidence, key, value):
     changed = wire.canonical(body); token['review_sha256'] = wire.sha(changed)
     with pytest.raises(ValueError):
         review.validate_bundle(raw, changed, wire.canonical(token))
+
+
+@pytest.mark.parametrize('stamp', ['2026-11-08', '2026-11-08 00:00:00Z',
+    '2026-11-08T00:00:00', '2026-11-08T00:00:00+00:00', '2026-11-08T00:00:00+01:00',
+    '2026-11-08T00:00:00z', '2026-11-08T00:00:60Z', '2026-13-08T00:00:00Z', True, None])
+def test_coded_word_requires_strict_parsed_utc(evidence, stamp):
+    raw, bundle, word = evidence
+    token = wire.strict_json(word)
+    token['authorized_at'] = stamp
+    with pytest.raises(ValueError):
+        review.validate_bundle(raw, bundle, wire.canonical(token))
+
+
+@pytest.mark.parametrize('stamp', ['2026-11-08T00:00:00Z', '2026-11-08T00:00:00.123456Z'])
+def test_coded_word_accepts_declared_utc_grammar(evidence, stamp):
+    raw, bundle, word = evidence
+    token = wire.strict_json(word)
+    token['authorized_at'] = stamp
+    assert review.validate_bundle(raw, bundle, wire.canonical(token))['quota_capture']['count'] == 3
+
+
+def test_legacy_capture_terms_are_readable_but_not_silently_upgraded(evidence):
+    raw, bundle, word = evidence
+    body, token = wire.strict_json(bundle), wire.strict_json(word)
+    body['owner_statement']['quota_capture'].update(
+        kind=review.LEGACY_CAPTURE_KIND, version=1, count=1)
+    changed = wire.canonical(body)
+    token['review_sha256'] = wire.sha(changed)
+    assert review.validate_bundle(raw, changed, wire.canonical(token))['quota_capture']['count'] == 1

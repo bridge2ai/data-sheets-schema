@@ -135,8 +135,8 @@ def test_expired_capture_stays_spent_and_refuses_before_generation_reservation(t
     assert not Path(value['attempt_directory']).exists()
     assert not Path(value['evidence_directory']).exists()
     assert capture.read_capture(manifest, **read_arguments(arguments)) == saved
-    with pytest.raises(ValueError, match='fresh|retries'):
-        capture.capture_subscription(**arguments)
+    # D115 now permits two further separately reserved captures. This check
+    # proves the old expired slot remains unchanged, not that the root is spent.
     after = {path.name: path.read_bytes() for path in manifest.parent.iterdir() if path.is_file()}
     assert after == before
 
@@ -166,7 +166,7 @@ def test_saved_guard_readback_rechecks_context_even_after_hashes_are_rebound(gua
 @pytest.mark.parametrize('mutation,diagnostic', [
     ('missing', 'no five_hour window'),
     ('nested_unsafe', 'five_hour subscription window is rejected'),
-    ('unknown', 'unknown window'),
+    ('unknown', 'unrecognized.*exhausted'),
 ])
 def test_admission_requires_five_hour_and_checks_every_present_window(guard_case, mutation, diagnostic):
     case = guard_case
@@ -178,6 +178,7 @@ def test_admission_requires_five_hour_and_checks_every_present_window(guard_case
         windows['five_hour']['status'] = 'rejected'
     else:
         windows['unrecognized'] = deepcopy(windows['five_hour'])
+        windows['unrecognized']['utilization'] = 1
     event_raw = guard.canonical(event)
     document = {**case['document'], 'event_json': event_raw.decode(), 'event_sha256': guard.sha(event_raw)}
     with pytest.raises(ValueError, match=diagnostic):

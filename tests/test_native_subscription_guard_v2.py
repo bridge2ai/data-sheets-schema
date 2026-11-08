@@ -108,8 +108,10 @@ def test_unknown_or_top_level_unsafe_observation_never_becomes_safe(case, change
     elif change == 'top_unknown': info['status'] = 'pending'
     elif change == 'top_overage': info['isUsingOverage'] = True
     elif change == 'missing_overage': del info['isUsingOverage']
-    elif change == 'unknown_window': info['unifiedWindows']['fortnight'] = deepcopy(info['unifiedWindows']['seven_day'])
-    elif change == 'unknown_top_window': info['rateLimitType'] = 'fortnight'
+    elif change == 'unknown_window':
+        info['unifiedWindows']['fortnight'] = {**info['unifiedWindows']['seven_day'], 'utilization': False}
+    elif change == 'unknown_top_window':
+        info.update(rateLimitType='fortnight', utilization=-0.1, resetsAt=case['now'] + 3000)
     elif change == 'malformed_windows': info['unifiedWindows'] = []
     else: info['utilization'] = 0.1
     with pytest.raises(ValueError):
@@ -264,7 +266,7 @@ def test_live_nested_stop_keeps_first_reason_and_observed_extrema(case):
 
 
 @pytest.mark.parametrize('window', ['five_hour', 'seven_day'])
-def test_live_exhaustion_and_unknown_windows_stop_even_with_allowed_top(case, window):
+def test_live_exhaustion_and_unsafe_unknown_windows_stop_even_with_allowed_top(case, window):
     value = build(case); value.before_dispatch()
     event = deepcopy(case['event'])
     event['rate_limit_info']['unifiedWindows'][window]['status'] = 'rejected'
@@ -272,9 +274,10 @@ def test_live_exhaustion_and_unknown_windows_stop_even_with_allowed_top(case, wi
         value.observe(event)
     assert value.stop_reason and value.observed_events == 1
     unknown = deepcopy(case['event'])
-    unknown['rate_limit_info']['unifiedWindows']['unrecognized'] = {}
+    unknown['rate_limit_info']['unifiedWindows']['unrecognized'] = {
+        'utilization': 1, 'resetsAt': case['now'] + 3600}
     fresh = build(case); fresh.before_dispatch()
-    with pytest.raises(ValueError, match='unknown window'):
+    with pytest.raises(ValueError, match='unrecognized.*exhausted'):
         fresh.observe(unknown)
 
 

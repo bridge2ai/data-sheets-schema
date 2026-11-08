@@ -11,7 +11,8 @@ from . import native_subscription_guard as wire
 
 KIND = 'd4d_native_execution_review_bundle_v2'
 TERMS_KIND = 'd4d_native_owner_launch_terms_v1'
-CAPTURE_KIND = 'd4d_native_subscription_capture_request_v1'
+CAPTURE_KIND = 'd4d_native_subscription_capture_request_v2'
+LEGACY_CAPTURE_KIND = 'd4d_native_subscription_capture_request_v1'
 PROMPT = 'Reply with OK.'
 BINDING_KEYS = {'registration_sha256', 'attempt_id', 'source_commit', 'dependencies_sha256'}
 WORD_KEYS = BINDING_KEYS | {'kind', 'version', 'owner', 'authorized_at', 'word',
@@ -74,9 +75,15 @@ def validate_terms(statement, runtime, *, word_owner):
     request = statement['quota_capture']
     _exact(request, {'kind', 'version', 'count', 'directory', 'deadline_seconds',
                     'prompt_sha256', 'max_stdout_bytes', 'max_stderr_bytes'}, 'quota capture request')
-    _version(request, CAPTURE_KIND, 1)
-    if type(request['count']) is not int or request['count'] != 1:
-        raise ValueError('word-bound statement must authorize exactly one quota capture')
+    # Historical one-shot evidence stays readable; only v2 can authorize new
+    # captures. The producer enforces that distinction before reserving a slot.
+    if type(request['version']) is not int or (
+            request['kind'], request['version']) not in (
+                (LEGACY_CAPTURE_KIND, 1), (CAPTURE_KIND, 2)):
+        raise ValueError('unknown quota capture request kind/version')
+    count = 3 if request['version'] == 2 else 1
+    if type(request['count']) is not int or request['count'] != count:
+        raise ValueError('word-bound statement differs from its closed capture allowance')
     if (type(request['deadline_seconds']) is not int
             or not 1 <= request['deadline_seconds'] <= min(60, deadline)):
         raise ValueError('quota capture deadline must be explicit and bounded')
@@ -114,7 +121,8 @@ def validate_bundle(registration_raw, review_bundle_raw, launch_word_raw):
     if word['word'] != 'AUTHORIZE_ONE_NATIVE_ATTEMPT':
         raise ValueError('coded word must authorize exactly one native attempt')
     _text(word['owner'], 'coded word owner')
-    authorized_at = wire._timestamp(word['authorized_at'])
+    from .native_subscription_guard_v2 import _timestamp
+    authorized_at = _timestamp(word['authorized_at'], 'coded word authorized_at')
     if (any(word[key] != expected for key, expected in binding.items())
             or word['review_sha256'] != wire.sha(review_bundle_raw)
             or word['permission_probe_sha256'] != value.get('permission_probe_sha256')):

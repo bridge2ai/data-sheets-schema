@@ -23,6 +23,7 @@ VERSION = 2
 MAX_BYTES = 65536
 MAX_AGE_SECONDS = 300
 WINDOWS = ("five_hour", "seven_day")
+MAX_WINDOWS = 64
 SAFE_STATUSES = ("allowed", "allowed_warning")
 KEYS = frozenset({
     "kind", "version", "registration_sha256", "runtime_sha256",
@@ -118,6 +119,13 @@ def _now():
     return datetime.now(timezone.utc).timestamp()
 
 
+def _window_name(name):
+    if (type(name) is not str or not name or len(name) > 128
+            or any(char in name for char in ("\0", "\r", "\n"))):
+        raise ValueError("subscription window name must be bounded nonempty text")
+    return name
+
+
 def _reading(row, info, name):
     if type(row) is not dict:
         raise ValueError(name + " subscription window is malformed")
@@ -142,17 +150,17 @@ def _reading(row, info, name):
 
 def _inspect(event, *, require_both):
     """Return unambiguous rows and the first deterministic policy refusal."""
-    errors, readings = [], {}
+    errors, readings, recorded = [], {}, {}
     if type(event) is not dict or event.get("type") != "rate_limit_event":
-        return {}, "subscription guard requires a native rate_limit_event"
+        return {}, {}, "subscription guard requires a native rate_limit_event"
     try:
         if len(canonical(event)) > MAX_BYTES:
-            return {}, "subscription event exceeds its byte bound"
+            return {}, {}, "subscription event exceeds its byte bound"
     except (TypeError, ValueError, RecursionError, OverflowError):
-        return {}, "subscription event is not finite bounded JSON"
+        return {}, {}, "subscription event is not finite bounded JSON"
     info = event.get("rate_limit_info")
     if type(info) is not dict:
-        return {}, "subscription rate-limit information is malformed"
+        return {}, {}, "subscription rate-limit information is malformed"
     if info.get("status") not in SAFE_STATUSES:
         errors.append("subscription top-level status is rejected or unknown")
     if info.get("isUsingOverage") is not False:
@@ -164,18 +172,32 @@ def _inspect(event, *, require_both):
     if type(windows) is not dict:
         errors.append("subscription windows are malformed")
         windows = {}
-    if set(windows) - set(WINDOWS):
-        errors.append("subscription observation contains an unknown window")
     top = info.get("rateLimitType")
-    if "rateLimitType" in info and top not in WINDOWS:
-        errors.append("subscription top-level window is unknown")
+    try:
+        for name in windows:
+            _window_name(name)
+        if "rateLimitType" in info:
+            _window_name(top)
+    except ValueError as exc:
+        return {}, {}, str(exc)
+    names = set(WINDOWS) | set(windows) | ({top} if top is not None else set())
+    if len(names) > MAX_WINDOWS:
+        return {}, {}, "subscription window inventory exceeds its bound"
     if "rateLimitType" not in info and any(key in info for key in ("utilization", "resetsAt")):
         errors.append("subscription reading has no declared window type")
-    for name in WINDOWS:
+    for name in (*WINDOWS, *sorted(names - set(WINDOWS))):
         rows = ([info] if top == name else []) + ([windows[name]] if name in windows else [])
         if not rows:
-            if require_both:
+            if require_both and name in WINDOWS:
                 errors.append("subscription evidence has no " + name + " window")
+            continue
+        if name not in WINDOWS and all(type(row) is dict and "utilization" not in row for row in rows):
+            # No numerical claim exists to admit or reject. Preserve every raw
+            # window payload, excluding the top row's separate nested-window
+            # container so it is neither duplicated nor credited to this name.
+            # Opaque metadata never certifies headroom or a reset.
+            recorded[name] = [deepcopy({key: value for key, value in row.items()
+                                       if row is not info or key != "unifiedWindows"}) for row in rows]
             continue
         values = []
         try:
@@ -192,16 +214,16 @@ def _inspect(event, *, require_both):
             errors.append(name + " subscription window reports overage")
         if reading["utilization"] >= 1:
             errors.append(name + " subscription window is exhausted")
-    if not readings and not errors:
+    if not readings and not recorded and not errors:
         errors.append("subscription event contains no supported window reading")
-    return readings, errors[0] if errors else None
+    return readings, recorded, errors[0] if errors else None
 
 
 def window_readings(event, *, require_both=True):
-    """Admission requires both supported windows; every present row is checked."""
+    """Validate all numerical windows; unknown nonnumeric rows are record-only."""
     if type(require_both) is not bool:
         raise ValueError("subscription presence selection must be boolean")
-    readings, refusal = _inspect(event, require_both=require_both)
+    readings, _, refusal = _inspect(event, require_both=require_both)
     if refusal is not None:
         raise ValueError(refusal)
     return readings
@@ -234,13 +256,23 @@ def _empty_windows():
 def _record(windows, readings, event_index):
     for name, reading in readings.items():
         value = {**reading, "event_index": event_index}
-        row = windows[name]
+        row = windows.setdefault(name, {"count": 0, "first": None, "last": None, "highest": None})
         row["count"] += 1
         if row["first"] is None:
             row["first"] = value
         row["last"] = value
         if row["highest"] is None or reading["utilization"] > row["highest"]["utilization"]:
             row["highest"] = value
+
+
+def _record_opaque(windows, recorded, event_index):
+    for name, rows in recorded.items():
+        value = {"rows": deepcopy(rows), "event_index": event_index}
+        row = windows.setdefault(name, {"count": 0, "first": None, "last": None})
+        row["count"] += 1
+        if row["first"] is None:
+            row["first"] = value
+        row["last"] = value
 
 
 def _admission(raw, expected_sha256, registration_raw, runtime, launch_word_raw, owner_statement):
@@ -278,7 +310,9 @@ def _admission(raw, expected_sha256, registration_raw, runtime, launch_word_raw,
     event_raw = value["event_json"]
     if type(event_raw) is not str or sha(event_raw.encode()) != value["event_sha256"]:
         raise ValueError("subscription event differs from its captured hash")
-    readings = window_readings(strict_json(event_raw), require_both=True)
+    readings, recorded, refusal = _inspect(strict_json(event_raw), require_both=True)
+    if refusal is not None:
+        raise ValueError(refusal)
     if readings["seven_day"]["utilization"] > maximum:
         raise ValueError("insufficient weekly subscription headroom")
     captured = _timestamp(value["captured_at"], "captured_at")
@@ -286,7 +320,8 @@ def _admission(raw, expected_sha256, registration_raw, runtime, launch_word_raw,
         raise ValueError("subscription observation predates owner authorization")
     if any(reading["resets_at"] <= captured for reading in readings.values()):
         raise ValueError("subscription window reset is not after its observation")
-    return {"value": value, "readings": readings, "maximum": maximum, "max_age": age,
+    return {"value": value, "readings": readings, "record_only": recorded,
+            "maximum": maximum, "max_age": age,
             "captured": captured, "authorized": authorized, "authorized_at": word["authorized_at"]}
 
 
@@ -298,7 +333,7 @@ class SubscriptionGuard:
     This helper repeats term equality and chronology, not reviewer authenticity.
     """
     __slots__ = ("_raw", "_expected", "_registration", "_runtime_raw", "_word_raw", "_owner_raw",
-                 "_clock", "_path", "_dispatched", "_stop", "_count", "_windows")
+                 "_clock", "_path", "_dispatched", "_dispatched_at", "_stop", "_count", "_windows", "_record_only")
 
     def __init__(self, raw, *, expected_sha256, registration_raw, runtime,
                  launch_word_raw, owner_statement, clock=None, check_freshness=True):
@@ -311,7 +346,9 @@ class SubscriptionGuard:
         if not callable(self._clock):
             raise ValueError("subscription guard clock must be callable")
         self._path, self._dispatched, self._stop, self._count = None, False, None, 0
+        self._dispatched_at = None
         self._windows = _empty_windows()
+        self._record_only = {}
         if check_freshness:
             self.before_dispatch(check_only=True)
 
@@ -341,6 +378,8 @@ class SubscriptionGuard:
         now = self._clock()
         if type(now) not in (int, float) or not math.isfinite(now):
             raise ValueError("subscription guard clock is invalid")
+        stamp = datetime.fromtimestamp(now, timezone.utc).isoformat().replace("+00:00", "Z")
+        now = _timestamp(stamp, "dispatch time")
         if not 0 <= now - bound["captured"] <= bound["max_age"]:
             raise ValueError("subscription observation is stale or future-dated")
         if any(row["resets_at"] <= now for row in bound["readings"].values()):
@@ -351,6 +390,7 @@ class SubscriptionGuard:
             raise ValueError(self._stop)
         if not check_only:
             self._dispatched = True
+            self._dispatched_at = stamp
 
     def observe(self, event):
         if type(event) is not dict or event.get("type") != "rate_limit_event":
@@ -359,12 +399,19 @@ class SubscriptionGuard:
         # cannot weaken the selected policy or manufacture an authorization.
         bound = self._static()
         self._count += 1
-        readings, refusal = _inspect(event, require_both=False)
+        readings, recorded, refusal = _inspect(event, require_both=False)
         if not self._dispatched:
             refusal = "subscription event was delivered before dispatch"
         elif any(row["resets_at"] <= bound["captured"] for row in readings.values()):
             refusal = refusal or "observed subscription reset is not after admission capture"
-        _record(self._windows, readings, self._count)
+        elif any(row["resets_at"] <= _timestamp(self._dispatched_at, "dispatch time") for row in readings.values()):
+            refusal = refusal or "observed subscription reset is not after dispatch"
+        names = set(self._windows) | set(self._record_only) | set(readings) | set(recorded)
+        if len(names) > MAX_WINDOWS:
+            refusal = refusal or "observed subscription window inventory exceeds its bound"
+        else:
+            _record(self._windows, readings, self._count)
+            _record_opaque(self._record_only, recorded, self._count)
         if refusal is not None and self._stop is None:
             self._stop = refusal
         if self._stop is not None:
@@ -378,9 +425,16 @@ class SubscriptionGuard:
             "owner_statement_sha256": bound["value"]["owner_statement_sha256"],
             "authorized_at": bound["authorized_at"], "captured_at": bound["value"]["captured_at"],
             "weekly": bound["readings"]["seven_day"], "five_hour": bound["readings"]["five_hour"],
+            "initial_windows": deepcopy(bound["readings"]),
+            "initial_record_only_windows": deepcopy(bound["record_only"]),
             "maximum_starting_utilization": bound["maximum"], "max_age_seconds": bound["max_age"],
-            "dispatched": self._dispatched, "observed_rate_limit_events": self._count,
+            "dispatched": self._dispatched, "dispatched_at": self._dispatched_at,
+            "observed_rate_limit_events": self._count,
             "observed_windows": deepcopy(self._windows), "stop_reason": self._stop,
+            "observed_record_only_windows": deepcopy(self._record_only),
+            "after_readings_verified": False,
+            "after_readings_basis": "unverified unless complete captured transcript replay succeeds; stopped-attempt readings remain unverified",
+            "unknown_window_policy": "utilization present: same numeric/reset/safety checks; utilization absent: raw record only, no safety verdict",
             "basis": "caller-supplied saved native events; not authenticated account state",
             "owner_authorization": "exact review bundle and separate authorization chain remain required"}
 
@@ -396,8 +450,10 @@ def load_guard(path, expected_sha256, *, registration_raw, runtime, launch_word_
 
 
 def _saved_windows(value, count):
-    _closed(value, WINDOWS, "saved subscription windows")
+    if type(value) is not dict or not set(WINDOWS) <= set(value) or len(value) > MAX_WINDOWS:
+        raise ValueError("saved subscription windows lack required names or exceed their bound")
     for name, row in value.items():
+        _window_name(name)
         _closed(row, {"count", "first", "last", "highest"}, "saved " + name + " summary")
         n = row["count"]
         if type(n) is not int or not 0 <= n <= count:
@@ -424,6 +480,29 @@ def _saved_windows(value, count):
             raise ValueError("saved subscription first/last/highest chronology is inconsistent")
 
 
+def _saved_record_only(value, count):
+    if type(value) is not dict or len(value) > MAX_WINDOWS or set(value) & set(WINDOWS):
+        raise ValueError("saved record-only windows are malformed")
+    for name, row in value.items():
+        _window_name(name)
+        _closed(row, {"count", "first", "last"}, "saved record-only summary")
+        n = row["count"]
+        if type(n) is not int or not 1 <= n <= count:
+            raise ValueError("saved record-only count is malformed")
+        for key in ("first", "last"):
+            item = row[key]
+            _closed(item, {"rows", "event_index"}, "saved record-only reading")
+            if (type(item["event_index"]) is not int or not 1 <= item["event_index"] <= count
+                    or type(item["rows"]) is not list or not 1 <= len(item["rows"]) <= 2
+                    or any(type(raw) is not dict or "utilization" in raw for raw in item["rows"])
+                    or len(canonical(item["rows"])) > MAX_BYTES):
+                raise ValueError("saved record-only reading is malformed")
+        if (row["first"]["event_index"] > row["last"]["event_index"]
+                or n > row["last"]["event_index"] - row["first"]["event_index"] + 1
+                or (n == 1 and row["first"] != row["last"])):
+            raise ValueError("saved record-only chronology is inconsistent")
+
+
 def validate_saved_snapshot(raw, snapshot, *, registration_raw, runtime, launch_word_raw, owner_statement):
     """Check static binding and shape only; dynamic truth requires transcript replay."""
     if type(snapshot) is not dict:
@@ -437,8 +516,22 @@ def validate_saved_snapshot(raw, snapshot, *, registration_raw, runtime, launch_
             (type(stop) is not str or not stop or len(stop) > 1024))):
         raise ValueError("saved subscription observation state is malformed")
     _saved_windows(snapshot.get("observed_windows"), count)
+    _saved_record_only(snapshot.get("observed_record_only_windows"), count)
+    if len(set(snapshot["observed_windows"]) | set(snapshot["observed_record_only_windows"])) > MAX_WINDOWS:
+        raise ValueError("saved subscription window inventory exceeds its bound")
+    dispatch = snapshot.get("dispatched_at")
+    if snapshot["dispatched"]:
+        when = _timestamp(dispatch, "dispatch time")
+        bound = guard._static()
+        if (not 0 <= when - bound["captured"] <= bound["max_age"]
+                or any(row["resets_at"] <= when for row in bound["readings"].values())):
+            raise ValueError("saved dispatch time contradicts capture freshness or reset")
+    elif dispatch is not None:
+        raise ValueError("undispatched subscription snapshot invents dispatch time")
     guard._dispatched, guard._count, guard._stop = snapshot["dispatched"], count, stop
+    guard._dispatched_at = dispatch
     guard._windows = deepcopy(snapshot["observed_windows"])
+    guard._record_only = deepcopy(snapshot["observed_record_only_windows"])
     # Compare canonical bytes too: Python equality alone treats bool as int.
     if canonical(snapshot) != canonical(guard.snapshot()):
         raise ValueError("saved subscription metadata differs from consumed evidence")
@@ -446,14 +539,15 @@ def validate_saved_snapshot(raw, snapshot, *, registration_raw, runtime, launch_
 
 
 def _transcript_replay(raw, *, registration_raw, runtime, launch_word_raw, owner_statement,
-                       transcript_raw, continue_after_stop):
+                       transcript_raw, continue_after_stop, dispatched_at):
     from .native_shared_contract import HARD_LIMITS
     if (type(transcript_raw) is not bytes or not transcript_raw
             or len(transcript_raw) > HARD_LIMITS["stream_bytes"] or not transcript_raw.endswith(b"\n")):
         raise ValueError("subscription replay requires a complete bounded transcript")
     replay = SubscriptionGuard(raw, expected_sha256=sha(raw), registration_raw=registration_raw,
         runtime=runtime, launch_word_raw=launch_word_raw, owner_statement=owner_statement, check_freshness=False)
-    replay._dispatched = True
+    replay._dispatched = dispatched_at is not None
+    replay._dispatched_at = dispatched_at
     start, rows = 0, 0
     while start < len(transcript_raw):
         end = transcript_raw.find(b"\n", start)
@@ -488,12 +582,15 @@ def validate_saved_observations(raw, snapshot, *, registration_raw, runtime,
             try:
                 replay = _transcript_replay(raw, registration_raw=registration_raw, runtime=runtime,
                     launch_word_raw=launch_word_raw, owner_statement=owner_statement,
-                    transcript_raw=transcript_raw, continue_after_stop=True)
+                    transcript_raw=transcript_raw, continue_after_stop=True,
+                    dispatched_at=snapshot["dispatched_at"])
                 result["transcript_diagnostic"] = {
                     "basis": "all buffered transcript events; not proof of delivered callback prefix",
                     "transcript": {"bytes": len(transcript_raw), "sha256": sha(transcript_raw)},
                     "observed_rate_limit_events": replay.observed_events,
-                    "observed_windows": replay.snapshot()["observed_windows"], "first_stop": replay.stop_reason}
+                    "observed_windows": replay.snapshot()["observed_windows"],
+                    "observed_record_only_windows": replay.snapshot()["observed_record_only_windows"],
+                    "first_stop": replay.stop_reason}
             except ValueError as exc:
                 result["transcript_diagnostic"] = {"error": str(exc), "complete": False}
         return result
@@ -501,14 +598,16 @@ def validate_saved_observations(raw, snapshot, *, registration_raw, runtime,
         raise ValueError("completed subscription snapshot lacks dispatch or retains a stop")
     replay = _transcript_replay(raw, registration_raw=registration_raw, runtime=runtime,
         launch_word_raw=launch_word_raw, owner_statement=owner_statement,
-        transcript_raw=transcript_raw, continue_after_stop=False)
+        transcript_raw=transcript_raw, continue_after_stop=False,
+        dispatched_at=snapshot["dispatched_at"])
     if canonical(replay.snapshot()) != canonical(snapshot):
         raise ValueError("saved subscription state differs from ordered transcript replay")
     return {"checked": True, "complete": True, "passed": True,
         "basis": "all ordered rate_limit_event observations in the complete captured transcript",
         "transcript": {"bytes": len(transcript_raw), "sha256": sha(transcript_raw)},
         "observed_rate_limit_events": replay.observed_events,
-        "observed_windows": replay.snapshot()["observed_windows"]}
+        "observed_windows": replay.snapshot()["observed_windows"],
+        "observed_record_only_windows": replay.snapshot()["observed_record_only_windows"]}
 
 
 def prepare_guard(*, registration_raw, runtime, launch_word_raw, event_raw, captured_at,

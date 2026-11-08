@@ -34,16 +34,19 @@ def runtime_inputs(tmp_path, *, binary_bytes=b'Inert fingerprint fixture; never 
         path.write_bytes(binary_bytes)
         path.chmod(0o700)
     init = {'type': 'system', 'subtype': 'init', 'model': subject.MODEL,
-            'claude_code_version': 'fixture-1',
-            'limits': {'contextWindow': 1_000_000, 'maxOutputTokens': 64_000},
-            'thinking': {'type': 'adaptive'}}
-    probe = root / 'saved-probe-init.jsonl'
-    probe.write_text(json.dumps(init) + '\n')
+            'claude_code_version': 'fixture-1', 'session_id': 'invented-observation-session'}
+    limits = {'contextWindow': 1_000_000, 'maxOutputTokens': 64_000}
+    terminal = {'type': 'result', 'subtype': 'success', 'is_error': False,
+                'session_id': init['session_id'], 'modelUsage': {subject.MODEL: deepcopy(limits)}}
+    probe = root / 'saved-probe.jsonl'
+    probe.write_text(json.dumps(init) + '\n' + json.dumps(terminal) + '\n')
+    request = root / 'native_request.json'
+    request.write_text(json.dumps({'model': 'claude-opus-5', 'thinking': {'type': 'adaptive'}}))
     runtime = {'route': historical.ROUTE,
         'executable': {'path': str(copied), 'sha256': hashlib.sha256(binary_bytes).hexdigest(),
                        'version': 'local fixture', 'init_version': 'fixture-1'},
         'model': subject.MODEL, 'auxiliary_models': [], 'effort': 'high',
-        'limits': deepcopy(init['limits']), 'limits_basis': 'not yet bound',
+        'limits': deepcopy(limits), 'limits_basis': 'not yet bound',
         'provider': 'synthetic-first-party-selection',
         'auth': {'loggedIn': True, 'authMethod': 'claude.ai', 'apiProvider': 'firstParty',
                  'subscriptionType': 'max', 'expected_api_key_source': 'none'},
@@ -52,10 +55,19 @@ def runtime_inputs(tmp_path, *, binary_bytes=b'Inert fingerprint fixture; never 
         'deadline_seconds': 180, 'budget_guard_usd': '90',
         'keep_awake': {'policy': 'not_applicable', 'host_platform': 'synthetic-host',
                        'basis': 'Offline evidence test, not launch authority'}}
-    arguments = {'probe_init_path': str(probe), 'updater_source': str(source),
+    arguments = {'probe_init_path': str(probe), 'native_request_path': str(request),
+                 'updater_source': str(source),
                  'updater_root': str(updater), 'thinking_setting': {'type': 'adaptive'},
                  'thinking_basis': 'Explicit synthetic setting, not inferred from effort'}
     return runtime, arguments
+
+
+def probe_rows(inputs):
+    return [json.loads(line) for line in Path(inputs[1]['probe_init_path']).read_text().splitlines() if line]
+
+
+def write_probe(inputs, rows):
+    Path(inputs[1]['probe_init_path']).write_text(''.join(json.dumps(row) + '\n' for row in rows))
 
 
 @pytest.fixture
@@ -86,10 +98,43 @@ def test_real_evidence_binding_preserves_closed_runtime_and_original(inputs):
     assert historical.validate_runtime(result) == result
     assert subject.validate_prepared_runtime(result) == result
     basis = json.loads(result['limits_basis'])
+    assert basis['version'] == 2
+    assert basis['model_aliases'] == {'requested': subject.MODEL, 'returned': 'claude-opus-5'}
     assert basis['observed'] == {'model': subject.MODEL, 'limits': runtime['limits'], 'init_version': 'fixture-1'}
     assert basis['thinking']['observed'] == {'state': 'observed', 'field': 'thinking', 'value': {'type': 'adaptive'}}
     assert basis['durable_copy']['source']['inode'] != basis['durable_copy']['copy']['inode']
     assert basis['probe']['sha256'] == hashlib.sha256(Path(arguments['probe_init_path']).read_bytes()).hexdigest()
+    assert basis['probe']['terminal_line'] == 2
+    assert basis['request']['sha256'] == hashlib.sha256(Path(arguments['native_request_path']).read_bytes()).hexdigest()
+
+
+def test_saved_probe_accepts_declared_returned_assistant_label(inputs):
+    rows = probe_rows(inputs)
+    rows.insert(1, {'type': 'assistant', 'session_id': rows[0]['session_id'],
+                    'message': {'model': 'claude-opus-5', 'content': []}})
+    write_probe(inputs, rows)
+    assert subject.validate_prepared_runtime(prepared(inputs))['model'] == subject.MODEL
+
+
+@pytest.mark.parametrize('mutation', ['foreign_assistant', 'missing_assistant',
+                                     'requested_assistant', 'foreign_terminal',
+                                     'returned_terminal'])
+def test_saved_probe_refuses_contradictory_or_missing_frame_model(inputs, mutation):
+    rows = probe_rows(inputs)
+    assistant = {'type': 'assistant', 'session_id': rows[0]['session_id'],
+                 'message': {'model': 'claude-opus-5', 'content': []}}
+    rows.insert(1, assistant)
+    if mutation == 'foreign_assistant':
+        assistant['message']['model'] = 'foreign-model'
+    elif mutation == 'missing_assistant':
+        del assistant['message']['model']
+    elif mutation == 'requested_assistant':
+        assistant['message']['model'] = subject.MODEL
+    else:
+        rows[-1]['model'] = 'foreign-model' if mutation == 'foreign_terminal' else 'claude-opus-5'
+    write_probe(inputs, rows)
+    with pytest.raises(ValueError, match='native (frame|assistant frame)'):
+        prepared(inputs)
 
 
 @pytest.mark.parametrize('field,value', [('model', 'claude-opus-5'), ('effort', 'medium'),
@@ -121,7 +166,7 @@ def test_declared_and_observed_identity_must_agree(inputs, mutation):
 @pytest.mark.parametrize('declared', [False, {'type': 'adaptive'}])
 def test_missing_thinking_refuses_even_with_an_explicit_declared_setting(inputs, declared):
     _, arguments = inputs
-    path = Path(arguments['probe_init_path'])
+    path = Path(arguments['native_request_path'])
     init = json.loads(path.read_text())
     del init['thinking']
     path.write_text(json.dumps(init) + '\n')
@@ -132,7 +177,7 @@ def test_missing_thinking_refuses_even_with_an_explicit_declared_setting(inputs,
 
 def test_observed_false_is_preserved_and_is_not_missing_thinking(inputs):
     _, arguments = inputs
-    path = Path(arguments['probe_init_path'])
+    path = Path(arguments['native_request_path'])
     init = json.loads(path.read_text())
     init['thinking'] = False
     path.write_text(json.dumps(init) + '\n')
@@ -147,7 +192,7 @@ def test_observed_false_is_preserved_and_is_not_missing_thinking(inputs):
 @pytest.mark.parametrize('change', ['absent', 'null'])
 def test_revalidation_refuses_unobserved_thinking_even_when_evidence_is_repinned(inputs, change):
     runtime = prepared(inputs)
-    path = Path(inputs[1]['probe_init_path'])
+    path = Path(inputs[1]['native_request_path'])
     init = json.loads(path.read_text())
     if change == 'absent':
         del init['thinking']
@@ -157,8 +202,7 @@ def test_revalidation_refuses_unobserved_thinking_even_when_evidence_is_repinned
     path.write_bytes(raw)
 
     def repin(basis):
-        basis['probe'].update(sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw),
-                              init_sha256=hashlib.sha256(raw.splitlines()[0]).hexdigest())
+        basis['request'].update(sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw))
         basis['thinking']['observed'] = {'state': 'not_emitted', 'field': None, 'value': None}
 
     with pytest.raises(ValueError, match='observed thinking setting|explicit boolean'):
@@ -205,7 +249,7 @@ def test_preparation_requires_an_explicit_registered_thinking_setting(inputs):
 @pytest.mark.parametrize('declared', [True, 'false', {'enabled': False}])
 def test_observed_false_must_equal_the_registered_thinking_value(inputs, declared):
     _, arguments = inputs
-    path = Path(arguments['probe_init_path'])
+    path = Path(arguments['native_request_path'])
     init = json.loads(path.read_text())
     init['thinking'] = False
     path.write_text(json.dumps(init) + '\n')
@@ -215,32 +259,100 @@ def test_observed_false_must_equal_the_registered_thinking_value(inputs, declare
 
 
 @pytest.mark.parametrize('change', ['missing_limits', 'duplicate_init', 'no_init', 'duplicate_key',
-                                  'boolean_limit', 'wrong_model', 'unknown_thinking_alias', 'null_thinking'])
+                                  'boolean_limit', 'wrong_model', 'no_terminal', 'duplicate_terminal',
+                                  'wrong_usage_model', 'foreign_session', 'failed_terminal', 'terminal_first'])
 def test_saved_probe_refuses_missing_ambiguous_or_conflicting_evidence(inputs, change):
     _, arguments = inputs
     path = Path(arguments['probe_init_path'])
-    original = path.read_text()
-    init = json.loads(original)
+    init, terminal = probe_rows(inputs)
     if change == 'missing_limits':
-        del init['limits']
+        del terminal['modelUsage'][subject.MODEL]['contextWindow']
     elif change == 'boolean_limit':
-        init['limits']['maxOutputTokens'] = True
+        terminal['modelUsage'][subject.MODEL]['maxOutputTokens'] = True
     elif change == 'wrong_model':
         init['model'] = 'other'
-    elif change == 'unknown_thinking_alias':
-        init['thinkingEnabled'] = True
-    elif change == 'null_thinking':
-        init['thinking'] = None
     elif change == 'no_init':
         init['subtype'] = 'other'
-    text = json.dumps(init) + '\n'
+    elif change == 'wrong_usage_model':
+        terminal['modelUsage'] = {'claude-opus-5': terminal['modelUsage'][subject.MODEL]}
+    elif change == 'foreign_session':
+        terminal['session_id'] = 'other'
+    elif change == 'failed_terminal':
+        terminal['is_error'] = True
+    rows = [init, terminal]
     if change == 'duplicate_init':
-        text += original
+        rows.insert(1, init)
+    elif change == 'no_terminal':
+        rows.pop()
+    elif change == 'duplicate_terminal':
+        rows.append(terminal)
+    elif change == 'terminal_first':
+        rows.reverse()
+    text = ''.join(json.dumps(row) + '\n' for row in rows)
     if change == 'duplicate_key':
         text = text.replace('"model":', '"model": "shadow", "model":')
     path.write_text(text)
     with pytest.raises(ValueError):
         prepared(inputs)
+
+
+def test_init_fields_never_replace_terminal_or_request_evidence(inputs):
+    init, terminal = probe_rows(inputs)
+    assert 'limits' not in init and 'thinking' not in init
+    result = prepared(inputs)
+    init['limits'] = {'contextWindow': 1, 'maxOutputTokens': 1}
+    init['thinking'] = False
+    write_probe(inputs, [init, terminal])
+    second = prepared(inputs)
+    assert second['limits'] == result['limits']
+    assert json.loads(second['limits_basis'])['thinking'] == json.loads(result['limits_basis'])['thinking']
+    del terminal['modelUsage']
+    write_probe(inputs, [init, terminal])
+    with pytest.raises(ValueError, match='modelUsage'):
+        prepared(inputs)
+
+
+@pytest.mark.parametrize('change', ['missing_thinking', 'null_thinking', 'unknown_thinking_alias',
+                                  'wrong_model', 'duplicate_key'])
+def test_saved_request_requires_unambiguous_real_observation(inputs, change):
+    path = Path(inputs[1]['native_request_path'])
+    body = json.loads(path.read_text())
+    if change == 'missing_thinking':
+        del body['thinking']
+    elif change == 'null_thinking':
+        body['thinking'] = None
+    elif change == 'unknown_thinking_alias':
+        body['thinkingEnabled'] = True
+    elif change == 'wrong_model':
+        body['model'] = subject.MODEL
+    raw = json.dumps(body)
+    if change == 'duplicate_key':
+        raw = raw.replace('"thinking":', '"thinking":false,"thinking":')
+    path.write_text(raw)
+    with pytest.raises(ValueError):
+        prepared(inputs)
+
+
+def test_init_thinking_cannot_supply_a_missing_request_observation(inputs):
+    init, terminal = probe_rows(inputs)
+    init['thinking'] = inputs[1]['thinking_setting']
+    write_probe(inputs, [init, terminal])
+    path = Path(inputs[1]['native_request_path'])
+    path.write_text(json.dumps({'model': 'claude-opus-5'}))
+    with pytest.raises(ValueError, match='saved request must expose'):
+        prepared(inputs)
+
+
+def test_request_path_is_required_and_request_bytes_cannot_change(inputs):
+    runtime, arguments = inputs
+    without = {key: value for key, value in arguments.items() if key != 'native_request_path'}
+    with pytest.raises(TypeError, match='native_request_path'):
+        subject.prepare_runtime(runtime, **without)
+    result = prepared(inputs)
+    with Path(arguments['native_request_path']).open('a') as stream:
+        stream.write('\n')
+    with pytest.raises(ValueError, match='saved request differs'):
+        subject.validate_prepared_runtime(result)
 
 
 @pytest.mark.parametrize('kind', ['same_path', 'hardlink', 'symlink', 'inside_updater', 'different_bytes'])
@@ -278,7 +390,7 @@ def test_updater_changes_do_not_replace_registered_durable_bytes(inputs):
 def test_saved_probe_changes_are_not_allowed(inputs):
     runtime = prepared(inputs)
     with Path(inputs[1]['probe_init_path']).open('a') as stream:
-        stream.write('{"type":"result"}\n')
+        stream.write('\n')
     with pytest.raises(ValueError, match='saved probe differs'):
         subject.validate_prepared_runtime(runtime)
 
@@ -308,7 +420,7 @@ def test_historical_basis_is_unchanged_but_never_satisfies_new_profile(inputs):
     with pytest.raises(ValueError):
         subject.validate_prepared_runtime(runtime)
     recognized = prepared(inputs)
-    recognized = mutate_basis(recognized, lambda b: b.update(version=2))
+    recognized = mutate_basis(recognized, lambda b: b.update(version=1))
     assert subject.is_prepared_runtime(recognized) is True
     with pytest.raises(ValueError, match='unknown U4b'):
         subject.validate_prepared_runtime(recognized)
@@ -331,7 +443,7 @@ def test_saved_line_number_boolean_is_not_integer_identity(inputs):
 
 def test_observed_thinking_boolean_is_not_a_number(inputs):
     _, arguments = inputs
-    path = Path(arguments['probe_init_path'])
+    path = Path(arguments['native_request_path'])
     init = json.loads(path.read_text())
     init['thinking'] = {'enabled': True}
     path.write_text(json.dumps(init) + '\n')

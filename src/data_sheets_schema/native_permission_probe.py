@@ -588,7 +588,8 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
     namespace = {}
     exec(compile(source_code, "fixed-permission-recipe/provider.py", "exec"), namespace)
     reply = namespace["reply"]
-    with local_provider(cases=supplier, model=expected["runtime"]["model"],
+    from .native_model_aliases import model_aliases
+    with local_provider(cases=supplier, model=model_aliases(expected['runtime'])['returned'],
                         deadline=deadline, reply=reply) as (server, url):
         launch.update(provider_url=url, provider_source_sha256=sha(source_code),
             executable=deepcopy(expected["runtime"]["executable"]),

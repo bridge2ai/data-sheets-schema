@@ -22,15 +22,16 @@ def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_ra
     if value['version'] != 2:
         raise ValueError('unknown subscription guard version')
     from .native_u4b_runtime import validate_prepared_runtime
-    from .native_subscription_capture import read_capture
+    from .native_subscription_capture import read_capture_for_event
     validate_prepared_runtime(runtime)
     terms = review.validate_bundle(registration_raw, review_bundle_raw, launch_word_raw)
-    capture = read_capture(Path(terms['quota_capture']['directory']) / 'capture.json',
+    capture = read_capture_for_event(Path(terms['quota_capture']['directory']),
         registration_raw=registration_raw, review_bundle_raw=review_bundle_raw,
-        launch_word_raw=launch_word_raw)
+        launch_word_raw=launch_word_raw,
+        **{key: value[key] for key in ('event_json', 'event_sha256', 'captured_at')})
     event = capture['selected_event']
     if any(value[key] != event[key] for key in ('event_json', 'event_sha256', 'captured_at')):
-        raise ValueError('guard differs from the one registered capture')
+        raise ValueError('guard differs from the selected registered capture')
     return v2, {'owner_statement': terms}
 
 

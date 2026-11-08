@@ -35,14 +35,13 @@ def registration_body(tmp_path):
 def corrupt_thinking(body, arguments, mutation):
     basis = json.loads(body['runtime']['limits_basis'])
     if mutation == 'missing_observation':
-        path = Path(arguments['probe_init_path'])
+        path = Path(arguments['native_request_path'])
         init = json.loads(path.read_bytes())
         del init['thinking']
         line = json.dumps(init).encode()
         raw = line + b'\n'
         path.write_bytes(raw)
-        basis['probe'].update(sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw),
-                              init_sha256=hashlib.sha256(line).hexdigest())
+        basis['request'].update(sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw))
         basis['thinking']['observed'] = {'state': 'not_emitted', 'field': None, 'value': None}
     elif mutation == 'missing_registration_field':
         del basis['thinking']['declared']
@@ -108,7 +107,7 @@ def test_historical_other_model_profile_keeps_its_validator(tmp_path, context_mo
 
 def test_observed_false_is_retained_by_observation_helper(tmp_path):
     initial, arguments = runtime_inputs(tmp_path)
-    path = Path(arguments['probe_init_path'])
+    path = Path(arguments['native_request_path'])
     init = json.loads(path.read_bytes())
     init['thinking'] = False
     path.write_text(json.dumps(init) + '\n')

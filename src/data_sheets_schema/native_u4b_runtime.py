@@ -5,8 +5,9 @@ copies a binary, discovers account state, or creates launch authority. The
 versioned evidence lives in the existing limits_basis string, preserving the
 historical closed runtime schema. Source-copy evidence is a local observation,
 not authenticated history; a later updater change does not invalidate the copy.
-The addendum's required thinking registration field is the decoded
-limits_basis.thinking object: both its declared and observed values are required.
+Basis v2 takes limits from terminal modelUsage and thinking from the separately
+captured native_request.json body. Both files are pinned and re-read; init
+fields cannot substitute for either observation. No probe is run by this code.
 """
 from __future__ import annotations
 
@@ -23,7 +24,8 @@ KIND = 'd4d_native_u4b_runtime_basis'
 MODEL = 'claude-opus-5[1m]'
 MAX_PROBE_BYTES = 4_000_000
 MAX_BINARY_BYTES = 1_073_741_824
-BASIS_KEYS = {'kind', 'version', 'probe', 'observed', 'thinking', 'durable_copy'}
+BASIS_KEYS = {'kind', 'version', 'probe', 'request', 'observed', 'thinking', 'durable_copy',
+              'model_aliases'}
 PIN_KEYS = {'path', 'sha256', 'bytes', 'device', 'inode'}
 
 
@@ -72,44 +74,77 @@ def _binary_pin(path):
             'device': before.st_dev, 'inode': before.st_ino}
 
 
-def _saved_init(path):
+def _saved_probe(path):
+    from .native_model_aliases import REQUESTED, RETURNED, require_frame_models
     member = read_regular(path, 'u4b_probe', max_bytes=MAX_PROBE_BYTES)
     raw = member.captured.raw
     rows = raw.splitlines()
     if not rows or len(rows) > 10_000:
         raise ValueError('saved probe requires bounded JSONL evidence')
-    found = []
+    found, terminals, events = [], [], []
     for index, row in enumerate(rows, 1):
         if not row.strip():
             continue
         value = values._json(row)
         if type(value) is not dict:
             raise ValueError('saved probe requires JSON object lines')
+        events.append((index, value))
         if value.get('type') == 'system' and value.get('subtype') == 'init':
             found.append((index, row, value))
+        if value.get('type') == 'result':
+            terminals.append((index, row, value))
     if len(found) != 1:
         raise ValueError('saved probe requires exactly one init line')
     line, row, init = found[0]
-    limits = init.get('limits')
-    values._closed(limits, {'contextWindow', 'maxOutputTokens'}, 'saved init limits')
+    if len(terminals) != 1:
+        raise ValueError('saved probe requires exactly one terminal result')
+    terminal_line, terminal_raw, terminal = terminals[0]
+    if (terminal_line <= line or terminal_line != events[-1][0]
+            or terminal.get('is_error') is not False or terminal.get('subtype') != 'success'):
+        raise ValueError('saved probe requires a successful final terminal result after init')
+    session = init.get('session_id')
+    values._text(session, 'saved probe session')
+    if any(event.get('session_id') != session for _, event in events
+           if event.get('type') in ('assistant', 'user', 'result')):
+        raise ValueError('saved probe terminal/messages differ from its init session')
+    for _, event in events:
+        if event.get('type') in ('assistant', 'user', 'result'):
+            require_frame_models(event, {'requested': REQUESTED, 'returned': RETURNED})
+    usage = terminal.get('modelUsage')
+    values._closed(usage, {MODEL}, 'saved terminal modelUsage')
+    own = usage[MODEL]
+    if type(own) is not dict:
+        raise ValueError('saved terminal modelUsage requires an object')
+    limits = {key: own.get(key) for key in ('contextWindow', 'maxOutputTokens')}
     if (any(type(value) is not int or value <= 0 for value in limits.values())
             or limits['maxOutputTokens'] > limits['contextWindow']):
-        raise ValueError('saved init limits must be explicit positive integer counts')
+        raise ValueError('saved terminal limits must be explicit positive integer counts')
     if init.get('model') != MODEL:
         raise ValueError('saved init does not name the D112 model')
     values._text(init.get('claude_code_version'), 'saved init version')
     pin = {'path': path, 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw),
-           'init_line': line, 'init_sha256': hashlib.sha256(row).hexdigest()}
+           'init_line': line, 'init_sha256': hashlib.sha256(row).hexdigest(),
+           'terminal_line': terminal_line, 'terminal_sha256': hashlib.sha256(terminal_raw).hexdigest()}
     observation = {'model': init['model'], 'limits': dict(limits),
                    'init_version': init['claude_code_version']}
-    # Do not infer a thinking setting from effort, model or an account config.
-    # Recognize one explicit field; ambiguous aliases cannot become "missing".
-    if any(name in init for name in ('thinkingEnabled', 'thinking_enabled', 'alwaysThinkingEnabled')):
-        raise ValueError('unsupported saved init thinking field; explicit adaptation required')
-    if 'thinking' not in init:
-        raise ValueError('saved init must expose an observed thinking setting')
-    thinking = {'state': 'observed', 'field': 'thinking', 'value': _thinking(init['thinking'])}
-    return pin, observation, thinking
+    return pin, observation
+
+
+def _saved_request(path):
+    """Read the captured HTTP body, never infer thinking from init or effort."""
+    from .native_model_aliases import RETURNED
+    member = read_regular(path, 'u4b_native_request', max_bytes=MAX_PROBE_BYTES)
+    raw = member.captured.raw
+    body = values._json(raw)
+    if type(body) is not dict or body.get('model') != RETURNED:
+        raise ValueError('saved request does not name the declared returned model')
+    if any(name in body for name in ('thinkingEnabled', 'thinking_enabled', 'alwaysThinkingEnabled')):
+        raise ValueError('unsupported saved request thinking field; explicit adaptation required')
+    if 'thinking' not in body:
+        raise ValueError('saved request must expose an observed thinking setting')
+    pin = {'path': path, 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
+    thinking = {'state': 'observed', 'field': 'thinking', 'value': _thinking(body['thinking'])}
+    return pin, thinking
 
 
 def _thinking(value):
@@ -156,9 +191,14 @@ def _copy_evidence(value):
         raise ValueError('durable binary must be a distinct same-byte copy outside the updater root')
 
 
-def prepare_runtime(runtime, *, probe_init_path, updater_source, updater_root,
+def prepare_runtime(runtime, *, probe_init_path, native_request_path, updater_source, updater_root,
                     thinking_setting, thinking_basis):
-    """Bind existing evidence, including required observed thinking; no execution."""
+    """Bind saved transcript and request; the old probe_init_path keyword is retained.
+
+    That path now requires the complete init-to-terminal JSONL observation,
+    never an init-only file. This is supplied evidence, not authenticated proof
+    that separately selected files arose from the same live probe.
+    """
     result = _profile(runtime)
     root = _physical(updater_root, 'updater root')
     if not root.is_dir():
@@ -166,12 +206,15 @@ def prepare_runtime(runtime, *, probe_init_path, updater_source, updater_root,
     evidence = {'updater_root': str(root), 'source': _binary_pin(updater_source),
                 'copy': _binary_pin(result['executable']['path'])}
     _copy_evidence(evidence)
-    probe, observed, thinking = _saved_init(probe_init_path)
+    probe, observed = _saved_probe(probe_init_path)
+    request, thinking = _saved_request(native_request_path)
     values._text(thinking_basis, 'declared thinking basis', 512)
     setting = _thinking(thinking_setting)
     if _canonical(thinking['value']) != _canonical(setting):
         raise ValueError('observed thinking differs from the registered setting')
-    basis = {'kind': KIND, 'version': 1, 'probe': probe, 'observed': observed,
+    from .native_model_aliases import REQUESTED, RETURNED
+    basis = {'kind': KIND, 'version': 2, 'probe': probe, 'request': request, 'observed': observed,
+             'model_aliases': {'requested': REQUESTED, 'returned': RETURNED},
              'thinking': {'declared': setting, 'basis': thinking_basis, 'observed': thinking},
              'durable_copy': evidence}
     result['limits_basis'] = _canonical(basis)
@@ -190,24 +233,31 @@ def validate_prepared_runtime(runtime):
         raise ValueError('U4b registered basis exceeds its byte bound')
     basis = values._json(raw)
     values._closed(basis, BASIS_KEYS, 'U4b runtime basis')
-    if basis['kind'] != KIND or type(basis['version']) is not int or basis['version'] != 1:
+    if basis['kind'] != KIND or type(basis['version']) is not int or basis['version'] != 2:
         raise ValueError('unknown U4b runtime basis')
     if _canonical(basis) != raw:
         raise ValueError('U4b runtime basis requires exact canonical JSON')
-    values._closed(basis['probe'], {'path', 'sha256', 'bytes', 'init_line', 'init_sha256'}, 'saved probe pin')
+    from .native_model_aliases import model_aliases
+    model_aliases(result)
+    values._closed(basis['probe'], {'path', 'sha256', 'bytes', 'init_line', 'init_sha256',
+                                 'terminal_line', 'terminal_sha256'}, 'saved probe pin')
+    values._closed(basis['request'], {'path', 'sha256', 'bytes'}, 'saved request pin')
     values._closed(basis['thinking'], {'declared', 'basis', 'observed'}, 'thinking basis')
     _copy_evidence(basis['durable_copy'])
     copied = _binary_pin(result['executable']['path'])
     if copied != basis['durable_copy']['copy'] or copied['sha256'] != result['executable']['sha256']:
         raise ValueError('durable binary differs from the registered copy')
-    pin, observed, thinking = _saved_init(basis['probe']['path'])
+    pin, observed = _saved_probe(basis['probe']['path'])
+    request, thinking = _saved_request(basis['request']['path'])
     if (_canonical(pin) != _canonical(basis['probe'])
             or _canonical(observed) != _canonical(basis['observed'])
             or _canonical(thinking) != _canonical(basis['thinking']['observed'])):
         raise ValueError('saved probe differs from the registered observations')
+    if _canonical(request) != _canonical(basis['request']):
+        raise ValueError('saved request differs from the registered observations')
     if (result['limits'] != observed['limits'] or result['model'] != observed['model']
             or result['executable']['init_version'] != observed['init_version']):
-        raise ValueError('runtime declarations differ from the saved init observations')
+        raise ValueError('runtime declarations differ from the saved probe observations')
     values._text(basis['thinking']['basis'], 'declared thinking basis', 512)
     declared = _thinking(basis['thinking']['declared'])
     if _canonical(thinking['value']) != _canonical(declared):

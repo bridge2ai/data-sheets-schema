@@ -13,7 +13,7 @@ def bundle_for(registration_raw, directory, now='2026-11-08T00:00:00Z'):
         'budget_guard_usd': '90', 'deadline_seconds': runtime['deadline_seconds'],
         'max_starting_weekly_utilization': 0.75, 'max_age_seconds': 120,
         'overage': 'disabled', 'keep_awake': runtime['keep_awake'], 'context_mode': '1m',
-        'quota_capture': {'kind': review.CAPTURE_KIND, 'version': 1, 'count': 1,
+        'quota_capture': {'kind': review.CAPTURE_KIND, 'version': 2, 'count': 3,
             'directory': str(directory), 'deadline_seconds': min(30, runtime['deadline_seconds']),
             'prompt_sha256': wire.sha(review.PROMPT.encode()),
             'max_stdout_bytes': 1048576, 'max_stderr_bytes': 1048576}}

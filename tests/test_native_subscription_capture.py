@@ -101,7 +101,8 @@ def test_one_fake_capture_persists_exact_observation_and_refuses_reuse(tmp_path,
     calls = []
 
     def child(argv, **kwargs):
-        assert (arguments['directory'] / 'claim.json').is_file()
+        assert (arguments['directory'] / 'claim-1.json').is_file()
+        assert (arguments['directory'] / 'capture-1' / 'claim.json').is_file()
         assert not Path(value['attempt_directory']).exists()
         assert not Path(value['evidence_directory']).exists()
         calls.append((argv, kwargs))
@@ -128,8 +129,10 @@ def test_one_fake_capture_persists_exact_observation_and_refuses_reuse(tmp_path,
     assert event['event_sha256'] == capture.sha(stdout.splitlines()[1])
     assert capture._timestamp(event['captured_at']) >= capture._timestamp(
         capture.strict_json(arguments['launch_word_raw'])['authorized_at'])
-    with pytest.raises(ValueError, match='fresh|retries'):
-        capture.capture_subscription(**arguments)
+    assert manifest.parent == arguments['directory'] / 'capture-1'
+    assert not (arguments['directory'] / 'capture-2').exists()
+    with pytest.raises(ValueError, match='directory differs'):
+        capture.capture_subscription(**{**arguments, 'directory': manifest.parent})
     assert len(calls) == 1
 
 
@@ -139,7 +142,7 @@ def test_failed_fake_capture_retains_claim_streams_and_cannot_retry(tmp_path, mo
     arguments, _ = component(tmp_path, monkeypatch, mode=mode, deadline=1 if mode == 'timeout' else 5)
     with pytest.raises(error):
         capture.capture_subscription(**arguments)
-    root = arguments['directory']
+    root = arguments['directory'] / 'capture-1'
     result = json.loads((root / 'capture.json').read_bytes())
     assert result['status'] == 'failed' and result['error']
     assert result['lifecycle']['spawn_count'] == 1
@@ -150,8 +153,8 @@ def test_failed_fake_capture_retains_claim_streams_and_cannot_retry(tmp_path, mo
     with pytest.raises(ValueError):
         capture.read_capture(root / 'capture.json', **read_arguments(arguments))
     monkeypatch.setattr(capture.subprocess, 'Popen', lambda *a, **k: pytest.fail('spent capture spawned again'))
-    with pytest.raises(ValueError, match='fresh|retries'):
-        capture.capture_subscription(**arguments)
+    with pytest.raises(ValueError, match='directory differs'):
+        capture.capture_subscription(**{**arguments, 'directory': root})
 
 
 @pytest.mark.parametrize('change', ['review_hash', 'extra_word_field', 'two_captures', 'prompt',
@@ -190,7 +193,8 @@ def test_invalid_bindings_refuse_before_any_claim_or_spawn(tmp_path, monkeypatch
     assert not arguments['directory'].exists()
 
 
-@pytest.mark.parametrize('change', ['stdout', 'observations', 'claim', 'lifecycle_type', 'selected_event'])
+@pytest.mark.parametrize('change', ['stdout', 'observations', 'claim', 'lifecycle_type',
+                                   'result_index_type', 'selected_event'])
 def test_saved_capture_reconstructs_and_refuses_changed_evidence(tmp_path, monkeypatch, change):
     arguments, _ = component(tmp_path, monkeypatch)
     path = capture.capture_subscription(**arguments)
@@ -207,6 +211,8 @@ def test_saved_capture_reconstructs_and_refuses_changed_evidence(tmp_path, monke
         result['claim_sha256'] = capture.sha(raw)
     elif change == 'lifecycle_type':
         result['lifecycle']['spawn_count'] = True
+    elif change == 'result_index_type':
+        result['capture_index'] = True
     else:
         result['selected_event']['line'] += 1
     path.write_bytes(capture.canonical(result))
@@ -226,7 +232,7 @@ def test_cleanup_refusal_retains_failure_and_never_claims_success(tmp_path, monk
     monkeypatch.setattr(capture, '_cleanup', refused)
     with pytest.raises(PermissionError):
         capture.capture_subscription(**arguments)
-    result = json.loads((arguments['directory'] / 'capture.json').read_bytes())
+    result = json.loads((arguments['directory'] / 'capture-1' / 'capture.json').read_bytes())
     assert result['status'] == 'failed' and result['lifecycle']['cleanup'] is None
     assert result['lifecycle']['cleanup_error']['type'] == 'PermissionError'
 

@@ -69,6 +69,8 @@ def fabricated_manifest(expected, selected, neutral_root, source_raw):
 
 
 def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls, p):
+    from data_sheets_schema.native_model_aliases import model_aliases
+    aliases = model_aliases(expected['runtime'])
     native = p._permission_protocol()
     files = {name: text.encode() for name,text in p.recipe_sources().items()}
     files.update({'policy.json': encoded(expected['policy']), 'selection.json': encoded(selected),
@@ -107,7 +109,7 @@ def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls,
         for case in cases:
             identity = case['id']; result, view = p._classification(expected, selected, launch, session,
                                                                      case, controls)
-            call = {'type':'assistant','session_id':session,'message':{'role':'assistant','model':expected['runtime']['model'],
+            call = {'type':'assistant','session_id':session,'message':{'role':'assistant','model':aliases['returned'],
                     'content':[{'type':'tool_use','id':identity,'name':case['tool'],'input':case['input']}]}}
             callback = {'type':'control_request','request_id':'callback-'+identity,'request':{'subtype':'hook_callback',
                 'callback_id':probe_policy['pretool_control']['callback_id'],'input':{'hook_event_name':'PreToolUse',
@@ -146,10 +148,16 @@ def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls,
         if trace == 'settled':
             events.append({'type':'assistant','session_id':session,
                 'message':{'role':'assistant','content':[{'type':'text','text':'OFFLINE_COMPLETE'}]}})
+            if aliases['requested'] != aliases['returned']:
+                events[-1]['message']['model'] = aliases['returned']
             terminal = {'type':'result','session_id':session,'subtype':'success','is_error':False,
                 'terminal_reason':'completed','stop_reason':'end_turn',
                 'permission_denials':[{'tool_use_id':case['id'],'tool_name':case['tool'],'tool_input':case['input']}
                                      for case in cases if case['mode']=='native_denied']}
+            if aliases['requested'] != aliases['returned']:
+                terminal['modelUsage'] = {aliases['requested']: {
+                    **expected['runtime']['limits'], 'inputTokens': 1, 'outputTokens': 1,
+                    'cacheReadInputTokens': 0, 'cacheCreationInputTokens': 0}}
             events.append(terminal)
         outcome = {'kind':'native_shared_permission_outcome','version':1,
             'mode':'settled' if trace=='settled' else 'observer_stopped','session_id':session,
@@ -166,7 +174,7 @@ def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls,
 
 
 @pytest.fixture(scope='module')
-def fixture(tmp_path_factory):
+def fixture(tmp_path_factory, request):
     """Build genuine S/R/preparation/C once; only the saved observations are synthetic."""
     root = tmp_path_factory.mktemp('fabricated-shared-permission').resolve()
     isolation = isolated_modules.__wrapped__()
@@ -181,6 +189,15 @@ def fixture(tmp_path_factory):
             source = inputs.__wrapped__(spec, names, root, patch)
             runtime = c.strict_json(source['runtime_path'].read_bytes())
             runtime['budget_guard_usd'] = '01.50'
+            if getattr(request, 'param', None) == 'u4b_aliases':
+                # Only the saved consumer's alias boundary is under test.
+                # This deliberately minimal declaration is not U4b prepared
+                # runtime evidence or public execution-registration acceptance.
+                from data_sheets_schema import native_model_aliases as aliases
+                runtime['model'] = aliases.REQUESTED
+                runtime['auxiliary_models'] = []
+                runtime['limits_basis'] = json.dumps({'kind': aliases.KIND, 'version': 2,
+                    'model_aliases': {'requested': aliases.REQUESTED, 'returned': aliases.RETURNED}})
             source['runtime_path'].write_bytes(c.canonical(runtime))
             prepared = execution_v2.prepare(source['selection'], source['runtime_path'], **source['kwargs'])
             instruction = root / 'instruction.md'
