@@ -126,7 +126,8 @@ def _join_subscription_authority(guard, raw, value, authorization, *, current_la
     if guard is not None:
         from .native_subscription_admission import context
         module, extra = context(guard.raw, registration_raw=raw, runtime=value['runtime'],
-            launch_word_raw=authorization['raw']['launch_word'], review_bundle_raw=authorization['raw']['review'])
+            launch_word_raw=authorization['raw']['launch_word'], review_bundle_raw=authorization['raw']['review'],
+            current=current_launch)
         if current_launch:
             from .native_u4b_runtime import validate_prepared_runtime
             from .native_subscription_guard_v2 import SubscriptionGuard
@@ -293,10 +294,16 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     # Source/preparer recapture may take time. Recheck quota freshness and its
     # current file after those reads, before a stale observation can spend the
     # attempt identity. The actual dispatch still performs its one-use check.
-    launch_guard.before_dispatch(check_only=True)
-    controls.require_complete()
-    attempt.mkdir(mode=0o700)  # Even a partial reservation consumes the identity.
-    _sync_directory(attempt.parent)
+    from .native_subscription_capture import capture_admission_lease
+    # Hold the registration-wide word/limits lock through the first reservation
+    # effect. A renewal cannot supersede the word between checking and mkdir.
+    with capture_admission_lease(registration_raw=registration_raw,
+            review_bundle_raw=authorization['raw']['review'],
+            launch_word_raw=authorization['raw']['launch_word']):
+        launch_guard.before_reservation()
+        controls.require_complete()
+        attempt.mkdir(mode=0o700)  # Even a partial reservation consumes the identity.
+        _sync_directory(attempt.parent)
     durable_new(attempt/'registration.json', registration_raw)
     if launch_guard is not None:
         durable_new(attempt/'subscription-guard.json', launch_guard.raw)

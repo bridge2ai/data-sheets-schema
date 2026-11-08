@@ -11,14 +11,16 @@ from . import native_subscription_guard as wire
 
 KIND = 'd4d_native_execution_review_bundle_v2'
 TERMS_KIND = 'd4d_native_owner_launch_terms_v1'
-CAPTURE_KIND = 'd4d_native_subscription_capture_request_v2'
+CAPTURE_KIND = 'd4d_native_subscription_capture_request_v3'
+PREVIOUS_CAPTURE_KIND = 'd4d_native_subscription_capture_request_v2'
 LEGACY_CAPTURE_KIND = 'd4d_native_subscription_capture_request_v1'
 PROMPT = 'Reply with OK.'
 BINDING_KEYS = {'registration_sha256', 'attempt_id', 'source_commit', 'dependencies_sha256'}
 WORD_KEYS = BINDING_KEYS | {'kind', 'version', 'owner', 'authorized_at', 'word',
                           'review_sha256', 'ci_sha256', 'permission_probe_sha256'}
 TERMS_KEYS = {'kind', 'version', 'owner', 'budget_guard_usd', 'deadline_seconds',
-              'max_starting_weekly_utilization', 'max_age_seconds', 'overage',
+              'max_starting_weekly_utilization', 'max_starting_five_hour_utilization',
+              'max_age_seconds', 'pre_reservation_margin_seconds', 'overage',
               'keep_awake', 'context_mode', 'quota_capture'}
 
 
@@ -52,12 +54,15 @@ def validate_terms(statement, runtime, *, word_owner):
             or type(runtime.get('deadline_seconds')) is not int
             or runtime['deadline_seconds'] != deadline):
         raise ValueError('owner/runtime deadline differs')
-    wire._fraction(statement['max_starting_weekly_utilization'], 'owner starting weekly utilization')
-    if statement['max_starting_weekly_utilization'] >= 1:
-        raise ValueError('owner starting weekly utilization must leave headroom')
-    age = statement['max_age_seconds']
-    if type(age) is not int or not 1 <= age <= 300:
-        raise ValueError('owner capture age must be an integer in 1..300 seconds')
+    from .native_u4b_policy import admission_terms
+    admission = admission_terms(runtime)
+    for key in ('max_starting_weekly_utilization', 'max_starting_five_hour_utilization'):
+        wire._fraction(statement[key], 'owner ' + key)
+        if statement[key] != admission[key]:
+            raise ValueError('owner/runtime subscription admission differs: ' + key)
+    for key in ('max_age_seconds', 'pre_reservation_margin_seconds'):
+        if type(statement[key]) is not int or statement[key] != admission[key]:
+            raise ValueError('owner/runtime subscription admission differs: ' + key)
     if statement['overage'] != 'disabled':
         raise ValueError('owner must explicitly disable overage')
     awake = statement['keep_awake']
@@ -75,13 +80,13 @@ def validate_terms(statement, runtime, *, word_owner):
     request = statement['quota_capture']
     _exact(request, {'kind', 'version', 'count', 'directory', 'deadline_seconds',
                     'prompt_sha256', 'max_stdout_bytes', 'max_stderr_bytes'}, 'quota capture request')
-    # Historical one-shot evidence stays readable; only v2 can authorize new
-    # captures. The producer enforces that distinction before reserving a slot.
+    # Historical one-shot and three-slot evidence retains its explicit version;
+    # only the current producer determines whether it can authorize a new capture.
     if type(request['version']) is not int or (
             request['kind'], request['version']) not in (
-                (LEGACY_CAPTURE_KIND, 1), (CAPTURE_KIND, 2)):
+                (LEGACY_CAPTURE_KIND, 1), (PREVIOUS_CAPTURE_KIND, 2), (CAPTURE_KIND, 3)):
         raise ValueError('unknown quota capture request kind/version')
-    count = 3 if request['version'] == 2 else 1
+    count = 1 if request['version'] == 1 else 3
     if type(request['count']) is not int or request['count'] != count:
         raise ValueError('word-bound statement differs from its closed capture allowance')
     if (type(request['deadline_seconds']) is not int
@@ -97,6 +102,10 @@ def validate_terms(statement, runtime, *, word_owner):
     if (not directory.is_absolute() or str(directory) != request['directory']
             or directory != directory.resolve()):
         raise ValueError('quota capture directory must be canonical and absolute')
+    if request['version'] == 3:
+        from .native_u4b_policy import registered_policy
+        if request['directory'] != registered_policy(runtime)['capture_state_directory']:
+            raise ValueError('quota capture directory differs from registered capture state directory')
     return wire.strict_json(wire.canonical(statement))
 
 

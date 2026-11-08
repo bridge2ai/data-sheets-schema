@@ -28,7 +28,8 @@ SAFE_STATUSES = ("allowed", "allowed_warning")
 KEYS = frozenset({
     "kind", "version", "registration_sha256", "runtime_sha256",
     "launch_word_sha256", "owner_statement_sha256", "max_starting_weekly_utilization",
-    "max_age_seconds", "captured_at", "event_json", "event_sha256",
+    "max_starting_five_hour_utilization", "max_age_seconds", "pre_reservation_margin_seconds",
+    "captured_at", "event_json", "event_sha256",
 })
 WORD_KEYS = frozenset({
     "kind", "version", "registration_sha256", "attempt_id", "source_commit",
@@ -285,7 +286,12 @@ def _admission(raw, expected_sha256, registration_raw, runtime, launch_word_raw,
     if value["kind"] != KIND or type(value["version"]) is not int or value["version"] != VERSION:
         raise ValueError("unsupported subscription guard protocol")
     word, authorized = _word(launch_word_raw, registration_raw)
-    from .native_launch_review import validate_terms
+    from .native_launch_review import registration_fields, validate_terms
+    # This is an exact outer-byte join, not full registration verification.
+    # The caller still must reconstruct and admit the registered execution.
+    registered_runtime = registration_fields(registration_raw).get("runtime")
+    if type(registered_runtime) is not dict or canonical(registered_runtime) != canonical(runtime):
+        raise ValueError("subscription runtime differs from registered runtime bytes")
     statement = validate_terms(owner_statement, runtime, word_owner=word["owner"])
     for key, wanted in (
         ("registration_sha256", sha(registration_raw)),
@@ -301,12 +307,19 @@ def _admission(raw, expected_sha256, registration_raw, runtime, launch_word_raw,
             or auth.get("expected_api_key_source") != "none"):
         raise ValueError("subscription guard requires selected first-party subscription auth")
     maximum = _fraction(value["max_starting_weekly_utilization"], "maximum starting utilization")
+    five_hour_maximum = _fraction(value["max_starting_five_hour_utilization"],
+                                 "maximum starting five-hour utilization")
     age = value["max_age_seconds"]
     if type(age) is not int or not 0 < age <= MAX_AGE_SECONDS:
         raise ValueError("subscription freshness must be 1..300 seconds")
+    margin = value["pre_reservation_margin_seconds"]
+    if type(margin) is not int or not 0 < margin <= age:
+        raise ValueError("subscription pre-reservation margin must be an integer within capture age")
     if (maximum != statement["max_starting_weekly_utilization"]
-            or age != statement["max_age_seconds"]):
-        raise ValueError("subscription guard threshold or age differs from owner statement")
+            or five_hour_maximum != statement["max_starting_five_hour_utilization"]
+            or age != statement["max_age_seconds"]
+            or margin != statement["pre_reservation_margin_seconds"]):
+        raise ValueError("subscription guard thresholds, age or margin differ from owner/runtime statement")
     event_raw = value["event_json"]
     if type(event_raw) is not str or sha(event_raw.encode()) != value["event_sha256"]:
         raise ValueError("subscription event differs from its captured hash")
@@ -315,13 +328,16 @@ def _admission(raw, expected_sha256, registration_raw, runtime, launch_word_raw,
         raise ValueError(refusal)
     if readings["seven_day"]["utilization"] > maximum:
         raise ValueError("insufficient weekly subscription headroom")
+    if readings["five_hour"]["utilization"] > five_hour_maximum:
+        raise ValueError("insufficient five-hour subscription headroom")
     captured = _timestamp(value["captured_at"], "captured_at")
     if captured < authorized:
         raise ValueError("subscription observation predates owner authorization")
     if any(reading["resets_at"] <= captured for reading in readings.values()):
         raise ValueError("subscription window reset is not after its observation")
     return {"value": value, "readings": readings, "record_only": recorded,
-            "maximum": maximum, "max_age": age,
+            "maximum": maximum, "five_hour_maximum": five_hour_maximum,
+            "max_age": age, "margin": margin,
             "captured": captured, "authorized": authorized, "authorized_at": word["authorized_at"]}
 
 
@@ -360,7 +376,9 @@ class SubscriptionGuard:
     value = property(lambda self: strict_json(self._raw))
     owner_statement = property(lambda self: strict_json(self._owner_raw))
     maximum = property(lambda self: self._static()["maximum"])
+    five_hour_maximum = property(lambda self: self._static()["five_hour_maximum"])
     max_age = property(lambda self: self._static()["max_age"])
+    pre_reservation_margin = property(lambda self: self._static()["margin"])
     captured_at = property(lambda self: self._static()["captured"])
     reading = property(lambda self: self._static()["readings"]["seven_day"])
     five_hour = property(lambda self: self._static()["readings"]["five_hour"])
@@ -369,9 +387,8 @@ class SubscriptionGuard:
     observed_events = property(lambda self: self._count)
     stop_reason = property(lambda self: self._stop)
 
-    def before_dispatch(self, *, check_only=False):
-        if type(check_only) is not bool:
-            raise ValueError("subscription dispatch selection must be boolean")
+    def _fresh(self):
+        """Recheck immutable admission and current time without consuming dispatch."""
         bound = self._static()
         if self._path is not None and read_regular(self._path) != self._raw:
             raise ValueError("subscription guard file changed before dispatch")
@@ -388,6 +405,22 @@ class SubscriptionGuard:
             raise ValueError("subscription guard dispatch already consumed")
         if self._stop is not None:
             raise ValueError(self._stop)
+        return bound, now, stamp
+
+    def before_reservation(self):
+        """Require the registered preparation margin before attempt reservation.
+
+        This performs no reservation, dispatch or external effect. The caller
+        must still run before_dispatch at actual dispatch after preparation.
+        """
+        bound, now, _ = self._fresh()
+        if bound["captured"] + bound["max_age"] - now < bound["margin"]:
+            raise ValueError("subscription pre-reservation freshness margin is insufficient")
+
+    def before_dispatch(self, *, check_only=False):
+        if type(check_only) is not bool:
+            raise ValueError("subscription dispatch selection must be boolean")
+        _, _, stamp = self._fresh()
         if not check_only:
             self._dispatched = True
             self._dispatched_at = stamp
@@ -428,6 +461,8 @@ class SubscriptionGuard:
             "initial_windows": deepcopy(bound["readings"]),
             "initial_record_only_windows": deepcopy(bound["record_only"]),
             "maximum_starting_utilization": bound["maximum"], "max_age_seconds": bound["max_age"],
+            "maximum_starting_five_hour_utilization": bound["five_hour_maximum"],
+            "pre_reservation_margin_seconds": bound["margin"],
             "dispatched": self._dispatched, "dispatched_at": self._dispatched_at,
             "observed_rate_limit_events": self._count,
             "observed_windows": deepcopy(self._windows), "stop_reason": self._stop,
@@ -611,14 +646,27 @@ def validate_saved_observations(raw, snapshot, *, registration_raw, runtime,
 
 
 def prepare_guard(*, registration_raw, runtime, launch_word_raw, event_raw, captured_at,
-                  maximum_starting_utilization, max_age_seconds, owner_statement, clock=None):
-    """Bind an existing observation; raw bundle validation must precede this helper."""
+                  maximum_starting_utilization, max_age_seconds, owner_statement, clock=None,
+                  maximum_starting_five_hour_utilization=None, pre_reservation_margin_seconds=None):
+    """Bind an observation and registered policy, without selecting numeric defaults.
+
+    Raw bundle validation must precede this helper. Omitted new arguments are
+    read from the required registered admission object, never ambient policy.
+    """
     if type(event_raw) is not bytes:
         raise ValueError("subscription event must be captured bytes")
+    from .native_u4b_policy import admission_terms
+    admission = admission_terms(runtime)
+    if maximum_starting_five_hour_utilization is None:
+        maximum_starting_five_hour_utilization = admission["max_starting_five_hour_utilization"]
+    if pre_reservation_margin_seconds is None:
+        pre_reservation_margin_seconds = admission["pre_reservation_margin_seconds"]
     document = {"kind": KIND, "version": VERSION,
         "registration_sha256": sha(registration_raw), "runtime_sha256": sha(canonical(runtime)),
         "launch_word_sha256": sha(launch_word_raw), "owner_statement_sha256": sha(canonical(owner_statement)),
         "max_starting_weekly_utilization": maximum_starting_utilization,
+        "max_starting_five_hour_utilization": maximum_starting_five_hour_utilization,
+        "pre_reservation_margin_seconds": pre_reservation_margin_seconds,
         "max_age_seconds": max_age_seconds, "captured_at": captured_at,
         "event_json": event_raw.decode("utf-8"), "event_sha256": sha(event_raw)}
     raw = canonical(document)

@@ -50,6 +50,14 @@ if MODE != 'missing':
 if MODE == 'nonzero':
     print('synthetic failed capture', file=sys.stderr, flush=True)
     raise SystemExit(7)
+if MODE != 'missing_terminal':
+    limits = {'contextWindow':1000000,'maxOutputTokens':64000}
+    if MODE in ('mismatch', 'mismatch_nonzero') or (MODE == 'second_mismatch' and os.path.basename(os.path.dirname(os.getcwd())) == 'capture-2'):
+        limits['contextWindow'] = 200000
+    print(json.dumps({'type':'result','subtype':'success','is_error':False,
+        'modelUsage':{'claude-opus-5[1m]':limits}}), flush=True)
+if MODE == 'mismatch_nonzero':
+    raise SystemExit(7)
 ''' % mode
     return ('#!' + sys.executable + '\n' + body).encode()
 
@@ -92,6 +100,10 @@ def read_arguments(arguments):
     return {key: value for key, value in arguments.items() if key != 'directory'}
 
 
+def word_directory(arguments):
+    return arguments['directory'] / 'captures' / capture.sha(arguments['launch_word_raw'])
+
+
 def test_one_fake_capture_persists_exact_observation_and_refuses_reuse(tmp_path, monkeypatch):
     arguments, value = component(tmp_path, monkeypatch)
     for key in ('ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'CBORG_API_KEY',
@@ -101,8 +113,8 @@ def test_one_fake_capture_persists_exact_observation_and_refuses_reuse(tmp_path,
     calls = []
 
     def child(argv, **kwargs):
-        assert (arguments['directory'] / 'claim-1.json').is_file()
-        assert (arguments['directory'] / 'capture-1' / 'claim.json').is_file()
+        assert (word_directory(arguments) / 'claim-1.json').is_file()
+        assert (word_directory(arguments) / 'capture-1' / 'claim.json').is_file()
         assert not Path(value['attempt_directory']).exists()
         assert not Path(value['evidence_directory']).exists()
         calls.append((argv, kwargs))
@@ -129,8 +141,8 @@ def test_one_fake_capture_persists_exact_observation_and_refuses_reuse(tmp_path,
     assert event['event_sha256'] == capture.sha(stdout.splitlines()[1])
     assert capture._timestamp(event['captured_at']) >= capture._timestamp(
         capture.strict_json(arguments['launch_word_raw'])['authorized_at'])
-    assert manifest.parent == arguments['directory'] / 'capture-1'
-    assert not (arguments['directory'] / 'capture-2').exists()
+    assert manifest.parent == word_directory(arguments) / 'capture-1'
+    assert not (word_directory(arguments) / 'capture-2').exists()
     with pytest.raises(ValueError, match='directory differs'):
         capture.capture_subscription(**{**arguments, 'directory': manifest.parent})
     assert len(calls) == 1
@@ -142,7 +154,7 @@ def test_failed_fake_capture_retains_claim_streams_and_cannot_retry(tmp_path, mo
     arguments, _ = component(tmp_path, monkeypatch, mode=mode, deadline=1 if mode == 'timeout' else 5)
     with pytest.raises(error):
         capture.capture_subscription(**arguments)
-    root = arguments['directory'] / 'capture-1'
+    root = word_directory(arguments) / 'capture-1'
     result = json.loads((root / 'capture.json').read_bytes())
     assert result['status'] == 'failed' and result['error']
     assert result['lifecycle']['spawn_count'] == 1
@@ -232,7 +244,7 @@ def test_cleanup_refusal_retains_failure_and_never_claims_success(tmp_path, monk
     monkeypatch.setattr(capture, '_cleanup', refused)
     with pytest.raises(PermissionError):
         capture.capture_subscription(**arguments)
-    result = json.loads((arguments['directory'] / 'capture-1' / 'capture.json').read_bytes())
+    result = json.loads((word_directory(arguments) / 'capture-1' / 'capture.json').read_bytes())
     assert result['status'] == 'failed' and result['lifecycle']['cleanup'] is None
     assert result['lifecycle']['cleanup_error']['type'] == 'PermissionError'
 

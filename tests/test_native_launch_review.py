@@ -14,6 +14,14 @@ def evidence(tmp_path):
             'keep_awake': {'policy': 'not_applicable', 'host_platform': 'linux', 'basis': 'fixture'},
             'model': 'claude-opus-5[1m]',
             'environment': {'CLAUDE_CODE_DISABLE_1M_CONTEXT': '0'}}}
+    # Deliberately minimal parser evidence, not a validated executable runtime.
+    value['runtime']['limits_basis'] = wire.canonical({
+        'kind': 'd4d_native_u4b_runtime_basis', 'version': 3, 'admission': {
+            'max_starting_weekly_utilization': 0.5,
+            'max_starting_five_hour_utilization': 0.25,
+            'max_age_seconds': 300, 'pre_reservation_margin_seconds': 90,
+            'capture_state_directory': str(tmp_path.resolve() / 'capture'),
+            'valid_from': '2026-11-08T00:00:00Z', 'valid_until': '2026-11-09T00:00:00Z'}}).decode()
     raw = wire.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,
                           'registration': value})
     bundle, word = bundle_for(raw, tmp_path / 'capture')
@@ -26,7 +34,7 @@ def test_two_reviews_and_exact_statement(evidence):
     assert result['budget_guard_usd'] == '90'
     assert result['quota_capture']['count'] == 3
     assert result['quota_capture']['kind'] == review.CAPTURE_KIND
-    assert result['quota_capture']['version'] == 2
+    assert result['quota_capture']['version'] == 3
     assert set(wire.strict_json(word)) == review.WORD_KEYS
 
 

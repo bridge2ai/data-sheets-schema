@@ -10,7 +10,9 @@ from . import native_subscription_guard_v2 as v2
 from . import native_launch_review as review
 
 
-def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_raw):
+def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_raw, current=False):
+    if type(current) is not bool:
+        raise ValueError('current subscription authority selection must be boolean')
     value = v1.strict_json(raw)
     if type(value) is not dict or type(value.get('version')) is not int:
         raise ValueError('subscription guard requires an explicit version')
@@ -28,6 +30,7 @@ def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_ra
     capture = read_capture_for_event(Path(terms['quota_capture']['directory']),
         registration_raw=registration_raw, review_bundle_raw=review_bundle_raw,
         launch_word_raw=launch_word_raw,
+        require_current=current,
         **{key: value[key] for key in ('event_json', 'event_sha256', 'captured_at')})
     event = capture['selected_event']
     if any(value[key] != event[key] for key in ('event_json', 'event_sha256', 'captured_at')):
@@ -39,7 +42,7 @@ def load_current(path, expected_sha256, *, registration_raw, runtime, launch_wor
     raw, word, bundle = (v1.read_regular(path), v1.read_regular(launch_word_path),
                          v1.read_regular(review_path))
     module, extra = context(raw, registration_raw=registration_raw, runtime=runtime,
-        launch_word_raw=word, review_bundle_raw=bundle)
+        launch_word_raw=word, review_bundle_raw=bundle, current=True)
     if module is not v2:
         raise ValueError('current native launch requires subscription guard v2')
     return module.load_guard(path, expected_sha256, registration_raw=registration_raw,

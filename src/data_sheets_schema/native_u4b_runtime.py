@@ -5,9 +5,10 @@ copies a binary, discovers account state, or creates launch authority. The
 versioned evidence lives in the existing limits_basis string, preserving the
 historical closed runtime schema. Source-copy evidence is a local observation,
 not authenticated history; a later updater change does not invalidate the copy.
-Basis v2 takes limits from terminal modelUsage and thinking from the separately
-captured native_request.json body. Both files are pinned and re-read; init
-fields cannot substitute for either observation. No probe is run by this code.
+Basis v3 takes limits and thinking from the separately authorized observation
+phase, pins its complete saved evidence, and registers admission terms. The
+later permission phase binds this final runtime without a hash back-edge.
+No probe is run by this code; saved records are supplied evidence.
 """
 from __future__ import annotations
 
@@ -25,7 +26,7 @@ MODEL = 'claude-opus-5[1m]'
 MAX_PROBE_BYTES = 4_000_000
 MAX_BINARY_BYTES = 1_073_741_824
 BASIS_KEYS = {'kind', 'version', 'probe', 'request', 'observed', 'thinking', 'durable_copy',
-              'model_aliases'}
+              'model_aliases', 'observation_probe', 'admission'}
 PIN_KEYS = {'path', 'sha256', 'bytes', 'device', 'inode'}
 
 
@@ -192,12 +193,13 @@ def _copy_evidence(value):
 
 
 def prepare_runtime(runtime, *, probe_init_path, native_request_path, updater_source, updater_root,
-                    thinking_setting, thinking_basis):
+                    thinking_setting, thinking_basis, observation_probe_path, admission_policy):
     """Bind saved transcript and request; the old probe_init_path keyword is retained.
 
     That path now requires the complete init-to-terminal JSONL observation,
-    never an init-only file. This is supplied evidence, not authenticated proof
-    that separately selected files arose from the same live probe.
+    never an init-only file. The observation manifest binds both supplied files
+    to one authorization and provisional runtime; this is evidence consistency,
+    not authentication of human authorization or a historical execution.
     """
     result = _profile(runtime)
     root = _physical(updater_root, 'updater root')
@@ -208,15 +210,20 @@ def prepare_runtime(runtime, *, probe_init_path, native_request_path, updater_so
     _copy_evidence(evidence)
     probe, observed = _saved_probe(probe_init_path)
     request, thinking = _saved_request(native_request_path)
+    from .native_u4b_probe_sequence import validate_observation
+    from .native_u4b_policy import validate_policy
     values._text(thinking_basis, 'declared thinking basis', 512)
     setting = _thinking(thinking_setting)
     if _canonical(thinking['value']) != _canonical(setting):
         raise ValueError('observed thinking differs from the registered setting')
+    observation = validate_observation(observation_probe_path, final_runtime=result,
+        transcript_path=probe_init_path, request_path=native_request_path)
     from .native_model_aliases import REQUESTED, RETURNED
-    basis = {'kind': KIND, 'version': 2, 'probe': probe, 'request': request, 'observed': observed,
+    basis = {'kind': KIND, 'version': 3, 'probe': probe, 'request': request, 'observed': observed,
              'model_aliases': {'requested': REQUESTED, 'returned': RETURNED},
              'thinking': {'declared': setting, 'basis': thinking_basis, 'observed': thinking},
-             'durable_copy': evidence}
+             'durable_copy': evidence, 'observation_probe': observation['pin'],
+             'admission': validate_policy(admission_policy)}
     result['limits_basis'] = _canonical(basis)
     return validate_prepared_runtime(result)
 
@@ -233,7 +240,7 @@ def validate_prepared_runtime(runtime):
         raise ValueError('U4b registered basis exceeds its byte bound')
     basis = values._json(raw)
     values._closed(basis, BASIS_KEYS, 'U4b runtime basis')
-    if basis['kind'] != KIND or type(basis['version']) is not int or basis['version'] != 2:
+    if basis['kind'] != KIND or type(basis['version']) is not int or basis['version'] != 3:
         raise ValueError('unknown U4b runtime basis')
     if _canonical(basis) != raw:
         raise ValueError('U4b runtime basis requires exact canonical JSON')
@@ -243,6 +250,10 @@ def validate_prepared_runtime(runtime):
                                  'terminal_line', 'terminal_sha256'}, 'saved probe pin')
     values._closed(basis['request'], {'path', 'sha256', 'bytes'}, 'saved request pin')
     values._closed(basis['thinking'], {'declared', 'basis', 'observed'}, 'thinking basis')
+    from .native_u4b_probe_sequence import validate_observation
+    from .native_u4b_policy import registered_policy
+    registered_policy(result)
+    values._closed(basis['observation_probe'], {'path', 'sha256', 'bytes'}, 'observation probe pin')
     _copy_evidence(basis['durable_copy'])
     copied = _binary_pin(result['executable']['path'])
     if copied != basis['durable_copy']['copy'] or copied['sha256'] != result['executable']['sha256']:
@@ -262,6 +273,8 @@ def validate_prepared_runtime(runtime):
     declared = _thinking(basis['thinking']['declared'])
     if _canonical(thinking['value']) != _canonical(declared):
         raise ValueError('observed thinking differs from the registered setting')
+    validate_observation(basis['observation_probe']['path'], expected_pin=basis['observation_probe'],
+        final_runtime=result, transcript_path=basis['probe']['path'], request_path=basis['request']['path'])
     return result
 
 

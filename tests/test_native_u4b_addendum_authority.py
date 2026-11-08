@@ -31,6 +31,7 @@ def bundle_reader_case(tmp_path, fabricated_authorizations):
     """Use the genuine v2 parser, with fabricated CI tied to real local bytes."""
     _, value, original, paths = fabricated_authorizations
     runtime, arguments = runtime_inputs(tmp_path)
+    arguments['admission_policy']['capture_state_directory'] = str(tmp_path / 'not-yet-captured')
     value['runtime'] = runtime_evidence.prepare_runtime(runtime, **arguments)
     raw = guard.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,
                            'registration': value})

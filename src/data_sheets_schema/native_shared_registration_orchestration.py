@@ -115,4 +115,8 @@ def _require_runtime_observation(value):
     if ((type(runtime) is dict and runtime.get('model') == MODEL)
             or is_prepared_runtime(runtime)):
         validate_prepared_runtime(runtime)
+        from .native_u4b_probe_sequence import validate_bound_probe
+        if type(value.get('permission_probe')) is not str:
+            raise ValueError('A3 registration requires its bound permission probe')
+        validate_bound_probe(runtime, value['permission_probe'])
     return value

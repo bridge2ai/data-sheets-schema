@@ -7,6 +7,7 @@ CLI request/init/accounting identity and the API request/assistant identity.
 from . import native_shared_contract as c
 
 KIND = 'd4d_native_u4b_runtime_basis'
+PROVISIONAL_KIND = 'd4d_native_u4b_provisional_runtime_basis'
 REQUESTED = 'claude-opus-5[1m]'
 RETURNED = 'claude-opus-5'
 
@@ -24,13 +25,13 @@ def model_aliases(runtime):
         except ValueError:
             if model == REQUESTED:
                 raise
-    current = model == REQUESTED or type(basis) is dict and basis.get('kind') == KIND
+    current = model == REQUESTED or type(basis) is dict and basis.get('kind') in (KIND, PROVISIONAL_KIND)
     if not current:
         return {'requested': model, 'returned': model}
-    if (type(basis) is not dict or basis.get('kind') != KIND
-            or type(basis.get('version')) is not int or basis['version'] != 2
+    if (type(basis) is not dict or type(basis.get('version')) is not int
+            or (basis.get('kind'), basis['version']) not in ((KIND, 2), (KIND, 3), (PROVISIONAL_KIND, 1))
             or model != REQUESTED):
-        raise ValueError('native 1M model requires the explicit U4b v2 alias declaration')
+        raise ValueError('native 1M model requires an explicit versioned U4b alias declaration')
     aliases = basis.get('model_aliases')
     if (type(aliases) is not dict or set(aliases) != {'requested', 'returned'}
             or aliases != {'requested': REQUESTED, 'returned': RETURNED}):

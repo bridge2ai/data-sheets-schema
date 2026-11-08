@@ -26,6 +26,15 @@ def case(tmp_path):
                'budget_guard_usd': '90', 'deadline_seconds': 900,
                'keep_awake': {'policy': 'not_applicable', 'host_platform': 'linux',
                              'basis': 'Invented guard component fixture; no host assertion.'}}
+    # Minimal declared policy for this parser component; not a prepared runtime
+    # or proof of the complete executable/observation admission chain.
+    runtime['limits_basis'] = guard.canonical({
+        'kind': 'd4d_native_u4b_runtime_basis', 'version': 3, 'admission': {
+            'max_starting_weekly_utilization': 0.5,
+            'max_starting_five_hour_utilization': 0.25,
+            'max_age_seconds': 300, 'pre_reservation_margin_seconds': 90,
+            'capture_state_directory': str(tmp_path.resolve() / 'unused-capture'),
+            'valid_from': timestamp(now - 60), 'valid_until': timestamp(now + 86400)}}).decode()
     value = {'attempt_id': 'invented-guard-component', 'runtime': runtime,
         'dependencies': {'base': {'source_commit': 'a' * 40}}, 'permission_probe_sha256': 'b' * 64}
     registration = guard.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,
@@ -134,7 +143,7 @@ def test_top_and_nested_window_aliases_must_agree(case, window, mutation):
 
 
 @pytest.mark.parametrize('captured_delta,dispatch_delta,passes', [(-11, 0, False), (-10, 0, True),
-                                                              (0, 120, True), (0, 121, False), (1, 0, False)])
+                                                              (0, 300, True), (0, 301, False), (1, 0, False)])
 def test_word_capture_and_actual_dispatch_chronology(case, captured_delta, dispatch_delta, passes):
     document = {**case['document'], 'captured_at': timestamp(case['now'] + captured_delta)}
     if passes:
@@ -224,11 +233,11 @@ def test_rehashed_runtime_must_still_equal_the_owner_terms(case, change):
 
 def test_public_values_do_not_mutate_admission_or_lifecycle(case):
     value = build(case)
-    value.value['max_age_seconds'] = 300
+    value.value['max_age_seconds'] = 1
     value.reading['utilization'] = 0
     value.owner_statement['budget_guard_usd'] = '900'
     value.snapshot()['observed_windows']['seven_day']['count'] = 99
-    assert value.max_age == 120 and value.reading['utilization'] == 0.3
+    assert value.max_age == 300 and value.reading['utilization'] == 0.3
     assert value.owner_statement['budget_guard_usd'] == '90' and value.observed_events == 0
     for attribute, replacement in [('raw', b'new'), ('maximum', 1), ('dispatched', True), ('stop_reason', None)]:
         with pytest.raises(AttributeError):

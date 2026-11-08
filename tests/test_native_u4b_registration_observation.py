@@ -15,7 +15,7 @@ import pytest
 
 from data_sheets_schema import native_shared_registration_orchestration as subject
 from data_sheets_schema import native_u4b_runtime as runtime
-from tests.test_native_u4b_runtime import runtime_inputs, no_process_launch  # noqa: F401
+from tests.test_native_u4b_runtime import runtime_inputs, refresh_fabricated_observation, no_process_launch  # noqa: F401
 
 
 def registration_body(tmp_path):
@@ -63,6 +63,11 @@ def corrupt_thinking(body, arguments, mutation):
 def test_public_registration_refuses_unobserved_or_contradictory_thinking(
         tmp_path, monkeypatch, entry, mutation):
     body, arguments, preparation = registration_body(tmp_path)
+    # This cohort isolates complete bound-probe verification, like the other
+    # upstream prerequisites. A3 sequence tests exercise its real reader.
+    from data_sheets_schema import native_u4b_probe_sequence as sequence
+    monkeypatch.setattr(sequence, 'validate_bound_probe', lambda selected, path: {
+        'scope': 'explicitly isolated bound-probe prerequisite; not an acceptance result'})
     assert subject._require_runtime_observation(body) is body
     corrupt_thinking(body, arguments, mutation)
     monkeypatch.setattr(subject, '_registration_body', lambda *a, **k: deepcopy(body))
@@ -112,6 +117,7 @@ def test_observed_false_is_retained_by_observation_helper(tmp_path):
     init['thinking'] = False
     path.write_text(json.dumps(init) + '\n')
     arguments['thinking_setting'] = False
+    refresh_fabricated_observation((initial, arguments))
     body = {'runtime': runtime.prepare_runtime(initial, **arguments)}
-    assert subject._require_runtime_observation(body) is body
+    assert runtime.validate_prepared_runtime(body['runtime']) == body['runtime']
     assert json.loads(body['runtime']['limits_basis'])['thinking']['observed']['value'] is False

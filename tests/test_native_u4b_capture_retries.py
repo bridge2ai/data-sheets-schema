@@ -13,7 +13,7 @@ import pytest
 from data_sheets_schema import native_launch_review as review
 from data_sheets_schema import native_subscription_capture as capture
 from data_sheets_schema import native_subscription_guard_v2 as guard
-from tests.test_native_subscription_capture import component, read_arguments
+from tests.test_native_subscription_capture import component, read_arguments, word_directory
 
 
 def retained(directory):
@@ -24,7 +24,7 @@ def retained(directory):
 @pytest.mark.parametrize('mode', ['success', 'nonzero'])
 def test_three_captures_share_one_word_and_fourth_never_spawns(tmp_path, monkeypatch, mode):
     arguments, value = component(tmp_path, monkeypatch, mode=mode)
-    parent = arguments['directory']
+    parent = word_directory(arguments)
     original = capture.subprocess.Popen
     calls = []
 
@@ -103,7 +103,7 @@ def test_interrupted_claim_consumes_slot_without_inventing_completed_capture(tmp
     monkeypatch.setattr(capture, '_new', interruption)
     with pytest.raises(InterruptedError):
         capture.capture_subscription(**arguments)
-    root = arguments['directory']
+    root = word_directory(arguments)
     claim = (root / 'claim-1.json').read_bytes()
     assert not (root / 'capture-1').exists()
     monkeypatch.setattr(capture, '_new', original)
@@ -119,9 +119,9 @@ def test_concurrent_capture_refuses_without_allocating_another_slot(tmp_path, mo
     original = capture.subprocess.Popen
 
     def contested(argv, **kwargs):
-        with pytest.raises(ValueError, match='another capture holds'):
+        with pytest.raises(ValueError, match='already in use|another capture holds'):
             capture.capture_subscription(**arguments)
-        assert not (arguments['directory'] / 'claim-2.json').exists()
+        assert not (word_directory(arguments) / 'claim-2.json').exists()
         return original(argv, **kwargs)
 
     monkeypatch.setattr(capture.subprocess, 'Popen', contested)
@@ -133,7 +133,7 @@ def test_concurrent_capture_refuses_without_allocating_another_slot(tmp_path, mo
 def test_changed_reservation_refuses_before_another_spawn(tmp_path, monkeypatch, mutation):
     arguments, _ = component(tmp_path, monkeypatch)
     first = capture.capture_subscription(**arguments)
-    root = arguments['directory']
+    root = word_directory(arguments)
     if mutation == 'gap':
         (root / 'claim-1.json').rename(root / 'claim-2.json')
     elif mutation == 'reserve':

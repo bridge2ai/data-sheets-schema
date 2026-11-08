@@ -38,9 +38,11 @@ def runtime_inputs(tmp_path, *, binary_bytes=b'Inert fingerprint fixture; never 
     limits = {'contextWindow': 1_000_000, 'maxOutputTokens': 64_000}
     terminal = {'type': 'result', 'subtype': 'success', 'is_error': False,
                 'session_id': init['session_id'], 'modelUsage': {subject.MODEL: deepcopy(limits)}}
-    probe = root / 'saved-probe.jsonl'
+    observation_dir = root / 'probe-sequence' / 'observation'
+    observation_dir.mkdir(parents=True)
+    probe = observation_dir / 'transcript.jsonl'
     probe.write_text(json.dumps(init) + '\n' + json.dumps(terminal) + '\n')
-    request = root / 'native_request.json'
+    request = observation_dir / 'native_request.json'
     request.write_text(json.dumps({'model': 'claude-opus-5', 'thinking': {'type': 'adaptive'}}))
     runtime = {'route': historical.ROUTE,
         'executable': {'path': str(copied), 'sha256': hashlib.sha256(binary_bytes).hexdigest(),
@@ -55,10 +57,15 @@ def runtime_inputs(tmp_path, *, binary_bytes=b'Inert fingerprint fixture; never 
         'deadline_seconds': 180, 'budget_guard_usd': '90',
         'keep_awake': {'policy': 'not_applicable', 'host_platform': 'synthetic-host',
                        'basis': 'Offline evidence test, not launch authority'}}
+    from tests.utils.native_u4b_observation import mint_observation
+    from tests.utils.native_u4b_fixtures import admission_policy
+    observation = mint_observation(runtime, probe, request)
     arguments = {'probe_init_path': str(probe), 'native_request_path': str(request),
                  'updater_source': str(source),
                  'updater_root': str(updater), 'thinking_setting': {'type': 'adaptive'},
-                 'thinking_basis': 'Explicit synthetic setting, not inferred from effort'}
+                 'thinking_basis': 'Explicit synthetic setting, not inferred from effort',
+                 'observation_probe_path': str(observation),
+                 'admission_policy': admission_policy(root / 'one-capture')}
     return runtime, arguments
 
 
@@ -80,6 +87,15 @@ def prepared(inputs):
     return subject.prepare_runtime(runtime, **arguments)
 
 
+def refresh_fabricated_observation(inputs):
+    """Explicitly re-mint invented test observations after a controlled mutation."""
+    from tests.utils.native_u4b_observation import mint_observation
+    arguments = inputs[1]
+    directory = Path(arguments['observation_probe_path']).parent.parent
+    provisional = json.loads((directory / 'provisional-runtime.json').read_bytes())
+    mint_observation(provisional, Path(arguments['probe_init_path']), Path(arguments['native_request_path']))
+
+
 def mutate_basis(runtime, change):
     result = deepcopy(runtime)
     basis = json.loads(result['limits_basis'])
@@ -98,7 +114,7 @@ def test_real_evidence_binding_preserves_closed_runtime_and_original(inputs):
     assert historical.validate_runtime(result) == result
     assert subject.validate_prepared_runtime(result) == result
     basis = json.loads(result['limits_basis'])
-    assert basis['version'] == 2
+    assert basis['version'] == 3
     assert basis['model_aliases'] == {'requested': subject.MODEL, 'returned': 'claude-opus-5'}
     assert basis['observed'] == {'model': subject.MODEL, 'limits': runtime['limits'], 'init_version': 'fixture-1'}
     assert basis['thinking']['observed'] == {'state': 'observed', 'field': 'thinking', 'value': {'type': 'adaptive'}}
@@ -113,6 +129,7 @@ def test_saved_probe_accepts_declared_returned_assistant_label(inputs):
     rows.insert(1, {'type': 'assistant', 'session_id': rows[0]['session_id'],
                     'message': {'model': 'claude-opus-5', 'content': []}})
     write_probe(inputs, rows)
+    refresh_fabricated_observation(inputs)
     assert subject.validate_prepared_runtime(prepared(inputs))['model'] == subject.MODEL
 
 
@@ -182,6 +199,7 @@ def test_observed_false_is_preserved_and_is_not_missing_thinking(inputs):
     init['thinking'] = False
     path.write_text(json.dumps(init) + '\n')
     arguments['thinking_setting'] = False
+    refresh_fabricated_observation(inputs)
     result = prepared(inputs)
     thinking = json.loads(result['limits_basis'])['thinking']
     assert thinking == {'declared': False, 'basis': arguments['thinking_basis'],
@@ -303,6 +321,7 @@ def test_init_fields_never_replace_terminal_or_request_evidence(inputs):
     init['limits'] = {'contextWindow': 1, 'maxOutputTokens': 1}
     init['thinking'] = False
     write_probe(inputs, [init, terminal])
+    refresh_fabricated_observation(inputs)
     second = prepared(inputs)
     assert second['limits'] == result['limits']
     assert json.loads(second['limits_basis'])['thinking'] == json.loads(result['limits_basis'])['thinking']

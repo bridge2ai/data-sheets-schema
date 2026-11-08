@@ -23,9 +23,10 @@ from .native_subscription_guard import canonical, sha, strict_json, _timestamp
 
 
 CAPTURE_PROMPT = 'Reply with OK.'
-REQUEST_KIND = 'd4d_native_subscription_capture_request_v2'
+REQUEST_KIND = 'd4d_native_subscription_capture_request_v3'
+PREVIOUS_REQUEST_KIND = 'd4d_native_subscription_capture_request_v2'
 LEGACY_REQUEST_KIND = 'd4d_native_subscription_capture_request_v1'
-REQUEST_VERSION = 2
+REQUEST_VERSION = 3
 RESERVATION_KIND = 'd4d_native_subscription_capture_reservation_v2'
 MAX_CAPTURES = 3
 KIND = 'd4d_native_subscription_capture_v1'
@@ -106,9 +107,9 @@ def _authority(registration_raw, review_bundle_raw, launch_word_raw, directory):
     if (type(request) is not dict or set(request) != REQUEST_KEYS
             or type(request['version']) is not int
             or (request['kind'], request['version']) not in (
-                (REQUEST_KIND, REQUEST_VERSION), (LEGACY_REQUEST_KIND, 1))
+                (REQUEST_KIND, REQUEST_VERSION), (PREVIOUS_REQUEST_KIND, 2), (LEGACY_REQUEST_KIND, 1))
             or type(request['count']) is not int
-            or request['count'] != (MAX_CAPTURES if request['version'] == REQUEST_VERSION else 1)
+            or request['count'] != (1 if request['version'] == 1 else MAX_CAPTURES)
             or request['prompt_sha256'] != sha(CAPTURE_PROMPT.encode())
             or type(request['deadline_seconds']) is not int
             or not 0 < request['deadline_seconds'] <= MAX_DEADLINE_SECONDS
@@ -119,6 +120,10 @@ def _authority(registration_raw, review_bundle_raw, launch_word_raw, directory):
     directory = _path(directory)
     if _path(request['directory']) != directory:
         raise ValueError('capture directory differs from the owner statement')
+    if request['kind'] == REQUEST_KIND:
+        from .native_u4b_policy import registered_policy
+        if directory != _path(registered_policy(runtime)['capture_state_directory']):
+            raise ValueError('capture directory differs from registered state')
     protected = [ROOT, Path(runtime['executable']['path'])]
     for key in ('attempt_directory', 'evidence_directory', 'composition', 'system_path', 'permission_probe'):
         protected.append(_path(value[key]))
@@ -272,7 +277,7 @@ def _event(raw, observations, authorized_at):
 
 
 def _reservation_raw(directory, request, binding):
-    return canonical({'kind': RESERVATION_KIND, 'version': REQUEST_VERSION,
+    return canonical({'kind': RESERVATION_KIND, 'version': 2,
         **binding, 'directory': str(directory), 'max_captures': MAX_CAPTURES,
         'request': request})
 
@@ -379,16 +384,92 @@ def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw
     authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, directory)
     value, statement, word, binding = authority
     if statement['quota_capture']['kind'] != REQUEST_KIND:
-        raise ValueError('historical one-shot capture requests are readback only')
+        raise ValueError('historical capture requests are readback only')
     if _timestamp(_utc()) < _timestamp(word['authorized_at']):
         raise ValueError('capture cannot precede the owner authorization time')
-    with _reserve(directory, value, statement, word, binding) as (slot, claim, bound):
-        return _perform_capture(slot, claim, bound, authority, directory,
-                                registration_raw, review_bundle_raw, launch_word_raw)
+    from . import native_capture_words as words
+    words.validate_window(value['runtime'], launch_word_raw)
+    words.require_unspent(value)
+    with words.locked(value, registration_raw, create=True) as journal:
+        journal.activate(launch_word_raw, review_bundle_raw, value)
+        word_directory = directory / 'captures' / sha(launch_word_raw)
+        with _reserve(word_directory, value, statement, word, binding) as (slot, claim, bound):
+            return _perform_capture(slot, claim, bound, authority, word_directory,
+                registration_raw, review_bundle_raw, launch_word_raw, journal)
+
+
+def _current_authority(registration_raw, review_bundle_raw, launch_word_raw):
+    from .native_launch_review import validate_bundle
+    statement = validate_bundle(registration_raw, review_bundle_raw, launch_word_raw)
+    if statement['quota_capture']['kind'] != REQUEST_KIND:
+        raise ValueError('current capture authority requires the registered v3 protocol')
+    return _authority(registration_raw, review_bundle_raw, launch_word_raw,
+                      statement['quota_capture']['directory'])
+
+
+def activate_capture_word(*, registration_raw, review_bundle_raw, launch_word_raw, now=None):
+    """Record presentation of a word offline; no capture or attempt is started."""
+    from . import native_capture_words as words
+    value, _, _, _ = _current_authority(registration_raw, review_bundle_raw, launch_word_raw)
+    words.validate_window(value['runtime'], launch_word_raw, now)
+    words.require_unspent(value)
+    with words.locked(value, registration_raw, create=True) as journal:
+        return journal.activate(launch_word_raw, review_bundle_raw, value, now)
+
+
+@contextmanager
+def capture_admission_lease(*, registration_raw, review_bundle_raw, launch_word_raw, now=None):
+    """Hold current-word/refusal state stable through generation reservation."""
+    from . import native_capture_words as words
+    value, _, _, _ = _current_authority(registration_raw, review_bundle_raw, launch_word_raw)
+    with words.locked(value, registration_raw) as journal:
+        yield journal.require(launch_word_raw, now)
+
+
+def require_current_capture_authority(*, registration_raw, review_bundle_raw, launch_word_raw, now=None):
+    """Current admission check; historical readback must not call this gate."""
+    with capture_admission_lease(registration_raw=registration_raw, review_bundle_raw=review_bundle_raw,
+            launch_word_raw=launch_word_raw, now=now) as current:
+        return current
+
+
+def _terminal(raw, runtime):
+    from .native_capture_words import observed_limits
+    lines = raw.splitlines()
+    found = [(index, line) for index, line in enumerate(lines, 1)
+             if type(event := strict_json(line)) is dict and event.get('type') == 'result']
+    if len(found) != 1 or found[0][0] != len(lines) or not raw.endswith(b'\n'):
+        raise ValueError('capture requires exactly one final terminal result')
+    index, line = found[0]
+    event, usage, limits = observed_limits(line, runtime)
+    return {'line': index, 'terminal_json': line.decode(), 'terminal_sha256': sha(line),
+        'result': event, 'modelUsage': usage, 'observed_limits': limits,
+        'registered_limits': runtime['limits'],
+        'limits_match': canonical(limits) == canonical(runtime['limits'])}
+
+
+def _observed_limits_mismatch(raw, runtime):
+    """Refusal evidence only: invalid surrounding lines cannot hide a mismatch.
+
+    The stream has already been byte-bounded by the supervisor. A valid result
+    object can permanently refuse the registration even in an otherwise failed
+    or ambiguous transcript. This scan never establishes capture success.
+    """
+    from .native_capture_words import observed_limits
+    for index, line in enumerate(raw.splitlines(), 1):
+        try:
+            event, usage, limits = observed_limits(line, runtime)
+        except ValueError:
+            continue
+        if canonical(limits) != canonical(runtime['limits']):
+            return {'line': index, 'terminal_json': line.decode(), 'terminal_sha256': sha(line),
+                'result': event, 'modelUsage': usage, 'observed_limits': limits,
+                'registered_limits': runtime['limits'], 'limits_match': False}
+    return None
 
 
 def _perform_capture(directory, claim, binding, authority, reservation_directory,
-                     registration_raw, review_bundle_raw, launch_word_raw):
+                     registration_raw, review_bundle_raw, launch_word_raw, journal):
     value, statement, word, _ = authority
     request = statement['quota_capture']
     invocation = _invocation(value['runtime'], directory)
@@ -398,14 +479,14 @@ def _perform_capture(directory, claim, binding, authority, reservation_directory
     lifecycle = {'spawn_count': 0, 'returncode': None, 'cleanup': None}
     result = {'kind': KIND, 'version': VERSION, **binding, 'status': 'failed',
               'claim_sha256': sha(canonical(claim)), 'selected_event': None,
-              'basis': BASIS}
+              'terminal': None, 'basis': BASIS}
     failure = None
     try:
         for name in ('cwd', 'config'):
             (directory / name).mkdir(mode=0o700)
         _sync(directory)
         # Real verification repeats after the durable claim and before spawn.
-        again = _authority(registration_raw, review_bundle_raw, launch_word_raw, reservation_directory)
+        again = _authority(registration_raw, review_bundle_raw, launch_word_raw, request['directory'])
         if canonical(again) != canonical(authority):
             raise ValueError('capture authority changed after claiming the directory')
         _, claims = _claims(reservation_directory, *authority)
@@ -414,12 +495,32 @@ def _perform_capture(directory, claim, binding, authority, reservation_directory
         with _signals():
             _supervise(invocation, request['deadline_seconds'], outputs, observations, lifecycle)
         result['selected_event'] = _event(bytes(outputs['stdout']), observations, claimed_at)
-        _authority(registration_raw, review_bundle_raw, launch_word_raw, reservation_directory)
+        _authority(registration_raw, review_bundle_raw, launch_word_raw, request['directory'])
         result['status'] = 'captured'
     except BaseException as exc:
         failure = exc
         result['error'] = {'type': type(exc).__name__, 'message': str(exc)}
     finally:
+        try:
+            mismatch = _observed_limits_mismatch(bytes(outputs['stdout']), value['runtime'])
+            if mismatch is not None:
+                result['terminal'] = mismatch
+                journal.refuse_limits(launch_word_raw, mismatch['terminal_json'].encode(),
+                                      directory / 'capture.json')
+                raise ValueError('capture limits differ; registration permanently refused; new observation and registration required')
+            terminal = result['terminal'] = _terminal(bytes(outputs['stdout']), value['runtime'])
+            if not terminal['limits_match']:
+                journal.refuse_limits(launch_word_raw, terminal['terminal_json'].encode(),
+                                      directory / 'capture.json')
+                raise ValueError('capture limits differ; registration permanently refused; new observation and registration required')
+            if terminal['result'].get('is_error') is not False or terminal['result'].get('subtype') != 'success':
+                raise ValueError('capture terminal does not report successful completion')
+        except BaseException as exc:
+            result['status'] = 'failed'
+            result['terminal_error'] = {'type': type(exc).__name__, 'message': str(exc)}
+            if failure is None:
+                failure = exc
+                result['error'] = {'type': type(exc).__name__, 'message': str(exc)}
         for name, raw in outputs.items():
             _new(directory / (name + '.jsonl' if name == 'stdout' else name + '.txt'), bytes(raw))
         observations_raw = canonical(observations)
@@ -436,7 +537,23 @@ def _perform_capture(directory, claim, binding, authority, reservation_directory
     return directory / 'capture.json'
 
 
-def read_capture(manifest_path, *, registration_raw, review_bundle_raw, launch_word_raw):
+def _read_root(authority, registration_raw, launch_word_raw, require_current):
+    if type(require_current) is not bool:
+        raise ValueError('capture readback current selection must be boolean')
+    value, statement, _, _ = authority
+    root = _path(statement['quota_capture']['directory'])
+    if statement['quota_capture']['kind'] == REQUEST_KIND:
+        from . import native_capture_words as words
+        with words.locked(value, registration_raw) as journal:
+            journal.require(launch_word_raw, current=require_current)
+        return root / 'captures' / sha(launch_word_raw)
+    if require_current:
+        raise ValueError('historical capture cannot provide current admission')
+    return root
+
+
+def read_capture(manifest_path, *, registration_raw, review_bundle_raw, launch_word_raw,
+                 require_current=False):
     """Offline byte reconstruction; a retained failure never becomes admission."""
     path = _path(manifest_path)
     if path.name != 'capture.json':
@@ -447,9 +564,11 @@ def read_capture(manifest_path, *, registration_raw, review_bundle_raw, launch_w
     from .native_launch_review import validate_bundle
     terms = validate_bundle(registration_raw, review_bundle_raw, launch_word_raw)
     root = _path(terms['quota_capture']['directory'])
-    value, statement, word, binding = _authority(registration_raw, review_bundle_raw, launch_word_raw, root)
+    authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, root)
+    value, statement, word, binding = authority
+    root = _read_root(authority, registration_raw, launch_word_raw, require_current)
     journal_claim = None
-    if statement['quota_capture']['kind'] == REQUEST_KIND:
+    if statement['quota_capture']['kind'] in (REQUEST_KIND, PREVIOUS_REQUEST_KIND):
         reservation_raw, claims = _claims(root, value, statement, word, binding)
         if directory.parent != root or directory.name not in {
                 f'capture-{index}' for index in range(1, MAX_CAPTURES + 1)}:
@@ -470,8 +589,11 @@ def read_capture(manifest_path, *, registration_raw, review_bundle_raw, launch_w
             or (journal_claim is not None and claim_raw != journal_claim)
             or _timestamp(claim['claimed_at']) < _timestamp(word['authorized_at'])):
         raise ValueError('capture claim differs from the registered authority or chronology')
-    if (type(result) is not dict or set(result) != {'kind', 'version', *binding, 'status',
-            'claim_sha256', 'selected_event', 'basis', 'lifecycle', 'files'}
+    result_keys = {'kind', 'version', *binding, 'status', 'claim_sha256', 'selected_event',
+                   'basis', 'lifecycle', 'files'}
+    if statement['quota_capture']['kind'] == REQUEST_KIND:
+        result_keys.add('terminal')
+    if (type(result) is not dict or set(result) != result_keys
             or result['kind'] != KIND or type(result['version']) is not int or result['version'] != VERSION
             or canonical({key: result.get(key) for key in binding}) != canonical(binding)
             or result['basis'] != BASIS
@@ -487,11 +609,17 @@ def read_capture(manifest_path, *, registration_raw, review_bundle_raw, launch_w
     if (canonical(result['selected_event']) != canonical(selected)
             or _timestamp(selected['captured_at']) < _timestamp(claim['claimed_at'])):
         raise ValueError('selected capture event differs from saved stdout or claim chronology')
+    if statement['quota_capture']['kind'] == REQUEST_KIND:
+        terminal = _terminal(raw['stdout.jsonl'], value['runtime'])
+        if (canonical(result['terminal']) != canonical(terminal) or not terminal['limits_match']
+                or terminal['result'].get('is_error') is not False
+                or terminal['result'].get('subtype') != 'success'):
+            raise ValueError('saved capture terminal limits or result differ from registration')
     return result
 
 
 def read_capture_for_event(directory, *, registration_raw, review_bundle_raw, launch_word_raw,
-                           event_json, event_sha256, captured_at):
+                           event_json, event_sha256, captured_at, require_current=False):
     """Join a guard to its exact retained capture, without a mutable latest pointer.
 
     Failed/incomplete slots stay spent but cannot supply admission evidence. A
@@ -500,6 +628,7 @@ def read_capture_for_event(directory, *, registration_raw, review_bundle_raw, la
     """
     directory = _path(directory)
     authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, directory)
+    directory = _read_root(authority, registration_raw, launch_word_raw, require_current)
     if authority[1]['quota_capture']['kind'] == LEGACY_REQUEST_KIND:
         paths = [directory / 'capture.json']
     else:
@@ -517,7 +646,8 @@ def read_capture_for_event(directory, *, registration_raw, review_bundle_raw, la
             continue
         # Matching text alone is never proof: run genuine saved reconstruction.
         matches.append(read_capture(path, registration_raw=registration_raw,
-            review_bundle_raw=review_bundle_raw, launch_word_raw=launch_word_raw))
+            review_bundle_raw=review_bundle_raw, launch_word_raw=launch_word_raw,
+            require_current=require_current))
     if len(matches) != 1:
         raise ValueError('guard event does not match exactly one retained registered capture')
     return matches[0]

@@ -120,12 +120,15 @@ class _Handler(BaseHTTPRequestHandler):
             self.server.requests += 1
             if self.server.requests > 256:
                 raise ValueError("scripted request count exceeds its bound")
+            observer = getattr(self.server, 'observation_request', None)
+            if observer is not None:
+                observer(raw, endpoint=path.path)
             if path.path.endswith("/count_tokens"):
                 # This value is a local protocol stub, never calibration.
                 content_type, output = "application/json", b'{"input_tokens":0}'
             else:
                 cases = self.server.case_supplier()
-                if not cases:
+                if not cases and observer is None:
                     raise ValueError("native initialization has not selected probe cases")
                 payload = response_payload(body, cases, self.server.model, reply=self.server.reply)
                 content_type, output = encode_response(payload, body.get("stream") is True)
@@ -199,16 +202,19 @@ def _serve(server):
 
 
 @contextmanager
-def local_provider(*, cases, model, deadline, reply=None):
+def local_provider(*, cases, model, deadline, reply=None, observation_request=None):
     """Listen only on loopback; close and join on every exit, including errors."""
     if (type(deadline) not in (int, float) or not math.isfinite(deadline)
             or deadline <= time.monotonic()):
         raise ValueError('permission provider needs a finite future deadline')
+    if observation_request is not None and not callable(observation_request):
+        raise ValueError('observation request capture must be explicit and callable')
     server = _Server(("127.0.0.1", 0), _Handler)
     thread, started = None, False
     try:
         server.case_supplier, server.model, server.deadline = cases, model, deadline
         server.reply = reply
+        server.observation_request = observation_request
         server.failure, server.requests = None, 0
         server.timeout = 0.05
         server.active_connection = None

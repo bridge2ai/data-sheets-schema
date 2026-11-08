@@ -4,7 +4,7 @@ U4 preparation, 2026-11-08. D105 retains receipts v4; D106 selects explicit
 high effort and the LBL work first-party Max account. The separately supplied
 account-choice document binds that intent to exact input/runtime bytes. It is
 not an account observation, permission proof, CI/review or launch authority.
-Only permission-probe, capture-subscription-event and launch can invoke the
+Only explicitly selected probe phases, capture-subscription-event and launch can invoke the
 registered executable. Saved validation/preparation never invokes a producer.
 """
 from __future__ import annotations
@@ -64,6 +64,10 @@ def _emit(result, choice_raw, *, command):
     scope = {
         "validate-probe": "Saved permission observations only; receipt-policy bytes, account identity and launch authorization are not established.",
         "permission-probe": "Saved local-provider permission observations; not production generation, account identity or launch authorization.",
+        "observation-probe": "Authorized provisional observation against the scripted local provider; not account or launch acceptance.",
+        "bound-permission-probe": "Authorized bound permission protocol after the pinned observation; not account or launch acceptance.",
+        "validate-probe-sequence": "Saved two-phase evidence consistency; not authenticated execution or launch authority.",
+        "record-capture-word": "Recorded supplied word supersession; no capture or generation attempt executed.",
         "prepare-subscription-guard": "Bound saved subscription observation and selected intent; not authenticated account state or launch authorization.",
         "prepare-subscription-guard-v2": "Bound registered capture and exact owner terms; not authenticated account state or authorization to launch.",
         "capture-subscription-event": "One explicitly authorized fixed-prompt quota capture; not a generation attempt or authenticated account evidence.",
@@ -89,6 +93,18 @@ def parser():
         help="Offline verification of saved observations; never produces a probe")
     validate.add_argument("--expectation", required=True)
     validate.add_argument("--probe", required=True)
+    observation = commands.add_parser('observation-probe', allow_abbrev=False,
+        help='LIVE authorized provisional observation against the scripted local provider only')
+    observation.add_argument('--authorization', required=True)
+    observation.add_argument('--runtime', required=True)
+    bound = commands.add_parser('bound-permission-probe', allow_abbrev=False,
+        help='LIVE authorized bound permission protocol after the saved observation')
+    bound.add_argument('--authorization', required=True)
+    bound.add_argument('--expectation', required=True)
+    sequence = commands.add_parser('validate-probe-sequence', allow_abbrev=False,
+        help='Offline reconstruction of the observation-to-permission binding')
+    sequence.add_argument('--runtime', required=True)
+    sequence.add_argument('--probe', required=True)
     prepare = commands.add_parser("prepare-subscription-guard", allow_abbrev=False,
         help="Offline binding of existing quota/word evidence; never creates authority")
     prepare.add_argument("--registration", required=True)
@@ -102,6 +118,10 @@ def parser():
         help="LIVE one fixed-prompt pinned-binary capture, only after its exact owner word")
     for name in ("registration", "review", "launch-word", "output-directory"):
         capture.add_argument("--" + name, required=True)
+    record_word = commands.add_parser('record-capture-word', allow_abbrev=False,
+        help='Record a supplied newer word and supersede older capture authority without a process')
+    for name in ('registration', 'review', 'launch-word'):
+        record_word.add_argument('--' + name, required=True)
     prepare_v2 = commands.add_parser("prepare-subscription-guard-v2", allow_abbrev=False,
         help="Offline guard v2 from the one registered capture and exact owner terms")
     for name in ("registration", "review", "launch-word", "capture", "output"):
@@ -114,7 +134,8 @@ def parser():
     readback = commands.add_parser("read-final", allow_abbrev=False,
         help="Offline independent saved execution readback; never resumes an attempt")
     readback.add_argument("--registration", required=True)
-    for command in (probe, validate, prepare, capture, prepare_v2, launch, readback):
+    for command in (probe, validate, observation, bound, sequence, record_word,
+                    prepare, capture, prepare_v2, launch, readback):
         command.add_argument("--account-choice", required=True,
             help="Closed D105/D106 selected-intent document bound to exact subject/runtime bytes")
     return result
@@ -123,6 +144,29 @@ def parser():
 def main(argv=None):
     args = parser().parse_args(argv)
     from . import native_permission_probe as probe
+    if args.command in ('observation-probe', 'bound-permission-probe', 'validate-probe-sequence'):
+        from . import native_u4b_probe_sequence as sequence
+        subject_path = args.expectation if args.command == 'bound-permission-probe' else args.runtime
+        subject_raw = _read(subject_path)
+        subject = guard.strict_json(subject_raw)
+        runtime = subject['runtime'] if args.command == 'bound-permission-probe' else subject
+        choice_raw = _account_choice(args.account_choice, subject_raw, runtime)
+        captures = [(subject_path, subject_raw, SUBJECT_LIMIT),
+                    (args.account_choice, choice_raw, CHOICE_LIMIT)]
+        if args.command == 'validate-probe-sequence':
+            result = sequence.validate_bound_probe(runtime, args.probe)
+        else:
+            authorization_raw = _read(args.authorization)
+            captures.append((args.authorization, authorization_raw, SUBJECT_LIMIT))
+            _unchanged(*captures)
+            if args.command == 'observation-probe':
+                output = sequence.produce_observation(authorization_raw, runtime)
+            else:
+                output = sequence.produce_bound_probe(authorization_raw, subject)
+            result = {'manifest': str(output), 'sha256': guard.sha(_read(output))}
+        _unchanged(*captures)
+        _emit(result, choice_raw, command=args.command)
+        return 0
     if args.command in ("permission-probe", "validate-probe"):
         subject_raw = _read(args.expectation)
         expected = guard.strict_json(subject_raw)
@@ -132,6 +176,9 @@ def main(argv=None):
         captures = [(args.expectation, subject_raw, SUBJECT_LIMIT),
                     (args.account_choice, choice_raw, CHOICE_LIMIT)]
         if args.command == "permission-probe":
+            from .native_u4b_runtime import MODEL, is_prepared_runtime
+            if expected['runtime']['model'] == MODEL or is_prepared_runtime(expected['runtime']):
+                raise ValueError('A3 current profile requires the authorized observation/bound probe sequence')
             _unchanged(*captures)
             produced = probe.produce_saved_probe(expected, args.output_directory,
                 deadline_seconds=args.deadline_seconds)
@@ -157,7 +204,7 @@ def main(argv=None):
     choice_raw = _account_choice(args.account_choice, subject_raw, value["runtime"])
     captures = [(args.registration, subject_raw, SUBJECT_LIMIT),
                 (args.account_choice, choice_raw, CHOICE_LIMIT)]
-    if args.command in ("capture-subscription-event", "prepare-subscription-guard-v2"):
+    if args.command in ("capture-subscription-event", "prepare-subscription-guard-v2", 'record-capture-word'):
         from . import native_launch_review as review
         from . import native_subscription_capture as capture
         from . import native_subscription_guard_v2 as guard_v2
@@ -168,13 +215,16 @@ def main(argv=None):
         captures.extend([(args.review, bundle_raw, SUBJECT_LIMIT),
                          (args.launch_word, word_raw, SUBJECT_LIMIT)])
         _unchanged(*captures)
-        if args.command == "capture-subscription-event":
+        if args.command == 'record-capture-word':
+            result = capture.activate_capture_word(registration_raw=subject_raw,
+                review_bundle_raw=bundle_raw, launch_word_raw=word_raw)
+        elif args.command == "capture-subscription-event":
             path = capture.capture_subscription(registration_raw=subject_raw,
                 review_bundle_raw=bundle_raw, launch_word_raw=word_raw, directory=args.output_directory)
             result = {"capture_manifest": str(path), "sha256": guard.sha(_read(path))}
         else:
             saved = capture.read_capture(args.capture, registration_raw=subject_raw,
-                review_bundle_raw=bundle_raw, launch_word_raw=word_raw)
+                review_bundle_raw=bundle_raw, launch_word_raw=word_raw, require_current=True)
             event = saved['selected_event']
             raw = guard_v2.prepare_guard(registration_raw=subject_raw, runtime=value['runtime'],
                 launch_word_raw=word_raw, event_raw=event['event_json'].encode(),

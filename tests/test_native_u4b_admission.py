@@ -11,7 +11,7 @@ from data_sheets_schema import native_subscription_admission as admission
 from data_sheets_schema import native_subscription_guard_v2 as guard
 from data_sheets_schema import native_subscription_capture as capture
 from data_sheets_schema import native_execution_orchestration as engine
-from tests.test_native_subscription_capture import component, read_arguments
+from tests.test_native_subscription_capture import component, read_arguments, word_directory
 
 
 def prepared(tmp_path, monkeypatch):
@@ -59,13 +59,13 @@ def test_rehashed_guard_cannot_substitute_owner_or_capture(tmp_path, monkeypatch
     args, value, paths, raw = prepared(tmp_path, monkeypatch)
     doc = guard.strict_json(raw)
     if mutation == 'maximum': doc['max_starting_weekly_utilization'] = 0.99
-    elif mutation == 'age': doc['max_age_seconds'] = 300
+    elif mutation == 'age': doc['max_age_seconds'] = 299
     elif mutation == 'capture_event':
         event = guard.strict_json(doc['event_json'])
         event['rate_limit_info']['unifiedWindows']['seven_day']['utilization'] = 0.01
         doc['event_json'] = guard.canonical(event).decode(); doc['event_sha256'] = guard.sha(doc['event_json'].encode())
     elif mutation == 'capture_manifest':
-        path = args['directory'] / 'capture-1' / 'capture.json'
+        path = word_directory(args) / 'capture-1' / 'capture.json'
         manifest = capture.strict_json(path.read_bytes()); manifest['lifecycle']['spawn_count'] = 0
         path.write_bytes(capture.canonical(manifest))
     else: doc['version'] = 1
