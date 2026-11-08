@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTEXTS = sorted((ROOT / 'data/context').glob('*_context.yaml'))
 PREDICATES = {'human_subjects', 'regulated_access', 'shared_dataset',
               'data_collection', 'data_processing', 'processing_software', 'ml_training_dataset'}
-NEEDS_OWNER = {('ai_readi_context', 'processing_software')}
+NEEDS_OWNER = set()
 ABSENCE_SUPPORTED = {('kids_first_context', 'ml_training_dataset')}
 OWNER_DECISIONS = {
     ('chorus_context', 'regulated_access'): "[curator_assertion: true; accepted by the owner's human review, D52, 2026-10-27]",
@@ -117,9 +117,9 @@ def test_context_inventory_is_not_empty_or_partial():
             if state == 'needs_owner':
                 unresolved.add((path.stem, pred))
     assert unresolved == NEEDS_OWNER
-    assert counts['quoted'] == 40
+    assert counts['quoted'] == 41
     assert counts['absence_supported'] == 1
-    assert counts['needs_owner'] == 1
+    assert counts['needs_owner'] == 0
     assert sum(counts.values()) == 42
 
 

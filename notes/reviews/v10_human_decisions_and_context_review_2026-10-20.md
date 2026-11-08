@@ -19,7 +19,7 @@ All 6 project applicability context files under `data/context/` (`schema_version
 
 | Project | Context File | Normalized Context Digest (`SHA-256`) | `human_subjects` | `regulated_access` | `shared_dataset` | `data_collection` | `data_processing` | `processing_software` | `ml_training_dataset` | Rubric 10 Applicable (`max`) | Rubric 20 Applicable (`max`) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **AI_READI** | `data/context/ai_readi_context.yaml` | `d93efe18ea0942dacd2c3dc72003ef342240a19fd33262fa786af5a915604b29` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **AI_READI** | `data/context/ai_readi_context.yaml` | `0338b9371bf07996077e2957e6e5dc3728a645da91cf8d8cacb700bf0a599e46` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
 | **CHORUS** | `data/context/chorus_context.yaml` | `8f651ac8ceba1ac58b1edaf9a5a6843e0a3e5040ed1f77120af6a313f4a2cd0b` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
 | **CM4AI** | `data/context/cm4ai_context.yaml` | `e0fc85526b74146fb9a443c7cb42fc0ad97e6298dd838887e2d1f483a9e3fbfc` | `false` | `false` | `true` | `true` | `true` | `true` | `true` | `44 / 50` (`44.0`) | `18 / 20` (`78.0`) |
 | **VOICE** | `data/context/voice_context.yaml` | `e33e20c39487c590c56e7825992d0ecb1a060d0e36745b8138a213863806d412` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |

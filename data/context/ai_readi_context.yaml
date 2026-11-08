@@ -30,8 +30,8 @@ data_processing:
 
 processing_software:
   value: true
-  # chunks: [c007, c018]
-  evidence: "[needs_owner: true] [search_notes] \"D52 value retained. Review of the declared bundle: REDCap at 1005-1008 describes collection, not processing; FAIRhub at 1930-1931 is still developing. The healthsheet at 4409 says N/A - no labeling was performed; this is limited to labeling and does not negate other processing. Neither excerpt establishes actual use of processing software. Owner disposition required; quotations provide context only.\" [chunks: c007] \"problem, we are developing a cloud-based data management, curation\\nand sharing platform called FAIRhub\" [chunks: c018] \"N/A - no labeling was performed\""
+  # chunks: [c018]
+  evidence: "[chunks: c018] \"clinical data outside of expected min/max ranges were flagged in REDCap, which was visible in reports viewed by clinical research coordinators (CRCs) and Data Managers\""
 
 ml_training_dataset:
   value: true
