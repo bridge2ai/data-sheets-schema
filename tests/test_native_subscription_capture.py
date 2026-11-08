@@ -10,6 +10,8 @@ from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
 import sys
+import subprocess
+from types import SimpleNamespace
 
 import pytest
 
@@ -63,6 +65,10 @@ if MODE == 'mismatch_nonzero':
 
 
 def component(tmp_path, monkeypatch, *, mode='success', deadline=5):
+    # Capture traps/counters must observe the capture child, not mutate the
+    # shared stdlib module used by genuine registration-commit Git reads.
+    monkeypatch.setattr(capture, 'subprocess', SimpleNamespace(
+        Popen=subprocess.Popen, DEVNULL=subprocess.DEVNULL, PIPE=subprocess.PIPE))
     runtime, arguments = runtime_inputs(tmp_path, binary_bytes=peer(mode))
     runtime = runtime_evidence.prepare_runtime(runtime, **arguments)
     source = tmp_path / 'source.txt'

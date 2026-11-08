@@ -6,6 +6,7 @@ word journal, capture readback and guard admission all execute. No real native
 program, provider, account or generation attempt is used.
 """
 from pathlib import Path
+import subprocess
 
 import pytest
 
@@ -15,7 +16,24 @@ from data_sheets_schema import native_subscription_capture as capture
 from data_sheets_schema import native_subscription_guard_v2 as guard
 from tests.test_native_u4b_admission import prepared
 from tests.test_native_u4b_a3_captures import newer, journal_rows
-from tests.test_native_subscription_capture import read_arguments, word_directory
+from tests.test_native_subscription_capture import component, read_arguments, word_directory
+
+
+def test_capture_process_trap_leaves_real_review_git_reads_intact(tmp_path, monkeypatch):
+    original = subprocess.Popen
+    arguments, _ = component(tmp_path, monkeypatch)
+    assert capture.subprocess is not subprocess
+    assert capture.subprocess.Popen is original
+    class CaptureRefused(Exception):
+        pass
+    def forbidden(*args, **kwargs):
+        raise CaptureRefused('capture launch remains trapped')
+    monkeypatch.setattr(capture.subprocess, 'Popen', forbidden)
+    assert review.validate_bundle(arguments['registration_raw'], arguments['review_bundle_raw'],
+                                  arguments['launch_word_raw'])
+    assert subprocess.Popen is original
+    with pytest.raises(CaptureRefused, match='capture launch remains trapped'):
+        capture.subprocess.Popen(['never-run'])
 
 
 def test_saved_word_a_guard_refuses_recorded_word_b_before_dispatch(tmp_path, monkeypatch):
@@ -38,15 +56,8 @@ def test_saved_word_a_guard_refuses_recorded_word_b_before_dispatch(tmp_path, mo
     word_b.write_bytes(renewed['launch_word_raw'])
     terms_b = review.validate_bundle(arguments['registration_raw'], arguments['review_bundle_raw'],
                                     renewed['launch_word_raw'])
-    original_popen = capture.subprocess.Popen
-    def only_local_review_git(command, **kwargs):
-        # Review validation now rechecks immutable registration commit objects.
-        # Permit exactly that read path while still trapping capture/dispatch.
-        assert command[:2] == ['/usr/bin/git', '--no-replace-objects']
-        assert 'protocol.allow=never' in command
-        assert kwargs['env']['GIT_NO_LAZY_FETCH'] == '1'
-        return original_popen(command, **kwargs)
-    monkeypatch.setattr(capture.subprocess, 'Popen', only_local_review_git)
+    monkeypatch.setattr(capture.subprocess, 'Popen',
+                        lambda *a, **k: pytest.fail('cross-word refusal started another capture'))
 
     # Direct guard admission proves the immutable word digest check itself;
     # removing it must not be hidden by the outer capture-history refusal.

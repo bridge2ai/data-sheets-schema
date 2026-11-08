@@ -37,6 +37,20 @@ UNCHANGED = (
 
 def classify(run, node, message, trace):
     text = message + '\n' + trace
+    if (run == 'a4-focused1'
+            and node == 'tests.test_native_u4b_a4_cross_word::test_saved_word_a_guard_refuses_recorded_word_b_before_dispatch'
+            and '_git_read' in text and 'cross-word refusal started another process' in text):
+        return 'corrected_A4_capture_fixture_global_Popen_interception'
+    if (run == 'a4-focused1'
+            and node == 'tests.test_native_u4b_audit_counts::test_stated_severity_mismatch_refuses_without_a_stated_total'
+            and "Findings: 2 high." in text and 'assert True is False' in text):
+        return 'corrected_A4_test_uses_existing_explicit_global_summary_grammar'
+    if (run == 'a4-u4-final' and node.startswith((
+            'tests.test_native_subscription_capture::', 'tests.test_native_u4b_capture_retries::',
+            'tests.test_native_u4b_addendum_authority::', 'tests.test_native_u4b_a3_captures::'))
+            and ('_git_read' in text or 'registration_commit_for' in text)
+            and ('Popen' in text or 'RecursionError' in text)):
+        return 'corrected_A4_capture_fixture_global_Popen_interception'
     if (run == 'a3-u4-final' and node in {
             'tests.test_native_u4b_addendum_authority::test_saved_guard_readback_rechecks_context_even_after_hashes_are_rebound[runtime]',
             'tests.test_native_u4b_addendum_authority::test_saved_guard_readback_rechecks_context_even_after_hashes_are_rebound[both]'}

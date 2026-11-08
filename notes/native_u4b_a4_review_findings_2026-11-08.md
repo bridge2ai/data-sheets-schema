@@ -16,9 +16,12 @@ Offline findings ledger; no GitHub writes are authorized in this task.
   mismatch. Tests preserve both cases: unrecognized language is unavailable,
   never verified consistent. Broadening this shared scoring grammar is deferred;
   no prompt or instrument bytes were changed.
-- **A4-F3, test harness interaction, addressed.** The cross-word no-process trap
-  also trapped the new local registration-commit Git reads. It now permits only
-  that offline Git invocation and continues to trap native/capture dispatch.
+- **A4-F3, test harness interaction, addressed.** The cross-word and inherited
+  capture tests patched the shared stdlib subprocess module, so their traps and
+  counters also intercepted new local registration-commit Git reads. The shared
+  component fixture now gives capture its own Popen/PIPE/DEVNULL proxy. All
+  existing capture traps remain strict; the real stdlib Git reader remains
+  untouched. An explicit isolation regression verifies both properties.
 - **P3-7, instruction conflict, pending lead ruling.** The brief requests
   subscription/no-key observation, while the cited review requires
   `ANTHROPIC_API_KEY` for the deliberate local scripted-provider observation.
