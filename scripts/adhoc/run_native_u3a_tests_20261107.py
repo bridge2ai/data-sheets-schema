@@ -36,7 +36,7 @@ def execution_root(source_root):
 
 
 EXECUTIONS = execution_root(ROOT)
-SCRATCH = EXECUTIONS / "scratch-native-u3a-r5"
+SCRATCH = EXECUTIONS / "scratch-native-u3a-r6"
 LOCK = EXECUTIONS / "plans/native_quiet_window.lock"
 DEADLINE = 3600
 PROFILE = "(version 1)\n(allow default)\n(deny network*)\n"
@@ -99,7 +99,7 @@ def network_witness():
 def worker(args):
     out = args.out.resolve(strict=True)
     if out == SCRATCH or not out.is_relative_to(SCRATCH):
-        raise RuntimeError("test output must stay under round-4 scratch")
+        raise RuntimeError("test output must stay under round-6 scratch")
     if not (sys.flags.no_user_site and sys.flags.safe_path and sys.dont_write_bytecode):
         raise RuntimeError("test child requires no-user-site, safe-path and no-bytecode")
     if Path(sys.prefix).resolve() != out / "venv":
@@ -233,7 +233,7 @@ def parent(args):
     dependencies = dependency_site()
     out = args.out.absolute()
     if out != out.resolve() or out == SCRATCH or not out.is_relative_to(SCRATCH):
-        raise ValueError("output must be a new literal path under scratch-native-u3a-r4")
+        raise ValueError("output must be a new literal path under scratch-native-u3a-r6")
     if any((parent / ".git").exists() for parent in (out, *out.parents)
            if parent.is_relative_to(EXECUTIONS)):
         raise ValueError("evidence must be outside every source worktree")
