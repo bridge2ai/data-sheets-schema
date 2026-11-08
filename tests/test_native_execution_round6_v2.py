@@ -24,9 +24,18 @@ def test_verify_preparer_uses_current_runtime_capture(inputs, monkeypatch, repla
         current = importlib.util.module_from_spec(spec)
         monkeypatch.setitem(sys.modules, name, current)
         spec.loader.exec_module(current)
+        # This fixture changes only the runtime carrier's identity.
+        current.NativeSelectionCapture = contract.NativeSelectionCapture
         monkeypatch.setattr(package, 'native_shared_contract', current)
         monkeypatch.setattr(render, 'c', current)
-        monkeypatch.setattr(evidence, 'c', current)
+        name = evidence.__name__
+        spec = importlib.util.spec_from_file_location(name, evidence.__file__)
+        evidence = importlib.util.module_from_spec(spec)
+        monkeypatch.setitem(sys.modules, name, evidence)
+        spec.loader.exec_module(evidence)
+        monkeypatch.setattr(package, 'native_shared_evidence', evidence)
+        assert type(old_reader(str(inputs['runtime_path']), 'runtime_declaration',
+            max_bytes=contract.HARD_LIMITS['input_bytes']).captured) is not current.CapturedArtifact
     else:
         current = contract
     seen = []
