@@ -133,12 +133,19 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         `6be15822` -> `b2d80be0`, 2026-10-29 (3.1.0/D66, G1 F6/N1):
         the schema declares neutral substrate term sources and describes
         type or format. No inventory or validation constraint changes.
+
+        `b2d80be089a79aab0ef1a88002b94ca6` -> `c807b62f37e927c5d49addf273957a34`, 2026-11-08 (PR5531, D99):
+        nested multivalued enums explicitly render [many], including
+        data_use_permission, credit_roles and conforms_to_standard.
+        Neutral moves from `49d14e268864c35704fd000a1b10fb05` to `94fb1b7b3e8ea42ac151bbe52b5f5f72`.
+        This is a deliberate model-facing cardinality instruction change;
+        historical inventory entries and recorded digests remain unchanged.
         """
         if not self.SCHEMA.exists():
             self.skipTest("merged schema not present in this checkout")
         self.assertEqual(
             schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=BRIDGE2AI)),
-            "b2d80be089a79aab0ef1a88002b94ca6")
+            "c807b62f37e927c5d49addf273957a34")
 
 
 class SyncCheckTest(unittest.TestCase):

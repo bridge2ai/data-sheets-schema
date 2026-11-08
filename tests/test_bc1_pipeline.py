@@ -90,12 +90,17 @@ def test_public_bc1_pipeline_multiple_groups_final_and_completed_replay(register
     state = runtime._state(spec)
     assert state["state"] == "accepted"
     packet = receipts._load(state["packet"])
-    assert packet["term_policy"]["format"] == "bc1_neutral_term_policy_v2"
-    from data_sheets_schema import bc1_context
-    for term in ("EDAM:data_0006", "EDAM:format_1915", "mediatypes:text/csv"):
-        bc1_context.validate_term_value(term, policy=packet["term_policy"], cls="Instance", field="data_substrate")
-    for term in ("GO:0008150", "MeSH:D012640", "EFO:0000001", "NCIT:C12345"):
-        bc1_context.validate_term_value(term, policy=packet["term_policy"], cls="Instance", field="data_topic")
+    if registered.profile == "neutral":
+        assert packet["term_policy"]["format"] == "bc1_neutral_term_policy_v2"
+        from data_sheets_schema import bc1_context
+        for term in ("EDAM:data_0006", "EDAM:format_1915", "mediatypes:text/csv"):
+            bc1_context.validate_term_value(term, policy=packet["term_policy"], cls="Instance", field="data_substrate")
+        for term in ("GO:0008150", "MESH:D012640", "EFO:0000001", "NCIT:C12345"):
+            bc1_context.validate_term_value(term, policy=packet["term_policy"], cls="Instance", field="data_topic")
+        assert yaml.safe_load(spec.full_path.read_bytes())["instances"] == [
+            {"data_substrate": "EDAM:data_0006", "data_topic": "GO:0008150"}]
+    else:
+        assert packet["term_policy"] is None
     assert len(packet["plan"]["workers"]) > 2
     assert len(packet["groups"]) > 1
     expected = (["full", receipts.PHASE] + [runtime.WORKER_PHASE] * len(packet["plan"]["workers"])

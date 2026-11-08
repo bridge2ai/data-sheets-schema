@@ -1,4 +1,4 @@
-id: "https://w3id.org/bridge2ai/data-sheets-schema/composition"
+﻿id: "https://w3id.org/bridge2ai/data-sheets-schema/composition"
 name: "data-sheets-schema-composition"
 title: "Datasheets for Datasets – Composition Module"
 description: >
@@ -66,7 +66,7 @@ classes:
           "d4d:termSourceIdentifierForms": >-
             {"version":1,"sources":[
               {"id":"go","label":"GO","curies":[{"prefix":"GO","local_prefix":""}],"iri_bases":["http://purl.obolibrary.org/obo/GO_","https://purl.obolibrary.org/obo/GO_"]},
-              {"id":"mesh","label":"MeSH","curies":[{"prefix":"MeSH","local_prefix":""},{"prefix":"MESH","local_prefix":""}],"iri_bases":["http://id.nlm.nih.gov/mesh/","https://id.nlm.nih.gov/mesh/","http://purl.bioontology.org/ontology/MESH/","https://purl.bioontology.org/ontology/MESH/"]},
+              {"id":"mesh","label":"MeSH","curies":[{"prefix":"MESH","local_prefix":""}],"iri_bases":["http://id.nlm.nih.gov/mesh/","https://id.nlm.nih.gov/mesh/","http://purl.bioontology.org/ontology/MESH/","https://purl.bioontology.org/ontology/MESH/"]},
               {"id":"efo","label":"EFO","curies":[{"prefix":"EFO","local_prefix":""}],"iri_bases":["http://www.ebi.ac.uk/efo/EFO_","https://www.ebi.ac.uk/efo/EFO_","http://purl.obolibrary.org/obo/EFO_","https://purl.obolibrary.org/obo/EFO_"]},
               {"id":"ncit","label":"NCIT","curies":[{"prefix":"NCIT","local_prefix":""}],"iri_bases":["http://purl.obolibrary.org/obo/NCIT_","https://purl.obolibrary.org/obo/NCIT_"]}
             ]}

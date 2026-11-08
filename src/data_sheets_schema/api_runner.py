@@ -5308,7 +5308,7 @@ def _multivalued_slots() -> set[str]:
 def _multivalued_of(view):
     for cls in view.all_classes():
         for slot in view.class_induced_slots(cls):
-            if slot.multivalued and str(slot.range) == 'string':
+            if slot.multivalued:
                 yield str(slot.name)
 
 

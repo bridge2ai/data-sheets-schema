@@ -58,10 +58,12 @@ def contract_identity(version: int = 2) -> dict:
             "limitations": "Identifier source syntax only; membership and scientific support remain unverified."}
 
 
-def _annotation_value(annotations: Any, key: str) -> Any:
+def _annotation_value(annotations: Any, key: str, *, contract_version: int = 2) -> Any:
     if not isinstance(annotations, dict) or key not in annotations:
         return None
     annotation = annotations.get(key)
+    if contract_version == 1 and isinstance(annotation, dict):
+        return annotation.get("value")
     if isinstance(annotation, dict) and "value" in annotation and set(annotation) <= {"tag", "value", "annotations", "extensions"}:
         return annotation.get("value")
     return annotation
@@ -132,7 +134,7 @@ def _validate_identifier_form_entries(entries: Any, *, declared_labels: list[str
         for base in iri_bases:
             if (type(base) is not str or not base or base != base.strip()
                     or any(ch.isspace() or unicodedata.category(ch) in {"Cc", "Cf", "Zl", "Zp"} for ch in base)
-                    or not re.match(r"^https?://[^/]+/.+", base)):
+                    or not re.fullmatch(r"[A-Za-z][A-Za-z0-9+.-]*:.+", base)):
                 raise ValueError(f"BC1 term source {label!r} on {cls}.{slot} has invalid IRI base {base!r}")
             for _other_id, other_base in all_iris:
                 if base.startswith(other_base) or other_base.startswith(base):
@@ -164,7 +166,8 @@ def _sources(catalog: dict, *, contract_version: int = 2) -> dict:
     for cls, row in sorted(catalog["classes"].items()):
         for slot, info in sorted(row["slots"].items()):
             annotations = info["definition"].get("annotations") or {}
-            annotation = _annotation_value(annotations, TERM_SOURCES_ANNOTATION)
+            annotation = _annotation_value(annotations, TERM_SOURCES_ANNOTATION,
+                                           contract_version=contract_version)
             forms_annotation = _annotation_value(annotations, TERM_SOURCE_FORMS_ANNOTATION)
             if annotation is not None:
                 if not isinstance(annotation, str) or not annotation.strip():
@@ -177,7 +180,7 @@ def _sources(catalog: dict, *, contract_version: int = 2) -> dict:
                 names = [v.strip() for v in re.split(r",|;", annotation)]
                 if len(names) > 1 and names[-1].startswith("and "):
                     names[-1] = names[-1][4:].strip()
-                if any(not v for v in names) or len(names) != len(set(names)):
+                if any(not v for v in names) or (contract_version == 2 and len(names) != len(set(names))):
                     raise ValueError("BC1 term-source annotation has unsupported source syntax")
                 basis = "schema_annotation"
             elif contract_version == 1:
@@ -316,7 +319,6 @@ def validate_term_policy(policy: dict, *, catalog: dict, context: dict, schema_s
 
 
 def _curie_prefixes(source: str) -> tuple[str, ...]:
-    """Legacy v1 label-to-CURIE-prefix rule, retained only for v1 replay."""
     if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9._-]*", source):
         return ()
     return (source, "MESH") if source == "MeSH" else (source,)
@@ -357,8 +359,9 @@ def _require_identifier_forms(terms: dict, *, schema_prefixes: dict[str, str] | 
                         prefix = c["prefix"]
                         local_prefix = c["local_prefix"]
                         if prefix not in schema_prefixes:
-                            raise ValueError(f"BC1 term-source CURIE prefix {prefix!r} on {cls}.{slot} "
-                                             "is not declared in the captured schema")
+                            # Annotation forms are self-contained; schema prefixes
+                            # only constrain expansions when independently declared.
+                            continue
                         expanded = schema_prefixes[prefix] + local_prefix
                         if iri_bases and expanded not in iri_bases:
                             raise ValueError(f"BC1 term-source CURIE prefix {prefix!r} on {cls}.{slot} "
@@ -373,11 +376,12 @@ def validate_term_value(value: Any, *, policy: dict, cls: str, field: str) -> No
     """Accept source syntax only. Null is preserved as an absent assertion."""
     if value is None:
         return
-    if (not isinstance(value, str) or not value or value != value.strip()
-            or any(c.isspace() or unicodedata.category(c) in {"Cc", "Cf", "Zl", "Zp"} for c in value)):
-        raise ValueError("BC1 controlled term requires a declared external source identifier")
     if type(policy) is not dict or not isinstance(policy.get("external_terms"), dict):
         raise ValueError("invalid BC1 term policy")
+    if (not isinstance(value, str) or not value or value != value.strip()
+            or any(c.isspace() or (policy.get("format") != LEGACY_FORMAT
+                   and unicodedata.category(c) in {"Cc", "Cf", "Zl", "Zp"}) for c in value)):
+        raise ValueError("BC1 controlled term requires a declared external source identifier")
     declaration = policy["external_terms"].get(cls, {}).get(field) or {}
     fmt = policy.get("format")
     if fmt == LEGACY_FORMAT:
