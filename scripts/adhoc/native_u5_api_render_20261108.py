@@ -20,10 +20,15 @@ def main():
     parser.add_argument('--schema-dir', required=True, type=Path)
     parser.add_argument('--input-dir', required=True, type=Path)
     parser.add_argument('--out', required=True, type=Path)
+    parser.add_argument('--scratch-root', type=Path,
+                        help='Explicit named U4b/U5 scratch; defaults to historical U5')
     args = parser.parse_args()
     source = args.source_root.resolve(strict=True)
     checkout = Path(__file__).resolve().parents[2]
-    scratch = checkout.parent / 'scratch-native-u5-prep'
+    scratch = args.scratch_root or checkout.parent / 'scratch-native-u5-prep'
+    if (scratch not in {checkout.parent / 'scratch-native-u5-prep', checkout.parent / 'scratch-native-u4b'}
+            or scratch.resolve(strict=True) != scratch):
+        raise ValueError('render requires one of the named U4b/U5 scratch roots')
     allowed = {checkout, scratch / 'baseline-d258611c5/tree'}
     if args.source_root != source or source not in allowed:
         raise ValueError('render source must be the assigned candidate or pinned baseline')

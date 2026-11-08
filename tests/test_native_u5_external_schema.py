@@ -102,7 +102,8 @@ def test_same_external_320_api_instruction_before_after(tmp_path):
     for label, source in (('before', baseline), ('after', ROOT)):
         out = tmp_path / label
         command = [sys.executable, '-P', '-B', str(helper), '--source-root', str(source),
-                   '--schema-dir', str(folder), '--input-dir', str(tmp_path / 'inputs'), '--out', str(out)]
+                   '--schema-dir', str(folder), '--input-dir', str(tmp_path / 'inputs'), '--out', str(out),
+                   '--scratch-root', str(SCRATCH)]
         result = subprocess.run(command, cwd=source, env=env, capture_output=True, timeout=600)
         (tmp_path / (label + '.stdout')).write_bytes(result.stdout)
         (tmp_path / (label + '.stderr')).write_bytes(result.stderr)
@@ -114,3 +115,22 @@ def test_same_external_320_api_instruction_before_after(tmp_path):
     assert (tmp_path / 'before/instruction.txt').read_bytes() == (tmp_path / 'after/instruction.txt').read_bytes()
     checked_input('baseline-' + BASE_COMMIT[:9], BASE_COMMIT)
     checked_input('schema-' + SCHEMA_COMMIT[:9], SCHEMA_COMMIT)
+
+
+@pytest.mark.parametrize('kind', ['outside', 'relative', 'alias'])
+def test_api_comparison_refuses_other_scratch_roots(tmp_path, kind):
+    selected = tmp_path
+    if kind == 'relative':
+        selected = Path('relative')
+    elif kind == 'alias':
+        selected = tmp_path / 'alias'; selected.symlink_to(SCRATCH, target_is_directory=True)
+    helper = ROOT / 'scripts/adhoc/native_u5_api_render_20261108.py'
+    env = {k: os.environ[k] for k in ('PATH', 'HOME', 'TMPDIR', 'VIRTUAL_ENV') if k in os.environ}
+    env['PYTHONDONTWRITEBYTECODE'] = '1'
+    out = tmp_path / 'must-not-exist'
+    result = subprocess.run([sys.executable, '-P', '-B', str(helper), '--source-root', str(ROOT),
+        '--schema-dir', str(tmp_path), '--input-dir', str(tmp_path), '--out', str(out),
+        '--scratch-root', str(selected)], env=env, capture_output=True, timeout=30)
+    assert result.returncode != 0
+    assert b'named U4b/U5 scratch roots' in result.stderr
+    assert not out.exists()
