@@ -475,7 +475,8 @@ def _authorizations(raw, value, *, review_path, ci_path, launch_word_path):
             raise ValueError('v2 CI check source differs from source commit')
         if row['status'] != 'completed':
             raise ValueError('v2 CI check status must be completed')
-        pass  # MD: deliberately removed refusal
+        if row['conclusion'] != 'success':
+            raise ValueError('v2 CI check conclusion must be success')
         if type(row['details_url']) is not str or re.fullmatch(action_url, row['details_url']) is None:
             raise ValueError('v2 CI check URL differs from the configured repository Actions run')
     word = records['launch_word']
