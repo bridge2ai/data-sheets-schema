@@ -50,7 +50,7 @@ def main():
                 cutoff = OUT / label / 'early-cutoff.json'
                 value = json.loads(outcome.read_text()) if outcome.exists() else {}
                 events = json.loads(cutoff.read_text()).get('events', []) if cutoff.exists() else []
-                if (value.get('interrupted') == 'deadline' or events) and not value.get('observed_surviving_pids'):
+                if (value.get('interrupted') == 'deadline' or events) and value.get('observed_surviving_pids') == []:
                     print('Retained incomplete bounded run; continuing unaffected files', flush=True)
                 else:
                     return 125
