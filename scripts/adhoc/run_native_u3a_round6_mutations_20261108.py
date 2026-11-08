@@ -27,7 +27,20 @@ def main():
     parser.add_argument('--case', choices=tuple(helper.CASES))
     parser.add_argument('--remaining', action='store_true')
     parser.add_argument('--run', action='store_true')
+    parser.add_argument('--plan-all', action='store_true')
     args = parser.parse_args()
+    if args.plan_all:
+        if args.run or args.case or args.remaining:
+            parser.error('--plan-all is read-only planning')
+        raw = helper.git(ROOT, 'show', args.base + ':' + helper.SOURCE)
+        plans = {}
+        for case in helper.CASES:
+            changed, edit = helper.mutate(raw, case)
+            plans[case] = {'edit': edit, 'source_sha256': helper.sha(raw),
+                          'mutated_source_sha256': helper.sha(changed),
+                          'node': helper.CASES[case][3]}
+        helper.save(SCRATCH / 'mutation-plans.json', {'base': args.base, 'plans': plans})
+        return 0
     if args.remaining:
         if args.case or not args.run:
             parser.error('--remaining requires --run and no --case')

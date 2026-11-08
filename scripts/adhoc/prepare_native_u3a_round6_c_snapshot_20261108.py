@@ -20,7 +20,7 @@ helper.new_copy(BASE, target)
 files = {
     'src/data_sheets_schema/native_execution_registration_v2.py': 'src/data_sheets_schema/native_execution_registration_v2.py',
     'scripts/adhoc/run_native_u3a_tests_20261107.py': 'scripts/adhoc/run_native_u3a_tests_20261107.py',
-    'scripts/adhoc/test_native_u3a_round6_c_integration_20261108.py': 'tests/test_native_u3a_round6_c_integration.py',
+    'scripts/adhoc/probe_native_u3a_round6_c_integration_20261108.py': 'tests/test_native_u3a_round6_c_integration.py',
 }
 for source, destination in files.items():
     shutil.copyfile(ROOT / source, target / destination)
