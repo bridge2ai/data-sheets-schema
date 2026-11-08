@@ -18,6 +18,11 @@ are retained here for later filing; none is silently discarded.
   basename under `scripts/adhoc`, which would make whole-tree discovery try
   importing absent C modules in A. Renamed it to `probe_`; the snapshot helper
   copies it into a pytest test filename only inside the C snapshot.
+- **R6-C — fixture schema paths across loader eviction:** the first genuine C
+  probe stopped at schema-root validation because verified loading discarded
+  the ordinary API module's tiny-schema test patches. Apply those same two
+  fixture paths to the freshly loaded API module; retain all loader, rendering,
+  capture-class and source checks. The first attempt is not acceptance evidence.
 
 ## Reproduction and limits
 

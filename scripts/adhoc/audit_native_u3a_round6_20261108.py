@@ -57,7 +57,7 @@ def main():
     assert not git('status', '--porcelain'), 'committed clean source required'
     final = run(SCRATCH / args.final_run)
     assert final['source_commit'] == git('rev-parse', 'HEAD')
-    c_run = run(SCRATCH / 'c-real', SCRATCH / 'c-source')
+    c_run = run(SCRATCH / 'c-real-r2', SCRATCH / 'c-source')
     for item in (final, c_run):
         assert item['returncode'] == 0
         assert not any(item['counts'][k] for k in ('failures', 'errors', 'skipped'))
@@ -76,7 +76,7 @@ def main():
     assert git('diff', '--name-only', 'a6edb1c2d', 'HEAD', '--', 'src') == source
     summary = {'head': git('rev-parse', 'HEAD'), 'source_sha256': sha(ROOT / source),
         'final': final, 'c_integration': c_run, 'mutations': mutations,
-        'c_snapshot_sha256': sha(SCRATCH / 'c-snapshot.json'),
+        'c_snapshot_sha256': sha(SCRATCH / 'c-snapshot-r2.json'),
         'scope': 'R9-3 runtime capture identity; not native or full C/D admission'}
     with (SCRATCH / 'final-summary.json').open('x') as stream:
         json.dump(summary, stream, indent=2, sort_keys=True)

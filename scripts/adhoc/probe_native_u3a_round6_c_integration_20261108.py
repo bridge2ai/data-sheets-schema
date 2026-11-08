@@ -4,6 +4,7 @@ Inputs: final C sources plus the exact A6 registration source. Outputs: pytest
 assertions/properties. Never runs a native executable; fixture permits only Git.
 """
 import sys
+from pathlib import Path
 
 from data_sheets_schema import native_execution_registration_v2 as registration
 from data_sheets_schema import native_shared_contract as contract
@@ -13,7 +14,7 @@ from tests.test_native_shared_render import native_spec
 from tests.test_native_shared_selection import declaration
 
 
-def test_real_c_verified_loader_preparer_capture_identity(inputs, record_property):
+def test_real_c_verified_loader_preparer_capture_identity(inputs, monkeypatch, record_property):
     authority = registration.authority
     dependencies = authority.dependency_identity()
     authority.require_committed(dependencies)
@@ -29,6 +30,12 @@ def test_real_c_verified_loader_preparer_capture_identity(inputs, record_propert
             fresh = evidence.read_regular(str(inputs['runtime_path']), 'runtime_declaration',
                 max_bytes=contract.HARD_LIMITS['input_bytes']).captured
             assert type(fresh) is current.CapturedArtifact
+            # Carry the fixture's tiny schema paths into the freshly loaded API.
+            # The loader deliberately discards the ordinary module's test patches.
+            from data_sheets_schema import api_runner
+            doc = contract.strict_json(inputs['selection'].read_bytes())
+            monkeypatch.setattr(api_runner, 'FULL_SCHEMA_PATH', Path(doc['inputs']['full_schema']['root']))
+            monkeypatch.setattr(api_runner, 'CORE_SCHEMA_PATH', Path(doc['inputs']['core_schema']['root']))
             envelope = registration.prepare(inputs['selection'], inputs['runtime_path'], **inputs['kwargs'])
             body = registration.verify_preparer(contract.canonical(envelope), job_id=inputs['kwargs']['job_id'])
             assert body == envelope['registration']
