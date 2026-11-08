@@ -145,14 +145,14 @@ def test_pure_gate_members_preserve_pinned_results(dependencies, tmp_path):
         assert pure['observation_problems'](observation) == native.observation_problems(observation)
 
 
-def test_c_source_loader_worker_thread_blocker_is_reproduced(dependencies):
-    """Diagnostic retained finding, not an admission/acceptance success.
+def test_c_worker_refuses_missing_main_thread_preloading(dependencies):
+    """An unadmitted worker refuses before attempting source loading.
 
     NativeControl._start_work runs the real C classifier body on its actual
     worker.  The minimal state bypasses construction only to isolate the thread
     boundary: no execution registration, permission or launch is fabricated.
-    C currently enters A's main-thread-only loader there and must be repaired
-    by its owner before the native runtime can satisfy the live gate.
+    The repaired C entry requires an already-preloaded classifier. Positive
+    worker execution is covered by the callback-preloading integration suite.
     """
     from data_sheets_schema.native_shared_controller_orchestration import CallbackAdapter
     adapter = object.__new__(CallbackAdapter)
@@ -172,7 +172,7 @@ def test_c_source_loader_worker_thread_blocker_is_reproduced(dependencies):
         assert not worker._work_thread.is_alive()
         _, result = worker._work_replies.get_nowait()
         assert isinstance(result, ValueError)
-        assert str(result) == 'native source loading requires the main thread'
+        assert str(result) == 'native callback requires main-thread preloading at admission'
 
 
 def test_c_refusal_is_translated_without_losing_transport_budget_identity():

@@ -49,3 +49,12 @@ an expected result on the main thread. Public execution still needs rechecking.
 
 The initial merge-overlap wording above was corrected on read-only review:
 the A-runner overlap is D's quiet-window logic, not its already-shared root lookup.
+
+## R10-4: obsolete R9 diagnostic expects loading from an unadmitted worker
+
+The first complete D/C cohort at 1688dd357 has 721 passes and two failures:
+the protected U1 hook and the old R9 blocker diagnostic. C7 now refuses the
+unadmitted classifier before loading, with `native callback requires
+main-thread preloading at admission`. Update the negative test's name,
+description and exact error; preserve its actual historical worker and
+ValueError assertion. The independent positive worker cases pass in this run.
