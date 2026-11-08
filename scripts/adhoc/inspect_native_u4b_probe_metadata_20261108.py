@@ -17,13 +17,15 @@ def main():
     args = parser.parse_args()
     result = []
     for path in args.paths:
-        raw = path.read_bytes()
-        if len(raw) > 8 * 1024 * 1024:
+        limit = 8 * 1024 * 1024
+        with path.open('rb') as stream:
+            raw = stream.read(limit + 1)
+        if len(raw) > limit:
             raise ValueError('metadata inspection requires bounded saved evidence')
-        rows = ([json.loads(line) for line in raw.splitlines() if line.strip()]
-                if path.suffix == '.jsonl' else [json.loads(raw)])
+        rows = ([(index, json.loads(line)) for index, line in enumerate(raw.splitlines(), 1)
+                 if line.strip()] if path.suffix == '.jsonl' else [(1, json.loads(raw))])
         selected = []
-        for index, row in enumerate(rows, 1):
+        for index, row in rows:
             if row.get('type') == 'system' and row.get('subtype') == 'init':
                 selected.append({'line': index, 'kind': 'init', 'keys': sorted(row),
                     'model': row.get('model'), 'limits': row.get('limits'),
