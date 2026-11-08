@@ -50,6 +50,17 @@ The adjacent `.diff` is a review proposal only. Validate the direct requirement,
 the complete registration canary, A's complete core suite and saved mutations
 before considering the gate closed.
 
+The completed `round9-registration-r2` cohort at `c852b3e72` has 17 passes,
+four call-phase failures and no setup errors. Its genuine A-loaded fixed D entry
+executed `rebuild_v2_body`, the real gate census, `_registration_body` and
+`command`, producing exactly the original body (JUnit property
+`genuine_fixed_entry_equal=True`; source SHA-256
+`734aa6b3f33029da04e8f34fc12c3fc5c04ede4cb6a1b9c8438b16fb8cbb5901`).
+The positive public-verifier check and all three missing-gate requirements then
+fail at R9-3. The latter do not establish their intended missing-gate refusals.
+The initial interrupted `round9-registration` has no completion witness and
+contributes no counts; it remains untouched.
+
 ## R9-4: C callbacks enter a main-thread-only loader on real workers
 
 Pinned `native_control.py` SHA-256
