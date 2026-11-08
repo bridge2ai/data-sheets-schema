@@ -64,10 +64,11 @@ def main():
     for name, values in plan.items():
         if name != 'collection':
             expected_files.update(v.split('::')[0] for v in values)
-    continuation = OUT / 'continuation-plan.json'
-    if continuation.exists():
-        for _, values in json.loads(continuation.read_text()):
-            expected_files.update(v.split('::')[0] for v in values)
+    for name in ('continuation-plan.json', 'extra-plan.json'):
+        continuation = OUT / name
+        if continuation.exists():
+            for _, values in json.loads(continuation.read_text()):
+                expected_files.update(v.split('::')[0] for v in values)
     expected = {node for node in collected if any(node.startswith(path + '::') or node.startswith(path + '/') for path in expected_files)}
     observed = defaultdict(set)
     for item in nodes:
@@ -76,6 +77,7 @@ def main():
     reconciliation = {'collected_unique_nodes': len(collected), 'planned_files_or_directories': sorted(expected_files),
         'planned_collected_nodes': len(expected), 'candidate_observed_unique_nodes': len(observed),
         'uncovered_planned_nodes': sorted(expected - observed.keys()),
+        'unexecuted_repository_nodes': sorted(collected - observed.keys()),
         'mixed_candidate_outcomes': {key: sorted(value) for key, value in observed.items() if len(value) > 1},
         'scope': 'Completed XML only; interrupted runs without XML and collection alone provide no execution credit. Packet and baseline nodes excluded from candidate coverage.'}
     table = ['| Run | Pass | Fail | Error | Skip | Supervised seconds | Exit | Cleanup |',
@@ -90,6 +92,11 @@ def main():
             json.dump(value, f, indent=2, sort_keys=True)
             f.write('\n')
     (OUT / 'validation-table.md').write_text('\n'.join(table) + '\n')
+    failures = ['# Exact retained non-passing observations', '', 'Repeated observations are retained separately; this is not a unique failure count.', '']
+    for item in nodes:
+        if item['status'] != 'passed':
+            failures.extend(['## ' + item['run'] + ': ' + item['status'], '', '`' + item['node'] + '`', '', item['message'], ''])
+    (OUT / 'exact-nonpasses.md').write_text('\n'.join(failures) + '\n')
     print(json.dumps({'runs': len(rows), 'node_records': len(nodes), 'uncovered': len(reconciliation['uncovered_planned_nodes'])}))
 
 if __name__ == '__main__':
