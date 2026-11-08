@@ -178,8 +178,12 @@ def test_binary_runner_bounded_software_peer_cleanup(tmp_path, monkeypatch, case
     monkeypatch.setattr(probe.subprocess, "Popen", spawn)
     snippets = {
         "success": "import sys; print('version'); print('diagnostic', file=sys.stderr)",
-        "stdout_overflow": "import sys; sys.stdout.write('x'*8192); sys.stdout.flush()",
-        "stderr_overflow": "import sys; sys.stderr.write('x'*8192); sys.stderr.flush()",
+        # Keep the leader alive until cleanup. An immediately exiting peer
+        # races sandbox group lookup and can produce an ambiguous EPERM
+        # during group cleanup; that uncertainty correctly refuses.
+        # The separate inherited-pipe test retains the exited-leader case.
+        "stdout_overflow": "import sys,time; sys.stdout.write('x'*8192); sys.stdout.flush(); time.sleep(30)",
+        "stderr_overflow": "import sys,time; sys.stderr.write('x'*8192); sys.stderr.flush(); time.sleep(30)",
         "timeout": "import time; time.sleep(30)",
     }
     started = time.monotonic()
@@ -238,6 +242,45 @@ def test_binary_runner_exited_leader_with_open_pipes_still_attempts_group_cleanu
     finally:
         for descriptor in writers:
             os.close(descriptor)
+
+
+@pytest.mark.parametrize(('already_exited', 'wait_times_out'), [
+    (True, False), (False, False), (False, True),
+])
+def test_denied_group_signal_still_attempts_reap_and_preserves_refusal(
+        monkeypatch, already_exited, wait_times_out):
+    """A reaped leader alone cannot attest cleanup of its process group."""
+    refusal = PermissionError('group cleanup denied')
+    calls = []
+
+    class Process:
+        pid = 999999999
+        reaped = False
+        returncode = 0 if already_exited else None
+
+        def wait(self, timeout):
+            calls.append(('wait', timeout))
+            if wait_times_out:
+                raise probe.subprocess.TimeoutExpired('invented child', timeout)
+            self.reaped = True
+            self.returncode = 0
+            return 0
+
+        def poll(self):
+            return self.returncode
+
+    process = Process()
+
+    def denied(pid, sig):
+        calls.append(('signal', pid, sig))
+        raise refusal
+
+    monkeypatch.setattr(probe.os, 'killpg', denied)
+    with pytest.raises(PermissionError) as caught:
+        probe._terminate(process)
+    assert caught.value is refusal
+    assert calls == [('signal', process.pid, probe.signal.SIGTERM), ('wait', 1)]
+    assert process.reaped is (not wait_times_out)
 
 
 def test_retained_binary_codesign_failure_is_not_verified(tmp_path):

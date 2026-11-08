@@ -314,18 +314,25 @@ class _Bounded:
 
 
 def _terminate(process):
-    """Terminate/reap the new process group, including inherited pipe holders."""
+    """Terminate/reap the group; leader exit never excuses a signal denial.
+
+    Even when the host refuses a group signal, attempt a bounded direct-child
+    reap. Preserve the signal error: reaping the leader does not establish that
+    inherited pipe holders or other members of its group have stopped.
+    """
     if process is None:
         return
     for sig in (signal.SIGTERM, signal.SIGKILL):
         try:
-            os.killpg(process.pid, sig)
-        except ProcessLookupError:
-            pass
-        try:
-            process.wait(timeout=1)
-        except subprocess.TimeoutExpired:
-            pass
+            try:
+                os.killpg(process.pid, sig)
+            except ProcessLookupError:
+                pass
+        finally:
+            try:
+                process.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                pass
     if process.poll() is None:
         raise RuntimeError("permission child could not be reaped")
 

@@ -121,6 +121,7 @@ the execution report rather than inferred from the presence of a patch.
 | U4P-R2 | Donor local-provider startup bound a listener and started its thread outside the cleanup guard; thread-start failure leaked the listener. | Fixed with guarded startup; fake-server/thread regression `test_provider_listener_cleanup_is_bounded_even_on_start_failure` passes. |
 | U4P-R3 | Donor provider body reads could exceed the absolute deadline under continuous trickling; synchronous shutdown could then wait without a bound. | Fixed with absolute-deadline `read1` loops, a stop-event request loop, active-connection close and bounded join. `test_provider_body_uses_absolute_deadline_without_socket` and cleanup regressions pass without a real listener. |
 | U4P-R4 | Saved-probe output could imply that D105's v4 choice was a newly verified receipt-policy result. | Output now says `selected_receipt_instrument`, with command-specific proof limits. The account-choice schema is unchanged; producer/registration paths retain genuine receipt-policy checks. |
+| U4P-R5 | The combined final-head cohort produced 569 passes and one stdout-overflow failure: the byte-bound refusal was followed by a group-signal `PermissionError`. The immediately exiting software peer made its intended live-group cleanup check racy; a denied signal also bypassed the bounded child wait. | Retain the failed evidence. Keep overflow peers alive after flushing until cleanup terminates them; keep all time/byte bounds and strict cleanup refusal. Attempt bounded child reaping even after a denied signal, then propagate the denial. Exact final rechecks are in the execution report. |
 
 ## Validation checkpoint
 
@@ -145,3 +146,10 @@ test bytes. Run evidence stays under `scratch-native-u4-prep/{canary-1,port-1,
 permissions-1,authority-1,collection-1}`. The checked-in summary helper retains
 per-run counts, source heads, exact JUnit identities and artifact hashes, so
 overlapping canaries cannot inflate the distinct-test total.
+
+The combined `final-570` run at `c7765b28bd9732e918ad46eb76beaef7b75ef745`
+returned **569 passed / 1 failed**, retained without replacement. Its traceback
+is consistent with an exited-peer signal-policy race, but does not establish
+the precise OS state. U4P-R5 changes the synthetic peer lifetime and strengthens
+error-path reaping; it does not turn denied group cleanup into success. The
+report distinguishes these earlier results from the final repaired-head runs.
