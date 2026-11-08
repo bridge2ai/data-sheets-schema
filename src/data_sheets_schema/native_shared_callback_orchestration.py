@@ -28,7 +28,13 @@ def _locked_stack(lock):
     stack = ExitStack()
     try:
         yield stack
-    finally:
+    except BaseException:
+        require_main_thread()
+        with lock:
+            if not stack.__exit__(*sys.exc_info()):
+                raise
+    else:
+        require_main_thread()
         with lock:
             stack.close()
 
