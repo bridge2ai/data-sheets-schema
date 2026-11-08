@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 basis = os.environ.get('U3E_PARITY_BASIS')
-if basis not in ('baseline', 'candidate'):
+if basis not in ('baseline', 'candidate', 'packet'):
     raise RuntimeError('explicit parity basis required')
 name = 'baseline_native_u1u3_20261108.py' if basis == 'baseline' else 'run_native_u1u3_20261108.py'
 spec = importlib.util.spec_from_file_location('parity_basis', ROOT / 'scripts/adhoc' / name)
@@ -17,6 +17,8 @@ r = module.r if basis == 'baseline' else module
 if basis == 'baseline':
     module.root = r.SCRATCH / 'baseline-parity'
     r.w.ROOT = r.w.runner.ROOT = r.w.dependency.ROOT = module.root
+elif basis == 'packet':
+    r.w.ROOT = r.w.runner.ROOT = r.w.dependency.ROOT = r.SCRATCH / 'packet-parity-composition/tree'
 r.w.__file__ = r.w.runner.__file__ = __file__
 clean = r.w.runner.clean_environment
 def environment(out, interpreter_directory):
