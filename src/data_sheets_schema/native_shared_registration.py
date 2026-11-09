@@ -123,7 +123,17 @@ def _selection(raw, *, preparation_raw, classifier_projection):
     if (spec.provider, spec.reasoning_effort) != (runtime['provider'], runtime['effort']):
         raise ValueError('execution runtime differs from selected provider/effort')
     from .agentic_runtime import toolchain
-    if c.canonical(spec._agentic_toolchain) != c.canonical(toolchain()):
+    # This pure discriminator does not import the host-reading U4b preparer.
+    # Historical captures keep their original toolchain. U4b is explicit and
+    # cannot pass until the constructor installs its selected generation set.
+    native_shared = False
+    basis = runtime['limits_basis']
+    if basis.lstrip().startswith('{'):
+        declared = c.strict_json(basis.encode('utf-8'), 'runtime profile basis', 16384)
+        native_shared = type(declared) is dict and declared.get('kind') == 'd4d_native_u4b_runtime_basis'
+    if c.canonical(spec._agentic_toolchain) != c.canonical(toolchain(native_shared=native_shared)):
+        if native_shared:
+            raise ValueError('execution requires the explicit native-shared generation-only toolchain')
         raise ValueError('execution requires the exact local helper toolchain')
     return selected, spec, doc, runtime
 

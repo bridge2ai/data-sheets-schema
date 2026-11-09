@@ -1,0 +1,1922 @@
+{
+  "events": [
+    {
+      "bytes": 435,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.05,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.21,\"resetsAt\":1789776000}}},\"uuid\":\"569dd449-66fa-4b79-ba55-bb4da5a646ea\",\"session_id\":\"df657365-b389-4c43-be54-68c6b7e54637\"}\n",
+      "sha256": "9881993600b7c7babb24492dacdc57d8568e3ee2eb020f3e0ad298805e789c6a",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T08-05-41.050919+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 146,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.06,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.21,\"resetsAt\":1789776000}}},\"uuid\":\"f1caad53-8255-4535-85b7-87a83b09655d\",\"session_id\":\"df657365-b389-4c43-be54-68c6b7e54637\"}\n",
+      "sha256": "a9d56958719422e1eb504dde848337e790e46437d0b3684ab7649497c1e6f5a3",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T08-05-41.050919+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 156,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.07,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.21,\"resetsAt\":1789776000}}},\"uuid\":\"98c38bf9-9044-4926-82e3-2c1d45252e7b\",\"session_id\":\"df657365-b389-4c43-be54-68c6b7e54637\"}\n",
+      "sha256": "6e6437d80012dd1f902a5b1e2d9c5e4841fb38dd272b77e09b928d35113a02a4",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T08-05-41.050919+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.17,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.23,\"resetsAt\":1789776000}}},\"uuid\":\"fe71fb01-b65a-406f-a583-4233e43223bb\",\"session_id\":\"2852ebd4-df68-4ac8-8dab-a4923bc3a93b\"}\n",
+      "sha256": "0db06a94b4d62b34e0dea71cba580f4a7f1596b81116cc395c29d2de18689877",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T09-04-18.246187+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 106,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.18,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.23,\"resetsAt\":1789776000}}},\"uuid\":\"564bad30-6823-4f3a-ab69-e97964c11e2c\",\"session_id\":\"2852ebd4-df68-4ac8-8dab-a4923bc3a93b\"}\n",
+      "sha256": "acbb098fe2589037eeee37baa35ff8fa46f023d75f4e47e9fd6ffdc0516ca728",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T09-04-18.246187+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.35,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.02,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.35,\"resetsAt\":1789776000}}},\"uuid\":\"16230c05-4495-4206-92be-48d479f3e67a\",\"session_id\":\"bcb906fd-3bcf-43fb-87fb-58a869257a87\"}\n",
+      "sha256": "bef737db60aa3a7fbd9ab6b7abfff5cf0df0e2c4d32bb83fe40bf9cf7605d63c",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating2/2026-09-12T15-25-37.530014+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 105,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.35,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.04,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.35,\"resetsAt\":1789776000}}},\"uuid\":\"359da9ff-6e12-431a-b5ba-1b550ee21032\",\"session_id\":\"bcb906fd-3bcf-43fb-87fb-58a869257a87\"}\n",
+      "sha256": "3ad27a2cfff5fe1d45034e502b7d9dedabc3f489cf32089a39449bd3e5da0d1e",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating2/2026-09-12T15-25-37.530014+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.35,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.02,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.35,\"resetsAt\":1789776000}}},\"uuid\":\"30e4b508-0956-4aa9-adff-7349965847fc\",\"session_id\":\"d087d345-20cf-457b-b3ed-72f5d90346de\"}\n",
+      "sha256": "61b63cc38d7be33c16a7144469a2a7858c0fae24d5618c0534e57713a11cd68a",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating3/2026-09-12T15-26-05.675689+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 33,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.35,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.03,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.35,\"resetsAt\":1789776000}}},\"uuid\":\"09a09ba5-6cf2-49cb-b99b-8a67b35b8f3b\",\"session_id\":\"d087d345-20cf-457b-b3ed-72f5d90346de\"}\n",
+      "sha256": "9365618f2bee21f12838b437e38ef415e68d61080d4e5a225d7b251b7973ec82",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating3/2026-09-12T15-26-05.675689+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 154,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.06,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"7caf4172-3a3d-426c-ac97-c48febf29c68\",\"session_id\":\"d087d345-20cf-457b-b3ed-72f5d90346de\"}\n",
+      "sha256": "6458ebed8ad438688e1ab80feccfbcf853acc041962c10d119b32cafb1b70742",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating3/2026-09-12T15-26-05.675689+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 159,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.07,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"afbc6705-d1c7-4d49-bb94-fa28f69c6920\",\"session_id\":\"d087d345-20cf-457b-b3ed-72f5d90346de\"}\n",
+      "sha256": "dc09045f2ce6d33af7c157993e6ec693f9849860aea569f767ad68cdc7706246",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating3/2026-09-12T15-26-05.675689+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.18,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.23,\"resetsAt\":1789776000}}},\"uuid\":\"a3176c01-f607-4819-97a6-53fa40844687\",\"session_id\":\"075c21ce-0d35-4c42-91ff-aa7214edb807\"}\n",
+      "sha256": "5ae0927b10c8a7336c4b03d871eb04c28a322f2b65af3830ae6edbb999568df8",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T09-11-58.143131+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 153,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.19,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.23,\"resetsAt\":1789776000}}},\"uuid\":\"7cc689aa-2de9-41b0-92be-8add0d5dd6df\",\"session_id\":\"075c21ce-0d35-4c42-91ff-aa7214edb807\"}\n",
+      "sha256": "dec02fedbd4bb689e3abb8d6735daf9cda92ecad9716569d8ea3939f2e9b681a",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T09-11-58.143131+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 434,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.2,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"55f223a4-6f3d-4ba1-b4d7-e440361d6906\",\"session_id\":\"f51ee1b7-d3a5-483f-8967-8826857fd6c4\"}\n",
+      "sha256": "ace3710e124098ec83fbd477449903e76186fe6a86bf710c61604772f2016ae5",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T09-24-36.443700+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 128,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.21,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"a3267bed-b7a5-4694-b11e-5028c162d485\",\"session_id\":\"f51ee1b7-d3a5-483f-8967-8826857fd6c4\"}\n",
+      "sha256": "38c1e59269499f7ff95f1f1ef18faeecaa1cefdf61fa7537e9fcc81a1b980fac",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T09-24-36.443700+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 132,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.25,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"fbf75254-b125-483e-b435-5223ce5fe60e\",\"session_id\":\"f51ee1b7-d3a5-483f-8967-8826857fd6c4\"}\n",
+      "sha256": "6b3604d00770337a1a302a9fff72e85f91306f2f247ddffcd1beced2c1e032d1",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T09-24-36.443700+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 145,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.26,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"cf636e99-3a7d-4e8f-98c5-ccb42c318fb5\",\"session_id\":\"f51ee1b7-d3a5-483f-8967-8826857fd6c4\"}\n",
+      "sha256": "cf88894802452c0671159f2eed93d200907e2bdd48fe1a0279963dba78c87279",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T09-24-36.443700+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 434,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.2,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"11eb11fd-d496-4eff-8768-3dca7e767214\",\"session_id\":\"2e2702e7-ec50-4b73-b928-fdee9c6f9809\"}\n",
+      "sha256": "5bcd61baeecf7f8e4d33fabc6eda1eb4012e0d1f316f5e95b834dd8c18d2bedd",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T09-24-40.465250+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 197,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.22,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"0a2364b9-abe1-4ead-9a68-659899dc8adc\",\"session_id\":\"2e2702e7-ec50-4b73-b928-fdee9c6f9809\"}\n",
+      "sha256": "79b2a57d85698d889cb68b62f60e350f2e82fa9436e485f1fdc362443deed399",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T09-24-40.465250+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 206,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.24,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"22ff68ae-33b2-40b2-b680-6bb904cf73c5\",\"session_id\":\"2e2702e7-ec50-4b73-b928-fdee9c6f9809\"}\n",
+      "sha256": "3976df95326dca0245ac5b5de2d3e6b4a993ce10ed272182ecf8ef20d504a628",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T09-24-40.465250+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 210,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.25,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"8ef6269c-5367-4180-af83-5dba3ef9ab2a\",\"session_id\":\"2e2702e7-ec50-4b73-b928-fdee9c6f9809\"}\n",
+      "sha256": "19eaa5027944953390e607fbb7d0d5cc799e962d6c84efc59abafc17a860ec55",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T09-24-40.465250+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 434,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.2,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"5dba25cf-38c0-462e-830a-e720a530f5c9\",\"session_id\":\"7fa965bc-d548-4567-a137-3b583edd4377\"}\n",
+      "sha256": "dcb16a241500b311941be77027708314837c9288f68ed918387cc8f9769e2e48",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T09-24-43.946094+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 100,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.23,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"ec307e88-b165-4697-8cc6-803f1e6c8d15\",\"session_id\":\"7fa965bc-d548-4567-a137-3b583edd4377\"}\n",
+      "sha256": "9a2f1da47ba30be0845d419e21ecca5bb4c300ec77d526f87b82a6370508d811",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T09-24-43.946094+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 106,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.25,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"42367e26-52d1-48fa-8269-02f29bab86bb\",\"session_id\":\"7fa965bc-d548-4567-a137-3b583edd4377\"}\n",
+      "sha256": "49add880b922fc792b9974f0e86a4a7b79babcea87e9750e4310bff89dadde29",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T09-24-43.946094+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 434,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.2,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"dc93f604-e175-4eb1-b02c-b6b1ccabba57\",\"session_id\":\"8f2f824f-bcda-4a6f-beec-68b08f3c8422\"}\n",
+      "sha256": "34de66c269341c291649d234767cb812868d4e7c8f733fbf80facec7d98bdc43",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T09-24-48.941270+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 149,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.21,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"ba3cf641-f7da-4aaf-a228-6c3518c07365\",\"session_id\":\"8f2f824f-bcda-4a6f-beec-68b08f3c8422\"}\n",
+      "sha256": "c080f4a7109cd508de013238e79727dedafb0ff9a3965afe4d62675120941426",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T09-24-48.941270+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 153,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.24,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"48ecd5ce-594f-4738-884a-a04765dbaaca\",\"session_id\":\"8f2f824f-bcda-4a6f-beec-68b08f3c8422\"}\n",
+      "sha256": "4279245fc0d87abac893d92f789675983464ce7e28b7d9417fd1fb1e8181328f",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T09-24-48.941270+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 161,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.25,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"4350348a-adba-421b-898c-a40f0e66017d\",\"session_id\":\"8f2f824f-bcda-4a6f-beec-68b08f3c8422\"}\n",
+      "sha256": "1dc0fe84ff8676f5c931155a457a16880077aa2c0b5db747fc9c08571ebfc778",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T09-24-48.941270+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.26,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"4256e6ff-6b44-41a0-b255-4328f8dcce05\",\"session_id\":\"9f61e8ec-eefc-4968-bc27-44827f1d4737\"}\n",
+      "sha256": "d7e850d1fec861a1a8de22b5099c704a6ed0d092edebe83da6ab828a6aede022",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r10_rating1/2026-09-12T09-34-57.687223+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 18,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.26,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"7479ca9e-0410-4372-9778-02591119206d\",\"session_id\":\"9f61e8ec-eefc-4968-bc27-44827f1d4737\"}\n",
+      "sha256": "dbbbf94cb2d5661807c655d4559b495832b6f51592fc6cbf85c17bebe83aa852",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r10_rating1/2026-09-12T09-34-57.687223+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 118,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.28,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"2cf8f5ce-7669-4377-8b23-9e64dd68263f\",\"session_id\":\"9f61e8ec-eefc-4968-bc27-44827f1d4737\"}\n",
+      "sha256": "605258528c953528aeae0021b75604403e962125bf23556e61676efc8febec84",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r10_rating1/2026-09-12T09-34-57.687223+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 3,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.26,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.24,\"resetsAt\":1789776000}}},\"uuid\":\"ed1cd45c-768d-4120-af13-dc7891c4b39c\",\"session_id\":\"66e5beec-c649-4ea4-816f-27948c8f7420\"}\n",
+      "sha256": "6d8f90dbcc79089ed5d16d25f63f493698ea4221505f6bae5fecf8042bd93980",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r20_rating1/2026-09-12T09-35-01.802029+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 13,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.26,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"598e32df-ce01-4d70-a4f2-cba51acfb523\",\"session_id\":\"66e5beec-c649-4ea4-816f-27948c8f7420\"}\n",
+      "sha256": "dba3e90fc093b1487c48ba5ac2bb875b05a3f9d7e83ab765c5e6d74b3b8097b0",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r20_rating1/2026-09-12T09-35-01.802029+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 160,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.27,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"14ede135-e427-463a-bf8d-c003ca7413f1\",\"session_id\":\"66e5beec-c649-4ea4-816f-27948c8f7420\"}\n",
+      "sha256": "1db82dc5d6701b5208b42013fa3a069da12d87e9fb64d06f137db1a950d3ec59",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r20_rating1/2026-09-12T09-35-01.802029+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 168,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.29,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"515c5368-543a-4f60-abee-f74a77b15acf\",\"session_id\":\"66e5beec-c649-4ea4-816f-27948c8f7420\"}\n",
+      "sha256": "669ba606154e73743e7ba45cfa4d9d952d83262a157294e1b0a2277b90fe0934",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r20_rating1/2026-09-12T09-35-01.802029+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.26,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"bffb2cdb-46fc-4770-96ea-6332db8c7f76\",\"session_id\":\"45b5b6ca-d2b9-469e-a842-18da2b186f88\"}\n",
+      "sha256": "0fe8a2fc430d7461ec557f87c1c39f041da755703aeee93ebc2f3c34f81dc5ff",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r10_rating1/2026-09-12T09-35-05.428183+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 131,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.31,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"1ad56d91-ce42-4b0a-89aa-f271a76f26fd\",\"session_id\":\"45b5b6ca-d2b9-469e-a842-18da2b186f88\"}\n",
+      "sha256": "167c27e634c01a92e9ace828f3feb8f19f53cf22420be2d9fe98ac999456cb50",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r10_rating1/2026-09-12T09-35-05.428183+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.26,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"162ca2ca-86d0-4f00-bf54-d178162b840d\",\"session_id\":\"a1736366-2437-4103-befe-01137888bffc\"}\n",
+      "sha256": "5e13f4f4ccfd716b7a1c0b3b63a49e5af2bd31fa9d6132f47f54d1ec015ea7ef",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r20_rating1/2026-09-12T09-35-09.078994+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 146,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.27,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"f9b363b8-26e9-4380-aaaa-11a00f6c74f6\",\"session_id\":\"a1736366-2437-4103-befe-01137888bffc\"}\n",
+      "sha256": "333080d85968e437d643b65d8ab7d64e97424e400a33cb583ddb84472cc29f90",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r20_rating1/2026-09-12T09-35-09.078994+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 154,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.3,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"480973c1-ef04-4e6c-b2c0-cb07fab2b151\",\"session_id\":\"a1736366-2437-4103-befe-01137888bffc\"}\n",
+      "sha256": "f2270493c41a22081b802588c3ddfabfbf578ab297f5723cb0377b10779f2189",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r20_rating1/2026-09-12T09-35-09.078994+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 391,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"0bdd2435-2472-4f57-ba28-4d7e855631ef\",\"session_id\":\"87c8703b-5cd4-4ec3-bf58-90bdc91126a9\"}\n",
+      "sha256": "41dbe77cbb7cb7e10af684d951be3c565473cff39420abbd4cc85405298b8268",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r10_rating1/2026-09-12T10-11-09.605326+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 27,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.01,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"6d0e2f35-3061-4020-8b53-6f4578a18f0a\",\"session_id\":\"87c8703b-5cd4-4ec3-bf58-90bdc91126a9\"}\n",
+      "sha256": "35b535003b45b4299bf4a1540cef47c1db0861210f840f66e51b21046148e22c",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r10_rating1/2026-09-12T10-11-09.605326+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 132,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.01,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"124056a7-a962-498e-b646-0d2cab31d5df\",\"session_id\":\"87c8703b-5cd4-4ec3-bf58-90bdc91126a9\"}\n",
+      "sha256": "ddef2d564a026cbb65701686d138edb9b2dd6ab6efc3e7e1b3e3f8b8fc7c7d6d",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r10_rating1/2026-09-12T10-11-09.605326+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 136,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.03,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"a9ea65e0-ff4e-4625-9320-7ed51cd41409\",\"session_id\":\"87c8703b-5cd4-4ec3-bf58-90bdc91126a9\"}\n",
+      "sha256": "c964780c7da8a93c60f1dfb2b552f94ee7408f647e382a5f77a2975513d5c6e5",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r10_rating1/2026-09-12T10-11-09.605326+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 144,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.04,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"e00d610e-3320-4eee-9883-295841270847\",\"session_id\":\"87c8703b-5cd4-4ec3-bf58-90bdc91126a9\"}\n",
+      "sha256": "cf73fbbfb255de7f072e9aba209a644bd42d32805c5c4c09f188ff08c35ce588",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r10_rating1/2026-09-12T10-11-09.605326+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 391,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"f019d850-1710-4f69-9584-7a6090bace63\",\"session_id\":\"bee26a51-91ae-4e08-9d28-fba930f0c420\"}\n",
+      "sha256": "3216392e5199c35b7db69b4f70e91e1a1d7602b105ddbbdfa8fc6d94a51a08cd",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r20_rating1/2026-09-12T10-11-13.611621+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 117,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.01,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"49b7b166-876c-4be2-b76d-c774347ca2c9\",\"session_id\":\"bee26a51-91ae-4e08-9d28-fba930f0c420\"}\n",
+      "sha256": "e6bcb43b23acfa99ef5265adf85199670ad1a0302b7199714a80412a9892c0c1",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r20_rating1/2026-09-12T10-11-13.611621+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 124,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.01,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"58db95fe-e241-4545-a25d-37332d66915b\",\"session_id\":\"bee26a51-91ae-4e08-9d28-fba930f0c420\"}\n",
+      "sha256": "af37695f6d64f78c9d7f9f51d04a63ca126a4fe41e59f39990584e6072532fa6",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r20_rating1/2026-09-12T10-11-13.611621+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 126,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.05,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"8ca846fe-e90d-49ba-b4dc-2f5fcb528d32\",\"session_id\":\"bee26a51-91ae-4e08-9d28-fba930f0c420\"}\n",
+      "sha256": "ddfae5eafd56ffe82ca9c1ae4966200dcee24071d1a25125e00cfbf7440b2b68",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r20_rating1/2026-09-12T10-11-13.611621+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 130,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.04,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"dd4c1e04-679d-45ef-b7fd-09f715ea64e8\",\"session_id\":\"bee26a51-91ae-4e08-9d28-fba930f0c420\"}\n",
+      "sha256": "9d2b0bdc63c5d183cde492123850ffa960527e9eed248416036860ae4e63105b",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r20_rating1/2026-09-12T10-11-13.611621+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 434,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.03,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.2,\"resetsAt\":1789776000}}},\"uuid\":\"a0b008da-3c3f-4153-85b6-66758632631b\",\"session_id\":\"fd641843-01a6-47be-8190-50181406a935\"}\n",
+      "sha256": "d38c093346bb41e8ef351d30f01beade98f6b43ddc68d9b79bb3065765cb3b7b",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T07-20-00.645660+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 17,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.03,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.21,\"resetsAt\":1789776000}}},\"uuid\":\"e3d6a8c8-f562-4950-8215-888c6a6fd57b\",\"session_id\":\"fd641843-01a6-47be-8190-50181406a935\"}\n",
+      "sha256": "fde1cf0cdeca03e61390a6e893231c18a534821470d4eef13bfa6f2128a6794b",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T07-20-00.645660+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 435,
+      "line": 149,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1789207800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"out_of_credits\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.04,\"resetsAt\":1789207800},\"seven_day\":{\"utilization\":0.21,\"resetsAt\":1789776000}}},\"uuid\":\"84eee30f-3709-4626-b536-e22bcfdb273e\",\"session_id\":\"fd641843-01a6-47be-8190-50181406a935\"}\n",
+      "sha256": "3d5e6a1c0eb123c1a337f1294a1aa0acc9e22559091258403d9ee6b59dd59960",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T07-20-00.645660+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.35,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.02,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.35,\"resetsAt\":1789776000}}},\"uuid\":\"902e3aa4-80e5-4271-8af4-49682149627c\",\"session_id\":\"a57c431b-83fc-4d4b-b8ba-853cc53fd28e\"}\n",
+      "sha256": "56b67addea43439e7eb9f8f9ca3c4967480a770b3c0c7074b3278edf6101a2e8",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T15-26-10.559978+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 27,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.35,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.03,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.35,\"resetsAt\":1789776000}}},\"uuid\":\"d52cf162-8014-4560-900b-4fbd74709aa0\",\"session_id\":\"a57c431b-83fc-4d4b-b8ba-853cc53fd28e\"}\n",
+      "sha256": "7653538852b57772bc24b08f06fee0bf322799e54615e31a6d531f38853a8d03",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T15-26-10.559978+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 156,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.35,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.05,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.35,\"resetsAt\":1789776000}}},\"uuid\":\"62222e7a-b3a8-4555-8ed8-ac186bcfacd9\",\"session_id\":\"a57c431b-83fc-4d4b-b8ba-853cc53fd28e\"}\n",
+      "sha256": "a336fb3ed04131955864395a2a3a05c6c8da712e0933ac678e401e30451523e5",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T15-26-10.559978+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 169,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.07,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"34618d36-93ee-4f06-ab20-c3867a746913\",\"session_id\":\"a57c431b-83fc-4d4b-b8ba-853cc53fd28e\"}\n",
+      "sha256": "24f925d9d3da0b02c8cdb8dce54c09548ddb4b01e76871bd254f3ee94f93388a",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T15-26-10.559978+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.35,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.02,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.35,\"resetsAt\":1789776000}}},\"uuid\":\"9212e267-c7d1-4072-9238-6cb7604f596c\",\"session_id\":\"9c568685-4914-4b46-a388-411ff3375504\"}\n",
+      "sha256": "d04b132d91d5fdc9410d50ded8690e7a598620f6196ba3c4e8c227563c6d8579",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating3/2026-09-12T15-26-14.501987+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 25,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.35,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.03,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.35,\"resetsAt\":1789776000}}},\"uuid\":\"80ae99a0-bcf5-4cc5-991a-920f57fc8046\",\"session_id\":\"9c568685-4914-4b46-a388-411ff3375504\"}\n",
+      "sha256": "9cf858ea06abebc94b1134c34131c47a2b3ab798fd747ab2e64a1afa7dbfad23",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating3/2026-09-12T15-26-14.501987+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 164,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.07,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"9843ed99-f551-4c27-a033-4487e0b913cc\",\"session_id\":\"9c568685-4914-4b46-a388-411ff3375504\"}\n",
+      "sha256": "59643e53053a01d6c6e4c87c106b204a18ad97c66041bc7e10928c5e38852c33",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating3/2026-09-12T15-26-14.501987+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 170,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.08,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"b56835b0-1c97-4244-883a-5266a51a6e6d\",\"session_id\":\"9c568685-4914-4b46-a388-411ff3375504\"}\n",
+      "sha256": "f9f7c5ec1ecd319d5bd8f21d203255076e999c55e7aff8100db96bf03698bb1d",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating3/2026-09-12T15-26-14.501987+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 391,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"75f324ab-c91b-4249-aa23-0c0529c14307\",\"session_id\":\"47946e25-4bb0-4ca6-9231-88d78347e652\"}\n",
+      "sha256": "ce3dd238fc9abb8d165d662e32865362ad6a3f83c6c48b2bc4d3510de61dfa4d",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r20_rating1/2026-09-12T10-11-17.769243+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 23,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.01,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"061753b0-b397-492b-b446-4058e6cda7e4\",\"session_id\":\"47946e25-4bb0-4ca6-9231-88d78347e652\"}\n",
+      "sha256": "171635fea4a319130d55d28a0189cfa421189a904e2bcee1363da0f20bce7c6b",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r20_rating1/2026-09-12T10-11-17.769243+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 111,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.02,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"c48bb55d-3cf6-4f3a-b338-4a1b838c2bee\",\"session_id\":\"47946e25-4bb0-4ca6-9231-88d78347e652\"}\n",
+      "sha256": "e77cc52d68bd8507c800727fff718368e689aab0c747b1a664f1ce608e369225",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r20_rating1/2026-09-12T10-11-17.769243+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 114,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.01,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"6b9bc8f7-82a9-45cd-8431-525042faf3e2\",\"session_id\":\"47946e25-4bb0-4ca6-9231-88d78347e652\"}\n",
+      "sha256": "ae80debdf49556bd0c173ec6ce0c279c47a7cda90bac0b79cf1476c3b8728ef0",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r20_rating1/2026-09-12T10-11-17.769243+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 118,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.02,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"a4b23098-3ca7-4f8e-ad81-a27a45aae544\",\"session_id\":\"47946e25-4bb0-4ca6-9231-88d78347e652\"}\n",
+      "sha256": "440f9df5784cd82fd966aa457704cca9c88367280937dff0ad742d02f19c14b1",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r20_rating1/2026-09-12T10-11-17.769243+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 391,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"c0890789-6a46-43af-afb3-b4456d8ee1a8\",\"session_id\":\"17934551-7373-4df1-bee9-ff5efa337764\"}\n",
+      "sha256": "b7d12d0f1bd9d879c46bc664f3af49e0a5fb3681770ca3015c2a8f0c02d529af",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r10_rating1/2026-09-12T10-11-23.210817+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 120,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.25,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.01,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.25,\"resetsAt\":1789776000}}},\"uuid\":\"79bdf793-c0b2-4fbb-920c-f83454fc56de\",\"session_id\":\"17934551-7373-4df1-bee9-ff5efa337764\"}\n",
+      "sha256": "cca31d23d42a8e367f5d1ef6df620442c7d01b87f3b01bf93df4a6ae60a44189",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r10_rating1/2026-09-12T10-11-23.210817+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 123,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.03,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"cdf198bd-333a-466a-ac94-a293535563db\",\"session_id\":\"17934551-7373-4df1-bee9-ff5efa337764\"}\n",
+      "sha256": "22e999058bccbc912324f9f444d53c116ecebe2e5d5488a28ebcfb9c3eef85d2",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r10_rating1/2026-09-12T10-11-23.210817+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 127,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.02,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"4e9235fe-e3d8-457a-96f4-fee0e7a5d52e\",\"session_id\":\"17934551-7373-4df1-bee9-ff5efa337764\"}\n",
+      "sha256": "a9477211a98c1544b734509f8424f62431ef58d05990104928d8cebfe2292c56",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r10_rating1/2026-09-12T10-11-23.210817+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.05,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"372999db-ffe6-49ea-b281-f1c66f2b1e4f\",\"session_id\":\"906a63a6-34a8-49a4-966e-e9fb1ea3b8e9\"}\n",
+      "sha256": "fcf944b378ef1208525854df33d4605e5677bfa896674ddb22640ae62c2e9fbe",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r20_rating1/2026-09-12T10-21-22.007907+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 113,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.07,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"f48abd8f-4827-4e8f-8722-301024aa9de7\",\"session_id\":\"906a63a6-34a8-49a4-966e-e9fb1ea3b8e9\"}\n",
+      "sha256": "f8262d4b2d9c9e23de413eb9081a13e1fc54ec081f04490246117b612ae3c1ec",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r20_rating1/2026-09-12T10-21-22.007907+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.05,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"1460fda6-4b83-438f-8664-b2b57a189ab2\",\"session_id\":\"17a0cff6-e7c9-4956-98d3-61ce9d6207de\"}\n",
+      "sha256": "996b83a464a8ad4f2282f102b7bbdafd57b7fe7bd752f8019ef26bf8a615149a",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T10-21-26.301953+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 150,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.06,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"254a3b05-d1cb-4159-b16f-fd5487faf4e8\",\"session_id\":\"17a0cff6-e7c9-4956-98d3-61ce9d6207de\"}\n",
+      "sha256": "475fca3450fe3eececd31aa08ff54a632539a9c749a51bb15e7d4cb3e4635700",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T10-21-26.301953+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 152,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.08,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"3ee6481f-8645-44ad-b188-65d03aac2f9e\",\"session_id\":\"17a0cff6-e7c9-4956-98d3-61ce9d6207de\"}\n",
+      "sha256": "48404069cb0fb9af9615fa5a1ede2f89483737cd0061a25288f24f4b14b1d175",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T10-21-26.301953+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 158,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.09,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"dc531eb9-f27e-4730-9b30-88008a11aec0\",\"session_id\":\"17a0cff6-e7c9-4956-98d3-61ce9d6207de\"}\n",
+      "sha256": "42adfc22bb86b21b2474bfccd986e743512722f993443342baa377fab828583a",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T10-21-26.301953+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.05,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"72994e2d-eb5b-4657-a140-49ab83295911\",\"session_id\":\"803c5593-acb8-4055-b23f-fd261160c211\"}\n",
+      "sha256": "225712f04ee9c66f9cf848bf951b273c3d476e4fc856725a5c740deba5008270",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r20_rating1/2026-09-12T10-21-30.227209+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 185,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.06,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"6ec1da10-442d-4f81-994e-a21232c451d1\",\"session_id\":\"803c5593-acb8-4055-b23f-fd261160c211\"}\n",
+      "sha256": "f20d0ca29ee8f9284f72d976c2bd2865f6268057b3f186e2de1e1337731063c5",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r20_rating1/2026-09-12T10-21-30.227209+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 191,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.08,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"8f8f57e0-2f8c-4541-818f-69e84a7c6400\",\"session_id\":\"803c5593-acb8-4055-b23f-fd261160c211\"}\n",
+      "sha256": "1e6098d6fbc01f845cfaa808e9d4937070ddc3c5ad88b17186841a73963230ab",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r20_rating1/2026-09-12T10-21-30.227209+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 3,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.05,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"74be166c-7cd7-4a23-9582-5604c84ad0c4\",\"session_id\":\"15623e94-7d9b-4f77-a2cc-2fa310bb7ca6\"}\n",
+      "sha256": "ff8bdea3fcb74ab71165561fb6775c33ae96fbf44cf6471ec4e8dca09919ff80",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T10-21-34.529106+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 142,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.26,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.06,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.26,\"resetsAt\":1789776000}}},\"uuid\":\"d28bdefc-7db7-4617-baa0-00b85851b4bb\",\"session_id\":\"15623e94-7d9b-4f77-a2cc-2fa310bb7ca6\"}\n",
+      "sha256": "742d7f9edfed913846e15d37183dae77c8f57a6340db5ea9c157fc2ed827104b",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T10-21-34.529106+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 146,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.1,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"bb111d73-ce8f-4b89-a807-71732ecf3be9\",\"session_id\":\"15623e94-7d9b-4f77-a2cc-2fa310bb7ca6\"}\n",
+      "sha256": "8181fd61f31ee741eff9df62b8be93aa7fcebb3189bf6aaef4c9b2366669e2d5",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T10-21-34.529106+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.1,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"7532d02d-3e22-48c0-aa27-fcfd7eedc9e6\",\"session_id\":\"1c9757fe-ba42-4ee8-9dcc-b29740d00bcc\"}\n",
+      "sha256": "bc958ff458b9c29b5f832a9cf0488d0583943b54723224f803dd106309c86276",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T10-34-00.487246+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 24,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.11,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"d82ab1af-70d2-4c7d-a034-7275e2202abb\",\"session_id\":\"1c9757fe-ba42-4ee8-9dcc-b29740d00bcc\"}\n",
+      "sha256": "93ed8be1d0d9d663d1c6b740cc0e1a2671fa7fe975ae4ac41a877b47af134007",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T10-34-00.487246+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 131,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.13,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"3b578054-48ce-4891-88df-b490dbc034c2\",\"session_id\":\"1c9757fe-ba42-4ee8-9dcc-b29740d00bcc\"}\n",
+      "sha256": "e00cab89c97b7d88ce9d3cdbcd494aeb8be229fc28495da54ac6a6b124b26b97",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T10-34-00.487246+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 151,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.14,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"d0d1526b-6240-4478-a2a2-7a7e1d2e9b78\",\"session_id\":\"1c9757fe-ba42-4ee8-9dcc-b29740d00bcc\"}\n",
+      "sha256": "2edeb509eebc158e498611bd88658807b234e9296726c3193ee0af85d1e5115f",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T10-34-00.487246+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 186,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.28,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.17,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.28,\"resetsAt\":1789776000}}},\"uuid\":\"0d4edc1d-9bc3-4373-8313-1e508fa76891\",\"session_id\":\"1c9757fe-ba42-4ee8-9dcc-b29740d00bcc\"}\n",
+      "sha256": "55c14f2d25f938fcb4b79205bb662812df3be47fdd957615492bf8183d172013",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T10-34-00.487246+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.1,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"504f4445-75c5-4a30-b31c-308454c762d5\",\"session_id\":\"2a127f09-2fb3-4656-a44c-a7f5ed20296a\"}\n",
+      "sha256": "94b39739bb109335d4c0bc307f5d0298e12b575d1a2d43f58700e6395b2a264d",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r10_rating1/2026-09-12T10-34-04.212789+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 28,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.11,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"3919c205-e79d-4460-b6bb-2efc53346d9c\",\"session_id\":\"2a127f09-2fb3-4656-a44c-a7f5ed20296a\"}\n",
+      "sha256": "b3d28c1b07791786d7fbbe42f77eb5b757e77dc7ee6352e54eea344a1a1585c9",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r10_rating1/2026-09-12T10-34-04.212789+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 194,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.12,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"a184fae1-1083-4666-a4ed-b146a0cc7a42\",\"session_id\":\"2a127f09-2fb3-4656-a44c-a7f5ed20296a\"}\n",
+      "sha256": "024aa5ef4b39c63470b21219a0f0f5f4052fbec1be93a668f98e1d6dd540c27b",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r10_rating1/2026-09-12T10-34-04.212789+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 199,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.28,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.16,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.28,\"resetsAt\":1789776000}}},\"uuid\":\"41e5018a-033d-4675-ba97-2af82d5cd3ce\",\"session_id\":\"2a127f09-2fb3-4656-a44c-a7f5ed20296a\"}\n",
+      "sha256": "df8438ed3715b2e48f45a972bc7aaf58dc8a057eefc7c7d586a9b0d8b3f9cd94",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r10_rating1/2026-09-12T10-34-04.212789+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.1,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"3b271f91-4212-469d-8d48-d9a6791f26f1\",\"session_id\":\"9666683d-17f0-4cb1-bf50-f7bba5005f76\"}\n",
+      "sha256": "1af65d671387b22a14c3dcbd8b32566916db6e6cf8f030bae050bc846946b63c",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T10-34-08.427493+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 19,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.11,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"82e9c3d9-41bf-45d2-aa78-21d8ab62f8d1\",\"session_id\":\"9666683d-17f0-4cb1-bf50-f7bba5005f76\"}\n",
+      "sha256": "735f7a5496ae466204314edde9e6d02e94b68bf931548b23faa09c60e7e04ccf",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T10-34-08.427493+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 134,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.14,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"20c493bc-9f05-4b81-a60f-feb4497a368b\",\"session_id\":\"9666683d-17f0-4cb1-bf50-f7bba5005f76\"}\n",
+      "sha256": "47b8cce07801511dda6d8d71f8636a869654ddfea8a777775cc1d8b7fe9c97db",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T10-34-08.427493+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.28,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.17,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.28,\"resetsAt\":1789776000}}},\"uuid\":\"2554521a-6c72-49fc-b75e-1397b225f972\",\"session_id\":\"9da62dfd-ff2e-44c5-8a09-7559fa428b1e\"}\n",
+      "sha256": "5aca566a3f79d2f759ccdf38f0b2c3c9ad8e411863136fb197ae17b68166b051",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T11-01-48.594901+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 129,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.28,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.18,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.28,\"resetsAt\":1789776000}}},\"uuid\":\"3c5beba0-0cfd-46a7-ac5b-2af8c9a3047e\",\"session_id\":\"9da62dfd-ff2e-44c5-8a09-7559fa428b1e\"}\n",
+      "sha256": "3bec837889da90607bbf4500ef7313d91df00c11ac4c7f4a142ded75a1daac13",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T11-01-48.594901+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.1,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"744621eb-692e-4b39-8912-1c5a2ae38dde\",\"session_id\":\"8c8f64a3-02d7-447c-abc6-172b716519c1\"}\n",
+      "sha256": "f7dc51c010fbbca8ac8b21c8aded666bb6cff07bd8ab9c916e53b8071505da18",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T10-34-11.987974+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 20,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.27,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.11,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.27,\"resetsAt\":1789776000}}},\"uuid\":\"5ff66982-0ccd-40a5-8cc9-8a0ef02ea9b1\",\"session_id\":\"8c8f64a3-02d7-447c-abc6-172b716519c1\"}\n",
+      "sha256": "c7fbad2b4ccb009f67b84f2b1d7507b9ea8a29f39e19d1a3ce7e2548fef3960e",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T10-34-11.987974+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 153,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.28,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.15,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.28,\"resetsAt\":1789776000}}},\"uuid\":\"e216249e-ceea-4531-88bd-a26ab7d3ce0e\",\"session_id\":\"8c8f64a3-02d7-447c-abc6-172b716519c1\"}\n",
+      "sha256": "1969d6fb69fac3e9ad4309c56b1b115075aee8070f0416de791730e44362b39b",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T10-34-11.987974+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.28,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.18,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.28,\"resetsAt\":1789776000}}},\"uuid\":\"f37ed2c0-c877-4d54-8260-4efe25a50956\",\"session_id\":\"c71a4e94-f21d-4fb8-a7a5-c66d0f543aa8\"}\n",
+      "sha256": "311e5f22f0dd73b1b2461a2b71ec11b8557f403b95c53850b73cf77250ac1a41",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T11-13-49.423296+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 164,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.28,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.2,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.28,\"resetsAt\":1789776000}}},\"uuid\":\"b01790b3-cb1a-4ca8-ace5-f25b1e859994\",\"session_id\":\"c71a4e94-f21d-4fb8-a7a5-c66d0f543aa8\"}\n",
+      "sha256": "c73d263e40547c164f409f2e481bdc599eed9e75a7652904f0c5829fb9975bfd",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T11-13-49.423296+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.21,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"f8f8aa59-c4a6-4d7e-bea0-a48d9dadd2fa\",\"session_id\":\"b8012552-ecdd-4bd6-be20-2e630374924e\"}\n",
+      "sha256": "4d0abb44fa42634db36a298afffbf46bed0c80c9d721598316f8f771ea34d55f",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r20_rating1/2026-09-12T12-01-04.480594+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 93,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.23,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"0000755b-e0e3-48d3-abfd-6823634de421\",\"session_id\":\"b8012552-ecdd-4bd6-be20-2e630374924e\"}\n",
+      "sha256": "ec5f506f0167ccc8c3703e04b0f8f185e01e1c7f2b64c15fd0685dc30b74c5b9",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r20_rating1/2026-09-12T12-01-04.480594+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.21,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"85b05c97-6de2-4ced-97c9-aa94d155e1ed\",\"session_id\":\"329e632d-8333-4ae9-9ef6-7ab53181a654\"}\n",
+      "sha256": "9cc9242e0870db524121d3073eaf9c10366a17080b1de806008b4b1207e02180",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating1/2026-09-12T12-01-23.560480+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 189,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.22,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"cd05ca3f-7c5c-4dda-af7a-615eeaf9ba35\",\"session_id\":\"329e632d-8333-4ae9-9ef6-7ab53181a654\"}\n",
+      "sha256": "5ea07d0cd839d21b4a2faef074bdd528cacfc03f5f7ea31da87f8448358e885e",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating1/2026-09-12T12-01-23.560480+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 194,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.25,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"b502ed01-010c-4e21-b33f-d4cdc6e001d2\",\"session_id\":\"329e632d-8333-4ae9-9ef6-7ab53181a654\"}\n",
+      "sha256": "e877a2c44c1b7bb26b7a8b93c9f37909bf08e4ace27249dec26b84563b1df005",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating1/2026-09-12T12-01-23.560480+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.08,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"4353464d-b0fd-4e63-bbb7-9d1afeae3b0b\",\"session_id\":\"7f548c37-e735-4dba-9a1f-6907b67a1007\"}\n",
+      "sha256": "9241f7ec5396a94c8e1f648b7d598d8756c74c97b4aa2b091b51484a475d58b8",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating2/2026-09-12T15-43-31.385599+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 146,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.13,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"7c16e365-7902-4962-9b09-e41746fefae2\",\"session_id\":\"7f548c37-e735-4dba-9a1f-6907b67a1007\"}\n",
+      "sha256": "52c1082d73d4334c7bd68ea45f752e12532318d03e0f9e4c5a8cadf36a5a485f",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating2/2026-09-12T15-43-31.385599+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 151,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.12,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"b1122705-fa46-42ed-a546-4de399e53058\",\"session_id\":\"7f548c37-e735-4dba-9a1f-6907b67a1007\"}\n",
+      "sha256": "69db4255d8c25206441bd564ee5d4e5679161981641e9a2fb11aa9e017dfe42c",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating2/2026-09-12T15-43-31.385599+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 155,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.37,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.13,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.37,\"resetsAt\":1789776000}}},\"uuid\":\"785ab74b-e355-4906-83aa-2e5e946415b9\",\"session_id\":\"7f548c37-e735-4dba-9a1f-6907b67a1007\"}\n",
+      "sha256": "a61d29064eb9bdedaee0584dea95f2c73d12f263f4bb8834c6f2a3a0f414dc09",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating2/2026-09-12T15-43-31.385599+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.08,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"0239702f-cc0c-4e95-84c0-9597125a0d2d\",\"session_id\":\"0abf2bd2-55d6-49e1-b334-b03b948c2e4c\"}\n",
+      "sha256": "ccd6fd54a93b0f53194a8909574234e5f3374a79c983c8e832838684d5a9c94b",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating3/2026-09-12T15-43-40.990679+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 140,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.09,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"cdb6355a-96f4-4169-9888-91f4503e1212\",\"session_id\":\"0abf2bd2-55d6-49e1-b334-b03b948c2e4c\"}\n",
+      "sha256": "c7441c298715f52086eedf25a3df0375b03f9c721fe2a02da53dd79485b3bbdd",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating3/2026-09-12T15-43-40.990679+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 149,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.1,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"8645f0af-68bd-4b97-8425-fcb2de2a8c7b\",\"session_id\":\"0abf2bd2-55d6-49e1-b334-b03b948c2e4c\"}\n",
+      "sha256": "0184fba991d06c8a6207ba540993c3d84d01d169abe308712d69e93922c8d501",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating3/2026-09-12T15-43-40.990679+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.21,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"f07531fa-24bc-482b-8a74-98aadffe10e8\",\"session_id\":\"1be8afa4-bc1c-4545-a6da-82314260fe7e\"}\n",
+      "sha256": "d7275d999b82c66fb9ac0d6f3f365ee0f4da2fdd83c82c17b1ec153a2ed26022",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r20_rating1/2026-09-12T12-01-28.560393+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 171,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.22,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"1a5b6dcc-06f9-404f-99da-30decb384d8b\",\"session_id\":\"1be8afa4-bc1c-4545-a6da-82314260fe7e\"}\n",
+      "sha256": "c2a75d0705a9ec547e2b703ef3960de8ee79579c291e587d84d38af8b0c34ff0",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r20_rating1/2026-09-12T12-01-28.560393+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 175,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.25,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"94c3ece3-8bc9-48fc-85be-87ecaa90662a\",\"session_id\":\"1be8afa4-bc1c-4545-a6da-82314260fe7e\"}\n",
+      "sha256": "eea633ccf882a64d66888e94aada317d2a9ba361e065fb4f62c4871efa0ceebc",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r20_rating1/2026-09-12T12-01-28.560393+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 183,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.24,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"1d97ce1b-ab04-4159-b941-48fd8049a4bd\",\"session_id\":\"1be8afa4-bc1c-4545-a6da-82314260fe7e\"}\n",
+      "sha256": "c7b7c263112d3c1d3eac45acb0773b08a249e87273c979f7b097b7764490db99",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r20_rating1/2026-09-12T12-01-28.560393+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 190,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.25,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"fec4787c-eb56-4c6b-98aa-c0fe57016047\",\"session_id\":\"1be8afa4-bc1c-4545-a6da-82314260fe7e\"}\n",
+      "sha256": "930a989aaf0193eeb2c3bb7665957ed5e35558ab74268f992afbde11739ce3a4",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r20_rating1/2026-09-12T12-01-28.560393+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.21,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"649cfceb-7985-4177-95b1-4689d84c8fc5\",\"session_id\":\"26075721-2a5d-4191-9917-44af137173c5\"}\n",
+      "sha256": "82e3d81d7387c40b628d2b7fd00b56eb00510e2c7d65632570ad44e46a8143f5",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r10_rating1/2026-09-12T12-01-32.268119+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 114,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.24,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"9fec197f-c64a-481c-9206-26522276dff8\",\"session_id\":\"26075721-2a5d-4191-9917-44af137173c5\"}\n",
+      "sha256": "99e742d58216e87cd77009ef900fd519ed49015491599c65d9450800758b03d0",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r10_rating1/2026-09-12T12-01-32.268119+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.26,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"ba24a3fb-e53b-4b68-b0ea-48f42d970608\",\"session_id\":\"33bebce7-b4de-4144-9c30-73bbe806b73e\"}\n",
+      "sha256": "c49bc02ceec9f0ac43d8c754445ea68b4e0569b795b5cd38da841c9bad86d5aa",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T12-15-44.372640+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 103,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.27,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"0692260c-e030-4281-b0d4-a0f235ccf0f0\",\"session_id\":\"33bebce7-b4de-4144-9c30-73bbe806b73e\"}\n",
+      "sha256": "c918c156a821bf941ad5aa802fec7317d361e27c00b5b6cfb39e16ddbd0aa9fe",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T12-15-44.372640+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 106,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.28,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"24cfabb0-daba-4420-835b-242b5b25e6d9\",\"session_id\":\"33bebce7-b4de-4144-9c30-73bbe806b73e\"}\n",
+      "sha256": "420a01d010bc71b670fcf850d5f140b529e265676f6a6402321142cf553cab70",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T12-15-44.372640+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.26,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"4fab22d0-8f39-48cd-8998-8de76f611509\",\"session_id\":\"b1e2a16b-3ccd-47a7-bda3-4f4b59bd1a98\"}\n",
+      "sha256": "64a6545b3b49968e73e829d467bc83db98485d40f5364106f36dc883aed04655",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r10_rating1/2026-09-12T12-15-48.452760+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 175,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.27,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"8cfa52df-2595-436d-9568-ec5a0741e02e\",\"session_id\":\"b1e2a16b-3ccd-47a7-bda3-4f4b59bd1a98\"}\n",
+      "sha256": "fd050ec1056f574b2e589605ae2238897226dcd4be132080051a0c3005b5192e",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r10_rating1/2026-09-12T12-15-48.452760+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 391,
+      "line": 179,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.3,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"a52dbcc0-6301-460b-866a-15f7d115a815\",\"session_id\":\"b1e2a16b-3ccd-47a7-bda3-4f4b59bd1a98\"}\n",
+      "sha256": "2f0347c85e58471d7e5fb0fb2b38b7ae215b91223e321f54bc626775565af195",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r10_rating1/2026-09-12T12-15-48.452760+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 191,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.31,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"e6f2c72d-fdaa-4d3c-9c75-b936af632e0b\",\"session_id\":\"b1e2a16b-3ccd-47a7-bda3-4f4b59bd1a98\"}\n",
+      "sha256": "f14fb24801ab0105cc09976cd3b118b9ad0dca7b7d4868068d307939f77045d5",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r10_rating1/2026-09-12T12-15-48.452760+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 6,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.26,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"4898c036-b397-49a7-ba7b-346bd7571150\",\"session_id\":\"2937b9dd-5351-4200-8be8-e34ed2bcef65\"}\n",
+      "sha256": "bba766ea2190d4632c95923e0e0a6cbdff1a1ed9940de8ae2576e28064e3e1b0",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r20_rating1/2026-09-12T12-15-51.905429+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 147,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.29,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"6203e4a4-ddbb-4746-9f97-7c5c4e9bc8ae\",\"session_id\":\"2937b9dd-5351-4200-8be8-e34ed2bcef65\"}\n",
+      "sha256": "496de0f056e75c07cab2245ac7584c38122f78aa1aa10d1100d8be17b0ecd820",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r20_rating1/2026-09-12T12-15-51.905429+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 3,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.29,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.26,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.29,\"resetsAt\":1789776000}}},\"uuid\":\"6e3c9694-f90d-468b-89df-751003a8ad66\",\"session_id\":\"0704405d-fec1-4fab-af83-a5717bafe4c1\"}\n",
+      "sha256": "57d497af734a2b94450f5f89f98d266fe19a045f09e3d180c2cce020cee411fa",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r10_rating1/2026-09-12T12-16-00.522098+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 152,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.27,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"6e866f97-725d-4492-94b6-df743198a271\",\"session_id\":\"0704405d-fec1-4fab-af83-a5717bafe4c1\"}\n",
+      "sha256": "477219c2e324cf665276b515a2281031b80aa32c3ff1fc81c35314e35791459b",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r10_rating1/2026-09-12T12-16-00.522098+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 391,
+      "line": 155,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.3,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"b443ab8a-7b4b-4c7b-b23f-14397f60753c\",\"session_id\":\"0704405d-fec1-4fab-af83-a5717bafe4c1\"}\n",
+      "sha256": "b06e62deaf343bf0c09e52328a1c83438f2401d1c120cf5c0d45ea017935cbd6",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r10_rating1/2026-09-12T12-16-00.522098+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 159,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.31,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"2343fae1-f10f-4d5e-849a-e54f8abefa77\",\"session_id\":\"0704405d-fec1-4fab-af83-a5717bafe4c1\"}\n",
+      "sha256": "9b91c82266e8cab629fc12903771fc3a27ca950a4ce3f37c2d2f73168acc2beb",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r10_rating1/2026-09-12T12-16-00.522098+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.31,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"5f676239-65e4-4c1e-a48b-3514486ea64d\",\"session_id\":\"502ff423-7c36-4acd-bd1e-efe72ef3e0c3\"}\n",
+      "sha256": "9cefba9168768c953d94eacacd2e1c64cba2eb167fcfa87038d8066f399c9860",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r20_rating1/2026-09-12T12-26-07.176275+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 118,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.32,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"7addecfa-b3e1-4e0e-834e-4705755544de\",\"session_id\":\"502ff423-7c36-4acd-bd1e-efe72ef3e0c3\"}\n",
+      "sha256": "746c297170dc15b082b14cf0de36eb17f4954c875ecc527edaae6e5e70f763a9",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r20_rating1/2026-09-12T12-26-07.176275+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 125,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.33,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"6d2ef1f0-4896-48a9-b78f-64222549ad38\",\"session_id\":\"502ff423-7c36-4acd-bd1e-efe72ef3e0c3\"}\n",
+      "sha256": "18a46559231049ea2c0e5df74731a91048c697625c16dc73000347d9646ef48d",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r20_rating1/2026-09-12T12-26-07.176275+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.31,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"69e29f43-f04f-4647-a6a6-5b1af67313f2\",\"session_id\":\"1086b9d7-c800-40a4-a99e-b32612465662\"}\n",
+      "sha256": "8636ebfdb575339136fbb911d00d914a558c94206c422648c6da46fdb8fe0787",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r10_rating1/2026-09-12T12-26-10.913494+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 161,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.32,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"092e08b9-dfe2-4dc7-840c-fcd41810115a\",\"session_id\":\"1086b9d7-c800-40a4-a99e-b32612465662\"}\n",
+      "sha256": "d0b98c60bcbf0c5cf6f39b814fce15e9fb467b7e0a5c1263ab6a3aba552fb841",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r10_rating1/2026-09-12T12-26-10.913494+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 165,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.34,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"9cfdf0cf-0eec-4688-978e-8d88cea8f055\",\"session_id\":\"1086b9d7-c800-40a4-a99e-b32612465662\"}\n",
+      "sha256": "aea172505384cf225d224684c00675e40de442955c876644b8028fd6b8d3e736",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r10_rating1/2026-09-12T12-26-10.913494+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.31,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"22d47591-e81c-4324-b480-9d561e8c5516\",\"session_id\":\"e94b5fb0-979e-4483-8f25-172d25d4db5a\"}\n",
+      "sha256": "d6a5a4b217cd014c20b0c26174e5586076b46d8791bfdc014c89cf948ce3b26a",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r20_rating1/2026-09-12T12-26-16.697843+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 120,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.32,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"25a5a707-2ffd-48c2-b26b-397e7ec7dc52\",\"session_id\":\"e94b5fb0-979e-4483-8f25-172d25d4db5a\"}\n",
+      "sha256": "fe0fa46e87abf4c688de4f0393f9f72b4d52947a6ce10037b9a4a1fc6e756de0",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r20_rating1/2026-09-12T12-26-16.697843+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 122,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.34,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"b747833b-319d-4610-adc5-abdec2928027\",\"session_id\":\"e94b5fb0-979e-4483-8f25-172d25d4db5a\"}\n",
+      "sha256": "a9627add8d609f53cd74ef1377d48c2de80c95bae9c5dbfce39e0ce4987f1061",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r20_rating1/2026-09-12T12-26-16.697843+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 392,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.3,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.31,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.3,\"resetsAt\":1789776000}}},\"uuid\":\"a152ef29-0077-4ef7-a265-1966faf12c2e\",\"session_id\":\"d6ac8420-afc2-4372-b360-7c1b90ac5876\"}\n",
+      "sha256": "24acf7ee50adaf488f4bca9512a1cfe8156a6e03817191f499d6540482d855aa",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-26-20.307075+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 180,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.36,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"a589ef33-3d07-454f-8f4b-425ae79b77ba\",\"session_id\":\"d6ac8420-afc2-4372-b360-7c1b90ac5876\"}\n",
+      "sha256": "03c49cf11d676e213f4d3a6e53afc599756a72b606d20dd39a56049f268bcf9d",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-26-20.307075+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.36,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"1495830d-c896-423f-94bc-bddff4975906\",\"session_id\":\"4e85e48c-815b-477b-aea1-10eac4b212a1\"}\n",
+      "sha256": "5a5ed700a509ab775860d3da78b7a770284fb0db272e1e14512efbea4f616840",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-42-37.138735+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 152,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.37,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"6492f4a7-7d9d-4b24-83fa-bd5ad54b494f\",\"session_id\":\"4e85e48c-815b-477b-aea1-10eac4b212a1\"}\n",
+      "sha256": "f8d0da6d5abc883bb4cd80a0ddf662f9ddadb6d5de0176de43e32e05a7e00679",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-42-37.138735+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.37,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"8a255b33-f2b2-4a84-907a-acb658f0143e\",\"session_id\":\"fe20bb9a-1d14-472d-9e09-762a5453a562\"}\n",
+      "sha256": "57f1b3e1c29dbc2e6644923cefb45a672221fa44b3e269bae7ff82ebb2e3b8e9",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-53-23.084438+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 172,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.39,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"a71c0456-34e2-4453-a644-3f31bdca3ec1\",\"session_id\":\"fe20bb9a-1d14-472d-9e09-762a5453a562\"}\n",
+      "sha256": "77cc7ff97ce0a27a89fbb6419b6454780cf9bb6b5854f25ab327a66f6607e701",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-53-23.084438+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.39,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"c8964901-1c40-4f40-a00e-88a740541a3e\",\"session_id\":\"fb5fba42-032d-4cf9-bd1f-9b8468fd3885\"}\n",
+      "sha256": "3090b3f9ff81088d96b9215e34a6657ca23c326aea23d7941bfff7683b5952a2",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r20_rating1/2026-09-12T13-03-41.815986+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 149,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.4,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"5679fd4f-3222-4387-8658-9bdf14ebc93c\",\"session_id\":\"fb5fba42-032d-4cf9-bd1f-9b8468fd3885\"}\n",
+      "sha256": "06ed169a223a08cd01d5f1ece04896e6a6bb2eb89fc8be7e0ae7cbdd23df2e83",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r20_rating1/2026-09-12T13-03-41.815986+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 152,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.4,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"68a61628-2aee-42ae-b62a-468def806b4f\",\"session_id\":\"fb5fba42-032d-4cf9-bd1f-9b8468fd3885\"}\n",
+      "sha256": "6455ca9ae69cac29f6fbe80a8e000f2fc6d1766c3611b93a485a701641e01aee",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r20_rating1/2026-09-12T13-03-41.815986+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 169,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.43,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"d0d2317b-e004-4bc3-aefe-526e642b102a\",\"session_id\":\"fb5fba42-032d-4cf9-bd1f-9b8468fd3885\"}\n",
+      "sha256": "c281fcd0330fb90e355cdc00b0fb4dc5de2fe3ca7fa1dedce2ea2d1896ed3cd0",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r20_rating1/2026-09-12T13-03-41.815986+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 180,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.44,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"616c51fa-a604-46d3-9632-bcd1f3cbbefc\",\"session_id\":\"fb5fba42-032d-4cf9-bd1f-9b8468fd3885\"}\n",
+      "sha256": "6a417003824045b416588eb3c18cb084f5767eef4e280e496df8d590051c1320",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r20_rating1/2026-09-12T13-03-41.815986+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.39,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"9fdab7bb-e8ce-4c44-82db-8ea2e3130757\",\"session_id\":\"94be4a55-24c0-43b4-9097-161d566851f4\"}\n",
+      "sha256": "d1d1c1c2e2846c7e817562b1384de1e18a4867f46d3bea5db831323f16f17ce3",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating1/2026-09-12T13-03-45.829464+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 109,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.41,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"42e830d4-9b61-4267-a8b6-9d50e8fc339c\",\"session_id\":\"94be4a55-24c0-43b4-9097-161d566851f4\"}\n",
+      "sha256": "33d9ce290242c2379a0cfdc7826a2a73547b563f6f1ce36f704a66b7dcb39006",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating1/2026-09-12T13-03-45.829464+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.08,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"f930aeb2-1de8-4357-9826-e0eeebf18545\",\"session_id\":\"2d4bdf49-1b4c-4d61-9f65-fd94c9f71296\"}\n",
+      "sha256": "8c0a4466dd99142337168e618a6cde85f2c7c2be96b756a3ae91e56c7563eba4",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating2/2026-09-12T15-43-53.030302+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 127,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.1,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"6a390105-620a-4d79-8071-3772a70adf78\",\"session_id\":\"2d4bdf49-1b4c-4d61-9f65-fd94c9f71296\"}\n",
+      "sha256": "87e90b85129ab29ab04f11a857af33fd3f77039320cc50124695ccc3361a7ed0",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating2/2026-09-12T15-43-53.030302+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 134,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.11,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"0e113560-8c4b-43ae-8fcd-34e36badbf60\",\"session_id\":\"2d4bdf49-1b4c-4d61-9f65-fd94c9f71296\"}\n",
+      "sha256": "fa31ddf49fc5f2205b3e9a868d72a4b0b2f0449d3b46a2099cb34d0be9d21966",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating2/2026-09-12T15-43-53.030302+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 165,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.12,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"e809c32a-7e6f-46a6-adcd-abbda754e999\",\"session_id\":\"2d4bdf49-1b4c-4d61-9f65-fd94c9f71296\"}\n",
+      "sha256": "3e733a2ea0d33d596f83f55b78dabd0e215aefd087b8da865a30f3b13658ad31",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating2/2026-09-12T15-43-53.030302+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 167,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.37,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.14,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.37,\"resetsAt\":1789776000}}},\"uuid\":\"394131de-247b-4010-8284-f80d2a1fd8d4\",\"session_id\":\"2d4bdf49-1b4c-4d61-9f65-fd94c9f71296\"}\n",
+      "sha256": "a2c3817b6c17ebf57ff7b7e945dbd10bf401978115fa087d4d6168af0e5b81d8",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating2/2026-09-12T15-43-53.030302+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.08,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"199ea707-ae68-49b6-af13-716d48b9aa6f\",\"session_id\":\"549601a5-b884-4771-bf8e-54a539acf248\"}\n",
+      "sha256": "1bf485dfac9076da2371c0d80dd56a00140943c30e0e5de2cad61ab22c457349",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating3/2026-09-12T15-44-02.319887+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 112,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.1,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"2e413259-f98f-4ec3-922a-be67899b5085\",\"session_id\":\"549601a5-b884-4771-bf8e-54a539acf248\"}\n",
+      "sha256": "9481cca4ce65a7e9568c095b3006cb1d8f333d3ffc331a6925f9867fc755144d",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating3/2026-09-12T15-44-02.319887+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 121,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.36,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.11,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.36,\"resetsAt\":1789776000}}},\"uuid\":\"3c086248-f73a-44ec-a082-00e8f7e6fa29\",\"session_id\":\"549601a5-b884-4771-bf8e-54a539acf248\"}\n",
+      "sha256": "5a7fff95c60471cfb6c94b9307dc28e25e9851845529867f111ca9f6ed4c1a8e",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating3/2026-09-12T15-44-02.319887+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.39,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"0cc3bf59-aa30-424e-8a38-a5e27ccc99ec\",\"session_id\":\"eac3fd1d-2e9f-4be8-b796-80e44022e3bb\"}\n",
+      "sha256": "7caf704d1e1871fe7551e61b3d1b2c88a8804c8e8b86284c66494a3969f53fd2",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r20_rating1/2026-09-12T13-03-49.385118+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 136,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.41,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"1a7bb43c-aff9-43a8-8223-e62ec8dcf021\",\"session_id\":\"eac3fd1d-2e9f-4be8-b796-80e44022e3bb\"}\n",
+      "sha256": "9ff6ab66604b154fe0b9c2cd5de725beea5f0ae8504bb0c45c47f4bb447bc91d",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r20_rating1/2026-09-12T13-03-49.385118+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 154,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.42,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"ddb00a80-8290-4c2a-b0b1-e24cc00de40b\",\"session_id\":\"eac3fd1d-2e9f-4be8-b796-80e44022e3bb\"}\n",
+      "sha256": "914676fc0eebd9766621c8f4efb421359037f6d8d981adad48022f111811a260",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r20_rating1/2026-09-12T13-03-49.385118+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.39,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"84957f80-f766-4cdb-97bc-34a7b51ede3b\",\"session_id\":\"372c6131-c902-4dd0-8aa3-eba88fed93e1\"}\n",
+      "sha256": "be21b5459f152a38ab99fb69cda9a1cf506dad18e5e4d76f6aac4e665b9aaf58",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r10_rating1/2026-09-12T13-03-52.871518+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 120,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.31,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.4,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.31,\"resetsAt\":1789776000}}},\"uuid\":\"941d211a-ad0f-4035-b717-2902ff72d153\",\"session_id\":\"372c6131-c902-4dd0-8aa3-eba88fed93e1\"}\n",
+      "sha256": "ab2b6c81036d74da38df526c5790740ff7af90e5caeedb787272124d0b8eecf1",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r10_rating1/2026-09-12T13-03-52.871518+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 124,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.42,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"9a1e8a7e-de06-4884-80c5-a19f861a42d7\",\"session_id\":\"372c6131-c902-4dd0-8aa3-eba88fed93e1\"}\n",
+      "sha256": "51c1d17dacc203977eac6823665b1f70e8b9aa955c949c695ca5bf7e3efa7ecb",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r10_rating1/2026-09-12T13-03-52.871518+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 131,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.44,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"31ef7af2-c901-45de-8c93-d0c085839558\",\"session_id\":\"372c6131-c902-4dd0-8aa3-eba88fed93e1\"}\n",
+      "sha256": "e8add5eb11d335bc5b79bbe9d9944dc5df09c2db5d5657269400bd23636af916",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r10_rating1/2026-09-12T13-03-52.871518+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.45,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"a4836325-ff7f-4c7b-a1aa-0e2ac39f98f1\",\"session_id\":\"f2e992d8-ba1b-47d9-b4a7-4c2ff2d12cb4\"}\n",
+      "sha256": "70f11ca80f781009631fd1cdcb58788ad89de3ad21ba8ce1c44e7cd44c87b9d7",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r20_rating1/2026-09-12T14-14-33.051912+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 130,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.33,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.46,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.33,\"resetsAt\":1789776000}}},\"uuid\":\"9897bc06-dca2-4338-a17c-5121bf6e878c\",\"session_id\":\"f2e992d8-ba1b-47d9-b4a7-4c2ff2d12cb4\"}\n",
+      "sha256": "4a321eeb0bb6233fb583eef8f3b9a8a42ba61fc178fc4e1cee875ff3244d0f22",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r20_rating1/2026-09-12T14-14-33.051912+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 134,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.33,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.49,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.33,\"resetsAt\":1789776000}}},\"uuid\":\"b7006a5b-bdfe-464f-87a0-44d8a47a9ac0\",\"session_id\":\"f2e992d8-ba1b-47d9-b4a7-4c2ff2d12cb4\"}\n",
+      "sha256": "937b56bd693b012afed65cf113bee1427d874de59d633b8743135d7e861874e5",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r20_rating1/2026-09-12T14-14-33.051912+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.45,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"b8cc9ac4-9377-473f-9d64-bcdf478dc578\",\"session_id\":\"e5c2fb33-9378-4371-9b2f-b27e4d6291ca\"}\n",
+      "sha256": "a3a0dd30d65813f6c2783f62eed807264a0f79473cb8e9a92c611fbdc7d8f469",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r10_rating1/2026-09-12T14-14-48.740180+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 81,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.46,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"697de23f-6dbe-42e0-85be-dd2d2c2a5f94\",\"session_id\":\"e5c2fb33-9378-4371-9b2f-b27e4d6291ca\"}\n",
+      "sha256": "eaf17362b962cd79df89b5d3e3aef7ecec123b831f023d7a4f161aa52a379eb0",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r10_rating1/2026-09-12T14-14-48.740180+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 90,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.33,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.47,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.33,\"resetsAt\":1789776000}}},\"uuid\":\"c5ba98ac-a8e5-4bc3-9f6b-8ddaa0a57266\",\"session_id\":\"e5c2fb33-9378-4371-9b2f-b27e4d6291ca\"}\n",
+      "sha256": "e911296585e11b82f71761753581dc002154ad21d0cc5cce7538b7921c2be509",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r10_rating1/2026-09-12T14-14-48.740180+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.45,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"c11891aa-a35f-408a-ab73-a9b62f905289\",\"session_id\":\"662e636b-a95a-46f7-9086-2b10de3ccda4\"}\n",
+      "sha256": "94f6a437060d6006f63f357ddfc690327a58b91845e8cdab3c6d0039c9a05c9e",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r20_rating1/2026-09-12T14-14-52.504091+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 89,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.46,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"33d73385-3d34-498f-a587-08775bc18980\",\"session_id\":\"662e636b-a95a-46f7-9086-2b10de3ccda4\"}\n",
+      "sha256": "d79e3ba9cfae3b17d1bbdd4c8447b51749d310f03729818293fd3ad61f6473dc",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r20_rating1/2026-09-12T14-14-52.504091+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 103,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.33,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.48,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.33,\"resetsAt\":1789776000}}},\"uuid\":\"3a21fab6-a79a-48d8-8b44-071ac730cb8c\",\"session_id\":\"662e636b-a95a-46f7-9086-2b10de3ccda4\"}\n",
+      "sha256": "09a43a2b22a5ea3b032d9f662ff012084de7252688e456b0bfd56ba59ea233cb",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r20_rating1/2026-09-12T14-14-52.504091+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 107,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.33,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.47,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.33,\"resetsAt\":1789776000}}},\"uuid\":\"c9ff7e42-8a44-481d-8b63-b503db507bfe\",\"session_id\":\"662e636b-a95a-46f7-9086-2b10de3ccda4\"}\n",
+      "sha256": "82600fc8b467dbd5aa78a40c834375ecaa81f8cd578370d0e17ff5f5cfb679ee",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r20_rating1/2026-09-12T14-14-52.504091+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.45,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"dcc1a34a-ff6e-4708-974d-75a2eb3ba9ed\",\"session_id\":\"385f99b1-c8af-47a4-9a8a-af82f33ca40d\"}\n",
+      "sha256": "039fa0231d31eb85107e10ab6e90796ab8be7c88bd000e424d3d769f6ea9ee6e",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-14-57.243736+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 20,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.32,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.46,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.32,\"resetsAt\":1789776000}}},\"uuid\":\"b65fcca4-1da8-4d48-ae1d-63322305a554\",\"session_id\":\"385f99b1-c8af-47a4-9a8a-af82f33ca40d\"}\n",
+      "sha256": "06eae5fe82820b2e1859fcfc536b16e0dda352eabe3d0b1a4f8617ac3c966f97",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-14-57.243736+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 101,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.33,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.49,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.33,\"resetsAt\":1789776000}}},\"uuid\":\"e0b9df41-03c4-46f1-8838-826ba1a5e6f7\",\"session_id\":\"385f99b1-c8af-47a4-9a8a-af82f33ca40d\"}\n",
+      "sha256": "9902a01f93c542f1df0c06bf62a16b2dd69b06c7b1dd0ab6c9fd0b6c221b7659",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-14-57.243736+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.33,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.49,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.33,\"resetsAt\":1789776000}}},\"uuid\":\"31ec049d-d0f9-47bc-a22d-8a154d280ce0\",\"session_id\":\"23dc464a-956d-45ce-85be-da1f2f847c8a\"}\n",
+      "sha256": "2ccad9e653fc220a59f7711583b9f15ffc06909790b67dee6dd22d6ccdb5217a",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-26-49.081797+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 14,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.33,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.5,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.33,\"resetsAt\":1789776000}}},\"uuid\":\"cb05c5b3-ad33-4bb4-a5ef-3fb745badaa0\",\"session_id\":\"23dc464a-956d-45ce-85be-da1f2f847c8a\"}\n",
+      "sha256": "b48f893cf33701e8b01c32e24943ef628764b0c73e4f99fbf62bb3375308b89c",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-26-49.081797+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 132,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.33,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.51,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.33,\"resetsAt\":1789776000}}},\"uuid\":\"b241f769-cac0-4f2f-8740-023337bc02b5\",\"session_id\":\"23dc464a-956d-45ce-85be-da1f2f847c8a\"}\n",
+      "sha256": "8b5ad45b7ffd9305d4bfa945dd503bee9a28412ff9bbbccfa3dcaae4d9c29f50",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-26-49.081797+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.53,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"b2521b9c-7679-4a0b-a1dc-9eccb166a9bb\",\"session_id\":\"82ef00b1-5131-48d0-8639-3f838dab16d1\"}\n",
+      "sha256": "7b6f8657b8719f801c6b42e7a88585dbd0588bf3143285e3c7b5ee345a1905f5",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 98,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.54,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"7ecb0667-d0e9-4edd-9a81-6978bb5ef037\",\"session_id\":\"82ef00b1-5131-48d0-8639-3f838dab16d1\"}\n",
+      "sha256": "483567ca4b88742d800a8280578ec4a00f47b3360ac53e7f9f5c97a3389ad604",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 107,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.57,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"9950a246-b8e9-45fa-886f-758e6d434971\",\"session_id\":\"82ef00b1-5131-48d0-8639-3f838dab16d1\"}\n",
+      "sha256": "56796f90b5b1e07168ece2fba02afb9bc9e27f7f6fc5e3e096c95e8ff82644ea",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 114,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.56,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"0de2c724-0938-4212-bf0a-76c24e6ca08e\",\"session_id\":\"82ef00b1-5131-48d0-8639-3f838dab16d1\"}\n",
+      "sha256": "1f6aa1528918a75324143aec5b615e6ebd84ea65df320859b4427af6036fb40c",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 122,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.57,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"2abc3927-894c-4016-a713-24faac7d61c7\",\"session_id\":\"82ef00b1-5131-48d0-8639-3f838dab16d1\"}\n",
+      "sha256": "f6aaa9648dd1b035cab4d85aa69a199092ae72290422b1b567f696364fff6a0b",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.58,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"4493e7ab-2ee4-48f5-a84d-740cefb0f78b\",\"session_id\":\"677a09ed-0077-4888-a883-5ffba34f868d\"}\n",
+      "sha256": "187cba590623135dcca0e16b5221eb1f151bd777e27830d67bab6a18afb24606",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-01-34.769807+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 20,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.59,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"35a8f55f-4d4e-45da-89d3-0bec91333f01\",\"session_id\":\"677a09ed-0077-4888-a883-5ffba34f868d\"}\n",
+      "sha256": "93042e341b40e55fec7052956a6d8050fb64475205269e22bed73c496b302f87",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-01-34.769807+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 393,
+      "line": 138,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.35,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.6,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.35,\"resetsAt\":1789776000}}},\"uuid\":\"b3b0f57f-2b2b-4091-b8ee-fb0672de33ee\",\"session_id\":\"677a09ed-0077-4888-a883-5ffba34f868d\"}\n",
+      "sha256": "12597f16e3442627165c788de1474f566357be122c79b157e0529cf279be9587",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-01-34.769807+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 391,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.35,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.35,\"resetsAt\":1789776000}}},\"uuid\":\"e333df5f-7f48-46f4-a183-92d95c679da5\",\"session_id\":\"0b39c375-0a86-42c1-8ff2-045e0451a93a\"}\n",
+      "sha256": "7199e0ffe0201cd89e8af804def43be6d1f92e83869bfea758cfa15f88827ef4",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-13-26.050899+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 146,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.35,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.01,\"resetsAt\":1789243800},\"seven_day\":{\"utilization\":0.35,\"resetsAt\":1789776000}}},\"uuid\":\"d37dc267-35b9-409a-b118-dbda1bbd9871\",\"session_id\":\"0b39c375-0a86-42c1-8ff2-045e0451a93a\"}\n",
+      "sha256": "54be3a6b21a2a101ee119ed80b537d86fbe81c31747b0cde6824da717fa47766",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-13-26.050899+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.53,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"6c640b53-5fa6-4c9d-b613-d72e98bd47c9\",\"session_id\":\"4ded3457-e9d1-4f56-bd4d-e7ede0087c82\"}\n",
+      "sha256": "da0e0d647642b9c70fb877b44309bc6f42c6a331e7a5c53e0a5150676d41a419",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r10_rating1/2026-09-12T14-47-53.778431+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 34,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.54,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"d91b2d2e-4bd5-4896-b987-64e4d3ade9ef\",\"session_id\":\"4ded3457-e9d1-4f56-bd4d-e7ede0087c82\"}\n",
+      "sha256": "3b785f73663de86d0fb2335e19b6385407fe1116c2516a4143feb44f5b6f9a50",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r10_rating1/2026-09-12T14-47-53.778431+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 118,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.56,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"09182f00-f84b-4b4a-9232-fa9c3f643150\",\"session_id\":\"4ded3457-e9d1-4f56-bd4d-e7ede0087c82\"}\n",
+      "sha256": "63578f8ba7b2d73b543e9f733f5072f57f84fd71767c26262425298fa9e948b0",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r10_rating1/2026-09-12T14-47-53.778431+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 124,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.55,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"da12c5bc-a0f1-4631-bfd4-0efee5f055a1\",\"session_id\":\"4ded3457-e9d1-4f56-bd4d-e7ede0087c82\"}\n",
+      "sha256": "87b15a1473fb267dd562c4f5b8be5b5d6b2adaa2fc6cf2faaee3d0ccbdf2e24d",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r10_rating1/2026-09-12T14-47-53.778431+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.53,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"8b28aaa9-2eab-4162-8e6a-de03566ce1f1\",\"session_id\":\"293daf34-4aa8-40da-9275-c1f75b96cbfc\"}\n",
+      "sha256": "4788ce17c7fb419d15cca3c548a40c7ca21cc97485628f507fbb6a952ce08c69",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r20_rating1/2026-09-12T14-47-58.594993+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 35,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.54,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"9cfea6dc-6b9b-4255-9d02-a3a0b1151c00\",\"session_id\":\"293daf34-4aa8-40da-9275-c1f75b96cbfc\"}\n",
+      "sha256": "de74d91f2b872cf651e40387445436f68757627ce3ef04dd0251c0b52ae559cd",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r20_rating1/2026-09-12T14-47-58.594993+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 135,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.58,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"255c8006-6f33-43ca-9148-e32e418082df\",\"session_id\":\"293daf34-4aa8-40da-9275-c1f75b96cbfc\"}\n",
+      "sha256": "c0b8d6e3621bde84a5c562cbbfe67bb6d99a0ae5c2bc4a4b152db0d6b37a5dc0",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r20_rating1/2026-09-12T14-47-58.594993+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.33,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.51,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.33,\"resetsAt\":1789776000}}},\"uuid\":\"e4f7d02c-42d5-4008-8940-f3bf726edff4\",\"session_id\":\"1ac96aae-084a-4309-a22e-ee076df8b63e\"}\n",
+      "sha256": "a0a2821d629bf7a0c5bea8b8dc4e89ba6427bc67b3947d0a5deeace80b26161a",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r10_rating1/2026-09-12T14-36-38.472626+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 136,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.33,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.52,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.33,\"resetsAt\":1789776000}}},\"uuid\":\"24025410-65b5-4da9-a108-6d41e6a9ff73\",\"session_id\":\"1ac96aae-084a-4309-a22e-ee076df8b63e\"}\n",
+      "sha256": "0d4e6c6a90e036c5209f8c1e5ac6977bde7b8fbcbcf21ad792c005e1e07c284e",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r10_rating1/2026-09-12T14-36-38.472626+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 140,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.33,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.53,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.33,\"resetsAt\":1789776000}}},\"uuid\":\"475b87ce-1bf2-473d-ba93-c0a3d735efaf\",\"session_id\":\"1ac96aae-084a-4309-a22e-ee076df8b63e\"}\n",
+      "sha256": "bc78fc84fb456836a28bc8c2bc2afa3b660300c7f636e580236232aca9c40ff0",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r10_rating1/2026-09-12T14-36-38.472626+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 2,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.53,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"1cb80a29-ff1d-4f3c-a5a9-2dbe2ec3d331\",\"session_id\":\"21b4901c-59d2-4da4-9825-ac5ae40bd01e\"}\n",
+      "sha256": "185f8b1dc0973af43702adcea01c7cc0d38112eefe4cf4e6a7638515bef3d897",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r20_rating1/2026-09-12T14-48-03.495134+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 123,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.54,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"73291ef5-cc5f-4296-9545-37080fbc21c1\",\"session_id\":\"21b4901c-59d2-4da4-9825-ac5ae40bd01e\"}\n",
+      "sha256": "79527c7488c84c4eb24bff17fb35fa49d92271633539b8183f064be80be969db",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r20_rating1/2026-09-12T14-48-03.495134+00-00/transcript.jsonl"
+    },
+    {
+      "bytes": 394,
+      "line": 130,
+      "raw_json": "{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed_warning\",\"resetsAt\":1789776000,\"rateLimitType\":\"seven_day\",\"utilization\":0.34,\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.55,\"resetsAt\":1789225800},\"seven_day\":{\"utilization\":0.34,\"resetsAt\":1789776000}}},\"uuid\":\"fc2eaf60-032d-4eb5-899f-79ebed7bd501\",\"session_id\":\"21b4901c-59d2-4da4-9825-ac5ae40bd01e\"}\n",
+      "sha256": "560f5730fc81380a3ecbd45857c09a38edb996fad5081d659323e717478fc688",
+      "source_path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r20_rating1/2026-09-12T14-48-03.495134+00-00/transcript.jsonl"
+    }
+  ],
+  "kind": "native_u4b_a4_real_events",
+  "scanned_transcripts": 134,
+  "scope": "Every rate_limit_event in committed notes/**/transcript.jsonl; .local_worktrees excluded",
+  "source_commit": "efbcfffb3c553110c6f4783452ba9bb84489ad6a",
+  "sources": [
+    {
+      "blob_oid": "b8ee436cd12e99abd6befc8e0855a7b00bb2846d",
+      "bytes": 465273,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T08-05-41.050919+00-00/transcript.jsonl",
+      "sha256": "0fd22a7ed5cf07831ece10dae8e274c885680d915c1334aaa39875ce5a4e8c21"
+    },
+    {
+      "blob_oid": "59abe12fff272168d63051ae25f570bbefc2d8b8",
+      "bytes": 421725,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T09-04-18.246187+00-00/transcript.jsonl",
+      "sha256": "457e6185ed8079feecafae9e56cb78e1354082c55ca654df1ccfd73e24c78624"
+    },
+    {
+      "blob_oid": "fc19e2b9831ab19cbf5134e6af09378ce1c6483b",
+      "bytes": 435734,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating2/2026-09-12T15-25-37.530014+00-00/transcript.jsonl",
+      "sha256": "1568579a18bac7870799c07e61a0284331cfe2e449a35823b12454ea763e1a6e"
+    },
+    {
+      "blob_oid": "ce3919b1eeb5c87e24f2b08b606211c3252c1263",
+      "bytes": 716840,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating3/2026-09-12T15-26-05.675689+00-00/transcript.jsonl",
+      "sha256": "f3da09f180e87376e75556beaf4e903ecdd6bf05d77e957fd869d27af9ded2ef"
+    },
+    {
+      "blob_oid": "c95ae2b9709773905ca6ccea18d77200f2da454e",
+      "bytes": 472054,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T09-11-58.143131+00-00/transcript.jsonl",
+      "sha256": "4bb0e4454e6b3849bf2f6a32a74a2ece360704fe9a35e88f58a56f51a0c79763"
+    },
+    {
+      "blob_oid": "c7cc4641abf20a261419ddeb285ea7231e6cda6a",
+      "bytes": 466399,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T09-24-36.443700+00-00/transcript.jsonl",
+      "sha256": "5d6123328fb9ca4dc316cd05a235fff4677abf4ac23a58c3a6b0a8e35232f350"
+    },
+    {
+      "blob_oid": "4c4d91188b43879e3a7378ec771ed16215e350c3",
+      "bytes": 412327,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T09-24-40.465250+00-00/transcript.jsonl",
+      "sha256": "c4327f87c3c8c69a9123d2e4cce9b8bfc482aa9a269cc5d869280e054d7a5466"
+    },
+    {
+      "blob_oid": "a8385c70ad35be5a33953c64168e0acf17cd0ea3",
+      "bytes": 440622,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T09-24-43.946094+00-00/transcript.jsonl",
+      "sha256": "429659856e63a7db52eb8e071dd0c6c66bf06519281fdd7312726ddd4b600dc8"
+    },
+    {
+      "blob_oid": "760af01d45b60c8bc8fd0c33d81b26b2c8cd4021",
+      "bytes": 472628,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T09-24-48.941270+00-00/transcript.jsonl",
+      "sha256": "1146b4be6baaed08148662ba5dca11a7930ab3a2fd7f855b898997c60bca6bf2"
+    },
+    {
+      "blob_oid": "cad8f71ccde383a0f992baae0527abc44f22cbec",
+      "bytes": 418419,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r10_rating1/2026-09-12T09-34-57.687223+00-00/transcript.jsonl",
+      "sha256": "4991d63053fd4dd23ef4c8034d8da5e81091b66e7ba823dda11df8e82a4e1b52"
+    },
+    {
+      "blob_oid": "ec69ff4ec3de0d70f9820110d45eaa7df99459f9",
+      "bytes": 472087,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r20_rating1/2026-09-12T09-35-01.802029+00-00/transcript.jsonl",
+      "sha256": "299a2c33c708fb916130c0ed919f1c84350103cfbdd1ff19d0b43a8f016a9e97"
+    },
+    {
+      "blob_oid": "a8b6d7ff818b9a6c76f4582ee164b95c6b542383",
+      "bytes": 511305,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r10_rating1/2026-09-12T09-35-05.428183+00-00/transcript.jsonl",
+      "sha256": "6e2245709cdba3f35c3194b2628c69b301654881a57e9cf9e925941fbcbf8440"
+    },
+    {
+      "blob_oid": "185a877c9b9667fb0ed63799be0ba4407b42aa7a",
+      "bytes": 439180,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r20_rating1/2026-09-12T09-35-09.078994+00-00/transcript.jsonl",
+      "sha256": "7ece3fab2ce6a4734054882cd2ed25692a8327885b43a9fc24ad0628b66e26cf"
+    },
+    {
+      "blob_oid": "29d81168d61902c62a4afa59cf56c2d60b9118bc",
+      "bytes": 448041,
+      "events": 5,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r10_rating1/2026-09-12T10-11-09.605326+00-00/transcript.jsonl",
+      "sha256": "6404c180c6602389d777511164c4b41f5c562867ecdd741a2f7aec7a2cec846b"
+    },
+    {
+      "blob_oid": "65e82c3a0c2b45d9e6b7233b3ab14a54eeb587a5",
+      "bytes": 455428,
+      "events": 5,
+      "path": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r20_rating1/2026-09-12T10-11-13.611621+00-00/transcript.jsonl",
+      "sha256": "90adf36987dc17664ab0c26beb224a3ddeabbbbb1c3178ce8a24d729dc6c3386"
+    },
+    {
+      "blob_oid": "295ff6d0acb51d79dc7c1698f07582270419ae86",
+      "bytes": 470568,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T07-20-00.645660+00-00/transcript.jsonl",
+      "sha256": "ad8db7b4221bb40bc2c3a1924047efdf241724be8f13bf5e62d734cee59987a4"
+    },
+    {
+      "blob_oid": "d49c03836574a2e54ea2ef1d6d1bd2f1ade3f035",
+      "bytes": 589612,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T15-26-10.559978+00-00/transcript.jsonl",
+      "sha256": "39c23b838c324cb81a884c62a9a66dbad5ad5e202aa4389718c272014fe241f5"
+    },
+    {
+      "blob_oid": "81d59df3ab1de4c227d3031e158e43a9a80cb8de",
+      "bytes": 532683,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating3/2026-09-12T15-26-14.501987+00-00/transcript.jsonl",
+      "sha256": "122cfe1d8b1717433d80798866a6aec9393eb4938154ff62ef3a5204c242d75d"
+    },
+    {
+      "blob_oid": "70caef11ccdf70683cbf16a83628213cf4ea1431",
+      "bytes": 455155,
+      "events": 5,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r20_rating1/2026-09-12T10-11-17.769243+00-00/transcript.jsonl",
+      "sha256": "1f9bc3e97d10961139c19498094a0c84a7f299aa0600b366a550dc9cd0401c95"
+    },
+    {
+      "blob_oid": "7827cb9436c2acf11136999ddb4a24cec829777f",
+      "bytes": 362510,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r10_rating1/2026-09-12T10-11-23.210817+00-00/transcript.jsonl",
+      "sha256": "03078b1b74ddb5057727ddd4b3067ae5afa193d0473af6a5b67bdf231166853f"
+    },
+    {
+      "blob_oid": "9813208a106b65ad44b6bb2647e7c5acba602034",
+      "bytes": 496867,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r20_rating1/2026-09-12T10-21-22.007907+00-00/transcript.jsonl",
+      "sha256": "fd9a0c88a37f5760a4ad807502de21a0a2538853208e2589da0b9103e1d1a81f"
+    },
+    {
+      "blob_oid": "b431be811ae2b9bb42465a51498c6089178c9e5c",
+      "bytes": 481364,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T10-21-26.301953+00-00/transcript.jsonl",
+      "sha256": "97d1bf0b6eb0e0a55a16ea64108905f9aaae7aecb626511533145db74ac280cf"
+    },
+    {
+      "blob_oid": "20918bec966ef647367cb951b946e4606f485438",
+      "bytes": 443630,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r20_rating1/2026-09-12T10-21-30.227209+00-00/transcript.jsonl",
+      "sha256": "d813e7d065aae617c7c8150e291802ce73d8a7a1ffc49bbf5be58da650573f65"
+    },
+    {
+      "blob_oid": "0b3f0a803b39f748f7da3d0461cb4d901907feb9",
+      "bytes": 541391,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T10-21-34.529106+00-00/transcript.jsonl",
+      "sha256": "08c7290e3ec68706be58290facc54c21402f9e9da9eb7b6fc28ffb8c55206d81"
+    },
+    {
+      "blob_oid": "b7c244c9289b579c8716823c20f6c0959b437ae3",
+      "bytes": 820314,
+      "events": 5,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T10-34-00.487246+00-00/transcript.jsonl",
+      "sha256": "c7a9aa0d1fb926d3a44dccf6a61f8d0ef5f3d179f29af2d1b467ff22743ed1c6"
+    },
+    {
+      "blob_oid": "baf62c9c9df76ceeda363a694cef20fff01a53d8",
+      "bytes": 508249,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r10_rating1/2026-09-12T10-34-04.212789+00-00/transcript.jsonl",
+      "sha256": "d9102fea80f6ccf311d36338016644baaab7dbccde5320d7e440b1c680c9f873"
+    },
+    {
+      "blob_oid": "f178653412dcf1ab7077f7429ef604d7e0953a9f",
+      "bytes": 468906,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T10-34-08.427493+00-00/transcript.jsonl",
+      "sha256": "0cf9b967897248106fc68cfbd6797eb8a97d5e4ed81c22f78061b9882e215c7f"
+    },
+    {
+      "blob_oid": "fa70c8555aa4c2a7949ef8b3ef190db3d4605adc",
+      "bytes": 371953,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T11-01-48.594901+00-00/transcript.jsonl",
+      "sha256": "15cdf6c089e0f13e8b760a05777cf20e02ebd636cc776b432ea81a3280a4d730"
+    },
+    {
+      "blob_oid": "6cf5cfebc754637c9fb8c3533837b4d91f01a1a3",
+      "bytes": 570556,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T10-34-11.987974+00-00/transcript.jsonl",
+      "sha256": "cc9bf1b8cd9a3387a40ce52fc33ef837f0dfcee172619b474ec919eea73dcc57"
+    },
+    {
+      "blob_oid": "8dcbb8d3228cdc32c8e13eb78228f88b47a16610",
+      "bytes": 516877,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T11-13-49.423296+00-00/transcript.jsonl",
+      "sha256": "2ad0c5c927f545bdb627780ceac39b1c611bfef20d7bff3a2aa82b9a3beebeaa"
+    },
+    {
+      "blob_oid": "97503df25fd47d2a27170b25739ace8e186144af",
+      "bytes": 343474,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r20_rating1/2026-09-12T12-01-04.480594+00-00/transcript.jsonl",
+      "sha256": "3c7558cb25a29e837a70ce518a55e6f4955d4b30a93af912d0ae33c0f03bd506"
+    },
+    {
+      "blob_oid": "ace863d6bd71e9c4a8a17220235c657b34199515",
+      "bytes": 507621,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating1/2026-09-12T12-01-23.560480+00-00/transcript.jsonl",
+      "sha256": "407f389eb8523b76864d7daa0db587ebf8088299e3ca0a32ab43e8fb1f79e8bc"
+    },
+    {
+      "blob_oid": "35d07039347d1271ad8f4192502111b7830bfc07",
+      "bytes": 481990,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating2/2026-09-12T15-43-31.385599+00-00/transcript.jsonl",
+      "sha256": "ee05729be4fd94d8ac95587be868d6b0f3383fcd7158e2231ebcd08f0dde4fd5"
+    },
+    {
+      "blob_oid": "75b318181ebd533bc799046b985a29aa3395d2af",
+      "bytes": 412605,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating3/2026-09-12T15-43-40.990679+00-00/transcript.jsonl",
+      "sha256": "2f0192edb5d0c0e67db2b0bcddc7049883201ee903751e8c8862dd2ff1a877ac"
+    },
+    {
+      "blob_oid": "307bac6ab0955f8efd5ddc63d7947302f707f161",
+      "bytes": 512899,
+      "events": 5,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r20_rating1/2026-09-12T12-01-28.560393+00-00/transcript.jsonl",
+      "sha256": "973609a754c80e6501f639869ce41d03f7c62583816719c31ace3c1789bd7433"
+    },
+    {
+      "blob_oid": "dfe8053c764c8bb6c71a7b39d80909c5dc8e2251",
+      "bytes": 447392,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r10_rating1/2026-09-12T12-01-32.268119+00-00/transcript.jsonl",
+      "sha256": "4f8b388c698ead86504b8379acfb452cd9a2936e40d714619f751a57101f55fd"
+    },
+    {
+      "blob_oid": "2399f74c72f1a31f36867d33ea62987571b71408",
+      "bytes": 418244,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T12-15-44.372640+00-00/transcript.jsonl",
+      "sha256": "f6d556996069e69de20c2e7f9e8a9003ff69db5073b33b8788e8de8a9c2fe2d4"
+    },
+    {
+      "blob_oid": "69ad58f242f2405511b1427202d22cf7b3e083d2",
+      "bytes": 462606,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r10_rating1/2026-09-12T12-15-48.452760+00-00/transcript.jsonl",
+      "sha256": "15e7051c8f81314227d23dd951a2fa2d7ad27a97cfe53f990739ba358efc40f2"
+    },
+    {
+      "blob_oid": "840c646b4e5f4b7196b064c8c6ca008bc46f3ecb",
+      "bytes": 504732,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r20_rating1/2026-09-12T12-15-51.905429+00-00/transcript.jsonl",
+      "sha256": "0b18fe6be7afd97d2523133a942fe356a998409be732f497965b1cf7d651ce8f"
+    },
+    {
+      "blob_oid": "9b7ba4cf1c0aa19fd044417672322838ab58c894",
+      "bytes": 386796,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r10_rating1/2026-09-12T12-16-00.522098+00-00/transcript.jsonl",
+      "sha256": "e50c3886230728d478b4fedea9dd01221a3e6a193976c2d3f7d08957112e98ac"
+    },
+    {
+      "blob_oid": "6840a05a809c75eedb0a04812e0c3b5f9eb57b04",
+      "bytes": 362864,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r20_rating1/2026-09-12T12-26-07.176275+00-00/transcript.jsonl",
+      "sha256": "01809715e4a68c1ae5e0ed2d1aa348269e67aa7f196481655f0efeaad99da3cb"
+    },
+    {
+      "blob_oid": "552f8d220800b070c30b6155d8ba1a320108ff08",
+      "bytes": 464442,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r10_rating1/2026-09-12T12-26-10.913494+00-00/transcript.jsonl",
+      "sha256": "33094483b5c11dd9292d7d73e5ee03c70c4a19201ebd4dd6959014c5724bdd65"
+    },
+    {
+      "blob_oid": "fb546af5d8d8474dfb445b8cf6e87e066b1e2920",
+      "bytes": 413694,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r20_rating1/2026-09-12T12-26-16.697843+00-00/transcript.jsonl",
+      "sha256": "dae03bc19e68a5a5a83ee01b814f707a567ee1d62e5928181763fefec230276b"
+    },
+    {
+      "blob_oid": "efe05c43d82c574f21aca0e659e4b7e4a0299c6a",
+      "bytes": 550122,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-26-20.307075+00-00/transcript.jsonl",
+      "sha256": "e47bf61d6a3449944f3d47ad1c1d0d2fde0cf3f5d5eca98e84dca427f31b8e39"
+    },
+    {
+      "blob_oid": "b0927b68c1d18027b3ae3cfb6a0fb4f9a303dc44",
+      "bytes": 481097,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-42-37.138735+00-00/transcript.jsonl",
+      "sha256": "df8abb148b86e5929d11b6e2e92b73a3185735fa8fd4839c8fdfa880e1350fbb"
+    },
+    {
+      "blob_oid": "3c48f558fcc7546786c06bf17e99340b2581a594",
+      "bytes": 427494,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-53-23.084438+00-00/transcript.jsonl",
+      "sha256": "0d5502f8e3f7b4c722b5899dcc8f30300826b10c8d38ef20f24db98ab103c1b6"
+    },
+    {
+      "blob_oid": "593e86474466863eabf6db8ab7f0318c65b7c362",
+      "bytes": 573225,
+      "events": 5,
+      "path": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r20_rating1/2026-09-12T13-03-41.815986+00-00/transcript.jsonl",
+      "sha256": "94b52daec88fef7c1cbf3b2ef39d5c4441ae5f5298a43df3aa21402a7b895058"
+    },
+    {
+      "blob_oid": "d782a0a5eee5a5a843db012a2f18b2507972117f",
+      "bytes": 434285,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating1/2026-09-12T13-03-45.829464+00-00/transcript.jsonl",
+      "sha256": "36181990d74e5ab1b0626f7b98811d1d94348f081d67657828db1ff05efdd3e3"
+    },
+    {
+      "blob_oid": "da3c85b9576cf45ad8a5c02aabfb9f6f09f1d0a0",
+      "bytes": 823528,
+      "events": 5,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating2/2026-09-12T15-43-53.030302+00-00/transcript.jsonl",
+      "sha256": "fa51d7b1fda71ba156013d5fbce1ab7aa0f865eab3fb51e0c0edee41ca75a291"
+    },
+    {
+      "blob_oid": "fa89223bdc18e7b9f072a342cfc3f49babf1c83d",
+      "bytes": 432986,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating3/2026-09-12T15-44-02.319887+00-00/transcript.jsonl",
+      "sha256": "16e3bb989d75e2d96a9bef21322bc42e2d0109a4deacf0bf76250c1b7b939231"
+    },
+    {
+      "blob_oid": "7bcc458cec9bbf0a2c350f3ec877ca4275a13b97",
+      "bytes": 459013,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r20_rating1/2026-09-12T13-03-49.385118+00-00/transcript.jsonl",
+      "sha256": "ad9da2b830de842d572d26dea972a52050371d4a1281f46e714e78afa8706b0f"
+    },
+    {
+      "blob_oid": "3427b5a2f6d2f96b22e6c783929ede6de9c0060f",
+      "bytes": 472942,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r10_rating1/2026-09-12T13-03-52.871518+00-00/transcript.jsonl",
+      "sha256": "dac796f7e4c0f4b8114f0932a33aabd212c343bcab0c1844b14fc58dc7407c0c"
+    },
+    {
+      "blob_oid": "7fc6d1417b1d45a4922be0395ced4de7a98b826a",
+      "bytes": 453339,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r20_rating1/2026-09-12T14-14-33.051912+00-00/transcript.jsonl",
+      "sha256": "aa732cb1cc4386ee6520e4b5782b9df561ed9c2122e8619a40335764a6e33b7c"
+    },
+    {
+      "blob_oid": "940ce16a59cad445b47cdb9bc5e713da6e21e2f8",
+      "bytes": 390671,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r10_rating1/2026-09-12T14-14-48.740180+00-00/transcript.jsonl",
+      "sha256": "da3b91cc1f35a59c0b2663b4e1eebcf982b14fa08cac46523dea7b3431d73228"
+    },
+    {
+      "blob_oid": "a4203877ee63d01e305aed73a602b9f32c8fa531",
+      "bytes": 415530,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r20_rating1/2026-09-12T14-14-52.504091+00-00/transcript.jsonl",
+      "sha256": "8e74e91cbd553f415a7671e8af13c87e3575be878c68aa1bda0b2a4e7b0c1bbc"
+    },
+    {
+      "blob_oid": "22c10ad79b2c6898a0f3b43b641fd83a02d12395",
+      "bytes": 399432,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-14-57.243736+00-00/transcript.jsonl",
+      "sha256": "22ae21ae0478701fc187d7d09d20ef0fc77159a7e4ed3fea5ef799f0f28d4932"
+    },
+    {
+      "blob_oid": "b242eb09d2400b3330254fac73ac68e7066c876a",
+      "bytes": 470422,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-26-49.081797+00-00/transcript.jsonl",
+      "sha256": "85947c3f1136b925cca164aa877f42a258d41ce526c0655befdd4b3725a56789"
+    },
+    {
+      "blob_oid": "6f9fcc5e4b228a370c283c3e1cc7af9e615e6d3c",
+      "bytes": 444616,
+      "events": 5,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00/transcript.jsonl",
+      "sha256": "49655492c8d7757f14b90d3331d44fd182613f081689cfcb9c344c65b16818a8"
+    },
+    {
+      "blob_oid": "45a1fc623d98f1e810c3575789ced9dd8fc9badf",
+      "bytes": 439265,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-01-34.769807+00-00/transcript.jsonl",
+      "sha256": "29abdd79e3485b64189d0495400c7a8bb7df181361f13b3e61dcf4ec11aa082d"
+    },
+    {
+      "blob_oid": "fe3358f7e9c7a1b831ee71ced7250cad74dfe8a3",
+      "bytes": 447713,
+      "events": 2,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-13-26.050899+00-00/transcript.jsonl",
+      "sha256": "973ecd5c4de7d20eef1a0b77d977101e08bdb3807138de56e5afffce2f2ce19a"
+    },
+    {
+      "blob_oid": "86c62f6716446fd11610b2e56070aed23d712b81",
+      "bytes": 439777,
+      "events": 4,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r10_rating1/2026-09-12T14-47-53.778431+00-00/transcript.jsonl",
+      "sha256": "d21dbbd1733806e0d87b75508c5f10d44b6c39a22d23bb15069dcb193d207d86"
+    },
+    {
+      "blob_oid": "c810e651913cae77661c994148664c7f976616ad",
+      "bytes": 428290,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r20_rating1/2026-09-12T14-47-58.594993+00-00/transcript.jsonl",
+      "sha256": "03e991447e6cc15bd4dfa3ea299b256482bc4e72486cdaf959ad8f3d1e54abcc"
+    },
+    {
+      "blob_oid": "f41dd27cb3cca88a5af2d9ea78f561ddb65217ba",
+      "bytes": 471561,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r10_rating1/2026-09-12T14-36-38.472626+00-00/transcript.jsonl",
+      "sha256": "57cd8dab2b529203b3062e63670cba6163aecf1a434348f14b88ecd0792109bc"
+    },
+    {
+      "blob_oid": "95ecaeb290bd5b5693af57fe92dc6fcc7a0caf70",
+      "bytes": 372746,
+      "events": 3,
+      "path": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r20_rating1/2026-09-12T14-48-03.495134+00-00/transcript.jsonl",
+      "sha256": "f35c3daeb1c78e0c5f1d0fdf305b96e92c3d8ff7fd0f3701f7afea6afefded1c"
+    }
+  ],
+  "version": 1
+}

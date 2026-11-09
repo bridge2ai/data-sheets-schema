@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""Summarize retained U5 offline validation evidence, 2026-11-08 (#4354).
+
+Inputs: named run directories under assigned scratch and this checkout's Git
+identity. Output: one new JSON manifest with exact hashes and JUnit counts.
+Reads existing artifacts only; never executes tests or updates prior evidence.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parents[2]
+SCRATCH = ROOT.parent / 'scratch-native-u5-prep'
+BASE = 'd258611c5381bd7cf973817ebd2b6a04f65818b3'
+ENV = {'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'GIT_NO_LAZY_FETCH': '1',
+       'GIT_ALLOW_PROTOCOL': '', 'GIT_OPTIONAL_LOCKS': '0',
+       'GIT_CONFIG_GLOBAL': '/dev/null', 'GIT_CONFIG_SYSTEM': '/dev/null'}
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def git(*args):
+    return subprocess.check_output(['/usr/bin/git', '--no-replace-objects', *args],
+                                   cwd=ROOT, env=ENV, timeout=30, text=True).strip()
+
+
+def summarize(name):
+    if not name or Path(name).name != name or name in ('.', '..'):
+        raise ValueError('run must be a single explicit directory component')
+    run = SCRATCH / name
+    if run.resolve(strict=True) != run or not run.is_dir():
+        raise ValueError('run must be an existing literal directory in assigned scratch')
+    outcome = json.loads((run / 'outcome.json').read_bytes())
+    stability = json.loads((run / 'source-stability.json').read_bytes())
+    artifacts = {}
+    for filename in ('outcome.json', 'source-stability.json', 'plan.json',
+                     'worker-outcome.json', 'pytest.xml', 'pytest.log',
+                     'bootstrap.json', 'network.json', 'origins-before.json',
+                     'origins-after.json', 'subprocess-origins.json', 'pytest-command.json'):
+        path = run / filename
+        if path.is_file():
+            artifacts[filename] = {'sha256': sha(path), 'bytes': path.stat().st_size}
+    counts = {'passed': 0, 'failed': 0, 'errors': 0, 'skipped': 0}
+    nodes = []
+    junit = run / 'pytest.xml'
+    if junit.is_file():
+        for case in ET.parse(junit).getroot().iter('testcase'):
+            state = ('failed' if case.find('failure') is not None else
+                     'errors' if case.find('error') is not None else
+                     'skipped' if case.find('skipped') is not None else 'passed')
+            counts[state] += 1
+            detail = case.find({'failed': 'failure', 'errors': 'error', 'skipped': 'skipped'}.get(state, '_none'))
+            nodes.append({'classname': case.get('classname'), 'name': case.get('name'),
+                          'state': state, 'message': None if detail is None else detail.get('message')})
+    collected = re.findall(r'(?m)^(\d+) tests collected in ', (run / 'pytest.log').read_text())
+    return {'name': name, 'path': str(run), 'outcome': outcome,
+            'source_stability': stability, 'counts': counts, 'nodes': nodes,
+            'collected': None if not collected else int(collected[-1]), 'artifacts': artifacts}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('runs', nargs='+')
+    args = parser.parse_args()
+    if len(set(args.runs)) != len(args.runs):
+        raise ValueError('duplicate run names')
+    output = args.output.absolute()
+    if (output.parent != SCRATCH or output.resolve() != output
+            or os.path.lexists(output)):
+        raise ValueError('output must be a new literal file directly in assigned scratch')
+    runs = [summarize(name) for name in args.runs]
+    latest = {}
+    for run in runs:
+        for node in run['nodes']:
+            latest[(node['classname'], node['name'])] = node['state']
+    unique_counts = {state: list(latest.values()).count(state)
+                     for state in ('passed', 'failed', 'errors', 'skipped')}
+    # U5-R3 split the incorrect unparameterized cache assertion into two
+    # explicit schema shapes. Keep its failed identity in the raw history;
+    # don't misreport that removed node as an additional current blocker.
+    old = ('tests.test_native_u5_external_schema',
+           'test_external_320_capture_rebuild_and_cold_warm_catalog')
+    replacements = [(old[0], old[1] + '[' + shape + ']')
+                    for shape in ('modular', 'merged')]
+    current = dict(latest)
+    superseded = []
+    if old in latest and all(latest.get(node) == 'passed' for node in replacements):
+        superseded.append({'classname': old[0], 'name': old[1],
+                           'historical_state': latest[old],
+                           'reason': 'U5-R3: incorrect cache assumption split by schema eligibility',
+                           'replacements': [{'classname': node[0], 'name': node[1],
+                                             'state': latest[node]} for node in replacements]})
+        del current[old]
+    current_counts = {state: list(current.values()).count(state)
+                      for state in ('passed', 'failed', 'errors', 'skipped')}
+    result = {'kind': 'native_u5_preparation_validation', 'version': 1,
+              'base': BASE, 'head': git('rev-parse', 'HEAD'),
+              'status': git('status', '--porcelain', '--untracked-files=all'),
+              'changed_paths': git('diff', '--name-only', BASE, 'HEAD').splitlines(),
+              'generator_sha256': sha(Path(__file__)),
+              'runs': runs, 'unique_counts_latest': unique_counts,
+              'superseded_nodes': superseded,
+              'current_named_counts': current_counts,
+              'validation_heads': sorted({run['source_stability']['before']['head'] for run in runs}),
+              'scope': 'offline preparation; counts overlap; no native acceptance or timing claim'}
+    with output.open('x', encoding='utf-8') as stream:
+        json.dump(result, stream, indent=2, sort_keys=True)
+        stream.write('\n')
+    print(json.dumps({'path': str(output), 'sha256': sha(output),
+                      'unique_counts_latest': unique_counts,
+                      'current_named_counts': current_counts,
+                      'runs': [{'name': run['name'], 'counts': run['counts'],
+                                'collected': run['collected'],
+                                'returncode': run['outcome']['returncode']}
+                               for run in result['runs']]}, sort_keys=True))
+
+
+if __name__ == '__main__':
+    main()

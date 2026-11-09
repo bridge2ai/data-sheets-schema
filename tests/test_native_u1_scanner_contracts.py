@@ -55,6 +55,8 @@ def test_native_complete_v2_route_derives():
     assert route['model_calls_minimum'] is None
     assert route['runtime_binding']['path'] == 'src/data_sheets_schema/native_execution_registration_v2.py'
     assert any('native_execution_registration_v2.py:' in row for row in route['evidence'])
+    assert 'separate acceptance gates' in route['runtime_binding']['basis']
+    assert any(row.startswith('src/data_sheets_schema/cli/prompt.py:') for row in route['evidence'])
 
 
 def test_native_route_requires_later_cli_consumer(tmp_path):
@@ -75,6 +77,8 @@ def test_native_route_requires_later_cli_consumer(tmp_path):
     ('cli/prompt.py', "destination.open('x'", "destination.open('w'"),
     ('native_execution_registration_v2.py', '_require_registered_input_spellings(spec)', 'pass'),
     ('native_execution_registration_v2.py', 'native_shared_generation_version=1', 'native_shared_generation_version=0'),
+    ('native_execution_registration_v2.py', 'registered_input_paths=True', 'registered_input_paths=False'),
+    ('native_execution_registration_v2.py', ',\n        registered_input_paths=True', ''),
     ('native_execution_registration_v2.py', 'spec._native_shared_runtime_capture = runtime_capture', 'spec._native_shared_runtime_capture = None'),
     ('native_execution_registration_v2.py', 'instruction = spec.instruction', "instruction = 'unrelated instruction'"),
     ('native_execution_registration_v2.py', 'from . import native_shared_selection as selection', 'from . import native_shared_contract as selection'),
@@ -96,7 +100,7 @@ def test_native_v2_import_shadow_refuses_with_configuration_error(tmp_path):
     assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
     path = root / 'src/data_sheets_schema/native_execution_registration_v2.py'
     path.write_text(path.read_text()+'\ndef changed_binding(c):\n    return c\n')
-    with pytest.raises(scan.ConfigError, match='binding is replaced'):
+    with pytest.raises(scan.ConfigError, match='binding is replaced|imported authority escapes fixed uses'):
         scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
 
 
@@ -374,6 +378,10 @@ def test_native_response_roster_refuses_changed_producer(tmp_path, relative, bef
     "del self.options['_catalog_lookup']",
     "setattr(self, 'options', {})",
     "self.__dict__['options'] = {}",
+    "getattr(self, 'options')['_catalog_lookup'] = None",
+    "vars(self)['options']['_catalog_lookup'] = None",
+    "opts = getattr(self, 'options')\n        opts['_catalog_lookup'] = None",
+    "fields = vars(self)\n        fields['options']['_catalog_lookup'] = None",
 ])
 def test_native_packet_options_refuse_mutation_and_alias_escape(tmp_path, mutation):
     root = _procedure_root(tmp_path)

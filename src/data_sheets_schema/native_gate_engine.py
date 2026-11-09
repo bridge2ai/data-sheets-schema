@@ -9,6 +9,101 @@ from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
 
+
+def receipt_observation(transcript, bundle, receipt, manifest):
+    """Report original receipt claims against successful file-tool windows only.
+
+    A permitted shell read is intentionally counted as unopened by this
+    instrument. Neither its count nor that limitation is an acceptance floor.
+    """
+    from data_sheets_schema import agentic_observed
+    out = agentic_observed.observe([transcript], bundle, receipt=receipt, manifest=manifest)
+    out['receipt_chunks_unopened_basis'] = {
+        'mode': 'reported_only', 'receipt': 'original_phase1_receipt',
+        'reads': 'successful_file_tool_windows', 'permitted_shell_reads_count_as_unopened': True}
+    return out
+
+
+def audit_counts(prepared):
+    """Compare captured report totals with a freshly reconstructed typed audit.
+
+    This row never borrows a successful receipt, phase or evidence verdict.
+    Missing inputs remain an explicit unchecked refusal. A valid report with
+    no stated total has no numerical claim to compare: retain an unavailable
+    row after independently checking its captured inputs and typed audit.
+    """
+    from . import native_shared_contract as c
+    from . import native_shared_gates as native
+    from . import native_shared_stage as stage
+    from .report_audit_totals import check_report_audit_totals
+    row = {'checked': False, 'passed': False, 'status': 'refused', 'compared_artifacts': {},
+           'comparison': None, 'reason': None}
+    try:
+        final = prepared.get('final_result')
+        if (type(final) is not dict or type(final.get('checked')) is not bool
+                or type(final.get('findings')) is not list):
+            raise ValueError('native final evidence is missing or malformed')
+        run = native._run(prepared)
+        if run.phase1 is None or run.phase1.core is None:
+            raise ValueError('audit counts precede the sealed originals')
+        if run.reader.pool is None:
+            raise ValueError('audit counts require captured artifacts, not live fallback')
+        assembly = run.reader.read('typed_assembly', run.selection.role('typed_assembly'))
+        row['compared_artifacts']['typed_assembly'] = c.pin_dict(assembly.pin)
+        completion = stage.check_assembly(run.selection, run.binding, run.phase1,
+                                          run.history, assembly.raw)
+        audit = run.reader.read('audit', run.selection.role('audit'))
+        row['compared_artifacts']['derived_audit'] = c.pin_dict(completion.audit.pin)
+        if audit != completion.audit:
+            raise ValueError('captured audit differs from the freshly derived assembly audit')
+        report = native._current(run, 'final_report')
+        row['compared_artifacts']['final_report'] = c.pin_dict(report.pin)
+        for item in (assembly, audit, report):
+            if prepared['snapshot'].read(item.pin.path, item.pin.role) != item.raw:
+                raise ValueError('audit-count artifacts differ between captured views')
+        audit_document = c.strict_json(audit.raw, 'derived native audit',
+                                       c.HARD_LIMITS['assembly_bytes'])
+        # The shared instrument accepts strings or paths. A trailing newline
+        # forces its text branch even if a one-line report spells a live path.
+        compared = check_report_audit_totals(report.raw.decode('utf-8') + '\n', audit_document)
+        row['comparison'] = compared
+        if (compared.get('checked') is True and compared.get('status') == 'no_total_stated'
+                and compared.get('stated_total') is None and compared.get('stated_totals') == []
+                and type(compared.get('computed_total')) is int and compared['computed_total'] >= 0
+                and compared.get('mismatches') == [] and compared.get('findings') == []):
+            row.update(status='unavailable', checked=False, passed=None,
+                       reason='report states no finding total; numerical comparison unavailable')
+            return row
+        typed_totals = (type(compared.get('stated_total')) is int
+                        and type(compared.get('computed_total')) is int
+                        and compared['stated_total'] >= 0 and compared['computed_total'] >= 0)
+        row['checked'] = compared.get('checked') is True and typed_totals
+        row['passed'] = (row['checked'] and compared.get('status') == 'consistent'
+                         and compared['stated_total'] == compared['computed_total']
+                         and compared.get('mismatches') == [] and compared.get('findings') == [])
+        row['status'] = 'consistent' if row['passed'] else 'refused'
+        if not row['passed']:
+            row['reason'] = (compared.get('reason') or
+                             'report audit totals are missing, contradictory or unequal')
+    except (ValueError, TypeError, KeyError, AttributeError, UnicodeError) as exc:
+        row['checked'] = row['passed'] = False
+        row['reason'] = type(exc).__name__ + ': ' + str(exc)
+    return row
+
+
+def evidence_gate(prepared):
+    """Retain the evidence obligation and its independent audit-count row."""
+    counts = audit_counts(prepared)
+    final = prepared.get('final_result')
+    counts_available = counts['status'] != 'unavailable'
+    checked = (type(final) is dict and final.get('checked') is True
+               and (not counts_available or counts['checked'] is True))
+    return {'checked': checked,
+            'passed': checked and final.get('findings') == []
+                      and (not counts_available or counts['passed'] is True),
+            'result': deepcopy(final), 'audit_counts': counts}
+
+
 def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown, live,
           first_stop, runtime_authority, keep_awake, keep_awake_raw=None, runtime_authority_expected=None):
     """Run the fixed obligations; only selected semantic readers differ."""
@@ -48,6 +143,8 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
             results[name] = {'checked': False, 'passed': False, 'reason': f'{type(exc).__name__}: {exc}'}
 
     def terminal_gate():
+        from .native_model_aliases import model_aliases, require_frame_models, require_model_usage
+        aliases = model_aliases(runtime)
         init = [e for e in events if e.get('type') == 'system' and e.get('subtype') == 'init']
         final = [e for e in events if e.get('type') == 'result']
         if len(init) != 1 or len(final) != 1:
@@ -57,7 +154,7 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
         if (not isinstance(session, str) or not session or one.get('cwd') != prepared['state'].reg['working_directory']
                 or any(e.get('session_id') != session for e in events if e.get('type') in ('assistant', 'user', 'result'))):
             raise ValueError('native stream session or initialization cwd differs from this selected attempt')
-        if (one.get('model') != runtime['model']
+        if (one.get('model') != aliases['requested']
                 or one.get('apiKeySource') != runtime['auth']['expected_api_key_source']
                 or one.get('claude_code_version') != runtime['executable']['init_version']
                 or not isinstance(one.get('tools'), list) or sorted(one['tools']) != ['Bash', 'Read', 'Write']):
@@ -71,10 +168,8 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
             if isinstance(message, dict):
                 if 'role' in message and message['role'] != event['type']:
                     raise ValueError('native message role contradicts its stream frame')
-                if 'model' in message and message['model'] != runtime['model']:
-                    raise ValueError('native assistant model contradicts the selected primary')
-            if 'model' in event and event['model'] != runtime['model']:
-                raise ValueError('native stream model contradicts the selected primary')
+            require_frame_models(event, aliases)
+        require_model_usage(last, aliases)
         if ('permissionMode' in one and one['permissionMode'] != 'dontAsk'):
             raise ValueError('native initialization permission mode contradicts the selected argv')
         if (type(exit_code) is not int or exit_code != 0 or last.get('is_error') is not False
@@ -86,10 +181,13 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
 
     def accounting():
         from decimal import Decimal
+        from .native_model_aliases import model_aliases, require_model_usage
+        aliases = model_aliases(runtime)
         finals = [e for e in events if e.get('type') == 'result']
         if len(finals) != 1:
             raise ValueError('native model accounting requires one terminal result')
         terminal = finals[0]
+        require_model_usage(terminal, aliases)
         own, auxiliary = controls['model_accounting'](terminal, {'model': {
             'model': runtime['model'], 'auxiliary_models_permitted': runtime['auxiliary_models']}})
         usage = terminal.get('usage')
@@ -126,7 +224,9 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
         return native.pair_gate(prepared, projections)
 
     def observed():
-        out = agentic_observed.observe([projected(Path(runtime['attempt_directory']) / 'transcript.jsonl')], projected(spec.bundle))
+        out = receipt_observation(projected(Path(runtime['attempt_directory']) / 'transcript.jsonl'),
+            projected(spec.bundle), projected(spec._agentic_artifact_paths['receipt']),
+            projected(spec.chunk_manifest))
         problems = controls['observation_problems'](out)
         return {'passed': not problems, 'observation': out, 'problems': problems}
 
@@ -150,8 +250,7 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
     run('schema', schemas)
     run('pair', paired)
     run('receipts', lambda: native.receipt_gate(prepared))
-    run('evidence', lambda: {'passed': prepared['final_result'].get('checked') is True
-        and prepared['final_result'].get('findings') == [], 'result': deepcopy(prepared['final_result'])})
+    run('evidence', lambda: evidence_gate(prepared))
     run('observation', observed)
     run('accounting', accounting)
     run('runtime_authority', lambda: runtime_observation_result(

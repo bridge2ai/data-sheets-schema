@@ -24,6 +24,15 @@ SELECTED_SHARED_PLAYBOOKS = frozenset({
 })
 SCHEMAS = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
            "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
+# D114 is an explicit successor selection. Expose the selected generation
+# playbooks, their two schemas, and only agents those playbooks reference:
+# d4d-agent.md names provenance-guard and validator. Neither selected full-core
+# nor uniform-rules names another agent. Keep this closed roster reviewable;
+# discovering a new ambient agent must not change the instruction surface.
+# Historical renderers retain their enumerated resources.
+NATIVE_SHARED_RESOURCES = (*SCHEMAS, PLAYBOOK,
+    ".claude/commands/d4d-agent.md", ".claude/commands/d4d-uniform-rules.md",
+    ".claude/agents/d4d-provenance-guard.md", ".claude/agents/d4d-validator.md")
 UNOBSERVED_TEMPERATURE = "unknown (not observed from the agent runtime)"
 
 
@@ -49,7 +58,13 @@ def resource_names(directory: str) -> list[str]:
     return [f"{directory}/{path.name}" for path in sorted((root / directory).glob("*.md"))]
 
 
-def toolchain() -> dict:
+def toolchain(*, native_shared: bool = False) -> dict:
+    """Select D114 only explicitly; never infer a route from ambient state."""
+    if type(native_shared) is not bool:
+        raise ValueError("native_shared toolchain selection must be an explicit boolean")
+    if native_shared:
+        paths = {name: str(resource_path(name).absolute()) for name in NATIVE_SHARED_RESOURCES}
+        return validate_toolchain({"python": str(Path(sys.executable).absolute()), "resources": paths})
     paths = {name: str(resource_path(name).absolute()) for name in SCHEMAS}
     for directory in (".claude/commands", ".claude/agents"):
         for name in resource_names(directory):

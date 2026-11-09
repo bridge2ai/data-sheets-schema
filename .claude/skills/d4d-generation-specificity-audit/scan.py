@@ -12074,12 +12074,12 @@ def _derive_native_v2_render(root, cli, command):
     """
     fail = lambda detail: _not_derived('separate native shared render route', detail)
     dump = lambda node: ast.dump(node, include_attributes=False)
-    def exact(actual, text):
-        expected = ast.parse(text).body[0]
+    def exact(actual, text, *, alternatives=()):
+        expected = [ast.parse(value).body[0] for value in (text, *alternatives)]
         # Copy the AST; never mutate the tree used by other derivations.
         observed = ast.parse(ast.unparse(actual)).body[0]
         observed.body = _without_docstring(observed.body)
-        if dump(observed) != dump(expected):
+        if not any(dump(observed) == dump(template) for template in expected):
             raise fail('unsupported v2 render producer: ' + actual.name)
     exact(command, r"""@prompt.command('render-native-shared')
 @click.option('--selection', required=True, type=click.Path(exists=True, dir_okay=False), help='Exact native shared-generation selection JSON.')
@@ -12127,7 +12127,7 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
     if len(definitions) != 1:
         raise fail('v2 preparation has no unique producer')
     prepare = definitions[0]
-    exact(prepare, r"""def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
+    current_prepare = r"""def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
     from .api_runner import RunSpec, _require_registered_input_spellings
     from .native_shared_evidence import read_regular as current_read_regular
     _job_id(job_id)
@@ -12144,7 +12144,7 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
     doc = captured.document()
     inputs = doc['inputs']
     manifest = inputs['source_manifest']
-    spec = RunSpec(**doc['run'], condition=c.CONDITION, render_version=c.RENDERER, bundle=Path(inputs['bundle']['path']), chunk_manifest=Path(inputs['chunk_manifest']['path']), manifest=None if manifest is None else Path(manifest['path']), profile=inputs['profile']['name'], profile_basis=inputs['profile']['basis'], runtime=c.RUNTIME, provider=runtime['provider'], reasoning_effort=runtime['effort'], prompt_text_env=True, run_date=run_date, native_shared_generation_version=1, native_shared_generation_registration=captured.registration.raw.decode('utf-8'))
+    spec = RunSpec(**doc['run'], condition=c.CONDITION, render_version=c.RENDERER, bundle=Path(inputs['bundle']['path']), chunk_manifest=Path(inputs['chunk_manifest']['path']), manifest=None if manifest is None else Path(manifest['path']), profile=inputs['profile']['name'], profile_basis=inputs['profile']['basis'], runtime=c.RUNTIME, provider=runtime['provider'], reasoning_effort=runtime['effort'], prompt_text_env=True, run_date=run_date, native_shared_generation_version=1, native_shared_generation_registration=captured.registration.raw.decode('utf-8'), registered_input_paths=True)
     _require_registered_input_spellings(spec)
     spec._native_shared_runtime_capture = runtime_capture
     spec._native_shared_max_draft_checks = max_draft_checks
@@ -12155,7 +12155,19 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
     body = {'kind': PREPARATION_KIND, 'schema_version': VERSION, 'execution': PREPARATION_SCOPE, 'job_id': job_id, 'working_directory': str(authority.ROOT), 'dependencies': dependencies, 'selection': _file_pin(captured.registration), 'runtime': _file_pin(runtime_capture), 'run_date': run_date, 'max_draft_checks': max_draft_checks, 'render_spec': spec.render_spec(), 'input_identity': spec.input_identity(), 'instruction': instruction, 'instruction_sha256': c.sha(instruction.encode('utf-8')), 'outputs': {name: str(Path(path).absolute()) for name, path in {'full': spec.full_path, 'core': spec.core_path, 'report': spec.report_path, 'provenance': spec.provenance_path}.items()}, 'pinned_files': pins}
     if selection.capture(selection_path) != captured or current_read_regular(str(runtime_path), 'runtime_declaration', max_bytes=c.HARD_LIMITS['input_bytes']).captured != runtime_capture or authority.dependency_identity() != dependencies:
         raise ValueError('v2 preparation authority changed during capture')
-    return _envelope(body, dependencies)""")
+    return _envelope(body, dependencies)"""
+    # Two complete current-reader bodies: U3-F2 and its exact D114 successor.
+    # Never restore the stale _read producer or strip an arbitrary branch.
+    anchor = '    spec._native_shared_runtime_capture = runtime_capture\n'
+    u4b_hook = '''    basis = runtime['limits_basis']
+    if basis.lstrip().startswith('{'):
+        declared = c.strict_json(basis.encode('utf-8'), 'runtime profile basis', 16384)
+        if type(declared) is dict and declared.get('kind') == 'd4d_native_u4b_runtime_basis':
+            from .agentic_runtime import toolchain
+            spec._agentic_toolchain = toolchain(native_shared=True)
+'''
+    exact(prepare, current_prepare,
+          alternatives=(current_prepare.replace(anchor, anchor + u4b_hook, 1),))
     helpers = {
         '_job_id': """def _job_id(value):
     if type(value) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', value) is None:
@@ -12195,6 +12207,65 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
             raise fail('missing unique v2 render producer: ' + name)
         exact(found[0], template)
         producers[name] = found[0]
+    # Retain U5's imported-authority escape proof alongside U3-F2's full
+    # loader/source pins and exact helper contracts. Neither substitutes for
+    # the other: unchanged source can still be rebound by the inspected file.
+    parents = {id(child): node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
+    annotations = {id(child) for node in ast.walk(tree) if isinstance(node, ast.AnnAssign)
+                   for child in ast.walk(node.annotation)}
+    fixed_calls = {
+        'authority': {'authority.dependency_identity', 'authority.require_committed',
+                      'authority.loaded_dependencies', 'authority.refuse_legacy_consumer_imports',
+                      'authority.verified_source_module', 'authority.module_source_identity'},
+        'c': {'c.strict_json', 'c.canonical', 'c.positive_int', 'c.sha', 'c.exact',
+              'c.file_pin', 'c.parse_selection'},
+        'selection': {'selection.capture'}, 're': {'re.fullmatch', 're.escape'},
+        'Path': {'Path', 'Path.cwd'}, 'validate_runtime': {'validate_runtime'},
+    }
+    fixed_values = {'authority.ROOT', 'authority.neutral.composition.SOURCES_SHA256',
+                    'c.CONDITION', 'c.RENDERER', 'c.RUNTIME',
+                    "c.HARD_LIMITS['request_bytes']", "c.HARD_LIMITS['input_bytes']"}
+
+    def closed_import_uses(name):
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Name) or node.id != name or not isinstance(node.ctx, ast.Load):
+                continue
+            outer = node
+            while True:
+                parent = parents.get(id(outer))
+                if isinstance(parent, (ast.Attribute, ast.Subscript)) and parent.value is outer:
+                    outer = parent
+                else:
+                    break
+            if any(isinstance(child, (ast.Attribute, ast.Subscript))
+                   and isinstance(child.ctx, (ast.Store, ast.Del)) for child in ast.walk(outer)):
+                raise fail('v2 preparation imported authority is mutated: ' + name)
+            parent = parents.get(id(outer))
+            spelling = ast.unparse(outer)
+            if isinstance(parent, ast.Call) and parent.func is outer:
+                if spelling in fixed_calls[name]:
+                    continue
+            elif spelling in fixed_values:
+                continue
+            elif spelling in {'Path', 'c.CapturedArtifact'} and id(outer) in annotations:
+                continue
+            elif (name == 'Path' and outer is node and isinstance(parent, ast.Call)
+                  and isinstance(parent.func, ast.Name) and parent.func.id == 'isinstance'
+                  and len(parent.args) == 2 and parent.args[1] is outer and not parent.keywords):
+                continue
+            raise fail('v2 preparation imported authority escapes fixed uses: ' + name)
+
+    for name in fixed_calls:
+        closed_import_uses(name)
+    for name, value in (('VERSION', 2), ('PREPARATION_KIND', 'd4d_native_shared_preparation_v2'),
+                        ('PREPARATION_SCOPE', 'offline_inputs_only_not_permission_or_launch_authority')):
+        expected = ast.parse(f'{name} = {value!r}').body[0]
+        bindings = [node for node in tree.body if dump(node) == dump(expected)]
+        if len(bindings) != 1 or any(
+                (isinstance(node, ast.Name) and node.id == name
+                 and isinstance(node.ctx, (ast.Store, ast.Del)) and node is not bindings[0].targets[0])
+                or _rebinding(node, name, command) for node in ast.walk(tree)):
+            raise fail('v2 preparation identity is not exact: ' + name)
     # Imported producer/contract names must retain the bindings used by the
     # templates. A shadow, duplicate import, assignment or monkeypatch refuses.
     def bound(module, statement, name):
@@ -12216,12 +12287,19 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         ('from . import native_shared_selection as selection', 'selection'),
         ('from . import native_execution_authority_v2 as authority', 'authority'),
         ('from .native_execution_registration import validate_runtime', 'validate_runtime'),
+        ('from pathlib import Path', 'Path'),
+        ('import re', 're'),
     ):
         bound(tree, statement, name)
     for name, producer in producers.items():
         if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
                or _rebinding(n, name, producer) for n in ast.walk(tree) if n is not producer):
             raise fail('v2 preparation producer is replaced: ' + name)
+        direct_calls = {id(node.func) for node in ast.walk(tree) if isinstance(node, ast.Call)}
+        if any(isinstance(node, ast.Name) and node.id == name
+               and isinstance(node.ctx, ast.Load) and id(node) not in direct_calls
+               for node in ast.walk(tree)):
+            raise fail('v2 render function escapes its fixed direct callers: ' + name)
     # Module-level CLI rebinding must not bypass the fixed decorated command.
     for n in cli.body:
         if n is command:
@@ -12229,6 +12307,11 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         if any((isinstance(x, ast.Name) and x.id == command.name and isinstance(x.ctx, (ast.Store, ast.Del)))
                or _rebinding(x, command.name, command) for x in ast.walk(n)):
             raise fail('v2 render command is replaced')
+    direct_cli_calls = {id(node.func) for node in ast.walk(cli) if isinstance(node, ast.Call)}
+    if any(isinstance(node, ast.Name) and node.id == command.name
+           and isinstance(node.ctx, ast.Load) and id(node) not in direct_cli_calls
+           for node in ast.walk(cli)):
+        raise fail('v2 render function escapes its fixed direct callers: ' + command.name)
     import hashlib
     for source, digest in _NATIVE_V2_RENDER_SOURCES.items():
         try:
@@ -12459,8 +12542,10 @@ from data_sheets_schema.native_shared_controller import bind_runtime
             'api_phase_builder': 'refused', 'instruction_builder': relative + ':instruction',
             'cli': 'd4d prompt render-native-shared',
             'runtime_binding': {'path': binder, 'source_present': binder_present,
-                'basis': 'Source presence only; the binder is not executed or its acceptance inferred.'
-                if binder_present else 'Referenced binder source is absent in this snapshot; runnable rendering is not established.'},
+                'basis': ('Exact captured-runtime/instruction transport source proof only; '
+                          'installed U1 guards and runnable rendering remain separate acceptance gates.')
+                if v2_route else ('Source presence only; the binder is not executed or its acceptance inferred.'
+                if binder_present else 'Referenced binder source is absent in this snapshot; runnable rendering is not established.')},
             'scope': 'Offline rendering of the explicit native selection and runtime declaration; '
                      'separate execution registration and controller acceptance are not established by this scan.',
             'model_calls_minimum': None, 'evidence': evidence}
@@ -12477,6 +12562,7 @@ def derive_native_shared_procedure(root: Path) -> dict:
     paths = {name: prefix + name + '.py' for name in (
         'native_shared_stage', 'native_shared_receipts', 'typed_audit',
         'audit_omissions', 'native_shared_render')}
+    # Read the pure package body, never the CLI or a fallback legacy module.
     paths['native_shared_stage'] = prefix + 'native_shared_stage/__init__.py'
     trees = {name: _tree(root / path) for name, path in paths.items()}
     fail = lambda detail: _not_derived('native shared response roster', detail)
@@ -12644,6 +12730,13 @@ def derive_native_shared_procedure(root: Path) -> dict:
     if actual_options != allowed_options:
         raise fail('native packet options are replaced, mutated or aliased')
     for node in ast.walk(trees['native_shared_stage']):
+        # These reflective reads expose the same mutable options without an
+        # Attribute node. They have no use in the fixed producer; refuse the
+        # receiver escape rather than trying to infer a later mutation.
+        if (isinstance(node, ast.Call) and ast.unparse(node.func) in {'getattr', 'vars'}
+                and node.args and isinstance(node.args[0], ast.Name)
+                and node.args[0].id == 'self'):
+            raise fail('native packet options are replaced, mutated or aliased')
         if (isinstance(node, ast.Call) and ast.unparse(node.func) in {'setattr', 'delattr'}
                 and len(node.args) >= 2 and isinstance(node.args[1], ast.Constant)
                 and node.args[1].value == 'options') or (

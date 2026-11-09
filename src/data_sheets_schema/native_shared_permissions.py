@@ -20,6 +20,7 @@ from urllib.parse import urlsplit
 from data_sheets_schema import native_shared_contract as contract
 from data_sheets_schema import native_shared_policy as command_policy
 from data_sheets_schema import native_shared_runtime_values as runtime_values
+from data_sheets_schema import native_model_aliases
 
 KIND = contract.KINDS['permission']
 EXPECTED_KIND = contract.KINDS['permission_expected']
@@ -155,6 +156,7 @@ def _runtime(value):
     _need(awake['policy'] in ('macos_iokit_ims_v1','not_applicable'), 'unknown keep-awake declaration')
     _text(awake['host_platform'], 'host platform'); _text(awake['basis'], 'keep-awake basis')
     _need(awake['policy'] != 'macos_iokit_ims_v1' or awake['host_platform'] == 'darwin', 'IOKit platform differs')
+    native_model_aliases.model_aliases(value)
 
 
 def _dependencies():
@@ -251,6 +253,7 @@ def _source_closure(expected):
                          ('data_sheets_schema.native_shared_effects', effects.__file__),
                          ('data_sheets_schema.native_shared_policy', command_policy.__file__),
                          ('data_sheets_schema.native_shared_runtime_values', runtime_values.__file__),
+                         ('data_sheets_schema.native_model_aliases', native_model_aliases.__file__),
                          ('data_sheets_schema.native_shared_permission_protocol', _permission_protocol().__file__)]:
         raw = Path(file).read_bytes()
         wanted = {'module': module, 'path': str(Path(file).resolve()), 'bytes': len(raw), 'sha256': _sha(raw)}
@@ -682,7 +685,7 @@ def _members(value):
     return raw
 
 
-def _native_scope(event, session, model, role=None):
+def _native_scope(event, session, aliases, role=None):
     _need(event.get('session_id') == session and event.get('parent_tool_use_id') is None,
           'frame is outside the initialized parent session')
     containers = [event]
@@ -690,13 +693,12 @@ def _native_scope(event, session, model, role=None):
         _need(type(event['message']) is dict, 'message is not an object')
         containers.append(event['message'])
     for value in containers:
-        if 'model' in value:
-            _need(value['model'] == model, 'frame contradicts selected model')
         if role is not None and 'role' in value:
             _need(value['role'] == role, 'frame contradicts event role')
+    native_model_aliases.require_frame_models(event, aliases)
 
 
-def _settled_text(events, offset, session, model):
+def _settled_text(events, offset, session, aliases):
     while offset < len(events):
         event = events[offset]
         if event.get('type') != 'assistant':
@@ -705,7 +707,7 @@ def _settled_text(events, offset, session, model):
         if not (type(content) is list and content and all(type(x) is dict and set(x) == {'type','text'}
                 and x['type'] == 'text' and type(x['text']) is str for x in content)):
             break
-        _native_scope(event, session, model, 'assistant')
+        _native_scope(event, session, aliases, 'assistant')
         offset += 1
     return offset
 
@@ -834,7 +836,9 @@ def _trace_body(expected, selection, trace, raw, controls):
     events = _rows(raw[prefix + 'transcript.jsonl'], 'transcript')
     records = _rows(raw[prefix + 'control.jsonl'], 'control')
     clean = [{k:v for k,v in row.items() if k != 'at'} for row in records]
-    native = _permission_protocol(); model = expected['runtime']['model']
+    native = _permission_protocol()
+    aliases = native_model_aliases.model_aliases(expected['runtime'])
+    model = aliases['requested']
     init_id = native.initialization_id()
     ack = {'type': 'control_response', 'response': {'subtype': 'success', 'request_id': init_id}}
     _need(_same(clean[0], {'kind': 'initialize_sent', 'policy_sha256': native.policy_digest(policy),
@@ -849,7 +853,7 @@ def _trace_body(expected, selection, trace, raw, controls):
     session = init.get('session_id')
     _need(type(session) is str and re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}', session),
           'invalid parent session')
-    _native_scope(init, session, model)
+    _native_scope(init, session, aliases)
     recipe = _recipe_data(expected, selection, launch, session, roots_checked=True)
     projected = projection(expected, selection, launch, session, policy=policy, recipe=recipe)
     _need(_same(_json(raw[prefix + 'projection.json']), projected), 'projection is not independently derived')
@@ -866,10 +870,10 @@ def _trace_body(expected, selection, trace, raw, controls):
     offset, request_ids, outcomes = 2, set(), []
     build_view = _view_factory(expected, selection, launch, session, policy=policy, recipe=recipe)
     for number, case in enumerate(cases):
-        offset = _settled_text(events, offset, session, model)
+        offset = _settled_text(events, offset, session, aliases)
         call, callback = events[offset:offset+2]; offset += 2
         _need(call.get('type') == 'assistant', 'tool call is out of order')
-        _native_scope(call, session, model, 'assistant')
+        _native_scope(call, session, aliases, 'assistant')
         wanted_block = {'type': 'tool_use', 'id': case['id'], 'name': case['tool'], 'input': case['input']}
         _need(_same(call.get('message', {}).get('content'), [wanted_block]), 'call differs from required case')
         request_id = callback.get('request_id')
@@ -901,7 +905,7 @@ def _trace_body(expected, selection, trace, raw, controls):
                     'response': native.hook_output(*classification)}}}
             _need(_same(clean[number+2], decision), 'parent decision contradicts recomputed classification')
             _need(result.get('type') == 'user', 'missing settled result')
-            _native_scope(result, session, model, 'user')
+            _native_scope(result, session, aliases, 'user')
             _tool_result(result, case, expected, selection, launch, session, raw['source.before'],
                          policy=policy, recipe=recipe)
             result_sha = _sha(_encoded(result))
@@ -911,9 +915,10 @@ def _trace_body(expected, selection, trace, raw, controls):
             'result_sha256': result_sha, 'stop_sha256': stop_sha})
     outcome = _json(raw[prefix + 'outcome.json'])
     if trace == 'settled':
-        offset = _settled_text(events, offset, session, model)
+        offset = _settled_text(events, offset, session, aliases)
         _need(len(events) == offset + 1, 'extra/pending/post-terminal evidence')
-        terminal = events[offset]; _native_scope(terminal, session, model)
+        terminal = events[offset]; _native_scope(terminal, session, aliases)
+        native_model_aliases.require_model_usage(terminal, aliases)
         _need(terminal.get('type') == 'result' and terminal.get('is_error') is False and terminal.get('error') is None
               and terminal.get('subtype', 'success') == 'success' and terminal.get('terminal_reason') == 'completed'
               and terminal.get('stop_reason') == 'end_turn', 'terminal contradicts successful completion')

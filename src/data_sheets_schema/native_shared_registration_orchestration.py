@@ -58,7 +58,7 @@ def registration(composition_path, system_path, **kwargs):
 
     RunSpec precondition: Caller supplies explicit composition/system paths; _registration_body verifies preparation and composition before creating an execution proposal.
     """
-    body = _registration_body(composition_path, system_path, **kwargs)
+    body = _require_runtime_observation(_registration_body(composition_path, system_path, **kwargs))
     with authority.loaded_dependencies(body['dependencies']) as controls:
         value = controls['prepare_registration_v2'].envelope(body)
         controls['prepare_registration_v2'].require_envelope(value)
@@ -101,7 +101,7 @@ def verified_v2_body(body_raw, *, preparation_raw):
         raise ValueError('incomplete native shared execution registration') from exc
     if c.canonical(value) != c.canonical(expected):
         raise ValueError('execution registration differs from its selected authorities')
-    return value
+    return _require_runtime_observation(value)
 
 def verified(raw):
     """Explicit v2 outer-envelope verifier; no historical fallback.
@@ -112,4 +112,34 @@ def verified(raw):
     """
     dependencies = authority.dependency_identity()
     with control_loading.loaded_controls(dependencies) as controls:
-        return execution_v2.verified(raw, classifier_projection=controls)
+        value = execution_v2.verified(raw, classifier_projection=controls)
+    return _require_runtime_observation(value)
+
+
+def _require_runtime_observation(value):
+    """Require U4b's observed registration fields at the host-reading boundary.
+
+    The fixed input-only reconstruction graph remains unchanged. Historical
+    other-model runtime profiles retain their own validators. The current
+    model identity independently requires U4b evidence, so removing its basis
+    discriminator cannot downgrade a proposal or readback to historical rules.
+    """
+    from .native_u4b_runtime import MODEL, is_prepared_runtime, validate_prepared_runtime
+    runtime = value['runtime']
+    if ((type(runtime) is dict and runtime.get('model') == MODEL)
+            or is_prepared_runtime(runtime)):
+        validate_prepared_runtime(runtime)
+        from .native_u4b_probe_sequence import validate_bound_probe
+        if type(value.get('permission_probe')) is not str:
+            raise ValueError('A3 registration requires its bound permission probe')
+        c._hash(value.get('permission_probe_sha256'), 'registered permission probe sha256')
+        bound = validate_bound_probe(runtime, value['permission_probe'])
+        pin = bound.get('permission') if type(bound) is dict else None
+        if (type(bound) is not dict or bound.get('checked') is not True or bound.get('passed') is not True
+                or type(pin) is not dict or set(pin) != {'path', 'sha256', 'bytes'}
+                or type(pin.get('bytes')) is not int
+                or not 0 < pin['bytes'] <= c.HARD_LIMITS['permission_wire_bytes']
+                or pin.get('path') != value['permission_probe']
+                or pin.get('sha256') != value['permission_probe_sha256']):
+            raise ValueError('bound permission result differs from the registered path and bytes')
+    return value

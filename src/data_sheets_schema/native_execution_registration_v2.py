@@ -252,9 +252,17 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks)
         profile=inputs['profile']['name'], profile_basis=inputs['profile']['basis'],
         runtime=c.RUNTIME, provider=runtime['provider'], reasoning_effort=runtime['effort'],
         prompt_text_env=True, run_date=run_date, native_shared_generation_version=1,
-        native_shared_generation_registration=captured.registration.raw.decode('utf-8'))
+        native_shared_generation_registration=captured.registration.raw.decode('utf-8'),
+        registered_input_paths=True)
     _require_registered_input_spellings(spec)
     spec._native_shared_runtime_capture = runtime_capture
+    # D114 is an explicit U4b successor; historical shared-native stays literal.
+    basis = runtime['limits_basis']
+    if basis.lstrip().startswith('{'):
+        declared = c.strict_json(basis.encode('utf-8'), 'runtime profile basis', 16384)
+        if type(declared) is dict and declared.get('kind') == 'd4d_native_u4b_runtime_basis':
+            from .agentic_runtime import toolchain
+            spec._agentic_toolchain = toolchain(native_shared=True)
     spec._native_shared_max_draft_checks = max_draft_checks
     instruction = spec.instruction
     dependencies = authority.dependency_identity()
@@ -455,18 +463,28 @@ def _authorizations(raw, value, *, review_path, ci_path, launch_word_path):
                 or record['version'] != VERSION or any(record.get(k) != v for k, v in binding.items())):
             raise ValueError(name + ' must bind this exact v2 execution, attempt and source')
     review = records['review']
-    c.exact(review, set(binding) | {'kind', 'version', 'reviewer', 'author', 'independent',
-        'decision', 'reviewed_at', 'evidence'}, 'v2 independent review')
-    if review['kind'] != 'd4d_native_execution_review_v2':
-        raise ValueError('v2 review kind is not independent review evidence')
-    for key in ('reviewer', 'author', 'reviewed_at', 'evidence'):
-        _text(review[key], key)
-    if review['independent'] is not True:
-        raise ValueError('v2 review independence must be explicit')
-    if review['decision'] != 'approved':
-        raise ValueError('v2 review decision must be approved')
-    if review['reviewer'] == review['author']:
-        raise ValueError('v2 review cannot approve its own author')
+    from . import native_launch_review as launch_review
+    from .native_u4b_runtime import is_prepared_runtime
+    if review.get('kind') == launch_review.KIND:
+        launch_review.validate_bundle(raw, captured['review'].raw, captured['launch_word'].raw)
+    else:
+        # Historical approval-only parser callers supply binding fields.
+        # Current execution independently requires its complete U4b runtime
+        # before admission; this does not make a partial body executable.
+        if is_prepared_runtime(value.get('runtime')):
+            raise ValueError('U4b requires its two-review owner-terms bundle')
+        c.exact(review, set(binding) | {'kind', 'version', 'reviewer', 'author', 'independent',
+            'decision', 'reviewed_at', 'evidence'}, 'v2 independent review')
+        if review['kind'] != 'd4d_native_execution_review_v2':
+            raise ValueError('v2 review kind is not independent review evidence')
+        for key in ('reviewer', 'author', 'reviewed_at', 'evidence'):
+            _text(review[key], key)
+        if review['independent'] is not True:
+            raise ValueError('v2 review independence must be explicit')
+        if review['decision'] != 'approved':
+            raise ValueError('v2 review decision must be approved')
+        if review['reviewer'] == review['author']:
+            raise ValueError('v2 review cannot approve its own author')
     ci = records['ci']
     c.exact(ci, set(binding) | {'kind', 'version', 'checks', 'workflow_event', 'workflow_ref',
         'workflow_sha256', 'tested_commit'}, 'v2 CI evidence')

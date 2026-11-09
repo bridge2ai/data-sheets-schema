@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.10.1
+  version: 1.10.2
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -50,6 +50,17 @@ expansions, refusing item/method mutations and alias escapes. These are
 source proofs, not permission, receipt validity or completed-execution
 evidence. The separately reviewed generic plain-alias model-text gap (B2)
 remains outside this revision.
+
+Version 1.10.2 composes those contracts with U5's closed imported-authority
+uses, function-escape refusals and preparation identity checks. The integrated
+producer keeps the current-module runtime reader and requires explicit
+registered input paths. It accepts that complete producer with or without the
+exact D114 runtime-basis toolchain selection immediately after runtime binding;
+it does not admit the older saved-module reader or remove arbitrary branches.
+The stage proof also refuses reflective receiver exposure through `getattr`
+and `vars`, which otherwise bypassed the literal `self.options` checks. All
+earlier package-command, parser, response-roster and loaded-source proofs remain
+in force. This integration still does not establish runtime admission.
 
 ## Run it
 
