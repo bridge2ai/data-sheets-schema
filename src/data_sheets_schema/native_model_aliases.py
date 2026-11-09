@@ -18,15 +18,26 @@ def model_aliases(runtime):
         raise ValueError('native model identity must be explicit text')
     model = runtime['model']
     from . import native_runtime_profiles as profiles
-    profile = profiles.profile_name(runtime)
     raw = runtime.get('limits_basis')
     basis = None
     if type(raw) is str and raw.lstrip().startswith('{'):
         try:
             basis = c.strict_json(raw.encode('utf-8'), 'native model alias basis', 4096)
         except ValueError:
-            if model == REQUESTED:
+            # Historical aliases never interpreted opaque basis text. Retain
+            # that readback behavior only when no current/profile marker exists;
+            # malformed declarations cannot downgrade a software-test identity.
+            reserved = (profiles.SYNTHETIC_PROFILE, profiles.SYNTHETIC_PROVIDER,
+                        profiles.SYNTHETIC_REQUESTED, profiles.SYNTHETIC_RETURNED)
+            markers = [model, runtime.get('provider')]
+            auth = runtime.get('auth')
+            if type(auth) is dict:
+                markers.extend(auth.values())
+            if (model == REQUESTED or any(type(item) is str and item in reserved for item in markers)
+                    or any(marker in raw for marker in (KIND, PROVISIONAL_KIND, 'profile', *reserved))):
                 raise
+            return {'requested': model, 'returned': model}
+    profile = profiles.profile_name(runtime)
     current = model == REQUESTED or type(basis) is dict and basis.get('kind') in (KIND, PROVISIONAL_KIND)
     if not current:
         return {'requested': model, 'returned': model}

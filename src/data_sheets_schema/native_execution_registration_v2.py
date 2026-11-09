@@ -227,13 +227,67 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks)
 
     RunSpec boundary: validated-caller
 
-    RunSpec precondition: Caller supplies explicit selection and runtime paths; this production entry refuses synthetic runtime authority, then _prepare constructs and entry-checks the fresh RunSpec before instruction, input_identity or render_spec access.
+    RunSpec precondition: Caller supplies explicit selection and runtime paths; this production entry refuses synthetic runtime authority, constructs RunSpec and calls _require_registered_input_spellings before attaching runtime or rendering instruction, input_identity or render_spec.
     """
-    from .native_runtime_profiles import PRODUCTION_PROFILE, require_production
-    require_production(c.strict_json(_read(str(runtime_path), 'runtime declaration',
-                                         c.HARD_LIMITS['input_bytes']).raw, 'runtime declaration'))
-    return _prepare(selection_path, runtime_path, job_id=job_id, run_date=run_date,
-                    max_draft_checks=max_draft_checks, expected_profile=PRODUCTION_PROFILE)
+    from .api_runner import RunSpec, _require_registered_input_spellings
+    from .native_shared_evidence import read_regular as current_read_regular
+    from .native_runtime_profiles import require_production
+    _job_id(job_id)
+    c.positive_int(max_draft_checks, 'maximum draft checks')
+    if type(run_date) is not str or re.fullmatch(r'\d{4}-\d{2}-\d{2}', run_date) is None:
+        raise ValueError('run_date must be an explicit ISO date')
+    from datetime import date
+    date.fromisoformat(run_date)
+    if Path.cwd().resolve() != authority.ROOT:
+        raise ValueError('v2 preparation requires its exact source checkout root')
+    # The current source owns both reads. Reject test authority before any
+    # selection construction; do not borrow the module-level captured reader.
+    runtime_capture = current_read_regular(str(runtime_path), 'runtime_declaration',
+        max_bytes=c.HARD_LIMITS['input_bytes']).captured
+    declared_runtime = c.strict_json(runtime_capture.raw, 'runtime declaration')
+    require_production(declared_runtime)
+    runtime = validate_runtime(declared_runtime)
+    captured = selection.capture(selection_path)
+    doc = captured.document()
+    inputs = doc['inputs']
+    manifest = inputs['source_manifest']
+    spec = RunSpec(**doc['run'], condition=c.CONDITION, render_version=c.RENDERER,
+        bundle=Path(inputs['bundle']['path']), chunk_manifest=Path(inputs['chunk_manifest']['path']),
+        manifest=None if manifest is None else Path(manifest['path']),
+        profile=inputs['profile']['name'], profile_basis=inputs['profile']['basis'],
+        runtime=c.RUNTIME, provider=runtime['provider'], reasoning_effort=runtime['effort'],
+        prompt_text_env=True, run_date=run_date, native_shared_generation_version=1,
+        native_shared_generation_registration=captured.registration.raw.decode('utf-8'),
+        registered_input_paths=True)
+    _require_registered_input_spellings(spec)
+    spec._native_shared_runtime_capture = runtime_capture
+    # D114 is an explicit U4b successor; historical shared-native stays literal.
+    basis = runtime['limits_basis']
+    if basis.lstrip().startswith('{'):
+        declared = c.strict_json(basis.encode('utf-8'), 'runtime profile basis', 16384)
+        if type(declared) is dict and declared.get('kind') == 'd4d_native_u4b_runtime_basis':
+            from .agentic_runtime import toolchain
+            spec._agentic_toolchain = toolchain(native_shared=True)
+    spec._native_shared_max_draft_checks = max_draft_checks
+    instruction = spec.instruction
+    dependencies = authority.dependency_identity()
+    pins = _pin_map(captured, runtime_capture, dependencies)
+    pins[runtime['executable']['path']] = runtime['executable']['sha256']
+    body = {'kind': PREPARATION_KIND, 'schema_version': VERSION, 'execution': PREPARATION_SCOPE,
+        'job_id': job_id, 'working_directory': str(authority.ROOT), 'dependencies': dependencies,
+        'selection': _file_pin(captured.registration), 'runtime': _file_pin(runtime_capture),
+        'run_date': run_date, 'max_draft_checks': max_draft_checks, 'render_spec': spec.render_spec(),
+        'input_identity': spec.input_identity(), 'instruction': instruction,
+        'instruction_sha256': c.sha(instruction.encode('utf-8')),
+        'outputs': {name: str(Path(path).absolute()) for name, path in {
+            'full': spec.full_path, 'core': spec.core_path, 'report': spec.report_path,
+            'provenance': spec.provenance_path}.items()}, 'pinned_files': pins}
+    if (selection.capture(selection_path) != captured
+            or current_read_regular(str(runtime_path), 'runtime_declaration',
+                max_bytes=c.HARD_LIMITS['input_bytes']).captured != runtime_capture
+            or authority.dependency_identity() != dependencies):
+        raise ValueError('v2 preparation authority changed during capture')
+    return _envelope(body, dependencies)
 
 
 def prepare_synthetic(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):

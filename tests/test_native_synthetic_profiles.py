@@ -156,11 +156,28 @@ def test_real_preparation_refuses_synthetic_before_constructing_selection(runtim
     from data_sheets_schema import native_execution_registration_v2 as preparation
     def forbidden(*args, **kwargs):
         pytest.fail('real preparation must refuse before constructing selection')
-    monkeypatch.setattr(preparation, '_prepare', forbidden)
+    monkeypatch.setattr(preparation.selection, 'capture', forbidden)
     path = tmp_path / 'runtime.json'
     path.write_text(json.dumps(runtime))
     with pytest.raises(ValueError, match='real native entry refuses'):
         preparation.prepare('unused', str(path), job_id='unused', run_date='2026-11-09', max_draft_checks=3)
+
+
+@pytest.mark.parametrize('marker', ['model', 'provider', 'auth', 'profile', 'kind'])
+def test_malformed_historical_basis_exception_never_downgrades_synthetic_markers(marker):
+    value = {'model': 'other-historical-model', 'limits_basis': '{not previously interpreted'}
+    if marker == 'model':
+        value['model'] = profiles.SYNTHETIC_REQUESTED
+    elif marker == 'provider':
+        value['provider'] = profiles.SYNTHETIC_PROVIDER
+    elif marker == 'auth':
+        value['auth'] = {'subscriptionType': profiles.SYNTHETIC_PROFILE}
+    elif marker == 'profile':
+        value['limits_basis'] = '{"profile":"synthetic-software-test"'
+    else:
+        value['limits_basis'] = '{"kind":"' + aliases.KIND + '"'
+    with pytest.raises(ValueError):
+        aliases.model_aliases(value)
 
 
 def test_real_registration_refuses_before_observation(runtime, monkeypatch):

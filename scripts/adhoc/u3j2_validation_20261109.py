@@ -81,7 +81,7 @@ def main():
         if not (tree / node.split('::')[0]).is_file():
             raise ValueError('missing selected test: ' + node)
     env = os.environ.copy()
-    if args.cohort == 'parity':
+    if args.cohort.startswith('parity'):
         env['U3F_PARITY'] = '1'
     command = [sys.executable, '-S', '-P', '-B',
         str(ROOT / 'scripts/adhoc/run_native_u3j2_20261109.py'),

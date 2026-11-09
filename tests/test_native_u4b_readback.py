@@ -16,6 +16,7 @@ import pytest
 from data_sheets_schema import native_execution_orchestration as engine
 from data_sheets_schema import native_execution_registration_v2 as admission
 from data_sheets_schema import native_launch_review as review
+from data_sheets_schema.native_runtime_profiles import profile_name
 from data_sheets_schema import native_shared_evidence as evidence
 from data_sheets_schema import native_shared_execution_orchestration as native
 from data_sheets_schema import native_shared_registration_orchestration as registration
@@ -31,6 +32,9 @@ def publication(tmp_path, monkeypatch, mode='buffered'):
     """Persist a synthetic failure; every copied authority byte is still joined."""
     arguments, original = component(tmp_path, monkeypatch)
     value = deepcopy(original)
+    # This component retains the production-profile wire with invented runtime
+    # observations; it does not exercise the separate synthetic launch route.
+    profile = profile_name(value['runtime'])
     value['composition_sha256'] = guard.sha(value['composition_raw_json'].encode())
     raw = guard.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,
                            'registration': value})
@@ -91,6 +95,7 @@ def publication(tmp_path, monkeypatch, mode='buffered'):
 
     monkeypatch.setattr(admission, '_authorizations', approvals)
     started = {'kind': native.KIND, 'version': 1, 'state': 'started',
+        'profile': profile,
         'attempt_id': value['attempt_id'], 'started_at': now,
         'registration_sha256': guard.sha(raw), 'composition_sha256': value['composition_sha256'],
         'authority': authority, 'dispatch_limit': 1,
@@ -117,6 +122,7 @@ def publication(tmp_path, monkeypatch, mode='buffered'):
             'links': info.st_nlink, 'device': info.st_dev, 'inode': info.st_ino,
             'size': info.st_size, 'mtime_ns': info.st_mtime_ns}
     result = {'kind': native.KIND, 'version': 1, 'attempt_id': value['attempt_id'],
+        'profile': profile,
         'composition_sha256': value['composition_sha256'], 'registration_sha256': guard.sha(raw),
         'started_sha256': guard.sha(started_raw), **engine.UNASSESSED,
         'authority': authority, 'state': 'failed', 'runtime_gates_passed': False,
