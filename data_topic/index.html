@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -412,6 +419,45 @@ Alias: data_topic</p>
 <li>Range: <a href="../Uriorcurie/">Uriorcurie</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:termSources</td>
+<td>GO, MeSH, EFO, NCIT</td>
+</tr>
+<tr>
+<td>d4d:termSourceIdentifierForms</td>
+<td>{"version":1,"sources":[</td>
+</tr>
+<tr>
+<td>{"id":"go","label":"GO","curies":[{"prefix":"GO","local_prefix":""}],"iri_bases":["http://purl.obolibrary.org/obo/GO_","https://purl.obolibrary.org/obo/GO_"]},</td>
+<td></td>
+</tr>
+<tr>
+<td>{"id":"mesh","label":"MeSH","curies":[{"prefix":"MESH","local_prefix":""}],"iri_bases":["http://id.nlm.nih.gov/mesh/","https://id.nlm.nih.gov/mesh/","http://purl.bioontology.org/ontology/MESH/","https://purl.bioontology.org/ontology/MESH/"]},</td>
+<td></td>
+</tr>
+<tr>
+<td>{"id":"efo","label":"EFO","curies":[{"prefix":"EFO","local_prefix":""}],"iri_bases":["http://www.ebi.ac.uk/efo/EFO_","https://www.ebi.ac.uk/efo/EFO_","http://purl.obolibrary.org/obo/EFO_","https://purl.obolibrary.org/obo/EFO_"]},</td>
+<td></td>
+</tr>
+<tr>
+<td>{"id":"ncit","label":"NCIT","curies":[{"prefix":"NCIT","local_prefix":""}],"iri_bases":["http://purl.obolibrary.org/obo/NCIT_","https://purl.obolibrary.org/obo/NCIT_"]}</td>
+<td></td>
+</tr>
+<tr>
+<td>]}</td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -439,6 +485,24 @@ Alias: data_topic</p>
 <details>
 
 <pre><code class="language-yaml">name: data_topic
+annotations:
+  d4d:termSources:
+    tag: d4d:termSources
+    value: GO, MeSH, EFO, NCIT
+  d4d:termSourceIdentifierForms:
+    tag: d4d:termSourceIdentifierForms
+    value: &quot;{\&quot;version\&quot;:1,\&quot;sources\&quot;:[\n  {\&quot;id\&quot;:\&quot;go\&quot;,\&quot;label\&quot;:\&quot;GO\&quot;,\&quot;curies\&quot;\
+      :[{\&quot;prefix\&quot;:\&quot;GO\&quot;,\&quot;local_prefix\&quot;:\&quot;\&quot;}],\&quot;iri_bases\&quot;:[\&quot;http://purl.obolibrary.org/obo/GO_\&quot;\
+      ,\&quot;https://purl.obolibrary.org/obo/GO_\&quot;]},\n  {\&quot;id\&quot;:\&quot;mesh\&quot;,\&quot;label\&quot;:\&quot;\
+      MeSH\&quot;,\&quot;curies\&quot;:[{\&quot;prefix\&quot;:\&quot;MESH\&quot;,\&quot;local_prefix\&quot;:\&quot;\&quot;}],\&quot;iri_bases\&quot;\
+      :[\&quot;http://id.nlm.nih.gov/mesh/\&quot;,\&quot;https://id.nlm.nih.gov/mesh/\&quot;,\&quot;http://purl.bioontology.org/ontology/MESH/\&quot;\
+      ,\&quot;https://purl.bioontology.org/ontology/MESH/\&quot;]},\n  {\&quot;id\&quot;:\&quot;efo\&quot;,\&quot;label\&quot;\
+      :\&quot;EFO\&quot;,\&quot;curies\&quot;:[{\&quot;prefix\&quot;:\&quot;EFO\&quot;,\&quot;local_prefix\&quot;:\&quot;\&quot;}],\&quot;iri_bases\&quot;\
+      :[\&quot;http://www.ebi.ac.uk/efo/EFO_\&quot;,\&quot;https://www.ebi.ac.uk/efo/EFO_\&quot;,\&quot;http://purl.obolibrary.org/obo/EFO_\&quot;\
+      ,\&quot;https://purl.obolibrary.org/obo/EFO_\&quot;]},\n  {\&quot;id\&quot;:\&quot;ncit\&quot;,\&quot;label\&quot;:\&quot;\
+      NCIT\&quot;,\&quot;curies\&quot;:[{\&quot;prefix\&quot;:\&quot;NCIT\&quot;,\&quot;local_prefix\&quot;:\&quot;\&quot;}],\&quot;iri_bases\&quot;\
+      :[\&quot;http://purl.obolibrary.org/obo/NCIT_\&quot;,\&quot;https://purl.obolibrary.org/obo/NCIT_\&quot;\
+      ]}\n]}&quot;
 description: 'General topic of each instance, as an ontology term — records use GO,
   MeSH, EFO and NCIT IRIs and terms from a pinned standards registry. Where no term
   is found, prefer omission over a prose topic.

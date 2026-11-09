@@ -432,6 +432,26 @@ Alias: data_substrate</p>
 <td>d4d:termSources</td>
 <td>EDAM Data, EDAM Format, IANA media types</td>
 </tr>
+<tr>
+<td>d4d:termSourceIdentifierForms</td>
+<td>{"version":1,"sources":[</td>
+</tr>
+<tr>
+<td>{"id":"edam-data","label":"EDAM Data","curies":[{"prefix":"EDAM","local_prefix":"data_"}],"iri_bases":["http://edamontology.org/data_"]},</td>
+<td></td>
+</tr>
+<tr>
+<td>{"id":"edam-format","label":"EDAM Format","curies":[{"prefix":"EDAM","local_prefix":"format_"}],"iri_bases":["http://edamontology.org/format_"]},</td>
+<td></td>
+</tr>
+<tr>
+<td>{"id":"iana-media-types","label":"IANA media types","curies":[{"prefix":"mediatypes","local_prefix":""}],"iri_bases":["https://www.iana.org/assignments/media-types/"]}</td>
+<td></td>
+</tr>
+<tr>
+<td>]}</td>
+<td></td>
+</tr>
 </tbody>
 </table>
 <h3 id="schema-source">Schema Source</h3>
@@ -465,6 +485,16 @@ annotations:
   d4d:termSources:
     tag: d4d:termSources
     value: EDAM Data, EDAM Format, IANA media types
+  d4d:termSourceIdentifierForms:
+    tag: d4d:termSourceIdentifierForms
+    value: &quot;{\&quot;version\&quot;:1,\&quot;sources\&quot;:[\n  {\&quot;id\&quot;:\&quot;edam-data\&quot;,\&quot;label\&quot;:\&quot;EDAM\
+      \ Data\&quot;,\&quot;curies\&quot;:[{\&quot;prefix\&quot;:\&quot;EDAM\&quot;,\&quot;local_prefix\&quot;:\&quot;data_\&quot;}],\&quot;iri_bases\&quot;\
+      :[\&quot;http://edamontology.org/data_\&quot;]},\n  {\&quot;id\&quot;:\&quot;edam-format\&quot;,\&quot;label\&quot;\
+      :\&quot;EDAM Format\&quot;,\&quot;curies\&quot;:[{\&quot;prefix\&quot;:\&quot;EDAM\&quot;,\&quot;local_prefix\&quot;:\&quot;format_\&quot;\
+      }],\&quot;iri_bases\&quot;:[\&quot;http://edamontology.org/format_\&quot;]},\n  {\&quot;id\&quot;:\&quot;iana-media-types\&quot;\
+      ,\&quot;label\&quot;:\&quot;IANA media types\&quot;,\&quot;curies\&quot;:[{\&quot;prefix\&quot;:\&quot;mediatypes\&quot;,\&quot;local_prefix\&quot;\
+      :\&quot;\&quot;}],\&quot;iri_bases\&quot;:[\&quot;https://www.iana.org/assignments/media-types/\&quot;]}\n\
+      ]}&quot;
 description: 'Type or format of data (e.g., raw text, images): an EDAM Data or Format
   term or an IANA media type, written as a CURIE with the schema''s declared `EDAM`
   or `mediatypes` prefix, when the documents supply one; or a term from the selected

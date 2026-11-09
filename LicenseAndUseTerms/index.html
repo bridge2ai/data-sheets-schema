@@ -251,7 +251,7 @@
 
 
 
-        LicenseAndUseTerms --&gt; "0..1" DataUsePermissionEnum : data_use_permission
+        LicenseAndUseTerms --&gt; "*" DataUsePermissionEnum : data_use_permission
         click DataUsePermissionEnum href "../DataUsePermissionEnum/"
 
 
@@ -307,8 +307,8 @@
 </tr>
 <tr>
 <td><a href="../data_use_permission/">data_use_permission</a></td>
-<td>0..1 <br/> <a href="../DataUsePermissionEnum/">DataUsePermissionEnum</a></td>
-<td>Structured data use permissions using the Data Use Ontology (DUO)</td>
+<td>* <br/> <a href="../DataUsePermissionEnum/">DataUsePermissionEnum</a></td>
+<td>Structured data use permissions using the Data Use Ontology (DUO): one primar...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -441,10 +441,10 @@ attributes:
       d4d:docExample:
         tag: d4d:docExample
         value: health_medical_biomedical_research
-    description: Structured data use permissions using the Data Use Ontology (DUO).
-      Specifies permitted uses (e.g., general research, health/medical research, disease-specific
-      research) and restrictions (e.g., non-commercial use, ethics approval required,
-      collaboration required). See https://github.com/EBISPOT/DUO.
+    description: 'Structured data use permissions using the Data Use Ontology (DUO):
+      one primary permission (e.g., general research, health/medical research, disease-specific
+      research) plus any applicable modifiers (e.g., non-commercial use, ethics approval
+      required, collaboration required). See https://github.com/EBISPOT/DUO.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     exact_mappings:
     - DUO:0000001
@@ -453,6 +453,7 @@ attributes:
     domain_of:
     - LicenseAndUseTerms
     range: DataUsePermissionEnum
+    multivalued: true
   contact_person:
     name: contact_person
     description: 'Contact person for licensing questions, as a Person object — an
@@ -509,10 +510,10 @@ attributes:
       d4d:docExample:
         tag: d4d:docExample
         value: health_medical_biomedical_research
-    description: Structured data use permissions using the Data Use Ontology (DUO).
-      Specifies permitted uses (e.g., general research, health/medical research, disease-specific
-      research) and restrictions (e.g., non-commercial use, ethics approval required,
-      collaboration required). See https://github.com/EBISPOT/DUO.
+    description: 'Structured data use permissions using the Data Use Ontology (DUO):
+      one primary permission (e.g., general research, health/medical research, disease-specific
+      research) plus any applicable modifiers (e.g., non-commercial use, ethics approval
+      required, collaboration required). See https://github.com/EBISPOT/DUO.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     exact_mappings:
     - DUO:0000001
@@ -523,6 +524,7 @@ attributes:
     domain_of:
     - LicenseAndUseTerms
     range: DataUsePermissionEnum
+    multivalued: true
   contact_person:
     name: contact_person
     description: 'Contact person for licensing questions, as a Person object — an
