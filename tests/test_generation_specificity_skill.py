@@ -5253,6 +5253,62 @@ class TestModelFacingDerivation(unittest.TestCase):
             off, _, _ = self._derive(root, sinks=False)
             self.assertNotIn('consumed_policy_4733', off)
 
+    def test_plain_alias_of_model_text_container_traces_subscript_and_update_writes_5657(self):
+        """#5657 (B2 and aliased .update variants): writes through a plain alias
+        of a model-text container (`view = contracts; view['worker']['hint'] = ...`
+        and `view = contracts; view['worker'].update(...)` / `view.update(...)`)
+        trace into the helper module just like direct writes on `contracts` (B3)."""
+        cases = (
+            ("B2_plain_alias_subscript",
+             '    view = contracts\n    view["worker"]["hint"] = project_hint(project)\n'),
+            ("B3_direct_subscript",
+             '    contracts["worker"]["hint"] = project_hint(project)\n'),
+            ("plain_alias_nested_update",
+             '    view = contracts\n    view["worker"].update({"hint": project_hint(project)})\n'),
+            ("plain_alias_top_update",
+             '    view = contracts\n    view.update({"worker": {"hint": project_hint(project)}})\n'),
+            ("nested_subscript_alias_store",
+             '    view = contracts["worker"]\n    view["hint"] = project_hint(project)\n'),
+        )
+        for label, mutation in cases:
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as directory:
+                runner = PRECISION_RUNNER.replace(
+                    "from pathlib import Path\n",
+                    "from pathlib import Path\nfrom data_sheets_schema import contracts_5657\n",
+                ).replace(
+                    "[guide, value, ids_4085.label(spec)]",
+                    "[guide, value, ids_4085.label(spec), contracts_5657.render_worker(spec)]",
+                )
+                modules = dict(PRECISION_MODULES)
+                modules["project_hints"] = (
+                    "def project_hint(project: str) -> str:\n"
+                    '    return f"Review the CHORUS cohort for {project}."\n'
+                )
+                modules["contracts_5657"] = (
+                    "from data_sheets_schema.project_hints import project_hint\n\n"
+                    "def _contracts_seed() -> dict[str, dict[str, object]]:\n"
+                    '    return {"worker": {"stage": "worker"}}\n\n'
+                    "def _role_contracts(project: str = \"\") -> dict[str, dict[str, object]]:\n"
+                    "    contracts = _contracts_seed()\n"
+                    + mutation +
+                    "    return contracts\n\n"
+                    "def render_worker(spec) -> str:\n"
+                    '    return str(_role_contracts(spec.project)["worker"])\n'
+                )
+                root = self._root(directory, runner, modules)
+                derived, spans, _ = self._derive(root)
+                self.assertIn("project_hints", derived)
+                self.assertEqual(
+                    self._violations(root, "src/data_sheets_schema/project_hints.py", derived, spans),
+                    {("CHORUS", 2)},
+                )
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn("project_hints", off)
+                self.assertEqual(
+                    self._violations(root, "src/data_sheets_schema/project_hints.py", off, off_spans),
+                    set(),
+                )
+
 
 
 

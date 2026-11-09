@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.9.1
+  version: 1.9.2
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -975,4 +975,7 @@ Direct imports of the request runner share namespace-write evidence. A module-le
 Local dataclass records with structurally proved freshness admit exact field appends and counter mutations without treating the record as an untracked escape. The record class must be a finite, undecorated single-dataclass definition in the same source module, with no bases, keywords, post-init, custom methods, or dynamic factory overrides, and its class and factory references must remain unexposed. Fields are limited to explicit scalar defaults and fresh list factories (`field(default_factory=list)`).
 
 Returned-instance tracking follows the allocation through exact tuple slots, plain bindings, and authentic single-callee functions across the module call graph. Any exposure of the instance to unknown calls, attribute calls, reflection (`type()`, `__class__`), containers, global/nonlocal assignments, iterations, context managers, or recursive call cycles refuses the proof. Only exact append calls to the proved fresh list fields and direct integer augmentations to proved counter fields are cleared as non-escaping local operations; the record, its borrowed aliases, and nested values retain all ordinary effect and dependency checks.
+
+Plain local aliases (`view = contracts`) of a model-text container carry the same write and method-call obligations as the container itself (#5657): `_local_writes()` propagates subscript/attribute stores, augmented assignments, and method-call arguments across the function's direct `Name` alias closure, and `effects()` walks subscript stores and nested `.update`/`.setdefault` calls on plain and direct-subscript aliases into the container's flow while refusing unmodeled nested or copied receiver mutations.
+
 

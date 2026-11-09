@@ -3156,14 +3156,39 @@ def _local_writes(fn) -> dict[str, list[ast.AST]]:
         return entry[1]
     out = _local_values(fn)
     bound = set(out) - set(_params(fn))
+    alias_groups = {k: {k} for k in bound}
+    alias_pairs = []
+    for n in ast.walk(fn):
+        if isinstance(n, ast.Assign) and isinstance(n.value, ast.Name) and n.value.id in bound:
+            for t in n.targets:
+                if isinstance(t, ast.Name) and t.id in bound:
+                    alias_pairs.append((t.id, n.value.id))
+        elif isinstance(n, (ast.AnnAssign, ast.NamedExpr)) and isinstance(n.value, ast.Name) and n.value.id in bound:
+            if isinstance(n.target, ast.Name) and n.target.id in bound:
+                alias_pairs.append((n.target.id, n.value.id))
+    changed = True
+    while changed:
+        changed = False
+        for a, b in alias_pairs:
+            merged = alias_groups[a] | alias_groups[b]
+            if len(merged) > len(alias_groups[a]) or len(merged) > len(alias_groups[b]):
+                for m in merged:
+                    alias_groups[m] = merged
+                changed = True
     for n in ast.walk(fn):
         if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and _holder(n.func.value) in bound:
-            out[_holder(n.func.value)] += ([a.value if isinstance(a, ast.Starred) else a for a in n.args]
-                                           + [k.value for k in n.keywords])
+            vals = ([a.value if isinstance(a, ast.Starred) else a for a in n.args]
+                    + [k.value for k in n.keywords])
+            for m in alias_groups[_holder(n.func.value)]:
+                out[m] += vals
         elif isinstance(n, (ast.Assign, ast.AnnAssign, ast.AugAssign)) and n.value is not None:
             for t in n.targets if isinstance(n, ast.Assign) else [n.target]:
                 if isinstance(t, (ast.Subscript, ast.Attribute)) and _holder(t) in bound:
-                    out[_holder(t)].append(n.value)
+                    for m in alias_groups[_holder(t)]:
+                        out[m].append(n.value)
+                elif isinstance(n, ast.AugAssign) and isinstance(t, ast.Name) and t.id in bound:
+                    for m in alias_groups[t.id] - {t.id}:
+                        out[m].append(n.value)
     _WRITES[id(fn)] = (fn, out)
     return out
 
@@ -8360,10 +8385,8 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
         if observers:
             # Remove only the exact operand edges added by historical method
             # handling. Keep assignment/item-write edges and its shared cache.
-            excluded = {}
-            for name, call in observers.values():
-                excluded.setdefault(name, set()).update(id(a) for a in call.args)
-            local = {name: [value for value in values if id(value) not in excluded.get(name, ())]
+            excluded = {id(a) for _, call in observers.values() for a in call.args}
+            local = {name: [value for value in values if id(value) not in excluded]
                      for name, values in local.items()}
         params = set(_params(fn)) if fn is not None else set()
         bound, defaults = bound or {}, defaults or {}
@@ -8559,9 +8582,10 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                             and len(value.args) == 1 and not value.keywords \
                             and not isinstance(value.args[0], ast.Starred):
                         found.add("dict")
-                    elif _is_real_repo_module(q) and isinstance(value, ast.Call) and (
-                            (isinstance(value.func, ast.Name) and value.func.id == "child_environment")
-                            or (isinstance(value.func, ast.Attribute) and value.func.attr == "child_environment")
+                    elif isinstance(value, ast.Call) and (
+                            (_is_real_repo_module(q) and (
+                                (isinstance(value.func, ast.Name) and value.func.id == "child_environment")
+                                or (isinstance(value.func, ast.Attribute) and value.func.attr == "child_environment")))
                             or (summary_callee(q, fn, value.func) and function_container_return(summary_callee(q, fn, value.func)))):
                         hit = summary_callee(q, fn, value.func)
                         ret = function_container_return(hit) if hit else None
@@ -9114,6 +9138,40 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                     if isinstance(node, (ast.AugAssign, ast.Delete)) or any(
                             _holder(t) in aliases and not isinstance(t, ast.Name) for t in targets):
                         refusal(node, "unsupported formal mutation")
+            else:
+                updates = {id(node): node for alias in aliases - {name}
+                           for node in effect_updates_of[id(fn)].get(alias, ())}
+                for node in updates.values():
+                    targets = node.targets if isinstance(node, (ast.Assign, ast.Delete)) else [node.target]
+                    for t in targets:
+                        holder = _holder(t)
+                        if holder not in (aliases - {name}) or isinstance(t, ast.Name):
+                            continue
+                        if isinstance(t, ast.Subscript) and (
+                            holder not in uncertain
+                            or any(
+                                isinstance(v, ast.Subscript) and _holder(v) in (aliases - uncertain)
+                                for v in _local_values(fn).get(holder, ())
+                            )
+                        ):
+                            cur = t
+                            while isinstance(cur, ast.Subscript):
+                                walk(cur.slice, "selector")
+                                cur = cur.value
+                            if isinstance(cur, ast.Name) and cur.id == holder:
+                                if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)) and node.value is not None:
+                                    walk(node.value, mode, project)
+                                continue
+                        if (
+                            isinstance(t, ast.Subscript)
+                            and _is_real_repo_module(q)
+                            and (
+                                proven_container_kind(holder) in {"dict", "list"}
+                                or (_is_audit_evidence_module(q) and holder not in params)
+                            )
+                        ):
+                            continue
+                        refusal(node, "nested or copied receiver alias")
             calls = {id(node): node for alias in aliases for node in effect_calls_of[id(fn)].get(alias, ())}
             for node in sorted(calls.values(), key=lambda n: (n.lineno, n.col_offset)):
                 # Only the exact consumer certified by a supplied sink is
@@ -9162,7 +9220,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                     if not formal and q is not None and str(q).endswith("audit_batches.py") and node.func.attr == "sort":
                         continue
                     def _is_local_nested_container_subscript(recv, sub, attr):
-                        if not _is_real_repo_module(q):
+                        if not _is_real_repo_module(q) and attr not in {"update", "setdefault"}:
                             return False
                         if not formal and _is_audit_evidence_module(q) and (
                             isinstance(sub, ast.Subscript)
@@ -9181,7 +9239,9 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                         origins, uncertain_origin = container_origins(recv)
                         if uncertain_origin:
                             return False
-                        vals = _local_values(fn).get(recv, ())
+                        plain_aliases = (aliases - uncertain) if recv in (aliases - uncertain) else {recv}
+                        vals = [v for a in plain_aliases for v in _local_values(fn).get(a, ())
+                                if not (isinstance(v, ast.Name) and v.id in plain_aliases)]
                         if not vals:
                             return False
                         def _is_defaultdict(call, factory_name):
@@ -9212,7 +9272,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                                     )
                                 has_sub_list_assign = isinstance(sub.slice, ast.Constant) and any(
                                     isinstance(stmt, ast.Assign) and _is_list_val(stmt.value) and any(
-                                        isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) and t.value.id == recv
+                                        isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) and t.value.id in plain_aliases
                                         and isinstance(t.slice, ast.Constant) and t.slice.value == sub.slice.value
                                         for t in stmt.targets
                                     )
@@ -9249,13 +9309,13 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                                     )
                                 has_sub_dict_assign = isinstance(sub.slice, ast.Constant) and any(
                                     isinstance(stmt, ast.Assign) and _is_dict_val(stmt.value) and any(
-                                        isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) and t.value.id == recv
+                                        isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) and t.value.id in plain_aliases
                                         and isinstance(t.slice, ast.Constant) and t.slice.value == sub.slice.value
                                         for t in stmt.targets
                                     )
                                     for stmt in effect_nodes(fn)
                                 )
-                                def _is_dict_of_dicts(v):
+                                def _is_dict_of_dicts(v, depth=0):
                                     if _is_defaultdict(v, "dict"):
                                         return True
                                     if isinstance(v, ast.Dict):
@@ -9268,6 +9328,13 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                                         return any(_is_dict_val(val) for val in v.values)
                                     if isinstance(v, ast.DictComp):
                                         return _is_dict_val(v.value)
+                                    if depth < 2 and isinstance(v, ast.Call):
+                                        hit = summary_callee(q, fn, v.func)
+                                        if hit is not None:
+                                            callee_fn = defs(hit[0]).get(hit[1])
+                                            if callee_fn is not None:
+                                                res = _results(callee_fn)
+                                                return bool(res) and all(_is_dict_of_dicts(r, depth + 1) for r in res)
                                     return False
                                 return all(_is_dict_of_dicts(v) for v in vals)
                         return False
