@@ -5,35 +5,35 @@
 
 human_subjects:
   value: true
-  # chunks: [c002, c010, c011, c015, c019]
-  evidence: "[chunks: c002, c010, c011, c015, c019] AI-READI recruits and collects multi-domain human participant data from adults with and without Type 2 Diabetes Mellitus (T2DM) across three clinical sites (2,280 participants collected between 2023-07-19 and 2025-05-01 in v3.0.0, doi:10.60775/fairhub.3, c015, c019; protocol and IRB-approved human cohort described in c002, c010, c011)."
+  # chunks: [c002, c019]
+  evidence: "[chunks: c002] \"AI- READI was approved by the Institutional Review Board\" [chunks: c019] \"This dataset contains data from 2280 participants that was collected between July 19, 2023 and May 01, 2025.\""
 
 regulated_access:
   value: true
-  # chunks: [c010, c011, c012, c015]
-  evidence: "[chunks: c010, c011, c012, c015] Access to the AI-READI dataset is governed by the AI-READI Data License Agreement v2.0 (doi:10.5281/zenodo.17555036, c012, c015), requiring verified identity login, self-attestation limiting public-tier use to T2DM research, HIPAA Business Associate Agreement requirements for cloud storage, and a separate controlled-access data use agreement for sensitive variables (5-digit zip code, sex, race/ethnicity, genetics, medications; c010, c011, c012, c015)."
+  # chunks: [c015]
+  evidence: "[chunks: c015] \"Accessing the dataset requires several steps, including: Login in through a verified ID system, Agreeing to use the data only for type 2 diabetes related research, Agreeing to the license terms which set certain restrictions and obligations for data usage\""
 
 shared_dataset:
   value: true
-  # chunks: [c011, c013, c014, c015]
-  evidence: "[chunks: c011, c013, c014, c015] The Flagship Dataset of Type 2 Diabetes from the AI-READI Project is publicly shared via the FAIRhub data portal across multiple versioned releases, with v3.0.0 (doi:10.60775/fairhub.3, released 2025-11-17) comprising 356,343 files (3.82 TB) from 2,280 participants (c011, c013, c014, c015)."
+  # chunks: [c004]
+  evidence: "[chunks: c004] \"All  data  are  stored  and  shared\\nusing  FAIRhub\""
 
 data_collection:
   value: true
-  # chunks: [c002, c004, c010, c011, c015]
-  evidence: "[chunks: c002, c004, c010, c011, c015] AI-READI executes a harmonized multi-site clinical data acquisition protocol across three sites capturing survey responses (REDCap), physical measurements, blood and urine laboratory panels, retinal imaging, 12-lead ECG, continuous glucose monitoring (Dexcom G6), wearable fitness activity (Garmin Vivosmart 5), cognitive and monofilament testing, and home environmental monitoring (c002, c004, c010, c011, c015)."
+  # chunks: [c004, c019]
+  evidence: "[chunks: c019] \"This dataset contains data from 2280 participants that was collected between July 19, 2023 and May 01, 2025.\" [chunks: c004] \"REDCap is used for collecting patient- reported data from\\nquestionnaires  and  the  following  clinical  data  from  the\\nvisit: medications assessment, vitals, visual acuity, contrast\\nsensitivity, monofilament test results and CBC test results.\""
 
 data_processing:
   value: true
-  # chunks: [c004, c005, c010, c011, c015, c016, c017, c018, c019]
-  evidence: "[chunks: c004, c005, c010, c011, c015, c016, c017, c018, c019] Acquired clinical, wearable, and imaging streams are harmonized into standardized formats — OMOP CDM tables for clinical CSV/survey data, DICOM for retinal imaging, WFDB (WaveForm DataBase) for 12-lead cardiac ECG waveforms, Open mHealth for continuous glucose monitoring (Dexcom G6) and wearable fitness activity (Garmin Vivosmart 5), and ASCII File Format Guidelines for Earth Science Data (Earth Science Data Systems / ESDS format) for environmental sensor streams — and checked to ensure no HIPAA direct identifiers or PHI remain in the public release (c004, c005, c010, c011, c015, c016, c017, c018, c019)."
+  # chunks: [c015, c019]
+  evidence: "[context_note: D120] \"D120: c019 supplies contextual file-format standards and automated + custom processing evidence; it does not identify processing software.\" [chunks: c015] \"Each CSV file in this directory is a one-to-one mapping to the OMOP CDM tables.\" [chunks: c019] \"| environment               | This directory contains data collected through an environmental sensor device custom built for the AI-READI project.                                                                             | [Earth Science Data Systems (ESDS) format](https://www.earthdata.nasa.gov/esdis/esco/standards-and-practices/ascii-file-format-guidelines-for-earth-science-data) |\" [chunks: c019] \"| wearable_activity_monitor | This directory contains data collected through a wearable fitness tracker.                                                                                                                       | [Open mHealth](https://www.openmhealth.org/documentation/#/schema-docs/schema-library)                                                                            |\" [chunks: c019] \"| Processing   | custom / ad hoc | automated + custom |automated + custom | automated + custom |\""
 
 processing_software:
   value: true
-  # chunks: [c002, c004, c005, c015, c016, c017, c018, c019]
-  evidence: "[chunks: c002, c004, c005, c015, c016, c017, c018, c019] The AI-READI corpus documents data capture, conversion, harmonization, and portal packaging software used to produce the dataset, including REDCap survey export and OMOP CDM mapping workflows, DICOM conversion for retinal imaging devices, WFDB conversion for 12-lead cardiac ECG, Open mHealth formatting for CGM and wearable activity streams, ASCII/ESDS formatting for environmental sensor streams, and FAIRhub dataset metadata/packaging infrastructure (c002, c004, c005, c015, c016, c017, c018, c019)."
+  # chunks: [c018, c019]
+  evidence: "[context_note: D120] \"D120: c019 supplies contextual file-format standards and automated + custom processing evidence; it does not identify processing software. D104 direct software evidence remains in c018.\" [chunks: c018] \"clinical data outside of expected min/max ranges were flagged in REDCap, which was visible in reports viewed by clinical research coordinators (CRCs) and Data Managers\" [chunks: c019] \"| environment               | This directory contains data collected through an environmental sensor device custom built for the AI-READI project.                                                                             | [Earth Science Data Systems (ESDS) format](https://www.earthdata.nasa.gov/esdis/esco/standards-and-practices/ascii-file-format-guidelines-for-earth-science-data) |\" [chunks: c019] \"| wearable_activity_monitor | This directory contains data collected through a wearable fitness tracker.                                                                                                                       | [Open mHealth](https://www.openmhealth.org/documentation/#/schema-docs/schema-library)                                                                            |\" [chunks: c019] \"| Processing   | custom / ad hoc | automated + custom |automated + custom | automated + custom |\""
 
 ml_training_dataset:
   value: true
-  # chunks: [c002, c007, c009, c010, c011, c015]
-  evidence: "[chunks: c002, c007, c009, c010, c011, c015] AI-READI is an NIH Bridge2AI flagship Data Generation Project (1OT2OD032644-01, c009) explicitly designed with balanced recruitment across diabetes severity and multi-modal clinical/wearable/imaging capture to train and evaluate AI/ML models studying salutogenesis in Type 2 Diabetes Mellitus (c002, c007, c009, c010, c011, c015)."
+  # chunks: [c019]
+  evidence: "[chunks: c019] \"The current version of the dataset comes with recommended data splits. Because sex, race, and ethnicity data are not being released with the public version of the dataset, the project team has prepared data splits into proportions (70%/15%/15%) that can be used for subsequent training/validation/testing where the validation and test sets are balanced as well as possible for sex, race/ethnicity and diabetes status (no diabetes, prediabetes/lifestyle controlled, oral medication controlled, and insulin controlled).\""

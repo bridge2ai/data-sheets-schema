@@ -1,0 +1,384 @@
+# #5517 D103 bundle search, 2026-11-08
+# Scope: complete declared bundle; direct read includes ignored/hidden files.
+# Bundle: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+# SHA256: 5f81bb53f43f9ec6debc3ab7297bb3897d30c675888eefeaf840ebbbaca9ecc4
+# Original command (JSON argv): ["rg", "--hidden", "--no-ignore", "-n", "-i", "access|credential|embargo|agreement|committee|restricted|controlled|permission|license|licensing|\\bDUA\\b|\\bDAC\\b|\\bMTA\\b|regulated", "data/preprocessed/concatenated/CM4AI_preprocessed.txt"]
+# Python reproduction: case-insensitive regex; LF-only lines.
+# Command (JSON argv): ["python", "scripts/adhoc/context_evidence_5517_search.py", "access|credential|embargo|agreement|committee|restricted|controlled|permission|license|licensing|\\bDUA\\b|\\bDAC\\b|\\bMTA\\b|regulated", "data/preprocessed/concatenated/CM4AI_preprocessed.txt"]
+# Matching lines: 376
+18:  6. creativecommons_org_licenses-by-nc-sa_row15.txt
+63:Open access
+246:Accesses
+438:; Jaccard index ≥ 10%). We found that 41 assemblies closely reconstructed a known component (Jaccard index ≥ 50%) while 90 had moderate agreement, with some unexpected differences (20% ≤ Jaccard index < 50%).
+489:Integration of these measurements with the multiscale cell map revealed significant agreement, with proteins in the same assembly (as identified earlier by AP–MS and imaging) having a strong tendency to co-elute in the same chromatography size fractions (Fig.
+615:) upregulated the canonical ISG targets of STAT transcription factors, including IFNβ1, IFNγ1 and IFNγ2, while a non-ISG control was unaffected (
+1242:, a database containing proteins known to participate in biological condensates. IUPred3.0 predicts the probability of each amino acid in a sequence as being disordered. Proteins containing a contiguous sequence of amino acids >30 residues, where each amino acid has a >50% chance of being disordered, were annotated as likely disordered. FuzDrop assigns a probability of a sequence driving phase separation, which we thresholded at >60% to annotate a protein as ‘likely phase-separated’. Finally, we searched for each gene’s UniProtID in CD-Code (accessed 31 May 2023) under ‘
+1491:proteome (accessed 2 June and 11 September 2023;
+1495:), CD-CODE condensate database (accessed 31 May 2023;
+2197:Mirdita, M. et al. ColabFold: making protein folding accessible to all.
+2328:Thomas, P. D. et al. PANTHER: making genome-scale phylogenetics accessible to all.
+2718:Rights and permissions
+2719:Open Access
+2720:This article is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptation, distribution and reproduction in any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the Creative Commons licence, and indicate if changes were made. The images or other third party material in this article are included in the article’s Creative Commons licence, unless indicated otherwise in a credit line to the material. If material is not included in the article’s Creative Commons licence and your intended use is not permitted by statutory regulation or exceeds the permitted use, you will need to obtain permission directly from the copyright holder. To view a copy of this licence, visit
+2721:http://creativecommons.org/licenses/by/4.0/
+2723:Reprints and permissions
+2795:Open access funding
+2832:Open access
+2834:Reprints & permissions
+2869:Accessibility
+2918:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+2922:CC-BY-NC-ND 4.0 International license
+2992:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+2996:CC-BY-NC-ND 4.0 International license
+3037:be visualized in a web browser or accessed via tools such as Cytoscape14, HiView15,
+3066:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3070:CC-BY-NC-ND 4.0 International license
+3122:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3126:CC-BY-NC-ND 4.0 International license
+3149:  Ethical – The dataset was obtained, validated, documented, licensed, and
+3155:and reagents; and licensing and distribution of data, software, and models with
+3206:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3210:CC-BY-NC-ND 4.0 International license
+3215:Initiative (HipSci) resource30. It is available for access by non-for-profit organizations via
+3216:a simple MTA.
+3280:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3284:CC-BY-NC-ND 4.0 International license
+3296:resolve to complete human- and machine-readable metadata including licensing
+3356:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3360:CC-BY-NC-ND 4.0 International license
+3413:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3417:CC-BY-NC-ND 4.0 International license
+3477:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3481:CC-BY-NC-ND 4.0 International license
+3502:freely available, under the MIT open-source license (see Data and Software Availability
+3535:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3539:CC-BY-NC-ND 4.0 International license
+3542:to FAIR principles and high-performance access, making our deliverables both
+3543:accessible and useful to users.
+3585:Committee with representation from all Cores to direct initiatives which has at its core to
+3609:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3613:CC-BY-NC-ND 4.0 International license
+3625:develop a plan for ethical preparation, licensing, dissemination, and Data Access
+3683:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3687:CC-BY-NC-ND 4.0 International license
+3710:access B2AI data (including CM4AI datasets), to attest and commit to it prior to
+3711:accessing the data.
+3721:open-access CM4AI web portal, and initiated a Diversity Equity and Inclusion (DEI)
+3722:Committee (Pillar: People). Beyond these specific activities, CM4AI has been actively
+3724:meeting in Pentagon City, Virginia; the overall Bridge2AI Steering Committee and
+3737:access and distribution.
+3755:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3759:CC-BY-NC-ND 4.0 International license
+3767:All CM4AI integration and packaging software is freely available and licensed under
+3768:nonrestrictive open-source licenses.  Data packages are licensed under Creative
+3769:Commons CC-BY-NC-SA 4.0 license terms31, which include a requirement for
+3771:this article.  Commercial use requires a separate license negotiation with the copyright
+3773:question). A Data Access Committee will supervise ethical matters related to dataset
+3774:distribution and potential dual licensing for commercial use.
+3796:The most recent data and metadata produced by CM4AI are licensed for reuse under
+3798:License  (https://creativecommons.org/licenses/by-nc-sa/4.0/) and are available in
+3828:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3832:CC-BY-NC-ND 4.0 International license
+3848:source license in GitHub (for alpha level tools) or in the Zenodo long-term archive (for
+3855:source MIT License.
+3880:online February 7, 2023. Accessed February 9, 2023.
+3904:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3908:CC-BY-NC-ND 4.0 International license
+3984:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+3988:CC-BY-NC-ND 4.0 International license
+4019:arXiv:180309010 [cs]. Published online March 19, 2020. Accessed August 4, 2021.
+4065:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+4069:CC-BY-NC-ND 4.0 International license
+4143:was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made
+4147:CC-BY-NC-ND 4.0 International license
+4220:standards data management approach based on FAIR access and software principles,
+4485:FILE: creativecommons_org_licenses-by-nc-sa_row15.txt
+4486:PATH: data/preprocessed/individual/CM4AI/creativecommons_org_licenses-by-nc-sa_row15.txt
+4492:Source ID: dataset_license
+4493:Source type: license
+4494:Source URL: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+4495:Raw file: data/raw/CM4AI/creativecommons_org_licenses-by-nc-sa_row15.html
+4565:CC Licenses
+4594:https://creativecommons.org/licenses/by-nc-sa/4.0/
+4604:the license terms.
+4609:, provide a link to the license, and
+4621:same license
+4627:that legally restrict others from doing anything the license
+4630:You do not have to comply with the license for elements of the
+4635:No warranties are given. The license may not give you all of the
+4636:permissions necessary for your intended use. For example, other
+4642:actual license. It is not a license and has no legal value. You
+4644:actual license before using the licensed material.
+4647:license that it summarizes does not create a lawyer-client or any
+4649:Creative Commons is the nonprofit behind the open licenses and other
+4653:Learn more about CC Licensing
+4655:Use the license for your own material.
+4656:Licenses List
+4663:copyright notice, a license notice, a disclaimer notice, and a
+4664:link to the material. CC licenses prior to Version 4.0 also
+4673:license versions, the indication of changes is only required
+4684:same license
+4685:— You may also use a license
+4687:https://creativecommons.org/compatiblelicenses
+4691:— The license
+4700:dealing, are not affected by the CC licenses.
+4705:need to get additional permissions before using the material
+4732:on this site is licensed under a
+4733:Creative Commons Attribution 4.0 International license
+4785:Access Dataset
+4792:This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center. This data is Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University. Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required to the copyright holders and the authors. Any publications referencing this data or derived products should cite the Related Publication below, as well as directly citing this data collection (2025-03-04). (2025-03-07)
+4799:License/Data Use Agreement
+4816:Access:
+4837:Access File
+4838:File Access
+4855:Access File
+4856:File Access
+4874:Access File
+4875:File Access
+4893:Access File
+4894:File Access
+4912:Access File
+4913:File Access
+4930:Access File
+4931:File Access
+5041:This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center. This data is Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University. Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required to the copyright holders and the authors. Any publications referencing this data or derived products should cite the Related Publication below, as well as directly citing this data collection (2025-03-04). (2025-03-07)
+5135:License/Data Use Agreement
+5151:Restrict Access
+5152:Restricting limits access to published files. People who want to use the restricted files can request access by default.
+5153:If you disable request access, you must add information about access to the Terms of Access field.
+5154:Learn about restricting files and dataset access in the
+5157:Request Access
+5158:Enable access request
+5159:You must enable request access or add terms of access to restrict file access.
+5160:Terms of Access for Restricted Files
+5163:Edit Embargo
+5164:The selected file or files have already been published. Contact an administrator to change the embargo date or reason of the file or files.
+5190:Inaccessible Files Selected
+5191:The selected file(s) may not be downloaded because you have not been granted access or the file(s) have a retention period that has expired or the files can only be transferred via Globus.
+5192:You may request access to any restricted file(s) by clicking the Request Access button.
+5195:The selected file(s) may not be transferred because you have not been granted access or the file(s) have a retention period that has expired or the files are not Globus accessible.
+5196:You may request access to any restricted file(s) by clicking the Request Access button.
+5201:Data Access API
+5202:for programmatic access to the files.
+5206:Inaccessible Files Selected
+5207:The selected file(s) may not be downloaded because you have not been granted access or the file(s) have a retention period that has expired.
+5208:Click Continue to download the files you have access to download.
+5212:Some file(s) cannot be transferred. (They are restricted, embargoed, with an expired retention period, or not Globus accessible.)
+5231:Create a URL that others can use to review this draft dataset version before it is published. They will be able to access all files in the dataset and see all metadata, including metadata that may identify the dataset's authors.
+5234:Create a URL that others can use to access an anonymized view of this unpublished dataset version. Metadata that could identify the dataset's author will not be displayed. (See Tool Tip for the list of withheld metadata fields.) Non-identifying metadata will be visible.
+5235:The dataset's files are not changed and users of the Anonymous Preview URL will be able to access them. Users of the Anonymous Preview URL will not be able to see the name of the Dataverse that this dataset is in but will be able to see the name of the repository, which might expose the dataset authors' identities.
+5244:Are you sure you want to disable the Preview URL? If you have shared the Preview URL with others they will no longer be able to use it to access your unpublished dataset.
+5253:This dataset contains restricted files you may not compute on because you have not been granted access.
+5255:Deaccession Dataset
+5256:Are you sure you want to deaccession? This is permanent and the selected version(s) will no longer be viewable by the public.
+5258:Deaccession Dataset
+5259:Are you sure you want to deaccession this dataset? This is permanent an it will no longer be viewable by the public.
+5271:Please select a file or files for access request.
+5274:Embargoed files cannot be accessed. Please select an unembargoed file or files for your access request.
+5280:Request Access
+5283:to request access.
+5286:Please confirm and/or complete the information needed below in order to request access to files in this dataset.
+5288:License/Data Use Agreement
+5303:https://dataverse.lib.virginia.edu/api/access/datafile/
+5408:Access Dataset
+5419:Access external data resources related to this dataset:
+5431:FDA Regulated:
+5433:Data Governance Committee:
+5439:Some datasets are under temporary pre-publication embargo
+5471:License/Data Use Agreement
+5490:Access:
+5511:Access File
+5512:File Access
+5531:Access File
+5532:File Access
+5550:Access File
+5551:File Access
+5569:Access File
+5570:File Access
+5588:Access File
+5589:File Access
+5607:Access File
+5608:File Access
+5628:Access File
+5629:File Access
+5649:Access File
+5650:File Access
+5671:Access File
+5672:File Access
+5690:Access File
+5691:File Access
+5817:Access external data resources related to this dataset:
+5829:FDA Regulated:
+5831:Data Governance Committee:
+5837:Some datasets are under temporary pre-publication embargo
+5956:License/Data Use Agreement
+5972:Restrict Access
+5973:Restricting limits access to published files. People who want to use the restricted files can request access by default.
+5974:If you disable request access, you must add information about access to the Terms of Access field.
+5975:Learn about restricting files and dataset access in the
+5978:Request Access
+5979:Enable access request
+5980:You must enable request access or add terms of access to restrict file access.
+5981:Terms of Access for Restricted Files
+5984:Edit Embargo
+5985:The selected file or files have already been published. Contact an administrator to change the embargo date or reason of the file or files.
+6011:Inaccessible Files Selected
+6012:The selected file(s) may not be downloaded because you have not been granted access or the file(s) have a retention period that has expired or the files can only be transferred via Globus.
+6013:You may request access to any restricted file(s) by clicking the Request Access button.
+6016:The selected file(s) may not be transferred because you have not been granted access or the file(s) have a retention period that has expired or the files are not Globus accessible.
+6017:You may request access to any restricted file(s) by clicking the Request Access button.
+6022:Data Access API
+6023:for programmatic access to the files.
+6027:Inaccessible Files Selected
+6028:The selected file(s) may not be downloaded because you have not been granted access or the file(s) have a retention period that has expired.
+6029:Click Continue to download the files you have access to download.
+6033:Some file(s) cannot be transferred. (They are restricted, embargoed, with an expired retention period, or not Globus accessible.)
+6049:Are you sure you want to disable the Preview URL? If you have shared the Preview URL with others they will no longer be able to use it to access your unpublished dataset.
+6058:This dataset contains restricted files you may not compute on because you have not been granted access.
+6060:Deaccession Dataset
+6061:Are you sure you want to deaccession? This is permanent and the selected version(s) will no longer be viewable by the public.
+6063:Deaccession Dataset
+6064:Are you sure you want to deaccession this dataset? This is permanent an it will no longer be viewable by the public.
+6076:Please select a file or files for access request.
+6079:Embargoed files cannot be accessed. Please select an unembargoed file or files for your access request.
+6085:Request Access
+6088:to request access.
+6091:Please confirm and/or complete the information needed below in order to request access to files in this dataset.
+6093:License/Data Use Agreement
+6108:https://dataverse.lib.virginia.edu/api/access/datafile/
+6211:Access Dataset
+6224:Access external data resources related to this dataset:
+6226:Embargoed
+6228:Embargoed
+6238:FDA Regulated:
+6240:Data Governance Committee:
+6246:Some datasets are under temporary pre-publication embargo
+6278:License/Data Use Agreement
+6294:Access:
+6315:Access File
+6316:File Access
+6333:Access File
+6334:File Access
+6351:Access File
+6352:File Access
+6369:Access File
+6370:File Access
+6386:Access File
+6387:File Access
+6405:Access File
+6406:File Access
+6424:Access File
+6425:File Access
+6443:Access File
+6444:File Access
+6646:Access external data resources related to this dataset:
+6648:Embargoed
+6650:Embargoed
+6660:FDA Regulated:
+6662:Data Governance Committee:
+6668:Some datasets are under temporary pre-publication embargo
+6787:License/Data Use Agreement
+6802:Restrict Access
+6803:Restricting limits access to published files. People who want to use the restricted files can request access by default.
+6804:If you disable request access, you must add information about access to the Terms of Access field.
+6805:Learn about restricting files and dataset access in the
+6808:Request Access
+6809:Enable access request
+6810:You must enable request access or add terms of access to restrict file access.
+6811:Terms of Access for Restricted Files
+6814:Edit Embargo
+6815:The selected file or files have already been published. Contact an administrator to change the embargo date or reason of the file or files.
+6841:Inaccessible Files Selected
+6842:The selected file(s) may not be downloaded because you have not been granted access or the file(s) have a retention period that has expired or the files can only be transferred via Globus.
+6843:You may request access to any restricted file(s) by clicking the Request Access button.
+6846:The selected file(s) may not be transferred because you have not been granted access or the file(s) have a retention period that has expired or the files are not Globus accessible.
+6847:You may request access to any restricted file(s) by clicking the Request Access button.
+6852:Data Access API
+6853:for programmatic access to the files.
+6857:Inaccessible Files Selected
+6858:The selected file(s) may not be downloaded because you have not been granted access or the file(s) have a retention period that has expired.
+6859:Click Continue to download the files you have access to download.
+6863:Some file(s) cannot be transferred. (They are restricted, embargoed, with an expired retention period, or not Globus accessible.)
+6879:Are you sure you want to disable the Preview URL? If you have shared the Preview URL with others they will no longer be able to use it to access your unpublished dataset.
+6888:This dataset contains restricted files you may not compute on because you have not been granted access.
+6890:Deaccession Dataset
+6891:Are you sure you want to deaccession? This is permanent and the selected version(s) will no longer be viewable by the public.
+6893:Deaccession Dataset
+6894:Are you sure you want to deaccession this dataset? This is permanent an it will no longer be viewable by the public.
+6906:Please select a file or files for access request.
+6909:Embargoed files cannot be accessed. Please select an unembargoed file or files for your access request.
+6915:Request Access
+6918:to request access.
+6921:Please confirm and/or complete the information needed below in order to request access to files in this dataset.
+6923:License/Data Use Agreement
+6938:https://dataverse.lib.virginia.edu/api/access/datafile/
+7046:Access Dataset
+7060:Access external data resources related to this dataset:
+7062:Embargoed
+7064:Embargoed
+7080:FDA Regulated:
+7082:Data Governance Committee:
+7088:Some datasets are under temporary pre-publication embargo
+7120:License/Data Use Agreement
+7133:Access:
+7153:Access File
+7154:File Access
+7170:Access File
+7171:File Access
+7187:Access File
+7188:File Access
+7204:Access File
+7205:File Access
+7221:Access File
+7222:File Access
+7238:Access File
+7239:File Access
+7255:Access File
+7256:File Access
+7272:Access File
+7273:File Access
+7289:Access File
+7290:File Access
+7306:Access File
+7307:File Access
+7510:Access external data resources related to this dataset:
+7512:Embargoed
+7514:Embargoed
+7530:FDA Regulated:
+7532:Data Governance Committee:
+7538:Some datasets are under temporary pre-publication embargo
+7657:License/Data Use Agreement
+7671:Restrict Access
+7672:Restricting limits access to published files. People who want to use the restricted files can request access by default.
+7673:If you disable request access, you must add information about access to the Terms of Access field.
+7674:Learn about restricting files and dataset access in the
+7677:Request Access
+7678:Enable access request
+7679:You must enable request access or add terms of access to restrict file access.
+7680:Terms of Access for Restricted Files
+7683:Edit Embargo
+7684:The selected file or files have already been published. Contact an administrator to change the embargo date or reason of the file or files.
+7710:Inaccessible Files Selected
+7711:The selected file(s) may not be downloaded because you have not been granted access or the file(s) have a retention period that has expired or the files can only be transferred via Globus.
+7712:You may request access to any restricted file(s) by clicking the Request Access button.
+7715:The selected file(s) may not be transferred because you have not been granted access or the file(s) have a retention period that has expired or the files are not Globus accessible.
+7716:You may request access to any restricted file(s) by clicking the Request Access button.
+7721:Data Access API
+7722:for programmatic access to the files.
+7726:Inaccessible Files Selected
+7727:The selected file(s) may not be downloaded because you have not been granted access or the file(s) have a retention period that has expired.
+7728:Click Continue to download the files you have access to download.
+7732:Some file(s) cannot be transferred. (They are restricted, embargoed, with an expired retention period, or not Globus accessible.)
+7748:Are you sure you want to disable the Preview URL? If you have shared the Preview URL with others they will no longer be able to use it to access your unpublished dataset.
+7757:This dataset contains restricted files you may not compute on because you have not been granted access.
+7759:Deaccession Dataset
+7760:Are you sure you want to deaccession? This is permanent and the selected version(s) will no longer be viewable by the public.
+7762:Deaccession Dataset
+7763:Are you sure you want to deaccession this dataset? This is permanent an it will no longer be viewable by the public.
+7775:Please select a file or files for access request.
+7778:Embargoed files cannot be accessed. Please select an unembargoed file or files for your access request.
+7784:Request Access
+7787:to request access.
+7790:Please confirm and/or complete the information needed below in order to request access to files in this dataset.
+7792:License/Data Use Agreement
+7807:https://dataverse.lib.virginia.edu/api/access/datafile/

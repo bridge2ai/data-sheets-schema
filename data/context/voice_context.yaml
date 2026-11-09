@@ -5,35 +5,35 @@
 
 human_subjects:
   value: true
-  # chunks: [c002, c006, c015, c016, c018, c019]
-  evidence: "[chunks: c002, c006, c015, c016, c018, c019] Bridge2AI-Voice enrolls and collects voice recordings, clinical histories, and validated questionnaires from human participants across multi-institutional specialty clinics under University of South Florida central IRB approval (306 adult participants in v1.1 c015; 833 participants across five North American sites in v3.0.0/v3.1.0 c016, c018, c019; protocol in c002, c006)."
+  # chunks: [c018]
+  evidence: "[chunks: c018] \"Patients presenting at specialty clinics and institutions were considered for enrollment.\" [chunks: c018] \"If eligible for enrollment, patient consent was sought for the data collection initiative and to share the acquired research data.\""
 
 regulated_access:
   value: true
-  # chunks: [c008, c015, c017, c018, c019]
-  evidence: "[chunks: c008, c015, c017, c018, c019] Bridge2AI-Voice Adult Dataset releases on PhysioNet (v1.1 c015, v3.0.0 c017, v3.1.0 doi:10.13026/8xbn-nq66 / latest doi:10.13026/37yb-1t42 c018, c019) require PhysioNet Credentialed Access and signing the Bridge2AI Voice Registered Access Agreement / License (c008, c018, c019), while raw audio waveforms require institutional sign-off and DACO approval via Synapse (syn72370534, c018)."
+  # chunks: [c019]
+  evidence: "[chunks: c019] \"Only credentialed users who sign the DUA can access the files.\""
 
 shared_dataset:
   value: true
-  # chunks: [c015, c016, c017, c018, c019]
-  evidence: "[chunks: c015, c016, c017, c018, c019] Bridge2AI-Voice Adult Dataset is publicly distributed to credentialed researchers on PhysioNet (v1.1 c015; v3.0.0 c016, c017; v3.1.0 doi:10.13026/8xbn-nq66 and canonical doi:10.13026/37yb-1t42 c018, c019) containing derived audio feature Parquet files, static acoustic features, and phenotype TSVs with JSON data dictionaries."
+  # chunks: [c018]
+  evidence: "[chunks: c018] \"Bridge2AI-Voice v3.1 contains data for 833 participants across five sites in North America.\" [chunks: c018] \"Detailed demographic, clinical, and validated questionnaire data are also made available.\""
 
 data_collection:
   value: true
-  # chunks: [c002, c007, c009, c011, c018]
-  evidence: "[chunks: c002, c007, c009, c011, c018] Bridge2AI-Voice collects standardized multi-disorder voice and speech task recordings (sustained vowel phonation, Harvard sentences, Stroop, Winograd, random item generation) via a custom tablet application and headset alongside REDCap demographic, confounder, diagnosis, and validated clinical questionnaires across respiratory, voice, neurological, and mood disorder cohorts (c002, c007, c009, c011, c018)."
+  # chunks: [c018]
+  evidence: "[chunks: c018] \"Data collection was conducted using a custom application on a tablet with a headset used for data collection when possible.\""
 
 data_processing:
   value: true
-  # chunks: [c009, c015, c016, c018, c019]
-  evidence: "[chunks: c009, c015, c016, c018, c019] Raw audio is converted to monaural, resampled to 16 kHz with a Butterworth anti-aliasing filter, and processed into spectrograms, Mel spectrograms, 60 MFCCs, pitch, SPARC articulatory/kinematic traces, Phonetic Posteriorgrams (PPGs), OpenSMILE/Praat/Parselmouth static features, and Whisper Large transcriptions, with HIPAA Safe Harbor identifiers and free-speech spectrograms removed (c009, c015, c016, c018, c019)."
+  # chunks: [c018]
+  evidence: "[chunks: c018] \"Raw audio was preprocessed by converting to monaural and resampling to 16 kHz with a Butterworth anti-aliasing filter applied.\""
 
 processing_software:
   value: true
-  # chunks: [c009, c015, c017, c018, c019]
-  evidence: "[chunks: c009, c015, c017, c018, c019] Dataset preparation and feature extraction use the open-source b2aiprep library (v3.0.0, github.com/sensein/b2aiprep), Bridge2AI Voice REDCap export library (zenodo.org/records/14989503), TorchAudio, openSMILE, Praat, Parselmouth, SPARC, ppgs, and OpenAI Whisper Large (c009, c015, c017, c018, c019)."
+  # chunks: [c019]
+  evidence: "[chunks: c019] \"The code used to process the raw audio into the above features and to merge the source data into the phenotype files has been made open source in the\\nb2aiprep library\\n[8]. This release was generated with b2aiprep v3.0.0.\""
 
 ml_training_dataset:
   value: true
-  # chunks: [c002, c003, c006, c008, c018]
-  evidence: "[chunks: c002, c003, c006, c008, c018] Bridge2AI-Voice is an NIH Bridge2AI flagship Data Generation Project (3OT2OD032720-01S1, c006, c018) explicitly created to provide an ethically sourced, multi-institutional bioacoustic benchmark dataset for training and evaluating AI/ML models using voice as a biomarker of health (c002, c003, c006, c008, c018)."
+  # chunks: [c011]
+  evidence: "[chunks: c011] \"Our group aims to develop voice as a biomarker of health used in clinical care. To do so we will generate a large multi-institutional, ethically sourced, and diverse voice database linked to multimodal health biomarkers to fuel voice AI research. We will then build predictive models to assist in screening, diagnosis, and treatment of a broad range of diseases, including several diseases with unmet clinical needs.\""
