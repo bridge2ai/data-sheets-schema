@@ -1,10 +1,16 @@
 Prefix	URI
 AIO	https://w3id.org/aio/
+B2AI_DATA	https://w3id.org/bridge2ai/standards-dataset-schema/
+B2AI_ORG	https://w3id.org/bridge2ai/standards-organization-schema/
 B2AI_STANDARD	https://w3id.org/bridge2ai/b2ai-standards-registry/
-B2AI_SUBSTRATE	https://w3id.org/bridge2ai/b2ai-standards-registry/
-B2AI_TOPIC	https://w3id.org/bridge2ai/b2ai-standards-registry/
+B2AI_SUBSTRATE	https://w3id.org/bridge2ai/standards-datasubstrate-schema/
+B2AI_TOPIC	https://w3id.org/bridge2ai/standards-datatopic-schema/
 DUO	http://purl.obolibrary.org/obo/DUO_
+EDAM	http://edamontology.org/
+ORCID	https://orcid.org/
+ROR	https://ror.org/
 biolink	https://w3id.org/biolink/vocab/
+d4d	https://w3id.org/bridge2ai/data-sheets-schema/
 d4dcomposition	https://w3id.org/bridge2ai/data-sheets-schema/composition#
 d4ddatagovernance	https://w3id.org/bridge2ai/data-sheets-schema/data-governance#
 d4ddistribution	https://w3id.org/bridge2ai/data-sheets-schema/distribution#
@@ -19,6 +25,7 @@ data_sheets_schema	https://w3id.org/bridge2ai/data-sheets-schema/
 datasets	https://w3id.org/linkml/report
 dcat	http://www.w3.org/ns/dcat#
 dcterms	http://purl.org/dc/terms/
+doi	https://doi.org/
 example	https://example.org/
 linkml	https://w3id.org/linkml/
 mediatypes	https://www.iana.org/assignments/media-types/
@@ -29,4 +36,5 @@ schema	http://schema.org/
 sh	https://w3id.org/shacl/
 shex	http://www.w3.org/ns/shex#
 skos	http://www.w3.org/2004/02/skos/core#
+spdx	http://spdx.org/rdf/terms#
 xsd	http://www.w3.org/2001/XMLSchema#
