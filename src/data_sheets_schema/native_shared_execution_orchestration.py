@@ -89,6 +89,10 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
 
 
 def read_final(registration_raw):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies exact execution-registration bytes; the fixed shared-v2 readback delegation freshly verifies guarded preparation before saved publication-evidence reads.
+    """
     from .native_execution_orchestration import read_final as read
     contract, effects = _engine_bindings()
     return read(registration_raw, contract=contract, effects=effects)

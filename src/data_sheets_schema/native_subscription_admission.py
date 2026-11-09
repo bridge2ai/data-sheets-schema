@@ -11,6 +11,13 @@ from . import native_launch_review as review
 
 
 def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_raw, current=False):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies execution bytes and the runtime
+    returned by prior registration.verified; historical v1 only selects its
+    saved reader, while v2 also reconstructs registered capture through
+    read_capture_for_event before returning guard context.
+    """
     if type(current) is not bool:
         raise ValueError('current subscription authority selection must be boolean')
     value = v1.strict_json(raw)
@@ -39,6 +46,13 @@ def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_ra
 
 
 def load_current(path, expected_sha256, *, registration_raw, runtime, launch_word_path, review_path):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies paths plus execution bytes/runtime
+    from registration.verified; context selects v2 and reconstructs capture
+    authority before load_guard checks the exact guard. No RunSpec argument
+    is accepted.
+    """
     raw, word, bundle = (v1.read_regular(path), v1.read_regular(launch_word_path),
                          v1.read_regular(review_path))
     module, extra = context(raw, registration_raw=registration_raw, runtime=runtime,

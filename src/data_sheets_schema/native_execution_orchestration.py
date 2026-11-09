@@ -578,7 +578,12 @@ def _subscription_transcript(result, attempt):
 
 def read_final(registration_raw, *, contract: ExecutionContract,
                effects: ExecutionEffects):
-    """Check complete publication and immutable saved identities; never resume."""
+    """Check complete publication and immutable saved identities; never resume.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies exact execution-registration bytes and the fixed shared-v2 execution contract; its registration verifier reconstructs and guards a fresh RunSpec before saved publication evidence is read.
+    """
     contract.require_fixed()
     registration, composition, authority = contract.registration, contract.composition, contract.authority
     gates, replay, shared = contract.gates, contract.replay, contract.shared

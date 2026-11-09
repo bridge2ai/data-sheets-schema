@@ -380,7 +380,14 @@ def _reserve(directory, value, statement, word, binding):
 
 
 def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw, directory):
-    """Consume the next of three word-bound slots; never overwrite prior evidence."""
+    """Consume the next of three word-bound slots; never overwrite prior evidence.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies serialized registration/review/word
+    and a capture path; _authority reconstructs guarded preparation before
+    any capture reservation or process.
+    """
     directory = _path(directory)
     authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, directory)
     value, statement, word, binding = authority
@@ -409,7 +416,14 @@ def _current_authority(registration_raw, review_bundle_raw, launch_word_raw):
 
 
 def activate_capture_word(*, registration_raw, review_bundle_raw, launch_word_raw, now=None):
-    """Record presentation of a word offline; no capture or attempt is started."""
+    """Record presentation of a word offline; no capture or attempt is started.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies serialized registration/review/word;
+    _current_authority calls _authority to reconstruct guarded preparation
+    before window checks or journal creation.
+    """
     from . import native_capture_words as words
     value, _, _, _ = _current_authority(registration_raw, review_bundle_raw, launch_word_raw)
     words.validate_window(value['runtime'], launch_word_raw, now)
@@ -420,7 +434,14 @@ def activate_capture_word(*, registration_raw, review_bundle_raw, launch_word_ra
 
 @contextmanager
 def capture_admission_lease(*, registration_raw, review_bundle_raw, launch_word_raw, now=None):
-    """Hold current-word/refusal state stable through generation reservation."""
+    """Hold current-word/refusal state stable through generation reservation.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies serialized registration/review/word;
+    _current_authority reconstructs guarded preparation before locking or
+    yielding current-word authority.
+    """
     from . import native_capture_words as words
     value, _, _, _ = _current_authority(registration_raw, review_bundle_raw, launch_word_raw)
     with words.locked(value, registration_raw) as journal:
@@ -428,7 +449,14 @@ def capture_admission_lease(*, registration_raw, review_bundle_raw, launch_word_
 
 
 def require_current_capture_authority(*, registration_raw, review_bundle_raw, launch_word_raw, now=None):
-    """Current admission check; historical readback must not call this gate."""
+    """Current admission check; historical readback must not call this gate.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies serialized registration/review/word;
+    capture_admission_lease reconstructs guarded preparation before returning
+    current authority.
+    """
     with capture_admission_lease(registration_raw=registration_raw, review_bundle_raw=review_bundle_raw,
             launch_word_raw=launch_word_raw, now=now) as current:
         return current
@@ -555,7 +583,14 @@ def _read_root(authority, registration_raw, launch_word_raw, require_current):
 
 def read_capture(manifest_path, *, registration_raw, review_bundle_raw, launch_word_raw,
                  require_current=False):
-    """Offline byte reconstruction; a retained failure never becomes admission."""
+    """Offline byte reconstruction; a retained failure never becomes admission.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies a saved manifest path and serialized
+    authorities; _authority reconstructs guarded preparation before reading
+    claims/results and comparing saved capture bytes.
+    """
     path = _path(manifest_path)
     if path.name != 'capture.json':
         raise ValueError('capture readback requires the fixed manifest path')
@@ -626,6 +661,13 @@ def read_capture_for_event(directory, *, registration_raw, review_bundle_raw, la
     Failed/incomplete slots stay spent but cannot supply admission evidence. A
     later re-capture does not rewrite the saved event chosen by an earlier guard.
     Freshness and window admission are checked independently by the guard.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies a capture directory, serialized
+    authorities and exact event identity; _authority reconstructs guarded
+    preparation before inspecting numbered slots, and each matching slot is
+    checked by read_capture.
     """
     directory = _path(directory)
     authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, directory)

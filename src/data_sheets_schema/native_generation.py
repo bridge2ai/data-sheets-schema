@@ -142,6 +142,14 @@ def parser():
 
 
 def main(argv=None):
+    """RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies CLI arguments, not a RunSpec;
+    registration-consuming branches call registration.verified and rederive
+    guarded preparation before dispatching capture, guard, launch or readback.
+    Probe-only branches consume closed runtime/permission values without
+    constructing RunSpec.
+    """
     args = parser().parse_args(argv)
     from . import native_permission_probe as probe
     if args.command in ('observation-probe', 'bound-permission-probe', 'validate-probe-sequence'):
