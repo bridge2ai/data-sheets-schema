@@ -12191,7 +12191,8 @@ for key in {companions!r}:
             or [ast.unparse(n) for n in command_decorators[0].args] != [repr('render-native-shared')]):
         raise fail('offline CLI command spelling is not derived')
     v2_import = ast.parse('from data_sheets_schema import native_execution_registration_v2 as preparation').body[0]
-    if any(dump(n) == dump(v2_import) for n in command.body):
+    v2_route = any(dump(n) == dump(v2_import) for n in command.body)
+    if v2_route:
         evidence.extend(_derive_native_v2_render(root, cli, command))
     else:
         expected_imports = ast.parse('''from data_sheets_schema.api_runner import RunSpec
@@ -12241,7 +12242,8 @@ for key in {companions!r}:
                for n in ast.walk(statement) if isinstance(n, ast.Call)):
             raise fail('offline render consumer contains an unsupported call')
     evidence.append(f'{cli_path}:{command.lineno}')
-    binder = 'src/data_sheets_schema/native_shared_controller.py'
+    binder = ('src/data_sheets_schema/native_execution_registration_v2.py' if v2_route else
+              'src/data_sheets_schema/native_shared_controller.py')
     binder_present = (root / binder).is_file()
     if binder_present:
         _tree(root / binder)  # a present but unreadable/unparsed module is not coverage

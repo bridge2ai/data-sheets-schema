@@ -49,6 +49,7 @@ def test_native_complete_v2_route_derives():
     assert route['renderer'] == 26
     assert route['api_execute'] == 'refused before dry-run, locks or dispatch'
     assert route['model_calls_minimum'] is None
+    assert route['runtime_binding']['path'] == 'src/data_sheets_schema/native_execution_registration_v2.py'
     assert any('native_execution_registration_v2.py:' in row for row in route['evidence'])
 
 
