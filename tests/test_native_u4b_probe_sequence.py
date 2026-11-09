@@ -210,6 +210,50 @@ def test_observation_manifest_rejects_wrong_init_version_before_publication(prep
             finished_at=document['finished_at'], process=document['process'])
 
 
+@pytest.mark.parametrize('source', ['missing', 'none', 'ANTHROPIC_AUTH_TOKEN', '', None, True, 0, [], {}])
+def test_observation_refuses_missing_or_other_auth_source_before_publication(prepared, source):
+    saved = prepared['path'].read_bytes()
+    transcript = Path(prepared['arguments']['probe_init_path']).read_bytes()
+    events = [json.loads(line) for line in transcript.splitlines()]
+    if source == 'missing':
+        events[0].pop('apiKeySource')
+    else:
+        events[0]['apiKeySource'] = source
+    changed = b''.join(sequence.canonical(event) + b'\n' for event in events)
+    document = json.loads(saved)
+    with pytest.raises(ValueError, match='scripted-provider API-key source'):
+        sequence.observation_document(prepared['authorization'], prepared['provisional'],
+            transcript_raw=changed, request_raw=Path(prepared['arguments']['native_request_path']).read_bytes(),
+            provider_url=document['provider_url'], started_at=document['started_at'],
+            finished_at=document['finished_at'], process=document['process'])
+    assert prepared['path'].read_bytes() == saved
+
+
+def test_observation_readback_refuses_rehashed_subscription_auth_claim(prepared):
+    transcript_path = Path(prepared['arguments']['probe_init_path'])
+    lines = transcript_path.read_bytes().splitlines(keepends=True)
+    original_terminal = lines[-1]
+    initial = json.loads(lines[0])
+    initial['apiKeySource'] = 'none'
+    lines[0] = sequence.canonical(initial) + b'\n'
+    changed = b''.join(lines)
+    transcript_path.write_bytes(changed)
+    document = json.loads(prepared['path'].read_bytes())
+    assert lines[-1] == original_terminal
+    assert document['terminal']['sha256'] == sequence.sha(original_terminal.removesuffix(b'\n'))
+    document['transcript'].update(bytes=len(changed), sha256=sequence.sha(changed))
+    prepared['path'].write_bytes(sequence.canonical(document))
+    with pytest.raises(ValueError, match='scripted-provider API-key source'):
+        sequence.validate_observation(prepared['path'])
+
+
+def test_observation_and_subscription_auth_sources_remain_distinct(prepared):
+    events = [json.loads(line) for line in Path(prepared['arguments']['probe_init_path']).read_bytes().splitlines()]
+    assert events[0]['apiKeySource'] == 'ANTHROPIC_API_KEY'
+    assert prepared['runtime']['auth']['expected_api_key_source'] == 'none'
+    assert sequence.validate_observation(prepared['path'])
+
+
 def producer_case(prepared):
     authorized = sequence.strict_json(prepared['authorization'])
     root = prepared['root'].parent / 'produced-probe-sequence'

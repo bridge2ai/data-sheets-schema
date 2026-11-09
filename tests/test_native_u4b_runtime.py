@@ -34,7 +34,8 @@ def runtime_inputs(tmp_path, *, binary_bytes=b'Inert fingerprint fixture; never 
         path.write_bytes(binary_bytes)
         path.chmod(0o700)
     init = {'type': 'system', 'subtype': 'init', 'model': subject.MODEL,
-            'claude_code_version': 'fixture-1', 'session_id': 'invented-observation-session'}
+            'claude_code_version': 'fixture-1', 'session_id': 'invented-observation-session',
+            'apiKeySource': 'ANTHROPIC_API_KEY'}
     limits = {'contextWindow': 1_000_000, 'maxOutputTokens': 64_000}
     terminal = {'type': 'result', 'subtype': 'success', 'is_error': False,
                 'session_id': init['session_id'], 'modelUsage': {subject.MODEL: deepcopy(limits)}}

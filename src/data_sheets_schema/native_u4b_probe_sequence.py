@@ -176,6 +176,10 @@ def _observed(transcript_raw, request_raw, runtime):
         raise ValueError('observation does not have an ordered successful terminal')
     if initial.get('claude_code_version') != runtime['executable']['init_version']:
         raise ValueError('observation initialization version differs from the selected executable')
+    # This observation deliberately uses the local scripted provider with its
+    # dummy key. Subscription quota captures separately require no API key.
+    if initial.get('apiKeySource') != 'ANTHROPIC_API_KEY':
+        raise ValueError('observation must attest the scripted-provider API-key source')
     session = initial.get('session_id')
     values._text(session, 'observation session')
     pair = {'requested': aliases.REQUESTED, 'returned': aliases.RETURNED}
