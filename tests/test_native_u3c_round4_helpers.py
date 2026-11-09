@@ -22,10 +22,11 @@ def helper(name):
 
 def test_parent_worker_and_subprocess_reenter_c4_wrapper():
     module = helper('run_native_u3c_round4_20261107.py')
-    assert module.runner.SCRATCH == ROOT.parent / 'scratch-native-u3c-r4'
+    executions = next(path for path in ROOT.parents if path.name == 'd4d-executions')
+    assert module.runner.SCRATCH == executions / 'scratch-native-u3c-r4'
     assert module.runner.ROOT == ROOT
     assert Path(module.runner.__file__) == Path(module.__file__)
-    assert module.runner.LOCK == ROOT.parent / 'plans/native_quiet_window.lock'
+    assert module.runner.LOCK == executions / 'plans/native_quiet_window.lock'
     assert module.runner.DEADLINE == 3600
     env = module.runner.clean_environment(module.SCRATCH / 'synthetic', ROOT / 'venv/bin')
     assert env['PYTHONPATH'] == str(ROOT / 'src') + ':' + str(ROOT)

@@ -220,8 +220,8 @@ def test_native_model_command_import_closure_and_other_package_are_discovered(tm
     package = root / 'src/data_sheets_schema/second_command'
     package.mkdir()
     (package / '__init__.py').write_text('')
-    (package / '__main__.py').write_text('from . import helper\nprint(helper.result())\n')
-    (package / 'helper.py').write_text("def result():\n    if 'CHORUS':\n        return 'cohort'\n")
+    (package / '__main__.py').write_text("from . import helper\nprint(helper.result('selected'))\n")
+    (package / 'helper.py').write_text("def result(project):\n    if project == 'CHORUS':\n        return 'cohort'\n")
     renderer = root / 'src/data_sheets_schema/native_shared_render.py'
     renderer.write_text(renderer.read_text() +
         "\nSECOND = ('python', '-m', 'data_sheets_schema.second_command')\n")
