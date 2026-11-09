@@ -59,10 +59,15 @@ original_environment = runner.clean_environment
 
 def environment(out, interpreter_directory):
     result = original_environment(out, interpreter_directory)
-    result.update(U3J2_MANIFEST=str(MANIFEST), U3J2_METRICS=str(out / 'phase-metrics'),
-                  PYTEST_PLUGINS='scripts.adhoc.u3j2_metrics_plugin_20261109')
-    if os.environ.get('U3F_PARITY') == '1':
-        result['PYTEST_PLUGINS'] += ',scripts.adhoc.u3e_parity_plugin_20261108'
+    result['U3J2_MANIFEST'] = str(MANIFEST)
+    # Timing is required only for the two public measurements. Broad refusal
+    # tests intentionally trap filesystem effects (including Path.mkdir), so
+    # adding per-phase metric writes there would change what those tests see.
+    if out.name.startswith(('public-', 'harness-canary-')):
+        result.update(U3J2_METRICS=str(out / 'phase-metrics'),
+                      PYTEST_PLUGINS='scripts.adhoc.u3j2_metrics_plugin_20261109')
+        if os.environ.get('U3F_PARITY') == '1':
+            result['PYTEST_PLUGINS'] += ',scripts.adhoc.u3e_parity_plugin_20261108'
     return result
 
 
