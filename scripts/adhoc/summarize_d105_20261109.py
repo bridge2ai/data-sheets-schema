@@ -37,11 +37,14 @@ def main():
     final = SCRATCH / args.final_label
     for path in sorted((final / "pytest").rglob("*_transformation_measure.json")):
         result = json.loads(path.read_text())
+        diagnostic = result["diagnostic"]
         corpus.append({"project": path.name.removesuffix("_transformation_measure.json"),
                        "receipt_path": str(path), "receipt_sha256": digest(path),
-                       "counts": result["counts"],
+                       "counts": diagnostic["counts"],
+                       "v5_counts": result["counts"],
+                       "v5_verified": result["verification_result"]["verified"],
                        "matches_derived_core": result["matches_derived_core"],
-                       "input_digests": result["input_digests"],
+                       "input_digests": diagnostic["input_digests"],
                        "instrument": result["instrument"]})
     assert len(corpus) == 3 and {r["project"] for r in corpus} == {"CHORUS", "VOICE", "CM4AI"}
     final_result = json.loads((final / "result.json").read_text())

@@ -25,6 +25,9 @@ def main():
     parser.add_argument("--label", required=True)
     parser.add_argument("nodes", nargs="+")
     args = parser.parse_args()
+    if EXECUTIONS.name != "d4d-executions" or not (EXECUTIONS / "plans").is_dir():
+        parser.error("validation must run from a worktree directly under d4d-executions; "
+                     "quiet-window location cannot be established")
     if not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", args.label):
         parser.error("label must be a simple lowercase name")
     if LOCK.exists() or LOCK.is_symlink():

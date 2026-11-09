@@ -19,17 +19,22 @@ def receipts():
 @click.option("--core", "core_file", required=True,
               type=click.Path(exists=True, dir_okay=False, path_type=Path))
 def transform(full_file, core_file):
-    """Print D105's separate, non-gating full-to-core leaf receipt as JSON.
+    """Print D105's non-gating v5 transformation receipt and leaf diagnostic.
 
-    Uses saved YAML/JSON records, with no model or provider calls. Reports
-    current deterministic projection lineage, not evidence of a historical
-    execution. Mismatches are measured, not an exit-status gate. Neither input
-    nor the registered v4 `receipts` block is written or rescored.
+    Requires a checkout with dev dependencies (including linkml-map). Reads
+    saved YAML/JSON, emits and verifies v5's existing receipt, and adds a leaf
+    diagnostic that is not an instrument. This is not evidence of historical
+    execution. Mismatches do not gate exit status. Inputs and the registered
+    v4 `receipts` block are never written or rescored.
     """
     from data_sheets_schema.transformation_measure_io import measure_files, report_text
 
     try:
         output = report_text(measure_files(full_file, core_file))
+    except ImportError as exc:
+        raise click.ClickException(
+            "transformation measurement needs a checkout with dev dependencies "
+            "(including linkml-map)") from exc
     except (OSError, ValueError, TypeError, RecursionError) as exc:
         raise click.ClickException(f"transformation measurement refused: {exc}") from exc
     click.echo(output, nl=False)
