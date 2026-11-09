@@ -1,5 +1,6 @@
 """U3-J2 closed software-test profile refusals; never invoke a native binary."""
 from copy import deepcopy
+import ast
 import hashlib
 import json
 import os
@@ -67,6 +68,67 @@ def test_explicit_synthetic_profile_is_distinct_and_preserves_900_180(runtime):
     assert hashlib.sha256(raw.split(b'\n', 1)[1]).hexdigest() == profiles.SYNTHETIC_PEER_SHA256
     with pytest.raises(ValueError, match='first-party'):
         values.validate_runtime(runtime)
+
+
+@pytest.mark.parametrize('fixture_file,peer_class', [
+    ('native_shared_fixture.py', '_NeutralAnswers'),
+    ('native_shared_omission_fixture.py', '_OmissionAnswers'),
+])
+def test_pinned_answer_classes_preserve_original_ast(fixture_file, peer_class):
+    """Read code as data; neither the peer nor test fixture modules are imported."""
+    root = Path(__file__).parent
+    original_tree = ast.parse((root / fixture_file).read_bytes())
+    peer_tree = ast.parse((root / 'fixtures/native_shared_execution/fake_cli.py').read_bytes())
+    original = [node for node in original_tree.body
+                if isinstance(node, ast.ClassDef) and node.name == '_Answers']
+    embedded = [node for node in peer_tree.body
+                if isinstance(node, ast.ClassDef) and node.name == peer_class]
+    assert len(original) == len(embedded) == 1
+    embedded[0].name = '_Answers'  # The sole permitted AST normalization.
+    assert ast.dump(embedded[0], include_attributes=False) == ast.dump(original[0], include_attributes=False)
+
+
+def test_pinned_peer_never_imports_test_code_and_guards_before_fixture_selection():
+    peer = Path(__file__).parent / 'fixtures/native_shared_execution/fake_cli.py'
+    tree = ast.parse(peer.read_bytes())
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            assert all(alias.name.split('.')[0] != 'tests' for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            assert node.level == 0 and (node.module or '').split('.')[0] != 'tests'
+        elif isinstance(node, ast.Attribute):
+            assert not (isinstance(node.value, ast.Name) and node.value.id == 'sys'
+                        and node.attr == 'path'), 'the pinned peer must not alter import discovery'
+        elif isinstance(node, ast.Name):
+            assert node.id not in {'__import__', 'eval', 'exec', 'compile'}
+    main = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'main')
+    runtime_index = next(index for index, node in enumerate(main.body)
+        if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == 'runtime'
+                                              for target in node.targets))
+    expected = ast.parse("runtime = value['runtime']\nrequire_synthetic(runtime)").body
+    assert [ast.dump(node, include_attributes=False) for node in main.body[runtime_index:runtime_index + 2]] == [
+        ast.dump(node, include_attributes=False) for node in expected]
+    assert runtime_index == 2  # attempt path, captured value, then immediate runtime guard.
+
+
+@pytest.mark.parametrize('mutation', ['neutral_answer', 'omission_answer', 'trailing_byte'])
+def test_repinning_changed_answer_code_or_peer_bytes_never_admits(runtime, mutation):
+    """A caller-supplied executable hash cannot authorize changed peer behavior."""
+    peer = Path(runtime['executable']['path'])
+    before = peer.read_bytes()
+    if mutation == 'neutral_answer':
+        after = before.replace(b'No additional synthetic candidate declared.', b'Changed neutral declaration.', 1)
+    elif mutation == 'omission_answer':
+        after = before.replace(b'Invented merged/dropped declarations; scientific validity unverified.',
+                               b'Changed omission declaration.', 1)
+    else:
+        after = before + b'\n'
+    assert after != before
+    ast.parse(after)  # The refusal is identity, not invalid Python syntax.
+    peer.write_bytes(after)
+    runtime['executable']['sha256'] = hashlib.sha256(after).hexdigest()
+    with pytest.raises(ValueError, match='exact Python test peer'):
+        profiles.require_synthetic(runtime)
 
 
 @pytest.mark.parametrize('mutation', [

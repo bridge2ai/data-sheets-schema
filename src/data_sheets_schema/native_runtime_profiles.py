@@ -19,7 +19,7 @@ SYNTHETIC_RETURNED = 'synthetic-native-returned-model'
 SYNTHETIC_PROVIDER = 'scripted-local'
 SYNTHETIC_DEADLINE_SECONDS = 900
 SYNTHETIC_BUDGET = '1.0'
-SYNTHETIC_PEER_SHA256 = 'bc165bf46a5fce5084dc999790abf169cea8fe6523065b5c4f7dff561c8fa7bc'
+SYNTHETIC_PEER_SHA256 = 'eea1f457b940ced66fe8a2c7e2bbb030d20d902fc04824baa74eba7a86ae510d'
 _KINDS = {'d4d_native_u4b_runtime_basis', 'd4d_native_u4b_provisional_runtime_basis'}
 _AUTH = {'loggedIn': False, 'authMethod': SYNTHETIC_PROFILE,
          'apiProvider': SYNTHETIC_PROVIDER, 'subscriptionType': SYNTHETIC_PROFILE,

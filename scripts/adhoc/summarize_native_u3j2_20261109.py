@@ -381,6 +381,7 @@ def summarize_composition(directory, evidence):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out', type=Path, required=True, help='Exclusive physical JSON path under U3-J2 scratch')
+    parser.add_argument('--compact', action='store_true', help='Also print per-run counts and evidence digests without traces')
     args = parser.parse_args()
     quiet()
     if BASE.resolve(strict=True) != BASE or ROOT.name != 'codex-native-u1u3':
@@ -428,7 +429,23 @@ def main():
         stream.write(raw)
     if args.out.read_bytes() != raw:
         raise ValueError('summary output did not persist exactly')
-    print(json.dumps({'path': str(args.out), 'bytes': len(raw), 'sha256': sha(raw)}, sort_keys=True))
+    result = {'path': str(args.out), 'bytes': len(raw), 'sha256': sha(raw)}
+    if args.compact:
+        result['runs'] = [{
+            'name': run['name'], 'counts': run['junit']['counts'],
+            'qualification': run['qualification'],
+            'seconds': run['supervisor']['seconds'],
+            'artifacts': {Path(item['path']).name: item['sha256']
+                for item in run['immediate_artifacts']
+                if Path(item['path']).name in ('outcome.json', 'pytest.xml')},
+        } for run in runs]
+        result['compositions'] = [{key: item[key] for key in (
+            'manifest', 'source_commit', 'composition_commit', 'composition_tree',
+            'status', 'observed_postimages_equal_d127', 'cleanup_manifest')}
+            for item in compositions]
+        result['qualified_invocation_testcase_totals'] = dict(qualified)
+        result['unqualified_invocation_testcase_totals'] = dict(invalid)
+    print(json.dumps(result, sort_keys=True))
 
 
 if __name__ == '__main__':

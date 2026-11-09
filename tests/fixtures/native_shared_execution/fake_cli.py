@@ -18,6 +18,157 @@ from data_sheets_schema.native_model_aliases import model_aliases
 from data_sheets_schema.native_runtime_profiles import require_synthetic
 
 
+class _NeutralAnswers:
+    """Answer exact current outer requests; perform no file or runtime effects."""
+    def __init__(self, selection, full_raw, quote):
+        self.selection = selection
+        self.full_raw = full_raw
+        self.quote = quote
+
+    def __call__(self, request_raw):
+        from data_sheets_schema import native_shared_contract as c
+        value = c.strict_json(request_raw, max_bytes=self.selection.bounds()['max_request_bytes'])
+        c.exact(value, {'request_sha256', 'payload'}, 'fixture outer request')
+        payload = value['payload']
+        c.exact(payload, c.OUTER_REQUEST_KEYS, 'fixture outer payload')
+        if value['request_sha256'] != c.sha(c.canonical(payload)):
+            raise ValueError('fixture outer request hash differs')
+        if payload['selection']['sha256'] != self.selection.registration.pin.sha256:
+            raise ValueError('fixture request selected a different authority')
+        if payload['owner_context']['original_full_yaml'].encode() != self.full_raw:
+            raise ValueError('fixture request selected different full bytes')
+        if payload['generation_context'] != self.selection.generation_context():
+            raise ValueError('fixture request selected different generation context')
+        return self.answer_inner(payload['cursor']['kind'], payload['inner_request'])
+
+    def answer_inner(self, kind, inner):
+        """Pure reply construction, separately usable by data conformance checks."""
+        from data_sheets_schema import native_shared_contract as c
+        if kind == 'receipt':
+            return c.canonical({'rereceipt': [
+                {'path': path, 'unsupported': True,
+                 'reason': 'Synthetic receipt uncertainty; independent review required.'}
+                for path in inner['requested_paths']]})
+        if kind == 'worker':
+            shared = json.loads(inner['payload']['shared_context'])
+            stage = json.loads(inner['payload']['stage'])
+            if shared['original_full'].encode() != self.full_raw:
+                raise ValueError('fixture worker full differs')
+            paths = stage['assignment']['paths']
+            values = []
+            for row in stage['inventory']['values']:
+                if row['path'] not in paths:
+                    continue
+                values.append({'path': row['path'], 'claims': [{
+                    'text': row['text'], 'verdict': 'supported', 'attributed_to': [],
+                    'claim_status': 'fact', 'source_status': 'fact',
+                    'evidence': [dict(self.quote)],
+                    'reason': 'The fictional source explicitly declares this value and relationship; this is not scientific scoring.'}]})
+            return c.canonical({'findings': [], 'summary': 'Synthetic declared review only.',
+                'source_review': {'artifact': 'original_full', 'sha256': c.sha(self.full_raw), 'values': values}})
+        if kind == 'omission':
+            return c.canonical({'format': 'omission_inventory_v1',
+                'request_sha256': inner['request_sha256'], 'chunks': [
+                    {'chunk': row['chunk'], 'status': 'no_omission',
+                     'reason': 'No additional synthetic candidate declared.', 'candidates': []}
+                    for row in inner['payload']['chunks']]})
+        if kind == 'integration':
+            return c.canonical({'kind': 'audit_integration_v2',
+                'proposal_index_sha256': inner['index']['sha256'],
+                'retain_other_rows_from_index_sha256': inner['index']['sha256'],
+                'row_replacements': [], 'finding_decisions': [], 'new_findings': [],
+                'summary': 'Synthetic declared integration only.', 'omission_dispositions': []})
+        raise ValueError('fixture has no answer for cursor kind ' + str(kind))
+
+
+class _OmissionAnswers:
+    """Answer exact current outer requests; perform no file or runtime effects."""
+    def __init__(self, selection, full_raw, quote):
+        self.selection = selection
+        self.full_raw = full_raw
+        self.quote = quote
+
+    def __call__(self, request_raw):
+        from data_sheets_schema import native_shared_contract as c
+        value = c.strict_json(request_raw, max_bytes=self.selection.bounds()['max_request_bytes'])
+        c.exact(value, {'request_sha256', 'payload'}, 'fixture outer request')
+        payload = value['payload']
+        c.exact(payload, c.OUTER_REQUEST_KEYS, 'fixture outer payload')
+        if value['request_sha256'] != c.sha(c.canonical(payload)):
+            raise ValueError('fixture outer request hash differs')
+        if payload['selection']['sha256'] != self.selection.registration.pin.sha256:
+            raise ValueError('fixture request selected a different authority')
+        if payload['owner_context']['original_full_yaml'].encode() != self.full_raw:
+            raise ValueError('fixture request selected different full bytes')
+        if payload['generation_context'] != self.selection.generation_context():
+            raise ValueError('fixture request selected different generation context')
+        return self.answer_inner(payload['cursor']['kind'], payload['inner_request'])
+
+    def answer_inner(self, kind, inner):
+        """Pure reply construction, separately usable by data conformance checks."""
+        from data_sheets_schema import native_shared_contract as c
+        if kind == 'receipt':
+            return c.canonical({'rereceipt': [
+                {'path': path, 'unsupported': True,
+                 'reason': 'Synthetic receipt uncertainty; independent review required.'}
+                for path in inner['requested_paths']]})
+        if kind == 'worker':
+            shared = json.loads(inner['payload']['shared_context'])
+            stage = json.loads(inner['payload']['stage'])
+            if shared['original_full'].encode() != self.full_raw:
+                raise ValueError('fixture worker full differs')
+            paths = stage['assignment']['paths']
+            values = []
+            for row in stage['inventory']['values']:
+                if row['path'] not in paths:
+                    continue
+                values.append({'path': row['path'], 'claims': [{
+                    'text': row['text'], 'verdict': 'supported', 'attributed_to': [],
+                    'claim_status': 'fact', 'source_status': 'fact',
+                    'evidence': [dict(self.quote)],
+                    'reason': 'The fictional source explicitly declares this value and relationship; this is not scientific scoring.'}]})
+            return c.canonical({'findings': [], 'summary': 'Synthetic declared review only.',
+                'source_review': {'artifact': 'original_full', 'sha256': c.sha(self.full_raw), 'values': values}})
+        if kind == 'omission':
+            rows = [{'chunk': row['chunk'], 'status': 'no_omission',
+                     'reason': 'No additional fictional candidate declared.', 'candidates': []}
+                    for row in inner['payload']['chunks']]
+            target = next(row for row in inner['payload']['chunks'] if row['source'] == 'neutral.txt')
+            prefix = inner['request_sha256'][:16]
+            quote = 'The fictional description also states: release notes are illustrative and optional.'
+            candidates = [{'id': f'fixture-{prefix}-{index}', 'kind': 'omission',
+                'source': 'neutral.txt', 'quote': quote,
+                'target': {'owner': '', 'slot_chain': ['description']},
+                'missing_information': ['Illustrative release notes.', 'Optional release notes.',
+                    'An intentionally redundant proposed detail.'][index],
+                'scope_basis': 'Explicit fictional fixture declaration; novelty and support remain unverified.'}
+                for index in range(3)]
+            next(row for row in rows if row['chunk'] == target['chunk']).update(status='omission', candidates=candidates)
+            return c.canonical({'format': 'omission_inventory_v1',
+                'request_sha256': inner['request_sha256'], 'chunks': rows})
+        if kind == 'integration':
+            candidates = inner['omission_check']['declared_candidates']
+            if len(candidates) != 3:
+                raise ValueError('variant requires exactly its three captured candidates')
+            # Derive identity and evidence only from this actual captured request.
+            candidates = sorted(candidates, key=lambda row: row['id'])
+            evidence = [{'source': row['source'], 'chunk': row['chunk'], 'quote': row['quote']}
+                        for row in candidates]
+            dispositions = [{'candidate_id': row['id'], 'action': 'retain' if i < 2 else 'drop',
+                'reason': 'Invented mechanical disposition; no scientific adjudication.',
+                'evidence': [] if i < 2 else [evidence[i]]} for i, row in enumerate(candidates)]
+            finding = {'severity': 'medium', 'record': 'full', 'slot': 'description',
+                'issue': 'Merged fictional release-note omission declarations.', 'kind': 'omission',
+                'omission_candidates': [row['id'] for row in candidates[:2]], 'evidence': [evidence[0]]}
+            return c.canonical({'kind': 'audit_integration_v2',
+                'proposal_index_sha256': inner['index']['sha256'],
+                'retain_other_rows_from_index_sha256': inner['index']['sha256'],
+                'row_replacements': [], 'finding_decisions': [], 'new_findings': [finding],
+                'summary': 'Invented merged/dropped declarations; scientific validity unverified.',
+                'omission_dispositions': dispositions})
+        raise ValueError('fixture has no answer for cursor kind ' + str(kind))
+
+
 def _write_file(path, content):
     """Emulate the granted Write's parent creation, without prepopulating data."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -27,10 +178,10 @@ def _write_file(path, content):
 def main():
     attempt = Path(os.environ['CLAUDE_CONFIG_DIR']).parent
     value = captured_execution_body((attempt / 'registration.json').read_bytes())
+    runtime = value['runtime']
+    require_synthetic(runtime)
+    aliases = model_aliases(runtime)
     assert os.getcwd() == value['working_directory']
-    # Test data is deliberately outside the production package import path.
-    # Load it only from the already verified, exact registered source checkout.
-    sys.path.insert(0, value['working_directory'])
     assert sys.argv[1:] == value['argv'][1:]
     assert all(os.environ.get(k) == v for k, v in value['environment'].items())
     assert not any(k in os.environ for k in ('ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'CBORG_API_KEY'))
@@ -39,19 +190,17 @@ def main():
     root = Path(composition['instruction_path']).parent
     fixture = c.strict_json((root / 'synthetic-seeds.json').read_bytes(), max_bytes=c.HARD_LIMITS['request_bytes'])
     if fixture['answer_fixture'] == 'neutral':
-        from tests.native_shared_fixture import _Answers
+        answers_type = _NeutralAnswers
     elif fixture['answer_fixture'] == 'omission':
-        from tests.native_shared_omission_fixture import _Answers
+        answers_type = _OmissionAnswers
     else:
         raise ValueError('unknown synthetic native answer fixture')
     full = fixture['full'].encode(); receipt = fixture['receipt']
     quote = {'source': 'neutral.txt', 'chunk': fixture['chunk_id'], 'quote': fixture['source_text'].strip()}
-    answer = _Answers(selection, full, quote)
+    answer = answers_type(selection, full, quote)
     paths = composition['render_spec']['agentic_artifact_paths']
     commands = composition['policy']['native_shared_helpers']
-    runtime = value['runtime']; session = '43540000-0000-4000-8000-000000000001'
-    require_synthetic(runtime)
-    aliases = model_aliases(runtime)
+    session = '43540000-0000-4000-8000-000000000001'
     number = 0
     def send(event):
         print(json.dumps(event, allow_nan=False), flush=True)
