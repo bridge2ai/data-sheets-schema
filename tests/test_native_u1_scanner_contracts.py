@@ -95,6 +95,19 @@ def test_native_v2_import_shadow_refuses_with_configuration_error(tmp_path):
         scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
 
 
+def test_native_non_v2_route_retains_configuration_refusal(tmp_path):
+    root = _native_route_root(tmp_path)
+    assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+    path = root / 'src/data_sheets_schema/cli/prompt.py'
+    source = path.read_text()
+    original = 'from data_sheets_schema import native_execution_registration_v2 as preparation'
+    assert original in source
+    path.write_text(source.replace(original,
+        'from data_sheets_schema import unknown_preparation as preparation', 1))
+    with pytest.raises(scan.ConfigError, match='unproved constructor, contract or runtime binding'):
+        scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+
+
 def _procedure_root(tmp_path):
     for relative in ('native_shared_stage/__init__.py', 'native_shared_receipts.py',
                      'typed_audit.py', 'audit_omissions.py', 'native_shared_render.py'):

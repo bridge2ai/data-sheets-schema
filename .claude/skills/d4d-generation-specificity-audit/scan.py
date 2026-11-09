@@ -12196,10 +12196,10 @@ for key in {companions!r}:
         evidence.extend(_derive_native_v2_render(root, cli, command))
     else:
         expected_imports = ast.parse('''from data_sheets_schema.api_runner import RunSpec
-    from data_sheets_schema import native_shared_contract as contract
-    from data_sheets_schema.native_shared_selection import capture
-    from data_sheets_schema.native_shared_controller import bind_runtime
-    ''').body
+from data_sheets_schema import native_shared_contract as contract
+from data_sheets_schema.native_shared_selection import capture
+from data_sheets_schema.native_shared_controller import bind_runtime
+''').body
         for imp in expected_imports:
             matches = [n for n in command.body if dump(n) == dump(imp)]
             if len(matches) != 1:
