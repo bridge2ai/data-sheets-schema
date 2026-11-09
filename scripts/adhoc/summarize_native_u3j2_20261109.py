@@ -2,7 +2,8 @@
 """Summarize retained native U3-J2 validation evidence, 2026-11-09.
 
 Inputs: immediate run directories under scratch-native-u1u3/u3j2, their
-outcome/JUnit/worker-metric artifacts, and private composition/cleanup manifests.
+outcome/JUnit/worker-metric artifacts, private composition/cleanup manifests,
+and the retained baseline/candidate raw API parity files.
 Output: one exclusive --out JSON in that scratch directory. Standard library
 only; no tests, project imports, subprocesses, network or evidence modification.
 Nested JUnit testcases are counted once. CPU scopes stay separate; unavailable
@@ -38,6 +39,9 @@ D127 = {
     'src/download/prompts/canonical_hashes.yaml': '543e5cd6dc0da0f622ba2cd11a16a90732e9302a1ed0a4700efb61971299d252',
     'tests/utils/run_spec_boundary_contracts.json': 'b1e0cbd14c533a51b88eacb84b974cb93963e18d8f1fb71ae4ed3228f784d1ce',
 }
+PARITY_NAMES = frozenset({'generic.txt', 'tuned.txt', 'bc1.txt',
+    'declared_heading_spans_v1.txt', 'captured_json_values_v1.txt'}
+    | {'generic_v' + str(i) + '.txt' for i in range(2, 11)})
 
 
 def quiet():
@@ -69,6 +73,17 @@ def fingerprint(path):
 class Evidence:
     def __init__(self):
         self.artifacts = {}
+        self.directories = {}
+
+    def directory(self, path):
+        quiet()
+        if path.is_symlink() or not path.is_dir() or path.resolve(strict=True) != path:
+            raise ValueError('parity directory must be physical: ' + str(path))
+        names = sorted(item.name for item in path.iterdir())
+        old = self.directories.setdefault(str(path), names)
+        if old != names:
+            raise ValueError('parity directory entries changed: ' + str(path))
+        return {name: path / name for name in names}
 
     def record(self, path):
         identity = fingerprint(path)
@@ -95,6 +110,59 @@ class Evidence:
         for path, identity in self.artifacts.items():
             if fingerprint(Path(path)) != identity:
                 raise ValueError('input changed before summary publication: ' + path)
+        for path in self.directories:
+            self.directory(Path(path))
+
+
+def summarize_parity(evidence):
+    """Compare raw bytes; neither a passing pytest result nor a hash alone is parity."""
+    baseline = {}
+    for folder, expected in (
+        ('parity2-canary-baseline', {'generic.txt'}),
+        ('parity2-rest-baseline', PARITY_NAMES - {'generic.txt'}),
+    ):
+        paths = evidence.directory(BASE.parent / folder / 'parity')
+        if set(paths) != expected or set(paths) & set(baseline):
+            raise ValueError('baseline parity roster changed or overlaps: ' + folder)
+        for name, path in paths.items():
+            raw = evidence.raw(path)
+            if not raw:
+                raise ValueError('empty baseline parity artifact: ' + str(path))
+            baseline[name] = (path, raw)
+    comparisons = []
+    for label, expected in (
+        ('parity-canary-final-ffc0255d2', {'generic.txt'}),
+        ('parity-final-ffc0255d2', PARITY_NAMES),
+    ):
+        directory = BASE / label / 'parity'
+        if not os.path.lexists(directory):
+            comparisons.append({'run': label, 'available': False, 'passed': False,
+                'expected_count': len(expected), 'matched_count': None,
+                'reason': 'candidate parity directory missing'})
+            continue
+        actual = evidence.directory(directory)
+        rows = []
+        for name, path in actual.items():
+            candidate = evidence.raw(path)
+            if not candidate:
+                raise ValueError('empty candidate parity artifact: ' + str(path))
+            reference = baseline.get(name)
+            rows.append({'name': name, 'candidate': evidence.artifacts[str(path)],
+                'baseline': evidence.artifacts[str(reference[0])] if reference else None,
+                'equal_raw_bytes': bool(reference is not None and name in expected
+                                        and reference[1] == candidate)})
+        missing, extra = sorted(expected - set(actual)), sorted(set(actual) - expected)
+        matched = sum(row['equal_raw_bytes'] for row in rows)
+        comparisons.append({'run': label, 'available': True,
+            'passed': not missing and not extra and matched == len(expected),
+            'expected_count': len(expected), 'observed_count': len(actual),
+            'matched_count': matched, 'missing_names': missing,
+            'unexpected_names': extra, 'files': rows})
+    return {'expected_full_count': 14, 'expected_names': sorted(PARITY_NAMES),
+        'baseline_policy': 'Disjoint exact 1+13 roster; nonempty physical regular files.',
+        'comparison_policy': 'Direct raw byte equality, no normalization. Canary and full results are separate; the repeated canary is not a fifteenth rendering.',
+        'comparisons': comparisons,
+        'scope': 'API instruction bytes only; not native completion or scientific acceptance.'}
 
 
 def tag(element):
@@ -409,6 +477,7 @@ def main():
         if run['junit']['counts'] is not None:
             totals.update(run['junit']['counts'])
             (qualified if run['qualification']['qualified'] else invalid).update(run['junit']['counts'])
+    parity = summarize_parity(evidence)
     payload = {'kind': 'native_u3j2_retained_validation_summary', 'version': 1,
                'created_utc': datetime.now(timezone.utc).isoformat(), 'input_root': str(BASE),
                'helper': fingerprint(Path(__file__).resolve()), 'runs': runs, 'compositions': compositions,
@@ -418,6 +487,7 @@ def main():
                'totals_scope': 'Raw observed testcase instances across retained invocations, including synthetic diagnostic cases; repeated nodes are not unique coverage. Qualified and unqualified totals are separate. Missing XML is not a zero-test pass.',
                'incomplete_or_invalid_runs': [run['name'] for run in runs if not run['qualification']['qualified']],
                'missing_result_artifact_runs': [run['name'] for run in runs if not run['outcome_present'] or not run['junit']['available']],
+               'raw_parity': parity, 'verified_directory_rosters': evidence.directories,
                'artifacts': sorted(evidence.artifacts.values(), key=lambda row: row['path']),
                'artifact_scope': 'All consumed artifacts and immediate run evidence files; not a recursive hash of cases, dependencies or archives.',
                'cpu_policy': 'No cross-process CPU sum. Per-PID process CPU, self user/system, and reaped-child CPU remain separate.',
@@ -445,6 +515,7 @@ def main():
             for item in compositions]
         result['qualified_invocation_testcase_totals'] = dict(qualified)
         result['unqualified_invocation_testcase_totals'] = dict(invalid)
+        result['raw_parity'] = parity
     print(json.dumps(result, sort_keys=True))
 
 
