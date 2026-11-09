@@ -13,7 +13,7 @@ def main():
     pattern, filename = sys.argv[1:]
     regex = re.compile(pattern, re.IGNORECASE)
     matches = 0
-    for number, line in enumerate(Path(filename).read_text(encoding='utf-8').splitlines(), 1):
+    for number, line in enumerate(Path(filename).read_bytes().decode('utf-8').split('\n'), 1):
         if regex.search(line):
             print(f'{number}:{line}')
             matches += 1

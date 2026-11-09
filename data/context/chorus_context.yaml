@@ -32,7 +32,7 @@ data_processing:
 processing_software:
   value: true
   # chunks: [c007]
-  evidence: "[chunks: c007] \"who have produced powerful open-source tooling for transforming and interacting with\\n\\nclinical data.\""
+  evidence: "[chunks: c007] \"We have software contributors within CHoRUS who have a broad range of expertise, and\\n\\nwho have produced powerful open-source tooling for transforming and interacting with\\n\\nclinical data.\""
 
 ml_training_dataset:
   value: true

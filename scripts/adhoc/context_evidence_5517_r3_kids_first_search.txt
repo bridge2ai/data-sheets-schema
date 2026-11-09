@@ -3,7 +3,7 @@
 # Bundle: notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt
 # SHA256: cc45c89548158a7a909699fbf1f75e6cc88c32ac8486d5518c5d4e46cdc9447c
 # Original command (JSON argv): ["rg", "--hidden", "--no-ignore", "-n", "-i", "machine learning|training|\\bAI\\b|model|artificial intelligence|deep learning|AI-ready|AI/ML|predictive|benchmark|split", "notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt"]
-# Equivalent: Python re.IGNORECASE, direct whole-file read including ignored/hidden files.
+# Reproduction for this bundle: Python re.IGNORECASE, LF-only direct whole-file read including ignored/hidden files.
 # Command (JSON argv): ["python", "scripts/adhoc/context_evidence_5517_search.py", "machine learning|training|\\bAI\\b|model|artificial intelligence|deep learning|AI-ready|AI/ML|predictive|benchmark|split", "notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt"]
 # Matching lines: 32
 173:Validate discoveries in model organisms to human health

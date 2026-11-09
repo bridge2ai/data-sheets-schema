@@ -19,12 +19,19 @@ All 6 project applicability context files under `data/context/` (`schema_version
 
 | Project | Context File | Normalized Context Digest (`SHA-256`) | `human_subjects` | `regulated_access` | `shared_dataset` | `data_collection` | `data_processing` | `processing_software` | `ml_training_dataset` | Rubric 10 Applicable (`max`) | Rubric 20 Applicable (`max`) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **AI_READI** | `data/context/ai_readi_context.yaml` | `d999aea6fa80f0f05fce816e2984dd7cf7011afce7e9e295a61180ac6f2055c0` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
-| **CHORUS** | `data/context/chorus_context.yaml` | `8f651ac8ceba1ac58b1edaf9a5a6843e0a3e5040ed1f77120af6a313f4a2cd0b` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
-| **CM4AI** | `data/context/cm4ai_context.yaml` | `e0fc85526b74146fb9a443c7cb42fc0ad97e6298dd838887e2d1f483a9e3fbfc` | `false` | `false` | `true` | `true` | `true` | `true` | `true` | `44 / 50` (`44.0`) | `18 / 20` (`78.0`) |
+| **AI_READI** | `data/context/ai_readi_context.yaml` | `2b4f46de47139c53b575cae67c9b0ab0888564e0c9a68ea055b3bc5c6019b7fd` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **CHORUS** | `data/context/chorus_context.yaml` | `cd11d1021f99f505edd4e6e90fc95f8bec8c6af9f02e3962c52027ca70dd7e2b` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **CM4AI** | `data/context/cm4ai_context.yaml` | `4bab63de3db78508588c088e209a2c5729a6110e293d1dc2fed0f86fb0fdb5ca` | `false` | `false` | `true` | `true` | `true` | `true` | `true` | `44 / 50` (`44.0`) | `18 / 20` (`78.0`) |
 | **VOICE** | `data/context/voice_context.yaml` | `e33e20c39487c590c56e7825992d0ecb1a060d0e36745b8138a213863806d412` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
-| **VOICE_PEDIATRIC** | `data/context/voice_pediatric_context.yaml` | `def79616baacd139cb5a6b4f142399fef62d2e04ba33f9a3b322d575c60e4fb0` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
-| **KIDS_FIRST** | `data/context/kids_first_context.yaml` | `3eb513a8b151b8808c157693019ee829989dac07bdf1b66bcb313ca040d2c0f4` | `true` | `true` | `true` | `true` | `true` | `true` | `false` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **VOICE_PEDIATRIC** | `data/context/voice_pediatric_context.yaml` | `b2fe656374f1e3c5166280208644f10277ef21a32a05aa24035f8719d52dfaf8` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **KIDS_FIRST** | `data/context/kids_first_context.yaml` | `4f6907c97e6518372dd3b9d0ee002addd072429f271fefe6902c09ee3f5e1b71` | `true` | `true` | `true` | `true` | `true` | `true` | `false` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+
+D102 live-pin update, 2026-11-08, PR #5532 round 6: the table above reflects
+D103 absence support for CM4AI, D120 decision-tagged notes, D122's quoted release
+qualification, and the widened CHORUS/Kids First quotations. Applicability values
+and D52 tags are unchanged. Historical registrations retain their original pins.
+These evidence bytes reach evaluation judges and semantic agents; future evaluations
+will record the new context digests. Generation does not consume these contexts.
 
 ### 1.2 The 5 Hold Questions Requiring Human Confirmation (`#2912`)
 

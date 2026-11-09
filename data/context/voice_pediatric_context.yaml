@@ -26,7 +26,7 @@ data_collection:
 data_processing:
   value: true
   # chunks: [c002, c003]
-  evidence: "[search_notes] \"Release qualification for v1.1.0: manual checking is documented by the c003 release note quoted below; retained c002 describes feature derivation.\" [chunks: c002] \"torchaudio_mfcc.parquet (n=23533) contains Mel-frequency cepstrum coefficients of dimension 60xT using the same parameters as the mel spectrograms.\" [chunks: c003] \"b2ai-voice-pediatric v1.1: No new participants released in this minor update, but releasing audio features for all free speech tasks that were manually checked for presence of unconsented speakers and PII.\""
+  evidence: "[chunks: c002] \"torchaudio_mfcc.parquet (n=23533) contains Mel-frequency cepstrum coefficients of dimension 60xT using the same parameters as the mel spectrograms.\" [chunks: c003] \"b2ai-voice-pediatric v1.1: No new participants released in this minor update, but releasing audio features for all free speech tasks that were manually checked for presence of unconsented speakers and PII.\""
 
 processing_software:
   value: true

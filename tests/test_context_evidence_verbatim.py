@@ -19,14 +19,17 @@ CONTEXTS = sorted((ROOT / 'data/context').glob('*_context.yaml'))
 PREDICATES = {'human_subjects', 'regulated_access', 'shared_dataset',
               'data_collection', 'data_processing', 'processing_software', 'ml_training_dataset'}
 NEEDS_OWNER = set()
-ABSENCE_SUPPORTED = {('kids_first_context', 'ml_training_dataset')}
+ABSENCE_SUPPORTED = {('kids_first_context', 'ml_training_dataset'),
+                     ('cm4ai_context', 'regulated_access')}
+CONTEXT_NOTES = {('ai_readi_context', pred): 'D120'
+                 for pred in ('data_processing', 'processing_software')}
 OWNER_DECISIONS = {
     ('chorus_context', 'regulated_access'): "[curator_assertion: true; accepted by the owner's human review, D52, 2026-10-27]",
     ('kids_first_context', 'ml_training_dataset'): "[curator_assertion: true; set to false by the owner's human review, D52, 2026-10-27]",
 }
 
 
-def parse_evidence(evidence):
+def parse_evidence(evidence, key=None):
     """Closed grammar: optional curator metadata, unresolved metadata, cited JSON strings."""
     remaining = evidence
     owner = None
@@ -45,9 +48,19 @@ def parse_evidence(evidence):
             assert remaining.startswith('[search_notes] '), 'state requires notes'
             break
     if remaining.startswith('[search_notes] '):
+        assert state != 'quoted', 'search notes require an explicit evidence state'
         remaining = remaining[len('[search_notes] '):]
         notes, end = decoder.raw_decode(remaining)
         assert isinstance(notes, str) and len(notes.strip()) >= 40, 'substantive search notes required'
+        remaining = remaining[end:].lstrip()
+    if remaining.startswith('[context_note: '):
+        decision = CONTEXT_NOTES.get(key)
+        assert state == 'quoted' and decision, 'context note not authorized'
+        prefix = f'[context_note: {decision}] '
+        assert remaining.startswith(prefix), 'incorrect note decision'
+        remaining = remaining[len(prefix):]
+        notes, end = decoder.raw_decode(remaining)
+        assert isinstance(notes, str) and notes.startswith(decision + ': '), 'note must start with decision id'
         remaining = remaining[end:].lstrip()
     quotations = []
     while remaining:
@@ -63,8 +76,8 @@ def parse_evidence(evidence):
     return state, notes, owner, quotations
 
 
-def validate_quotes(evidence, chunks):
-    state, notes, owner, quotations = parse_evidence(evidence)
+def validate_quotes(evidence, chunks, key=None):
+    state, notes, owner, quotations = parse_evidence(evidence, key)
     for ids, quote in quotations:
         assert len(ids) == len(set(ids)), 'duplicate citation'
         for cid in ids:
@@ -112,13 +125,13 @@ def test_context_inventory_is_not_empty_or_partial():
         context = yaml.safe_load(path.read_text())
         assert set(context) == PREDICATES
         for pred, entry in context.items():
-            state, _, _ = validate_quotes(entry['evidence'], source_chunks(path))
+            state, _, _ = validate_quotes(entry['evidence'], source_chunks(path), (path.stem, pred))
             counts[state] += 1
             if state == 'needs_owner':
                 unresolved.add((path.stem, pred))
     assert unresolved == NEEDS_OWNER
-    assert counts['quoted'] == 41
-    assert counts['absence_supported'] == 1
+    assert counts['quoted'] == 40
+    assert counts['absence_supported'] == 2
     assert counts['needs_owner'] == 0
     assert sum(counts.values()) == 42
 
@@ -148,8 +161,8 @@ def test_literal_check_does_not_accept_terms_or_casefolding():
                          ids=[f'{p.stem}-{pred}' for p in CONTEXTS for pred in sorted(PREDICATES)])
 def test_every_evidence_string_occurs_verbatim_in_its_bundle(path, predicate):
     entry = yaml.safe_load(path.read_text())[predicate]
-    state, notes, owner = validate_quotes(entry['evidence'], source_chunks(path))
     key = (path.stem, predicate)
+    state, notes, owner = validate_quotes(entry['evidence'], source_chunks(path), key)
     assert state == ('needs_owner' if key in NEEDS_OWNER else
                      'absence_supported' if key in ABSENCE_SUPPORTED else 'quoted')
     assert owner == OWNER_DECISIONS.get(key)
@@ -161,20 +174,31 @@ def test_every_evidence_string_occurs_verbatim_in_its_bundle(path, predicate):
     assert entry['value'] is (not expected)
 
 
-def test_absence_supported_search_is_reproducible():
+@pytest.mark.parametrize('project,predicate,record_name', [
+    ('kids_first', 'ml_training_dataset', 'context_evidence_5517_r3_kids_first_search.txt'),
+    ('cm4ai', 'regulated_access', 'context_evidence_5517_r6_cm4ai_search.txt'),
+])
+def test_absence_supported_search_is_reproducible(project, predicate, record_name):
     import subprocess
     import sys
-    path = ROOT / 'data/context/kids_first_context.yaml'
-    entry = yaml.safe_load(path.read_text())['ml_training_dataset']
+    path = ROOT / f'data/context/{project}_context.yaml'
+    entry = yaml.safe_load(path.read_text())[predicate]
     state, notes, _, _ = parse_evidence(entry['evidence'])
     assert state == 'absence_supported' and entry['value'] is False
-    record = (ROOT / 'scripts/adhoc/context_evidence_5517_r3_kids_first_search.txt').read_text()
+    record = (ROOT / 'scripts/adhoc' / record_name).read_text()
     command = json.loads(next(l.removeprefix('# Command (JSON argv): ') for l in record.splitlines()
                               if l.startswith('# Command (JSON argv): ')))
     assert command[:2] == ['python', 'scripts/adhoc/context_evidence_5517_search.py']
     pattern = command[2]
-    assert command[-1] == 'notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt'
-    for term in ('artificial intelligence', 'deep learning', 'AI-ready', 'AI/ML'):
+    original = json.loads(next(l.removeprefix('# Original command (JSON argv): ') for l in record.splitlines()
+                              if l.startswith('# Original command (JSON argv): ')))
+    assert original == ['rg', '--hidden', '--no-ignore', '-n', '-i', pattern, command[-1]]
+    expected_bundle = ('notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt'
+                       if project == 'kids_first' else 'data/preprocessed/concatenated/CM4AI_preprocessed.txt')
+    assert command[-1] == expected_bundle
+    terms = (('artificial intelligence', 'deep learning', 'AI-ready', 'AI/ML') if project == 'kids_first'
+             else ('access', 'credential', 'embargo', 'agreement', 'committee'))
+    for term in terms:
         assert term in pattern
     assert 'research|resource' not in pattern
     digest = hashlib.sha256((ROOT / command[-1]).read_bytes()).hexdigest()
@@ -184,7 +208,28 @@ def test_absence_supported_search_is_reproducible():
                             text=True, capture_output=True, timeout=60)
     assert result.returncode == 0
     assert record.split('# Matching lines: ', 1)[1].split('\n', 1)[1] == result.stdout
-    assert '1440:' in result.stdout and '1440' in notes and 'downstream use' in notes
+    assert int(record.split('# Matching lines: ', 1)[1].split('\n', 1)[0]) == len(result.stdout.splitlines())
+    if project == 'kids_first':
+        assert '1440:' in result.stdout and '1440' in notes and 'downstream use' in notes
+    else:
+        assert '3773:' in result.stdout and '3773' in notes
+
+
+@pytest.mark.parametrize('key', [(p.stem, pred) for p in CONTEXTS for pred in sorted(PREDICATES)])
+def test_quoted_notes_require_specific_decision(key):
+    quote = '[chunks: c001] "exact source"'
+    chunks = {'c001': 'exact source'}
+    with pytest.raises(AssertionError):
+        validate_quotes('[search_notes] "' + 'x' * 50 + '" ' + quote, chunks, key)
+    note = '[context_note: D120] "D120: contextual file-format evidence only." '
+    if key in CONTEXT_NOTES:
+        assert validate_quotes(note + quote, chunks, key)[0] == 'quoted'
+        for bad in (note.replace('D120:', 'D119:'), note.replace('context_note: D120', 'context_note: D119')):
+            with pytest.raises(AssertionError):
+                validate_quotes(bad + quote, chunks, key)
+    else:
+        with pytest.raises(AssertionError):
+            validate_quotes(note + quote, chunks, key)
 
 
 @pytest.mark.parametrize('state', ['needs_owner', 'absence_supported'])

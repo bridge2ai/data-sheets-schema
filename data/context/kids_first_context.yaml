@@ -6,7 +6,7 @@
 human_subjects:
   value: true
   # chunks: [c006]
-  evidence: "[chunks: c006] \"is a single individual who enrolled in a Kids First study and has consented to share biospecimens and data for research and discovery.\" [chunks: c006] \"Not all participants are themselves affected by the condition of interest of their study – for example, some studies enroll parents and siblings who do not have the condition.\""
+  evidence: "[chunks: c006] \"A\\nparticipant\\nis a single individual who enrolled in a Kids First study and has consented to share biospecimens and data for research and discovery.\" [chunks: c006] \"Not all participants are themselves affected by the condition of interest of their study – for example, some studies enroll parents and siblings who do not have the condition.\""
 
 regulated_access:
   value: true
