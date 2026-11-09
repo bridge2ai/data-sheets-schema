@@ -27,7 +27,7 @@ def runtime_for(data, root):
     updater.mkdir()
     source, copied = updater / 'current', directory / 'ordinary-python-test-peer'
     peer = Path(__file__).parents[1] / 'fixtures/native_shared_execution/fake_cli.py'
-    binary = ('#!' + sys.executable + '\n').encode() + peer.read_bytes()
+    binary = ('#!' + sys.executable + ' -P\n').encode() + peer.read_bytes()
     for path in (source, copied):
         path.write_bytes(binary)
         path.chmod(0o700)

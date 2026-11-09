@@ -29,7 +29,7 @@ def runtime(tmp_path):
     root = tmp_path.resolve()
     peer = root / 'ordinary-python-peer'
     body = (Path(__file__).parent / 'fixtures/native_shared_execution/fake_cli.py').read_bytes()
-    raw = ('#!' + sys.executable + '\n').encode() + body
+    raw = ('#!' + sys.executable + ' -P\n').encode() + body
     peer.write_bytes(raw)
     peer.chmod(0o700)
     home = root / 'synthetic-home'
@@ -64,10 +64,26 @@ def test_explicit_synthetic_profile_is_distinct_and_preserves_900_180(runtime):
     assert runtime == original
     assert runtime['deadline_seconds'] == 900
     raw = Path(runtime['executable']['path']).read_bytes()
+    assert raw.split(b'\n', 1)[0] == ('#!' + sys.executable + ' -P').encode()
     assert b'timeout=180)' in raw
     assert hashlib.sha256(raw.split(b'\n', 1)[1]).hexdigest() == profiles.SYNTHETIC_PEER_SHA256
     with pytest.raises(ValueError, match='first-party'):
         values.validate_runtime(runtime)
+
+
+@pytest.mark.parametrize('shebang', ['missing_safe_path', 'foreign_interpreter', 'extra_options'])
+def test_synthetic_peer_refuses_changed_startup_even_with_recomputed_hash(runtime, shebang):
+    """Data-only mutation check: no interpreter or peer is invoked."""
+    peer = Path(runtime['executable']['path'])
+    body = peer.read_bytes().split(b'\n', 1)[1]
+    header = {'missing_safe_path': '#!' + sys.executable,
+              'foreign_interpreter': '#!' + sys.executable + '-unregistered -P',
+              'extra_options': '#!' + sys.executable + ' -P -S'}[shebang]
+    raw = (header + '\n').encode() + body
+    peer.write_bytes(raw)
+    runtime['executable']['sha256'] = hashlib.sha256(raw).hexdigest()
+    with pytest.raises(ValueError, match='exact Python test peer'):
+        profiles.require_synthetic(runtime)
 
 
 @pytest.mark.parametrize('fixture_file,peer_class', [

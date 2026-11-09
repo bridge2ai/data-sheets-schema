@@ -139,7 +139,9 @@ def require_synthetic(runtime):
     if any(getattr(before, k) != getattr(after, k) or
            getattr(after, k) != getattr(binary.stat(), k) for k in fields):
         raise ValueError('synthetic peer changed during validation')
-    shebang = ('#!' + sys.executable + '\n').encode()
+    # The exact interpreter must suppress the peer directory before any import.
+    # A sibling json.py/package must never execute before this runtime guard.
+    shebang = ('#!' + sys.executable + ' -P\n').encode()
     if (not raw.startswith(shebang)
             or hashlib.sha256(raw[len(shebang):]).hexdigest() != SYNTHETIC_PEER_SHA256
             or hashlib.sha256(raw).hexdigest() != runtime['executable']['sha256']):
