@@ -69,6 +69,10 @@ def synthetic_registration(composition_path, system_path, **kwargs):
 
     The same captured preparation, permission and observation consumers run.
     The separate entry additionally requires the fixed ordinary-Python peer.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit composition and system paths; _registration_body reconstructs guarded preparation and composition before creating the proposal, and require_synthetic restricts it to the fixed software-test peer.
     """
     from .native_runtime_profiles import require_synthetic
     body = _registration_body(composition_path, system_path, **kwargs)

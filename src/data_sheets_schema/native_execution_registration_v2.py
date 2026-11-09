@@ -223,7 +223,12 @@ def _pin_map(captured, runtime, dependencies):
 
 
 def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
-    """Prepare a real native contract; explicit software-test runtimes refuse."""
+    """Prepare a real native contract; explicit software-test runtimes refuse.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit selection and runtime paths; this production entry refuses synthetic runtime authority, then _prepare constructs and entry-checks the fresh RunSpec before instruction, input_identity or render_spec access.
+    """
     from .native_runtime_profiles import PRODUCTION_PROFILE, require_production
     require_production(c.strict_json(_read(str(runtime_path), 'runtime declaration',
                                          c.HARD_LIMITS['input_bytes']).raw, 'runtime declaration'))
@@ -232,7 +237,12 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks)
 
 
 def prepare_synthetic(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
-    """Prepare the distinct software-test contract over the exact isolated peer."""
+    """Prepare the distinct software-test contract over the exact isolated peer.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit selection and runtime paths for the exact isolated Python test peer; _prepare constructs and entry-checks the fresh RunSpec before instruction, input_identity or render_spec access. This entry grants no production launch authority.
+    """
     from .native_runtime_profiles import SYNTHETIC_PROFILE, require_synthetic
     require_synthetic(c.strict_json(_read(str(runtime_path), 'runtime declaration',
                                         c.HARD_LIMITS['input_bytes']).raw, 'runtime declaration'))
@@ -313,7 +323,7 @@ def verify_preparer(raw, *, job_id):
 
     RunSpec boundary: validated-caller
 
-    RunSpec precondition: Caller supplies bounded preparation bytes and job identity; prepare reconstructs and guards the fresh RunSpec before the full comparison.
+    RunSpec precondition: Caller supplies bounded preparation bytes and job identity; the profile-selected prepare or prepare_synthetic reconstructs and guards the fresh RunSpec before the full comparison.
     """
     _job_id(job_id)
     body, dependencies = _wire(raw)

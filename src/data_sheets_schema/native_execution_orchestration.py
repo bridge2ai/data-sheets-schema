@@ -265,7 +265,12 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
 
 def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path,
                      contract: ExecutionContract, effects: ExecutionEffects):
-    """Fixed synthetic dispatch entry; the real launch entry always refuses it."""
+    """Fixed synthetic dispatch entry; the real launch entry always refuses it.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit synthetic execution-registration bytes and the fixed shared-v2 contract and effects; registration.verified reconstructs guarded preparation, and _launch retains fresh admission before execution effects.
+    """
     from .native_execution_capabilities import loaded_capabilities
     from .native_runtime_profiles import require_synthetic, SYNTHETIC_PROFILE
     contract.require_fixed()

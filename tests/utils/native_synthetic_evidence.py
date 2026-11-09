@@ -139,13 +139,17 @@ def authority_for(registration_raw, ci_path, directory):
     slot = reservation / 'capture-1'
     slot.mkdir()
     bound = capture._slot_binding(binding, 1, reserve_raw, None)
-    claim = capture._claim(slot, terms['quota_capture'], runtime, bound, stamp)
+    # The word predates authority reconstruction. The invented capture is made
+    # only now: do not age its observation by reusing that earlier word time.
+    capture_now = datetime.now(timezone.utc)
+    capture_stamp = capture_now.isoformat().replace('+00:00', 'Z')
+    claim = capture._claim(slot, terms['quota_capture'], runtime, bound, capture_stamp)
     claim_raw = c.canonical(claim)
     (reservation / 'claim-1.json').write_bytes(claim_raw)
     (slot / 'claim.json').write_bytes(claim_raw)
     event = {'type': 'rate_limit_event', 'rate_limit_info': {
         'status': 'allowed', 'isUsingOverage': False, 'unifiedWindows': {
-            name: {'status': 'allowed', 'utilization': 0.2, 'resetsAt': int(now.timestamp()) + 86400}
+            name: {'status': 'allowed', 'utilization': 0.2, 'resetsAt': int(capture_now.timestamp()) + 86400}
             for name in ('five_hour', 'seven_day')}}}
     session = 'invented-synthetic-capture'
     rows = [{'type': 'system', 'subtype': 'init', 'model': runtime['model'],
@@ -155,12 +159,12 @@ def authority_for(registration_raw, ci_path, directory):
             'modelUsage': {runtime['model']: deepcopy(runtime['limits'])}}]
     stdout = b''.join(c.canonical(row) + b'\n' for row in rows)
     event_raw = c.canonical(event)
-    observations = [{'line': 2, 'captured_at': stamp,
+    observations = [{'line': 2, 'captured_at': capture_stamp,
         'event_sha256': c.sha(event_raw), 'event_json': event_raw.decode()}]
     files = {'stdout.jsonl': stdout, 'stderr.txt': b'',
         'observations.json': c.canonical(observations)}
     result = {'kind': capture.KIND, 'version': capture.VERSION, **bound, 'status': 'captured',
-        'claim_sha256': c.sha(claim_raw), 'selected_event': capture._event(stdout, observations, stamp),
+        'claim_sha256': c.sha(claim_raw), 'selected_event': capture._event(stdout, observations, capture_stamp),
         'terminal': capture._terminal(stdout, runtime), 'basis': capture.BASIS,
         'lifecycle': {'spawn_count': 1, 'returncode': 0,
             'cleanup': {'child_started': True, 'leader_reaped': True, 'group_absent': True}},

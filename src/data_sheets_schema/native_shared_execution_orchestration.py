@@ -97,6 +97,10 @@ def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path
 
     This separate entry cannot accept a real executable/account. Saved authority
     remains expressly synthetic; actual capture and production launch refuse it.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit synthetic execution-registration bytes; registration.verified reconstructs guarded preparation before creating fixed effects, and the common synthetic engine retains fresh admission before dispatch.
     """
     from dataclasses import replace
     from .native_execution_orchestration import synthetic_launch as execute
