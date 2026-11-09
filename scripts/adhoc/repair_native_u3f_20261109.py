@@ -4,6 +4,8 @@ Outputs only scratch-native-u1u3/u3f; supports the U3-F local repair handoff.
 No provider/native launch. Each scanner runs under the inherited OS deny policy.
 """
 import json
+import importlib.util
+import hashlib
 import os
 from pathlib import Path
 import subprocess
@@ -31,10 +33,15 @@ def scan(label, source):
         '--root', str(source), '--report', str(OUT / (label + '.md')),
         '--json', str(OUT / (label + '.json')), '--full-json']
     start = time.monotonic()
+    tool = ROOT / '.claude/skills/d4d-generation-specificity-audit/scan.py'
+    tool_sha = hashlib.sha256(tool.read_bytes()).hexdigest()
+    source_head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=source).decode().strip()
     with (OUT / (label + '.log')).open('xb') as stream:
         result = subprocess.run(command, cwd=source, env=env, stdout=stream,
             stderr=subprocess.STDOUT, timeout=3300)
-    record = dict(command=command, returncode=result.returncode, seconds=time.monotonic()-start)
+    record = dict(command=command, returncode=result.returncode, seconds=time.monotonic()-start,
+        tool_sha256=tool_sha, source_commit=source_head,
+        tool_unchanged=hashlib.sha256(tool.read_bytes()).hexdigest() == tool_sha)
     (OUT / (label + '-run.json')).write_text(json.dumps(record, indent=2)+'\n')
     print(json.dumps(record), flush=True)
 
@@ -51,8 +58,21 @@ def ledger():
     (OUT / 'prior-ledger-review.json').write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps(result, indent=2))
 
+def derive(label):
+    quiet()
+    path = ROOT / '.claude/skills/d4d-generation-specificity-audit/scan.py'
+    spec = importlib.util.spec_from_file_location('u3f_scanner', path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    result = module.derive_native_shared_procedure(ROOT)
+    (OUT / (label+'.json')).write_text(json.dumps(result, indent=2)+'\n')
+    print(json.dumps(result))
+
 if __name__ == '__main__':
     if sys.argv[1] == 'ledger':
         ledger()
     elif sys.argv[1] == 'scan':
         scan(sys.argv[2], Path(sys.argv[3]).resolve())
+    elif sys.argv[1] == 'derive':
+        derive(sys.argv[2])

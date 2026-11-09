@@ -85,6 +85,66 @@ def test_native_v2_route_rejects_changed_producer(tmp_path, relative, before, af
         scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
 
 
+def test_native_v2_import_shadow_refuses_with_configuration_error(tmp_path):
+    root = _native_route_root(tmp_path)
+    assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+    path = root / 'src/data_sheets_schema/native_execution_registration_v2.py'
+    path.write_text(path.read_text()+'\ndef changed_binding(c):\n    return c\n')
+    with pytest.raises(scan.ConfigError, match='binding is replaced'):
+        scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+
+
+def _procedure_root(tmp_path):
+    for relative in ('native_shared_stage/__init__.py', 'native_shared_receipts.py',
+                     'typed_audit.py', 'audit_omissions.py', 'native_shared_render.py'):
+        path = tmp_path / 'src/data_sheets_schema' / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes((ROOT / 'src/data_sheets_schema' / relative).read_bytes())
+    return tmp_path
+
+
+def test_native_complete_response_roster_derives():
+    result = scan.derive_native_shared_procedure(ROOT)
+    assert result['protocol_responses']['formula'] == 'R + W + 2'
+    assert result['model_calls_minimum'] is None
+    assert [stage['kind'] for stage in result['stages']] == ['receipt', 'worker', 'omission', 'integration']
+
+
+@pytest.mark.parametrize('relative,before,after', [
+    ('native_shared_stage/__init__.py', "roster += [('omission', 'omission'), ('integration', 'integration')]", "roster += [('integration', 'integration')]"),
+    ('native_shared_stage/__init__.py', "'_catalog_lookup': catalog_reuse._CatalogLookup(self.catalogs, selection)", "'_catalog_lookup': None"),
+    ('typed_audit.py', 'if captured_assets is None:\n        prepared = omissions.prepare', 'if captured_assets is not None:\n        prepared = omissions.prepare'),
+    ('typed_audit.py', "if k not in (\"classes\", \"slots\")", "if k not in (\"classes\", \"slots\", \"terms\")"),
+    ('audit_omissions.py', 'for key, value in chunks.items()]', "for key, value in chunks.items() if prior.get(key) != 'nothing_relevant']"),
+    ('audit_omissions.py', 'owners=owners, chunks=chunks, prior=prior,', 'owners=owners, chunks={}, prior=prior,'),
+])
+def test_native_response_roster_refuses_changed_producer(tmp_path, relative, before, after):
+    root = _procedure_root(tmp_path)
+    assert scan.derive_native_shared_procedure(root)
+    path = root / 'src/data_sheets_schema' / relative
+    source = path.read_text()
+    assert before in source
+    path.write_text(source.replace(before, after, 1))
+    with pytest.raises(scan.ConfigError, match='native shared response roster'):
+        scan.derive_native_shared_procedure(root)
+
+
+@pytest.mark.parametrize('before,after', [
+    ('key = raw, token', 'key = token'),
+    ('return value, candidate', 'return {"project": "CHORUS"}, candidate'),
+    ('retain_native(candidate, limit=limit)', 'pass'),
+    ('events.clear()', "events.append('CHORUS')"),
+    ('if not reusable or _token(limit) != token:', 'if not reusable:'),
+    ('from . import audit_omissions as _omissions', 'from . import unknown as _omissions'),
+])
+def test_native_event_parser_summary_is_bound_to_complete_source(before, after):
+    source = (ROOT / 'src/data_sheets_schema/native_schema_event_reuse.py').read_text()
+    assert scan._native_event_parser_contract(source)
+    assert before in source
+    with pytest.raises(scan.ConfigError, match='parser transport source changed'):
+        scan._native_event_parser_contract(source.replace(before, after, 1))
+
+
 def test_native_route_cannot_omit_bc1_exclusion(tmp_path):
     root = fixture_root(tmp_path)
     path = root / 'src/data_sheets_schema/native_shared_render.py'

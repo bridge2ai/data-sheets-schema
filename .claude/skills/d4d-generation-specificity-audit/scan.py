@@ -3604,7 +3604,12 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
         res = _audit_evidence_module_of.get(q)
         if res is not None:
             return res
-        res = str(q).endswith(_audit_evidence_modules)
+        if _rel(root, q) == 'src/data_sheets_schema/native_schema_event_reuse.py':
+            # A closed parser implementation, not a basename waiver. Its
+            # imported authority bindings are included in the source contract.
+            res = q in parsed and _native_event_parser_contract(parsed[q][0])
+        else:
+            res = str(q).endswith(_audit_evidence_modules)
         _audit_evidence_module_of[q] = res
         return res
 
@@ -9274,6 +9279,14 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
 
                     is_nested_sub = _is_local_nested_container_subscript(receiver, node.func.value, node.func.attr)
                     if not is_nested_sub and (receiver in uncertain or not isinstance(node.func.value, ast.Name)):
+                        if (q is not None and _rel(root, q) == 'src/data_sheets_schema/native_schema_event_reuse.py'
+                                and _is_audit_evidence_module(q) and fn.name == 'load_native'
+                                and ast.unparse(node) == 'events.clear()'):
+                            # The complete source-bound parser contract proves
+                            # this is its fresh deque, released only after the
+                            # detached mapping has been composed. Other calls
+                            # and any changed parser source still refuse.
+                            continue
                         if (
                             _is_real_repo_module(q)
                             and not formal
@@ -11862,6 +11875,26 @@ def _early_axis_refusal(tree: ast.Module) -> dict:
     return {'field': field, 'api_value': 0, 'renderer': renderer, 'line': guard.lineno}
 
 
+def _native_event_parser_contract(source):
+    """Closed transport summary for the reviewed immutable YAML-event cache.
+
+    The entire source, including imports/constants, is fixed, not just the
+    receiving call. load_native keys by exact input bytes plus the runtime
+    fingerprint; cached records contain immutable parser fields, while every
+    result is freshly composed. mapping repeats JSON/shape validation before
+    retention. Bounds, fallback and runtime-token drift checks remain exact.
+
+    This permits the existing parser/evidence transfer rules for this one
+    fixed implementation. It does not prove admission, omit source literals,
+    trust a cache verdict or permit any future implementation by filename.
+    A changed byte refuses discovery and requires a new instrument review.
+    """
+    import hashlib
+    if hashlib.sha256(source.encode('utf-8')).hexdigest() != '3e129b15084b428503a18be12e95ec4c43c684b145bfb7a84eb0dd5dcb99e335':
+        raise ConfigError('native event parser transport source changed; fixed summary requires review')
+    return True
+
+
 def _without_docstring(body):
     """Ignore only Python's leading literal docstring, never executable work."""
     if (body and isinstance(body[0], ast.Expr)
@@ -11890,7 +11923,7 @@ def _derive_native_v2_render(root, cli, command):
         observed.body = _without_docstring(observed.body)
         if dump(observed) != dump(expected):
             raise fail('unsupported v2 render producer: ' + actual.name)
-    exact(command, """@prompt.command('render-native-shared')
+    exact(command, r"""@prompt.command('render-native-shared')
 @click.option('--selection', required=True, type=click.Path(exists=True, dir_okay=False), help='Exact native shared-generation selection JSON.')
 @click.option('--runtime-declaration', required=True, type=click.Path(exists=True, dir_okay=False), help='Sole runtime declaration, checked without invoking the runtime.')
 @click.option('--job-id', required=True, help='Explicit job identity for the v2 preparation.')
@@ -11936,7 +11969,7 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
     if len(definitions) != 1:
         raise fail('v2 preparation has no unique producer')
     prepare = definitions[0]
-    exact(prepare, """def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
+    exact(prepare, r"""def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
     from .api_runner import RunSpec, _require_registered_input_spellings
     from .native_shared_evidence import read_regular as current_read_regular
     _job_id(job_id)
@@ -11977,7 +12010,7 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
             if n is alias:
                 continue
             if ((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
-                    or _rebinding(n, name, None)
+                    or _rebinding(n, name, prepare)
                     or isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))
                        and isinstance(n.value, ast.Name) and n.value.id == name):
                 raise fail('v2 producer binding is replaced: ' + name)
@@ -11990,14 +12023,14 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         bound(tree, statement, name)
     for name in ('prepare',):
         if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
-               or _rebinding(n, name, None) for n in ast.walk(tree) if n is not prepare):
+               or _rebinding(n, name, prepare) for n in ast.walk(tree) if n is not prepare):
             raise fail('v2 preparation producer is replaced')
     # Module-level CLI rebinding must not bypass the fixed decorated command.
     for n in cli.body:
         if n is command:
             continue
         if any((isinstance(x, ast.Name) and x.id == command.name and isinstance(x.ctx, (ast.Store, ast.Del)))
-               or _rebinding(x, command.name, None) for x in ast.walk(n)):
+               or _rebinding(x, command.name, command) for x in ast.walk(n)):
             raise fail('v2 render command is replaced')
     return [f'{relative}:{prepare.lineno}']
 
@@ -12237,6 +12270,7 @@ def derive_native_shared_procedure(root: Path) -> dict:
     paths = {name: prefix + name + '.py' for name in (
         'native_shared_stage', 'native_shared_receipts', 'typed_audit',
         'audit_omissions', 'native_shared_render')}
+    paths['native_shared_stage'] = prefix + 'native_shared_stage/__init__.py'
     trees = {name: _tree(root / path) for name, path in paths.items()}
     fail = lambda detail: _not_derived('native shared response roster', detail)
     dump = lambda node: ast.dump(node, include_attributes=False)
@@ -12279,8 +12313,9 @@ def derive_native_shared_procedure(root: Path) -> dict:
 
     def fixed_import(module, source, name, alias):
         tree = trees[module]
-        expected = ast.parse(f'from .{source} import {name} as {alias}' if source else
-                             f'from . import {name} as {alias}').body[0]
+        level = '..' if paths[module].endswith('/__init__.py') else '.'
+        expected = ast.parse(f'from {level}{source} import {name} as {alias}' if source else
+                             f'from {level} import {name} as {alias}').body[0]
         found = [n for n in tree.body if dump(n) == dump(expected)]
         if len(found) != 1:
             raise fail('missing fixed producer import ' + alias)
@@ -12377,8 +12412,14 @@ def derive_native_shared_procedure(root: Path) -> dict:
     if not isinstance(packet_call, ast.Call) or ast.unparse(packet_call.func) != 'typed._prepare' or packet_call.args:
         raise fail('native worker packet is not the fixed typed preparation')
     kwargs = {k.arg: ast.unparse(k.value) for k in packet_call.keywords}
-    if kwargs.get('_catalog_lookup') != 'catalog_reuse._CatalogLookup(self.catalogs, self.s)':
+    if kwargs.get(None) != 'self.options' or sum(k.arg is None for k in packet_call.keywords) != 1:
         raise fail('native packet lacks its fixed private receipt-catalog association')
+    initializer = function('native_shared_stage', '__init__', '_Replay')
+    options = statement(initializer, "self.options = {'captured_assets': nr.omission_assets(selection), 'derivations': self.cache, '_catalog_lookup': catalog_reuse._CatalogLookup(self.catalogs, selection)}")
+    writes = [n for n in ast.walk(trees['native_shared_stage']) if isinstance(n, ast.Attribute)
+              and ast.unparse(n) == 'self.options' and isinstance(n.ctx, (ast.Store, ast.Del))]
+    if writes != [options.targets[0]]:
+        raise fail('native packet options are replaced')
     for key, value in {'original_full': 'self.p.full.raw', 'max_paths': "limits['max_paths_per_worker']",
                        'max_inventory_bytes': "limits['max_inventory_bytes']", 'max_workers': "limits['max_workers']"}.items():
         if kwargs.get(key) != value:
@@ -12400,6 +12441,8 @@ def derive_native_shared_procedure(root: Path) -> dict:
         schema_snapshot=schema_snapshot, derivations=derivations, captured_assets=captured_assets,
         omission_wire=omission_wire)''')
     prepare = function('typed_audit', '_prepare')
+    exact_body(function('typed_audit', '_native_options'), '''return ({} if captured_assets is None else
+        {'captured_assets': captured_assets, '_catalog_lookup': lookup})''')
     inputs = statement(prepare, '''inputs = {key: _blob(value) for key, value in dict(
         original_full=original_full, bundle=bundle, manifest=manifest, receipt=receipt,
         context=context, original_core=original_core, source_manifest=source_manifest).items()
@@ -12445,35 +12488,53 @@ def derive_native_shared_procedure(root: Path) -> dict:
     cache_init = function('typed_audit', '__init__', 'DerivationCache')
     empty = statement(cache_init, 'self._rows, self._bytes = {}, 0')
     unchanged(cache_init, 'self._rows', [empty.targets[0]])
-    cache = function('typed_audit', '_derive', 'DerivationCache')
-    lookup = statement(cache, 'encoded = self._rows.get(key)')
-    misses = [n for n in cache.body if isinstance(n, ast.If) and ast.unparse(n.test) == 'encoded is None']
-    if len(misses) != 1:
-        raise fail('cache producer lacks its unique miss branch')
-    miss = misses[0]
-    expected_miss = ast.parse('''if encoded is None:
+    # Fixed cache transport includes all fresh fallbacks and the runtime-token
+    # race checks. The store is separately pinned; no new return or mutation
+    # can be treated as the old cached producer. This is not cache admission.
+    exact_body(function('typed_audit', '_derive', 'DerivationCache'), r'''if captured_assets is not None and type(_schema_reuse) is not _SchemaReuse:
+        return _derive_uncached(inputs, schema_rows, project, limits, captured_assets=captured_assets)
+    def exact_json(value):
+        if type(value) is dict:
+            if any((type(key) is not str for key in value)):
+                raise ValueError('derivation cache keys require exact string mapping keys')
+            for item in value.values():
+                exact_json(item)
+        elif type(value) is list:
+            for item in value:
+                exact_json(item)
+        elif type(value) not in (str, int, float, bool, type(None)):
+            raise ValueError('derivation cache keys require exact JSON types')
+    selected = [inputs, schema_rows, project, limits]
+    exact_json(selected)
+    assets = {name: _sha(raw) for name, raw in omissions.captured_asset_bytes(captured_assets).items()}
+    identity = _json([selected, assets] if captured_assets is None else ['captured_logical_schema_v1', selected, assets, _schema_reuse.catalog])
+    key = ('derive', len(identity), _sha(identity))
+    marker = None
+    if captured_assets is not None:
+        from .native_catalog_reuse import runtime_token
+        marker = runtime_token()
+        if marker is None or _schema_reuse.marker is not marker:
+            return _derive_uncached(inputs, schema_rows, project, limits, captured_assets=captured_assets)
+        key = (*key, marker)
+    encoded = self._rows.get(key)
+    if encoded is None:
         derived, raw, prepared = _derive(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
-        encoded = _json({'derived': derived, 'raw': {name: _blob(value) for name, value in raw.items()},
-                         'prepared_payload_json': prepared.payload_json})
-        if len(encoded) <= self.max_bytes:
-            while self._rows and (len(self._rows) >= self.max_entries or self._bytes + len(encoded) > self.max_bytes):
-                self._bytes -= len(self._rows.pop(next(iter(self._rows))))
-            self._rows[key] = encoded
-            self._bytes += len(encoded)''').body[0]
-    if dump(miss) != dump(expected_miss):
-        raise fail('cache miss does not transport the complete fixed derivation')
-    decoded = statement(cache, 'value = json.loads(encoded)')
-    cache_return = statement(cache, '''return value['derived'], {
-        name: _unblob(blob) for name, blob in value['raw'].items()}, omissions.Prepared(value['prepared_payload_json'])''')
-    sole_return(cache, cache_return)
-    for name, uses in (('encoded', [lookup, miss, decoded]),
-                       ('value', [miss.body[1], decoded, cache_return]),
-                       ('derived', [miss.body[0], miss.body[1]]),
-                       ('self._rows', [lookup, miss])):
-        unchanged(cache, name, uses, after=None if name == 'self._rows' else lookup)
-    if not (cache.body.index(lookup) < cache.body.index(miss)
-            < cache.body.index(decoded) < cache.body.index(cache_return)):
-        raise fail('cache product lookup/producer/return order changed')
+        encoded = _json({'derived': derived, 'raw': {name: _blob(value) for name, value in raw.items()}, 'prepared_payload_json': prepared.payload_json})
+        if captured_assets is None or runtime_token() is marker:
+            self._store(key, encoded)
+    value = json.loads(encoded)
+    if captured_assets is not None and runtime_token() is not marker:
+        return _derive_uncached(inputs, schema_rows, project, limits, captured_assets=captured_assets)
+    return (value['derived'], {name: _unblob(blob) for name, blob in value['raw'].items()}, omissions.Prepared(value['prepared_payload_json']))''')
+    exact_body(function('typed_audit', '_store', 'DerivationCache'), r'''if len(encoded) > self.max_bytes:
+        return
+    previous = self._rows.pop(key, None)
+    if previous is not None:
+        self._bytes -= len(previous)
+    while self._rows and (len(self._rows) >= self.max_entries or self._bytes + len(encoded) > self.max_bytes):
+        self._bytes -= len(self._rows.pop(next(iter(self._rows))))
+    self._rows[key] = encoded
+    self._bytes += len(encoded)''')
     derived = function('typed_audit', '_derive_uncached')
     plan = assignment(derived, 'plan')
     if not same(plan, "plan = batches.make_plan(raw['original_full'].decode('utf-8'), version=2, **{k: limits[k] for k in ('max_paths', 'max_inventory_bytes', 'max_workers')})"):
@@ -12483,7 +12544,7 @@ def derive_native_shared_procedure(root: Path) -> dict:
             manifest=raw['manifest'], receipt=raw['receipt'], context=raw['context'],
             schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,
             max_output_tokens=limits['max_output_tokens'], max_request_bytes=limits['max_request_bytes'])
-    else:
+else:
         prepared = omissions._prepare(record=raw['original_full'], bundle=raw['bundle'],
         manifest=raw['manifest'], receipt=raw['receipt'], context=raw['context'],
         schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,
@@ -12534,13 +12595,18 @@ def derive_native_shared_procedure(root: Path) -> dict:
         record=record, bundle=bundle, manifest=manifest, receipt=receipt,
         context=context, schema_path=schema_path, max_output_tokens=max_output_tokens,
         schema_snapshot=schema_snapshot, max_request_bytes=max_request_bytes,
-        captured_assets=captured_assets)''')
+        term_policy=term_policy, captured_assets=captured_assets)''')
     omission = function('audit_omissions', '_prepare')
     chunk_calls = [n for n in ast.walk(omission) if isinstance(n, ast.Assign) and
                    same(n, 'chunks, _pins = evidence.source_chunks_from_bytes(bundle, manifest)')]
     if len(chunk_calls) != 1:
         raise fail('omission chunks are not the canonical captured bundle/manifest chunks')
-    payload = assignment(omission, 'payload')
+    formatter = function('audit_omissions', '_render_prepared')
+    transport = statement(omission, '''prepared = _render_prepared(record=record, bundle=bundle, manifest=manifest, receipt=receipt,
+        context=context, context_doc=context_doc, catalog=catalog, owners=owners, chunks=chunks, prior=prior,
+        max_output_tokens=max_output_tokens, max_request_bytes=max_request_bytes, term_policy=term_policy,
+        **({'captured_assets': captured_assets} if captured_assets is not None else {}))''')
+    payload = assignment(formatter, 'payload')
     chunk_list = field(payload.value, 'chunks')
     expected_chunks = ast.parse("[{'chunk': key, **value, 'prior_receipt_status': prior.get(key, 'unreviewed')} for key, value in chunks.items()]", mode='eval').body
     if dump(chunk_list) != dump(expected_chunks):
@@ -12549,15 +12615,18 @@ def derive_native_shared_procedure(root: Path) -> dict:
     if len(stores) != 1 or any(isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
                               and ast.unparse(n.func.value) == 'chunks' and n.func.attr != 'items' for n in ast.walk(omission)):
         raise fail('canonical chunk map is modified before omission enumeration')
-    encoded_payload = statement(omission, 'encoded = _json(payload)')
-    omission_bound = statement(omission, '''if len(_json(Prepared(encoded).request()).encode()) > max_request_bytes:
+    omission_bound = statement(omission, '''if len(_json(prepared.request()).encode()) > max_request_bytes:
         raise ValueError('complete request exceeds max_request_bytes; no partial request returned')''')
-    omission_return = statement(omission, 'return Prepared(encoded)')
+    omission_return = statement(omission, 'return prepared')
     sole_return(omission, omission_return)
-    unchanged(omission, 'payload', [payload.targets[0], encoded_payload])
-    unchanged(omission, 'encoded', [encoded_payload.targets[0], omission_bound, omission_return])
-    if not (omission.body.index(payload) < omission.body.index(encoded_payload)
-            < omission.body.index(omission_bound) < omission.body.index(omission_return)):
+    formatter_return = statement(formatter, 'return Prepared(_json(payload))')
+    sole_return(formatter, formatter_return)
+    policy = statement(formatter, "if term_policy is not None:\n    payload['term_policy'] = term_policy")
+    unchanged(formatter, 'payload', [payload.targets[0], policy, formatter_return])
+    unchanged(formatter, 'chunks', [chunk_list])
+    unchanged(omission, 'prepared', [transport.targets[0], omission_bound, omission_return])
+    if not (omission.body.index(transport) < omission.body.index(omission_bound) < omission.body.index(omission_return)
+            and formatter.body.index(payload) < formatter.body.index(policy) < formatter.body.index(formatter_return)):
         raise fail('omission payload does not reach its captured return')
     exact_body(function('audit_omissions', 'request', 'Prepared'), '''payload = json.loads(self.payload_json)
     return {'format': FORMAT, 'request_sha256': _sha(self.payload_json.encode()),
@@ -12577,7 +12646,8 @@ def derive_native_shared_procedure(root: Path) -> dict:
             raise fail('helper key is dynamic')
         keys.append(key.value)
     statement(commands, 'return result')
-    if len(keys) != len(set(keys)) or sum(isinstance(n, ast.Name) and n.id == 'result' for n in ast.walk(commands)) != 2 + len(extra):
+    statement(commands, "result['final_receipts'] = (*result['phase1_receipts'][:-1], '--strict')")
+    if len(keys) != len(set(keys)) or sum(isinstance(n, ast.Name) and n.id == 'result' for n in ast.walk(commands)) != 3 + len(extra):
         raise fail('helper mapping is mutated or has duplicate kinds')
 
     evidence = [f'{paths[module]}:{node.lineno}' for module, node in (

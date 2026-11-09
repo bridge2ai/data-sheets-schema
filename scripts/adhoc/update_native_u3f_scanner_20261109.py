@@ -84,7 +84,7 @@ def main():
     return [f'{relative}:{prepare.lineno}']
 
 
-'''.replace('CLI_TEMPLATE', '"""'+cli+'"""').replace('PREPARE_TEMPLATE', '"""'+prepare+'"""')
+'''.replace('CLI_TEMPLATE', 'r"""'+cli+'"""').replace('PREPARE_TEMPLATE', 'r"""'+prepare+'"""')
     text = PATH.read_text()
     marker = 'def derive_native_shared_route(root: Path, tree: ast.Module) -> dict | None:'
     assert text.count(marker) == 1

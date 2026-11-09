@@ -11,8 +11,6 @@ import types
 import yaml
 from . import native_catalog_initialization as initialization
 from . import audit_omissions as _omissions
-from .support_targets import _validate_json
-from .audit_omissions import _require_mapping
 
 _SCHEMA_PARSER = _omissions._schema_yaml
 _SCHEMA_PARSER_CODE = getattr(_SCHEMA_PARSER, '__code__', None)
@@ -352,15 +350,17 @@ def retain_native(candidate, *, limit):
 
 def mapping(raw, label, *, limit=MAX_INPUT_BYTES, _schema_events=False, json_only=False):
     """Native-only strict mapping; unsuccessful construction is never retained."""
+    from . import audit_omissions as omissions
     if json_only:
-        return _omissions._mapping(raw, label, limit=limit, json_only=True)
+        return omissions._mapping(raw, label, limit=limit, json_only=True)
     if type(raw) is not bytes or not raw or len(raw) > limit:
         raise ValueError(f"{label} must be nonempty bytes within the {limit}-byte bound")
     try:
         value, candidate = load_native(raw.decode('utf-8'), limit=limit)
-        _validate_json(value, max_nodes=_omissions.MAX_NODES, max_depth=_omissions.MAX_DEPTH)
+        omissions._validate_json(value, max_nodes=omissions.MAX_NODES, max_depth=omissions.MAX_DEPTH)
     except (ValueError, TypeError, KeyError, AttributeError, RecursionError, yaml.YAMLError) as exc:
         raise ValueError(f"{label} cannot be read safely ({type(exc).__name__})") from exc
-    _require_mapping(value, label)
+    if not isinstance(value, dict):
+        raise ValueError(f"{label} must be a mapping")
     retain_native(candidate, limit=limit)
     return value

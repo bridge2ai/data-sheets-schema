@@ -163,11 +163,6 @@ def _mapping(raw, label, *, _native_events=False, **kwargs):
         from .native_schema_event_reuse import mapping
         return mapping(raw, label, **kwargs)
     value = _read(raw, label, **kwargs)
-    return _require_mapping(value, label)
-
-
-def _require_mapping(value, label):
-    """The same mapping-shape refusal after ordinary or native JSON validation."""
     if not isinstance(value, dict):
         raise ValueError(f"{label} must be a mapping")
     return value
