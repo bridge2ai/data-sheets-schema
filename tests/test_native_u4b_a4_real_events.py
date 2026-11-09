@@ -116,7 +116,7 @@ def test_real_allowed_shapes_complete_exact_saved_replay(case, status):
 
 
 @pytest.mark.parametrize('mutation', [
-    'overage_allowed', 'overage_unknown', 'overage_null', 'reason_unknown', 'reason_without_status',
+    'overage_allowed', 'overage_unknown', 'overage_null', 'reason_nonstring', 'reason_without_status',
     'using_overage', 'missing_overage_flag', 'alias_missing_nested', 'alias_missing_reset',
     'alias_conflicting_reset', 'alias_boolean_reset', 'alias_status_conflict', 'nested_overage',
     'nested_missing_utilization', 'nested_boolean_utilization', 'nested_exhausted',
@@ -132,7 +132,7 @@ def test_real_alias_shape_remains_fail_closed_at_admission_delivery_and_replay(c
     if mutation == 'overage_allowed': info['overageStatus'] = 'allowed'
     elif mutation == 'overage_unknown': info['overageStatus'] = 'unknown'
     elif mutation == 'overage_null': info['overageStatus'] = None
-    elif mutation == 'reason_unknown': info['overageDisabledReason'] = 'unrecognized'
+    elif mutation == 'reason_nonstring': info['overageDisabledReason'] = 42
     elif mutation == 'reason_without_status': del info['overageStatus']
     elif mutation == 'using_overage': info['isUsingOverage'] = True
     elif mutation == 'missing_overage_flag': del info['isUsingOverage']

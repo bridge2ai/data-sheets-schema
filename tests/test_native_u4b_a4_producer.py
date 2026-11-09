@@ -148,16 +148,18 @@ def test_proposal_refuses_preimage_drift_and_any_nonlocal_or_order_change(change
         helper.prepare(original, expected_sha256=helper.sha(original))
 
 
-def test_current_pinned_source_is_only_read_and_sole_insertion_is_proposed():
+def test_applied_source_matches_the_pinned_proposal_exactly():
     path = ROOT / helper.TARGET
     before = path.read_bytes()
-    assert helper.sha(before) == helper.PREIMAGE_SHA256
-    proposed = helper.prepare(before)
-    helper.verify_single_insertion(before, proposed)
-    assert proposed.replace(helper.ANCHOR + helper.INSERTION, helper.ANCHOR, 1) == before
+    original = helper.committed_preimage()
+    assert helper.sha(original) == helper.PREIMAGE_SHA256
+    proposed = helper.prepare(original)
+    helper.verify_single_insertion(original, proposed)
+    assert proposed.replace(helper.ANCHOR + helper.INSERTION, helper.ANCHOR, 1) == original
     assert path.read_bytes() == before
-    assert proposed != before
-    assert b'api_runner.py' not in helper.patch(before, proposed)
+    assert proposed == before
+    assert helper.sha(before) == '18f1b63466dd68c662f14bf6b3010680528b5e701f1c6d44ba1b849a184dd3da'
+    assert b'api_runner.py' not in helper.patch(original, proposed)
     assert helper.TARGET.endswith('/native_execution_registration_v2.py')
     assert any('D76' in entry for entry in helper.FUTURE_TEST_PLAN)
     assert any('replay' in entry for entry in helper.FUTURE_TEST_PLAN)

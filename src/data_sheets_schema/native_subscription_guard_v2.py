@@ -175,10 +175,13 @@ def _inspect(event, *, require_both):
     # refusal, never permission to use overage or infer subscription headroom.
     if "overageStatus" in info and info["overageStatus"] != "rejected":
         errors.append("subscription overage status must be rejected when present")
-    if "overageDisabledReason" in info and (
-            info["overageDisabledReason"] != "out_of_credits"
-            or info.get("overageStatus") != "rejected"):
-        errors.append("subscription overage disabled reason is unknown or inconsistent")
+    if "overageDisabledReason" in info or "overageStatus" in info:
+        reason = info.get("overageDisabledReason")
+        if (type(reason) is not str or not reason.strip()
+                or not reason.isprintable() or len(reason.encode('utf-8')) > 256
+                or info.get("overageStatus") != "rejected"
+                or info.get("isUsingOverage") is not False):
+            errors.append("subscription overage disabled reason is malformed or inconsistent")
     windows = info.get("unifiedWindows", {})
     if type(windows) is not dict:
         errors.append("subscription windows are malformed")

@@ -21,6 +21,7 @@ wrapper.__file__ = __file__
 wrapper.runner.SCRATCH = SCRATCH
 wrapper.runner.__file__ = __file__
 wrapper.runner.PROFILE = wrapper.sandbox_profile()
+wrapper.runner.DEADLINE = 3200  # A5: leave cleanup margin below the 3300 s invocation limit.
 wrapper.dependency.SCRATCH = SCRATCH
 wrapper.dependency.DESTINATION = SCRATCH / 'dependencies' / ('fairscape-' + wrapper.dependency.PIN)
 _environment = wrapper.runner.clean_environment

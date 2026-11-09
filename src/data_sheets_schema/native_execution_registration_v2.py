@@ -251,6 +251,13 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks)
         native_shared_generation_registration=captured.registration.raw.decode('utf-8'))
     _require_registered_input_spellings(spec)
     spec._native_shared_runtime_capture = runtime_capture
+    # D114 is an explicit U4b successor; historical shared-native stays literal.
+    basis = runtime['limits_basis']
+    if basis.lstrip().startswith('{'):
+        declared = c.strict_json(basis.encode('utf-8'), 'runtime profile basis', 16384)
+        if type(declared) is dict and declared.get('kind') == 'd4d_native_u4b_runtime_basis':
+            from .agentic_runtime import toolchain
+            spec._agentic_toolchain = toolchain(native_shared=True)
     spec._native_shared_max_draft_checks = max_draft_checks
     instruction = spec.instruction
     dependencies = authority.dependency_identity()
