@@ -19,6 +19,7 @@ from pathlib import Path
 import stat
 
 from . import native_shared_runtime_values as values
+from . import native_runtime_profiles as profiles
 from .native_shared_evidence import read_regular
 from .native_path_identity import contains
 
@@ -76,8 +77,10 @@ def _binary_pin(path):
             'device': before.st_dev, 'inode': before.st_ino}
 
 
-def _saved_probe(path):
+def _saved_probe(path, model_pair=None):
     from .native_model_aliases import REQUESTED, RETURNED, require_frame_models
+    pair = {'requested': REQUESTED, 'returned': RETURNED} if model_pair is None else model_pair
+    model = pair['requested']
     member = read_regular(path, 'u4b_probe', max_bytes=MAX_PROBE_BYTES)
     raw = member.captured.raw
     rows = raw.splitlines()
@@ -111,17 +114,17 @@ def _saved_probe(path):
         raise ValueError('saved probe terminal/messages differ from its init session')
     for _, event in events:
         if event.get('type') in ('assistant', 'user', 'result'):
-            require_frame_models(event, {'requested': REQUESTED, 'returned': RETURNED})
+            require_frame_models(event, pair)
     usage = terminal.get('modelUsage')
-    values._closed(usage, {MODEL}, 'saved terminal modelUsage')
-    own = usage[MODEL]
+    values._closed(usage, {model}, 'saved terminal modelUsage')
+    own = usage[model]
     if type(own) is not dict:
         raise ValueError('saved terminal modelUsage requires an object')
     limits = {key: own.get(key) for key in ('contextWindow', 'maxOutputTokens')}
     if (any(type(value) is not int or value <= 0 for value in limits.values())
             or limits['maxOutputTokens'] > limits['contextWindow']):
         raise ValueError('saved terminal limits must be explicit positive integer counts')
-    if init.get('model') != MODEL:
+    if init.get('model') != model:
         raise ValueError('saved init does not name the D112 model')
     values._text(init.get('claude_code_version'), 'saved init version')
     pin = {'path': path, 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw),
@@ -132,13 +135,14 @@ def _saved_probe(path):
     return pin, observation
 
 
-def _saved_request(path):
+def _saved_request(path, model_pair=None):
     """Read the captured HTTP body, never infer thinking from init or effort."""
     from .native_model_aliases import RETURNED
+    returned = RETURNED if model_pair is None else model_pair['returned']
     member = read_regular(path, 'u4b_native_request', max_bytes=MAX_PROBE_BYTES)
     raw = member.captured.raw
     body = values._json(raw)
-    if type(body) is not dict or body.get('model') != RETURNED:
+    if type(body) is not dict or body.get('model') != returned:
         raise ValueError('saved request does not name the declared returned model')
     if any(name in body for name in ('thinkingEnabled', 'thinking_enabled', 'alwaysThinkingEnabled')):
         raise ValueError('unsupported saved request thinking field; explicit adaptation required')
@@ -159,7 +163,9 @@ def _thinking(value):
 
 
 def _profile(runtime):
-    result = values.validate_runtime(runtime)
+    result = values.validate_runtime_v2(runtime)
+    if profiles.profile_name(result) == profiles.SYNTHETIC_PROFILE:
+        return result
     if (result['model'] != MODEL or result['effort'] != 'high'
             or result['environment']['CLAUDE_CODE_DISABLE_1M_CONTEXT'] != '0'
             or result['budget_guard_usd'] != '90' or result['auth']['subscriptionType'] != 'max'):
@@ -202,15 +208,37 @@ def prepare_runtime(runtime, *, probe_init_path, native_request_path, updater_so
     to one authorization and provisional runtime; this is evidence consistency,
     not authentication of human authorization or a historical execution.
     """
+    profiles.require_production(runtime)
+    return _prepare(runtime, probe_init_path=probe_init_path, native_request_path=native_request_path,
+        updater_source=updater_source, updater_root=updater_root, thinking_setting=thinking_setting,
+        thinking_basis=thinking_basis, observation_probe_path=observation_probe_path,
+        admission_policy=admission_policy)
+
+
+def prepare_synthetic(runtime, *, probe_init_path, native_request_path, updater_source, updater_root,
+                      thinking_setting, thinking_basis, observation_probe_path, admission_policy):
+    """Bind only saved synthetic evidence over the exact isolated Python peer."""
+    profiles.require_synthetic(runtime)
+    return _prepare(runtime, probe_init_path=probe_init_path, native_request_path=native_request_path,
+        updater_source=updater_source, updater_root=updater_root, thinking_setting=thinking_setting,
+        thinking_basis=thinking_basis, observation_probe_path=observation_probe_path,
+        admission_policy=admission_policy)
+
+
+def _prepare(runtime, *, probe_init_path, native_request_path, updater_source, updater_root,
+             thinking_setting, thinking_basis, observation_probe_path, admission_policy):
     result = _profile(runtime)
+    from .native_model_aliases import model_aliases, REQUESTED, RETURNED
+    pair = (model_aliases(result) if profiles.profile_name(result) == profiles.SYNTHETIC_PROFILE
+            else {'requested': REQUESTED, 'returned': RETURNED})
     root = _physical(updater_root, 'updater root')
     if not root.is_dir():
         raise ValueError('updater root must name an existing directory')
     evidence = {'updater_root': str(root), 'source': _binary_pin(updater_source),
                 'copy': _binary_pin(result['executable']['path'])}
     _copy_evidence(evidence)
-    probe, observed = _saved_probe(probe_init_path)
-    request, thinking = _saved_request(native_request_path)
+    probe, observed = _saved_probe(probe_init_path, pair)
+    request, thinking = _saved_request(native_request_path, pair)
     from .native_u4b_probe_sequence import validate_observation
     from .native_u4b_policy import validate_policy
     values._text(thinking_basis, 'declared thinking basis', 512)
@@ -219,12 +247,13 @@ def prepare_runtime(runtime, *, probe_init_path, native_request_path, updater_so
         raise ValueError('observed thinking differs from the registered setting')
     observation = validate_observation(observation_probe_path, final_runtime=result,
         transcript_path=probe_init_path, request_path=native_request_path)
-    from .native_model_aliases import REQUESTED, RETURNED
     basis = {'kind': KIND, 'version': 3, 'probe': probe, 'request': request, 'observed': observed,
-             'model_aliases': {'requested': REQUESTED, 'returned': RETURNED},
+             'model_aliases': pair,
              'thinking': {'declared': setting, 'basis': thinking_basis, 'observed': thinking},
              'durable_copy': evidence, 'observation_probe': observation['pin'],
              'admission': validate_policy(admission_policy)}
+    if profiles.profile_name(result) == profiles.SYNTHETIC_PROFILE:
+        basis['profile'] = profiles.SYNTHETIC_PROFILE
     result['limits_basis'] = _canonical(basis)
     return validate_prepared_runtime(result)
 
@@ -240,13 +269,14 @@ def validate_prepared_runtime(runtime):
     if len(raw.encode('utf-8')) > 4096:
         raise ValueError('U4b registered basis exceeds its byte bound')
     basis = values._json(raw)
-    values._closed(basis, BASIS_KEYS, 'U4b runtime basis')
+    profile_keys = {'profile'} if 'profile' in basis else set()
+    values._closed(basis, BASIS_KEYS | profile_keys, 'U4b runtime basis')
     if basis['kind'] != KIND or type(basis['version']) is not int or basis['version'] != 3:
         raise ValueError('unknown U4b runtime basis')
     if _canonical(basis) != raw:
         raise ValueError('U4b runtime basis requires exact canonical JSON')
     from .native_model_aliases import model_aliases
-    model_aliases(result)
+    pair = model_aliases(result)
     values._closed(basis['probe'], {'path', 'sha256', 'bytes', 'init_line', 'init_sha256',
                                  'terminal_line', 'terminal_sha256'}, 'saved probe pin')
     values._closed(basis['request'], {'path', 'sha256', 'bytes'}, 'saved request pin')
@@ -259,8 +289,8 @@ def validate_prepared_runtime(runtime):
     copied = _binary_pin(result['executable']['path'])
     if copied != basis['durable_copy']['copy'] or copied['sha256'] != result['executable']['sha256']:
         raise ValueError('durable binary differs from the registered copy')
-    pin, observed = _saved_probe(basis['probe']['path'])
-    request, thinking = _saved_request(basis['request']['path'])
+    pin, observed = _saved_probe(basis['probe']['path'], pair)
+    request, thinking = _saved_request(basis['request']['path'], pair)
     if (_canonical(pin) != _canonical(basis['probe'])
             or _canonical(observed) != _canonical(basis['observed'])
             or _canonical(thinking) != _canonical(basis['thinking']['observed'])):

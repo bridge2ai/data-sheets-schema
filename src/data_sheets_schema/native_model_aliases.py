@@ -17,6 +17,8 @@ def model_aliases(runtime):
     if type(runtime) is not dict or type(runtime.get('model')) is not str:
         raise ValueError('native model identity must be explicit text')
     model = runtime['model']
+    from . import native_runtime_profiles as profiles
+    profile = profiles.profile_name(runtime)
     raw = runtime.get('limits_basis')
     basis = None
     if type(raw) is str and raw.lstrip().startswith('{'):
@@ -28,13 +30,15 @@ def model_aliases(runtime):
     current = model == REQUESTED or type(basis) is dict and basis.get('kind') in (KIND, PROVISIONAL_KIND)
     if not current:
         return {'requested': model, 'returned': model}
+    requested, returned = (profiles.SYNTHETIC_REQUESTED, profiles.SYNTHETIC_RETURNED) if (
+        profile == profiles.SYNTHETIC_PROFILE) else (REQUESTED, RETURNED)
     if (type(basis) is not dict or type(basis.get('version')) is not int
             or (basis.get('kind'), basis['version']) not in ((KIND, 2), (KIND, 3), (PROVISIONAL_KIND, 1))
-            or model != REQUESTED):
+            or model != requested):
         raise ValueError('native 1M model requires an explicit versioned U4b alias declaration')
     aliases = basis.get('model_aliases')
     if (type(aliases) is not dict or set(aliases) != {'requested', 'returned'}
-            or aliases != {'requested': REQUESTED, 'returned': RETURNED}):
+            or aliases != {'requested': requested, 'returned': returned}):
         raise ValueError('native 1M model alias pair differs from its closed declaration')
     if runtime.get('auxiliary_models') != []:
         raise ValueError('native 1M model alias pair does not permit auxiliary models')

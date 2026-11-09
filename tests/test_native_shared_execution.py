@@ -7,15 +7,12 @@ No paid provider, native binary, authentication or scientific claim is made.
 from dataclasses import replace
 from copy import deepcopy
 from pathlib import Path
-from datetime import datetime, timezone
 import json
 import sys
 
 import pytest
 
 from tests.native_shared_fixture import build_native_fixture
-from tests.test_native_shared_permissions import fabricated_manifest
-from tests.test_native_execution import fake_observation
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_controller_orchestration as composition
 from data_sheets_schema import native_shared_registration_orchestration as registration
@@ -24,6 +21,7 @@ from data_sheets_schema import native_shared_policy as policy
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_execution_registration_v2 as preparation
 from tests.utils.native_shared_consumer_scope import command_guidance, observe_consumer_calls
+from tests.utils.native_synthetic_evidence import runtime_for, bound_permission_for, authority_for
 
 
 def make_case(root, *, fixture='neutral', receipt_origin_version=0):
@@ -36,19 +34,9 @@ def make_case(root, *, fixture='neutral', receipt_origin_version=0):
     data = builder(root, registered_python=sys.executable)
     spec = replace(data['spec'])
     parent = data['runtime_path'].parent
-    fake = root / 'ordinary-python-test-peer'
-    fake.write_bytes(('#!' + sys.executable + '\n').encode() + (
-        Path(__file__).parent / 'fixtures/native_shared_execution/fake_cli.py').read_bytes())
-    fake.chmod(0o700)
-    runtime = c.strict_json(data['runtime_path'].read_bytes())
-    runtime['executable'] = {'path': str(fake), 'sha256': c.sha(fake.read_bytes()),
-        'version': 'SYNTHETIC PYTHON SOFTWARE TEST', 'init_version': 'synthetic-python-1'}
-    runtime['environment']['PATH'] = str(Path(sys.executable).parent) + ':/usr/bin:/bin'
-    runtime['keep_awake']['host_platform'] = sys.platform
-    # Bounded test allowance for >30 genuine offline helper processes on CI.
-    runtime['deadline_seconds'] = 900
+    runtime = runtime_for(data, root)
     runtime_path = parent / 'runtime-execution.json'; runtime_path.write_bytes(c.canonical(runtime))
-    prepared = preparation.prepare(data['selection'].registration.pin.path, runtime_path,
+    prepared = preparation.prepare_synthetic(data['selection'].registration.pin.path, runtime_path,
         job_id='synthetic-native-execution', run_date='2026-10-05', max_draft_checks=3)
     preparation_raw = c.canonical(prepared)
     (parent / 'preparation-execution.json').write_bytes(preparation_raw)
@@ -66,9 +54,8 @@ def make_case(root, *, fixture='neutral', receipt_origin_version=0):
     dependencies = authority.dependency_identity()
     expected = registration.permission_expectation(runtime, selected, spec,
         system.read_text() + command_guidance(selected['policy']), attempt / 'cli_config', dependencies)
-    manifest = fabricated_manifest(expected, data['selection'].document(), root / 'invented-probe', spec.bundle.read_bytes())
-    probe = parent / 'invented-permissions.json'; probe.write_bytes(c.canonical(manifest))
-    envelope = registration.registration(comp, system, permission_probe_path=probe,
+    probe = bound_permission_for(expected, data['selection'].document(), spec.bundle.read_bytes())
+    envelope = registration.synthetic_registration(comp, system, permission_probe_path=probe,
         attempt_id=attempt.name, attempt_directory=attempt, evidence_directory=output, max_draft_checks=3,
         receipt_origin_version=receipt_origin_version)
     raw = c.canonical(envelope)
@@ -76,10 +63,6 @@ def make_case(root, *, fixture='neutral', receipt_origin_version=0):
     binding = {'registration_sha256': c.sha(raw), 'attempt_id': value['attempt_id'],
         'source_commit': value['dependencies']['base']['source_commit'],
         'dependencies_sha256': c.sha(c.canonical(value['dependencies']))}
-    review = {**binding, 'kind': 'd4d_native_execution_review_v2', 'version': 2,
-        'reviewer': 'invented-independent-reviewer', 'author': 'invented-author',
-        'independent': True, 'decision': 'approved', 'reviewed_at': 'synthetic-time',
-        'evidence': 'Fabricated software test only; no actual review authority.'}
     # Fabricated offline CI declaration only: no workflow or Actions run was
     # requested or observed. Manual CI tests the exact source commit without
     # inventing a PR merge object; separate A3 tests cover real PR Git topology.
@@ -95,52 +78,19 @@ def make_case(root, *, fixture='neutral', receipt_origin_version=0):
         name: {'head_sha': binding['source_commit'], 'status': 'completed', 'conclusion': 'success',
             'details_url': details_url}
         for name in preparation.required_checks(workflow_event)}}
-    review_path = parent / 'invented-review.json'; review_path.write_bytes(c.canonical(review))
     ci_path = parent / 'invented-ci.json'; ci_path.write_bytes(c.canonical(ci))
-    word = {**binding, 'kind': 'd4d_native_execution_launch_authorization_v2', 'version': 2,
-        'owner': 'invented-test-owner', 'authorized_at': 'synthetic-time', 'word': 'AUTHORIZE_ONE_NATIVE_ATTEMPT',
-        'review_sha256': c.sha(review_path.read_bytes()), 'ci_sha256': c.sha(ci_path.read_bytes()),
-        'permission_probe_sha256': value['permission_probe_sha256']}
-    word_path = parent / 'invented-owner.json'; word_path.write_bytes(c.canonical(word))
-    # Explicitly synthetic, launch-bound quota evidence. The production route
-    # has no exemption for this ordinary-Python peer.
-    from data_sheets_schema import native_subscription_guard as guard
-    now = datetime.now(timezone.utc)
-    event = c.canonical({'type': 'rate_limit_event', 'rate_limit_info': {
-        'status': 'allowed', 'isUsingOverage': False, 'rateLimitType': 'seven_day',
-        'utilization': 0.2, 'resetsAt': int(now.timestamp()) + 3600}})
-    guard_raw = c.canonical({'kind': guard.KIND, 'version': 1,
-        'registration_sha256': c.sha(raw), 'runtime_sha256': c.sha(c.canonical(runtime)),
-        'launch_word_sha256': c.sha(word_path.read_bytes()),
-        'max_starting_weekly_utilization': 0.8, 'max_age_seconds': 300,
-        'captured_at': now.isoformat().replace('+00:00', 'Z'),
-        'event_json': event.decode(), 'event_sha256': c.sha(event)})
-    guard_path = parent / 'invented-subscription.json'; guard_path.write_bytes(guard_raw)
+    kwargs = authority_for(raw, ci_path, parent)
     return {**data, 'root': root, 'spec': spec, 'value': value, 'raw': raw,
-        'kwargs': {'review_path': review_path, 'ci_path': ci_path, 'launch_word_path': word_path,
-            'subscription_guard_path': guard_path, 'subscription_guard_sha256': c.sha(guard_raw)}}
-
-
-def synthetic_subscription_clock(case, monkeypatch):
-    """Bind invented subscription evidence to an explicit functional-test clock."""
-    from data_sheets_schema import native_subscription_guard as subscription
-    # The subscription observation is invented, as is its clock. Keep this
-    # functional test independent of host load during repeated source checks;
-    # stale/future observations retain separate real refusal regressions.
-    guard = c.strict_json(case['kwargs']['subscription_guard_path'].read_bytes())
-    captured_at = datetime.fromisoformat(guard['captured_at'].replace('Z', '+00:00')).timestamp()
-    monkeypatch.setattr(subscription, '_now', lambda: captured_at)
+        'kwargs': kwargs}
 
 
 def launch_case(case, monkeypatch):
     """Use the actual public lifetime; only runtime/review/provider data is synthetic."""
-    synthetic_subscription_clock(case, monkeypatch)
-    monkeypatch.setattr(execute, '_probe_runtime', fake_observation)
     forbidden = {key: () for key in (
         ('prepare_direct', 'auth_evidence'), ('run_direct_canary', 'main'),
         ('run_api_canary', 'main'), ('budgeted_cborg', 'cborg_client'))}
     with observe_consumer_calls(forbidden, forbid=True):
-        result = execute.launch(case['raw'], **case['kwargs'])
+        result = execute.synthetic_launch(case['raw'], **case['kwargs'])
     (case['root'] / 'actual-result.json').write_bytes(c.canonical(result))
     return result
 
@@ -148,6 +98,7 @@ def launch_case(case, monkeypatch):
 def assert_completed_case(case, result):
     """Both data variants require the same actual gates, readback and spent refusal."""
     assert result['runtime_gates_passed'], json.dumps(result, indent=2)
+    assert result['profile'] == 'synthetic-software-test'
     assert result['state'] == 'completed_pending_independent_review'
     assert set(result['gates']) == set(execute.gates.GATES)
     assert all(row['checked'] is True and row['passed'] is True for row in result['gates'].values())
@@ -189,7 +140,7 @@ def assert_completed_case(case, result):
             marker_path.write_bytes(marker_raw)
     assert result['scientific_acceptance'] == 'not_assessed'
     with pytest.raises(ValueError, match='new|resume'):
-        execute.launch(case['raw'], **case['kwargs'])
+        execute.synthetic_launch(case['raw'], **case['kwargs'])
     return records
 
 

@@ -151,15 +151,21 @@ def _version(value, kind, version):
 
 def validate_terms(statement, runtime, *, word_owner):
     """Validate exact declared terms; raw bundle/word joining is separate."""
+    from . import native_runtime_profiles as profiles
+    synthetic = profiles.profile_name(runtime) == profiles.SYNTHETIC_PROFILE
+    if synthetic:
+        profiles.require_synthetic_declarations(runtime)
     _exact(statement, TERMS_KEYS, 'owner launch terms')
     _version(statement, TERMS_KIND, 1)
     _text(statement['owner'], 'owner')
     if statement['owner'] != word_owner:
         raise ValueError('owner statement differs from coded word owner')
-    if statement['budget_guard_usd'] != '90' or runtime.get('budget_guard_usd') != '90':
+    budget = profiles.SYNTHETIC_BUDGET if synthetic else '90'
+    if statement['budget_guard_usd'] != budget or runtime.get('budget_guard_usd') != budget:
         raise ValueError('owner/runtime budget must equal the D110 string 90')
     deadline = statement['deadline_seconds']
-    if (type(deadline) is not int or deadline != 21600
+    expected_deadline = profiles.SYNTHETIC_DEADLINE_SECONDS if synthetic else 21600
+    if (type(deadline) is not int or deadline != expected_deadline
             or type(runtime.get('deadline_seconds')) is not int
             or runtime['deadline_seconds'] != deadline):
         raise ValueError('owner/runtime deadline differs')
@@ -178,12 +184,14 @@ def validate_terms(statement, runtime, *, word_owner):
     _exact(awake, {'policy', 'host_platform', 'basis'}, 'owner keep-awake')
     for key in awake:
         _text(awake[key], 'keep-awake ' + key)
-    if (awake['policy'] != 'macos_iokit_ims_v1' or awake['host_platform'] != 'darwin'
+    if ((not synthetic and (awake['policy'] != 'macos_iokit_ims_v1' or awake['host_platform'] != 'darwin'))
             or wire.canonical(awake) != wire.canonical(runtime.get('keep_awake'))):
         raise ValueError('owner/runtime keep-awake policy differs')
-    if (statement['context_mode'] != '1m'
+    context_mode = profiles.SYNTHETIC_PROFILE if synthetic else '1m'
+    model = profiles.SYNTHETIC_REQUESTED if synthetic else 'claude-opus-5[1m]'
+    if (statement['context_mode'] != context_mode
             or runtime.get('environment', {}).get('CLAUDE_CODE_DISABLE_1M_CONTEXT') != '0'
-            or runtime.get('model') != 'claude-opus-5[1m]'):
+            or runtime.get('model') != model):
         raise ValueError('owner/runtime context mode differs from D112')
     request = statement['quota_capture']
     _exact(request, {'kind', 'version', 'count', 'directory', 'deadline_seconds',

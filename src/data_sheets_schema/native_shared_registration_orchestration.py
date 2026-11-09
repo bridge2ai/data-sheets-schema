@@ -58,7 +58,26 @@ def registration(composition_path, system_path, **kwargs):
 
     RunSpec precondition: Caller supplies explicit composition/system paths; _registration_body verifies preparation and composition before creating an execution proposal.
     """
-    body = _require_runtime_observation(_registration_body(composition_path, system_path, **kwargs))
+    from .native_runtime_profiles import require_production
+    body = _registration_body(composition_path, system_path, **kwargs)
+    require_production(body['runtime'])
+    return _observed_envelope(body)
+
+
+def synthetic_registration(composition_path, system_path, **kwargs):
+    """Prepare an explicitly synthetic proposal; never real launch authority.
+
+    The same captured preparation, permission and observation consumers run.
+    The separate entry additionally requires the fixed ordinary-Python peer.
+    """
+    from .native_runtime_profiles import require_synthetic
+    body = _registration_body(composition_path, system_path, **kwargs)
+    require_synthetic(body['runtime'])
+    return _observed_envelope(body)
+
+
+def _observed_envelope(body):
+    body = _require_runtime_observation(body)
     with authority.loaded_dependencies(body['dependencies']) as controls:
         value = controls['prepare_registration_v2'].envelope(body)
         controls['prepare_registration_v2'].require_envelope(value)

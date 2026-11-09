@@ -160,7 +160,8 @@ def _saved_authorizations(raw, value, started_raw, result, *, contract, file):
     started = c.strict_json(started_raw, 'saved started identity')
     c.exact(started, {'kind', 'version', 'state', 'attempt_id', 'started_at',
         'registration_sha256', 'composition_sha256', 'authority', 'dispatch_limit',
-        'dispatch_unit', *UNASSESSED}, 'saved started identity')
+        'dispatch_unit', 'profile', *UNASSESSED}, 'saved started identity')
+    from .native_runtime_profiles import profile_name
     if (started['kind'] != contract.kind or type(started['version']) is not int
             or started['version'] != 1 or started['state'] != 'started'
             or started['attempt_id'] != value['attempt_id']
@@ -168,6 +169,8 @@ def _saved_authorizations(raw, value, started_raw, result, *, contract, file):
             or started['composition_sha256'] != value['composition_sha256']
             or type(started['dispatch_limit']) is not int or started['dispatch_limit'] != 1
             or started['dispatch_unit'] != 'native CLI process, not provider transactions'
+            or started['profile'] != profile_name(value['runtime'])
+            or result.get('profile') != started['profile']
             or any(started[name] != expected for name, expected in UNASSESSED.items())):
         raise ValueError('saved started identity differs from its one-use v2 execution')
     admission._text(started['started_at'], 'saved start timestamp')
@@ -249,13 +252,40 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
     """
     contract.require_fixed()
     from .native_execution_capabilities import loaded_capabilities
+    from .native_runtime_profiles import require_production, PRODUCTION_PROFILE
     value = contract.registration.verified(registration_raw)
+    require_production(value['runtime'])
     # Resolve the complete reviewed execution/replay interface before entering
     # the path that can reserve directories, write evidence or probe a runtime.
     with loaded_capabilities(value['dependencies']) as controls:
         return _launch(registration_raw, review_path=review_path, ci_path=ci_path,
             launch_word_path=launch_word_path, contract=contract, effects=effects,
-            controls=controls)
+            controls=controls, expected_profile=PRODUCTION_PROFILE)
+
+
+def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path,
+                     contract: ExecutionContract, effects: ExecutionEffects):
+    """Fixed synthetic dispatch entry; the real launch entry always refuses it."""
+    from .native_execution_capabilities import loaded_capabilities
+    from .native_runtime_profiles import require_synthetic, SYNTHETIC_PROFILE
+    contract.require_fixed()
+    value = contract.registration.verified(registration_raw)
+    require_synthetic(value['runtime'])
+    with loaded_capabilities(value['dependencies']) as controls:
+        return _launch(registration_raw, review_path=review_path, ci_path=ci_path,
+            launch_word_path=launch_word_path, contract=contract, effects=effects,
+            controls=controls, expected_profile=SYNTHETIC_PROFILE)
+
+
+def _require_launch_profile(runtime, expected):
+    from .native_runtime_profiles import (
+        PRODUCTION_PROFILE, SYNTHETIC_PROFILE, require_production, require_synthetic)
+    if expected == PRODUCTION_PROFILE:
+        require_production(runtime)
+    elif expected == SYNTHETIC_PROFILE:
+        require_synthetic(runtime)
+    else:
+        raise ValueError('unknown fixed execution profile')
 
 
 def _execute_child(controls, argv, **kwargs):
@@ -265,7 +295,7 @@ def _execute_child(controls, argv, **kwargs):
 
 
 def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
-            contract, effects, controls):
+            contract, effects, controls, expected_profile='production'):
     controls.require_complete()
     registration, composition, authority = contract.registration, contract.composition, contract.authority
     gates, replay, shared = contract.gates, contract.replay, contract.shared
@@ -278,6 +308,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     if contract.kind == 'd4d_native_shared_attempt' and launch_guard is None:
         raise ValueError('shared native launch requires a subscription guard')
     value = registration.verified(registration_raw)
+    _require_launch_profile(value['runtime'], expected_profile)
     authorization = authorizations(registration_raw, value, review_path=review_path,
                                   ci_path=ci_path, launch_word_path=launch_word_path)
     _join_subscription_authority(launch_guard, registration_raw, value, authorization, current_launch=True)
@@ -312,6 +343,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         # Source recapture can be slow: measure the preparation margin only
         # after it, immediately before the attempt identity is consumed.
         launch_guard.before_reservation()
+        _require_launch_profile(value['runtime'], expected_profile)
         attempt.mkdir(mode=0o700)  # Even a partial reservation consumes the identity.
         _sync_directory(attempt.parent)
     durable_new(attempt/'registration.json', registration_raw)
@@ -320,7 +352,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     started = {'kind': KIND, 'version': VERSION, 'state': 'started', 'attempt_id': value['attempt_id'],
         'started_at': _now(), 'registration_sha256': draft._sha(registration_raw),
         'composition_sha256': value['composition_sha256'], 'authority': authorization['identity'],
-        'dispatch_limit': 1, 'dispatch_unit': 'native CLI process, not provider transactions', **UNASSESSED}
+        'dispatch_limit': 1, 'dispatch_unit': 'native CLI process, not provider transactions',
+        'profile': expected_profile, **UNASSESSED}
     started_raw = draft._encoded(started)
     durable_new(attempt/'started.json', started_raw)
     evidence.mkdir(mode=0o700)
@@ -365,6 +398,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                         raise ValueError('native admission is closed or consumed identity changed')
                     _admit_subscription_guard(launch_guard, attempt, _file, durable_new)
                     contract.activate_before_dispatch(adapter, started_raw)
+                    _require_launch_profile(value['runtime'], expected_profile)
                 observe = _guarded_observer(launch_guard, adapter, controls['run_native_canary'].BudgetStop)
                 status = _execute_child(controls, value['argv'], proxy=proxy,
                     instruction=Path(selected['instruction_path']), attempt=attempt,
@@ -506,6 +540,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                     runtime=value['runtime'], launch_word_raw=authorization['raw']['launch_word'],
                     transcript_raw=transcript_raw, complete=False, **guard_extra)
             final = {'kind': KIND, 'version': VERSION, 'attempt_id': value['attempt_id'],
+                'profile': expected_profile,
                 'state': 'completed_pending_independent_review' if completed else 'failed',
                 'runtime_gates_passed': completed, **UNASSESSED, 'first_stop': first_stop,
                 'registration_sha256': draft._sha(registration_raw), 'started_sha256': draft._sha(started_raw),

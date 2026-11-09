@@ -136,8 +136,12 @@ def _runtime(value):
     for key in ('limits_basis','provider'):
         _text(value[key], key)
     auth = _object(value['auth'], {'loggedIn','authMethod','apiProvider','subscriptionType','expected_api_key_source'}, 'auth selection')
-    _need(auth['loggedIn'] is True and auth['authMethod'] == 'claude.ai' and auth['apiProvider'] == 'firstParty'
-          and auth['expected_api_key_source'] == 'none', 'unsupported selected auth declaration')
+    from . import native_runtime_profiles as profiles
+    if profiles.profile_name(value) == profiles.SYNTHETIC_PROFILE:
+        profiles.require_synthetic_declarations(value)
+    else:
+        _need(auth['loggedIn'] is True and auth['authMethod'] == 'claude.ai' and auth['apiProvider'] == 'firstParty'
+              and auth['expected_api_key_source'] == 'none', 'unsupported selected auth declaration')
     _text(auth['subscriptionType'], 'subscription type')
     env = value['environment']
     _need(type(env) is dict and not set(env) - runtime_values.BASE_ENV_KEYS
@@ -237,6 +241,7 @@ def recipe(expected):
 
 
 def _source_closure(expected):
+    from . import native_runtime_profiles as profiles
     contract, effects = _dependencies()
     rows = expected['production_sources']
     _need(type(rows) is list and 0 < len(rows) <= 640, 'invalid production source closure')
@@ -253,6 +258,7 @@ def _source_closure(expected):
                          ('data_sheets_schema.native_shared_effects', effects.__file__),
                          ('data_sheets_schema.native_shared_policy', command_policy.__file__),
                          ('data_sheets_schema.native_shared_runtime_values', runtime_values.__file__),
+                         ('data_sheets_schema.native_runtime_profiles', profiles.__file__),
                          ('data_sheets_schema.native_model_aliases', native_model_aliases.__file__),
                          ('data_sheets_schema.native_shared_permission_protocol', _permission_protocol().__file__)]:
         raw = Path(file).read_bytes()

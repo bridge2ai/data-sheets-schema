@@ -14,6 +14,8 @@ from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_selection as selected
 from data_sheets_schema import source_review
 from data_sheets_schema.native_shared_controller import captured_execution_body
+from data_sheets_schema.native_model_aliases import model_aliases
+from data_sheets_schema.native_runtime_profiles import require_synthetic
 
 
 def _write_file(path, content):
@@ -48,6 +50,8 @@ def main():
     paths = composition['render_spec']['agentic_artifact_paths']
     commands = composition['policy']['native_shared_helpers']
     runtime = value['runtime']; session = '43540000-0000-4000-8000-000000000001'
+    require_synthetic(runtime)
+    aliases = model_aliases(runtime)
     number = 0
     def send(event):
         print(json.dumps(event, allow_nan=False), flush=True)
@@ -63,7 +67,7 @@ def main():
         nonlocal number
         number += 1
         identity = 'shared-test-' + str(number)
-        send({'type': 'assistant', 'session_id': session, 'message': {'content': [
+        send({'type': 'assistant', 'session_id': session, 'message': {'model': aliases['returned'], 'content': [
             {'type': 'tool_use', 'id': identity, 'name': name, 'input': inputs}]}})
         request_id = 'callback-' + identity
         send({'type': 'control_request', 'request_id': request_id, 'request': {'subtype': 'hook_callback',

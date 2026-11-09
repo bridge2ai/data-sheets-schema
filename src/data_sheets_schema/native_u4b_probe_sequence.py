@@ -84,14 +84,17 @@ def _utc():
 
 def validate_provisional_runtime(value):
     """The closed pre-observation declaration is never a final admission basis."""
-    runtime = values.validate_runtime(value)
-    if (runtime['model'] != aliases.REQUESTED or runtime['auxiliary_models'] != []
+    from . import native_runtime_profiles as profiles
+    runtime = values.validate_runtime_v2(value)
+    synthetic = profiles.profile_name(runtime) == profiles.SYNTHETIC_PROFILE
+    if not synthetic and (runtime['model'] != aliases.REQUESTED or runtime['auxiliary_models'] != []
             or runtime['effort'] != 'high' or runtime['auth']['subscriptionType'] != 'max'
             or runtime['environment']['CLAUDE_CODE_DISABLE_1M_CONTEXT'] != '0'
             or runtime['budget_guard_usd'] != '90'):
         raise ValueError('provisional probe must retain the selected U4b runtime profile')
     basis = strict_json(runtime['limits_basis'])
-    _closed(basis, {'kind', 'version', 'model_aliases'}, 'provisional runtime basis')
+    _closed(basis, {'kind', 'version', 'model_aliases'} | ({'profile'} if 'profile' in basis else set()),
+            'provisional runtime basis')
     if (basis['kind'] != aliases.PROVISIONAL_KIND or type(basis['version']) is not int
             or basis['version'] != 1):
         raise ValueError('observation requires the explicit provisional runtime basis')
@@ -154,6 +157,7 @@ def observation_invocation(runtime, directory, provider_url):
 
 
 def _observed(transcript_raw, request_raw, runtime):
+    pair = aliases.model_aliases(runtime)
     if (type(transcript_raw) is not bytes or not 0 < len(transcript_raw) <= MAX_BYTES
             or not transcript_raw.endswith(b'\n') or type(request_raw) is not bytes
             or not 0 < len(request_raw) <= MAX_BYTES):
@@ -171,7 +175,7 @@ def _observed(transcript_raw, request_raw, runtime):
         raise ValueError('observation requires one init and one terminal result')
     begin, initial = init[0]
     end, terminal = terminals[0]
-    if (begin >= end or end != len(events) - 1 or initial.get('model') != aliases.REQUESTED
+    if (begin >= end or end != len(events) - 1 or initial.get('model') != pair['requested']
             or terminal.get('is_error') is not False or terminal.get('subtype') != 'success'):
         raise ValueError('observation does not have an ordered successful terminal')
     if initial.get('claude_code_version') != runtime['executable']['init_version']:
@@ -182,20 +186,19 @@ def _observed(transcript_raw, request_raw, runtime):
         raise ValueError('observation must attest the scripted-provider API-key source')
     session = initial.get('session_id')
     values._text(session, 'observation session')
-    pair = {'requested': aliases.REQUESTED, 'returned': aliases.RETURNED}
     for index, event in enumerate(events):
         if event.get('type') in ('assistant', 'user', 'result'):
             if index <= begin or event.get('session_id') != session or event.get('parent_tool_use_id') is not None:
                 raise ValueError('observation frame is outside its initialized parent session')
             aliases.require_frame_models(event, pair)
     aliases.require_model_usage(terminal, pair)
-    own = terminal['modelUsage'][aliases.REQUESTED]
+    own = terminal['modelUsage'][pair['requested']]
     limits = {key: own.get(key) for key in ('contextWindow', 'maxOutputTokens')}
     if (any(type(value) is not int or value <= 0 for value in limits.values())
             or limits['maxOutputTokens'] > limits['contextWindow']):
         raise ValueError('observation terminal has no usable limits')
     body = strict_json(request_raw)
-    if (type(body) is not dict or body.get('model') != aliases.RETURNED or 'thinking' not in body
+    if (type(body) is not dict or body.get('model') != pair['returned'] or 'thinking' not in body
             or body['thinking'] is None or type(body['thinking']) not in (dict, str, bool)
             or body['thinking'] == {} or (type(body['thinking']) is str and not body['thinking'].strip())
             or len(canonical(body['thinking'])) > 1024
@@ -260,7 +263,7 @@ def validate_observation(path, *, expected_pin=None, final_runtime=None,
             or sha(claim) != derived['claim']['sha256'] or sha(invocation) != derived['invocation']['sha256']):
         raise ValueError('observation manifest differs from freshly derived saved evidence')
     if final_runtime is not None:
-        final = values.validate_runtime(final_runtime)
+        final = values.validate_runtime_v2(final_runtime)
         omit = {'limits', 'limits_basis'}  # The thinking field is nested in limits_basis.
         if canonical({key: value for key, value in final.items() if key not in omit}) != canonical(
                 {key: value for key, value in provisional.items() if key not in omit}):
@@ -334,6 +337,8 @@ def _run_observation(invocation, deadline, server, outputs, process_state):
 
 def produce_observation(authorization_raw, provisional_runtime, directory=None):
     """Explicit one-child observation; no retries or inherited provider route."""
+    from .native_runtime_profiles import require_production
+    require_production(provisional_runtime)
     from .native_probe_provider import local_provider
     from .native_permission_probe import _identity
     runtime = validate_provisional_runtime(provisional_runtime)
@@ -395,6 +400,8 @@ def _bound_claim(auth_raw, observation, runtime, expected_raw):
 
 def produce_bound_probe(authorization_raw, expected, directory=None):
     """Consume phase two once; retain the genuine seven-trace permission verifier."""
+    from .native_runtime_profiles import require_production
+    require_production(expected['runtime'])
     from . import native_permission_probe as producer
     from .native_u4b_runtime import validate_prepared_runtime
     expected = strict_json(canonical(expected))

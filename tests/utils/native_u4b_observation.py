@@ -20,8 +20,13 @@ def mint_observation(provisional_runtime, transcript_path, request_path):
     assert transcript_path == observation / 'transcript.jsonl'
     assert request_path == observation / 'native_request.json'
     provisional = deepcopy(provisional_runtime)
+    from data_sheets_schema.native_runtime_profiles import profile_name, SYNTHETIC_PROFILE
+    synthetic = profile_name(provisional) == SYNTHETIC_PROFILE
+    declared_aliases = aliases.model_aliases(provisional) if synthetic else {
+        'requested': aliases.REQUESTED, 'returned': aliases.RETURNED}
     provisional['limits_basis'] = sequence.canonical({'kind': aliases.PROVISIONAL_KIND,
-        'version': 1, 'model_aliases': {'requested': aliases.REQUESTED, 'returned': aliases.RETURNED}}).decode()
+        'version': 1, 'model_aliases': declared_aliases,
+        **({'profile': SYNTHETIC_PROFILE} if synthetic else {})}).decode()
     stamp = '2026-11-08T00:00:00Z'
     authorization = {'kind': sequence.AUTH_KIND, 'version': 1,
         'owner': 'Invented offline fixture identity', 'authorized_at': stamp,

@@ -389,6 +389,9 @@ def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw
     any capture reservation or process.
     """
     directory = _path(directory)
+    from .native_launch_review import registration_fields
+    from .native_runtime_profiles import require_production
+    require_production(registration_fields(registration_raw)['runtime'])
     authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, directory)
     value, statement, word, binding = authority
     if statement['quota_capture']['kind'] != REQUEST_KIND:

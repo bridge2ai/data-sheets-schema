@@ -23,7 +23,7 @@ from .native_shared_evidence import read_regular
 from .resources import git_env
 # Reuse only pure runtime validation/fingerprinting. No legacy registration,
 # verification, composition, loader or execution entrypoint is called.
-from .native_execution_registration import validate_runtime
+from .native_shared_runtime_values import validate_runtime_v2 as validate_runtime
 
 VERSION = 2
 PREPARATION_KIND = 'd4d_native_shared_preparation_v2'
@@ -223,6 +223,24 @@ def _pin_map(captured, runtime, dependencies):
 
 
 def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
+    """Prepare a real native contract; explicit software-test runtimes refuse."""
+    from .native_runtime_profiles import PRODUCTION_PROFILE, require_production
+    require_production(c.strict_json(_read(str(runtime_path), 'runtime declaration',
+                                         c.HARD_LIMITS['input_bytes']).raw, 'runtime declaration'))
+    return _prepare(selection_path, runtime_path, job_id=job_id, run_date=run_date,
+                    max_draft_checks=max_draft_checks, expected_profile=PRODUCTION_PROFILE)
+
+
+def prepare_synthetic(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
+    """Prepare the distinct software-test contract over the exact isolated peer."""
+    from .native_runtime_profiles import SYNTHETIC_PROFILE, require_synthetic
+    require_synthetic(c.strict_json(_read(str(runtime_path), 'runtime declaration',
+                                        c.HARD_LIMITS['input_bytes']).raw, 'runtime declaration'))
+    return _prepare(selection_path, runtime_path, job_id=job_id, run_date=run_date,
+                    max_draft_checks=max_draft_checks, expected_profile=SYNTHETIC_PROFILE)
+
+
+def _prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks, expected_profile):
     """Prepare the explicit shared-native input contract; perform no writes.
 
     RunSpec boundary: validated-caller
@@ -243,6 +261,9 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks)
     runtime_capture = current_read_regular(str(runtime_path), 'runtime_declaration',
         max_bytes=c.HARD_LIMITS['input_bytes']).captured
     runtime = validate_runtime(c.strict_json(runtime_capture.raw, 'runtime declaration'))
+    from .native_runtime_profiles import profile_name
+    if profile_name(runtime) != expected_profile:
+        raise ValueError('preparation entry differs from the explicitly selected runtime profile')
     doc = captured.document()
     inputs = doc['inputs']
     manifest = inputs['source_manifest']
@@ -302,7 +323,11 @@ def verify_preparer(raw, *, job_id):
         raise ValueError('not the selected shared-native v2 preparation')
     c.file_pin(body['selection'], 'selection pin')
     c.file_pin(body['runtime'], 'runtime pin')
-    expected = prepare(body['selection']['path'], body['runtime']['path'], job_id=job_id,
+    from .native_runtime_profiles import profile_name, SYNTHETIC_PROFILE
+    runtime = c.strict_json(_read(body['runtime']['path'], 'runtime declaration',
+                                 c.HARD_LIMITS['input_bytes']).raw, 'runtime declaration')
+    preparer = prepare_synthetic if profile_name(runtime) == SYNTHETIC_PROFILE else prepare
+    expected = preparer(body['selection']['path'], body['runtime']['path'], job_id=job_id,
                        run_date=body['run_date'], max_draft_checks=body['max_draft_checks'])
     if c.canonical(body) != c.canonical(expected['registration']):
         raise ValueError('v2 preparation differs from current pins, selection, runtime or rendering')

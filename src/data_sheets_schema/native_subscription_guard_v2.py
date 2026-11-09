@@ -328,7 +328,10 @@ def _admission(raw, expected_sha256, registration_raw, runtime, launch_word_raw,
         if value[key] != wanted:
             raise ValueError("subscription guard binding differs: " + key)
     auth = runtime.get("auth")
-    if (type(auth) is not dict or auth.get("loggedIn") is not True
+    from . import native_runtime_profiles as profiles
+    if profiles.profile_name(runtime) == profiles.SYNTHETIC_PROFILE:
+        profiles.require_synthetic_declarations(runtime)
+    elif (type(auth) is not dict or auth.get("loggedIn") is not True
             or auth.get("authMethod") != "claude.ai" or auth.get("apiProvider") != "firstParty"
             or auth.get("expected_api_key_source") != "none"):
         raise ValueError("subscription guard requires selected first-party subscription auth")

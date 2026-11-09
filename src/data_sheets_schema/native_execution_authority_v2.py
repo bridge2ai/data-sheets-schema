@@ -56,7 +56,7 @@ CONSUMER_OWNED_MODULES = frozenset('data_sheets_schema.' + name for name in (
     'native_shared_stage', 'native_shared_streams', 'native_shared_execution',
     'native_shared_gates', 'native_shared_permissions', 'native_shared_publication',
     'native_shared_registration', 'native_shared_results', 'native_shared_schema_gates',
-    'native_shared_gate_primitives', 'native_shared_runtime_values',
+    'native_shared_gate_primitives', 'native_shared_runtime_values', 'native_runtime_profiles',
     'native_execution_engine', 'native_gate_engine', 'native_subscription_guard'))
 
 

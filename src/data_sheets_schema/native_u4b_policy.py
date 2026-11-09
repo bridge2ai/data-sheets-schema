@@ -52,6 +52,10 @@ def validate_policy(policy):
 
 def validate_runtime_terms(runtime):
     """Fixed N1.8 runtime choices; declaration matching alone is insufficient."""
+    from . import native_runtime_profiles as profiles
+    if profiles.profile_name(runtime) == profiles.SYNTHETIC_PROFILE:
+        profiles.require_synthetic_declarations(runtime)
+        return
     if type(runtime) is not dict:
         raise ValueError('registration requires an explicit runtime')
     if (type(runtime.get('deadline_seconds')) is not int

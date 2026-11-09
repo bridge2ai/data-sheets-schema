@@ -13,7 +13,7 @@ from . import native_shared_contract as c
 from . import native_shared_controller as composition
 from . import native_shared_policy as policy
 from . import native_shared_controls as pure_controls
-from .native_shared_runtime_values import validate_runtime, POLICY_ENV, FLAGS
+from .native_shared_runtime_values import validate_runtime_v2 as validate_runtime, POLICY_ENV, FLAGS
 from .native_shared_evidence import read_regular
 from .native_execution_engine import GATES
 

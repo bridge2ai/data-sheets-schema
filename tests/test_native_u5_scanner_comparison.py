@@ -41,6 +41,9 @@ def scanner_inputs(candidate_head):
     return before, after, old, new
 
 
+@pytest.mark.skip(reason='Historical d258 full-array gate superseded by owner D128; '
+                         'test body and failed evidence retained, never relabelled as passed. '
+                         'Replacement: tests/test_native_d128_scanner_comparison.py')
 def test_scanner_before_after_retains_complete_arrays_or_explicit_blocker(tmp_path):
     candidate_head = inputs.git('rev-parse', '--verify', 'HEAD^{commit}').decode().strip()
     baseline, candidate, old, new = scanner_inputs(candidate_head)

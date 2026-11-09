@@ -438,7 +438,7 @@ def test_supplied_tool_metadata_contradictions_refuse(fixture,field,value):
     with pytest.raises(ValueError):verify(changed,fixture['expected'])
 
 
-@pytest.mark.parametrize('field,value',[('deadline_seconds',True),('auxiliary_models',['synthetic-native-model']),
+@pytest.mark.parametrize('field,value',[('deadline_seconds',True),('auxiliary_models',['historical-native-fixture-model']),
     ('limits',{'contextWindow':1000,'maxOutputTokens':True}),('model','--unregistered-option')])
 def test_expected_runtime_is_the_closed_typed_runtime_contract(fixture,field,value):
     changed=deepcopy(fixture['manifest']);expected=deepcopy(fixture['expected'])

@@ -52,7 +52,7 @@ def inputs(native_spec, isolated_modules, tmp_path, monkeypatch):
     runtime = c.strict_json(native_spec._native_shared_runtime_capture.raw)
     runtime['executable'].update(path=str(executable), sha256=c.sha(executable.read_bytes()))
     runtime['auth'] = {'loggedIn': True, 'authMethod': 'claude.ai', 'apiProvider': 'firstParty',
-        'subscriptionType': 'synthetic-software-test', 'expected_api_key_source': 'none'}
+        'subscriptionType': 'historical-software-test', 'expected_api_key_source': 'none'}
     runtime['environment'] = {'PATH': '/usr/bin:/bin', 'HOME': str(tmp_path.resolve()),
         'CLAUDE_SECURESTORAGE_CONFIG_DIR': '', 'CLAUDE_CODE_DISABLE_1M_CONTEXT': '1'}
     runtime['keep_awake']['host_platform'] = sys.platform
@@ -157,7 +157,7 @@ def test_prepare_rederives_real_native26_and_all_pins_without_effects(inputs, is
     assert body['render_spec']['render_version'] == 26
     assert body['render_spec']['native_shared_generation_version'] == 1
     assert body['instruction_sha256'] == c.sha(body['instruction'].encode())
-    assert '# Model: synthetic-native-model' in body['instruction']
+    assert '# Model: historical-native-fixture-model' in body['instruction']
     assert 'Registered maximum draft checks: 2.' in body['instruction']
     assert 'native_shared_stage advance --registration' in body['instruction']
     assert body['selection']['path'] == str(inputs['selection'])

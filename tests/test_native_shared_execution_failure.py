@@ -5,7 +5,7 @@ import signal
 import socket
 import subprocess
 import pytest
-from tests.test_native_shared_execution import make_case, synthetic_subscription_clock
+from tests.test_native_shared_execution import make_case
 from data_sheets_schema import native_shared_execution_orchestration as execute
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_execution_authority_v2 as authority
@@ -15,7 +15,6 @@ from data_sheets_schema import native_execution_authority_v2 as authority
 def execution_case(tmp_path, monkeypatch):
     monkeypatch.chdir(authority.ROOT)
     case = make_case(tmp_path / 'v2-lifecycle')
-    synthetic_subscription_clock(case, monkeypatch)
     return case
 
 
@@ -29,11 +28,11 @@ def test_missing_external_gate_refuses_before_reservation_or_probe(tmp_path, mon
         for item in case['root'].rglob('*') if item.is_file()}
     def forbidden(*args, **kwargs):
         pytest.fail('missing v2 external gate reached an effect')
-    monkeypatch.setattr(execute, '_probe_runtime', forbidden)
+    monkeypatch.setattr(execute, '_synthetic_runtime_observation', forbidden)
     monkeypatch.setattr(execute, 'durable_new', forbidden)
     monkeypatch.setattr(execute, '_mkdir_durable', forbidden)
     with pytest.raises((ValueError, FileNotFoundError)):
-        execute.launch(case['raw'], **case['kwargs'])
+        execute.synthetic_launch(case['raw'], **case['kwargs'])
     assert not Path(case['value']['attempt_directory']).exists()
     assert not Path(case['value']['evidence_directory']).exists()
     assert {str(item.relative_to(case['root'])): item.read_bytes()
@@ -44,7 +43,7 @@ def test_public_pre_dispatch_failure_is_readable_and_cannot_resume(tmp_path, mon
     original = subprocess.Popen
     calls = []
     def git_only(argv, *args, **kwargs):
-        assert isinstance(argv, (list, tuple)) and argv[0] == 'git', 'unexpected child dispatch'
+        assert isinstance(argv, (list, tuple)) and argv[0] in ('git', '/usr/bin/git'), 'unexpected child dispatch'
         return original(argv, *args, **kwargs)
     def forbidden(*args, **kwargs):
         pytest.fail('pre-dispatch failure made a network connection')
@@ -55,8 +54,8 @@ def test_public_pre_dispatch_failure_is_readable_and_cannot_resume(tmp_path, mon
     def observation_failure(value):
         calls.append(value['attempt_id'])
         raise RuntimeError('intentional software-test observation failure; no auth executed')
-    monkeypatch.setattr(execute, '_probe_runtime', observation_failure)
-    result = execute.launch(case['raw'], **case['kwargs'])
+    monkeypatch.setattr(execute, '_synthetic_runtime_observation', observation_failure)
+    result = execute.synthetic_launch(case['raw'], **case['kwargs'])
     (case['root'] / 'actual-failed-result.json').write_bytes(c.canonical(result))
     assert result['state'] == 'failed' and result['runtime_gates_passed'] is False
     assert result['first_stop'] is not None
@@ -68,7 +67,7 @@ def test_public_pre_dispatch_failure_is_readable_and_cannot_resume(tmp_path, mon
     reread = execute.read_final(case['raw'])
     assert reread == result
     with pytest.raises(ValueError, match='new|resume'):
-        execute.launch(case['raw'], **case['kwargs'])
+        execute.synthetic_launch(case['raw'], **case['kwargs'])
     assert calls == [case['value']['attempt_id']]
     attempt = Path(case['value']['attempt_directory'])
     assert (attempt / 'started.json').is_file()
@@ -93,17 +92,17 @@ def test_v2_partial_reservation_stays_spent_without_probe(execution_case, monkey
         return real_write(path, raw)
     monkeypatch.setattr(execute, '_sync_directory', sync)
     monkeypatch.setattr(execute, 'durable_new', write)
-    monkeypatch.setattr(execute, '_probe_runtime', lambda value: pytest.fail('probe preceded durable reservation'))
+    monkeypatch.setattr(execute, '_synthetic_runtime_observation', lambda value: pytest.fail('probe preceded durable reservation'))
     with pytest.raises(OSError, match='durability'):
-        execute.launch(case['raw'], **case['kwargs'])
+        execute.synthetic_launch(case['raw'], **case['kwargs'])
     assert Path(case['value']['attempt_directory']).is_dir()
     with pytest.raises(ValueError, match='new|resume'):
-        execute.launch(case['raw'], **case['kwargs'])
+        execute.synthetic_launch(case['raw'], **case['kwargs'])
 
 
 def test_subscription_expiring_during_admission_refuses_before_reservation(execution_case, monkeypatch):
     from data_sheets_schema import native_execution_registration_v2 as admission
-    from data_sheets_schema import native_subscription_guard as subscription
+    from data_sheets_schema import native_subscription_guard_v2 as subscription
     case = execution_case
     now = [subscription._now()]
     monkeypatch.setattr(subscription, '_now', lambda: now[0])
@@ -115,10 +114,10 @@ def test_subscription_expiring_during_admission_refuses_before_reservation(execu
         now[0] += subscription.MAX_AGE_SECONDS + 1
         return result
     monkeypatch.setattr(admission, 'admit', slow_admission)
-    monkeypatch.setattr(execute, '_probe_runtime', lambda value: pytest.fail('expired guard reached probe'))
+    monkeypatch.setattr(execute, '_synthetic_runtime_observation', lambda value: pytest.fail('expired guard reached probe'))
     monkeypatch.setattr(execute, 'durable_new', lambda *args: pytest.fail('expired guard reached durable write'))
     with pytest.raises(ValueError, match='stale|future-dated'):
-        execute.launch(case['raw'], **case['kwargs'])
+        execute.synthetic_launch(case['raw'], **case['kwargs'])
     assert completed == [True]
     assert not Path(case['value']['attempt_directory']).exists()
     assert not Path(case['value']['evidence_directory']).exists()
@@ -130,8 +129,8 @@ def test_v2_signal_is_sticky_and_previous_handlers_are_restored(execution_case, 
     def interrupt_before_native(value):
         os.kill(os.getpid(), signal.SIGTERM)
         pytest.fail('the installed attempt signal handler did not interrupt')
-    monkeypatch.setattr(execute, '_probe_runtime', interrupt_before_native)
-    result = execute.launch(case['raw'], **case['kwargs'])
+    monkeypatch.setattr(execute, '_synthetic_runtime_observation', interrupt_before_native)
+    result = execute.synthetic_launch(case['raw'], **case['kwargs'])
     assert result['state'] == 'failed' and result['runtime_gates_passed'] is False
     assert result['keep_awake']['signals_received'] == [signal.SIGTERM]
     assert result['first_stop'] is not None
@@ -142,17 +141,15 @@ def test_v2_signal_is_sticky_and_previous_handlers_are_restored(execution_case, 
 
 def test_v2_injected_transport_timeout_keeps_registered_limit_and_failure(execution_case, monkeypatch):
     """Inject the transport timeout; no native or Python peer is dispatched."""
-    from tests.test_native_execution import fake_observation
     from data_sheets_schema import native_execution_orchestration as lifetime
     case = execution_case
-    monkeypatch.setattr(execute, '_probe_runtime', fake_observation)
     calls = []
     def timeout(controls, argv, **kwargs):
         calls.append((argv, kwargs['deadline_seconds']))
         assert kwargs['deadline_seconds'] == case['value']['runtime']['deadline_seconds'] == 900
         raise subprocess.TimeoutExpired(argv, kwargs['deadline_seconds'])
     monkeypatch.setattr(lifetime, '_execute_child', timeout)
-    result = execute.launch(case['raw'], **case['kwargs'])
+    result = execute.synthetic_launch(case['raw'], **case['kwargs'])
     assert calls == [(case['value']['argv'], 900)]
     assert result['state'] == 'failed' and result['runtime_gates_passed'] is False
     assert 'TimeoutExpired' in result['first_stop']
@@ -172,16 +169,16 @@ def test_v2_publication_failure_preserves_first_error(execution_case, monkeypatc
         if Path(path).name == boundary:
             raise later_error
         return original_write(path, raw)
-    monkeypatch.setattr(execute, '_probe_runtime', failed_probe)
+    monkeypatch.setattr(execute, '_synthetic_runtime_observation', failed_probe)
     monkeypatch.setattr(execute, 'durable_new', interrupted)
     with pytest.raises(RuntimeError) as caught:
-        execute.launch(case['raw'], **case['kwargs'])
+        execute.synthetic_launch(case['raw'], **case['kwargs'])
     assert caught.value is initial_error
     assert caught.value.__cause__ is later_error
     assert not (Path(case['value']['evidence_directory']) / 'published.json').exists()
     assert (Path(case['value']['attempt_directory']) / 'started.json').is_file()
     with pytest.raises(ValueError, match='new|resume'):
-        execute.launch(case['raw'], **case['kwargs'])
+        execute.synthetic_launch(case['raw'], **case['kwargs'])
 
 
 @pytest.mark.parametrize('filename', ['runtime-observation.json', 'keep-awake.json'])
@@ -189,8 +186,8 @@ def test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read(exe
     case = execution_case
     def failed_probe(value):
         raise RuntimeError('synthetic refusal before any native operation')
-    monkeypatch.setattr(execute, '_probe_runtime', failed_probe)
-    result = execute.launch(case['raw'], **case['kwargs'])
+    monkeypatch.setattr(execute, '_synthetic_runtime_observation', failed_probe)
+    result = execute.synthetic_launch(case['raw'], **case['kwargs'])
     assert execute.read_final(case['raw']) == result
     attempt = Path(case['value']['attempt_directory'])
     path = attempt / filename
@@ -202,7 +199,7 @@ def test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read(exe
 
 
 @pytest.mark.parametrize('role,expected', [
-    pytest.param('review', 'v2 review decision must be approved',
+    pytest.param('review', 'review independence, roles or decision differs',
                  id='review-independent v2 approval'),
     pytest.param('ci', 'v2 CI check roster differs from the exact required event roster',
                  id='ci-full v2 required CI'),
@@ -212,13 +209,13 @@ def test_saved_readback_revalidates_consumed_v2_approvals(execution_case, monkey
     case = execution_case
     def failed_probe(value):
         raise RuntimeError('synthetic refusal before native dispatch')
-    monkeypatch.setattr(execute, '_probe_runtime', failed_probe)
-    result = execute.launch(case['raw'], **case['kwargs'])
+    monkeypatch.setattr(execute, '_synthetic_runtime_observation', failed_probe)
+    result = execute.synthetic_launch(case['raw'], **case['kwargs'])
     assert execute.read_final(case['raw']) == result
     path = Path(case['value']['attempt_directory']) / (role + '.json')
     changed = c.strict_json(path.read_bytes())
     if role == 'review':
-        changed['decision'] = 'rejected'
+        changed['reviews'][0]['decision'] = 'rejected'
     else:
         changed['checks'].pop(next(iter(changed['checks'])))
     path.write_bytes(c.canonical(changed))

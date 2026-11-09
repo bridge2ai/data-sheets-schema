@@ -52,6 +52,6 @@ def test_verify_preparer_uses_current_runtime_capture(inputs, monkeypatch, repla
     envelope = registration.prepare(inputs['selection'], inputs['runtime_path'], **inputs['kwargs'])
     body = registration.verify_preparer(contract.canonical(envelope), job_id=inputs['kwargs']['job_id'])
     assert body == envelope['registration']
-    assert '# Model: synthetic-native-model' in body['instruction']
+    assert '# Model: historical-native-fixture-model' in body['instruction']
     assert len(seen) == 4  # initial and stability read in prepare and verify_preparer
     assert registration.read_regular is old_reader

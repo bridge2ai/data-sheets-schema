@@ -33,7 +33,7 @@ def native_spec(declaration, tmp_path, monkeypatch):
     runtime = {'route': ROUTE,
         'executable': {'path': '/synthetic/not-executed', 'sha256': 'a' * 64,
                        'version': 'synthetic', 'init_version': 'synthetic'},
-        'model': 'synthetic-native-model', 'auxiliary_models': [], 'effort': 'high',
+        'model': 'historical-native-fixture-model', 'auxiliary_models': [], 'effort': 'high',
         'limits': {'contextWindow': 10000, 'maxOutputTokens': 1000},
         'limits_basis': 'synthetic test declaration, not observation',
         'provider': 'synthetic provider', 'auth': {'test': 'not authenticated'},
@@ -49,7 +49,7 @@ def test_native_instruction_roundtrip_uses_only_sole_runtime(native_spec, monkey
     spec = native_spec
     text = spec.instruction
     recorded = spec.render_spec()
-    assert '# Model: synthetic-native-model' in text
+    assert '# Model: historical-native-fixture-model' in text
     assert '# Provider: synthetic provider' in text
     assert '# Temperature: unknown (not observed from the agent runtime)' in text
     assert 'Registered maximum draft checks: 2.' in text

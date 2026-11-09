@@ -156,3 +156,11 @@ def validate_runtime(value):
     if awake['policy'] == 'macos_iokit_ims_v1' and awake['host_platform'] != 'darwin':
         raise ValueError('the selected IOKit policy requires a declared macOS host')
     return _json(_encoded(value))
+
+
+def validate_runtime_v2(value):
+    """Dispatch explicitly declared v2 software tests without changing v1 validation."""
+    from . import native_runtime_profiles as profiles
+    if profiles.profile_name(value) == profiles.SYNTHETIC_PROFILE:
+        return profiles.require_synthetic(value)
+    return validate_runtime(value)
