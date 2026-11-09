@@ -1,27 +1,20 @@
 #!/usr/bin/env python3
-"""Inspect C4 plus pinned D8 import graphs, without importing D, 2026-11-07.
+"""Inspect the current integrated C/D import graphs; U3-F2, 2026-11-09.
 
-Inputs: actual C4 package bytes; git-show D8's ten consumers and two neutral
-dependencies. Outputs: a fresh scratch-only overlay, per-file origin manifest,
-and unchanged A guard outcomes. Run through the C4 diagnostic pytest node.
-This uncommitted composite proves no loader lifetime or execution admission.
+Inputs: this checkout's unchanged package bytes and genuine A dependency pins.
+Outputs: fresh manifest, graph census and source-stability JSON below pytest's
+tmp_path. No source overlay, consumer execution or launcher metadata is used.
+The historical filename is retained for provenance; the D8-overlay test and
+entry point are retired. Static graph acceptance is not execution admission.
 """
 from __future__ import annotations
 
-import argparse
-import errno
 import hashlib
 import json
-import os
 from pathlib import Path
-import socket
-import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-SCRATCH = ROOT.parent / 'scratch-native-u3c-r4'
-LOCK = ROOT.parent / 'plans/native_quiet_window.lock'
-D_HEAD = '3ab9fbc189f647d0abf00a50ab4c35634fe5228e'
 D_CONSUMERS = (
     'native_execution_engine', 'native_gate_engine', 'native_subscription_guard',
     'native_shared_execution', 'native_shared_gates', 'native_shared_permissions',
@@ -38,6 +31,7 @@ C_CONSUMERS = (
     'native_shared_permission_protocol', 'native_shared_runtime_constants',
     'native_shared_evidence',
 )
+HISTORICAL_D8_HEAD = '3ab9fbc189f647d0abf00a50ab4c35634fe5228e'
 OLD_BOOTSTRAP = ('consumer cannot import verifier bootstrap boundary: '
                  'data_sheets_schema.native_execution_registration_v2')
 OLD_REFUSALS = {name: OLD_BOOTSTRAP for name in (
@@ -46,6 +40,8 @@ OLD_REFUSALS = {name: OLD_BOOTSTRAP for name in (
 OLD_REFUSALS['native_shared_permissions'] = (
     'consumer package import has missing or ambiguous source: '
     'data_sheets_schema.native_shared_permission_protocol')
+MAX_SOURCE_BYTES = 64 * 1024 * 1024
+MAX_PACKAGE_BYTES = 256 * 1024 * 1024
 
 
 def sha(raw):
@@ -58,157 +54,134 @@ def save(path, value):
         stream.write('\n')
 
 
-def require_network_denial():
-    with socket.socket() as sock:
-        try:
-            sock.bind(('127.0.0.1', 0))
-        except OSError as exc:
-            if exc.errno == errno.EPERM:
-                return {'network_bind_denied': True, 'errno': exc.errno}
-            raise
-    raise RuntimeError('census must run inside the C4 network-denied test runner')
-
-
 def package_files(root):
+    """Retain the full package source set; never construct a filtered pin map."""
     result = {}
-    for path in sorted((root / 'src/data_sheets_schema').rglob('*')):
+    total = 0
+    package = root / 'src/data_sheets_schema'
+    for path in sorted(package.rglob('*')):
+        if path.is_symlink():
+            raise RuntimeError('census package contains a symbolic link: ' + str(path))
         if path.suffix not in ('.py', '.yaml', '.json'):
             continue
-        if path.is_symlink() or not path.is_file():
-            raise RuntimeError('package inventory requires regular source files: ' + str(path))
-        if path.stat().st_size > 64 * 1024 * 1024:
+        if not path.is_file() or path != path.resolve(strict=True):
+            raise RuntimeError('package inventory requires regular physical source files: ' + str(path))
+        with path.open('rb') as stream:
+            raw = stream.read(MAX_SOURCE_BYTES + 1)
+        if len(raw) > MAX_SOURCE_BYTES:
             raise RuntimeError('individual census source exceeds 64 MiB')
-        result[path.relative_to(root).as_posix()] = path.read_bytes()
-    if not result or sum(map(len, result.values())) > 256 * 1024 * 1024:
-        raise RuntimeError('empty or oversized census package')
+        total += len(raw)
+        if total > MAX_PACKAGE_BYTES:
+            raise RuntimeError('census package exceeds 256 MiB')
+        result[path.relative_to(root).as_posix()] = raw
+    if not result:
+        raise RuntimeError('empty census package')
     return result
 
 
-def git(*args):
-    return subprocess.check_output(['git', '--no-replace-objects', *args], cwd=ROOT,
-                                   env={**os.environ, 'GIT_NO_LAZY_FETCH': '1'}, timeout=30)
+def _project_origins():
+    """Record loaded project modules without importing any census consumers."""
+    origins = {}
+    package = ROOT / 'src/data_sheets_schema'
+    for name, module in tuple(sys.modules.items()):
+        if name != 'data_sheets_schema' and not name.startswith('data_sheets_schema.'):
+            continue
+        source = getattr(module, '__file__', None)
+        if source is not None:
+            resolved = Path(source).resolve()
+            if not resolved.is_relative_to(package):
+                raise RuntimeError('foreign project module: ' + name)
+            origins[name] = str(resolved)
+        for item in getattr(module, '__path__', ()):
+            if not Path(item).resolve().is_relative_to(package):
+                raise RuntimeError('foreign project package namespace: ' + name)
+    return origins
 
 
-def build_and_inspect(out, dependency_site, *, scratch_root=SCRATCH):
-    require_network_denial()
-    if os.path.lexists(LOCK):
-        raise RuntimeError('quiet window is active; census not started')
-    out = Path(out).absolute()
-    scratch_root = Path(scratch_root).absolute()
-    if scratch_root != scratch_root.resolve(strict=True) or not scratch_root.is_dir():
-        raise ValueError('census scratch root must be a physical directory')
-    if out != out.resolve() or out == scratch_root or not out.is_relative_to(scratch_root):
-        raise ValueError('census output must be a fresh literal path below the assigned scratch root')
-    dependency_site = Path(dependency_site)
-    if (dependency_site != dependency_site.resolve(strict=True)
-            or dependency_site.name != 'site-packages' or not dependency_site.is_dir()):
-        raise ValueError('expected physical dependency site; no site hooks are loaded')
-    out.mkdir(parents=False, exist_ok=False)
-    overlay = out / 'overlay'
-    original = package_files(ROOT)
-    sources = dict(original)
-    origins = {name: {'kind': 'current_C4', 'sha256': sha(raw), 'bytes': len(raw)}
-               for name, raw in sources.items()}
-    for name in (*D_CONSUMERS, *D_SUPPORT):
-        relative = 'src/data_sheets_schema/' + name + '.py'
-        raw = git('show', D_HEAD + ':' + relative)
-        if name in D_SUPPORT and relative in sources and sources[relative] != raw:
-            raise RuntimeError('C/D neutral dependency conflict requires review: ' + relative)
-        prior = sha(sources[relative]) if relative in sources else None
-        sources[relative] = raw
-        origins[relative] = {'kind': 'git_show_D8', 'commit': D_HEAD,
-                             'sha256': sha(raw), 'bytes': len(raw), 'prior_C4_sha256': prior}
-    for name, raw in sources.items():
-        path = overlay / name
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(raw)
-    manifest = {'C4_head': git('rev-parse', 'HEAD').decode().strip(),
-                'C4_status': git('status', '--porcelain', '--untracked-files=normal').decode(),
-                'D8_head': D_HEAD, 'files': origins,
-                'overlay': str(overlay), 'helper_sha256': sha(Path(__file__).read_bytes()),
-                'scope': 'uncommitted source overlay; static graph census only; D consumers never imported'}
-    if manifest['C4_status']:
-        raise RuntimeError('C4 census requires a committed clean candidate')
-    save(out / 'manifest.json', manifest)
-    env = {key: value for key, value in os.environ.items() if key in (
-        'PATH', 'HOME', 'TMPDIR', 'LANG', 'PYTHONNOUSERSITE', 'PYTHONSAFEPATH',
-        'PYTHONDONTWRITEBYTECODE', 'GIT_NO_LAZY_FETCH', 'GIT_CONFIG_GLOBAL', 'GIT_CONFIG_SYSTEM')}
-    env['PYTHONPATH'] = str(overlay / 'src') + os.pathsep + str(overlay)
-    command = [sys.executable, '-S', '-P', '-B', str(Path(__file__).resolve()),
-               '--inspect-overlay', str(overlay), '--dependency-site', str(dependency_site),
-               '--out', str(out / 'census.json')]
-    save(out / 'command.json', {'argv': command, 'environment': env,
-                               'deadline': 'enclosing C4 runner, at most 3600 s'})
-    # The enclosing runner owns the deadline and descendant cleanup. An inner
-    # timeout must not orphan the census child when a quiet lock pauses it.
-    completed = subprocess.run(command, cwd=overlay, env=env, capture_output=True)
-    (out / 'stdout.log').write_bytes(completed.stdout)
-    (out / 'stderr.log').write_bytes(completed.stderr)
-    unchanged = package_files(ROOT) == original
-    save(out / 'source-stability.json', {'unchanged': unchanged})
-    if completed.returncode or not unchanged:
-        raise RuntimeError('census failed or source changed; retained logs identify the failure')
-    result = json.loads((out / 'census.json').read_bytes())
-    return result
+def inspect_current(out):
+    """Run A's actual graph guard against the current complete package closure.
 
-
-def inspect_overlay(overlay, dependency_site, output):
-    network = require_network_denial()
-    if not (sys.flags.no_site and sys.flags.safe_path and sys.dont_write_bytecode):
-        raise RuntimeError('census child requires -S -P -B')
-    sys.path.append(str(dependency_site))  # Path only; no .pth processing.
+    A's dependency capture performs local Git reads. This helper creates no
+    subprocess, socket, package copy, loader substitution or source overlay.
+    Already-imported consumers are recorded; the census may not import more.
+    """
     from data_sheets_schema import native_execution_authority_v2 as authority
-    if authority.ROOT != overlay:
-        raise RuntimeError('A guard did not resolve its own scratch source root')
-    inventory = package_files(overlay)
-    pins = {name: sha(raw) for name, raw in inventory.items()}
+
+    if authority.ROOT.resolve() != ROOT:
+        raise RuntimeError('A guard resolved a different source root')
+    out = Path(out).absolute()
+    if out != out.resolve() or out.is_relative_to(ROOT):
+        raise ValueError('census output must be a fresh physical path outside the worktree')
+    out.mkdir(parents=False, exist_ok=False)
+    original = package_files(ROOT)
+    helper_raw = Path(__file__).read_bytes()
+    origins_before = _project_origins()
+    identity = authority.dependency_identity()
+    pins = identity['base']['package_sources']
+    if pins != {name: sha(raw) for name, raw in original.items()}:
+        raise RuntimeError('A dependency pins do not cover the exact current source inventory')
+    names = (*C_CONSUMERS, *D_CONSUMERS, *D_SUPPORT)
+    owned = {'data_sheets_schema.' + name for name in names}
+    if len(names) != 28 or len(owned) != 28 or owned != authority.CONSUMER_OWNED_MODULES:
+        raise RuntimeError('current C/D census roster differs from the closed A roster')
+    imported_before = {name: sys.modules[name] for name in owned if name in sys.modules}
+    save(out / 'manifest.json', {
+        'kind': 'current_integrated_consumer_graph_census', 'version': 1,
+        'root': str(ROOT), 'source_commit': identity['base']['source_commit'],
+        'source_commit_basis': 'observed local HEAD; graph census is not a committed-source admission proof',
+        'helper_sha256': sha(helper_raw), 'dependency_identity': identity,
+        'files': {name: {'sha256': sha(raw), 'bytes': len(raw)}
+                  for name, raw in original.items()},
+        'source_overlay': False,
+        'historical_overlay_retired': {
+            'D8_head': HISTORICAL_D8_HEAD,
+            'test_node': 'test_actual_c_and_overlay_d_graphs_are_accepted',
+            'reason': 'D8 bytes predate the current integrated consumers and neutral dependencies',
+        },
+    })
     outcomes = {}
-    for short in (*C_CONSUMERS, *D_CONSUMERS, *D_SUPPORT):
+    for short in names:
         name = 'data_sheets_schema.' + short
         stem = 'src/' + name.replace('.', '/')
-        candidates = [p for p in (stem + '.py', stem + '/__init__.py') if p in inventory]
+        candidates = [path for path in (stem + '.py', stem + '/__init__.py') if path in original]
         if len(candidates) != 1:
             raise RuntimeError('census target has missing or ambiguous source: ' + name)
-        raw = inventory[candidates[0]]
         try:
-            graph = authority.refuse_legacy_consumer_imports(raw, name=name, package_sources=pins)
+            graph = authority.refuse_legacy_consumer_imports(
+                original[candidates[0]], name=name, package_sources=pins)
         except ValueError as exc:
             outcomes[short] = {'status': 'refused', 'reason': str(exc)}
         else:
             outcomes[short] = {'status': 'accepted', 'graph': graph}
-    origins = {}
-    for name, module in tuple(sys.modules.items()):
-        if name == 'data_sheets_schema' or name.startswith('data_sheets_schema.'):
-            path = getattr(module, '__file__', None)
-            if path is not None:
-                resolved = Path(path).resolve()
-                if not resolved.is_relative_to(overlay / 'src/data_sheets_schema'):
-                    raise RuntimeError('foreign project module: ' + name)
-                origins[name] = str(resolved)
-            for item in getattr(module, '__path__', ()):
-                if not Path(item).resolve().is_relative_to(overlay / 'src/data_sheets_schema'):
-                    raise RuntimeError('foreign project package namespace: ' + name)
-    if any('data_sheets_schema.' + name in sys.modules for name in D_CONSUMERS):
-        raise RuntimeError('census unexpectedly executed a D consumer')
-    result = {'network': network, 'A_guard_path': str(Path(authority.__file__).resolve()),
-              'A_guard_sha256': sha(Path(authority.__file__).read_bytes()),
-              'rosters': {'C': list(C_CONSUMERS), 'D': list(D_CONSUMERS), 'D_support': list(D_SUPPORT)},
-              'A_closed_owned_roster': sorted(authority.CONSUMER_OWNED_MODULES),
-              'origins': origins, 'outcomes': outcomes, 'old_D8_refusals': OLD_REFUSALS,
-              'old_refusal_comparison': {name: {'old_reason': old,
-                  'current': outcomes[name], 'old_reason_still_present': outcomes[name].get('reason') == old}
-                  for name, old in OLD_REFUSALS.items()},
-              'remaining_refusals': {name: row for name, row in outcomes.items() if row['status'] == 'refused'},
-              'limits': ['No admission or runtime reconstruction executed.',
-                         'No projection lifetime or D classifier handoff acceptance follows from import acceptance.',
-                         'This composite is not a merged commit or a complete D integration validation.']}
-    save(output, result)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--inspect-overlay', type=Path, required=True)
-    parser.add_argument('--dependency-site', type=Path, required=True)
-    parser.add_argument('--out', type=Path, required=True)
-    args = parser.parse_args()
-    inspect_overlay(args.inspect_overlay, args.dependency_site, args.out)
+    origins_after = _project_origins()
+    imported_after = {name: sys.modules[name] for name in owned if name in sys.modules}
+    source_unchanged = package_files(ROOT) == original
+    helper_unchanged = Path(__file__).read_bytes() == helper_raw
+    consumers_unchanged = (imported_before.keys() == imported_after.keys()
+        and all(imported_after[name] is module for name, module in imported_before.items()))
+    stability = {'package_sources_unchanged': source_unchanged,
+                 'helper_source_unchanged': helper_unchanged,
+                 'consumer_modules_unchanged': consumers_unchanged}
+    save(out / 'source-stability.json', stability)
+    result = {
+        'kind': 'current_integrated_consumer_graph_census', 'version': 1,
+        'A_guard_path': str(Path(authority.__file__).resolve()),
+        'A_guard_sha256': sha(original['src/data_sheets_schema/native_execution_authority_v2.py']),
+        'rosters': {'C': list(C_CONSUMERS), 'D': list(D_CONSUMERS), 'D_support': list(D_SUPPORT)},
+        'A_closed_owned_roster': sorted(authority.CONSUMER_OWNED_MODULES),
+        'origins_before': origins_before, 'origins_after': origins_after,
+        'previously_loaded_consumers': sorted(imported_before),
+        'outcomes': outcomes, 'historical_D8_refusals': OLD_REFUSALS,
+        'remaining_refusals': {name: row for name, row in outcomes.items() if row['status'] == 'refused'},
+        'source_stability': stability, 'source_overlay': False,
+        'limits': [
+            'Static graph acceptance only; no admission or runtime reconstruction executed.',
+            'No projection lifetime or classifier handoff acceptance follows from import acceptance.',
+            'No child or native executable was launched by this helper; A captures local Git identity.',
+            'Historical D8 refusal metadata is provenance only; no D8 source is loaded or overlaid.',
+        ],
+    }
+    save(out / 'census.json', result)
+    if not all(stability.values()):
+        raise RuntimeError('census changed source or loaded consumers; retained witness identifies the failure')
+    return result

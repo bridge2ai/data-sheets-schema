@@ -10954,6 +10954,58 @@ def discover_model_facing_assets(root: Path, parsed: dict, surfaces: Surfaces) -
     return {key: value for key, value in sorted(found.items())}
 
 
+def discover_model_commands(root: Path, parsed: dict, surfaces: Surfaces, derived=()) -> dict:
+    """Follow literal command argv in model-facing generation modules.
+
+    An import of a package does not execute its ``__main__``. A command
+    table handed to a model does: include that entry point, its package
+    initializer and local imports. Command stdout is conservatively model
+    text; imports retain the ordinary source-derived module roles. This is
+    discovery, not a claim that a command ran or that its output was valid.
+    """
+    found = {}
+    done = set()
+    while True:
+        pending = [(rel, surface) for rel, surface in sorted(surfaces.files.items())
+                   if rel.endswith('.py') and rel not in done
+                   and any(role == 'model_facing' and APPROACHES[approach][0]
+                           for approach, role in surface.roles.items())]
+        if not pending:
+            break
+        for rel, surface in pending:
+            done.add(rel)
+            path = _resolved(root / rel)
+            if path not in parsed:
+                text, tree = _parse(path)
+                if tree is None:
+                    raise _unparsed([f'{rel} ({_parse_problem(path)})'])
+                parsed[path] = text, tree
+            approaches = [a for a, role in surface.roles.items()
+                          if role == 'model_facing' and APPROACHES[a][0]]
+            for target, why in _argv_runs(root, path, parsed[path][1]):
+                if target.name == '__init__.py' and 'runs `-m ' in why:
+                    raise ConfigError('model-facing package command lacks __main__.py: ' + why)
+                starts = [target]
+                if target.name == '__main__.py' and (target.parent / '__init__.py').is_file():
+                    starts.append(target.parent / '__init__.py')
+                members, _ = _code_closure(root, starts, stop=set())
+                target_rel = _rel(root, target)
+                entry = found.setdefault(target_rel, {'commands': set(), 'imports': set(), 'approaches': set()})
+                entry['commands'].add(why)
+                entry['approaches'].update(approaches)
+                for member in members:
+                    member_rel = _rel(root, member)
+                    if member_rel != target_rel:
+                        entry['imports'].add(member_rel)
+                    for approach in approaches:
+                        surfaces.add(member_rel, approach,
+                            'model_facing' if member == target else _module_role(member, derived),
+                            surface.status, 'model-facing command: ' + why,
+                            runs=member == target)
+    return {rel: {key: sorted(value) for key, value in entry.items()}
+            for rel, entry in sorted(found.items())}
+
+
 def discover(root: Path) -> tuple[Surfaces, dict]:
     root = _resolved(root)
     s = Surfaces()
@@ -11435,6 +11487,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         "listed": sorted(MODEL_FACING_MODULES),
         "derived_not_listed": sorted(name for name in derived if name in live and name not in MODEL_FACING_MODULES),
         "listed_not_derived": sorted(name for name in MODEL_FACING_MODULES if name not in derived)}
+    facts['model_commands'] = discover_model_commands(root, parsed, s, derived)
     facts["model_facing_assets"] = discover_model_facing_assets(root, parsed, s)
     return s, facts
 
@@ -11524,6 +11577,10 @@ def scan_file(root: Path, surface: Surface, tokens: list[Token]) -> list[dict]:
     the module."""
     path = root / surface.path
     text = path.read_text(encoding="utf-8")
+    if surface.path == 'src/data_sheets_schema/native_schema_event_reuse.py':
+        # The complete source contract is required even when a changed
+        # return bypasses the parser container edge that text_flow follows.
+        _native_event_parser_contract(text)
     is_py = path.suffix == ".py"
     tree = None
     if is_py:
@@ -11904,6 +11961,19 @@ def _without_docstring(body):
     return body
 
 
+_NATIVE_V2_RENDER_SOURCES = {
+    # This closed summary binds the loader's complete implementation, its
+    # source-identity producers and the loaded envelope implementation. It
+    # is not a basename waiver or evidence of a successful runtime load.
+    'src/data_sheets_schema/native_execution_authority_v2.py': '36991f4b3bbec237a65996a2f86576540ff38917b75a93284e7b582f98a2559e',
+    'src/data_sheets_schema/native_supervisor_authority_v2.py': '9ade8c83d6fe3f0d874901ae62fcaeba115513328c77a3dbbc23e5230ea8221b',
+    'src/data_sheets_schema/native_attribution_controller_v2.py': '1e1cc08057523bb6d6c0d2da660af6a1b68a43b5b08bf9e43993c0b17ee75722',
+    'src/data_sheets_schema/native_attribution_registration_v2.py': '41b11294a270a98f571ce424aee8b914c2e0533516e7e9bab1b232cfb8cdc0f1',
+    'src/data_sheets_schema/native_controller_sources_v2.json': '58d9be00007719d2bc1247c7524256a60522d3d7bfedf39409341973c88c0a6c',
+    'notes/matched_cborg_2026-09-13/prepare_registration_v2.py': '6cb0a4a1b234cbe63272b48ea117a42efc9dfac04992d41050848b4412d2bbb7',
+}
+
+
 def _derive_native_v2_render(root, cli, command):
     """Closed source proof of the v2 preparation producer and CLI data flow.
 
@@ -11998,6 +12068,45 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
     if selection.capture(selection_path) != captured or current_read_regular(str(runtime_path), 'runtime_declaration', max_bytes=c.HARD_LIMITS['input_bytes']).captured != runtime_capture or authority.dependency_identity() != dependencies:
         raise ValueError('v2 preparation authority changed during capture')
     return _envelope(body, dependencies)""")
+    helpers = {
+        '_job_id': """def _job_id(value):
+    if type(value) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', value) is None:
+        raise ValueError('job_id must be an explicit bounded single path component')""",
+        '_file_pin': """def _file_pin(artifact):
+    return {'path': artifact.pin.path, 'bytes': artifact.pin.bytes, 'sha256': artifact.pin.sha256}""",
+        '_envelope': """def _envelope(body, dependencies):
+    with authority.loaded_dependencies(dependencies) as controls:
+        value = controls['prepare_registration_v2'].envelope(body)
+        controls['prepare_registration_v2'].require_envelope(value)
+    raw = c.canonical(value)
+    if len(raw) > MAX_WIRE_BYTES:
+        raise ValueError('v2 authority envelope exceeds its byte bound')
+    return value""",
+        '_pin_map': """def _pin_map(captured, runtime, dependencies):
+    pins = {}
+    artifacts = (captured.registration, captured.receipt_policy, runtime,
+                 *captured.authority, *(a for s in captured.schemas for a in s.sources))
+    for artifact in artifacts:
+        previous = pins.setdefault(artifact.pin.path, artifact.pin.sha256)
+        if previous != artifact.pin.sha256:
+            raise ValueError('one selected path has conflicting input identities')
+    base = dependencies['base']
+    for relative, digest in base['package_sources'].items():
+        pins[str(authority.ROOT / relative)] = digest
+    for pin in (*base['modules'].values(), *dependencies['additional_modules'].values()):
+        path = str(authority.ROOT / pin['path'])
+        if path in pins and pins[path] != pin['sha256']:
+            raise ValueError('selected helper conflicts with another source pin')
+        pins[path] = pin['sha256']
+    return pins""",
+    }
+    producers = {'prepare': prepare}
+    for name, template in helpers.items():
+        found = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name]
+        if len(found) != 1 or not isinstance(found[0], ast.FunctionDef):
+            raise fail('missing unique v2 render producer: ' + name)
+        exact(found[0], template)
+        producers[name] = found[0]
     # Imported producer/contract names must retain the bindings used by the
     # templates. A shadow, duplicate import, assignment or monkeypatch refuses.
     def bound(module, statement, name):
@@ -12021,10 +12130,10 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         ('from .native_execution_registration import validate_runtime', 'validate_runtime'),
     ):
         bound(tree, statement, name)
-    for name in ('prepare',):
+    for name, producer in producers.items():
         if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
-               or _rebinding(n, name, prepare) for n in ast.walk(tree) if n is not prepare):
-            raise fail('v2 preparation producer is replaced')
+               or _rebinding(n, name, producer) for n in ast.walk(tree) if n is not producer):
+            raise fail('v2 preparation producer is replaced: ' + name)
     # Module-level CLI rebinding must not bypass the fixed decorated command.
     for n in cli.body:
         if n is command:
@@ -12032,7 +12141,15 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         if any((isinstance(x, ast.Name) and x.id == command.name and isinstance(x.ctx, (ast.Store, ast.Del)))
                or _rebinding(x, command.name, command) for x in ast.walk(n)):
             raise fail('v2 render command is replaced')
-    return [f'{relative}:{prepare.lineno}']
+    import hashlib
+    for source, digest in _NATIVE_V2_RENDER_SOURCES.items():
+        try:
+            raw = (root / source).read_bytes()
+        except OSError as error:
+            raise fail('v2 envelope authority source unavailable: ' + source) from error
+        if hashlib.sha256(raw).hexdigest() != digest:
+            raise fail('v2 envelope authority source changed: ' + source)
+    return [f'{relative}:{node.lineno}' for node in producers.values()] + list(_NATIVE_V2_RENDER_SOURCES)
 
 
 def derive_native_shared_route(root: Path, tree: ast.Module) -> dict | None:
@@ -12418,10 +12535,34 @@ def derive_native_shared_procedure(root: Path) -> dict:
         raise fail('native packet lacks its fixed private receipt-catalog association')
     initializer = function('native_shared_stage', '__init__', '_Replay')
     options = statement(initializer, "self.options = {'captured_assets': nr.omission_assets(selection), 'derivations': self.cache, '_catalog_lookup': catalog_reuse._CatalogLookup(self.catalogs, selection)}")
-    writes = [n for n in ast.walk(trees['native_shared_stage']) if isinstance(n, ast.Attribute)
-              and ast.unparse(n) == 'self.options' and isinstance(n.ctx, (ast.Store, ast.Del))]
-    if writes != [options.targets[0]]:
-        raise fail('native packet options are replaced')
+    allowed_options = {id(options.targets[0])}
+    allowed_options.update(id(k.value) for k in packet_call.keywords if k.arg is None)
+    option_calls = (
+        'typed.worker_request(self.packet, cursor.target_id, **self.options)',
+        'typed.index(self.packet, self.workers, self.omission, **self.options)',
+        'typed.check_worker(self.packet, cursor.target_id, envelope, **self.options)',
+        'typed.index(self.packet, self.workers, raw, **self.options)',
+        'typed.assemble(self.packet, self.workers, self.omission, envelope, **self.options)',
+    )
+    for expression in option_calls:
+        expected = ast.dump(ast.parse(expression, mode='eval').body, include_attributes=False)
+        matches = [n for n in ast.walk(trees['native_shared_stage']) if isinstance(n, ast.Call)
+                   and ast.dump(n, include_attributes=False) == expected]
+        if len(matches) != 1:
+            raise fail('native packet options have an unproved consumer')
+        allowed_options.update(id(k.value) for k in matches[0].keywords if k.arg is None)
+    actual_options = {id(n) for n in ast.walk(trees['native_shared_stage'])
+                      if isinstance(n, ast.Attribute) and ast.unparse(n) == 'self.options'}
+    if actual_options != allowed_options:
+        raise fail('native packet options are replaced, mutated or aliased')
+    for node in ast.walk(trees['native_shared_stage']):
+        if (isinstance(node, ast.Call) and ast.unparse(node.func) in {'setattr', 'delattr'}
+                and len(node.args) >= 2 and isinstance(node.args[1], ast.Constant)
+                and node.args[1].value == 'options') or (
+                isinstance(node, ast.Subscript) and isinstance(node.value, ast.Attribute)
+                and node.value.attr == '__dict__' and isinstance(node.slice, ast.Constant)
+                and node.slice.value == 'options'):
+            raise fail('native packet options are replaced, mutated or aliased')
     for key, value in {'original_full': 'self.p.full.raw', 'max_paths': "limits['max_paths_per_worker']",
                        'max_inventory_bytes': "limits['max_inventory_bytes']", 'max_workers': "limits['max_workers']"}.items():
         if kwargs.get(key) != value:

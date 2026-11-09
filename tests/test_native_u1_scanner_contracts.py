@@ -39,6 +39,10 @@ def _native_route_root(tmp_path):
         path = root / 'src/data_sheets_schema' / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes((ROOT / 'src/data_sheets_schema' / relative).read_bytes())
+    for relative in scan._NATIVE_V2_RENDER_SOURCES:
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes((ROOT / relative).read_bytes())
     return root
 
 
@@ -55,6 +59,7 @@ def test_native_complete_v2_route_derives():
 
 def test_native_route_requires_later_cli_consumer(tmp_path):
     root = _native_route_root(tmp_path)
+    assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
     path = root / 'src/data_sheets_schema/cli/prompt.py'
     tree = ast.parse(path.read_text())
     tree.body = [n for n in tree.body if not isinstance(n, ast.FunctionDef)
@@ -82,7 +87,7 @@ def test_native_v2_route_rejects_changed_producer(tmp_path, relative, before, af
     source = path.read_text()
     assert before in source
     path.write_text(source.replace(before, after, 1))
-    with pytest.raises(scan.ConfigError, match='v2'):
+    with pytest.raises(scan.ConfigError, match='unsupported v2 render producer|v2 producer import is not exact'):
         scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
 
 
@@ -93,6 +98,52 @@ def test_native_v2_import_shadow_refuses_with_configuration_error(tmp_path):
     path.write_text(path.read_text()+'\ndef changed_binding(c):\n    return c\n')
     with pytest.raises(scan.ConfigError, match='binding is replaced'):
         scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+
+
+@pytest.mark.parametrize('relative,before,after,diagnostic', [
+    ('src/data_sheets_schema/native_execution_registration_v2.py',
+     "        value = controls['prepare_registration_v2'].envelope(body)",
+     "        text = body['instruction'] + '\\nThis is the CHORUS dataset; use CHORUS naming.'\n"
+     "        body = {**body, 'instruction': text, 'instruction_sha256': c.sha(text.encode('utf-8'))}\n"
+     "        value = controls['prepare_registration_v2'].envelope(body)",
+     'unsupported v2 render producer: _envelope'),
+    ('src/data_sheets_schema/native_execution_registration_v2.py',
+     'def _pin_map(captured, runtime, dependencies):',
+     'def _pin_map(captured, runtime, dependencies):\n    dependencies = {}',
+     'unsupported v2 render producer: _pin_map'),
+    ('src/data_sheets_schema/native_execution_registration_v2.py',
+     'def _job_id(value):', 'def _job_id(value):\n    return value',
+     'unsupported v2 render producer: _job_id'),
+    ('src/data_sheets_schema/native_execution_registration_v2.py',
+     "        controls['prepare_registration_v2'].require_envelope(value)", '        pass',
+     'unsupported v2 render producer: _envelope'),
+    ('notes/matched_cborg_2026-09-13/prepare_registration_v2.py',
+     '    return {"authority_version": 2, "controller_sources_sha256": SOURCES_SHA256,\n'
+     '            "registration": registration}',
+     '    registration = dict(registration)\n'
+     '    registration["instruction"] = registration["instruction"] + "\\nThis is the CHORUS dataset; use CHORUS naming."\n'
+     '    registration["instruction_sha256"] = hashlib.sha256(registration["instruction"].encode("utf-8")).hexdigest()\n'
+     '    return {"authority_version": 2, "controller_sources_sha256": SOURCES_SHA256,\n'
+     '            "registration": registration}',
+     'v2 envelope authority source changed: notes/matched_cborg_2026-09-13/prepare_registration_v2.py'),
+    ('notes/matched_cborg_2026-09-13/prepare_registration_v2.py',
+     'def require_envelope(value):', 'def require_envelope(value):\n    return value["registration"]',
+     'v2 envelope authority source changed: notes/matched_cborg_2026-09-13/prepare_registration_v2.py'),
+    ('src/data_sheets_schema/native_execution_authority_v2.py',
+     "        prepared = importlib.import_module('prepare_registration')",
+     "        prepared = importlib.import_module('unknown_preparer')",
+     'v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py'),
+])
+def test_native_v2_envelope_and_identity_producers_are_bound(tmp_path, relative, before, after, diagnostic):
+    root = _native_route_root(tmp_path)
+    assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+    path = root / relative
+    source = path.read_text()
+    assert source.count(before) == 1
+    path.write_text(source.replace(before, after, 1))
+    with pytest.raises(scan.ConfigError) as caught:
+        scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+    assert diagnostic in str(caught.value)
 
 
 def test_native_non_v2_route_retains_configuration_refusal(tmp_path):
@@ -124,6 +175,72 @@ def test_native_complete_response_roster_derives():
     assert [stage['kind'] for stage in result['stages']] == ['receipt', 'worker', 'omission', 'integration']
 
 
+def _command_root(tmp_path):
+    # Bounded discovery fixture uses the actual command table and entry point;
+    # it does not stand in for a complete generation-route acceptance test.
+    for relative in ('native_shared_render.py', 'native_shared_stage/__init__.py',
+                     'native_shared_stage/__main__.py'):
+        path = tmp_path / 'src/data_sheets_schema' / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes((ROOT / 'src/data_sheets_schema' / relative).read_bytes())
+    return tmp_path
+
+
+def _command_discovery(root):
+    surfaces = scan.Surfaces()
+    surfaces.add('src/data_sheets_schema/native_shared_render.py', 'native_agentic',
+                 'model_facing', 'live', 'actual shared-native command table', runs=False)
+    facts = scan.discover_model_commands(root, {}, surfaces)
+    return surfaces, facts
+
+
+def test_native_model_command_discovers_main_and_imports(tmp_path):
+    root = _command_root(tmp_path)
+    entry = 'src/data_sheets_schema/native_shared_stage/__main__.py'
+    surfaces, facts = _command_discovery(root)
+    assert entry in surfaces.files and entry in facts
+    assert 'native_agentic' in surfaces.files[entry].runs
+    assert surfaces.files[entry].roles['native_agentic'] == 'model_facing'
+    assert 'src/data_sheets_schema/native_shared_stage/__init__.py' in facts[entry]['imports']
+    # F3c: model-readable stdout in the actual entry point must now gate.
+    path = root / entry
+    source = path.read_text()
+    before = "    print(c.canonical(result).decode('utf-8'))"
+    assert source.count(before) == 1
+    path.write_text(source.replace(before,
+        "    if 'CHORUS' in args.registration:\n"
+        "        print('Note: this is the CHORUS dataset; prefer CHORUS naming.')\n" + before, 1))
+    surfaces, _ = _command_discovery(root)
+    hits = scan.scan_file(root, surfaces.files[entry], scan.load_tokens(ROOT))
+    assert any(h['match'] == 'CHORUS' and h['model_facing'] and h['gates_in'] for h in hits)
+
+
+def test_native_model_command_import_closure_and_other_package_are_discovered(tmp_path):
+    root = _command_root(tmp_path)
+    package = root / 'src/data_sheets_schema/second_command'
+    package.mkdir()
+    (package / '__init__.py').write_text('')
+    (package / '__main__.py').write_text('from . import helper\nprint(helper.result())\n')
+    (package / 'helper.py').write_text("def result():\n    if 'CHORUS':\n        return 'cohort'\n")
+    renderer = root / 'src/data_sheets_schema/native_shared_render.py'
+    renderer.write_text(renderer.read_text() +
+        "\nSECOND = ('python', '-m', 'data_sheets_schema.second_command')\n")
+    surfaces, facts = _command_discovery(root)
+    entry = 'src/data_sheets_schema/second_command/__main__.py'
+    helper = 'src/data_sheets_schema/second_command/helper.py'
+    assert entry in facts and helper in facts[entry]['imports']
+    hits = scan.scan_file(root, surfaces.files[helper], scan.load_tokens(ROOT))
+    assert any(h['match'] == 'CHORUS' and h['code'] and h['gates_in'] for h in hits)
+
+
+def test_native_model_package_command_without_main_refuses(tmp_path):
+    root = _command_root(tmp_path)
+    _command_discovery(root)  # Exact fixture calibrates before removing its entry point.
+    (root / 'src/data_sheets_schema/native_shared_stage/__main__.py').unlink()
+    with pytest.raises(scan.ConfigError, match='model-facing package command lacks __main__.py'):
+        _command_discovery(root)
+
+
 @pytest.mark.parametrize('relative,before,after', [
     ('native_shared_stage/__init__.py', "roster += [('omission', 'omission'), ('integration', 'integration')]", "roster += [('integration', 'integration')]"),
     ('native_shared_stage/__init__.py', "'_catalog_lookup': catalog_reuse._CatalogLookup(self.catalogs, selection)", "'_catalog_lookup': None"),
@@ -143,6 +260,28 @@ def test_native_response_roster_refuses_changed_producer(tmp_path, relative, bef
         scan.derive_native_shared_procedure(root)
 
 
+@pytest.mark.parametrize('mutation', [
+    "self.options['_catalog_lookup'] = None",
+    "self.options['captured_assets'] = None",
+    "self.options.update(_catalog_lookup=None)",
+    "self.options.pop('derivations')",
+    "opts = self.options\n        opts['_catalog_lookup'] = None",
+    "del self.options['_catalog_lookup']",
+    "setattr(self, 'options', {})",
+    "self.__dict__['options'] = {}",
+])
+def test_native_packet_options_refuse_mutation_and_alias_escape(tmp_path, mutation):
+    root = _procedure_root(tmp_path)
+    assert scan.derive_native_shared_procedure(root)
+    path = root / 'src/data_sheets_schema/native_shared_stage/__init__.py'
+    source = path.read_text()
+    before = '        self.pending = None\n        self.pending_predecessor = None'
+    assert source.count(before) == 1
+    path.write_text(source.replace(before, '        ' + mutation + '\n' + before, 1))
+    with pytest.raises(scan.ConfigError, match='native packet options are replaced, mutated or aliased'):
+        scan.derive_native_shared_procedure(root)
+
+
 @pytest.mark.parametrize('before,after', [
     ('key = raw, token', 'key = token'),
     ('return value, candidate', 'return {"project": "CHORUS"}, candidate'),
@@ -150,13 +289,25 @@ def test_native_response_roster_refuses_changed_producer(tmp_path, relative, bef
     ('events.clear()', "events.append('CHORUS')"),
     ('if not reusable or _token(limit) != token:', 'if not reusable:'),
     ('from . import audit_omissions as _omissions', 'from . import unknown as _omissions'),
+    ('        events.clear()\n    return value, candidate',
+     "        events.clear()\n    if isinstance(value, dict):\n        value = {**value, 'description': 'CHORUS cohort'}\n    return value, candidate"),
 ])
-def test_native_event_parser_summary_is_bound_to_complete_source(before, after):
-    source = (ROOT / 'src/data_sheets_schema/native_schema_event_reuse.py').read_text()
-    assert scan._native_event_parser_contract(source)
+def test_native_event_parser_summary_is_bound_to_complete_source(tmp_path, before, after):
+    # Exercise actual surface scanning, not a direct digest-helper assertion.
+    # This also refuses a return changed to bypass text_flow's container edge.
+    relative = 'src/data_sheets_schema/native_schema_event_reuse.py'
+    path = tmp_path / relative
+    path.parent.mkdir(parents=True)
+    source = (ROOT / relative).read_text()
+    path.write_text(source)
+
+    surface = scan.Surface(relative, ['native_agentic'], 'model_facing', 'live', 'native parser dependency')
+    tokens = scan.load_tokens(ROOT)
+    assert isinstance(scan.scan_file(tmp_path, surface, tokens), list)
     assert before in source
+    path.write_text(source.replace(before, after, 1))
     with pytest.raises(scan.ConfigError, match='parser transport source changed'):
-        scan._native_event_parser_contract(source.replace(before, after, 1))
+        scan.scan_file(tmp_path, surface, tokens)
 
 
 def test_native_route_cannot_omit_bc1_exclusion(tmp_path):

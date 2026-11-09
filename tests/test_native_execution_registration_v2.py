@@ -6,6 +6,7 @@ approval evidence below are rejection/unit fixtures, not execution acceptance.
 """
 from copy import deepcopy
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -95,6 +96,21 @@ def _prepare(inputs):
     return registration.prepare(inputs['selection'], inputs['runtime_path'], **inputs['kwargs'])
 
 
+def _checkout_git_state():
+    """Tracked changes and visible untracked paths, without refreshing Git's index.
+
+    This adds checkout coverage to the complete scratch-tree snapshot below;
+    it deliberately does not claim to inventory ignored checkout artifacts.
+    The enclosing validation harness separately denies checkout writes.
+    """
+    prefix = ['git', '-C', str(registration.authority.ROOT)]
+    environment = {**os.environ, 'GIT_OPTIONAL_LOCKS': '0'}
+    return tuple(subprocess.run(prefix + args, check=True, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, timeout=30, env=environment).stdout for args in (
+            ['status', '--porcelain=v1', '--untracked-files=all'],
+            ['diff', '--no-ext-diff', '--binary', 'HEAD', '--']))
+
+
 def test_preparation_factory_guards_constructed_spec_before_instruction(inputs, monkeypatch):
     """The path-input factory must guard its newly built RunSpec, not a dummy argument."""
     from data_sheets_schema import api_runner as api
@@ -114,10 +130,14 @@ def test_preparation_factory_guards_constructed_spec_before_instruction(inputs, 
     monkeypatch.setattr(api, 'RunSpec', invalid_registered_spec)
     monkeypatch.setattr(original, 'instruction', property(forbidden_instruction))
     before = _files(inputs['root'])
+    entries_before = _entries(inputs['root'])
+    checkout_before = _checkout_git_state()
     with pytest.raises(ValueError, match='registered input'):
         _prepare(inputs)
     assert len(constructed) == 1
     assert _files(inputs['root']) == before
+    assert _entries(inputs['root']) == entries_before
+    assert _checkout_git_state() == checkout_before
 
 
 @pytest.fixture

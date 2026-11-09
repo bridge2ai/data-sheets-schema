@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.9.1
+  version: 1.10.0
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -20,6 +20,29 @@ possible, and must be tracked as such.
 
 This skill runs a scanner and reads its report. It does not fix findings,
 edit pinned files, or launch any run.
+
+Version 1.10.0 adds the U3-F2 source contracts. Literal Python command argv
+in model-facing generation modules now discover the executed module; a
+package run with `-m` contributes its `__main__.py`, initializer and local
+import closure. The entry point's stdout is conservatively model-facing;
+imported modules retain the ordinary module roles. A package command with
+no `__main__.py` refuses derivation. The `model_commands` facts record the
+command evidence, imports and approaches. Discovery is not proof of an
+observed command or a successful run.
+
+The separate native-v2 render proof binds `prepare`, `_job_id`, `_file_pin`,
+`_pin_map` and `_envelope` to exact AST contracts. Explicit whole-source
+pins bind the loaded preparer's `envelope` and `require_envelope`, the v2
+loader and its identity producers, and their source manifest. Changing
+these sources requires instrument review; unknown changes refuse rather
+than receiving a summary by filename. Native parser-event reuse requires
+its complete source pin during ordinary surface scanning as well as at
+the text-flow transport boundary. The stage roster proof permits
+`self.options` only at its initializer and six fixed typed-audit keyword
+expansions, refusing item/method mutations and alias escapes. These are
+source proofs, not permission, receipt validity or completed-execution
+evidence. The separately reviewed generic plain-alias model-text gap (B2)
+remains outside this revision.
 
 ## Run it
 
