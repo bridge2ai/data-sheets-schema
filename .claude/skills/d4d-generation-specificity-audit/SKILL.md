@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.10.0
+  version: 1.10.1
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -21,12 +21,19 @@ possible, and must be tracked as such.
 This skill runs a scanner and reads its report. It does not fix findings,
 edit pinned files, or launch any run.
 
-Version 1.10.0 adds the U3-F2 source contracts. Literal Python command argv
-in model-facing generation modules now discover the executed module; a
-package run with `-m` contributes its `__main__.py`, initializer and local
-import closure. The entry point's stdout is conservatively model-facing;
-imported modules retain the ordinary module roles. A package command with
-no `__main__.py` refuses derivation. The `model_commands` facts record the
+Version 1.10.1 adds the U3-F2 source contracts and limits command discovery
+to literal named mappings and nested list/tuple command tables in existing
+model-facing generation modules. Direct argv aliases and starred literal
+prefixes are followed through unique local assignments. A package run
+with `-m` contributes its `__main__.py`, initializer and local import
+closure. The CLI entry point is included, but its initializer stays opaque:
+CLI groups are still followed only where selected. Upstream-input stops
+and existing approach roles remain in force. The shared-native command
+table receives only native-agentic attribution after deriving its separate
+native route and API refusal. A helper's runtime argv does not recursively
+become another model command. The entry point's stdout is conservatively
+model-facing; imports retain ordinary module roles. A package command with
+no `__main__.py` refuses derivation. The `model_commands` facts record
 command evidence, imports and approaches. Discovery is not proof of an
 observed command or a successful run.
 

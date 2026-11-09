@@ -10954,41 +10954,119 @@ def discover_model_facing_assets(root: Path, parsed: dict, surfaces: Surfaces) -
     return {key: value for key, value in sorted(found.items())}
 
 
-def discover_model_commands(root: Path, parsed: dict, surfaces: Surfaces, derived=()) -> dict:
-    """Follow literal command argv in model-facing generation modules.
+def _model_command_tables(tree):
+    """Literal argv entries in named mappings or nested list/tuple tables.
 
-    An import of a package does not execute its ``__main__``. A command
-    table handed to a model does: include that entry point, its package
-    initializer and local imports. Command stdout is conservatively model
-    text; imports retain the ordinary source-derived module roles. This is
-    discovery, not a claim that a command ran or that its output was valid.
+    A stand-alone argv used by subprocess/runtime code is not a command
+    table. Literal local starred prefixes (the native table's ``*cli``)
+    are expanded without evaluating their interpreter or argument values.
+    """
+    parents = {id(child): node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
+
+    def scope(node):
+        while node is not tree and not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+            node = parents[id(node)]
+        return node
+
+    def literal(value, owner, seen=frozenset()):
+        if not isinstance(value, ast.Name):
+            return value if isinstance(value, (ast.List, ast.Tuple)) else None
+        name = value.id
+        if name in seen:
+            raise ConfigError('model-facing command table has a cyclic argv alias: ' + name)
+        bindings = [n.value for n in ast.walk(owner)
+                    if isinstance(n, (ast.Assign, ast.AnnAssign)) and scope(n) is owner
+                    and any(isinstance(t, ast.Name) and t.id == name
+                            for t in (n.targets if isinstance(n, ast.Assign) else [n.target]))]
+        if len(bindings) != 1:
+            if any(isinstance(part, ast.Constant) and part.value == '-m'
+                   for binding in bindings if binding is not None for part in ast.walk(binding)):
+                raise ConfigError('model-facing command table has an ambiguous argv alias: ' + name)
+            return None
+        return literal(bindings[0], owner, seen | {name})
+
+    def expand(value, owner, seen=frozenset()):
+        elements = []
+        for item in value.elts:
+            if isinstance(item, ast.Starred) and isinstance(item.value, ast.Name) and item.value.id not in seen:
+                name = item.value.id
+                binding = literal(item.value, owner)
+                if binding is not None:
+                    elements.extend(expand(binding, owner, seen | {name}).elts)
+                    continue
+            elements.append(item)
+        return ast.copy_location(ast.Tuple(elts=elements, ctx=ast.Load()), value)
+
+    values = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Dict):
+            values.extend(value for key, value in zip(node.keys, node.values)
+                          if isinstance(key, ast.Constant) and type(key.value) is str
+                          and isinstance(value, (ast.List, ast.Tuple, ast.Name)))
+        elif isinstance(node, (ast.List, ast.Tuple)) and node.elts and all(
+                isinstance(item, (ast.List, ast.Tuple, ast.Name)) for item in node.elts):
+            values.extend(node.elts)
+        elif isinstance(node, ast.Assign) and isinstance(node.value, (ast.List, ast.Tuple, ast.Name)):
+            for target in node.targets:
+                if (not isinstance(target, ast.Subscript) or not isinstance(target.value, ast.Name)
+                        or not isinstance(target.slice, ast.Constant) or type(target.slice.value) is not str):
+                    continue
+                owner = scope(node)
+                if any(isinstance(binding, ast.Assign) and scope(binding) is owner
+                       and isinstance(binding.value, ast.Dict)
+                       and any(isinstance(t, ast.Name) and t.id == target.value.id for t in binding.targets)
+                       for binding in ast.walk(owner)):
+                    values.append(node.value)
+    found = []
+    for value in values:
+        owner = scope(value)
+        resolved = literal(value, owner)
+        if resolved is not None:
+            found.append(expand(resolved, owner))
+    return found
+
+
+def discover_model_commands(root: Path, parsed: dict, surfaces: Surfaces, derived=(), *, stop=frozenset()) -> dict:
+    """Discover package entry points from the existing model-facing tables.
+
+    Snapshot the existing surfaces: an imported helper's runtime argv does
+    not recursively become a model command. Retain the existing CLI opaque
+    boundary (groups are followed where selected) and upstream-input stop
+    set. The native shared table belongs to the independently derived native
+    route; its presence in an API import closure does not execute it there.
     """
     found = {}
-    done = set()
-    while True:
-        pending = [(rel, surface) for rel, surface in sorted(surfaces.files.items())
-                   if rel.endswith('.py') and rel not in done
-                   and any(role == 'model_facing' and APPROACHES[approach][0]
-                           for approach, role in surface.roles.items())]
-        if not pending:
-            break
-        for rel, surface in pending:
-            done.add(rel)
-            path = _resolved(root / rel)
-            if path not in parsed:
-                text, tree = _parse(path)
-                if tree is None:
-                    raise _unparsed([f'{rel} ({_parse_problem(path)})'])
-                parsed[path] = text, tree
-            approaches = [a for a, role in surface.roles.items()
-                          if role == 'model_facing' and APPROACHES[a][0]]
-            for target, why in _argv_runs(root, path, parsed[path][1]):
-                if target.name == '__init__.py' and 'runs `-m ' in why:
+    opaque = frozenset(_resolved(root / relative) for relative in CLI_PACKAGE)
+    pending = [(rel, surface) for rel, surface in sorted(surfaces.files.items())
+               if rel.endswith('.py') and any(role == 'model_facing' and APPROACHES[approach][0]
+                                              for approach, role in surface.roles.items())]
+    for rel, surface in pending:
+        path = _resolved(root / rel)
+        if path not in parsed:
+            text, tree = _parse(path)
+            if tree is None:
+                raise _unparsed([f'{rel} ({_parse_problem(path)})'])
+            parsed[path] = text, tree
+        approaches = [a for a, role in surface.roles.items()
+                      if role == 'model_facing' and APPROACHES[a][0]]
+        if rel == 'src/data_sheets_schema/native_shared_render.py':
+            route = derive_native_shared_route(root, _tree(root / RUNNER))
+            if (not route or route['api_execute'] != 'refused before dry-run, locks or dispatch'
+                    or not any(citation.startswith(rel + ':') for citation in route['evidence'])):
+                raise ConfigError('model-facing native command table lacks its derived native-only route')
+            approaches = [a for a in approaches if a == 'native_agentic']
+        if not approaches:
+            continue
+        for argv in _model_command_tables(parsed[path][1]):
+            for target, why in _argv_runs(root, path, argv):
+                if 'runs `-m ' not in why or target.name not in {'__init__.py', '__main__.py'}:
+                    continue
+                if target.name == '__init__.py':
                     raise ConfigError('model-facing package command lacks __main__.py: ' + why)
                 starts = [target]
-                if target.name == '__main__.py' and (target.parent / '__init__.py').is_file():
+                if (target.parent / '__init__.py').is_file():
                     starts.append(target.parent / '__init__.py')
-                members, _ = _code_closure(root, starts, stop=set())
+                members, _ = _code_closure(root, starts, stop=set(stop), opaque=opaque)
                 target_rel = _rel(root, target)
                 entry = found.setdefault(target_rel, {'commands': set(), 'imports': set(), 'approaches': set()})
                 entry['commands'].add(why)
@@ -11000,8 +11078,7 @@ def discover_model_commands(root: Path, parsed: dict, surfaces: Surfaces, derive
                     for approach in approaches:
                         surfaces.add(member_rel, approach,
                             'model_facing' if member == target else _module_role(member, derived),
-                            surface.status, 'model-facing command: ' + why,
-                            runs=member == target)
+                            surface.status, 'model-facing command: ' + why, runs=member == target)
     return {rel: {key: sorted(value) for key, value in entry.items()}
             for rel, entry in sorted(found.items())}
 
@@ -11487,7 +11564,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         "listed": sorted(MODEL_FACING_MODULES),
         "derived_not_listed": sorted(name for name in derived if name in live and name not in MODEL_FACING_MODULES),
         "listed_not_derived": sorted(name for name in MODEL_FACING_MODULES if name not in derived)}
-    facts['model_commands'] = discover_model_commands(root, parsed, s, derived)
+    facts['model_commands'] = discover_model_commands(root, parsed, s, derived, stop=stop)
     facts["model_facing_assets"] = discover_model_facing_assets(root, parsed, s)
     return s, facts
 

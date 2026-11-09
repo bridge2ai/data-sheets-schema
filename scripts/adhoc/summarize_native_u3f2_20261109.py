@@ -43,6 +43,21 @@ def scans(before_label, after_label, composed_label):
             sha256=s.sha(path.read_bytes()), source_commit=run['source_commit'],
             tool_commit=run['tool_commit'], tool_sha256=run['tool_sha256']))
     s.save('scanner-comparison.json', result)
+    intermediate_path = s.OUT / 'scanner-intermediate-main/scanner.json'
+    intermediate_run = json.loads((intermediate_path.parent / 'run.json').read_bytes())
+    intermediate = json.loads(intermediate_path.read_bytes())
+    assert intermediate_run['source_commit'] == runs[0]['source_commit']
+    assert intermediate_run['exit_code'] in (0, 1) and intermediate_run['tool_unchanged']
+    assert intermediate_run['scanner_json_sha256'] == s.sha(intermediate_path.read_bytes())
+    stages = [(before, runs[0]), (intermediate, intermediate_run), (reports[1], runs[1])]
+    history = []
+    for (left, left_run), (right, right_run) in zip(stages, stages[1:]):
+        history.append(dict(before=left_run, after=right_run,
+            before_violations=left['violations'], after_violations=right['violations'],
+            exact_violations_equal=left['violations'] == right['violations'],
+            added_findings=[row for row in right['violations'] if row not in left['violations']],
+            removed_findings=[row for row in left['violations'] if row not in right['violations']]))
+    s.save('scanner-instrument-history.json', history)
     assert all(row['exact_nine_violation_parity'] for row in result), 'scanner violations changed'
     print(json.dumps([{k:v for k,v in row.items() if k != 'finding_by_finding'} for row in result]))
 
@@ -69,6 +84,36 @@ def packets(manifest_path):
     result = dict(manifest=str(Path(manifest_path).resolve()), owner_bundle=str(bundle),
         forward_check=True, reverse_check=True, packet_hashes_verified=True,
         worktree_packets_installed=False, packets=manifest['packets'])
+    summary = {row['run']: row for row in json.loads((s.OUT / 'validation-summary.json').read_bytes())}
+    labels = ('render-contracts-scoped', 'delegated-scoped', 'specificity-scoped',
+              'parity-composed', 'parity-worktree')
+    final_runs = []
+    for label in labels:
+        row = summary[label]
+        expected = manifest['composition_parent'] if label == 'parity-worktree' else manifest['composition_commit']
+        assert row['source_commit'] == expected
+        assert row['returncode'] == 0 and row['cleanup_verified']
+        assert row['worker']['source_origin_checks_passed'] and not row['interrupted']
+        assert row['workers'] <= 2 and row['seconds'] < 3300
+        assert row['counts']['passed'] > 0 and all(row['counts'][key] == 0 for key in ('failed', 'error', 'skipped'))
+        final_runs.append(row)
+    for label in ('parity-composed', 'parity-worktree'):
+        rows = json.loads((s.OUT / (label + '-comparison.json')).read_bytes())
+        assert len(rows) == 14 and all(row['equal'] for row in rows)
+    comparison = json.loads((s.OUT / 'scanner-comparison.json').read_bytes())
+    assert len(comparison) == 3 and all(row['exact_nine_violation_parity'] for row in comparison)
+    assert comparison[2]['source_commit'] == manifest['composition_commit']
+    evidence_names = ('validation-summary.json', 'exact-node-ledger.json', 'evidence-hashes.json',
+                     'protected-files.json', 'scanner-comparison.json', 'scanner-instrument-history.json',
+                     'parity-composed-comparison.json', 'parity-worktree-comparison.json')
+    validation = dict(status='requested_offline_cohorts_passed', native_execution_acceptance=False,
+        source_commit=manifest['composition_parent'], composition_commit=manifest['composition_commit'],
+        runs=final_runs, evidence={str(s.OUT / name): s.sha((s.OUT / name).read_bytes()) for name in evidence_names})
+    validation_path = bundle / 'validation.json'
+    with validation_path.open('x') as stream:
+        json.dump(validation, stream, indent=2)
+        stream.write('\n')
+    result.update(validation=str(validation_path), validation_sha256=s.sha(validation_path.read_bytes()))
     s.save('owner-packet-verification.json', result)
     pointer = s.SCRATCH / 'owner-packets/u3f2-current.json'
     with pointer.open('x') as stream:

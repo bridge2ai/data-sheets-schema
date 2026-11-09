@@ -178,6 +178,7 @@ def test_native_complete_response_roster_derives():
 def _command_root(tmp_path):
     # Bounded discovery fixture uses the actual command table and entry point;
     # it does not stand in for a complete generation-route acceptance test.
+    _native_route_root(tmp_path)  # Native-only attribution uses the genuine route proof.
     for relative in ('native_shared_render.py', 'native_shared_stage/__init__.py',
                      'native_shared_stage/__main__.py'):
         path = tmp_path / 'src/data_sheets_schema' / relative
@@ -224,7 +225,7 @@ def test_native_model_command_import_closure_and_other_package_are_discovered(tm
     (package / 'helper.py').write_text("def result(project):\n    if project == 'CHORUS':\n        return 'cohort'\n")
     renderer = root / 'src/data_sheets_schema/native_shared_render.py'
     renderer.write_text(renderer.read_text() +
-        "\nSECOND = ('python', '-m', 'data_sheets_schema.second_command')\n")
+        "\nSECOND = {'second': ('python', '-m', 'data_sheets_schema.second_command')}\n")
     surfaces, facts = _command_discovery(root)
     entry = 'src/data_sheets_schema/second_command/__main__.py'
     helper = 'src/data_sheets_schema/second_command/helper.py'
@@ -239,6 +240,105 @@ def test_native_model_package_command_without_main_refuses(tmp_path):
     (root / 'src/data_sheets_schema/native_shared_stage/__main__.py').unlink()
     with pytest.raises(scan.ConfigError, match='model-facing package command lacks __main__.py'):
         _command_discovery(root)
+
+
+def test_native_starred_cli_table_discovers_entry_but_not_every_group(tmp_path):
+    root = _command_root(tmp_path)
+    cli = root / 'src/data_sheets_schema/cli'
+    (cli / '__init__.py').write_text('from . import review, evaluate\n')
+    (cli / '__main__.py').write_text('from . import cli\ncli()\n')
+    (cli / 'review.py').write_text("PROJECT = 'CHORUS'\n")
+    (cli / 'evaluate.py').write_text("PROJECT = 'VOICE'\n")
+    surfaces = scan.Surfaces()
+    renderer = 'src/data_sheets_schema/native_shared_render.py'
+    for approach in ('native_agentic', 'api', 'deterministic', 'github_assistant'):
+        surfaces.add(renderer, approach, 'model_facing', 'live', 'imported renderer', runs=False)
+    surfaces.add('src/data_sheets_schema/cli/review.py', 'native_agentic', 'exposed', 'live', 'unselected group', runs=False)
+    facts = scan.discover_model_commands(root, {}, surfaces)
+    entry = 'src/data_sheets_schema/cli/__main__.py'
+    assert facts[entry]['approaches'] == ['native_agentic']
+    assert surfaces.files[entry].roles == {'native_agentic': 'model_facing'}
+    assert 'src/data_sheets_schema/cli/__init__.py' in facts[entry]['imports']
+    assert surfaces.files['src/data_sheets_schema/cli/review.py'].roles == {'native_agentic': 'exposed'}
+    assert 'src/data_sheets_schema/cli/evaluate.py' not in surfaces.files
+
+
+@pytest.mark.parametrize('table', [
+    "[('python', '-m', 'data_sheets_schema.second_command')]",
+    "(('python', '-m', 'data_sheets_schema.second_command'),)",
+])
+def test_model_nested_command_tables_preserve_approaches_without_runtime_argv_reseeding(tmp_path, table):
+    root = tmp_path
+    package = root / 'src/data_sheets_schema/second_command'
+    package.mkdir(parents=True)
+    (package / '__init__.py').write_text('')
+    (package / '__main__.py').write_text('from . import helper\n')
+    # Runtime argv in an imported module must not recursively acquire command authority.
+    (package / 'helper.py').write_text("ARGV = ('python', '-m', 'data_sheets_schema.third_command')\n")
+    other = package.parent / 'third_command'
+    other.mkdir()
+    (other / '__init__.py').write_text('')
+    (other / '__main__.py').write_text("print('not a model command')\n")
+    source = package.parent / 'table_fixture.py'
+    source.write_text('COMMANDS = ' + table + '\n'
+                      "RUNTIME_ARGV = ('python', '-m', 'data_sheets_schema.third_command')\n")
+    surfaces = scan.Surfaces()
+    relative = source.relative_to(root).as_posix()
+    surfaces.add(relative, 'native_agentic', 'model_facing', 'live', 'explicit table fixture', runs=False)
+    surfaces.add(relative, 'api', 'run_shaping', 'live', 'import only', runs=False)
+    facts = scan.discover_model_commands(root, {}, surfaces)
+    entry = 'src/data_sheets_schema/second_command/__main__.py'
+    assert facts[entry]['approaches'] == ['native_agentic']
+    assert surfaces.files[entry].roles == {'native_agentic': 'model_facing'}
+    assert 'src/data_sheets_schema/third_command/__main__.py' not in facts
+    assert 'src/data_sheets_schema/third_command/__main__.py' not in surfaces.files
+
+
+def test_model_package_imports_preserve_upstream_stop(tmp_path):
+    root = _command_root(tmp_path)
+    path = root / 'src/data_sheets_schema/native_shared_stage/__main__.py'
+    path.write_text(path.read_text() + '\nfrom . import upstream_fixture\n')
+    upstream = path.with_name('upstream_fixture.py')
+    upstream.write_text("PROJECT = 'CHORUS'\n")
+    surfaces = scan.Surfaces()
+    surfaces.add('src/data_sheets_schema/native_shared_render.py', 'native_agentic',
+                 'model_facing', 'live', 'actual native table', runs=False)
+    facts = scan.discover_model_commands(root, {}, surfaces, stop={upstream.resolve()})
+    relative = upstream.relative_to(root).as_posix()
+    assert relative not in surfaces.files
+    assert all(relative not in entry['imports'] for entry in facts.values())
+
+
+@pytest.mark.parametrize('binding', [
+    "args = ('python', '-m', 'data_sheets_schema.second_command')",
+    "args: tuple = ('python', '-m', 'data_sheets_schema.second_command')",
+    "prefix = ('python', '-m', 'data_sheets_schema.second_command')\nargs = prefix",
+])
+def test_model_named_table_direct_argv_alias_is_followed(tmp_path, binding):
+    package = tmp_path / 'src/data_sheets_schema/second_command'
+    package.mkdir(parents=True)
+    (package / '__init__.py').write_text('')
+    (package / '__main__.py').write_text("print('a helper')\n")
+    source = package.parent / 'table_fixture.py'
+    source.write_text(binding + "\nCOMMANDS = {'advance': args}\n")
+    surfaces = scan.Surfaces()
+    surfaces.add(source.relative_to(tmp_path).as_posix(), 'native_agentic', 'model_facing',
+                 'live', 'literal named table', runs=False)
+    facts = scan.discover_model_commands(tmp_path, {}, surfaces)
+    assert facts['src/data_sheets_schema/second_command/__main__.py']['approaches'] == ['native_agentic']
+
+
+def test_model_named_table_ambiguous_argv_alias_refuses(tmp_path):
+    source = tmp_path / 'src/data_sheets_schema/table_fixture.py'
+    source.parent.mkdir(parents=True)
+    source.write_text("args = ('python', '-m', 'data_sheets_schema.second_command')\n"
+                      "args = ('python', '-m', 'data_sheets_schema.third_command')\n"
+                      "COMMANDS = {'advance': args}\n")
+    surfaces = scan.Surfaces()
+    surfaces.add(source.relative_to(tmp_path).as_posix(), 'native_agentic', 'model_facing',
+                 'live', 'ambiguous named table', runs=False)
+    with pytest.raises(scan.ConfigError, match='ambiguous argv alias: args'):
+        scan.discover_model_commands(tmp_path, {}, surfaces)
 
 
 @pytest.mark.parametrize('relative,before,after', [
