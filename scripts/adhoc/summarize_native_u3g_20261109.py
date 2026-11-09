@@ -9,6 +9,7 @@ U5 full-array comparison separately from the saved-main exact-nine gate.
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -189,7 +190,7 @@ def parity(label):
     A repeated canary name must retain identical raw bytes; it cannot overwrite
     a differing output. This also supports a final cohort containing all 14.
     """
-    need(label in ('worktree-parity', 'composed-parity'), 'unknown U3-G parity label')
+    need(re.fullmatch(r'(worktree|composed)(?:-r[0-9]+)?-parity', label), 'unknown U3-G parity label')
     baseline = {path.name: path for folder in ('parity2-canary-baseline', 'parity2-rest-baseline')
                 for path in (s.SCRATCH / folder / 'parity').glob('*.txt')}
     actual = {}
@@ -267,7 +268,10 @@ def packets(manifest_path, *required_labels):
         for label in required_labels]
     comparison = load(s.OUT / 'scanner-comparison.json')
     parity = {}
-    for label in ('composed-parity', 'worktree-parity'):
+    parity_labels = [label for label in required_labels if label.endswith('-parity')]
+    need(len(parity_labels) == 2 and any(label.startswith('worktree-') for label in parity_labels)
+         and any(label.startswith('composed-') for label in parity_labels), 'required parity pair missing')
+    for label in parity_labels:
         path = s.OUT / (label + '-comparison.json')
         data = load(path) if path.is_file() else []
         parity[label] = dict(present=path.is_file(), total=len(data),
@@ -288,8 +292,8 @@ def packets(manifest_path, *required_labels):
                                                        and row['matches_current_source'] for row in required)))
     evidence_names = ('validation-summary.json', 'exact-node-ledger.json', 'evidence-hashes.json',
         'protected-files.json', 'scanner-comparison.json', 'nonpassing-attempts.json',
-        'composed-parity-comparison.json', 'worktree-parity-comparison.json',
-        'composed-parity-capture-hashes.json', 'worktree-parity-capture-hashes.json')
+        *(label + suffix for label in parity_labels
+          for suffix in ('-comparison.json', '-capture-hashes.json')))
     witnesses.update({str(s.OUT / name): s.sha((s.OUT / name).read_bytes())
                       for name in evidence_names if (s.OUT / name).is_file()})
     result = dict(status='offline_evidence_reconciled_no_blanket_acceptance',

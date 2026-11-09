@@ -23,7 +23,8 @@ def canary(folder):
     assert outcome['worker']['source_origin_checks_passed']
     assert outcome['seconds'] < 3300
     assert (folder / 'pytest.xml').stat().st_size
-    paths = list(folder.glob('cases/popen-*/test_validate_probe_uses_saved*/verified-output.json'))
+    paths = [p for p in folder.glob('cases/popen-*/test_validate_probe_uses_saved*/verified-output.json')
+             if p.resolve(strict=True) == p]
     assert len(paths) == 1
     document = json.loads(paths[0].read_bytes())
     assert document['result']['checked'] is document['result']['passed'] is True
@@ -31,7 +32,8 @@ def canary(folder):
     assert document['effort'] == 'high' and document['selected_receipt_instrument'] == 4
     for name in ('expectation.json', 'probe.json', 'account-choice.json'):
         assert paths[0].with_name(name).stat().st_size
-    instructions = list(folder.glob('cases/popen-*/u4-genuine-saved-probe*/instruction.md'))
+    instructions = [p for p in folder.glob('cases/popen-*/u4-genuine-saved-probe*/instruction.md')
+                    if p.resolve(strict=True) == p]
     assert len(instructions) == 1 and instructions[0].stat().st_size
     return {'verified_output_sha256': hashlib.sha256(paths[0].read_bytes()).hexdigest(),
             'instruction_sha256': hashlib.sha256(instructions[0].read_bytes()).hexdigest()}
