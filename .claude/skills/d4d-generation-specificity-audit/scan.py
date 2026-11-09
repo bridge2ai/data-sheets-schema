@@ -10968,19 +10968,30 @@ def _model_command_tables(tree):
             node = parents[id(node)]
         return node
 
+    def bindings_for(name, owner):
+        return [n.value for n in ast.walk(owner)
+                if isinstance(n, (ast.Assign, ast.AnnAssign)) and scope(n) is owner
+                and any(isinstance(t, ast.Name) and t.id == name
+                        for t in (n.targets if isinstance(n, ast.Assign) else [n.target]))]
+
+    def mentions_module(value, owner, seen=frozenset()):
+        if value is None:
+            return False
+        if any(isinstance(part, ast.Constant) and part.value == '-m' for part in ast.walk(value)):
+            return True
+        names = {part.id for part in ast.walk(value) if isinstance(part, ast.Name)} - seen
+        return any(mentions_module(binding, owner, seen | {name})
+                   for name in names for binding in bindings_for(name, owner))
+
     def literal(value, owner, seen=frozenset()):
         if not isinstance(value, ast.Name):
             return value if isinstance(value, (ast.List, ast.Tuple)) else None
         name = value.id
         if name in seen:
             raise ConfigError('model-facing command table has a cyclic argv alias: ' + name)
-        bindings = [n.value for n in ast.walk(owner)
-                    if isinstance(n, (ast.Assign, ast.AnnAssign)) and scope(n) is owner
-                    and any(isinstance(t, ast.Name) and t.id == name
-                            for t in (n.targets if isinstance(n, ast.Assign) else [n.target]))]
+        bindings = bindings_for(name, owner)
         if len(bindings) != 1:
-            if any(isinstance(part, ast.Constant) and part.value == '-m'
-                   for binding in bindings if binding is not None for part in ast.walk(binding)):
+            if any(mentions_module(binding, owner, seen | {name}) for binding in bindings):
                 raise ConfigError('model-facing command table has an ambiguous argv alias: ' + name)
             return None
         return literal(bindings[0], owner, seen | {name})

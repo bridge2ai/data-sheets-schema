@@ -49,7 +49,13 @@ def scans(before_label, after_label, composed_label):
     assert intermediate_run['source_commit'] == runs[0]['source_commit']
     assert intermediate_run['exit_code'] in (0, 1) and intermediate_run['tool_unchanged']
     assert intermediate_run['scanner_json_sha256'] == s.sha(intermediate_path.read_bytes())
-    stages = [(before, runs[0]), (intermediate, intermediate_run), (reports[1], runs[1])]
+    scoped_path = s.OUT / 'scanner-after-main/scanner.json'
+    scoped_run = json.loads((scoped_path.parent / 'run.json').read_bytes())
+    scoped = json.loads(scoped_path.read_bytes())
+    assert scoped_run['source_commit'] == runs[0]['source_commit']
+    assert scoped_run['exit_code'] in (0, 1) and scoped_run['tool_unchanged']
+    assert scoped_run['scanner_json_sha256'] == s.sha(scoped_path.read_bytes())
+    stages = [(before, runs[0]), (intermediate, intermediate_run), (scoped, scoped_run), (reports[1], runs[1])]
     history = []
     for (left, left_run), (right, right_run) in zip(stages, stages[1:]):
         history.append(dict(before=left_run, after=right_run,

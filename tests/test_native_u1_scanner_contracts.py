@@ -328,12 +328,17 @@ def test_model_named_table_direct_argv_alias_is_followed(tmp_path, binding):
     assert facts['src/data_sheets_schema/second_command/__main__.py']['approaches'] == ['native_agentic']
 
 
-def test_model_named_table_ambiguous_argv_alias_refuses(tmp_path):
+@pytest.mark.parametrize('bindings', [
+    "args = ('python', '-m', 'data_sheets_schema.second_command')\n"
+    "args = ('python', '-m', 'data_sheets_schema.third_command')\n",
+    "first = ('python', '-m', 'data_sheets_schema.second_command')\n"
+    "second = ('python', '-m', 'data_sheets_schema.third_command')\n"
+    "args = first\nargs = second\n",
+])
+def test_model_named_table_ambiguous_argv_alias_refuses(tmp_path, bindings):
     source = tmp_path / 'src/data_sheets_schema/table_fixture.py'
     source.parent.mkdir(parents=True)
-    source.write_text("args = ('python', '-m', 'data_sheets_schema.second_command')\n"
-                      "args = ('python', '-m', 'data_sheets_schema.third_command')\n"
-                      "COMMANDS = {'advance': args}\n")
+    source.write_text(bindings + "COMMANDS = {'advance': args}\n")
     surfaces = scan.Surfaces()
     surfaces.add(source.relative_to(tmp_path).as_posix(), 'native_agentic', 'model_facing',
                  'live', 'ambiguous named table', runs=False)
