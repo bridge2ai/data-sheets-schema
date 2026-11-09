@@ -11008,6 +11008,215 @@ def discover_model_facing_assets(root: Path, parsed: dict, surfaces: Surfaces) -
     return {key: value for key, value in sorted(found.items())}
 
 
+def _model_command_tables(tree):
+    """Literal argv entries in named mappings, nested list/tuple tables, or
+    formatted shlex.join(...) command lines in model-facing surfaces.
+
+    A stand-alone argv used by subprocess/runtime code is not a command
+    table. Literal local starred prefixes (the native table's ``*cli``),
+    string-constant module names (``MODULE``), and single-return helper
+    calls in the same module (``command_args(spec)``, ``d4d_command(...)``)
+    are expanded without evaluating their interpreter or argument values.
+    """
+    parents = {}
+    scoped_bindings = {}
+    dict_names = set()
+    funcs = {n.name: n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+    func_counts = {}
+    for n in tree.body:
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            func_counts[n.name] = func_counts.get(n.name, 0) + 1
+    for node in ast.walk(tree):
+        for child in ast.iter_child_nodes(node):
+            parents[id(child)] = node
+
+    def scope(node):
+        while node is not tree and not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+            node = parents[id(node)]
+        return node
+
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Assign, ast.AnnAssign)) and node.value is not None:
+            owner = scope(node)
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            for t in targets:
+                if isinstance(t, ast.Name):
+                    scoped_bindings.setdefault((id(owner), t.id), []).append(node.value)
+                    if isinstance(node, ast.Assign) and isinstance(node.value, ast.Dict):
+                        dict_names.add((id(owner), t.id))
+
+    def bindings_for(name, owner):
+        local = scoped_bindings.get((id(owner), name), [])
+        if local or owner is tree:
+            return local
+        return scoped_bindings.get((id(tree), name), [])
+
+    def mentions_module(value, owner, seen=frozenset()):
+        if value is None:
+            return False
+        if any(isinstance(part, ast.Constant) and part.value == "-m" for part in ast.walk(value)):
+            return True
+        names = {part.id for part in ast.walk(value) if isinstance(part, ast.Name)}
+        return any(
+            mentions_module(binding, owner, seen | {(id(owner), name)})
+            for name in names
+            if (id(owner), name) not in seen
+            for binding in bindings_for(name, owner)
+        )
+
+    def literal(value, owner, seen=frozenset()):
+        if isinstance(value, (ast.List, ast.Tuple)):
+            return value
+        if isinstance(value, ast.BinOp) and isinstance(value.op, ast.Add):
+            left = literal(value.left, owner, seen)
+            right = literal(value.right, owner, seen)
+            if left is not None and right is not None:
+                return ast.copy_location(ast.List(elts=list(left.elts) + list(right.elts), ctx=ast.Load()), value)
+            return None
+        if isinstance(value, ast.Call) and isinstance(value.func, ast.Name):
+            fname = value.func.id
+            key = (id(tree), f"call:{fname}")
+            if key not in seen and func_counts.get(fname) == 1:
+                fn = funcs[fname]
+                returns = [n.value for n in ast.walk(fn) if isinstance(n, ast.Return) and n.value is not None]
+                if len(returns) == 1:
+                    resolved = literal(returns[0], fn, seen | {key})
+                    if resolved is not None:
+                        return expand(resolved, fn, seen | {key})
+            return None
+        if not isinstance(value, ast.Name):
+            return None
+        name = value.id
+        key = (id(owner), name)
+        if key in seen:
+            raise ConfigError("model-facing command table has a cyclic argv alias: " + name)
+        bindings = bindings_for(name, owner)
+        if len(bindings) != 1:
+            if any(mentions_module(binding, owner, seen | {key}) for binding in bindings):
+                raise ConfigError("model-facing command table has an ambiguous argv alias: " + name)
+            return None
+        return literal(bindings[0], owner, seen | {key})
+
+    def expand(value, owner, seen=frozenset()):
+        elements = []
+        for item in value.elts:
+            if isinstance(item, ast.Starred) and isinstance(item.value, ast.Name):
+                name = item.value.id
+                key = (id(owner), name)
+                if key not in seen:
+                    binding = literal(item.value, owner, seen)
+                    if binding is not None:
+                        elements.extend(expand(binding, owner, seen | {key}).elts)
+                        continue
+            elif isinstance(item, ast.Name):
+                bindings = bindings_for(item.id, owner)
+                if len(bindings) == 1 and isinstance(bindings[0], ast.Constant) and type(bindings[0].value) is str:
+                    elements.append(bindings[0])
+                    continue
+                if (elements and isinstance(elements[-1], ast.Constant) and elements[-1].value == "-m"
+                        and len(bindings) > 1):
+                    raise ConfigError("model-facing command table has an ambiguous module alias: " + item.id)
+            elements.append(item)
+        return ast.copy_location(ast.Tuple(elts=elements, ctx=ast.Load()), value)
+
+    values = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Dict):
+            values.extend(
+                value for key, value in zip(node.keys, node.values)
+                if isinstance(key, ast.Constant) and type(key.value) is str
+                and isinstance(value, (ast.List, ast.Tuple, ast.Name, ast.Call))
+            )
+        elif isinstance(node, (ast.List, ast.Tuple)) and node.elts and all(
+                isinstance(item, (ast.List, ast.Tuple, ast.Name)) for item in node.elts):
+            values.extend(node.elts)
+        elif isinstance(node, ast.Assign) and isinstance(node.value, (ast.List, ast.Tuple, ast.Name, ast.Call)):
+            for target in node.targets:
+                if (not isinstance(target, ast.Subscript) or not isinstance(target.value, ast.Name)
+                        or not isinstance(target.slice, ast.Constant) or type(target.slice.value) is not str):
+                    continue
+                owner = scope(node)
+                if (id(owner), target.value.id) in dict_names:
+                    values.append(node.value)
+        elif (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+              and isinstance(node.func.value, ast.Name) and node.func.value.id == "shlex"
+              and node.func.attr == "join" and len(node.args) == 1 and not node.keywords):
+            values.append(node.args[0])
+    found = []
+    for value in values:
+        owner = scope(value)
+        resolved = literal(value, owner)
+        if resolved is not None:
+            found.append(expand(resolved, owner))
+    return found
+
+
+def discover_model_commands(root: Path, parsed: dict, surfaces: Surfaces, derived=(), *, stop=frozenset()) -> dict:
+    """Discover package and module ``-m`` entry points from model-facing command tables.
+
+    Snapshot the existing surfaces: an imported helper's runtime argv does
+    not recursively become a model command. Retain the existing CLI opaque
+    boundary (groups are followed where selected) and upstream-input stop
+    set. Native-only command tables and instruction adapters belong to the
+    native route; their presence in an API import closure does not execute
+    them there.
+    """
+    found = {}
+    opaque = frozenset(_resolved(root / relative) for relative in CLI_PACKAGE)
+    pending = [(rel, surface) for rel, surface in sorted(surfaces.files.items())
+               if rel.endswith(".py") and any(role == "model_facing" and APPROACHES[approach][0]
+                                              for approach, role in surface.roles.items())]
+    closure_cache = {}
+    for rel, surface in pending:
+        path = _resolved(root / rel)
+        if path not in parsed:
+            text, tree = _parse(path)
+            if tree is None:
+                raise _unparsed([f"{rel} ({_parse_problem(path)})"])
+            parsed[path] = text, tree
+        approaches = [a for a, role in surface.roles.items()
+                      if role == "model_facing" and APPROACHES[a][0]]
+        if rel == "src/data_sheets_schema/native_shared_render.py":
+            if hasattr(sys.modules[__name__], "derive_native_shared_route"):
+                route = derive_native_shared_route(root, _tree(root / RUNNER))
+                if (not route or route["api_execute"] != "refused before dry-run, locks or dispatch"
+                        or not any(citation.startswith(rel + ":") for citation in route["evidence"])):
+                    raise ConfigError("model-facing native command table lacks its derived native-only route")
+            approaches = [a for a in approaches if a == "native_agentic"]
+        elif rel in {"src/data_sheets_schema/agentic_runtime.py",
+                     "src/data_sheets_schema/native_source_attribution.py",
+                     "src/data_sheets_schema/api_runner.py"} and "native_agentic" in approaches:
+            approaches = ["native_agentic"]
+        if not approaches:
+            continue
+        for argv in _model_command_tables(parsed[path][1]):
+            for target, why in _argv_runs(root, path, argv):
+                if "runs `-m " not in why or target.suffix != ".py":
+                    continue
+                if target.name == "__init__.py":
+                    raise ConfigError("model-facing package command lacks __main__.py: " + why)
+                if target not in closure_cache:
+                    starts = [target]
+                    if target.name == "__main__.py" and (target.parent / "__init__.py").is_file():
+                        starts.append(target.parent / "__init__.py")
+                    closure_cache[target], _ = _code_closure(root, starts, stop=set(stop), opaque=opaque)
+                members = closure_cache[target]
+                target_rel = _rel(root, target)
+                entry = found.setdefault(target_rel, {"commands": set(), "imports": set(), "approaches": set()})
+                entry["commands"].add(why)
+                entry["approaches"].update(approaches)
+                for member in members:
+                    member_rel = _rel(root, member)
+                    if member_rel != target_rel:
+                        entry["imports"].add(member_rel)
+                    for approach in approaches:
+                        surfaces.add(member_rel, approach,
+                            "model_facing" if member == target else _module_role(member, derived),
+                            surface.status, "model-facing command: " + why, runs=member == target)
+    return {rel: {key: sorted(value) for key, value in entry.items()}
+            for rel, entry in sorted(found.items())}
+
+
 def discover(root: Path) -> tuple[Surfaces, dict]:
     root = _resolved(root)
     s = Surfaces()
@@ -11489,6 +11698,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         "listed": sorted(MODEL_FACING_MODULES),
         "derived_not_listed": sorted(name for name in derived if name in live and name not in MODEL_FACING_MODULES),
         "listed_not_derived": sorted(name for name in MODEL_FACING_MODULES if name not in derived)}
+    facts["model_commands"] = discover_model_commands(root, parsed, s, derived, stop=stop)
     facts["model_facing_assets"] = discover_model_facing_assets(root, parsed, s)
     return s, facts
 

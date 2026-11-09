@@ -978,4 +978,6 @@ Returned-instance tracking follows the allocation through exact tuple slots, pla
 
 Plain local aliases (`view = contracts`) of a model-text container carry the same write and method-call obligations as the container itself (#5657): `_local_writes()` propagates subscript/attribute stores, augmented assignments, and method-call arguments across the function's direct `Name` alias closure, and `effects()` walks subscript stores and nested `.update`/`.setdefault` calls on plain and direct-subscript aliases into the container's flow while refusing unmodeled nested or copied receiver mutations.
 
+Model-facing command discovery (`discover_model_commands`, `facts["model_commands"]`) scans both package `__main__.py` entry points and module `-m` targets named in literal mappings, nested list/tuple tables, or `shlex.join(...)` command lines in model-facing generation surfaces as `model_facing` surfaces, and follows their local import closures (with ordinary `_module_role` roles, respecting the opaque CLI-group boundary and upstream-input stops) (#5666). Direct argv aliases, starred local prefixes, string-constant module names, and single-return helper calls in the same module are resolved through unique bindings; cyclic or ambiguous `-m` aliases refuse with `ConfigError`. A package command without `__main__.py` also refuses.
+
 

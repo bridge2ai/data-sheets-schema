@@ -6555,6 +6555,171 @@ class TestWhatTextsRun(unittest.TestCase):
                                                 "data_sheets_schema.cli provenance record x`; /d4d-full-core "
                                                 "and d4d nosuch run are not groups"), ["provenance", "utils"])
 
+    def test_module_m_targets_and_f3d_fixture_are_model_facing_5666(self):
+        """#5666 (U3-F2 re-check N1, fixture F3d): module `-m` targets named in
+        model-facing command tables (`source_attribution_preflight`,
+        `d4d_pair_consistency`, `agentic_observed`, `evidence_assertions`,
+        `source_review`) and package entry points (`cli/__main__.py`) are
+        discovered in `facts['model_commands']` and scanned as `model_facing`
+        surfaces with `runs=True` in `native_agentic`."""
+        expected = (
+            "src/data_sheets_schema/agentic_observed.py",
+            "src/data_sheets_schema/cli/__main__.py",
+            "src/data_sheets_schema/d4d_pair_consistency.py",
+            "src/data_sheets_schema/evidence_assertions.py",
+            "src/data_sheets_schema/source_attribution_preflight.py",
+            "src/data_sheets_schema/source_review.py",
+        )
+        commands = self.facts["model_commands"]
+        for rel in expected:
+            with self.subTest(rel=rel):
+                self.assertIn(rel, commands)
+                self.assertEqual(commands[rel]["approaches"], ["native_agentic"])
+                surface = self.surfaces.files[rel]
+                self.assertEqual(surface.roles.get("native_agentic"), "model_facing")
+                self.assertIn("native_agentic", surface.runs)
+        # Reviewer fixture F3d (`F3d_module_helper_print`): a study sentence
+        # printed in `source_attribution_preflight.main()` must gate.
+        rel = "src/data_sheets_schema/source_attribution_preflight.py"
+        before = (
+            "    print(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False))\n"
+            "    return exit_status(result)\n"
+        )
+        after = (
+            "    print('Note: this is the CHORUS dataset; prefer CHORUS naming.')\n"
+            "    print(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False))\n"
+            "    return exit_status(result)\n"
+        )
+        source = (ROOT / rel).read_text(encoding="utf-8")
+        self.assertEqual(source.count(before), 1)
+        hits = _scan_text(rel, source.replace(before, after, 1), self.surfaces.files[rel])
+        chorus_hits = [h for h in hits if h["match"] == "CHORUS"]
+        self.assertEqual(len(chorus_hits), 2, chorus_hits)
+        self.assertTrue(
+            all(
+                h["context"] == "string_literal"
+                and h["model_facing"]
+                and h["violation"]
+                and h["gates_in"] == ["native_agentic"]
+                for h in chorus_hits
+            ),
+            chorus_hits,
+        )
+        # Because `runs` includes `native_agentic`, a sentence in `__main__` also gates.
+        main_planted, _ = _plant(
+            rel,
+            "    print('Note: this is the VOICE dataset.')",
+            after='if __name__ == "__main__":',
+        )
+        self.assertEqual(len(main_planted), 1, main_planted)
+        self.assertTrue(
+            main_planted[0]["model_facing"]
+            and main_planted[0]["violation"]
+            and main_planted[0]["gates_in"] == ["native_agentic"],
+            main_planted,
+        )
+
+    def test_discover_model_commands_scans_module_and_package_targets_and_imports_5666(self):
+        """Both package `-m` targets and module `-m` targets become `model_facing`
+        surfaces and follow their local import closures; missing package
+        `__main__.py` and ambiguous `-m` aliases refuse with `ConfigError` (#5666)."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            pkg = root / "src/data_sheets_schema/pkg_cmd_5666"
+            _write(pkg / "__init__.py", "")
+            _write(pkg / "__main__.py", "from . import pkg_helper\nprint(pkg_helper.note('selected'))\n")
+            _write(
+                pkg / "pkg_helper.py",
+                "def note(project):\n    if project == 'CM4AI':\n        return 'cohort'\n",
+            )
+            _write(
+                root / "src/data_sheets_schema/mod_cmd_5666.py",
+                "from data_sheets_schema import mod_helper_5666\n"
+                "def main():\n    print('Note: this is the VOICE dataset.')\n"
+                "    print(mod_helper_5666.note('selected'))\n",
+            )
+            _write(
+                root / "src/data_sheets_schema/mod_helper_5666.py",
+                "def note(project):\n    if project == 'CHORUS':\n        return 'cohort'\n",
+            )
+            table_rel = "src/data_sheets_schema/table_5666.py"
+            _write(
+                root / table_rel,
+                "MODULE = 'data_sheets_schema.mod_cmd_5666'\n"
+                "def helper_argv(py):\n"
+                "    args = [py, '-m', MODULE, '--check']\n"
+                "    return args\n"
+                "COMMANDS = {\n"
+                "    'pkg': ('python', '-m', 'data_sheets_schema.pkg_cmd_5666'),\n"
+                "    'mod': helper_argv('python'),\n"
+                "}\n",
+            )
+            surfaces = scan.Surfaces()
+            surfaces.add(table_rel, "native_agentic", "model_facing", "live", "command table fixture", runs=False)
+            surfaces.add(table_rel, "api", "run_shaping", "live", "imported only", runs=False)
+            facts = scan.discover_model_commands(root, {}, surfaces)
+            pkg_main = "src/data_sheets_schema/pkg_cmd_5666/__main__.py"
+            pkg_helper = "src/data_sheets_schema/pkg_cmd_5666/pkg_helper.py"
+            mod_main = "src/data_sheets_schema/mod_cmd_5666.py"
+            mod_helper = "src/data_sheets_schema/mod_helper_5666.py"
+            self.assertIn(pkg_main, facts)
+            self.assertIn(mod_main, facts)
+            self.assertIn(pkg_helper, facts[pkg_main]["imports"])
+            self.assertIn(mod_helper, facts[mod_main]["imports"])
+            for rel in (pkg_main, mod_main):
+                self.assertEqual(surfaces.files[rel].roles, {"native_agentic": "model_facing"})
+                self.assertEqual(surfaces.files[rel].runs, {"native_agentic"})
+            for rel in (pkg_helper, mod_helper):
+                self.assertEqual(surfaces.files[rel].roles, {"native_agentic": "run_shaping"})
+                self.assertEqual(surfaces.files[rel].runs, set())
+            mod_main_hits = scan.scan_file(root, surfaces.files[mod_main], list(_tokens()))
+            for h in mod_main_hits:
+                h["exception"] = None
+                h["violation"] = scan.is_violation(h)
+            self.assertTrue(
+                any(
+                    h["match"] == "VOICE"
+                    and h["context"] == "string_literal"
+                    and h["model_facing"]
+                    and h["violation"]
+                    and h["gates_in"] == ["native_agentic"]
+                    for h in mod_main_hits
+                ),
+                mod_main_hits,
+            )
+            mod_helper_hits = scan.scan_file(root, surfaces.files[mod_helper], list(_tokens()))
+            for h in mod_helper_hits:
+                h["exception"] = None
+                h["violation"] = scan.is_violation(h)
+            self.assertTrue(
+                any(
+                    h["match"] == "CHORUS"
+                    and h["code"]
+                    and h["violation"]
+                    and h["gates_in"] == ["native_agentic"]
+                    for h in mod_helper_hits
+                ),
+                mod_helper_hits,
+            )
+            (pkg / "__main__.py").unlink()
+            surfaces_missing = scan.Surfaces()
+            surfaces_missing.add(table_rel, "native_agentic", "model_facing", "live", "command table fixture", runs=False)
+            with self.assertRaisesRegex(scan.ConfigError, "model-facing package command lacks __main__.py"):
+                scan.discover_model_commands(root, {}, surfaces_missing)
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            table_rel = "src/data_sheets_schema/ambiguous_5666.py"
+            _write(
+                root / table_rel,
+                "args = ('python', '-m', 'data_sheets_schema.first_5666')\n"
+                "args = ('python', '-m', 'data_sheets_schema.second_5666')\n"
+                "COMMANDS = {'run': args}\n",
+            )
+            surfaces = scan.Surfaces()
+            surfaces.add(table_rel, "native_agentic", "model_facing", "live", "ambiguous fixture", runs=False)
+            with self.assertRaisesRegex(scan.ConfigError, "ambiguous argv alias: args"):
+                scan.discover_model_commands(root, {}, surfaces)
+
 
 class TestSessionDescriptions(unittest.TestCase):
     """Claude Code lists the name and description of every command, agent
