@@ -4,7 +4,9 @@ Saved U4b observation bytes are invented fixtures validated by real consumers.
 Only local Git subprocesses are allowed; no native or provider execution.
 """
 from copy import deepcopy
+import json
 from pathlib import Path
+import shlex
 import sys
 
 import pytest
@@ -128,12 +130,14 @@ def test_prepare_verify_first_instruction_and_recorded_replay(inputs, monkeypatc
 @pytest.mark.parametrize('basis', ['historical shared-v1 text', '{"kind":"unrelated"}',
                                   '{"kind":"d4d_native_u4b_runtime_basis_extra"}'])
 def test_historical_discriminators_keep_pre_hook_instruction_and_only_d76_recorder_delta(inputs, monkeypatch, basis):
-    """D114 leaves old rosters alone; D76 adds one model-facing recorder field.
+    """With out-of-checkout inputs, D76 adds one model-facing recorder field.
 
     Compare the real producer with an independent pre-D114 construction using
     its new default registered-path setting. Keep a separate old-false reference
     and require one exact JSON-field insertion in its embedded recorder command;
-    no text or metadata normalization is permitted.
+    no text or metadata normalization is permitted. This fixture's corpus root
+    differs from cwd, so it does not exercise the in-checkout spelling change;
+    the D126 discriminator below covers that separate condition.
     """
     selected = deepcopy(inputs['runtime'])
     selected['limits_basis'] = basis
@@ -176,6 +180,179 @@ def test_historical_discriminators_keep_pre_hook_instruction_and_only_d76_record
     assert calls == [{}]
     assert body['instruction'] == expected
     assert body['render_spec']['agentic_toolchain'] == historical._agentic_toolchain == pre_hook._agentic_toolchain
+
+
+@pytest.mark.parametrize('u4b', [False, True], ids=['historical-runtime', 'u4b-runtime'])
+def test_d126_in_checkout_manifest_pins_every_native_instruction_delta(inputs, u4b):
+    """D126: retain absolute authority and disclose its exact instruction delta.
+
+    The real checkout's standard manifest supplies the corpus root. The two
+    committed synthetic inputs are read-only; only this case's temporary
+    selection is rewritten. Neither RunSpec nor its D76 guard is replaced.
+    The old-false control is built independently of the genuine producer.
+    Expected edits apply to that raw control, never to the candidate, so extra
+    changed lines, JSON fields, argument spellings or whitespace fail equality.
+    Raw evidence stays local: publishing it requires recorded path redaction.
+    """
+    from data_sheets_schema.native_shared_evidence import read_regular
+    from tests.test_native_shared_selection import pin, save
+
+    select_runtime(inputs, u4b)
+    root = authority.ROOT
+    assert Path.cwd().resolve() == root
+    paths = {
+        'bundle': root / 'tests/fixtures/native_u3h_paths/bundle.txt',
+        'chunk_manifest': root / 'tests/fixtures/native_u3h_paths/bundle_chunks.json',
+        'manifest': root / 'data/preprocessed/source_manifest.yaml',
+    }
+    originals = {name: path.read_bytes() for name, path in paths.items()}
+    relative = {name: str(path.relative_to(root)) for name, path in paths.items()}
+    absolute = {name: str(path) for name, path in paths.items()}
+    assert relative['manifest'] == 'data/preprocessed/source_manifest.yaml'
+    doc = c.strict_json(inputs['selection'].read_bytes())
+    for field, key in (('bundle', 'bundle'), ('chunk_manifest', 'chunk_manifest'),
+                       ('manifest', 'source_manifest')):
+        doc['inputs'][key] = pin(paths[field], originals[field])
+    save(doc)
+    selected = c.strict_json(inputs['runtime_path'].read_bytes())
+    runtime_capture = read_regular(str(inputs['runtime_path']), 'runtime_declaration',
+        max_bytes=c.HARD_LIMITS['input_bytes']).captured
+    historical = api.RunSpec(**doc['run'], condition=c.CONDITION, render_version=c.RENDERER,
+        bundle=paths['bundle'], manifest=paths['manifest'], chunk_manifest=paths['chunk_manifest'],
+        profile=doc['inputs']['profile']['name'], profile_basis=doc['inputs']['profile']['basis'],
+        runtime=c.RUNTIME, provider=selected['provider'], reasoning_effort=selected['effort'],
+        prompt_text_env=True, run_date=inputs['kwargs']['run_date'],
+        native_shared_generation_version=1,
+        native_shared_generation_registration=c.canonical(doc).decode('utf-8'),
+        registered_input_paths=False)
+    historical._native_shared_runtime_capture = runtime_capture
+    historical._native_shared_max_draft_checks = inputs['kwargs']['max_draft_checks']
+    # Hold D114's separately tested runtime choice constant; this comparison
+    # isolates D76's spelling/recording effect for both runtime selections.
+    historical._agentic_toolchain = tools.toolchain(native_shared=u4b)
+    assert historical._corpus_root == root
+    assert {name: str(getattr(historical, name)) for name in paths} == relative
+    before = historical.instruction.encode('utf-8')
+    before_spec = historical.render_spec()
+
+    observed, guards = [], []
+    previous = sys.getprofile()
+
+    def observe(frame, event, argument):
+        if previous is not None:
+            previous(frame, event, argument)
+        if (event == 'return' and frame.f_code.co_name == '__init__'
+                and frame.f_back is not None
+                and frame.f_back.f_code is producer.prepare.__code__):
+            spec = frame.f_locals.get('self')
+            if type(spec) is api.RunSpec:
+                observed.append(spec)
+        if (event == 'call' and frame.f_code is api._require_registered_input_spellings.__code__
+                and frame.f_back is not None
+                and frame.f_back.f_code is producer.prepare.__code__):
+            guards.append(frame.f_locals['spec'])
+
+    sys.setprofile(observe)
+    try:
+        body = _prepare(inputs)['registration']
+    finally:
+        sys.setprofile(previous)
+    assert len(observed) == 1 and guards == observed
+    current = observed[0]
+    assert type(current) is api.RunSpec and current.registered_input_paths is True
+    assert api._input_binding(current).spellings is not None
+    assert {name: str(getattr(current, name)) for name in paths} == absolute
+    api._require_registered_input_spellings(current)
+    after = body['instruction'].encode('utf-8')
+    expected_spec = {**before_spec, **absolute,
+        'manifest_line': '# Source manifest: ' + absolute['manifest'],
+        'registered_input_paths': True}
+    assert 'registered_input_paths' not in before_spec
+    assert body['render_spec'] == expected_spec
+
+    # A closed, command-specific roster avoids accidental global replacement:
+    # --manifest means the chunk manifest for the evidence helpers only.
+    changed_commands = {
+        'chunk_check': {'--bundle': 'bundle', '--chunk-manifest': 'chunk_manifest', '--manifest': 'manifest'},
+        'source_scope': {'--manifest': 'manifest'},
+        'phase1_receipts': {'--bundle': 'bundle', '--chunk-manifest': 'chunk_manifest', '--manifest': 'manifest'},
+        'draft': {'--bundle': 'bundle', '--chunk-manifest': 'chunk_manifest', '--source-manifest': 'manifest'},
+        'audit_evidence': {'--bundle': 'bundle', '--manifest': 'chunk_manifest', '--source-manifest': 'manifest'},
+        'final_evidence': {'--bundle': 'bundle', '--manifest': 'chunk_manifest', '--source-manifest': 'manifest'},
+        'final_scope': {'--manifest': 'manifest'},
+        'final_receipts': {'--bundle': 'bundle', '--chunk-manifest': 'chunk_manifest', '--manifest': 'manifest'},
+        'recorder': {'--input-bundle': 'bundle', '--chunk-manifest': 'chunk_manifest', '--manifest': 'manifest'},
+    }
+    edits = [
+        ('header:source_bundle', ('# Source bundle: ' + relative['bundle']).encode(),
+         ('# Source bundle: ' + absolute['bundle']).encode()),
+        ('header:source_manifest', ('# Source manifest: ' + relative['manifest']).encode(),
+         ('# Source manifest: ' + absolute['manifest']).encode()),
+    ]
+    for name, arguments in changed_commands.items():
+        marker = (name + ':\n\n```bash\n').encode()
+        assert before.count(marker) == 1
+        old = before.split(marker, 1)[1].split(b'\n```', 1)[0]
+        assert b'\n' not in old
+        words = shlex.split(old.decode('utf-8'))
+        assert shlex.join(words).encode('utf-8') == old
+        for flag, field in arguments.items():
+            assert words.count(flag) == 1
+            position = words.index(flag) + 1
+            assert words[position] == relative[field]
+            words[position] = absolute[field]
+        if name == 'recorder':
+            assert words.count('--render-spec-json') == 1
+            position = words.index('--render-spec-json') + 1
+            assert words[position] == json.dumps(before_spec, sort_keys=True, separators=(',', ':'))
+            words[position] = json.dumps(expected_spec, sort_keys=True, separators=(',', ':'))
+        edits.append(('helper:' + name, old, shlex.join(words).encode('utf-8')))
+
+    before_lines, after_lines = before.splitlines(keepends=True), after.splitlines(keepends=True)
+    assert len(before_lines) == len(after_lines)
+    expected_lines = list(before_lines)
+    changes = []
+    for role, old, new in edits:
+        old, new = old + b'\n', new + b'\n'
+        assert old != new and before_lines.count(old) == 1
+        index = before_lines.index(old)
+        expected_lines[index] = new
+        changes.append({'role': role, 'line_index1': index + 1,
+            'before': old.decode('utf-8'), 'after': new.decode('utf-8'),
+            'before_sha256': c.sha(old), 'after_sha256': c.sha(new)})
+    assert len(changes) == 11
+    observed_changed_lines = [index + 1 for index, (old, new)
+                              in enumerate(zip(before_lines, after_lines)) if old != new]
+    assert observed_changed_lines == sorted(row['line_index1'] for row in changes)
+    assert after == b''.join(expected_lines)
+    assert {name: path.read_bytes() for name, path in paths.items()} == originals
+    replay = restored(inputs, body)
+    assert replay.render_spec() == body['render_spec']
+    assert replay.instruction.encode('utf-8') == after
+
+    # Retain raw local evidence and exact line bytes for FACTS.json/report.
+    # These are not publishable until absolute paths are redacted and that
+    # transformation is recorded under D126.
+    evidence = inputs['root'] / 'd126-in-checkout-discriminator'
+    evidence.mkdir()
+    (evidence / 'before-instruction.txt').write_bytes(before)
+    (evidence / 'after-instruction.txt').write_bytes(after)
+    (evidence / 'd126-instruction-delta.json').write_text(json.dumps({
+        'decision': 'D126', 'u4b_runtime': u4b,
+        'source_manifest_relative': relative['manifest'],
+        'before_sha256': c.sha(before), 'after_sha256': c.sha(after),
+        'changed_lines': sorted(changes, key=lambda row: row['line_index1']),
+        'unchanged_line_count': len(before_lines) - len(changes),
+        'expected_change_count': 11,
+        'observed_change_count': len(observed_changed_lines),
+        'render_spec_fields_changed': ['bundle', 'chunk_manifest', 'manifest', 'manifest_line',
+                                       'registered_input_paths'],
+        'private_root_mapping': {'checkout_root': str(root),
+                                 'test_artifact_root': str(inputs['root']),
+                                 'interpreter': sys.executable},
+        'publication_ready': False,
+        'publication_policy': 'Local raw evidence only; redact absolute local paths before publication and record the redaction.',
+    }, indent=2, sort_keys=True) + '\n')
 
 
 @pytest.mark.parametrize('basis', ['{broken', '{"kind":"a","kind":"b"}',

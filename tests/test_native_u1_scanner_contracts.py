@@ -245,7 +245,19 @@ def test_native_v2_import_shadow_refuses_with_configuration_error(tmp_path):
     assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
     path = root / 'src/data_sheets_schema/native_execution_registration_v2.py'
     path.write_text(path.read_text()+'\ndef changed_binding(c):\n    return c\n')
-    with pytest.raises(scan.ConfigError, match='binding is replaced|imported authority escapes fixed uses'):
+    with pytest.raises(scan.ConfigError, match='v2 preparation imported authority escapes fixed uses: c'):
+        scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+
+
+def test_native_v2_unused_import_shadow_reaches_binding_refusal(tmp_path):
+    """An unused shadow passes the load-use proof and reaches the binding proof."""
+    root = _native_route_root(tmp_path)
+    assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+    path = root / 'src/data_sheets_schema/native_execution_registration_v2.py'
+    # Unlike the sibling mutant, the parameter has no ast.Name/Load use for
+    # closed_import_uses to reject. bound must independently reject ast.arg c.
+    path.write_text(path.read_text()+'\ndef changed_binding(c):\n    return None\n')
+    with pytest.raises(scan.ConfigError, match='v2 producer binding is replaced: c'):
         scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
 
 
