@@ -10,7 +10,29 @@ from data_sheets_schema.corpus import anchored as _corpus_path
 
 @click.group()
 def receipts():
-    """Coverage and claim receipts: what the agent says it read, checked."""
+    """Coverage, claim and secondary offline transformation receipts."""
+
+
+@receipts.command("transform")
+@click.option("--full", "full_file", required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--core", "core_file", required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path))
+def transform(full_file, core_file):
+    """Print D105's separate, non-gating full-to-core leaf receipt as JSON.
+
+    Uses saved YAML/JSON records, with no model or provider calls. Reports
+    current deterministic projection lineage, not evidence of a historical
+    execution. Mismatches are measured, not an exit-status gate. Neither input
+    nor the registered v4 `receipts` block is written or rescored.
+    """
+    from data_sheets_schema.transformation_measure_io import measure_files, report_text
+
+    try:
+        output = report_text(measure_files(full_file, core_file))
+    except (OSError, ValueError, TypeError, RecursionError) as exc:
+        raise click.ClickException(f"transformation measurement refused: {exc}") from exc
+    click.echo(output, nl=False)
 
 
 def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
