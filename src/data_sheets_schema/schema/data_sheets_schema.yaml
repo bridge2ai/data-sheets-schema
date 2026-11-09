@@ -17,9 +17,9 @@ title: data-sheets-schema
 # The core schema declares the same version and moves with it.
 #
 # 3.2.0 (#5471, D98/D99): declares structured d4d:termSourceIdentifierForms
-# metadata on Instance.data_substrate and Instance.data_topic (with
-# GO/MESH/MeSH/EFO/NCIT prefix consistency checks in D4D_Base_import.yaml)
-# and restores multivalued: true on LicenseAndUseTerms.data_use_permission
+# metadata on Instance.data_substrate and Instance.data_topic. Identifier-form
+# expansions live only in annotations; schema prefixes stay at 3.1.0 (D108).
+# Restores multivalued: true on LicenseAndUseTerms.data_use_permission
 # so records can state one primary DUO permission plus modifiers.
 # A 3.1.0 record with scalar data_use_permission is invalid under 3.2.0:
 # migrate it to a one-element list. The API write-time normaliser wraps scalars;

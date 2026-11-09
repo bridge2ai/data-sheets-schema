@@ -21,8 +21,11 @@ STUDY_MANIFEST = ROOT / "data/preprocessed/source_manifest.yaml"
 
 # Current generated-record fixtures after the deliberate #1771 boundary.
 # Historical fingerprints remain covered by test_nested_string_lists.py.
-CURRENT_STUDY = "b2d80be089a79aab0ef1a88002b94ca6"
-CURRENT_NEUTRAL = "49d14e268864c35704fd000a1b10fb05"
+# 2026-11-08, PR5531 D99 fix A: nested multivalued enums now render [many].
+# Deliberate model-facing change, matching test_schema_sync.py; historical
+# inventory/receipt digests retain their original identities.
+CURRENT_STUDY = "c807b62f37e927c5d49addf273957a34"
+CURRENT_NEUTRAL = "94fb1b7b3e8ea42ac151bbe52b5f5f72"
 
 
 class _Clean(unittest.TestCase):

@@ -40,6 +40,33 @@ def test_enum_multivalued_slots_are_discovered(slot):
     assert slot in api._multivalued_slots()
 
 
+def test_multivalued_wrap_set_is_bounded_to_types_and_enums():
+    # Main's 27 string slots plus D99's three enums and the uri access_urls.
+    baseline = set('''affected_subsets annotator_demographics categories
+        disagreement_patterns examples external_resources guardian_consent
+        imputation_method imputation_validation imputed_fields irb_approval
+        keywords missing missing_value_code regulatory_compliance
+        regulatory_restrictions release_dates representative_verification
+        restrictions special_populations special_protections stewardship_roles
+        tool_accuracy tools versions_available warnings why_missing'''.split())
+    assert api._multivalued_slots() == baseline | {
+        'access_urls', 'conforms_to_standard', 'credit_roles', 'data_use_permission'}
+
+
+def test_class_and_unknown_ranges_do_not_supply_wrap_names():
+    from types import SimpleNamespace
+    slots = [SimpleNamespace(name=name, range=range_name, multivalued=many)
+             for name, range_name, many in [
+                 ('text', 'string', True), ('choice', 'Choice', True),
+                 ('objects', 'Object', True), ('unknown', 'Missing', True),
+                 ('scalar', 'string', False)]]
+    view = SimpleNamespace(all_types=lambda: {'string': None},
+                           all_enums=lambda: {'Choice': None},
+                           all_classes=lambda: {'Object': None},
+                           class_induced_slots=lambda cls: slots)
+    assert set(api._multivalued_of(view)) == {'text', 'choice'}
+
+
 @pytest.mark.parametrize('profile', [profiles.NEUTRAL, profiles.BRIDGE2AI])
 def test_nested_enum_digest_states_list_cardinality(profile):
     text = schema_digest.digest_text('Dataset', profile=profile)
@@ -77,10 +104,11 @@ def test_legacy_annotation_without_value_uses_original_fallback():
         bc._sources(catalog, contract_version=2)
 
 
-def test_legacy_curie_helper_invalidates_derivation_cache(monkeypatch):
+@pytest.mark.parametrize('name', ['_curie_prefixes', 'validate_term_value', 'permits_unbound_slot'])
+def test_term_helper_invalidates_derivation_cache(monkeypatch, name):
     before = audit._cache_dependency_token()
     assert before is not None
-    monkeypatch.setattr(bc, '_curie_prefixes', lambda source: ('DIFFERENT',))
+    monkeypatch.setattr(bc, name, lambda *args, **kwargs: ('DIFFERENT',))
     assert audit._cache_dependency_token() != before
 
 
@@ -93,12 +121,28 @@ def test_v2_still_rejects_control_and_separator_characters(fixture, character):
         bc.validate_term_value('GO:abc' + character + 'def', policy=policy, cls='Instance', field='data_topic')
 
 
-@pytest.mark.parametrize('base', ['urn:example:', 'ftp://example.test/', 'https://example.test'])
-def test_iri_base_does_not_choose_owner_scheme_policy(base):
-    result = bc._validate_identifier_form_entries([
-        {'id': 'example', 'label': 'Example', 'curies': [], 'iri_bases': [base]}],
-        declared_labels=['Example'], cls='Instance', slot='data_topic')
-    assert result['iri_prefixes'] == [base]
+@pytest.mark.parametrize('base', ['urn:example:', 'ftp://example.test/',
+                                 'https://example.test', 'https://example.test/', 'GO:0'])
+def test_iri_base_preserves_designed_scheme_and_path_rule(base):
+    with pytest.raises(ValueError, match='invalid IRI base'):
+        bc._validate_identifier_form_entries([
+            {'id': 'example', 'label': 'Example', 'curies': [], 'iri_bases': [base]}],
+            declared_labels=['Example'], cls='Instance', slot='data_topic')
+
+
+@pytest.mark.parametrize('prefix', ['http', 'https', 'HTTP', 'HTTPS'])
+def test_curie_forms_cannot_overlap_http_iri_forms(prefix):
+    with pytest.raises(ValueError, match='invalid CURIE prefix'):
+        bc._validate_identifier_form_entries([
+            {'id': 'example', 'label': 'Example',
+             'curies': [{'prefix': prefix, 'local_prefix': '//example.test/path/'}],
+             'iri_bases': ['https://example.test/path/']}],
+            declared_labels=['Example'], cls='Instance', slot='data_topic')
+
+
+def test_class_range_continuation_prose_is_preserved():
+    text = "description: 'Release dates are enumerated as\n  resources: March 2025, June 2025.'\n"
+    assert api.normalise_record_text(text) == text
 
 
 @pytest.mark.parametrize('term', ['EDAM:format_1915', 'mediatypes:text/csv'])

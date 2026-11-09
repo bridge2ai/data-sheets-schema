@@ -138,6 +138,10 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         nested multivalued enums explicitly render [many], including
         data_use_permission, credit_roles and conforms_to_standard.
         Neutral moves from `49d14e268864c35704fd000a1b10fb05` to `94fb1b7b3e8ea42ac151bbe52b5f5f72`.
+        Fix A also moves CoreDataset bridge2ai from
+        `21788192188f82da909d71eb550237da` to `f3943c162b41d94850fd60dde7c41ba7`
+        and neutral from `cc386c84e1efd0262d65e99d1e9fdba6` to
+        `47c578052bab48144fc2575826aef4c1` (+28 UTF-8 bytes each).
         This is a deliberate model-facing cardinality instruction change;
         historical inventory entries and recorded digests remain unchanged.
         """

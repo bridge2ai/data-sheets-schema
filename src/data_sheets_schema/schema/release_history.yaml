@@ -51,20 +51,21 @@ releases:
       Historical schema hashes stay unchanged.
   - version: 3.2.0
     declared: 2026-11-08
-    full_source_sha256: b37f37552375b05c1685ffe52649df5e1f17ed0da46d6dd82ca4f1b49b4d549a
+    full_source_sha256: f232e9a2c70675a1d09bf96991621101294509e4bfd14bc6624873a7773ae51c
     full_merged_sha256: cf4e0992a807cbf98efbf936b02d05ef48c438c437c3d380775aea9ab69302f7
     core_source_sha256: cf48f77652bcf6b937e7c0e8d78eb9472d76980aae02f03a5581e15920bfe8e8
     core_merged_sha256: db4c4fa49c33ccf14d79ac5c65098d868036ad211a3036df60437b9939220700
     note: >-
       D98 (#5471, Option A) declares d4d:termSourceIdentifierForms on
       Instance.data_substrate and Instance.data_topic (plus d4d:termSources on
-      Instance.data_topic) and GO, MESH/MeSH, EFO, and NCIT prefixes in
-      D4D_Base_import.yaml. D99 restores multivalued: true on
+      Instance.data_topic). Identifier-form expansions live only in annotations;
+      schema prefixes stay at 3.1.0 (D108). D99 restores multivalued: true on
       LicenseAndUseTerms.data_use_permission (one primary DUO permission plus
       applicable modifiers) and aligns D4D_Core.yaml version: 3.2.0.
       A 3.0.0 or 3.1.0 record with scalar data_use_permission is invalid under
       3.2.0; migrate that scalar to a one-element list. The API write-time
-      normaliser wraps scalar multivalued slots, including enum ranges.
+      normaliser wraps scalar multivalued slots with type or enum ranges;
+      class ranges are excluded.
       BC1 sizing does not migrate historical inputs: scalar cardinality is
       refused during owner traversal, so migrate the sizing record first.
       Historical schema hashes stay unchanged.

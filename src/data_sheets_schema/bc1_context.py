@@ -134,7 +134,9 @@ def _validate_identifier_form_entries(entries: Any, *, declared_labels: list[str
         for base in iri_bases:
             if (type(base) is not str or not base or base != base.strip()
                     or any(ch.isspace() or unicodedata.category(ch) in {"Cc", "Cf", "Zl", "Zp"} for ch in base)
-                    or not re.fullmatch(r"[A-Za-z][A-Za-z0-9+.-]*:.+", base)):
+                    # D98/#5555: retain the designed http(s), nonempty-path
+                    # rule; extending the scheme set needs an owner decision.
+                    or not re.fullmatch(r"https?://[^/]+/.+", base)):
                 raise ValueError(f"BC1 term source {label!r} on {cls}.{slot} has invalid IRI base {base!r}")
             for _other_id, other_base in all_iris:
                 if base.startswith(other_base) or other_base.startswith(base):
