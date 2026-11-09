@@ -18,6 +18,8 @@ def function(relative, name):
     return ast.unparse(fn)
 
 def main():
+    if 'def _derive_native_v2_render(' in PATH.read_text():
+        raise RuntimeError('one-time migration already applied; use the committed diff, not a second rewrite')
     cli = function('src/data_sheets_schema/cli/prompt.py', 'render_native_shared')
     prepare = function('src/data_sheets_schema/native_execution_registration_v2.py', 'prepare')
     helper = '''def _derive_native_v2_render(root, cli, command):
