@@ -78,6 +78,15 @@ def local_entries(tree):
 
 def setup(args):
     evidence, worktree = layout(args.commit)
+    # Reject a dependency export passed where a Git repository is required
+    # before producing a large partial composition. The validation runner uses
+    # its separately pinned dependency export when this option is omitted.
+    if args.fairscape_source is not None:
+        source = Path(args.fairscape_source)
+        base.need(source.is_absolute() and source.resolve(strict=True) == source,
+                  'FAIRSCAPE source must be a physical absolute Git repository')
+        base.need(Path(base.git('rev-parse', '--show-toplevel', cwd=source).decode().strip()) == source,
+                  'FAIRSCAPE source must be its own Git repository, not an export')
     helper = str(Path(__file__).resolve().relative_to(ROOT))
     base.need(base.strict_blob(args.commit, helper) == Path(__file__).read_bytes(),
               'this exact helper must be committed at source HEAD')
