@@ -1,4 +1,5 @@
 """A5 overage reasons, 2026-11-09 (#4354): real event shapes, no account calls."""
+import json
 import pytest
 
 from data_sheets_schema import native_subscription_guard_v2 as guard
@@ -28,11 +29,12 @@ def test_malformed_or_oversized_reason_refuses_both_routes(case, reason):
     event = guard.strict_json(_representative('allowed')['raw_json'])
     context = event_case(case, guard.canonical(event))
     event['rate_limit_info']['overageDisabledReason'] = reason
-    with pytest.raises(ValueError, match='overage disabled reason'):
-        _prepare(context, guard.canonical(event))
+    diagnostic = 'finite bounded JSON' if reason == '\ud800' else 'overage disabled reason'
+    with pytest.raises(ValueError, match=diagnostic):
+        _prepare(context, json.dumps(event).encode())
     value = make_guard(guard, context, seed=True)
     value.before_dispatch()
-    with pytest.raises(ValueError, match='overage disabled reason'):
+    with pytest.raises(ValueError, match=diagnostic):
         value.observe(event)
 
 

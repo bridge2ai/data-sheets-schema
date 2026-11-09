@@ -152,6 +152,9 @@ def test_d76_input_mutation_still_refuses_before_hook(inputs, monkeypatch):
     select_runtime(inputs, True)
     post_init = api.RunSpec.__post_init__
     def mutate_after_construction(spec):
+        # The frozen constructor does not yet select D76 for shared-v1.
+        # Select its public opt-in before construction; never reset a binding.
+        spec.registered_input_paths = True
         post_init(spec)
         spec.bundle = spec.bundle.parent / 'changed-bundle.txt'
     monkeypatch.setattr(api.RunSpec, '__post_init__', mutate_after_construction)
