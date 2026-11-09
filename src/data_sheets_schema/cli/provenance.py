@@ -2994,6 +2994,10 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
     Grounding is skipped for a record whose bundle has drifted: checking its
     identifiers against today's bundle would answer a question about a file the
     run never read. Reported as such rather than silently omitted.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: CLI supplies recorded provenance to compute; native receipt reconstruction validates its recorded selection rather than accepting a caller RunSpec.
     """
     from pathlib import Path
 

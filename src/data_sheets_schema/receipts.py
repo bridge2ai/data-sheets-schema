@@ -2658,6 +2658,10 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     `identity_rules` reports the actual schema and effective ordered bases,
     independently of snapshot/source authority and receipt version 3/4.
     With no record, the existing current-generation output is unchanged.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies a validated snapshot_spec when present or explicit recorded input authority; native receipt helpers reconstruct and compare selected preparation before native assessment.
     """
     import hashlib
 

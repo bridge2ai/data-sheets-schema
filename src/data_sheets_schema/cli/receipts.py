@@ -68,6 +68,10 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     an origin the record carries is kept while the receipt still has the
     sha256 it was measured on, and otherwise the origin is `unknown`, never
     `contemporaneous`. Reported, never gated: `--strict` does not read it.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: CLI supplies explicit recorded or native selection paths; native receipt helpers reconstruct the admitted selection before assessing receipts.
     """
     if initial_structure and strict:
         raise click.UsageError('--initial-structure and --strict are mutually exclusive')

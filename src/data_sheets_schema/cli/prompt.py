@@ -46,7 +46,12 @@ prompt.add_command(render_prompt_cmd, name="render")
 @click.option("--out", type=click.Path(dir_okay=False), help="Write a new instruction file; refuse an existing file.")
 def render_native_shared(selection, runtime_declaration, job_id, provider, reasoning_effort,
                          max_draft_checks, run_date, out):
-    """Render genuine v2 preparation offline; this does not authorize execution."""
+    """Render genuine v2 preparation offline; this does not authorize execution.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: CLI supplies explicit selection/runtime paths to v2 prepare, which constructs and guards its RunSpec before instruction access; this command grants no execution authority.
+    """
     from pathlib import Path
     import hashlib
     from data_sheets_schema import native_execution_registration_v2 as preparation

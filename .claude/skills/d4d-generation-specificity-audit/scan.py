@@ -11871,6 +11871,137 @@ def _without_docstring(body):
     return body
 
 
+def _derive_native_v2_render(root, cli, command):
+    """Closed source proof of the v2 preparation producer and CLI data flow.
+
+    Exact executable AST templates bind selection/runtime arguments, RunSpec
+    construction, its entry guard, runtime capture, instruction and envelope
+    reads, provider comparison and exclusive output. Literal diagnostics are
+    also pinned. Only leading docstrings and source formatting are ignored.
+    No template is loaded from the scanned checkout, and no source is executed.
+    This proves rendering structure, not preparation or launch acceptance.
+    """
+    fail = lambda detail: _not_derived('separate native shared render route', detail)
+    dump = lambda node: ast.dump(node, include_attributes=False)
+    def exact(actual, text):
+        expected = ast.parse(text).body[0]
+        # Copy the AST; never mutate the tree used by other derivations.
+        observed = ast.parse(ast.unparse(actual)).body[0]
+        observed.body = _without_docstring(observed.body)
+        if dump(observed) != dump(expected):
+            raise fail('unsupported v2 render producer: ' + actual.name)
+    exact(command, """@prompt.command('render-native-shared')
+@click.option('--selection', required=True, type=click.Path(exists=True, dir_okay=False), help='Exact native shared-generation selection JSON.')
+@click.option('--runtime-declaration', required=True, type=click.Path(exists=True, dir_okay=False), help='Sole runtime declaration, checked without invoking the runtime.')
+@click.option('--job-id', required=True, help='Explicit job identity for the v2 preparation.')
+@click.option('--provider', required=True, help='Must match the sole runtime declaration.')
+@click.option('--reasoning-effort', required=True, help='Must match the sole runtime declaration.')
+@click.option('--max-draft-checks', required=True, type=click.IntRange(min=1))
+@click.option('--run-date', required=True, type=click.DateTime(formats=['%Y-%m-%d']))
+@click.option('--out', type=click.Path(dir_okay=False), help='Write a new instruction file; refuse an existing file.')
+def render_native_shared(selection, runtime_declaration, job_id, provider, reasoning_effort, max_draft_checks, run_date, out):
+    from pathlib import Path
+    import hashlib
+    from data_sheets_schema import native_execution_registration_v2 as preparation
+    from data_sheets_schema import native_shared_contract as contract
+    try:
+        envelope = preparation.prepare(selection, runtime_declaration, job_id=job_id, run_date=run_date.strftime('%Y-%m-%d'), max_draft_checks=max_draft_checks)
+        body = envelope['registration']
+        spec = body['render_spec']
+        if (spec['provider'], spec['reasoning_effort']) != (provider, reasoning_effort):
+            raise ValueError('provider and reasoning effort differ from the sole runtime declaration')
+        text = body['instruction']
+        if out:
+            destination = Path(out).absolute()
+            if destination != destination.resolve() or destination.is_symlink():
+                raise ValueError('instruction output must use its physical path')
+            selected = contract.parse_selection(spec['native_shared_generation_registration']['raw_json'].encode('utf-8'))
+            stage_root = Path(selected['stage_root'])
+            if destination == stage_root or stage_root in destination.parents:
+                raise ValueError('instruction output must be outside the mutable native stage root')
+            with destination.open('x', encoding='utf-8') as stream:
+                stream.write(text)
+    except (OSError, ValueError, UnicodeError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    raw = text.encode('utf-8')
+    click.echo(f'# sha256 {hashlib.sha256(raw).hexdigest()}  ({len(raw)} bytes)', err=True)
+    click.echo('# Offline v2 preparation; execution requires separate registration and all admission gates.', err=True)
+    if out:
+        click.echo(f'✓ {out}', err=True)
+    else:
+        click.echo(text, nl=False)""")
+    relative = 'src/data_sheets_schema/native_execution_registration_v2.py'
+    tree = _tree(root / relative)
+    definitions = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'prepare']
+    if len(definitions) != 1:
+        raise fail('v2 preparation has no unique producer')
+    prepare = definitions[0]
+    exact(prepare, """def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
+    from .api_runner import RunSpec, _require_registered_input_spellings
+    from .native_shared_evidence import read_regular as current_read_regular
+    _job_id(job_id)
+    c.positive_int(max_draft_checks, 'maximum draft checks')
+    if type(run_date) is not str or re.fullmatch('\\d{4}-\\d{2}-\\d{2}', run_date) is None:
+        raise ValueError('run_date must be an explicit ISO date')
+    from datetime import date
+    date.fromisoformat(run_date)
+    if Path.cwd().resolve() != authority.ROOT:
+        raise ValueError('v2 preparation requires its exact source checkout root')
+    captured = selection.capture(selection_path)
+    runtime_capture = current_read_regular(str(runtime_path), 'runtime_declaration', max_bytes=c.HARD_LIMITS['input_bytes']).captured
+    runtime = validate_runtime(c.strict_json(runtime_capture.raw, 'runtime declaration'))
+    doc = captured.document()
+    inputs = doc['inputs']
+    manifest = inputs['source_manifest']
+    spec = RunSpec(**doc['run'], condition=c.CONDITION, render_version=c.RENDERER, bundle=Path(inputs['bundle']['path']), chunk_manifest=Path(inputs['chunk_manifest']['path']), manifest=None if manifest is None else Path(manifest['path']), profile=inputs['profile']['name'], profile_basis=inputs['profile']['basis'], runtime=c.RUNTIME, provider=runtime['provider'], reasoning_effort=runtime['effort'], prompt_text_env=True, run_date=run_date, native_shared_generation_version=1, native_shared_generation_registration=captured.registration.raw.decode('utf-8'))
+    _require_registered_input_spellings(spec)
+    spec._native_shared_runtime_capture = runtime_capture
+    spec._native_shared_max_draft_checks = max_draft_checks
+    instruction = spec.instruction
+    dependencies = authority.dependency_identity()
+    pins = _pin_map(captured, runtime_capture, dependencies)
+    pins[runtime['executable']['path']] = runtime['executable']['sha256']
+    body = {'kind': PREPARATION_KIND, 'schema_version': VERSION, 'execution': PREPARATION_SCOPE, 'job_id': job_id, 'working_directory': str(authority.ROOT), 'dependencies': dependencies, 'selection': _file_pin(captured.registration), 'runtime': _file_pin(runtime_capture), 'run_date': run_date, 'max_draft_checks': max_draft_checks, 'render_spec': spec.render_spec(), 'input_identity': spec.input_identity(), 'instruction': instruction, 'instruction_sha256': c.sha(instruction.encode('utf-8')), 'outputs': {name: str(Path(path).absolute()) for name, path in {'full': spec.full_path, 'core': spec.core_path, 'report': spec.report_path, 'provenance': spec.provenance_path}.items()}, 'pinned_files': pins}
+    if selection.capture(selection_path) != captured or current_read_regular(str(runtime_path), 'runtime_declaration', max_bytes=c.HARD_LIMITS['input_bytes']).captured != runtime_capture or authority.dependency_identity() != dependencies:
+        raise ValueError('v2 preparation authority changed during capture')
+    return _envelope(body, dependencies)""")
+    # Imported producer/contract names must retain the bindings used by the
+    # templates. A shadow, duplicate import, assignment or monkeypatch refuses.
+    def bound(module, statement, name):
+        expected = ast.parse(statement).body[0]
+        matches = [n for n in module.body if dump(n) == dump(expected)]
+        if len(matches) != 1:
+            raise fail('v2 producer import is not exact: ' + name)
+        alias = matches[0].names[0]
+        for n in ast.walk(module):
+            if n is alias:
+                continue
+            if ((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
+                    or _rebinding(n, name, None)
+                    or isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))
+                       and isinstance(n.value, ast.Name) and n.value.id == name):
+                raise fail('v2 producer binding is replaced: ' + name)
+    for statement, name in (
+        ('from . import native_shared_contract as c', 'c'),
+        ('from . import native_shared_selection as selection', 'selection'),
+        ('from . import native_execution_authority_v2 as authority', 'authority'),
+        ('from .native_execution_registration import validate_runtime', 'validate_runtime'),
+    ):
+        bound(tree, statement, name)
+    for name in ('prepare',):
+        if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
+               or _rebinding(n, name, None) for n in ast.walk(tree) if n is not prepare):
+            raise fail('v2 preparation producer is replaced')
+    # Module-level CLI rebinding must not bypass the fixed decorated command.
+    for n in cli.body:
+        if n is command:
+            continue
+        if any((isinstance(x, ast.Name) and x.id == command.name and isinstance(x.ctx, (ast.Store, ast.Del)))
+               or _rebinding(x, command.name, None) for x in ast.walk(n)):
+            raise fail('v2 render command is replaced')
+    return [f'{relative}:{prepare.lineno}']
+
+
 def derive_native_shared_route(root: Path, tree: ast.Module) -> dict | None:
     """Source proof of a separate native render selector, not launch approval.
 
@@ -12026,52 +12157,56 @@ for key in {companions!r}:
     if (len(command_decorators) != 1 or command_decorators[0].keywords
             or [ast.unparse(n) for n in command_decorators[0].args] != [repr('render-native-shared')]):
         raise fail('offline CLI command spelling is not derived')
-    expected_imports = ast.parse('''from data_sheets_schema.api_runner import RunSpec
-from data_sheets_schema import native_shared_contract as contract
-from data_sheets_schema.native_shared_selection import capture
-from data_sheets_schema.native_shared_controller import bind_runtime
-''').body
-    for imp in expected_imports:
-        matches = [n for n in command.body if dump(n) == dump(imp)]
-        if len(matches) != 1:
-            raise fail('CLI uses an unproved constructor, contract or runtime binding')
-        alias = matches[0].names[0]
-        name = alias.asname or alias.name
-        if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
-               or _rebinding(n, name, command) for n in ast.walk(command) if n is not alias):
-            raise fail('CLI selected binding is rebound')
-    tries = [n for n in command.body if isinstance(n, ast.Try)]
-    if len(tries) != 1:
-        raise fail('unsupported offline CLI structure')
-    statements = tries[0].body
-    capture_prefix = ast.parse("captured = capture(selection)\ndocument = captured.document()\ninputs = document['inputs']").body
-    if [dump(n) for n in statements[:3]] != [dump(n) for n in capture_prefix]:
-        raise fail('CLI does not capture its actual selection argument')
-    assignments = [(i, n) for i, n in enumerate(statements) if isinstance(n, ast.Assign)
-                   and len(n.targets) == 1 and ast.unparse(n.targets[0]) == 'spec']
-    if len(assignments) != 1:
-        raise fail('CLI lacks one selected spec')
-    index, assignment = assignments[0]
-    call = assignment.value
-    if not isinstance(call, ast.Call) or ast.unparse(call.func) != 'RunSpec' or call.args:
-        raise fail('CLI spec constructor is not proven')
-    keywords = {k.arg: k.value for k in call.keywords}
-    required = {'condition': 'contract.CONDITION', 'render_version': 'contract.RENDERER',
-                'runtime': 'contract.RUNTIME', field: '1', 'prompt_text_env': 'True'}
-    if len(keywords) != len(call.keywords) or any(k not in keywords or ast.unparse(keywords[k]) != v for k,v in required.items()):
-        raise fail('CLI native identity differs from the contract')
-    tail = ast.parse('bind_runtime(spec, runtime_declaration, max_draft_checks)\ntext = spec.instruction').body
-    if [dump(n) for n in statements[index+1:index+3]] != [dump(n) for n in tail]:
-        raise fail('CLI does not bind the explicit runtime before rendering the same spec')
-    # The consumer is render-only. A new call here is not silently relabeled an
-    # execution gate; its source shape needs a separate derivation/review.
-    allowed_calls = {'capture', 'captured.document', 'ValueError', 'RunSpec', 'Path',
-        'captured.registration.raw.decode', 'run_date.strftime', 'bind_runtime',
-        'Path(out).resolve', 'destination.open', 'stream.write', 'click.ClickException',
-        'str', 'text.encode', 'click.echo', 'hashlib.sha256', 'hashlib.sha256(raw).hexdigest', 'len'}
-    if any(ast.unparse(n.func) not in allowed_calls for statement in command.body
-           for n in ast.walk(statement) if isinstance(n, ast.Call)):
-        raise fail('offline render consumer contains an unsupported call')
+    v2_import = ast.parse('from data_sheets_schema import native_execution_registration_v2 as preparation').body[0]
+    if any(dump(n) == dump(v2_import) for n in command.body):
+        evidence.extend(_derive_native_v2_render(root, cli, command))
+    else:
+        expected_imports = ast.parse('''from data_sheets_schema.api_runner import RunSpec
+    from data_sheets_schema import native_shared_contract as contract
+    from data_sheets_schema.native_shared_selection import capture
+    from data_sheets_schema.native_shared_controller import bind_runtime
+    ''').body
+        for imp in expected_imports:
+            matches = [n for n in command.body if dump(n) == dump(imp)]
+            if len(matches) != 1:
+                raise fail('CLI uses an unproved constructor, contract or runtime binding')
+            alias = matches[0].names[0]
+            name = alias.asname or alias.name
+            if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
+                   or _rebinding(n, name, command) for n in ast.walk(command) if n is not alias):
+                raise fail('CLI selected binding is rebound')
+        tries = [n for n in command.body if isinstance(n, ast.Try)]
+        if len(tries) != 1:
+            raise fail('unsupported offline CLI structure')
+        statements = tries[0].body
+        capture_prefix = ast.parse("captured = capture(selection)\ndocument = captured.document()\ninputs = document['inputs']").body
+        if [dump(n) for n in statements[:3]] != [dump(n) for n in capture_prefix]:
+            raise fail('CLI does not capture its actual selection argument')
+        assignments = [(i, n) for i, n in enumerate(statements) if isinstance(n, ast.Assign)
+                       and len(n.targets) == 1 and ast.unparse(n.targets[0]) == 'spec']
+        if len(assignments) != 1:
+            raise fail('CLI lacks one selected spec')
+        index, assignment = assignments[0]
+        call = assignment.value
+        if not isinstance(call, ast.Call) or ast.unparse(call.func) != 'RunSpec' or call.args:
+            raise fail('CLI spec constructor is not proven')
+        keywords = {k.arg: k.value for k in call.keywords}
+        required = {'condition': 'contract.CONDITION', 'render_version': 'contract.RENDERER',
+                    'runtime': 'contract.RUNTIME', field: '1', 'prompt_text_env': 'True'}
+        if len(keywords) != len(call.keywords) or any(k not in keywords or ast.unparse(keywords[k]) != v for k,v in required.items()):
+            raise fail('CLI native identity differs from the contract')
+        tail = ast.parse('bind_runtime(spec, runtime_declaration, max_draft_checks)\ntext = spec.instruction').body
+        if [dump(n) for n in statements[index+1:index+3]] != [dump(n) for n in tail]:
+            raise fail('CLI does not bind the explicit runtime before rendering the same spec')
+        # The consumer is render-only. A new call here is not silently relabeled an
+        # execution gate; its source shape needs a separate derivation/review.
+        allowed_calls = {'capture', 'captured.document', 'ValueError', 'RunSpec', 'Path',
+            'captured.registration.raw.decode', 'run_date.strftime', 'bind_runtime',
+            'Path(out).resolve', 'destination.open', 'stream.write', 'click.ClickException',
+            'str', 'text.encode', 'click.echo', 'hashlib.sha256', 'hashlib.sha256(raw).hexdigest', 'len'}
+        if any(ast.unparse(n.func) not in allowed_calls for statement in command.body
+               for n in ast.walk(statement) if isinstance(n, ast.Call)):
+            raise fail('offline render consumer contains an unsupported call')
     evidence.append(f'{cli_path}:{command.lineno}')
     binder = 'src/data_sheets_schema/native_shared_controller.py'
     binder_present = (root / binder).is_file()
@@ -12262,7 +12397,8 @@ def derive_native_shared_procedure(root: Path) -> dict:
         max_output_tokens=max_output_tokens, original_core=original_core,
         source_manifest=source_manifest, project=project, max_request_bytes=max_request_bytes,
         max_paths=max_paths, max_inventory_bytes=max_inventory_bytes, max_workers=max_workers,
-        schema_snapshot=schema_snapshot, derivations=derivations, captured_assets=captured_assets)''')
+        schema_snapshot=schema_snapshot, derivations=derivations, captured_assets=captured_assets,
+        omission_wire=omission_wire)''')
     prepare = function('typed_audit', '_prepare')
     inputs = statement(prepare, '''inputs = {key: _blob(value) for key, value in dict(
         original_full=original_full, bundle=bundle, manifest=manifest, receipt=receipt,
@@ -12274,10 +12410,14 @@ def derive_native_shared_procedure(root: Path) -> dict:
     derive_call = statement(prepare, 'derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets, _schema_reuse=_schema_reuse)')
     seal = statement(prepare, '''packet = _seal(dict(kind=PACKET,
         protocol=audit_protocol.select(protocol), inputs=inputs, schema_sources=rows,
-        project=project, limits=limits, **derived, limitations=list(LIMITATIONS)))''')
+        project=project, limits=limits, **derived, limitations=list(LIMITATIONS),
+        **({'omission_wire': omission_wire} if omission_wire is not None else {})))''')
+    statement(prepare, '''if omission_wire is not None and (type(omission_wire) is not str or omission_wire != SHARED_OMISSION_WIRE):
+        raise ValueError('unsupported omission wire selection')''')
     packet_size = statement(prepare, '_bounded_json(_json(packet), "packet", MAX_PACKET_BYTES)')
     packet_validation = statement(prepare, '''for worker in packet['plan']['workers']:
-        worker_request(packet, worker['id'], derivations=derivations, captured_assets=captured_assets)''')
+        worker_request(packet, worker['id'], derivations=derivations,
+                       **_native_options(captured_assets, _catalog_lookup))''')
     returned = statement(prepare, 'return packet')
     sole_return(prepare, returned)
     for name, uses in (('inputs', [inputs.targets[0], derive_call, seal]),
@@ -12338,15 +12478,18 @@ def derive_native_shared_procedure(root: Path) -> dict:
     plan = assignment(derived, 'plan')
     if not same(plan, "plan = batches.make_plan(raw['original_full'].decode('utf-8'), version=2, **{k: limits[k] for k in ('max_paths', 'max_inventory_bytes', 'max_workers')})"):
         raise fail('typed plan is not derived from the original full and partition limits')
-    prepared = assignment(derived, 'prepared').value
-    if not isinstance(prepared, ast.Call) or ast.unparse(prepared.func) != 'omissions._prepare':
-        raise fail('typed omission request does not use its actual constructor')
-    statement(derived, '''prepared = omissions._prepare(record=raw['original_full'], bundle=raw['bundle'],
+    prepared_branch = statement(derived, '''if captured_assets is None:
+        prepared = omissions.prepare(record=raw['original_full'], bundle=raw['bundle'],
+            manifest=raw['manifest'], receipt=raw['receipt'], context=raw['context'],
+            schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,
+            max_output_tokens=limits['max_output_tokens'], max_request_bytes=limits['max_request_bytes'])
+    else:
+        prepared = omissions._prepare(record=raw['original_full'], bundle=raw['bundle'],
         manifest=raw['manifest'], receipt=raw['receipt'], context=raw['context'],
         schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,
         max_output_tokens=limits['max_output_tokens'], max_request_bytes=limits['max_request_bytes'],
         captured_assets=captured_assets, _catalog=(_schema_reuse.for_snapshot(snapshot)
-            if captured_assets is not None and type(_schema_reuse) is _SchemaReuse else None))''')
+            if type(_schema_reuse) is _SchemaReuse else None))''')
     result = [n for n in derived.body if isinstance(n, ast.Return) and isinstance(n.value, ast.Tuple)]
     if len(result) != 1 or ast.unparse(field(result[0].value.elts[0], 'plan')) != 'plan' or \
             ast.unparse(field(result[0].value.elts[0], 'omission_request')) != 'prepared.request()':
@@ -12365,9 +12508,9 @@ def derive_native_shared_procedure(root: Path) -> dict:
     shared_fields = shared.func.value.args[0]
     prepared_reads = [field(shared_fields, key) for key in ('context', 'schema')]
     if [ast.unparse(n) for n in prepared_reads] != [
-            "prepared.request()['payload']['context']", "prepared.request()['payload']['schema']"]:
+            "prepared.request()['payload']['context']", "{k: v for k, v in prepared.request()['payload']['schema'].items() if k not in ('classes', 'slots')}"]:
         raise fail('typed context does not read its actual omission request')
-    unchanged(derived, 'prepared', [assignment(derived, 'prepared').targets[0], *prepared_reads,
+    unchanged(derived, 'prepared', [prepared_branch.body[0].targets[0], prepared_branch.orelse[0].targets[0], *prepared_reads,
         field(result[0].value.elts[0], 'omission_request'), result[0].value.elts[2]])
 
     packet_binding = statement(run, 'self.packet = self._packet()')

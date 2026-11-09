@@ -32,6 +32,10 @@ class FrozenSpec:
 
     @classmethod
     def capture(cls, spec):
+        """        RunSpec boundary: validated-caller
+
+        RunSpec precondition: Admission caller supplies the unchanged validated RunSpec from freshly verified preparation; this captures fields and render_spec without granting authority.
+        """
         fields = {name: getattr(spec, name) for name in _SPEC_FIELDS}
         fields = {name: str(value) if isinstance(value, Path) else value
                   for name, value in fields.items()}

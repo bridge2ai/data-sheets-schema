@@ -85,6 +85,10 @@ def activate(selection, execution_raw, started_raw):
 
     This writes no session declaration. The later session binding must come
     from actual initialized native/control streams.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Fixed lifetime supplies selected execution bytes; registration.verified and reconstruct_composition rederive preparation before activation effects.
     """
     from . import native_execution_registration_v2 as registration
     from . import native_shared_controls_orchestration as controls_orchestration
@@ -174,7 +178,12 @@ def _base(selection_path, *, _catalogs=None, _admission=None):
 
 
 def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files, observed_prefixes, _admission=None):
-    """Bind the actual parent-observed initialization, never owner summary flags."""
+    """Bind the actual parent-observed initialization, never owner summary flags.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies actual observed initialization; _base reconstructs the active execution and its guarded preparation before stream binding.
+    """
     selection, reader, value, composition, _ = _base(selection_path, _admission=_admission)
     streams, (transcript, control) = _live_streams(value, stream_files=stream_files, transcript_bytes=transcript_bytes, control_bytes=control_bytes)
     c.exact(observed_prefixes, {'transcript', 'control'}, 'parent observed prefixes')
@@ -225,7 +234,12 @@ def _persist_observation(run, kind, payload):
 
 
 def capture_stage(selection_registration_path, *, _catalogs=None):
-    """Capture the sole pending, actually admitted fixed advance invocation."""
+    """Capture the sole pending, actually admitted fixed advance invocation.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies the selected registration path; _load_live reconstructs active execution and preparation before returning the pending invocation.
+    """
     run = _load_live(str(selection_registration_path), _catalogs=_catalogs)
     if run.phase1 is None:
         raise ValueError('advance precedes actual sealed originals')
@@ -265,7 +279,12 @@ def capture_stage(selection_registration_path, *, _catalogs=None):
 
 
 def publish_stage(invocation, proposal, *, _catalogs=None):
-    """Recheck the same current invocation, then perform only derived effects."""
+    """Recheck the same current invocation, then perform only derived effects.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies a captured invocation; capture_stage rechecks its live execution and guarded preparation before publication.
+    """
     from .native_shared_publication_orchestration import publish_derived
     if type(invocation) is not c.StageInvocationCapture:
         raise ValueError('publication requires the actual selected captured invocation')
@@ -416,7 +435,12 @@ def observe_advance_settled(run, identity):
 
 
 def selected_receipt_paths(selection_registration_path):
-    """Explicit live S reaches only the paths captured in its already active E."""
+    """Explicit live S reaches only the paths captured in its already active E.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit active selection; _base reconstructs the execution and its guarded preparation before returning paths.
+    """
     _, _, _, composition, spec = _base(str(selection_registration_path))
     paths = spec._agentic_artifact_paths
     return {'full': Path(paths['full']), 'receipt': Path(paths['receipt']),
@@ -425,6 +449,10 @@ def selected_receipt_paths(selection_registration_path):
 
 
 def live_receipt_block(selection_registration_path, *, full_path, receipt_path):
+    """    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit active selection and output paths; _load_live reconstructs the selected preparation before receipt assessment.
+    """
     run = _load_live(str(selection_registration_path))
     phase_replay(run)
     block = _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
@@ -432,6 +460,10 @@ def live_receipt_block(selection_registration_path, *, full_path, receipt_path):
 
 
 def live_provenance_block(selection_registration_path):
+    """    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit active selection; _load_live reconstructs preparation and current final obligations before provenance assessment.
+    """
     run = _load_live(str(selection_registration_path))
     phase, _ = phase_replay(run)
     required = {'draft', 'final_evidence', 'final_source_inventory', 'final_receipts', 'final_scope',
@@ -476,12 +508,21 @@ def _recorded_run(spec, record):
 
 
 def recorded_receipt_block(spec, *, record, full_path, receipt_path):
+    """    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies a validated spec or None plus explicit recorded provenance; _recorded_run reconstructs the recorded selection and compares render_spec before assessment.
+    """
     run = _recorded_run(spec, record)
     return _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
 
 
 def recorded_receipt_claims(spec, *, record, full_path, receipt_path, expected_block):
-    """Claim sidecar from the same captured effective bytes as the checked block."""
+    """Claim sidecar from the same captured effective bytes as the checked block.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies a validated spec or None and a checked receipt block; _recorded_run reconstructs selection and compares the recorded render_spec before deriving claims.
+    """
     from . import native_shared_receipts as receipts
     from . import receipts as rc
     from .audit_omissions import _mapping

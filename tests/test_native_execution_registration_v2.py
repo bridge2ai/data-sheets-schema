@@ -95,6 +95,31 @@ def _prepare(inputs):
     return registration.prepare(inputs['selection'], inputs['runtime_path'], **inputs['kwargs'])
 
 
+def test_preparation_factory_guards_constructed_spec_before_instruction(inputs, monkeypatch):
+    """The path-input factory must guard its newly built RunSpec, not a dummy argument."""
+    from data_sheets_schema import api_runner as api
+    original = api.RunSpec
+    constructed = []
+
+    def invalid_registered_spec(**kwargs):
+        spec = original(**kwargs)
+        spec.registered_input_paths = True
+        spec.bundle = spec.bundle.with_name('unbound-factory-input.txt')
+        constructed.append(spec)
+        return spec
+
+    def forbidden_instruction(self):
+        pytest.fail('instruction preceded the constructed RunSpec entry guard')
+
+    monkeypatch.setattr(api, 'RunSpec', invalid_registered_spec)
+    monkeypatch.setattr(original, 'instruction', property(forbidden_instruction))
+    before = _files(inputs['root'])
+    with pytest.raises(ValueError, match='registered input'):
+        _prepare(inputs)
+    assert len(constructed) == 1
+    assert _files(inputs['root']) == before
+
+
 @pytest.fixture
 def prepared(inputs):
     return inputs, _prepare(inputs)

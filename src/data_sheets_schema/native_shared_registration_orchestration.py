@@ -52,7 +52,12 @@ def _registration_body(composition_path, system_path, **kwargs):
 
 
 def registration(composition_path, system_path, **kwargs):
-    """Produce a closed v2 proposal; never reserve an attempt or grant admission."""
+    """Produce a closed v2 proposal; never reserve an attempt or grant admission.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit composition/system paths; _registration_body verifies preparation and composition before creating an execution proposal.
+    """
     body = _registration_body(composition_path, system_path, **kwargs)
     with authority.loaded_dependencies(body['dependencies']) as controls:
         value = controls['prepare_registration_v2'].envelope(body)
@@ -66,6 +71,10 @@ def verified_v2_body(body_raw, *, preparation_raw):
 
     A calls the separate input-only rebuild_v2_body and owns the outer body
     comparison. This retained helper does not bypass A's source/import guard.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies bounded body/preparation bytes; _registration_body reconstructs guarded preparation and compares the complete body.
     """
     value = c.strict_json(body_raw, 'native shared v2 execution body', c.HARD_LIMITS['request_bytes'])
     if (type(value) is not dict or value.get('kind') != KIND
@@ -95,7 +104,12 @@ def verified_v2_body(body_raw, *, preparation_raw):
     return value
 
 def verified(raw):
-    """Explicit v2 outer-envelope verifier; no historical fallback."""
+    """Explicit v2 outer-envelope verifier; no historical fallback.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies outer execution bytes; execution_v2.verified freshly rederives guarded preparation under verified controls.
+    """
     dependencies = authority.dependency_identity()
     with control_loading.loaded_controls(dependencies) as controls:
         return execution_v2.verified(raw, classifier_projection=controls)

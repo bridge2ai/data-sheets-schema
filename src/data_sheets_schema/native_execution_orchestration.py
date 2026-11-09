@@ -98,6 +98,10 @@ def authorizations(raw, value, *, review_path, ci_path, launch_word_path, contra
 
     The artifacts are caller-supplied review/CI/owner evidence, not signatures.
     A matching hash does not authenticate their author or GitHub's service.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies execution bytes and a fixed contract; verified reconstructs the selected preparation before external authorization comparisons.
     """
     contract.require_fixed()
     inputs = {name: str(Path(path).absolute()) for name, path in {
@@ -227,6 +231,10 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
 
     This method can invoke the selected native executable. Calling it is a
     separate action from preparation; there is no inferred model or live value.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit execution registration and fixed effects; registration.verified reconstructs the guarded preparation before any execution effect.
     """
     contract.require_fixed()
     from .native_execution_capabilities import loaded_capabilities

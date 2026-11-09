@@ -89,13 +89,16 @@ def git(*args):
                                    env={**os.environ, 'GIT_NO_LAZY_FETCH': '1'}, timeout=30)
 
 
-def build_and_inspect(out, dependency_site):
+def build_and_inspect(out, dependency_site, *, scratch_root=SCRATCH):
     require_network_denial()
     if os.path.lexists(LOCK):
         raise RuntimeError('quiet window is active; census not started')
     out = Path(out).absolute()
-    if out != out.resolve() or out == SCRATCH or not out.is_relative_to(SCRATCH):
-        raise ValueError('census output must be a fresh literal C4 scratch path')
+    scratch_root = Path(scratch_root).absolute()
+    if scratch_root != scratch_root.resolve(strict=True) or not scratch_root.is_dir():
+        raise ValueError('census scratch root must be a physical directory')
+    if out != out.resolve() or out == scratch_root or not out.is_relative_to(scratch_root):
+        raise ValueError('census output must be a fresh literal path below the assigned scratch root')
     dependency_site = Path(dependency_site)
     if (dependency_site != dependency_site.resolve(strict=True)
             or dependency_site.name != 'site-packages' or not dependency_site.is_dir()):

@@ -263,6 +263,10 @@ def saved(selection, *, execution_raw, spec, composition_raw, captured_instructi
     This pure replay neither proves canonical rendering nor grants admission.
     The caller independently verifies canonical C/E and supplies the actual
     instruction artifact. ``finish()`` is mandatory for attribution acceptance.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies an independently verified spec and canonical preparation/composition plus actual captured instruction; saved replay does not confer admission.
     """
     return _SavedAttribution(selection, execution_raw=execution_raw, spec=spec, composition_raw=composition_raw,
                              captured_instruction=captured_instruction,

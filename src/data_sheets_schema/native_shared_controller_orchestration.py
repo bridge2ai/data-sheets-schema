@@ -131,12 +131,22 @@ def _compose(preparation_raw, instruction_path, *, submitted_raw=None):
 
 
 def compose(preparation_raw: bytes, *, instruction_path):
-    """Compose actual U3-A preparation and instruction bytes, without effects."""
+    """Compose actual U3-A preparation and instruction bytes, without effects.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit preparation bytes and instruction path; _compose verifies preparation and reconstructs the guarded RunSpec before composing.
+    """
     return _compose(preparation_raw, instruction_path)[0]
 
 
 def reconstruct_composition(raw):
-    """Fresh live-source reconstruction; never use in captured-only replay."""
+    """Fresh live-source reconstruction; never use in captured-only replay.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies composition bytes; _compose revalidates preparation and reconstructs its RunSpec before comparing the complete composition.
+    """
     value = consumer.captured_composition(raw)
     try:
         expected, spec, current = _compose(value['preparation_raw_json'].encode('utf-8'),
@@ -149,7 +159,12 @@ def reconstruct_composition(raw):
 
 
 def verified_composition(raw):
-    """Recheck the entire closed composition against fresh U3-A preparation."""
+    """Recheck the entire closed composition against fresh U3-A preparation.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies composition bytes; reconstruct_composition performs fresh preparation and RunSpec reconstruction before comparison.
+    """
     return reconstruct_composition(raw)[0]
 
 
@@ -211,6 +226,10 @@ class CallbackAdapter:
             raise ValueError('native26 requires its actual fixed phase observer and selected policy')
 
     def activate_before_dispatch(self, started_raw):
+        """        RunSpec boundary: validated-caller
+
+        RunSpec precondition: Adapter holds the validated spec from composition reconstruction; fresh execution verification precedes freezing the same spec for callback admission.
+        """
         if self._activated:
             raise ValueError('native shared callback identity is already spent')
         with control_loading.loaded_controls(self.value['dependencies']) as controls:

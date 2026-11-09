@@ -210,6 +210,10 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
     checked, and the captured fixed D consumer rebuilds E on each capture.
     No mutable RunSpec, caller-selected verifier, or source loader is handed
     to callback code. Missing D modules refuse here, before activation writes.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Main-thread caller has just verified outer execution through A and supplies its unchanged prepared spec and composition; frozen capture is not independent admission.
     """
     require_main_thread()
     frozen = FrozenSpec.capture(spec)

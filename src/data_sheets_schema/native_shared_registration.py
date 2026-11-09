@@ -147,7 +147,12 @@ def _production_sources(dependencies):
 
 
 def permission_expectation(runtime, selected, spec, effective_system, config_directory, dependencies):
-    """Expected bindings are selected software/input authority, never probe flags."""
+    """Expected bindings are selected software/input authority, never probe flags.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies the unchanged validated spec from verified composition and its selected runtime; expected probe bindings grant no execution authority.
+    """
     from .native_shared_permissions import recipe
     doc = c.parse_selection(selected['selection_raw_json'].encode('utf-8'))
     commands = policy.helper_commands(selected['policy'])
@@ -290,6 +295,10 @@ def rebuild_v2_body(*, preparation_raw, composition_path, system_path,
     No submitted execution body or derived verdict is accepted. The live C
     projection stays explicit and is checked inside the actual reconstruction.
     A verifies preparation before this entry and compares the entire result.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: A has verified preparation and supplies an explicit classifier projection; input-only reconstruction verifies composition and its prepared spec before producing the body.
     """
     if (type(preparation_raw) is not bytes or not preparation_raw
             or len(preparation_raw) > c.HARD_LIMITS['request_bytes']):

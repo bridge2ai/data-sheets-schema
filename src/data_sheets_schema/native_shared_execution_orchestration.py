@@ -56,6 +56,10 @@ def _engine_bindings(*, launch_guard=None):
 
 
 def authorizations(raw, value, *, review_path, ci_path, launch_word_path):
+    """    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies execution bytes and a fixed verified value; the common authorization routine freshly verifies preparation before checking declarations.
+    """
     from .native_execution_orchestration import authorizations as check
     contract, _ = _engine_bindings()
     return check(raw, value, review_path=review_path, ci_path=ci_path,
@@ -64,6 +68,10 @@ def authorizations(raw, value, *, review_path, ci_path, launch_word_path):
 
 def launch(registration_raw, *, review_path, ci_path, launch_word_path,
            subscription_guard_path, subscription_guard_sha256):
+    """    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit execution registration; registration.verified reconstructs guarded preparation before creating fixed effects or dispatching.
+    """
     from .native_execution_orchestration import launch as execute
     from .native_subscription_guard import load_guard
     value = registration.verified(registration_raw)

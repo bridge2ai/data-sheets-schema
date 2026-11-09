@@ -113,7 +113,12 @@ def compose(preparation_raw, *, prepared, spec, current, runtime, instruction,
 def reconstruct_composition(raw, *, prepared, spec, current, runtime, instruction,
                             controller_sources, command_argv, repository, output_directories,
                             python, python_version, classifier_projection):
-    """Compare the complete submitted C with explicit independently verified inputs."""
+    """Compare the complete submitted C with explicit independently verified inputs.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies the unchanged validated spec and independently verified preparation, selection and runtime; compose compares the complete captured composition without live reconstruction.
+    """
     pure_controls.require_controls(classifier_projection)
     value = captured_composition(raw)
     expected = compose(value['preparation_raw_json'].encode('utf-8'), prepared=prepared,
@@ -129,6 +134,10 @@ def reconstruct_composition(raw, *, prepared, spec, current, runtime, instructio
 def verified_composition(raw, *, prepared, spec, current, runtime, instruction,
                          controller_sources, command_argv, repository, output_directories,
                          python, python_version, classifier_projection):
+    """    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies the unchanged validated spec and independently verified reconstruction inputs; reconstruct_composition compares the complete composition.
+    """
     return reconstruct_composition(raw, prepared=prepared, spec=spec, current=current,
         runtime=runtime, instruction=instruction, controller_sources=controller_sources,
         command_argv=command_argv, repository=repository, output_directories=output_directories,

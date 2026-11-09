@@ -12,6 +12,10 @@ from ..native_shared_capture_orchestration import capture_stage, publish_stage
 
 
 def main():
+    """    RunSpec boundary: validated-caller
+
+    RunSpec precondition: CLI supplies an explicit registration path; capture_stage revalidates selected preparation and pending invocation before replay and publication.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
     advance = commands.add_parser('advance')

@@ -286,14 +286,18 @@ def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=No
         authority = _source_authority(raw["source_manifest"], project)
     _exact(limits, {"max_paths", "max_inventory_bytes", "max_workers", "max_output_tokens", "max_request_bytes"}, "limits")
     snapshot = _snapshot(schema_rows)
-    producer = omissions.prepare if captured_assets is None else omissions._prepare
-    native_options = {} if captured_assets is None else dict(captured_assets=captured_assets,
-        _catalog=(_schema_reuse.for_snapshot(snapshot) if type(_schema_reuse) is _SchemaReuse else None))
-    prepared = producer(record=raw["original_full"], bundle=raw["bundle"],
-        manifest=raw["manifest"], receipt=raw["receipt"], context=raw["context"],
-        schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,
-        max_output_tokens=limits["max_output_tokens"], max_request_bytes=limits["max_request_bytes"],
-        **native_options)
+    if captured_assets is None:
+        prepared = omissions.prepare(record=raw["original_full"], bundle=raw["bundle"],
+            manifest=raw["manifest"], receipt=raw["receipt"], context=raw["context"],
+            schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,
+            max_output_tokens=limits["max_output_tokens"], max_request_bytes=limits["max_request_bytes"])
+    else:
+        prepared = omissions._prepare(record=raw["original_full"], bundle=raw["bundle"],
+            manifest=raw["manifest"], receipt=raw["receipt"], context=raw["context"],
+            schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,
+            max_output_tokens=limits["max_output_tokens"], max_request_bytes=limits["max_request_bytes"],
+            captured_assets=captured_assets,
+            _catalog=(_schema_reuse.for_snapshot(snapshot) if type(_schema_reuse) is _SchemaReuse else None))
     plan = batches.make_plan(raw["original_full"].decode("utf-8"), version=2,
         **{k: limits[k] for k in ("max_paths", "max_inventory_bytes", "max_workers")})
     contracts = {stage: {"contract": output_format.contract(stage, version=2),

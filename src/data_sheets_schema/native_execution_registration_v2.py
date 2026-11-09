@@ -225,7 +225,9 @@ def _pin_map(captured, runtime, dependencies):
 def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
     """Prepare the explicit shared-native input contract; perform no writes.
 
-    RunSpec boundary: guarded
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit selection and runtime paths, never a RunSpec argument; this factory constructs RunSpec and calls _require_registered_input_spellings before instruction, input_identity or render_spec access.
     """
     from .api_runner import RunSpec, _require_registered_input_spellings
     from .native_shared_evidence import read_regular as current_read_regular
@@ -278,7 +280,12 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks)
 
 
 def verify_preparer(raw, *, job_id):
-    """Return a fresh rederived shared preparation, never a launch capability."""
+    """Return a fresh rederived shared preparation, never a launch capability.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies bounded preparation bytes and job identity; prepare reconstructs and guards the fresh RunSpec before the full comparison.
+    """
     _job_id(job_id)
     body, dependencies = _wire(raw)
     c.exact(body, _PREPARATION_KEYS, 'shared-native v2 preparation')
@@ -375,6 +382,10 @@ def verified(raw, *, classifier_projection):
     and original/effective receipt authority from inputs only. The submitted
     body's derived fields are never passed to the reconstruction consumer.
     The live classifier projection is forwarded unchanged; C owns its validation.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies execution bytes and an explicit classifier projection; verification rederives preparation through verify_preparer before consumer reconstruction.
     """
     if classifier_projection is None:
         raise ValueError('v2 execution requires an explicit classifier projection')
@@ -537,7 +548,12 @@ def _checked_reservations(result, value, evidence):
 
 
 def admit(raw, *, review_path, ci_path, launch_word_path, classifier_projection):
-    """Fresh pre-effect checks. U3-D must call again immediately before effects."""
+    """Fresh pre-effect checks. U3-D must call again immediately before effects.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies explicit authorization paths and classifier projection; verified rederives the guarded preparation before admission checks.
+    """
     if classifier_projection is None:
         raise ValueError('v2 execution requires an explicit classifier projection')
     if threading.current_thread() is not threading.main_thread():

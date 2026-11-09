@@ -22,7 +22,12 @@ class _LiveAttribution(consumer._Attribution):
 
 
 def live(selection, *, execution_raw, spec, composition_raw):
-    """Verify current preparation/C, then hand captured inputs to the observer."""
+    """Verify current preparation/C, then hand captured inputs to the observer.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies a verified spec from the same preparation/composition; reconstruct_composition rechecks that preparation and compares render_spec before observation.
+    """
     from . import native_shared_controller_orchestration as controller
     consumer._joined(selection, execution_raw, spec, composition_raw)
     composition = c.strict_json(composition_raw, 'attribution composition', c.HARD_LIMITS['request_bytes'])

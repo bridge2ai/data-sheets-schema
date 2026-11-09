@@ -36,7 +36,8 @@ def test_actual_c_and_overlay_d_graphs_are_accepted(pytestconfig, record_propert
     dependencies = Path(json.loads(bootstrap.read_bytes())['dependency_site'])
     # Keep source/graph evidence outside transient pytest fixture cleanup.
     out = Path(pytestconfig.option.basetemp).parent / 'graph-census'
-    result = module.build_and_inspect(out, dependencies)
+    plan = json.loads((bootstrap.parent / 'plan.json').read_bytes())
+    result = module.build_and_inspect(out, dependencies, scratch_root=plan['scratch_root'])
     record_property('census_artifact', str(out / 'census.json'))
     expected = set(module.C_CONSUMERS) | set(module.D_CONSUMERS) | set(module.D_SUPPORT)
     assert set(result['outcomes']) == expected

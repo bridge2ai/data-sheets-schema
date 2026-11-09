@@ -90,7 +90,12 @@ def _captured_selection(pool, value):
 
 
 def rebuild(pool, value, *, _catalogs=None):
-    """Reconstruct the captured run; this function performs no filesystem reads."""
+    """Reconstruct the captured run; this function performs no filesystem reads.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies bounded captured pool and execution value; RunSpec.from_render_spec validates the captured spec before replay, with no filesystem reads or live admission.
+    """
     from .api_runner import RunSpec
     selected = _captured_selection(pool, value)
     if sum(member.captured.pin.bytes for member in pool.members) > selected.bounds()['max_evidence_bytes']:

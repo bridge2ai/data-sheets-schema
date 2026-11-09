@@ -29,7 +29,12 @@ def _capture_member(snapshot, path, role, limit, expected=None):
 
 
 def capture(value, controls, *, authority_inputs, registration_raw):
-    """One actual bounded capture, followed by the same saved-only reconstruction."""
+    """One actual bounded capture, followed by the same saved-only reconstruction.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies verified execution and complete controls; _load reconstructs selected preparation before bounded capture and saved replay.
+    """
     composition = c.strict_json(value['composition_raw_json'].encode(), 'captured C', c.HARD_LIMITS['request_bytes'])
     selected_doc = c.parse_selection(composition['selection_raw_json'].encode('utf-8'))
     controls.require_complete()
@@ -154,6 +159,10 @@ def _classify_saved(command, policy, snapshot, controls):
 
 
 def prepare(pool, value, controls, *, snapshot=None, _catalogs=None):
+    """    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies captured pool, verified execution and complete controls; rebuild validates the captured render spec before result assessment.
+    """
     from . import native_shared_attribution as attribution
     from . import native_shared_gates as gates
     from .audit_omissions import _mapping
@@ -297,7 +306,12 @@ def write_report(prepared, destination):
 
 
 def require_saved_basis(value, result):
-    """Additional fixed readback; failed attempts never gain success by omission."""
+    """Additional fixed readback; failed attempts never gain success by omission.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Common reader has checked retained report bytes; saved reconstruction validates the captured render spec and never upgrades failed attempts to success.
+    """
     # The common reader has already checked a declared report from the bytes
     # retained by its file validation loop, including an unavailable capture.
     if 'receipt_origin_reporting' not in value and 'receipt_origin' in result['gates']['receipts']:

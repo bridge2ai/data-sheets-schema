@@ -123,7 +123,12 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     transcript is read here, so it is the measurement the record carries
     while it still describes the receipt, else `unknown`. `origin_prior` is
     that measurement where the record no longer holds it -- a re-record
-    rewrites the file before its inline checks run."""
+    rewrites the file before its inline checks run.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies recorded provenance, not a live RunSpec; native receipts reconstruct the explicitly recorded selection through block_for.
+    """
     if schema_policy not in {"recorded", "legacy_current"}:
         raise ValueError("schema_policy must be recorded or legacy_current")
     want = (lambda name: only is None or name in only)
