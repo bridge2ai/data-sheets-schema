@@ -6,6 +6,7 @@ under the assigned scratch root. Local offline handoff, no remote operations.
 """
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -53,6 +54,28 @@ def parity(label):
         for name,path in sorted(baseline.items())]
     save(label+'-comparison.json', result)
     print(json.dumps(dict(label=label, equal=sum(row['equal'] for row in result), total=len(result))))
+
+def packets(manifest_path):
+    if os.path.lexists(ROOT.parent / 'plans/native_quiet_window.lock'):
+        raise RuntimeError('quiet window is active')
+    manifest = json.loads(Path(manifest_path).read_bytes())
+    tree, bundle = Path(manifest['tree']), Path(manifest['owner_bundle'])
+    paths = [str(bundle / (row['name']+'.patch')) for row in manifest['packets']]
+    env = {**os.environ, 'GIT_NO_LAZY_FETCH':'1', 'GIT_CONFIG_GLOBAL':'/dev/null', 'GIT_CONFIG_SYSTEM':'/dev/null'}
+    base = ['git', '--no-replace-objects', '-c', 'core.hooksPath=/dev/null', '-c', 'protocol.allow=never', 'apply', '--check']
+    subprocess.run(base+paths, cwd=ROOT, env=env, check=True, timeout=60)
+    subprocess.run(base+['--reverse']+paths, cwd=tree, env=env, check=True, timeout=60)
+    for row in manifest['packets']:
+        assert sha((ROOT / row['target']).read_bytes()) == row['preimage_sha256']
+        assert sha((tree / row['target']).read_bytes()) == row['postimage_sha256']
+        assert sha((bundle / (row['name']+'.patch')).read_bytes()) == row['patch_sha256']
+        assert row['changed_from_u1'] == (row['name'] == 'run_spec_boundary_contracts')
+    result = dict(manifest=str(Path(manifest_path).resolve()), owner_bundle=str(bundle),
+        forward_check=True, reverse_check=True, packet_hashes_verified=True,
+        worktree_packets_installed=False, packets=manifest['packets'])
+    save('owner-packet-verification.json', result)
+    (SCRATCH / 'owner-packets/u3f-current.json').write_text(json.dumps(result, indent=2)+'\n')
+    print(json.dumps(dict(owner_bundle=str(bundle), verified_packets=len(paths))))
 
 def summary():
     runs, ledger, hashes = [], [], {}
@@ -104,3 +127,5 @@ if __name__ == '__main__':
         parity(sys.argv[2])
     elif sys.argv[1] == 'summary':
         summary()
+    elif sys.argv[1] == 'packets':
+        packets(sys.argv[2])
