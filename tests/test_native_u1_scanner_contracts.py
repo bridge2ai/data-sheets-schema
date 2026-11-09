@@ -109,6 +109,66 @@ def test_generation_launch_inventory_retains_candidate_and_closure_boundaries(tm
     assert rows[0]['carries'] is True and rows[0]['memory_off'] is True
 
 
+def test_api_meaning_refuses_missing_registered_launch_inventory(tmp_path):
+    facts = {'conditions': {}, 'controllers': {}, 'legacy_scripts': []}
+    with pytest.raises(scan.ConfigError, match='registered_launch_sources.*is missing'):
+        scan.api_meaning(tmp_path, facts)
+
+
+@pytest.mark.parametrize('replacement', [
+    None,
+    "spec.condition != 'generic_v10' or spec.render_version != 26",
+    'spec.is_agentic',
+    'False',
+])
+def test_generation_closure_keeps_native_continuation_and_its_actual_gate(tmp_path, replacement):
+    """Importing a genuine continuation preserves its proof, including refusal failures."""
+    relative = 'src/data_sheets_schema/native_shared_registration.py'
+    continuation = tmp_path / relative
+    entry = tmp_path / 'src/data_sheets_schema/cli/prompt.py'
+    runner = tmp_path / RUNNER
+    entry.parent.mkdir(parents=True)
+    entry.write_text('def render():\n    pass\n')
+    runner.write_text('class RunSpec:\n    pass\n')
+    (tmp_path / scan.CLI_API).write_bytes((ROOT / scan.CLI_API).read_bytes())
+    source = (ROOT / relative).read_text()
+    original = "spec.condition != 'generic_v10' or spec.render_version != 26 or not spec.is_agentic"
+    assert source.count(original) == 1
+    if replacement is not None:
+        source = source.replace(original, replacement, 1)
+    continuation.write_text(source)
+    runner_tree = scan._tree(ROOT / RUNNER)
+    agentic = scan.condition_table(ROOT)['agentic_runtimes']
+
+    def inventory():
+        parsed = {path: (path.read_text(), ast.parse(path.read_text()))
+                  for path in (entry, continuation, runner)}
+        closure = scan._package_closure(tmp_path, ['data_sheets_schema.cli.prompt'])
+        excluded = frozenset(path.relative_to(tmp_path).as_posix() for path in closure)
+        controllers, _, _ = scan.run_controllers(tmp_path, parsed, {}, excluded)
+        sources = scan._registered_launch_sources(tmp_path, parsed, {}, controllers, closure)
+        proof = scan.audit_continuations(tmp_path, 20, sorted(sources), runner_tree, agentic)
+        return controllers, proof
+
+    before_controllers, before = inventory()
+    assert relative in before_controllers
+    entry.write_text('from data_sheets_schema import native_shared_registration\n'
+                     'def render():\n    pass\n')
+    after_controllers, after = inventory()
+    assert relative not in after_controllers
+    assert after == before
+    assert [row['package'] for row in after['continuations']] == ['src/data_sheets_schema']
+    if replacement is None:
+        assert after['runtime_hybrid_possible'] is False
+        assert after['ungated_continuations'] == after['uncovered'] == []
+        assert {(row['path'], row['condition'], row['parent_renderer']) for row in after['gates']} == {
+            (relative, 'generic_v10', 26)}
+    else:
+        assert after['runtime_hybrid_possible'] is True
+        assert after['ungated_continuations'] == ['src/data_sheets_schema']
+        assert after['gates'] == []
+
+
 def test_native_complete_v2_route_derives():
     route = scan.derive_native_shared_route(ROOT, scan._tree(ROOT / RUNNER))
     assert route['cli'] == 'd4d prompt render-native-shared'

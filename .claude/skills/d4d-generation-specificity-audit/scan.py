@@ -11434,6 +11434,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     described_set = {_rel(root, p) for p in described}
     launch_sources = _registered_launch_sources(root, parsed, index, controllers,
                                                 api_closure + native_closure)
+    facts["registered_launch_sources"] = sorted(launch_sources)
     launches = launch_flags(launch_sources, parsed)
     # not shown to pass --safe-mode: the session descriptions stay on; not
     # shown to pass --safe-mode or --bare: the memory and the hooks too (#4131)
@@ -15351,7 +15352,7 @@ else:
 
 
 def api_meaning(root: Path, facts: dict) -> dict:
-    for key in ("conditions", "controllers", "legacy_scripts"):
+    for key in ("conditions", "controllers", "legacy_scripts", "registered_launch_sources"):
         if key not in facts:
             raise ConfigError(f"api_meaning needs discover()'s facts; `{key}` is missing")
     tree = _tree(root / RUNNER)
@@ -15376,7 +15377,11 @@ def api_meaning(root: Path, facts: dict) -> dict:
     full_schema = schema_form.startswith("merged LinkML schema")
     whole_schema = schema_form.startswith("schema digest") and any("_all.yaml" in c for c in strings)
     floor = derive_agentic_audit_from(build)
-    continuation = audit_continuations(root, floor, sorted(facts["controllers"]), tree, cond["agentic_runtimes"])
+    # Generation-closure membership changes a module's role, not whether
+    # its registered launch can continue a parent run. Apply the same gate
+    # proof to those already discovered launches; never infer a gate here.
+    continuation_sources = sorted(set(facts["controllers"]) | set(facts["registered_launch_sources"]))
+    continuation = audit_continuations(root, floor, continuation_sources, tree, cond["agentic_runtimes"])
     followups = derive_followups(tree, phases, consts, root=root)
     native_shared = derive_native_shared_route(root, tree)
     if native_shared:

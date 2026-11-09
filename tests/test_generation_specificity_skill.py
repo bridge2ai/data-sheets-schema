@@ -5381,7 +5381,8 @@ class TestOptionalFollowupDerivation(unittest.TestCase):
     def test_optional_turn_is_not_a_default_monolithic_call(self):
         with tempfile.TemporaryDirectory() as d:
             root = self.root(d)
-            facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": []}
+            facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": [],
+                     "registered_launch_sources": []}
             meaning = scan.api_meaning(root, facts)
         self.assertEqual(set(meaning["followup_turns"]), {"restore_full"})
         for row in meaning["conditions"].values():
@@ -5423,7 +5424,8 @@ class TestOptionalFollowupDerivation(unittest.TestCase):
             with self.subTest(value=value), tempfile.TemporaryDirectory() as d:
                 root = self.root(d)
                 self.restricted(root, value=value)
-                facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": []}
+                facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": [],
+                         "registered_launch_sources": []}
                 meaning = scan.api_meaning(root, facts)
                 turn = meaning["followup_turns"]["restore_full"]
                 self.assertEqual(turn["conditions"], ["generic_v2"])
@@ -5713,7 +5715,8 @@ def run(spec, client):
                 self.assertEqual(row['via'][0]['replacement']['phase'],'audit')
                 self.assertTrue(row['calls'][0].startswith(self.HELPER+':'))
                 self.assertTrue(row['delegated_plan']['evidence'][-1].startswith(self.PLAN+':'))
-            meaning=scan.api_meaning(root,{'conditions':scan.condition_table(root),'controllers':{},'legacy_scripts':[]})
+            meaning=scan.api_meaning(root,{'conditions':scan.condition_table(root),'controllers':{},'legacy_scripts':[],
+                                          'registered_launch_sources':[]})
             self.assertEqual(meaning['conditions']['generic']['model_calls_minimum'],3)
             self.assertIsNone(meaning['conditions']['generic_v3']['model_calls_minimum'])
             selected=meaning['conditions']['generic_v3']['selected_procedure']
@@ -6133,7 +6136,8 @@ class TestApiMeaning(unittest.TestCase):
         def meaning(**kw):
             with tempfile.TemporaryDirectory() as d:
                 root = _synthetic_root(Path(d), **kw)
-                facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": []}
+                facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": [],
+                         "registered_launch_sources": []}
                 return scan.api_meaning(root, facts)
 
         mono = meaning()
@@ -6469,7 +6473,8 @@ class TestDerivationsFailLoudly(unittest.TestCase):
     def test_a_runner_that_branches_on_the_arm_is_not_derived(self):
         with tempfile.TemporaryDirectory() as d:
             root = _synthetic_root(Path(d), extra="\ndef _x(spec):\n    if spec.arm == 'other':\n        pass\n")
-            facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": []}
+            facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": [],
+                     "registered_launch_sources": []}
             with self.assertRaisesRegex(scan.ConfigError, "arms' shape"):
                 scan.api_meaning(root, facts)
 
