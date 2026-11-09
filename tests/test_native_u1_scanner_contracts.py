@@ -115,6 +115,28 @@ def test_api_meaning_refuses_missing_registered_launch_inventory(tmp_path):
         scan.api_meaning(tmp_path, facts)
 
 
+def test_generation_launch_inventory_distinguishes_api_execution_from_native_launch(tmp_path):
+    runner = tmp_path / RUNNER
+    runner.parent.mkdir(parents=True)
+    runner.write_bytes((ROOT / RUNNER).read_bytes())
+    api = tmp_path / 'src/data_sheets_schema/api_only_launch.py'
+    api.write_text('from .api_runner import RunSpec, execute\n'
+                   'def run(registration):\n'
+                   "    spec = RunSpec(render_version=registration['renderer'])\n"
+                   '    return execute(spec)\n')
+    source = api.read_text()
+    tree = ast.parse(source)
+    parsed = {api: (source, tree)}
+    relative = api.relative_to(tmp_path).as_posix()
+    assert scan._builders_used(tree)
+    assert scan._launch_evidence(tmp_path, api, tree, {}) == ['execute()']
+    assert scan.launch_flags({relative: api}, parsed) == []
+    assert scan._registered_launch_sources(tmp_path, parsed, {}, {}, [api]) == {}
+    # Original controller membership is independent of the narrower additions.
+    controllers = {relative: api}
+    assert scan._registered_launch_sources(tmp_path, parsed, {}, controllers, [api]) == controllers
+
+
 @pytest.mark.parametrize('replacement', [
     None,
     "spec.condition != 'generic_v10' or spec.render_version != 26",

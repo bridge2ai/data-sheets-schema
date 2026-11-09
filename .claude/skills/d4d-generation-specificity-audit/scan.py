@@ -2944,15 +2944,17 @@ def _registered_launch_sources(root: Path, parsed: dict, index: dict,
     A statically imported generation module is excluded from controller
     classification, but importing an existing argv builder must not hide its
     launch. Within the already discovered API/native closure, require the
-    same builder plus launch evidence used for src/ controller seeds. Keep
-    the existing probe/evaluation exclusions, and do not walk new imports or
-    infer safe-mode flags here.
+    same builder evidence and a native system-prompt launch flag. An API
+    execute() call alone does not introduce a native continuation. Keep all
+    existing controllers and probe/evaluation exclusions; do not walk new
+    imports or infer safe-mode flags here.
     """
     sources = dict(controllers)
     members = set(generation_closure)
     for path, (_, tree) in parsed.items():
         if (path in members and _candidate_controller(root, path)
-                and _builders_used(tree) and _launch_evidence(root, path, tree, index)):
+                and _builders_used(tree) and any(kind in LAUNCH_FLAGS
+                    for _, kind in _launch_sites(root, path, tree, index))):
             sources.setdefault(_rel(root, path), path)
     return sources
 
