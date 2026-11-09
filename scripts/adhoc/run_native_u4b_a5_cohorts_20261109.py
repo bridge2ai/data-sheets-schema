@@ -9,6 +9,7 @@ Default is a read-only plan. No provider/native executable is invoked.
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -24,6 +25,10 @@ GROUPS = {'u4': 'a4-u4-final', 'u5-core': 'a4-u5-core',
 
 
 def nodes(group):
+    if group == 'neutral':
+        return ['tests/test_neutral_generation_schema.py', 'tests/test_profiles.py',
+                'tests/test_external_dataset_onboarding.py', 'tests/test_native_u4b_a5_scanner.py',
+                'tests/test_native_u4b_toolchain.py']
     if group == 'u4b':
         return sorted(str(p.relative_to(ROOT)) for p in (ROOT / 'tests').glob('test_native_u4b_*.py')) + [
             'tests/test_native_subscription_guard_v2.py', 'tests/test_native_subscription_capture.py',
@@ -36,11 +41,14 @@ def nodes(group):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run', action='store_true')
-    parser.add_argument('groups', nargs='+', choices=['u4b', *GROUPS])
+    parser.add_argument('--prefix', default='a5')
+    parser.add_argument('groups', nargs='+', choices=['u4b', 'neutral', *GROUPS])
     args = parser.parse_args()
+    if re.fullmatch(r'a5(?:r[0-9]+)?', args.prefix) is None:
+        raise ValueError('require an A5 evidence prefix')
     commands = [[sys.executable, '-S', '-P', '-B',
                  str(ROOT / 'scripts/adhoc/run_native_u4b_tests_20261108.py'),
-                 '--out', str(SCRATCH / ('a5-' + group)), '--workers', '2', *nodes(group)]
+                 '--out', str(SCRATCH / (args.prefix + '-' + group)), '--workers', '2', *nodes(group)]
                 for group in args.groups]
     print(json.dumps(commands, indent=2), flush=True)
     if not args.run:

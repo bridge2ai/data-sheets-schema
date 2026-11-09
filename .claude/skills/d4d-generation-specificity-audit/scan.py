@@ -11881,15 +11881,15 @@ def _derive_native_v2_render_consumer(root: Path, cli: ast.Module, command) -> l
     fail = lambda detail: _not_derived('separate native shared render route', detail)
     dump = lambda node: ast.dump(node, include_attributes=False)
 
-    def exact_function(tree, name, source):
+    def exact_function(tree, name, source, *, alternatives=()):
         found = [node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
                  and node.name == name]
-        expected = ast.parse(source).body[0]
+        expected = [ast.parse(text).body[0] for text in (source, *alternatives)]
         if (len(found) != 1 or not isinstance(found[0], ast.FunctionDef)
                 or (name != 'render_native_shared' and found[0].decorator_list)
-                or dump(found[0].args) != dump(expected.args)
-                or [dump(node) for node in _without_docstring(found[0].body)] !=
-                   [dump(node) for node in expected.body]):
+                or not any(dump(found[0].args) == dump(template.args)
+                           and [dump(node) for node in _without_docstring(found[0].body)] ==
+                               [dump(node) for node in template.body] for template in expected)):
             raise fail('unsupported exact v2 render producer/consumer: ' + name)
         fn = found[0]
         # A second binding elsewhere must not replace the inspected function.
@@ -12037,7 +12037,7 @@ def expected():
                  and isinstance(node.ctx, (ast.Store, ast.Del)) and node is not bindings[0].targets[0])
                 or _rebinding(node, name, command) for node in ast.walk(producer)):
             raise fail('v2 preparation identity is not exact: ' + name)
-    fn = exact_function(producer, 'prepare', r'''def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
+    historical_prepare = r'''def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
     from .api_runner import RunSpec, _require_registered_input_spellings
     _job_id(job_id)
     c.positive_int(max_draft_checks, 'maximum draft checks')
@@ -12081,7 +12081,19 @@ def expected():
             or authority.dependency_identity() != dependencies):
         raise ValueError('v2 preparation authority changed during capture')
     return _envelope(body, dependencies)
-''')
+'''
+    # Two complete, exact bodies: historical shared-v1 and the D114 successor.
+    # Never strip an arbitrary branch or accept a partially matching producer.
+    anchor = '    spec._native_shared_runtime_capture = runtime_capture\n'
+    u4b_hook = '''    basis = runtime['limits_basis']
+    if basis.lstrip().startswith('{'):
+        declared = c.strict_json(basis.encode('utf-8'), 'runtime profile basis', 16384)
+        if type(declared) is dict and declared.get('kind') == 'd4d_native_u4b_runtime_basis':
+            from .agentic_runtime import toolchain
+            spec._agentic_toolchain = toolchain(native_shared=True)
+'''
+    fn = exact_function(producer, 'prepare', historical_prepare,
+        alternatives=(historical_prepare.replace(anchor, anchor + u4b_hook, 1),))
     envelope = exact_function(producer, '_envelope', '''def _envelope(body, dependencies):
     with authority.loaded_dependencies(dependencies) as controls:
         value = controls['prepare_registration_v2'].envelope(body)
