@@ -127,20 +127,45 @@ def test_prepare_verify_first_instruction_and_recorded_replay(inputs, monkeypatc
 
 @pytest.mark.parametrize('basis', ['historical shared-v1 text', '{"kind":"unrelated"}',
                                   '{"kind":"d4d_native_u4b_runtime_basis_extra"}'])
-def test_historical_discriminators_keep_original_instruction_and_enumeration(inputs, monkeypatch, basis):
+def test_historical_discriminators_keep_pre_hook_instruction_and_only_d76_recorder_delta(inputs, monkeypatch, basis):
+    """D114 leaves old rosters alone; D76 adds one model-facing recorder field.
+
+    Compare the real producer with an independent pre-D114 construction using
+    its new default registered-path setting. Keep a separate old-false reference
+    and require one exact JSON-field insertion in its embedded recorder command;
+    no text or metadata normalization is permitted.
+    """
     selected = deepcopy(inputs['runtime'])
     selected['limits_basis'] = basis
     inputs['runtime_path'].write_bytes(c.canonical(selected))
-    # Independently construct the pre-hook path on the same inputs.
     original = inputs['spec']
     from dataclasses import replace
     from data_sheets_schema.native_shared_evidence import read_regular
-    old = replace(original, provider=selected['provider'], reasoning_effort=selected['effort'],
-                  run_date=inputs['kwargs']['run_date'])
-    old._native_shared_runtime_capture = read_regular(str(inputs['runtime_path']),
-        'runtime_declaration', max_bytes=c.HARD_LIMITS['input_bytes']).captured
-    old._native_shared_max_draft_checks = 2
-    expected = old.instruction
+    captured = read_regular(str(inputs['runtime_path']), 'runtime_declaration',
+                            max_bytes=c.HARD_LIMITS['input_bytes']).captured
+    references = []
+    for registered in (False, True):
+        reference = replace(original, provider=selected['provider'],
+            reasoning_effort=selected['effort'], run_date=inputs['kwargs']['run_date'],
+            registered_input_paths=registered)
+        reference._native_shared_runtime_capture = captured
+        reference._native_shared_max_draft_checks = 2
+        references.append(reference)
+    historical, pre_hook = references
+    historical_instruction = historical.instruction
+    expected = pre_hook.instruction
+    assert 'registered_input_paths' not in historical.render_spec()
+    assert pre_hook.render_spec() == {**historical.render_spec(), 'registered_input_paths': True}
+    recorder = [line for line in historical_instruction.splitlines() if '--render-spec-json' in line]
+    assert len(recorder) == 1 and 'provenance record' in recorder[0]
+    anchor = ',"render_version":26,'
+    insertion = ',"registered_input_paths":true'
+    assert recorder[0].count(anchor) == historical_instruction.count(anchor) == 1
+    assert insertion not in historical_instruction
+    # Whole-instruction byte equality after exactly this one insertion also
+    # forbids an unreported directive, roster, whitespace or other JSON delta.
+    assert expected.encode() == historical_instruction.encode().replace(
+        anchor.encode(), (insertion + anchor).encode(), 1)
     calls = []
     real = tools.toolchain
     def count(**kwargs):
@@ -150,7 +175,7 @@ def test_historical_discriminators_keep_original_instruction_and_enumeration(inp
     body = _prepare(inputs)['registration']
     assert calls == [{}]
     assert body['instruction'] == expected
-    assert body['render_spec']['agentic_toolchain'] == old._agentic_toolchain
+    assert body['render_spec']['agentic_toolchain'] == historical._agentic_toolchain == pre_hook._agentic_toolchain
 
 
 @pytest.mark.parametrize('basis', ['{broken', '{"kind":"a","kind":"b"}',

@@ -49,7 +49,12 @@ def test_v2_route_refuses_one_changed_producer_or_consumer(tmp_path, relative, b
     source = path.read_text()
     assert source.count(before) == 1
     path.write_text(source.replace(before, after))
-    with pytest.raises(scan.ConfigError, match='v2 render|v2 preparation|v2 producer'):
+    diagnostic = ('CLI uses an unproved constructor, contract or runtime binding'
+                  if (relative, before, after) == (CLI,
+                      'native_execution_registration_v2 as preparation',
+                      'foreign_preparer as preparation')
+                  else 'v2 render|v2 preparation|v2 producer')
+    with pytest.raises(scan.ConfigError, match=diagnostic):
         scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
 
 

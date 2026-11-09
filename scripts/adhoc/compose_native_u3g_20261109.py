@@ -118,7 +118,9 @@ The exact patch is `shared_generation.patch`; no U4b toolchain selector is added
 **api_runner_companion — unchanged from U1.** Approve the matching RunSpec admission
 and native shared-v1 integration hooks in `src/data_sheets_schema/api_runner.py`.
 D114 remains in the nonprotected native v2 producer after runtime binding; its
-registered-path setting is a separate branch change. The exact proposed API patch
+registered-path setting is a separate branch change and appears in the recorder
+command inside newly prepared native instructions. Historical records remain intact.
+The exact proposed API patch
 is `api_runner_companion.patch`.
 
 **canonical_hashes — changed from U1 only in repository locations.** Approve the
