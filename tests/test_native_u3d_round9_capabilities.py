@@ -67,7 +67,14 @@ def test_missing_real_capability_refuses_before_reservation_or_any_effect(
                 setattr(module, member, value)
 
     monkeypatch.setattr(capabilities.authority, 'loaded_dependencies', missing_capability)
-    monkeypatch.setattr(execute.registration, 'verified', lambda raw: {'dependencies': dependencies})
+    from data_sheets_schema.native_runtime_profiles import profile_name, PRODUCTION_PROFILE
+    # Outer registration reconstruction is isolated here. This typed context
+    # supplies only its explicit production discriminator, not runtime admission
+    # authority; the genuine profile check must precede the missing capability.
+    runtime_context = {'limits_basis': '{"profile":"production"}'}
+    assert profile_name(runtime_context) == PRODUCTION_PROFILE
+    monkeypatch.setattr(execute.registration, 'verified', lambda raw: {
+        'dependencies': dependencies, 'runtime': runtime_context})
     entered = []
 
     def effect_path(*args, **kwargs):

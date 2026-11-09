@@ -22,6 +22,7 @@ FORBIDDEN = {
 
 @pytest.mark.parametrize('module', ['native_gate_engine', 'native_shared_gates',
     'native_shared_gate_primitives', 'native_shared_runtime_values',
+    'native_runtime_profiles',
     'native_shared_results', 'native_shared_publication'])
 def test_consumer_owns_no_deferred_verifier_legacy_or_orchestration_import(module):
     tree = ast.parse((PACKAGE / (module + '.py')).read_text())

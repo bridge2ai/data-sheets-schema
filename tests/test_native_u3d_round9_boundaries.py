@@ -19,7 +19,7 @@ from tests.test_native_execution_registration_v2 import isolated_modules  # noqa
 PACKAGE = 'data_sheets_schema'
 
 
-def test_all_28_actual_merged_consumers_pass_the_unmodified_guard(isolated_modules, record_property):
+def test_all_29_actual_merged_consumers_pass_the_unmodified_guard(isolated_modules, record_property):
     pins = authority.dependency_identity()['base']['package_sources']
     roster = _source_roster(pins)
     outcomes, refused = {}, {}
@@ -30,8 +30,8 @@ def test_all_28_actual_merged_consumers_pass_the_unmodified_guard(isolated_modul
             outcomes[name] = authority.refuse_legacy_consumer_imports(raw, name=name, package_sources=pins)
         except ValueError as error:
             refused[name] = str(error)
-    record_property('actual_merged_28_graphs', json.dumps({'accepted': outcomes, 'refused': refused}, sort_keys=True))
-    assert len(authority.CONSUMER_OWNED_MODULES) == 28
+    record_property('actual_merged_29_graphs', json.dumps({'accepted': outcomes, 'refused': refused}, sort_keys=True))
+    assert len(authority.CONSUMER_OWNED_MODULES) == 29
     assert refused == {}
     assert set(outcomes) == set(authority.CONSUMER_OWNED_MODULES)
 
@@ -149,7 +149,8 @@ def test_all_real_d_roots_have_no_reachable_forbidden_edges(isolated_modules, re
             if row['forbidden_edges']} == {}
 
 
-@pytest.mark.parametrize('short_name', ['native_shared_gate_primitives', 'native_shared_runtime_values'])
+@pytest.mark.parametrize('short_name', [
+    'native_shared_gate_primitives', 'native_shared_runtime_values', 'native_runtime_profiles'])
 def test_new_d_neutral_consumers_refuse_deferred_legacy_edges(short_name, isolated_modules):
     """Mutation of in-memory source must refuse; no mutated module is loaded."""
     name = PACKAGE + '.' + short_name

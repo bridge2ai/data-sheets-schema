@@ -18,13 +18,14 @@ from tests.test_native_execution_registration_v2 import isolated_modules  # noqa
 
 
 PACKAGE = 'data_sheets_schema.'
-# D's ten original modules plus the two neutral value/primitive extractions.
+# D's ten original modules, two neutral extractions and the U3-J2 runtime profile.
 D_CONSUMERS = frozenset(PACKAGE + name for name in (
     'native_execution_engine', 'native_gate_engine', 'native_subscription_guard',
     'native_shared_execution', 'native_shared_gates', 'native_shared_permissions',
     'native_shared_publication', 'native_shared_registration',
     'native_shared_results', 'native_shared_schema_gates',
     'native_shared_gate_primitives', 'native_shared_runtime_values',
+    'native_runtime_profiles',
 ))
 C_CONSUMERS = frozenset(PACKAGE + name for name in (
     'native_shared_attribution', 'native_shared_capture', 'native_shared_controller',
@@ -74,7 +75,7 @@ def _imports(raw, name):
 
 
 def test_census_roster_covers_exactly_the_current_c_and_d_consumer_layers():
-    assert len(D_CONSUMERS) == 12
+    assert len(D_CONSUMERS) == 13
     assert len(C_CONSUMERS) == 16
     assert C_CONSUMERS.isdisjoint(D_CONSUMERS)
     assert authority.CONSUMER_OWNED_MODULES == C_CONSUMERS | D_CONSUMERS
