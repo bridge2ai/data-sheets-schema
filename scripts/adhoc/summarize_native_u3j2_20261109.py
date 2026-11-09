@@ -30,7 +30,7 @@ CPU_KEYS = ('wall_monotonic', 'process_cpu', 'self_user_cpu', 'self_system_cpu',
             'reaped_child_user_cpu', 'reaped_child_system_cpu')
 PUBLIC_TESTS = {
     'test_actual_public_correction_three_workers_and_saved_completion',
-    'test_actual_public_merged_omissions_and_saved_completion',
+    'test_actual_public_merged_omissions_and_all_chunk_statuses',
 }
 D127 = {
     'src/data_sheets_schema/shared_generation.py': '2ec18e60316423035f88a2a30263c56385bfbbc587303e84e805a8349ab4f781',
