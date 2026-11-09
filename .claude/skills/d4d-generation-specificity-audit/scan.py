@@ -2937,6 +2937,26 @@ def _flags_shown(rel: str, lst, flags: frozenset, named: str, shown: bool, how: 
     return False, [f"{rel}:{lst.lineno} no element of the argv list is the literal {named}"]
 
 
+def _registered_launch_sources(root: Path, parsed: dict, index: dict,
+                               controllers: dict[str, Path], generation_closure) -> dict[str, Path]:
+    """Keep launch inventory independent of generation/controller role.
+
+    A statically imported generation module is excluded from controller
+    classification, but importing an existing argv builder must not hide its
+    launch. Within the already discovered API/native closure, require the
+    same builder plus launch evidence used for src/ controller seeds. Keep
+    the existing probe/evaluation exclusions, and do not walk new imports or
+    infer safe-mode flags here.
+    """
+    sources = dict(controllers)
+    members = set(generation_closure)
+    for path, (_, tree) in parsed.items():
+        if (path in members and _candidate_controller(root, path)
+                and _builders_used(tree) and _launch_evidence(root, path, tree, index)):
+            sources.setdefault(_rel(root, path), path)
+    return sources
+
+
 def launch_flags(controllers: dict[str, Path], parsed: dict) -> list[dict]:
     """Whether each registered native launch is shown to switch off what an
     interactive session loads (#4092, #4131, #4156). A launch is a list or
@@ -11412,7 +11432,9 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         s.files[rel].loaded["interactive_session"] = session_description_lines(p.read_text(encoding="utf-8"))
     skills = sorted(_rel(root, p) for p in (root / ".claude/skills").glob("*/SKILL.md"))
     described_set = {_rel(root, p) for p in described}
-    launches = launch_flags(controllers, parsed)
+    launch_sources = _registered_launch_sources(root, parsed, index, controllers,
+                                                api_closure + native_closure)
+    launches = launch_flags(launch_sources, parsed)
     # not shown to pass --safe-mode: the session descriptions stay on; not
     # shown to pass --safe-mode or --bare: the memory and the hooks too (#4131)
     unsafe = [x["site"] for x in launches if not x["carries"]]

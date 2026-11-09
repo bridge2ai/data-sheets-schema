@@ -46,6 +46,69 @@ def _native_route_root(tmp_path):
     return root
 
 
+def test_static_generation_import_does_not_hide_an_existing_native_launch(tmp_path):
+    """U4b moves a real argv producer into the generation closure, not out of use."""
+    entry = tmp_path / 'src/data_sheets_schema/cli/prompt.py'
+    launch = tmp_path / 'src/data_sheets_schema/native_launch.py'
+    runner = tmp_path / RUNNER
+    entry.parent.mkdir(parents=True)
+    entry.write_text('def render():\n    pass\n')
+    runner.write_text('class RunSpec:\n    pass\n')
+    launch.write_text('from .api_runner import RunSpec\n'
+                      "FLAGS = ('--print', '--safe-mode')\n"
+                      'def command():\n'
+                      '    spec = RunSpec()\n'
+                      "    return ['claude', *FLAGS, '--system-prompt', 'instruction']\n")
+    relative = launch.relative_to(tmp_path).as_posix()
+
+    def inventory():
+        parsed = {path: (path.read_text(), ast.parse(path.read_text()))
+                  for path in (entry, launch, runner)}
+        closure = scan._package_closure(tmp_path, ['data_sheets_schema.cli.prompt'])
+        excluded = frozenset(path.relative_to(tmp_path).as_posix() for path in closure)
+        controllers, _, _ = scan.run_controllers(tmp_path, parsed, {}, excluded)
+        sources = scan._registered_launch_sources(tmp_path, parsed, {}, controllers, closure)
+        return controllers, scan.launch_flags(sources, parsed)
+
+    before_controllers, before = inventory()
+    assert relative in before_controllers
+    assert len(before) == 1
+    assert before[0]['site'].startswith(relative + ':')
+    assert before[0]['carries'] is None and before[0]['memory_off'] is None
+    assert any('`*FLAGS`' in line and 'are not followed' in line for line in before[0]['evidence'])
+    entry.write_text('from data_sheets_schema import native_launch\n'
+                     'def render():\n    pass\n')
+    after_controllers, after = inventory()
+    assert relative not in after_controllers  # The generation role remains distinct.
+    assert after == before                  # The unchanged argv is still inventoried.
+
+
+def test_generation_launch_inventory_retains_candidate_and_closure_boundaries(tmp_path):
+    builder = ('from data_sheets_schema.api_runner import RunSpec\n'
+               'def command():\n    spec = RunSpec()\n'
+               "    return ['claude', '--safe-mode', '--system-prompt', 'instruction']\n")
+    definitions = {
+        'src/data_sheets_schema/native_launch.py': builder,
+        'src/data_sheets_schema/unreached_launch.py': builder,
+        'src/data_sheets_schema/native_probe.py': builder,
+        'src/data_sheets_schema/evaluation/native_launch.py': builder,
+        'src/data_sheets_schema/flags_only.py': "FLAGS = ['--system-prompt']\n",
+        'src/data_sheets_schema/builder_only.py': 'from .api_runner import RunSpec\n',
+    }
+    parsed = {}
+    for relative, source in definitions.items():
+        path = tmp_path / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(source)
+        parsed[path] = (source, ast.parse(source))
+    closure = [path for path in parsed if path.name != 'unreached_launch.py']
+    sources = scan._registered_launch_sources(tmp_path, parsed, {}, {}, closure)
+    assert set(sources) == {'src/data_sheets_schema/native_launch.py'}
+    rows = scan.launch_flags(sources, parsed)
+    assert len(rows) == 1
+    assert rows[0]['carries'] is True and rows[0]['memory_off'] is True
+
+
 def test_native_complete_v2_route_derives():
     route = scan.derive_native_shared_route(ROOT, scan._tree(ROOT / RUNNER))
     assert route['cli'] == 'd4d prompt render-native-shared'
