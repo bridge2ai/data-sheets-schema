@@ -90,6 +90,8 @@ def _selection(raw, *, preparation_raw, classifier_projection):
     run = doc['run']
     spec = RunSpec.from_render_spec(prepared['render_spec'], project=run['project'],
         method=run['method'], label=run['label'])
+    if spec.condition != 'generic_v10' or spec.render_version != 26 or not spec.is_agentic:
+        raise ValueError('native composition requires its agentic generic_v10 renderer26 parent')
     if (render.validate_spec(spec) != doc
             or captured.generation_context() != render.metadata(spec)['native_shared_generation_context']):
         raise ValueError('composition selection differs from prepared rendering')
