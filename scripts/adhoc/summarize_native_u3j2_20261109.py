@@ -109,9 +109,12 @@ def number(value):
 
 def xml_report(path, evidence):
     if not os.path.lexists(path):
-        return {'available': False, 'counts': None, 'testcases': [], 'reason': 'pytest.xml missing'}
+        return {'available': False, 'counts': None, 'testcases': [],
+                'diagnostic_event_counts': None, 'synthetic_diagnostic_testcase_count': None,
+                'reason': 'pytest.xml missing'}
     root = ET.fromstring(evidence.raw(path))
     counts = Counter(tests=0, passed=0, failed=0, errors=0, skipped=0)
+    events = Counter(failure=0, error=0, skipped=0)
     cases = []
     for item in root.iter():
         if tag(item) != 'testcase':
@@ -124,6 +127,7 @@ def xml_report(path, evidence):
         counts[status] += 1
         diagnostics = []
         for child in children:
+            events[tag(child)] += 1
             text = ''.join(child.itertext())
             diagnostics.append({'kind': tag(child), 'message': child.get('message'),
                                 'type': child.get('type'), 'trace': text,
@@ -131,10 +135,16 @@ def xml_report(path, evidence):
         cases.append({'classname': item.get('classname'), 'name': item.get('name'),
                       'file': item.get('file'), 'line': item.get('line'),
                       'seconds_reported': item.get('time'), 'status': status,
+                      'role': ('pytest_internal_diagnostic' if item.get('classname') == 'pytest'
+                               and item.get('name') == 'internal' else 'testcase'),
                       'diagnostics': diagnostics})
     claims = [{key: item.get(key) for key in ('name', 'tests', 'failures', 'errors', 'skipped', 'time')}
               for item in root.iter() if tag(item) == 'testsuite']
     return {'available': True, 'counts': dict(counts), 'testcases': cases,
+            'count_unit': 'testcase_instances_including_synthetic_pytest_diagnostic_cases',
+            'diagnostic_event_counts': dict(events),
+            'diagnostic_event_count_unit': 'individual_failure_error_or_skipped_XML_elements',
+            'synthetic_diagnostic_testcase_count': sum(row['role'] == 'pytest_internal_diagnostic' for row in cases),
             'suite_claims_not_summed': claims,
             'count_basis': 'Each nested testcase once; error then failure then skip then pass. Suite totals are not added.'}
 
@@ -246,6 +256,60 @@ def public_details(run, xml, command, metrics, evidence):
             'worker_measurements': metrics['workers']}
 
 
+def qualification(loaded, xml):
+    """Keep partial/internal-error observations out of completed-run totals.
+
+    Qualification is only of this software-test invocation's provenance and
+    completion. Exit 1 can be qualified failed tests; no pass/acceptance follows.
+    Missing witnesses are unknown and therefore unqualified, never assumed true.
+    """
+    outcome = loaded['outcome.json'] or {}
+    worker = loaded['worker-outcome.json'] or outcome.get('worker') or {}
+    stability = loaded['source-stability.json'] or {}
+    reasons = []
+    status = outcome.get('returncode')
+    worker_status = worker.get('returncode')
+    if loaded['outcome.json'] is None:
+        reasons.append('supervisor_outcome_missing')
+    if not xml['available']:
+        reasons.append('junit_missing')
+    if type(status) is not int or status not in (0, 1):
+        reasons.append('pytest_invocation_not_completed_with_exit_0_or_1')
+    if status == 3 or xml.get('synthetic_diagnostic_testcase_count', 0):
+        reasons.append('pytest_internal_error_diagnostic')
+    if type(worker_status) is not int or worker_status != status:
+        reasons.append('worker_exit_missing_or_disagrees_with_supervisor')
+    if outcome.get('worker_returncode') != worker_status:
+        reasons.append('supervisor_worker_exit_missing_or_disagrees')
+    if outcome.get('interrupted') is not None:
+        reasons.append('supervisor_interrupted')
+    if outcome.get('forced_cleanup') is not False:
+        reasons.append('forced_cleanup_or_missing_cleanup_mode')
+    if outcome.get('cleanup_verified') is not True:
+        reasons.append('cleanup_not_verified')
+    if outcome.get('observed_surviving_pids') != []:
+        reasons.append('observed_survivors_or_missing_survivor_witness')
+    if outcome.get('observation_errors') != []:
+        reasons.append('process_observation_errors_or_missing_witness')
+    if worker.get('source_origin_checks_passed') is not True:
+        reasons.append('source_origin_checks_not_verified')
+    if stability.get('unchanged') is not True:
+        reasons.append('source_stability_not_verified')
+    for name in ('origins-before.json', 'origins-after.json', 'subprocess-origins.json', 'u3j2-harness.json'):
+        if loaded[name] is None:
+            reasons.append('missing_' + name)
+    counts = xml['counts']
+    if counts is not None:
+        if status == 0 and counts['failed'] + counts['errors']:
+            reasons.append('zero_exit_contradicts_failed_or_error_testcases')
+        if status == 1 and not counts['failed'] + counts['errors']:
+            reasons.append('failed_exit_has_no_failed_or_error_testcase')
+    return {'qualified': not reasons,
+            'status': 'qualified_completed_test_invocation' if not reasons else 'unqualified_partial_or_invalid_invocation',
+            'reasons': reasons, 'pytest_exitcode': status, 'worker_exitcode': worker_status,
+            'scope': 'Invocation provenance and pytest completion only; qualified failures remain failures, and this is not native acceptance.'}
+
+
 def summarize_run(run, evidence):
     loaded = {}
     names = ('outcome.json', 'plan.json', 'worker-outcome.json', 'pytest-command.json',
@@ -265,6 +329,7 @@ def summarize_run(run, evidence):
     xml = xml_report(run / 'pytest.xml', evidence)
     metrics = phase_metrics(run / 'phase-metrics', evidence)
     return {'name': run.name, 'path': str(run), 'outcome_present': loaded['outcome.json'] is not None,
+            'qualification': qualification(loaded, xml),
             'supervisor': {key: outcome.get(key) for key in (
                 'returncode', 'seconds', 'worker_returncode', 'cleanup_verified', 'cleanup_scope',
                 'forced_cleanup', 'interrupted', 'observed_surviving_pids', 'observation_errors')},
@@ -337,15 +402,21 @@ def main():
                 for name in ('outcome.json', 'pytest.xml', 'phase-metrics')):
             runs.append(summarize_run(path, evidence))
     totals = Counter(tests=0, passed=0, failed=0, errors=0, skipped=0)
+    qualified = Counter(tests=0, passed=0, failed=0, errors=0, skipped=0)
+    invalid = Counter(tests=0, passed=0, failed=0, errors=0, skipped=0)
     for run in runs:
         if run['junit']['counts'] is not None:
             totals.update(run['junit']['counts'])
+            (qualified if run['qualification']['qualified'] else invalid).update(run['junit']['counts'])
     payload = {'kind': 'native_u3j2_retained_validation_summary', 'version': 1,
                'created_utc': datetime.now(timezone.utc).isoformat(), 'input_root': str(BASE),
                'helper': fingerprint(Path(__file__).resolve()), 'runs': runs, 'compositions': compositions,
                'invocation_testcase_totals': dict(totals),
-               'totals_scope': 'Observed testcase instances across retained invocations; repeated nodes are not unique coverage. Missing XML is not a zero-test pass.',
-               'incomplete_runs': [run['name'] for run in runs if not run['outcome_present'] or not run['junit']['available']],
+               'qualified_invocation_testcase_totals': dict(qualified),
+               'unqualified_invocation_testcase_totals': dict(invalid),
+               'totals_scope': 'Raw observed testcase instances across retained invocations, including synthetic diagnostic cases; repeated nodes are not unique coverage. Qualified and unqualified totals are separate. Missing XML is not a zero-test pass.',
+               'incomplete_or_invalid_runs': [run['name'] for run in runs if not run['qualification']['qualified']],
+               'missing_result_artifact_runs': [run['name'] for run in runs if not run['outcome_present'] or not run['junit']['available']],
                'artifacts': sorted(evidence.artifacts.values(), key=lambda row: row['path']),
                'artifact_scope': 'All consumed artifacts and immediate run evidence files; not a recursive hash of cases, dependencies or archives.',
                'cpu_policy': 'No cross-process CPU sum. Per-PID process CPU, self user/system, and reaped-child CPU remain separate.',
