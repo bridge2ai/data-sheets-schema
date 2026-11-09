@@ -61,6 +61,15 @@ classes:
         range: uriorcurie
         values_from:
           - B2AI_TOPIC
+        annotations:
+          "d4d:termSources": "GO, MeSH, EFO, NCIT"
+          "d4d:termSourceIdentifierForms": >-
+            {"version":1,"sources":[
+              {"id":"go","label":"GO","curies":[{"prefix":"GO","local_prefix":""}],"iri_bases":["http://purl.obolibrary.org/obo/GO_","https://purl.obolibrary.org/obo/GO_"]},
+              {"id":"mesh","label":"MeSH","curies":[{"prefix":"MESH","local_prefix":""}],"iri_bases":["http://id.nlm.nih.gov/mesh/","https://id.nlm.nih.gov/mesh/","http://purl.bioontology.org/ontology/MESH/","https://purl.bioontology.org/ontology/MESH/"]},
+              {"id":"efo","label":"EFO","curies":[{"prefix":"EFO","local_prefix":""}],"iri_bases":["http://www.ebi.ac.uk/efo/EFO_","https://www.ebi.ac.uk/efo/EFO_","http://purl.obolibrary.org/obo/EFO_","https://purl.obolibrary.org/obo/EFO_"]},
+              {"id":"ncit","label":"NCIT","curies":[{"prefix":"NCIT","local_prefix":""}],"iri_bases":["http://purl.obolibrary.org/obo/NCIT_","https://purl.obolibrary.org/obo/NCIT_"]}
+            ]}
         slot_uri: dcat:theme
       instance_type:
         description: >
@@ -96,6 +105,12 @@ classes:
           - B2AI_SUBSTRATE
         annotations:
           "d4d:termSources": "EDAM Data, EDAM Format, IANA media types"
+          "d4d:termSourceIdentifierForms": >-
+            {"version":1,"sources":[
+              {"id":"edam-data","label":"EDAM Data","curies":[{"prefix":"EDAM","local_prefix":"data_"}],"iri_bases":["http://edamontology.org/data_"]},
+              {"id":"edam-format","label":"EDAM Format","curies":[{"prefix":"EDAM","local_prefix":"format_"}],"iri_bases":["http://edamontology.org/format_"]},
+              {"id":"iana-media-types","label":"IANA media types","curies":[{"prefix":"mediatypes","local_prefix":""}],"iri_bases":["https://www.iana.org/assignments/media-types/"]}
+            ]}
         slot_uri: dcterms:type
       counts:
         description: >

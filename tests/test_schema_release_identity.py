@@ -18,7 +18,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / "src" / "data_sheets_schema" / "schema"
-RELEASE = "3.1.0"
+RELEASE = "3.2.0"
 
 
 def _declared(path: Path) -> str | None:
@@ -31,6 +31,7 @@ class TestReleaseIdentity(unittest.TestCase):
     def test_full_and_core_declare_the_same_release(self):
         self.assertEqual(_declared(SCHEMA / "data_sheets_schema.yaml"), RELEASE)
         self.assertEqual(_declared(SCHEMA / "data_sheets_schema_core.yaml"), RELEASE)
+        self.assertEqual(_declared(SCHEMA / "D4D_Core.yaml"), RELEASE)
 
     def test_the_release_is_semantic_and_past_the_two_line(self):
         """2.0.0 was declared on 2026-08-06 and kept through incompatible

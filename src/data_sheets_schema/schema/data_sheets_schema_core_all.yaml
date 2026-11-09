@@ -15,7 +15,7 @@ see_also:
 - https://bridge2ai.github.io/data-sheets-schema
 - src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl
 id: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
-version: 3.1.0
+version: 3.2.0
 license: MIT
 prefixes:
   AIO:
@@ -7904,6 +7904,25 @@ classes:
     attributes:
       data_topic:
         name: data_topic
+        annotations:
+          d4d:termSources:
+            tag: d4d:termSources
+            value: GO, MeSH, EFO, NCIT
+          d4d:termSourceIdentifierForms:
+            tag: d4d:termSourceIdentifierForms
+            value: "{\"version\":1,\"sources\":[\n  {\"id\":\"go\",\"label\":\"GO\"\
+              ,\"curies\":[{\"prefix\":\"GO\",\"local_prefix\":\"\"}],\"iri_bases\"\
+              :[\"http://purl.obolibrary.org/obo/GO_\",\"https://purl.obolibrary.org/obo/GO_\"\
+              ]},\n  {\"id\":\"mesh\",\"label\":\"MeSH\",\"curies\":[{\"prefix\":\"\
+              MESH\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://id.nlm.nih.gov/mesh/\"\
+              ,\"https://id.nlm.nih.gov/mesh/\",\"http://purl.bioontology.org/ontology/MESH/\"\
+              ,\"https://purl.bioontology.org/ontology/MESH/\"]},\n  {\"id\":\"efo\"\
+              ,\"label\":\"EFO\",\"curies\":[{\"prefix\":\"EFO\",\"local_prefix\"\
+              :\"\"}],\"iri_bases\":[\"http://www.ebi.ac.uk/efo/EFO_\",\"https://www.ebi.ac.uk/efo/EFO_\"\
+              ,\"http://purl.obolibrary.org/obo/EFO_\",\"https://purl.obolibrary.org/obo/EFO_\"\
+              ]},\n  {\"id\":\"ncit\",\"label\":\"NCIT\",\"curies\":[{\"prefix\":\"\
+              NCIT\",\"local_prefix\":\"\"}],\"iri_bases\":[\"http://purl.obolibrary.org/obo/NCIT_\"\
+              ,\"https://purl.obolibrary.org/obo/NCIT_\"]}\n]}"
         description: 'General topic of each instance, as an ontology term — records
           use GO, MeSH, EFO and NCIT IRIs and terms from a pinned standards registry.
           Where no term is found, prefer omission over a prose topic.
@@ -7944,6 +7963,16 @@ classes:
           d4d:termSources:
             tag: d4d:termSources
             value: EDAM Data, EDAM Format, IANA media types
+          d4d:termSourceIdentifierForms:
+            tag: d4d:termSourceIdentifierForms
+            value: "{\"version\":1,\"sources\":[\n  {\"id\":\"edam-data\",\"label\"\
+              :\"EDAM Data\",\"curies\":[{\"prefix\":\"EDAM\",\"local_prefix\":\"\
+              data_\"}],\"iri_bases\":[\"http://edamontology.org/data_\"]},\n  {\"\
+              id\":\"edam-format\",\"label\":\"EDAM Format\",\"curies\":[{\"prefix\"\
+              :\"EDAM\",\"local_prefix\":\"format_\"}],\"iri_bases\":[\"http://edamontology.org/format_\"\
+              ]},\n  {\"id\":\"iana-media-types\",\"label\":\"IANA media types\",\"\
+              curies\":[{\"prefix\":\"mediatypes\",\"local_prefix\":\"\"}],\"iri_bases\"\
+              :[\"https://www.iana.org/assignments/media-types/\"]}\n]}"
         description: 'Type or format of data (e.g., raw text, images): an EDAM Data
           or Format term or an IANA media type, written as a CURIE with the schema''s
           declared `EDAM` or `mediatypes` prefix, when the documents supply one; or
@@ -38287,10 +38316,10 @@ classes:
           d4d:docExample:
             tag: d4d:docExample
             value: health_medical_biomedical_research
-        description: Structured data use permissions using the Data Use Ontology (DUO).
-          Specifies permitted uses (e.g., general research, health/medical research,
-          disease-specific research) and restrictions (e.g., non-commercial use, ethics
-          approval required, collaboration required). See https://github.com/EBISPOT/DUO.
+        description: 'Structured data use permissions using the Data Use Ontology
+          (DUO): one primary permission (e.g., general research, health/medical research,
+          disease-specific research) plus any applicable modifiers (e.g., non-commercial
+          use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
         exact_mappings:
         - DUO:0000001
@@ -38300,6 +38329,7 @@ classes:
         domain_of:
         - LicenseAndUseTerms
         range: DataUsePermissionEnum
+        multivalued: true
       contact_person:
         name: contact_person
         description: 'Contact person for licensing questions, as a Person object —

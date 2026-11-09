@@ -7667,6 +7667,28 @@
           }
         }
       }
+    },
+    "pr5531_fix_c_local_20261108": {
+      "base_commit": "75463cb38e5c2528a409477968cfc3735dc0cd8f",
+      "kind": "local working-tree measurement; not a CI run",
+      "python": "3.13.12",
+      "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+      "workers": 2,
+      "method": "utils.update_ci_shard_timings.build; sum JUnit case seconds, unscaled",
+      "artifacts": [
+        {
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-pr5531-fix/fix-c-final/pytest.xml",
+          "sha256": "486ef63188751eee5db7c5c06a199c02700dcee8e4aa7062788871e142f4c341"
+        }
+      ],
+      "previous_file_seconds": {
+        "tests/test_pr5531_regressions.py": null,
+        "tests/test_bc1_pipeline.py": 47.963
+      },
+      "file_seconds": {
+        "tests/test_pr5531_regressions.py": 400.518,
+        "tests/test_bc1_pipeline.py": 779.194
+      }
     }
   },
   "method": "Sum JUnit case times by collected file, with a 0.001-second floor. These are scheduling estimates, not wall-clock predictions or a test allowlist. Untimed collected files use the median known duration; obsolete entries are ignored. Missing-shard observations use elapsed time between consecutive results on each CI worker (first result measured from pytest session start; includes setup, prior teardown and scheduling delay). Unfinished cases use completed local JUnit times listed in source.supplement. Unmeasured prior entries retain their exact values. BC1/G2 additions (2026-11-03) only fill previously unweighted files: sum one complete source per current collected file, preferring run 41707437114, then run 41700664435 for G1 files, then round-2 local with-mode JUnit (macOS Python 3.13, two workers). Exact case-occurrence multisets and pinned XML SHA256 values are checked; 0.001-second floor, no local-time scaling. Completed failures/skips remain timing observations, not evidence of CI success. Original provenance and every existing weight are retained. Follow-up: measured-ratio scaling (2026-11-03) supersedes only the six initial local-source weights with local sum x 2.729, the larger of two observed complete-file Linux-CI/local ratios rounded to three decimals, as authorized by the lead. These six weights are derived, not measured; source.bc1_g2_measured_ratio_scaling_20261103 records each local sum, multiplier and both paired measurements with XML hashes. All other weights and the prior measured provenance remain unchanged. All-file BC1/G2 refresh (2026-11-04): use run 41735860489, then 41707437114, then retain current weight, requiring an exact current case-occurrence multiset within one shard XML per file. Preserve all earlier provenance. Completed failures/skips are timing observations. Inputs are SHA256-pinned in the new source block.",
@@ -7738,7 +7760,7 @@
     "tests/test_bc1_g2_journal.py": 1492.334,
     "tests/test_bc1_g2_round2.py": 111.351,
     "tests/test_bc1_generality.py": 3.186,
-    "tests/test_bc1_pipeline.py": 47.963,
+    "tests/test_bc1_pipeline.py": 779.194,
     "tests/test_bc1_registration.py": 2808.544,
     "tests/test_bc1_resources.py": 0.299,
     "tests/test_bc1_runtime.py": 126.875,
@@ -8077,6 +8099,7 @@
     "tests/test_pr5212_r4_fixes.py": 280.798,
     "tests/test_pr5212_round6_startup.py": 111.472,
     "tests/test_pr5212_round7_journal.py": 629.007,
+    "tests/test_pr5531_regressions.py": 400.518,
     "tests/test_preflight_resource_authority.py": 400.561,
     "tests/test_presence_scoping.py": 16.458,
     "tests/test_profile_review_r8.py": 1.05,

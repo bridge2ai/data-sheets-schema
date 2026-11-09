@@ -255,8 +255,19 @@ def test_unusable_label_refuses_at_derivation(fixture, label):
 
 
 def test_synthetic_prefix_derives_and_validates_populated_record(fixture):
-    change_annotation(fixture, "SYNTHETIC")
     selection, inputs = fixture
+    schema = yaml.safe_load(inputs["schema_path"].read_bytes())
+    schema.setdefault("prefixes", {})["SYNTHETIC"] = "https://example.test/synthetic/"
+    schema["classes"]["Instance"]["attributes"]["data_substrate"]["annotations"] = {
+        "d4d:termSources": "SYNTHETIC",
+        "d4d:termSourceIdentifierForms": json.dumps({"version": 1, "sources": [
+            {"id": "synthetic", "label": "SYNTHETIC",
+             "curies": [{"prefix": "SYNTHETIC", "local_prefix": ""}],
+             "iri_bases": ["https://example.test/synthetic/"]},
+        ]})}
+    inputs["schema_path"].write_text(yaml.safe_dump(schema))
+    inputs["schema_snapshot"] = capture_schema(inputs["schema_path"], strict=True)
+    selection["inputs"]["full_schema"] = bc._schema_pin(inputs["schema_snapshot"])
     inputs["record"] = b"name: Example\ninstances:\n- data_substrate: SYNTHETIC:123\n"
     assert om.prepare(**inputs, term_policy=policy(fixture)).request()["payload"]["record_yaml"].encode() == inputs["record"]
 

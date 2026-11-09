@@ -18,8 +18,21 @@ def raw(value):
 
 @pytest.fixture
 def fixture(tmp_path):
+    topic_forms = json.dumps({"version": 1, "sources": [
+        {"id": "go", "label": "GO", "curies": [{"prefix": "GO", "local_prefix": ""}],
+         "iri_bases": ["http://purl.obolibrary.org/obo/GO_"]},
+        {"id": "ncit", "label": "NCIT", "curies": [{"prefix": "NCIT", "local_prefix": ""}],
+         "iri_bases": ["http://purl.obolibrary.org/obo/NCIT_"]},
+    ]})
+    custom_forms = json.dumps({"version": 1, "sources": [
+        {"id": "custom", "label": "CUSTOM", "curies": [{"prefix": "CUSTOM", "local_prefix": ""}],
+         "iri_bases": ["https://example.test/custom/"]},
+    ]})
     schema = {"id": "https://example.test/bc1", "name": "bc1", "prefixes": {
-        "linkml": "https://w3id.org/linkml/"}, "imports": ["linkml:types"], "default_range": "string",
+        "linkml": "https://w3id.org/linkml/",
+        "GO": "http://purl.obolibrary.org/obo/GO_",
+        "NCIT": "http://purl.obolibrary.org/obo/NCIT_",
+        "CUSTOM": "https://example.test/custom/"}, "imports": ["linkml:types"], "default_range": "string",
         "classes": {"CoreDataset": {"description": "Complete core semantics.", "attributes": {
             "core_only": {"description": "Core-only full description must not be truncated."}}},
             "Dataset": {"description": "Complete dataset semantics.", "attributes": {
@@ -28,10 +41,13 @@ def fixture(tmp_path):
                                              "inlined_as_list": True}}},
             "Instance": {"description": "Instance semantics must survive.", "attributes": {
                 "data_topic": {"range": "uriorcurie", "values_from": ["B2AI_TOPIC"],
-                               "description": "Exact source topic, never guessed."},
+                               "description": "Exact source topic, never guessed.",
+                               "annotations": {"d4d:termSources": "GO, NCIT",
+                                               "d4d:termSourceIdentifierForms": topic_forms}},
                 "data_substrate": {"range": "uriorcurie", "values_from": ["B2AI_SUBSTRATE"]},
                 "other_topic": {"range": "uriorcurie", "values_from": ["unused_registry"],
-                                "annotations": {"d4d:termSources": "CUSTOM"}}}}}}
+                                "annotations": {"d4d:termSources": "CUSTOM",
+                                                "d4d:termSourceIdentifierForms": custom_forms}}}}}}
     path = tmp_path / "schema.yaml"
     path.write_text(yaml.safe_dump(schema))
     snapshot = capture_schema(path, strict=True)
@@ -254,3 +270,187 @@ def test_core_context_uses_captured_bytes_and_requires_core_root(fixture, tmp_pa
     captured.core_schema = capture_schema(missing, strict=True)
     with pytest.raises(ValueError, match="missing class CoreDataset"):
         bc.schema_context(captured, None)
+
+
+def test_real_schema_substrate_and_topic_identifier_forms_accept_and_reject(fixture):
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    schema_path = root / "src" / "data_sheets_schema" / "schema" / "data_sheets_schema_all.yaml"
+    snapshot = capture_schema(schema_path, strict=True)
+    selection, inputs = fixture
+    selection = deepcopy(selection)
+    selection["inputs"]["full_schema"] = bc._schema_pin(snapshot)
+    derived = bc.derive_term_policy(selection=selection, context_raw=inputs["context"], schema_snapshot=snapshot)
+    assert derived["format"] == "bc1_neutral_term_policy_v2"
+    substrate = derived["external_terms"]["Instance"]["data_substrate"]
+    assert substrate["sources"] == ["EDAM Data", "EDAM Format", "IANA media types"]
+    assert substrate["curie_prefixes"] == ["EDAM:data_", "EDAM:format_", "mediatypes:"]
+    assert substrate["iri_prefixes"] == [
+        "http://edamontology.org/data_",
+        "http://edamontology.org/format_",
+        "https://www.iana.org/assignments/media-types/",
+    ]
+    topic = derived["external_terms"]["Instance"]["data_topic"]
+    assert topic["sources"] == ["EFO", "GO", "MeSH", "NCIT"]
+    assert topic["curie_prefixes"] == ["EFO:", "GO:", "MESH:", "NCIT:"]
+    for good in (
+        "EDAM:data_0006", "EDAM:format_1915", "EDAM:format_3752",
+        "http://edamontology.org/data_0006", "http://edamontology.org/format_3752",
+        "mediatypes:text/csv", "mediatypes:application/vnd.apache.parquet",
+        "https://www.iana.org/assignments/media-types/text/csv",
+    ):
+        bc.validate_term_value(good, policy=derived, cls="Instance", field="data_substrate")
+    for bad in (
+        "EDAM_Data:0006", "EDAM Format:3752", "IANA_media_types:text/csv",
+        "EDAM:0006", "EDAM:topic_0003", "EDAM:operation_0004",
+        "https://edamontology.org/data_0006", "http://www.iana.org/assignments/media-types/text/csv",
+        "EDAM:data_", "EDAM:format_", "mediatypes:",
+        "http://edamontology.org/data_", "https://www.iana.org/assignments/media-types/",
+        "B2AI_SUBSTRATE:43", "CSV file",
+    ):
+        with pytest.raises(ValueError, match="controlled term"):
+            bc.validate_term_value(bad, policy=derived, cls="Instance", field="data_substrate")
+    for good_topic in (
+        "GO:0008150", "MESH:D012640", "EFO:0000001", "NCIT:C12345",
+        "http://purl.obolibrary.org/obo/GO_0008150", "https://purl.obolibrary.org/obo/GO_0008150",
+        "http://id.nlm.nih.gov/mesh/D012640", "https://id.nlm.nih.gov/mesh/D012640",
+        "http://purl.bioontology.org/ontology/MESH/D012640", "https://purl.bioontology.org/ontology/MESH/D012640",
+        "http://www.ebi.ac.uk/efo/EFO_0000001", "https://www.ebi.ac.uk/efo/EFO_0000001",
+        "http://purl.obolibrary.org/obo/EFO_0000001", "https://purl.obolibrary.org/obo/EFO_0000001",
+        "http://purl.obolibrary.org/obo/NCIT_C12345", "https://purl.obolibrary.org/obo/NCIT_C12345",
+    ):
+        bc.validate_term_value(good_topic, policy=derived, cls="Instance", field="data_topic")
+    for bad_topic in (
+        "MeSH:D012640", "B2AI_TOPIC:1", "EDAM:data_0006", "GO:", "http://purl.obolibrary.org/obo/GO_", "Genomics",
+    ):
+        with pytest.raises(ValueError, match="controlled term"):
+            bc.validate_term_value(bad_topic, policy=derived, cls="Instance", field="data_topic")
+
+
+@pytest.mark.parametrize("bad_forms,match", [
+    ("", "JSON string"),
+    ("not json", r"^BC1 term-source identifier forms cannot be read safely \(JSONDecodeError\)$"),
+    ('{"version": 1, "version": 1, "sources": []}', r"^BC1 term-source identifier forms cannot be read safely \(ValueError\)$"),
+    ('{"version": 2, "sources": []}', "version 1"),
+    ('{"version": 1, "sources": [], "extra": 1}', "exact version and sources"),
+    ('{"version": 1, "sources": []}', "nonempty sources list"),
+    (json.dumps({"version": 1, "sources": [{"id": "Bad_ID", "label": "CUSTOM", "curies": [{"prefix": "CUSTOM", "local_prefix": ""}], "iri_bases": []}]}), "invalid id"),
+    (json.dumps({"version": 1, "sources": [
+        {"id": "dup", "label": "CUSTOM", "curies": [{"prefix": "CUSTOM", "local_prefix": ""}], "iri_bases": []},
+        {"id": "dup", "label": "OTHER", "curies": [{"prefix": "OTHER", "local_prefix": ""}], "iri_bases": []},
+    ]}), "duplicate term-source id"),
+    (json.dumps({"version": 1, "sources": [
+        {"id": "one", "label": "CUSTOM", "curies": [{"prefix": "CUSTOM", "local_prefix": ""}], "iri_bases": []},
+        {"id": "two", "label": "CUSTOM", "curies": [{"prefix": "OTHER", "local_prefix": ""}], "iri_bases": []},
+    ]}), "duplicate term-source label"),
+    (json.dumps({"version": 1, "sources": [{"id": "custom", "label": "CUSTOM", "curies": [], "iri_bases": []}]}), "nonempty curies or iri_bases"),
+    (json.dumps({"version": 1, "sources": [{"id": "custom", "label": "CUSTOM", "curies": [{"prefix": "http", "local_prefix": ""}], "iri_bases": []}]}), "invalid CURIE prefix"),
+    (json.dumps({"version": 1, "sources": [{"id": "custom", "label": "CUSTOM", "curies": [{"prefix": "CUSTOM", "local_prefix": "a:b"}], "iri_bases": []}]}), "invalid CURIE local_prefix"),
+    (json.dumps({"version": 1, "sources": [{"id": "custom", "label": "CUSTOM", "curies": [], "iri_bases": ["://example.test/"]}]}), "invalid IRI base"),
+    (json.dumps({"version": 1, "sources": [
+        {"id": "one", "label": "CUSTOM", "curies": [{"prefix": "CUSTOM", "local_prefix": ""}], "iri_bases": []},
+        {"id": "two", "label": "OTHER", "curies": [{"prefix": "CUSTOM", "local_prefix": "sub_"}], "iri_bases": []},
+    ]}), "conflicting CURIE"),
+    (json.dumps({"version": 1, "sources": [
+        {"id": "one", "label": "CUSTOM", "curies": [], "iri_bases": ["https://example.test/base/"]},
+        {"id": "two", "label": "OTHER", "curies": [], "iri_bases": ["https://example.test/base/sub/"]},
+    ]}), "conflicting IRI base"),
+    (json.dumps({"version": 1, "sources": [{"id": "custom", "label": "UNDECLARED", "curies": [{"prefix": "CUSTOM", "local_prefix": ""}], "iri_bases": []}]}), "no accepted identifier form"),
+    (json.dumps({"version": 1, "sources": [
+        {"id": "custom", "label": "CUSTOM", "curies": [{"prefix": "CUSTOM", "local_prefix": ""}], "iri_bases": []},
+        {"id": "extra", "label": "EXTRA", "curies": [{"prefix": "NCIT", "local_prefix": ""}], "iri_bases": []},
+    ]}), "undeclared label"),
+])
+def test_identifier_forms_parser_rejects_malformed_declarations(bad_forms, match):
+    with pytest.raises(ValueError, match=match) as exc_info:
+        bc._parse_identifier_forms(bad_forms, declared_labels=["CUSTOM"], cls="Instance", slot="other_topic")
+    if '"version": 1, "version": 1' in bad_forms:
+        assert exc_info.value.__cause__ is not None
+        assert "duplicate evidence JSON key: version" in str(exc_info.value.__cause__)
+
+
+def test_identifier_forms_accept_self_contained_prefix(fixture):
+    selection, inputs = fixture
+    schema = yaml.safe_load(inputs["schema_path"].read_bytes())
+    schema["classes"]["Instance"]["attributes"]["other_topic"]["annotations"]["d4d:termSourceIdentifierForms"] = json.dumps({
+        "version": 1, "sources": [
+            {"id": "custom", "label": "CUSTOM", "curies": [{"prefix": "MISSING_PREFIX", "local_prefix": ""}], "iri_bases": ["https://example.test/custom/"]}
+        ]})
+    inputs["schema_path"].write_text(yaml.safe_dump(schema))
+    inputs["schema_snapshot"] = capture_schema(inputs["schema_path"], strict=True)
+    selection["inputs"]["full_schema"] = bc._schema_pin(inputs["schema_snapshot"])
+    derived = policy(fixture)
+    for value in ("MISSING_PREFIX:123", "https://example.test/custom/123"):
+        bc.validate_term_value(value, policy=derived, cls="Instance", field="other_topic")
+
+
+def test_identifier_forms_reject_conflicting_schema_expansion(fixture):
+    selection, inputs = fixture
+    schema = yaml.safe_load(inputs["schema_path"].read_bytes())
+    schema["classes"]["Instance"]["attributes"]["other_topic"]["annotations"]["d4d:termSourceIdentifierForms"] = json.dumps({
+        "version": 1, "sources": [
+            {"id": "custom", "label": "CUSTOM", "curies": [{"prefix": "CUSTOM", "local_prefix": "sub_"}],
+             "iri_bases": ["https://example.test/custom/other_"]}
+        ]})
+    inputs["schema_path"].write_text(yaml.safe_dump(schema))
+    inputs["schema_snapshot"] = capture_schema(inputs["schema_path"], strict=True)
+    selection["inputs"]["full_schema"] = bc._schema_pin(inputs["schema_snapshot"])
+    with pytest.raises(ValueError, match="not in declared iri_bases"):
+        policy(fixture)
+
+
+def test_tampered_identifier_form_prefixes_cannot_replay_or_validate(fixture):
+    _, inputs = fixture
+    derived = policy(fixture)
+    for key, tampered in (
+        ("curie_prefixes", ["CUSTOM:", "EVIL:"]),
+        ("iri_prefixes", ["https://evil.test/"]),
+        ("identifier_forms", []),
+    ):
+        bad = deepcopy(derived)
+        bad["external_terms"]["Instance"]["other_topic"][key] = tampered
+        with pytest.raises(ValueError, match="BC1"):
+            om.prepare(**inputs, term_policy=bad)
+        with pytest.raises(ValueError, match="BC1"):
+            bc.validate_term_value("CUSTOM:001", policy=bad, cls="Instance", field="other_topic")
+
+
+def test_label_rename_and_legacy_v1_replay_work_without_code_changes(fixture):
+    selection, inputs = fixture
+    schema = yaml.safe_load(inputs["schema_path"].read_bytes())
+    schema["classes"]["Instance"]["attributes"]["other_topic"]["annotations"] = {
+        "d4d:termSources": "Renamed Custom Ontology (v2)",
+        "d4d:termSourceIdentifierForms": json.dumps({"version": 1, "sources": [
+            {"id": "custom", "label": "Renamed Custom Ontology (v2)",
+             "curies": [{"prefix": "CUSTOM", "local_prefix": ""}],
+             "iri_bases": ["https://example.test/custom/"]},
+        ]}),
+    }
+    inputs["schema_path"].write_text(yaml.safe_dump(schema))
+    inputs["schema_snapshot"] = capture_schema(inputs["schema_path"], strict=True)
+    selection["inputs"]["full_schema"] = bc._schema_pin(inputs["schema_snapshot"])
+    derived = policy(fixture)
+    bc.validate_term_value("CUSTOM:42", policy=derived, cls="Instance", field="other_topic")
+    bc.validate_term_value("https://example.test/custom/42", policy=derived, cls="Instance", field="other_topic")
+    # Legacy v1 contract replay continues to work for historical v1 captures.
+    schema["classes"]["Instance"]["attributes"]["other_topic"]["annotations"] = {"d4d:termSources": "CUSTOM"}
+    del schema["classes"]["Instance"]["attributes"]["data_topic"]["annotations"]
+    inputs["schema_path"].write_text(yaml.safe_dump(schema))
+    inputs["schema_snapshot"] = capture_schema(inputs["schema_path"], strict=True)
+    selection["inputs"]["full_schema"] = bc._schema_pin(inputs["schema_snapshot"])
+    legacy = bc.derive_term_policy(selection=selection, context_raw=inputs["context"],
+                                   schema_snapshot=inputs["schema_snapshot"], contract_version=1)
+    assert legacy["format"] == "bc1_neutral_term_policy_v1"
+    bc.validate_term_value("GO:0008150", policy=legacy, cls="Instance", field="data_topic")
+    bc.validate_term_value("CUSTOM:42", policy=legacy, cls="Instance", field="other_topic")
+
+
+def test_data_use_permission_is_multivalued_in_full_and_core_schemas():
+    from pathlib import Path
+    from linkml_runtime.utils.schemaview import SchemaView
+    root = Path(__file__).resolve().parents[1]
+    for filename in ("D4D_Data_Governance.yaml", "data_sheets_schema_all.yaml", "data_sheets_schema_core_all.yaml"):
+        view = SchemaView(str(root / "src" / "data_sheets_schema" / "schema" / filename))
+        slot = view.induced_slot("data_use_permission", "LicenseAndUseTerms")
+        assert slot.multivalued is True
+        assert str(slot.range) == "DataUsePermissionEnum"

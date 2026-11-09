@@ -153,20 +153,15 @@ VOCABULARY_PIN = Path("src/data_sheets_schema/b2ai_registry_vocabularies.yaml")
 
 #: The slot annotation that names a slot's term sources in prose the digest
 #: renders (#1302): `"d4d:termSources": "GO, MeSH, EFO, NCIT"`. Read when a
-#: schema carries it; this schema does not yet, see `TERM_SOURCES`.
+#: schema carries it; 3.2.0 declares it on Instance.data_topic and data_substrate.
 TERM_SOURCES_ANNOTATION = "d4d:termSources"
 
 #: The term sources the schema's own descriptions declare, by (class, slot),
 #: rendered ahead of any pinned registry list (#1302). `Instance.data_topic`
 #: has said "GO, MeSH, EFO and NCIT IRIs as well as Bridge2AI standards
 #: terms" since #487; the renderer added in #538 carried only the registry.
-#: Declared here rather than as a schema annotation for now: an edit to the
-#: merged schema moves the schema hashes every checked report block attests
-#: (#1362 pins which blocks the runner wrote and which were backfilled, and
-#: a runner-written block cannot be recomputed under a changed schema
-#: without being recast as a backfill), so the annotation route waits for a
-#: schema boundary. `term_sources_of` already reads the annotation when a
-#: schema carries it, and it wins over this table.
+#: Retained for historical schemas without the annotation. `term_sources_of`
+#: prefers the captured schema annotation over this fallback table.
 TERM_SOURCES: dict[tuple[str, str], str] = {
     ("Instance", "data_topic"): "GO, MeSH, EFO, NCIT",
 }
@@ -688,7 +683,8 @@ def render(digest: ClassDigest, *, vocabulary: dict | None = None) -> str:
                 shown = ", ".join(f"`{v}`" for v in values)
                 extra = n.enums_truncated.get(slot_name, 0)
                 tail = f" (+{extra} more)" if extra else ""
-                lines.append(f"    - `{slot_name}` accepts only: {shown}{tail}")
+                cardinality = " [many]" if n.ranges.get(slot_name, "").endswith("[]") else ""
+                lines.append(f"    - `{slot_name}`{cardinality} accepts only: {shown}{tail}")
             # The registry vocabulary a nested attribute draws from (#538).
             # Here or nowhere, exactly as for the enums above.
             for slot_name in sorted(set(n.values_from) | set(n.term_sources)):
