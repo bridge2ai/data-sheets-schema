@@ -4,7 +4,8 @@ Inputs: committed source and explicit test nodes. Outputs: fresh assigned
 scratch-native-u1u3/u3f2 evidence. Inherit U3-F's credential removal, OS network
 and native-execution denial, origin checks and observed-descendant cleanup;
 use a 3200-second test bound below this brief's 3300-second invocation ceiling.
-No production or selected test deadline is changed.
+No production or selected test deadline is changed. Invoke the parent with
+the dependency venv Python -S -P -B; workers retain the inherited bootstrap.
 """
 import importlib.util
 import os
@@ -49,7 +50,7 @@ def bounded_parent(args):
         return f.r.supervised(args)
     finally:
         if args.out.is_dir():
-            f.r.w.runner.save(args.out / 'early-cutoff.json',
+            f.r.w.runner.save(args.out / 'u3f2-cutoff.json',
                 dict(cutoff_seconds=3250, events=f.r.watchdog_events))
 
 
