@@ -1,0 +1,17 @@
+{
+  "job": "website",
+  "authorization": "owner explicitly approved temporary pause in lead conversation",
+  "started_utc": "2026-11-10T05:29:45.317011+00:00",
+  "targets": [
+    {
+      "pid": 92782,
+      "ppid": 89865,
+      "pgid": 89865,
+      "state": "R+",
+      "started": "Mon Nov 9 21:22:28 2026",
+      "command": "/opt/homebrew/Caskroom/miniforge/base/bin/python3"
+    }
+  ],
+  "stopped_verified": true,
+  "verified_utc": "2026-11-10T05:29:45.554596+00:00"
+}
