@@ -9,6 +9,7 @@ with the dependency Python -S -P -B. Both child entries use this same adapter.
 from __future__ import annotations
 
 import csv
+import errno
 import hashlib
 import importlib.util
 import json
@@ -82,12 +83,26 @@ wrapper.__file__ = runner.__file__ = str(Path(__file__).resolve())
 original_make_venv = runner.make_test_venv
 original_parent = runner.parent
 original_environment = runner.clean_environment
+original_worker = runner.worker
+
+# Preserve the shared dependency export that failed its final census. Future
+# cohorts use a fresh local-Git export, with no test-descendant writes allowed.
+# This is harness isolation only; the pinned Gitlink and full census stay exact.
+wrapper.dependency.SCRATCH = SCRATCH / 'u3k'
+wrapper.dependency.DESTINATION = wrapper.dependency.SCRATCH / 'dependencies' / (
+    'fairscape-' + wrapper.dependency.PIN)
+runner.PROFILE += '(deny file-write* (subpath ' + json.dumps(
+    str(wrapper.dependency.DESTINATION)) + '))\n'
 
 
 def environment(out, interpreter_directory):
     result = original_environment(out, interpreter_directory)
     result['U3K_MANIFEST'] = str(MANIFEST)
     result['U3K_MANIFEST_SHA'] = MANIFEST_SHA
+    canary = os.environ.get('U3K_DEPENDENCY_CANARY', '0')
+    if canary not in {'0', '1'}:
+        raise ValueError('unknown U3-K dependency canary mode')
+    result['U3K_DEPENDENCY_CANARY'] = canary
     # Timing is enabled for explicit diagnostic/canary/public cohorts. Broad refusal
     # tests intentionally trap filesystem effects (including Path.mkdir), so
     # adding per-phase metric writes there would change what those tests see.
@@ -104,6 +119,38 @@ def environment(out, interpreter_directory):
         if os.environ.get('U3F_PARITY') == '1':
             result['PYTEST_PLUGINS'] += ',scripts.adhoc.u3e_parity_plugin_20261108'
     return result
+
+
+def worker(args):
+    if os.environ.get('U3K_DEPENDENCY_CANARY') == '1':
+        before = wrapper.dependency.dependency_evidence()
+        package = wrapper.dependency.DESTINATION / 'tree/fairscape_models'
+        link = Path(sys.prefix) / 'lib' / (
+            f'python{sys.version_info.major}.{sys.version_info.minor}'
+        ) / 'site-packages/fairscape_models'
+        if not link.is_symlink() or link.resolve(strict=True) != package:
+            raise RuntimeError('dependency canary requires the exact isolated package link')
+        probe = link / '.u3k-write-denial-canary'
+        if os.path.lexists(probe):
+            raise RuntimeError('dependency write-denial canary path already exists')
+        try:
+            fd = os.open(probe, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        except OSError as exc:
+            if exc.errno not in (errno.EPERM, errno.EACCES):
+                raise
+            denied_errno = exc.errno
+        else:
+            os.close(fd)
+            raise RuntimeError('dependency write denial failed; preserve probe and stop')
+        after = wrapper.dependency.dependency_evidence()
+        if before != after or os.path.lexists(probe):
+            raise RuntimeError('dependency changed during write-denial canary')
+        runner.save(args.out / 'dependency-write-denied.json', dict(
+            status='write_denied_and_exact_dependency_unchanged', errno=denied_errno,
+            probe=str(probe), physical_probe=str(package / probe.name),
+            dependency=after, policy_sha256=hashlib.sha256(
+                runner.PROFILE.encode()).hexdigest()))
+    return original_worker(args)
 
 
 def excluded(name):
@@ -208,6 +255,10 @@ def parent(args):
 runner.make_test_venv = nested_dependency_venv
 runner.clean_environment = environment
 runner.parent = parent
+runner.worker = worker
 if __name__ == '__main__':
-    runner.time = wrapper.DeadlineClock()
-    raise SystemExit(runner.main())
+    if sys.argv[1:] == ['--hydrate-local-dependency']:
+        wrapper.dependency.main()
+    else:
+        runner.time = wrapper.DeadlineClock()
+        raise SystemExit(runner.main())
