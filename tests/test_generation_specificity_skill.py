@@ -5515,6 +5515,199 @@ class TestModelFacingDerivation(unittest.TestCase):
                 set(),
             )
 
+    def test_alias_flow_try_except_loops_and_if_join_kill_5724(self):
+        """#5724 (R2-1): flow-sensitive alias walkers in `_local_writes` and
+        `effects()` preserve live aliases across `try/except`, multi-hop loop
+        fixed points (`for`/`while`), and `kill_alias` after `if/else` joins,
+        without merging unrelated containers or losing `FP1` kill behavior."""
+        # Case 4 (unit): killing an alias after an if/else join must not merge
+        # two unrelated containers (`c1` and `c2`) in `_local_writes`.
+        fn_ast = scan.ast.parse(
+            "def f(cond, secret):\n"
+            "    c1 = {}\n"
+            "    c2 = {}\n"
+            "    if cond:\n"
+            "        view = c1\n"
+            "    else:\n"
+            "        view = c2\n"
+            "    view = 0\n"
+            "    c2['k'] = secret\n"
+            "    return c1\n"
+        ).body[0]
+        writes = scan._local_writes(fn_ast)
+        c1_names = [
+            n.id for w in writes.get("c1", []) for n in scan.ast.walk(w) if isinstance(n, scan.ast.Name)
+        ]
+        self.assertNotIn("secret", c1_names)
+
+        # Positive derivation cases: Case 1 (try/except rebind), Case 2 (1-hop loop),
+        # Case 2b (3-hop loop requiring >2 passes), and Case 3 (kill_alias after if/else join).
+        positive_cases = (
+            (
+                "Case1_try_except_rebind",
+                False,
+                "    try:\n"
+                "        view = contracts\n"
+                "    except KeyError:\n"
+                '        view = {"worker": {}}\n'
+                '    view["worker"]["hint"] = project_hint(project)\n',
+            ),
+            (
+                "Case2_loop_carried_1hop",
+                False,
+                '    view = {"worker": {}}\n'
+                "    for _ in (1, 2):\n"
+                '        view["worker"]["hint"] = project_hint(project)\n'
+                "        view = contracts\n",
+            ),
+            (
+                "Case2b_loop_carried_3hop",
+                False,
+                '    v1 = {"worker": {}}\n'
+                '    v2 = {"worker": {}}\n'
+                '    v3 = {"worker": {}}\n'
+                "    for _ in (1, 2, 3, 4):\n"
+                '        v3["worker"]["hint"] = project_hint(project)\n'
+                "        v3 = v2\n"
+                "        v2 = v1\n"
+                "        v1 = contracts\n",
+            ),
+            (
+                "Case3_kill_alias_after_if_join",
+                True,
+                '    inner = {"hint": project_hint(spec.project)}\n'
+                "    contracts = {}\n"
+                "    v2 = {}\n"
+                "    if spec.project:\n"
+                "        v1 = v2\n"
+                "    else:\n"
+                "        v2 = contracts\n"
+                "        v1 = {}\n"
+                "    v1 = 0\n"
+                '    v2["worker"] = json.dumps(inner)\n',
+            ),
+            (
+                "Case5a_try_nested_if_raise_before_rebind",
+                False,
+                '    view = {"worker": {}}\n'
+                "    try:\n"
+                "        if project:\n"
+                "            view = contracts\n"
+                '            _ = contracts["worker"]\n'
+                '            view = {"worker": {}}\n'
+                "    except KeyError:\n"
+                "        pass\n"
+                '    view["worker"]["hint"] = project_hint(project)\n',
+            ),
+            (
+                "Case5b_with_suppression_skips_rebind",
+                False,
+                '    view = {"worker": {}}\n'
+                "    with project:\n"
+                "        view = contracts\n"
+                '        _ = contracts["worker"]\n'
+                '        view = {"worker": {}}\n'
+                '    view["worker"]["hint"] = project_hint(project)\n',
+            ),
+            (
+                "Case6_match_guard_fallthrough_retains_binding",
+                False,
+                '    view = {"worker": {}}\n'
+                "    match project:\n"
+                "        case _ if (view := contracts) and False:\n"
+                "            pass\n"
+                "        case _:\n"
+                '            view["worker"]["hint"] = project_hint(project)\n',
+            ),
+            (
+                "Case7_match_capture_alias_unbound_elsewhere",
+                False,
+                "    match contracts:\n"
+                "        case view:\n"
+                '            view["worker"]["hint"] = project_hint(project)\n',
+            ),
+        )
+        for label, direct_return, body in positive_cases:
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as directory:
+                runner = PRECISION_RUNNER.replace(
+                    "from pathlib import Path\n",
+                    "from pathlib import Path\nfrom data_sheets_schema import contracts_5724\n",
+                ).replace(
+                    "[guide, value, ids_4085.label(spec)]",
+                    "[guide, value, ids_4085.label(spec), contracts_5724.render_worker(spec)]",
+                )
+                modules = dict(PRECISION_MODULES)
+                modules["project_hints"] = (
+                    "def project_hint(project: str) -> str:\n"
+                    '    return f"Review the CHORUS cohort for {project}."\n'
+                )
+                if direct_return:
+                    modules["contracts_5724"] = (
+                        "import json\n"
+                        "from data_sheets_schema.project_hints import project_hint\n\n"
+                        "def render_worker(spec) -> str:\n"
+                        + body
+                        + '    return contracts["worker"]\n'
+                    )
+                else:
+                    modules["contracts_5724"] = (
+                        "from data_sheets_schema.project_hints import project_hint\n\n"
+                        "def _contracts_seed() -> dict[str, dict[str, object]]:\n"
+                        '    return {"worker": {"stage": "worker"}}\n\n'
+                        'def _role_contracts(project: str = "") -> dict[str, dict[str, object]]:\n'
+                        "    contracts = _contracts_seed()\n"
+                        + body
+                        + "    return contracts\n\n"
+                        "def render_worker(spec) -> str:\n"
+                        '    return str(_role_contracts(spec.project)["worker"])\n'
+                    )
+                root = self._root(directory, runner, modules)
+                derived, spans, _ = self._derive(root)
+                self.assertIn("project_hints", derived)
+                self.assertEqual(
+                    self._violations(root, "src/data_sheets_schema/project_hints.py", derived, spans),
+                    {("CHORUS", 2)},
+                )
+
+        # Control: when both try and except kill the alias before the write,
+        # `project_hints` is not derived (preserving FP1 precision).
+        with tempfile.TemporaryDirectory() as directory:
+            runner = PRECISION_RUNNER.replace(
+                "from pathlib import Path\n",
+                "from pathlib import Path\nfrom data_sheets_schema import contracts_try_kill_5724\n",
+            ).replace(
+                "[guide, value, ids_4085.label(spec)]",
+                "[guide, value, ids_4085.label(spec), contracts_try_kill_5724.render_worker(spec)]",
+            )
+            modules = dict(PRECISION_MODULES)
+            modules["project_hints"] = (
+                "def project_hint(project: str) -> str:\n"
+                '    return f"Review the CHORUS cohort for {project}."\n'
+            )
+            modules["contracts_try_kill_5724"] = (
+                "from data_sheets_schema.project_hints import project_hint\n\n"
+                "def _contracts_seed() -> dict[str, dict[str, object]]:\n"
+                '    return {"worker": {"stage": "worker"}}\n\n'
+                'def _role_contracts(project: str = "") -> dict[str, dict[str, object]]:\n'
+                "    contracts = _contracts_seed()\n"
+                "    view = contracts\n"
+                "    try:\n"
+                '        view = {"other": {}}\n'
+                "    except KeyError:\n"
+                '        view = {"other": {}}\n'
+                '    view["other"]["hint"] = project_hint(project)\n'
+                "    return contracts\n\n"
+                "def render_worker(spec) -> str:\n"
+                '    return str(_role_contracts(spec.project)["worker"])\n'
+            )
+            root = self._root(directory, runner, modules)
+            derived, spans, _ = self._derive(root)
+            self.assertNotIn("project_hints", derived)
+            self.assertEqual(
+                self._violations(root, "src/data_sheets_schema/project_hints.py", derived, spans),
+                set(),
+            )
+
 
 
 
@@ -7139,6 +7332,69 @@ class TestWhatTextsRun(unittest.TestCase):
                 surfaces.add(rel, "native_agentic", "model_facing", "live", "refusal fixture", runs=False)
                 with self.assertRaisesRegex(scan.ConfigError, pattern):
                     scan.discover_model_commands(root, {}, surfaces)
+
+    def test_model_command_tables_starred_multi_prefix_and_param_shadowing_5725(self):
+        """#5725 (R2-3): `_model_command_tables` expands multi-bound starred
+        prefixes (`[*prefix, '--check']`), records function parameters in
+        `scoped_bindings` so a parameter shadowing a module-level constant
+        refuses as an unresolvable `-m` operand rather than falling back to the
+        module constant, and keeps the documented intra-module helper boundary."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            _write(root / "src/data_sheets_schema/__init__.py", "")
+            _write(
+                root / "src/data_sheets_schema/starred_a_5725.py",
+                'def main() -> str:\n    return "Review the CHORUS cohort."\n',
+            )
+            _write(
+                root / "src/data_sheets_schema/starred_b_5725.py",
+                'def main() -> str:\n    return "Review the CM4AI cohort."\n',
+            )
+            rel = "src/data_sheets_schema/table_5725.py"
+            _write(
+                root / rel,
+                "def _cmd(flag: bool) -> list[str]:\n"
+                "    if flag:\n"
+                '        prefix = ["python3", "-m", "data_sheets_schema.starred_a_5725"]\n'
+                "    else:\n"
+                '        prefix = ["python3", "-m", "data_sheets_schema.starred_b_5725"]\n'
+                '    return [*prefix, "--check"]\n'
+                'COMMANDS = {"run": _cmd(True)}\n',
+            )
+            surfaces = scan.Surfaces()
+            surfaces.add(rel, "native_agentic", "model_facing", "live", "starred multi-prefix fixture", runs=False)
+            commands = scan.discover_model_commands(root, {}, surfaces)
+            self.assertIn("src/data_sheets_schema/starred_a_5725.py", commands)
+            self.assertIn("src/data_sheets_schema/starred_b_5725.py", commands)
+
+        # Function parameter `MOD` shadowing module-level `MOD` must refuse as an
+        # unresolvable `-m` operand rather than resolving to the module constant.
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            rel = "src/data_sheets_schema/param_shadow_5725.py"
+            _write(
+                root / rel,
+                'MOD = "data_sheets_schema.starred_a_5725"\n'
+                "def _cmd(MOD: str) -> list[str]:\n"
+                '    return ["python3", "-m", MOD]\n'
+                'COMMANDS = {"run": _cmd("dynamic")}\n',
+            )
+            surfaces = scan.Surfaces()
+            surfaces.add(rel, "native_agentic", "model_facing", "live", "param shadow fixture", runs=False)
+            with self.assertRaisesRegex(
+                scan.ConfigError,
+                r"unresolvable -m operand at src/data_sheets_schema/param_shadow_5725\.py:3",
+            ):
+                scan.discover_model_commands(root, {}, surfaces)
+
+        # Documented known boundary (#5725): a command-table entry constructed by
+        # an imported cross-module helper without a literal `-m` in the caller's
+        # AST is outside intra-module `_model_command_tables` expansion.
+        tree_imported = scan.ast.parse(
+            "from data_sheets_schema.external_helper import build_cmd\n"
+            'COMMANDS = {"run": build_cmd()}\n'
+        )
+        self.assertEqual(scan._model_command_tables(tree_imported, "src/data_sheets_schema/caller.py"), [])
 
 
 class TestSessionDescriptions(unittest.TestCase):
