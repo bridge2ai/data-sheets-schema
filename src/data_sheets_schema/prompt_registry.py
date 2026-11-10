@@ -281,6 +281,27 @@ def _head_commit(at: Path | None = None) -> str | None:
     return (out or "").strip() or None
 
 
+def _git_common_dir(at: Path | None = None) -> Path | None:
+    """Resolved git common directory (`--git-common-dir`) for `at`, shared by a
+    repository and its linked worktrees (#5673), or None outside git."""
+    if at is None:
+        return None
+    try:
+        d = Path(os.path.abspath(at))
+        while not d.exists() and d != d.parent:
+            d = d.parent
+        d = d.resolve()
+    except OSError:
+        return None
+    out = (_git("rev-parse", "--git-common-dir", cwd=d) or "").strip()
+    if not out:
+        return None
+    try:
+        return (d / out).resolve()
+    except OSError:
+        return None
+
+
 def _is_dirty(path: Path) -> bool:
     """Does the working tree differ from HEAD for this file?
 
@@ -359,7 +380,10 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
         if not tracked:
             unavailable, head = f"not tracked by git: {p}", None
         elif top:
-            toplevel = top
+            from data_sheets_schema.resources import CHECKOUT_ROOT
+            reg_common = _git_common_dir(Path(registry).parent) or _git_common_dir(CHECKOUT_ROOT)
+            file_common = _git_common_dir(p.parent)
+            toplevel = "." if (file_common is not None and file_common == reg_common) else top
             blob = _os.path.relpath(p.resolve(), Path(top).resolve()).replace(_os.sep, "/")
     if _is_dirty(p):
         raise ValueError(

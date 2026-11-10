@@ -564,3 +564,115 @@ class TestRegistryCaching(unittest.TestCase):
         except Exception:                                    # noqa: BLE001
             pr._REGISTRY_CACHE.clear()
         self.assertEqual(pr._REGISTRY_CACHE, {})
+
+
+class TestPinnedInRepositoryLocation(unittest.TestCase):
+    """#5673: `pinned_in_repository` is `.` when the pinned file belongs to the
+    same repository (same resolved `--git-common-dir`, linked worktrees
+    included) as the registry, and the absolute toplevel for a foreign
+    repository."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+
+    @staticmethod
+    def _git(cwd: Path, *args: str) -> str:
+        import subprocess
+        from data_sheets_schema.resources import git_env
+        return subprocess.run(
+            ["git", "-c", "user.email=t@example.org", "-c", "user.name=t", *args],
+            cwd=cwd, check=True, capture_output=True, text=True, env=git_env(),
+        ).stdout
+
+    def test_pin_in_this_repository_writes_dot_and_preserves_canonical_hashes(self):
+        from data_sheets_schema.resources import CHECKOUT_ROOT, resource_path
+        real_reg = resource_path(pr.REGISTRY)
+        before_bytes = real_reg.read_bytes()
+        before_entries = pr.pins()
+
+        target_prompt = resource_path("src/download/prompts/d4d_generic_arm_prompt_v10.md")
+        scratch_reg = self.root / "canonical_hashes.yaml"
+        pr.pin(target_prompt, "verify local pin location", registry=scratch_reg)
+        pinned = pr.entry_for(target_prompt, scratch_reg)
+
+        self.assertEqual(pinned["pinned_in_repository"], ".")
+        self.assertEqual(
+            pinned["pinned_blob_path"],
+            "src/download/prompts/d4d_generic_arm_prompt_v10.md",
+        )
+        blob = self._git(
+            CHECKOUT_ROOT / pinned["pinned_in_repository"],
+            "show",
+            f"{pinned['pinned_at_commit']}:{pinned['pinned_blob_path']}",
+        )
+        self.assertEqual(blob, target_prompt.read_text(encoding="utf-8"))
+        self.assertEqual(real_reg.read_bytes(), before_bytes)
+        self.assertEqual(pr.pins(), before_entries)
+
+    def test_pin_in_repository_and_linked_worktree_writes_dot_and_audit_route_works(self):
+        repo = self.root / "repo"
+        (repo / "src" / "download" / "prompts").mkdir(parents=True)
+        self._git(repo, "init", "-q")
+        p1 = repo / "src" / "download" / "prompts" / "p1.md"
+        p1.write_text("# p1\n\n## Prompt body\nmain checkout body\n", encoding="utf-8")
+        self._git(repo, "add", ".")
+        self._git(repo, "commit", "-q", "-m", "initial")
+
+        wt = self.root / "linked-wt"
+        self._git(repo, "worktree", "add", "-q", "-b", "wt-branch", str(wt))
+        p2 = wt / "src" / "download" / "prompts" / "p2.md"
+        p2.write_text("# p2\n\n## Prompt body\nlinked worktree body\n", encoding="utf-8")
+        self._git(wt, "add", ".")
+        self._git(wt, "commit", "-q", "-m", "worktree prompt")
+
+        reg = repo / "src" / "download" / "prompts" / "canonical_hashes.yaml"
+        pr.pin(p1, "pinned in main checkout", registry=reg)
+        pr.pin(p2, "pinned in linked worktree", registry=reg)
+
+        wt_reg = wt / "src" / "download" / "prompts" / "canonical_hashes.yaml"
+        pr.pin(p2, "pinned directly in linked worktree registry", registry=wt_reg)
+
+        pinned_1 = pr.entry_for(p1, reg)
+        pinned_2 = pr.entry_for(p2, reg)
+        pinned_wt = pr.entry_for(p2, wt_reg)
+
+        self.assertEqual(pinned_1["pinned_in_repository"], ".")
+        self.assertEqual(pinned_2["pinned_in_repository"], ".")
+        self.assertEqual(pinned_wt["pinned_in_repository"], ".")
+
+        for pinned, expected in (
+            (pinned_1, "# p1\n\n## Prompt body\nmain checkout body\n"),
+            (pinned_2, "# p2\n\n## Prompt body\nlinked worktree body\n"),
+        ):
+            shown = self._git(
+                repo / pinned["pinned_in_repository"],
+                "show",
+                f"{pinned['pinned_at_commit']}:{pinned['pinned_blob_path']}",
+            )
+            self.assertEqual(shown, expected)
+
+    def test_pin_in_foreign_repository_writes_absolute_toplevel(self):
+        repo = self.root / "repo"
+        (repo / "src" / "download" / "prompts").mkdir(parents=True)
+        self._git(repo, "init", "-q")
+        (repo / "README.md").write_text("repo\n", encoding="utf-8")
+        self._git(repo, "add", ".")
+        self._git(repo, "commit", "-q", "-m", "init repo")
+
+        foreign = self.root / "foreign"
+        (foreign / "nested").mkdir(parents=True)
+        self._git(foreign, "init", "-q")
+        fp = foreign / "nested" / "foreign.md"
+        fp.write_text("# foreign\n\n## Prompt body\nforeign body\n", encoding="utf-8")
+        self._git(foreign, "add", ".")
+        self._git(foreign, "commit", "-q", "-m", "init foreign")
+
+        reg = repo / "src" / "download" / "prompts" / "canonical_hashes.yaml"
+        pr.pin(fp, "foreign pin", registry=reg)
+        pinned = pr.entry_for(fp, reg)
+
+        self.assertNotEqual(pinned["pinned_in_repository"], ".")
+        self.assertTrue(Path(pinned["pinned_in_repository"]).is_absolute())
+        self.assertEqual(Path(pinned["pinned_in_repository"]).resolve(), foreign.resolve())
