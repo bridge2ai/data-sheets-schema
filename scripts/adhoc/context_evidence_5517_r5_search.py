@@ -6,11 +6,13 @@ Standard library only; direct byte reads include ignored files. No source edits.
 """
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT.parent / 'scratch-5517'
+OUT = Path(os.environ.get('D4D_5517_SCRATCH', ROOT.parent / 'scratch-5517'))
+assert not (ROOT.parent / 'plans/native_quiet_window.lock').exists()
 manifest = (ROOT / 'data/preprocessed/chunks/AI_READI_chunks.yaml').read_text()
 bundle = ROOT / 'data/preprocessed/concatenated/AI_READI_preprocessed.txt'
 raw = bundle.read_bytes()
