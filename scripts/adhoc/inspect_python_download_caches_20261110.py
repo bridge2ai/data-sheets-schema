@@ -224,13 +224,13 @@ def main():
               'One non-root lsof snapshot; absence is not proof of future non-use or visibility '
               'into every process. Active npm/package jobs may open files after this snapshot.', '',
               '```json', json.dumps(lsof, indent=2), '```', '',
-              '## Preserved Homebrew three-archive result', '',
+              '## Homebrew archive observations', '',
               'Reverified with `scripts/adhoc/inspect_download_cache_candidates_20261110.py --verify-candidates`. '
-              f"The three archives total {homebrew['allocated_bytes_sum']:,} allocated bytes "
-              f"({homebrew['allocated_mib_sum']:.3f} MiB), consistent with the initial 611.6 MiB result. "
-              'All three headers are gzip and each has one hardlink. The Boost archive has an access '
-              'timestamp older than 180 days, which is only a staleness signal. lsof return code 1 with '
-              'empty stdout/stderr means no matching visible open files in that snapshot, not a future-use guarantee.', '',
+              f"The {len(homebrew['candidates'])} candidates total {homebrew['allocated_bytes_sum']:,} allocated bytes "
+              f"({homebrew['allocated_mib_sum']:.3f} MiB). "
+              'The JSON below records the observed header bytes, link counts, timestamps and lsof '
+              'return code/stdout/stderr. These observations must be checked for each run; '
+              'this section does not grant cleanup clearance (#5743).', '',
               '```json', json.dumps(homebrew, indent=2), '```', '',
               'Provenance helpers: `scripts/adhoc/inspect_download_cache_candidates_20261110.py` and '
               '`scripts/adhoc/inspect_python_download_caches_20261110.py`.', '',
