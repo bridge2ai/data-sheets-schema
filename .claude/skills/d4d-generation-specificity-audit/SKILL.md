@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.10.2
+  version: 1.10.3
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -1016,4 +1016,36 @@ Direct imports of the request runner share namespace-write evidence. A module-le
 Local dataclass records with structurally proved freshness admit exact field appends and counter mutations without treating the record as an untracked escape. The record class must be a finite, undecorated single-dataclass definition in the same source module, with no bases, keywords, post-init, custom methods, or dynamic factory overrides, and its class and factory references must remain unexposed. Fields are limited to explicit scalar defaults and fresh list factories (`field(default_factory=list)`).
 
 Returned-instance tracking follows the allocation through exact tuple slots, plain bindings, and authentic single-callee functions across the module call graph. Any exposure of the instance to unknown calls, attribute calls, reflection (`type()`, `__class__`), containers, global/nonlocal assignments, iterations, context managers, or recursive call cycles refuses the proof. Only exact append calls to the proved fresh list fields and direct integer augmentations to proved counter fields are cleared as non-escaping local operations; the record, its borrowed aliases, and nested values retain all ordinary effect and dependency checks.
+
+### Integrated native-v2 producer contract (1.10.3, U3-L)
+
+The separate native render proof also accepts the integrated production and
+synthetic preparation family. Its complete executable AST contracts bind
+`prepare`, `prepare_synthetic`, `_prepare`, `verify_preparer`, `_read`, `_wire`,
+`_job_id`, `_file_pin`, `_pin_map` and `_envelope`. Production runtime rejection
+precedes selection capture. The synthetic entry validates the explicit test
+profile and passes its fixed profile name to `_prepare`, which checks that name
+after validating a fresh runtime capture. Both producers construct a fresh
+RunSpec with explicit registered input paths and call its input-spelling guard
+before runtime attachment or instruction/render-spec/input-identity reads.
+Each producer admits exactly the complete body with or without the D114
+runtime-basis toolchain selection immediately after runtime attachment.
+
+The only new function-reference exception is the two branch expressions of
+`verify_preparer`'s exact local profile dispatcher. Its complete body fixes the
+wire and identity checks, runtime reread, selector, sole call and canonical
+comparison. Other function escapes still refuse. Module import identities,
+authority uses, preparation constants, byte bound and complete preparation-key
+set are checked; additional imports of the profile authorities refuse. The
+runtime validator and profile dispatcher are a closed two-module dependency
+pair whose entire sources are pinned, including validation helpers and profile
+constants. The integrated loader has its own exact whole-source pin. The older
+two producer templates retain their original import and source-pin contracts;
+an arbitrary mixture or unknown source version receives no fallback.
+
+This is a source proof only. It does not execute a preparer or profile check,
+establish admission, validate a receipt or authorize a runtime. Ordinary model
+text flow, parser-event and response-roster proofs are unchanged. The U3-F B2
+plain-container-alias gap and F3d helper-stdout gap remain tracked under #5657
+and N1; this contract does not claim to repair them.
 

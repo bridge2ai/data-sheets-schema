@@ -3,6 +3,8 @@
 Fixtures preserve the real route, then change one authority/dataflow edge.
 They prove source derivation only, never the absent protected U1 installation.
 """
+import ast
+
 import pytest
 
 from tests.test_generation_specificity_delegated import ROOT, RUNNER, scan
@@ -18,37 +20,58 @@ def copied_route(tmp_path):
     return _native_route_root(tmp_path)
 
 
-@pytest.mark.parametrize('relative,before,after', [
-    (CLI, '@prompt.command("render-native-shared")', '@wrap_consumer\n@prompt.command("render-native-shared")'),
-    (CLI, 'native_execution_registration_v2 as preparation', 'foreign_preparer as preparation'),
-    (CLI, 'preparation.prepare(selection, runtime_declaration, job_id=job_id,',
+def _producer_source(path, producer):
+    """Select one exact hook owner while preserving every surrounding byte."""
+    assert producer in ('prepare', '_prepare')
+    source = path.read_bytes()
+    definitions = [node for node in ast.parse(source).body
+                   if isinstance(node, ast.FunctionDef) and node.name == producer]
+    assert len(definitions) == 1
+    function = definitions[0]
+    lines = source.splitlines(keepends=True)
+    return (b''.join(lines[:function.lineno - 1]),
+            b''.join(lines[function.lineno - 1:function.end_lineno]),
+            b''.join(lines[function.end_lineno:]))
+
+
+@pytest.mark.parametrize('relative,producer,before,after', [
+    (CLI, None, '@prompt.command("render-native-shared")', '@wrap_consumer\n@prompt.command("render-native-shared")'),
+    (CLI, None, 'native_execution_registration_v2 as preparation', 'foreign_preparer as preparation'),
+    (CLI, None, 'preparation.prepare(selection, runtime_declaration, job_id=job_id,',
      'preparation.prepare(runtime_declaration, selection, job_id=job_id,'),
-    (CLI, 'job_id=job_id,', 'job_id="other-job",'),
-    (CLI, "run_date=run_date.strftime('%Y-%m-%d'),", 'run_date="2026-01-01",'),
-    (CLI, 'max_draft_checks=max_draft_checks)', 'max_draft_checks=1)'),
-    (CLI, "body = envelope['registration']", "body = envelope['other']"),
-    (CLI, "text = body['instruction']", "text = 'replacement instruction'"),
-    (CLI, "stream.write(text)", "stream.write('replacement instruction')"),
-    (CLI, '        body = envelope', '        preparation.prepare = replacement\n        body = envelope'),
-    (CLI, '    raw = text.encode', '    launch()\n    raw = text.encode'),
-    (PREPARER, 'from . import native_shared_selection as selection', 'from . import foreign_selection as selection'),
-    (PREPARER, 'captured = selection.capture(selection_path)', 'captured = selection.capture(runtime_path)'),
-    (PREPARER, 'native_shared_generation_version=1,', 'native_shared_generation_version=0,'),
-    (PREPARER, 'spec._native_shared_runtime_capture = runtime_capture', 'spec._native_shared_runtime_capture = replacement'),
-    (PREPARER, 'spec._native_shared_max_draft_checks = max_draft_checks', 'spec._native_shared_max_draft_checks = 1'),
-    (PREPARER, '    instruction = spec.instruction', '    instruction = "replacement instruction"'),
-    (PREPARER, "'instruction': instruction,", "'instruction': 'replacement',"),
-    (PREPARER, '    return _envelope(body, dependencies)', '    return _envelope({}, dependencies)'),
-    (PREPARER, "controls['prepare_registration_v2'].envelope(body)", "controls['prepare_registration_v2'].envelope({})"),
-    (PREPARER, 'VERSION = 2', 'VERSION = 1'),
+    (CLI, None, 'job_id=job_id,', 'job_id="other-job",'),
+    (CLI, None, "run_date=run_date.strftime('%Y-%m-%d'),", 'run_date="2026-01-01",'),
+    (CLI, None, 'max_draft_checks=max_draft_checks)', 'max_draft_checks=1)'),
+    (CLI, None, "body = envelope['registration']", "body = envelope['other']"),
+    (CLI, None, "text = body['instruction']", "text = 'replacement instruction'"),
+    (CLI, None, "stream.write(text)", "stream.write('replacement instruction')"),
+    (CLI, None, '        body = envelope', '        preparation.prepare = replacement\n        body = envelope'),
+    (CLI, None, '    raw = text.encode', '    launch()\n    raw = text.encode'),
+    (PREPARER, None, 'from . import native_shared_selection as selection', 'from . import foreign_selection as selection'),
+    *[(PREPARER, producer, before, after)
+      for producer in ('prepare', '_prepare')
+      for before, after in [
+          ('captured = selection.capture(selection_path)', 'captured = selection.capture(runtime_path)'),
+          ('native_shared_generation_version=1,', 'native_shared_generation_version=0,'),
+          ('spec._native_shared_runtime_capture = runtime_capture', 'spec._native_shared_runtime_capture = replacement'),
+          ('spec._native_shared_max_draft_checks = max_draft_checks', 'spec._native_shared_max_draft_checks = 1'),
+          ('    instruction = spec.instruction', '    instruction = "replacement instruction"'),
+          ("'instruction': instruction,", "'instruction': 'replacement',"),
+          ('    return _envelope(body, dependencies)', '    return _envelope({}, dependencies)'),
+      ]],
+    (PREPARER, None, "controls['prepare_registration_v2'].envelope(body)", "controls['prepare_registration_v2'].envelope({})"),
+    (PREPARER, None, 'VERSION = 2', 'VERSION = 1'),
 ])
-def test_v2_route_refuses_one_changed_producer_or_consumer(tmp_path, relative, before, after):
+def test_v2_route_refuses_one_changed_producer_or_consumer(tmp_path, relative, producer, before, after):
     root = copied_route(tmp_path)
     assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))['enabled_values'] == [1]
     path = root / relative
-    source = path.read_text()
-    assert source.count(before) == 1
-    path.write_text(source.replace(before, after))
+    if producer is None:
+        prefix, source, suffix = b'', path.read_bytes(), b''
+    else:
+        prefix, source, suffix = _producer_source(path, producer)
+    assert source.count(before.encode('utf-8')) == 1
+    path.write_bytes(prefix + source.replace(before.encode('utf-8'), after.encode('utf-8'), 1) + suffix)
     diagnostic = ('CLI uses an unproved constructor, contract or runtime binding'
                   if (relative, before, after) == (CLI,
                       'native_execution_registration_v2 as preparation',

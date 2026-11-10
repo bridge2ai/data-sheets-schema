@@ -39,7 +39,7 @@ def _native_route_root(tmp_path):
         path = root / 'src/data_sheets_schema' / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes((ROOT / 'src/data_sheets_schema' / relative).read_bytes())
-    for relative in scan._NATIVE_V2_RENDER_SOURCES:
+    for relative in scan._NATIVE_V2_RENDER_SOURCES | scan._NATIVE_V2_INTEGRATED_RENDER_SOURCES:
         path = root / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes((ROOT / relative).read_bytes())

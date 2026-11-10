@@ -12087,6 +12087,19 @@ _NATIVE_V2_RENDER_SOURCES = {
 }
 
 
+_NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
+    **_NATIVE_V2_RENDER_SOURCES,
+    # U3-L: one integrated authority version, coupled to the complete producer
+    # family below. The older contracts retain their original source identity.
+    'src/data_sheets_schema/native_execution_authority_v2.py': 'bfdb5c86feb4c071ebf17e6ececa8fd60f1bc23bda98fefd42c0c211ecd7511a',
+    # validate_runtime_v2 and the profile guards form a closed two-module
+    # dispatcher. Pin their complete bodies, imports, constants and callees;
+    # neither a profile label nor a function's spelling authenticates it.
+    'src/data_sheets_schema/native_shared_runtime_values.py': '751724f8be39c450a0b4e4f10fe56c797085e0323512aaaab6d0e995a5477985',
+    'src/data_sheets_schema/native_runtime_profiles.py': '33d6893d53bc8951ac93a063c156e088b5b84da56b98f75006a35feb3cadb778',
+}
+
+
 def _derive_native_v2_render(root, cli, command):
     """Closed source proof of the v2 preparation producer and CLI data flow.
 
@@ -12104,8 +12117,10 @@ def _derive_native_v2_render(root, cli, command):
         # Copy the AST; never mutate the tree used by other derivations.
         observed = ast.parse(ast.unparse(actual)).body[0]
         observed.body = _without_docstring(observed.body)
-        if not any(dump(observed) == dump(template) for template in expected):
-            raise fail('unsupported v2 render producer: ' + actual.name)
+        for index, template in enumerate(expected):
+            if dump(observed) == dump(template):
+                return index
+        raise fail('unsupported v2 render producer: ' + actual.name)
     exact(command, r"""@prompt.command('render-native-shared')
 @click.option('--selection', required=True, type=click.Path(exists=True, dir_okay=False), help='Exact native shared-generation selection JSON.')
 @click.option('--runtime-declaration', required=True, type=click.Path(exists=True, dir_okay=False), help='Sole runtime declaration, checked without invoking the runtime.')
@@ -12191,8 +12206,21 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
             from .agentic_runtime import toolchain
             spec._agentic_toolchain = toolchain(native_shared=True)
 '''
-    exact(prepare, current_prepare,
-          alternatives=(current_prepare.replace(anchor, anchor + u4b_hook, 1),))
+    current_u4b_prepare = current_prepare.replace(anchor, anchor + u4b_hook, 1)
+    # Build finite scanner-owned templates, never transform the observed AST.
+    # The production entry rejects synthetic authority before selection capture.
+    integrated_prepare = current_u4b_prepare.replace(
+        '    _job_id(job_id)\n',
+        '    from .native_runtime_profiles import require_production\n    _job_id(job_id)\n', 1).replace(
+        '    captured = selection.capture(selection_path)\n', '', 1).replace(
+        "    runtime = validate_runtime(c.strict_json(runtime_capture.raw, 'runtime declaration'))\n",
+        "    declared_runtime = c.strict_json(runtime_capture.raw, 'runtime declaration')\n"
+        '    require_production(declared_runtime)\n'
+        '    runtime = validate_runtime(declared_runtime)\n'
+        '    captured = selection.capture(selection_path)\n', 1)
+    integrated_without_u4b = integrated_prepare.replace(anchor + u4b_hook, anchor, 1)
+    integrated = exact(prepare, current_prepare,
+        alternatives=(current_u4b_prepare, integrated_prepare, integrated_without_u4b)) >= 2
     helpers = {
         '_job_id': """def _job_id(value):
     if type(value) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', value) is None:
@@ -12225,12 +12253,66 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         pins[path] = pin['sha256']
     return pins""",
     }
+    if integrated:
+        # Both preparation branches and the sole indirect function selection
+        # are exact. Its input wire, reread and profile predicates are proved
+        # too; no generic alias or conditional-call exception is introduced.
+        helpers.update({
+            '_prepare': current_u4b_prepare.replace(
+                'def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):',
+                'def _prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks, expected_profile):', 1).replace(
+                "    doc = captured.document()\n",
+                '    from .native_runtime_profiles import profile_name\n'
+                '    if profile_name(runtime) != expected_profile:\n'
+                "        raise ValueError('preparation entry differs from the explicitly selected runtime profile')\n"
+                '    doc = captured.document()\n', 1),
+            'prepare_synthetic': """def prepare_synthetic(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
+    from .native_runtime_profiles import SYNTHETIC_PROFILE, require_synthetic
+    require_synthetic(c.strict_json(_read(str(runtime_path), 'runtime declaration', c.HARD_LIMITS['input_bytes']).raw, 'runtime declaration'))
+    return _prepare(selection_path, runtime_path, job_id=job_id, run_date=run_date, max_draft_checks=max_draft_checks, expected_profile=SYNTHETIC_PROFILE)""",
+            'verify_preparer': """def verify_preparer(raw, *, job_id):
+    _job_id(job_id)
+    body, dependencies = _wire(raw)
+    c.exact(body, _PREPARATION_KEYS, 'shared-native v2 preparation')
+    if body['kind'] != PREPARATION_KIND or body['execution'] != PREPARATION_SCOPE or body['job_id'] != job_id:
+        raise ValueError('not the selected shared-native v2 preparation')
+    c.file_pin(body['selection'], 'selection pin')
+    c.file_pin(body['runtime'], 'runtime pin')
+    from .native_runtime_profiles import profile_name, SYNTHETIC_PROFILE
+    runtime = c.strict_json(_read(body['runtime']['path'], 'runtime declaration', c.HARD_LIMITS['input_bytes']).raw, 'runtime declaration')
+    preparer = prepare_synthetic if profile_name(runtime) == SYNTHETIC_PROFILE else prepare
+    expected = preparer(body['selection']['path'], body['runtime']['path'], job_id=job_id, run_date=body['run_date'], max_draft_checks=body['max_draft_checks'])
+    if c.canonical(body) != c.canonical(expected['registration']):
+        raise ValueError('v2 preparation differs from current pins, selection, runtime or rendering')
+    if body['dependencies'] != dependencies:
+        raise ValueError('v2 preparation source authority changed')
+    return expected['registration']""",
+            '_read': """def _read(path, label, maximum=MAX_WIRE_BYTES):
+    return read_regular(str(path), label, max_bytes=maximum).captured""",
+            '_wire': """def _wire(raw):
+    value = c.strict_json(raw, 'v2 authority envelope', MAX_WIRE_BYTES)
+    if (type(value) is not dict or set(value) != {'authority_version', 'controller_sources_sha256', 'registration'}
+            or type(value['authority_version']) is not int or value['authority_version'] != VERSION
+            or type(value['controller_sources_sha256']) is not str
+            or value['controller_sources_sha256'] != authority.neutral.composition.SOURCES_SHA256
+            or type(value['registration']) is not dict
+            or type(value['registration'].get('schema_version')) is not int
+            or value['registration']['schema_version'] != VERSION):
+        raise ValueError('v2 launch requires an exact v2 authority envelope')
+    identity = authority.dependency_identity()
+    authority.require_committed(identity)
+    with authority.loaded_dependencies(identity) as controls:
+        inner = controls['prepare_registration_v2'].require_envelope(value)
+    return inner, identity""",
+        })
     producers = {'prepare': prepare}
     for name, template in helpers.items():
         found = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name]
         if len(found) != 1 or not isinstance(found[0], ast.FunctionDef):
             raise fail('missing unique v2 render producer: ' + name)
-        exact(found[0], template)
+        alternatives = ((template.replace(anchor + u4b_hook, anchor, 1),)
+                        if integrated and name == '_prepare' else ())
+        exact(found[0], template, alternatives=alternatives)
         producers[name] = found[0]
     # Retain U5's imported-authority escape proof alongside U3-F2's full
     # loader/source pins and exact helper contracts. Neither substitutes for
@@ -12247,6 +12329,8 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         'selection': {'selection.capture'}, 're': {'re.fullmatch', 're.escape'},
         'Path': {'Path', 'Path.cwd'}, 'validate_runtime': {'validate_runtime'},
     }
+    if integrated:
+        fixed_calls['read_regular'] = {'read_regular'}
     fixed_values = {'authority.ROOT', 'authority.neutral.composition.SOURCES_SHA256',
                     'c.CONDITION', 'c.RENDERER', 'c.RUNTIME',
                     "c.HARD_LIMITS['request_bytes']", "c.HARD_LIMITS['input_bytes']"}
@@ -12291,6 +12375,21 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
                  and isinstance(node.ctx, (ast.Store, ast.Del)) and node is not bindings[0].targets[0])
                 or _rebinding(node, name, command) for node in ast.walk(tree)):
             raise fail('v2 preparation identity is not exact: ' + name)
+    if integrated:
+        for name, statement in (
+            ('MAX_WIRE_BYTES', "MAX_WIRE_BYTES = c.HARD_LIMITS['request_bytes']"),
+            ('_PREPARATION_KEYS', """_PREPARATION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'job_id',
+    'working_directory', 'dependencies', 'selection', 'runtime', 'run_date',
+    'max_draft_checks', 'render_spec', 'input_identity', 'instruction',
+    'instruction_sha256', 'outputs', 'pinned_files'))"""),
+        ):
+            expected = ast.parse(statement).body[0]
+            bindings = [node for node in tree.body if dump(node) == dump(expected)]
+            if len(bindings) != 1 or any(
+                    (isinstance(node, ast.Name) and node.id == name
+                     and isinstance(node.ctx, (ast.Store, ast.Del)) and node is not bindings[0].targets[0])
+                    or _rebinding(node, name, command) for node in ast.walk(tree)):
+                raise fail('v2 preparation identity is not exact: ' + name)
     # Imported producer/contract names must retain the bindings used by the
     # templates. A shadow, duplicate import, assignment or monkeypatch refuses.
     def bound(module, statement, name):
@@ -12307,15 +12406,62 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
                     or isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))
                        and isinstance(n.value, ast.Name) and n.value.id == name):
                 raise fail('v2 producer binding is replaced: ' + name)
-    for statement, name in (
+    import_contracts = [
         ('from . import native_shared_contract as c', 'c'),
         ('from . import native_shared_selection as selection', 'selection'),
         ('from . import native_execution_authority_v2 as authority', 'authority'),
-        ('from .native_execution_registration import validate_runtime', 'validate_runtime'),
+        (('from .native_shared_runtime_values import validate_runtime_v2 as validate_runtime'
+          if integrated else 'from .native_execution_registration import validate_runtime'), 'validate_runtime'),
         ('from pathlib import Path', 'Path'),
         ('import re', 're'),
-    ):
+    ]
+    if integrated:
+        import_contracts.append(('from .native_shared_evidence import read_regular', 'read_regular'))
+    for statement, name in import_contracts:
         bound(tree, statement, name)
+    dispatcher_references = set()
+    if integrated:
+        dispatcher = next(node for node in producers['verify_preparer'].body
+                          if isinstance(node, ast.Assign) and len(node.targets) == 1
+                          and isinstance(node.targets[0], ast.Name) and node.targets[0].id == 'preparer')
+        dispatcher_references = {id(dispatcher.value.body), id(dispatcher.value.orelse)}
+        # The matched function body proves the selector's sole assignment and
+        # sole direct use. Additional imports may otherwise mutate an imported
+        # function through another alias while leaving all templates intact.
+        profile_modules = {'native_runtime_profiles', 'native_shared_runtime_values'}
+        parent_packages = {'data_sheets_schema', 'src.data_sheets_schema', 'src'}
+        parent_imports = {dump(ast.parse(statement).body[0]) for statement in (
+            'from . import native_execution_authority_v2 as authority',
+            'from . import native_shared_contract as c',
+            'from . import native_shared_selection as selection',
+            'from . import native_launch_review as launch_review',
+        )}
+        allowed_imports = {id(node) for producer in producers.values()
+                           for node in producer.body if isinstance(node, ast.ImportFrom)
+                           and node.level == 1 and node.module in profile_modules}
+        allowed_imports.update(id(node) for node in tree.body
+                               if isinstance(node, ast.ImportFrom) and node.level == 1
+                               and node.module == 'native_shared_runtime_values'
+                               and dump(node) == dump(ast.parse(import_contracts[3][0]).body[0]))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                # An unaliased dotted import binds its first package, not its
+                # final module. Either parent spelling can expose the watched
+                # modules and their mutable functions through attributes.
+                affected = any(alias.name.split('.')[-1] in profile_modules
+                               or (alias.name if alias.asname else alias.name.split('.')[0])
+                                   in parent_packages for alias in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                affected = ((node.module or '').split('.')[-1] in profile_modules
+                            or any(alias.name in profile_modules | parent_packages
+                                   for alias in node.names)
+                            or node.module in parent_packages
+                            or node.level == 1 and node.module is None
+                               and dump(node) not in parent_imports)
+            else:
+                continue
+            if affected and id(node) not in allowed_imports:
+                raise fail('v2 preparation profile authority has an unsupported import')
     for name, producer in producers.items():
         if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
                or _rebinding(n, name, producer) for n in ast.walk(tree) if n is not producer):
@@ -12323,6 +12469,7 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         direct_calls = {id(node.func) for node in ast.walk(tree) if isinstance(node, ast.Call)}
         if any(isinstance(node, ast.Name) and node.id == name
                and isinstance(node.ctx, ast.Load) and id(node) not in direct_calls
+               and id(node) not in dispatcher_references
                for node in ast.walk(tree)):
             raise fail('v2 render function escapes its fixed direct callers: ' + name)
     # Module-level CLI rebinding must not bypass the fixed decorated command.
@@ -12338,14 +12485,15 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
            for node in ast.walk(cli)):
         raise fail('v2 render function escapes its fixed direct callers: ' + command.name)
     import hashlib
-    for source, digest in _NATIVE_V2_RENDER_SOURCES.items():
+    source_contract = _NATIVE_V2_INTEGRATED_RENDER_SOURCES if integrated else _NATIVE_V2_RENDER_SOURCES
+    for source, digest in source_contract.items():
         try:
             raw = (root / source).read_bytes()
         except OSError as error:
             raise fail('v2 envelope authority source unavailable: ' + source) from error
         if hashlib.sha256(raw).hexdigest() != digest:
             raise fail('v2 envelope authority source changed: ' + source)
-    return [f'{relative}:{node.lineno}' for node in producers.values()] + list(_NATIVE_V2_RENDER_SOURCES)
+    return [f'{relative}:{node.lineno}' for node in producers.values()] + list(source_contract)
 
 
 def derive_native_shared_route(root: Path, tree: ast.Module) -> dict | None:
