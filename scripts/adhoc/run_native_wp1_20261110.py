@@ -6,10 +6,9 @@ Outputs: inherited M sandbox/origin/cleanup evidence plus WP1 deadline witnesses
 Derived by composition from the unchanged M runner, not by editing protected
 files or its packet approvals. No setup/hydration mode is exposed here.
 
-IMPLEMENTATION GAP: measured arms remain fail-closed until a separately reviewed
-owned quiet-window adapter covers M's import guard, C/A parent guards and A's
-pause logic. A missing foreign lock alone does not prove the quiet protocol.
-This file has not been executed, compiled or collected in its delivery task.
+Measured arms authenticate the inherited read-only lease carrier and the real
+process ancestry at M import, C/A entry and A's runtime pause observation.
+This source implementation conveys no permission to execute a measured arm.
 """
 from __future__ import annotations
 
@@ -41,21 +40,34 @@ if KIND not in contract_module.KINDS:
 NODE, ARM, LIMIT = contract_module.KINDS[KIND]
 if os.environ.get('U3WP1_CONSUMER_ARM') != ARM or os.environ.get('U3K_PROFILE') != 'control':
     raise ValueError('WP1 arm and control metrics selection must be explicit')
-if KIND != 'canary':
-    raise RuntimeError('WP1 measured arms blocked: verified-owned quiet-window adapter not implemented')
 STARTED = float(os.environ['U3WP1_STARTED_MONOTONIC'])
 HARD_DEADLINE = float(os.environ['U3WP1_HARD_DEADLINE'])
 now = time.monotonic()
 if (not math.isfinite(STARTED) or not math.isfinite(HARD_DEADLINE)
         or HARD_DEADLINE - STARTED != LIMIT or not STARTED <= now < HARD_DEADLINE):
     raise ValueError('WP1 absolute invocation deadline is missing, invalid or expired')
+quiet = contract_module.wp1_helper('quiet')
+LEASE = None
+if KIND == 'canary':
+    quiet.refuse_existing(contract_module.QUIET_LOCK)
+    if 'U3WP1_LEASE_FD' in os.environ:
+        raise ValueError('canary cannot borrow a measured-arm lease')
+else:
+    sys.path.append(str(contract_module.dependency_site()))
+    import psutil
+    role = 'child-check' if '--child-check' in sys.argv else ('worker' if '--worker' in sys.argv else 'driver')
+    LEASE = contract_module.read_quiet_lease(quiet, psutil, role, MANIFEST_SHA, CONTRACT)
 os.environ['U3M_MANIFEST'] = CONTRACT['composition_manifest']
 os.environ['U3M_MANIFEST_SHA'] = CONTRACT['composition_manifest_sha256']
 os.environ['U3M_OBSERVE'] = '1'
 for name in ('U3F_PARITY', 'U3M_D126', 'U3M_DEPENDENCY_CANARY'):
     if os.environ.get(name, '0') != '0':
         raise ValueError('WP1 cannot select another validation mode')
-m = load('native_wp1_retained_m', ROOT / 'scripts/adhoc/run_native_u3m_20261109.py')
+if LEASE is None:
+    m = load('native_wp1_retained_m', ROOT / 'scripts/adhoc/run_native_u3m_20261109.py')
+else:
+    m = contract_module.load_with_lease_os('native_wp1_retained_m',
+        ROOT / 'scripts/adhoc/run_native_u3m_20261109.py', LEASE)
 runner = m.runner
 wrapper = m.wrapper
 r = m.h.g.f.r
@@ -66,9 +78,24 @@ children = []
 timers = []
 watchdog_events = []
 runner.__file__ = wrapper.__file__ = str(Path(__file__).resolve())
+original_lock = runner.LOCK
+original_wrapper_os = wrapper.os
+if LEASE is not None:
+    runner.LOCK = LEASE.lock_view()
+    wrapper.os = LEASE.os_proxy()
+
+
+def restore_adapters():
+    runner.LOCK = original_lock
+    wrapper.os = original_wrapper_os
+    m.os = os
 
 
 def check_args(args):
+    if LEASE is not None:
+        LEASE.validate()
+        if args.out != LEASE.output:
+            raise ValueError('WP1 arguments differ from the inherited lease output')
     if args.collect_only or args.workers != 1 or args.nodes != [NODE]:
         raise ValueError('WP1 requires its exact fixed node and one worker; no collection/batch mode')
     expected_prefix = 'wp1-' + CONTRACT['source_commit'][:12] + '-' + KIND + '-'
@@ -87,17 +114,31 @@ def environment(out, interpreter_directory):
         U3M_OBSERVE='1')
     if result.get('PYTEST_PLUGINS') != 'scripts.adhoc.u3m_metrics_plugin_20261109':
         raise ValueError('WP1 requires exactly the existing control metrics plugin')
+    if LEASE is not None:
+        LEASE.validate()
+        result.update(LEASE.environment())
     return result
 
 
 def worker(args):
     check_args(args)
-    return original_worker(args)
+    runner.subprocess.Popen = bounded_popen
+    try:
+        return original_worker(args)
+    finally:
+        runner.subprocess.Popen = original_popen
 
 
 def bounded_popen(command, *args, **kwargs):
     """Keep inherited child session and owned-descendant cleanup unchanged."""
     is_test = bool(command and command[0] == '/usr/bin/sandbox-exec')
+    is_check = (isinstance(command, (list, tuple)) and len(command) == 5
+        and command[1:3] == ['-P', '-B']
+        and command[3] == str(Path(__file__).resolve()) and command[4] == '--child-check')
+    if LEASE is not None and (is_test or is_check):
+        LEASE.validate()
+        if kwargs.get('env', {}).get('U3WP1_LEASE_FD') != str(LEASE.witness_fd):
+            raise ValueError('WP1 child spawn lost its inherited lease carrier')
     if is_test:
         # The driver cutoff is recomputed at actual launch, after preparation,
         # rather than granting a new full budget when preparation finishes.
@@ -119,7 +160,11 @@ def bounded_popen(command, *args, **kwargs):
             '--ready-fd', str(ready_fd), '--release-fd', str(release_fd),
             '--nonce', os.environ['U3WP1_HANDOFF_NONCE'],
             '--deadline', repr(HARD_DEADLINE - 5), '--', *command]
-        kwargs['pass_fds'] = (ready_fd, release_fd)
+        kwargs['pass_fds'] = (ready_fd, release_fd) + (() if LEASE is None else (LEASE.witness_fd,))
+    elif is_check and LEASE is not None:
+        if kwargs.get('pass_fds'):
+            raise ValueError('unexpected descriptors at the WP1 child-check boundary')
+        kwargs['pass_fds'] = (LEASE.witness_fd,)
     child = original_popen(command, *args, **kwargs)
     if is_test:
         os.close(ready_fd)
@@ -172,6 +217,8 @@ def supervised(args):
                 elapsed=time.monotonic() - STARTED))
             runner.save(args.out / 'host-load.json', dict(before=before,
                 after={'load': os.getloadavg()}, scope='instant samples; not an idle-host gate'))
+            runner.save(args.out / 'wp1-quiet-lease.json',
+                dict(kind=KIND, lease=None if LEASE is None else LEASE.witness()))
     return 125 if watchdog_events or time.monotonic() > HARD_DEADLINE else code
 
 
@@ -193,7 +240,7 @@ def parent(args):
             implementation_sha256=CONTRACT['implementation_sha256'],
             interpreter=CONTRACT['interpreter'], invocation_limit_seconds=LIMIT,
             seconds=time.monotonic() - STARTED, metrics_profile='control',
-            quiet_window='measured arms blocked pending verified-owned adapter',
+            quiet_window='canary refuses any lock' if LEASE is None else LEASE.witness(),
             scope='Observer diagnostic only; no production or native acceptance'))
     return code if unchanged and time.monotonic() <= HARD_DEADLINE else 125
 
@@ -208,4 +255,7 @@ if __name__ == '__main__':
     if '--hydrate-local-dependency' in sys.argv:
         raise ValueError('WP1 setup is a separately authorized action')
     runner.time = wrapper.DeadlineClock()
-    raise SystemExit(runner.main())
+    try:
+        raise SystemExit(runner.main())
+    finally:
+        restore_adapters()

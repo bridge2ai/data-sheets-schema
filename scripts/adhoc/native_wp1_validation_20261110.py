@@ -13,14 +13,16 @@ interpreter={path,sha256,version}. It belongs at u3m/wp1-contract-<source12>.jso
 the referenced fresh M composition must cover that same newly committed source.
 This identity envelope conveys no packet, launch or production acceptance.
 
-Measured arms remain blocked pending a separately reviewed verified-owned
-quiet-window adapter. The inherited M/C/A refusal of any existing lock is kept;
-absence of a foreign lock is not falsely described as an owned quiet window.
+Measured arms require a verified owned quiet-window lease and one bounded host
+qualification before their unchanged 900-second budget. This implementation
+does not authorize running those arms or waive the same-path canary gate.
 """
 from __future__ import annotations
 
 import argparse
+import builtins
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -36,6 +38,8 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRATCH = ROOT.parent / 'scratch-native-u1u3/u3m'
+QUIET_LOCK = ROOT.parent / 'plans/native_quiet_window.lock'
+QUALIFICATION_LIMIT = 150
 CANARY = 'tests/test_native_u3k_profile.py::test_consumer_observer_equivalence_canary'
 DIAGNOSTIC = 'tests/test_native_u3k_profile.py::test_neutral_pre_reservation_diagnostic'
 KINDS = {'canary': (CANARY, 'legacy', 60),
@@ -48,6 +52,8 @@ REQUIRED_FILES = frozenset({
     'scripts/adhoc/native_wp1_validation_20261110.py',
     'scripts/adhoc/run_native_wp1_20261110.py',
     'scripts/adhoc/native_wp1_child_gate_20261110.py',
+    'scripts/adhoc/native_wp1_quiet_20261110.py',
+    'scripts/adhoc/native_wp1_qualification_20261110.py',
     'scripts/adhoc/run_native_u3m_20261109.py',
     'scripts/adhoc/u3m_metrics_plugin_20261109.py',
     'scripts/adhoc/u3k_metrics_plugin_20261109.py',
@@ -64,6 +70,57 @@ REQUIRED_FILES = frozenset({
 GIT_ENV = {'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'GIT_NO_LAZY_FETCH': '1',
            'GIT_ALLOW_PROTOCOL': '', 'GIT_CONFIG_GLOBAL': '/dev/null',
            'GIT_CONFIG_SYSTEM': '/dev/null', 'GIT_OPTIONAL_LOCKS': '0'}
+
+
+def wp1_helper(name):
+    path = ROOT / 'scripts/adhoc' / ('native_wp1_' + name + '_20261110.py')
+    spec = importlib.util.spec_from_file_location('wp1_' + name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_with_lease_os(name, path, reader):
+    """Adapt only this module's os import; restore its builtins even on refusal."""
+    reader.validate()
+    proxy = reader.os_proxy()
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+
+    def scoped_import(import_name, globals=None, locals=None, fromlist=(), level=0):
+        if import_name == 'os' and level == 0 and globals and globals.get('__name__') == name:
+            return proxy
+        return builtins.__import__(import_name, globals, locals, fromlist, level)
+
+    module.__dict__['__builtins__'] = dict(vars(builtins), __import__=scoped_import)
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        module.__dict__['__builtins__'] = vars(builtins)
+    return module
+
+
+def role_scripts():
+    outer = str(ROOT / 'scripts/adhoc/native_wp1_validation_20261110.py')
+    driver = str(ROOT / 'scripts/adhoc/run_native_wp1_20261110.py')
+    return {'outer': outer, 'supervised': outer, 'driver': driver,
+            'worker': driver, 'child-check': driver}
+
+
+def dependency_site():
+    # Preserve the venv spelling; resolve only the binary for identity checks.
+    prefix = Path(sys.executable).absolute().parent.parent
+    site = prefix / 'lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages'
+    if not (prefix / 'pyvenv.cfg').is_file() or not site.is_dir() or site != site.resolve(strict=True):
+        raise ValueError('physical installed dependency prefix required')
+    return site
+
+
+def read_quiet_lease(quiet, psutil, role, manifest_sha, value):
+    return quiet.read_lease(int(os.environ['U3WP1_LEASE_FD']), role=role,
+        expected_lock=QUIET_LOCK,
+        expected_manifest_sha256=manifest_sha, expected_source_commit=value['source_commit'],
+        psutil_module=psutil, role_scripts=role_scripts())
 
 
 def sha(path):
@@ -306,8 +363,6 @@ class _SandboxHandoff:
 
 def supervised_main(args):
     node, arm, limit = KINDS[args.kind]
-    if args.kind != 'canary':
-        raise RuntimeError('WP1 measured arms blocked: verified-owned quiet-window adapter not implemented')
     started = float(os.environ['U3WP1_STARTED_MONOTONIC'])
     deadline = float(os.environ['U3WP1_HARD_DEADLINE'])
     if (int(os.environ['U3WP1_SUPERVISOR_PID']) != os.getppid()
@@ -327,15 +382,19 @@ def supervised_main(args):
     out = SCRATCH / ('wp1-' + value['source_commit'][:12] + '-' + args.kind + '-' + args.label)
     if any(os.path.lexists(path) for path in (out, out.with_suffix('.outer.json'), out.with_suffix('.outer.log'))):
         raise ValueError('WP1 evidence label is already occupied')
-    lock = ROOT.parent / 'plans/native_quiet_window.lock'
-    if os.path.lexists(lock):
-        raise ValueError('quiet window is active; WP1 does not bypass its owner')
-    prefix = Path(sys.executable).absolute().parent.parent
-    dependencies = prefix / 'lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages'
-    if not (prefix / 'pyvenv.cfg').is_file() or dependencies != dependencies.resolve(strict=True):
-        raise ValueError('physical installed dependency prefix required')
+    dependencies = dependency_site()
     sys.path.append(str(dependencies))  # No site.addsitedir, .pth or editable hook.
     import psutil
+    quiet = wp1_helper('quiet')
+    lease = None
+    if args.kind == 'canary':
+        quiet.refuse_existing(QUIET_LOCK)
+        if 'U3WP1_LEASE_FD' in os.environ:
+            raise ValueError('canary cannot borrow a measured-arm lease')
+    else:
+        lease = read_quiet_lease(quiet, psutil, 'supervised', manifest_sha, value)
+        if lease.output != out:
+            raise ValueError('supervised output differs from inherited lease')
     env = {**GIT_ENV, 'PATH': str(Path(sys.executable).parent) + ':/usr/bin:/bin:/usr/sbin:/sbin',
            'LANG': 'en_US.UTF-8', 'PYTHONNOUSERSITE': '1', 'PYTHONSAFEPATH': '1',
            'PYTHONDONTWRITEBYTECODE': '1', 'PYTEST_DISABLE_PLUGIN_AUTOLOAD': '1',
@@ -348,6 +407,9 @@ def supervised_main(args):
            'U3WP1_HANDOFF_NONCE': os.environ['U3WP1_HANDOFF_NONCE'],
            'U3K_PROFILE': 'control'}
     handoff_fds = (int(env['U3WP1_READY_FD']), int(env['U3WP1_RELEASE_FD']))
+    if lease is not None:
+        env.update(lease.environment())
+        handoff_fds += (lease.witness_fd,)
     command = [sys.executable, '-S', '-P', '-B',
                str(ROOT / 'scripts/adhoc/run_native_wp1_20261110.py'),
                '--out', str(out), '--workers', '1', node]
@@ -412,27 +474,36 @@ def supervised_main(args):
 
     with out.with_suffix('.outer.log').open('xb') as log:
         try:
+            if lease is not None:
+                lease.validate()
             remaining = deadline - 3 - time.monotonic()
             if remaining <= 0:
                 raise subprocess.TimeoutExpired(command, limit)
             child = subprocess.Popen(command, cwd=ROOT, env=env, stdout=log,
                                      stderr=subprocess.STDOUT, start_new_session=False,
                                      pass_fds=handoff_fds)
+            # The lease FD remains readable for validation throughout this role.
             for fd in handoff_fds:
-                os.close(fd)
+                if lease is None or fd != lease.witness_fd:
+                    os.close(fd)
             handoff_fds = ()
             created_child = psutil.Process(child.pid).create_time()
             with state_lock:
                 known[child.pid] = created_child
             observer = threading.Thread(target=observe, daemon=True)
             observer.start()
-            child.wait(timeout=max(0, deadline - 3 - time.monotonic()))
+            while child.poll() is None:
+                if lease is not None:
+                    lease.validate()
+                if time.monotonic() >= deadline - 3:
+                    raise subprocess.TimeoutExpired(command, limit)
+                time.sleep(min(0.1, max(0, deadline - 3 - time.monotonic())))
         except subprocess.TimeoutExpired:
             timed_out = True
             interrupted = 'outer_deadline'
             kill_owned()
         except BaseException as exc:
-            interrupted = type(exc).__name__
+            interrupted = type(exc).__name__ + ': ' + str(exc)
             kill_owned()
         finally:
             for fd in handoff_fds:
@@ -484,6 +555,7 @@ def supervised_main(args):
         interrupted=interrupted, cleanup_verified=certified, observed_surviving_pids=survivors,
         forced_cleanup=bool(survivors_before_cleanup or post_observer_cleanup_pids or interrupted),
         observation_errors=errors_snapshot, observer_joined=observer_joined,
+        quiet_lease=None if lease is None else lease.witness(),
         post_observer_cleanup_pids=post_observer_cleanup_pids,
         observed_processes=known_snapshot,
         scope='Offline WP1 only; post-deadline cleanup time is reported, never accepted as an in-limit pass.'))
@@ -494,15 +566,19 @@ def main():
     args = arguments()
     if args.supervised:
         return supervised_main(args)
-    if args.kind != 'canary':
-        raise RuntimeError('WP1 measured arms blocked: verified-owned quiet-window adapter not implemented')
     # Arm the hard cap BEFORE any preflight. The outer owner, independent of
     # the driver/watchdog, admits one detached sandbox through inherited pipes.
     _, _, limit = KINDS[args.kind]
     started = time.monotonic()
-    deadline = started + limit
+    acquisition_started = started
+    phase_limit = limit if args.kind == 'canary' else QUALIFICATION_LIMIT
+    deadline = started + phase_limit
     child = None
     handoff = None
+    lease = None
+    qualification = None
+    qualification_children = []
+    lease_release = None
     previous = {number: signal.getsignal(number)
                 for number in (signal.SIGALRM, signal.SIGINT, signal.SIGTERM)}
     forced = False
@@ -510,6 +586,7 @@ def main():
     errors = []
     code = 125
     out = None
+    cleanup_errors = []
 
     class OuterInterrupted(BaseException):
         def __init__(self, number):
@@ -525,6 +602,18 @@ def main():
             except ProcessLookupError:
                 pass
 
+    def kill_qualification_observer(observer):
+        if observer.poll() is None:
+            # New-session direct handle is still unreaped: its process identity
+            # cannot have been reused. Include an in-flight ps/sysctl child.
+            try:
+                if os.getpgid(observer.pid) == observer.pid and os.getsid(observer.pid) == observer.pid:
+                    os.killpg(observer.pid, signal.SIGKILL)
+                else:
+                    observer.kill()
+            except ProcessLookupError:
+                pass
+
     def hard_stop(number, frame):
         # Detached sandbox ownership survives loss of the inner driver/tracker.
         # Close the release pipe first: a not-yet-admitted gate cannot exec tests.
@@ -535,13 +624,17 @@ def main():
             try:
                 kill_supervisor()
             finally:
+                for observer in qualification_children:
+                    kill_qualification_observer(observer)
+                # Killing is not proof of absence. os._exit has no finally;
+                # retain the coordination lock for explicit review, never unlink.
                 # No new grace, wait or evidence write extends the hard cap.
                 os._exit(124)
 
     signal.signal(signal.SIGALRM, hard_stop)
     signal.signal(signal.SIGINT, external_stop)
     signal.signal(signal.SIGTERM, external_stop)
-    signal.setitimer(signal.ITIMER_REAL, limit)
+    signal.setitimer(signal.ITIMER_REAL, phase_limit)
     try:
         if not (sys.flags.no_site and sys.flags.safe_path and sys.dont_write_bytecode):
             raise ValueError('WP1 outer requires physical dependency Python -S -P -B')
@@ -552,14 +645,38 @@ def main():
         if not match:
             raise ValueError('fresh WP1 contract filename required')
         out = SCRATCH / ('wp1-' + match[1] + '-' + args.kind + '-' + args.label)
-        if os.path.lexists(out.with_suffix('.supervisor.json')):
+        if any(os.path.lexists(path) for path in (
+                out, out.with_suffix('.supervisor.json'), out.with_suffix('.outer.json'),
+                out.with_suffix('.outer.log'), out.with_suffix('.qualification'))):
             raise ValueError('WP1 outer evidence label already exists')
-        prefix = Path(sys.executable).absolute().parent.parent
-        site = prefix / 'lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages'
-        if not (prefix / 'pyvenv.cfg').is_file() or site != site.resolve(strict=True):
-            raise ValueError('physical installed dependency site required')
+        site = dependency_site()
         sys.path.append(str(site))  # Never evaluate .pth or editable hooks.
         import psutil
+        quiet = wp1_helper('quiet')
+        if args.kind == 'canary':
+            quiet.refuse_existing(QUIET_LOCK)
+        else:
+            manifest, manifest_sha, value = contract()
+            if args.canary_out is None:
+                raise ValueError('measured arm requires its exact completed canary')
+            require_canary(args.canary_out, manifest_sha)
+            lease = quiet.acquire(QUIET_LOCK, out, manifest_sha256=manifest_sha,
+                source_commit=value['source_commit'], qualification_seconds=QUALIFICATION_LIMIT,
+                arm_seconds=limit, psutil_module=psutil, role_scripts=role_scripts())
+            qualifier = wp1_helper('qualification')
+            try:
+                qualification = qualifier.qualify(lease=lease,
+                    output_path=out.with_suffix('.qualification'), psutil_module=psutil,
+                    deadline=deadline, register_child=qualification_children.append)
+            except qualifier.QualificationError as exc:
+                qualification = exc.evidence
+                raise
+            # Qualification has a separate, bounded interval; it cannot borrow
+            # arm time or grant a second qualification attempt on contention.
+            lease.validate()
+            started = time.monotonic()
+            deadline = started + limit
+            signal.setitimer(signal.ITIMER_REAL, limit)
         handoff = _SandboxHandoff(psutil)
         env = {**GIT_ENV, 'LANG': 'en_US.UTF-8', 'PYTHONNOUSERSITE': '1',
                'PYTHONSAFEPATH': '1', 'PYTHONDONTWRITEBYTECODE': '1',
@@ -568,14 +685,20 @@ def main():
                'U3WP1_READY_FD': str(handoff.ready_write),
                'U3WP1_RELEASE_FD': str(handoff.release_read),
                'U3WP1_HANDOFF_NONCE': handoff.nonce}
+        lease_fds = ()
+        if lease is not None:
+            env.update(lease.environment())
+            lease_fds = (lease.witness_fd,)
         command = [sys.executable, '-S', '-P', '-B', str(Path(__file__).resolve()),
                    '--supervised', args.kind, '--label', args.label]
         if args.canary_out is not None:
             command += ['--canary-out', str(args.canary_out)]
         child = subprocess.Popen(command, cwd=ROOT, env=env, start_new_session=True,
-            pass_fds=(handoff.ready_write, handoff.release_read))
+            pass_fds=(handoff.ready_write, handoff.release_read) + lease_fds)
         handoff.attach(child)
         while child.poll() is None:
+            if lease is not None:
+                lease.validate()
             handoff.poll()
             if time.monotonic() >= deadline - 2:
                 raise subprocess.TimeoutExpired(command, limit)
@@ -589,7 +712,7 @@ def main():
         interrupted = 'outer_deadline'
         forced = True
     except BaseException as exc:
-        interrupted = type(exc).__name__
+        interrupted = type(exc).__name__ + ': ' + str(exc)
         errors.append(str(exc))
         forced = True
     finally:
@@ -597,6 +720,15 @@ def main():
         # armed and independently kills verified detached owners at the same cap.
         signal.signal(signal.SIGINT, signal.SIG_IGN)
         signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        for observer in qualification_children:
+            if observer.poll() is None:
+                forced = True
+                try:
+                    kill_qualification_observer(observer)
+                    observer.wait(timeout=max(0, min(0.5, deadline - time.monotonic())))
+                except BaseException as exc:
+                    errors.append('qualification_cleanup:' + type(exc).__name__)
+                    cleanup_errors.append(errors[-1])
         if handoff is not None:
             handoff.close_release()
         try:
@@ -609,6 +741,7 @@ def main():
                     time.sleep(min(0.05, max(0, until - time.monotonic())))
         except BaseException as exc:
             errors.append('graceful_cleanup:' + type(exc).__name__)
+            cleanup_errors.append(errors[-1])
             forced = True
         ownership = {'admitted': False, 'errors': ['ownership_not_initialized'],
                      'observed_surviving_pids': []}
@@ -620,6 +753,7 @@ def main():
                 ownership = handoff.witness()
         except BaseException as exc:
             errors.append('detached_cleanup:' + type(exc).__name__)
+            cleanup_errors.append(errors[-1])
             forced = True
         finally:
             # Detached owners are handled FIRST, even if the inner driver has
@@ -627,15 +761,39 @@ def main():
             if child is not None and child.poll() is None:
                 forced = True
                 kill_supervisor()
+            if child is not None:
+                try:
+                    child.wait(timeout=max(0, min(0.5, deadline - time.monotonic())))
+                except BaseException as exc:
+                    errors.append('supervisor_reap:' + type(exc).__name__)
+                    cleanup_errors.append(errors[-1])
             if handoff is not None:
                 handoff.close()
         try:
             inner_path = None if out is None else out.with_suffix('.outer.json')
             inner = json.loads(inner_path.read_bytes()) if inner_path is not None and inner_path.is_file() else None
+            # Release certification is separate from success. A qualification
+            # refusal with its observer reaped may release; unknown/hard cleanup
+            # retains. For launched work require the inner observer's evidence.
+            qualification_cleanup = (not qualification_children or
+                (qualification is not None and qualification.get('cleanup_verified') is True
+                 and all(observer.poll() is not None for observer in qualification_children)))
+            if child is None:
+                release_cleanup = qualification_cleanup and not cleanup_errors
+            else:
+                release_cleanup = (qualification_cleanup and child.returncode is not None and not cleanup_errors
+                    and not ownership['errors'] and not ownership['observed_surviving_pids']
+                    and inner is not None and inner.get('cleanup_verified') is True
+                    and inner.get('forced_cleanup') is False and inner.get('observer_joined') is True
+                    and not inner.get('observation_errors') and not inner.get('observed_surviving_pids')
+                    and type(inner.get('child_returncode')) is int and inner['child_returncode'] >= 0)
+            if lease is not None:
+                lease_release = lease.release(cleanup_verified=release_cleanup)
             certified = (not forced and interrupted is None and code == 0 and not errors
                 and ownership['admitted'] and not ownership['errors']
                 and not ownership['observed_surviving_pids']
                 and inner is not None and inner['returncode'] == 0 and inner['cleanup_verified']
+                and (lease is None or lease_release.get('released') is True)
                 and time.monotonic() < deadline)
             result = 0 if certified else (124 if interrupted == 'outer_deadline' else 125)
             if out is not None:
@@ -643,9 +801,14 @@ def main():
                     manifest=str(manifest), manifest_sha256=sha(manifest),
                     returncode=result, cleanup_verified=certified, forced_cleanup=forced,
                     interrupted=interrupted, errors=errors, sandbox_handoff=ownership,
+                    lock_release_cleanup_verified=release_cleanup, cleanup_errors=cleanup_errors,
                     seconds=time.monotonic() - started, limit_seconds=limit,
+                    acquisition_to_end_seconds=time.monotonic() - acquisition_started,
+                    qualification=qualification, quiet_lease_release=lease_release,
                     scope='Outer ownership survives inner interruption. Hard exit or missing witness is uncertified.'))
         finally:
+            if lease is not None and lease_release is None:
+                lease.retain(reason='final_evidence_or_cleanup_uncertain')
             signal.setitimer(signal.ITIMER_REAL, 0)
             for number, handler in previous.items():
                 signal.signal(number, handler)
