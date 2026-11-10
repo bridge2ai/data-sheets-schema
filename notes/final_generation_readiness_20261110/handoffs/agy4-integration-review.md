@@ -1,0 +1,29 @@
+# `G4` (`agy4`) Final Integration Read-Only Review (`2e9469852b09150a998793a552ffe8926bf95754`)
+
+- **Worker**: `agy4` (`G4` — Independent Read-Only Reviewer; Terminal window 6921, tab 1, `/dev/ttys010`)
+- **Target Checkout**: `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/final-generation-readiness-verification-20261110`
+- **Reviewed Range**: `7233f193ad102a8488b31ec7333662c8fefaa996..2e9469852b09150a998793a552ffe8926bf95754` (`42` changed files)
+- **Mode**: Read-only static diff and file inspection (`0` tests, `0` Python imports, `0` edits in the frozen verification tree).
+- **Verdict**: **PASS — `0` unresolved findings or blockers.**
+
+## 1. Source Compatibility (`G1`, `G2`, `G3`, and Component Limits at `2e9469852`)
+
+- **`G1` Acceptance Harness & `G2` `3.2.1` Schema Compatibility**: [`tests/test_final_generation_acceptance.py`](../../../tests/test_final_generation_acceptance.py) anchors schema and module resolution to `REPO_ROOT` (`#5803`), validates positive Full (`Dataset`) and derived Core (`CoreDataset`) fixtures with valid `FileCollectionTypeEnum` values (`processed_data`, `raw_data`) plus pair-consistency, instance-lint, and deterministic renderer checks before running the single-field negative mutations (`#5798`), and reads `pair_schema.full_view.schema.version` / `core_view.schema.version` dynamically so it integrates cleanly with `G2`'s `3.2.1` schema update.
+- **Portable Component Limits (`#5802`)**: [`tests/test_final_record_component_limits.py`](../../../tests/test_final_record_component_limits.py) includes `9fb93110e` asserting `findings == []` on both empty-receipt and literal-`Verified` blocks, isolating `"receipts vacuous": 1` from contract/MD5 findings without importing native-only modules (prior unsourced snippet-character count in [`agy4-components-review.md`](agy4-components-review.md) was also removed).
+- **`G3` Acceptance Runbook**: [`docs/final-generation-acceptance.md`](../../../docs/final-generation-acceptance.md) reflects `#5795`, `#5796`, `#5797`, and `#5803` (pinned-checkout working directory and module/schema path verification).
+
+## 2. Protected-File Scope
+
+- **Zero edits** across `src/data_sheets_schema/api_runner.py`, `src/data_sheets_schema/shared_generation.py`, `src/download/prompts/canonical_hashes.yaml`, `tests/utils/run_spec_boundary_contracts.json`, and `.claude/skills/d4d-generation-specificity-audit/scan.py`.
+- **Zero edits** to [`pyproject.toml`](../../../pyproject.toml) (`version = "0.1.0"`) or `poetry.lock`.
+
+## 3. Release, Citation, and History Closure (`3.2.1` for `#2975`)
+
+- **`#2975` Wording Fix**: [`src/data_sheets_schema/schema/D4D_FileCollection.yaml`](../../../src/data_sheets_schema/schema/D4D_FileCollection.yaml) updates only `FileCollection.collection_type.description` to neutral scalar-consistent prose while preserving `range: FileCollectionTypeEnum` and single-valued cardinality.
+- **`3.2.1` Version Parity**: [`data_sheets_schema.yaml`](../../../src/data_sheets_schema/schema/data_sheets_schema.yaml), [`data_sheets_schema_core.yaml`](../../../src/data_sheets_schema/schema/data_sheets_schema_core.yaml), [`D4D_Core.yaml`](../../../src/data_sheets_schema/schema/D4D_Core.yaml), [`data_sheets_schema_all.yaml`](../../../src/data_sheets_schema/schema/data_sheets_schema_all.yaml), [`data_sheets_schema_core_all.yaml`](../../../src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml), [`src/data_sheets_schema/datamodel/data_sheets_schema.py`](../../../src/data_sheets_schema/datamodel/data_sheets_schema.py), [`project/jsonschema/data_sheets_schema.schema.json`](../../../project/jsonschema/data_sheets_schema.schema.json), [`project/jsonld/data_sheets_schema.jsonld`](../../../project/jsonld/data_sheets_schema.jsonld) (with repo-relative `"project/jsonld/data_sheets_schema.context.jsonld"` staged via `#5799`), [`CITATION.cff`](../../../CITATION.cff), [`tests/test_schema_release_identity.py`](../../../tests/test_schema_release_identity.py), and [`scripts/adhoc/check_citation_metadata_20261110.py`](../../../scripts/adhoc/check_citation_metadata_20261110.py) are all aligned on `3.2.1`.
+- **Immutable History Prefix & Verified Digests**: [`src/data_sheets_schema/schema/release_history.yaml`](../../../src/data_sheets_schema/schema/release_history.yaml) preserves `2.0.0`–`3.2.0` byte-for-byte (`#5800`) and appends `3.2.1` with all four SHA-256 digests (`3cc458d7554e543fb3684d5718b226e03a64b3c3141d92977d53a0cb9733422d`, `bc560a3cd5d04c49e95fcbf33fa8ac349171df1a877e7e0882827bd526a95214`, `49044208a00774adaa02d3d0936b2c7d1c01253bd5629a3400c5e99f4c413117`, `e174a7a6ec1b5eccef5ee4a8b9f8f773f48243c2d6012ff8a1b846b45a40d088`) matching the committed files on disk.
+
+## 4. Non-Prerequisite Scope & Post-`2e9469852` Wording Corrections (`#5806`)
+
+- **No Deferred Gate Creep at `2e9469852`**: Deferred RO-Crate/FAIRSCAPE/SSSOM export items (`#4034`, `#3972`, `#3025`, `#4044`, `#2973`, `#5788`–`#5790`), `CoreDataset` slot expansion (`#5787`), 28-criterion AI-readiness rubric scoring (`#5786`, `#44`, `#23`), and receipt `v5` (`D105`) remain explicitly outside generation prerequisites; native branch schema-pin alignment to `3.2.1` remains a downstream `main` -> `native` integration step.
+- **Distinct Post-`2e9469852` Wording Corrections (`#5806`)**: Subsequent to frozen commit `2e9469852`, Lead recorded `#5806` and updated [`PLAN.md`](../PLAN.md) (`line 70` — qualifying the run-ready condition to chosen-route applicable existing gates so native-only gates do not block API-only generation) and [`docs/final-generation-acceptance.md`](../../../docs/final-generation-acceptance.md) (clarifying that `N1` executed only the receipt and source-review component checks while `G1` executed schema/pair acceptance separately), alongside removing stale incidental counts here.

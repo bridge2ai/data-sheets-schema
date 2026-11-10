@@ -88,7 +88,7 @@ The independent review must disposition `variables`, `splits`/`subsets`, and `pa
 ## 6. API vs. Native Stub-Refusal Boundary (`N1` Is Component-Only)
 
 - **API runner guard:** The API record check requires top-level `id`, rejects every unknown top-level key, and requires at least five top-level keys (`>= 5` keys) in addition to non-vacuous receipt floors and report gates.
-- **Native boundary (`N1`):** `N1` exercises isolated receipt, schema/pair, and source-review components without composing the full native admission, process-lifecycle, typed-assembly, and fifteen-gate completion path. Its executed receipt check shows that an accurately quoted `id` alone can satisfy those component floors. **Completing `N1` is always component-only evidence and does not establish whole-native stub refusal or whole-native acceptance.** Operator source review and native process-lifecycle/quiet-window gates (`#5745`, `#5746`, `#5755`, `#5775`, `#5778`–`#5785`, D127/D128) remain separate prerequisites.
+- **Native boundary (`N1`):** The executed `N1` checks cover isolated receipt and source-review components. `G1` separately verifies schema/pair consistency. Neither composes the full native admission, process-lifecycle, typed-assembly, and fifteen-gate completion path. The receipt check shows that an accurately quoted `id` alone can satisfy those component floors. **These checks do not establish whole-native stub refusal or whole-native acceptance.** Operator source review remains required; native process-lifecycle/quiet-window gates (`#5745`, `#5746`, `#5755`, `#5775`, `#5778`–`#5785`, D127/D128) apply to a native run, not an API-only run.
 
 ## 7. Non-Prerequisites and Staged Execution Sequence
 

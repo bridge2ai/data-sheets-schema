@@ -1,0 +1,10 @@
+Checking schema file synchronization...
+
+[0;32m✓ Merged schema is up to date[0m
+[0;32m✓ Python model is up to date[0m
+
+[0;32mAll schema files are in sync ✓[0m
+ ✓ in_sync   Dataset      digest 94fb1b7b3e8e  src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+ ✓ in_sync   CoreDataset  digest 47c578052bab  src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+
+2 merged schema(s) built from current source.
