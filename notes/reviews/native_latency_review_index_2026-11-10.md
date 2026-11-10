@@ -21,15 +21,20 @@ preserves that sequence. Plan acceptance is not implementation acceptance.
   required NL-9 through NL-11 corrections, issues 5721 through 5723.
 - [Plan v3](native_latency_implementation_plan_2026-11-10_v3.md): current
   planning direction. The [v3 lead review](native_latency_plan_v3_lead_review_2026-11-10.md)
-  accepts the bounded corrections. Native Codex finishes and reports U3-M
-  before the next diagnostic is assigned. Historical cohort counts must be
-  reconciled with the final U3-M collection.
+  accepts the bounded corrections. U3-M has since reported its resource stop;
+  native acceptance remains unmet. The current dispatch records the reviewed
+  rollup and outstanding checks.
 - [Prepared WP1 diagnostic handoff](codex_native_wp1_assignment_2026-11-10.md):
-  prepared and undispatched until the lead reviews the final U3-M report.
+  implementation only is now dispatched after final U3-M report review.
+  Composition, canary and timing execution remain separate pending steps.
 - [Worker coordination](worker_dispatch_2026-11-10.md) and
   [read-only monitoring helper](../../scripts/adhoc/monitor_worker_terminals_20261110.applescript):
   terminal identities, dispatches, native scheduling amendment and active-turn
   monitoring limits.
+- [Temporary pause and verified recovery](live-resource-pause-20261110/README.md)
+  and [identity-pinned intervention helper](../../scripts/adhoc/pause_contending_jobs_20261110.py).
+- [Read-only download cache inventory](python_download_cache_candidates_20261110.md):
+  a proposal for review; it does not authorize deletion.
 
 Historical plans remain unchanged as review evidence. Their rejected claims
 and proposed speedups are not current conclusions. No document in this review

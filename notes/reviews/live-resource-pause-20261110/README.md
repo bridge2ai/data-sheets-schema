@@ -47,3 +47,10 @@ read verified that all 15 recorded PIDs were present and none had a stopped
 state. Both JSON journals contain their resumption timestamps. No termination
 or deletion occurred. Disk space remained volatile, so the recovery does not
 authorize new expensive D4D validation runs.
+
+This fixed-identity helper is retained as provenance for this completed
+intervention. Its resume action records signal delivery; the lead performed
+the process-state verification separately. Review F2 identifies missing
+automatic resume verification and handling of an exited controller as template
+hardening work. Reusing it for another intervention requires addressing those
+limitations and new authorization; the completed event is not being rerun.

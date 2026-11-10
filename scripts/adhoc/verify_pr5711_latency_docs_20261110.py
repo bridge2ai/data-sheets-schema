@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Purpose: Verify SHA-256 digests, relative links, and zero-at-sign invariants for PR #5711 latency/coordination docs.
+"""Purpose: Verify historical digests and current links for PR #5711 latency docs.
 Inputs: Worktree root (--repo, defaults to parents[2]) and optional sibling d4d-executions root (--d4d-executions).
 Outputs: JSON verification summary to stdout; exits non-zero on any digest, link, or at-sign mismatch.
-Serves: PR #5711 documentation review and issue #5740 index-link resolution.
+Serves: PR #5711 documentation review, #5740 links and #5741 mutable coordination.
+Historical assessment/plan bytes remain pinned. Current coordination files are
+required to be nonempty and hashed for reporting, not compared with old snapshots.
 Date: 2026-11-10
 """
 
@@ -40,16 +42,19 @@ PINNED_WORKTREE_SHAS = {
     "notes/reviews/native_latency_plan_v3_lead_review_2026-11-10.md": (
         "ff81141341ea18a519838e966c753835338d2c7f7c47102560188bc5b3e469b4"
     ),
-    "notes/reviews/worker_dispatch_2026-11-10.md": (
-        "01bbe17c19dcd1ed696b733a718c658c9ab27ff37e387562b9db5fef11d01cba"
-    ),
     "notes/reviews/codex_native_wp1_assignment_2026-11-10.md": (
         "9e1531d7d729ed9772781ea91501b468a4879a990af473ab21d4939c6ea4da5d"
     ),
-    "scripts/adhoc/monitor_worker_terminals_20261110.applescript": (
-        "c6687b4adedd4169c66da69491383072fa144040a3d0ed3cb2db542d8547904b"
-    ),
 }
+
+CURRENT_COORDINATION_PATHS = (
+    "notes/reviews/worker_dispatch_2026-11-10.md",
+    "scripts/adhoc/monitor_worker_terminals_20261110.applescript",
+    "notes/reviews/live-resource-pause-20261110/README.md",
+    "notes/reviews/live-resource-pause-20261110/pfas.json",
+    "notes/reviews/live-resource-pause-20261110/website.json",
+    "scripts/adhoc/pause_contending_jobs_20261110.py",
+)
 
 APPENDIX_A_SHAS = {
     "plans/reviews/native_u3j_2026-11-09.md": (
@@ -115,6 +120,13 @@ def verify_repo(repo_root: Path, d4d_exec_root: Path | None) -> dict[str, object
             raise AssertionError(f"Unexpected at-sign character in {rel}")
         verified_worktree[rel] = actual
 
+    current_coordination: dict[str, str] = {}
+    for rel in CURRENT_COORDINATION_PATHS:
+        raw = (repo_root / rel).read_bytes()
+        if not raw.strip():
+            raise AssertionError(f"Empty current coordination artifact: {rel}")
+        current_coordination[rel] = hashlib.sha256(raw).hexdigest()
+
     index_path = repo_root / "notes/reviews/native_latency_review_index_2026-11-10.md"
     index_text = index_path.read_text(encoding="utf-8")
     if at_char in index_text:
@@ -140,6 +152,7 @@ def verify_repo(repo_root: Path, d4d_exec_root: Path | None) -> dict[str, object
         "index_link_count": len(resolved_index_links),
         "index_links": resolved_index_links,
         "pinned_worktree_files_verified": len(verified_worktree),
+        "current_coordination_sha256_observed": current_coordination,
         "appendix_a_files_verified": len(verified_appendix_a),
     }
 
