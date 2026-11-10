@@ -106,11 +106,21 @@ def runtime_binaries():
     profiler = importlib.util.find_spec('_lsprof')
     if profiler is None or not profiler.origin:
         raise ValueError('installed _lsprof extension origin is unavailable')
-    library = Path(sysconfig.get_config_var('LIBDIR')) / sysconfig.get_config_var('LDLIBRARY')
+    shared = sysconfig.get_config_var('Py_ENABLE_SHARED')
+    if type(shared) is not int or shared not in (0, 1):
+        raise ValueError('installed Python shared/static build identity is unavailable')
+    library = None
+    basis = 'Static Python runtime core is covered by the executable identity; no separate runtime library is claimed.'
+    if shared:
+        library = binary_identity(Path(sysconfig.get_config_var('LIBDIR')) / sysconfig.get_config_var('LDLIBRARY'))
+        basis = 'Physical sysconfig LIBDIR/LDLIBRARY file for shared Python; not a loaded-image census.'
     return {'python': binary_identity(Path(sys.executable)),
             '_lsprof': binary_identity(Path(profiler.origin)),
-            'libpython': binary_identity(library),
-            'libpython_identity_basis': 'Physical sysconfig LIBDIR/LDLIBRARY file; not a loaded-image census.'}
+            'libpython': library,
+            'python_build': {'Py_ENABLE_SHARED': shared,
+                             'LIBDIR': sysconfig.get_config_var('LIBDIR'),
+                             'LDLIBRARY': sysconfig.get_config_var('LDLIBRARY')},
+            'libpython_identity_basis': basis}
 
 
 def local_imports():
