@@ -1,0 +1,59 @@
+{
+  "source_sha": "7233f193ad102a8488b31ec7333662c8fefaa996",
+  "schema": "src/data_sheets_schema/schema/data_sheets_schema.yaml",
+  "target_class": "Dataset",
+  "validator": "Draft201909Validator",
+  "versions": {
+    "linkml": "1.9.3",
+    "linkml-runtime": "1.9.4",
+    "jsonschema": "4.25.1"
+  },
+  "generated_schema_sha256": "21c4fdaab26037ff3503e2f5bb84398a54e00918210648c9d982daa0f76e4483",
+  "elapsed_seconds": 1.3898354999837466,
+  "checks": {
+    "id_only": {
+      "input": {
+        "id": "https://example.org/review/minimal"
+      },
+      "valid": true,
+      "errors": []
+    },
+    "missing_id_control": {
+      "input": {},
+      "valid": false,
+      "errors": [
+        {
+          "path": [],
+          "message": "'id' is a required property"
+        }
+      ]
+    },
+    "shared_creator_input": {
+      "input": {
+        "id": "https://example.org/review/dataset",
+        "title": "Exchange review canary",
+        "description": "Fictional record for a bounded offline export check.",
+        "license": "CC0-1.0",
+        "keywords": [
+          "synthetic"
+        ],
+        "creators": [
+          {
+            "principal_investigator": {
+              "id": "https://example.org/person/a",
+              "name": "Example Scientist"
+            }
+          }
+        ],
+        "known_limitations": [
+          {
+            "limitation_description": "Synthetic only."
+          }
+        ]
+      },
+      "valid": true,
+      "errors": []
+    }
+  },
+  "limits": "In-memory JSON Schema generated from pinned LinkML; no endpoint, scientific evidence, or RO-Crate conformance checks. No converter rerun."
+}

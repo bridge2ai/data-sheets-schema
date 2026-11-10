@@ -1,0 +1,561 @@
+{
+  "source_sha": "7233f193ad102a8488b31ec7333662c8fefaa996",
+  "elapsed_seconds": 0.6675294580054469,
+  "exporter_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-schema-alignment-review-20261110/src/fairscape_integration/d4d_to_fairscape.py",
+  "model_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/fairscape_models/fairscape_models/rocrate.py",
+  "model_git_sha": "8c80311d7d8b0fadac07dca9567d632103691f48",
+  "input": {
+    "id": "https://example.org/review/dataset",
+    "title": "Exchange review canary",
+    "description": "Fictional record for a bounded offline export check.",
+    "license": "CC0-1.0",
+    "keywords": [
+      "synthetic"
+    ],
+    "creators": [
+      {
+        "principal_investigator": {
+          "id": "https://example.org/person/a",
+          "name": "Example Scientist"
+        }
+      }
+    ],
+    "known_limitations": [
+      {
+        "limitation_description": "Synthetic only."
+      }
+    ],
+    "distributions": [
+      {
+        "path": "data.csv",
+        "format": "CSV",
+        "conforms_to": "BIDS",
+        "conforms_to_standard": [
+          "BIDS"
+        ]
+      }
+    ]
+  },
+  "input_schema_validation": "not run; field shapes checked against current Core source",
+  "wire": {
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#",
+      "rai": "http://mlcommons.org/croissant/RAI/",
+      "d4d": "https://w3id.org/bridge2ai/data-sheets-schema/"
+    },
+    "@graph": [
+      {
+        "@id": "ro-crate-metadata.json",
+        "@type": "CreativeWork",
+        "conformsTo": {
+          "@id": "https://w3id.org/ro/crate/1.2"
+        },
+        "about": {
+          "@id": "./"
+        },
+        "fairscapeVersion": "1.0.24"
+      },
+      {
+        "@id": "./",
+        "@type": [
+          "Dataset",
+          "https://w3id.org/EVI#ROCrate"
+        ],
+        "name": "Exchange review canary",
+        "description": "Fictional record for a bounded offline export check.",
+        "keywords": [
+          "synthetic"
+        ],
+        "version": "1.0",
+        "isPartOf": [],
+        "hasPart": [],
+        "author": "Unknown",
+        "license": "CC0-1.0",
+        "rai:dataLimitations": "Synthetic only."
+      }
+    ]
+  },
+  "model_valid": true,
+  "model_errors": null,
+  "checks": {
+    "datePublished_present": false,
+    "author": "Unknown",
+    "hasPart": [],
+    "known_limitation_text": "Synthetic only.",
+    "descriptor_conformance_predicates": [
+      "https://schema.org/conformsTo"
+    ],
+    "source_dataset_id_present_in_wire": false,
+    "distribution_standard_present_in_wire": false
+  },
+  "route_evidence": {
+    "contract": "fairscape-declared-assertions-v1",
+    "direction": "d4d_to_fairscape",
+    "input": {
+      "kind": "dict",
+      "source_sha256": null,
+      "source_bytes": null,
+      "source_path": null
+    },
+    "status": "complete",
+    "assertions": [
+      {
+        "source": "citation",
+        "source_pointer": "/citation",
+        "presence": "missing",
+        "raw": null,
+        "target": "citation",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "cleaning_strategies",
+        "source_pointer": "/cleaning_strategies",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataManipulationProtocol",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "funders",
+        "source_pointer": "/funders",
+        "presence": "missing",
+        "raw": null,
+        "target": "funder",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "collection_mechanisms",
+        "source_pointer": "/collection_mechanisms",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataCollection",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "future_use_impacts",
+        "source_pointer": "/future_use_impacts",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataSocialImpact",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "sensitive_elements",
+        "source_pointer": "/sensitive_elements",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:personalSensitiveInformation",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "human_subject_research",
+        "source_pointer": "/human_subject_research",
+        "presence": "missing",
+        "raw": null,
+        "target": "humanSubjectResearch",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "data_governance",
+        "source_pointer": "/data_governance",
+        "presence": "missing",
+        "raw": null,
+        "target": "dataGovernanceCommittee",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "confidential_elements",
+        "source_pointer": "/confidential_elements",
+        "presence": "missing",
+        "raw": null,
+        "target": "d4d:confidentialElements",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "acquisition_methods",
+        "source_pointer": "/acquisition_methods",
+        "presence": "missing",
+        "raw": null,
+        "target": "d4d:acquisitionMethods",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "data_protection_impacts",
+        "source_pointer": "/data_protection_impacts",
+        "presence": "missing",
+        "raw": null,
+        "target": "d4d:dataProtectionImpacts",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "labeling_strategies",
+        "source_pointer": "/labeling_strategies",
+        "presence": "missing",
+        "raw": null,
+        "target": "d4d:labelingStrategies",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "labeling_strategies",
+        "source_pointer": "/labeling_strategies",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataAnnotationProtocol",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "labeling_strategies",
+        "source_pointer": "/labeling_strategies",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataAnnotationPlatform",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "labeling_strategies",
+        "source_pointer": "/labeling_strategies",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:annotationsPerItem",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null
+      },
+      {
+        "source": "known_limitations",
+        "source_pointer": "/known_limitations",
+        "presence": "present",
+        "raw": [
+          {
+            "limitation_description": "Synthetic only."
+          }
+        ],
+        "target": "rai:dataLimitations",
+        "decision": "constructed",
+        "reason": "all admitted projected values supplied to the model; raw shape remains evidence",
+        "retention": "retained",
+        "final_value": "Synthetic only.",
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "scalar",
+        "units": [
+          {
+            "source_index": 0,
+            "source_pointer": "/known_limitations/0",
+            "raw": {
+              "limitation_description": "Synthetic only."
+            },
+            "decision": "constructed",
+            "reason": "exact single-member narrative projection; raw object retained in evidence",
+            "projected_value": "Synthetic only.",
+            "projection_index": null,
+            "retention": "retained",
+            "final_value": "Synthetic only."
+          }
+        ],
+        "projection": "Synthetic only."
+      },
+      {
+        "source": "known_biases",
+        "source_pointer": "/known_biases",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataBiases",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "scalar",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "intended_uses",
+        "source_pointer": "/intended_uses",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataUseCases",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "scalar",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "updates",
+        "source_pointer": "/updates",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataReleaseMaintenancePlan",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "object",
+        "wire_cardinality": "scalar",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "missing_data_documentation",
+        "source_pointer": "/missing_data_documentation",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataCollectionMissingData",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "scalar",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "raw_data_sources",
+        "source_pointer": "/raw_data_sources",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataCollectionRawData",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "scalar",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "collection_timeframes",
+        "source_pointer": "/collection_timeframes",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataCollectionTimeframe",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "list",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "preprocessing_strategies",
+        "source_pointer": "/preprocessing_strategies",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataPreprocessingProtocol",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "list",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "annotation_analyses",
+        "source_pointer": "/annotation_analyses",
+        "presence": "missing",
+        "raw": null,
+        "target": "rai:dataAnnotationAnalysis",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "list",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "distribution_formats",
+        "source_pointer": "/distribution_formats",
+        "presence": "missing",
+        "raw": null,
+        "target": "evi:formats",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "list",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "addressing_gaps",
+        "source_pointer": "/addressing_gaps",
+        "presence": "missing",
+        "raw": null,
+        "target": "d4d:addressingGaps",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "scalar",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "anomalies",
+        "source_pointer": "/anomalies",
+        "presence": "missing",
+        "raw": null,
+        "target": "d4d:dataAnomalies",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "scalar",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "content_warnings",
+        "source_pointer": "/content_warnings",
+        "presence": "missing",
+        "raw": null,
+        "target": "d4d:contentWarning",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "scalar",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "informed_consent",
+        "source_pointer": "/informed_consent",
+        "presence": "missing",
+        "raw": null,
+        "target": "d4d:informedConsent",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "list",
+        "wire_cardinality": "scalar",
+        "units": [],
+        "projection": null
+      },
+      {
+        "source": "at_risk_populations",
+        "source_pointer": "/at_risk_populations",
+        "presence": "missing",
+        "raw": null,
+        "target": "d4d:atRiskPopulations",
+        "decision": "missing",
+        "reason": "source key absent",
+        "retention": "not_constructed",
+        "final_value": null,
+        "projection_scope": "fairscape-forward-types-v1",
+        "source_cardinality": "object",
+        "wire_cardinality": "scalar",
+        "units": [],
+        "projection": null
+      }
+    ],
+    "error": null,
+    "projection_scope": {
+      "contract": "fairscape-forward-types-v1",
+      "sources": [
+        "known_limitations",
+        "known_biases",
+        "intended_uses",
+        "updates",
+        "missing_data_documentation",
+        "raw_data_sources",
+        "collection_timeframes",
+        "preprocessing_strategies",
+        "annotation_analyses",
+        "distribution_formats",
+        "addressing_gaps",
+        "anomalies",
+        "content_warnings",
+        "informed_consent",
+        "at_risk_populations"
+      ],
+      "compatibility_alias": "vulnerable_populations",
+      "limits": "Fifteen outgoing fields only; model validity and retained text do not establish source-shape preservation or scientific coverage."
+    },
+    "projection_summary": {
+      "status": "complete",
+      "model_valid": true,
+      "incomplete": false,
+      "omitted": [],
+      "partial": [],
+      "null_not_emitted": [],
+      "superseded": []
+    }
+  },
+  "limits": "One forward API call, not CLI, reverse conversion, SHACL conformance or broad coverage; no network."
+}

@@ -1,0 +1,1044 @@
+{
+  "source_sha": "7233f193ad102a8488b31ec7333662c8fefaa996",
+  "comprehensive_rows": 301,
+  "mapping_status_counts": {
+    "unmapped": 84,
+    "free_text": 13,
+    "recommended": 1,
+    "mapped": 176,
+    "novel_d4d": 27
+  },
+  "structural_rows": 165,
+  "ttl_mapping_triples": 150,
+  "core_induced_slots": {
+    "CoreDataset": 84,
+    "CoreDistribution": 17,
+    "CoreDatasetCollection": 27
+  },
+  "core_rows": [
+    {
+      "class": "CoreDataset",
+      "slot": "distributions",
+      "range": "CoreDistribution",
+      "slot_uri": "dcat:distribution",
+      "comprehensive_status": "absent",
+      "comprehensive_object": null
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "purposes",
+      "range": "Purpose",
+      "slot_uri": "d4d:purposes",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataUseCases"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "tasks",
+      "range": "Task",
+      "slot_uri": "d4d:tasks",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataUseCases"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "addressing_gaps",
+      "range": "AddressingGap",
+      "slot_uri": "d4d:addressingGaps",
+      "comprehensive_status": "novel_d4d",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "creators",
+      "range": "Creator",
+      "slot_uri": "schema:creator",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:author"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "funders",
+      "range": "FundingMechanism",
+      "slot_uri": "schema:funder",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:funder"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "instances",
+      "range": "Instance",
+      "slot_uri": "d4d:instances",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:variableMeasured"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "anomalies",
+      "range": "DataAnomaly",
+      "slot_uri": "d4d:anomalies",
+      "comprehensive_status": "unmapped",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "known_biases",
+      "range": "DatasetBias",
+      "slot_uri": "d4d:known_biases",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataBiases"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "known_limitations",
+      "range": "DatasetLimitation",
+      "slot_uri": "d4d:known_limitations",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataLimitations"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "confidential_elements",
+      "range": "Confidentiality",
+      "slot_uri": "d4d:confidentialElements",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:personalSensitiveInformation"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "content_warnings",
+      "range": "ContentWarning",
+      "slot_uri": "d4d:contentWarnings",
+      "comprehensive_status": "novel_d4d",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "subpopulations",
+      "range": "Subpopulation",
+      "slot_uri": "d4d:subpopulations",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:variableMeasured"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "sensitive_elements",
+      "range": "SensitiveElement",
+      "slot_uri": "d4d:sensitiveElements",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:personalSensitiveInformation"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "acquisition_methods",
+      "range": "InstanceAcquisition",
+      "slot_uri": "d4d:acquisitionMethods",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataCollection"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "collection_mechanisms",
+      "range": "CollectionMechanism",
+      "slot_uri": "d4d:collectionMechanisms",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataCollection"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "collection_timeframes",
+      "range": "CollectionTimeframe",
+      "slot_uri": "d4d:collectionTimeframes",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataCollectionTimeframe"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "data_collectors",
+      "range": "DataCollector",
+      "slot_uri": "d4d:dataCollectors",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:contributor"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "missing_data_documentation",
+      "range": "MissingDataDocumentation",
+      "slot_uri": "d4d:missingDataDocumentation",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataCollectionMissingData"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "raw_data_sources",
+      "range": "RawDataSource",
+      "slot_uri": "d4d:rawDataSources",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataCollectionRawData"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "sampling_strategies",
+      "range": "SamplingStrategy",
+      "slot_uri": "d4d:samplingStrategies",
+      "comprehensive_status": "novel_d4d",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "raw_sources",
+      "range": "RawData",
+      "slot_uri": "d4d:rawSources",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataCollectionRawData"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "preprocessing_strategies",
+      "range": "PreprocessingStrategy",
+      "slot_uri": "d4d:preprocessingStrategies",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataPreprocessingProtocol"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "cleaning_strategies",
+      "range": "CleaningStrategy",
+      "slot_uri": "d4d:cleaningStrategies",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataManipulationProtocol"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "labeling_strategies",
+      "range": "LabelingStrategy",
+      "slot_uri": "d4d:labelingStrategies",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataAnnotationProtocol"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "imputation_protocols",
+      "range": "ImputationProtocol",
+      "slot_uri": "d4d:imputation_protocols",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataImputationProtocol"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "annotation_analyses",
+      "range": "AnnotationAnalysis",
+      "slot_uri": "d4d:annotation_analyses",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataAnnotationAnalysis"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "machine_annotation_tools",
+      "range": "MachineAnnotationTools",
+      "slot_uri": "d4d:machineAnnotationTools",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:machineAnnotationTools"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "existing_uses",
+      "range": "ExistingUse",
+      "slot_uri": "d4d:existingUses",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataUseCases"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "use_repository",
+      "range": "UseRepository",
+      "slot_uri": "d4d:useRepository",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:relatedLink"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "other_tasks",
+      "range": "OtherTask",
+      "slot_uri": "d4d:otherTasks",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataUseCases"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "future_use_impacts",
+      "range": "FutureUseImpact",
+      "slot_uri": "d4d:futureUseImpacts",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataSocialImpact"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "discouraged_uses",
+      "range": "DiscouragedUse",
+      "slot_uri": "d4d:discouragedUses",
+      "comprehensive_status": "novel_d4d",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "intended_uses",
+      "range": "IntendedUse",
+      "slot_uri": "d4d:intendedUses",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataUseCases"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "prohibited_uses",
+      "range": "ProhibitedUse",
+      "slot_uri": "d4d:prohibitedUses",
+      "comprehensive_status": "novel_d4d",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "distribution_formats",
+      "range": "DistributionFormat",
+      "slot_uri": "d4d:distributionFormats",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "evi:formats"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "distribution_dates",
+      "range": "DistributionDate",
+      "slot_uri": "d4d:distributionDates",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:datePublished"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "maintainers",
+      "range": "Maintainer",
+      "slot_uri": "d4d:maintainers",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:maintainer"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "errata",
+      "range": "Erratum",
+      "slot_uri": "d4d:errata",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:correction"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "updates",
+      "range": "UpdatePlan",
+      "slot_uri": "d4d:updates",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataReleaseMaintenancePlan"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "retention_limit",
+      "range": "RetentionLimits",
+      "slot_uri": "d4d:retentionLimit",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:conditionsOfAccess"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "version_access",
+      "range": "VersionAccess",
+      "slot_uri": "d4d:versionAccess",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:version"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "extension_mechanism",
+      "range": "ExtensionMechanism",
+      "slot_uri": "d4d:extensionMechanism",
+      "comprehensive_status": "unmapped",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "ethical_reviews",
+      "range": "EthicalReview",
+      "slot_uri": "d4d:ethicalReviews",
+      "comprehensive_status": "novel_d4d",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "data_protection_impacts",
+      "range": "DataProtectionImpact",
+      "slot_uri": "d4d:dataProtectionImpacts",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rai:dataSocialImpact"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "human_subject_research",
+      "range": "HumanSubjectResearch",
+      "slot_uri": "d4d:humanSubjectResearch",
+      "comprehensive_status": "unmapped",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "informed_consent",
+      "range": "InformedConsent",
+      "slot_uri": "d4d:informedConsent",
+      "comprehensive_status": "free_text",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "at_risk_populations",
+      "range": "AtRiskPopulations",
+      "slot_uri": "d4d:atRiskPopulations",
+      "comprehensive_status": "unmapped",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "license_and_use_terms",
+      "range": "LicenseAndUseTerms",
+      "slot_uri": "d4d:license_and_use_terms",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:license"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "ip_restrictions",
+      "range": "IPRestrictions",
+      "slot_uri": "d4d:ipRestrictions",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:conditionsOfAccess"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "regulatory_restrictions",
+      "range": "ExportControlRegulatoryRestrictions",
+      "slot_uri": "d4d:regulatoryRestrictions",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:conditionsOfAccess"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "data_governance",
+      "range": "DataGovernance",
+      "slot_uri": "d4d:dataGovernance",
+      "comprehensive_status": "novel_d4d",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "is_deidentified",
+      "range": "Deidentification",
+      "slot_uri": "d4d:isDeidentified",
+      "comprehensive_status": "novel_d4d",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "is_tabular",
+      "range": "boolean",
+      "slot_uri": "d4d:isTabular",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:encodingFormat"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "dialect",
+      "range": "FormatDialect",
+      "slot_uri": "schema:encodingFormat",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:encodingFormat"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "external_resources",
+      "range": "ExternalResource",
+      "slot_uri": "schema:relatedLink",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:relatedLink"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "related_datasets",
+      "range": "DatasetRelationship",
+      "slot_uri": "schema:isRelatedTo",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:isRelatedTo"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "resources",
+      "range": "CoreDataset",
+      "slot_uri": "schema:hasPart",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:hasPart"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "compression",
+      "range": "CompressionEnum",
+      "slot_uri": "dcat:compressFormat",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "evi:formats"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "conforms_to",
+      "range": "string",
+      "slot_uri": "dcterms:conformsTo",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:conformsTo"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "conforms_to_class",
+      "range": "string",
+      "slot_uri": "d4d:conformsToClass",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:conformsTo"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "conforms_to_schema",
+      "range": "string",
+      "slot_uri": "d4d:conformsToSchema",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:conformsTo"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "conforms_to_standard",
+      "range": "DataStandardEnum",
+      "slot_uri": "dcterms:conformsTo",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "dcterms:conformsTo"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "created_by",
+      "range": "string",
+      "slot_uri": "dcterms:creator",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:creator"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "created_on",
+      "range": "datetime",
+      "slot_uri": "dcterms:created",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:dateCreated"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "doi",
+      "range": "string",
+      "slot_uri": "d4d:doiIdentifier",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:identifier"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "download_url",
+      "range": "uri",
+      "slot_uri": "dcat:downloadURL",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:contentUrl"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "issued",
+      "range": "datetime",
+      "slot_uri": "dcterms:issued",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:datePublished"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "keywords",
+      "range": "string",
+      "slot_uri": "dcat:keyword",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:keywords"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "language",
+      "range": "string",
+      "slot_uri": "dcterms:language",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:inLanguage"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "last_updated_on",
+      "range": "datetime",
+      "slot_uri": "dcterms:modified",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:dateModified"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "license",
+      "range": "string",
+      "slot_uri": "dcterms:license",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:license"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "modified_by",
+      "range": "string",
+      "slot_uri": "dcterms:contributor",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:contributor"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "page",
+      "range": "string",
+      "slot_uri": "dcat:landingPage",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:url"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "publisher",
+      "range": "uriorcurie",
+      "slot_uri": "dcterms:publisher",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:publisher"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "status",
+      "range": "string",
+      "slot_uri": "d4d:publicationStatus",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:creativeWorkStatus"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "title",
+      "range": "string",
+      "slot_uri": "dcterms:title",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:name"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "version",
+      "range": "string",
+      "slot_uri": "schema:version",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:version"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "was_derived_from",
+      "range": "string",
+      "slot_uri": "prov:wasDerivedFrom",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:isBasedOn"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "id",
+      "range": "uriorcurie",
+      "slot_uri": "schema:identifier",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rdf:ID"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "name",
+      "range": "string",
+      "slot_uri": "schema:name",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:name"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "description",
+      "range": "string",
+      "slot_uri": "schema:description",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:description"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "notes",
+      "range": "string",
+      "slot_uri": "schema:comment",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:comment"
+    },
+    {
+      "class": "CoreDataset",
+      "slot": "source_caveats",
+      "range": "string",
+      "slot_uri": "dcterms:provenance",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "dcterms:provenance"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "bytes",
+      "range": "integer",
+      "slot_uri": "dcat:byteSize",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:contentSize"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "hash",
+      "range": "string",
+      "slot_uri": "d4d:hashValue",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "evi:md5"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "md5",
+      "range": "string",
+      "slot_uri": "d4d:md5Checksum",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "evi:md5"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "sha256",
+      "range": "string",
+      "slot_uri": "schema:sha256",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "evi:sha256"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "path",
+      "range": "string",
+      "slot_uri": "schema:contentUrl",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:contentUrl"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "format",
+      "range": "FormatEnum",
+      "slot_uri": "dcterms:format",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:encodingFormat"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "encoding",
+      "range": "EncodingEnum",
+      "slot_uri": "d4d:characterEncoding",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "evi:formats"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "compression",
+      "range": "CompressionEnum",
+      "slot_uri": "dcat:compressFormat",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "evi:formats"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "media_type",
+      "range": "MediaTypeEnum",
+      "slot_uri": "dcat:mediaType",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:encodingFormat"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "conforms_to",
+      "range": "string",
+      "slot_uri": "dcterms:conformsTo",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:conformsTo"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "conforms_to_standard",
+      "range": "DataStandardEnum",
+      "slot_uri": "dcterms:conformsTo",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "dcterms:conformsTo"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "id",
+      "range": "uriorcurie",
+      "slot_uri": "schema:identifier",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rdf:ID"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "name",
+      "range": "string",
+      "slot_uri": "schema:name",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:name"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "description",
+      "range": "string",
+      "slot_uri": "schema:description",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:description"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "notes",
+      "range": "string",
+      "slot_uri": "schema:comment",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:comment"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "source_caveats",
+      "range": "string",
+      "slot_uri": "dcterms:provenance",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "dcterms:provenance"
+    },
+    {
+      "class": "CoreDistribution",
+      "slot": "used_software",
+      "range": "Software",
+      "slot_uri": "d4d:usedSoftware",
+      "comprehensive_status": "unmapped",
+      "comprehensive_object": "sssom:NoTermFound"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "resources",
+      "range": "CoreDataset",
+      "slot_uri": "schema:hasPart",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:hasPart"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "compression",
+      "range": "CompressionEnum",
+      "slot_uri": "dcat:compressFormat",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "evi:formats"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "conforms_to",
+      "range": "string",
+      "slot_uri": "dcterms:conformsTo",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:conformsTo"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "conforms_to_class",
+      "range": "string",
+      "slot_uri": "d4d:conformsToClass",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:conformsTo"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "conforms_to_schema",
+      "range": "string",
+      "slot_uri": "d4d:conformsToSchema",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:conformsTo"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "conforms_to_standard",
+      "range": "DataStandardEnum",
+      "slot_uri": "dcterms:conformsTo",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "dcterms:conformsTo"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "created_by",
+      "range": "string",
+      "slot_uri": "dcterms:creator",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:creator"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "created_on",
+      "range": "datetime",
+      "slot_uri": "dcterms:created",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:dateCreated"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "doi",
+      "range": "string",
+      "slot_uri": "d4d:doiIdentifier",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:identifier"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "download_url",
+      "range": "uri",
+      "slot_uri": "dcat:downloadURL",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:contentUrl"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "issued",
+      "range": "datetime",
+      "slot_uri": "dcterms:issued",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:datePublished"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "keywords",
+      "range": "string",
+      "slot_uri": "dcat:keyword",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:keywords"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "language",
+      "range": "string",
+      "slot_uri": "dcterms:language",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:inLanguage"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "last_updated_on",
+      "range": "datetime",
+      "slot_uri": "dcterms:modified",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:dateModified"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "license",
+      "range": "string",
+      "slot_uri": "dcterms:license",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:license"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "modified_by",
+      "range": "string",
+      "slot_uri": "dcterms:contributor",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:contributor"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "page",
+      "range": "string",
+      "slot_uri": "dcat:landingPage",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:url"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "publisher",
+      "range": "uriorcurie",
+      "slot_uri": "dcterms:publisher",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:publisher"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "status",
+      "range": "string",
+      "slot_uri": "d4d:publicationStatus",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:creativeWorkStatus"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "title",
+      "range": "string",
+      "slot_uri": "dcterms:title",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:name"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "version",
+      "range": "string",
+      "slot_uri": "schema:version",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:version"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "was_derived_from",
+      "range": "string",
+      "slot_uri": "prov:wasDerivedFrom",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:isBasedOn"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "id",
+      "range": "uriorcurie",
+      "slot_uri": "schema:identifier",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "rdf:ID"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "name",
+      "range": "string",
+      "slot_uri": "schema:name",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:name"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "description",
+      "range": "string",
+      "slot_uri": "schema:description",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:description"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "notes",
+      "range": "string",
+      "slot_uri": "schema:comment",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "schema:comment"
+    },
+    {
+      "class": "CoreDatasetCollection",
+      "slot": "source_caveats",
+      "range": "string",
+      "slot_uri": "dcterms:provenance",
+      "comprehensive_status": "mapped",
+      "comprehensive_object": "dcterms:provenance"
+    }
+  ]
+}
