@@ -1,0 +1,122 @@
+{
+  "job": "pfas",
+  "authorization": "owner explicitly approved temporary pause in lead conversation",
+  "started_utc": "2026-11-10T05:29:54.927542+00:00",
+  "targets": [
+    {
+      "pid": 92016,
+      "ppid": 92015,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:21:36 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 92031,
+      "ppid": 92016,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:21:38 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 92034,
+      "ppid": 92016,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:21:38 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 92035,
+      "ppid": 92016,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:21:38 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 92038,
+      "ppid": 92016,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:21:38 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 92041,
+      "ppid": 92016,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:21:38 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 92044,
+      "ppid": 92016,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:21:38 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 92047,
+      "ppid": 92016,
+      "pgid": 91896,
+      "state": "R+",
+      "started": "Mon Nov 9 21:21:38 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 92050,
+      "ppid": 92016,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:21:38 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 92053,
+      "ppid": 92016,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:21:38 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 92056,
+      "ppid": 92016,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:21:39 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 94434,
+      "ppid": 92050,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:23:31 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 95236,
+      "ppid": 92034,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:24:15 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 95832,
+      "ppid": 92056,
+      "pgid": 91896,
+      "state": "S+",
+      "started": "Mon Nov 9 21:24:42 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.8/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+    }
+  ],
+  "stopped_verified": true,
+  "verified_utc": "2026-11-10T05:29:55.129817+00:00",
+  "resumed_utc": "2026-11-10T05:38:05.016898+00:00"
+}
