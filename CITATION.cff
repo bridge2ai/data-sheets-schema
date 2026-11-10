@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use data-sheets-schema (D4D), please cite this software."
+title: "data-sheets-schema: A LinkML Schema and Toolkit for Datasheets for Datasets"
+type: software
+license: MIT
+version: 3.2.0
+repository-code: "https://github.com/bridge2ai/data-sheets-schema"
+url: "https://bridge2ai.github.io/data-sheets-schema/"
+authors:
+  - family-names: Joachimiak
+    given-names: Marcin P.
+    orcid: "https://orcid.org/0000-0001-8175-045X"
+    affiliation: Lawrence Berkeley National Laboratory
+  # Add additional Bridge2AI / D4D co-authors here in citation order
+keywords:
+  - Datasheets for Datasets
+  - LinkML
+  - Bridge2AI
+  - RO-Crate
+  - FAIRSCAPE
+  - metadata schema

@@ -2,7 +2,7 @@
 name = "data_sheets_schema"
 version = "0.1.0"
 description = "A LinkML schema for Datasheets for Datasets."
-authors = ["My Name <MJoachimiak@lbl.gov>"]
+authors = ["Marcin P. Joachimiak <MJoachimiak@lbl.gov>"]
 license = "MIT"
 readme = "README.md"
 packages = [
