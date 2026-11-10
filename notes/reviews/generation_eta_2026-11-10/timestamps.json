@@ -1,0 +1,1378 @@
+{
+  "observed_utc": "2026-11-10T02:25:25.602822+00:00",
+  "scope": "Explicit globs in primary notes/coordination and sibling plans/reviews; ignores not applied; not a whole-disk inventory.",
+  "files": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/budget_reconciliation_2026-11-09.md",
+      "size": 43598,
+      "birth_utc": "2026-11-09T20:11:53.660808+00:00",
+      "modified_utc": "2026-11-09T20:12:25.432138+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "74ec6b7018bf7f61af32c0586df20764a9f4a07213712382129d3375be36a248"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u0_recorder_2026-11-06.md",
+      "size": 76407,
+      "birth_utc": "2026-11-06T02:21:46.881112+00:00",
+      "modified_utc": "2026-11-06T10:10:49.795749+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "e17db37c86cdd7f652f4d1bee07c19e7e03881224a930c6263e28800d98b01e9"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u1_2026-11-06.md",
+      "size": 60200,
+      "birth_utc": "2026-11-06T02:08:06.724878+00:00",
+      "modified_utc": "2026-11-06T10:43:18.325433+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "8927009e49afb30468498377f79cc242ae0a61514deccb3075bd3a1b2ff658c1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u1u3_assembly_2026-11-08.md",
+      "size": 33306,
+      "birth_utc": "2026-11-08T09:13:35.934783+00:00",
+      "modified_utc": "2026-11-09T01:32:18.637876+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "e7ca697c1e0784423a1203de2f653f8e96138b04ad166cc54ca36cfa3b11f4af"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u2_2026-11-06.md",
+      "size": 45533,
+      "birth_utc": "2026-11-06T01:53:26.465065+00:00",
+      "modified_utc": "2026-11-06T07:52:21.876963+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "1ba0f6fc26b7de37eee6b76089a7a85433653797f5132cf8290ce1e00dd90d3b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u2_claude_review_2026-11-06.md",
+      "size": 25602,
+      "birth_utc": "2026-11-06T05:05:55.027742+00:00",
+      "modified_utc": "2026-11-06T05:05:55.028803+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "dc0c090232307d414ef640d50a652128c99d2f1edb79653384a0de53baec3afb"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3_deadline_2026-11-08.md",
+      "size": 54500,
+      "birth_utc": "2026-11-08T22:28:20.389468+00:00",
+      "modified_utc": "2026-11-09T19:34:12.608977+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "8cd41bba481318a27238f34af273d2958fdf8a523abffe2cc3d605074d65a91d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3_plan_2026-11-06.md",
+      "size": 39036,
+      "birth_utc": "2026-11-06T10:29:25.078672+00:00",
+      "modified_utc": "2026-11-06T10:36:05.261721+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "ca44185aff6933a0740afafbd6b044b661ab3710ff9b674d1600c6184164f81a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3a_2026-11-07.md",
+      "size": 70565,
+      "birth_utc": "2026-11-07T02:25:50.123694+00:00",
+      "modified_utc": "2026-11-08T04:06:37.461247+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "f40f7251ee1c3ae3e52d218293b7908e30fe9b96c92996f63fd58126170c7ba4"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3a_claude_review_2026-11-07.md",
+      "size": 45330,
+      "birth_utc": "2026-11-07T04:38:36.238911+00:00",
+      "modified_utc": "2026-11-07T08:16:21.787969+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "917fb2e1783a73e8b9040465e18903f53da2f294d3e16219235da04bfdb2d931"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3a_r3_u3d_r8_claude_review_2026-11-07.md",
+      "size": 27679,
+      "birth_utc": "2026-11-07T22:16:15.412674+00:00",
+      "modified_utc": "2026-11-07T22:16:15.413514+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "c393f628970c1084229490d30de575124a4ec2951b5e1c93acd975d37c375b6a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3b_2026-11-07.md",
+      "size": 34201,
+      "birth_utc": "2026-11-07T03:31:26.318908+00:00",
+      "modified_utc": "2026-11-07T23:44:02.656734+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "4c86ce962790cbeaf7e2f4e850a42d66ea64f98091926c864f0136d699b26d34"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3b_claude_review_2026-11-07.md",
+      "size": 26482,
+      "birth_utc": "2026-11-07T06:39:10.941206+00:00",
+      "modified_utc": "2026-11-07T06:39:10.941456+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "a5cdf6aa6119e005e1a140b8900ef0889daf8a2698f3bb59b909e6407c1a616a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3c_2026-11-07.md",
+      "size": 93417,
+      "birth_utc": "2026-11-07T03:49:52.790394+00:00",
+      "modified_utc": "2026-11-08T04:48:13.986632+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "d7b0cdcebbb8a54145714d03159dc002e56febc4c89c44560356b0a7f493655f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3d_2026-11-07.md",
+      "size": 122829,
+      "birth_utc": "2026-11-07T04:34:14.970339+00:00",
+      "modified_utc": "2026-11-08T09:01:54.907054+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "a70a76e687c1f8be19053dc431d6de992a7e52ed182fcb9a57e55fc6b8739b6a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3d_r2r3_claude_review_2026-11-07.md",
+      "size": 42701,
+      "birth_utc": "2026-11-07T05:59:25.698741+00:00",
+      "modified_utc": "2026-11-07T05:59:25.699461+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "97f963e3f5f94ca83c983f0533293e3648f21c6073baa34da7098b9efbcfae86"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3e_integration_plan_2026-11-08.md",
+      "size": 28868,
+      "birth_utc": "2026-11-08T02:48:28.787653+00:00",
+      "modified_utc": "2026-11-08T02:48:28.804661+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "76e66e8de81a17006cf9e2ef162d0a43c47aff3e787734db626601315122542d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3f2_2026-11-09.md",
+      "size": 19294,
+      "birth_utc": "2026-11-09T03:56:21.245882+00:00",
+      "modified_utc": "2026-11-09T04:21:14.679914+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "6eeb806b093fa8f59395e639433a99c68b0478d7a6d6cdce748746c6b4513502"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3f2_claude_recheck_2026-11-09.md",
+      "size": 13141,
+      "birth_utc": "2026-11-09T06:18:12.572770+00:00",
+      "modified_utc": "2026-11-09T06:18:25.277710+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "36e4b156d5473466d9a7f4767176bd6d292870b9a6da349e4622c7dddb047a1f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3f_2026-11-09.md",
+      "size": 15841,
+      "birth_utc": "2026-11-09T02:35:51.299927+00:00",
+      "modified_utc": "2026-11-09T02:48:27.575464+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "d6822731229830ed71463806c9ad3bce517da3ba086bd23ae93ac41358af0a2f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3f_claude_review_2026-11-09.md",
+      "size": 19812,
+      "birth_utc": "2026-11-09T03:37:07.342117+00:00",
+      "modified_utc": "2026-11-09T03:37:07.342390+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "1a91913a2489716f06309f1854ba3c1eb572365ee462531e0ee8d1fe03e13b08"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3g_2026-11-09.md",
+      "size": 22783,
+      "birth_utc": "2026-11-09T05:59:01.173358+00:00",
+      "modified_utc": "2026-11-09T09:06:21.831213+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "3f6505ec3942d2e3b96adf0959dccd5a3bf1f6e9c068b6acefad2be0189018ef"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3g_claude_review_2026-11-09.md",
+      "size": 18557,
+      "birth_utc": "2026-11-09T10:24:14.525763+00:00",
+      "modified_utc": "2026-11-09T10:24:14.526306+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "fa0346a11acc757bcbedae6f06af5e4c1a1483f8a3d62008c60883f253e0f714"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3h_2026-11-09.md",
+      "size": 163128,
+      "birth_utc": "2026-11-09T17:28:02.352045+00:00",
+      "modified_utc": "2026-11-09T19:35:03.975684+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "494b060a54f6b24c71fe75ca5245765e4bf07aa23ecef71194dd8dae787416c8"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3j_2026-11-09.md",
+      "size": 27562,
+      "birth_utc": "2026-11-09T19:41:21.716703+00:00",
+      "modified_utc": "2026-11-09T23:30:19.493128+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "6142f5ff851f04246b7dc06a6359490cbdcd69696779d942a149ed8fedada630"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3k_2026-11-09.md",
+      "size": 26262,
+      "birth_utc": "2026-11-10T00:30:20.560357+00:00",
+      "modified_utc": "2026-11-10T02:23:12.232910+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "117c28d1442e63b5a53b6c9e130de6011a869864788051d9737a4121409c8f5a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u4_prep_2026-11-08.md",
+      "size": 12888,
+      "birth_utc": "2026-11-08T05:53:51.904176+00:00",
+      "modified_utc": "2026-11-08T05:59:59.595586+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "23a383a2b8e27a364e94bbfe36a08485ff14f8b5ddd4479c590a33f3032d0c48"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u4b_2026-11-08.md",
+      "size": 111916,
+      "birth_utc": "2026-11-08T08:51:51.311124+00:00",
+      "modified_utc": "2026-11-09T03:17:19.430362+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "16b1aec189e4d3e0f8e2cb48f405036c9831c78c1009661725e2cae293909e16"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u4b_claude_recheck2_f704188d3_2026-11-09.md",
+      "size": 9484,
+      "birth_utc": "2026-11-09T03:25:19.819329+00:00",
+      "modified_utc": "2026-11-09T03:25:19.819667+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "518846c777fa433d1f7903c34ca4baea54df35a2808c46158701a2ec43a8a7b9"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u4b_claude_recheck_e75ca0871_2026-11-09.md",
+      "size": 15585,
+      "birth_utc": "2026-11-09T02:17:52.923449+00:00",
+      "modified_utc": "2026-11-09T02:19:26.191134+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "288cb7cd6e3c3f2891f650ad042f8eea6b5d4fa968036a68ce14667bc8dd06cb"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u4b_claude_review_2026-11-08.md",
+      "size": 21378,
+      "birth_utc": "2026-11-08T22:48:59.489111+00:00",
+      "modified_utc": "2026-11-08T22:49:26.619300+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "101ee7c3672d814724d3f6c8b5edd7dcfa492a498e3104a8cc2c5af60d21d4f2"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u4u5_integration_plan_2026-11-09.md",
+      "size": 29389,
+      "birth_utc": "2026-11-09T02:11:04.913464+00:00",
+      "modified_utc": "2026-11-09T02:11:42.579902+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "ab733519b757272b253026112033f7bc5fb3291d5e22ffe1f31cce29fdb3187b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u4u7_readiness_2026-11-08.md",
+      "size": 36621,
+      "birth_utc": "2026-11-08T05:25:33.550048+00:00",
+      "modified_utc": "2026-11-08T05:26:53.742651+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "07ebb68661512e6f0d4bd04b42523b3930a8ce952f9b89148babf061195d9a6f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u5_prep_2026-11-08.md",
+      "size": 25995,
+      "birth_utc": "2026-11-08T07:38:52.820384+00:00",
+      "modified_utc": "2026-11-08T07:59:59.576604+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "5cfbe5e5480479f8df2cdac07f601546032bf8a65ff50771aae71afa68388605"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_unit_plan_2026-11-06.md",
+      "size": 37748,
+      "birth_utc": "2026-11-06T01:36:25.948408+00:00",
+      "modified_utc": "2026-11-06T01:36:25.957051+00:00",
+      "primary_git_status": "sibling_execution_artifact",
+      "sha256": "da99c07683665b76cfa6b0c71124cee6f4b16b51313725bcfed25f723dd8b23f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-06-codex-native-u0.md",
+      "size": 9412,
+      "birth_utc": "2026-11-06T01:51:49.229802+00:00",
+      "modified_utc": "2026-11-06T08:24:02.503052+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "a243da2393a091abdacbf242ffdeca49e6e5c5a060f1ec63108e453d3551c5db"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-06-codex-native-u1-r2.md",
+      "size": 2881,
+      "birth_utc": "2026-11-06T02:11:30.069372+00:00",
+      "modified_utc": "2026-11-06T02:11:30.075761+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "b6910b948fca636e380eee6a3be5f1e3c99bb09db2d91be2e0ca3b0cfc0155ca"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-06-codex-native-u1-r3.md",
+      "size": 2944,
+      "birth_utc": "2026-11-06T06:14:12.124894+00:00",
+      "modified_utc": "2026-11-06T06:14:12.130088+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "26e033db4976ec5f784cf088501407778ebb26581ca19896ed860ea19166c5a3"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-06-codex-native-u1.md",
+      "size": 3044,
+      "birth_utc": "2026-11-06T01:51:49.237214+00:00",
+      "modified_utc": "2026-11-06T01:51:49.242666+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "e569df4f69ff8d69c124336363a0844cc0d3155654453f2086351243ded8c3c6"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-06-codex-native-u3-plan.md",
+      "size": 4210,
+      "birth_utc": "2026-11-06T10:21:52.463047+00:00",
+      "modified_utc": "2026-11-06T10:44:18.798098+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "9662da32e555c7d5bc24d60af918da30ebec9c39ffadd7233345332a47731610"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3a-r2.md",
+      "size": 6619,
+      "birth_utc": "2026-11-07T04:39:34.157538+00:00",
+      "modified_utc": "2026-11-07T08:17:33.219305+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "b25d6176e423e08826400455c715a93fe6c7f9eed2eac99d39b10bfadf45e229"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3a-r4.md",
+      "size": 2031,
+      "birth_utc": "2026-11-07T21:35:31.957836+00:00",
+      "modified_utc": "2026-11-07T21:35:31.963541+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "34f3051c8f219ee52f5e3344edfa5c1d22679e686b6eb0e4d5acbb9cdb9ca787"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3a-r5.md",
+      "size": 2296,
+      "birth_utc": "2026-11-07T22:17:41.715240+00:00",
+      "modified_utc": "2026-11-07T22:17:41.726700+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "c6f5bdff3de0f91529c8442f580b12c20189977a44a34716a5c4b2bc3fd8aa89"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3a.md",
+      "size": 2418,
+      "birth_utc": "2026-11-07T02:10:11.477305+00:00",
+      "modified_utc": "2026-11-07T02:10:11.477813+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "f67c245f3705819c339889b88fb6d6336c67ea99754fadfe7a6b02b14dc78ef7"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3b.md",
+      "size": 8348,
+      "birth_utc": "2026-11-07T02:10:11.484037+00:00",
+      "modified_utc": "2026-11-07T22:47:10.360423+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "89e36452d6055ba9f64326463ad4b51eaa77b7211e1adf4fdb00f05e58eb5265"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3c-r2.md",
+      "size": 3460,
+      "birth_utc": "2026-11-07T06:06:00.329849+00:00",
+      "modified_utc": "2026-11-07T08:18:23.979170+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "0a101215da268c8080b7fa02f91cc0636f61a6b9df822bebbff9ea82ef193163"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3c-r3.md",
+      "size": 1285,
+      "birth_utc": "2026-11-07T20:43:01.479724+00:00",
+      "modified_utc": "2026-11-07T20:43:01.484682+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "6e11e48c88b5037c24c8e9f27f3c0546d04fc6dee58fba796ae318f7d85d1eb2"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3c-r4.md",
+      "size": 3811,
+      "birth_utc": "2026-11-07T22:02:18.778406+00:00",
+      "modified_utc": "2026-11-07T22:17:41.713119+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "a7020d4f22fbdf0e149469dbd13aa9f19536d04abd48fcfb4aa65088c793cfa8"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3c-r5.md",
+      "size": 2220,
+      "birth_utc": "2026-11-07T23:00:08.596114+00:00",
+      "modified_utc": "2026-11-07T23:00:08.602337+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "672d5d8f7d6ee0dbf57e9e88430bbd5135cbf43eb4ab2761c8823707bcbd7b96"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3c-r6.md",
+      "size": 1591,
+      "birth_utc": "2026-11-07T23:51:05.202365+00:00",
+      "modified_utc": "2026-11-07T23:51:05.212218+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "e4e586c92fad89e0adcf712f652456e0ec20c2e0a20c17e7d573d80aba2290cf"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3c.md",
+      "size": 2650,
+      "birth_utc": "2026-11-07T03:33:51.001136+00:00",
+      "modified_utc": "2026-11-07T03:33:51.007263+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "60bbdab5478162c658325a6f0b25e60ba7c178a300f042ca167fa51b85006c2a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3d-r5.md",
+      "size": 2625,
+      "birth_utc": "2026-11-07T09:07:15.341259+00:00",
+      "modified_utc": "2026-11-07T09:07:15.347003+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "7aae69d335b5e9f30219f3fdc400e72eac5301d8e11a568556e9793c455a547f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3d-r6.md",
+      "size": 2253,
+      "birth_utc": "2026-11-07T09:29:25.817098+00:00",
+      "modified_utc": "2026-11-07T09:29:25.826107+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "81ea6e9d11f13e9358ae35c03e8c67ec2069603f0ba0b57a7de4d57528afce9d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3d-r7.md",
+      "size": 2426,
+      "birth_utc": "2026-11-07T20:43:01.485614+00:00",
+      "modified_utc": "2026-11-07T20:43:01.490314+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "252cc6c3cbb78f6b9810e13ba8d38046adf8e72a32411cec809c6a4ec3ceed05"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3d-r8.md",
+      "size": 2004,
+      "birth_utc": "2026-11-07T20:50:31.359263+00:00",
+      "modified_utc": "2026-11-07T20:50:31.365176+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "2d095a1ce565260a3009da44af0dd9a54ee43392375fe53cfaa4defea062fa7a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3d-r9.md",
+      "size": 2707,
+      "birth_utc": "2026-11-07T23:51:05.213332+00:00",
+      "modified_utc": "2026-11-07T23:51:05.221001+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "2daf57a6e4dd42a4881f2171a9677aeff1a78d9389959a89254d58208c56937e"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-07-codex-native-u3d.md",
+      "size": 13045,
+      "birth_utc": "2026-11-07T03:59:54.386536+00:00",
+      "modified_utc": "2026-11-07T05:35:16.855550+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "9fdfec66f865422bf76d55727818fafbc6b76606904142dea74335b89668e487"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-08-codex-native-u3a-r6.md",
+      "size": 1468,
+      "birth_utc": "2026-11-08T03:45:30.829201+00:00",
+      "modified_utc": "2026-11-08T03:45:30.835796+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "8d0d013e5a36f8301f9dc812c85f24fd6d1bce890f5d474ab8c87be199e1e057"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-08-codex-native-u3c-r7.md",
+      "size": 1782,
+      "birth_utc": "2026-11-08T03:45:30.837277+00:00",
+      "modified_utc": "2026-11-08T03:45:30.842257+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "83efe7ba7ba6be1e2021a0cd070dc08bfa39ab14d70f772ae44cdaf96ebdb0f0"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-08-codex-native-u3d-r10.md",
+      "size": 2363,
+      "birth_utc": "2026-11-08T04:59:55.686407+00:00",
+      "modified_utc": "2026-11-08T05:00:16.898898+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "f6d082609c37a87286d4a04ca437743d4936664abbce582bac1df874e5b7b67b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-08-codex-native-u4-prep.md",
+      "size": 2127,
+      "birth_utc": "2026-11-08T05:29:08.603754+00:00",
+      "modified_utc": "2026-11-08T05:29:08.610106+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "59cc48e8bd30f7c850172c89fa5fc54f01e95b19c2be6b55a033de975d75586f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-08-codex-native-u4b-addendum.md",
+      "size": 2083,
+      "birth_utc": "2026-11-08T08:39:18.262221+00:00",
+      "modified_utc": "2026-11-08T08:39:18.268349+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "ba25e02d942c72baab1c25dc658fc6e4ed431439532083f89f69bc0a2195e90c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-08-codex-native-u4b-addendum2.md",
+      "size": 3086,
+      "birth_utc": "2026-11-08T08:48:43.711490+00:00",
+      "modified_utc": "2026-11-08T08:53:40.215639+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "9c8783fa8c108ed190bd498ce5808afa2601efb5ba601dfc4d7176b556f07aee"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-08-codex-native-u4b-addendum3.md",
+      "size": 4296,
+      "birth_utc": "2026-11-08T08:59:39.522823+00:00",
+      "modified_utc": "2026-11-08T09:08:16.674634+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "4472fde84eb588fde15217294b21c8c48ee2f3f3b40cd88129d83b1157aa0240"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-08-codex-native-u4b-addendum4.md",
+      "size": 3879,
+      "birth_utc": "2026-11-08T22:50:18.620853+00:00",
+      "modified_utc": "2026-11-08T22:50:18.627871+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "41268560452ce16669313130635817814349688da2f26491d0febb884f78d946"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-08-codex-native-u4b.md",
+      "size": 4393,
+      "birth_utc": "2026-11-08T08:33:00.079119+00:00",
+      "modified_utc": "2026-11-08T08:33:00.083762+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "af5cb901c0a77f75926d0c6f0e14c6d198ce3415a5cbe87fbce57f567818037e"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-08-codex-native-u5-prep.md",
+      "size": 2747,
+      "birth_utc": "2026-11-08T07:17:19.569809+00:00",
+      "modified_utc": "2026-11-08T07:17:19.574441+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "84317c59a82597cc307163e321daeec109c522b8df415bf77caf4047b13694a8"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-08-codex-u3-deadline-diagnosis.md",
+      "size": 2294,
+      "birth_utc": "2026-11-08T22:20:39.525847+00:00",
+      "modified_utc": "2026-11-08T22:20:39.539844+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "e3c07169a08849dee95939ae1a4711919d82accf1476b9d2699267b6919de6b5"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u3f.md",
+      "size": 3539,
+      "birth_utc": "2026-11-09T01:34:25.109070+00:00",
+      "modified_utc": "2026-11-09T01:34:25.127186+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "3e98eb841ab13780cb5274eaabe576290a050534fa1c6a60c201652e0285ae9f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u3f2.md",
+      "size": 3975,
+      "birth_utc": "2026-11-09T03:38:07.336729+00:00",
+      "modified_utc": "2026-11-09T03:38:07.341587+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "c97f93980146a14e237d009acd9b1c45ce36b12442d703280389375cbb434ec6"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u3g.md",
+      "size": 2952,
+      "birth_utc": "2026-11-09T05:45:24.535068+00:00",
+      "modified_utc": "2026-11-09T05:45:24.540745+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "e4f59a4d754df073fd00a0d4da2e5341ab772b2de7c32014c595ceabaeffa771"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u3h-resume.md",
+      "size": 1642,
+      "birth_utc": "2026-11-09T17:58:29.474262+00:00",
+      "modified_utc": "2026-11-09T17:58:29.480044+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "715c9abaa11fa51a5dcd2e1f5a2c7ad1bee334f8f5ebfd767239ecb16e7f10f0"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u3h.md",
+      "size": 3729,
+      "birth_utc": "2026-11-09T17:25:05.119256+00:00",
+      "modified_utc": "2026-11-09T17:25:05.123899+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "a07499945f5515dc2fb074ab4c1ca5bada1595876da8d4d776bb61ee43bc4bb7"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u3i.md",
+      "size": 2148,
+      "birth_utc": "2026-11-09T19:17:45.111217+00:00",
+      "modified_utc": "2026-11-09T19:17:45.115756+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "0bad01e44c0a79d7d26fc87657c98241b76261d3952aafd56caee76fde545b54"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u3j.md",
+      "size": 2443,
+      "birth_utc": "2026-11-09T19:35:04.812533+00:00",
+      "modified_utc": "2026-11-09T19:35:04.817143+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "a20da364ae12800a281074ab02ba617a8a9503ebc5e3cfa72cfe44a17add2574"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u3j2.md",
+      "size": 3478,
+      "birth_utc": "2026-11-09T20:05:37.397869+00:00",
+      "modified_utc": "2026-11-09T20:05:37.402369+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "d3d76b0edada131b543cdfda1b4464a74507826890fc52b9cd443ad7959e7de0"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u3k.md",
+      "size": 2982,
+      "birth_utc": "2026-11-09T23:31:11.776474+00:00",
+      "modified_utc": "2026-11-09T23:31:11.785519+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "ec3910e352527f89a2e3707d37d474a6ad4d614d1128301ef1c868bc2871a09b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u3l.md",
+      "size": 2244,
+      "birth_utc": "2026-11-09T23:32:32.606076+00:00",
+      "modified_utc": "2026-11-09T23:32:32.619584+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "222f012c2a3a346676644c25ba7697ba1a61b11d02514e8f98641fc4d2ffcf4c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u3m.md",
+      "size": 4462,
+      "birth_utc": "2026-11-09T23:56:12.392123+00:00",
+      "modified_utc": "2026-11-09T23:56:12.392294+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "49fc7fbd7cb8be7063da3eee079c44117648b7dd549ad2c82ff3fbacc34c61c1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u4b-addendum5.md",
+      "size": 2371,
+      "birth_utc": "2026-11-09T02:20:33.527105+00:00",
+      "modified_utc": "2026-11-09T02:20:33.535218+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "5e929e8faf02f3b98d3e5754ca8bb9df89713219782484cd72e53603525285c5"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-native-u4u5-integration-plan.md",
+      "size": 1889,
+      "birth_utc": "2026-11-09T02:05:18.077932+00:00",
+      "modified_utc": "2026-11-09T02:05:18.082051+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "fc69c6e958174c2d2d2bb5422eb6819a1cb2b56ea2f532ea764abbf28ae0a052"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-u3-cpu-profile.md",
+      "size": 2796,
+      "birth_utc": "2026-11-09T17:25:02.856570+00:00",
+      "modified_utc": "2026-11-09T17:47:32.831447+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "eee3b527b891905093dfaba44cb813fd5cbd783ec716d5e7137a707af0c69933"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-u3-cpu-profile2.md",
+      "size": 3343,
+      "birth_utc": "2026-11-09T19:17:45.116820+00:00",
+      "modified_utc": "2026-11-09T19:26:00.673565+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "f5f1042b90d78ba8bb0e53e621cf513590c556af07b493e59210445de888f87a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-09-codex-u3-deadline-canary.md",
+      "size": 1779,
+      "birth_utc": "2026-11-09T09:43:42.746852+00:00",
+      "modified_utc": "2026-11-09T09:43:42.751404+00:00",
+      "primary_git_status": "untracked_or_ignored",
+      "sha256": "72bcd6e24e6faaa4b2ec9647656cc6a10b8261e1713b4d6c26264b85f7566f6c"
+    }
+  ],
+  "stage_pairs": [
+    {
+      "stage": "F",
+      "assignment_birth": "2026-11-09T01:34:25.109070+00:00",
+      "assignment_modified": "2026-11-09T01:34:25.127186+00:00",
+      "report_birth": "2026-11-09T02:35:51.299927+00:00",
+      "report_modified": "2026-11-09T02:48:27.575464+00:00",
+      "assignment_birth_to_latest_report_hours": 1.2340184427632226
+    },
+    {
+      "stage": "F2",
+      "assignment_birth": "2026-11-09T03:38:07.336729+00:00",
+      "assignment_modified": "2026-11-09T03:38:07.341587+00:00",
+      "report_birth": "2026-11-09T03:56:21.245882+00:00",
+      "report_modified": "2026-11-09T04:21:14.679914+00:00",
+      "assignment_birth_to_latest_report_hours": 0.7187064403957791
+    },
+    {
+      "stage": "G",
+      "assignment_birth": "2026-11-09T05:45:24.535068+00:00",
+      "assignment_modified": "2026-11-09T05:45:24.540745+00:00",
+      "report_birth": "2026-11-09T05:59:01.173358+00:00",
+      "report_modified": "2026-11-09T09:06:21.831213+00:00",
+      "assignment_birth_to_latest_report_hours": 3.3492489293548795
+    },
+    {
+      "stage": "H",
+      "assignment_birth": "2026-11-09T17:25:05.119256+00:00",
+      "assignment_modified": "2026-11-09T17:25:05.123899+00:00",
+      "report_birth": "2026-11-09T17:28:02.352045+00:00",
+      "report_modified": "2026-11-09T19:35:03.975684+00:00",
+      "assignment_birth_to_latest_report_hours": 2.1663490079508887
+    },
+    {
+      "stage": "I",
+      "assignment_birth": "2026-11-09T19:17:45.111217+00:00",
+      "assignment_modified": "2026-11-09T19:17:45.115756+00:00"
+    },
+    {
+      "stage": "J",
+      "assignment_birth": "2026-11-09T19:35:04.812533+00:00",
+      "assignment_modified": "2026-11-09T19:35:04.817143+00:00",
+      "report_birth": "2026-11-09T19:41:21.716703+00:00",
+      "report_modified": "2026-11-09T23:30:19.493128+00:00",
+      "assignment_birth_to_latest_report_hours": 3.920744609501627
+    },
+    {
+      "stage": "J2",
+      "assignment_birth": "2026-11-09T20:05:37.397869+00:00",
+      "assignment_modified": "2026-11-09T20:05:37.402369+00:00",
+      "report_birth": "2026-11-09T19:41:21.716703+00:00",
+      "report_modified": "2026-11-09T23:30:19.493128+00:00",
+      "assignment_birth_to_latest_report_hours": 3.411693127353986
+    },
+    {
+      "stage": "K",
+      "assignment_birth": "2026-11-09T23:31:11.776474+00:00",
+      "assignment_modified": "2026-11-09T23:31:11.785519+00:00",
+      "report_birth": "2026-11-10T00:30:20.560357+00:00",
+      "report_modified": "2026-11-10T02:23:12.232910+00:00",
+      "assignment_birth_to_latest_report_hours": 2.866793454421891
+    }
+  ],
+  "status_events": [
+    {
+      "line": 3476,
+      "text": "- 2026-11-06T01:53Z **Native first is under way: D89\u2013D93 are recorded, and U0, U1 and U2 are running.**"
+    },
+    {
+      "line": 3481,
+      "text": "    - **U0, the codex tab:** the recorder diagnosis (`2026-11-06-codex-native-u0.md`). It owns the quiet-window lock (`2026-11-06-native-quiet-window-protocol.md`)."
+    },
+    {
+      "line": 3482,
+      "text": "    - **U1, codex background (pid 89172):** the selector and render foundation (`2026-11-06-codex-native-u1.md`)."
+    },
+    {
+      "line": 3483,
+      "text": "    - **U2, codex background (pid 89179):** J-b's v2 authority closure (`2026-11-06-codex-native-u2.md`)."
+    },
+    {
+      "line": 3486,
+      "text": "- 2026-11-06T02:11Z **Native U1 round 1 stopped correctly at the protected boundary. The lead found two packet gaps, and round 2 has been dispatched. U0 has been resent.**"
+    },
+    {
+      "line": 3487,
+      "text": "  - **U1 round 1** (`41b7169f6`, 32 files, +4,363/\u221245; `plans/reviews/native_u1_2026-11-06.md`): 168 focused native tests pass."
+    },
+    {
+      "line": 3496,
+      "text": "  - **Round 2** (background codex, pid 94387; `2026-11-06-codex-native-u1-r2.md`):"
+    },
+    {
+      "line": 3502,
+      "text": "- 2026-11-06T02:52Z **Native U0 is blocked twice on host conditions, not on recorder evidence. The lead ruled on the sampler and is rescheduling the measurement.**"
+    },
+    {
+      "line": 3504,
+      "text": "    - **The lead's ruling** (appended to `2026-11-06-codex-native-u0.md`): the host sampler runs as a separate, unsandboxed, read-only observer. The test driver and all its descendants stay network-denied with credentials removed. The split is recorded as a protocol amendment."
+    },
+    {
+      "line": 3510,
+      "text": "- 2026-11-06T05:07Z **Native U2's independent review is in (changes requested). U2 round 2 has been dispatched. U1 round 2 is still validating. U0 waits for a quiet host.**"
+    },
+    {
+      "line": 3511,
+      "text": "  - **U2 round 1** (`b7a9c900f`, 7 commits, +2,386/\u22120). The review is `plans/reviews/native_u2_claude_review_2026-11-06.md`: **no P1, three P2, seven P3.**"
+    },
+    {
+      "line": 3517,
+      "text": "  - **U2 round 2** (background codex, pid 18003; `2026-11-06-codex-native-u2-r2.md`): fixes P2-1 to P2-3 and P3-1 to P3-7 without touching v1 launcher bytes, re-runs M1\u2013M9 and follows the strict lock."
+    },
+    {
+      "line": 3520,
+      "text": "- 2026-11-06T06:14Z **The native units, mid-flight: U1 round 3, U2 round 3 and U0 profiling are all dispatched.**"
+    },
+    {
+      "line": 3526,
+      "text": "  - **U1 round 3** (pid 2549; `2026-11-06-codex-native-u1-r3.md`):"
+    },
+    {
+      "line": 3533,
+      "text": "- 2026-11-06T08:24Z **Native: U2 is published (#5519) and being merged under D94. U0 has a partial causal result and its second treatment is dispatched. U1 round 3 continues.**"
+    },
+    {
+      "line": 3538,
+      "text": "  - **U0 causal pair** (`plans/reviews/native_u0_recorder_2026-11-06.md`):"
+    },
+    {
+      "line": 3545,
+      "text": "- 2026-11-06T10:22Z **#5519 (native U2) is merged under D94. U0 has its causal result. U3's change plan has been dispatched.**"
+    },
+    {
+      "line": 3552,
+      "text": "  - **U3 plan** (the codex tab, read-only; `2026-11-06-codex-native-u3-plan.md`): map T1+T2 onto M8 and write the U3 change set on M8 + U1, covering files, donors, A21 pins and protected packets, tests, and the post-U3 measurement plan."
+    },
+    {
+      "line": 3554,
+      "text": "- 2026-11-07T02:11Z **Native U3 has started under D95. U1 round 3 is done but blocked on the native group, so U1 and U3 land together.**"
+    },
+    {
+      "line": 3562,
+      "text": "  - **The U3 plan** (`plans/reviews/native_u3_plan_2026-11-06.md`): 4\u20136 days in units U3-A to U3-E, including an explicit v2 execution bridge and production T1/T2."
+    },
+    {
+      "line": 3565,
+      "text": "    - **U3-A (the codex tab):** the v2 execution bridge (`2026-11-07-codex-native-u3a.md`);"
+    },
+    {
+      "line": 3566,
+      "text": "    - **U3-B (background codex, pid 53909):** catalog support and production T1/T2 (`2026-11-07-codex-native-u3b.md`)."
+    },
+    {
+      "line": 3567,
+      "text": "- 2026-11-07T03:54Z **D96 is carried out: all 15 native archive tags are on origin, each verified by the lead. U3-A is done and under independent review; U3-C has started.**"
+    },
+    {
+      "line": 3571,
+      "text": "  - **U3-A** (`3690a570a`, 4 additive commits, +2,067; `plans/reviews/native_u3a_2026-11-07.md`): 792 regression and 121 focused tests pass; collection is 23,356. The U3-C and U3-D interfaces are frozen, and admission is closed. **An independent Claude review is running.**"
+    },
+    {
+      "line": 3572,
+      "text": "  - **U3-C** (the codex tab; `2026-11-07-codex-native-u3c.md`): the captured controller, built from U3-A's head. It merges U3-B by merge commit once U3-B reports."
+    },
+    {
+      "line": 3575,
+      "text": "  - **#4659:** the decision memo is `plans/pr4659_decisions_and_recommendations_2026-11-07.md`. D97 closes it when the U1+U3 PR opens."
+    },
+    {
+      "line": 3576,
+      "text": "- 2026-11-07T04:50Z **Lead ruling on U3D-R5: an explicitly structural initial receipt check is approved; U3-D round 2 is running in the background (pid 8708). The cleanup ledger is being corrected before it goes to the owner.**"
+    },
+    {
+      "line": 3577,
+      "text": "  - **U3-D** (`96adabfb3`, `plans/reviews/native_u3d_2026-11-07.md`) stopped on two gates:"
+    },
+    {
+      "line": 3580,
+      "text": "  - **The ruling** (appended to `2026-11-07-codex-native-u3d.md`):"
+    },
+    {
+      "line": 3585,
+      "text": "  - **Background codex:** `plans/codex_logs/prompts/2026-11-07-codex-native-u3d-r2-launch.sh`. B isn't merged in this round."
+    },
+    {
+      "line": 3601,
+      "text": "- 2026-11-07T05:10Z **U3-D rounds 2 and 3 are done; an independent Claude review of both is running.**"
+    },
+    {
+      "line": 3607,
+      "text": "- 2026-11-07T05:36Z **The independent review of U3-D rounds 2 and 3 found 1 P1, 2 P2 and 4 P3. The lead checked P1 in the code, and round 4 is running in the background (pid 54405).**"
+    },
+    {
+      "line": 3615,
+      "text": "  - **Report:** `plans/reviews/native_u3d_r2r3_claude_review_2026-11-07.md`. **Issues to file (agy, when the U1+U3 PR opens; no mentions):** U3D-R9, plus the seven findings here."
+    },
+    {
+      "line": 3616,
+      "text": "- 2026-11-07T06:55Z **Native: U3-B and U3-A round 2 have reported, and U3-D round 4 passed its re-review. U3-B round 2 is running in the background (pid 13510), and U3-C round 2 is on the codex tab.**"
+    },
+    {
+      "line": 3623,
+      "text": "  - **U3-B** (`a3aac3bed`; review `plans/reviews/native_u3b_claude_review_2026-11-07.md`): the production code is sound (T1 changes no output, the catalog identity is content-based, the real merged schema is byte-identical). P1 0 \u00b7 P2 5 \u00b7 P3 10."
+    },
+    {
+      "line": 3625,
+      "text": "    - Round 2 brief: the \"Lead ruling on the U3-B review\" section of `2026-11-07-codex-native-u3b.md`."
+    },
+    {
+      "line": 3627,
+      "text": "  - **U3-C round 2** (codex tab; `2026-11-07-codex-native-u3c-r2.md`) merges B `a3aac3bed` and A `73f50666e`, then re-merges B after B's round 2."
+    },
+    {
+      "line": 3648,
+      "text": "- 2026-11-07T20:50Z **Native: the lead approved U3-D round 7's proposal as the consumer/orchestrator split** (`2026-11-07-native-ruling-consumer-split.md`)."
+    },
+    {
+      "line": 3660,
+      "text": "- 2026-11-07T22:18Z **Native: the review of U3-A round 3 and U3-D round 8 found P1 0, P2 6, P3 8** (`plans/reviews/native_u3a_r3_u3d_r8_claude_review_2026-11-07.md`). **The rulings are in the 22:25Z addendum** of `2026-11-07-native-ruling-consumer-split.md`."
+    },
+    {
+      "line": 3671,
+      "text": "    - **a read-only integration plan for the combined U1+U3 PR** (pid 20018; brief `2026-11-08-codex-u3e-plan.md`)."
+    },
+    {
+      "line": 3689,
+      "text": "  - **Rulings on U3-D round 9's gates (R9-3, R9-4):** the 03:50Z addendum in `2026-11-07-native-ruling-consumer-split.md`."
+    },
+    {
+      "line": 5734,
+      "text": "    - Created and updated `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_pin_ledger_2026-11-06.md` via `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/scripts/adhoc/build_native_pin_ledger_20261106.py` (checked `native_quiet_window.lock` absent before Snapshots #1 at `01:58:19Z`, #2 at `02:29:38Z`, #3 at `06:09:54Z`, and #4 at `06:42:55Z`; respected `native_quiet_window.lock` when U0 held it at `02:35:34Z`):"
+    },
+    {
+      "line": 5737,
+      "text": "      - **Snapshot #1 (`2026-11-06T01:58:19Z`)**: `codex/native-u0-diag-20261106` not yet created; `codex/native-u1-selector-20261106` at `8bc90e93d`; `codex/native-u2-authority-v2-20261106` at `00db63025` (`3` committed changes); **protected: `none`**; **overlap: `none`**."
+    },
+    {
+      "line": 5738,
+      "text": "      - **Snapshot #2 (`2026-11-06T02:29:38Z`)**: `codex/native-u0-diag-20261106` at `d70bc8158` (`13` committed changes); `codex/native-u1-selector-20261106` at `41b7169f6` (`32` committed changes; `2` A21-pinned: `api_runner.py`, `schema_snapshot.py`); `codex/native-u2-authority-v2-20261106` at `4aba8a382` (`18` committed changes); **protected: `none`**; **overlap: `none`**."
+    },
+    {
+      "line": 5739,
+      "text": "      - **Snapshot #3 (`2026-11-06T06:09:54Z`)**: `codex/native-u0-diag-20261106` at `f1bd8f803` (`3` commits; `15` committed changes); `codex/native-u1-selector-20261106` at `41b7169f6` (`1` commit; `32` committed changes + `10` packet files in `scripts/adhoc/native_u1_packets/`; `2` A21-pinned: `api_runner.py`, `schema_snapshot.py`); `codex/native-u2-authority-v2-20261106` at `e8c9dbe3c` (`8` commits; `19` committed changes; `native_u2_2026-11-06.md` gained Round 2 section); **protected: `none`**; **overlap: `none`**."
+    },
+    {
+      "line": 5741,
+      "text": "        - **`codex/native-u0-diag-20261106`**: head **`36bf17d80afbd3d0d8cc4aa2cfe52c75bb9717d5`** (`5` commits: `36bf17d80`, `d56821c7f`, `f1bd8f803`, `d70bc8158`, `620f622f1`; `20` committed changed paths under `scripts/adhoc/` and `tests/` + `1` uncommitted new worktree file `scripts/adhoc/inspect_native_u0_cpu_cost_20261106.py`); **A21-pinned: `none` (`0`)**; **protected: `none` (`0`)**; **overlap: `none` (`0`)**; report `native_u0_recorder_2026-11-06.md` (`19,918` B, `312` lines, SHA-256 `0123d29770cdef1e6266b198586eff36284d32247c9ac4b7d829536cea58d40d`)."
+    },
+    {
+      "line": 5742,
+      "text": "        - **`codex/native-u1-selector-20261106`**: head **`e0b868b0eeb940567dcc8be15921a0c89b57a93e`** (`2` commits: `e0b868b0e`, `41b7169f6`; `42` committed changed paths + `9` uncommitted round-3 worktree paths in `codex-native-u1`; `10` committed packet files in `scripts/adhoc/native_u1_packets/`: `api_runner_companion.json` `16b4b8af4b4d\u2026`, `api_runner_companion.patch` `996bd9bce74d\u2026`, `canonical_hashes.json` `603a3fc78f0e\u2026`, `canonical_hashes.patch` `f26d093b88ee\u2026`, `evidence.json` `4ea302166dfd\u2026`, `round2_evidence.json` `897c49866d42\u2026`, `run_spec_boundary_contracts.json` `5fae9f0ab10d\u2026`, `run_spec_boundary_contracts.patch` `dc58e99f73fe\u2026`, `shared_generation.json` `e33e862c638d\u2026`, `shared_generation.patch` `22b81b6cd63a\u2026`); **A21-pinned: `2` (`src/data_sheets_schema/api_runner.py`, `src/data_sheets_schema/schema_snapshot.py`)**; **protected: `none` (`0`)** (both protected files remain byte-identical to M7 in branch and worktree; U1 proposed protected edits strictly via unapplied packets); **overlap: `none` (`0`)**; report `native_u1_2026-11-06.md` (`35,374` B, `350` lines, SHA-256 `1c72ecbae26405a1b20051201711b9948c98299719deb17f734bee4c1f8e4db3`; **Round 2 section: present** \u2014 `## Round 2 \u2014 corrected packets, scratch composition, remaining acceptance failures`)."
+    },
+    {
+      "line": 5743,
+      "text": "        - **`codex/native-u2-authority-v2-20261106`**: head **`c5ebe623f39a645d6f7b468e9b7f6f2b48e4954e`** (`13` commits: `c5ebe623f`, `329014d3a`, `9f05bcf1d`, `4ed83b7f6`, `139c8c847`, `e8c9dbe3c`, `b7a9c900f`, `9e5cad5d3`, `4aba8a382`, `0d3330cd4`, `644d64d43`, `3f84e3c1c`, `00db63025`; `32` committed changed paths; `0` uncommitted in `codex-native-u2` worktree); **A21-pinned: `none` (`0`)**; **protected: `none` (`0`)**; **overlap: `none` (`0`)**; report `native_u2_2026-11-06.md` (`22,452` B, `112` lines, SHA-256 `60a3cde427e05cc7d463990c6a4dbd70eac4b6a8b545ba7fe23769f550bed688`; **Round 2 section: present** \u2014 `## Round 2 \u2014 stopped at the explicit v1 authority-migration boundary`)."
+    },
+    {
+      "line": 5745,
+      "text": "  - **Part 59 (`2026-11-06-agy-prompt-part59.md`, COMPLETE at `2026-11-06T08:09:38Z`: pushed `codex/native-u2-authority-v2-20261106` at `4f10963df461ef66f8485f37a61d2a89c4f4ea93`, filed review issue `REV = #5518`, opened DRAFT PR `#5519`, CI 100% green `20 SUCCESS / 5 SKIPPED / 0 FAILURE`)**:"
+    },
+    {
+      "line": 5752,
+      "text": "    - **Draft PR**: Replaced `<REV>` with `#5518` and dropped line 1 of `notes/coordination/2026-11-06-pr-body-native-u2.md` into `/tmp/pr_body_native_u2_20261106.md` (`has_REV: False`, `at_count: 0`); opened DRAFT PR **`#5519`** (`https://github.com/bridge2ai/data-sheets-schema/pull/5519`, title `Native U2: additive versioned v2 authority closure (#5508)`)."
+    },
+    {
+      "line": 5784,
+      "text": "    - **Remote branch & issues**: Verified remote branch `codex/native-u2-authority-v2-20261106` is deleted (`git ls-remote --heads origin codex/native-u2-authority-v2-20261106` empty; local worktree `d4d-executions/codex-native-u2` left intact); verified `#5508` is `CLOSED` (`2026-11-06T08:26:49Z`); left `#5505` open as instructed."
+    },
+    {
+      "line": 5788,
+      "text": "  - **Part 61 (`2026-11-07-agy-prompt-part61.md`, COMPLETE at `2026-11-07T02:09:30Z` under D95: built local U3 base worktree `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/native-u3-base` on `codex/native-u3-base-20261107` at `f101652f53f23d9be83a213b6d5850bd6e9341fc`)**:"
+    },
+    {
+      "line": 5800,
+      "text": "  - **Part 62 (`2026-11-07-agy-prompt-part62.md`, COMPLETE at `2026-11-07T02:37:44Z`: filed aggregate issues `#5520` (U0) and `#5521` (U1), posted U2 local diff-review comment on `#5518`, and rehearsed U1's four protected packets in `d4d-executions/scratch-u1-packet-rehearsal`)**:"
+    },
+    {
+      "line": 5802,
+      "text": "      - **U0 (`#5520`, `https://github.com/bridge2ai/data-sheets-schema/issues/5520`)**: `Native U0 (recorder diagnosis): local review findings U0-R1 to U0-R8 and dispositions` (`U0-R1` to `U0-R8` copied from `native_u0_recorder_2026-11-06.md`, including the result line that T1+T2 cut recorder-body CPU from `168.95 s` to `52.30 s`, production change is U3-B, quiet-host confirmation still pending)."
+    },
+    {
+      "line": 5803,
+      "text": "      - **U1 (`#5521`, `https://github.com/bridge2ai/data-sheets-schema/issues/5521`)**: `Native U1 (selector/render): local findings R2-F* and R3-F1 to R3-F6 and dispositions` (`F1`, `R2-F1` to `R2-F6`, and `R3-F1` to `R3-F7` copied from `native_u1_2026-11-06.md`, noting that U1 lands together with U3 and its four protected packets await the owner's approval at that integration)."
+    },
+    {
+      "line": 5804,
+      "text": "      - **U2 (`#5518` comment, `https://github.com/bridge2ai/data-sheets-schema/issues/5518#issuecomment-6701105751`)**: Added one comment recording the local diff-review findings (`U2-R1` to `U2-R5`, `R3-T1` to `R3-T3`, `R3-H1`, `R3-R4`, `R3-L1`, and `R3-R1`..`R3-R3`) from `native_u2_2026-11-06.md` and `notes/native_authority_v2.md`."
+    },
+    {
+      "line": 6035,
+      "text": "  - **3. Slow-test CI cost issue filed (`#5541`, zero mentions)**: `https://github.com/bridge2ai/data-sheets-schema/issues/5541` \u2014 *\"CI cost risk: test_source_heading_runtime_api.py::test_actual_completed_capture_is_portable_and_refuses_changed_bytes and three neighbours take 380-1,626 s serially\"*, recording the Round 3\u20134 evidence from `d4d-executions/plans/reviews/native_u3b_2026-11-07.md` (`1,513.718 s` at base `f101652f5` vs `1,626.230 s` at U3-B head `ea2c9728c`, ratio `1.074x`, plus the three neighbouring tests at `380.512\u20131,557.460 s`)."
+    },
+    {
+      "line": 6191,
+      "text": "  - 2026-11-08T19:37:20-08:00 \u2014 **Part 94 (review findings filed for PR `#5620` / D105 and native U4b \u2014 `#5621`\u2013`#5653`, 33 issues, zero `@` signs verified via `grep`)**:"
+    },
+    {
+      "line": 6210,
+      "text": "    - **B. Native U4b (`native_u4b_claude_review_2026-11-08.md`, `native_u4b_claude_recheck_e75ca0871_2026-11-09.md`, `native_u4b_claude_recheck2_f704188d3_2026-11-09.md`, 17 issues: `#5637`\u2013`#5653`)**:"
+    },
+    {
+      "line": 6232,
+      "text": "  - 2026-11-08T19:45:40-08:00 \u2014 **Part 96 (native U3-F review findings filed \u2014 `#5654`\u2013`#5664`, 11 issues, zero `@` signs verified via `grep`)**:"
+    },
+    {
+      "line": 6233,
+      "text": "    - Source: `d4d-executions/plans/reviews/native_u3f_claude_review_2026-11-09.md` (`1 P1`, `3 P2`, `7 P3` on `codex/native-u1u3-combined-20261108`, preserving `file:line` references and fixture names `F1`\u2013`F3c`, `B1`\u2013`B3`):"
+    },
+    {
+      "line": 6260,
+      "text": "  - 2026-11-09T23:57:00Z \u2014 **Part 100 (applied PR `#5665` body + filed 10 native U3-G / U3-H review and follow-up issues `#5667`\u2013`#5676`, zero `@` signs)**:"
+    },
+    {
+      "line": 6357,
+      "text": "  - 2026-11-10T01:48:30Z \u2014 **agy3 part 3 (read-only review map of `codex/native-u1u3-combined-20261108`, zero `@` signs)**:"
+    },
+    {
+      "line": 6359,
+      "text": "    - **Review map**: `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/u1u3_pr_map_2026-11-10.md` \u2014 `sha256: 40c23860bd4a38f99102ba00c535deda115898f0f667a5cb26699e887f864efa` (`87,014` bytes, `690` lines, `0` `@` signs)."
+    },
+    {
+      "line": 6408,
+      "text": "- 2026-11-09T23:28:56Z \u2014 **U3-J2 implementation and offline validation reported; acceptance remains blocked; stopped.** Clean local branch `codex/native-u1u3-combined-20261108`, final head **`1e2aaf086668c56fbf28d4775b74905b197cb9f2`**. Final tested checkpoint **`ffc0255d2badf8868e17a96d0dbb6e25ad66c71d`**, private composition **`93fa95c0d24284c1b4320ca3be54635dec2414e8`**, tree **`114d9da672b306d2c0e4707046b5196c2d4159da`**. Final commit changes only the reviewed summary helper. Added closed `synthetic-software-test` profile, real-entry refusals, complete labelled synthetic fixtures, profile-bearing started/final records, pinned self-contained Python peer and safe startup. Production 21,600 s policy remains; synthetic limits remain **900/180 s**. D127's four packet bytes and assigned protected preimages are unchanged; packets installed only in private compositions."
+    },
+    {
+      "line": 6412,
+      "text": "    - **Artifacts and cleanup:** [report \u00a74 addendum](../../../d4d-executions/plans/reviews/native_u3j_2026-11-09.md), SHA-256 **`6142f5ff851f04246b7dc06a6359490cbdcd69696779d942a149ed8fedada630`**; [final evidence manifest](../../../d4d-executions/scratch-native-u1u3/u3j2/final-summary-01.json), **`12acd401ecabf7c0591385c9a31bc4086854a0d43ff233c8b4f5fadee8f291ba`** (10,290,635 bytes); final private composition manifest **`5621861ed478044c7137cb1ffb644dc218621cd241d5e7df99056bfa8fc46edb`**; final config-restoration witness **`02451e188406f34c65e696fa4e2823061d2b7011f5a1fdaa1c94fe6e99438983`**. All six configured private repositories restored byte-for-byte; all evidence/worktrees retained, including the separately refused setup. Helpers committed under `scripts/adhoc/`; local findings U3J2-01\u201312 and all per-run hashes are in the report/manifest. No fetch/push/gh/network/provider/account/real-native executable, protected edit, merge or external notification. No native/scientific/quiet-host acceptance. Exactly one U3-J2 entry; no follow-on work."
+    },
+    {
+      "line": 6416,
+      "text": "- 2026-11-09T19:40:35Z \u2014 **U3-J stopped on a mandatory deadline conflict; no fixture/guard changes or public attempts.** Clean local head **`17590f1ebb143e78e0bf3f4f98adb3a75e34db19`** on `codex/native-u1u3-combined-20261108`; sole change is `scripts/adhoc/reproduce_native_u3j_20261109.py`. Created the requested real private worktree at **`c6c5dc821fda057a984155aeb8388ca41b22be02`**, set only the private repo's `--local` CI URL, and verified actual HEAD/CI lookups. Reproduced original `validate_prepared_runtime` \u2192 `_profile:166` refusal: `U4b requires D106 high/Max, D112 model/context and D110 decimal-string budget` (model/context flag/budget/subscription mismatch). An in-memory four-field profile correction passes `_profile`, but unchanged `native_u4b_policy.validate_runtime_terms:59` then refuses preserved **900**: **`registered deadline must equal N1.8 21600 seconds`**. That exact runtime field is the actual child deadline; an outer watchdog cannot reconcile the requirements. No 900/180-second limit changed, no guard bypass or fabricated real-binary evidence."
+    },
+    {
+      "line": 6419,
+      "text": "    - **SHA-256:** [report](../../../d4d-executions/plans/reviews/native_u3j_2026-11-09.md) `fbdb2305762947b2729db1ae96411a033e6283bd180972dc62e5f2c488c1eddf`; `u3j/refusals.json` `7ca65237f6fbeb7caf7a595ad493090275aaa21290a86470c9fe18008cd6f995`; `outcome.json` `e57593d643687af8a50f545dc79d610622920b8605128a1d1b6c1c608cda1351`; `cleanup.json` `50fae7614b7ad3131d1ed53a433d114cd32e662ac10f658d65d3defd49db211e`; helper `74f6fca0612bef9e53b8659d6459c6a6e20f8604016633774302222702dbda6e`. One STATUS entry; stopped."
+    },
+    {
+      "line": 6421,
+      "text": "- 2026-11-09T19:35:11Z \u2014 **U3-I complete; U3H-E1 resolved; stopped.** On `codex/native-u1u3-combined-20261108`, harness repair **`4504d6e7de9a4b0f0c72a7a9fea4f57faafd470a`**, final clean head **`698cee4417c550f09cd68693fb4c79433c1dfa55`**. Only two `scripts/adhoc/` helpers changed. Reused unchanged private composition **`660b2d884c3032f0eca61fcfd3ae523fcbbe9614`**. Adapted C3 dependency links into the fresh test venv, excluding startup hooks, editable markers, project code/metadata and foreign FAIRSCAPE; retained exact pinned FAIRSCAPE, source-origin/isolation checks and OS network/native denial. No production/test-fixture semantics changed."
+    },
+    {
+      "line": 6425,
+      "text": "    - **SHA-256:** [report \u00a77](../../../d4d-executions/plans/reviews/native_u3h_2026-11-09.md) `494b060a54f6b24c71fe75ca5245765e4bf07aa23ecef71194dd8dae787416c8`; updated FACTS `ae2df594a23f6f91a992d6ee2fc61651ff8c5743a87de4f7d028ce22d4fdb991`; original FACTS backup `4eaf7baa5d59200fb762a6d6896d9f7a41d6f2dae275b62a770cb058e2067f3a`; U3-I validation `4af30eb636620e182bf72f81ab9e6584f09b377a9c13ed35a41bcb8b1496c2f8`; decision note `f95f2b57732c21956d4132e4587b2b8cdcd011fee790d920bd53b27de4d76352`. Helper hashes and all run artifacts are retained in the supplement. Offline: no fetch/push/gh/network/provider/account/native executable, protected edit, packet installation or existing-evidence deletion. One STATUS entry; no follow-on work."
+    },
+    {
+      "line": 6427,
+      "text": "- 2026-11-09T19:33Z \u2014 **D125 round 3 stopped before attempt, as instructed.** Real private-composition worktree `c6c5dc821`; private `git config --local d4d.ciRepositoryUrl` fixed HEAD/CI preflight. One unprofiled correction test (`-n 1`) failed in U4b runtime profile validation before dispatch: synthetic model/context/budget/subscription mismatch; 235.269 s supervisor, worker 129.979 CPU s / 230.938 wall s. Public pre-dispatch launch: 33.696 CPU s; four pre-launch schema captures: 8.926 CPU s. Exact fixture-only/observer CPU unavailable (xdist checkpoint gap); no attempt/worker/recorder/replay timing. Omissions and cProfile skipped under explicit stop condition; no workaround or protected change. Report: [\u00a79.5 round 3](../../../d4d-executions/plans/reviews/native_u3_deadline_2026-11-08.md), evidence under `scratch-native-u3-deadline/cpu-profile2-20261109/round3-*`; helpers committed locally `c62674c06`. Original private config bytes restored, scratch worktree removed, no owned descendants remain. Offline/no native executable; D92 lock absent, no quiet-host claim, unchanged 900/180 limits. Exactly one entry; stopped."
+    },
+    {
+      "line": 6429,
+      "text": "- 2026-11-09T19:24:20Z \u2014 **D125 CPU profile round 2 blocked at preflight; stopped.** Real detached composition `c6c5dc821` resolved HEAD, but production `git config --local` ignores the requested worktree-local CI URL (and conditional includes); no public test or unprofiled control launched. Instrument-only smoke preserved observer detection/refusal, network denial and parent/child CPU artifacts, but exposed inconsistent cProfile cumulative timing; overhead target and all attempt-phase results remain unverified. Report: `d4d-executions/plans/reviews/native_u3_deadline_2026-11-08.md` \u00a79. Helpers-only local commit `fbe75f6ce3776a0901352d0e54f931c2a153eb08`; branch clean. Private config restored byte-for-byte, scratch worktree removed, evidence retained solely under `scratch-native-u3-deadline/cpu-profile2-20261109`. Isolated-clone alternative requested but not authorized or executed. No protected edits, changed 900/180-second limits, native executable, network/provider calls, fetch/push/gh or follow-on work."
+    },
+    {
+      "line": 6431,
+      "text": "- 2026-11-09T19:02:46Z \u2014 **U3-H resumed under D126; evidence prepared, acceptance incomplete; stopped.** Committed only tests, two synthetic fixtures and offline helpers on `codex/native-u1u3-combined-20261108`, clean head **`e0b964b0e182548411045c5f6186b7d4ee64b8ec`**. Private four-packet composition **`660b2d884c3032f0eca61fcfd3ae523fcbbe9614`**; bundle `scratch-native-u1u3/owner-packets/u3h/e0b964b0e182/`. Canonical postimage **`543e5cd6dc0da0f622ba2cd11a16a90732e9302a1ed0a4700efb61971299d252`** changes only the two U1 locations; historical entries are byte-identical, other three U1 packets exact. No protected worktree edits or packet installation; owner prose untouched."
+    },
+    {
+      "line": 6435,
+      "text": "    - **Artifacts / SHA-256:** [appended private report](../../../d4d-executions/plans/reviews/native_u3h_2026-11-09.md) **`216853e3b3e7f0faa7bbe398d09fbe700240b6f564b1dc9d16972f0960581839`**; FACTS.json **`4eaf7baa5d59200fb762a6d6896d9f7a41d6f2dae275b62a770cb058e2067f3a`**; validation.json **`03687eb34d73dccb226c0b3cf5121fdf705588435bb572816667401cd47e331f`**; itemized comparison **`98e6d082db4df2176a452ab60bc83280406333ba339a96e30ae501aeb6957ada`**; exact-node ledger **`5f6b4e5da870472548b97532f095ff68ef13eb73c4a2d34feab2da2c8a95ab60`**. Report retains its original 92-line prefix byte-for-byte and includes remaining artifact hashes. Raw report/FACTS paths require recorded D126 redaction before publication. Source and observed descendants verified stable/finished; no remaining U3-H process found in final read-only sample. Offline: no fetch/push/gh/network/provider/account/native executable, merge, existing-evidence deletion or acceptance waiver. **No native acceptance.** Owner prose, launcher-environment rerun, offline skips and historical/F2 comparison gates remain pending. One new STATUS entry; stop."
+    },
+    {
+      "line": 6437,
+      "text": "- 2026-11-09T18:20:33Z \u2014 **D125 corrected-source CPU profile: partial setup evidence; stopped.** Archived private composition `c6c5dc821fda057a984155aeb8388ca41b22be02`; both requested tests ran exactly once, separately with `-n 1`, unchanged 900s/180s limits and a 3200s supervisor. Both failed in fixture construction: correction lacked archive Git identity; after adding fixed detached metadata, omissions lacked local `d4d.ciRepositoryUrl`/origin. These are diagnostic preparation failures; no launch admission, execution workers, recorder, read_final, observer or parent replay was reached. Final test-worker CPU/wall: correction **175.324/177.009s (0.9905)**; omissions **1361.383/1387.069s (0.9815)**. Measured setup hot path: selection/schema capture and YAML parsing; hook overhead **65.39%/64.51%**, so no unprofiled deadline, quiet-host or acceptance claim. All observed descendants ended. Before/after verification: **12,289 archive blobs unchanged**, protected files untouched. Only three diagnostic helpers committed on `codex/native-u3-deadline-20261108`, clean head **`ff8fddce4`** (prior helper commit `d8ee67d48`). [Report \u00a78](../../../d4d-executions/plans/reviews/native_u3_deadline_2026-11-08.md), SHA-256 `cd82dc1a855e4928b23345ad88817a854da2bdebe946a884a7835aa8eedd83e4`; all retained new evidence under `scratch-native-u3-deadline/cpu-profile-20261109`, verified `evidence.sha256`. Local review findings UCPU-1\u20133 record preparation, attribution and helper limits. Offline throughout; no fetch/push/gh/network/provider/native executable, production fix, protected edit or rerun. Exactly one new STATUS entry; stopped with requested execution-phase coverage incomplete."
+    },
+    {
+      "line": 6439,
+      "text": "- 2026-11-09T17:28:09Z \u2014 **U3-H stopped under its explicit P2-1 rule; no implementation or recomposition.** Read the full brief and independent U3-G review; assigned `codex-native-u1u3` / `codex/native-u1u3-combined-20261108` remains clean at **`26d3b0449b01f4276c177f9ea07a2757110441e8`**. The literal no-absolute-local-path requirement cannot be met by a spelling-only repair under the current contracts: protected RunSpec construction absolutizes and D76 freezes inputs; removing the flag loses active binding; native helper admission requires the canonical absolute interpreter and stage selection; inline recorder JSON embeds captured absolute authority and exact replay must reproduce it. A portable model view is possible in principle but needs an explicit command/record representation and decoder, with versioned admission/replay support. No guard reset, replay-as-live workaround, blanket replacement or narrowed interpretation was used. Independent light read-only checks confirmed the boundary."
+    },
+    {
+      "line": 6444,
+      "text": "- 2026-11-09T17:25:39Z \u2014 **D125 U3 CPU profile blocked at prescribed archive source; neither test ran.** Read `2026-11-09-codex-u3-cpu-profile.md` and D92. Primary-repository Git cannot resolve full commit `c6c5dc821fda057a984155aeb8388ca41b22be02` (`cat-file -t`, exit 128, including `GIT_NO_LAZY_FETCH=1`); linked worktree lookup also fails. Direct object checks are gitignore-independent. Prior private composition metadata and `.git` were located in scratch, but not substituted for the brief's explicit primary-repository archive. Evidence: `scratch-native-u3-deadline/cpu-profile-20261109/source-check.stderr`; [report \u00a77](../../../d4d-executions/plans/reviews/native_u3_deadline_2026-11-08.md). No extraction, pytest, profiler or child execution; CPU totals/functions/phases/ratios unavailable and cause unresolved. This is a source-precondition failure, not another host-gate failure. D92 lock absent at initial check; no heavy work started. 900s/180s limits unchanged. Assigned branch `codex/native-u3-deadline-20261108` unchanged, no helper or commit. No protected edit, native executable, fetch/push/gh/network/provider/account call or notification. Required next input is a locally resolvable primary object or corrected archive-source instruction. Exactly one STATUS entry; stopped."
+    },
+    {
+      "line": 6446,
+      "text": "- 2026-11-09T10:03:55Z \u2014 **U3 deadline-canary retry: strict host gate failed; stopped before either public test.** Executed `2026-11-09-codex-u3-deadline-canary.md` with the unchanged committed gate helper on clean diagnostic branch `codex/native-u3-deadline-20261108` at **`8400472dcf158947c3c7a8a9da235568815e633d`**. Intended measurement source remains U3-G private composition **`c6c5dc821fda057a984155aeb8388ca41b22be02`**, source **`26d3b0449b01f4276c177f9ea07a2757110441e8`** with four packets; no archive extraction/test execution occurred after failed qualification. Owned D92 lock PID1959, acquired10:00:40Z; 60s settling plus **60 samples spanning63.858520292s**. **MeanCPU29.0417% (limit15), peak51.6% (limit35), max load/CPU1.72314453125 (limit0.5), foreign processes\u22655%; no repository-test PIDs or inaccessible Python processes.** Result10:02:45Z: `blocked_host_gate`, exit75, `pytest_launched:false`; lock released and observer/self-check PIDs ended, independently checked. Network-denied credential-free self-check passed. No correction/omissions run, CPU-profile result, deadline increase, production fix or causal timing claim. Old failure cause remains unresolved; current host load is scheduling evidence only. [Appended report \u00a76](../../../d4d-executions/plans/reviews/native_u3_deadline_2026-11-08.md), SHA-256 **`7760d3ed292f1b3c3834bacd31e0970e19ce9e4ea4ad9f335f22abfdb1d9a641`**; original14908-byte prefix preserved at `f816a4f3fc249b656a394442fdb4332cee90967258cabb5278fc3c3a96e241cc`. Evidence `scratch-native-u3-deadline/gate-02-20261109/`: outcome **`980686a1f40f39902be91cd02b05406a66bb327e54efb81a2b69f1c59a148d77`**, host samples **`6ca92f83331fe7c14089d8d975cb227783eb56693ae209c5c3f9c31990792fa9`**, plan `874045f40084e256205a3efc7228bf6485129a3f1dd5c57001c832a7c5a2e578`, sandbox `736663f7f6e5541ff81686c830b354718835bdec38ee9de488cb7499e0b069da`. Independent light read-only gate review complete. 900s/180s limits unchanged; no fetch/push/gh/network/provider/account/native execution/protected edit/notification. Exactly one STATUS entry, owned lock released, no follow-on work."
+    },
+    {
+      "line": 6448,
+      "text": "- 2026-11-09T09:06:28Z \u2014 **U3-G complete locally; historical comparison and owner/native acceptance gates remain; stopped.** Assigned `codex-native-u1u3`, branch `codex/native-u1u3-combined-20261108`, clean final head **`26d3b0449b01f4276c177f9ea07a2757110441e8`**. Complete U4b **`f704188d30b7b3a0673c418e7a03237cb5ab3d29`** merged with U3-F2 **`77bfa23368af201b77585f334ed0456ed1d40f01`** by two-parent merge **`fd426c4a81c52757fa563f67a3f5f5decc7f5a16`**, no cherry-picks. Final private four-packet composition **`c6c5dc821fda057a984155aeb8388ca41b22be02`**, tree `11e2bfa9246f7d2304405ab7242e6ed15c96f337`; protected worktree preimages and checker unchanged. Resolved all three textual conflicts preserving both proof suites; genuine producer D76 opt-in/guard precedes runtime-bound D114; explicitly disclosed native recorder `registered_input_paths` instruction delta. Repaired native launch/continuation inventory and API-only false hybrid; eleven traced validated-caller declarations are docstring-only, with unchanged runtime bodies and sidecar."
+    },
+    {
+      "line": 6453,
+      "text": "    - **Handoff:** [Report](../../../d4d-executions/plans/reviews/native_u3g_2026-11-09.md), SHA-256 **`3f6505ec3942d2e3b96adf0959dccd5a3bf1f6e9c068b6acefad2be0189018ef`**. Validation summary **`28065a0d03ed7f40469320747bec4c0f6b3e9f6c9600b98db9fa69a030400bb3`**; exact-node ledger **`2692fda9268d4f8a950b6f06f3551267fceaac7b865e43b7bff6d7f2a39b85f5`**. Independent read-only evidence/report review complete. Remaining narrow F2 N1/N2/N3, static U3G-R1 and B2/#5657 are recorded locally for the permitted next round. **`audit_counts: unavailable` must enter N1.9 item9 and N1.4(B)2 before registration; never zero.** Prior timing/U6/U7 and owner approval gates remain. No fetch/push/gh/network/provider/account/native executable/main merge/notification; no packet installation in the assigned worktree. All own jobs ended; exactly this one STATUS entry, then stop."
+    },
+    {
+      "line": 6455,
+      "text": "- 2026-11-09T04:21:14Z \u2014 **U3-F2 review repairs complete locally; stopped.** Clean `codex-native-u1u3`, branch `codex/native-u1u3-combined-20261108`, final local head **`77bfa23368af201b77585f334ed0456ed1d40f01`**, from `bb287d90a61af18b320efe9eabf720d0f77fd72f`; no push. Private four-packet composition **`8ba1aa8c03c72f1758c6f2697419c2c6c057fd5a`**, tree `60b474d777055324351addcb850fb5283a9ecc23`. Scanner 1.10.1 discovers model-facing package commands and their imports while preserving CLI/arm boundaries; closes envelope/identity, options mutation and parser-source gaps, with review F2/F3 regressions. Four real shared RunSpec construction witnesses, constant-contract test and current-source 28-module census pass. **Final cohorts: 192 + 95 + 371 = 658 passed, zero failures/errors/skips; raw instruction parity 14/14 on both unpatched and composed trees.** Final scanner SHA-256 `15cfde4bbc230dbe661683ad03325bb4d7c328e0243a38e034831ede4fbdb5cb`: saved main 5,292 hits, composition 5,293; **the same nine violation objects, exact and ordered, no additions**. Full saved-main hits unchanged. Initial two fixture failures, five discovery-scope regressions and the intermediate 35-violation measurement are retained with their fixes and full instrument history. New owner bundle `scratch-native-u1u3/owner-packets/u3f2/77bfa23368af/`: **only canonical_hashes changes from U1**, six verified repository paths to `.`; D76 exact U1, other two patches exact U1. Hash/forward/reverse checks pass; packets remain unapplied. [Report](../../../d4d-executions/plans/reviews/native_u3f2_2026-11-09.md), SHA-256 **`6eeb806b093fa8f59395e639433a99c68b0478d7a6d6cdce748746c6b4513502`**; [validation summary](../../../d4d-executions/scratch-native-u1u3/u3f2/validation-summary.json) **`b0b7af3c7610fa4e00d117ff5c413484cb5efe4fff7912c752e6c8f43f518da8`**; [exact scanner comparison](../../../d4d-executions/scratch-native-u1u3/u3f2/scanner-comparison.json) **`86e8e8693a99dfb370627df11b01fbc4557b12f871b2175073d6bd65bc3b29e7`**; bundle validation **`2cfa24fd6f87ca9076bb7e8f9be8c5f5c60231edb60bf0b3db581893db67d721`**. B2 generic alias gap deliberately unchanged; concrete issue draft in report. Prior deadline and native/owner-acceptance gates remain. All runs sequential, at most two workers; all completed pytest invocations below344s, origins/source stability/observed cleanup verified. No protected or production `src/` edits, fetch/push/gh/merge/network/provider/account/native-executable/notification; all own jobs ended. Exactly one new STATUS entry; no follow-on work."
+    },
+    {
+      "line": 6459,
+      "text": "- 2026-11-09T03:17:29Z \u2014 **U4b addendum 5 complete; both P2 fixes implemented and tested offline; stopped.** Assigned branch `codex/native-u4b-20261108`, clean local HEAD **`f704188d30b7b3a0673c418e7a03237cb5ab3d29`**, from `e75ca0871`, three commits, no push. Guard v2 accepts printable nonblank reasons up to 256 UTF-8 bytes only with rejected overage and an explicit false usage flag; all **209 real events** still parse/observe, with admission unchanged at **117 admitted / 92 headroom refusals**. Applied the authorized producer diff after verifying preimage/diff hashes; final postimage remains **`18f1b63466dd68c662f14bf6b3010680528b5e701f1c6d44ba1b849a184dd3da`**. Genuine preparation/verification, seven-resource-before-instruction binding, historical behavior, both recorded replays, matching/swapped C/D rosters and authority mutations tested without native/provider calls. D76 test uses its existing public opt-in; protected constructor hook remains uninstalled. Repaired the newly exposed exact-AST scanner regression with only historical/D114 whole-body alternatives and mutation tests. **U4b 1,069 passed; U4 1,599 passed; final neutrality/scanner group 143 passed.** Final latest-node census **2,487 passed / 71 failed / 47 errors**; exact comparison with A4 confirms **the same 118 nonpassing node/state/classification identities**, no additions/changes/removals. All 14 final-manifest runs sequential at `-n 2`, 3,200-second deadlines, longest 734.686 seconds, source/origin/network-denial/observed-cleanup checks passed. Initial sandbox failure, two corrected fixture failures, corrected scanner failures and deliberately interrupted obsolete scan retained; interrupted scan excluded, cleanup flag false, no observed survivors. [Appended report](../../../d4d-executions/plans/reviews/native_u4b_2026-11-08.md), SHA-256 **`16b1aec189e4d3e0f8e2cb48f405036c9831c78c1009661725e2cae293909e16`**; [manifest](../../../d4d-executions/scratch-native-u4b/validation-addendum5.json), SHA-256 **`5f4afb80ab87f0a26b21b061065802a3a9e6b4b13e06c4af952bb60d4ea45763`**. Protected/frozen files and rejected API packet untouched; all scratch remains under `scratch-native-u4b`. No fetch/push/gh/merge/network/provider/native executable/notification. Broader inherited integration/scanner and owner-admission gates remain blocked. Exactly this one STATUS entry; all own supervisors returned; no follow-on work."
+    },
+    {
+      "line": 6461,
+      "text": "- 2026-11-09T02:49Z \u2014 **U3-F offline repair handoff complete; named integration cohorts green, historical census still blocked; stopped.** Branch `codex/native-u1u3-combined-20261108`, clean local HEAD **`bb287d90a61af18b320efe9eabf720d0f77fd72f`**, no push. Tested source **`158a948dce24c673485c81f26f2c1567e22aec24`**, private four-packet composition **`5c78892f8ee5e0925d9e02d97c8f991274232346`**; later HEAD delta is one read-only audit helper. Explicit typed-audit producer branches, closed scanner derivations, complete-route/missing-consumer mutation split, 42 native/factory declarations and a genuine constructed-RunSpec guard witness repair the U3-E integration blockers. Final hook **1 pass**, render/prompt/BC1/U1-scanner/D76/factory plus delegated **252 passes (157+95)**, full specificity **371 passes**, behavior **72 passes**. Final identical scanner completes with full arrays (saved main **5292**, composition **5295**) and **exactly the same nine gc_project violation objects**, no extras, exit1 on both. Raw instruction parity **14/14 on both primary and composed bases**, no normalization. Final owner bundle `scratch-native-u1u3/owner-packets/u3f/158a948dce24/` has verified forward/reverse checks and exact pre/post/patch hashes; only D76 differs from U1, with proposed source-pinned declarations. Census scratch-root repair works, but serial recheck **fails** the unchanged neutral-dependency guard: pinned historical D8 conflicts with the combined `native_shared_gate_primitives.py`; failure retained, no bypass or graph acceptance. [Report](../../../d4d-executions/plans/reviews/native_u3f_2026-11-09.md), SHA256 **`d6822731229830ed71463806c9ad3bce517da3ba086bd23ae93ac41358af0a2f`**. Evidence and local review findings under `scratch-native-u1u3/u3f/`; all completed pytest invocations at most two workers, below3300s, source/origin and observed-cleanup checks passed. All protected worktree bytes/checker unchanged; no network/fetch/push/gh/provider/native-agent call, U4b/D114 delta or deadline change. Public-completion deadline blockers and later owner/independent-review/release/native-admission gates remain. Exactly this one STATUS entry; no further work."
+    },
+    {
+      "line": 6465,
+      "text": "- 2026-11-09T02:12:42Z \u2014 **Native U4/U4b/U5 integration plan complete, read-only; stopped.** Required `git merge-tree --write-tree` of U4b **`e75ca08712133f28d79c1fe1407afebf12034c73`** onto combined **`49a5f2b741d1f8c8d4a7a1caf1189c4c97055383`** uses D9 base **`59d2982cfa3f0e88acc66047d2d9428c61eed74b`**, exits0, tree **`0b7ae63199282d03fd9b88a16a590599714ab2d7`**: zero textual conflicts; only both-changed path is `native_execution_registration_v2.py` (A6 runtime reader plus disjoint U4b authorization hunks). All26 U4\u2192U4b non-merge commits are patch-unique. Supplemental preview against observed U3-F **`317457e8e64a27c8a732b18588cd4395e13bd064`** exits1, conflict tree **`df67d17b00e9bb0e04e7a7d78afe5b9de0a94f94`**: three conflicts (`scan.py`, `native_shared_registration_orchestration.py`, `test_native_u1_scanner_contracts.py`) among eight shared changed paths, all classified in report. **Recommend a complete U4b merge commit after accepted U3-F handoff**, with semantic proof/test reconciliation, historical producer-pin repair, obsolete expected-roster-refusal migration, fresh scratch/export identities and staged validation. One final owner bundle should carry the four protected packets plus the separately identified runtime-aware producer proposal; exclude the rejected constructor-wide D114 API delta. Regenerate D76 declarations last from all final affected sources. Current U3-F bundle source `dd16f0271bf17e245973aae3f1055ed0ddc0a44f` remains `composed_not_tested`; no completed U3-F STATUS/report found, including ignored review files, so its checkpoint is not accepted. Both previews retain the four protected blobs unchanged. [Plan](../../../d4d-executions/plans/reviews/native_u4u5_integration_plan_2026-11-09.md), SHA-256 **`ab733519b757272b253026112033f7bc5fb3291d5e22ffe1f31cce29fdb3187b`**. Independent read-only commit/semantic/packet checks completed. No tests, scanner execution, imports of production, checkout/worktree/index/ref changes, commits, protected/source edits, packet application, native executable, network/provider/fetch/push/gh or notification. Only report and this one STATUS entry written, plus unattached Git objects from the explicit dry runs. No acceptance claim or follow-on implementation."
+    },
+    {
+      "line": 6467,
+      "text": "- 2026-11-09T02:03:47Z \u2014 **Native U4b addendum 4 handoff; implementation committed locally, acceptance gates and protocol failure retained; stopped.** Clean `codex/native-u4b-20261108` in `codex-native-u4b`, head **`e75ca08712133f28d79c1fe1407afebf12034c73`**, following `ce4170e7467512025fda5fb23440542171f0ae69`, `640bc8aee8cb936ab9ca9bd473b5824347475122` and `e8a41e78d80400d460e67ab583b050063dbf70d8`, from A3 `efbcfffb3c553110c6f4783452ba9bb84489ad6a`. Guard parsing/observation now accepts all **209 real event shapes / 64 transcripts** (before 182/27); starting admission is **117 admitted / 92 headroom refusals**, with every per-event reason retained. Added document-SHA-bound distinct review kinds, physical containment in consumers, exact N1 deadline/keep-awake/14-day commit-anchored validity, strict review chronology and direct cross-word refusal. Per the user ruling, scripted observation requires **ANTHROPIC_API_KEY** while subscription captures retain **none**. No-total audit_counts is unavailable inside the existing 15 gates, an explicit N1.9 item 9 amendment deviation; recognized mismatches still refuse. Seven-resource selection follows playbook references. The initial constructor-wide API proposal is rejected; the approved runtime-bound producer alternative is a **scratch diff only, unapplied**, with genuine composition/replay/D76 integration pending. Final U4b **902 passed**; latest overlapping U4/U4b census **1,617 passed**. U5 plus two controls: **704 passed / 71 failed / 47 errors**, exactly the same **118 node/state/classification** nonpasses as A3, no new/changed entries or unclassified failures. API instruction pair is byte-identical; full-input scanner arrays/equality remain null and the strict gate unmet. **Protocol exception:** monolithic `a4-u5-derivation` exceeded 3600s at **4338.210798s**, exit124, forced cleanup, `cleanup_verified=false`, no observed survivors; no completed JUnit, excluded from counts, retained unexplained as A4-F4. Smaller unchanged replacements completed; all 14 final-manifest runs have clean/stable source, denied-network/bootstrap-origin and observed-cleanup witnesses, at most two workers and under3600s. Post-margin timing and host-dependent readback remain residuals; review documents and registration Git objects must be retained. [A4 report](../../../d4d-executions/plans/reviews/native_u4b_2026-11-08.md), SHA-256 **`d8cdd4c0fd9372eceb31f9bfed50c6d10527bfee973c7079f02822dcc398e3ac`**; [final evidence](../../../d4d-executions/scratch-native-u4b/validation-addendum4.json), SHA-256 **`f7f28ed5c700399805e71d5db8a416ce998faa5cb387dfa257a622136e8b77d7`**. Independent read-only audit verified report counts, hashes, scope and unchanged 485-line prefix. Seven protected/v1 paths, prompts, frozen packets and producer file unchanged; existing evidence and other worktrees preserved. All supervisors returned; overrun cleanup caveat remains. No fetch/push/merge/gh/network service/provider/account/native executable or notification. Exactly this one STATUS entry; no follow-on work."
+    },
+    {
+      "line": 6469,
+      "text": "- 2026-11-09T01:33Z \u2014 **U3-E combined assembly handoff complete; integration acceptance BLOCKED.** Local branch `codex/native-u1u3-combined-20261108`, HEAD `49a5f2b741d1f8c8d4a7a1caf1189c4c97055383`; ordered no-ff U1 then D10 merges on saved local `cf50d9a1c`, not fetched. [Assembly report](/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u1u3_assembly_2026-11-08.md). Exact four-packet bundle and mention-free PR draft are under `scratch-native-u1u3`; protected worktree targets remain unchanged. All 7,601 planned unique IDs are observed, including failures/skips; zero uncovered planned IDs. Raw API instruction parity is 14/14 for both unpatched and packet-composed trees. All three final SG2 layouts have passes after a retained conventional-layout interruption/retry. Scanner exit 2, packet CLI/D76 failures, public/legacy deadline failures and environment/census limitations remain; P3-4 is partial and schema 3.2.0 is not included. The earlier 4004.42-second overrun and rejected optional power-wrapper action are documented. No push, network/provider call, native-agent launch or remote issue action. Local findings await the later online workflow; no approval or acceptance is implied. One STATUS entry; stopping."
+    },
+    {
+      "line": 6477,
+      "text": "- 2026-11-08T22:28:51Z \u2014 **U3 deadline diagnosis: retained-failure localization complete; profiled canary blocked by host gate; stopped.** New isolated `codex-native-u3-deadline`, branch `codex/native-u3-deadline-20261108`, from **`ff3aaaddba5754e6624f0c435397403f29505459`**, clean final local head **`8400472dcf158947c3c7a8a9da235568815e633d`** after helper commit `4cb62772d010e990c1fc2fb71def749301f8001f`. Only two diagnostic scripts changed; all production/tests/historical controls/protected bytes and 900s attempt/180s helper limits unchanged. Round10 r2 cases reached sealed phase1/core, pending `shared-test-21`, assembly incomplete and recorder incomplete; later observer recheck reached pending `shared-test-22`. Independent public `read_final` was never reached. Timer starts before pre-spawn verification/callback activation; failed-result replay/gates run afterward. Retained wall times do not allocate phase CPU, and no retained host series establishes the old runs were quiet. Fresh gate held the owned lock, completed credential-free sandbox network denial plus 60s settling, then 60 host samples spanning **65.149442292s**: reported mean/peak CPU **100%/100%**, maximum load/logical CPU **4.104150391**, foreign processes \u22655%, and repository test PIDs **57640 / 92367 / 92451** present in `codex-native-u4b` / `codex-5517`. Gate exited75, own lock released, **no pytest or profiled canary launched**. Current contention does not prove historical causation; hot path versus fixture deadline versus host contention remains unresolved. No optimization/deadline increase justified yet; a qualified window is needed for thread-specific profiling preserving the existing observer/refusals. [Report](../../../d4d-executions/plans/reviews/native_u3_deadline_2026-11-08.md), SHA-256 **`f816a4f3fc249b656a394442fdb4332cee90967258cabb5278fc3c3a96e241cc`**; [diagnostic evidence](../../../d4d-executions/scratch-native-u3-deadline/diagnosis.json), SHA-256 **`b4971bdd94c6b32a3d85ed605b6b20cce91dd7e8fdd8617e7ab3f0b61b045c9e`**. Independent read-only review checked report/source/artifact claims; local UD-1 gate-cleanup robustness finding fixed before gate. No fetch/push/gh/network service/provider/account/native executable, no other-worktree edits or notifications; all own observer/self-check jobs ended. Exactly this one STATUS entry; stopped with steps2\u20134 pending the stated precondition, no follow-on work."
+    },
+    {
+      "line": 6479,
+      "text": "- 2026-11-08T22:18:27Z \u2014 **Native U4b addendum 3 complete locally; stopped.** Clean `codex/native-u4b-20261108` in `codex-native-u4b`, final head **`efbcfffb3c553110c6f4783452ba9bb84489ad6a`**, after `1d01942475fbf776107517b5f64cb62950cbe7e6`, `23bdb0a8a46f476a049cacaf69b43fe9c47413ce` and `c9232219ef48159568b58b3f04d4a8c2f28e7596`, starting from A2 `905ff402d71e8736b5b3f2ac476ae5188e399d1c`. Implemented two authorized probe phases (bound phase retains seven traces plus version check), observation-pinned runtime v3 with request thinking inside limits_basis, exact bound-permission pin join, registered 90-second pre-reservation margin measured after source verification, five-hour \u22640.25/seven-day \u22640.50 with complete owner/runtime equality, per-capture saved terminal limits and permanent mismatch refusal, and hash-bound word supersession with three fresh capture slots per newer recorded word. Retained exact 1M model pair and audit_counts inside evidence, still 15 gates. Broad U4 **1261 passed / 2 diagnostic-assertion failures** at `23bdb0a8a`; corrected exact diagnostics and timing order then **376 passed** at `c9232219e`; final physical-path guard canary passed and affected suite **176 passed** at `efbcfffb3`. U5's unchanged 820 cases plus two complete integration controls, split into complementary bounded invocations: **704 passed / 71 failed / 47 errors**. Comparator verifies the **same 118 node/state/classification nonpasses as A2**, no new/changed or removed entries; no unclassified failures. Final scanner cohort **18 passed / 1 inherited failure**; both scans stop at typed_audit.py:311 and exact finding arrays/equality remain null, an unmet gate. Fresh API pair is equal (86,955 bytes each; SHA-256 `21df68e580d4fbdccf4430144a2ed24c43685e0f0285f1c1e58801aa93a15d60`). [A3 report](../../../d4d-executions/plans/reviews/native_u4b_2026-11-08.md), SHA-256 **`6cff95a9bd498015940a6877e38734bd4a3a87536c9870af45ce7e306a647c48`**; [A3 evidence](../../../d4d-executions/scratch-native-u4b/validation-addendum3.json), SHA-256 **`1ad682ddf21a0ebd7cbf0ae7b80e5345aa82d5040b9e057cd3390ddb96937474`**. Separate read-only review verified report counts/hashes/scope. Eight local findings fixed; **A3-F9 remains open:** older capture/permission producer lexical-only path guards need physical-containment review/fix before live acceptance; the new wrapper alone is fixed. No GitHub issues under offline restrictions. All 12 runs recorded clean unchanged source, bootstrap origin checks, denied network, observed-descendant cleanup, at most two workers and under 3600 seconds. Counts overlap and span four commits; no final-head full-suite or native-acceptance claim. Seven protected/v1 files and the entire prior 378-line report prefix are unchanged. No fetch/push/merge/gh, provider/account access, real native executable, other-worktree edits or notifications. Inherited integration/derivation/scanner gates and A3-F9 remain for this candidate; all own jobs ended; exactly this one new STATUS entry; stopped after A3."
+    },
+    {
+      "line": 6483,
+      "text": "- 2026-11-08T11:21:14Z \u2014 **Native U4b addendum 2 complete; stopped.** Clean local branch `codex/native-u4b-20261108` in `codex-native-u4b`, final head **`905ff402d71e8736b5b3f2ac476ae5188e399d1c`**, following `c3088487c4f82257e263933be7bc9b16c7f49c87` and `180d725e6fee39078ebd221e7bf43bb9e449d82b`, from A1 `c49a29aed4c7f26a4c11f43286c3fbfcc38733da`. Implemented the exact requested/returned 1M model pair; terminal-usage limits and pinned request-body thinking; D115's three separately reserved captures with fresh capture-only config/cwd and retained failed/stale/interrupted evidence; numeric versus record-only unknown windows; strict UTC word chronology; explicitly unverified stopped-attempt readings. A3 remains pending. Initial focused run **421 passed / 1 obsolete-path test failure**, corrected and exact-node re-canary passed. Final U4 plus affected gates **1,135 passed** at `180d725e6`; final helper-only commit leaves `src/` and `tests/` identical. Final U5 plus two genuine integration controls **704 passed / 71 failed / 47 errors**, reproducing A1: typed-audit proof 90, protected selector proof 24, protected hook 1, blocked scanner comparison 1, inherited captured-runtime identity 2. No unclassified nonpasses; no downstream assertions credited after setup errors. Fresh API instruction pair matches (86,958 bytes, SHA-256 `f2e098d211947eb24038b14c04c400c101f03298f96c3d93f2a77a127aaf71b9`); exact scanner arrays/equality remain null and the gate unmet. [A2 report appendix](../../../d4d-executions/plans/reviews/native_u4b_2026-11-08.md), SHA-256 **`d225cdc553f45e93aab2436392bd0e01680ebb1f24d204dc85633b5691be065d`**; [A2 evidence manifest](../../../d4d-executions/scratch-native-u4b/validation-addendum2.json), SHA-256 **`a4bf7914ff9749d7bda690f4fc0fd6f61ebaa9c7a7b68bafb5b35d40e2cfa8f1`**. Three local review findings corrected and independently rechecked; no GitHub issues under the offline restriction. All five runs retained clean unchanged source, origin checks, network denial and observed-descendant cleanup, at most two workers and below 3600 seconds. Seven protected/v1 files and the prior 289-line report prefix remain unchanged. **Preparation only:** historical count-1 bytes retained without guaranteed current-reader acceptance; separately pinned probe/request files do not authenticate a common live probe; actual account, entitlement, protected/full-chain integration and native acceptance remain unproved. No fetch/push/merge/gh, provider/account access, real native executable, other-worktree edits or notifications. All own jobs ended; exactly this one new STATUS entry; stopped after A2."
+    },
+    {
+      "line": 6487,
+      "text": "- 2026-11-08T10:35:26Z \u2014 **Native U4b addendum 1 handoff complete; stopped.** Clean local branch `codex/native-u4b-20261108` in `codex-native-u4b`, final head **`c49a29aed4c7f26a4c11f43286c3fbfcc38733da`**, with preceding addendum commit `94791f898c1fc9a4f4e5e4dc73f696f7fd3312bc`, from original handoff `45437b109b1a610ce1152c2ff2b7618181ee2e07`. Added independent captured report/derived-audit `audit_counts` equality inside the existing 15 gates; required observed thinking at proposal/readback; closed discriminator-only downgrade for the current model; expanded genuine review-bundle, expiry, context and window regressions. Final U4/U4b **884 passed**; focused affected suites **146 passed** on the first addendum commit. Final U5 plus two representative integration checks **704 passed / 71 failed / 47 errors**, all classified: typed-audit proof 90, protected selector proof 24, protected hook 1, unavailable scanner comparison 1, inherited captured-runtime identity 2. The original U5 cohort remains 704/70/46; the two added integration checks reproduce one failure and one setup error. API instruction before/after bytes match; exact scanner equality remains unmet. Six local review records retained, independent final code/report/artifact reviews completed; no GitHub issues filed under the offline constraint. **Preparation only:** addenda 2/3, A6/C7 integration and protected/native acceptance gates remain pending; interim init-thinking policy is not the final N1 protocol. [Appended report](../../../d4d-executions/plans/reviews/native_u4b_2026-11-08.md), SHA-256 `c3be9efc01905050f7412e6d037e3cbf5af79cc47ae878c21cc06660bd6f84b1`; [A1 evidence manifest](../../../d4d-executions/scratch-native-u4b/validation-addendum1.json), SHA-256 `07ccc61e1983e36b44f8106dab3d0dc22a764b726b593ef5847ca9249593b980`. All six invocations retained clean unchanged source, denied-network, bootstrap-origin and observed-cleanup witnesses, at most two workers and under 3600 seconds each. Protected/v1 files remain byte-identical to the permitted U5 base; original report prefix and all prior evidence preserved. No real native executable, account/provider access, fetch/push/gh/merge, other-worktree edits or notifications. All own validation ended; exactly this one new STATUS entry; no follow-on work."
+    },
+    {
+      "line": 6489,
+      "text": "- 2026-11-08T09:50:44Z \u2014 **Native U4b original-brief handoff; stopped.** Clean local branch `codex/native-u4b-20261108` in `codex-native-u4b`, head **`45437b109b1a610ce1152c2ff2b7618181ee2e07`**, from permitted U5 `8ac918c603b2172c014b112affdce26a6c8899f6`. Original eight-item brief implemented with per-item scoped dispositions; D114 remains partial because the protected constructor hook is absent. Six local commits, no push; production/test bytes equal `7e058bf5f5387b5568762067cf20b646c7a07ead` (final commit is reporting-only). Final U4/U4b cohort **808 passed**; U5 **704 passed / 70 failed / 46 errors**; affected integration **61 passed / 10 failed / 16 errors**. Every nonpass classified: inherited R9-3 capture identity, typed-audit derivation, selector proof, missing protected native hook, or unavailable scanner comparison; no equality waiver. Fourteen local review records addressed, including failed-publication readback; original failed runs retained. **Preparation only, not current N1 readiness:** three later standalone U4b addenda were discovered during final coordination review; scope clarification was requested and remains unanswered, so this handoff follows the specifically named original brief and stops. Addenda are explicitly pending, including the two-probe/terminal-limits/request-thinking sequence, three-capture accounting, model alias pair, admission maxima/margin and audit-count equality. [Report](../../../d4d-executions/plans/reviews/native_u4b_2026-11-08.md), SHA-256 `a380672c791163d386d81379945f8888d5cd40ac76e68d3d4db27e522020c250`; [evidence manifest](../../../d4d-executions/scratch-native-u4b/validation-final.json), SHA-256 `81ffd8e9c0b47ba174cd0a86d56e33d99f822ba4b805816d534ea14d45be1696`. Independent final code/report/digest reviews completed. All 13 invocations retained clean source and denied-network/observed-cleanup witnesses, at most two pytest workers and under 3600 seconds each; no native executable, provider/account access, fetch/push/gh/merge or protected/v1 edits. All own validation ended, existing evidence preserved, exactly one STATUS entry; no follow-on implementation."
+    },
+    {
+      "line": 6493,
+      "text": "- 2026-11-08T09:10:14Z \u2014 **N1 v6 narrow read-only re-check complete; stopped.** Draft SHA256 verified as `18f29f8351c1a7b45248bea3b427ebdbf6f0550b3a7b42da00af136d5bafd8c6`. **Verdict: ratifiable as is; no replacement-introduced defect requiring correction (0 P1/P2/P3).** N1.8 retains 23 substantive proposal markers mapped one-to-one to (a)\u2013(w); N1.9 matches the body and U4b assignments under their precedence. All four U4b hashes match, including addendum 3 `4472fde8\u2026`; newly cited v3\u2013v5 review hashes also match. [Report](../../../d4d-executions/plans/reviews/n1v6_18f29f83_codex_recheck_2026-11-08.md), SHA256 `154830be901cba293fc434e7c8990c29b04d9ade3dbcbd4bb3bb711fe7c9650a`. Implementation and launch readiness are not certified. Light offline reads, bounded diff and hashes only; quiet-window protocol observed. No pytest/heavy work, native executable, network/provider calls, fetch/push/gh, branch changes or protected edits. No helpers, scratch artifacts, basetemps or new directories; only the named report and this single STATUS entry written. No follow-on work."
+    },
+    {
+      "line": 6495,
+      "text": "- 2026-11-08T09:02:38Z \u2014 **N1 v5 narrow read-only review complete; stopped.** Verified draft SHA256 `ece2c8b387ef0d4781cb8763ea96f501dbe3492a1372f865f657d77d12b97241`. **Verdict: ratifiable as is; both Codex v4 findings resolved in specification, no new defect requiring correction identified.** N1.8 maps one-to-one to all 23 substantive proposal markers; all four U4b file hashes match, and N1.9 matches the body and assignments read with their precedence. Two-probe ordering removes the binding cycle; stale-at-dispatch risk and attempt consumption are disclosed. Both admission thresholds must receive the equality check explicitly assigned by addendum 3. Implementation, merged acceptance and launch readiness are not certified. [Report](../../../d4d-executions/plans/reviews/n1v5_ece2c8b3_codex_review_2026-11-08.md), SHA256 `73df58bf3fac3b707ce140abb5432c160e34e3df21813361431bf67fb13179e6`. Light offline reads, bounded text comparison and small-file hashes only; quiet-window protocol observed, no pytest/heavy work, native executable, network/provider calls, fetch/push/gh, branch changes or protected edits. No helpers, scratch artifacts, basetemps or new directories. Only the report and this single STATUS entry written; no follow-on work."
+    },
+    {
+      "line": 6497,
+      "text": "- 2026-11-08T09:02Z **U3-D Round 10 complete; admission still blocked; stopped.** Final local head **`ff3aaaddba5754e6624f0c435397403f29505459`** on `codex/native-u3d-integration-20261107`, no push. Started from the brief addendum's `59d2982cf`; merged C7 `0a260a632` then A6 `a6da0cd2a`, both `--no-ff`. R9-3 exact capture identity and the demonstrated R9-4 historical-worker loading refusal are repaired. Planned D/C coverage: **1,399 pass, 3 fail, zero setup errors** after explicit rechecks; **138/138 former setup-error nodes pass**, and 150/153 former nonpasses pass. A: 308 pass; B: 204 pass/11 skip plus 78 schema passes; final census: 23 pass; collect-only: 24,815. Exact final-head four-packet U1 scratch composition: hook canary 1 pass and render/prompt suite 76 pass. Remaining blockers are the **protected U1 hook** and **both public completion variants exhausting the selected 900-second synthetic attempt deadline**; not an all-green admission claim. Round 9 remains final per the addendum. [Round 10 report](../../../d4d-executions/plans/reviews/native_u3d_2026-11-07.md) records exact heads, overlaps, local findings, all failed/interrupted runs and manifest hashes. All own jobs ended; 28 completed basetemps removed after verified retention, interrupted basetemp retained. Offline throughout; no protected/v1/U2/launch-a21 edits, real native/provider calls, network, fetch/push/gh or external messages."
+    },
+    {
+      "line": 6499,
+      "text": "- 2026-11-08T08:51:58Z \u2014 **N1 v4 independent read-only review complete; stopped.** Verified draft SHA256 `9edff5b9bf92cb9835245b86d50a7cbcbd0e8db552662bdcdfb7fab433732476`. Four substantive v3 findings resolved in specification; **v3 R5 withdrawn as reviewer error** (the original D106 quotation already had correct punctuation). **Verdict: fix before ratification; 1 new P2, 1 new P3.** The window predicate permits negative utilization; recording prose mislabels the terminal accounting alias as a returned model. Statement/bundle/word ordering is now acyclic, all proposed values map to N1.8, and the U4b brief plus both addenda cover N1.9's nine prerequisites; implementation and launch readiness are not certified. All seven criteria match the saved #4354 body exactly. [Report](../../../d4d-executions/plans/reviews/n1v4_9edff5b9_codex_review_2026-11-08.md), SHA256 `0408c6f670b880137092ac2a782bbc73ccb973f38d86153fc2b53cdf2d858ac3`. Light offline reads and supplied read-only comparison only; quiet-window protocol observed, no pytest/heavy work, native executable, network/provider calls, fetch/push/gh, branch changes or protected edits. No scratch artifacts, helpers, basetemps or new directories. Only the report and this one STATUS entry written; findings retained for later lead issue filing, no follow-on work."
+    },
+    {
+      "line": 6501,
+      "text": "- 2026-11-08T08:37:59Z \u2014 **N1 v3 independent read-only review complete; stopped.** Reviewed exact draft SHA256 `e8b475c43113ff36fe551511c0927e4273b8629bfb40a6897bce0a3c1ce2e07b` against both v2 reviews, D112\u2013D114, the saved full #4354 body, U4b's assignment and selected immutable local source blobs. **Verdict: fix before ratification; 1 P1, 3 P2, 1 P3.** All ten prior Codex findings assessed: six resolved in specification, four partly resolved. Remaining findings: statement/bundle/word dependency cycle; U4b coverage gaps including N1.9 item 9, context equality and thinking evidence; separately proposed choices bundled in N1.8; ambiguous required five-hour presence; residual exact-quotation punctuation. All seven #4354 criteria match the saved body exactly. [Report](../../../d4d-executions/plans/reviews/n1v3_e8b475c4_codex_review_2026-11-08.md), SHA256 `5f66e4bea9117d9e2bac0484c5fc41cef65ee0f19cb3d22b4af7b3ab88d67d7b`. Light offline reads and the supplied read-only comparison script only; no pytest/heavy work, native executable, network/provider calls, fetch/push/gh, branch/worktree changes or protected edits. No scratch artifacts, helpers, basetemps or new directories. Only the report and this one STATUS entry written. Findings retained for later lead issue filing; no implementation or launch readiness certified, no follow-on work."
+    },
+    {
+      "line": 6505,
+      "text": "- 2026-11-08T07:59:59Z \u2014 **Native U5 preparation delivered locally; acceptance remains blocked; stopped.** Executed `2026-11-08-codex-native-u5-prep.md` in new worktree `d4d-executions/codex-native-u5-prep`, branch `codex/native-u5-prep-20261108`, from permitted U4 base `d258611c5381bd7cf973817ebd2b6a04f65818b3`. Clean final head **`8ac918c603b2172c014b112affdce26a6c8899f6`**; preceding preparation/correction commits `b7e5480abd1bf7e9bc4e391c0b601872e3eb7d3f`, `e4dde14e9e3a042b17651bc55316bee77d7202f0`, `64f920bc0715f59b0ce52381ab7e6f0f0d2770d7`. Drafted declared differences preserving H1/H3/H6/H7 and D91/D105\u2013D111, plus the operator guide with unratified terms PENDING N1; recovered v2 retention helpers and proved the current offline CLI source route with negative controls. Named external schema input **`5e382f0c423fa8b0a331340adcdfac5a328bd6b3`** was measured without merge/rebase; it still contains D108's five prefixes. External modular/merged captures replay exactly, merged cold/warm reuse passes, and same-schema API instructions match byte-for-byte. Twelve bounded offline runs: latest named cases **701 passed / 70 failed / 46 setup errors / 0 skipped**, with initial failures and the explicitly superseded R3 identity preserved. These are results across recorded heads, not a full final-head repository suite. Every nonpassing case classified: typed-audit container-alias source proof, shared-selector constructor proof, missing protected admission hook, and incomplete scanner comparison. Corrected complete committed scanner exports (6,269/6,284 files) both exit 2 at `typed_audit.py:311`; full arrays/equality remain null/unavailable, with no waiver. Final canary and all 18 input-integrity controls pass. Local review findings U5-R1\u2013R8 addressed and retained for later authorized issue publication. [Report](../../../d4d-executions/plans/reviews/native_u5_prep_2026-11-08.md), SHA-256 **`5cfbe5e5480479f8df2cdac07f601546032bf8a65ff50771aae71afa68388605`**; [validation manifest](../../../d4d-executions/scratch-native-u5-prep/validation-summary.json), SHA-256 **`836d611b4801f7ab3a31679df617e18a31f5a05f0230cb6da228933f21e8b9e6`**; corrected scanner JSON SHA-256 `9e653db964e7579565fbced5e0e378abb1f2955d3e94f4868eae507f4419cde6`. Independent final audits verified all 144 standard artifact hashes and source/origin/network-denial/observed-cleanup checks. At most two workers, longest invocation 642.79 s, no quiet-lock interruption. Seventeen changed paths; all `src/` and protected/v1/U2/schema bytes unchanged. No fetch/push/gh, merge, packet application, native executable, probe, launch, provider/account access or notification. Evidence retained under `scratch-native-u5-prep`; exactly this one STATUS entry, no follow-on work."
+    },
+    {
+      "line": 6511,
+      "text": "- 2026-11-08T06:02:01Z \u2014 **U3-E assembly retry stopped at its prerequisite.** Read `notes/coordination/2026-11-08-codex-u3e-assembly.md` in full. Ignore-independent searches of the complete STATUS file, independently rechecked read-only, still find no entry under `### codex` declaring U3-D round 10 complete and naming its final D head. The 05:01Z coordination entry records round 10 running; the latest completed D handoff remains round 9, `59d2982cfa3f0e88acc66047d2d9428c61eed74b`. The 06:00:47Z U4 preparation handoff is not D10 completion. Per the brief's explicit stop condition, no assembly tasks were started: no combined branch/worktree, merge, tests/scans, scratch composition, packet application, PR draft, assembly report or commit. Only this requested STATUS entry was written. No protected edits, native executable, network/provider access, fetch/push/gh or notification. The prerequisite completion entry and immutable final D head remain required; stopped with no follow-on work."
+    },
+    {
+      "line": 6513,
+      "text": "- 2026-11-08T06:00:47Z \u2014 **Native U4 preparation complete; stopped.** Clean local branch `codex/native-u4-prep-20261108` in `codex-native-u4-prep`, final head **`d258611c5381bd7cf973817ebd2b6a04f65818b3`**, from permitted D9 base `59d2982cfa3f0e88acc66047d2d9428c61eed74b` (D10 was not declared complete at selection). Ported the public permission/subscription front door onto current v2 orchestration; bound D106 literal `high` and LBL work Claude Max selected intent, and D105 receipt v4 primary without activating v5. Selected intent is not authenticated account evidence. Final head: genuine saved-probe canary **1 passed**, cleanup cohort **9 passed**, required combined cohort **573 passed / 0 failed / 0 errors / 0 skipped**, full collection **24,901**; overlapping cases are not double-counted, and the full repository suite was not executed. The prior combined run's **569 passes / 1 cleanup refusal failure** is retained; reviewed U4P-R5 fixes bounded reaping and the synthetic peer lifetime without weakening signal denial. U4P-R1\u2013R5 recorded locally for later authorized issue publication. All eleven runs passed source/origin/network-denial/observed-cleanup checks; independent final report/hash audit passed. Exactly nine added files; no preexisting/protected/v1/U2/launch-a21 edits. [Report](../../../d4d-executions/plans/reviews/native_u4_prep_2026-11-08.md), SHA-256 `23a383a2b8e27a364e94bbfe36a08485ff14f8b5ddd4479c590a33f3032d0c48`; [evidence manifest](../../../d4d-executions/scratch-native-u4-prep/validation-summary.json), SHA-256 `feba04168beb9dd1a12ccacc2ebeffee7ed1490ec8f20498a26cabeb7055733c`. **Preparation, not acceptance:** accepted D10/A6/C7 integration, released-schema/four-packet installation, fresh identities, native amendment ratification and separately authorized binary/probe/canary acceptance remain. Offline, quiet-window cooperation, at most two workers, each invocation under 3600 s; no native executable, live probe, launch, provider/account access, fetch/push/gh or merge. All own validation finished, evidence preserved, one STATUS entry; no follow-on work."
+    },
+    {
+      "line": 6517,
+      "text": "- 2026-11-08T05:28:22Z \u2014 **U3-E assembly stopped at its prerequisite; no assembly started.** Read `notes/coordination/2026-11-08-codex-u3e-assembly.md` in full. A direct, ignore-independent search of this STATUS file found no entry under `### codex` declaring U3-D round 10 complete and naming its final D head. The 2026-11-08T05:01Z coordination entry still records round 10 running; the latest completed D handoff remains round 9 at `59d2982cfa3f0e88acc66047d2d9428c61eed74b`. Per the brief's explicit stop condition, tasks 1\u20136 were not started: no combined branch/worktree, merge, validation, scratch composition, packet application, PR draft or assembly report created. Only this requested STATUS entry was written; no source/protected edits, commits, fetch/push/gh, network/provider call or native executable. The required completion entry and immutable final D head must be recorded before a new assembly attempt."
+    },
+    {
+      "line": 6519,
+      "text": "- 2026-11-08T05:26:53Z \u2014 **Native U4\u2013U7 read-only readiness plan complete; stopped.** [Report](../../../d4d-executions/plans/reviews/native_u4u7_readiness_2026-11-08.md), SHA-256 **`07ebb68661512e6f0d4bd04b42523b3930a8ce952f9b89148babf061195d9a6f`**. Inspected Git objects M8 `cf50d9a1c059f3b5030103378ccef33619475dde`, A6 `a6da0cd2a5227d768c9f3e21291a0ce848d66640`, B4 `b69de158be4ea276725f4c7659674f3e5cecd292`, C7 `0a260a632394ce43ae2c8ed2144c05f7a8a21def` and D9 `59d2982cfa3f0e88acc66047d2d9428c61eed74b`; no accepted D10/released-schema integration head inferred. Plan maps U4\u2013U7 goals, existing work, files, tests, dependencies and #4354 criteria; estimates **3\u20136 engineering days after accepted U3 integration**, excluding owner/CI/review/quiet-host waits and any primary-v5 activation. Critical path includes schema 3.2.0, the approved atomic four-packet U1 bundle, U4 front-door port, installed assets/scanner, complete-path and measurement acceptance, D29/amendment/slice-stop choices, separately authorized real-binary probe, and reviewed canary registration. Ready first-U4 brief requires a literal accepted merged-base SHA before edits; current donors need an interface port. Receipts v5 remains inactive: yes/no/defer consequences are explicit; recommendation is v4 for first feasibility, with final-primary selection still the owner's. Native final-record floor is distinct from API D37. D93 supersedes the old freeze ambiguity: native integration precedes A21 rebuild/review; D35 starts at that rebuilt registration. The subscription guard must be built fresh after the separate launch word, not fabricated for readiness. Two independent read-only planning audits completed; command-specific authority and synthetic-local-token clarifications incorporated. **Zero tests/scans/imports, native executables, provider/network calls, commits, branch/worktree changes, fetch/push/gh or notifications.** Only the report and this one entry written; no scratch/helper artifacts and no follow-on work."
+    },
+    {
+      "line": 6523,
+      "text": "- 2026-11-08T04:59:30Z \u2014 **U3-D Round 9 resumed, validated and reported; stopped.** Clean local branch `codex/native-u3d-integration-20261107`, head **`59d2982cfa3f0e88acc66047d2d9428c61eed74b`**. Final C `d205ceddee386acd4749b779cc18b3e78d094b93` was merged by `edb3938e1c3b9f0c0f88ea8d6fcdc5cb6011c7f7`; all overlaps are reported. Finished the previously active D/C cohort and fixed four independently reviewed D-owned migration findings (R9-5\u20138: native writer imports, genuine gate/projection fixtures, inherited-alias isolation), preserving every assertion and production guard. Six complete baseline D/C cohorts: **1,324 passed / 29 failed / 31 setup errors** across 1,384 distinct cases; final repair canary **1 passed**, affected cohort **348 passed**, actual **28/28 consumer graphs accepted**, final full collection **24,795**. Earlier A core **306 passed**; B native/cache/schema **282 passed / 11 inherited reprlib skips**. Exact former-138 ledger after explicit rechecks: **113 passed / 4 failed / 21 setup errors**; all former153: **121 passed / 11 failed / 21 errors**. Six original lifecycle failures remain; six separate forwarding/preparation-binding requirements pass. These are baseline cohorts plus focused final-head rechecks, not a full final-head suite. **Admission remains blocked on this branch by R9-3, R9-4 and the protected U1 hook; P3-4 partial.** The separately completed A6/C7 heads belong to D10's assigned integration and were not merged here. U1 four-packet scratch composition: **1 canary + 76 render/registry passes**, protected branch bytes unchanged. [Round 9 report](../../../d4d-executions/plans/reviews/native_u3d_2026-11-07.md#round-9--final-c-merge-and-genuine-d-consumer-integration), SHA-256 `7b86a63f04a60cd0bd609d08ab4f381b738d75499e05d3c80ce0e03e30c6b020`; [final evidence](../../../d4d-executions/scratch-native-u3d/round9-final-evidence.json), SHA-256 `4d79410e7b59e118a43283c578c16adeb60e0a0e3908f9144ca0788f964af9af`; [exact-node ledger](../../../d4d-executions/scratch-native-u3d/round9-former-nodes-rechecked.json), SHA-256 `6c6057e1ab7dde408c045166c83192500d752a6f23845ca53ecce9b4a21fa186`. Independent report/hash audit passed. All own background validation completed; 16 completed synthetic basetemps removed after retained-witness checks; interrupted registration attempt and all evidence preserved. Offline/network-denied, quiet-lock cooperation, at most two workers, every run under 3600 s; no protected/frozen-v1/U2/launch-a21 edits, real native executable, provider call, fetch/push/gh or notification. Exactly one Round 9 STATUS entry; no follow-on work."
+    },
+    {
+      "line": 6525,
+      "text": "- 2026-11-08T04:48:18Z \u2014 **U3-C Round 7 / R9-4 implementation and offline validation complete; stopped.** Assigned `codex-native-u3c-r4` worktree and `codex/native-u3c-interface-20261107` branch clean at final C HEAD **`0a260a632394ce43ae2c8ed2144c05f7a8a21def`**, from `d205cedde`; committed locally, no push. Main-thread admission captures verified classifier/observer interfaces, source/input identities and a loader-minted immutable admission; worker loading refuses before effects, and synchronized teardown preserves active callbacks. A's main-thread rule is unchanged. Real historical observer/classifier workers running C's classifier pass. Final fixed-HEAD results: **16 new tests passed; C 671 passed/1 known protected U1 failure; A 306 passed; B 204 passed/11 reprlib skips plus 78 schema tests passed; census 28/28 accepted (2 tests); 24,150 collected.** The protected U1 node remains unedited and executable; this is not an all-green C result. Full D observer/admission still requires D10's merge with A6; the static census overlay is not runtime acceptance. All final origin/source-stability/observed-cleanup checks passed; <=2 workers, 3600-second deadlines and quiet-window cooperation. All scratch/basetemps/evidence retained under `scratch-native-u3c-r4`. [Round 7 report](../../../d4d-executions/plans/reviews/native_u3c_2026-11-07.md#round-7--r9-4-main-thread-callback-preloading-2026-11-08), SHA-256 `d7b0cdcebbb8a54145714d03159dc002e56febc4c89c44560356b0a7f493655f`; [evidence summary](../../../d4d-executions/scratch-native-u3c-r4/r7-acceptance-summary.json), SHA-256 `ee518a7c257a525900ec9e8c3914414deb394400a9412845fae4266bd876eb04`. No protected/A/frozen-v1/U2/launch-a21 edit, native executable, fetch/push/gh, provider/network call, merge or external notification. Exactly one STATUS entry; no follow-on work."
+    },
+    {
+      "line": 6529,
+      "text": "- 2026-11-08T04:06:41Z \u2014 **U3-A Round 6 / R9-3 complete; stopped.** Assigned `codex-native-u3a` worktree and `codex/native-u3a-bridge-20261107` branch clean at **`a6da0cd2a5227d768c9f3e21291a0ce848d66640`**, from `a6edb1c2d`; committed locally, no push. Applied D's capture-identity proposal exactly: both runtime reads use the current local reader; A's interface/control map/loader/guard unchanged. **308 A tests passed**, including the actual-helper forged-bytecode probe and two new fixture cases; **1 genuine final-C loader test passed** in an isolated scratch snapshot. **All 15 mutations detected** (controls 24 passed; mutants 18 failed/6 passed; no errors/skips), every restoration tree verified. Final suite ran at fixed HEAD; earlier HEAD-drift and fixture-path failures retained as development evidence. All scratch/basetemps/evidence retained under `scratch-native-u3a-r6`; audited own-source imports, network denial, quiet-window cooperation, <=2 workers, 3600-second deadlines and observed-process cleanup. [Round 6 report](../../../d4d-executions/plans/reviews/native_u3a_2026-11-07.md#round-6--r9-3-runtime-capture-identity-2026-11-08), SHA-256 `f40f7251ee1c3ae3e52d218293b7908e30fe9b96c92996f63fd58126170c7ba4`; [evidence summary](../../../d4d-executions/scratch-native-u3a-r6/final-summary.json), SHA-256 `b03de5d6525a5008ade7c095ebcc5098297b544591a82b54164ea351b8ba70a8`. No protected/frozen-v1/U2/C/D/launch-a21 edit, native executable, provider/network call, fetch/push/gh, merge or notification. R9-4 and the protected U1 hook remain separate gates. Exactly one STATUS entry; no follow-on work."
+    },
+    {
+      "line": 6538,
+      "text": "- 2026-11-08T02:46:50Z \u2014 **U3-C round 6 complete; final C head for D: `d205ceddee386acd4749b779cc18b3e78d094b93`.** Clean `codex/native-u3c-interface-20261107` in `codex-native-u3c-r4`. Verified Round 5 completion first. Controller R3 `aaaa5a6a06666d89d73921ca75344262de1ee15d` merged by `4baf2597ac30cb7cb916026793def6fca4d75a4b`; B R4 `b69de158be4ea276725f4c7659674f3e5cecd292` merged by `7bec63c0f875f4ad8976f0b4849829ce77e0d930`. Zero overlaps/conflicts; all twelve donor helper/evidence paths exact; production/tests unchanged from R5. Original C attempt hit the deadline guard (3979.166 effective seconds, no final XML, no passing counts credited); evidence and its cases directory retained. Re-canary passed, then six independently audited disjoint cohorts executed all **656 C nodes: 655 passed / 1 unchanged protected-U1 failure**, each within 285 seconds, with verified cleanup. A **306 passed**; focused B **204 passed / 11 runtime reprlib skips**; additional B schemas **78 passed**; census **28/28 graphs accepted (2 tests)**; **24,134 collected**. Final-head/source/origin/network/cleanup witnesses retained; eleven completed basetemps removed. Report `d4d-executions/plans/reviews/native_u3c_2026-11-07.md`, Round 6, SHA-256 `07eb93ccc19658502d05a35e26b15c65acab8a5f7c7241b7d0da17642ab9494a`; final summary SHA-256 `fa6e0b99c97b9942ea2f5dcf15f8f9cef670ccf01fda5b647a3771b2e23d6547`; exact C partition ledger SHA-256 `832ff0c17d9ae194f85ff878cad0e3a11b9c54bd9692678db3273ea2beff47af`. U1 hook and D runtime admission remain pending; full-order API/BC1 evidence is historical. Old C and protected/v1/U2/launch paths untouched. Offline; no native/provider execution, fetch, push, GitHub action or merge into D. Stopped after report and this one entry."
+    },
+    {
+      "line": 6540,
+      "text": "- 2026-11-07T23:58:35Z \u2014 **U3-C round 5 complete; projection-lifetime gate closed.** Clean local head `c203a2c0b5cb344f23d306a12bf29efe5631ec86` on `codex/native-u3c-interface-20261107` in `codex-native-u3c-r4`; A5 `a6edb1c2df9095e436df00acfc7f8e2a14229328` merged by `93cb9103a2ab24b4109d56770a1ad1bcdb1986b8` (three automatic overlaps recorded). Genuine A-loaded projection handoff passes, with ordinary-import/forged/expired/changed-source refusals intact. Final C: **655 passed / 1 unchanged protected-U1 failure**; A: **306 passed**; focused B: **204 passed / 11 runtime reprlib skips**; census: **28/28 graphs accepted (2 tests)**; **24,134 collected**, not full-suite execution. Final runs retain stable-head, origin, network-denial and descendant-cleanup witnesses; nine transient basetemps removed after evidence retention. Correction to Round 4: the instruction to keep A's loader unchanged came from the lead's brief, not from the owner. Report `d4d-executions/plans/reviews/native_u3c_2026-11-07.md`, Round 5, SHA-256 `73ff8d014ec158e9b8d9829b65cec153784e2dc67e9d2441183fbbdbc555abc7`; final evidence summary `scratch-native-u3c-r4/r5-summary-final.json` SHA-256 `7a7dceea4bfa2fb7afd6e50a15c4ab1175b582ba4acf0eac851c06d0f195d133`; retained B smoke assembly SHA-256 `662314bdfe55fb1318e5876559db395b7c18ea6b6bc47007cf018da908380e68`. Protected U1 hook and D runtime integration remain pending; no D merge, old-C/protected/v1/U2/launch edits, provider/native execution, network, GitHub write or push. Stopped after report and this entry."
+    },
+    {
+      "line": 6542,
+      "text": "- **2026-11-07T23:50:17+00:00 \u2014 Native U3-C Round 3 completed; stopped.** Branch `codex/native-u3c-controller-20261107`, clean head **`aaaa5a6a06666d89d73921ca75344262de1ee15d`**. Merged exact B repair `35d1aae4a` with no-ff merge `11d6b77fc`; zero overlaps/conflicts; all twelve donor paths preserved, including basetemp-only smoke output. C/A **742 passed**; B shared/S7/typed **677 passed**; BC1 **257 passed, 1 expected failure, 15 exact-baseline setup errors**. Effective API: **522 passed; 0 unfinished of 522 selected nodes**. Initial API interruption and eight harness-only missing-yaml failures remain retained; nested dependency harness repair and exact continuation are documented. All runs bounded below 3600 seconds, at most two workers; 13 basetemps removed after evidence retention. Protected/frozen-v1/U2/launch-a21 unchanged; offline, no native executable or C-to-D merge. [Round 3 report](../../../d4d-executions/plans/reviews/native_u3c_2026-11-07.md), SHA-256 `fa8f47601a8a839b481748edacb321996e64c11e36e267447b9b63c360314e97`. No further work started."
+    },
+    {
+      "line": 6544,
+      "text": "- **2026-11-07T23:43:34Z \u2014 native U3-B Round 4 complete; inherited slowness; stopped.** Assigned branch `codex/native-u3b-catalog-20261107`, clean worktree, local provenance commit **`b69de158be4ea276725f4c7659674f3e5cecd292`** (parent `ea2c9728c`). Exactly two serial `-n 0` invocations of the portable completed-capture node passed: exact base archive `f101652f5` **1,513.718 s call / 1,550.298 s supervisor**, head `ea2c9728c` **1,626.230 s call / 1,646.814 s supervisor**. Ratio **1.074328\u00d7**, below 1.25\u00d7; no cause investigation or fix triggered. **P2-3 closed as not reproduced by the lead ruling**; original `-n 2` order/distribution risk remains for the U1+U3 PR body and CI, not exercised here. Source hashes verified against exact revisions; production/tests/protected files unchanged. Quiet-window and offline/native-denial protections retained, each run under 3,600 s. Evidence: `scratch-native-u3b/round4-20261107-timing/`; committed manifest SHA-256 **`6ae77ea9cd0d431caa002f84861ba179d05f8b95fb8762b79b1e3803a3890a78`**. Both transient basetemps removed after verified evidence and cleanup canary; processes ended. [Round 4 report](../../../d4d-executions/plans/reviews/native_u3b_2026-11-07.md#round-4--one-basehead-timing-comparison-2026-11-07). No network/provider/native execution, fetch/push/gh, PR, merge, additional test or next-unit work."
+    },
+    {
+      "line": 6546,
+      "text": "- 2026-11-07T23:02Z **U3-C round 4 implemented; acceptance held on two named gates.** New worktree `d4d-executions/codex-native-u3c-r4`, branch `codex/native-u3c-interface-20261107`, final local head **`834cd93604c33a64efa24e76d5984b06cfa09e67`**. Merge `ea1689e96372da5d5d33f40ba6b02103012f9a3d` has parents `1e784ed9101d4f43e6115ca60d4f0ebc14dae308` and A4 `26a8632d9fba325dd6c9463b84f5281ebfffa64e`; sole conflict was the authority note. C consumers now receive verified captures explicitly, live verification/writers moved to orchestration, the six-function source-loaded protocol has pinned byte-parity tests, and render uses neutral constants. All **28** static consumer graphs accepted (all seven former C-dependent refusals resolved). A core **276 passed**; B focused **204 passed, 11 runtime-specific skips**; full collection **24,099**, exit 0. Broad C: 596 passed/8 failed/2 collection errors; moved-test seams were repaired and rechecked (56 passed/3 failed follow-up, then the remaining stale stream trap passed). Two executable failures remain: genuine projection lifetime across A's loader, and protected U1 shared-admission hook. The owner directed **keep the loader unchanged; report the gate pending**. No skip/xfail or guard weakening. Counts overlap across runs; broader inherited B API/BC1/shared campaigns were not rerun. Changes after validation head `f280067083a4a4349a39c7492295b3481377733e` are the cleanup inventory helper, two EOF blank-line removals and their review note; production bytes and test statements/assertions are unchanged. Nine transient basetemps removed after preserving evidence; B assembly 198,059 bytes, SHA-256 `a7eca069fbe45f20baa1fa11585ff5f62a124684626d2f06d7f0fc134563f3de`. Final evidence summary SHA-256 `1567e0f2a4d1b3fd2c341adfd1d04303a24e341ac6062496312db5c8e260742f`. Report: `d4d-executions/plans/reviews/native_u3c_2026-11-07.md`, Round 4, SHA-256 `3c4156ec1002816e2aef975d00d5527934e2c204b309713781afc6ab9e2b5336` at handoff. Old C worktree untouched; no D merge, protected edits, provider/native calls, network, push or GitHub action. Stopped after report."
+    },
+    {
+      "line": 6548,
+      "text": "- **2026-11-07T22:54:03Z \u2014 native U3-A Round 5 complete; stopped.** Assigned worktree `d4d-executions/codex-native-u3a`, branch `codex/native-u3a-bridge-20261107`, clean at **`a6edb1c2df9095e436df00acfc7f8e2a14229328`**, from `26a8632d9`. P2-2: scoped A-verified module set and `loaded_verified_package_module(name, *, package_sources)` orchestration context preserve exact carrier/module identity through the consumer; ordinary copies and changed verified sources refuse. P2-1: resolved physical origins govern lint, boundary/v1 refusal and source-only loading, including src/namespace/bare aliases; aliases share canonical objects. Cheap P3 lint gaps closed; process-wide eviction and the no-concurrent-package-use precondition documented; remaining C/D findings assigned by the lead's ruling. **Final A suite 305 passed; actual pinned-helper forged-cache probe 1 passed; all 15 mutations detected** (controls 24 passed; mutants 18 failed/6 passed, zero errors/skips). All task/mutation commits stayed in the assigned worktree; each mutation was restored. Source-origin, network-denial, deadline and observed-cleanup witnesses verified; at most two pytest workers. **38 basetemps removed**, all retained evidence unchanged by cleanup. [Round 5 report](../../../d4d-executions/plans/reviews/native_u3a_2026-11-07.md#round-5--verified-module-set-and-resolved-path-imports-2026-11-07), SHA-256 `def6870877523d138a196cfd77aec17df857e3c98d29d8c3d74d619cff63a2f1`; [final evidence](../../../d4d-executions/scratch-native-u3a-r5/final-summary.json), SHA-256 `4405bbc098030f95d0dd0aa4aaac2fbd71358622a5b32f756bd8ebce1a18931b`, identical after cleanup. R5-A/B/C review findings fixed and retained locally; online issue/PR filing deferred. No protected/v1/U2/C/D/launch-a21 edit, native executable, provider/network call, fetch/push/gh, merge or external notification. Real C/D integration remains their next rounds. One STATUS entry; no further task started."
+    },
+    {
+      "line": 6550,
+      "text": "- **2026-11-07T22:45:42Z \u2014 native U3-B Round 3 committed; P2-3 remains incomplete; stopped.** Assigned branch `codex/native-u3b-catalog-20261107`, clean worktree `d4d-executions/codex-native-u3b`, commit **`ea2c9728c88f1ac5ae9b17b719f068c79eaf5d62`**, parent `35d1aae4a`. The one authorized full-roster `-n 0` run reached its **7,200-second deadline: 365 passing calls, zero failures, exit 124** (7,200.138 UTC seconds including termination). Node IDs exactly match the 522-node collection prefix; 157 nodes remain unfinished. It passed the portable-capture case that blocked round 2, then stopped during `tests/test_download/test_api_runner.py::TestValidatorRepairRefreshCheckpoint::test_interruption_before_refresh_does_not_restart_the_sealed_full`. Original `F.F` identities remain unknown; no full-order pass or P2-3 closure is claimed. Production/tests and protected/A21-pinned/frozen-v1/U2/launch-a21 files unchanged. Source-attributed evidence retained in `scratch-native-u3b/round3-20261107-ordered/`; committed manifest SHA-256 **`a85a3ceda359ead00ed1378b434b01e2e5239bec15022f830f6b835ce7b3c844`**. Sole transient basetemp removed after evidence retention and guarded checks. Quiet-lock and offline protections retained; no network/provider/native execution, fetch/push/gh, PR, merge, continuation or additional pytest run. [Round 3 report](../../../d4d-executions/plans/reviews/native_u3b_2026-11-07.md#round-3--longer-ordered-api-run-2026-11-07). All own validation processes ended; no next unit started."
+    },
+    {
+      "line": 6552,
+      "text": "- **2026-11-07T22:00:33Z \u2014 native U3-A Round 4 complete; stopped.** Worktree `d4d-executions/codex-native-u3a`, branch `codex/native-u3a-bridge-20261107`, clean at **`26a8632d9fba325dd6c9463b84f5281ebfffa64e`**, from `dd3bb23bde5b8e04bb0fa65c040c5121474130fa` via implementation `1ea26b8944ca1372c4f71c669b609c5377dae247` and the final mutation-coordinator commit. Added one required keyword-only `classifier_projection` to A's fixed reconstruction contract and threaded the identical object through `verified` and both `admit` checks. Missing/None refuses before reads/effects; no construction, inspection, serialization, global storage or E/Admission field. A's two-entry map, guard and loader are unchanged. **Canary 1 passed; all seven A suites 276 passed; all 15 selected mutations detected** (24 passing control tests; mutants 18 failed/6 passed, zero errors/skips); actual-helper forged-bytecode probe valid. MG establishes verifier invocation and MO diagnostic specificity with a deeper refusal still present; these limits are recorded. Independent source/evidence review found no remaining scoped issue after the R4-A auditor repair. All runs retained own-source/network-denial/observed-cleanup evidence, explicit PYTHONPATH, quiet-lock monitoring and bounded execution; at most two pytest workers. All 32 new transient basetemps removed after audit/preflight/dry-run/canary, with source archives and all results retained; post-cleanup manifest is byte-identical. [Round 4 report](../../../d4d-executions/plans/reviews/native_u3a_2026-11-07.md#round-4--explicit-classifier-projection-forwarding-2026-11-07), SHA-256 **`b34ca3a9ebe35b3227c36fccb21d78e81b5b066a42aa52aa5e59faf9464eebb9`**; [final evidence](../../../d4d-executions/scratch-native-u3a-r4/final-summary.json) **`47e25681d2c58c2e0a102c056f960a4286bc97c7d400e2fc5b9ff8cf4e7f9de4`**; cleanup TSV **`106d9123edeb9a7f91deda5393fba69746e8604597a54b6d5da2d519d5945032`**. C still owns genuine carrier/lifetime/source-pin acceptance; no C/D integrated admission claimed. No protected/v1/U2/C/D/launch-a21 edit, native executable, provider/network call, fetch/push/gh, main merge or external notification. One entry; no further task started."
+    },
+    {
+      "line": 6554,
+      "text": "- **2026-11-07T21:33:23Z \u2014 native U3-D Round 8 complete; stopped with integration gates open.** Assigned worktree `d4d-executions/codex-native-u3d`, branch `codex/native-u3d-integration-20261107`, clean at **`3ab9fbc189f647d0abf00a50ab4c35634fe5228e`**. Three linear local commits from `9687dea189faa92cba1b30bdb0c6ee2f476ec747`: split `faae7e8eb9eafe9525d4fe3d3ba18ea9a648412c`, restored pre-input engine-contract check `0b2e86bcb2fa2e97a94c408cb22d8b8003b81c94`, final evidence/EOF cleanup `3ab9fbc18`. D's ten original consumers have no direct/deferred A/v1 or orchestration imports; verification/launch/readback/writes moved to explicit orchestration, with neutral runtime/gate parity and the fixed six-function C protocol seam. No C stand-in or C merge. A's unchanged guard accepts the three C-independent original D graphs and names seven remaining C-dependent refusals. **Full suites at `0b2e86bcb`: D 537 passed / 15 failed / 138 setup errors; A/C 786 passed; safe B 30 passed; 24,650 collected with no collection errors. Final-head boundaries: 75 passed.** The final production delta is only six trailing blank lines in two files, with exact whitespace-only/AST-equivalence assertions retained; full-suite and final-head evidence are distinguished. Both canaries passed before broader runs. D's failed/error node list is unchanged from the first split run: absent real C protocol, fixed A projection-handoff gap, real C graph refusal and pending protected U1 hook; no skip/fake authority substituted. Inherited missing transport/replay helper interfaces and C writer-import migration remain open before admission. Excluded only the inherited B fixed-output CPU-smoke execution. All nine runs verify own-source/network-denial/observed-process cleanup under quiet-lock and 3,600-second limits, at most two workers per invocation. Five new transient basetemps removed after retaining logs/XML/render witnesses; all earlier evidence/worktrees preserved. Independent read-only review findings/dispositions and exact requirements are in [Round 8 report](../../../d4d-executions/plans/reviews/native_u3d_2026-11-07.md), SHA-256 **`22673accaf24553af937eefe6d0269e3c1dafe0fda19f62e8cbc64a6ffdebf87`**; [evidence manifest](../../../d4d-executions/scratch-native-u3d/round8-evidence.json) **`4eaa7a374825d9ab6276481bc3c57e41a146503121b9f5a1edb3d9ed60a18308`**; final D JUnit **`1b4a9bb87ed242bd1178b803c731c1da43e4da9b5ce43f5ef7300e2393678865`**; cleanup TSV **`14c4a6e3563296dfe13ff963c9cd24e42c9b7b99c155dd37812482c9ef6ca12b`**. No protected/v1/U2/launch-a21 edit, native executable, provider/network call, fetch/push/gh, external notification or main merge. One entry; no Round 9 started."
+    },
+    {
+      "line": 6556,
+      "text": "- 2026-11-07T20:48:47Z **Native U3-D Round 7 STOPPED for the brief's ownership/interface ruling; no implementation claimed.** Assigned branch `codex/native-u3d-integration-20261107` and worktree `d4d-executions/codex-native-u3d` remain clean at **`9687dea189faa92cba1b30bdb0c6ee2f476ec747`**. First refusal: D `native_shared_registration.py:15` imports A `native_execution_registration_v2`, rejected by `native_execution_authority_v2.py:214\u2013215` before compilation. D owns this and adjacent A/v1 imports, but removing them exposes C controller `:19\u201320` and C controls `:17`, which genuinely require A verification/source loading; C capture and deferred U1 runtime parsing also reach frozen v1 modules. No import reshuffle, guard exemption or partial repair was represented as closure. **R6-6 independently requires a C interface ruling:** its closed projection supplies only `HISTORY_CONTRACT`, not `INIT_ID`, `digest`, `initialize_frame`, `hook_output` or `permission_arguments`; classification also requires C's loader-minted projection, so an equivalent dictionary is not valid. Donor **`f719de58104338ce89a364a0284f8e856037b99c`** supplies pure view preparation/reuse, not those helpers. Proposed C-owned pure reconstruction/permission boundary, exact six-function surface, digest binding, migration sites and parity/refusal tests are in the [Round 7 report](../../../d4d-executions/plans/reviews/native_u3d_2026-11-07.md#round-7--stopped-at-c-owned-interface-boundaries-2026-11-07), SHA-256 **`360809d930ef2dab3f145078424169e913bcecea9be5cd17cafc70a1d86cdfa7`**. New offline diagnostics: real refusal canary **1 passed**, then census plus all C projection cases **16 passed**; own-source/network-denial/observed-cleanup witnesses passed, serial pytest under the quiet-lock protocol. JUnit SHA-256s **`b90a934062ceef2adc303447b22199d9654dcc6eb6bb19b54ca92abe2b60d9dc`** and **`bd55ca18541b6d113930e430a56913681820eca04d05ac7dff9c8f5b3ff8a418`**. Full D/C/A/B, collection and new U1 scratch composition were not rerun because no implementation candidate exists at this stop; neither gate is fixed and Round 6 results are not relabeled as new acceptance. Two empty transient basetemps removed after recording evidence; all logs/census/hashes/history/worktrees retained. No source/test/protected/A-guard/v1/U2/launch-a21 edit, new helper, commit, C3 merge, push/gh/fetch, provider/network call, native executable or external notification. Protected U1 hook stays pending; stopped after this report and entry."
+    },
+    {
+      "line": 6558,
+      "text": "- **2026-11-07T10:33:27Z \u2014 native U3-B round 2 committed; P2-3 ordered gate remains incomplete; stopped.** Assigned worktree `d4d-executions/codex-native-u3b`, branch `codex/native-u3b-catalog-20261107`, clean at **`35d1aae4a631ce55660c45f838c6f03688ea38d3`**, parent `a3aac3bed7402e5afad953eb050a39ec3ec5e553`. Fixed the smoke output path, restored donor guard/refusal/count cases, strengthened owner fixtures and merged-schema parity, and added live event-field and metamodel-callback guards. The prior U3-C overwrite and unplanned U1 edit are disclosed with all P3 dispositions. Final-source validation: **48 U3-B tests passed; 677 shared/S7/typed passed; all 522 API nodes passed across three disjoint selections (354 + 158 + 10)**. The full-order `-n 0` attempt timed out after 354 passes, exactly matching the collection prefix; the original two `F.F` node IDs remain unrecoverable and unidentified. Separate-process continuation is broad coverage, not full-order proof. BC1: **257 passed, 1 expected failure, 15 exact-baseline setup errors**. Collection: **22,867 nodes, 3 exact-baseline import errors**. Deadline/clock-gap attempts are retained and qualified; final launcher watches UTC and monotonic clocks. Protected/A21-pinned, frozen-v1, U2 and launch-a21 files unchanged; offline throughout, no native executable or provider/network call, fetch/push/gh, merge or PR. All own test processes and temporary sleep assertions ended; 17 transient basetemps removed after evidence retention. [Round 2 report](../../../d4d-executions/plans/reviews/native_u3b_2026-11-07.md#round-2--lead-ruling-of-2026-11-07), SHA-256 **`5464edb5c24ff833b112e542b19117a71ab3c2695eaad6ff7a4e0d4d12aa17b1`**; committed evidence SHA-256 **`6a80cca66009bb8bd82558f478d329388ef849f9605a4c469185a67fa2718787`**. No U3-C/D or next-unit work started."
+    },
+    {
+      "line": 6560,
+      "text": "- 2026-11-07T10:05:29Z **Native U3-D Round 6 complete; stopped with unresolved admission gates.** Assigned branch `codex/native-u3d-integration-20261107`, worktree `d4d-executions/codex-native-u3d`, clean at **`9687dea189faa92cba1b30bdb0c6ee2f476ec747`**. Merge **`b63e7d32ca67ddfbb28d59e5e43bd52f4705a761`** has parents **`00a72ee21e0b99c6da25a9cd8cbaeb9711329c3e`** and specified C final **`42e16482543d7e0269bd4a7b91445c11b7729063`**. Report explicitly resolves all five both-side overlaps, preserves the exact eighteen-command R9 table and Round 5 phase/receipt contracts, and records partial A3 input-only interface migration without bypassing the real graph refusal. Fixed reader schema-root test alignment, entered the new consumer context manager in the absence test, migrated D from the removed static CI constant to explicit events, and isolated the guard test's foreign bare aliases. **C/A 786 passed** at `d28c78b484c827b63ceae87602863ec02d0c190b`; final-head **D 381 passed / 7 failed / 138 setup errors, zero collection errors**, compatibility **285 passed**, full collection **24,471 nodes / zero errors**. Counts overlap. All twelve formerly B-blocked initial-JSON CLI cases, two model-error boundary cases, three actual receipt-reader kernels and fifteen selected safe B reuse cases pass. All fifteen D guard-contract tests pass, including genuine graph refusal before compilation/effects. Every remaining error/failure is classified: **138 setup errors plus six test-body failures** stop at unavailable `native_control` during fixture construction, before execution/CI; the seventh failure is the unchanged protected U1 construction/replay hook expectation. The real graph, pure permission interface and U1 hook remain integration gates; no native execution acceptance is claimed. All source-origin and observed-cleanup witnesses passed, quiet lock honored, at most two workers and 3,600 seconds per invocation. Nine transient basetemps removed after retaining logs, source snapshots, failure evidence and render witnesses; other worktrees/history preserved. [Round 6 report](../../../d4d-executions/plans/reviews/native_u3d_2026-11-07.md#round-6--c-integration-r9-preservation-and-a3-refusal-accounting-2026-11-07), SHA-256 **`d182054a70d4edb1a24d726c89950a215ecfb5ca8c0203bbeae79b081c7f8951`**; [manifest](../../../d4d-executions/scratch-native-u3d/round6-evidence.json) **`603269d4380772abb0b8846ba03fbf7cc41dea645c27686eb5e475e033db14f1`**. Protected/frozen-v1/U2/launch-a21 unchanged; local findings retained rather than GitHub posts. No fetch/push/gh, provider/network call, real native executable, main merge or later C/B2 merge. No further task started."
+    },
+    {
+      "line": 6562,
+      "text": "- **2026-11-07T09:19:04Z \u2014 native U3-D Round 5 N1\u2013N5 complete; stopped.** Worktree `d4d-executions/codex-native-u3d`, branch `codex/native-u3d-integration-20261107`, clean at **`00a72ee21e0b99c6da25a9cd8cbaeb9711329c3e`**, sole parent `46e2f12b25bb848c5bb5474fbffb1281e59d015f`. Fixed exact standalone structural-marker matching, complete pending-floor/SystemExit regression, path-normalized independent receipt-render witness, untracked test/source byte inventories, and real #727 CLI unexpected/expected missing-receipt tests. Canary **1 passed**; acceptance **5 passed**; both intended mutation copies **1 failed each**, followed by **2 passed** after restoring the same copy. Focused **169 passed / 15 unchanged failures** (14 missing B catalog, 1 unapplied U1 shared-admission hook); inherited receipt-policy/v5 regressions **285 passed**. Counts overlap. Separate read-only code/evidence reviews found no additional scoped issue and confirmed the intended red failures. All runs retained own-source/network-denial/observed-cleanup evidence, serial pytest, at most two simultaneous invocations and individual 3,600-second deadlines. Seven transient basetemps removed with guarded cleanup after retaining cited render witnesses; all earlier evidence preserved. Only `native_shared_phase.py` changed in production; no C merge, protected/v1/U2/launch-a21 edit, native executable, provider/network call, fetch/push/gh or main merge. Full B/C/U1 integration acceptance remains pending. [Round 5 report](../../../d4d-executions/plans/reviews/native_u3d_2026-11-07.md) SHA-256 **`b601b25cf24d7908f541b1b6241a86a7d6aaaa00c95f7c6ba1c64c5f7ec536c2`**; [evidence](../../../d4d-executions/scratch-native-u3d/round5-evidence.json) **`425cd0a3d9f7596284b6fe151446ecdee51bb61ca405c838476ea14cb698116b`**; regression JUnit **`41a16ad288a1b399f7b871b890155d15a5942ebad75e5ea52030ff9b908af8e0`**; cleanup TSV **`aa702bed6bc05acf4c76d362e95802d50d8741283f372f0ff1818e9c2e47305a`**. One entry; no further task started."
+    },
+    {
+      "line": 6564,
+      "text": "- **2026-11-07T08:58:49Z \u2014 native U3-C round 2 validated; stopped at the pending B review-repair handoff.** Assigned worktree `d4d-executions/codex-native-u3c`, branch `codex/native-u3c-controller-20261107`, clean at **`b9c144a182ccba84fac27e3b5717363c769d4a97`**. Required B `a3aac3bed7402e5afad953eb050a39ec3ec5e553` and A round-2 `73f50666e24fa7629f5e6e9a3f6171621866567c` were merged separately (`1cde8d3c1d6db910c769e5d39594a37f08047f49`, `5eac46c2a47ff6677b69a0e230c810ed0ea1f616`). Later A review fixes were separately merged through completed head **`dd3bb23bde5b8e04bb0fa65c040c5121474130fa`**, final merge **`42e16482543d7e0269bd4a7b91445c11b7729063`**. Preserved B's exact owner prefix, migrated C to closed interfaces, threaded real owner catalogs, repaired saved/live acknowledgement checks and the quiet-window runner; local findings U3C-R2-1\u20139 are retained. **Final combined: 742 passed, zero failures/errors/skips** (475 C + 263 A + 4 runner), 757.57 s; **24,020 collected**, no collection errors. Canary passed before the final batch. Credential-free network denial, own-source witnesses, observed-process cleanup, at most two workers and individual 3,600-second caps verified. Earlier 750 native passes belong to `3c3f89e3e`; the intermediate failed A census is retained and passes after the completed A repair. No protected/v1/U2/launch-a21 edits, native executable, provider/network call, fetch/push/gh, main merge or C-to-D merge."
+    },
+    {
+      "line": 6568,
+      "text": "- **2026-11-07T08:35:16Z \u2014 native U3-A round 3 complete; stopped.** Assigned worktree `d4d-executions/codex-native-u3a`, branch `codex/native-u3a-bridge-20261107`, clean at **`dd3bb23bde5b8e04bb0fa65c040c5121474130fa`**, five linear local commits from `73f50666e`. Addressed accepted **N1\u2013N5**: check-run `head_sha` binds the source head separately from tested PR merge; closed C/D-owned lint with source-only loading of reached package imports; verifier re-export and deep/deferred/cached v1 refusals; cheap introspection/signature hardening; commit proof before helper loading; explicit normal-import trust base and corrected audit-hook/echo claims. Census **231/244 accepted**, including `api_runner`, `native_shared_selection` and U2 v2 modules; real source-loading/digest/restoration canary passes. **263 distinct tests passed** (262 focused at `945ff5596`, plus the final real-import test; production bytes identical to final head), zero failures/errors/skips in those passing runs; **23,498 collected** at final head. Initial sandbox-startup failure and one red census canary retained and classified. All completed drivers verified network denial, source origins and observed cleanup; at most two workers, 3600-second deadlines, required PYTHONPATH and quiet-lock protocol. Evidence exclusively in `d4d-executions/scratch-native-u3a-r3`; six recorded transient basetemps deleted, about 13 MiB recovered. [Round 3 report](../../../d4d-executions/plans/reviews/native_u3a_2026-11-07.md#round-3--lead-ruling-on-round-2-re-review-2026-11-07), SHA-256 `98c0fa48e995480f5ca7fd63f0f17b49a2351892263e650f7999f83f83d5cc98`; evidence summary SHA-256 `2059d2e0134031762297dff3fe24e12de56062f72ae82cac87ee0892ae565736`. Local review findings R3-A/R3-B addressed and retained for later issue filing. No protected/v1/U2/launch-a21/C/D edits, fetch/push/gh/network/provider/native-executable use or merge; admission stays closed. No repeat of the prior 750-test or mutation campaign is claimed. Lead owns subsequent C/D merge coordination; no further work started."
+    },
+    {
+      "line": 6570,
+      "text": "- **2026-11-07T05:55:18Z \u2014 native U3-B complete; stopped for independent review.** Assigned worktree `d4d-executions/codex-native-u3b`, branch `codex/native-u3b-catalog-20261107`, clean at **`a3aac3bed7402e5afad953eb050a39ec3ec5e553`**, direct parent `f101652f53f23d9be83a213b6d5850bd6e9341fc`. Added bounded T1 event reuse through M8's loader, exact T2 initialization markers, and private owner catalog support; fresh validation/refusal behavior retained. **522 API and 677 shared/S7/typed tests passed** before the final optional-LibYAML import correction; final-source follow-ups **221 passed/11 existing skips**, **170 cache-consumer passes**, and **14/14 API render conditions byte-identical to M8**. All **273 BC1 cases** attempted: 257 passes, 1 expected failure, 15 scanner setup errors reproduced exactly on base. Collection: **22,850 nodes**, same 3 FAIRSCAPE import errors as base's 22,808; all 42 added nodes accounted for. CPU smoke only: 0.695142 s cold / 0.615591 s warm, saved independent reconstruction passed. [Report](../../../d4d-executions/plans/reviews/native_u3b_2026-11-07.md) classifies inherited gates, earlier incomplete runs, final correction and later A21 rebuild. Committed evidence SHA-256 `fc4f23d41a4fee46d16761b92d4ef66f2ffb69b373a9175f9f188878de30c8b8`. Quiet protocol respected; pytest at most two workers under individual 3600-second deadlines. No protected-file edits, fetch/push/gh/network/provider calls or native agent execution. One STATUS entry; no further work started."
+    },
+    {
+      "line": 6572,
+      "text": "- **2026-11-07T05:46:37Z \u2014 native U3-A round 2 complete; stopped.** Local branch `codex/native-u3a-bridge-20261107` in `d4d-executions/codex-native-u3a` ends at **`73f50666e24fa7629f5e6e9a3f6171621866567c`**, linear from `3690a570a078d30ed8abd113200ce7f6384c5536`. Addressed P2-1/P2-2/P2-3 and P3-1\u2013P3-5: closed input-only reconstruction and checked reservations; named independent refusals; verified-byte loading, including implicit package parents; workflow/merge evidence binding; narrowed exposed helpers and test hygiene. **750 passed, zero failures/errors/skips** at `5912b5713c5104c5094aec3bdb3713f3c7d6d807` (`-n 2`, 1527.66 s driver; network/source-origin/observed-cleanup checks passed); final head differs only by the committed evidence-audit helper. **23,477 collected** at production head `b2916118a1e24d62f6a59f5350b07056bf8b75a1`, whose `src/` remains identical. **15/15 mutation probes killed** on `ff53b3f4fc0bd594f1585a38a662aa487aeb3629`: 24 passing controls, 18 expected mutant failures/6 passes, no errors/skips; MG proves invocation, MO still has a deeper refusal. Independent final audit valid; SHA-256 `492405ceeb4a551d932d95352df98687e02e7a5aaff614410ffdcc1a3e5ef51a`. Actual pinned-helper forged-cache probe passed without executing forged bytecode. Retained red and failed-fixture evidence is classified in [Round 2 report](/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_u3a_2026-11-07.md:217), SHA-256 **`8dc8f331c8680da51cce807037864f6a68ef0aa35af4f8fa57ecb5628fe2a238`**; final regression outcome SHA-256 `88e5e00ec274767224e90c0d5e4b9eefb18f64d506cafd5f8d0351b4bd63b687`, JUnit `8bd55ba450db348bca1c38bb45f6077e0ff079a208bbf8c28b4a504c749c03e2`. Clean assigned worktree and full diff check pass. U3-C/D untouched and must migrate to the revised signatures/control map; complete v2 admission remains closed pending integration. No protected/v1/U2/launch-a21 edits, fetch/push/GitHub/network/provider/native-executable use; quiet lock respected. No further task started."
+    },
+    {
+      "line": 6574,
+      "text": "- 2026-11-07T05:42:21Z **D95 native U3-D Round 4 complete; stopped.** Assigned worktree `d4d-executions/codex-native-u3d`, branch `codex/native-u3d-integration-20261107`, clean at **`46e2f12b25bb848c5bb5474fbffb1281e59d015f`**, parent `98eb2c4f2`. Implemented all seven accepted round-2/3 review repairs: unconditional strict initial-stage refusal and native completion/pending-floor checks; positive final-stage stdout tripwire and prefixed saved mutations; exact initial JSON keys and producer joins; date serialization, unchecked native model errors and retry/sticky exit rules; CLI binding assertions/write refusal; permission rerun/per-run diff digests; portable digest constants and actual command-spelling rejection. P1 strengthened regression **red 1 failed** on baseline production, then **green 1 passed**. **283 regressions, 94 permission-module tests, 169 composed consumer tests passed**, plus composed canary. Focused run **163 passed/15 failed**: 14 B-import-blocked cases and one U1-packet-dependent render case that passes in composition. Counts overlap. [Round 4 report](../../../d4d-executions/plans/reviews/native_u3d_2026-11-07.md) records each disposition, corrected Round 3/PR wording, identities and B-dependent `check_initial` follow-up. [Evidence](../../../d4d-executions/scratch-native-u3d/round4-evidence.json) SHA-256 `5dd5e82e03b2b0c202cb3e19910362d7e582baa3dcc310427f816da023e7915f`; all runs bind saved diff digests and verify source origins/observed cleanup. Fresh scratch preserves all four packet postimages; no scratch commit. Offline, no B/C merge, protected edit, native executable, provider/network call, fetch/push/gh or SG2 batch. Criteria 4/5 and public native integration acceptance remain open. One entry; stopped after reporting."
+    },
+    {
+      "line": 6576,
+      "text": "- 2026-11-07T05:03Z **U3-D Round 3 complete: `98eb2c4f2`**, clean on `codex/native-u3d-integration-20261107`. Resolved U3D-R9 in the three authorized consumers: exact eighteen-command table, structural-only initial settlement, strict `final_receipts` final/provenance obligation, rejection of structural JSON relabelled as final, and current full/receipt epochs. **68 worktree consumer tests, 277 Round 2/receipt-v5/table regressions, and 141 four-packet scratch phase/render/controller tests passed** (overlapping cohorts); retained split-command regression passes in both trees. Fresh reader collection has **3 B-blocked missing-native_catalog_reuse errors**; one prior wrong-filename usage error is retained. Live/saved mutation tests exercise synthetic events through the real observer, not public B-dependent readback acceptance. Read-only review found no new scoped issue. Evidence, scratch hashes, prepared PR text and explicit future C-overlap obligations are in [Round 3 report](../../../d4d-executions/plans/reviews/native_u3d_2026-11-07.md). Offline, quiet-window checks, serial pytest/3600-second deadlines, network/native denial and observed cleanup honored. No B/C merge, protected worktree edit or scratch commit. One local implementation commit only; stopped after this entry."
+    },
+    {
+      "line": 6578,
+      "text": "- 2026-11-07T04:52Z **U3-D Round 2 scoped checkpoint: `04c2ba98a`**, clean on `codex/native-u3d-integration-20261107`. Added explicit initial structural receipt JSON mode (pending floors, no acceptance claim), mutually exclusive with unchanged strict mode; render binds initial/final commands separately. **272 regression tests + 42 render tests passed**; 10 CLI cases and 2 reader collection errors remain B-blocked. **New U3D-R9 blocker:** the out-of-scope fixed helper policy, phase observer and provenance final obligations still require the old 17-command table; retained regression fails on `final_receipts`. No consumer guard was weakened. Old/new render digests, evidence, local issue record and prepared owner PR wording are in `d4d-executions/plans/reviews/native_u3d_2026-11-07.md`, Round 2. Offline; no B/C merge, protected edit, native/provider call or new scratch commit. Stopped after report and this single entry; integration acceptance remains open."
+    },
+    {
+      "line": 6580,
+      "text": "- 2026-11-07T04:34:30Z **D95 native U3-D implementation checkpoint; stopped with B and initial-check contract gates open.** Assigned worktree `d4d-executions/codex-native-u3d`, branch `codex/native-u3d-integration-20261107`, clean at **`96adabfb3ea6e558be02bbfa5dfcbcac16c03b0b`**, from C **`9bf29183a4a8fa97290ed6b7691848fe22313241`**. Five local commits: baseline **`e8f0682fe88de2de078a67c0329895d9445d72c2`**; separate f719 pure-preparation carry **`cc1cad44e25dea1003eb40d3d85456051947831e`**; readiness/scratch tools **`398052742d021c720440c57eb29c0d26460281a8`**; lazy gates/receipt mutation coverage **`85615184432274a19f92725adeba5dff5eaefbfa`**; final U3-A refusal-fixture adaptation **`96adabfb3ea6e558be02bbfa5dfcbcac16c03b0b`**. Added ten D modules and eleven allowed adapters; `provenance.py`, frozen v1/U2 source, protected implementation files and launch-a21 unchanged. Local review ledger R1\u2013R8 retains subscription replay, consumed approval joins, exact Write-result text, pending-floor refusal, gate readiness and test-fixture corrections. **No B/C merge:** B still **`f101652f53f23d9be83a213b6d5850bd6e9341fc`**, report \u201cvalidation in progress; not yet a handoff,\u201d checked `04:33:02Z`; C remains its checkpoint. **R5 needs a scope ruling:** inherited native rendering requires initial `receipts check --strict` while its floor is pending. Strict now correctly fails; a distinct initial-structure command/render amendment is pending, with no prompt or guard relaxation. Validation: **160 independent adapter/guard tests passed; 139 permission/reuse tests passed; 100 existing receipt-v5 tests passed.** The v2/U2 run had **133 passes/2 stale absence-fixture failures**; repaired affected module **51 passed** in final exact U1 scratch composition, with a passing same-route canary. Counts overlap. Final scratch commit **`d2feae57f49b65ba34ef38842b5b8d0b25095c79`**, parent final D, tree **`17e17e84509f75c0557fb51c95e7433fda44e503`**, includes only four exact packet postimages; source worktree protected bytes unchanged. Full collection: **23,918 tests collected/20 errors**, all unavailable B owner interfaces (18 native_catalog_reuse, one schema_snapshot, one _ReceiptCatalogContext). Lazy-gate injection remains dependency-blocked, not passed; 13 new recorded-reader/kernel tests and public correction/omission/lifecycle acceptance remain B-blocked. Full integrated native/API/BC1/A\u2013C regressions and SG2 final batch remain pending. No criterion-4/5 or native launch acceptance claimed. [Report](../../../d4d-executions/plans/reviews/native_u3d_2026-11-07.md) SHA-256 **`bb4091d222ec2d10d036cf0454e0cdf3b1165c984a2a7d858a039e47afb17611`**; [25-invocation evidence manifest](../../../d4d-executions/plans/reviews/native_u3d_evidence_2026-11-07.json) SHA-256 **`6a78532567a9111b11498e1d1e7bd35e6b16fd5756e564537f1cd21f7ca5b75b`**; scope packet **`e50417690e32d7d57acb13a7763b052205fd0bfe48dfa4f28ef84ce816bf1490`**; final scratch composition manifest **`a4c2afde365fa5290ecbb7ccff9a7b9fda108b7d97e51130765d1ea1fc224550`**. All test processes ended with origin/observed-descendant cleanup checks passing. Credential-stripped OS network denial, native executable denial, external basetemp, serial pytest/3,600-second limits and quiet-lock checks used throughout. No provider/native executable, fetch/push/gh, merge, notification, evidence removal or timing campaign. Report and this one entry complete the blocked handoff; stopped."
+    },
+    {
+      "line": 6582,
+      "text": "- 2026-11-07T03:49:59Z **D95 native U3-C prepared; stopped at the required U3-B gate.** Assigned worktree `d4d-executions/codex-native-u3c`, branch `codex/native-u3c-controller-20261107`, clean at local checkpoint **`9bf29183a4a8fa97290ed6b7691848fe22313241`**, based on U3-A **`3690a570a078d30ed8abd113200ce7f6384c5536`**. Added the ten C components and receipt delivery fragment, consuming explicit v2 preparation/control interfaces; fresh live execution verification keeps admission closed until D. Preserved the B owner boundary; removed donor acceptance caches and recorded R1\u2013R5 review dispositions/tests in `notes/native_authority_v2.md`. **U3-B merge not performed:** at `2026-11-07T03:49:03Z` its branch still points to initial base **`f101652f53f23d9be83a213b6d5850bd6e9341fc`**, and its report says \u201cvalidation in progress; not yet a handoff.\u201d Stopped exactly at that dependency gate, without copying uncommitted B code. Preliminary validation: one observation canary passed, then **261 unique independent observer/phase/current tests passed** (canary overlaps). A broader preliminary collection failed with two missing donor `coverage_counts` import errors; fixed locally in C, failure evidence retained, B-dependent suites still deferred. New controller/attribution/receipt/stage/integration tests, full native/U3-A regressions, SG2 final batch and full collection **remain unrun** pending the real B merge; criterion 3 is not claimed complete. Static packet verifies 11 added source modules, no existing `src/` modification, AST syntax and clean worktree; 30 changed paths. [Report](../../../d4d-executions/plans/reviews/native_u3c_2026-11-07.md), SHA-256 **`28d1aa050a67ba9fc56ad6f48592367b92ba0e29aaeb6790a9f26e2f84673164`**; [scope/hash packet](../../../d4d-executions/plans/reviews/native_u3c_packet_2026-11-07.json), SHA-256 **`0d6571d2c6096970645f315a3eca9b3a8b14a7b8f9c19180944d5aad070ed34b`**; passing-suite outcome **`acea17806bf65cd841bed353e12ccf1b2df6554eb725d9724c27d447d1f730ab`**. Tests used credential-stripped OS network denial, serial workers, external basetemp, quiet-lock handling and 3,600-second limits, with own-source and observed-process cleanup checks passing. No protected/v1/U2/launch-a21 edits, provider/network call, native agent executable, fetch/push/gh, merge, external notification or timing campaign. No further work after report and this entry."
+    },
+    {
+      "line": 6584,
+      "text": "- 2026-11-07T03:20:27Z **D95 native U3-A complete; stopped for independent review.** Assigned worktree `d4d-executions/codex-native-u3a`, branch `codex/native-u3a-bridge-20261107`, clean at **`3690a570a078d30ed8abd113200ce7f6384c5536`**, from supplied base **`f101652f53f23d9be83a213b6d5850bd6e9341fc`**. Added the explicit v2 execution authority and genuine U1 S/R preparation boundary; interfaces for U3-C/D are frozen in `notes/native_authority_v2.md`. The owner confirmed \u201cDefine shared preparation boundary now.\u201d Full execution admission **refuses until the committed C/D composition/permission consumer exists**; no v1 launcher redirection or launch capability is delivered. **792 regressions passed** at **`6cf61aca4dbfb731b4d23c29684d15cd97e5d976`** (3,029.11 s, including all three SG2 publication/replay cases); final test-only follow-up has byte-identical `src/`, **121 focused tests passed**, and **23,356 tests collected** with source-origin and observed-process cleanup checks passing. Counts overlap. Reviewed R1\u2013R6 findings are recorded locally; initial failed preparation and collection-wrapper evidence is retained. The wrapper now accepts repeated identical own-package namespace paths while retaining all foreign-origin refusals. FAIRSCAPE was materialized only in the assigned worktree from exact local Gitlink `8c80311d7d8b0fadac07dca9567d632103691f48`; no install/fetch. Eight changed paths; protected files, frozen v1/U2 routes, launch-a21 and existing evidence are unchanged. Every invocation used credential-stripped OS network denial, at most two workers and a 3,600-second deadline, honoring the quiet-window lock. [Report](../../../d4d-executions/plans/reviews/native_u3a_2026-11-07.md), SHA-256 **`644173ae0f01f41dad62d7843ae70bc253e5143b97ddbf52b02595a236fa70af`**; regression outcome **`7ddb4c0d5ce95225e7dc5230ce605a6a64d0728dd949da0820fb15844b7537a7`**; final collection outcome **`5f00666c4a92d79a8e8ec940f5a41d75d2871e79382c5cff28a4fae4c32b7810`**. No provider/network call, real native executable, fetch/push/gh/merge, external notification, quiet timing acceptance or N=10 campaign. Combined U1/U3 scanner, protected bundle, full valid-v2 execution acceptance and C/D/E integration remain later gates. No further work after this report and entry."
+    },
+    {
+      "line": 6586,
+      "text": "- 2026-11-06T10:35:49Z **Native U3 read-only change plan complete; stopped.** [Report](../../../d4d-executions/plans/reviews/native_u3_plan_2026-11-06.md), SHA-256 **`ca44185aff6933a0740afafbd6b044b661ab3710ff9b674d1600c6184164f81a`**. Inspected M8 **`cf50d9a1c059f3b5030103378ccef33619475dde`**, U1 reference **`e0b868b0eeb940567dcc8be15921a0c89b57a93e`**, named N2 donors and U0 diagnostic commits through Git objects. Plan: five bounded units, **4\u20136 engineering days after accepted U1**, plus quiet-host measurement/approval queues. Compose U1's M7-relative delta onto M8; its round-3 acceptance and four exact approval packets remain prerequisites. U2 supplies authority v2 but no v2 execution route: U3 needs an explicit bridge that validates the envelope and inner pins before effects while preserving v1. M8 already has within-admission parser reuse; adapt T1's native-only bounded cross-call events and T2's exact supported initialization markers, fresh transition rebuild and unknown-state fallback without importing historical shared files wholesale. Report inventories new modules/current adapters, A21 intersections and protected packets, criteria 3/4 and partial-6 tests, mutation/refusal parity, current API/BC1/S7/v5/D76 regressions and independent reviewer gates. D93 retains native-first integration followed by A21 rebuild/review; first native canary keeps declared shared-v1 differences. Post-U3 plan specifies parent `read_final` CPU profiling, a quiet campaign-path canary, then **10 pairs / 20 trials**, unchanged 180/900 limits, separate settling/gate intervals, host-wide quiet qualification and foreign-load exclusion. Historical 69.04% recorder-body CPU reduction is not current-main or whole-test timing acceptance. Three read-only audits completed; documentation corrections included. Only this report and this single STATUS entry written; **no tests, source edits/imports, native executable, commits, branches/worktree changes, fetch/push/gh/network/provider calls or notifications**. No implementation or campaign launched."
+    },
+    {
+      "line": 6588,
+      "text": "- 2026-11-06T10:10:49Z **U0 Second treatment complete; stopped.** Exactly one fresh T1 versus T1+T2 pair, frozen control **`b3285903de8d6ca9389627a3515c6de430216338`**, treatment **`b1b50887068ca2672961833d7a4029c4e7ad2e4e`**, parent T1 **`2747e86c3f0521c1ef5c455d9be82428e4ca5be7`**. T2 recognizes exact supported rawloader/Mark/callback initialization with separate runtime markers and a fresh catalog rebuild; lazy imports, T1 bytes and refusal guards remain intact. Completed recorder-body owner CPU **168.946908 \u2192 52.303395 s (\u221269.04%)**; inline **140.781108 \u2192 24.560461 s (\u221282.55%)**; recorded reconstruction **118.506789 \u2192 15.922172 s**; schema products **37 \u2192 2**. Nested phases are not additive. Catalog eligibility **384 available / 0 None** in treatment; T1 cache unchanged at **6 documents / 2 parses / 2 hits / 2 fallbacks**. Control timed out at unchanged helper180, with valid completed body/late-phase returns but no observer end/readback. Treatment observer valid at **54.527568834 s**, exact public test **1 passed / 12 warnings**, persisted record/all runtime gates/readback/spent-attempt refusal verified; scientific acceptance remains unassessed. Corrected saved comparison **valid, 10 matched returning top-level calls**; full bytes equal, core differs only in source/schema paths including real `conforms_to_schema` (both schema bytes identical). Historical original-control reconstruction **123.301870 \u2192 15.922172 s (~87.1% descriptive reduction)** uses different instrumentation and a censored whole run; no cumulative whole-run causal percentage. A quiet-host N=10 campaign is worthwhile **after reviewed U3 and one quiet integrated canary**, with ~55 s as the recorder-phase working expectation, not established timing acceptance. Whole treatment test **1385.458 monotonic s / 3326.01 pytest session-clock s**; clock discrepancy preserved without inferred cause, parent readback CPU unprofiled, no end-to-end speedup claim. Both source/cleanup proofs pass and owned locks released; final direct absence check passed. Same credential-stripped, OS network-denied descendants, read-only external sampler, synthetic peer, 180/900 limits. Preparation tooling **`237cef0ab5d49948b6007a399d979be7fcdb42a3`**, launch **`f30b0c5915e357dabaa440795649a5b3562b1908`**, final tooling **`55d6f2c88fd0e4b34f5036f7a9b22fb8346107de`**, clean. Preflights46 valid; T2 tests7, observer10, wrapper124, source-pin8; post-run optional-stack reader correction canary1/new analyzer22/original analyzer20 passed (overlapping suites). Original invalid saved analysis retained; no trial rerun. [Second treatment report](../../../d4d-executions/plans/reviews/native_u0_recorder_2026-11-06.md) SHA-256 **`e17db37c86cdd7f652f4d1bee07c19e7e03881224a930c6263e28800d98b01e9`**; valid `native-u0-20261106/second-pair-analysis-v2.json` **`2fa29cd1ad9419015ad740d25682d50fdec520318220838b379cfb8ec209f04c`**; source manifest **`7431c06c7cfd9c10a9b87ec239da053a3666d31229f67bb618b317512bf997dc`**. Independent read-only audits completed; exact U3 change set and remaining limits documented. All historical evidence preserved. No production/protected-file/run/ATTIC changes, real native executable/provider/network call, fetch/push/gh or N=10. This replaces the in-progress entry and ends the task."
+    },
+    {
+      "line": 6590,
+      "text": "- 2026-11-06T07:52:21Z **Native U2 exact baseline comparison complete:** frozen M7 `8bc90e93d` and U2 `4f10963df` each **685 passed / 262 failed**, identical 947-node collection; **0 U2-only / 0 M7-only / 262 common failures**, all original Round 3 failures reproduced on M7 and all new common first-error strings equal. Grouped causes/full exact-node evidence in `d4d-executions/scratch-native-u2-baseline/comparison.json`; report appended under **Baseline comparison** in `d4d-executions/plans/reviews/native_u2_2026-11-06.md`. Quiet-window pause/resume honored; both invocations under 3600 s, two workers, offline, no real native executable or fixes. One additional passing-test reaper-thread warning disclosed. Helpers retained uncommitted in scratch. Stopped."
+    },
+    {
+      "line": 6592,
+      "text": "- 2026-11-06T08:09:34Z **U0 Causal pair complete; stopped.** U0-R7 project-import isolation and U0-R8 owner-thread CPU accounting repaired and verified. Exactly **one control/treatment pair**, frozen baseline **`01969cbed8eed93f420c640c1f1c306e5f58b033`**, control **`ac95994ae49741c71cc923d0a546b8544fd6debc`**, treatment **`2747e86c3f0521c1ef5c455d9be82428e4ca5be7`**; common instrumentation identical, only three diagnostic treatment source deltas. Launch tooling **`eaa73bf265f131935e3d16a15512dfbd12fad23a`**, final local tooling **`459b96eebbd80183241051b432733cf3b0e7bec9`**, clean/no push. R7 focused **16 passed**, R8 **9**, treatment parity **9**; combined pre-run tooling **178 passed**, later exact-pin **9**, both prepared-source preflights **43 targets valid**. Saved phase-reader canary **1 passed**, module **14 passed** after lock release. Control: original helper **TimeoutExpired(180)**, **1 failed / 12 warnings / 677.35 s**, valid partial observer prefix, persisted record, incomplete inline/backfill/final readback. Treatment: recorder **172.051525375 s**, valid end source closure, **1 passed / 12 warnings / 687.90 s**, persisted record, inline/backfill and exact synthetic readback/one-use refusal verified. **No quiet-host timing-fix claim:** host mean CPU **67.58% / 56.79%**, peak **100% / 98.7%**, peak load/logical CPU **1.741 / 3.494**. Completed owner-thread CPU: live provenance **25.915408\u219224.006217 s (\u22127.37%)**, six native captures **9.483868\u21927.594044 s (\u221219.93%)**, later record reconstruction **123.301870\u2192117.530559 s**. Matched schema boundaries do not prove all root-dependent workload bytes equal; nested CPU rows cannot be summed. Cache **2 cold parses / 2 hits / 2 fallbacks**, bounded at **119,918 events / 22,568,039 accounted bytes**. Raw parse starts **708 / 724** are unequal-cutoff counts, not a regression comparison. Narrow native benefit; **large reconstruction/timing resolution not established**. Next candidate: late inline/backfill generic schema replay, and determine whether late catalog eligibility loss and cache fallback share a cause using explicit reason counters. No production fix or N=10. Drivers **2877 / 49153**, recorders **77684 / 86030**, host observers **2861 / 49126**; all test descendants credential-stripped and OS network-denied, both bind checks EPERM, unchanged **180/900 s**, synthetic peer only. Both source-preservation and normal cleanup proofs pass; owned locks released, final absence verified. [Causal pair report](../../../d4d-executions/plans/reviews/native_u0_recorder_2026-11-06.md) SHA-256 **`65c6e8973c6b8fbe69221c12ab02b995a648469cc8e4a84877627232001380dc`**. Evidence `native-u0-20261106/causal-pair-analysis.json` SHA-256 **`569ea2c2c07107819fa4517cf0cd5e27c8c1419c382f989faff0220f70c5cf40`**; phase supplement **`54ddabf5f18cf1a5a5bae5d20c2aa8ba65082ad2819ddc13188d3a600c12825b`** (**1,401 compared / 170 excluded**, original global gate unchanged/passing); source manifest **`0d37744156f68f9fe50a4ebf5e31ed1d6ecb406707f09163380103f865477c8d`**. Independent read-only audits verified metrics/digests; two interpretation wordings corrected. Historical evidence retained. No fetch/push/gh, provider/network call, real native binary, production/protected-file or historical run/ATTIC edits. Final report and this replacement of the in-progress entry complete the task."
+    },
+    {
+      "line": 6594,
+      "text": "- **2026-11-06T07:20Z \u2014 Native U2 round 3 complete; stopped.** Local worktree `codex-native-u2`, branch `codex/native-u2-authority-v2-20261106`, head `4f10963df461ef66f8485f37a61d2a89c4f4ea93` (linear after `e8c9dbe3c`). Appended **Round 3** to `d4d-executions/plans/reviews/native_u2_2026-11-06.md`. V2 envelopes structurally refuse frozen API/native/direct verifiers and launchers; explicit study inputs and actual external-pin equivalence are covered. Scanner `tracked_without_reason` restored **113 \u2192 110**, with the same nine M7 violations. **M1\u2013M9 killed**, plus hash-without-pin M9b; focused **26 passed**, final-head control **25 passed**, legacy authority **335 passed**, gates/prompt registry **419 passed**, execution **73 passed**, direct arm **95 passed**, collection **23,016 / exit 0**. Dated native-controls remains **685 passed / 262 failed**: 256 permission-error traces; all six other assertions plus a representative permission case also fail on unchanged M7. Saved M7 artifacts verify in their original environment and refuse current v1 identity/v2 version as intended. Portable exact-v1 replay, reverse standalone import aliasing, and source-commit publication constraints are documented precisely. V1/protected bytes unchanged; quiet window honored; no network/provider/native executable, fetch/push/gh, PR or merge. Evidence: `scratch-native-u2/r3-summary.json`, `r3-baseline-comparison.json`, `r3-mutations3/`, and `r3-pin-mutations/`. Report and this single STATUS entry are the only coordination writes. **Stopped.**"
+    },
+    {
+      "line": 6596,
+      "text": "- 2026-11-06T06:53Z **Native U0, protocol amendment 2: one CPU-profile diagnostic completed with a software failure; partial cost localization, unresolved causality; stopped.** [Updated report](../../../d4d-executions/plans/reviews/native_u0_recorder_2026-11-06.md), SHA-256 **`2f24ff2eecb61140ced31cbb00d8b29f7d62113dd73a1edccad5ca062a7a6304`**. Tooling branch `codex/native-u0-diag-20261106` is clean at **`1d5fd8eab520fa3d501fedc3cd7c873b1b7641f5`**; launch tooling **`36bf17d80afbd3d0d8cc4aa2cfe52c75bb9717d5`**. Instrumentation-only copy `codex/native-u0-cpu-fixture-20261106` is clean at **`794901899b9cf4172f0af2cdde9fa62aa330edce`**, sole parent **`01969cbed8eed93f420c640c1f1c306e5f58b033`**; original test/peer/guards unchanged, bootstrap plus two observers/config only, **4,618 scoped files unchanged**. Before launch: synthetic profiler canary **1 passed**, target audit **42 valid ordinary targets**, final focused tooling **119 passed / 0 failed/errors/skips**. Exactly one unchanged neutral test ran under the ruling: original recorder helper raised `TimeoutExpired(180)`; pytest **1 failed, 12 warnings in 674.83 s**, contended software result with no 180 s timing verdict. Last verified checkpoint at process age **177.954 s** saved **167.505 process CPU s**, peak RSS **1,205,829,632 bytes**; 150/170 milestone profiles retained. Largest observed region: native `live_provenance_block` **133.896 process / 127.518 thread CPU s**; nested native base **36.180 thread CPU s**, checked observations **44.551**, schema catalog **21.245**; completed `check_record` **7.174**. Do not sum inclusive phases. Derive cache **30 hits / 2 misses**, open **98/2**, runtime token ready **191/191**; no cache-miss storm established. Record writing/validation completed; inline/backfill compute remained unfinished; apply/final native readback not reached. **Open local findings U0-R7/R8:** recorder namespace includes primary checkout (`valid:false` snapshots), and cProfile has impossible cross-thread caller edges. These prevent exact-source/function-level causal certification; no historical timeout cause or speedup claimed. Proposed one U3 treatment: bounded reuse of complete immutable YAML parser events for identical native schema bytes, preserving fresh strict validation, normalization, import traversal and views; repair common source isolation/profiling before one CPU-time control/treatment pair, with unchanged identities/refusals and limits. No production treatment or paired run performed. Evidence under `d4d-executions/native-u0-20261106/`; summary SHA-256 **`addeb38141d3fcba4c608079f7185739a71a819328adf72143cc1cfc04536c37`**, corrected detail **`8a7aa86c6a966f1d4c530f63eda082e9c646374cb86522b6d9d77e4527964b93`**, latest profile **`cc54d113cfbce98721293f30a61950a029f5307c98d692e57ef62e0d395e38ee`**, tooling XML **`a08990d221890d06c73184f45bd22a1d408a8a7867bec6a78ad644f34f049a9a`**. Driver **88171** and descendants network-denied/credential-stripped; recorder **23333**; independent read-only observer **88168**, **620 samples**, normal stop. Bind and observer-file write-open EPERM verified; sandbox hash **`b9b848dc14e0c0e9b30309daf0aec67dd68b8324209ec9f76bff2cb4fb4e32c7`**. Own lock PID **88163** released after verified cleanup at **06:36:57.311782Z**; exact-path absence confirmed. Independent measurement and treatment-plan audits approved report. Quiet gate remains required for wall claims; three baselines and campaign unrun. No real native binary, provider/network call, fetch/push/gh, production fix, protected/run/ATTIC/launch-a21 edit or notification. Report and this single final entry complete the amendment; stopped."
+    },
+    {
+      "line": 6598,
+      "text": "- 2026-11-06 **Native U2 round 2 stopped at the explicit P2-1 authority-migration boundary.** Evidence-only local commit `e8c9dbe3c` follows `b7a9c900f` in the existing U2 worktree. The isolated frozen verifier probe accepts schema 2 plus v2 authority in `run_api_canary.verify`; the direct verifier rejects schema 2. API version refusal requires changing frozen v1 code, triggering the brief's \u201cstop and report\u201d instruction. No implementation/protected edits; remaining findings and all suite/scanner/M1\u2013M9 reruns are pending, not claimed complete. Round 2 disposition table appended to `d4d-executions/plans/reviews/native_u2_2026-11-06.md`; evidence in `scratch-native-u2/r2-version-boundary/`, reproducible script committed under `scripts/adhoc/`. Offline throughout; no pytest/heavy work, native executable, provider/network calls, push or gh. Stopped for lead resolution of the frozen API boundary."
+    },
+    {
+      "line": 6600,
+      "text": "- 2026-11-06T02:49:15Z **U2 / #5508 additive native authority v2 delivered locally; legacy-controls validation remains partial.** Assigned worktree `codex-native-u2`, branch `codex/native-u2-authority-v2-20261106`, base `8bc90e93d`; clean local head **`b7a9c900f9d355228e855e9e7fd92f94accbaff5`**. Added explicit v2 manifest, registration/controller/supervisor consumers and generalized versioned preparers; v1 manifest, consumer and historical preparer bytes remain exact. Retained v2 checks **13 passed**; exact-M7 replay **1 passed**, with current-environment/cross-version refusals; full committed execution rerun **73 passed**; final review **15 passed** including both real-helper completion modes. Explicit old selections render all **32 jobs / four canaries** identically. Collection: **23,004 tests**. Scanner: **9 findings, exactly unchanged**, including model-facing derivation; no exception added. Combined legacy run: **1,226 passed / 199 failed / 94 errors**; mixed-lane cache-prefix setup was corrected, but socket binding and process inspection remain sandbox-blocked; one isolated socket failure reproduces at M7. Direct-arm **95**, source-metadata **39**, D76 inventory **30** passed. Two quiet windows paused active process groups; no heavy work was started under a lock. No protected-source edits, native executable, provider/external-network call, fetch/push/gh, publication or merge. Independent review and full legacy-controls certification remain open. [Report](../../../d4d-executions/plans/reviews/native_u2_2026-11-06.md), SHA-256 **`51fcf6f85ad44b4b0bec7bb36100364fc097008685fae358f5225f50ee5cad56`**; durable fixtures, logs, XML and summary under `d4d-executions/scratch-native-u2`. One STATUS entry; stopped as instructed."
+    },
+    {
+      "line": 6602,
+      "text": "- 2026-11-06T02:40:40Z **Native U0 resumed under the sampler ruling: sampler repaired, host gate failed; zero recorder trials; stopped.** Tooling branch `codex/native-u0-diag-20261106`, clean at **`f1bd8f8033a910d7ff1242b71797bba2204d2b1b`**, no push. [Updated report](../../../d4d-executions/plans/reviews/native_u0_recorder_2026-11-06.md), SHA-256 **`0123d29770cdef1e6266b198586eff36284d32247c9ac4b7d829536cea58d40d`**. Applied the explicit protocol amendment: unchanged `/bin/ps` plus sysctl in separate unsandboxed read-only observer PID **42712**; driver **42714** and all test descendants remain network-denied with credentials removed. Driver independently confirmed bind EPERM and observer-file write-open EPERM; profile SHA-256 **`b9b848dc14e0c0e9b30309daf0aec67dd68b8324209ec9f76bff2cb4fb4e32c7`**. **92 tooling tests passed**, and standalone observer smoke retained three samples. Review finding U0-R3 fixed before launch: unlock additionally requires normal observer shutdown and verified same-inode terminal evidence; forced/unproven cleanup retains lock. `canary-neutral-02` measured **60 distinct samples over 65.178858416 s**: mean CPU **60.475%** (limit 15), peak **94.2%** (35), maximum one-minute load/logical CPU **2.347** (0.5), competing processes in **all 60** samples. Gate returned `blocked_host_busy`, wrapper exit **3**, no pytest worker/peer/recorder launched. Raw process evidence retained; no unrelated process stopped. Frozen source **4,615 files unchanged** at `01969cbed8eed93f420c640c1f1c306e5f58b033`. Observer stopped normally after 62 total observations; own lock PID **38613** released at **02:37:44.178911Z**, absence verified. Summary SHA-256 **`03630a7a5b0a918a540386c3a37d87c2e88783f833dcf1c3c42b4e31afeba766`**. U0-R2 resolved by the approved split; canary, three baselines, instrumentation and paired campaign remain pending a genuinely quiet window. Current contention does not establish the historical 180-second timeout cause. Limits **180/900 s** unchanged; no production/protected/run/ATTIC/launch-a21 edits, real native binary, provider/network call, fetch/push/gh or notifications. Independent report/evidence audit found no discrepancy. Report and this final entry complete the resumed task; no U0 lock remains."
+    },
+    {
+      "line": 6604,
+      "text": "- 2026-11-06T02:22:00Z **Native U0: unresolved diagnosis; zero recorder trials; stopped.** D92 tooling branch `codex/native-u0-diag-20261106`, clean at **`d70bc8158921696a1aab5c58f1266297a03e2318`**, from M7 `8bc90e93d736d464f98e9eedffee45f0ad8e5d3f`; tooling only, no push. [Report](../../../d4d-executions/plans/reviews/native_u0_recorder_2026-11-06.md), SHA-256 **`49f6e38c4bba162b30cddd3c0f26200dd0faa120c9c5e209afddad1a7561ba6a`**. Frozen scoped source/fixture archives retained for `01969cbed8eed93f420c640c1f1c306e5f58b033`, `d41282871394dd8abe74e11afb0e80c95d149305`, and `be0bd05821256212e89e4d011ba6b30a780e299b`; historical third-party dependency bytes remain unattested. Tooling canary **1 passed**, final focused safety suite **56 passed**; review finding U0-R1 fixed before launch (abnormal worker/uncertain descendant cleanup retains quiet lock). The first neutral launch acquired the lock, passed OS network-denial self-check, settled 60 s, then failed **before its first host sample** executing setuid `/bin/ps` under sandbox (EPERM). No pytest worker, peer or recorder launched; no completed gate, no busy-host verdict. Exact unprivileged ps copy exited -9 with zero rows; sandboxed psutil saw only 711/1,129 processes, with 412 AccessDenied and six disappeared processes. U0-R2 sampler blocker remains; neither fallback qualified a gate. Source inventory (4,615 files) unchanged; own lock released at 02:16:19Z and absence verified. Evidence summary SHA-256 **`f71634777910b5a0c89b6d49f4cf78ac1dfffaddffacd49a69e637a1fa4d06e8`**. Three baselines, instrumentation, treatment and N=10 remain unrun; historical 180-second recorder cause unknown, registration-readiness blocker retained. Next: qualify complete host sampling under unchanged network denial, complete dependency inventory, rerun one unchanged neutral canary before any batch. Limits remain **180/900 s**; no real native binary, provider/network call, fetch/push/gh, production/protected-file/run/ATTIC/launch-a21 edits or notifications. U1/U2 may continue; no U0 lock remains. Report and this final entry complete the handoff."
+    },
+    {
+      "line": 6606,
+      "text": "- 2026-11-06T02:08:06Z **Native U1 BLOCKED at protected admission boundary; stopped as instructed.** Created the named isolated worktree from M7 `8bc90e93d736d464f98e9eedffee45f0ad8e5d3f`; local candidate commit **`41b7169f6296c69201fc46389082c441e7d7165c`** on `codex/native-u1-selector-20261106`. [Report](../../../d4d-executions/plans/reviews/native_u1_2026-11-06.md), SHA-256 **`3d06502f813f42011b2fdc866b00d2f28944711469c8e632704f6153962fe5b6`**. Native contract/evidence/selection/render and two prompts ported from the U1 reference with M7 BC1/D76 adaptations; **168 focused tests passed**, plus one native render/replay canary. Scanner **before: 9 violations; after: exit 2, shared selector call guards/order changed**, so no no-new-findings or API-parity claim. M7's scanner requires unconditional final shared admission and already recognizes a native dispatch inside protected `shared_generation.select`; exact protected hook + caller companion + additive prompt-pin patches and pre/postimage hashes are committed under `scripts/adhoc/native_u1_packets/`, applicability checked but **unapplied/untested**. Both protected files remain byte-identical to M7. A21-pinned files touched: `api_runner.py`, `schema_snapshot.py`; eventual shared hook would add a third. Interrupted the 66-file API/shared/BC1/D76 regression roster at the stop (27% progress); all-condition before/after parity, full collection and specificity guard suites remain incomplete. No further implementation/tests after the stop finding; quiet-window checks observed no lock, pytest at most two workers under 3600-second deadlines. Offline throughout; no native executable, provider/network, fetch/push/gh, PR or merge. Candidate is **not integration-ready**; AGY/owner exact-packet review and independent review are next, outside this stopped task."
+    },
+    {
+      "line": 8400,
+      "text": "- **2026-11-06T06:11:36Z \u2014 Native U1 round 2, `e0b868b0e`: corrected pins and D76 sidecar proposals; all four patches apply and protected worktree/checker unchanged. Scratch: 14/14 API render byte parity, 194 focused native passes, strict pins pass, 23,196 tests collected. Roster: incomplete (U1_CHECK_EXIT=124). D76 inventory still fails on six new native helper contracts and scanner exits 2 (five-axis prefix versus BC1 refusal); historical BC1 source-pin and guard failures retained. Report: `d4d-executions/plans/reviews/native_u1_2026-11-06.md`, Round 2. Two quiet-lock overlaps and initial canary inspection-order lapse disclosed; interrupted runs retained. BLOCKED for integration; no network/native execution. AGY/lead disposition next; stopped.**"
+    },
+    {
+      "line": 8402,
+      "text": "- 2026-11-06T10:43:18Z \u2014 Native U1 round 3 local handoff: `666ddd068` on `codex/native-u1-selector-20261106`. D76 caller contracts/closed fields repaired with executable-AST equality; 66-file roster: 1,569 passed, 1 expected failure, no failures/errors; 23,206 collected; packet/fixture regressions diagnosed and repaired. Per-batch evidence in `d4d-executions/plans/reviews/native_u1_2026-11-06.md` Round 3. BLOCKED: scanner exits 2 at the missing later-unit native render CLI consumer; native stage/receipts closure and expanded deterministic import paths also remain; guards 463 passed/9 failed/21 errors, no no-new-findings claim. Protected worktree bytes unchanged, packets scratch-only, offline/no native executable. Quiet-window interruption and overlap disclosed. Next: lead resolves staged scanner acceptance and reviews remaining evidence. Stopped."
+    },
+    {
+      "line": 8404,
+      "text": "- 2026-11-08T02:48:35Z \u2014 **U3-E read-only integration plan complete; stopped.** [Report](../../../d4d-executions/plans/reviews/native_u3e_integration_plan_2026-11-08.md), SHA-256 `76e66e8de81a17006cf9e2ef162d0a43c47aff3e787734db626601315122542d`. Plan: owner-approved schema 3.2.0 release first; finish/review C6 and D9, preserve A5/B4/C reconciliation ancestry, merge released main with merge commits, then agy applies the owner-approved atomic four-packet U1 bundle with exact pre/postimage verification. Records schema/catalog/render/scanner revalidation, stale missing-consumer assertion, bounded full affected suites and final SG2 batch, draft PR body including R5 fresh instruction identity, neutral render/constants, explicit classifier_projection and verified module set, P2-3 xdist residual risk, D97 closure/branch retention, and post-PR D29/amendment/canary-registration gates. Snapshot: A `a6edb1c2d`, B `b69de158b`, C-interface `d205cedde` awaiting C6 handoff, D `3ab9fbc18` awaiting D9; no final combined-head acceptance claimed. Only light offline reads and this report/entry; no tests, scans, archives, helpers, protected edits, worktree/branch changes, native executables, network/provider calls, fetch/push/gh or notifications. No scratch artifacts or new top-level execution directories created. Exactly one entry; no further work."
+    }
+  ],
+  "summary": {
+    "handoffs": [
+      {
+        "stage": "F",
+        "assignment_birth": "2026-11-09T01:34:25.109070+00:00",
+        "handoff_utc": "2026-11-09T02:49Z",
+        "elapsed_hours": 1.2430252583333332,
+        "source_status_line": 6461
+      },
+      {
+        "stage": "F2",
+        "assignment_birth": "2026-11-09T03:38:07.336729+00:00",
+        "handoff_utc": "2026-11-09T04:21:14Z",
+        "elapsed_hours": 0.7185175752777777,
+        "source_status_line": 6455
+      },
+      {
+        "stage": "G",
+        "assignment_birth": "2026-11-09T05:45:24.535068+00:00",
+        "handoff_utc": "2026-11-09T09:06:28Z",
+        "elapsed_hours": 3.3509624811111114,
+        "source_status_line": 6448
+      },
+      {
+        "stage": "I",
+        "assignment_birth": "2026-11-09T19:17:45.111217+00:00",
+        "handoff_utc": "2026-11-09T19:35:11Z",
+        "elapsed_hours": 0.2905246619444445,
+        "source_status_line": 6421
+      },
+      {
+        "stage": "J",
+        "assignment_birth": "2026-11-09T19:35:04.812533+00:00",
+        "handoff_utc": "2026-11-09T19:40:35Z",
+        "elapsed_hours": 0.09171874083333334,
+        "source_status_line": 6416
+      },
+      {
+        "stage": "J2",
+        "assignment_birth": "2026-11-09T20:05:37.397869+00:00",
+        "handoff_utc": "2026-11-09T23:28:56Z",
+        "elapsed_hours": 3.388500591944444,
+        "source_status_line": 6408
+      }
+    ],
+    "broad_round_sample_n": 4,
+    "broad_round_min_hours": 0.7185175752777777,
+    "broad_round_median_hours": 2.2969938697222223,
+    "broad_round_max_hours": 3.388500591944444,
+    "review_delays": [
+      {
+        "stage": "F",
+        "implementation_modified": "2026-11-09T02:48:27.575464+00:00",
+        "review_modified": "2026-11-09T03:37:07.342390+00:00",
+        "gap_hours": 0.8110463684797287
+      },
+      {
+        "stage": "F2",
+        "implementation_modified": "2026-11-09T04:21:14.679914+00:00",
+        "review_modified": "2026-11-09T06:18:25.277710+00:00",
+        "gap_hours": 1.9529438322120243
+      },
+      {
+        "stage": "G",
+        "implementation_modified": "2026-11-09T09:06:21.831213+00:00",
+        "review_modified": "2026-11-09T10:24:14.526306+00:00",
+        "gap_hours": 1.2979708590110144
+      }
+    ],
+    "limitation": "Convenience sample of handoffs, including unresolved outcomes; not time-to-success or independent trials."
+  }
+}

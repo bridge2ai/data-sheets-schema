@@ -1,0 +1,574 @@
+{
+  "evidence_commit": "2cfc4666c2d81003d9cf5f432248b4217ef477e1",
+  "local_provenance_files_enumerated": 317,
+  "reference_span_summary": {
+    "AI_READI": {
+      "n": 3,
+      "min_minutes": 34.23468333333334,
+      "median_minutes": 41.22513333333333,
+      "max_minutes": 43.8465
+    },
+    "CHORUS": {
+      "n": 3,
+      "min_minutes": 18.874366666666667,
+      "median_minutes": 19.13243333333333,
+      "max_minutes": 34.9152
+    },
+    "CM4AI": {
+      "n": 3,
+      "min_minutes": 16.278533333333332,
+      "median_minutes": 17.6945,
+      "max_minutes": 28.7793
+    },
+    "VOICE": {
+      "n": 3,
+      "min_minutes": 36.74218333333333,
+      "median_minutes": 49.557900000000004,
+      "max_minutes": 50.83943333333333
+    }
+  },
+  "pinned": [
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/CHORUS_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+        "project": "CHORUS",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 1,
+        "condition": "generic_v10",
+        "condition_basis": "stated by the runner",
+        "generation_id": "d4b09f0816e04ca3a8f2ee8abdfc034e",
+        "prior_generation_ids": []
+      },
+      "calls": 12,
+      "first_call": "2026-10-21T06:14:10+00:00",
+      "last_call_end": "2026-10-22T04:23:50.838000+00:00",
+      "api_seconds_sum": 4919.839,
+      "first_to_last_call_span_seconds": 79780.838,
+      "transport_error_rows": 1,
+      "completed_call_seconds_sum": 4220.55,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/ATTIC/d4d_concatenated_archived/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-10-22a_claude-opus-5-api-generic-v10_rep1",
+        "project": "CHORUS",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 1,
+        "condition": "generic_v10",
+        "condition_basis": "stated by the runner",
+        "generation_id": "77aec593797d45d9a83cd474a70cff0f",
+        "prior_generation_ids": []
+      },
+      "calls": 10,
+      "first_call": "2026-10-22T14:28:22+00:00",
+      "last_call_end": "2026-10-22T21:12:29.381000+00:00",
+      "api_seconds_sum": 3690.839,
+      "first_to_last_call_span_seconds": 24247.381,
+      "transport_error_rows": 1,
+      "completed_call_seconds_sum": 3059.739,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
+        "project": "AI_READI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 1
+      },
+      "calls": 6,
+      "first_call": "2026-09-06T03:58:35+00:00",
+      "last_call_end": "2026-09-06T04:31:34.445000+00:00",
+      "api_seconds_sum": 1958.996,
+      "first_to_last_call_span_seconds": 1979.445,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 1958.996,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
+        "project": "CHORUS",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 1
+      },
+      "calls": 7,
+      "first_call": "2026-09-07T00:22:52+00:00",
+      "last_call_end": "2026-09-07T00:41:59.946000+00:00",
+      "api_seconds_sum": 1127.708,
+      "first_to_last_call_span_seconds": 1147.946,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 1127.708,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
+        "project": "VOICE",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 1
+      },
+      "calls": 7,
+      "first_call": "2026-09-05T20:33:48+00:00",
+      "last_call_end": "2026-09-05T21:24:38.366000+00:00",
+      "api_seconds_sum": 3029.803,
+      "first_to_last_call_span_seconds": 3050.366,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 3029.803,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep2",
+        "project": "CHORUS",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 2
+      },
+      "calls": 8,
+      "first_call": "2026-09-07T05:11:46+00:00",
+      "last_call_end": "2026-09-07T05:46:40.912000+00:00",
+      "api_seconds_sum": 2068.637,
+      "first_to_last_call_span_seconds": 2094.912,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 2068.637,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep2",
+        "project": "VOICE",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 2
+      },
+      "calls": 8,
+      "first_call": "2026-09-07T03:44:34+00:00",
+      "last_call_end": "2026-09-07T04:34:07.474000+00:00",
+      "api_seconds_sum": 4135.659000000001,
+      "first_to_last_call_span_seconds": 2973.474,
+      "transport_error_rows": 1,
+      "completed_call_seconds_sum": 2952.3590000000004,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep3",
+        "project": "CHORUS",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 3
+      },
+      "calls": 8,
+      "first_call": "2026-09-07T05:46:58+00:00",
+      "last_call_end": "2026-09-07T06:05:50.462000+00:00",
+      "api_seconds_sum": 1113.212,
+      "first_to_last_call_span_seconds": 1132.462,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 1113.212,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep3",
+        "project": "VOICE",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 3
+      },
+      "calls": 9,
+      "first_call": "2026-09-07T04:34:20+00:00",
+      "last_call_end": "2026-09-07T05:11:04.531000+00:00",
+      "api_seconds_sum": 2556.188,
+      "first_to_last_call_span_seconds": 2204.531,
+      "transport_error_rows": 1,
+      "completed_call_seconds_sum": 2183.488,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep1",
+        "project": "AI_READI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 1
+      },
+      "calls": 7,
+      "first_call": "2026-09-07T00:16:45+00:00",
+      "last_call_end": "2026-09-07T00:50:59.081000+00:00",
+      "api_seconds_sum": 2118.853,
+      "first_to_last_call_span_seconds": 2054.081,
+      "transport_error_rows": 1,
+      "completed_call_seconds_sum": 2034.953,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep1",
+        "project": "CM4AI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 1
+      },
+      "calls": 7,
+      "first_call": "2026-09-07T01:57:34+00:00",
+      "last_call_end": "2026-09-07T02:26:20.758000+00:00",
+      "api_seconds_sum": 2090.833,
+      "first_to_last_call_span_seconds": 1726.758,
+      "transport_error_rows": 1,
+      "completed_call_seconds_sum": 1704.9330000000002,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep2",
+        "project": "AI_READI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 2
+      },
+      "calls": 8,
+      "first_call": "2026-09-07T03:44:34+00:00",
+      "last_call_end": "2026-09-07T04:28:24.790000+00:00",
+      "api_seconds_sum": 2607.238,
+      "first_to_last_call_span_seconds": 2630.79,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 2607.238,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep2",
+        "project": "CM4AI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 2
+      },
+      "calls": 7,
+      "first_call": "2026-09-07T05:10:37+00:00",
+      "last_call_end": "2026-09-07T05:26:53.712000+00:00",
+      "api_seconds_sum": 954.72,
+      "first_to_last_call_span_seconds": 976.712,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 954.72,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep3",
+        "project": "AI_READI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 3
+      },
+      "calls": 8,
+      "first_call": "2026-09-07T04:28:39+00:00",
+      "last_call_end": "2026-09-07T05:09:52.508000+00:00",
+      "api_seconds_sum": 2846.692,
+      "first_to_last_call_span_seconds": 2473.508,
+      "transport_error_rows": 1,
+      "completed_call_seconds_sum": 2452.792,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_provenance.yaml",
+      "basis": "pinned-budget-evidence",
+      "run": {
+        "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep3",
+        "project": "CM4AI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 3
+      },
+      "calls": 8,
+      "first_call": "2026-09-07T05:27:14+00:00",
+      "last_call_end": "2026-09-07T05:44:55.670000+00:00",
+      "api_seconds_sum": 1040.484,
+      "first_to_last_call_span_seconds": 1061.67,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 1040.484,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    }
+  ],
+  "local": [
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep2",
+        "project": "CHORUS",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 2
+      },
+      "calls": 8,
+      "first_call": "2026-09-07T05:11:46+00:00",
+      "last_call_end": "2026-09-07T05:46:40.912000+00:00",
+      "api_seconds_sum": 2068.637,
+      "first_to_last_call_span_seconds": 2094.912,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 2068.637,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep2",
+        "project": "VOICE",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 2
+      },
+      "calls": 8,
+      "first_call": "2026-09-07T03:44:34+00:00",
+      "last_call_end": "2026-09-07T04:34:07.474000+00:00",
+      "api_seconds_sum": 4135.659000000001,
+      "first_to_last_call_span_seconds": 2973.474,
+      "transport_error_rows": 1,
+      "completed_call_seconds_sum": 2952.3590000000004,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep3",
+        "project": "CHORUS",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 3
+      },
+      "calls": 8,
+      "first_call": "2026-09-07T05:46:58+00:00",
+      "last_call_end": "2026-09-07T06:05:50.462000+00:00",
+      "api_seconds_sum": 1113.212,
+      "first_to_last_call_span_seconds": 1132.462,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 1113.212,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep3",
+        "project": "VOICE",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 3
+      },
+      "calls": 9,
+      "first_call": "2026-09-07T04:34:20+00:00",
+      "last_call_end": "2026-09-07T05:11:04.531000+00:00",
+      "api_seconds_sum": 2556.188,
+      "first_to_last_call_span_seconds": 2204.531,
+      "transport_error_rows": 1,
+      "completed_call_seconds_sum": 2183.488,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep2",
+        "project": "AI_READI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 2
+      },
+      "calls": 8,
+      "first_call": "2026-09-07T03:44:34+00:00",
+      "last_call_end": "2026-09-07T04:28:24.790000+00:00",
+      "api_seconds_sum": 2607.238,
+      "first_to_last_call_span_seconds": 2630.79,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 2607.238,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep2",
+        "project": "CM4AI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 2
+      },
+      "calls": 7,
+      "first_call": "2026-09-07T05:10:37+00:00",
+      "last_call_end": "2026-09-07T05:26:53.712000+00:00",
+      "api_seconds_sum": 954.72,
+      "first_to_last_call_span_seconds": 976.712,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 954.72,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep3",
+        "project": "AI_READI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 3
+      },
+      "calls": 8,
+      "first_call": "2026-09-07T04:28:39+00:00",
+      "last_call_end": "2026-09-07T05:09:52.508000+00:00",
+      "api_seconds_sum": 2846.692,
+      "first_to_last_call_span_seconds": 2473.508,
+      "transport_error_rows": 1,
+      "completed_call_seconds_sum": 2452.792,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep3",
+        "project": "CM4AI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 3
+      },
+      "calls": 8,
+      "first_call": "2026-09-07T05:27:14+00:00",
+      "last_call_end": "2026-09-07T05:44:55.670000+00:00",
+      "api_seconds_sum": 1040.484,
+      "first_to_last_call_span_seconds": 1061.67,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 1040.484,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
+        "project": "AI_READI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 1
+      },
+      "calls": 6,
+      "first_call": "2026-09-06T03:58:35+00:00",
+      "last_call_end": "2026-09-06T04:31:34.445000+00:00",
+      "api_seconds_sum": 1958.996,
+      "first_to_last_call_span_seconds": 1979.445,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 1958.996,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
+        "project": "CHORUS",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 1
+      },
+      "calls": 7,
+      "first_call": "2026-09-07T00:22:52+00:00",
+      "last_call_end": "2026-09-07T00:41:59.946000+00:00",
+      "api_seconds_sum": 1127.708,
+      "first_to_last_call_span_seconds": 1147.946,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 1127.708,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
+        "project": "VOICE",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 1
+      },
+      "calls": 7,
+      "first_call": "2026-09-05T20:33:48+00:00",
+      "last_call_end": "2026-09-05T21:24:38.366000+00:00",
+      "api_seconds_sum": 3029.803,
+      "first_to_last_call_span_seconds": 3050.366,
+      "transport_error_rows": 0,
+      "completed_call_seconds_sum": 3029.803,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep1",
+        "project": "AI_READI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 1
+      },
+      "calls": 7,
+      "first_call": "2026-09-07T00:16:45+00:00",
+      "last_call_end": "2026-09-07T00:50:59.081000+00:00",
+      "api_seconds_sum": 2118.853,
+      "first_to_last_call_span_seconds": 2054.081,
+      "transport_error_rows": 1,
+      "completed_call_seconds_sum": 2034.953,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_provenance.yaml",
+      "basis": "local-ignore-independent",
+      "run": {
+        "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep1",
+        "project": "CM4AI",
+        "method": "claudecode_api",
+        "arm": "baseline",
+        "replicate": 1
+      },
+      "calls": 7,
+      "first_call": "2026-09-07T01:57:34+00:00",
+      "last_call_end": "2026-09-07T02:26:20.758000+00:00",
+      "api_seconds_sum": 2090.833,
+      "first_to_last_call_span_seconds": 1726.758,
+      "transport_error_rows": 1,
+      "completed_call_seconds_sum": 1704.9330000000002,
+      "caution": "Usage-row seconds can overlap or include retries; sum is not total wall time. First-to-last span includes interruptions and intervention."
+    }
+  ]
+}
