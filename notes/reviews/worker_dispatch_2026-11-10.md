@@ -126,3 +126,14 @@ or performed. The shared STATUS publication hold is released.
 The terminal monitor now reads bounded viewports with a per-window timeout.
 Scrolled viewports can be stale; the lead corroborates them with process state,
 artifact timestamps and worker messages. Low disk space is still unresolved.
+
+## WP1 implementation dispatched separately from measurement
+
+After the final U3-M report passed independent review, the lead authorized the
+native owner to implement the observer, selector, equivalence cases and explicit
+60/900-second bounds described in `codex_native_wp1_assignment_2026-11-10.md`.
+This first unit ends at a frozen patch for review. It does not authorize a new
+composition, source archive, environment install, canary or timing arm yet.
+The owner should identify the smallest subsequent equivalence check and the
+storage needed for a valid fresh measurement setup. The missing observer and
+selector are expected implementation work, not reasons to repeat planning.
