@@ -9,6 +9,7 @@ import pytest
 
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_shared_selection as ordinary
+from data_sheets_schema import api_runner as fixture_api
 from tests.test_native_shared_selection import declaration, pin, save
 
 
@@ -32,11 +33,27 @@ def pins():
 
 
 @contextmanager
-def loaded(source_pins):
+def loaded(source_pins, *, fixture_roots=True):
+    """Isolated schema-root fixture, not full registration admission.
+
+    Real file capture/hash/derivation and A's source guards remain. Reapply only
+    the existing declaration fixture's two roots after the verified reload;
+    restore them before that source scope exits.
+    """
+    selected_roots = {name: getattr(fixture_api, name)
+                      for name in ('FULL_SCHEMA_PATH', 'CORE_SCHEMA_PATH')}
     with authority.loaded_verified_package_module(
             'data_sheets_schema.native_shared_selection',
             package_sources=source_pins) as module:
-        yield module
+        if not fixture_roots:
+            yield module
+        else:
+            from data_sheets_schema import api_runner as loaded_api
+            authority.module_source_identity(loaded_api)
+            with pytest.MonkeyPatch.context() as roots:
+                for name, value in selected_roots.items():
+                    roots.setattr(loaded_api, name, value)
+                yield module
 
 
 def warm(module, declaration):
@@ -277,7 +294,7 @@ def test_unscoped_source_load_does_not_initialize_new_guard():
             calls.append(frame.f_code.co_filename)
     sys.setprofile(observe)
     try:
-        with loaded(pins()) as module:
+        with loaded(pins(), fixture_roots=False) as module:
             assert module._SCHEMA_LAUNCH_CONTEXT is None
             assert module._schema_dependencies is None
         assert not calls
