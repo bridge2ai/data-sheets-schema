@@ -75,3 +75,5 @@ Run-ready requires: exact final schema/source/registration identities; required 
 - Disk available at start: about 23 GiB; preserve existing recovery evidence.
 - G1 initial execution grant: one 30-second canary, then focused checks only after verified success.
 - G2, G3, G4 and N1: assigned preparation/review; G2 and N1 executions wait for serial budget.
+- 2026-11-10 21:57 UTC: G1 explicitly released its budget with no active test (`handoffs/agy1-budget.md`). N1 granted exactly the prepared 30-second receipt-component canary at `41e0d1c1330d52f4bee34d018a8a958fffb99315`; inspect evidence and release before any follow-on. G1 continues source-only fixture work.
+- 2026-11-10 21:59 UTC: N1 receipt canary completed normally (one test, 0.779 seconds total), artifacts and retirement verified, budget released. Identifier-only attestation can satisfy these receipt components; whole native acceptance remains unverified. Independent wrapper findings recorded as #5792/#5793; native handles source-only fixes. G1 regains the bounded execution grant. G4 report corrections are tracked as #5794.
