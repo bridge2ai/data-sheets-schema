@@ -103,6 +103,10 @@ def main():
         base.git('update-ref', '--no-deref', 'HEAD', MAIN, cwd=tree)
         base.git('read-tree', MAIN, cwd=tree)
         base.need(not base.git('remote', cwd=tree).strip(), 'private baseline has a remote')
+        # A newly read tree has no working-file stat cache. Refresh its private
+        # index before asking diff-index for content equality; do not mistake
+        # unpopulated index timestamps for a changed archive.
+        base.git('update-index', '--refresh', cwd=tree)
         base.git('diff-index', '--quiet', 'HEAD', '--', cwd=tree)
         for name, raw in additions.items():
             target = tree / name
