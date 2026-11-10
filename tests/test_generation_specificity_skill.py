@@ -5309,6 +5309,212 @@ class TestModelFacingDerivation(unittest.TestCase):
                     set(),
                 )
 
+    def test_alias_rebinding_kills_alias_fp1_and_preserves_fp3_5680(self):
+        """#5680 (P2-1): rebinding an alias to a non-Name (`view = {"other": {}}`)
+        kills the alias for subsequent subscript writes (`FP1`: `project_hints`
+        is not derived) and in `_local_writes(fn)`; `FP3` (`.update(...)` after
+        rebinding) stays conservative as pre-existing (`project_hints` derived)."""
+        # Direct unit check of `_local_writes(fn)` alias propagation and kill (#5680, #5687).
+        fn_tree = scan.ast.parse(
+            "def f():\n"
+            "    contracts = {}\n"
+            "    view = contracts\n"
+            "    view['live'] = live_val\n"
+            "    view = {'other': {}}\n"
+            "    view['dead'] = dead_val\n"
+            "    view2 = contracts\n"
+            "    view3 = view2\n"
+            "    view3.append(chained_val)\n"
+            "    view3, _ = ({}, 1)\n"
+            "    view3['after_unpack'] = unpack_val\n"
+        ).body[0]
+        local_map = scan._local_writes(fn_tree)
+        contracts_ids = [
+            n.id for n in local_map["contracts"] if isinstance(n, scan.ast.Name)
+        ]
+        self.assertIn("live_val", contracts_ids)
+        self.assertIn("chained_val", contracts_ids)
+        self.assertNotIn("dead_val", contracts_ids)
+        self.assertNotIn("unpack_val", contracts_ids)
+
+        with tempfile.TemporaryDirectory() as directory:
+            runner = PRECISION_RUNNER.replace(
+                "from pathlib import Path\n",
+                "from pathlib import Path\nfrom data_sheets_schema import contracts_5680\n",
+            ).replace(
+                "[guide, value, ids_4085.label(spec)]",
+                "[guide, value, ids_4085.label(spec), contracts_5680.render_worker(spec)]",
+            )
+            modules = dict(PRECISION_MODULES)
+            modules["project_hints"] = (
+                "def project_hint(project: str) -> str:\n"
+                '    return f"Review the CHORUS cohort for {project}."\n'
+            )
+            # FP1: rebinding `view = {"other": {}}` kills `view` as an alias of
+            # `contracts` before `view["other"]["hint"] = project_hint(project)`.
+            modules["contracts_5680"] = (
+                "from data_sheets_schema.project_hints import project_hint\n\n"
+                "def _contracts_seed() -> dict[str, dict[str, object]]:\n"
+                '    return {"worker": {"stage": "worker"}}\n\n'
+                "def _role_contracts(project: str = \"\") -> dict[str, dict[str, object]]:\n"
+                "    contracts = _contracts_seed()\n"
+                "    view = contracts\n"
+                '    view = {"other": {}}\n'
+                '    view["other"]["hint"] = project_hint(project)\n'
+                "    return contracts\n\n"
+                "def render_worker(spec) -> str:\n"
+                '    return str(_role_contracts(spec.project)["worker"])\n'
+            )
+            root = self._root(directory, runner, modules)
+            derived, spans, _ = self._derive(root)
+            self.assertNotIn("project_hints", derived)
+            self.assertEqual(
+                self._violations(root, "src/data_sheets_schema/project_hints.py", derived, spans),
+                set(),
+            )
+
+        with tempfile.TemporaryDirectory() as directory:
+            runner = PRECISION_RUNNER.replace(
+                "from pathlib import Path\n",
+                "from pathlib import Path\nfrom data_sheets_schema import contracts_fp3_5680\n",
+            ).replace(
+                "[guide, value, ids_4085.label(spec)]",
+                "[guide, value, ids_4085.label(spec), contracts_fp3_5680.render_worker(spec)]",
+            )
+            modules = dict(PRECISION_MODULES)
+            modules["project_hints"] = (
+                "def project_hint(project: str) -> str:\n"
+                '    return f"Review the CHORUS cohort for {project}."\n'
+            )
+            # FP3: `.update(...)` on a rebound alias stays conservative (pre-existing, #5680).
+            modules["contracts_fp3_5680"] = (
+                "from data_sheets_schema.project_hints import project_hint\n\n"
+                "def _contracts_seed() -> dict[str, dict[str, object]]:\n"
+                '    return {"worker": {"stage": "worker"}}\n\n'
+                "def _role_contracts(project: str = \"\") -> dict[str, dict[str, object]]:\n"
+                "    contracts = _contracts_seed()\n"
+                "    view = contracts\n"
+                '    view = {"other": {}}\n'
+                '    view.update({"hint": project_hint(project)})\n'
+                "    return contracts\n\n"
+                "def render_worker(spec) -> str:\n"
+                '    return str(_role_contracts(spec.project)["worker"])\n'
+            )
+            root = self._root(directory, runner, modules)
+            derived, spans, _ = self._derive(root)
+            self.assertIn("project_hints", derived)
+            self.assertEqual(
+                self._violations(root, "src/data_sheets_schema/project_hints.py", derived, spans),
+                {("CHORUS", 2)},
+            )
+
+    def test_copied_alias_subscript_mutations_documented_known_gaps_a7_a8_a9_5679(self):
+        """#5679 (P1-1 option (b)): documented known gaps `A7` (`dict(contracts)`),
+        `A8` (`contracts.copy()`), and `A9` (`{**contracts}`). On a real-repo
+        module (`typed_audit.py`), shallow copies land in `uncertain` and are
+        exempted by the existing real-repo carve-out (`scan.py:9267-9274`), so
+        nested subscript writes through the shallow copy neither trace into
+        `project_hints` nor refuse today."""
+        cases = (
+            ("A7_dict_copy_subscript",
+             '    view = dict(contracts)\n    view["worker"]["hint"] = project_hint(project)\n'),
+            ("A8_method_copy_subscript",
+             '    view = contracts.copy()\n    view["worker"]["hint"] = project_hint(project)\n'),
+            ("A9_dict_unpack_subscript",
+             '    view = {**contracts}\n    view["worker"]["hint"] = project_hint(project)\n'),
+        )
+        for label, mutation in cases:
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as directory:
+                runner = PRECISION_RUNNER.replace(
+                    "from pathlib import Path\n",
+                    "from pathlib import Path\nfrom data_sheets_schema import typed_audit\n",
+                ).replace(
+                    "[guide, value, ids_4085.label(spec)]",
+                    "[guide, value, ids_4085.label(spec), typed_audit.render_worker(spec)]",
+                )
+                modules = dict(PRECISION_MODULES)
+                modules["schema_semantics"] = ""
+                modules["receipt_completion_policy"] = ""
+                modules["project_hints"] = (
+                    "def project_hint(project: str) -> str:\n"
+                    '    return f"Review the CHORUS cohort for {project}."\n'
+                )
+                # Known gap (#5679): `typed_audit` is in `_audit_evidence_modules`
+                # on the real repo, where `uncertain` copy aliases hit the
+                # carve-out at `scan.py:9267-9274` rather than tracing or refusing.
+                modules["typed_audit"] = (
+                    "from data_sheets_schema.project_hints import project_hint\n\n"
+                    "def _contracts_seed() -> dict[str, dict[str, object]]:\n"
+                    '    return {"worker": {"stage": "worker"}}\n\n'
+                    "def _role_contracts(project: str = \"\") -> dict[str, dict[str, object]]:\n"
+                    "    contracts = _contracts_seed()\n"
+                    + mutation +
+                    "    return contracts\n\n"
+                    "def render_worker(spec) -> str:\n"
+                    '    return str(_role_contracts(spec.project)["worker"])\n'
+                )
+                root = self._root(directory, runner, modules)
+                derived, spans, _ = self._derive(root)
+                self.assertNotIn("project_hints", derived)
+                self.assertEqual(
+                    self._violations(root, "src/data_sheets_schema/project_hints.py", derived, spans),
+                    set(),
+                )
+
+    def test_local_writes_alias_propagation_and_observer_excluded_id_set_5687(self):
+        """#5687 (P3-3): test the two precision mechanisms from `#5657`:
+        (1) `_local_writes(fn)` propagates writes on a plain alias `view = contracts`
+        into `local['contracts']` so `consumed` admits `json.dumps(inner)` written
+        via `view['worker'] = json.dumps(inner)`; and (2) `excluded` in `flow()`
+        strips discarded primitive observer operand AST node `id`s across all
+        local observer containers in `fn`."""
+        with tempfile.TemporaryDirectory() as directory:
+            runner = PRECISION_RUNNER.replace(
+                "from pathlib import Path\n",
+                "from pathlib import Path\n"
+                "from data_sheets_schema import alias_local_writes_5687\n"
+                "from data_sheets_schema import observer_operand_trace as hidden\n",
+            ).replace(
+                "[guide, value, ids_4085.label(spec)]",
+                "[guide, value, ids_4085.label(spec), alias_local_writes_5687.render_worker(spec)]",
+            )
+            modules = dict(PRECISION_MODULES)
+            modules["observer_operand_trace"] = (
+                'TEXT = "Describe the CHORUS cohort from its source records."\n'
+                'ASIDE = "A VOICE aside this module never sends."\n'
+            )
+            modules["project_hints"] = (
+                "def project_hint(project: str) -> str:\n"
+                '    return f"Review the CM4AI cohort for {project}."\n'
+            )
+            modules["alias_local_writes_5687"] = (
+                "import json\n"
+                "from data_sheets_schema import observer_operand_trace as hidden\n"
+                "from data_sheets_schema.project_hints import project_hint\n\n"
+                "def render_worker(spec) -> str:\n"
+                '    obs_list = ["Neutral instruction."]\n'
+                "    obs_list.count(hidden.TEXT)\n"
+                '    obs_dict = {"neutral": "Neutral instruction."}\n'
+                '    obs_dict.get("missing", hidden.ASIDE)\n'
+                '    inner = {"hint": project_hint(spec.project)}\n'
+                "    contracts = {}\n"
+                "    view = contracts\n"
+                '    view["worker"] = json.dumps(inner)\n'
+                '    return contracts["worker"]\n'
+            )
+            root = self._root(directory, runner, modules)
+            derived, spans, _ = self._derive(root)
+            self.assertIn("project_hints", derived)
+            self.assertNotIn("observer_operand_trace", derived)
+            self.assertEqual(
+                self._violations(root, "src/data_sheets_schema/project_hints.py", derived, spans),
+                {("CM4AI", 2)},
+            )
+            self.assertEqual(
+                self._violations(root, "src/data_sheets_schema/observer_operand_trace.py", derived, spans),
+                set(),
+            )
+
 
 
 
@@ -6711,14 +6917,228 @@ class TestWhatTextsRun(unittest.TestCase):
             table_rel = "src/data_sheets_schema/ambiguous_5666.py"
             _write(
                 root / table_rel,
-                "args = ('python', '-m', 'data_sheets_schema.first_5666')\n"
-                "args = ('python', '-m', 'data_sheets_schema.second_5666')\n"
-                "COMMANDS = {'run': args}\n",
+                "MOD = 'data_sheets_schema.first_5666'\n"
+                "MOD = 'data_sheets_schema.second_5666'\n"
+                "COMMANDS = {'run': ('python', '-m', MOD)}\n",
             )
             surfaces = scan.Surfaces()
             surfaces.add(table_rel, "native_agentic", "model_facing", "live", "ambiguous fixture", runs=False)
-            with self.assertRaisesRegex(scan.ConfigError, "ambiguous argv alias: args"):
+            with self.assertRaisesRegex(
+                scan.ConfigError,
+                rf"unresolvable -m operand at {table_rel}:3",
+            ):
                 scan.discover_model_commands(root, {}, surfaces)
+
+    def test_module_m_imported_helper_prose_known_gap_f3e_5682(self):
+        """#5666 / #5682 (P2-3, documented known gap F3e): local modules in the
+        import closure of a `-m` target receive role `run_shaping` (not
+        `model_facing`), so code comparisons in the imported helper gate
+        (`violation: True`), whereas plain string literals in the imported
+        helper have `model_facing: False, violation: False` today."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            _write(
+                root / "src/data_sheets_schema/source_attribution_preflight.py",
+                "from data_sheets_schema import preflight_note_5666\n"
+                "def main():\n"
+                "    print(preflight_note_5666.note())\n",
+            )
+            # Known gap F3e (#5666, #5682): `preflight_note_5666.py` is imported
+            # by `-m data_sheets_schema.source_attribution_preflight` and gets
+            # role `run_shaping`; its string literal is not `model_facing` today.
+            _write(
+                root / "src/data_sheets_schema/preflight_note_5666.py",
+                "def note() -> str:\n"
+                "    return 'Note: this is the CHORUS dataset; prefer CHORUS naming.'\n",
+            )
+            table_rel = "src/data_sheets_schema/agentic_runtime.py"
+            _write(
+                root / table_rel,
+                "COMMANDS = {'preflight': ('python', '-m', 'data_sheets_schema.source_attribution_preflight')}\n",
+            )
+            surfaces = scan.Surfaces()
+            surfaces.add(table_rel, "native_agentic", "model_facing", "live", "runtime fixture", runs=False)
+            facts = scan.discover_model_commands(root, {}, surfaces)
+            target_rel = "src/data_sheets_schema/source_attribution_preflight.py"
+            helper_rel = "src/data_sheets_schema/preflight_note_5666.py"
+            self.assertIn(target_rel, facts)
+            self.assertIn(helper_rel, facts[target_rel]["imports"])
+            self.assertEqual(surfaces.files[target_rel].roles, {"native_agentic": "model_facing"})
+            self.assertEqual(surfaces.files[helper_rel].roles, {"native_agentic": "run_shaping"})
+            helper_hits = scan.scan_file(root, surfaces.files[helper_rel], list(_tokens()))
+            for h in helper_hits:
+                h["exception"] = None
+                h["violation"] = scan.is_violation(h)
+            chorus_hits = [h for h in helper_hits if h["match"] == "CHORUS"]
+            self.assertEqual(len(chorus_hits), 2, chorus_hits)
+            self.assertTrue(
+                all(
+                    h["context"] == "string_literal"
+                    and not h["model_facing"]
+                    and not h["violation"]
+                    and h["gates_in"] == []
+                    for h in chorus_hits
+                ),
+                chorus_hits,
+            )
+
+    def test_model_command_tables_r1_r2_r3_and_m_forms_5681_5683(self):
+        """#5681 (P2-2) and #5683 (P2-4):
+        - `R1` (unrelated multi-bound local where one binding calls `subprocess.run`
+          with `-m`), `R2` (command-table entry rebound in a branch to the same
+          `-m` target), and `R3` (`args = args + ['--quiet']; shlex.join(args)`),
+          plus `+=`, `.append`, and `.extend`, scan without refusing;
+        - Each of `M_forms` (`m1`–`m7`) and prose `MODULE_RUN` constants is
+          either discovered (`m3`–`m7`, prose) or refused naming `<file>:<line>`
+          (`m1`, `m2`, concatenated/conditional/conflicting `-m` operand), never
+          silently dropped."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            for mod_name in (
+                "r2_target",
+                "r3_target",
+                "aug_target",
+                "append_target",
+                "extend_target",
+                "m3_target",
+                "m4_target",
+                "m5_target",
+                "m6a_target",
+                "m6b_target",
+                "m7_target",
+                "prose_target",
+                "fstring_prose_target",
+            ):
+                _write(
+                    root / f"src/data_sheets_schema/{mod_name}.py",
+                    "def main():\n    return 0\n",
+                )
+            table_rel = "src/data_sheets_schema/agentic_runtime.py"
+            _write(
+                root / table_rel,
+                "import shlex\n"
+                "import subprocess\n"
+                "import sys\n"
+                "from shlex import join\n\n"
+                "def r1_unrelated_ambiguous(flag: bool):\n"
+                "    out = subprocess.run([sys.executable, '-m', 'pip', '--version'])\n"
+                "    if flag:\n"
+                "        out = None\n"
+                "    return {'probe': out}\n\n"
+                "def r2_branch_rebinding_cmd(py: str, strict: bool):\n"
+                "    check = [py, '-m', 'data_sheets_schema.r2_target']\n"
+                "    if strict:\n"
+                "        check = [py, '-m', 'data_sheets_schema.r2_target', '--strict']\n"
+                "    return {'Check again': check}\n\n"
+                "def r3_self_extend_shlex(args):\n"
+                "    args = args + ['--quiet']\n"
+                "    return shlex.join(args)\n\n"
+                "def r3_rebind_m():\n"
+                "    args = ['python']\n"
+                "    args = args + ['-m', 'data_sheets_schema.r3_target']\n"
+                "    return args\n\n"
+                "def aug_m():\n"
+                "    args = ['python']\n"
+                "    args += ['-m', 'data_sheets_schema.aug_target']\n"
+                "    return args\n\n"
+                "def append_m():\n"
+                "    args = ['python', '-m']\n"
+                "    args.append('data_sheets_schema.append_target')\n"
+                "    return args\n\n"
+                "def extend_m():\n"
+                "    args = ['python']\n"
+                "    args.extend(['-m', 'data_sheets_schema.extend_target'])\n"
+                "    return args\n\n"
+                "m3 = ' '.join(['python', '-m', 'data_sheets_schema.m3_target'])\n"
+                "m4 = join(['python', '-m', 'data_sheets_schema.m4_target'])\n"
+                "prefix = ['python', '-m']\n"
+                "m5 = [*prefix, 'data_sheets_schema.m5_target']\n\n"
+                "def m6_helper(flag: bool):\n"
+                "    if flag:\n"
+                "        return ['python', '-m', 'data_sheets_schema.m6a_target']\n"
+                "    return ['python', '-m', 'data_sheets_schema.m6b_target']\n\n"
+                "class _Builder:\n"
+                "    def cmd(self):\n"
+                "        return ['python', '-m', 'data_sheets_schema.m7_target']\n\n"
+                "COMMANDS = {\n"
+                "    'r3': r3_rebind_m(),\n"
+                "    'aug': aug_m(),\n"
+                "    'append': append_m(),\n"
+                "    'extend': extend_m(),\n"
+                "    'm5': m5,\n"
+                "    'm6': m6_helper(True),\n"
+                "    'm7': _Builder().cmd(),\n"
+                "}\n"
+                "PROSE_HELP = 'Run python -m data_sheets_schema.prose_target --check before exit.'\n"
+                "def fstring_prose(py: str) -> str:\n"
+                "    return f'{py} -m data_sheets_schema.fstring_prose_target\\n'\n",
+            )
+            surfaces = scan.Surfaces()
+            surfaces.add(table_rel, "native_agentic", "model_facing", "live", "runtime fixture", runs=False)
+            facts = scan.discover_model_commands(root, {}, surfaces)
+            for mod_name in (
+                "r2_target",
+                "r3_target",
+                "aug_target",
+                "append_target",
+                "extend_target",
+                "m3_target",
+                "m4_target",
+                "m5_target",
+                "m6a_target",
+                "m6b_target",
+                "m7_target",
+                "prose_target",
+                "fstring_prose_target",
+            ):
+                rel = f"src/data_sheets_schema/{mod_name}.py"
+                with self.subTest(discovered=mod_name):
+                    self.assertIn(rel, facts)
+                    self.assertEqual(surfaces.files[rel].roles, {"native_agentic": "model_facing"})
+                    self.assertEqual(surfaces.files[rel].runs, {"native_agentic"})
+
+        # Refusal cases (m1, m2, concatenated, conditional, conflicting multi-bound module alias):
+        refusal_cases = (
+            (
+                "m1_imported_constant",
+                "from other_mod import TARGET_MOD\n"
+                "COMMANDS = {'m1': ('python', '-m', TARGET_MOD)}\n",
+                r"unresolvable -m operand at src/data_sheets_schema/refusal_5683\.py:2",
+            ),
+            (
+                "m2_fstring_operand",
+                "PKG = 'data_sheets_schema'\n"
+                "COMMANDS = {'m2': ('python', '-m', f'{PKG}.source_review')}\n",
+                r"unresolvable -m operand at src/data_sheets_schema/refusal_5683\.py:2",
+            ),
+            (
+                "concat_operand",
+                "PKG = 'data_sheets_schema.'\n"
+                "COMMANDS = {'concat': ('python', '-m', PKG + 'source_review')}\n",
+                r"unresolvable -m operand at src/data_sheets_schema/refusal_5683\.py:2",
+            ),
+            (
+                "ifexp_operand",
+                "COMMANDS = {'ifexp': ('python', '-m', 'data_sheets_schema.a' if True else 'data_sheets_schema.b')}\n",
+                r"unresolvable -m operand at src/data_sheets_schema/refusal_5683\.py:1",
+            ),
+            (
+                "conflicting_multi_bound_module_alias",
+                "MOD = 'data_sheets_schema.first_5683'\n"
+                "MOD = 'data_sheets_schema.second_5683'\n"
+                "COMMANDS = {'multi': ('python', '-m', MOD)}\n",
+                r"unresolvable -m operand at src/data_sheets_schema/refusal_5683\.py:3",
+            ),
+        )
+        for label, code, pattern in refusal_cases:
+            with self.subTest(refusal=label), tempfile.TemporaryDirectory() as d:
+                root = Path(d).resolve()
+                rel = "src/data_sheets_schema/refusal_5683.py"
+                _write(root / rel, code)
+                surfaces = scan.Surfaces()
+                surfaces.add(rel, "native_agentic", "model_facing", "live", "refusal fixture", runs=False)
+                with self.assertRaisesRegex(scan.ConfigError, pattern):
+                    scan.discover_model_commands(root, {}, surfaces)
 
 
 class TestSessionDescriptions(unittest.TestCase):
