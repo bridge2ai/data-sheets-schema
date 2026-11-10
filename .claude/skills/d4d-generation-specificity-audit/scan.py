@@ -3138,6 +3138,18 @@ def _local_values(fn) -> dict[str, list[ast.AST]]:
             for x in ast.walk(n.target):
                 if isinstance(x, ast.Name) and isinstance(x.ctx, ast.Store):
                     out.setdefault(x.id, []).append(n.iter)
+        elif isinstance(n, ast.NamedExpr) and isinstance(n.target, ast.Name):
+            out.setdefault(n.target.id, []).append(n.value)
+        elif isinstance(n, ast.Match):
+            for case in n.cases:
+                for sub in ast.walk(case.pattern):
+                    p_name = (
+                        getattr(sub, "name", None)
+                        if type(sub).__name__ in {"MatchAs", "MatchStar"}
+                        else (getattr(sub, "rest", None) if type(sub).__name__ == "MatchMapping" else None)
+                    )
+                    if p_name:
+                        out.setdefault(p_name, []).append(n.subject)
     _VALUES[id(fn)] = (fn, {k: tuple(v) for k, v in out.items()})
     return out
 
@@ -3156,14 +3168,280 @@ def _local_writes(fn) -> dict[str, list[ast.AST]]:
         return entry[1]
     out = _local_values(fn)
     bound = set(out) - set(_params(fn))
-    for n in ast.walk(fn):
-        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and _holder(n.func.value) in bound:
-            out[_holder(n.func.value)] += ([a.value if isinstance(a, ast.Starred) else a for a in n.args]
-                                           + [k.value for k in n.keywords])
-        elif isinstance(n, (ast.Assign, ast.AnnAssign, ast.AugAssign)) and n.value is not None:
-            for t in n.targets if isinstance(n, ast.Assign) else [n.target]:
+    alias_groups = {k: {k} for k in bound}
+    seen_writes = {k: {id(v) for v in vals} for k, vals in out.items()}
+    loop_stack = []
+    exc_stack = []
+    try_types = (ast.Try, getattr(ast, "TryStar", ast.Try))
+
+    def add_write(m, val):
+        if id(val) not in seen_writes[m]:
+            seen_writes[m].add(id(val))
+            out[m].append(val)
+
+    def record_exc_state():
+        for acc in exc_stack:
+            for k in bound:
+                acc[k].update(alias_groups[k])
+
+    def clone_state(state=None):
+        src = alias_groups if state is None else state
+        return {k: set(v) for k, v in src.items()}
+
+    def restore_state(state):
+        for k in bound:
+            alias_groups[k] = set(state[k])
+        record_exc_state()
+
+    def join_states(*states):
+        return {
+            k: set().union(*(s[k] for s in states if s is not None))
+            for k in bound
+        }
+
+    def kill_alias(name):
+        if name in bound:
+            for m in list(alias_groups[name]):
+                if m != name:
+                    alias_groups[m].discard(name)
+            alias_groups[name] = {name}
+            record_exc_state()
+
+    def bind_alias(target_name, source_name):
+        if target_name == source_name:
+            return
+        kill_alias(target_name)
+        if target_name in bound and source_name in bound:
+            sources = set(alias_groups[source_name])
+            alias_groups[target_name] |= sources
+            for m in sources:
+                alias_groups[m].add(target_name)
+            record_exc_state()
+
+    def visit(node):
+        if isinstance(node, ast.Continue):
+            if loop_stack:
+                loop_stack[-1][0].append(clone_state())
+            return
+        if isinstance(node, ast.Break):
+            if loop_stack:
+                loop_stack[-1][1].append(clone_state())
+            return
+        if isinstance(node, (ast.If, ast.IfExp)):
+            visit(node.test)
+            saved = clone_state()
+            if isinstance(node, ast.If):
+                for stmt in node.body:
+                    visit(stmt)
+                after_body = clone_state()
+                restore_state(saved)
+                for stmt in node.orelse:
+                    visit(stmt)
+            else:
+                visit(node.body)
+                after_body = clone_state()
+                restore_state(saved)
+                visit(node.orelse)
+            restore_state(join_states(after_body, alias_groups))
+            return
+        if isinstance(node, try_types):
+            s_in = clone_state()
+            s_try_accum = clone_state(s_in)
+            exc_stack.append(s_try_accum)
+            try:
+                for stmt in node.body:
+                    visit(stmt)
+            finally:
+                exc_stack.pop()
+            s_after_body = clone_state()
+            s_orelse_accum = clone_state(s_after_body)
+            exc_stack.append(s_orelse_accum)
+            try:
+                for stmt in node.orelse:
+                    visit(stmt)
+            finally:
+                exc_stack.pop()
+            s_after_orelse = clone_state()
+            handler_exits = []
+            s_handlers_accum = {k: set() for k in bound}
+            exc_stack.append(s_handlers_accum)
+            try:
+                for handler in node.handlers:
+                    restore_state(s_try_accum)
+                    if handler.type is not None:
+                        visit(handler.type)
+                    if handler.name:
+                        kill_alias(handler.name)
+                    for stmt in handler.body:
+                        visit(stmt)
+                    handler_exits.append(clone_state())
+            finally:
+                exc_stack.pop()
+            s_normal = join_states(s_after_orelse, *handler_exits)
+            if node.finalbody:
+                restore_state(join_states(s_normal, s_try_accum, s_orelse_accum, s_handlers_accum))
+                for stmt in node.finalbody:
+                    visit(stmt)
+                restore_state(s_normal)
+                for stmt in node.finalbody:
+                    visit(stmt)
+            else:
+                restore_state(s_normal)
+            return
+        if isinstance(node, ast.Match):
+            visit(node.subject)
+            s_fallthrough = clone_state()
+            case_exits = []
+            has_irrefutable = False
+            for case in node.cases:
+                restore_state(s_fallthrough)
+                is_irrefutable_pattern = (
+                    isinstance(case.pattern, ast.MatchAs) and case.pattern.pattern is None
+                )
+                if is_irrefutable_pattern:
+                    if case.guard is None:
+                        has_irrefutable = True
+                    if case.pattern.name:
+                        if isinstance(node.subject, ast.Name):
+                            bind_alias(case.pattern.name, node.subject.id)
+                            if case.pattern.name in bound:
+                                add_write(case.pattern.name, node.subject)
+                        else:
+                            kill_alias(case.pattern.name)
+                else:
+                    for sub in ast.walk(case.pattern):
+                        p_name = (
+                            getattr(sub, "name", None)
+                            if type(sub).__name__ in {"MatchAs", "MatchStar"}
+                            else (getattr(sub, "rest", None) if type(sub).__name__ == "MatchMapping" else None)
+                        )
+                        if p_name:
+                            if isinstance(node.subject, ast.Name):
+                                bind_alias(p_name, node.subject.id)
+                            else:
+                                kill_alias(p_name)
+                if case.guard is not None:
+                    visit(case.guard)
+                if not (is_irrefutable_pattern and case.guard is None):
+                    s_fallthrough = join_states(s_fallthrough, alias_groups)
+                for stmt in case.body:
+                    visit(stmt)
+                case_exits.append(clone_state())
+            if not has_irrefutable:
+                case_exits.append(s_fallthrough)
+            restore_state(join_states(*case_exits))
+            return
+        if isinstance(node, (ast.For, ast.AsyncFor, ast.While)):
+            s_entry = clone_state()
+            max_iters = len(bound) * len(bound) + 4
+            break_states = []
+            for _ in range(max_iters):
+                restore_state(s_entry)
+                cont_states = []
+                cur_breaks = []
+                loop_stack.append((cont_states, cur_breaks))
+                try:
+                    if isinstance(node, (ast.For, ast.AsyncFor)):
+                        visit(node.iter)
+                        for sub in ast.walk(node.target):
+                            if isinstance(sub, ast.Name) and isinstance(sub.ctx, ast.Store):
+                                kill_alias(sub.id)
+                    else:
+                        visit(node.test)
+                    for stmt in node.body:
+                        visit(stmt)
+                finally:
+                    loop_stack.pop()
+                break_states = cur_breaks
+                s_next = join_states(s_entry, alias_groups, *cont_states)
+                if s_next == s_entry:
+                    break
+                s_entry = s_next
+            restore_state(s_entry)
+            if isinstance(node, (ast.For, ast.AsyncFor)):
+                visit(node.iter)
+            else:
+                visit(node.test)
+            for stmt in node.orelse:
+                visit(stmt)
+            restore_state(join_states(alias_groups, *break_states))
+            return
+        if isinstance(node, (ast.With, ast.AsyncWith)):
+            for item in node.items:
+                visit(item.context_expr)
+                if item.optional_vars is not None:
+                    for sub in ast.walk(item.optional_vars):
+                        if isinstance(sub, ast.Name) and isinstance(sub.ctx, ast.Store):
+                            kill_alias(sub.id)
+            s_with_accum = clone_state()
+            exc_stack.append(s_with_accum)
+            try:
+                for stmt in node.body:
+                    visit(stmt)
+            finally:
+                exc_stack.pop()
+            restore_state(join_states(alias_groups, s_with_accum))
+            return
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node is not fn:
+            for dec in node.decorator_list:
+                visit(dec)
+            if isinstance(node, ast.ClassDef):
+                for b in node.bases:
+                    visit(b)
+                for kw in node.keywords:
+                    visit(kw)
+            else:
+                for d in list(node.args.defaults) + [kd for kd in node.args.kw_defaults if kd is not None]:
+                    visit(d)
+            s_outer = clone_state()
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                for p_name in _params(node):
+                    kill_alias(p_name)
+            for stmt in node.body:
+                visit(stmt)
+            restore_state(s_outer)
+            kill_alias(node.name)
+            return
+        if isinstance(node, ast.Delete):
+            for t in node.targets:
+                if isinstance(t, ast.Name) and t.id in bound:
+                    kill_alias(t.id)
+                else:
+                    visit(t)
+            return
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and _holder(node.func.value) in bound:
+            vals = ([a.value if isinstance(a, ast.Starred) else a for a in node.args]
+                    + [k.value for k in node.keywords])
+            for m in alias_groups[_holder(node.func.value)]:
+                for v in vals:
+                    add_write(m, v)
+        elif isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign, ast.NamedExpr)) and node.value is not None:
+            visit(node.value)
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            for t in targets:
                 if isinstance(t, (ast.Subscript, ast.Attribute)) and _holder(t) in bound:
-                    out[_holder(t)].append(n.value)
+                    visit(t)
+                    for m in alias_groups[_holder(t)]:
+                        add_write(m, node.value)
+                elif isinstance(node, ast.AugAssign) and isinstance(t, ast.Name) and t.id in bound:
+                    for m in alias_groups[t.id] - {t.id}:
+                        add_write(m, node.value)
+                elif isinstance(t, ast.Name) and t.id in bound:
+                    if isinstance(node.value, ast.Name):
+                        bind_alias(t.id, node.value.id)
+                    else:
+                        kill_alias(t.id)
+                elif isinstance(t, (ast.Tuple, ast.List)):
+                    for sub in ast.walk(t):
+                        if isinstance(sub, ast.Name) and sub.id in bound:
+                            kill_alias(sub.id)
+                else:
+                    visit(t)
+            return
+        for child in ast.iter_child_nodes(node):
+            visit(child)
+
+    visit(fn)
     _WRITES[id(fn)] = (fn, out)
     return out
 
@@ -5793,7 +6071,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                                       for x in ast.walk(top_target))
                     modeled = isinstance(node.ctx, ast.Store) and pure_target and (
                         isinstance(owner, ast.Assign) and any(top_target is t for t in owner.targets)
-                        or isinstance(owner, (ast.AnnAssign, ast.AugAssign))
+                        or isinstance(owner, (ast.AnnAssign, ast.AugAssign, ast.NamedExpr))
                         and node is owner.target and owner.value is not None
                         or isinstance(owner, (ast.For, ast.AsyncFor)) and top_target is owner.target)
                     if not modeled:
@@ -5805,7 +6083,10 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                     unknown.add(node.name)
                 elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node is not fn:
                     unknown.add(node.name)
-                elif type(node).__name__ in {"MatchAs", "MatchStar"} and node.name:
+                elif type(node).__name__ == "MatchAs" and node.name:
+                    if not (isinstance(parents.get(id(node)), ast.match_case) and node.pattern is None):
+                        unknown.add(node.name)
+                elif type(node).__name__ == "MatchStar" and node.name:
                     unknown.add(node.name)
                 elif type(node).__name__ == "MatchMapping" and node.rest:
                     unknown.add(node.rest)
@@ -7518,6 +7799,40 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
         while changed:
             changed = False
             for node in effect_nodes(fn):
+                if isinstance(node, ast.Match):
+                    value = node.subject
+                    if value is None:
+                        continue
+                    for case in node.cases:
+                        if isinstance(case.pattern, ast.MatchAs) and case.pattern.pattern is None:
+                            if not case.pattern.name:
+                                continue
+                            t_name = case.pattern.name
+                            if _is_real_repo_module(q) and compute_entry_scalar_rebinding(q, fn, t_name):
+                                continue
+                            if isinstance(value, ast.Name):
+                                members = {t_name, value.id}
+                                if members & aliases and not members <= aliases:
+                                    aliases.update(members)
+                                    changed = True
+                            elif value_carries_alias_expr(q, fn, value, aliases):
+                                if t_name not in aliases:
+                                    aliases.add(t_name)
+                                    changed = True
+                                uncertain.add(t_name)
+                        elif value_carries_alias_expr(q, fn, value, aliases):
+                            for sub in ast.walk(case.pattern):
+                                p_name = (
+                                    getattr(sub, "name", None)
+                                    if type(sub).__name__ in {"MatchAs", "MatchStar"}
+                                    else (getattr(sub, "rest", None) if type(sub).__name__ == "MatchMapping" else None)
+                                )
+                                if p_name:
+                                    if p_name not in aliases:
+                                        aliases.add(p_name)
+                                        changed = True
+                                    uncertain.add(p_name)
+                    continue
                 if isinstance(node, ast.Assign):
                     targets, value = node.targets, node.value
                 elif isinstance(node, (ast.AnnAssign, ast.NamedExpr)):
@@ -8360,10 +8675,8 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
         if observers:
             # Remove only the exact operand edges added by historical method
             # handling. Keep assignment/item-write edges and its shared cache.
-            excluded = {}
-            for name, call in observers.values():
-                excluded.setdefault(name, set()).update(id(a) for a in call.args)
-            local = {name: [value for value in values if id(value) not in excluded.get(name, ())]
+            excluded = {id(a) for _, call in observers.values() for a in call.args}
+            local = {name: [value for value in values if id(value) not in excluded]
                      for name, values in local.items()}
         params = set(_params(fn)) if fn is not None else set()
         bound, defaults = bound or {}, defaults or {}
@@ -8559,9 +8872,10 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                             and len(value.args) == 1 and not value.keywords \
                             and not isinstance(value.args[0], ast.Starred):
                         found.add("dict")
-                    elif _is_real_repo_module(q) and isinstance(value, ast.Call) and (
-                            (isinstance(value.func, ast.Name) and value.func.id == "child_environment")
-                            or (isinstance(value.func, ast.Attribute) and value.func.attr == "child_environment")
+                    elif isinstance(value, ast.Call) and (
+                            (_is_real_repo_module(q) and (
+                                (isinstance(value.func, ast.Name) and value.func.id == "child_environment")
+                                or (isinstance(value.func, ast.Attribute) and value.func.attr == "child_environment")))
                             or (summary_callee(q, fn, value.func) and function_container_return(summary_callee(q, fn, value.func)))):
                         hit = summary_callee(q, fn, value.func)
                         ret = function_container_return(hit) if hit else None
@@ -9049,6 +9363,22 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                                 refusal(node, "unmodeled formal alias escape")
                             continue
                         escaping = node
+                    elif isinstance(node, ast.Match):
+                        if any(
+                            not (isinstance(c.pattern, ast.MatchAs) and c.pattern.pattern is None and isinstance(node.subject, ast.Name))
+                            and any(
+                                getattr(sub, "name", None) or getattr(sub, "rest", None)
+                                for sub in ast.walk(c.pattern)
+                            )
+                            for c in node.cases
+                        ):
+                            if _is_real_repo_module(q):
+                                if value_carries_alias(node.subject, aliases):
+                                    refusal(node, "unmodeled formal alias escape")
+                                continue
+                            escaping = node.subject
+                        else:
+                            continue
                     else:
                         continue
                     if escaping is not None and any(isinstance(n, ast.Name) and n.id in aliases
@@ -9114,6 +9444,364 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                     if isinstance(node, (ast.AugAssign, ast.Delete)) or any(
                             _holder(t) in aliases and not isinstance(t, ast.Name) for t in targets):
                         refusal(node, "unsupported formal mutation")
+            else:
+                live_plain, live_sub, live_uncertain = {name}, set(), set()
+                live_at = {}
+                loop_stack = []
+                exc_stack = []
+                try_types = (ast.Try, getattr(ast, "TryStar", ast.Try))
+                all_names = {n.id for n in ast.walk(fn) if isinstance(n, ast.Name)} | {name}
+
+                def _record_exc_live():
+                    for acc in exc_stack:
+                        acc[0].update(live_plain)
+                        acc[1].update(live_sub)
+                        acc[2].update(live_uncertain)
+
+                def _clone_live(state=None):
+                    if state is None:
+                        return (set(live_plain), set(live_sub), set(live_uncertain))
+                    return (set(state[0]), set(state[1]), set(state[2]))
+
+                def _restore_live(state):
+                    nonlocal live_plain, live_sub, live_uncertain
+                    live_plain, live_sub, live_uncertain = set(state[0]), set(state[1]), set(state[2])
+                    _record_exc_live()
+
+                def _join_live(*states):
+                    return (
+                        set().union(*(s[0] for s in states if s is not None)),
+                        set().union(*(s[1] for s in states if s is not None)),
+                        set().union(*(s[2] for s in states if s is not None)),
+                    )
+
+                def _kill_live_name(var_name):
+                    if var_name != name:
+                        live_plain.discard(var_name)
+                        live_sub.discard(var_name)
+                        live_uncertain.discard(var_name)
+                        _record_exc_live()
+
+                def _bind_live_name(target_id, val_node):
+                    live_all = live_plain | live_sub | live_uncertain
+                    if target_id == name:
+                        live_plain.add(name)
+                        live_sub.discard(name)
+                        live_uncertain.discard(name)
+                        _record_exc_live()
+                    elif _is_real_repo_module(q) and compute_entry_scalar_rebinding(q, fn, target_id):
+                        _kill_live_name(target_id)
+                    elif isinstance(val_node, ast.Name):
+                        if val_node.id in live_plain:
+                            live_plain.add(target_id)
+                            live_sub.discard(target_id)
+                            live_uncertain.discard(target_id)
+                            _record_exc_live()
+                        elif val_node.id in live_sub:
+                            live_sub.add(target_id)
+                            live_plain.discard(target_id)
+                            live_uncertain.discard(target_id)
+                            _record_exc_live()
+                        elif val_node.id in live_uncertain:
+                            live_uncertain.add(target_id)
+                            live_plain.discard(target_id)
+                            live_sub.discard(target_id)
+                            _record_exc_live()
+                        else:
+                            _kill_live_name(target_id)
+                    elif isinstance(val_node, ast.Subscript) and _holder(val_node) in live_plain:
+                        live_sub.add(target_id)
+                        live_plain.discard(target_id)
+                        live_uncertain.discard(target_id)
+                        _record_exc_live()
+                    elif value_carries_alias_expr(q, fn, val_node, live_all):
+                        live_uncertain.add(target_id)
+                        live_plain.discard(target_id)
+                        live_sub.discard(target_id)
+                        _record_exc_live()
+                    else:
+                        _kill_live_name(target_id)
+
+                def _walk_alias_state(stmt):
+                    nonlocal live_plain, live_sub, live_uncertain
+                    prev_live = live_at.get(id(stmt))
+                    if prev_live is None:
+                        live_at[id(stmt)] = (
+                            frozenset(live_plain),
+                            frozenset(live_sub),
+                            frozenset(live_uncertain),
+                        )
+                    else:
+                        live_at[id(stmt)] = (
+                            prev_live[0] | frozenset(live_plain),
+                            prev_live[1] | frozenset(live_sub),
+                            prev_live[2] | frozenset(live_uncertain),
+                        )
+                    if isinstance(stmt, ast.Continue):
+                        if loop_stack:
+                            loop_stack[-1][0].append(_clone_live())
+                        return
+                    if isinstance(stmt, ast.Break):
+                        if loop_stack:
+                            loop_stack[-1][1].append(_clone_live())
+                        return
+                    if isinstance(stmt, (ast.If, ast.IfExp)):
+                        _walk_alias_state(stmt.test)
+                        s0 = _clone_live()
+                        if isinstance(stmt, ast.If):
+                            for child in stmt.body:
+                                _walk_alias_state(child)
+                            s_body = _clone_live()
+                            _restore_live(s0)
+                            for child in stmt.orelse:
+                                _walk_alias_state(child)
+                        else:
+                            _walk_alias_state(stmt.body)
+                            s_body = _clone_live()
+                            _restore_live(s0)
+                            _walk_alias_state(stmt.orelse)
+                        _restore_live(_join_live(s_body, _clone_live()))
+                        return
+                    if isinstance(stmt, try_types):
+                        s_in = _clone_live()
+                        s_try_accum = _clone_live(s_in)
+                        exc_stack.append(s_try_accum)
+                        try:
+                            for child in stmt.body:
+                                _walk_alias_state(child)
+                        finally:
+                            exc_stack.pop()
+                        s_after_body = _clone_live()
+                        s_orelse_accum = _clone_live(s_after_body)
+                        exc_stack.append(s_orelse_accum)
+                        try:
+                            for child in stmt.orelse:
+                                _walk_alias_state(child)
+                        finally:
+                            exc_stack.pop()
+                        s_after_orelse = _clone_live()
+                        handler_exits = []
+                        s_handlers_accum = (set(), set(), set())
+                        exc_stack.append(s_handlers_accum)
+                        try:
+                            for handler in stmt.handlers:
+                                _restore_live(s_try_accum)
+                                if handler.type is not None:
+                                    _walk_alias_state(handler.type)
+                                if handler.name:
+                                    _kill_live_name(handler.name)
+                                for child in handler.body:
+                                    _walk_alias_state(child)
+                                handler_exits.append(_clone_live())
+                        finally:
+                            exc_stack.pop()
+                        s_normal = _join_live(s_after_orelse, *handler_exits)
+                        if stmt.finalbody:
+                            _restore_live(_join_live(s_normal, s_try_accum, s_orelse_accum, s_handlers_accum))
+                            for child in stmt.finalbody:
+                                _walk_alias_state(child)
+                            _restore_live(s_normal)
+                            for child in stmt.finalbody:
+                                _walk_alias_state(child)
+                        else:
+                            _restore_live(s_normal)
+                        return
+                    if isinstance(stmt, ast.Match):
+                        _walk_alias_state(stmt.subject)
+                        s_fallthrough = _clone_live()
+                        case_exits = []
+                        has_irrefutable = False
+                        for case in stmt.cases:
+                            _restore_live(s_fallthrough)
+                            is_irrefutable_pattern = (
+                                isinstance(case.pattern, ast.MatchAs) and case.pattern.pattern is None
+                            )
+                            if is_irrefutable_pattern:
+                                if case.guard is None:
+                                    has_irrefutable = True
+                                if case.pattern.name:
+                                    _bind_live_name(case.pattern.name, stmt.subject)
+                            else:
+                                carries = value_carries_alias_expr(
+                                    q, fn, stmt.subject, live_plain | live_sub | live_uncertain
+                                )
+                                for sub in ast.walk(case.pattern):
+                                    p_name = (
+                                        getattr(sub, "name", None)
+                                        if type(sub).__name__ in {"MatchAs", "MatchStar"}
+                                        else (
+                                            getattr(sub, "rest", None)
+                                            if type(sub).__name__ == "MatchMapping"
+                                            else None
+                                        )
+                                    )
+                                    if p_name and p_name != name:
+                                        if carries:
+                                            live_uncertain.add(p_name)
+                                            live_plain.discard(p_name)
+                                            live_sub.discard(p_name)
+                                            _record_exc_live()
+                                        else:
+                                            _kill_live_name(p_name)
+                            if case.guard is not None:
+                                _walk_alias_state(case.guard)
+                            if not (is_irrefutable_pattern and case.guard is None):
+                                s_fallthrough = _join_live(s_fallthrough, _clone_live())
+                            for child in case.body:
+                                _walk_alias_state(child)
+                            case_exits.append(_clone_live())
+                        if not has_irrefutable:
+                            case_exits.append(s_fallthrough)
+                        _restore_live(_join_live(*case_exits))
+                        return
+                    if isinstance(stmt, (ast.For, ast.AsyncFor, ast.While)):
+                        s_entry = _clone_live()
+                        max_iters = 3 * len(all_names) + 8
+                        converged = False
+                        break_states = []
+                        for _ in range(max_iters):
+                            _restore_live(s_entry)
+                            cont_states = []
+                            cur_breaks = []
+                            loop_stack.append((cont_states, cur_breaks))
+                            try:
+                                if isinstance(stmt, (ast.For, ast.AsyncFor)):
+                                    _walk_alias_state(stmt.iter)
+                                    carries = value_carries_alias_expr(
+                                        q, fn, stmt.iter, live_plain | live_sub | live_uncertain
+                                    )
+                                    for sub in ast.walk(stmt.target):
+                                        if isinstance(sub, ast.Name) and isinstance(sub.ctx, ast.Store) and sub.id != name:
+                                            if carries:
+                                                live_uncertain.add(sub.id)
+                                                live_plain.discard(sub.id)
+                                                live_sub.discard(sub.id)
+                                                _record_exc_live()
+                                            else:
+                                                _kill_live_name(sub.id)
+                                else:
+                                    _walk_alias_state(stmt.test)
+                                for child in stmt.body:
+                                    _walk_alias_state(child)
+                            finally:
+                                loop_stack.pop()
+                            break_states = cur_breaks
+                            s_next = _join_live(s_entry, _clone_live(), *cont_states)
+                            if s_next == s_entry:
+                                converged = True
+                                break
+                            s_entry = s_next
+                        if not converged:
+                            refusal(stmt, "loop alias state did not converge")
+                        _restore_live(s_entry)
+                        if isinstance(stmt, (ast.For, ast.AsyncFor)):
+                            _walk_alias_state(stmt.iter)
+                        else:
+                            _walk_alias_state(stmt.test)
+                        for child in stmt.orelse:
+                            _walk_alias_state(child)
+                        _restore_live(_join_live(_clone_live(), *break_states))
+                        return
+                    if isinstance(stmt, (ast.With, ast.AsyncWith)):
+                        for item in stmt.items:
+                            _walk_alias_state(item.context_expr)
+                            if item.optional_vars is not None:
+                                carries = value_carries_alias_expr(
+                                    q, fn, item.context_expr, live_plain | live_sub | live_uncertain
+                                )
+                                for sub in ast.walk(item.optional_vars):
+                                    if isinstance(sub, ast.Name) and isinstance(sub.ctx, ast.Store) and sub.id != name:
+                                        if carries:
+                                            live_uncertain.add(sub.id)
+                                            live_plain.discard(sub.id)
+                                            live_sub.discard(sub.id)
+                                            _record_exc_live()
+                                        else:
+                                            _kill_live_name(sub.id)
+                        s_with_accum = _clone_live()
+                        exc_stack.append(s_with_accum)
+                        try:
+                            for child in stmt.body:
+                                _walk_alias_state(child)
+                        finally:
+                            exc_stack.pop()
+                        _restore_live(_join_live(_clone_live(), s_with_accum))
+                        return
+                    if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and stmt is not fn:
+                        for dec in stmt.decorator_list:
+                            _walk_alias_state(dec)
+                        if isinstance(stmt, ast.ClassDef):
+                            for b in stmt.bases:
+                                _walk_alias_state(b)
+                            for kw in stmt.keywords:
+                                _walk_alias_state(kw)
+                        else:
+                            for d in list(stmt.args.defaults) + [kd for kd in stmt.args.kw_defaults if kd is not None]:
+                                _walk_alias_state(d)
+                        s_outer = _clone_live()
+                        if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            for p_name in _params(stmt):
+                                _kill_live_name(p_name)
+                        for child in stmt.body:
+                            _walk_alias_state(child)
+                        _restore_live(s_outer)
+                        _kill_live_name(stmt.name)
+                        return
+                    if isinstance(stmt, ast.Delete):
+                        for t in stmt.targets:
+                            if isinstance(t, ast.Name):
+                                _kill_live_name(t.id)
+                            else:
+                                _walk_alias_state(t)
+                        return
+                    if isinstance(stmt, (ast.Assign, ast.AnnAssign, ast.NamedExpr)) and stmt.value is not None:
+                        _walk_alias_state(stmt.value)
+                        stmt_targets = stmt.targets if isinstance(stmt, ast.Assign) else [stmt.target]
+                        for t in stmt_targets:
+                            if isinstance(t, ast.Name):
+                                _bind_live_name(t.id, stmt.value)
+                            elif isinstance(t, (ast.Tuple, ast.List)):
+                                for sub in ast.walk(t):
+                                    if isinstance(sub, ast.Name) and sub.id != name:
+                                        _kill_live_name(sub.id)
+                            else:
+                                _walk_alias_state(t)
+                        return
+                    for child in ast.iter_child_nodes(stmt):
+                        _walk_alias_state(child)
+
+                _walk_alias_state(fn)
+                updates = {id(node): node for alias in aliases - {name}
+                           for node in effect_updates_of[id(fn)].get(alias, ())}
+                for node in updates.values():
+                    plain_here, sub_here, uncertain_here = live_at.get(
+                        id(node), (aliases - uncertain, frozenset(), uncertain)
+                    )
+                    live_here = (plain_here | sub_here | uncertain_here) - {name}
+                    targets = node.targets if isinstance(node, (ast.Assign, ast.Delete)) else [node.target]
+                    for t in targets:
+                        holder = _holder(t)
+                        if holder not in live_here or isinstance(t, ast.Name):
+                            continue
+                        if isinstance(t, ast.Subscript) and (holder in plain_here or holder in sub_here):
+                            cur = t
+                            while isinstance(cur, ast.Subscript):
+                                walk(cur.slice, "selector")
+                                cur = cur.value
+                            if isinstance(cur, ast.Name) and cur.id == holder:
+                                if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)) and node.value is not None:
+                                    walk(node.value, mode, project)
+                                continue
+                        if (
+                            isinstance(t, ast.Subscript)
+                            and _is_real_repo_module(q)
+                            and (
+                                proven_container_kind(holder) in {"dict", "list"}
+                                or (_is_audit_evidence_module(q) and holder not in params)
+                            )
+                        ):
+                            continue
+                        refusal(node, "nested or copied receiver alias")
             calls = {id(node): node for alias in aliases for node in effect_calls_of[id(fn)].get(alias, ())}
             for node in sorted(calls.values(), key=lambda n: (n.lineno, n.col_offset)):
                 # Only the exact consumer certified by a supplied sink is
@@ -9162,7 +9850,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                     if not formal and q is not None and str(q).endswith("audit_batches.py") and node.func.attr == "sort":
                         continue
                     def _is_local_nested_container_subscript(recv, sub, attr):
-                        if not _is_real_repo_module(q):
+                        if not _is_real_repo_module(q) and attr not in {"update", "setdefault"}:
                             return False
                         if not formal and _is_audit_evidence_module(q) and (
                             isinstance(sub, ast.Subscript)
@@ -9181,7 +9869,9 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                         origins, uncertain_origin = container_origins(recv)
                         if uncertain_origin:
                             return False
-                        vals = _local_values(fn).get(recv, ())
+                        plain_aliases = (aliases - uncertain) if recv in (aliases - uncertain) else {recv}
+                        vals = [v for a in plain_aliases for v in _local_values(fn).get(a, ())
+                                if not (isinstance(v, ast.Name) and v.id in plain_aliases)]
                         if not vals:
                             return False
                         def _is_defaultdict(call, factory_name):
@@ -9212,7 +9902,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                                     )
                                 has_sub_list_assign = isinstance(sub.slice, ast.Constant) and any(
                                     isinstance(stmt, ast.Assign) and _is_list_val(stmt.value) and any(
-                                        isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) and t.value.id == recv
+                                        isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) and t.value.id in plain_aliases
                                         and isinstance(t.slice, ast.Constant) and t.slice.value == sub.slice.value
                                         for t in stmt.targets
                                     )
@@ -9249,13 +9939,13 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                                     )
                                 has_sub_dict_assign = isinstance(sub.slice, ast.Constant) and any(
                                     isinstance(stmt, ast.Assign) and _is_dict_val(stmt.value) and any(
-                                        isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) and t.value.id == recv
+                                        isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) and t.value.id in plain_aliases
                                         and isinstance(t.slice, ast.Constant) and t.slice.value == sub.slice.value
                                         for t in stmt.targets
                                     )
                                     for stmt in effect_nodes(fn)
                                 )
-                                def _is_dict_of_dicts(v):
+                                def _is_dict_of_dicts(v, depth=0):
                                     if _is_defaultdict(v, "dict"):
                                         return True
                                     if isinstance(v, ast.Dict):
@@ -9268,6 +9958,13 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                                         return any(_is_dict_val(val) for val in v.values)
                                     if isinstance(v, ast.DictComp):
                                         return _is_dict_val(v.value)
+                                    if depth < 2 and isinstance(v, ast.Call):
+                                        hit = summary_callee(q, fn, v.func)
+                                        if hit is not None:
+                                            callee_fn = defs(hit[0]).get(hit[1])
+                                            if callee_fn is not None:
+                                                res = _results(callee_fn)
+                                                return bool(res) and all(_is_dict_of_dicts(r, depth + 1) for r in res)
                                     return False
                                 return all(_is_dict_of_dicts(v) for v in vals)
                         return False
@@ -10941,6 +11638,369 @@ def discover_model_facing_assets(root: Path, parsed: dict, surfaces: Surfaces) -
     return {key: value for key, value in sorted(found.items())}
 
 
+def _model_command_tables(tree, rel=""):
+    """Literal argv entries in named mappings, nested list/tuple tables, or
+    formatted join(...) command lines in model-facing surfaces.
+
+    A stand-alone argv used by subprocess/runtime code is not a command
+    table. Literal local starred prefixes (the native table's ``*cli``),
+    string-constant module names (``MODULE``), incremental ``+=`` /
+    ``.append`` / ``.extend`` sequence builds, and helper calls in the same
+    module (``command_args(spec)``, ``d4d_command(...)``) are expanded
+    without evaluating their interpreter or argument values. Refuses only
+    when an argv slot of a table that already holds a literal ``"-m"``
+    cannot be resolved.
+    """
+    parents = {}
+    scoped_bindings = {}
+    dict_names = set()
+    funcs = {}
+    func_counts = {}
+    shlex_join_names = set()
+    for node in ast.walk(tree):
+        for child in ast.iter_child_nodes(node):
+            parents[id(child)] = node
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            funcs[node.name] = node
+            func_counts[node.name] = func_counts.get(node.name, 0) + 1
+        elif isinstance(node, ast.ImportFrom) and node.module == "shlex":
+            for alias in node.names:
+                if alias.name == "join":
+                    shlex_join_names.add(alias.asname or alias.name)
+
+    def loc(node):
+        lineno = getattr(node, "lineno", 1)
+        return f"{rel}:{lineno}" if rel else f"line {lineno}"
+
+    def scope(node):
+        while node is not tree and not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+            node = parents[id(node)]
+        return node
+
+    def record_bindings(node):
+        if isinstance(node, (ast.Assign, ast.AnnAssign)) and node.value is not None:
+            owner = scope(node)
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            for t in targets:
+                if isinstance(t, ast.Name):
+                    key = (id(owner), t.id)
+                    rhs = node.value
+                    if (
+                        isinstance(rhs, ast.BinOp)
+                        and isinstance(rhs.op, ast.Add)
+                        and isinstance(rhs.left, ast.Name)
+                        and rhs.left.id == t.id
+                        and scoped_bindings.get(key)
+                    ):
+                        scoped_bindings[key] = [
+                            ast.copy_location(ast.BinOp(left=prev, op=ast.Add(), right=rhs.right), node)
+                            for prev in scoped_bindings[key]
+                        ]
+                    else:
+                        scoped_bindings.setdefault(key, []).append(rhs)
+                    if isinstance(node, ast.Assign) and isinstance(node.value, ast.Dict):
+                        dict_names.add(key)
+        elif isinstance(node, ast.AugAssign) and isinstance(node.target, ast.Name) and isinstance(node.op, ast.Add):
+            owner = scope(node)
+            key = (id(owner), node.target.id)
+            if scoped_bindings.get(key):
+                scoped_bindings[key] = [
+                    ast.copy_location(ast.BinOp(left=prev, op=ast.Add(), right=node.value), node)
+                    for prev in scoped_bindings[key]
+                ]
+            else:
+                scoped_bindings[key] = [node.value]
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and isinstance(node.func.value, ast.Name)
+            and node.func.attr in {"append", "extend"}
+            and len(node.args) == 1
+            and not isinstance(node.args[0], ast.Starred)
+            and not node.keywords
+        ):
+            owner = scope(node)
+            key = (id(owner), node.func.value.id)
+            if scoped_bindings.get(key):
+                added = (
+                    ast.copy_location(ast.List(elts=[node.args[0]], ctx=ast.Load()), node)
+                    if node.func.attr == "append"
+                    else node.args[0]
+                )
+                scoped_bindings[key] = [
+                    ast.copy_location(ast.BinOp(left=prev, op=ast.Add(), right=added), node)
+                    for prev in scoped_bindings[key]
+                ]
+        elif isinstance(node, ast.arg):
+            owner = scope(node)
+            scoped_bindings.setdefault((id(owner), node.arg), []).append(node)
+        for child in ast.iter_child_nodes(node):
+            record_bindings(child)
+
+    record_bindings(tree)
+
+    def bindings_for(name, owner):
+        local = scoped_bindings.get((id(owner), name), [])
+        if local or owner is tree:
+            return local
+        return scoped_bindings.get((id(tree), name), [])
+
+    def resolve_str_name(name, owner, seen=frozenset()):
+        key = (id(owner), name)
+        if key in seen:
+            return None
+        bindings = bindings_for(name, owner)
+        if not bindings:
+            return None
+        resolved_vals = set()
+        resolved_node = None
+        for b in bindings:
+            if isinstance(b, ast.Constant) and type(b.value) is str and b.value:
+                resolved_vals.add(b.value)
+                resolved_node = b
+            elif isinstance(b, ast.Name):
+                sub = resolve_str_name(b.id, owner, seen | {key})
+                if sub is None:
+                    return None
+                resolved_vals.add(sub.value)
+                resolved_node = sub
+            else:
+                return None
+        if len(resolved_vals) == 1:
+            return resolved_node
+        return None
+
+    def expand_elements(value, owner, seen=frozenset()):
+        has_literal_m = any(isinstance(e, ast.Constant) and e.value == "-m" for e in value.elts)
+        partial_seqs = [[]]
+        for item in value.elts:
+            if isinstance(item, ast.Starred) and isinstance(item.value, ast.Name):
+                name = item.value.id
+                key = (id(owner), name)
+                if key not in seen:
+                    seqs = literals(item.value, owner, seen)
+                    if seqs:
+                        partial_seqs = [p + list(s.elts) for p in partial_seqs for s in seqs]
+                        continue
+                    if has_literal_m and bindings_for(name, owner):
+                        raise ConfigError(
+                            f"model-facing command table has an unresolvable argv slot at {loc(item)}"
+                        )
+                elif has_literal_m:
+                    raise ConfigError(
+                        f"model-facing command table has an unresolvable argv slot at {loc(item)}"
+                    )
+            elif isinstance(item, ast.Name):
+                resolved_str = resolve_str_name(item.id, owner)
+                if resolved_str is not None:
+                    partial_seqs = [p + [resolved_str] for p in partial_seqs]
+                    continue
+            partial_seqs = [p + [item] for p in partial_seqs]
+        return [ast.copy_location(ast.Tuple(elts=elts, ctx=ast.Load()), value) for elts in partial_seqs]
+
+    def literals(value, owner, seen=frozenset()):
+        if isinstance(value, (ast.List, ast.Tuple)):
+            return expand_elements(value, owner, seen)
+        if isinstance(value, ast.BinOp) and isinstance(value.op, ast.Add):
+            lefts = literals(value.left, owner, seen)
+            rights = literals(value.right, owner, seen)
+            if (not lefts or not rights) and any(
+                isinstance(e, ast.Constant) and e.value == "-m"
+                for seq in lefts + rights
+                for e in seq.elts
+            ):
+                raise ConfigError(
+                    f"model-facing command table has an unresolvable argv slot at {loc(value)}"
+                )
+            return [
+                ast.copy_location(ast.Tuple(elts=list(l.elts) + list(r.elts), ctx=ast.Load()), value)
+                for l in lefts
+                for r in rights
+            ]
+        if isinstance(value, ast.Call):
+            fname = None
+            if isinstance(value.func, ast.Name):
+                fname = value.func.id
+            elif isinstance(value.func, ast.Attribute):
+                fname = value.func.attr
+            if fname is not None:
+                key = (id(tree), f"call:{fname}")
+                if key not in seen and func_counts.get(fname) == 1:
+                    fn = funcs[fname]
+                    returns = [n.value for n in ast.walk(fn) if isinstance(n, ast.Return) and n.value is not None]
+                    ret_seqs = [literals(ret, fn, seen | {key}) for ret in returns]
+                    out = [seq for seqs in ret_seqs for seq in seqs]
+                    if any(not seqs for seqs in ret_seqs) and any(
+                        isinstance(e, ast.Constant) and e.value == "-m"
+                        for seq in out
+                        for e in seq.elts
+                    ):
+                        raise ConfigError(
+                            f"model-facing command table has an unresolvable argv slot at {loc(value)}"
+                        )
+                    return out
+            return []
+        if not isinstance(value, ast.Name):
+            return []
+        name = value.id
+        key = (id(owner), name)
+        if key in seen:
+            return []
+        bindings = bindings_for(name, owner)
+        branch_seqs = [literals(b, owner, seen | {key}) for b in bindings]
+        out = [seq for seqs in branch_seqs for seq in seqs]
+        if any(not seqs for seqs in branch_seqs) and any(
+            isinstance(e, ast.Constant) and e.value == "-m"
+            for seq in out
+            for e in seq.elts
+        ):
+            raise ConfigError(
+                f"model-facing command table has an unresolvable argv slot at {loc(value)}"
+            )
+        return out
+
+    def check_m_operands(seq):
+        elements = list(seq.elts)
+        for i, elem in enumerate(elements):
+            if isinstance(elem, ast.Constant) and elem.value == "-m":
+                if i + 1 >= len(elements):
+                    raise ConfigError(
+                        f"model-facing command table has an unresolvable -m operand at {loc(elem)}"
+                    )
+                op = elements[i + 1]
+                if not (isinstance(op, ast.Constant) and type(op.value) is str and op.value):
+                    raise ConfigError(
+                        f"model-facing command table has an unresolvable -m operand at {loc(op)}"
+                    )
+        return seq
+
+    values = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Dict):
+            values.extend(
+                value for key, value in zip(node.keys, node.values)
+                if isinstance(key, ast.Constant) and type(key.value) is str
+                and isinstance(value, (ast.List, ast.Tuple, ast.Name, ast.Call, ast.BinOp))
+            )
+        elif isinstance(node, (ast.List, ast.Tuple)) and node.elts and all(
+                isinstance(item, (ast.List, ast.Tuple, ast.Name, ast.Call, ast.BinOp)) for item in node.elts):
+            values.extend(node.elts)
+        elif isinstance(node, ast.Assign) and isinstance(node.value, (ast.List, ast.Tuple, ast.Name, ast.Call, ast.BinOp)):
+            for target in node.targets:
+                if (not isinstance(target, ast.Subscript) or not isinstance(target.value, ast.Name)
+                        or not isinstance(target.slice, ast.Constant) or type(target.slice.value) is not str):
+                    continue
+                owner = scope(node)
+                if (id(owner), target.value.id) in dict_names:
+                    values.append(node.value)
+        elif isinstance(node, ast.Call) and len(node.args) == 1 and not node.keywords:
+            if (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr == "join"
+                and (
+                    (isinstance(node.func.value, ast.Name) and node.func.value.id == "shlex")
+                    or (isinstance(node.func.value, ast.Constant) and type(node.func.value.value) is str)
+                )
+            ) or (isinstance(node.func, ast.Name) and node.func.id in shlex_join_names):
+                values.append(node.args[0])
+    found = []
+    for value in values:
+        owner = scope(value)
+        for resolved in literals(value, owner):
+            found.append(check_m_operands(resolved))
+    return found
+
+
+def discover_model_commands(root: Path, parsed: dict, surfaces: Surfaces, derived=(), *, stop=frozenset()) -> dict:
+    """Discover package and module ``-m`` entry points from model-facing command tables
+    and prose string constants.
+
+    Snapshot the existing surfaces: an imported helper's runtime argv does
+    not recursively become a model command. Retain the existing CLI opaque
+    boundary (groups are followed where selected) and upstream-input stop
+    set. Native-only command tables and instruction adapters belong to the
+    native route; their presence in an API import closure does not execute
+    them there.
+    """
+    found = {}
+    opaque = frozenset(_resolved(root / relative) for relative in CLI_PACKAGE)
+    pending = [(rel, surface) for rel, surface in sorted(surfaces.files.items())
+               if rel.endswith(".py") and any(role == "model_facing" and APPROACHES[approach][0]
+                                              for approach, role in surface.roles.items())]
+    closure_cache = {}
+    for rel, surface in pending:
+        path = _resolved(root / rel)
+        if path not in parsed:
+            text, tree = _parse(path)
+            if tree is None:
+                raise _unparsed([f"{rel} ({_parse_problem(path)})"])
+            parsed[path] = text, tree
+        approaches = [a for a, role in surface.roles.items()
+                      if role == "model_facing" and APPROACHES[a][0]]
+        if rel == "src/data_sheets_schema/native_shared_render.py":
+            if hasattr(sys.modules[__name__], "derive_native_shared_route"):
+                route = derive_native_shared_route(root, _tree(root / RUNNER))
+                if (not route or route["api_execute"] != "refused before dry-run, locks or dispatch"
+                        or not any(citation.startswith(rel + ":") for citation in route["evidence"])):
+                    raise ConfigError("model-facing native command table lacks its derived native-only route")
+            approaches = [a for a in approaches if a == "native_agentic"]
+        elif rel in {"src/data_sheets_schema/agentic_runtime.py",
+                     "src/data_sheets_schema/native_source_attribution.py",
+                     "src/data_sheets_schema/api_runner.py"} and "native_agentic" in approaches:
+            approaches = ["native_agentic"]
+        if not approaches:
+            continue
+        tree = parsed[path][1]
+        runs = []
+        for argv in _model_command_tables(tree, rel):
+            runs.extend(_argv_runs(root, path, argv))
+        docstrings = set()
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)) and node.body:
+                first = node.body[0]
+                if (
+                    isinstance(first, ast.Expr)
+                    and isinstance(first.value, ast.Constant)
+                    and type(first.value.value) is str
+                ):
+                    docstrings.add(id(first.value))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Constant) and type(node.value) is str and id(node) not in docstrings:
+                for offset, line in enumerate(node.value.splitlines()):
+                    for m in MODULE_RUN.finditer(line):
+                        if line[m.end():].startswith(r"\."):
+                            continue
+                        target = _run_module_target(root, path.parent, m.group(1))
+                        if target is not None:
+                            lineno = getattr(node, "lineno", 1) + offset
+                            runs.append((target, f"{rel}:{lineno} runs `-m {m.group(1)}`"))
+        for target, why in runs:
+            if "runs `-m " not in why or target.suffix != ".py":
+                continue
+            if target.name == "__init__.py":
+                raise ConfigError("model-facing package command lacks __main__.py: " + why)
+            if target not in closure_cache:
+                starts = [target]
+                if target.name == "__main__.py" and (target.parent / "__init__.py").is_file():
+                    starts.append(target.parent / "__init__.py")
+                closure_cache[target], _ = _code_closure(root, starts, stop=set(stop), opaque=opaque)
+            members = closure_cache[target]
+            target_rel = _rel(root, target)
+            entry = found.setdefault(target_rel, {"commands": set(), "imports": set(), "approaches": set()})
+            entry["commands"].add(why)
+            entry["approaches"].update(approaches)
+            for member in members:
+                member_rel = _rel(root, member)
+                if member_rel != target_rel:
+                    entry["imports"].add(member_rel)
+                for approach in approaches:
+                    surfaces.add(member_rel, approach,
+                        "model_facing" if member == target else _module_role(member, derived),
+                        surface.status, "model-facing command: " + why, runs=member == target)
+    return {rel: {key: sorted(value) for key, value in entry.items()}
+            for rel, entry in sorted(found.items())}
+
+
 def discover(root: Path) -> tuple[Surfaces, dict]:
     root = _resolved(root)
     s = Surfaces()
@@ -11422,6 +12482,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         "listed": sorted(MODEL_FACING_MODULES),
         "derived_not_listed": sorted(name for name in derived if name in live and name not in MODEL_FACING_MODULES),
         "listed_not_derived": sorted(name for name in MODEL_FACING_MODULES if name not in derived)}
+    facts["model_commands"] = discover_model_commands(root, parsed, s, derived, stop=stop)
     facts["model_facing_assets"] = discover_model_facing_assets(root, parsed, s)
     return s, facts
 
