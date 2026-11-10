@@ -7689,6 +7689,31 @@
         "tests/test_pr5531_regressions.py": 400.518,
         "tests/test_bc1_pipeline.py": 779.194
       }
+    },
+    "pr5531_ci_refresh_5602_20261110": {
+      "run_id": 42534095997,
+      "commit": "4ac73609c328bce8d7a48469eba4a0c73a07ee49",
+      "url": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/42534095997",
+      "kind": "GitHub Actions Python 3.12 shard JUnit measurement (#5602)",
+      "method": "utils.update_ci_shard_timings.build; sum CI JUnit case seconds for target files",
+      "artifacts": [
+        {
+          "path": "run42534095997/tests-py3.12-shard2/pytest.xml",
+          "sha256": "9dd7e76af5a4db28e85a01400358c7d1927e3536ef548573ecdf6abb75b26067"
+        },
+        {
+          "path": "run42534095997/tests-py3.12-shard6/pytest.xml",
+          "sha256": "2d510bc13a1f91605b9e06661a6ae9abfa4bf75085851188bcae1c3d56437eb9"
+        }
+      ],
+      "previous_file_seconds": {
+        "tests/test_pr5531_regressions.py": 400.518,
+        "tests/test_bc1_pipeline.py": 779.194
+      },
+      "file_seconds": {
+        "tests/test_pr5531_regressions.py": 963.687,
+        "tests/test_bc1_pipeline.py": 1337.314
+      }
     }
   },
   "method": "Sum JUnit case times by collected file, with a 0.001-second floor. These are scheduling estimates, not wall-clock predictions or a test allowlist. Untimed collected files use the median known duration; obsolete entries are ignored. Missing-shard observations use elapsed time between consecutive results on each CI worker (first result measured from pytest session start; includes setup, prior teardown and scheduling delay). Unfinished cases use completed local JUnit times listed in source.supplement. Unmeasured prior entries retain their exact values. BC1/G2 additions (2026-11-03) only fill previously unweighted files: sum one complete source per current collected file, preferring run 41707437114, then run 41700664435 for G1 files, then round-2 local with-mode JUnit (macOS Python 3.13, two workers). Exact case-occurrence multisets and pinned XML SHA256 values are checked; 0.001-second floor, no local-time scaling. Completed failures/skips remain timing observations, not evidence of CI success. Original provenance and every existing weight are retained. Follow-up: measured-ratio scaling (2026-11-03) supersedes only the six initial local-source weights with local sum x 2.729, the larger of two observed complete-file Linux-CI/local ratios rounded to three decimals, as authorized by the lead. These six weights are derived, not measured; source.bc1_g2_measured_ratio_scaling_20261103 records each local sum, multiplier and both paired measurements with XML hashes. All other weights and the prior measured provenance remain unchanged. All-file BC1/G2 refresh (2026-11-04): use run 41735860489, then 41707437114, then retain current weight, requiring an exact current case-occurrence multiset within one shard XML per file. Preserve all earlier provenance. Completed failures/skips are timing observations. Inputs are SHA256-pinned in the new source block.",
@@ -7760,7 +7785,7 @@
     "tests/test_bc1_g2_journal.py": 1492.334,
     "tests/test_bc1_g2_round2.py": 111.351,
     "tests/test_bc1_generality.py": 3.186,
-    "tests/test_bc1_pipeline.py": 779.194,
+    "tests/test_bc1_pipeline.py": 1337.314,
     "tests/test_bc1_registration.py": 2808.544,
     "tests/test_bc1_resources.py": 0.299,
     "tests/test_bc1_runtime.py": 126.875,
@@ -8099,7 +8124,7 @@
     "tests/test_pr5212_r4_fixes.py": 280.798,
     "tests/test_pr5212_round6_startup.py": 111.472,
     "tests/test_pr5212_round7_journal.py": 629.007,
-    "tests/test_pr5531_regressions.py": 400.518,
+    "tests/test_pr5531_regressions.py": 963.687,
     "tests/test_preflight_resource_authority.py": 400.561,
     "tests/test_presence_scoping.py": 16.458,
     "tests/test_profile_review_r8.py": 1.05,
