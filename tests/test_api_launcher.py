@@ -76,9 +76,22 @@ def _get_isolated_venv() -> Path:
     assert site_Result, f"No site-packages created in {venv_dir}"
     venv_site = site_Result[0]
 
+    expected_src = str((REPO_ROOT / "src").resolve())
     shared_sites = [p for p in site.getsitepackages() if Path(p).is_dir()]
-    deps_lines = [f"import sys; sys.path.append({p!r})" for p in shared_sites]
-    (venv_site / "deps.pth").write_text("\n".join(deps_lines) + "\n", encoding="utf-8")
+    deps_line = (
+        "import os, site, sys; "
+        f"_exp = {expected_src!r}; "
+        "_pre = set(sys.path); "
+        f"[site.addsitedir(p) for p in {shared_sites!r}]; "
+        "sys.path[:] = ["
+        "p for p in sys.path "
+        "if p in _pre or os.path.realpath(p) == _exp or not ("
+        "os.path.basename(os.path.normpath(p)) == 'src' "
+        "or os.path.isdir(os.path.join(p, 'data_sheets_schema'))"
+        ")"
+        "]"
+    )
+    (venv_site / "deps.pth").write_text(deps_line + "\n", encoding="utf-8")
     (venv_site / "data_sheets_schema.pth").write_text(f"{REPO_ROOT / 'src'}\n", encoding="utf-8")
 
     d4d_bin = venv_dir / "bin" / "d4d"
@@ -352,6 +365,46 @@ class TestImportIsolationCheck:
 
         with pytest.raises(LauncherError, match="does not resolve to expected"):
             run_import_check(py_bin, wt, clean_env)
+
+    def test_isolated_venv_processes_outer_site_pth_files(self, tmp_path: Path, monkeypatch):
+        """#5676: _get_isolated_venv processes .pth files in outer site directories without leaking external src."""
+        outer_site = tmp_path / "outer_site"
+        outer_site.mkdir()
+        pth_dep_dir = tmp_path / "pth_dep"
+        pth_dep_dir.mkdir()
+        (pth_dep_dir / "d4d_pth_probe_5676.py").write_text("MARKER = 'pth_dep_ok'\n", encoding="utf-8")
+
+        external_src = tmp_path / "external_wt" / "src"
+        (external_src / "data_sheets_schema").mkdir(parents=True)
+        (outer_site / "u3a_paths.pth").write_text(
+            f"{external_src}\n{pth_dep_dir}\n",
+            encoding="utf-8",
+        )
+
+        orig_sites = [p for p in site.getsitepackages() if Path(p).is_dir()]
+        monkeypatch.setattr(
+            sys.modules[__name__],
+            "_venv_is_isolated_for_repo",
+            lambda _venv, _repo: False,
+        )
+        monkeypatch.setattr(sys.modules[__name__], "_CACHED_ISOLATED_VENV", None)
+        monkeypatch.setattr(site, "getsitepackages", lambda: [str(outer_site), *orig_sites])
+
+        venv_dir = _get_isolated_venv()
+        _, py_bin, _ = find_venv_and_binaries(REPO_ROOT, venv_arg=venv_dir)
+        clean_env = clean_environment(REPO_ROOT)
+        clean_env["CBORG_API_KEY"] = "dummy"
+        run_import_check(py_bin, REPO_ROOT, clean_env)
+
+        probe = subprocess.run(
+            [str(py_bin), "-c", "import d4d_pth_probe_5676; print(d4d_pth_probe_5676.MARKER)"],
+            cwd=str(REPO_ROOT),
+            env=clean_env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        assert probe.stdout.strip() == "pth_dep_ok"
 
 
 class TestLauncherCLI:
