@@ -64,3 +64,33 @@ stop boundary; its running validation was not interrupted.
 
 This is active-turn supervision. There is no claim that the helper automatically
 reviews work or assigns tasks when the lead turn ends.
+
+## Live handoffs and native scheduling amendment
+
+During the same monitoring turn, agy2 finished PR 5710's body verification and
+advanced to publication/review of the lead documentation commit `7e04f1034` on
+PR 5711. agy4 delivered its PR 5677 re-review and received the immediate next
+task: refresh the PR description, record its finding, and preserve an erratum
+for incorrect per-file diff counts. agy3 delivered the Zenodo decision note and
+seven issues (5731 through 5737); it received a bounded validation-only fix
+assignment, with authorship, copyright and release decisions left to the owner.
+
+The lead identified expensive failure-path cohorts queued behind native
+shared-policy and sent a scheduling amendment directly to the verified native
+Codex thread `01a0f037-6988-7731-a35d-63532027e07a`. The amendment preserves the
+active run and acceptance criteria, but requires the existing reservation /
+freshness diagnostic before dependent failure-path cohorts or public tests.
+
+Codex acknowledged: shared-policy completed 423/423 with cleanup verified. The
+reservation cohort had just started; Codex stopped the queue and interrupted
+only that supervisor after 12.7 seconds. It retained the partial evidence,
+reported no observed survivors, and explicitly reported terminal cleanup
+certification false. No lifecycle, readback or public run started. A passing
+metrics canary preceded the unchanged-source pre-reservation diagnostic. If
+that diagnostic cannot reach reservation under the existing freshness contract,
+dependent cases stay blocked; independent cheap checks and exact configuration
+restoration still proceed. This does not waive the blocked acceptance checks.
+
+The next WP1 handoff is prepared in
+`codex_native_wp1_assignment_2026-11-10.md`. It remains undispatched until the
+lead reviews final U3-M evidence, including the scheduling amendment.
