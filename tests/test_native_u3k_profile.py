@@ -30,7 +30,7 @@ def u3k_cpu_witness():
 
 
 def test_consumer_observer_equivalence_canary(monkeypatch):
-    """WP1 equivalence is independent of the forced-cProfile CPU witness."""
+    """Selected WP1 checks; WP1-L1 prevents general replacement equivalence."""
     recorder = _recorder()
     from tests.utils.native_consumer_observer_checks import check_consumer_observers
     with recorder.phase('consumer_equivalence', force_unprofiled=True):
@@ -83,7 +83,40 @@ def test_consumer_observer_equivalence_canary(monkeypatch):
     assert all(not phase['profiled'] for phase in recorder.phases)
     result.update(recorder_functional_after_cleanup=True, open_call_rows=0,
                   open_thread_stacks=0, interpreter=sys.version, executable=sys.executable)
+    # The fixed single-node canary must also expose this limitation. Keep its
+    # phases and persisted result separate; it does not establish equivalence.
+    result['separate_limitation_witness'] = _profile_mutation_limitation_witness(recorder)
+    from tests.utils.native_consumer_observer_checks import check_profile_stability_guards
+    with recorder.phase('profile_stability_guards', force_unprofiled=True):
+        result['profile_stability_guards'] = check_profile_stability_guards()
+    assert all(row['outcome'] != 'open' for row in recorder.rows)
+    assert all(not stack for stack in recorder.stacks.values())
     recorder.save('consumer-observer-equivalence.json', result)
+
+
+def _profile_mutation_limitation_witness(recorder):
+    """Persist WP1-L1 distinctly, including through the fixed canary node."""
+    from tests.utils.native_consumer_observer_checks import check_profile_mutation_limitation
+    with recorder.phase('consumer_profile_mutation', force_unprofiled=True):
+        result = check_profile_mutation_limitation(recorder)
+    assert all(row['outcome'] != 'open' for row in recorder.rows)
+    assert all(not stack for stack in recorder.stacks.values())
+    with recorder.phase('recorder_after_mutation', force_unprofiled=True):
+        u3k_cpu_witness()
+    rows = [row for row in recorder.rows if row['phase'] == 'recorder_after_mutation'
+            and row['label'] == 'canary_cpu']
+    assert len(rows) == 1 and rows[0]['outcome'] == 'return'
+    assert all(row['outcome'] != 'open' for row in recorder.rows)
+    assert all(not stack for stack in recorder.stacks.values())
+    assert all(not phase['profiled'] for phase in recorder.phases)
+    result.update(recorder_functional_after_cleanup=True, open_call_rows=0,
+                  open_thread_stacks=0, interpreter=sys.version, executable=sys.executable)
+    return recorder.save('consumer-observer-profile-mutation-limitation.json', result)
+
+
+def test_consumer_observer_profile_mutation_limitation_witness():
+    """WP1-L1 records non-equivalence separately from the positive canary."""
+    _profile_mutation_limitation_witness(_recorder())
 
 
 def test_profile_observer_canary(tmp_path):
@@ -154,6 +187,7 @@ def test_neutral_pre_reservation_diagnostic(tmp_path, monkeypatch):
     from data_sheets_schema import native_shared_execution_orchestration as execute
     from data_sheets_schema import native_execution_authority_v2 as authority
     from tests.utils.native_shared_consumer_scope import observe_consumer_calls
+    from tests.utils.native_profile_stability import profile_stability_scope
     forbidden = {key: () for key in (
         ('prepare_direct', 'auth_evidence'), ('run_direct_canary', 'main'),
         ('run_api_canary', 'main'), ('budgeted_cborg', 'cborg_client'))}
@@ -177,6 +211,9 @@ def test_neutral_pre_reservation_diagnostic(tmp_path, monkeypatch):
     monkeypatch.setattr(Path, 'mkdir', stop_at_exact_attempt)
     result = {'profile': 'synthetic-software-test', 'fixture': 'neutral',
         'consumer_observer_arm': arm, 'metrics_profile_mode': recorder.mode,
+        'general_replacement_equivalence': False,
+        'known_observer_limitation': 'WP1-L1: body sys.setprofile mutation changes observation and refusal behavior differently between arms.',
+        'observer_stability_boundary': 'Common worker-wide audited mutation refusal plus zero-event reservation of profiler tool 2; exact runtime capability validation required. Audit overhead is included.',
         'consumer_observer_targets': [list(key) for key in forbidden],
         'attempt_limit_seconds': 900, 'helper_limit_seconds': 180,
         'capture_timestamp': guard['captured_at'],
@@ -184,11 +221,13 @@ def test_neutral_pre_reservation_diagnostic(tmp_path, monkeypatch):
         'capture_margin_seconds': guard['pre_reservation_margin_seconds'],
         'scope': 'Genuine make_case + synthetic_launch, wrapped by the selected consumer observer with the four public launch_case forbidden targets. OS sandbox denies native/network; exact attempt mkdir is a diagnostic stop, not a passed launch.'}
     observed = []
+    stability = None
     try:
         with recorder.phase('launch'):
             assert sys.getprofile() is None, 'fixture changed the WP1 observer starting state'
             with observe_consumer_calls(forbidden, forbid=True, arm=arm) as observed:
-                execute.synthetic_launch(case['raw'], **case['kwargs'])
+                with profile_stability_scope() as stability:
+                    execute.synthetic_launch(case['raw'], **case['kwargs'])
     except _ReachedReservation as exc:
         assert len(reached) == 1
         result.update(outcome='reached_reservation_without_effect', error=str(exc),
@@ -205,6 +244,7 @@ def test_neutral_pre_reservation_diagnostic(tmp_path, monkeypatch):
         raise AssertionError('diagnostic escaped the exact pre-reservation stop')
     finally:
         result.update(attempt_exists=os.path.lexists(attempt), evidence_exists=os.path.lexists(evidence),
+            profile_stability=stability,
             consumer_observer_calls=observed, profile_hook_restored=sys.getprofile() is None,
             open_call_rows=sum(row['outcome'] == 'open' for row in recorder.rows),
             open_thread_stacks=sum(bool(stack) for stack in recorder.stacks.values()),
@@ -214,5 +254,6 @@ def test_neutral_pre_reservation_diagnostic(tmp_path, monkeypatch):
     assert not os.path.lexists(evidence)
     assert recorder.phases[-1]['name'] == 'launch'
     assert observed == [] and sys.getprofile() is None
+    assert stability is not None and stability['stable'] and stability['restored']
     assert all(row['outcome'] != 'open' for row in recorder.rows)
     assert all(not stack for stack in recorder.stacks.values())

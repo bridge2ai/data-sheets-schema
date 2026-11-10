@@ -107,8 +107,23 @@ def bounded_popen(command, *args, **kwargs):
         runner.DEADLINE = remaining - 10
         if kwargs.get('start_new_session') is not True:
             raise RuntimeError('WP1 sandbox child must retain its isolated session')
+        if kwargs.get('pass_fds'):
+            raise RuntimeError('unexpected inherited descriptors at the WP1 sandbox boundary')
+        ready_fd = int(os.environ['U3WP1_READY_FD'])
+        release_fd = int(os.environ['U3WP1_RELEASE_FD'])
+        # The gate is a pinned diagnostic helper, before sandbox-exec. It cannot
+        # exec the unchanged test command until the OUTER supervisor owns its
+        # detached session. The inner watchdog is no longer the sole owner.
+        command = [sys.executable, '-S', '-P', '-B',
+            str(ROOT / 'scripts/adhoc/native_wp1_child_gate_20261110.py'),
+            '--ready-fd', str(ready_fd), '--release-fd', str(release_fd),
+            '--nonce', os.environ['U3WP1_HANDOFF_NONCE'],
+            '--deadline', repr(HARD_DEADLINE - 5), '--', *command]
+        kwargs['pass_fds'] = (ready_fd, release_fd)
     child = original_popen(command, *args, **kwargs)
     if is_test:
+        os.close(ready_fd)
+        os.close(release_fd)
         children.append(child)
 
         def cutoff():

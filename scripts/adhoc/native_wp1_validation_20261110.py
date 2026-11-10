@@ -25,6 +25,8 @@ import json
 import os
 from pathlib import Path
 import re
+import select
+import secrets
 import signal
 import subprocess
 import sys
@@ -42,8 +44,10 @@ KINDS = {'canary': (CANARY, 'legacy', 60),
 REQUIRED_FILES = frozenset({
     'tests/utils/native_shared_consumer_scope.py', 'tests/test_native_u3k_profile.py',
     'tests/utils/native_consumer_observer_checks.py',
+    'tests/utils/native_profile_stability.py',
     'scripts/adhoc/native_wp1_validation_20261110.py',
     'scripts/adhoc/run_native_wp1_20261110.py',
+    'scripts/adhoc/native_wp1_child_gate_20261110.py',
     'scripts/adhoc/run_native_u3m_20261109.py',
     'scripts/adhoc/u3m_metrics_plugin_20261109.py',
     'scripts/adhoc/u3k_metrics_plugin_20261109.py',
@@ -148,6 +152,7 @@ def require_canary(path, manifest_sha):
     if path != path.resolve(strict=True) or path.parent != SCRATCH:
         raise ValueError('physical same-scratch canary evidence required')
     outer = json.loads(physical(path.with_suffix('.outer.json')).read_bytes())
+    supervisor = json.loads(physical(path.with_suffix('.supervisor.json')).read_bytes())
     outcome = json.loads(physical(path / 'outcome.json').read_bytes())
     driver = json.loads(physical(path / 'wp1-harness.json').read_bytes())
     xml = ET.parse(physical(path / 'pytest.xml')).getroot()
@@ -157,6 +162,9 @@ def require_canary(path, manifest_sha):
             or not outcome['cleanup_verified'] or outcome['returncode'] != 0
             or driver['manifest_sha256'] != manifest_sha or driver['node'] != CANARY
             or driver['kind'] != 'canary' or not driver['source_unchanged']
+            or supervisor['kind'] != 'canary' or supervisor['manifest_sha256'] != manifest_sha
+            or supervisor['returncode'] != 0 or not supervisor['cleanup_verified']
+            or supervisor['forced_cleanup'] or not supervisor['sandbox_handoff']['admitted']
             or len(cases) != 1 or cases[0].get('name') != CANARY.split('::')[1]
             or any(list(case.iter(tag)) for case in cases for tag in ('failure', 'error', 'skipped'))):
         raise ValueError('WP1 canary is not a certified one-test pass on this identity')
@@ -169,6 +177,131 @@ def arguments():
     parser.add_argument('--canary-out', type=Path)
     parser.add_argument('--supervised', action='store_true', help=argparse.SUPPRESS)
     return parser.parse_args()
+
+
+class _SandboxHandoff:
+    """One private pipe handoff; retain ownership independently of the driver."""
+    def __init__(self, psutil):
+        self.psutil = psutil
+        self.ready_read, self.ready_write = os.pipe()
+        self.release_read, self.release_write = os.pipe()
+        os.set_blocking(self.ready_read, False)
+        self.nonce = secrets.token_hex(32)
+        self.buffer = b''
+        self.supervisor = None
+        self.group = None
+        self.known = {}
+        self.admitted = False
+        self.cancelled = False
+        self.errors = []
+
+    def attach(self, child):
+        self.supervisor = (child.pid, self.psutil.Process(child.pid).create_time())
+        for name in ('ready_write', 'release_read'):
+            os.close(getattr(self, name))
+            setattr(self, name, -1)
+
+    def close_release(self):
+        self.cancelled = True
+        if self.release_write >= 0:
+            os.close(self.release_write)
+            self.release_write = -1
+
+    def poll(self, *, allow_release=True):
+        if self.ready_read >= 0 and select.select([self.ready_read], [], [], 0)[0]:
+            chunk = os.read(self.ready_read, 4096)
+            self.buffer += chunk
+            if len(self.buffer) > 2048:
+                raise ValueError('oversized WP1 sandbox ownership message')
+            if b'\n' in self.buffer:
+                if self.group is not None or self.buffer.count(b'\n') != 1 or not self.buffer.endswith(b'\n'):
+                    raise ValueError('WP1 accepts exactly one sandbox handoff')
+                value = json.loads(self.buffer)
+                if (set(value) != {'kind', 'nonce', 'pid', 'ppid', 'pgid', 'sid'}
+                        or value['kind'] != 'wp1_sandbox_ready' or value['nonce'] != self.nonce
+                        or any(type(value[key]) is not int or value[key] <= 1
+                               for key in ('pid', 'ppid', 'pgid', 'sid'))
+                        or value['pid'] != value['pgid'] or value['pid'] != value['sid']):
+                    raise ValueError('WP1 sandbox ownership message differs')
+                process = self.psutil.Process(value['pid'])
+                parents = {(parent.pid, parent.create_time()) for parent in process.parents()}
+                if (self.supervisor not in parents or process.ppid() != value['ppid']
+                        or os.getpgid(process.pid) != process.pid or os.getsid(process.pid) != process.pid
+                        or Path(process.exe()).resolve(strict=True) != Path(sys.executable).resolve(strict=True)):
+                    raise ValueError('WP1 handoff is not this supervisor\'s detached Python child')
+                # Ownership is frozen BEFORE releasing any sandbox/test code.
+                self.group = process.pid
+                self.known[process.pid] = process.create_time()
+                os.close(self.ready_read)
+                self.ready_read = -1
+                if allow_release and not self.cancelled:
+                    ack = (self.nonce + '\n').encode()
+                    if os.write(self.release_write, ack) != len(ack):
+                        raise RuntimeError('WP1 sandbox ACK was incomplete')
+                    self.admitted = True
+                self.close_release()
+            elif not chunk:
+                os.close(self.ready_read)
+                self.ready_read = -1
+        self.observe()
+
+    def live(self):
+        result = []
+        for pid, created in tuple(self.known.items()):
+            try:
+                process = self.psutil.Process(pid)
+                if process.create_time() == created and process.is_running() and process.status() != self.psutil.STATUS_ZOMBIE:
+                    result.append(process)
+            except self.psutil.NoSuchProcess:
+                pass
+            except self.psutil.Error as exc:
+                self.errors.append(type(exc).__name__)
+        return result
+
+    def observe(self):
+        for process in self.live():
+            try:
+                for child in process.children(recursive=True):
+                    self.known[child.pid] = child.create_time()
+            except self.psutil.NoSuchProcess:
+                pass
+            except self.psutil.Error as exc:
+                self.errors.append(type(exc).__name__)
+
+    def kill_detached(self):
+        """Signal a session only with a still-matching owned creation identity."""
+        self.close_release()  # Unacknowledged gates see EOF and never exec tests.
+        live = self.live()
+        for process in live:
+            try:
+                if (self.group is not None and os.getpgid(process.pid) == self.group
+                        and os.getsid(process.pid) == self.group):
+                    os.killpg(self.group, signal.SIGKILL)
+                    break
+            except ProcessLookupError:
+                pass
+        for process in reversed(self.live()):
+            try:
+                process.kill()
+            except self.psutil.NoSuchProcess:
+                pass
+            except self.psutil.Error as exc:
+                self.errors.append(type(exc).__name__)
+
+    def close(self):
+        self.close_release()
+        for name in ('ready_read', 'ready_write', 'release_read'):
+            fd = getattr(self, name)
+            if fd >= 0:
+                os.close(fd)
+                setattr(self, name, -1)
+
+    def witness(self):
+        survivors = [process.pid for process in self.live()]
+        return dict(admitted=self.admitted, session_id=self.group,
+            known_processes=sorted(self.known.items()), errors=list(self.errors),
+            observed_surviving_pids=survivors,
+            scope='Inherited pipes; PID/creation and ancestry checked before ACK. Never-observed escaped descendants are not certified.')
 
 
 def supervised_main(args):
@@ -210,7 +343,11 @@ def supervised_main(args):
            'U3WP1_MANIFEST': str(manifest), 'U3WP1_MANIFEST_SHA': manifest_sha,
            'U3WP1_KIND': args.kind, 'U3WP1_CONSUMER_ARM': arm,
            'U3WP1_STARTED_MONOTONIC': repr(started), 'U3WP1_HARD_DEADLINE': repr(deadline),
+           'U3WP1_READY_FD': os.environ['U3WP1_READY_FD'],
+           'U3WP1_RELEASE_FD': os.environ['U3WP1_RELEASE_FD'],
+           'U3WP1_HANDOFF_NONCE': os.environ['U3WP1_HANDOFF_NONCE'],
            'U3K_PROFILE': 'control'}
+    handoff_fds = (int(env['U3WP1_READY_FD']), int(env['U3WP1_RELEASE_FD']))
     command = [sys.executable, '-S', '-P', '-B',
                str(ROOT / 'scripts/adhoc/run_native_wp1_20261110.py'),
                '--out', str(out), '--workers', '1', node]
@@ -279,7 +416,11 @@ def supervised_main(args):
             if remaining <= 0:
                 raise subprocess.TimeoutExpired(command, limit)
             child = subprocess.Popen(command, cwd=ROOT, env=env, stdout=log,
-                                     stderr=subprocess.STDOUT, start_new_session=False)
+                                     stderr=subprocess.STDOUT, start_new_session=False,
+                                     pass_fds=handoff_fds)
+            for fd in handoff_fds:
+                os.close(fd)
+            handoff_fds = ()
             created_child = psutil.Process(child.pid).create_time()
             with state_lock:
                 known[child.pid] = created_child
@@ -294,6 +435,9 @@ def supervised_main(args):
             interrupted = type(exc).__name__
             kill_owned()
         finally:
+            for fd in handoff_fds:
+                os.close(fd)
+            handoff_fds = ()
             # Retain the direct handle even if create_time()/observer startup
             # failed before it could enter the observed PID/creation-time map.
             if child is not None and child.poll() is None:
@@ -352,57 +496,160 @@ def main():
         return supervised_main(args)
     if args.kind != 'canary':
         raise RuntimeError('WP1 measured arms blocked: verified-owned quiet-window adapter not implemented')
-    # Start a tiny stdlib-only supervisor BEFORE any manifest, Git, file census
-    # or interpreter hashing. Expensive preflight is inside its isolated child
-    # session and is covered by the same sixty/nine-hundred-second limit.
+    # Arm the hard cap BEFORE any preflight. The outer owner, independent of
+    # the driver/watchdog, admits one detached sandbox through inherited pipes.
     _, _, limit = KINDS[args.kind]
     started = time.monotonic()
     deadline = started + limit
     child = None
-    previous = signal.getsignal(signal.SIGALRM)
+    handoff = None
+    previous = {number: signal.getsignal(number)
+                for number in (signal.SIGALRM, signal.SIGINT, signal.SIGTERM)}
+    forced = False
+    interrupted = None
+    errors = []
+    code = 125
+    out = None
+
+    class OuterInterrupted(BaseException):
+        def __init__(self, number):
+            self.number = number
+
+    def external_stop(number, frame):
+        raise OuterInterrupted(number)
+
+    def kill_supervisor():
+        if child is not None and child.poll() is None:
+            try:
+                os.killpg(child.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
 
     def hard_stop(number, frame):
-        if child is not None and child.poll() is None:
+        # Detached sandbox ownership survives loss of the inner driver/tracker.
+        # Close the release pipe first: a not-yet-admitted gate cannot exec tests.
+        try:
+            if handoff is not None:
+                handoff.kill_detached()
+        finally:
             try:
-                os.killpg(child.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-        # No unbounded final wait or write is allowed to extend the hard cap.
-        # A hard exit is an uncertified failure, never a canary pass.
-        os._exit(124)
+                kill_supervisor()
+            finally:
+                # No new grace, wait or evidence write extends the hard cap.
+                os._exit(124)
 
     signal.signal(signal.SIGALRM, hard_stop)
+    signal.signal(signal.SIGINT, external_stop)
+    signal.signal(signal.SIGTERM, external_stop)
     signal.setitimer(signal.ITIMER_REAL, limit)
-    env = {**GIT_ENV, 'LANG': 'en_US.UTF-8', 'PYTHONNOUSERSITE': '1',
-           'PYTHONSAFEPATH': '1', 'PYTHONDONTWRITEBYTECODE': '1',
-           'U3WP1_MANIFEST': os.environ['U3WP1_MANIFEST'],
-           'U3WP1_SUPERVISOR_PID': str(os.getpid()),
-           'U3WP1_STARTED_MONOTONIC': repr(started), 'U3WP1_HARD_DEADLINE': repr(deadline)}
-    command = [sys.executable, '-S', '-P', '-B', str(Path(__file__).resolve()),
-               '--supervised', args.kind, '--label', args.label]
-    if args.canary_out is not None:
-        command += ['--canary-out', str(args.canary_out)]
     try:
-        child = subprocess.Popen(command, cwd=ROOT, env=env, start_new_session=True)
-        try:
-            code = child.wait(timeout=max(0, deadline - 2 - time.monotonic()))
-        except subprocess.TimeoutExpired:
-            # Give the observer/driver supervisor a bounded cleanup interval.
-            child.send_signal(signal.SIGINT)
-            try:
-                child.wait(timeout=max(0, deadline - 0.25 - time.monotonic()))
-            except subprocess.TimeoutExpired:
-                os.killpg(child.pid, signal.SIGKILL)
-            return 124
-        return code if time.monotonic() <= deadline else 124
+        if not (sys.flags.no_site and sys.flags.safe_path and sys.dont_write_bytecode):
+            raise ValueError('WP1 outer requires physical dependency Python -S -P -B')
+        if not re.fullmatch('[a-zA-Z0-9_-]+', args.label):
+            raise ValueError('literal WP1 output label required')
+        manifest = Path(os.environ['U3WP1_MANIFEST'])
+        match = re.fullmatch('wp1-contract-([0-9a-f]{12})\\.json', manifest.name)
+        if not match:
+            raise ValueError('fresh WP1 contract filename required')
+        out = SCRATCH / ('wp1-' + match[1] + '-' + args.kind + '-' + args.label)
+        if os.path.lexists(out.with_suffix('.supervisor.json')):
+            raise ValueError('WP1 outer evidence label already exists')
+        prefix = Path(sys.executable).absolute().parent.parent
+        site = prefix / 'lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages'
+        if not (prefix / 'pyvenv.cfg').is_file() or site != site.resolve(strict=True):
+            raise ValueError('physical installed dependency site required')
+        sys.path.append(str(site))  # Never evaluate .pth or editable hooks.
+        import psutil
+        handoff = _SandboxHandoff(psutil)
+        env = {**GIT_ENV, 'LANG': 'en_US.UTF-8', 'PYTHONNOUSERSITE': '1',
+               'PYTHONSAFEPATH': '1', 'PYTHONDONTWRITEBYTECODE': '1',
+               'U3WP1_MANIFEST': str(manifest), 'U3WP1_SUPERVISOR_PID': str(os.getpid()),
+               'U3WP1_STARTED_MONOTONIC': repr(started), 'U3WP1_HARD_DEADLINE': repr(deadline),
+               'U3WP1_READY_FD': str(handoff.ready_write),
+               'U3WP1_RELEASE_FD': str(handoff.release_read),
+               'U3WP1_HANDOFF_NONCE': handoff.nonce}
+        command = [sys.executable, '-S', '-P', '-B', str(Path(__file__).resolve()),
+                   '--supervised', args.kind, '--label', args.label]
+        if args.canary_out is not None:
+            command += ['--canary-out', str(args.canary_out)]
+        child = subprocess.Popen(command, cwd=ROOT, env=env, start_new_session=True,
+            pass_fds=(handoff.ready_write, handoff.release_read))
+        handoff.attach(child)
+        while child.poll() is None:
+            handoff.poll()
+            if time.monotonic() >= deadline - 2:
+                raise subprocess.TimeoutExpired(command, limit)
+            time.sleep(min(0.05, max(0, deadline - 2 - time.monotonic())))
+        handoff.poll(allow_release=False)
+        code = child.returncode
+    except OuterInterrupted as exc:
+        interrupted = 'external_signal_' + str(exc.number)
+        forced = True
+    except subprocess.TimeoutExpired:
+        interrupted = 'outer_deadline'
+        forced = True
+    except BaseException as exc:
+        interrupted = type(exc).__name__
+        errors.append(str(exc))
+        forced = True
     finally:
-        if child is not None and child.poll() is None:
-            try:
-                os.killpg(child.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-        signal.setitimer(signal.ITIMER_REAL, 0)
-        signal.signal(signal.SIGALRM, previous)
+        # Prevent a second external signal from aborting cleanup. SIGALRM stays
+        # armed and independently kills verified detached owners at the same cap.
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        if handoff is not None:
+            handoff.close_release()
+        try:
+            if forced and child is not None and child.poll() is None:
+                child.send_signal(signal.SIGINT)
+                until = min(time.monotonic() + 1, deadline - 0.25)
+                while child.poll() is None and time.monotonic() < until:
+                    if handoff is not None:
+                        handoff.poll(allow_release=False)
+                    time.sleep(min(0.05, max(0, until - time.monotonic())))
+        except BaseException as exc:
+            errors.append('graceful_cleanup:' + type(exc).__name__)
+            forced = True
+        ownership = {'admitted': False, 'errors': ['ownership_not_initialized'],
+                     'observed_surviving_pids': []}
+        try:
+            if handoff is not None:
+                if handoff.live():
+                    forced = True
+                    handoff.kill_detached()
+                ownership = handoff.witness()
+        except BaseException as exc:
+            errors.append('detached_cleanup:' + type(exc).__name__)
+            forced = True
+        finally:
+            # Detached owners are handled FIRST, even if the inner driver has
+            # refused or hung. Killing its watchdog cannot remove outer ownership.
+            if child is not None and child.poll() is None:
+                forced = True
+                kill_supervisor()
+            if handoff is not None:
+                handoff.close()
+        try:
+            inner_path = None if out is None else out.with_suffix('.outer.json')
+            inner = json.loads(inner_path.read_bytes()) if inner_path is not None and inner_path.is_file() else None
+            certified = (not forced and interrupted is None and code == 0 and not errors
+                and ownership['admitted'] and not ownership['errors']
+                and not ownership['observed_surviving_pids']
+                and inner is not None and inner['returncode'] == 0 and inner['cleanup_verified']
+                and time.monotonic() < deadline)
+            result = 0 if certified else (124 if interrupted == 'outer_deadline' else 125)
+            if out is not None:
+                write_new(out.with_suffix('.supervisor.json'), dict(kind=args.kind,
+                    manifest=str(manifest), manifest_sha256=sha(manifest),
+                    returncode=result, cleanup_verified=certified, forced_cleanup=forced,
+                    interrupted=interrupted, errors=errors, sandbox_handoff=ownership,
+                    seconds=time.monotonic() - started, limit_seconds=limit,
+                    scope='Outer ownership survives inner interruption. Hard exit or missing witness is uncertified.'))
+        finally:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+            for number, handler in previous.items():
+                signal.signal(number, handler)
+    return result
 
 
 if __name__ == '__main__':

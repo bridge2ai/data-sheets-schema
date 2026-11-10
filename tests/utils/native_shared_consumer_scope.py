@@ -43,6 +43,14 @@ def observe_consumer_calls(targets, *, refuse=None, forbid=False, arm='legacy'):
     ordering. In that case only, monitoring uses an ordered profile compatibility
     shim rather than relying on CPython's ordering of independent tool callbacks.
     The diagnostic timing arms require no prior hook and do not measure this shim.
+
+    This opt-in arm is not a general replacement for legacy profiling: changing
+    ``sys.setprofile`` inside the body disables/replaces the legacy observer but
+    leaves the no-prior-hook monitoring path active. In particular, setting an
+    already-None hook to None cannot be detected by before/after hook identity
+    checks. The paired limitation witness records this difference. The exact
+    diagnostic additionally uses a common profile_stability_scope boundary;
+    this raw observer itself does not enforce profile stability.
     """
     if arm not in {'legacy', 'monitoring'}:
         raise ValueError('consumer observer arm must be legacy or monitoring')
