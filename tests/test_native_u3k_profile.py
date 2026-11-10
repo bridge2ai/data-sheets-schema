@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import sys
 import time
 
 import pytest
@@ -26,6 +27,63 @@ def u3k_cpu_witness():
     until = time.thread_time() + 0.05
     while time.thread_time() < until:
         sum(range(20))
+
+
+def test_consumer_observer_equivalence_canary(monkeypatch):
+    """WP1 equivalence is independent of the forced-cProfile CPU witness."""
+    recorder = _recorder()
+    from tests.utils.native_consumer_observer_checks import check_consumer_observers
+    with recorder.phase('consumer_equivalence', force_unprofiled=True):
+        result = check_consumer_observers(monkeypatch, recorder)
+    # WP1-T1: refuse a function that the active Recorder itself observes. The
+    # independent callbacks can run in a different order; any Recorder entry
+    # actually emitted must be closed even when another observer raises.
+    from tests.utils.native_shared_consumer_scope import observe_consumer_calls
+    key = (Path(__file__).stem, 'u3k_cpu_witness')
+    refusal_checks = []
+    with recorder.phase('consumer_metric_refusals', force_unprofiled=True):
+        for arm in ('legacy', 'monitoring'):
+            for kind in ('forbid', 'refuse'):
+                injected = ValueError('WP1 metrics-entry injected refusal')
+                options = {'forbid': True} if kind == 'forbid' else {'refuse': (key, injected)}
+                first = len(recorder.rows)
+                with pytest.raises(AssertionError if kind == 'forbid' else ValueError) as caught:
+                    with observe_consumer_calls({key: ()}, arm=arm, **options) as calls:
+                        u3k_cpu_witness()
+                if kind == 'refuse':
+                    assert caught.value is injected
+                else:
+                    assert 'forbidden production operation' in str(caught.value)
+                assert calls == [(key, {})]
+                refused_rows = [row for row in recorder.rows[first:] if row['label'] == 'canary_cpu']
+                assert all(row['outcome'].startswith('exception:') for row in refused_rows)
+                assert all(row['outcome'] != 'open' for row in recorder.rows)
+                assert all(not stack for stack in recorder.stacks.values())
+                first = len(recorder.rows)
+                u3k_cpu_witness()
+                recovered = [row for row in recorder.rows[first:] if row['label'] == 'canary_cpu']
+                assert len(recovered) == 1 and recovered[0]['outcome'] == 'return'
+                assert recovered[0]['inclusive_thread_cpu'] >= 0.05
+                assert all(not stack for stack in recorder.stacks.values())
+                refusal_checks.append({'arm': arm, 'refusal': kind,
+                    'metric_entry_outcomes': [row['outcome'] for row in refused_rows],
+                    'subsequent_recorder_call': recovered[0]['outcome']})
+    result['recorder_entry_refusal_checks'] = refusal_checks
+    # The consumer observer must leave the existing Recorder's callbacks and
+    # tool ID usable after normal exits, injected refusals and initialization
+    # failure. This control-mode witness is never wrapped by cProfile.
+    with recorder.phase('recorder_after_consumer', force_unprofiled=True):
+        u3k_cpu_witness()
+    rows = [row for row in recorder.rows if row['phase'] == 'recorder_after_consumer'
+            and row['label'] == 'canary_cpu']
+    assert len(rows) == 1 and rows[0]['outcome'] == 'return'
+    assert rows[0]['inclusive_thread_cpu'] >= 0.05
+    assert all(row['outcome'] != 'open' for row in recorder.rows)
+    assert all(not stack for stack in recorder.stacks.values())
+    assert all(not phase['profiled'] for phase in recorder.phases)
+    result.update(recorder_functional_after_cleanup=True, open_call_rows=0,
+                  open_thread_stacks=0, interpreter=sys.version, executable=sys.executable)
+    recorder.save('consumer-observer-equivalence.json', result)
 
 
 def test_profile_observer_canary(tmp_path):
@@ -87,9 +145,18 @@ class _ReachedReservation(RuntimeError):
 
 def test_neutral_pre_reservation_diagnostic(tmp_path, monkeypatch):
     recorder = _recorder()
+    arm = os.environ.get('U3WP1_CONSUMER_ARM')
+    if arm not in {'legacy', 'monitoring'}:
+        raise ValueError('U3WP1_CONSUMER_ARM must be explicitly legacy or monitoring')
+    assert recorder.mode == 'control', 'WP1 measured arms must use control profiling'
+    assert sys.getprofile() is None, 'WP1 measured arms require no inherited profile hook'
     from tests.test_native_shared_execution import make_case
     from data_sheets_schema import native_shared_execution_orchestration as execute
     from data_sheets_schema import native_execution_authority_v2 as authority
+    from tests.utils.native_shared_consumer_scope import observe_consumer_calls
+    forbidden = {key: () for key in (
+        ('prepare_direct', 'auth_evidence'), ('run_direct_canary', 'main'),
+        ('run_api_canary', 'main'), ('budgeted_cborg', 'cborg_client'))}
     monkeypatch.chdir(authority.ROOT)
     with recorder.phase('fixture'):
         case = make_case(tmp_path / 'u3k-neutral')
@@ -109,14 +176,19 @@ def test_neutral_pre_reservation_diagnostic(tmp_path, monkeypatch):
 
     monkeypatch.setattr(Path, 'mkdir', stop_at_exact_attempt)
     result = {'profile': 'synthetic-software-test', 'fixture': 'neutral',
+        'consumer_observer_arm': arm, 'metrics_profile_mode': recorder.mode,
+        'consumer_observer_targets': [list(key) for key in forbidden],
         'attempt_limit_seconds': 900, 'helper_limit_seconds': 180,
         'capture_timestamp': guard['captured_at'],
         'capture_age_limit_seconds': guard['max_age_seconds'],
         'capture_margin_seconds': guard['pre_reservation_margin_seconds'],
-        'scope': 'Genuine make_case + synthetic_launch; no launch_case profile observer. OS sandbox denies native/network; exact attempt mkdir is a diagnostic stop, not a passed launch.'}
+        'scope': 'Genuine make_case + synthetic_launch, wrapped by the selected consumer observer with the four public launch_case forbidden targets. OS sandbox denies native/network; exact attempt mkdir is a diagnostic stop, not a passed launch.'}
+    observed = []
     try:
         with recorder.phase('launch'):
-            execute.synthetic_launch(case['raw'], **case['kwargs'])
+            assert sys.getprofile() is None, 'fixture changed the WP1 observer starting state'
+            with observe_consumer_calls(forbidden, forbid=True, arm=arm) as observed:
+                execute.synthetic_launch(case['raw'], **case['kwargs'])
     except _ReachedReservation as exc:
         assert len(reached) == 1
         result.update(outcome='reached_reservation_without_effect', error=str(exc),
@@ -133,8 +205,14 @@ def test_neutral_pre_reservation_diagnostic(tmp_path, monkeypatch):
         raise AssertionError('diagnostic escaped the exact pre-reservation stop')
     finally:
         result.update(attempt_exists=os.path.lexists(attempt), evidence_exists=os.path.lexists(evidence),
+            consumer_observer_calls=observed, profile_hook_restored=sys.getprofile() is None,
+            open_call_rows=sum(row['outcome'] == 'open' for row in recorder.rows),
+            open_thread_stacks=sum(bool(stack) for stack in recorder.stacks.values()),
             observed_at=datetime.now(timezone.utc).isoformat())
         recorder.save('diagnostic.json', result)
     assert not os.path.lexists(attempt)
     assert not os.path.lexists(evidence)
     assert recorder.phases[-1]['name'] == 'launch'
+    assert observed == [] and sys.getprofile() is None
+    assert all(row['outcome'] != 'open' for row in recorder.rows)
+    assert all(not stack for stack in recorder.stacks.values())
