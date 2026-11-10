@@ -3,11 +3,91 @@
 Historical guard readback remains v1; current U4b launch requires v2. Neither
 a saved verdict nor a caller-supplied statement is launch authority.
 """
+from dataclasses import dataclass
 from pathlib import Path
 
 from . import native_subscription_guard as v1
 from . import native_subscription_guard_v2 as v2
 from . import native_launch_review as review
+
+
+@dataclass(frozen=True, slots=True)
+class CurrentSelection:
+    """Unaccepted caller-selected bytes/paths; never subscription authority."""
+    path: str
+    expected_sha256: str
+    registration_raw: bytes
+    runtime_json: bytes
+    launch_word_path: str
+    review_path: str
+
+
+def select_current(path, expected_sha256, *, registration_raw, runtime,
+                   launch_word_path, review_path):
+    """Bind data only; this neither accepts a capture nor observes an account."""
+    if (type(registration_raw) is not bytes or not registration_raw
+            or type(runtime) is not dict or type(expected_sha256) is not str
+            or len(expected_sha256) != 64
+            or any(char not in '0123456789abcdef' for char in expected_sha256)):
+        raise ValueError('deferred subscription selection has invalid wire inputs')
+    return CurrentSelection(str(Path(path).absolute()), expected_sha256,
+        registration_raw, v1.canonical(runtime),
+        str(Path(launch_word_path).absolute()), str(Path(review_path).absolute()))
+
+
+def _selection_inputs(selection, registration_raw, runtime, authorization):
+    if (type(selection) is not CurrentSelection
+            or selection.registration_raw != registration_raw
+            or selection.runtime_json != v1.canonical(runtime)
+            or selection.launch_word_path != authorization['inputs']['launch_word']
+            or selection.review_path != authorization['inputs']['review']):
+        raise ValueError('deferred subscription selection differs from launch authority')
+    raw = v1.read_regular(selection.path)
+    word = v1.read_regular(selection.launch_word_path)
+    bundle = v1.read_regular(selection.review_path)
+    if (word != authorization['raw']['launch_word']
+            or bundle != authorization['raw']['review']):
+        raise ValueError('deferred subscription authority bytes changed')
+    return raw, word, bundle
+
+
+def inspect_current_selection(selection, *, registration_raw, runtime, authorization):
+    """Warm static reconstruction; the result is expressly NOT current admission.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies execution bytes and the runtime from
+    registration.verified; context reconstructs guarded capture preparation.
+    This helper returns no guard and grants no freshness or current authority.
+
+    The temporary guard checks exact bytes, quota declarations and chronology.
+    It does not accept freshness or return a guard to the actuator. Current-word
+    and actual-clock checks remain mandatory in accept_current_selection.
+    """
+    raw, word, bundle = _selection_inputs(
+        selection, registration_raw, runtime, authorization)
+    module, extra = context(raw, registration_raw=registration_raw, runtime=runtime,
+        launch_word_raw=word, review_bundle_raw=bundle, current=False)
+    if module is not v2:
+        raise ValueError('current native launch requires subscription guard v2')
+    module.SubscriptionGuard(raw, expected_sha256=selection.expected_sha256,
+        registration_raw=registration_raw, runtime=runtime, launch_word_raw=word,
+        check_freshness=False, **extra)
+
+
+def accept_current_selection(selection, *, registration_raw, runtime, authorization):
+    """Accept the original timestamp only after heavy launch reconstruction.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies execution bytes and runtime from
+    registration.verified plus independently recaptured authority; load_current
+    reconstructs the guarded capture and validates current authority and age.
+    """
+    _selection_inputs(selection, registration_raw, runtime, authorization)
+    return load_current(selection.path, selection.expected_sha256,
+        registration_raw=registration_raw, runtime=runtime,
+        launch_word_path=selection.launch_word_path, review_path=selection.review_path)
 
 
 def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_raw, current=False):

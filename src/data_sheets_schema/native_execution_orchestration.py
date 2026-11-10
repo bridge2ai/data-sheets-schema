@@ -54,6 +54,17 @@ class ExecutionContract:
         return self.composition.CallbackAdapter(raw, execution=value,
                                                 registration_raw=registration_raw)
 
+    def prewarm_controller(self, adapter):
+        """Warm cold pure work in a closed scope; no callback finder escapes.
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: The fixed contract supplies an adapter constructed
+        from freshly verified execution/composition bytes; its prewarm method
+        revalidates before opening and closing the callback admission scope.
+        """
+        adapter.prewarm_before_acceptance()
+
     def transport_phase_spec(self, adapter):
         # This is a fixed renderer26 adapter, not a caller-selected phase bypass.
         # Its observer and saved checker reconstruct all old phase obligations.
@@ -251,16 +262,17 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
     RunSpec precondition: Caller supplies explicit execution registration and fixed effects; registration.verified reconstructs the guarded preparation before any execution effect.
     """
     contract.require_fixed()
-    from .native_execution_capabilities import loaded_capabilities
-    from .native_runtime_profiles import require_production, PRODUCTION_PROFILE
-    value = contract.registration.verified(registration_raw)
-    require_production(value['runtime'])
-    # Resolve the complete reviewed execution/replay interface before entering
-    # the path that can reserve directories, write evidence or probe a runtime.
-    with loaded_capabilities(value['dependencies']) as controls:
-        return _launch(registration_raw, review_path=review_path, ci_path=ci_path,
-            launch_word_path=launch_word_path, contract=contract, effects=effects,
-            controls=controls, expected_profile=PRODUCTION_PROFILE)
+    with contract.authority.launch_derivations():
+        from .native_execution_capabilities import loaded_capabilities
+        from .native_runtime_profiles import require_production, PRODUCTION_PROFILE
+        value = contract.registration.verified(registration_raw)
+        require_production(value['runtime'])
+        # Resolve the complete reviewed execution/replay interface before entering
+        # the path that can reserve directories, write evidence or probe a runtime.
+        with loaded_capabilities(value['dependencies']) as controls:
+            return _launch(registration_raw, review_path=review_path, ci_path=ci_path,
+                launch_word_path=launch_word_path, contract=contract, effects=effects,
+                controls=controls, expected_profile=PRODUCTION_PROFILE)
 
 
 def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path,
@@ -271,15 +283,16 @@ def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path
 
     RunSpec precondition: Caller supplies explicit synthetic execution-registration bytes and the fixed shared-v2 contract and effects; registration.verified reconstructs guarded preparation, and _launch retains fresh admission before execution effects.
     """
-    from .native_execution_capabilities import loaded_capabilities
-    from .native_runtime_profiles import require_synthetic, SYNTHETIC_PROFILE
     contract.require_fixed()
-    value = contract.registration.verified(registration_raw)
-    require_synthetic(value['runtime'])
-    with loaded_capabilities(value['dependencies']) as controls:
-        return _launch(registration_raw, review_path=review_path, ci_path=ci_path,
-            launch_word_path=launch_word_path, contract=contract, effects=effects,
-            controls=controls, expected_profile=SYNTHETIC_PROFILE)
+    with contract.authority.launch_derivations():
+        from .native_execution_capabilities import loaded_capabilities
+        from .native_runtime_profiles import require_synthetic, SYNTHETIC_PROFILE
+        value = contract.registration.verified(registration_raw)
+        require_synthetic(value['runtime'])
+        with loaded_capabilities(value['dependencies']) as controls:
+            return _launch(registration_raw, review_path=review_path, ci_path=ci_path,
+                launch_word_path=launch_word_path, contract=contract, effects=effects,
+                controls=controls, expected_profile=SYNTHETIC_PROFILE)
 
 
 def _require_launch_profile(runtime, expected):
@@ -316,7 +329,16 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     _require_launch_profile(value['runtime'], expected_profile)
     authorization = authorizations(registration_raw, value, review_path=review_path,
                                   ci_path=ci_path, launch_word_path=launch_word_path)
-    _join_subscription_authority(launch_guard, registration_raw, value, authorization, current_launch=True)
+    from .native_subscription_admission import (
+        CurrentSelection, inspect_current_selection, accept_current_selection)
+    if type(launch_guard) is CurrentSelection:
+        inspect_current_selection(launch_guard, registration_raw=registration_raw,
+            runtime=value['runtime'], authorization=authorization)
+    else:
+        # Existing lower-engine callers still supply an actual guard. Validate
+        # its static join now; actual type/clock/current-word checks run below.
+        _join_subscription_authority(
+            launch_guard, registration_raw, value, authorization, current_launch=False)
     _unchanged(value, registration_raw, authorization)
     runtime_identity = expected_runtime_observation(value)
     selected = composition.verified_composition(value['composition_raw_json'].encode())
@@ -335,9 +357,22 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 (authorization['inputs'][name], authorization['raw'][name])
                 for name in ('review', 'ci', 'launch_word'))):
         raise ValueError('fresh v2 admission differs from the captured launch authority')
-    # Source/preparer recapture may take time. Recheck quota freshness and its
-    # current file after those reads, before a stale observation can spend the
-    # attempt identity. The actual dispatch still performs its one-use check.
+    # All cold controller/callback derivations finish before saved-capture
+    # acceptance. The warmup closes its source-loader scope before returning:
+    # never keep a consumer finder active across live bootstrap orchestration.
+    adapter = contract.make_controller(value, registration_raw)
+    contract.prewarm_controller(adapter)
+    if type(launch_guard) is CurrentSelection:
+        launch_guard = accept_current_selection(launch_guard,
+            registration_raw=registration_raw, runtime=value['runtime'],
+            authorization=authorization)
+    _join_subscription_authority(
+        launch_guard, registration_raw, value, authorization, current_launch=True)
+    _unchanged(value, registration_raw, authorization)
+    # These real verifications continue on freshly checked identical bytes.
+    # They must now reuse only exact-byte derivations, never a prior verdict.
+    # The original captured_at and all current-word/freshness checks survive.
+    # The actual dispatch still performs its one-use check.
     from .native_subscription_capture import capture_admission_lease
     # Hold the registration-wide word/limits lock through the first reservation
     # effect. A renewal cannot supersede the word between checking and mkdir.
@@ -369,7 +404,6 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     signals = []
     observation = {'checked': False, 'passed': False, 'reason': 'native runtime not observed'}
     awake = {'passed': False, 'policy': value['runtime']['keep_awake'], 'state': 'not_acquired'}
-    adapter = contract.make_controller(value, registration_raw)
     additional_path = evidence/'attribution-replay.json'
     results = {name: {'checked': False, 'passed': False, 'reason': 'capture unavailable'} for name in GATES}
     def stopped(message):

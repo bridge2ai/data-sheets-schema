@@ -1,7 +1,7 @@
 """A3 execution reservation ordering, 2026-11-08; never native dispatch.
 
 The public engine.launch and its first real mkdir/fsync execute. Unavailable
-registration/composition/source capability and CI/admit prerequisites are
+registration/composition/source capability, controller prewarm and CI/admit prerequisites are
 explicit component isolations, not successful full-chain registration. The
 actual saved runtime, scripted capture, review/word, guard/context, current-word
 journal and capture_admission_lease bodies execute. A sentinel stops immediately
@@ -23,6 +23,7 @@ from data_sheets_schema import native_launch_review as review
 from data_sheets_schema import native_shared_execution_orchestration as native
 from data_sheets_schema import native_shared_registration_orchestration as registration
 from data_sheets_schema import native_subscription_capture as capture
+from data_sheets_schema import native_subscription_admission as subscription
 from data_sheets_schema import native_subscription_guard_v2 as guard
 from tests.test_native_subscription_capture import component, read_arguments
 from tests.test_native_subscription_guard_v2 import timestamp
@@ -33,7 +34,7 @@ class FirstReservationObserved(RuntimeError):
 
 
 def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
-                     source_check_seconds=0):
+                     source_check_seconds=0, deferred_selection=False):
     arguments, value = component(tmp_path, monkeypatch,
         mode='second_mismatch' if change_at_admit == 'poison' else 'success')
     raw = arguments['registration_raw']
@@ -68,6 +69,15 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
     authorization = {'inputs': inputs, 'raw': bodies}
     trace, classifier = [], object()
     active = [False]
+    entering_lease = [False]
+    admitted_guard = [watched]
+    if deferred_selection:
+        guard_path = tmp_path / 'authority-guard.json'
+        guard_path.write_bytes(guard_raw)
+        effects = replace(effects, launch_guard=subscription.select_current(
+            guard_path, guard.sha(guard_raw), registration_raw=raw,
+            runtime=value['runtime'], launch_word_path=inputs['launch_word'],
+            review_path=inputs['review']))
 
     def forbidden(*args, **kwargs):
         pytest.fail('reservation test reached a post-reservation effect or executable')
@@ -93,6 +103,19 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
         assert dependencies == value['dependencies']
         trace.append('isolated-source-enter')
         yield IsolatedSourceControls()
+
+    class IsolatedController:
+        """Unavailable controller prerequisite only; no activation or effects."""
+        def prewarm_before_acceptance(self):
+            assert not active[0] and not entering_lease[0]
+            assert not attempt.exists() and not evidence.exists()
+            trace.append('controller-prewarm-closed')
+
+    def isolated_controller(self, checked, submitted):
+        assert checked == value and submitted == raw
+        assert not active[0] and not attempt.exists() and not evidence.exists()
+        trace.append('controller-construct')
+        return IsolatedController()
 
     def isolated_composition(submitted):
         assert submitted == value['composition_raw_json'].encode()
@@ -122,8 +145,8 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
         assert submitted == raw and classifier_projection is classifier and not active[0]
         assert (review_path, ci_path, launch_word_path) == tuple(inputs.values())
         trace.append('isolated-admit')
-        # Mutations occur after the engine's initial genuine context join. Its
-        # later genuine lease must therefore be the check that prevents mkdir.
+        # Mutation follows static inspection but precedes late current capture
+        # acceptance. The genuine current join must now refuse before the lease.
         if change_at_admit == 'superseded':
             newer = guard.strict_json(arguments['launch_word_raw'])
             newer['authorized_at'] = timestamp(guard._timestamp(newer['authorized_at'], 'word') + 1)
@@ -138,12 +161,49 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
             SimpleNamespace(pin=SimpleNamespace(path=inputs[name]), raw=bodies[name])
             for name in ('review', 'ci', 'launch_word')))
 
+    actual_load_current = subscription.load_current
+    actual_join = engine._join_subscription_authority
+    actual_require = words.Journal.require
     actual_lease = capture.capture_admission_lease
+
+    def traced_load_current(*args, **kwargs):
+        assert deferred_selection and not active[0] and not entering_lease[0]
+        assert trace[-1] == 'controller-prewarm-closed'
+        trace.append('load-current-enter')
+        result = actual_load_current(*args, **kwargs)
+        assert type(result) is guard.SubscriptionGuard
+        assert result.raw == watched.raw == guard_raw
+        assert result.value['captured_at'] == selected['captured_at']
+        assert result._clock is guard._now and not result.dispatched
+        admitted_guard[0] = result
+        trace.append('load-current-accepted')
+        return result
+
+    def traced_join(*args, **kwargs):
+        current = kwargs.get('current_launch', False)
+        if current:
+            assert not active[0] and not entering_lease[0]
+            assert args[0] is admitted_guard[0]
+            trace.append('current-join-enter')
+        result = actual_join(*args, **kwargs)
+        if current:
+            trace.append('current-join-passed')
+        return result
+
+    def traced_require(self, *args, **kwargs):
+        if entering_lease[0]:
+            assert not active[0] and kwargs.get('current', True) is True
+            trace.append('lease-current-enter')
+        result = actual_require(self, *args, **kwargs)
+        if entering_lease[0]:
+            trace.append('lease-current-passed')
+        return result
 
     @contextmanager
     def traced_lease(**kwargs):
         assert not active[0], 'reservation attempted a nested capture journal lease'
         trace.append('lease-enter')
+        entering_lease[0] = True
         try:
             with actual_lease(**kwargs) as selected_word:
                 active[0] = True
@@ -153,12 +213,13 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
                 finally:
                     active[0] = False
         finally:
+            entering_lease[0] = False
             trace.append('lease-exit')
 
     actual_margin = guard.SubscriptionGuard.before_reservation
 
     def traced_margin(self):
-        assert self is watched and active[0]
+        assert self is admitted_guard[0] and active[0]
         trace.append('margin-enter')
         result = actual_margin(self)
         trace.append('margin-passed')
@@ -170,10 +231,15 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
         assert parent == attempt.parent and active[0]
         assert attempt.is_dir() and list(attempt.iterdir()) == []
         assert not evidence.exists() and not watched.dispatched
+        assert not admitted_guard[0].dispatched
         actual_sync(parent)
         trace.append('first-mkdir-fsynced')
         raise FirstReservationObserved('first generation reservation observed; intentional test stop')
 
+    monkeypatch.setattr(engine.ExecutionContract, 'make_controller', isolated_controller)
+    monkeypatch.setattr(subscription, 'load_current', traced_load_current)
+    monkeypatch.setattr(engine, '_join_subscription_authority', traced_join)
+    monkeypatch.setattr(words.Journal, 'require', traced_require)
     monkeypatch.setattr(capabilities, 'loaded_capabilities', isolated_capabilities)
     monkeypatch.setattr(contract.composition, 'verified_composition', isolated_composition)
     monkeypatch.setattr(registration, 'execution_paths_v2', isolated_paths)
@@ -255,6 +321,47 @@ def test_admission_changes_after_initial_join_refuse_before_attempt_reservation(
     assert not Path(value['attempt_directory']).exists()
     assert not Path(value['evidence_directory']).exists()
     assert not watched.dispatched and not active[0]
-    assert 'isolated-admit' in trace and 'lease-enter' in trace and trace[-1] == 'lease-exit'
+    assert 'isolated-admit' in trace and trace[-1] == 'current-join-enter'
+    assert 'current-join-passed' not in trace and 'lease-enter' not in trace
     assert 'lease-held' not in trace and 'margin-enter' not in trace
     assert 'first-mkdir-fsynced' not in trace
+
+
+def test_deferred_capture_acceptance_exact_order_to_real_reservation(tmp_path, monkeypatch):
+    """Only controller/source/CI prerequisites are isolated; all quota gates run."""
+    invoke, arguments, value, watched, trace, active = reservation_case(
+        tmp_path, monkeypatch, remaining=90, deferred_selection=True)
+    with pytest.raises(FirstReservationObserved):
+        invoke()
+    expected = [
+        'controller-construct', 'controller-prewarm-closed',
+        'load-current-enter', 'load-current-accepted',
+        'current-join-enter', 'current-join-passed',
+        'isolated-source-recapture', 'lease-enter',
+        'lease-current-enter', 'lease-current-passed', 'lease-held',
+        'isolated-source-check', 'in-lease-source-check',
+        'margin-enter', 'margin-passed', 'first-mkdir-fsynced', 'lease-exit',
+    ]
+    assert trace[trace.index('controller-construct'):] == expected
+    assert trace.count('load-current-enter') == trace.count('load-current-accepted') == 1
+    assert Path(value['attempt_directory']).is_dir()
+    assert not Path(value['evidence_directory']).exists()
+    assert not watched.dispatched and not active[0]
+    with words.locked(value, arguments['registration_raw']) as journal:
+        assert journal.require(arguments['launch_word_raw'])['word_sha256'] == guard.sha(
+            arguments['launch_word_raw'])
+
+
+@pytest.mark.parametrize('change,reason', [('superseded', 'superseded'),
+                                        ('poison', 'registration permanently refused')])
+def test_deferred_capture_late_load_refuses_admission_mutation(tmp_path, monkeypatch, change, reason):
+    invoke, _, value, watched, trace, active = reservation_case(
+        tmp_path, monkeypatch, remaining=90, deferred_selection=True, change_at_admit=change)
+    with pytest.raises(ValueError, match=reason):
+        invoke()
+    assert trace[-1] == 'load-current-enter'
+    assert 'load-current-accepted' not in trace and 'lease-enter' not in trace
+    assert 'margin-enter' not in trace and 'first-mkdir-fsynced' not in trace
+    assert not Path(value['attempt_directory']).exists()
+    assert not Path(value['evidence_directory']).exists()
+    assert not watched.dispatched and not active[0]

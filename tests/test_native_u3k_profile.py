@@ -74,6 +74,10 @@ def test_profile_observer_canary(tmp_path):
     assert cpu and sum(row['calls'] for row in cpu) >= 1
     assert all(row['self_thread_cpu'] >= 0 and row['inclusive_thread_cpu'] >= 0 for row in cpu)
     assert all(row['outcome'] != 'open' for row in recorder.rows)
+    coarse = [row for row in recorder.rows if row['label'] == 'canary_cpu'
+              and row['outcome'] == 'return']
+    assert coarse and all(row['coarse_elapsed']['thread_cpu'] >= 0.05 for row in coarse)
+    assert all(row['coarse_elapsed']['reaped_child_user_cpu'] >= 0 for row in coarse)
     assert all(not stack for stack in recorder.stacks.values())
 
 

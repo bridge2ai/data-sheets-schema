@@ -25,6 +25,19 @@ import pytest
 
 
 TARGETS = {
+    ('test_native_shared_execution.py', 'make_case'): 'public_fixture',
+    ('test_native_shared_execution.py', 'launch_case'): 'public_test_launch',
+    ('test_native_shared_execution.py', 'assert_completed_case'): 'public_assert_and_readbacks',
+    ('native_shared_execution_orchestration.py', 'synthetic_launch'): 'public_launch',
+    ('native_execution_orchestration.py', 'synthetic_launch'): 'engine_entry',
+    ('native_shared_controller_orchestration.py', 'prewarm_before_acceptance'): 'controller_prewarm',
+    ('native_shared_controller_orchestration.py', 'activate_before_dispatch'): 'controller_activate',
+    ('native_execution_orchestration.py', '_execute_child'): 'execute_child',
+    ('native_shared_results_orchestration.py', 'capture'): 'final_capture',
+    ('native_shared_results_orchestration.py', 'prepare'): 'saved_prepare',
+    ('native_shared_results_orchestration.py', 'check_capture'): 'saved_gate_replay',
+    ('native_shared_execution_orchestration.py', 'read_final'): 'public_saved_readback',
+    ('native_execution_orchestration.py', 'read_final'): 'engine_saved_readback',
     ('native_shared_selection.py', 'capture'): 'selection_capture',
     ('native_shared_selection.py', '_rebuild'): 'selection_rebuild',
     ('native_shared_selection.py', '_schemas'): 'schema_reconstruction',
@@ -46,6 +59,11 @@ TARGETS = {
     ('test_native_u3k_profile.py', 'u3k_dynamic_witness'): 'canary_dynamic_code',
     ('test_native_u3k_profile.py', 'u3k_cpu_witness'): 'canary_cpu',
 }
+COARSE_LABELS = frozenset(('public_fixture', 'public_test_launch', 'public_assert_and_readbacks',
+    'public_launch', 'engine_entry', 'launch_engine', 'controller_prewarm', 'controller_activate',
+    'execute_child', 'final_capture', 'saved_prepare', 'saved_gate_replay',
+    'public_saved_readback', 'engine_saved_readback', 'attempt_mkdir',
+    'accept_saved_capture', 'canary_cpu'))
 ROOT = Path(__file__).resolve().parents[2]
 _ACTIVE = None
 
@@ -129,6 +147,8 @@ class Recorder:
         row = {**self.codes[identity][1], 'phase': phase, 'thread': threading.get_ident(),
             'entered_wall': time.monotonic(), 'entered_thread_cpu': time.thread_time(),
             'entered_utc': datetime.now(timezone.utc).isoformat(), 'outcome': 'open'}
+        if label in COARSE_LABELS:
+            row['coarse_before'] = sample()
         if label == 'launch_engine':
             raw = frame.f_locals.get('registration_raw')
             if type(raw) is bytes:
@@ -161,6 +181,12 @@ class Recorder:
         row.update(outcome=outcome, inclusive_wall=time.monotonic() - row['entered_wall'],
             inclusive_thread_cpu=time.thread_time() - row['entered_thread_cpu'],
             left_utc=datetime.now(timezone.utc).isoformat())
+        if 'coarse_before' in row:
+            row['coarse_after'] = sample()
+            row['coarse_elapsed'] = delta(row['coarse_before'], row['coarse_after'])
+            row['coarse_scope'] = ('Inclusive boundary: worker process/self, calling thread and '
+                'reaped children separately. Nested boundaries overlap. Peer recorder helper CPU '
+                'is not isolated; child CPU can appear only after reaping.')
         return row
 
     def leave(self, code, offset, value):

@@ -9,7 +9,13 @@ import copy
 import _json
 import functools
 import json
+import os
 import types
+
+try:
+    import posix as _native_posix
+except ImportError:
+    _native_posix = None
 
 import yaml
 from linkml_runtime.dumpers import json_dumper
@@ -253,6 +259,72 @@ def _metadata():
     return function, setting_key(function.cache_parameters()), _FUNCTIONS.key(function.__wrapped__)
 
 
+def _native_path_state():
+    """Pure frozen/ordinary stdlib path binding state, without widening bindings.
+
+    Generic FunctionBindings intentionally rejects frozen stdlib origins.
+    Retain these two effective callables' exact identities/code/defaults instead;
+    the original donor's _STATE is never rebound after another package import.
+    Unknown callable shapes disable reuse.
+    """
+    module = os.path
+    if (snapshots.os is not os or snapshots.os.path is not module
+            or snapshots.Namespaces is not Namespaces):
+        raise TypeError('native schema path or namespace alias differs')
+    functions = []
+    fspath = os.fspath
+    if (_native_posix is None or type(fspath) is not types.BuiltinFunctionType
+            or fspath is not getattr(_native_posix, 'fspath', None)
+            or fspath.__self__ is not _native_posix or fspath.__name__ != 'fspath'):
+        raise TypeError('unrecognized native filesystem-path conversion')
+    for name in ('normpath', 'abspath'):
+        function = getattr(module, name)
+        # CPython 3.13's posixpath uses this immutable C builtin, not a
+        # Python normpath function. Its concrete object/receiver are guarded.
+        if (name == 'normpath' and type(function) is types.BuiltinFunctionType
+                and function is getattr(_native_posix, '_path_normpath', None)
+                and function.__self__ is _native_posix
+                and function.__name__ == '_path_normpath'):
+            functions.append((function, None, None, None))
+            continue
+        if (type(function) is not types.FunctionType
+                or function.__module__ != module.__name__
+                or function.__name__ != name
+                or function.__globals__ is not vars(module)
+                or function.__closure__ is not None or function.__dict__
+                or function.__code__.co_filename not in (
+                    module.__file__, '<frozen ' + module.__name__ + '>')):
+            raise TypeError('unrecognized native schema path callable')
+        functions.append((function, function.__code__,
+                          setting_key(function.__defaults__),
+                          setting_key(function.__kwdefaults__)))
+    return os, module, _native_posix, fspath, snapshots.Namespaces, tuple(functions)
+
+
+def _bound_schema_state():
+    """Same tuple as cache_dependencies._schema_state over this bound view.
+
+    The shared helper imports today's sys.modules binding. A retained donor must
+    instead check the original attested producer after another loader replaces
+    that binding. No ambient import or mutable module substitution is needed.
+    """
+    parsers = tuple(_FUNCTIONS.key(fn) for fn in
+                    (views.version_document, views.version_view, views.yaml.load))
+    models = tuple((name, constructor_key(cls, _FUNCTIONS))
+                   for name, cls in sorted(vars(meta).items())
+                   if isinstance(cls, type) and cls.__module__ == meta.__name__)
+    constructors = tuple(constructor_key(cls, _FUNCTIONS) for cls in
+                         (views.SchemaDefinition, views._ReleasableView, views.DupCheckYamlLoader))
+    tables = tuple((name, tuple((prefix, _FUNCTIONS.key(fn)) for prefix, fn in
+                               getattr(views.DupCheckYamlLoader, name).items()))
+                   for name in ('yaml_constructors', 'yaml_multi_constructors'))
+    resolvers = tuple((name, setting_key(getattr(views.DupCheckYamlLoader, name)))
+                      for name in ('yaml_implicit_resolvers', 'yaml_path_resolvers'))
+    return (parsers, models, constructors,
+            _methods_key(views._ReleasableView, _FUNCTIONS, views),
+            _methods_key(views.DupCheckYamlLoader, _FUNCTIONS, views), tables, resolvers)
+
+
 def _state():
     # Fixed bindings actually used by the two schema producers. Unfamiliar
     # replacements cannot become bound merely by being the first observation.
@@ -270,7 +342,8 @@ def _state():
         omissions.nesting_exceeds, omissions._validate_json,
         duplicate_keys.nesting_exceeds, support_targets._validate_json,
         grounding.declared_bases_of,
-        snapshots.capture_schema, snapshots._capture_schema, snapshots._metadata_document,
+        snapshots.capture_schema, snapshots._capture_schema, snapshots._capture_native_schema,
+        snapshots._metadata_document,
         snapshots.resolve_import_path, snapshots.map_import,
         views.captured_view, views.resolve_import_path,
         yaml.load, yaml.safe_load,
@@ -281,7 +354,7 @@ def _state():
         yamlutils.copy, formatutils.remove_empty_items,
         formatutils.is_list, formatutils.is_dict, formatutils.items, formatutils.is_empty,
         formatutils.as_dict, jsonobj.is_list, jsonobj.is_dict, jsonobj.items, jsonobj.as_dict,
-        copy.copy, copy._reconstruct,
+        copy.copy, copy.deepcopy, copy._keep_alive, copy._reconstruct,
         contract.strict_json, contract.canonical, contract._pairs, contract._reject_constant,
         contract._lexical_budget, contract._json_values, contract.positive_int,
         contract._JSONValidationCache.contains, contract._JSONValidationCache.remember,
@@ -328,7 +401,7 @@ def _state():
                           events.MAX_PAYLOAD_BYTES, events.MAX_INPUT_BYTES),
     })
     _loader_handlers()
-    return (functions, _explicit_loader_parse(), _schema_state(_FUNCTIONS), _metadata(),
+    return (functions, _explicit_loader_parse(), _bound_schema_state(), _metadata(),
             tuple(_loader(cls) for cls in (yaml.SafeLoader, yamlutils.SafeLoader,
                                           omissions._UniqueLoader,
                                           omissions._SchemaEventLoader)),
@@ -337,7 +410,11 @@ def _state():
             constructor_key(Namespaces, _FUNCTIONS), namespaces,
             JSONDumper, json_dumper, _FUNCTIONS.key(JSONDumper.__getattribute__), dumper_bindings,
             json_classes, json_state, yaml_root, object_methods, copy_methods, copy_dispatch, reducers, settings,
-            _yaml_constructor_state(), _primitive_state())
+            _yaml_constructor_state(), _primitive_state(),
+            # Effective aliases and dispatch used by native captured-byte schemas.
+            (snapshots.Path, views.Path, snapshots.deepcopy, copy.deepcopy),
+            tuple((cls, _FUNCTIONS.key(fn)) for cls, fn in copy._deepcopy_dispatch.items()),
+            _native_path_state())
 
 
 def _bind():
@@ -362,6 +439,32 @@ def runtime_token():
     except Exception:
         pass
     return None
+
+
+def schema_derivation_state(*, capture, view, contract_alias, path_alias):
+    """Pure recognized state for schema metadata; no filesystem or resolver reads.
+
+    The local marker is deliberately not transferable between loaded modules.
+    A retains the original donor's guard, and transports only the phase number
+    with exact-byte/domain keys. Aliases are part of the effective producer.
+    """
+    try:
+        if (capture is not snapshots._capture_native_schema
+                or view is not views.captured_view
+                or contract_alias is not contract
+                or path_alias is not snapshots.Path
+                or snapshots.Path is not views.Path
+                or snapshots.deepcopy is not copy.deepcopy):
+            return None
+        marker = runtime_token()
+        if marker is None:
+            return None
+        phase = initialization.phase()
+        if initialization.marker() is not marker:
+            return None
+        return phase, marker
+    except Exception:
+        return None
 
 
 def supported_snapshot(snapshot):

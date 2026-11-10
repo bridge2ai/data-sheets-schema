@@ -40,6 +40,9 @@ SOURCE_SUFFIXES = frozenset(('.py', '.yaml', '.json'))
 EXPOSED_CONTROLS = frozenset(('prepare_registration_v2', 'run_direct_canary_awake'))
 _SOURCE_MODULES = WeakKeyDictionary()
 _VERIFIED_PACKAGE_MODULES = {}
+_SCHEMA_BINDINGS = WeakKeyDictionary()
+_LAUNCH_DERIVATIONS = threading.local()
+_SELECTION_MODULE = 'data_sheets_schema.native_shared_selection'
 _LEGACY_CONSUMER_MODULES = frozenset('data_sheets_schema.' + name for name in (
     'native_execution', 'native_execution_registration', 'native_execution_authority',
     'native_supervisor', 'native_attempt_supervisor', 'native_supervisor_authority', 'native_attribution_registration',
@@ -338,15 +341,161 @@ def module_source_identity(module):
             or module.__loader__ is not loader or module.__cached__ is not None
             or _own_callables(module) != callables):
         raise ValueError('verified source module identity or callable code changed')
+    expected = _SCHEMA_BINDINGS.get(module)
+    if expected is not None:
+        context, guard = expected
+        if (vars(module).get('_SCHEMA_LAUNCH_CONTEXT') is not context
+                or vars(module).get('_schema_dependencies') is not guard):
+            raise ValueError('verified schema transfer context changed')
     return dict(identity)
+
+
+def _schema_memo_state(module):
+    """A-side attestation plus a neutral, no-I/O dependency-state check."""
+    module_source_identity(module)
+    guard = module._schema_dependencies
+    if guard is None:
+        return None
+    module_source_identity(guard)
+    return guard.schema_derivation_state(
+        capture=module._capture_native_schema, view=module.captured_view,
+        contract_alias=module.contract, path_alias=module.Path)
+
+
+class _LaunchDerivations:
+    """One bounded immutable payload; the original donor guard is never rebound."""
+    def __init__(self):
+        self.donor = None
+        self.phase = None
+        self.payload = ()
+        self.domain = None
+        self.modules = WeakKeyDictionary()
+
+    def current_donor(self):
+        if self.donor is None:
+            return None
+        state = _schema_memo_state(self.donor)
+        if state is None:
+            self.payload = ()
+            return None
+        if state[0] != self.phase:
+            self.payload = ()
+            self.phase = state[0]
+        return state
+
+    def before_load(self):
+        # Check the original guard before a fresh source-loaded guard can bind.
+        # Never let a later import adopt changed dependencies as a new baseline.
+        self.current_donor()
+
+    def bind(self, module, package_sources):
+        identity = module_source_identity(module)
+        # Includes ALL declared source pins, the executing source identity,
+        # physical root and interpreter identity; schema raw bytes form the
+        # other half of each key. No graph/admission result is retained.
+        domain = repr((
+            'native_launch_schema_metadata_v1', str(ROOT),
+            tuple(sorted(package_sources.items())), tuple(sorted(identity.items())),
+            sys.implementation.name, sys.implementation.cache_tag, sys.version,
+        )).encode('utf-8')
+        prior = self.modules.get(module)
+        if prior is not None:
+            if prior[0] == domain:
+                return
+            # Nested loaders can reuse the same attested selection object.
+            # A changed full package domain must not inherit its earlier cache.
+            # Keep this object cold for the remainder of this launch, including
+            # when the outer scope resumes; no per-scope context restoration.
+            context = (domain, False)
+            module._SCHEMA_DERIVATIONS.clear()
+            module._SCHEMA_LAUNCH_CONTEXT = context
+            _SCHEMA_BINDINGS[module] = (context, module._schema_dependencies)
+            self.modules[module] = context
+            self.payload = ()
+            self.domain = None
+            return
+        # Fixed neutral dependency, loaded through the already-installed A
+        # source finder. This is not a verifier callback and consumers never
+        # import authority. The guard has finished loading before association.
+        guard = importlib.import_module('data_sheets_schema.native_catalog_reuse')
+        module_source_identity(guard)
+        module._schema_dependencies = guard
+        current = _schema_memo_state(module)
+        if self.donor is None:
+            self.donor = module
+            self.phase = None if current is None else current[0]
+        donor = self.current_donor()
+        enabled = current is not None and donor is not None and current[0] == donor[0]
+        context = (domain, enabled)
+        module._SCHEMA_DERIVATIONS.clear()
+        module._SCHEMA_LAUNCH_CONTEXT = context
+        _SCHEMA_BINDINGS[module] = (context, guard)
+        self.modules[module] = context
+        if enabled and self.domain == domain:
+            for key, metadata in self.payload:
+                module._SCHEMA_DERIVATIONS.put(key, metadata)
+
+    def publish(self, module):
+        context = self.modules.get(module)
+        if context is None:
+            return
+        module_source_identity(module)
+        current, donor = _schema_memo_state(module), self.current_donor()
+        if (not context[1] or current is None or donor is None
+                or current[0] != donor[0]):
+            self.payload = ()
+            return
+        rows = module._SCHEMA_DERIVATIONS.snapshot()
+        prefix = context[0] + b'\nphase:' + str(current[0]).encode('ascii') + b'\n'
+        # Entries from the recognized earlier initialization phase never transfer.
+        self.payload = tuple((key, metadata) for key, metadata in rows
+                             if key[0].startswith(prefix))
+        self.domain = context[0]
+
+    def close(self):
+        for module, context in list(self.modules.items()):
+            module._SCHEMA_DERIVATIONS.clear()
+            module._SCHEMA_LAUNCH_CONTEXT = None
+            module._schema_dependencies = None
+            _SCHEMA_BINDINGS.pop(module, None)
+        self.modules.clear()
+        self.payload = ()
+        self.domain = None
+        self.donor = None
+        self.phase = None
+
+
+@contextmanager
+def launch_derivations():
+    """A-owned, re-entrant main-thread launch lifetime; outer exit clears all.
+
+    This context grants no verification or execution authority. The caller still
+    uses the existing attested loader and every existing live admission check.
+    """
+    _main_thread()
+    existing = getattr(_LAUNCH_DERIVATIONS, 'memo', None)
+    if existing is not None:
+        yield
+        return
+    memo = _LaunchDerivations()
+    _LAUNCH_DERIVATIONS.memo = memo
+    try:
+        yield
+    finally:
+        try:
+            memo.close()
+        finally:
+            del _LAUNCH_DERIVATIONS.memo
 
 
 class _VerifiedBytesLoader(importlib.abc.Loader):
     """A deliberately source-only loader: no SourceFileLoader/cache operations."""
-    def __init__(self, name, path, raw, digest, *, package=False, verified_package=False):
+    def __init__(self, name, path, raw, digest, *, package=False, verified_package=False,
+                 package_sources=None):
         self.identity = _source_identity(name, path, raw, digest, allow_empty_package=package)
         self.raw, self.package = raw, package
         self.verified_package = verified_package
+        self.package_sources = package_sources
 
     def create_module(self, spec):
         return None
@@ -364,11 +513,15 @@ class _VerifiedBytesLoader(importlib.abc.Loader):
         _SOURCE_MODULES[module] = (dict(self.identity), self, _own_callables(module))
         if self.verified_package:
             _VERIFIED_PACKAGE_MODULES[module.__name__] = module
+            memo = getattr(_LAUNCH_DERIVATIONS, 'memo', None)
+            if memo is not None and module.__name__ == _SELECTION_MODULE:
+                memo.bind(module, self.package_sources)
 
 
 class _VerifiedBytesFinder(importlib.abc.MetaPathFinder):
-    def __init__(self, sources, *, consumer=False, checked=()):
+    def __init__(self, sources, *, consumer=False, checked=(), package_sources=None):
         self.sources = sources
+        self.package_sources = None if package_sources is None else dict(package_sources)
         self.consumer = consumer
         self.checked = set(checked)
 
@@ -409,7 +562,8 @@ class _VerifiedBytesFinder(importlib.abc.MetaPathFinder):
             pins = {str(item[0].relative_to(ROOT)): item[2] for item in self.sources.values()}
             self.checked.update(refuse_legacy_consumer_imports(raw, name=canonical, package_sources=pins))
         loader = _VerifiedBytesLoader(fullname, filename, raw, digest, package=package,
-                                      verified_package=self.consumer and fullname == canonical)
+                                      verified_package=self.consumer and fullname == canonical,
+                                      package_sources=self.package_sources)
         return importlib.util.spec_from_loader(fullname, loader, origin=str(filename), is_package=package)
 
 
@@ -459,6 +613,9 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
     Verifier boundaries refuse; external libraries remain outside this scope.
     """
     _main_thread()
+    memo = getattr(_LAUNCH_DERIVATIONS, 'memo', None)
+    if memo is not None:
+        memo.before_load()
     _source_identity(name, path, raw, sha256)
     sources = {name: (Path(path), raw, sha256, False)}
     graph = {}
@@ -514,7 +671,8 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
     old_path = list(sys.path)
     old_meta = list(sys.meta_path)
     old_verified = dict(_VERIFIED_PACKAGE_MODULES)
-    finder = _VerifiedBytesFinder(sources, consumer=package_sources is not None, checked=graph)
+    finder = _VerifiedBytesFinder(sources, consumer=package_sources is not None, checked=graph,
+                                  package_sources=package_sources)
     try:
         sys.dont_write_bytecode = True
         sys.meta_path.insert(0, finder)
@@ -535,6 +693,10 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
         if package_sources is not None:
             _VERIFIED_PACKAGE_MODULES.update({key: loaded for key, loaded in initial_modules.items()
                                               if key == loaded.__name__})
+        if memo is not None and package_sources is not None:
+            selected = _VERIFIED_PACKAGE_MODULES.get(_SELECTION_MODULE)
+            if selected is not None:
+                memo.bind(selected, package_sources)
         yield module
         for key in sources:
             if key == 'data_sheets_schema':
@@ -548,6 +710,10 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
                 expected_name = _package_name(filename) if package_sources is not None else key
                 if (actual['name'], actual['path'], actual['sha256']) != (expected_name, str(filename), digest):
                     raise ValueError('consumer graph module differs from its captured source identity')
+        if memo is not None and package_sources is not None:
+            selected = _VERIFIED_PACKAGE_MODULES.get(_SELECTION_MODULE)
+            if selected is not None:
+                memo.publish(selected)
     finally:
         _VERIFIED_PACKAGE_MODULES.clear()
         _VERIFIED_PACKAGE_MODULES.update(old_verified)

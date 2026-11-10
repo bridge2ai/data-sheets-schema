@@ -92,8 +92,24 @@ class _SchemaDerivationCache:
             self._entries[key] = (value, size)
             self._bytes += size
 
+    def snapshot(self):
+        """Export only bounded immutable key/metadata pairs, never carriers."""
+        with self._lock:
+            return tuple((key, value) for key, (value, _size) in self._entries.items())
+
+    def clear(self):
+        with self._lock:
+            self._entries.clear()
+            self._bytes = 0
+
 
 _SCHEMA_DERIVATIONS = _SchemaDerivationCache()
+# Data only. A's verified loader installs (complete implementation domain, enabled)
+# during an explicit launch; no authority object or callback crosses this boundary.
+_SCHEMA_LAUNCH_CONTEXT = None
+# Fresh neutral guard module from A's attested loader, only inside a launch.
+# Ordinary imports/capture/rebuild incur no new guard initialization.
+_schema_dependencies = None
 
 
 def descriptor() -> dict:
@@ -262,7 +278,49 @@ def _schema_metadata(schemas):
     } for schema in schemas])
 
 
+def _launch_cached_schemas(doc, artifacts):
+    """Pure local reuse; every hit rechecks the recognized dependency state.
+
+    The A-owned boundary imports/exports data, not verification callbacks.
+    Captured authority validation still runs in _rebuild before reaching here.
+    Unknown dependencies fall back to the original producer.
+    """
+    context = _SCHEMA_LAUNCH_CONTEXT
+    if (type(context) is not tuple or len(context) != 2
+            or type(context[0]) is not bytes or not context[0]
+            or type(context[1]) is not bool or not context[1]):
+        return _schemas(doc, artifacts)
+    domain, _enabled = context
+    for _attempt in range(2):
+        before = _schema_dependencies.schema_derivation_state(
+            capture=_capture_native_schema, view=captured_view, contract_alias=contract,
+            path_alias=Path)
+        if before is None:
+            return _schemas(doc, artifacts)
+        base = _schema_cache_key(doc, artifacts)
+        key = (domain + b'\nphase:' + str(before[0]).encode('ascii') + b'\n' + base[0],
+               base[1])
+        metadata = _SCHEMA_DERIVATIONS.get(key)
+        if metadata is None:
+            metadata = _schema_metadata(_schemas(doc, artifacts))
+        result = _declared_schemas(doc, artifacts)
+        if _schema_metadata(result) != metadata:
+            raise ValueError('schema derivation metadata differs from the current captured carriers')
+        after = _schema_dependencies.schema_derivation_state(
+            capture=_capture_native_schema, view=captured_view, contract_alias=contract,
+            path_alias=Path)
+        if after != before:
+            # The recognized 0 -> 1 initialization is a miss/rekey, not a refusal.
+            # Unknown changes also never admit the candidate.
+            continue
+        _SCHEMA_DERIVATIONS.put(key, metadata)
+        return result
+    return _schemas(doc, artifacts)
+
+
 def _cached_schemas(doc, artifacts):
+    if _SCHEMA_LAUNCH_CONTEXT is not None:
+        return _launch_cached_schemas(doc, artifacts)
     from . import native_catalog_initialization as initialization
     try:
         phase = initialization.phase()
@@ -291,7 +349,8 @@ def rebuild(registration: contract.CapturedArtifact,
             schemas: tuple[contract.SchemaClosureCapture, ...],
             receipt_policy: contract.CapturedArtifact) -> contract.NativeSelectionCapture:
     """Independently reconstruct S from complete bytes; no live fallback."""
-    return _rebuild(registration, authority, schemas, receipt_policy, use_schema_cache=False)
+    return _rebuild(registration, authority, schemas, receipt_policy,
+                    use_schema_cache=_SCHEMA_LAUNCH_CONTEXT is not None)
 
 
 def _rebuild(registration, authority, schemas, receipt_policy, *, use_schema_cache):

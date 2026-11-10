@@ -225,6 +225,29 @@ class CallbackAdapter:
                 or self.spec.native_shared_generation_version != 1 or self.phase is None):
             raise ValueError('native26 requires its actual fixed phase observer and selected policy')
 
+    def prewarm_before_acceptance(self):
+        """Compute cold pure callback work without reserving or activating.
+
+        RunSpec boundary: validated-caller
+
+        RunSpec precondition: Adapter holds the spec reconstructed from its
+        verified composition; fresh outer execution verification precedes
+        freezing that same spec in a temporary callback admission scope.
+
+        The temporary source-loader/mint lifetime ends here. No admission,
+        classifier, finder or callback scope escapes this warmup. Activation
+        below retains its genuine fresh verification and one-use effects.
+        """
+        if self._activated:
+            raise ValueError('native shared callback identity is already spent')
+        with control_loading.loaded_controls(self.value['dependencies']) as controls:
+            if c.canonical(registration.verified(self.registration_raw,
+                    classifier_projection=controls)) != c.canonical(self.execution):
+                raise ValueError('callback execution changed before preflight')
+        with callback_loading.preloaded_callbacks(self.value, self.spec, self.selection,
+                self.execution, self.registration_raw, render.commands(self.spec)) as warming:
+            warming.admission.check_active()
+
     def activate_before_dispatch(self, started_raw):
         """        RunSpec boundary: validated-caller
 
