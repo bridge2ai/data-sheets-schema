@@ -605,14 +605,7 @@ def build_citations_map(roots: list[str]) -> dict[str, dict[str, Any]]:
     return result
 
 
-def load_subpath_citations_map() -> dict[str, dict[str, list[str]]]:
-    """Load precomputed sub-path citations map (`subpath_citations.json`), expanding brace ranges like `{1..6}`."""
-    if not os.path.exists(CACHED_SUBPATH_CITATIONS_JSON):
-        return {}
-    try:
-        raw = json.load(open(CACHED_SUBPATH_CITATIONS_JSON))
-    except Exception:
-        return {}
+def _expand_subpath_citations(raw: dict[str, Any]) -> dict[str, dict[str, list[str]]]:
     expanded: dict[str, dict[str, list[str]]] = {}
     brace_re = re.compile(r"\{(\d+)\.\.(\d+)\}")
     for root_base, sp_dict in raw.items():
@@ -629,11 +622,76 @@ def load_subpath_citations_map() -> dict[str, dict[str, list[str]]]:
                 if 0 <= (hi - lo) <= 50:
                     for idx in range(lo, hi + 1):
                         exp_p = sp_clean[: m.start()] + str(idx) + sp_clean[m.end() :]
-                        out_sp[exp_p] = cfiles
+                        out_sp[exp_p] = list(cfiles)
                     continue
-            out_sp[sp_clean] = cfiles
+            out_sp[sp_clean] = list(cfiles)
         expanded[root_base] = out_sp
     return expanded
+
+
+def load_subpath_citations_map(
+    roots: list[str] | None = None,
+    cached_json_path: str | None = None,
+    search_dirs: list[str] | None = None,
+) -> dict[str, dict[str, list[str]]]:
+    """Load precomputed sub-path citations map (`subpath_citations.json`), or build via live `rg` when absent."""
+    cache_path = cached_json_path if cached_json_path is not None else CACHED_SUBPATH_CITATIONS_JSON
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path) as f:
+                raw = json.load(f)
+            if isinstance(raw, dict):
+                return _expand_subpath_citations(raw)
+        except Exception:
+            pass
+
+    if not roots:
+        return {}
+    all_basenames = sorted({os.path.basename(os.path.normpath(r)) for r in roots if os.path.basename(os.path.normpath(r))})
+    if not all_basenames:
+        return {}
+
+    dirs = search_dirs if search_dirs is not None else [
+        os.path.join(EXECUTIONS_ROOT, "plans"),
+        os.path.join(PRIMARY_REPO, "notes"),
+        os.path.join(PRIMARY_REPO, "data"),
+    ]
+    dirs = [d for d in dirs if os.path.exists(d)]
+    if not dirs:
+        return {}
+
+    pat = r"(" + "|".join(re.escape(b) for b in all_basenames) + r")/[A-Za-z0-9_.\-/{}*]+"
+    wait_for_quiet_window()
+    raw_hits: dict[str, dict[str, set[str]]] = {}
+    try:
+        proc = subprocess.run(
+            ["rg", "--no-ignore", "--hidden", "--no-heading", "--with-filename", "-o", "-e", pat, *dirs],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        for line in proc.stdout.splitlines():
+            if ":" not in line:
+                continue
+            fpath, match_tok = line.rsplit(":", 1)
+            fpath = fpath.strip()
+            if any(excl in fpath for excl in SELF_CITATION_EXCLUDES):
+                continue
+            match_tok = match_tok.strip().rstrip(".,;:")
+            if "/" not in match_tok:
+                continue
+            rbase, subpath = match_tok.split("/", 1)
+            subpath = subpath.strip("/")
+            if rbase in all_basenames and subpath:
+                raw_hits.setdefault(rbase, {}).setdefault(subpath, set()).add(fpath)
+    except Exception:
+        return {}
+
+    raw_serializable = {
+        rbase: {sp: sorted(cfiles) for sp, cfiles in sp_map.items()}
+        for rbase, sp_map in raw_hits.items()
+    }
+    return _expand_subpath_citations(raw_serializable)
 
 
 def scan_all_alternates(
@@ -2680,7 +2738,7 @@ def main() -> int:
 
     live_procs = collect_live_processes()
     citations_map = build_citations_map(roots_list)
-    subpath_citations_map = load_subpath_citations_map()
+    subpath_citations_map = load_subpath_citations_map(roots_list)
     lender_to_borrowers, root_to_alternates = scan_all_alternates(list(all_roots_norm), PRIMARY_REPO)
     now_ts = time.time()
 
