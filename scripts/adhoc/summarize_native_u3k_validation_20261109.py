@@ -167,6 +167,47 @@ def validate_elapsed(before, after, recorded):
             rel_tol=1e-9, abs_tol=1e-9) for key in CPU), 'elapsed disagrees with endpoints')
 
 
+def public_call_groups(calls, coarse):
+    """Group retained same-thread calls; never sum overlapping same-label CPU.
+
+    Different labels still nest. A lookup total includes its reconstruction
+    misses and must not be added to reconstruction or verification totals.
+    Exception-completed launches remain measurable, without becoming passes.
+    """
+    result = []
+    for boundary in coarse:
+        if boundary['label'] not in {'public_fixture', 'public_launch'} \
+                or boundary['outcome'] == 'open':
+            continue
+        start = boundary['entered_wall']
+        stop = start + boundary['inclusive_wall']
+        grouped = {}
+        for index, row in enumerate(calls):
+            if row['thread'] != boundary['thread'] or row['outcome'] == 'open':
+                continue
+            require(all(finite(row.get(key)) for key in (
+                'entered_wall', 'inclusive_wall', 'inclusive_thread_cpu'))
+                and row['inclusive_wall'] >= 0 and row['inclusive_thread_cpu'] >= 0,
+                'invalid completed monitored interval')
+            if start <= row['entered_wall'] \
+                    and row['entered_wall'] + row['inclusive_wall'] <= stop:
+                grouped.setdefault(row['label'], []).append((index, row))
+        labels = []
+        for label, members in sorted(grouped.items()):
+            ordered = sorted(members, key=lambda item: item[1]['entered_wall'])
+            disjoint = all(left['entered_wall'] + left['inclusive_wall'] <= right['entered_wall']
+                for (_, left), (_, right) in zip(ordered, ordered[1:]))
+            labels.append({'label': label, 'calls': len(members),
+                'call_indices': [index for index, _ in members],
+                'same_label_intervals_disjoint': disjoint,
+                'inclusive_thread_cpu_sum': math.fsum(row['inclusive_thread_cpu']
+                    for _, row in members) if disjoint else None})
+        result.append({'boundary_call_index': boundary['call_index'],
+            'boundary_label': boundary['label'], 'thread': boundary['thread'],
+            'labels': labels})
+    return result
+
+
 def measurement(path, evidence):
     value = evidence.load(path)
     require(type(value.get('pid')) is int
@@ -251,6 +292,7 @@ def measurement(path, evidence):
         'worker': value['worker'], 'mode': value['mode'], 'public': public,
         'coarse_calls': coarse, 'phases': value['phases'], 'pytest_phases': value['pytest_phases'],
         'observed_reservation_windows': windows, 'public_preflight': preflight,
+        'public_call_groups': public_call_groups(calls, coarse),
         'measurement_passed': not failures, 'failures': failures, 'cpu_policy': CPU_POLICY}
 
 
