@@ -9,6 +9,8 @@ grant a timing/production acceptance. Callers own those separately bounded steps
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import ctypes
+import errno
 import fcntl
 import hashlib
 import json
@@ -86,7 +88,9 @@ def _read_fd(fd):
 
 
 def _open_read(path):
-    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    # A raced FIFO must refuse rather than block at open. _read_fd checks the
+    # descriptor's regular-file type before pread, independently of path checks.
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     try:
         raw, value, info = _read_fd(fd)
         if _regular(os.lstat(path)) != _regular(info):
@@ -353,6 +357,30 @@ class OsProxy:
         return getattr(os, name)
 
 
+def _rename_exclusive(source, destination):
+    """Darwin atomic rename without replacing a destination; no unlink fallback.
+
+    RENAME_EXCL=0x4 and renamex_np are declared in the installed SDK's
+    usr/include/sys/stdio.h. Both paths have physical parents; symlink leaves
+    are moved as symlinks, never followed. This is not a conditional-inode CAS.
+    """
+    source, destination = _path(source), _path(destination)
+    if sys.platform != 'darwin':
+        raise LeaseLost('quiet release requires Darwin exclusive rename')
+    library = ctypes.CDLL('/usr/lib/libSystem.B.dylib', use_errno=True)
+    rename = library.renamex_np
+    rename.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint)
+    rename.restype = ctypes.c_int
+    if rename(os.fsencode(source), os.fsencode(destination), 0x00000004) != 0:
+        number = ctypes.get_errno() or errno.EIO
+        raise OSError(number, os.strerror(number) + '; destination=' + str(destination), str(source))
+
+
+def _capture_lock(lock_path, candidate_path):
+    """Single fixture injection boundary after validation, before atomic capture."""
+    _rename_exclusive(lock_path, candidate_path)
+
+
 class OwnerLease(LeaseReader):
     def __init__(self, *args, lock_fd, **kwargs):
         self._lock_fd = lock_fd
@@ -373,6 +401,14 @@ class OwnerLease(LeaseReader):
     def release(self, cleanup_verified):
         if cleanup_verified is not True:
             return self.retain('cleanup_not_verified')
+        result = {'released': False, 'retained': True, 'reason': None,
+                  'lock_path': str(self._lock), 'witness_path': str(self._witness_path),
+                  'quarantine_path': None, 'captured_path': None, 'recovery_path': str(self._lock),
+                  'foreign_restored': False, 'canonical_already_occupied': False,
+                  'canonical_continuity_established': False,
+                  'scope': 'Cooperative local coordination only. Atomic capture may briefly vacate '
+                           'the canonical path; displaced objects are preserved, never unlinked. '
+                           'No hostile same-user pathname-security guarantee is claimed.'}
         try:
             self.validate()
             raw, _, info = _read_fd(self._lock_fd)
@@ -380,14 +416,45 @@ class OwnerLease(LeaseReader):
             if (_identity(info) != witness['lock_identity'] or _sha(raw) != witness['lock_sha256']
                     or _regular(os.lstat(self._lock)) != _regular(info)):
                 raise LeaseLost('owned lock changed immediately before release')
-            os.unlink(self._lock)
-            result = {'released': True, 'retained': False, 'reason': 'cleanup_verified_owned_lock_removed',
-                      'lock_path': str(self._lock), 'witness_path': str(self._witness_path)}
+            quarantine = _path(self._witness_path.with_name(
+                self._witness_path.name + '.release-' + witness['nonce'][:16]))
+            quarantine.mkdir(mode=0o700)  # Exclusive fresh directory; never reuse or clean it.
+            candidate = quarantine / 'captured-lock'
+            result.update(quarantine_path=str(quarantine), captured_path=str(candidate))
+            if stat.S_IMODE(quarantine.stat().st_mode) != 0o700:
+                raise LeaseLost('release evidence directory is not private')
+            _capture_lock(self._lock, candidate)
+            result['recovery_path'] = str(candidate)
+            matching = False
+            try:
+                _regular(os.lstat(candidate))
+                captured_raw, _, captured_info = _open_read(candidate)
+                matching = (_identity(captured_info) == witness['lock_identity']
+                            and _sha(captured_raw) == witness['lock_sha256'])
+            except Exception as exc:
+                # A raced foreign file need not contain JSON or be regular. Its
+                # captured object is preserved and the exclusive restore still runs.
+                result['capture_inspection_error'] = type(exc).__name__ + ': ' + str(exc)
+            if matching:
+                result.update(released=True, retained=False,
+                    reason='cleanup_verified_owned_lock_archived')
+            else:
+                self.failure_reason = 'foreign object captured during quiet release'
+                result['reason'] = self.failure_reason
+                try:
+                    _rename_exclusive(candidate, self._lock)
+                    result.update(foreign_restored=True, recovery_path=str(self._lock),
+                        reason='foreign_capture_restored_exclusively')
+                except FileExistsError:
+                    result.update(canonical_already_occupied=True,
+                        reason='foreign_capture_preserved_canonical_already_occupied')
+                except Exception as exc:
+                    result['reason'] = 'foreign_capture_preserved_restore_failed'
+                    result['restore_error'] = type(exc).__name__ + ': ' + str(exc)
         except Exception as exc:
             if self.failure_reason is None:
                 self.failure_reason = type(exc).__name__ + ': ' + str(exc)
-            result = {'released': False, 'retained': True, 'reason': self.failure_reason,
-                      'lock_path': str(self._lock), 'witness_path': str(self._witness_path)}
+            result['reason'] = self.failure_reason
         finally:
             self._close()
         return result

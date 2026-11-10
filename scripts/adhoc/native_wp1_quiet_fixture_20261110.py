@@ -21,6 +21,7 @@ from pathlib import Path
 import re
 import select
 import signal
+import stat
 import subprocess
 import sys
 import traceback
@@ -263,6 +264,102 @@ def reader_checks(reader, quiet, validator, output, label):
             'toy_source_sha256': digest(toy.read_bytes())}
 
 
+def entry_identity(path):
+    info = path.lstat()
+    result = {'device': info.st_dev, 'inode': info.st_ino, 'mode': info.st_mode}
+    if stat.S_ISLNK(info.st_mode):
+        result['link_target'] = os.readlink(path)
+    elif stat.S_ISREG(info.st_mode):
+        raw = path.read_bytes()
+        result.update(bytes=len(raw), sha256=digest(raw))
+    elif stat.S_ISFIFO(info.st_mode):
+        result['kind'] = 'fifo'  # Identity only: never open a fixture FIFO.
+    else:
+        raise AssertionError('fixture expected a regular file, symlink or FIFO')
+    return result
+
+
+def release_boundary_cases(base, source, manifest_sha, psutil, quiet):
+    """Inject at capture after validation; do not weaken the release checks."""
+    results = []
+    for kind in ('regular', 'symlink', 'fifo', 'restore-conflict'):
+        name = 'release-boundary-' + kind
+        owner = acquisition(quiet, psutil, base, name, manifest_sha, source)
+        lock = base / (name + '.lock')
+        owned_before = entry_identity(lock)
+        owned_archive = base / (name + '.original-owned-lock.json')
+        foreign = base / (name + '.foreign')
+        target = None
+        if kind == 'symlink':
+            target = base / (name + '.target')
+            target.write_bytes(b'foreign symlink target must survive\n')
+            target_before = entry_identity(target)
+            foreign.symlink_to(target)
+        elif kind == 'fifo':
+            os.mkfifo(foreign, 0o600)
+        else:
+            foreign.write_bytes(b'foreign lock injected at the atomic capture boundary\n')
+        foreign_before = entry_identity(foreign)
+        observations = {'successful_validations': 0, 'capture_calls': 0}
+        actual_validate, actual_capture = owner.validate, quiet._capture_lock
+
+        def validate():
+            value = actual_validate()
+            observations['successful_validations'] += 1
+            return value
+
+        def inject(source_path, captured_path):
+            assert Path(source_path) == lock
+            assert observations['successful_validations'] >= 1
+            assert observations['capture_calls'] == 0
+            assert entry_identity(lock) == owned_before
+            observations['capture_calls'] += 1
+            # The production prechecks have already succeeded. Preserve the
+            # owner object, then replace only this fixture's canonical entry.
+            os.rename(lock, owned_archive)
+            os.rename(foreign, lock)
+            assert entry_identity(lock) == foreign_before
+            value = actual_capture(source_path, captured_path)
+            assert entry_identity(Path(captured_path)) == foreign_before
+            observations['captured_path'] = str(captured_path)
+            if kind == 'restore-conflict':
+                with lock.open('xb') as stream:
+                    stream.write(b'a second foreign owner occupies the canonical path\n')
+                observations['new_canonical_identity'] = entry_identity(lock)
+            return value
+
+        owner.validate, quiet._capture_lock = validate, inject
+        try:
+            release = owner.release(cleanup_verified=True)
+        finally:
+            owner.validate, quiet._capture_lock = actual_validate, actual_capture
+        assert observations['capture_calls'] == 1
+        assert release['retained'] and not release['released']
+        assert release['reason'] and entry_identity(owned_archive) == owned_before
+        captured = Path(release['captured_path'])
+        quarantine = Path(release['quarantine_path'])
+        assert str(captured) == observations['captured_path']
+        assert captured.parent == quarantine and quarantine.is_dir()
+        assert stat.S_IMODE(quarantine.stat().st_mode) == 0o700
+        if kind == 'restore-conflict':
+            assert not release['foreign_restored'] and release['canonical_already_occupied']
+            assert entry_identity(captured) == foreign_before
+            assert entry_identity(lock) == observations['new_canonical_identity']
+            assert Path(release['recovery_path']) == captured
+        else:
+            assert release['foreign_restored'] and not release['canonical_already_occupied']
+            assert entry_identity(lock) == foreign_before and not os.path.lexists(captured)
+            assert Path(release['recovery_path']) == lock
+        if target is not None:
+            assert entry_identity(target) == target_before
+        results.append({'case': name, 'injection': observations, 'release': release,
+            'foreign_before': foreign_before, 'canonical_after': entry_identity(lock),
+            'original_owned_lock_preserved': str(owned_archive),
+            'original_owned_identity': owned_before,
+            'scope': 'Deterministic replacement at the real capture boundary after validation; preserved-object evidence, not uninterrupted canonical-path availability.'})
+    return results
+
+
 def pure_cases(root, source, manifest_sha, psutil, quiet, validator):
     base = root / 'cases'
     base.mkdir()
@@ -293,8 +390,10 @@ def pure_cases(root, source, manifest_sha, psutil, quiet, validator):
     bad_fd = refused(quiet.LeaseLost, lambda: quiet.read_lease(-1, role='outer',
         expected_lock=base / 'normal.lock', expected_manifest_sha256=manifest_sha,
         expected_source_commit=source, role_scripts=ROLES, psutil_module=psutil))
+    owned_before = entry_identity(base / 'normal.lock')
     release = normal.release(cleanup_verified=True)
     assert release['released'] and not os.path.lexists(base / 'normal.lock')
+    assert entry_identity(Path(release['captured_path'])) == owned_before
     result.append({'case': 'normal_owned_and_release', 'adapters': adapter,
                    'missing_carrier_refused': bad_fd, 'release': release})
     for name in ('altered', 'replaced', 'lost'):
@@ -326,6 +425,7 @@ def pure_cases(root, source, manifest_sha, psutil, quiet, validator):
     assert retained['retained'] and lock.read_bytes() == before
     result.append({'case': 'unknown_cleanup_retains', 'release': retained,
         'scope': 'Pure unknown-cleanup/hard-exit policy witness; no external hard termination was injected.'})
+    result.extend(release_boundary_cases(base, source, manifest_sha, psutil, quiet))
     return result
 
 
