@@ -89,11 +89,13 @@ def test_receipt_v4_distinguishes_unattested_stub_from_identifier_attestation(tm
         ],
     })
     empty = rows["unattested"]
+    assert empty["checked_block"]["findings"] == []
     assert empty["checked_block"]["chunks"]["total"] == 1
     assert empty["checked_block"]["chunks"]["reviewed"] == 1
     assert empty["checked_block"]["snippets"]["verified"] == 0
     assert empty["floors"]["receipts vacuous"] == 1
     literal = rows["literal_identifier_only"]
+    assert literal["checked_block"]["findings"] == []
     assert literal["checked_block"]["snippets"]["verified"] == 1
     assert literal["checked_block"]["slots"]["receiptable"] == 1
     assert literal["checked_block"]["slots"]["with_receipt"] == 1
