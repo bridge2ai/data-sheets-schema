@@ -31,8 +31,14 @@ here should be read as claiming it is. What it buys is that the two are now
 *separate, deliberate acts*, and rotating a pin leaves a dated line in a small
 file that a reviewer reads, rather than a paragraph inside a 200-line prompt
 that they do not. `pinned_at_commit` makes each pin re-derivable with
-`git show <commit>:<path>`, so the registry can be audited against history
-instead of trusted.
+`git show <commit>:<pinned_blob_path>` in `pinned_in_repository`, so the
+registry can be audited against history instead of trusted.
+`pinned_in_repository` has two forms (#5673): `.` when the pinned file and the
+registry file belong to the same git repository (same resolved
+`--git-common-dir`, linked worktrees included — though a commit recorded on a
+branch may still need to be fetched in another clone), and the pinned
+repository's absolute `--show-toplevel` path when the file lives in a foreign
+repository or the registry is outside git.
 """
 
 from __future__ import annotations
@@ -287,7 +293,7 @@ def _git_common_dir(at: Path | None = None) -> Path | None:
     if at is None:
         return None
     try:
-        d = Path(os.path.abspath(at))
+        d = Path(at).resolve()
         while not d.exists() and d != d.parent:
             d = d.parent
         d = d.resolve()
@@ -300,6 +306,17 @@ def _git_common_dir(at: Path | None = None) -> Path | None:
         return (d / out).resolve()
     except OSError:
         return None
+
+
+def _same_git_common_dir(a: Path | None, b: Path | None) -> bool:
+    """True when both paths name the same directory on disk (`os.path.samefile`),
+    even under case-variant spellings on a case-insensitive filesystem."""
+    if a is None or b is None:
+        return False
+    try:
+        return os.path.samefile(a, b)
+    except OSError:
+        return False
 
 
 def _is_dirty(path: Path) -> bool:
@@ -327,6 +344,12 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
     `reason` is required and not defaulted. A pin whose diff says only that a
     hash changed records nothing a reviewer could not compute; the sentence
     saying *why* the condition moved is the part worth versioning.
+
+    When the file is tracked in git, `pinned_in_repository` records `.` if the
+    pinned file and `registry` belong to the same git repository (same
+    `--git-common-dir` by `os.path.samefile`, including linked worktrees), or
+    the pinned file's absolute `--show-toplevel` path when it belongs to a
+    foreign repository or `registry` is outside git (#5673).
     """
     if not reason or not reason.strip():
         raise ValueError("a pin needs a reason — see the docstring")
@@ -380,10 +403,9 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
         if not tracked:
             unavailable, head = f"not tracked by git: {p}", None
         elif top:
-            from data_sheets_schema.resources import CHECKOUT_ROOT
-            reg_common = _git_common_dir(Path(registry).parent) or _git_common_dir(CHECKOUT_ROOT)
+            reg_common = _git_common_dir(Path(registry).parent)
             file_common = _git_common_dir(p.parent)
-            toplevel = "." if (file_common is not None and file_common == reg_common) else top
+            toplevel = "." if _same_git_common_dir(file_common, reg_common) else top
             blob = _os.path.relpath(p.resolve(), Path(top).resolve()).replace(_os.sep, "/")
     if _is_dirty(p):
         raise ValueError(

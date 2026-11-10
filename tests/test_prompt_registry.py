@@ -568,9 +568,9 @@ class TestRegistryCaching(unittest.TestCase):
 
 class TestPinnedInRepositoryLocation(unittest.TestCase):
     """#5673: `pinned_in_repository` is `.` when the pinned file belongs to the
-    same repository (same resolved `--git-common-dir`, linked worktrees
-    included) as the registry, and the absolute toplevel for a foreign
-    repository."""
+    same repository (same `--git-common-dir` by `os.path.samefile`, linked
+    worktrees included) as the registry, and the absolute toplevel when the
+    file belongs to a foreign repository or the registry is outside git."""
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -586,30 +586,53 @@ class TestPinnedInRepositoryLocation(unittest.TestCase):
             cwd=cwd, check=True, capture_output=True, text=True, env=git_env(),
         ).stdout
 
-    def test_pin_in_this_repository_writes_dot_and_preserves_canonical_hashes(self):
-        from data_sheets_schema.resources import CHECKOUT_ROOT, resource_path
-        real_reg = resource_path(pr.REGISTRY)
-        before_bytes = real_reg.read_bytes()
-        before_entries = pr.pins()
+    @staticmethod
+    def _git_bytes(cwd: Path, *args: str) -> bytes:
+        import subprocess
+        from data_sheets_schema.resources import git_env
+        return subprocess.run(
+            ["git", "-c", "user.email=t@example.org", "-c", "user.name=t", *args],
+            cwd=cwd, check=True, capture_output=True, env=git_env(),
+        ).stdout
 
-        target_prompt = resource_path("src/download/prompts/d4d_generic_arm_prompt_v10.md")
-        scratch_reg = self.root / "canonical_hashes.yaml"
-        pr.pin(target_prompt, "verify local pin location", registry=scratch_reg)
-        pinned = pr.entry_for(target_prompt, scratch_reg)
+    def test_pin_in_this_repository_writes_dot_and_preserves_canonical_hashes(self):
+        import hashlib
+        from data_sheets_schema.resources import CHECKOUT_ROOT
+        repo = self.root / "repo"
+        (repo / "src" / "download" / "prompts").mkdir(parents=True)
+        self._git(repo, "init", "-q")
+        target_prompt = repo / "src" / "download" / "prompts" / "p1.md"
+        expected_text = "# p1\n\n## Prompt body\nhermetic fixture prompt\n"
+        target_prompt.write_text(expected_text, encoding="utf-8")
+        self._git(repo, "add", ".")
+        self._git(repo, "commit", "-q", "-m", "initial prompt")
+
+        reg = repo / "src" / "download" / "prompts" / "canonical_hashes.yaml"
+        pr.pin(target_prompt, "verify local pin location", registry=reg)
+        pinned = pr.entry_for(target_prompt, reg)
 
         self.assertEqual(pinned["pinned_in_repository"], ".")
         self.assertEqual(
             pinned["pinned_blob_path"],
-            "src/download/prompts/d4d_generic_arm_prompt_v10.md",
+            "src/download/prompts/p1.md",
         )
         blob = self._git(
-            CHECKOUT_ROOT / pinned["pinned_in_repository"],
+            reg.parent / pinned["pinned_in_repository"],
             "show",
             f"{pinned['pinned_at_commit']}:{pinned['pinned_blob_path']}",
         )
-        self.assertEqual(blob, target_prompt.read_text(encoding="utf-8"))
-        self.assertEqual(real_reg.read_bytes(), before_bytes)
-        self.assertEqual(pr.pins(), before_entries)
+        self.assertEqual(blob, expected_text)
+
+        real_reg = CHECKOUT_ROOT / pr.REGISTRY
+        disk_bytes = real_reg.read_bytes()
+        origin_main_bytes = self._git_bytes(
+            CHECKOUT_ROOT, "show", f"origin/main:{pr.REGISTRY.as_posix()}"
+        )
+        self.assertEqual(
+            hashlib.sha256(disk_bytes).hexdigest(),
+            hashlib.sha256(origin_main_bytes).hexdigest(),
+        )
+        self.assertEqual(disk_bytes, origin_main_bytes)
 
     def test_pin_in_repository_and_linked_worktree_writes_dot_and_audit_route_works(self):
         repo = self.root / "repo"
@@ -676,3 +699,103 @@ class TestPinnedInRepositoryLocation(unittest.TestCase):
         self.assertNotEqual(pinned["pinned_in_repository"], ".")
         self.assertTrue(Path(pinned["pinned_in_repository"]).is_absolute())
         self.assertEqual(Path(pinned["pinned_in_repository"]).resolve(), foreign.resolve())
+
+    def test_pin_into_registry_outside_git_writes_absolute_toplevel(self):
+        """#5692 (P2-1): a registry outside any git repository gets the pinned
+        file's absolute toplevel even when the file belongs to CHECKOUT_ROOT."""
+        from unittest import mock
+        from data_sheets_schema import resources
+        repo = self.root / "repo"
+        (repo / "src" / "download" / "prompts").mkdir(parents=True)
+        self._git(repo, "init", "-q")
+        p1 = repo / "src" / "download" / "prompts" / "p1.md"
+        p1.write_text("# p1\n\n## Prompt body\nbody\n", encoding="utf-8")
+        self._git(repo, "add", ".")
+        self._git(repo, "commit", "-q", "-m", "init")
+
+        outside_reg = self.root / "nogit" / "canonical_hashes.yaml"
+        with mock.patch.object(resources, "CHECKOUT_ROOT", repo):
+            pr.pin(p1, "outside git registry", registry=outside_reg)
+            pinned = pr.entry_for(p1, outside_reg)
+
+        self.assertNotEqual(pinned["pinned_in_repository"], ".")
+        self.assertTrue(Path(pinned["pinned_in_repository"]).is_absolute())
+        self.assertEqual(Path(pinned["pinned_in_repository"]).resolve(), repo.resolve())
+
+    def test_pin_resolves_symlink_parent_traversal_for_file_and_registry(self):
+        """#5693 (P3-1): `..` after a symlink is resolved through the
+        filesystem rather than collapsed lexically with `os.path.abspath`."""
+        repo_a = self.root / "A"
+        repo_a.mkdir(parents=True)
+        self._git(repo_a, "init", "-q")
+        (repo_a / "README.md").write_text("a\n", encoding="utf-8")
+        self._git(repo_a, "add", ".")
+        self._git(repo_a, "commit", "-q", "-m", "init A")
+
+        repo_b = self.root / "B"
+        (repo_b / "sub").mkdir(parents=True)
+        self._git(repo_b, "init", "-q")
+        pb = repo_b / "p.md"
+        pb.write_text("# b\n\n## Prompt body\nbody B\n", encoding="utf-8")
+        (repo_b / "sub" / "keep").write_text("x\n", encoding="utf-8")
+        self._git(repo_b, "add", ".")
+        self._git(repo_b, "commit", "-q", "-m", "init B")
+
+        os.symlink(repo_b / "sub", repo_a / "link")
+
+        # S4: file spelled A/link/../p.md is physically B/p.md; registry in A.
+        spelled_file = repo_a / "link" / ".." / "p.md"
+        reg_a = repo_a / "reg" / "canonical_hashes.yaml"
+        pr.pin(spelled_file, "symlink .. file", registry=reg_a)
+        pinned_s4 = pr.entry_for(spelled_file, reg_a)
+        self.assertNotEqual(pinned_s4["pinned_in_repository"], ".")
+        self.assertEqual(
+            Path(pinned_s4["pinned_in_repository"]).resolve(),
+            repo_b.resolve(),
+        )
+        shown = self._git(
+            Path(pinned_s4["pinned_in_repository"]),
+            "show",
+            f"{pinned_s4['pinned_at_commit']}:{pinned_s4['pinned_blob_path']}",
+        )
+        self.assertEqual(shown, "# b\n\n## Prompt body\nbody B\n")
+
+        # S8: registry spelled A/link/../regx/c.yaml is physically B/regx/c.yaml; file in B.
+        spelled_reg = repo_a / "link" / ".." / "regx" / "canonical_hashes.yaml"
+        pr.pin(pb, "symlink .. registry", registry=spelled_reg)
+        pinned_s8 = pr.entry_for(pb, spelled_reg)
+        self.assertEqual(pinned_s8["pinned_in_repository"], ".")
+        self.assertTrue((repo_b / "regx" / "canonical_hashes.yaml").exists())
+        self.assertFalse((repo_a / "regx" / "canonical_hashes.yaml").exists())
+
+    def test_pin_with_case_variant_spelling_writes_dot(self):
+        """#5694 (P3-2): case-variant path spellings on a case-insensitive
+        filesystem still recognize the same git common directory via `samefile`."""
+        repo = self.root / "CaseRepo"
+        (repo / "sub").mkdir(parents=True)
+        self._git(repo, "init", "-q")
+        p = repo / "sub" / "p.md"
+        p.write_text("# c\n\n## Prompt body\ncase body\n", encoding="utf-8")
+        self._git(repo, "add", ".")
+        self._git(repo, "commit", "-q", "-m", "init CaseRepo")
+
+        lower_repo = self.root / "caserepo"
+        try:
+            case_insensitive = lower_repo.exists() and os.path.samefile(repo, lower_repo)
+        except OSError:
+            case_insensitive = False
+        if not case_insensitive:
+            self.skipTest("filesystem is case-sensitive")
+
+        wt = self.root / "CaseRepo-wt"
+        self._git(repo, "worktree", "add", "-q", "-b", "wt-case", str(wt))
+
+        reg_wt = lower_repo / "reg1" / "canonical_hashes.yaml"
+        pr.pin(wt / "sub" / "p.md", "case-variant worktree pin", registry=reg_wt)
+        pinned_wt = pr.entry_for(wt / "sub" / "p.md", reg_wt)
+        self.assertEqual(pinned_wt["pinned_in_repository"], ".")
+
+        reg_same = lower_repo / "reg2" / "canonical_hashes.yaml"
+        pr.pin(p, "case-variant same-checkout pin", registry=reg_same)
+        pinned_same = pr.entry_for(p, reg_same)
+        self.assertEqual(pinned_same["pinned_in_repository"], ".")
