@@ -30,6 +30,10 @@ preserves that sequence. Plan acceptance is not implementation acceptance.
   as outside the earlier U3-M authorization. The owner confirmation question
   is pending; no WP1 test has run. Composition and timing execution remain
   separate pending steps. See the latest worker coordination checkpoint.
+- [Quiet-window lead disposition](native_wp1_quiet_window_lead_disposition_20261110.md):
+  rejects speculative adapter wiring, records the corrected requirements and
+  leaves the child witness and cleanup integration to the native owner after
+  the approval stop is lifted. No execution is authorized by that note.
 - [Worker coordination](worker_dispatch_2026-11-10.md) and
   [read-only monitoring helper](../../scripts/adhoc/monitor_worker_terminals_20261110.applescript):
   terminal identities, dispatches, native scheduling amendment and active-turn
