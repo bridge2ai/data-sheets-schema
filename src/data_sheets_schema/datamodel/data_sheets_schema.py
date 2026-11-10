@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-10-30T14:14:48
+# Generation date: 2026-11-08T01:53:38
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -60,7 +60,7 @@ from linkml_runtime.linkml_model.types import Boolean, Date, Datetime, Float, In
 from linkml_runtime.utils.metamodelcore import Bool, URI, URIorCURIE, XSDDate, XSDDateTime
 
 metamodel_version = "1.7.0"
-version = "3.1.0"
+version = "3.2.0"
 
 # Namespaces
 AIO = CurieNamespace('AIO', 'https://w3id.org/aio/')
@@ -2704,15 +2704,16 @@ class LicenseAndUseTerms(DatasetProperty):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.LicenseAndUseTerms
 
     license_terms: Optional[str] = None
-    data_use_permission: Optional[Union[str, "DataUsePermissionEnum"]] = None
+    data_use_permission: Optional[Union[Union[str, "DataUsePermissionEnum"], list[Union[str, "DataUsePermissionEnum"]]]] = empty_list()
     contact_person: Optional[Union[dict, Person]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self.license_terms is not None and not isinstance(self.license_terms, str):
             self.license_terms = str(self.license_terms)
 
-        if self.data_use_permission is not None and not isinstance(self.data_use_permission, DataUsePermissionEnum):
-            self.data_use_permission = DataUsePermissionEnum(self.data_use_permission)
+        if not isinstance(self.data_use_permission, list):
+            self.data_use_permission = [self.data_use_permission] if self.data_use_permission is not None else []
+        self.data_use_permission = [v if isinstance(v, DataUsePermissionEnum) else DataUsePermissionEnum(v) for v in self.data_use_permission]
 
         if self.contact_person is not None and not isinstance(self.contact_person, Person):
             self.contact_person = Person(**as_dict(self.contact_person))
@@ -4994,7 +4995,7 @@ slots.licenseAndUseTerms__license_terms = Slot(uri=D4D.licenseDescription, name=
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__license_terms, domain=None, range=Optional[str])
 
 slots.licenseAndUseTerms__data_use_permission = Slot(uri=DUO['0000001'], name="licenseAndUseTerms__data_use_permission", curie=DUO.curie('0000001'),
-                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__data_use_permission, domain=None, range=Optional[Union[str, "DataUsePermissionEnum"]])
+                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__data_use_permission, domain=None, range=Optional[Union[Union[str, "DataUsePermissionEnum"], list[Union[str, "DataUsePermissionEnum"]]]])
 
 slots.licenseAndUseTerms__contact_person = Slot(uri=D4D.licenseContactPoint, name="licenseAndUseTerms__contact_person", curie=D4D.curie('licenseContactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__contact_person, domain=None, range=Optional[Union[dict, Person]])

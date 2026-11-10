@@ -6373,8 +6373,14 @@
                     "description": "Contact person for licensing questions, as a Person object \u2014 an `id` (an ORCID CURIE where stated, else a fragment minted on the record's own id), `name`, and where the evidence states them `email`, `affiliation` and `orcid`. This person can answer questions about licensing terms, usage restrictions, fees and permissions. Inlined (#805): a bare name string fails validation."
                 },
                 "data_use_permission": {
-                    "$ref": "#/$defs/DataUsePermissionEnum",
-                    "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO."
+                    "description": "Structured data use permissions using the Data Use Ontology (DUO): one primary permission (e.g., general research, health/medical research, disease-specific research) plus any applicable modifiers (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO.",
+                    "items": {
+                        "$ref": "#/$defs/DataUsePermissionEnum"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
                 },
                 "description": {
                     "description": "A human-readable description for this property.",
@@ -8613,5 +8619,5 @@
     ],
     "title": "data-sheets-schema",
     "type": "object",
-    "version": "3.1.0"
+    "version": "3.2.0"
 }

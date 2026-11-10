@@ -50,8 +50,9 @@ def source(project):
 def evidence(project, predicate):
     context = yaml.safe_load((ROOT / f'data/context/{project.lower()}_context.yaml').read_bytes())
     entry = context[predicate]
-    match = re.search(r'\[chunks:\s*([^\]]+)\]', entry['evidence'])
-    ids = [item.strip() for item in match.group(1).split(',')]
+    # D101 quotes each chunk separately; retain every A23 binding assertion.
+    groups = re.findall(r'\[chunks:\s*([^\]]+)\]', entry['evidence'])
+    ids = list(dict.fromkeys(item.strip() for group in groups for item in group.split(',')))
     _, parts = source(project)
     return entry['evidence'], ids, {key: parts[key] for key in ids}
 
@@ -81,7 +82,9 @@ def test_pediatric_free_speech_statement_keeps_the_release_qualification():
     assert 'c003' in ids
     statement = 'releasing audio features for all free speech tasks that were manually checked'
     assert statement in parts['c003']
-    assert 'v1.1.0' in text and 'manual checking' in text
+    c003_quotes = [json.loads(match[1]) for match in re.finditer(
+        r'\[chunks: c003\] ("(?:[^"\\]|\\.)*")', text)]
+    assert any('v1.1' in quote and 'manually checked' in quote for quote in c003_quotes)
     assert 'unconsented speakers and PII' in text
     assert 'free-speech spectrograms are stripped' not in text
 

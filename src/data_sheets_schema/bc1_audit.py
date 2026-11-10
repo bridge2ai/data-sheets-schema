@@ -92,7 +92,7 @@ def _selection(selection, fan_in):
     if (type(contract) is not dict or contract.get("protocol") != PROTOCOL
             or type(contract.get("version")) is not int or contract["version"] != 1
             or contract.get("audit") != contract_identity()
-            or contract.get("context") != context_contract()):
+            or contract.get("context") not in (context_contract(), context_contract(1))):
         raise ValueError("BC1 selected audit/context contract mismatch")
 
 
@@ -841,7 +841,7 @@ def _cache_dependency_token():
     try:
         # A fixed roster, not a walk through mutable module/cache globals.
         rosters = (
-            (bc1_context, 'derive_term_policy validate_term_policy _sources _schema_pin _core_catalog schema_context model_catalog _canonical _sha contract_identity'),
+            (bc1_context, 'derive_term_policy validate_term_policy validate_term_value permits_unbound_slot _annotation_value _parse_identifier_forms _validate_identifier_form_entries _sources _require_identifier_forms _curie_prefixes _schema_prefixes _selected_contract_version _schema_pin _core_catalog schema_context model_catalog _canonical _sha contract_identity'),
             (codec, 'build_dictionary validate_dictionary canonical _bounds'),
             (typed, '_snapshot _snapshot_rows _blob _unblob _source_authority'),
             (omissions, 'prepare _render_prepared _schema _schema_yaml _mapping _read _shape _owners _slot _class _dataset_range _sha _json _asset'),
@@ -862,7 +862,7 @@ def _cache_dependency_token():
                 (batches, 'MAX_ORIGINAL_BYTES MAX_NODES MAX_DEPTH MAX_FIELD_ROOTS'),
                 (typed, 'MAX_SCHEMA_FILES MAX_PACKET_BYTES'),
                 (codec, 'MAX_DEPTH MAX_NODES MAX_DICTIONARY_BYTES'),
-                (bc1_context, 'FALLBACK _IRI FORMAT SCHEMA_HEADER'),
+                (bc1_context, 'FALLBACK _IRI LEGACY_FORMAT FORMAT TERM_SOURCES_ANNOTATION TERM_SOURCE_FORMS_ANNOTATION SCHEMA_HEADER'),
                 (duplicate_keys, 'LIBYAML_MAX_DEPTH'),
             ))
         loaders = []

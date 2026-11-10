@@ -1,75 +1,51 @@
 # D4D Schema Statistics Export
 
-This directory contains exported schema statistics in TSV (tab-separated values) format.
+Basic and extended statistics regenerated for schema **3.2.0** on 2026-11-08
+from `src/data_sheets_schema/schema/data_sheets_schema_all.yaml`.
 
-Generated: 2026-02-19
+The current schema has 79 classes, 301 slots, 18 enums, 242 permissible values,
+19 types and 39 namespace prefixes. Counts use the repository's schema-statistics
+implementation; quality metrics are structural heuristics, not validation verdicts.
 
-## Files
+## Generated exports
 
-### Basic Statistics (Levels 1-4)
+- `level1_*.tsv`: summary counts.
+- `level2_*.tsv`: class/module and slot/range breakdowns.
+- `level3_*.tsv`: inheritance depths and the ten most reused slots.
+- `level4_*.tsv`: quality metrics and recommendations.
+- `ALL_STATS_COMBINED.tsv`: the basic exports in one table.
+- `extended_*.tsv`: types, enum summaries/values, classes, slots, schema metadata
+  and prefixes, produced by the repository's extended exporter.
 
-**Level 1: High-Level Summary**
-- `level1_summary.tsv` - Overall schema element counts (5 rows)
+## Regeneration
 
-**Level 2: Category Breakdowns**
-- `level2_class_categories.tsv` - Abstract vs concrete classes (2 rows)
-- `level2_classes_by_module.tsv` - Class distribution across modules (2 rows)
-- `level2_slot_categories.tsv` - Slot categorization (5 rows)
-- `level2_slots_by_range_type.tsv` - Complete breakdown of slots by data type (26 rows)
-
-**Level 3: Detailed Analysis**
-- `level3_inheritance_depth.tsv` - Class inheritance hierarchy distribution (5 rows)
-- `level3_top_reused_slots.tsv` - Top 10 most reused slots across classes (10 rows)
-
-**Level 4: Quality Metrics**
-- `level4_quality_metrics.tsv` - Schema quality assessment results (4 rows)
-- `level4_recommendations.tsv` - Recommendations for schema improvements (3 rows)
-
-**Combined**
-- `ALL_STATS_COMBINED.tsv` - All basic statistics in one file (1.5 KB)
-
-### Extended SchemaView Data
-
-**Type System**
-- `extended_type_system.tsv` - All 19 LinkML types with URIs and descriptions (19 rows)
-
-**Enumerations**
-- `extended_enum_summary.tsv` - All 15 enums with value counts and ontology mapping status (15 rows, 2.3 KB)
-- `extended_enum_values.tsv` - All 191 permissible values across all enums with descriptions and ontology terms (191 rows, 14 KB)
-
-**Classes**
-- `extended_class_details.tsv` - All 76 classes with inheritance, slots, URIs, and descriptions (76 rows, 10 KB)
-
-**Slots**
-- `extended_slot_details.tsv` - All 272 slots with ranges, usage counts, URIs, and mappings (272 rows, 26 KB)
-
-**Schema Metadata**
-- `extended_schema_metadata.tsv` - Schema-level metadata (name, version, license, etc.) (13 rows, 345 bytes)
-- `extended_prefix_mappings.tsv` - All 31 namespace prefix mappings (31 rows, 1.6 KB)
-
-## Usage
-
-These TSV files can be:
-- Opened in Excel, Google Sheets, or any spreadsheet application
-- Imported into data analysis tools (R, Python pandas, etc.)
-- Used for tracking schema evolution over time
-- Included in documentation or reports
-
-## Regenerating Statistics
-
-To regenerate these statistics:
+Run from the repository root in its installed Python environment. Keep the
+intermediate JSON in an explicitly chosen scratch directory:
 
 ```bash
-# Generate statistics at all levels
-poetry run python .claude/agents/scripts/schema_stats.py --level 4 --format markdown
-
-# Export to different formats
-poetry run python .claude/agents/scripts/schema_stats.py --level 4 --format json --output stats.json
-poetry run python .claude/agents/scripts/schema_stats.py --level 4 --format csv --output stats.csv
+PYTHONPATH="$PWD/src:$PWD" python -m data_sheets_schema.cli schema stats --level 4 --format json --output /path/to/scratch/level4.json
+python scripts/adhoc/d100_export_stats_20261108.py /path/to/scratch/level4.json
 ```
 
-## Schema Source
+The exporter converts the repository command's statistics to TSV and invokes
+`.claude/agents/scripts/schema_stats_extended.py`. It preserves recommendation
+wording while refreshing measured counts by issue label. It checks the input version
+against the merged schema and records that version in `extended_schema_metadata.tsv`.
+All TSV outputs go to this repository's `data/schema_stats/`, even when the adapter
+is invoked by absolute path from another working directory. The recommendations
+file is an editorial input and must be retained.
 
-Statistics generated from: `src/data_sheets_schema/schema/data_sheets_schema_all.yaml`
+Basic export labels now follow the statistics keys (for example, `Single use slots`
+and `Depth 0`); combined sections distinguish modules, slots and ranges and omit
+blank separator rows. The module breakdown currently reports `Main 70` and
+`Unknown 9`: this is a limitation of attribution on the merged schema, not proof
+that nine classes lack a source module.
 
-Full merged schema with all imports resolved (791 KB, 28,829 lines).
+## Retained supplementary tables
+
+`rai_*.tsv` and `d4d_properties*.txt` are historical, selected mapping/property
+lists with editorial descriptions. They are preserved unchanged, are not outputs
+of the repository statistics command, and are **not a complete 3.2.0 inventory**.
+Use `extended_slot_details.tsv` and `extended_class_details.tsv` for the current
+complete inventory. Their regeneration requires a separately defined selection
+and editorial contract.

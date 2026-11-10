@@ -116,6 +116,8 @@ def test_legacy_multivalued_fallback_retains_already_yielded_names(monkeypatch):
     from data_sheets_schema import schema_view
     class View:
         def __init__(self, full): self.full = full
+        def all_types(self): return {'string': None}
+        def all_enums(self): return {}
         def all_classes(self): return ['Dataset']
         def class_induced_slots(self, _):
             yield SimpleNamespace(name='full_retained' if self.full else 'core_retained', multivalued=True, range='string')

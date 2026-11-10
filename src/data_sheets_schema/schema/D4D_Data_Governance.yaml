@@ -60,11 +60,13 @@ classes:
           "d4d:docExample": "CC BY-NC 4.0 - Attribution-NonCommercial required"
       data_use_permission:
         description: >-
-          Structured data use permissions using the Data Use Ontology (DUO).
-          Specifies permitted uses (e.g., general research, health/medical research,
-          disease-specific research) and restrictions (e.g., non-commercial use,
-          ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO.
+          Structured data use permissions using the Data Use Ontology (DUO):
+          one primary permission (e.g., general research, health/medical research,
+          disease-specific research) plus any applicable modifiers (e.g.,
+          non-commercial use, ethics approval required, collaboration required).
+          See https://github.com/EBISPOT/DUO.
         range: DataUsePermissionEnum
+        multivalued: true
         slot_uri: DUO:0000001
         exact_mappings:
           - DUO:0000001

@@ -1,338 +1,334 @@
 Slot Name	Range	Required	Multivalued	Identifier	Used in Classes	URI	Exact Mappings	Broad Mappings	Description
-access_details	string	No	No	No	1				"Information on how to access or retrieve the raw source data.
+access_decision_timeframe	string	No	No	No	1	d4d:accessDecisionTimeframe			Stated turnaround for an access decision, as the source gives it. Free text rather than a duration, ...
+access_details	string	No	No	No	1	d4d:accessDetails			"Information on how to access or retrieve the raw source data.
 "
-access_url	uri	No	No	No	1				URL or access point for the raw data.
-access_urls	string	No	Yes	No	1	dcat:accessURL			Details of the distribution channel(s) or format(s).
-acquisition_details	string	No	Yes	No	1	dcterms:description			"Details on how data was acquired for each instance.
-"
+access_review_process	string	No	No	No	1	d4d:accessReviewProcess			How an access request is reviewed and decided: who submits, what is required of them, who reviews, a...
+access_url	uri	No	No	No	1	d4d:rawDataAccessURL			URL or access point for the raw data.
+access_urls	uri	No	Yes	No	1	dcat:accessURL			One or more URLs providing access to the distribution channel(s) or format(s).
+accountable_organization	Organization	No	No	No	1	d4d:accountableOrganization			The organization accountable for the dataset over time, including after the funding period ends. Fre...
+acquisition_details	string	No	No	No	1	dcterms:description			Free-text description of how data was acquired for each instance, including instruments, protocols, ...
 acquisition_methods	string	No	No	No	2				
 addressing_gaps	string	No	No	No	2				
-affected_subsets	string	No	Yes	No	1				"Specific subsets or features of the dataset affected by this bias.
-"
+affected_subsets	string	No	Yes	No	1	d4d:affectedSubsets			"One or more specific subsets or features of the dataset affected by this bias (e.g., ""female partici..."
 affiliation	Organization	No	Yes	No	1	schema:affiliation			The organization(s) to which the person belongs in the context of this dataset. May vary across data...
-affiliations	Organization	No	Yes	No	1	schema:affiliation			Organizations with which the creator or team is affiliated.
-agreement_metric	string	No	No	No	1				Type of agreement metric used (Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percentage agreem...
-analysis_method	string	No	No	No	1				"Methodology used to assess annotation quality and resolve disagreements.
+affiliations	Organization	No	Yes	No	1	d4d:teamAffiliation		schema:affiliation	Organizations with which the creator or team is affiliated.
+agreement_metric	string	No	No	No	1	d4d:agreementMetric			Type of agreement metric used (Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percentage agreem...
+analysis_method	string	No	No	No	1	d4d:analysisMethod			"Methodology used to assess annotation quality and resolve disagreements.
 "
 annotation_analyses	string	No	No	No	2				
-annotation_quality_details	string	No	Yes	No	1				"Additional details on annotation quality assessment and findings.
+annotation_quality_details	string	No	No	No	1	d4d:annotationQualityDetails			"Additional details on annotation quality assessment and findings.
 "
-annotations_per_item	integer	No	No	No	1		rai:annotationsPerItem		Number of annotations collected per data item. Multiple annotations per item enable calculation of i...
-annotator_demographics	string	No	Yes	No	1		rai:annotatorDemographics		Demographic information about annotators, if available and relevant (e.g., geographic location, lang...
+annotations_per_item	integer	No	No	No	1	d4d:annotationsPerItem	rai:annotationsPerItem		Number of annotations collected per data item. Multiple annotations per item enable calculation of i...
+annotator_demographics	string	No	Yes	No	1	d4d:annotatorDemographics	rai:annotatorDemographics		One or more demographic characteristics of the annotators, if available and relevant (e.g., geograph...
 anomalies	string	No	No	No	2				
-anomaly_details	string	No	Yes	No	1	dcterms:description			"Details on errors, noise sources, or redundancies in the dataset.
+anomaly_details	string	No	No	No	1	d4d:anomalyDetails		dcterms:description	Free-text description of errors, noise sources, or redundancies in the dataset, including their know...
+anonymization_method	string	No	No	No	1	d4d:anonymizationMethod			What methods were used to anonymize or de-identify participant data? Include technical details of pr...
+appeal_process	string	No	No	No	1	d4d:appealProcess			What recourse an applicant has if access is refused or revoked.
+archival	boolean	No	No	No	1	d4d:hasArchivalVersion			"Indicates whether official archival versions of external resources are included in the dataset.
 "
-anonymization_method	string	No	Yes	No	1				What methods were used to anonymize or de-identify participant data? Include technical details of pr...
-archival	boolean	No	Yes	No	1				"Indication whether official archival versions of external resources are included.
-"
-assent_procedures	string	No	Yes	No	1				For research involving minors, what assent procedures were used? How was developmentally appropriate...
+assent_procedures	string	No	No	No	1	d4d:assentProcedures			For research involving minors, what assent procedures were used? How was developmentally appropriate...
+at_risk_groups_included	boolean	No	No	No	1	d4d:atRiskGroupsIncluded			Are any at-risk populations included (e.g., children, pregnant women, prisoners, cognitively impaire...
+at_risk_populations	string	No	No	No	2				
 bias_description	string	No	No	No	1	dcterms:description			Detailed description of how this bias manifests in the dataset, including affected populations, feat...
-bias_type	BiasTypeEnum	No	No	No	1				The type of bias identified, using standardized categories from the Artificial Intelligence Ontology...
-bytes	integer	No	No	No	2	dcat:byteSize			Size of the data in bytes.
-categories	string	No	Yes	No	1	schema:valueReference			The permitted categories or values for a categorical variable. Each entry should describe a possible...
+bias_type	BiasTypeEnum	No	No	No	1	d4d:biasType			The type of bias identified, using standardized categories from the Artificial Intelligence Ontology...
+bytes	integer	No	No	No	1	dcat:byteSize			Size of the data in bytes.
+categories	string	No	Yes	No	1	schema:valueReference			One or more permitted categories or values for a categorical variable. Each entry should describe a ...
+checksum	string	No	No	No	1	spdx:checksum			"Integrity checksum of the distributed artifact, stated with its algorithm, e.g. ""md5:9e107d9d372bb68..."
 citation	string	No	No	No	2				
-cleaning_details	string	No	Yes	No	1	dcterms:description			"Details on data cleaning procedures applied.
-"
+cleaning_details	string	No	No	No	1	dcterms:description			Free-text description of data cleaning procedures applied, including criteria for removing or correc...
 cleaning_strategies	string	No	No	No	2				
-collection_details	string	No	Yes	No	1	dcterms:description			"Details on direct vs. indirect collection methods and sources.
-"
+collection_consents	string	No	No	No	2				
+collection_details	string	No	No	No	1	dcterms:description			Free-text description of whether data was collected directly from individuals or obtained via third ...
 collection_mechanisms	string	No	No	No	2				
+collection_notifications	string	No	No	No	2				
 collection_timeframes	string	No	No	No	2				
-collector_details	string	No	Yes	No	1	dcterms:description			"Details on who collected the data and their compensation.
+collection_type	FileCollectionTypeEnum	No	No	No	1	d4d:collectionType			Type(s) of content in this file collection. A collection may have multiple types, for example a coll...
+collector_details	string	No	No	No	1	dcterms:description			Free-text description of who was involved in data collection (e.g., students, crowdworkers, contract...
+comment_prefix	string	No	No	No	1				"Character(s) used to indicate comment lines (e.g., ""#"" for CSV comments)."
+committee_contact	Person	No	No	No	1	d4d:governanceContactPoint		schema:contactPoint	Contact point for the governance committee, as a Person object — an `id` (an ORCID CURIE where state...
+committee_members	Person	No	Yes	No	1	d4d:governanceCommitteeMember			Members of the governance or data access committee. One entry per person; do not collapse several me...
+committee_name	string	No	No	No	1	d4d:governanceCommitteeName			"Name of the body responsible for access decisions, as the source states it (e.g. ""Data Access Commit..."
+compensation_amount	string	No	No	No	1	d4d:compensationAmount			"What was the amount or value of compensation provided? Include currency or equivalent value.
 "
-comment_prefix	string	No	No	No	1				
-compensation_amount	string	No	Yes	No	1				"What was the amount or value of compensation provided? Include currency or equivalent value.
-"
-compensation_provided	boolean	No	No	No	1				Were participants compensated for their participation?
-compensation_rationale	string	No	Yes	No	1				What was the rationale for the compensation structure? How was the amount determined to be appropria...
-compensation_type	string	No	Yes	No	1				What type of compensation was provided (e.g., monetary payment, gift cards, course credit, other inc...
-compression	CompressionEnum	No	No	No	4	dcat:compressFormat			compression format used, if any. e.g., gzip, bzip2, zip
+compensation_provided	boolean	No	No	No	1	d4d:compensationProvided			Were participants compensated for their participation?
+compensation_rationale	string	No	No	No	1	d4d:compensationRationale			What was the rationale for the compensation structure? How was the amount determined to be appropria...
+compensation_type	string	No	No	No	1	d4d:compensationType			What type of compensation was provided (e.g., monetary payment, gift cards, course credit, other inc...
+compression	CompressionEnum	No	No	No	6	dcat:compressFormat			Compression format used, if any (e.g., gzip, bzip2, zip).
 confidential_elements	string	No	No	No	2				
-confidential_elements_present	boolean	No	No	No	1				Indicates whether any confidential data elements are present.
-confidentiality_details	string	No	Yes	No	1	dcterms:description			"Details on confidential data elements and handling procedures.
+confidential_elements_present	boolean	No	No	No	1	d4d:confidential_elements_present			Indicates whether any confidential data elements are present.
+confidentiality_details	string	No	No	No	1	dcterms:description			Free-text description of which data elements are confidential, the basis for confidentiality (e.g., ...
+confidentiality_level	ConfidentialityLevelEnum	No	No	No	1	d4d:confidentialityLevel			Confidentiality classification of the dataset indicating level of access restrictions and sensitivit...
+conforms_to	string	No	No	No	6	dcterms:conformsTo			A standard or specification the **dataset's own content** follows — an imaging, waveform, file-layou...
+conforms_to_class	string	No	No	No	6	d4d:conformsToClass		dcterms:conformsTo	The class within `conforms_to_schema` that this record instantiates — `Dataset` for a full datasheet...
+conforms_to_schema	string	No	No	No	6	d4d:conformsToSchema		dcterms:conformsTo	The metadata schema **this record itself** is written in — normally `https://w3id.org/bridge2ai/data...
+conforms_to_standard	DataStandardEnum	No	Yes	No	6	dcterms:conformsTo			Which registered data standard `conforms_to` names, where one applies — a term rather than prose, so...
+consent_details	string	No	No	No	1	dcterms:description			Free-text description of how consent was requested (e.g., opt-in form, verbal agreement), provided, ...
+consent_documentation	string	No	No	No	1	d4d:consentDocumentation			"How is consent documented? Include references to consent forms or procedures used.
 "
-confidentiality_level	ConfidentialityLevelEnum	No	No	No	1				Confidentiality classification of the dataset indicating level of access restrictions and sensitivit...
-conforms_to	string	No	No	No	4	dcterms:conformsTo			
-conforms_to_class	string	No	No	No	4	dcterms:conformsTo			
-conforms_to_schema	string	No	No	No	4	dcterms:conformsTo			
-consent_details	string	No	Yes	No	1	dcterms:description			"Details on how consent was requested, provided, and documented.
+consent_obtained	boolean	No	No	No	1	d4d:consentObtained			Was informed consent obtained from all participants?
+consent_revocations	string	No	No	No	2				
+consent_scope	string	No	No	No	1	d4d:consentScope			"What specific uses did participants consent to? Are there limitations on data use based on consent?
 "
-consent_documentation	string	No	Yes	No	1				"How is consent documented? Include references to consent forms or procedures used.
-"
-consent_obtained	boolean	No	No	No	1				Was informed consent obtained from all participants?
-consent_scope	string	No	Yes	No	1				"What specific uses did participants consent to? Are there limitations on data use based on consent?
-"
-consent_type	string	No	Yes	No	1				What type of consent was obtained (e.g., written, verbal, electronic, implied through participation)...
+consent_type	string	No	No	No	1	d4d:consentType			What type of consent was obtained (e.g., written, verbal, electronic, implied through participation)...
 contact_person	string	No	No	No	2				
 content_warnings	string	No	No	No	2				
-content_warnings_present	boolean	No	No	No	1				Indicates whether any content warnings are needed.
-contribution_url	uri	No	No	No	1				URL for contribution guidelines or process.
+content_warnings_present	boolean	No	No	No	1	d4d:content_warnings_present			Indicates whether any content warnings are needed.
+contribution_url	uri	No	No	No	1	d4d:contributionURL			URL for contribution guidelines or process.
 counts	integer	No	No	No	1	schema:numberOfItems			"How many instances are there in total (of each type, if appropriate)?
 "
-created_by	string	No	No	No	4	dcterms:creator			
-created_on	datetime	No	No	No	4	dcterms:created			
+created_by	string	No	No	No	6	dcterms:creator			The person or organization primarily responsible for creating the resource.
+created_on	datetime	No	No	No	6	dcterms:created			The date and time when the resource was created. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `da...
 creators	string	No	No	No	2				
-credit_roles	CRediTRoleEnum	No	Yes	No	1				Contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or cr...
-data_annotation_platform	string	No	No	No	1	schema:instrument	rai:dataAnnotationPlatform		Platform or tool used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom an...
-data_annotation_protocol	string	No	Yes	No	1		rai:dataAnnotationProtocol		Annotation methodology, tasks, and protocols followed during labeling. Includes annotation guideline...
+credit_roles	CRediTRoleEnum	No	Yes	No	1	d4d:creditRoles			One or more contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal invest...
+data_annotation_platform	string	No	No	No	1	rai:dataAnnotationPlatform			One or more platforms or tools used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical T...
+data_annotation_protocol	string	No	No	No	1	d4d:dataAnnotationProtocol	rai:dataAnnotationProtocol		Annotation methodology, tasks, and protocols followed during labeling. Includes annotation guideline...
 data_collectors	string	No	No	No	2				
-data_linkage	string	No	Yes	No	1				"Can this dataset be linked to other datasets in ways that might compromise participant privacy?
+data_governance	string	No	No	No	2				
+data_linkage	string	No	No	No	1	d4d:dataLinkage			"Can this dataset be linked to other datasets in ways that might compromise participant privacy?
 "
 data_protection_impacts	string	No	No	No	2				
-data_substrate	uriorcurie	No	No	No	1	dcterms:format			"Type of data (e.g., raw text, images) from Bridge2AI standards.
-"
-data_topic	uriorcurie	No	No	No	1	dcat:theme			"General topic of each instance (e.g., from Bridge2AI standards).
-"
+data_substrate	uriorcurie	No	No	No	1	dcterms:type			Type or format of data (e.g., raw text, images): an EDAM Data or Format term or an IANA media type, ...
+data_topic	uriorcurie	No	No	No	1	dcat:theme			General topic of each instance, as an ontology term — records use GO, MeSH, EFO and NCIT IRIs and te...
 data_type	VariableTypeEnum	No	No	No	1	schema:DataType	schema:DataType		The data type of the variable (e.g., integer, float, string, boolean, date, categorical). Use standa...
-data_use_permission	DataUsePermissionEnum	No	Yes	No	1	DUO:0000001	DUO:0000001		Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., g...
-deidentification_details	string	No	Yes	No	1	dcterms:description			"Details on de-identification procedures and residual risks.
+data_use_permission	DataUsePermissionEnum	No	Yes	No	1	DUO:0000001	DUO:0000001		Structured data use permissions using the Data Use Ontology (DUO): one primary permission (e.g., gen...
+deidentification_details	string	No	No	No	1	dcterms:description			"Details on de-identification procedures and residual risks.
 "
-delimiter	string	No	No	No	1				
-derivation	string	No	No	No	1				Description of how this variable was derived or calculated from other variables, if applicable.
-description	string	No	No	No	75				
-dialect	string	No	No	No	2				
-disagreement_patterns	string	No	Yes	No	1				Systematic patterns in annotator disagreements (e.g., by demographic group, annotation difficulty, t...
+delimiter	string	No	No	No	1				"Field delimiter character (e.g., "","" for CSV, ""\t"" for TSV)."
+derivation	string	No	No	No	1	dcterms:provenance			Description of how this variable was derived or calculated from other variables, if applicable.
+description	string	No	No	No	78				
+dialect	string	No	No	No	1	schema:encodingFormat			Specific format dialect or variation (e.g., CSV dialect, JSON-LD profile).
+direct_collection	string	No	No	No	2				
+disagreement_patterns	string	No	Yes	No	1	d4d:disagreementPatterns			Systematic patterns in annotator disagreements (e.g., by demographic group, annotation difficulty, t...
 discouraged_uses	string	No	No	No	2				
-discouragement_details	string	No	Yes	No	1	dcterms:description			"Details on tasks for which the dataset should not be used.
-"
-distribution	string	No	Yes	No	1	dcterms:description			
+discouragement_details	string	No	No	No	1	dcterms:description			Free-text description of tasks or applications for which the dataset is not recommended, with explan...
+distribution	string	No	No	No	1	d4d:subpopulationDistribution		dcterms:description	The distribution of instances across identified subpopulations, including counts, percentages, or pr...
 distribution_dates	string	No	No	No	2				
 distribution_formats	string	No	No	No	2				
-doi	string	No	No	No	4	dcterms:identifier			digital object identifier
-double_quote	string	No	No	No	1				
-download_url	uri	No	No	No	4	dcat:downloadURL	schema:url		URL from which the data can be downloaded. This is not the same as the landing page, which is a page...
+doi	string	No	No	No	6	d4d:doiIdentifier	schema:identifier	dcterms:identifier	Digital Object Identifier (DOI) in format 10.xxxx/xxxxx — a registrant prefix, a slash, a suffix — p...
+double_quote	string	No	No	No	1				"Whether quotes within quoted fields are escaped by doubling them. Expected values: ""true"" or ""false""..."
+download_url	uri	No	No	No	7	dcat:downloadURL	schema:url		URL from which the data can be downloaded. This is not the same as the landing page, which is a page...
 email	string	No	No	No	1	schema:email			The email address of the person. Represents current/preferred contact information in the context of ...
-encoding	EncodingEnum	No	No	No	2	dcat:mediaType			the character encoding of the data
-end_date	date	No	No	No	1				End date of data collection
+encoding	EncodingEnum	No	No	No	1	d4d:characterEncoding			The character encoding of the data.
+end_date	date	No	No	No	1	schema:endDate			End date of data collection.
 errata	string	No	No	No	2				
-erratum_details	string	No	Yes	No	1	dcterms:description			"Details on any errata or corrections to the dataset.
-"
-erratum_url	uri	No	No	No	1				URL or access point for the erratum.
+erratum_details	string	No	No	No	1	dcterms:description			Free-text description of the error, its scope, the affected data or records, and the correction appl...
+erratum_url	uri	No	No	No	1	d4d:erratumURL			URL or access point for the erratum.
 ethical_reviews	string	No	No	No	2				
-ethics_review_board	string	No	Yes	No	1				"What ethics review board(s) reviewed this research? Include institution names and approval details.
+ethics_review_board	string	No	No	No	1	d4d:ethicsReviewBoard			"What ethics review board(s) reviewed this research? Include institution names and approval details.
 "
 examples	string	No	No	No	3				
 existing_uses	string	No	No	No	2				
-extension_details	string	No	Yes	No	1	dcterms:description			"Details on extension mechanisms, contribution validation, and communication.
-"
+extension_details	string	No	No	No	1	dcterms:description			Free-text description of how third parties can contribute to the dataset, how contributions are vali...
 extension_mechanism	string	No	No	No	2				
-external_resources	string	No	Yes	No	3	dcterms:references			Links or identifiers for external resources. Can be used either as a list of ExternalResource object...
+external_resources	string	No	Yes	No	4	dcterms:references			Links or identifiers for external resources. Can be used either as a list of ExternalResource object...
+file_collections	string	No	No	No	2				
+file_count	integer	No	No	No	1	d4d:fileCount			Number of files in this collection.
+file_type	FileTypeEnum	No	No	No	1	d4d:fileType			Semantic type or purpose of this file (e.g., data_file, code_file, documentation_file, metadata_file...
 format	FormatEnum	No	No	No	2	dcterms:format			The file format, physical medium, or dimensions of a resource. This should be a file extension or MI...
-frequency	string	No	No	No	1				How often updates are planned (e.g., quarterly, annually).
+frequency	string	No	No	No	1	d4d:frequency			How often updates are planned (e.g., quarterly, annually).
 funders	string	No	No	No	2				
-future_guarantees	string	No	Yes	No	1	dcterms:description			"Explanation of any commitments that external resources will remain available and stable over time.
+future_guarantees	string	No	No	No	1	d4d:availabilityGuarantee		dcterms:description	"Explanation of any commitments that external resources will remain available and stable over time.
 "
 future_use_impacts	string	No	No	No	2				
-governance_committee_contact	Person	No	No	No	1	schema:contactPoint	schema:contactPoint		Contact person for data governance committee. This person can answer questions about data governance...
-grant_number	string	No	No	No	1	schema:identifier			The alphanumeric identifier for the grant.
-grantor	Grantor	No	No	No	1	schema:funder			Name/identifier of the organization providing monetary or resource support.
+governance_committee_contact	Person	No	No	No	1	d4d:governanceContactPoint		schema:contactPoint	DEPRECATED — use `DataGovernance.committee_contact` (#503). Kept declared so the slot still parses; ...
+grant_number	string	No	No	No	1	d4d:grantIdentifier		schema:identifier	The alphanumeric identifier for the grant.
+grantor	string	No	No	No	1	d4d:grantor		schema:funder	Name/identifier of the organization providing monetary or resource support.
 grants	Grant	No	Yes	No	1	schema:funding			Grant mechanisms supporting dataset creation. Multiple grants may fund a single dataset.
-guardian_consent	string	No	Yes	No	1				For participants unable to provide their own consent, how was guardian or surrogate consent obtained...
-handling_strategy	string	No	No	No	1				"Strategy used to handle missing data (e.g., deletion, imputation, flagging, multiple imputation).
-"
-hash	string	No	No	No	2	dcterms:identifier			hash of the data
-header	string	No	No	No	1				
-hipaa_compliant	ComplianceStatusEnum	No	No	No	1				Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA). HIPAA app...
+guardian_consent	string	No	Yes	No	1	d4d:guardianConsent			For participants unable to provide their own consent, how was guardian or surrogate consent obtained...
+handling_strategy	string	No	No	No	1	d4d:handlingStrategy			The primary strategy used to handle missing data (e.g., listwise deletion, mean imputation, multiple...
+hash	string	No	No	No	1	d4d:hashValue		dcterms:identifier	Cryptographic hash value of the data for integrity verification, where the algorithm is recorded alo...
+header	string	No	No	No	1				"Whether the first row of the file contains column headers. Expected values: ""true"" or ""false"" (as st..."
+hipaa_compliant	ComplianceStatusEnum	No	No	No	1	d4d:hipaaCompliant			Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA). HIPAA app...
 human_subject_research	string	No	No	No	2				
-id	string	No	No	No	75				
-identifiable_elements_present	boolean	No	No	No	1				Indicates whether data subjects can be identified.
-identification	string	No	Yes	No	1	dcterms:description			
-identifiers_removed	string	No	Yes	No	1				List of identifier types removed during de-identification.
+id	string	No	No	No	78				
+identifiable_elements_present	boolean	No	No	No	1	d4d:identifiableElementsPresent			Indicates whether data subjects can be identified.
+identification	string	No	No	No	1	d4d:subpopulationIdentification		dcterms:description	How subpopulations are identified and defined (e.g., by age groups, gender, geographic region, disea...
+identifiers_removed	string	No	No	No	1	d4d:removedIdentifierTypes			List of identifier types removed during de-identification (e.g., 'name', 'date of birth', 'SSN', 'em...
 impact_details	string	No	No	No	2				
-imputation_method	string	No	Yes	No	1				Specific imputation technique used (mean, median, mode, forward fill, backward fill, interpolation, ...
+imputation_method	string	No	Yes	No	1	d4d:imputation_method			Specific imputation technique used (mean, median, mode, forward fill, backward fill, interpolation, ...
 imputation_protocols	string	No	No	No	2				
-imputation_rationale	string	No	No	No	1				Justification for the imputation approach chosen, including assumptions made about missing data mech...
-imputation_validation	string	No	Yes	No	1				"Methods used to validate imputation quality (if any).
+imputation_rationale	string	No	No	No	1	d4d:imputation_rationale			Justification for the imputation approach chosen, including assumptions made about missing data mech...
+imputation_validation	string	No	Yes	No	1	d4d:imputation_validation			"Methods used to validate imputation quality (if any).
 "
-imputed_fields	string	No	Yes	No	1				"Fields or columns where imputation was applied.
+imputed_fields	string	No	Yes	No	1	d4d:imputed_fields			"Fields or columns where imputation was applied.
 "
 informed_consent	string	No	No	No	2				
-instance_type	string	No	No	No	1	dcterms:type			"Multiple types of instances? (e.g., movies, users, and ratings).
-"
+instance_type	string	No	No	No	1	d4d:instanceType		dcterms:type	"The type or types of instances in the dataset (e.g., ""movie"", ""user"", ""rating"", ""clinical record""). ..."
 instances	string	No	No	No	2				
 intended_uses	string	No	No	No	2				
 inter_annotator_agreement	string	No	No	No	1	schema:measurementMethod			Measure of agreement between annotators (e.g., Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, p...
-inter_annotator_agreement_score	float	No	No	No	1				Measured agreement between annotators (e.g., Cohen's kappa value, Fleiss' kappa, Krippendorff's alph...
-involves_human_subjects	boolean	No	No	No	1				Does this dataset involve human subjects research?
+inter_annotator_agreement_score	float	No	No	No	1	d4d:interAnnotatorAgreementScore			Measured agreement between annotators (e.g., Cohen's kappa value, Fleiss' kappa, Krippendorff's alph...
+involves_human_subjects	boolean	No	No	No	1	d4d:involvesHumanSubjects			Does this dataset involve human subjects research?
 ip_restrictions	string	No	No	No	2				
-irb_approval	string	No	Yes	No	1				Was Institutional Review Board (IRB) approval obtained? Include approval number and institution if a...
+irb_approval	string	No	Yes	No	1	d4d:irbApproval			Was Institutional Review Board (IRB) approval obtained? Include approval number and institution if a...
 is_data_split	boolean	No	No	No	1				Is this subset a split of the larger dataset, e.g., is it a set for model training, testing, or vali...
 is_deidentified	string	No	No	No	2				
-is_direct	boolean	No	No	No	1				Whether collection was direct from individuals
-is_identifier	boolean	No	No	No	1	schema:identifier			Indicates whether this variable serves as a unique identifier or key for records in the dataset.
-is_random	boolean	No	Yes	No	1				Indicates whether the sample is random.
-is_representative	boolean	No	Yes	No	1				"Indicates whether the sample is representative of the larger set.
+is_direct	boolean	No	No	No	1	d4d:isDirect			Whether collection was direct from individuals.
+is_identifier	boolean	No	No	No	1	d4d:isIdentifier			Indicates whether this variable serves as a unique identifier or key for records in the dataset.
+is_random	boolean	No	No	No	1	d4d:isRandom			Indicates whether the sample is random.
+is_representative	boolean	No	No	No	1	d4d:isRepresentative			"Indicates whether the sample is representative of the larger set.
 "
-is_sample	boolean	No	Yes	No	1				Indicates whether it is a sample of a larger set.
-is_sensitive	boolean	No	No	No	1				Indicates whether this variable contains sensitive information (e.g., personal data, protected healt...
-is_shared	boolean	No	No	No	1	dcterms:accessRights			Boolean indicating whether the dataset is distributed to parties external to the dataset-creating en...
+is_sample	boolean	No	No	No	1	d4d:isSample			Indicates whether it is a sample of a larger set.
+is_sensitive	boolean	No	No	No	1	d4d:isSensitive			Indicates whether this variable contains sensitive information (e.g., personal data, protected healt...
+is_shared	boolean	No	No	No	1	d4d:isExternallyShared			Boolean indicating whether the dataset is distributed to parties external to the dataset-creating en...
 is_subpopulation	boolean	No	No	No	1				Is this subset a subpopulation of the larger dataset, e.g., is it a set of data for a specific demog...
 is_tabular	string	No	No	No	2				
-issued	datetime	No	No	No	4	dcterms:issued			
-keywords	string	No	Yes	No	4	dcat:keyword			
+issued	datetime	No	No	No	6	dcterms:issued			Date of formal issuance or publication of the resource. A `datetime` renders as RFC 3339 `date-time`...
+keywords	string	No	Yes	No	6	dcat:keyword			Keywords or tags describing the resource for discovery and classification.
 known_biases	string	No	No	No	2				
 known_limitations	string	No	No	No	2				
-label	boolean	No	No	No	1				"Is there a label or target associated with each instance?
+label	boolean	No	No	No	1	d4d:hasLabel			"Is there a label or target associated with each instance?
 "
-label_description	string	No	No	No	1	schema:description			"If labeled, what pattern or format do labels follow?
+label_description	string	No	No	No	1	d4d:labelPattern		schema:description	"If labeled, what pattern or format do labels follow?
 "
-labeling_details	string	No	Yes	No	1	dcterms:description			"Details on labeling/annotation procedures and quality metrics.
-"
+labeling_details	string	No	No	No	1	dcterms:description			Free-text description of the labeling or annotation procedures, including annotation guidelines, tas...
 labeling_strategies	string	No	No	No	2				
-language	string	No	No	No	4	dcterms:language	schema:inLanguage		language in which the information is expressed
-last_updated_on	datetime	No	No	No	4	dcterms:modified			
-latest_version_doi	string	No	No	No	1				DOI or URL of the latest dataset version.
-license	string	No	No	No	5	dcterms:license			
+language	string	No	No	No	6	dcterms:language	schema:inLanguage		Language in which the information is expressed.
+last_updated_on	datetime	No	No	No	6	dcterms:modified			The date and time when the resource was most recently modified or updated. Requires a UTC offset (`…...
+latest_version_doi	uriorcurie	No	No	No	1	dcterms:hasVersion			DOI or URL identifying the latest version of this dataset. Use CURIE format for a DOI — doi:10.xxxx/...
+license	string	No	No	No	7	dcterms:license			"The legal license under which the resource is made available (e.g., ""MIT"", ""CC-BY-4.0"")."
 license_and_use_terms	string	No	No	No	2				
-license_terms	string	No	Yes	No	1	dcterms:license			Description of the dataset's license and terms of use (including links, costs, or usage constraints)...
+license_terms	string	No	No	No	1	d4d:licenseDescription		dcterms:license, dcterms:rights	Description of the dataset's license and terms of use, including links, costs, or usage constraints ...
 limitation_description	string	No	No	No	1	dcterms:description			"Detailed description of the limitation and its implications.
 "
-limitation_type	LimitationTypeEnum	No	No	No	1				"Category of limitation (e.g., scope, coverage, temporal, methodological).
+limitation_type	LimitationTypeEnum	No	No	No	1	d4d:limitationType			"Category of limitation (e.g., scope, coverage, temporal, methodological).
 "
 machine_annotation_tools	string	No	No	No	2				
-maintainer_details	string	No	Yes	No	1	dcterms:description			"Details on who will support, host, or maintain the dataset.
-"
+maintainer_details	string	No	No	No	1	dcterms:description			Free-text description of the organization, team, or individual responsible for maintaining the datas...
 maintainers	string	No	No	No	2				
 maximum_value	float	No	No	No	1	schema:maxValue			The maximum value that the variable can take. Applicable to numeric variables.
-md5	string	No	No	No	2	dcterms:identifier			md5 hash of the data
+md5	string	No	No	No	1	d4d:md5Checksum		dcterms:identifier	DEPRECATED. MD5 hash value of the data (128-bit). MD5 is not collision-resistant and is unsuitable f...
 measurement_technique	string	No	No	No	1	schema:measurementTechnique			"The technique or method used to measure this variable. Examples: ""mass spectrometry"", ""self-report s..."
-mechanism_details	string	No	Yes	No	1	dcterms:description			"Details on mechanisms or procedures used to collect the data.
-"
+mechanism_details	string	No	No	No	1	dcterms:description			Free-text description of the specific mechanisms or procedures used to collect the data (e.g., hardw...
 media_type	MediaTypeEnum	No	No	No	2	dcat:mediaType	schema:encodingFormat		The media type of the data. This should be a MIME type.
 method	string	No	No	No	1				Method used for de-identification (e.g., HIPAA Safe Harbor).
 minimum_value	float	No	No	No	1	schema:minValue			The minimum value that the variable can take. Applicable to numeric variables.
-missing	string	No	Yes	No	1	dcterms:description			"Description of the missing data fields or elements.
+missing	string	No	Yes	No	1	d4d:missingDataDescription		dcterms:description	"Description of the missing data fields or elements.
 "
-missing_data_causes	string	No	Yes	No	1				Known or suspected causes of missing data (e.g., sensor failures, participant dropout, privacy const...
+missing_data_causes	string	No	No	No	1	d4d:missingDataCauses			Known or suspected causes of missing data (e.g., sensor failures, participant dropout, privacy const...
 missing_data_documentation	string	No	No	No	2				
-missing_data_patterns	string	No	Yes	No	1				Description of patterns in missing data (e.g., missing completely at random, missing at random, miss...
-missing_information	MissingInfo	No	Yes	No	1				"References to one or more MissingInfo objects describing missing data.
+missing_data_patterns	string	No	No	No	1	d4d:missingDataPatterns			Description of patterns in missing data (e.g., missing completely at random, missing at random, miss...
+missing_information	MissingInfo	No	Yes	No	1	d4d:missingInformation			"References to one or more MissingInfo objects describing missing data.
 "
-missing_value_code	string	No	Yes	No	1				"Code(s) used to represent missing values for this variable. Examples: ""NA"", ""-999"", ""null"", """". Mult..."
-mitigation_strategy	string	No	No	No	1				"Steps taken or recommended to mitigate this bias.
+missing_value_code	string	No	Yes	No	1	d4d:missingValueCode			"Code(s) used to represent missing values for this variable. Examples: ""NA"", ""-999"", ""null"", """". Mult..."
+mitigation_strategy	string	No	No	No	1	d4d:mitigation_strategy			"Steps taken or recommended to mitigate this bias.
 "
-modified_by	string	No	No	No	4	dcterms:contributor			
-name	string	No	No	No	75				
-notification_details	string	No	Yes	No	1	dcterms:description			"Details on how individuals were notified about data collection.
-"
-orcid	string	No	No	No	1	schema:identifier	schema:identifier		ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format...
-other_compliance	string	No	Yes	No	1				Other regulatory compliance frameworks applicable to this dataset (e.g., CCPA, PIPEDA, industry-spec...
+modified_by	string	No	No	No	6	dcterms:contributor			A person or organization that contributed to modifying or updating the resource.
+name	string	No	No	No	78				
+notes	string	No	No	No	78				
+notification_details	string	No	No	No	1	dcterms:description			Free-text description of how individuals were notified about data collection, including the notifica...
+orcid	string	No	No	No	1	d4d:orcidIdentifier		schema:identifier	ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format...
+other_compliance	string	No	No	No	1	d4d:otherCompliance			Other regulatory compliance frameworks applicable to this dataset (e.g., CCPA, PIPEDA, industry-spec...
 other_tasks	string	No	No	No	2				
-page	string	No	No	No	4	dcat:landingPage			
+page	string	No	No	No	6	dcat:landingPage			A landing page or web page providing access to or information about the resource.
 parent_datasets	string	No	No	No	2				
 participant_compensation	string	No	No	No	2				
 participant_privacy	string	No	No	No	2				
-path	string	No	No	No	2	schema:contentUrl			
-precision	integer	No	No	No	1				The precision or number of decimal places for numeric variables.
-preprocessing_details	string	No	Yes	No	1	dcterms:description			"Details on preprocessing steps applied to the data.
-"
+path	string	No	No	No	2	schema:contentUrl			The file path or URL where the content is located.
+precision	integer	No	No	No	1	schema:valuePrecision			The precision or number of decimal places for numeric variables.
+preprocessing_details	string	No	No	No	1	dcterms:description			Free-text description of preprocessing steps applied to the data, including tools used, parameters, ...
 preprocessing_strategies	string	No	No	No	2				
-principal_investigator	Person	No	No	No	1	dcterms:creator	schema:creator		A key individual (Principal Investigator) responsible for or overseeing dataset creation.
-privacy_techniques	string	No	Yes	No	1				What privacy-preserving techniques were applied (e.g., differential privacy, k-anonymity, data maski...
+principal_investigator	Person	No	No	No	1	d4d:principalInvestigator		dcterms:creator, schema:creator	The key individual (Principal Investigator) responsible for or overseeing dataset creation, as a Per...
+privacy_techniques	string	No	No	No	1	d4d:privacyTechniques			What privacy-preserving techniques were applied (e.g., differential privacy, k-anonymity, data maski...
 prohibited_uses	string	No	No	No	2				
-prohibition_reason	string	No	Yes	No	1				Reason why this use is prohibited (e.g., license restriction, ethical concern, privacy risk, legal c...
-publisher	uriorcurie	No	No	No	4	dcterms:publisher			
+prohibition_reason	string	No	No	No	1	d4d:prohibitionReason			One or more reasons why this use is prohibited (e.g., license restriction, ethical concern, privacy ...
+publisher	uriorcurie	No	No	No	6	dcterms:publisher			The organization or entity responsible for making the resource available.
 purposes	string	No	No	No	2				
-quality_notes	string	No	Yes	No	1				Notes about data quality, reliability, or known issues specific to this variable.
-quote_char	string	No	No	No	1				
-raw_data_details	string	No	Yes	No	1	dcterms:description			"Details on raw data availability and access procedures.
-"
-raw_data_format	string	No	Yes	No	1				"Format of the raw data before any preprocessing.
+quality_notes	string	No	No	No	1	d4d:qualityNotes		dcterms:description	Notes about data quality, reliability, or known issues specific to this variable.
+quote_char	string	No	No	No	1				"Character used for quoting fields (e.g., '""' for CSV)."
+raw_data_details	string	No	No	No	1	dcterms:description			Free-text description of raw data availability, access procedures, and any conditions or restriction...
+raw_data_format	string	No	No	No	1	d4d:rawDataFormat			"One or more formats of the raw data before any preprocessing (e.g., CSV, DICOM, JSON).
 "
 raw_data_sources	string	No	No	No	2				
 raw_sources	string	No	No	No	2				
-recommended_mitigation	string	No	No	No	1				"Recommended approaches for users to address this limitation.
+recommended_mitigation	string	No	No	No	1	d4d:recommendedMitigation			"Recommended approaches for users to address this limitation.
 "
-regulatory_compliance	string	No	Yes	No	1				"What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, HIPAA)?
+regulatory_compliance	string	No	Yes	No	1	d4d:regulatoryCompliance			"What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, HIPAA)?
 "
 regulatory_restrictions	string	No	No	No	3				
-reidentification_risk	string	No	Yes	No	1				"What is the assessed risk of re-identification? What measures were taken to minimize this risk?
+reidentification_risk	string	No	No	No	1	d4d:reidentificationRisk			"What is the assessed risk of re-identification? What measures were taken to minimize this risk?
 "
 related_datasets	string	No	No	No	2				
-relationship_details	string	No	Yes	No	1	dcterms:description			"Details on relationships between instances (e.g., graph edges, ratings).
-"
-relationship_type	DatasetRelationshipTypeEnum	Yes	No	No	1				The type of relationship (e.g., derives_from, supplements, is_version_of). Uses DatasetRelationshipT...
-release_dates	string	No	Yes	No	1	dcterms:available			Dates or timeframe for dataset release. Could be a one-time release date or multiple scheduled relea...
-repository_details	string	No	Yes	No	1	dcterms:description			"Details on the repository of known dataset uses.
-"
+relationship_details	string	No	No	No	1	dcterms:description			Free-text description of how relationships between instances are represented (e.g., graph edges, rat...
+relationship_type	DatasetRelationshipTypeEnum	Yes	No	No	1	schema:additionalType			The type of relationship (e.g., derives_from, supplements, is_version_of). Uses DatasetRelationshipT...
+relationships	string	No	No	No	2				
+release_dates	string	No	Yes	No	1	dcterms:available			"One or more dates or timeframes for dataset release, in ISO 8601 format (e.g., ""2024-03-15"") or as a..."
+repository_details	string	No	No	No	1	dcterms:description			Free-text description of the repository of known dataset uses, including how it is maintained and ho...
 repository_url	uri	No	No	No	1				URL to a repository of known dataset uses.
-representative_verification	string	No	Yes	No	1				"Explanation of how representativeness was validated or verified.
-"
-resources	Dataset	No	Yes	No	3				Sub-resources or component datasets. Used in DatasetCollection to contain Dataset objects, and in Da...
+representative_verification	string	No	Yes	No	1	d4d:verificationDescription		schema:description	One or more explanations of how representativeness was validated or verified (e.g., statistical test...
+resources	string	No	Yes	No	4	schema:hasPart			Sub-resources or component items. In DatasetCollection, contains Dataset objects. In Dataset, contai...
 response	string	No	No	No	3				
 restrictions	string	No	No	No	2				
-retention_details	string	No	Yes	No	1	dcterms:description			"Details on data retention limits and enforcement procedures.
-"
+retention_details	string	No	No	No	1	dcterms:description			Free-text description of applicable retention limits, legal or ethical basis for those limits, and h...
+retention_incentive_rationale	string	No	No	No	1	d4d:retentionIncentiveRationale			The stated reason for structuring incentives to support retention, where a source gives one — an att...
+retention_incentives	string	No	No	No	1	d4d:retentionIncentiveStructure			Where the sources describe it, how the incentive structure was designed to keep participants enrolle...
 retention_limit	string	No	No	No	2				
-retention_period	string	No	No	No	1				Time period for data retention.
-review_details	string	No	Yes	No	1	dcterms:description			"Details on ethical review processes, outcomes, and supporting documentation.
-"
-reviewing_organization	Organization	No	No	No	1	schema:provider	schema:provider		Organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, ...
-revocation_details	string	No	Yes	No	1	dcterms:description			"Details on consent revocation mechanisms and procedures.
-"
+retention_period	string	No	No	No	1	d4d:retentionPeriod			Time period for data retention.
+review_details	string	No	No	No	1	dcterms:description			Free-text description of the ethical review process, board decisions, outcomes, and any supporting d...
+reviewing_organization	string	No	No	No	1	schema:provider	schema:provider		Name or identifier of the organization that conducted the ethical review (e.g., Institutional Review...
+revocation_details	string	No	No	No	1	dcterms:description			Free-text description of the mechanism provided for individuals to revoke consent (e.g., opt-out por...
 role	string	No	No	No	2				
-same_as	uriorcurie	No	Yes	No	0	schema:sameAs	schema:sameAs		URL of a reference web resource that is the same as this dataset. Used to link to canonical or alter...
+same_as	uriorcurie	No	Yes	No	0	schema:sameAs	schema:sameAs		One or more URLs or URIs identifying equivalent or related representations of this dataset. Used to ...
 sampling_strategies	string	No	No	No	3				
-scope_impact	string	No	No	No	1				"How this limitation affects the scope or applicability of the dataset.
+scope_impact	string	No	No	No	1	d4d:scopeImpact			"How this limitation affects the scope or applicability of the dataset.
 "
 sensitive_elements	string	No	No	No	2				
-sensitive_elements_present	boolean	No	No	No	1				Indicates whether sensitive data elements are present.
-sensitivity_details	string	No	Yes	No	1	dcterms:description			"Details on sensitive data elements present and handling procedures.
+sensitive_elements_present	boolean	No	No	No	1	d4d:sensitive_elements_present			Indicates whether sensitive data elements are present.
+sensitivity_details	string	No	No	No	1	dcterms:description			"Details on sensitive data elements present and handling procedures.
 "
-sha256	string	No	No	No	2	dcterms:identifier			sha256 hash of the data
-source_data	string	No	Yes	No	1				"Description of the larger set from which the sample was drawn, if any.
+sha256	string	No	No	No	1	schema:sha256			SHA-256 hash value of the data (256-bit cryptographic hash, recommended).
+source_caveats	string	No	No	No	78				
+source_data	string	No	No	No	1	d4d:sourceData			"One or more descriptions of the larger sets from which the sample was drawn, if applicable.
 "
-source_description	string	Yes	No	No	1				Detailed description of where raw data comes from (e.g., sensors, databases, web APIs, manual collec...
-source_type	string	No	Yes	No	1				"Type of raw source (sensor, database, user input, web scraping, etc.).
+source_description	string	Yes	No	No	1	dcterms:description			Detailed description of where raw data comes from (e.g., sensors, databases, web APIs, manual collec...
+source_type	string	No	No	No	1	d4d:sourceType		dcterms:type	"One or more types of raw source (e.g., sensor, database, user input, web scraping).
 "
-special_populations	string	No	Yes	No	1				Does the research involve any special populations that require additional protections (e.g., minors,...
-special_protections	string	No	Yes	No	1				What additional protections were implemented for vulnerable populations? Include safeguards, modifie...
-split_details	string	No	Yes	No	1	dcterms:description			"Details on recommended data splits and their rationale.
-"
-start_date	date	No	No	No	1				Start date of data collection
-status	string	No	No	No	4	dcterms:type			
-strategies	string	No	Yes	No	1				"Description of the sampling strategy (deterministic, probabilistic, etc.).
-"
-subpopulation_elements_present	boolean	No	No	No	1				Indicates whether any subpopulations are explicitly identified.
+special_populations	string	No	Yes	No	1	d4d:specialPopulations			Does the research involve any special populations that require additional protections (e.g., minors,...
+special_protections	string	No	Yes	No	1	d4d:specialProtections			What additional protections were implemented for at-risk populations? Include safeguards, modified p...
+split_details	string	No	No	No	1	dcterms:description			Free-text description of the recommended data splits (e.g., 80/10/10 train/ validation/test), how th...
+splits	string	No	No	No	2				
+start_date	date	No	No	No	1	schema:startDate			Start date of data collection.
+status	string	No	No	No	6	d4d:publicationStatus			The status of the resource (e.g., draft, published, deprecated).
+stewardship_roles	string	No	Yes	No	1	d4d:stewardshipRole			Named stewardship or custodianship roles for the data, distinct from its creators — who holds contin...
+strategies	string	No	No	No	1	d4d:strategies			One or more sampling strategies used (e.g., deterministic, simple random, stratified, cluster, syste...
+subpopulation_elements_present	boolean	No	No	No	1	d4d:subpopulationElementsPresent			Indicates whether any subpopulations are explicitly identified.
 subpopulations	string	No	No	No	2				
 subsets	string	No	No	No	2				
-target_dataset	string	Yes	No	No	1				The dataset that this relationship points to. Can be specified by identifier, URL, or Dataset object...
-task_details	string	No	Yes	No	1	dcterms:description			"Details on other potential tasks the dataset could be used for.
-"
+target_dataset	string	Yes	No	No	1	dcterms:relation			The identifier or URL of the dataset this relationship points to.
+task_details	string	No	No	No	1	dcterms:description			Free-text description of other potential tasks the dataset could support, including any prerequisite...
 tasks	string	No	No	No	2				
-themes	uriorcurie	No	Yes	No	0	dcat:theme			Themes associated with the data. These may be provided by the data creator or assigned later in a ma...
-timeframe_details	string	No	Yes	No	1	dcterms:description			"Details on the collection timeframe and relationship to data creation dates.
-"
-title	string	No	No	No	4	dcterms:title			the official title of the element
-tool_accuracy	string	No	Yes	No	1				Known accuracy or performance metrics for the automated tools (if available). Include metric name an...
-tool_descriptions	string	No	Yes	No	1				Descriptions of what each tool does in the annotation process and what types of annotations it produ...
-tools	string	No	Yes	No	1				"List of automated annotation tools with their versions. Format each entry as ""ToolName version"" (e.g..."
-unit	uriorcurie	No	No	No	1	qudt:unit	qudt:hasUnit, schema:unitCode		The unit of measurement for the variable, preferably using QUDT units (http://qudt.org/vocab/unit/)....
-update_details	string	No	Yes	No	1	dcterms:description			"Details on update plans, responsible parties, and communication methods.
-"
+themes	uriorcurie	No	Yes	No	0	dcat:theme			One or more themes associated with the data. These may be provided by the data creator or assigned l...
+third_party_sharing	string	No	No	No	2				
+timeframe_details	string	No	No	No	1	dcterms:description			Free-text description of the data collection period and whether this timeframe matches the creation ...
+title	string	No	No	No	6	dcterms:title			The official title of the element.
+tool_accuracy	string	No	Yes	No	1	d4d:toolAccuracy			One or more known accuracy or performance metrics for the automated tools (if available). Include me...
+tool_descriptions	string	No	No	No	1	d4d:toolDescriptions			Descriptions of what each tool does in the annotation process and what types of annotations it produ...
+tools	string	No	Yes	No	1	d4d:toolNames		schema:name	"List of automated annotation tools with their versions. Format each entry as ""ToolName version"" (e.g..."
+total_bytes	integer	No	No	No	1	d4d:total_bytes	dcat:byteSize		Total size of all files in this collection, in bytes (integer). Maps to dcat:byteSize.
+total_file_count	string	No	No	No	2				
+total_size_bytes	string	No	No	No	2				
+unit	string	No	No	No	1	qudt:unit	qudt:hasUnit, schema:unitCode		The unit of measurement for the variable, written as the source states it — `mg/dL`, `mm Hg`, `%`, `...
+update_details	string	No	No	No	1	dcterms:description			Free-text description of planned update types (e.g., corrections, additions, deletions), responsible...
 updates	string	No	No	No	2				
-url	string	No	No	No	1	schema:url			
-usage_notes	string	No	No	No	1				Notes or caveats about using the dataset for intended purposes.
-use_category	string	No	Yes	No	1				Category of intended use (e.g., research, clinical, educational, commercial, policy).
+url	uri	No	No	No	1	schema:url			URL where the software can be found (e.g., homepage, repository, or documentation).
+usage_notes	string	No	No	No	1				A note or caveat about using the dataset for its intended purposes.
+use_category	string	No	No	No	1	d4d:useCategory			One or more categories of intended use (e.g., research, clinical, educational, commercial, policy).
 use_repository	string	No	No	No	2				
-used_software	string	No	No	No	65				
-variable_name	string	Yes	No	No	1	schema:name	schema:name		The name or identifier of the variable as it appears in the data files.
+used_software	string	No	No	No	66				
+variable_name	string	Yes	No	No	1	d4d:variableName		schema:name, schema:identifier	The name or identifier of the variable as it appears in the data files.
 variables	string	No	No	No	2				
-version	string	No	No	No	5	dcterms:hasVersion			
+version	string	No	No	No	7	schema:version			"The version identifier of the resource (e.g., ""1.0"", ""2.3.1"")."
 version_access	string	No	No	No	2				
-version_details	string	No	Yes	No	1	dcterms:description			"Details on version support policies and obsolescence communication.
+version_details	string	No	No	No	1	dcterms:description			Free-text description of version support policies, how long older versions will be hosted, and how d...
+versions_available	string	No	Yes	No	1	d4d:versionsAvailable			List of available versions with metadata.
+warnings	string	No	Yes	No	1	dcterms:description			One or more specific content warnings describing potentially offensive, insulting, threatening, or a...
+was_derived_from	string	No	No	No	6	prov:wasDerivedFrom	dcterms:source		A resource from which this resource was derived, in whole or in part.
+was_directly_observed	boolean	No	No	No	1	d4d:wasDirectlyObserved			True if the data was directly observed by a researcher or instrument; false if it was obtained throu...
+was_inferred_derived	boolean	No	No	No	1	d4d:wasInferred			True if the data was computationally inferred or derived from other data (e.g., model outputs, imput...
+was_reported_by_subjects	boolean	No	No	No	1	d4d:wasReportedBySubjects			True if the data was self-reported directly by the subjects themselves (e.g., survey responses, ques...
+was_validated_verified	boolean	No	No	No	1	d4d:wasValidated			True if the data underwent a validation or verification process (e.g., expert review, cross-checking...
+why_missing	string	No	Yes	No	1	d4d:missingDataCause		dcterms:description	"Explanation of why each piece of data is missing.
 "
-versions_available	string	No	Yes	No	1				List of available versions with metadata.
-vulnerable_groups_included	boolean	No	No	No	1				Are any vulnerable populations included (e.g., children, pregnant women, prisoners, cognitively impa...
-vulnerable_populations	string	No	No	No	2				
-warnings	string	No	Yes	No	1	dcterms:description			
-was_derived_from	string	No	No	No	4	prov:wasDerivedFrom	dcterms:source		
-was_directly_observed	boolean	No	No	No	1				Whether the data was directly observed
-was_inferred_derived	boolean	No	No	No	1				Whether the data was inferred or derived from other data
-was_reported_by_subjects	boolean	No	No	No	1				Whether the data was reported directly by the subjects themselves
-was_validated_verified	boolean	No	No	No	1				Whether the data was validated or verified in any way
-why_missing	string	No	Yes	No	1	dcterms:description			"Explanation of why each piece of data is missing.
+why_not_representative	string	No	No	No	1	d4d:whyNotRepresentative			"One or more explanations of why the sample is not representative of the larger set, if applicable.
 "
-why_not_representative	string	No	Yes	No	1				"Explanation of why the sample is not representative, if applicable.
-"
-withdrawal_mechanism	string	No	Yes	No	1				How can participants withdraw their consent? What procedures are in place for data deletion upon wit...
+withdrawal_mechanism	string	No	No	No	1	d4d:withdrawalMechanism			How can participants withdraw their consent? What procedures are in place for data deletion upon wit...

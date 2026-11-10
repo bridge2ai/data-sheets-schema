@@ -71,16 +71,21 @@ were already optional there. What changed **after** the label, and so is the
   shifting"]` is now a validation error; the value is one block scalar
   naming both. This is a representation change, not permission to omit
   documented facts.
-- **Two enum-ranged slots became single-valued**: `data_use_permission`
-  and `collection_type`. A record that carried several values
+- **Two enum-ranged slots became single-valued** in `3.0.0`:
+  `data_use_permission` and `collection_type`. Under `3.0.0` and `3.1.0`, a
+  record that carried several values
   (`data_use_permission: [health_medical_biomedical_research,
-  no_commercial_use]`; `collection_type: [raw_data, processed_data]`) now
-  fails as a list and cannot become a block string of both. This is a
-  loss of expressiveness, not a representation change: keep the value
-  that names the governing permission or the collection's primary form,
-  and record the others in `notes` (or, for a use restriction the source
-  states, in `prohibited_uses` / `license_and_use_terms`), so the fact is
-  not dropped.
+  no_commercial_use]`; `collection_type: [raw_data, processed_data]`) failed
+  as a list and could not become a block string of both. That was a
+  loss of expressiveness, not a representation change: for `3.0.0`/`3.1.0`
+  records, keep the value that names the governing permission or the
+  collection's primary form, and record the others in `notes` (or, for a use
+  restriction the source states, in `prohibited_uses` /
+  `license_and_use_terms`), so the fact is not dropped. **Update in `3.2.0`
+  (D99):** `LicenseAndUseTerms.data_use_permission` is restored to
+  `multivalued: true` so a record can state one primary DUO permission plus
+  modifiers (e.g., `[health_medical_biomedical_research, no_commercial_use]`);
+  `collection_type` remains single-valued.
 - **Person references became inlined objects** (`816b44025`, 2026-09-03).
   Principal investigator, creator, contact, ethics, license and governance
   contacts require a `Person` object with its required identifier; a bare

@@ -29,11 +29,18 @@ def synthetic(sizing_fixture):
 
 
 def test_declared_synthetic_project_sizes_registers_and_all_uses_selected_manifest(sizing_fixture, monkeypatch, tmp_path):
+    import json
     registration, files, inputs, manifest = synthetic(sizing_fixture)
-    # A declared synthetic prefix: G1's display labels now refuse before billing.
+    # A declared synthetic prefix with explicit identifier forms (#5471).
     schema = yaml.safe_load(inputs["schema_path"].read_bytes())
+    schema.setdefault("prefixes", {})["SYNTHETIC"] = "https://example.test/synthetic/"
     schema["classes"]["Instance"]["attributes"]["data_substrate"]["annotations"] = {
-        "d4d:termSources": "SYNTHETIC"}
+        "d4d:termSources": "SYNTHETIC",
+        "d4d:termSourceIdentifierForms": json.dumps({"version": 1, "sources": [
+            {"id": "synthetic", "label": "SYNTHETIC",
+             "curies": [{"prefix": "SYNTHETIC", "local_prefix": ""}],
+             "iri_bases": ["https://example.test/synthetic/"]},
+        ]})}
     inputs["schema_path"].write_text(yaml.safe_dump(schema))
     monkeypatch.setattr(builder.api, "FULL_SCHEMA_PATH", inputs["schema_path"])
     monkeypatch.setattr(builder.api, "CORE_SCHEMA_PATH", inputs["schema_path"])

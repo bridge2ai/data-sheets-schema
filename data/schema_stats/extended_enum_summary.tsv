@@ -1,17 +1,26 @@
 Enum Name	Value Count	Has Ontology Mappings	Description
 BiasTypeEnum	9	Yes	Types of bias that may be present in datasets. Values are mapped to the Artificial Intelligence Ontology (AIO) bias taxonomy from BioPortal. See https://bioportal.bioontology.org/ontologies/AIO
-Boolean	3	No	
+Boolean	3	No	Three-valued boolean logic supporting true, false, and unknown states.
 CRediTRoleEnum	14	No	Contributor roles based on the CRediT (Contributor Roles Taxonomy). See https://credit.niso.org/
 ComplianceStatusEnum	5	No	Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific regulations (e.g., HIPAA, 45 CFR 46). These are workflow status values that may evolve as regulations are assessed or as the dataset is modified.
-CompressionEnum	7	No	
+CompressionEnum	7	No	Compression algorithms and formats for file compression.
 ConfidentialityLevelEnum	3	No	"Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity.
 NOTE: This enum classifies data sensitivity and access control (WHO can access), which is orthogonal to DataUsePermissionEnum that specifies use restrictions (WHAT authorized users can do with data). ConfidentialityLevelEnum determines access requirements, while DataUsePermissionEnum uses DUO terms to specify permitted uses once access is granted."
 CreatorOrMaintainerEnum	11	No	Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to schema.org organization types.
+DataStandardEnum	10	No	"Data standards and common data models a dataset's content follows.
+Deliberately **not** merged into `FormatEnum` (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would conflate them and make `format` unanswerable.
+Free-text `conforms_to` records what a source *says*; this records which registered standard that is, where one applies. Both may be populated for the same standard — one verbatim, one normalized — which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.
+⚠️ **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent — it is the exact failure `d4d runs identifiers` exists to find. A declared standards-registry prefix is the natural home for these once such a registry carries them; until one does, this is a controlled vocabulary without ontology grounding, and says so."
 DataUsePermissionEnum	22	Yes	Data use permissions and restrictions based on the Data Use Ontology (DUO). DUO is a standardized ontology for representing data use conditions developed by GA4GH. See https://github.com/EBISPOT/DUO
-DatasetRelationshipTypeEnum	14	No	Standardized types of relationships between datasets, based on DataCite Metadata Schema RelationType controlled vocabulary and Dublin Core relationship terms. See https://datacite-metadata-schema.readthedocs.io/ and http://purl.org/dc/terms/
-EncodingEnum	34	No	
-FormatEnum	18	No	
+DatasetRelationshipTypeEnum	36	No	"Relationships between datasets, aligned one-to-one with the DataCite Metadata Schema RelationType controlled vocabulary and mapped to Dublin Core terms where an equivalent exists.
+Permissible value names are snake_case, following this schema's naming throughout. The corresponding DataCite term is carried in `aliases` on each value, so the alignment is machine-readable rather than asserted in prose. DataCite publishes no per-term IRIs, which is why the link is an alias and not a `meaning`.
+All 36 DataCite RelationType values are represented. Generators reading DataCite metadata should map the CamelCase term to the snake_case name via `aliases`; emitting the DataCite spelling directly will not validate.
+See https://datacite-metadata-schema.readthedocs.io/ and http://purl.org/dc/terms/"
+EncodingEnum	43	No	Character encoding schemes for text representation in different languages and scripts.
+FileCollectionTypeEnum	10	Yes	Types of file collections within datasets.
+FileTypeEnum	9	Yes	Types of individual files within datasets.
+FormatEnum	18	No	Common file format extensions for data files and documents.
 LimitationTypeEnum	7	No	Types of limitations that may affect dataset use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).
-MediaTypeEnum	19	No	
+MediaTypeEnum	19	No	MIME media types (Internet Media Types) for file content identification.
 VariableTypeEnum	13	No	Common data types for variables. Values are mapped to schema.org DataType vocabulary. See https://schema.org/DataType
-VersionTypeEnum	12	No	Type of version change using semantic versioning principles. See https://semver.org/
+VersionTypeEnum	3	No	Type of version change using semantic versioning principles. See https://semver.org/

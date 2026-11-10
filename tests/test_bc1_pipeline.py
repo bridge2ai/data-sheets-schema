@@ -37,6 +37,12 @@ def offline(monkeypatch):
 
 class BC1Script(Script):
     """Only BC1 responses differ; every declaration derives from the wire."""
+    def __init__(self, spec, **kwargs):
+        super().__init__(spec, **kwargs)
+        self.full["instances"] = [
+            {"data_substrate": "EDAM:data_0006", "data_topic": "GO:0008150"}
+        ]
+
     def create(self, **kwargs):
         blocks = [part["text"] for part in kwargs["messages"][-1]["content"]]
         exact = next((s for s in blocks if s.startswith("# Exact BC1 stage request\n\n")), None)
@@ -71,7 +77,6 @@ class BC1Script(Script):
         return response(codec.encode_candidate(value, dictionary=payload["dictionary"], max_bytes=maximum).decode())
 
 
-@pytest.mark.xfail(strict=True, raises=ValueError, reason="#5471: neutral-profile BC1 refuses G1's EDAM term-source labels until their identifier forms are declared")
 def test_public_bc1_pipeline_multiple_groups_final_and_completed_replay(registered, journal_launch_monitor):
     # Retain the first launch's independent checkpoint for intact completed replay.
     reg = json.loads(registered.shared_generation_registration)
@@ -85,6 +90,17 @@ def test_public_bc1_pipeline_multiple_groups_final_and_completed_replay(register
     state = runtime._state(spec)
     assert state["state"] == "accepted"
     packet = receipts._load(state["packet"])
+    if registered.profile == "neutral":
+        assert packet["term_policy"]["format"] == "bc1_neutral_term_policy_v2"
+        from data_sheets_schema import bc1_context
+        for term in ("EDAM:data_0006", "EDAM:format_1915", "mediatypes:text/csv"):
+            bc1_context.validate_term_value(term, policy=packet["term_policy"], cls="Instance", field="data_substrate")
+        for term in ("GO:0008150", "MESH:D012640", "EFO:0000001", "NCIT:C12345"):
+            bc1_context.validate_term_value(term, policy=packet["term_policy"], cls="Instance", field="data_topic")
+        assert yaml.safe_load(spec.full_path.read_bytes())["instances"] == [
+            {"data_substrate": "EDAM:data_0006", "data_topic": "GO:0008150"}]
+    else:
+        assert packet["term_policy"] is None
     assert len(packet["plan"]["workers"]) > 2
     assert len(packet["groups"]) > 1
     expected = (["full", receipts.PHASE] + [runtime.WORKER_PHASE] * len(packet["plan"]["workers"])

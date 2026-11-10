@@ -8,35 +8,35 @@ BiasTypeEnum	algorithmic_bias	Bias introduced or amplified by algorithmic proces
 BiasTypeEnum	sampling_bias	Bias from sampling methodology not representative of the population.	
 BiasTypeEnum	annotation_bias	Bias introduced during data labeling or annotation. Occurs when annotators rely on heuristics or exhibit systematic patterns in labeling.	
 BiasTypeEnum	confirmation_bias	Bias from seeking data that confirms pre-existing beliefs. Tendency to prefer information that confirms existing beliefs, influencing the search for, interpretation of, and recall of information.	AIO:ConfirmationBias
-Boolean	true		
-Boolean	false		
-Boolean	unknown		
-CRediTRoleEnum	conceptualization	Ideas; formulation or evolution of overarching research goals and aims	
-CRediTRoleEnum	methodology	Development or design of methodology; creation of models	
-CRediTRoleEnum	software	Programming, software development; designing computer programs	
-CRediTRoleEnum	validation	Verification of the overall replication/reproducibility of results	
-CRediTRoleEnum	formal_analysis	Application of statistical, mathematical, or other formal techniques	
-CRediTRoleEnum	investigation	Conducting the research and investigation process	
+Boolean	true	Affirmative or positive value.	
+Boolean	false	Negative or false value.	
+Boolean	unknown	Unknown, uncertain, or not applicable value.	
+CRediTRoleEnum	conceptualization	Ideas; formulation or evolution of overarching research goals and aims.	
+CRediTRoleEnum	methodology	Development or design of methodology; creation of models.	
+CRediTRoleEnum	software	Programming, software development; designing computer programs.	
+CRediTRoleEnum	validation	Verification of the overall replication/reproducibility of results.	
+CRediTRoleEnum	formal_analysis	Application of statistical, mathematical, or other formal techniques.	
+CRediTRoleEnum	investigation	Conducting the research and investigation process.	
 CRediTRoleEnum	resources	Provision of study materials, reagents, patients, laboratory samples, etc.	
-CRediTRoleEnum	data_curation	Management activities to annotate, scrub data and maintain research data	
-CRediTRoleEnum	writing_original_draft	Preparation, creation and/or presentation of the published work	
-CRediTRoleEnum	writing_review_editing	Critical review, commentary or revision of the work	
-CRediTRoleEnum	visualization	Preparation, creation and/or presentation of visualizations/data presentation	
-CRediTRoleEnum	supervision	Oversight and leadership responsibility for the research activity	
-CRediTRoleEnum	project_administration	Management and coordination responsibility for the research activity	
-CRediTRoleEnum	funding_acquisition	Acquisition of the financial support for the project	
+CRediTRoleEnum	data_curation	Management activities to annotate, scrub data and maintain research data.	
+CRediTRoleEnum	writing_original_draft	Preparation, creation and/or presentation of the published work.	
+CRediTRoleEnum	writing_review_editing	Critical review, commentary or revision of the work.	
+CRediTRoleEnum	visualization	Preparation, creation and/or presentation of visualizations/data presentation.	
+CRediTRoleEnum	supervision	Oversight and leadership responsibility for the research activity.	
+CRediTRoleEnum	project_administration	Management and coordination responsibility for the research activity.	
+CRediTRoleEnum	funding_acquisition	Acquisition of the financial support for the project.	
 ComplianceStatusEnum	compliant	Dataset is compliant with the regulation. All requirements are met and documented.	
 ComplianceStatusEnum	partially_compliant	Dataset is partially compliant, with known limitations or gaps in compliance. Some but not all requirements are met.	
 ComplianceStatusEnum	not_compliant	Dataset does not comply with the regulation. Significant requirements are not met.	
 ComplianceStatusEnum	not_applicable	Regulation does not apply to this dataset based on scope, jurisdiction, or subject matter.	
 ComplianceStatusEnum	under_review	Compliance status is currently under review or assessment. Final determination has not been made.	
-CompressionEnum	gzip		
-CompressionEnum	bzip2		
-CompressionEnum	zip		
-CompressionEnum	tar		
-CompressionEnum	xz		
-CompressionEnum	lzma		
-CompressionEnum	compress		
+CompressionEnum	gzip	GNU zip compression (commonly used with .gz extension).	
+CompressionEnum	bzip2	Burrows-Wheeler block-sorting compression (commonly used with .bz2 extension).	
+CompressionEnum	zip	ZIP archive compression format.	
+CompressionEnum	tar	Tape Archive format (typically combined with gzip or bzip2).	
+CompressionEnum	xz	XZ Utils compression using LZMA2 algorithm.	
+CompressionEnum	lzma	Lempel-Ziv-Markov chain algorithm compression.	
+CompressionEnum	compress	Unix compress utility (LZW compression).	
 ConfidentialityLevelEnum	unrestricted	No confidentiality restrictions. Data is publicly available with no access controls required. Equivalent to public or open access data.	
 ConfidentialityLevelEnum	restricted	Restricted access requiring approval or registration. Data contains sensitive information requiring controlled access. May require account creation, data use agreement, or institutional approval.	
 ConfidentialityLevelEnum	confidential	Highly confidential with strict access controls. Data contains highly sensitive information with significant privacy or security implications. Typically requires IRB approval, formal data use agreements, institutional authorization, or other formal vetting processes.	
@@ -51,94 +51,154 @@ CreatorOrMaintainerEnum	non_profit_organization	Non-profit organization responsi
 CreatorOrMaintainerEnum	crowdsourced	Dataset created through crowdsourcing efforts with multiple contributors.	
 CreatorOrMaintainerEnum	automated_system	Automated system or process responsible for dataset.	
 CreatorOrMaintainerEnum	other	Other type of creator or maintainer not listed.	
-DataUsePermissionEnum	no_restriction	No restriction on data use	DUO:0000004
-DataUsePermissionEnum	general_research_use	Data available for any research purpose (GRU)	DUO:0000042
-DataUsePermissionEnum	health_medical_biomedical_research	Data limited to health, medical, or biomedical research (HMB)	DUO:0000006
-DataUsePermissionEnum	disease_specific_research	Data limited to research on specified disease(s) (DS)	DUO:0000007
-DataUsePermissionEnum	population_origins_ancestry_research	Data limited to population origins or ancestry research (POA)	DUO:0000011
-DataUsePermissionEnum	clinical_care_use	Data available for clinical care and applications (CC)	DUO:0000043
-DataUsePermissionEnum	no_commercial_use	Data use limited to non-commercial purposes (NCU)	DUO:0000046
-DataUsePermissionEnum	non_profit_use_only	Data use limited to not-for-profit organizations (NPU)	DUO:0000045
-DataUsePermissionEnum	non_profit_use_and_non_commercial_use	Data limited to not-for-profit organizations and non-commercial use (NPUNCU)	DUO:0000018
-DataUsePermissionEnum	no_methods_development	Data cannot be used for methods or software development (NMDS)	DUO:0000015
-DataUsePermissionEnum	genetic_studies_only	Data limited to genetic studies only (GSO)	DUO:0000016
-DataUsePermissionEnum	ethics_approval_required	Ethics approval (e.g., IRB/ERB) required for data use (IRB)	DUO:0000021
-DataUsePermissionEnum	collaboration_required	Collaboration with primary investigator required (COL)	DUO:0000020
-DataUsePermissionEnum	publication_required	Results must be published/shared with research community (PUB)	DUO:0000019
-DataUsePermissionEnum	geographic_restriction	Data use limited to specific geographic region (GS)	DUO:0000022
-DataUsePermissionEnum	institution_specific	Data use limited to approved institutions (IS)	DUO:0000028
-DataUsePermissionEnum	project_specific	Data use limited to approved project(s) (PS)	DUO:0000027
-DataUsePermissionEnum	user_specific	Data use limited to approved users (US)	DUO:0000026
-DataUsePermissionEnum	time_limit	Data use approved for limited time period (TS)	DUO:0000025
-DataUsePermissionEnum	return_to_database	Derived data must be returned to database/resource (RTN)	DUO:0000029
-DataUsePermissionEnum	publication_moratorium	Publication restricted until specified date (MOR)	DUO:0000024
-DataUsePermissionEnum	no_population_ancestry_research	Population/ancestry research prohibited (NPOA)	DUO:0000044
-DatasetRelationshipTypeEnum	derives_from	This dataset is derived from the target dataset through processing, analysis, or transformation. Equivalent to DataCite IsDerivedFrom.	
-DatasetRelationshipTypeEnum	supplements	This dataset supplements or adds to the target dataset. Equivalent to DataCite IsSupplementTo.	
-DatasetRelationshipTypeEnum	is_supplemented_by	This dataset is supplemented by the target dataset. Equivalent to DataCite IsSupplementedBy.	
-DatasetRelationshipTypeEnum	is_version_of	This dataset is a version of the target dataset (e.g., updated, corrected, or revised version). Equivalent to DataCite IsVersionOf.	
-DatasetRelationshipTypeEnum	is_new_version_of	This dataset is a new version that replaces or updates the target dataset. Equivalent to DataCite IsNewVersionOf.	
-DatasetRelationshipTypeEnum	replaces	This dataset replaces or supersedes the target dataset. Equivalent to DataCite Obsoletes.	
-DatasetRelationshipTypeEnum	is_replaced_by	This dataset is replaced or superseded by the target dataset. Equivalent to DataCite IsObsoletedBy.	
-DatasetRelationshipTypeEnum	is_required_by	This dataset is required by the target dataset. Equivalent to DataCite IsRequiredBy.	
-DatasetRelationshipTypeEnum	requires	This dataset requires the target dataset. Equivalent to DataCite Requires.	
-DatasetRelationshipTypeEnum	is_part_of	This dataset is part of the target dataset (e.g., subset, component). Equivalent to DataCite IsPartOf.	
-DatasetRelationshipTypeEnum	has_part	This dataset has the target dataset as a part. Equivalent to DataCite HasPart.	
-DatasetRelationshipTypeEnum	is_referenced_by	This dataset is referenced or cited by the target dataset. Equivalent to DataCite IsReferencedBy.	
-DatasetRelationshipTypeEnum	references	This dataset references or cites the target dataset. Equivalent to DataCite References.	
-DatasetRelationshipTypeEnum	is_identical_to	This dataset is identical to the target dataset (e.g., mirror, copy). Equivalent to DataCite IsIdenticalTo.	
-EncodingEnum	ASCII		
-EncodingEnum	Big5		
-EncodingEnum	EUC-JP		
-EncodingEnum	EUC-KR		
-EncodingEnum	EUC-TW		
-EncodingEnum	GB2312		
-EncodingEnum	HZ-GB-2312		
-EncodingEnum	ISO-2022-CN-EXT		
-EncodingEnum	ISO-2022-CN		
-EncodingEnum	ISO-2022-JP-2		
-EncodingEnum	ISO-2022-JP		
-EncodingEnum	ISO-2022-KR		
-EncodingEnum	ISO-8859-10		
-EncodingEnum	ISO-8859-11		
-EncodingEnum	ISO-8859-13		
-EncodingEnum	ISO-8859-14		
-EncodingEnum	ISO-8859-15		
-EncodingEnum	ISO-8859-16		
-EncodingEnum	ISO-8859-1		
-EncodingEnum	ISO-8859-2		
-EncodingEnum	ISO-8859-3		
-EncodingEnum	ISO-8859-4		
-EncodingEnum	ISO-8859-5		
-EncodingEnum	ISO-8859-6		
-EncodingEnum	ISO-8859-7		
-EncodingEnum	ISO-8859-8		
-EncodingEnum	ISO-8859-9		
-EncodingEnum	KOI8-R		
-EncodingEnum	KOI8-U		
-EncodingEnum	Shift_JIS		
-EncodingEnum	UTF-16		
-EncodingEnum	UTF-32		
-EncodingEnum	UTF-7		
-EncodingEnum	UTF-8		
-FormatEnum	CSV		
-FormatEnum	TSV		
-FormatEnum	XML		
-FormatEnum	JSON		
-FormatEnum	JSONL		
-FormatEnum	YAML		
-FormatEnum	HTML		
-FormatEnum	PDF		
-FormatEnum	DOCX		
-FormatEnum	XLSX		
-FormatEnum	PPTX		
-FormatEnum	TXT		
-FormatEnum	MD		
-FormatEnum	ZIP		
-FormatEnum	TAR		
-FormatEnum	GZ		
-FormatEnum	BZ2		
-FormatEnum	XZ		
+DataStandardEnum	DICOM	Digital Imaging and Communications in Medicine — imaging data and its acquisition metadata.	
+DataStandardEnum	BIDS	Brain Imaging Data Structure — a file and directory layout with accompanying metadata for neuroimaging and related recordings.	
+DataStandardEnum	OMOP_CDM	Observational Medical Outcomes Partnership Common Data Model — a relational model for observational health data.	
+DataStandardEnum	WFDB	WaveForm DataBase — physiologic signal records and annotations.	
+DataStandardEnum	OPEN_MHEALTH	Open mHealth — schemas for mobile health and wearable measures.	
+DataStandardEnum	ESDS	ASCII File Format Guidelines for Earth Science Data.	
+DataStandardEnum	CDS	Clinical Dataset Structure.	
+DataStandardEnum	RO_CRATE	RO-Crate — a packaging convention describing a dataset and its context as linked data.	
+DataStandardEnum	FHIR	HL7 FHIR — a standard for exchanging healthcare information.	
+DataStandardEnum	OTHER	A standard the sources name that has no value here. Use it **with** `conforms_to` carrying the name as the source states it, so the fact is not lost to the absence of a term. A run must never pick a near-neighbour: reporting BIDS because a dataset is neuroimaging, when the sources say something else, is an invention.	
+DataUsePermissionEnum	no_restriction	No restriction on data use.	DUO:0000004
+DataUsePermissionEnum	general_research_use	Data available for any research purpose (GRU).	DUO:0000042
+DataUsePermissionEnum	health_medical_biomedical_research	Data limited to health, medical, or biomedical research (HMB).	DUO:0000006
+DataUsePermissionEnum	disease_specific_research	Data limited to research on specified disease(s) (DS).	DUO:0000007
+DataUsePermissionEnum	population_origins_ancestry_research	Data limited to population origins or ancestry research (POA).	DUO:0000011
+DataUsePermissionEnum	clinical_care_use	Data available for clinical care and applications (CC).	DUO:0000043
+DataUsePermissionEnum	no_commercial_use	Data use limited to non-commercial purposes (NCU).	DUO:0000046
+DataUsePermissionEnum	non_profit_use_only	Data use limited to not-for-profit organizations (NPU).	DUO:0000045
+DataUsePermissionEnum	non_profit_use_and_non_commercial_use	Data limited to not-for-profit organizations and non-commercial use (NPUNCU).	DUO:0000018
+DataUsePermissionEnum	no_methods_development	Data cannot be used for methods or software development (NMDS).	DUO:0000015
+DataUsePermissionEnum	genetic_studies_only	Data limited to genetic studies only (GSO).	DUO:0000016
+DataUsePermissionEnum	ethics_approval_required	Ethics approval (e.g., IRB/ERB) required for data use (IRB).	DUO:0000021
+DataUsePermissionEnum	collaboration_required	Collaboration with primary investigator required (COL).	DUO:0000020
+DataUsePermissionEnum	publication_required	Results must be published/shared with research community (PUB).	DUO:0000019
+DataUsePermissionEnum	geographic_restriction	Data use limited to specific geographic region (GS).	DUO:0000022
+DataUsePermissionEnum	institution_specific	Data use limited to approved institutions (IS).	DUO:0000028
+DataUsePermissionEnum	project_specific	Data use limited to approved project(s) (PS).	DUO:0000027
+DataUsePermissionEnum	user_specific	Data use limited to approved users (US).	DUO:0000026
+DataUsePermissionEnum	time_limit	Data use approved for limited time period (TS).	DUO:0000025
+DataUsePermissionEnum	return_to_database	Derived data must be returned to database/resource (RTN).	DUO:0000029
+DataUsePermissionEnum	publication_moratorium	Publication restricted until specified date (MOR).	DUO:0000024
+DataUsePermissionEnum	no_population_ancestry_research	Population/ancestry research prohibited (NPOA).	DUO:0000044
+DatasetRelationshipTypeEnum	derives_from	This dataset is derived from the target dataset through processing, analysis, or transformation.	
+DatasetRelationshipTypeEnum	is_source_of	This dataset is a source from which the target dataset was derived. The inverse of derives_from.	
+DatasetRelationshipTypeEnum	supplements	This dataset supplements or adds to the target dataset.	
+DatasetRelationshipTypeEnum	is_supplemented_by	This dataset is supplemented by the target dataset.	
+DatasetRelationshipTypeEnum	is_version_of	This dataset is a version of the target dataset (e.g., updated, corrected, or revised version).	
+DatasetRelationshipTypeEnum	has_version	This dataset has the target dataset as a version of it. The inverse of is_version_of.	
+DatasetRelationshipTypeEnum	is_new_version_of	This dataset is a new version that replaces or updates the target dataset.	
+DatasetRelationshipTypeEnum	is_previous_version_of	This dataset is an earlier version of the target dataset. The inverse of is_new_version_of.	
+DatasetRelationshipTypeEnum	replaces	This dataset replaces or supersedes the target dataset.	
+DatasetRelationshipTypeEnum	is_replaced_by	This dataset is replaced or superseded by the target dataset.	
+DatasetRelationshipTypeEnum	is_required_by	This dataset is required by the target dataset.	
+DatasetRelationshipTypeEnum	requires	This dataset requires the target dataset.	
+DatasetRelationshipTypeEnum	is_part_of	This dataset is part of the target dataset (e.g., subset, component).	
+DatasetRelationshipTypeEnum	has_part	This dataset has the target dataset as a part.	
+DatasetRelationshipTypeEnum	is_published_in	This dataset is published in the target resource, typically a publication or a data journal.	
+DatasetRelationshipTypeEnum	is_referenced_by	This dataset is referenced by the target dataset.	
+DatasetRelationshipTypeEnum	references	This dataset references the target dataset.	
+DatasetRelationshipTypeEnum	is_cited_by	This dataset is cited by the target dataset. Narrower than is_referenced_by: a citation is a formal bibliographic reference.	
+DatasetRelationshipTypeEnum	cites	This dataset cites the target dataset.	
+DatasetRelationshipTypeEnum	is_continued_by	This dataset is continued by the target dataset, which extends it as a later instalment in the same series.	
+DatasetRelationshipTypeEnum	continues	This dataset continues the target dataset as a later instalment in the same series.	
+DatasetRelationshipTypeEnum	is_described_by	This dataset is described by the target resource.	
+DatasetRelationshipTypeEnum	describes	This dataset describes the target resource.	
+DatasetRelationshipTypeEnum	has_metadata	This dataset has additional metadata held in the target resource.	
+DatasetRelationshipTypeEnum	is_metadata_for	This dataset is metadata for the target dataset.	
+DatasetRelationshipTypeEnum	is_documented_by	This dataset is documented by the target resource, such as a manual or a data dictionary.	
+DatasetRelationshipTypeEnum	documents	This dataset documents the target dataset.	
+DatasetRelationshipTypeEnum	is_compiled_by	This dataset is compiled or created by the target resource, typically software or an instrument.	
+DatasetRelationshipTypeEnum	compiles	This dataset compiles or creates the target dataset.	
+DatasetRelationshipTypeEnum	is_variant_form_of	This dataset is a variant or different form of the target dataset, such as a different encoding or format. This dataset is the variant; the target is the original.	
+DatasetRelationshipTypeEnum	is_original_form_of	This dataset is the original form of the target dataset. This dataset is the original; the target is the variant.	
+DatasetRelationshipTypeEnum	is_reviewed_by	This dataset is reviewed by the target resource.	
+DatasetRelationshipTypeEnum	reviews	This dataset reviews the target dataset.	
+DatasetRelationshipTypeEnum	is_collected_by	This dataset is collected by the target resource, such as a study or a collection effort.	
+DatasetRelationshipTypeEnum	collects	This dataset collects the target dataset.	
+DatasetRelationshipTypeEnum	is_identical_to	This dataset is identical to the target dataset (e.g., mirror, copy).	
+EncodingEnum	ASCII	American Standard Code for Information Interchange (7-bit, English characters only).	
+EncodingEnum	Big5	Traditional Chinese character encoding (primarily Taiwan and Hong Kong).	
+EncodingEnum	EUC-JP	Extended Unix Code for Japanese.	
+EncodingEnum	EUC-KR	Extended Unix Code for Korean.	
+EncodingEnum	EUC-TW	Extended Unix Code for Traditional Chinese.	
+EncodingEnum	GB2312	Simplified Chinese character encoding standard.	
+EncodingEnum	HZ-GB-2312	7-bit encoding for Simplified Chinese (GB2312).	
+EncodingEnum	ISO-2022-CN-EXT	Extended ISO-2022 encoding for Chinese (includes both Simplified and Traditional).	
+EncodingEnum	ISO-2022-CN	ISO-2022 encoding for Chinese.	
+EncodingEnum	ISO-2022-JP-2	Extended ISO-2022 encoding for Japanese (includes additional character sets).	
+EncodingEnum	ISO-2022-JP	ISO-2022 encoding for Japanese.	
+EncodingEnum	ISO-2022-KR	ISO-2022 encoding for Korean.	
+EncodingEnum	ISO-8859-10	Latin-6 (Nordic languages - Danish, Norwegian, Swedish, Icelandic).	
+EncodingEnum	ISO-8859-11	Latin/Thai encoding.	
+EncodingEnum	ISO-8859-13	Latin-7 (Baltic Rim languages).	
+EncodingEnum	ISO-8859-14	Latin-8 (Celtic languages).	
+EncodingEnum	ISO-8859-15	Latin-9 (Western European with Euro sign).	
+EncodingEnum	ISO-8859-16	Latin-10 (South-Eastern European languages).	
+EncodingEnum	ISO-8859-1	Latin-1 (Western European languages).	
+EncodingEnum	ISO-8859-2	Latin-2 (Central European languages).	
+EncodingEnum	ISO-8859-3	Latin-3 (South European languages - Turkish, Maltese, Esperanto).	
+EncodingEnum	ISO-8859-4	Latin-4 (North European languages).	
+EncodingEnum	ISO-8859-5	Latin/Cyrillic encoding.	
+EncodingEnum	ISO-8859-6	Latin/Arabic encoding.	
+EncodingEnum	ISO-8859-7	Latin/Greek encoding.	
+EncodingEnum	ISO-8859-8	Latin/Hebrew encoding.	
+EncodingEnum	ISO-8859-9	Latin-5 (Turkish).	
+EncodingEnum	KOI8-R	Russian character encoding (Kod Obmena Informatsiey).	
+EncodingEnum	KOI8-U	Ukrainian character encoding.	
+EncodingEnum	Shift_JIS	Japanese character encoding (Microsoft and other systems).	
+EncodingEnum	UTF-16	Unicode Transformation Format 16-bit (variable-width encoding).	
+EncodingEnum	UTF-32	Unicode Transformation Format 32-bit (fixed-width encoding).	
+EncodingEnum	UTF-7	Unicode Transformation Format 7-bit (for 7-bit channels).	
+EncodingEnum	UTF-8	Unicode Transformation Format 8-bit (variable-width, most common Unicode encoding).	
+EncodingEnum	Windows-1250	Windows code page for Central European languages.	
+EncodingEnum	Windows-1251	Windows code page for Cyrillic script.	
+EncodingEnum	Windows-1252	Windows code page for Western European languages.	
+EncodingEnum	Windows-1253	Windows code page for Greek.	
+EncodingEnum	Windows-1254	Windows code page for Turkish.	
+EncodingEnum	Windows-1255	Windows code page for Hebrew.	
+EncodingEnum	Windows-1256	Windows code page for Arabic.	
+EncodingEnum	Windows-1257	Windows code page for Baltic languages.	
+EncodingEnum	Windows-1258	Windows code page for Vietnamese.	
+FileCollectionTypeEnum	raw_data	Raw, unprocessed data files.	d4d:RawData
+FileCollectionTypeEnum	processed_data	Cleaned, processed, or transformed data files.	d4d:ProcessedData
+FileCollectionTypeEnum	training_split	Files designated for model training.	d4d:TrainingSplit
+FileCollectionTypeEnum	test_split	Files designated for model testing.	d4d:TestSplit
+FileCollectionTypeEnum	validation_split	Files designated for model validation.	d4d:ValidationSplit
+FileCollectionTypeEnum	documentation	Documentation files (README, codebook, etc.).	schema:Documentation
+FileCollectionTypeEnum	metadata	Metadata or annotation files.	dcat:CatalogRecord
+FileCollectionTypeEnum	code	Code or script files.	schema:SoftwareSourceCode
+FileCollectionTypeEnum	supplementary	Supplementary materials.	schema:SupplementalMaterial
+FileCollectionTypeEnum	other	Other file collection type.	d4d:OtherFileCollection
+FileTypeEnum	data_file	A data file containing dataset content.	schema:DataDownload
+FileTypeEnum	code_file	A source code or script file.	schema:SoftwareSourceCode
+FileTypeEnum	documentation_file	A documentation file (README, guide, etc.).	schema:Documentation
+FileTypeEnum	metadata_file	A metadata or annotation file.	dcat:CatalogRecord
+FileTypeEnum	configuration_file	A configuration or settings file.	d4d:ConfigurationFile
+FileTypeEnum	notebook_file	A computational notebook file (Jupyter, R Markdown, etc.).	d4d:NotebookFile
+FileTypeEnum	image_file	An image or visualization file.	schema:ImageObject
+FileTypeEnum	archive_file	An archive or compressed file.	d4d:ArchiveFile
+FileTypeEnum	other	Other file type.	d4d:OtherFile
+FormatEnum	CSV	Comma-Separated Values - tabular data format.	
+FormatEnum	TSV	Tab-Separated Values - tabular data format with tab delimiters.	
+FormatEnum	XML	Extensible Markup Language - structured markup format.	
+FormatEnum	JSON	JavaScript Object Notation - structured data interchange format.	
+FormatEnum	JSONL	JSON Lines - newline-delimited JSON format.	
+FormatEnum	YAML	YAML Ain't Markup Language - human-readable data serialization format.	
+FormatEnum	HTML	HyperText Markup Language - web page markup format.	
+FormatEnum	PDF	Portable Document Format - fixed-layout document format.	
+FormatEnum	DOCX	Microsoft Word Open XML Document - word processing document.	
+FormatEnum	XLSX	Microsoft Excel Open XML Spreadsheet - spreadsheet format.	
+FormatEnum	PPTX	Microsoft PowerPoint Open XML Presentation - presentation format.	
+FormatEnum	TXT	Plain text file.	
+FormatEnum	MD	Markdown - lightweight markup language.	
+FormatEnum	ZIP	ZIP archive - compressed file container.	
+FormatEnum	TAR	Tape Archive - file archive format.	
+FormatEnum	GZ	Gzip compressed file.	
+FormatEnum	BZ2	Bzip2 compressed file.	
+FormatEnum	XZ	XZ compressed file.	
 LimitationTypeEnum	scope_limitation	Dataset does not cover all intended use cases or populations. The scope of the dataset is narrower than the intended application domain.	
 LimitationTypeEnum	temporal_limitation	Dataset is limited to specific time periods. Data may not reflect current conditions or may not be applicable to other time periods.	
 LimitationTypeEnum	coverage_limitation	Dataset has incomplete coverage of target domain. Missing data points, categories, or geographic regions within the intended scope.	
@@ -146,25 +206,25 @@ LimitationTypeEnum	methodological_limitation	Data collection methodology introdu
 LimitationTypeEnum	representativeness_limitation	Dataset may not be representative of target population. Sample may not accurately reflect the broader population of interest.	
 LimitationTypeEnum	resolution_limitation	Data granularity or resolution is insufficient for some uses. Level of detail may not support fine-grained analysis or specific applications.	
 LimitationTypeEnum	integration_limitation	Challenges in combining with other data sources. Incompatibilities in formats, identifiers, or schemas that hinder data integration.	
-MediaTypeEnum	text/csv		
-MediaTypeEnum	text/tab-separated-values		
-MediaTypeEnum	application/json		
-MediaTypeEnum	application/xml		
-MediaTypeEnum	text/xml		
-MediaTypeEnum	application/yaml		
-MediaTypeEnum	text/yaml		
-MediaTypeEnum	text/html		
-MediaTypeEnum	application/pdf		
-MediaTypeEnum	application/vnd.openxmlformats-officedocument.wordprocessingml.document		
-MediaTypeEnum	application/vnd.openxmlformats-officedocument.spreadsheetml.sheet		
-MediaTypeEnum	application/vnd.openxmlformats-officedocument.presentationml.presentation		
-MediaTypeEnum	text/plain		
-MediaTypeEnum	text/markdown		
-MediaTypeEnum	application/zip		
-MediaTypeEnum	application/x-tar		
-MediaTypeEnum	application/gzip		
-MediaTypeEnum	application/x-bzip2		
-MediaTypeEnum	application/x-xz		
+MediaTypeEnum	text/csv	MIME type for CSV (Comma-Separated Values) files.	
+MediaTypeEnum	text/tab-separated-values	MIME type for TSV (Tab-Separated Values) files.	
+MediaTypeEnum	application/json	MIME type for JSON (JavaScript Object Notation) files.	
+MediaTypeEnum	application/xml	MIME type for XML (Extensible Markup Language) files.	
+MediaTypeEnum	text/xml	Alternative MIME type for XML files (text variant).	
+MediaTypeEnum	application/yaml	MIME type for YAML files.	
+MediaTypeEnum	text/yaml	Alternative MIME type for YAML files (text variant).	
+MediaTypeEnum	text/html	MIME type for HTML (HyperText Markup Language) files.	
+MediaTypeEnum	application/pdf	MIME type for PDF (Portable Document Format) files.	
+MediaTypeEnum	application/vnd.openxmlformats-officedocument.wordprocessingml.document	MIME type for Microsoft Word DOCX files.	
+MediaTypeEnum	application/vnd.openxmlformats-officedocument.spreadsheetml.sheet	MIME type for Microsoft Excel XLSX files.	
+MediaTypeEnum	application/vnd.openxmlformats-officedocument.presentationml.presentation	MIME type for Microsoft PowerPoint PPTX files.	
+MediaTypeEnum	text/plain	MIME type for plain text files.	
+MediaTypeEnum	text/markdown	MIME type for Markdown files.	
+MediaTypeEnum	application/zip	MIME type for ZIP archive files.	
+MediaTypeEnum	application/x-tar	MIME type for TAR archive files.	
+MediaTypeEnum	application/gzip	MIME type for Gzip compressed files.	
+MediaTypeEnum	application/x-bzip2	MIME type for Bzip2 compressed files.	
+MediaTypeEnum	application/x-xz	MIME type for XZ compressed files.	
 VariableTypeEnum	integer	Whole numbers.	
 VariableTypeEnum	float	Floating-point numbers (single precision).	
 VariableTypeEnum	double	Double-precision floating-point numbers.	
@@ -178,15 +238,6 @@ VariableTypeEnum	identifier	Unique identifiers or keys for records or entities.
 VariableTypeEnum	json	JSON-encoded data structures.	
 VariableTypeEnum	array	Arrays or lists of values. May contain elements of the same or different types.	
 VariableTypeEnum	object	Complex structured objects or nested data structures.	
-VersionTypeEnum	MAJOR	Incompatible changes, breaking backward compatibility	
-VersionTypeEnum	MINOR	Backward-compatible new functionality or enhancements	
-VersionTypeEnum	PATCH	Backward-compatible bug fixes or minor corrections	
-EncodingEnum	Windows-1250		
-EncodingEnum	Windows-1251		
-EncodingEnum	Windows-1252		
-EncodingEnum	Windows-1253		
-EncodingEnum	Windows-1254		
-EncodingEnum	Windows-1255		
-EncodingEnum	Windows-1256		
-EncodingEnum	Windows-1257		
-EncodingEnum	Windows-1258		
+VersionTypeEnum	MAJOR	Incompatible changes, breaking backward compatibility.	
+VersionTypeEnum	MINOR	Backward-compatible new functionality or enhancements.	
+VersionTypeEnum	PATCH	Backward-compatible bug fixes or minor corrections.	

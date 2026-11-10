@@ -211,13 +211,49 @@ def without_hash(facts):
     return {k: v for k, v in facts.items() if k != 'request_sha256'}
 
 
-def admit(spec, counter):
+def admit(spec, counter, *, phase='report', max_tokens=128000):
     """The admission alone, on a fixed report request: no run, no ledger."""
     client = SimpleNamespace(messages=SimpleNamespace(count_tokens=counter))
-    kwargs = {'model': 'claude-opus-5', 'system': 'synthetic system', 'max_tokens': 128000, 'temperature': None,
+    kwargs = {'model': 'claude-opus-5', 'system': 'synthetic system', 'max_tokens': max_tokens, 'temperature': None,
               'thinking': None, 'effort': None,
               'messages': [{'role': 'user', 'content': [{'type': 'text', 'text': 'synthetic request'}]}]}
-    api._admit_shared_context(spec, 'report', 1, client, kwargs)
+    api._admit_shared_context(spec, phase, 1, client, kwargs)
+
+
+@pytest.mark.parametrize('phase', ['report', 'report_regate'])
+@pytest.mark.parametrize('input_tokens', [816145, 872000, 872001, 880265])
+def test_million_token_report_window_preserves_requested_cap(tmp_path, phase, input_tokens):
+    """Replay the brief's historical sizes as fake counts, not live measurements."""
+    spec = example(tmp_path, limit=1000000)
+    counter = lambda **kwargs: SimpleNamespace(input_tokens=input_tokens)
+    if input_tokens <= 872000:
+        admit(spec, counter, phase=phase)
+        [facts] = kept(spec, f'{phase}_context.json')
+        assert facts['max_tokens'] == 128000
+        assert facts['input_tokens'] == input_tokens
+    else:
+        with pytest.raises(api.ContextNotAdmitted) as refused:
+            admit(spec, counter, phase=phase)
+        message = str(refused.value)
+        assert all(value in message for value in (
+            phase, f'{input_tokens:,}', '128,000', '1,000,000'))
+        assert refused.value.facts['reason'] == 'over_window'
+        assert refused.value.facts['max_tokens'] == 128000
+    assert not ledger.ledger_path(spec).exists()
+
+
+@pytest.mark.parametrize('phase', ['report', 'report_regate'])
+def test_explicit_cap_uses_exact_remaining_room(tmp_path, phase):
+    """Admission honors a supplied cap; it must never silently choose a smaller one."""
+    spec = example(tmp_path, limit=1000000)
+    input_tokens = 880265
+    room = 1000000 - input_tokens
+    counter = lambda **kwargs: SimpleNamespace(input_tokens=input_tokens)
+    admit(spec, counter, phase=phase, max_tokens=room)
+    [facts] = kept(spec, f'{phase}_context.json')
+    assert facts['max_tokens'] == 119735
+    with pytest.raises(api.ContextNotAdmitted, match='119,736'):
+        admit(spec, counter, phase=phase, max_tokens=room + 1)
 
 
 def kept(spec, name):
