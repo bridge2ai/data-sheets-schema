@@ -597,18 +597,52 @@ class TestPinnedInRepositoryLocation(unittest.TestCase):
 
     def test_pin_in_this_repository_writes_dot_and_preserves_canonical_hashes(self):
         import hashlib
-        from data_sheets_schema.resources import CHECKOUT_ROOT
         repo = self.root / "repo"
         (repo / "src" / "download" / "prompts").mkdir(parents=True)
         self._git(repo, "init", "-q")
+        existing_prompt = repo / "src" / "download" / "prompts" / "p0.md"
+        existing_prompt.write_text(
+            "# p0\n\n## Prompt body\nexisting fixture prompt\n", encoding="utf-8"
+        )
         target_prompt = repo / "src" / "download" / "prompts" / "p1.md"
         expected_text = "# p1\n\n## Prompt body\nhermetic fixture prompt\n"
         target_prompt.write_text(expected_text, encoding="utf-8")
         self._git(repo, "add", ".")
-        self._git(repo, "commit", "-q", "-m", "initial prompt")
+        self._git(repo, "commit", "-q", "-m", "initial prompts")
 
         reg = repo / "src" / "download" / "prompts" / "canonical_hashes.yaml"
-        pr.pin(target_prompt, "verify local pin location", registry=reg)
+        pr.pin(
+            existing_prompt,
+            "seed fixture registry",
+            registry=reg,
+            today="2026-11-09",
+        )
+        self._git(repo, "add", "src/download/prompts/canonical_hashes.yaml")
+        self._git(repo, "commit", "-q", "-m", "commit fixture registry")
+        before_existing_entry = pr.entry_for(existing_prompt, reg)
+        committed_reg_bytes = self._git_bytes(
+            repo, "show", f"HEAD:{pr.REGISTRY.as_posix()}"
+        )
+
+        scratch_reg = repo / "src" / "download" / "prompts" / "scratch_hashes.yaml"
+        pr.pin(
+            target_prompt,
+            "pin into scratch registry",
+            registry=scratch_reg,
+            today="2026-11-10",
+        )
+        self.assertEqual(
+            hashlib.sha256(reg.read_bytes()).hexdigest(),
+            hashlib.sha256(committed_reg_bytes).hexdigest(),
+        )
+        self.assertEqual(reg.read_bytes(), committed_reg_bytes)
+
+        pr.pin(
+            target_prompt,
+            "verify local pin location",
+            registry=reg,
+            today="2026-11-10",
+        )
         pinned = pr.entry_for(target_prompt, reg)
 
         self.assertEqual(pinned["pinned_in_repository"], ".")
@@ -616,6 +650,7 @@ class TestPinnedInRepositoryLocation(unittest.TestCase):
             pinned["pinned_blob_path"],
             "src/download/prompts/p1.md",
         )
+        self.assertEqual(pr.entry_for(existing_prompt, reg), before_existing_entry)
         blob = self._git(
             reg.parent / pinned["pinned_in_repository"],
             "show",
@@ -623,16 +658,15 @@ class TestPinnedInRepositoryLocation(unittest.TestCase):
         )
         self.assertEqual(blob, expected_text)
 
-        real_reg = CHECKOUT_ROOT / pr.REGISTRY
-        disk_bytes = real_reg.read_bytes()
-        origin_main_bytes = self._git_bytes(
-            CHECKOUT_ROOT, "show", f"origin/main:{pr.REGISTRY.as_posix()}"
+        reg_bytes_after_pin = reg.read_bytes()
+        repin = pr.pin(
+            target_prompt,
+            "re-pin unchanged prompt",
+            registry=reg,
+            today="2026-11-10",
         )
-        self.assertEqual(
-            hashlib.sha256(disk_bytes).hexdigest(),
-            hashlib.sha256(origin_main_bytes).hexdigest(),
-        )
-        self.assertEqual(disk_bytes, origin_main_bytes)
+        self.assertEqual(repin["status"], "unchanged")
+        self.assertEqual(reg.read_bytes(), reg_bytes_after_pin)
 
     def test_pin_in_repository_and_linked_worktree_writes_dot_and_audit_route_works(self):
         repo = self.root / "repo"
