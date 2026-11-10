@@ -25,8 +25,11 @@ preserves that sequence. Plan acceptance is not implementation acceptance.
   native acceptance remains unmet. The current dispatch records the reviewed
   rollup and outstanding checks.
 - [Prepared WP1 diagnostic handoff](codex_native_wp1_assignment_2026-11-10.md):
-  implementation only is now dispatched after final U3-M report review.
-  Composition, canary and timing execution remain separate pending steps.
+  the first implementation checkpoint is saved at `e3e9cfa12`. Its partial
+  follow-up is stopped after automatic approval review rejected further edits
+  as outside the earlier U3-M authorization. The owner confirmation question
+  is pending; no WP1 test has run. Composition and timing execution remain
+  separate pending steps. See the latest worker coordination checkpoint.
 - [Worker coordination](worker_dispatch_2026-11-10.md) and
   [read-only monitoring helper](../../scripts/adhoc/monitor_worker_terminals_20261110.applescript):
   terminal identities, dispatches, native scheduling amendment and active-turn

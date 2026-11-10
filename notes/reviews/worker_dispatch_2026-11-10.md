@@ -137,3 +137,41 @@ composition, source archive, environment install, canary or timing arm yet.
 The owner should identify the smallest subsequent equivalence check and the
 storage needed for a valid fresh measurement setup. The missing observer and
 selector are expected implementation work, not reasons to repeat planning.
+
+## Live monitoring checkpoint, 2026-11-10 06:08 UTC
+
+The lead continues active-turn monitoring. Terminal viewport reads sometimes
+time out; process state, saved artifacts, the native thread and published
+GitHub readbacks provide corroboration. A timeout is not treated as an idle
+worker or permission to restart it. The original AGY2 conversation was resumed
+again using `agy-work` at approximately 05:59 UTC; its obsolete PR 5711
+publication assignment was cancelled after transfer to AGY4.
+
+| Worker | Current verified state | Next action or gate |
+|---|---|---|
+| agy1, ttys034 | Scanner PR 5665 has published head `2a5db4ac5c5f18d1397a4b0aaa17a5e1e13a4cd7`; all 15 focused witness cases are retained. Independent source review found no new missed-content regression in its bounded scope. CI is queued. | Record two P3 conservative precision limits and the helper's silent durable-write failure as follow-ups; finish body and handoff. No broader local test run is authorized by this checkpoint. |
+| agy2, ttys048 | Saved the read-only WP1 quiet-window adapter proposal in the sibling review directory. | Await AGY3 and lead review; no native implementation ownership transferred. |
+| agy3, ttys002 | PR 5709 head `807417fc2200b3126d485b215e68c5eeaabd507b` and description passed independent readback; retained validation is 15 passes in 3.68 seconds. | Review AGY2's proposal. Authorship issue 5731 and release issue 5737 remain owner decisions. |
+| agy4, ttys010 | Published PR 5711 at `c22a08538f1901671b79e071d6c1eec87ef36ca0`. The WP1 issue-publication task is in progress. | Finish mapping seven existing local findings to issue records; no native code or tests. |
+| native Codex, ttys001 | U3-M is complete; WP1 checkpoint `e3e9cfa12e3c81cbbe4f78cda2a0e1612fcb44c1` plus a partial follow-up are preserved. No WP1 code was executed. | Explicit owner confirmation is pending after automatic approval review rejected the remaining helper edit. Do not run or implement around the partial state. |
+
+The native approval request names the remaining bounded WP1 helper fixes and
+one synthetic observer smoke test capped at 30 seconds. It does not authorize
+composition, timing arms, native/provider execution, protected-byte changes,
+push or merge. Findings 5745 and 5746 record profile-mutation non-equivalence
+and interruption cleanup; both remain open. The partial ownership gate has
+not been wired into the supervisor and must not run.
+
+Current native handoff:
+`/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_wp1_implementation_2026-11-10.md`
+(SHA-256 `9e56df956edb2210c192a993fb87f1f4bf99b50c489b652ccd3014116ed4fcf4`).
+The new, unaccepted proposal is
+`/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/native_wp1_quiet_window_adapter_plan_2026-11-10.md`.
+It is planning evidence, not permission to remove the measured-arm refusals.
+
+Free space is approximately 18 GiB at this checkpoint. All 15 externally paused
+processes were resumed and verified at 05:38 UTC; later process absence does
+not establish those jobs' outcomes. No deletion occurred. The separate proposal
+to remove exactly 26 npm cache archives and their index entries remains
+unapproved and is no longer an immediate storage prerequisite. No PR was merged
+and no generation run was started by this coordination work.
