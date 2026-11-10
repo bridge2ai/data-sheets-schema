@@ -514,6 +514,50 @@ class TestCitationMetadataValidation(unittest.TestCase):
             self.assertEqual(code, 1)
             self.assertIn("FAIL pyproject.toml declares conditional tomli dependency for Python < 3.11", stdout)
 
+    def test_r2_cruft_null_url_port_ipv6_and_invalid_utf8(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+
+            # 1. .cruft.json valid JSON null must fail author check (#5735)
+            fx_null = _copy_metadata_fixture(base / "cruft_json_null", mutable=(".cruft.json",))
+            (fx_null / ".cruft.json").write_text("null\n", encoding="utf-8")
+            code, stdout, stderr, exc = _invoke_checker(fx_null)
+            self.assertIsNone(exc, f".cruft.json null raised {exc!r}")
+            self.assertEqual(code, 1, ".cruft.json null must fail")
+            self.assertIn("FAIL .cruft.json parses and declares non-empty full_name and __author", stdout)
+            self.assertEqual(stderr, "")
+
+            # 2a. https://example.com:bad/path invalid port must fail (#5733)
+            fx_port = _copy_metadata_fixture(base / "url_bad_port", mutable=("CITATION.cff",))
+            cff_doc = yaml.safe_load((fx_port / "CITATION.cff").read_text(encoding="utf-8"))
+            cff_doc["repository-code"] = "https://example.com:bad/path"
+            (fx_port / "CITATION.cff").write_text(yaml.safe_dump(cff_doc, sort_keys=False), encoding="utf-8")
+            code, stdout, stderr, exc = _invoke_checker(fx_port)
+            self.assertIsNone(exc, f"Bad port URL raised {exc!r}")
+            self.assertEqual(code, 1, "https://example.com:bad/path must fail")
+            self.assertIn("FAIL repository-code is a valid https URL with host and path", stdout)
+            self.assertEqual(stderr, "")
+
+            # 2b. https://[example.com/path malformed IPv6 host must fail cleanly without ValueError (#5734)
+            fx_ipv6 = _copy_metadata_fixture(base / "url_bad_ipv6", mutable=("CITATION.cff",))
+            cff_doc = yaml.safe_load((fx_ipv6 / "CITATION.cff").read_text(encoding="utf-8"))
+            cff_doc["url"] = "https://[example.com/path"
+            (fx_ipv6 / "CITATION.cff").write_text(yaml.safe_dump(cff_doc, sort_keys=False), encoding="utf-8")
+            code, stdout, stderr, exc = _invoke_checker(fx_ipv6)
+            self.assertIsNone(exc, f"Malformed IPv6 URL raised {exc!r}")
+            self.assertEqual(code, 1, "https://[example.com/path must fail cleanly")
+            self.assertIn("FAIL url is a valid https URL with host and path", stdout)
+            self.assertEqual(stderr, "")
+
+            # 3. Invalid UTF-8 bytes must fail cleanly without UnicodeDecodeError (#5734)
+            fx_utf8 = _copy_metadata_fixture(base / "invalid_utf8", mutable=("LICENSE",))
+            (fx_utf8 / "LICENSE").write_bytes(b"\xff\xfeinvalid utf-8\n")
+            code, stdout, stderr, exc = _invoke_checker(fx_utf8)
+            self.assertIsNone(exc, f"Invalid UTF-8 raised {exc!r}")
+            self.assertEqual(code, 1, "Invalid UTF-8 must fail cleanly")
+            self.assertIn("FAIL LICENSE is readable", stdout)
+            self.assertEqual(stderr, "")
+
 
 if __name__ == "__main__":
     unittest.main()

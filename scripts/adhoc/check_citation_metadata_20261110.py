@@ -40,11 +40,15 @@ def _is_non_empty_str(value: Any) -> bool:
 def _is_valid_https_url(value: Any) -> bool:
     if not _is_non_empty_str(value) or any(ch.isspace() for ch in value):
         return False
-    parsed = urlsplit(value)
+    try:
+        parsed = urlsplit(value)
+        _ = parsed.port
+    except ValueError:
+        return False
     return (
         parsed.scheme == "https"
-        and bool(parsed.netloc)
-        and "." in parsed.netloc
+        and bool(parsed.hostname)
+        and "." in parsed.hostname
         and bool(parsed.path and parsed.path != "/")
     )
 
@@ -72,7 +76,7 @@ def run_checks(root: Path | None = None) -> list[str]:
         path = repo_root / rel_path
         try:
             return path.read_text(encoding="utf-8")
-        except OSError as exc:
+        except (OSError, UnicodeDecodeError) as exc:
             check(False, f"{rel_path} is readable ({exc})")
             return None
 
@@ -218,10 +222,12 @@ def run_checks(root: Path | None = None) -> list[str]:
     if cruft_text is not None:
         try:
             cruft_doc = json.loads(cruft_text)
+            cruft_parsed = True
         except json.JSONDecodeError as exc:
             check(False, f".cruft.json parses as valid JSON ({exc.msg})")
             cruft_doc = None
-        if cruft_doc is not None:
+            cruft_parsed = False
+        if cruft_parsed:
             cc = (
                 cruft_doc.get("context", {}).get("cookiecutter", {})
                 if isinstance(cruft_doc, dict) and isinstance(cruft_doc.get("context"), dict)
