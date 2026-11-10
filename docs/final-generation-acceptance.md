@@ -1,6 +1,6 @@
 # Final Generation Acceptance Guide
 
-Operator acceptance checklist for final D4D record generation on schema `3.2.0`. Acceptance combines shape validation, full-to-Core derivation consistency, existing coverage/audit/provenance gates, rendered HTML inspection, and independent source review.
+Operator acceptance checklist for final D4D record generation on the pinned integrated schema. Acceptance combines shape validation, full-to-Core derivation consistency, existing coverage/audit/provenance gates, rendered HTML inspection, and independent source review.
 
 ## 1. Freeze Prerequisites Before Generation
 
@@ -37,9 +37,9 @@ Operator acceptance checklist for final D4D record generation on schema `3.2.0`.
    poetry run d4d validate --schema core <core.yaml>
    ```
    Because `id` (`NamedThing.id`) is the only required top-level field on `Dataset` and `CoreDataset`, an ID-only stub passes isolated schema validation. Schema validity is required for shape conformance, not sufficient for pipeline acceptance.
-2. **Schema `3.2.0` structural boundaries:**
-   - `creators` is a list of `Creator` containers and `maintainers` is a list of `Maintainer` containers, with `Person` objects nested inside those containers (for example `principal_investigator`) or under governance `contact_person` fields—never bare name strings.
-   - Narrative response/description fields and `FileCollection.collection_type` (`#2975`) must be scalar strings, while `DataUsePermission.data_use_permission` is a list.
+2. **Pinned integrated schema structural boundaries:**
+   - `creators` is a list of `Creator` containers (`Creator.principal_investigator` takes a nested `Person` object) and `maintainers` is a list of `Maintainer` containers (`role` plus scalar string `maintainer_details`, with no nested `Person`). Explicit `Person` object paths (`Creator.principal_investigator`, `LicenseAndUseTerms.contact_person`, and `DataGovernance.committee_contact`) must be inline `Person` mappings, never bare name strings.
+   - Scalar narrative slots (for example `Purpose.response`) and `FileCollection.collection_type` (`#2975`) must be scalar strings, while `LicenseAndUseTerms.data_use_permission` is a list.
 3. **Full/Core pair consistency (does not replace schema validation):** The pair checker verifies full-to-Core projection consistency only, not LinkML schema validity, so run it after separate full and Core `d4d validate` checks:
    ```bash
    make validate-d4d-pair FULL=<full.yaml> CORE=<core.yaml>
