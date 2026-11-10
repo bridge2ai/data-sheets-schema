@@ -28,7 +28,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / "src" / "data_sheets_schema" / "schema"
 CHECKER_SCRIPT = ROOT / "scripts" / "adhoc" / "check_citation_metadata_20261110.py"
-RELEASE = "3.2.0"
+RELEASE = "3.2.1"
 
 METADATA_FILES = (
     "CITATION.cff",
@@ -176,6 +176,27 @@ class TestReleaseIdentity(unittest.TestCase):
         self.assertIn("core_declared_version", attrs)
         self.assertIn("core_declared_in", attrs)
         self.assertFalse(attrs["core_declared_version"].get("required", False))
+
+    def test_file_collection_type_prose_matches_scalar_declaration(self):
+        """FileCollection.collection_type is scalar FileCollectionTypeEnum (#2975)."""
+        fc_doc = yaml.safe_load((SCHEMA / "D4D_FileCollection.yaml").read_text(encoding="utf-8"))
+        attr = fc_doc["classes"]["FileCollection"]["attributes"]["collection_type"]
+        self.assertEqual(attr["range"], "FileCollectionTypeEnum")
+        self.assertFalse(bool(attr.get("multivalued", False)))
+        desc = " ".join(str(attr.get("description", "")).split())
+        self.assertIn("one collection_type value", desc)
+        self.assertIn("separate FileCollection entries", desc)
+        for forbidden in ("Type(s)", "may have multiple types", "both types listed"):
+            self.assertNotIn(forbidden, desc)
+
+        merged_path = SCHEMA / "data_sheets_schema_all.yaml"
+        if merged_path.exists():
+            merged_doc = yaml.safe_load(merged_path.read_text(encoding="utf-8"))
+            merged_attr = merged_doc["classes"]["FileCollection"]["attributes"]["collection_type"]
+            self.assertEqual(merged_attr["range"], "FileCollectionTypeEnum")
+            self.assertFalse(bool(merged_attr.get("multivalued", False)))
+            merged_desc = " ".join(str(merged_attr.get("description", "")).split())
+            self.assertEqual(merged_desc, desc)
 
 
 class TestCitationMetadataValidation(unittest.TestCase):
@@ -397,7 +418,7 @@ class TestCitationMetadataValidation(unittest.TestCase):
             fx_float = _copy_metadata_fixture(base / "version_float")
             cff_text = (fx_float / "CITATION.cff").read_text(encoding="utf-8")
             (fx_float / "CITATION.cff").write_text(
-                re.sub(r"^version:\s*3\.2\.0\b", "version: 3.20", cff_text, count=1, flags=re.MULTILINE),
+                re.sub(r"^version:\s*3\.2\.1\b", "version: 3.20", cff_text, count=1, flags=re.MULTILINE),
                 encoding="utf-8",
             )
             code, stdout, _, exc = _invoke_checker(fx_float)
@@ -418,9 +439,9 @@ class TestCitationMetadataValidation(unittest.TestCase):
                 p = fx / rel_schema
                 text = p.read_text(encoding="utf-8")
                 if rel_schema.endswith("release_history.yaml"):
-                    text = text.replace("  - version: 3.2.0", "  - version: 3.1.9", 1)
+                    text = text.replace("  - version: 3.2.1", "  - version: 3.1.9", 1)
                 else:
-                    text = re.sub(r"^version:\s*3\.2\.0\b", "version: 3.1.9", text, count=1, flags=re.MULTILINE)
+                    text = re.sub(r"^version:\s*3\.2\.1\b", "version: 3.1.9", text, count=1, flags=re.MULTILINE)
                 p.write_text(text, encoding="utf-8")
                 code, stdout, _, exc = _invoke_checker(fx)
                 self.assertIsNone(exc)
