@@ -56,6 +56,78 @@ def _venv_is_isolated_for_repo(venv_dir: Path, repo_root: Path) -> bool:
     return True
 
 
+_OUTER_SITES_HELPER_SOURCE = '''"""Helper imported by deps.pth in the isolated test venv (#5676, #5677)."""
+
+import os
+import sys
+
+
+def _has_dist_or_egg_info(dir_path):
+    try:
+        entries = os.listdir(dir_path)
+    except OSError:
+        return False
+    for entry in entries:
+        if entry.endswith((".dist-info", ".egg-info")):
+            return True
+    return False
+
+
+def _is_filtered_pth_path(candidate, expected_src_real):
+    norm = os.path.normpath(candidate)
+    if os.path.realpath(norm) == expected_src_real:
+        return False
+    if _has_dist_or_egg_info(norm):
+        return False
+    if os.path.isdir(os.path.join(norm, "data_sheets_schema")):
+        return True
+    if os.path.isdir(os.path.join(norm, "src", "data_sheets_schema")):
+        return True
+    return False
+
+
+def _append_unique(path_str):
+    if path_str not in sys.path:
+        sys.path.append(path_str)
+
+
+def add_outer_sites(expected_src, outer_sites):
+    expected_src_real = os.path.realpath(expected_src)
+    for raw_site in outer_sites:
+        site_dir = os.path.abspath(raw_site)
+        if not os.path.isdir(site_dir):
+            continue
+        _append_unique(site_dir)
+        try:
+            names = sorted(os.listdir(site_dir))
+        except OSError:
+            continue
+        for name in names:
+            if not name.endswith((".pth", ".PTH")):
+                continue
+            pth_file = os.path.join(site_dir, name)
+            try:
+                with open(pth_file, "r", encoding="utf-8", errors="ignore") as fh:
+                    lines = fh.read().splitlines()
+            except OSError:
+                continue
+            for raw_line in lines:
+                if raw_line.startswith("#"):
+                    continue
+                stripped = raw_line.strip()
+                if not stripped or stripped.startswith("#"):
+                    continue
+                if raw_line.startswith(("import ", "import\\t")) or stripped.startswith(("import ", "import\\t")):
+                    continue
+                candidate = os.path.abspath(os.path.join(site_dir, stripped))
+                if not os.path.exists(candidate):
+                    continue
+                if _is_filtered_pth_path(candidate, expected_src_real):
+                    continue
+                _append_unique(candidate)
+'''
+
+
 def _get_isolated_venv() -> Path:
     """Return REPO_ROOT/.venv if isolated for REPO_ROOT, or build a lightweight isolated venv."""
     global _CACHED_ISOLATED_VENV
@@ -76,9 +148,11 @@ def _get_isolated_venv() -> Path:
     assert site_Result, f"No site-packages created in {venv_dir}"
     venv_site = site_Result[0]
 
+    expected_src = str((REPO_ROOT / "src").resolve())
     shared_sites = [p for p in site.getsitepackages() if Path(p).is_dir()]
-    deps_lines = [f"import sys; sys.path.append({p!r})" for p in shared_sites]
-    (venv_site / "deps.pth").write_text("\n".join(deps_lines) + "\n", encoding="utf-8")
+    (venv_site / "_d4d_outer_sites.py").write_text(_OUTER_SITES_HELPER_SOURCE, encoding="utf-8")
+    deps_line = f"import _d4d_outer_sites; _d4d_outer_sites.add_outer_sites({expected_src!r}, {shared_sites!r})"
+    (venv_site / "deps.pth").write_text(deps_line + "\n", encoding="utf-8")
     (venv_site / "data_sheets_schema.pth").write_text(f"{REPO_ROOT / 'src'}\n", encoding="utf-8")
 
     d4d_bin = venv_dir / "bin" / "d4d"
@@ -352,6 +426,331 @@ class TestImportIsolationCheck:
 
         with pytest.raises(LauncherError, match="does not resolve to expected"):
             run_import_check(py_bin, wt, clean_env)
+
+    @staticmethod
+    def _build_isolated_venv_with_outer_sites(monkeypatch, outer_site: Path) -> tuple[Path, Path, dict[str, str]]:
+        orig_sites = [p for p in site.getsitepackages() if Path(p).is_dir()]
+        monkeypatch.setattr(
+            sys.modules[__name__],
+            "_venv_is_isolated_for_repo",
+            lambda _venv, _repo: False,
+        )
+        monkeypatch.setattr(sys.modules[__name__], "_CACHED_ISOLATED_VENV", None)
+        monkeypatch.setattr(site, "getsitepackages", lambda: [str(outer_site), *orig_sites])
+
+        venv_dir = _get_isolated_venv()
+        _, py_bin, _ = find_venv_and_binaries(REPO_ROOT, venv_arg=venv_dir)
+        clean_env = clean_environment(REPO_ROOT)
+        clean_env["CBORG_API_KEY"] = "dummy"
+        return venv_dir, py_bin, clean_env
+
+    def test_isolated_venv_processes_outer_site_pth_files(self, tmp_path: Path, monkeypatch):
+        """#5676: _get_isolated_venv processes .pth files in outer site directories without leaking external src."""
+        outer_site = tmp_path / "outer_site"
+        outer_site.mkdir()
+        pth_dep_dir = tmp_path / "pth_dep"
+        pth_dep_dir.mkdir()
+        (pth_dep_dir / "d4d_pth_probe_5676.py").write_text("MARKER = 'pth_dep_ok'\n", encoding="utf-8")
+
+        external_src = tmp_path / "external_wt" / "src"
+        (external_src / "data_sheets_schema").mkdir(parents=True)
+        (outer_site / "u3a_paths.pth").write_text(
+            f"{external_src}\n{pth_dep_dir}\n",
+            encoding="utf-8",
+        )
+
+        _, py_bin, clean_env = self._build_isolated_venv_with_outer_sites(monkeypatch, outer_site)
+        run_import_check(py_bin, REPO_ROOT, clean_env)
+
+        probe = subprocess.run(
+            [str(py_bin), "-c", "import d4d_pth_probe_5676; print(d4d_pth_probe_5676.MARKER)"],
+            cwd=str(REPO_ROOT),
+            env=clean_env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert probe.returncode == 0, f"probe failed (stderr={probe.stderr!r}, stdout={probe.stdout!r})"
+        assert probe.stdout.strip() == "pth_dep_ok"
+
+    def test_isolated_venv_drops_foreign_src_basename_from_outer_pth(self, tmp_path: Path, monkeypatch):
+        """N-1 (#5706): A foreign src holding data_sheets_schema/ is dropped while a src-layout dependency is kept and imports."""
+        outer_site = tmp_path / "outer_site"
+        outer_site.mkdir()
+        pth_dep_dir = tmp_path / "pth_dep"
+        pth_dep_dir.mkdir()
+        (pth_dep_dir / "d4d_pth_probe_5676.py").write_text("MARKER = 'pth_dep_ok'\n", encoding="utf-8")
+
+        foreign_src = tmp_path / "other_checkout" / "src"
+        (foreign_src / "data_sheets_schema").mkdir(parents=True)
+        (foreign_src / "foreign_src_only_5677.py").write_text("LEAKED = True\n", encoding="utf-8")
+
+        src_layout_dep = tmp_path / "otherdep" / "src"
+        (src_layout_dep / "otherdep_r2").mkdir(parents=True)
+        (src_layout_dep / "otherdep_r2" / "__init__.py").write_text("DEP_MARKER = 'otherdep_ok'\n", encoding="utf-8")
+
+        (outer_site / "u3a_paths.pth").write_text(
+            f"{foreign_src}\n{src_layout_dep}\n{pth_dep_dir}\n",
+            encoding="utf-8",
+        )
+
+        _, py_bin, clean_env = self._build_isolated_venv_with_outer_sites(monkeypatch, outer_site)
+        run_import_check(py_bin, REPO_ROOT, clean_env)
+
+        probe = subprocess.run(
+            [
+                str(py_bin),
+                "-c",
+                (
+                    "import json, sys, d4d_pth_probe_5676, otherdep_r2\n"
+                    "try:\n"
+                    "    import foreign_src_only_5677\n"
+                    "    leaked = True\n"
+                    "except ImportError:\n"
+                    "    leaked = False\n"
+                    "print(json.dumps({\n"
+                    "    'sys_path': sys.path,\n"
+                    "    'leaked': leaked,\n"
+                    "    'otherdep': otherdep_r2.DEP_MARKER,\n"
+                    "    'marker': d4d_pth_probe_5676.MARKER,\n"
+                    "}))\n"
+                ),
+            ],
+            cwd=str(REPO_ROOT),
+            env=clean_env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert probe.returncode == 0, f"probe failed (stderr={probe.stderr!r}, stdout={probe.stdout!r})"
+        payload = json.loads(probe.stdout.strip().splitlines()[-1])
+        assert str(foreign_src) not in payload["sys_path"]
+        assert str(src_layout_dep) in payload["sys_path"]
+        assert payload["leaked"] is False
+        assert payload["otherdep"] == "otherdep_ok"
+        assert payload["marker"] == "pth_dep_ok"
+
+    def test_isolated_venv_drops_directory_holding_data_sheets_schema_from_outer_pth(self, tmp_path: Path, monkeypatch):
+        """P3-1: isdir(<candidate>/data_sheets_schema) filter clause alone drops a non-'src' directory holding data_sheets_schema."""
+        outer_site = tmp_path / "outer_site"
+        outer_site.mkdir()
+        pth_dep_dir = tmp_path / "pth_dep"
+        pth_dep_dir.mkdir()
+        (pth_dep_dir / "d4d_pth_probe_5676.py").write_text("MARKER = 'pth_dep_ok'\n", encoding="utf-8")
+
+        foreign_pkg_holder = tmp_path / "foreign_pkg_holder"
+        (foreign_pkg_holder / "data_sheets_schema").mkdir(parents=True)
+        (outer_site / "u3a_paths.pth").write_text(
+            f"{foreign_pkg_holder}\n{pth_dep_dir}\n",
+            encoding="utf-8",
+        )
+
+        _, py_bin, clean_env = self._build_isolated_venv_with_outer_sites(monkeypatch, outer_site)
+        run_import_check(py_bin, REPO_ROOT, clean_env)
+
+        probe = subprocess.run(
+            [str(py_bin), "-c", "import json, sys, d4d_pth_probe_5676; print(json.dumps({'sys_path': sys.path, 'marker': d4d_pth_probe_5676.MARKER}))"],
+            cwd=str(REPO_ROOT),
+            env=clean_env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert probe.returncode == 0, f"probe failed (stderr={probe.stderr!r}, stdout={probe.stdout!r})"
+        payload = json.loads(probe.stdout.strip().splitlines()[-1])
+        assert str(foreign_pkg_holder) not in payload["sys_path"]
+        assert payload["marker"] == "pth_dep_ok"
+
+    def test_isolated_venv_drops_foreign_checkout_root_from_outer_pth(self, tmp_path: Path, monkeypatch):
+        """P3-1 & P3-2: isdir(<candidate>/src/data_sheets_schema) filter clause drops a foreign checkout root."""
+        outer_site = tmp_path / "outer_site"
+        outer_site.mkdir()
+        pth_dep_dir = tmp_path / "pth_dep"
+        pth_dep_dir.mkdir()
+        (pth_dep_dir / "d4d_pth_probe_5676.py").write_text("MARKER = 'pth_dep_ok'\n", encoding="utf-8")
+
+        foreign_root = tmp_path / "foreign_checkout"
+        (foreign_root / "src" / "data_sheets_schema").mkdir(parents=True)
+        (foreign_root / "src" / "foreign_only_5677.py").write_text("X = 1\n", encoding="utf-8")
+        (foreign_root / "foreign_toplevel_5677.py").write_text("X = 1\n", encoding="utf-8")
+        (outer_site / "u3a_paths.pth").write_text(
+            f"{foreign_root}\n{pth_dep_dir}\n",
+            encoding="utf-8",
+        )
+
+        _, py_bin, clean_env = self._build_isolated_venv_with_outer_sites(monkeypatch, outer_site)
+        probe = subprocess.run(
+            [
+                str(py_bin),
+                "-c",
+                (
+                    "import json, sys, d4d_pth_probe_5676\n"
+                    "try:\n"
+                    "    import foreign_toplevel_5677\n"
+                    "    top_leaked = True\n"
+                    "except ImportError:\n"
+                    "    top_leaked = False\n"
+                    "try:\n"
+                    "    import src.foreign_only_5677\n"
+                    "    src_ns_leaked = True\n"
+                    "except ImportError:\n"
+                    "    src_ns_leaked = False\n"
+                    "print(json.dumps({'sys_path': sys.path, 'top_leaked': top_leaked, 'src_ns_leaked': src_ns_leaked, 'marker': d4d_pth_probe_5676.MARKER}))\n"
+                ),
+            ],
+            cwd=str(tmp_path),
+            env=clean_env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert probe.returncode == 0, f"probe failed (stderr={probe.stderr!r}, stdout={probe.stdout!r})"
+        payload = json.loads(probe.stdout.strip().splitlines()[-1])
+        assert str(foreign_root) not in payload["sys_path"]
+        assert payload["top_leaked"] is False
+        assert payload["src_ns_leaked"] is False
+        assert payload["marker"] == "pth_dep_ok"
+
+    def test_isolated_venv_keeps_this_checkouts_own_src_from_outer_pth(self, tmp_path: Path, monkeypatch):
+        """P3-1: realpath(candidate) == expected_src_real clause keeps this checkout's own src when added via an outer .pth."""
+        outer_site = tmp_path / "outer_site"
+        outer_site.mkdir()
+
+        own_src_alias_parent = tmp_path / "own_wt_alias"
+        own_src_alias_parent.mkdir()
+        own_src_alias = own_src_alias_parent / "src"
+        own_src_alias.symlink_to((REPO_ROOT / "src").resolve())
+        (outer_site / "u3a_paths.pth").write_text(f"{own_src_alias}\n", encoding="utf-8")
+
+        venv_dir, py_bin, clean_env = self._build_isolated_venv_with_outer_sites(monkeypatch, outer_site)
+        run_import_check(py_bin, REPO_ROOT, clean_env)
+
+        for pth in venv_dir.glob("lib/python*/site-packages/data_sheets_schema.pth"):
+            pth.unlink()
+        env_no_pythonpath = {k: v for k, v in clean_env.items() if k != "PYTHONPATH"}
+        probe = subprocess.run(
+            [
+                str(py_bin),
+                "-c",
+                "import json, sys, data_sheets_schema.api_launcher as m; print(json.dumps({'sys_path': sys.path, 'file': m.__file__}))",
+            ],
+            cwd=str(tmp_path),
+            env=env_no_pythonpath,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert probe.returncode == 0, f"probe failed (stderr={probe.stderr!r}, stdout={probe.stdout!r})"
+        payload = json.loads(probe.stdout.strip().splitlines()[-1])
+        assert str(own_src_alias) in payload["sys_path"]
+        assert Path(payload["file"]).resolve() == (REPO_ROOT / "src" / "data_sheets_schema" / "api_launcher.py").resolve()
+
+    def test_isolated_venv_never_drops_outer_site_directory_itself(self, tmp_path: Path, monkeypatch):
+        """P3-3: An outer site directory itself is never dropped even if it contains a data_sheets_schema directory."""
+        outer_site = tmp_path / "outer_site"
+        (outer_site / "data_sheets_schema").mkdir(parents=True)
+        (outer_site / "sibling_dep_5677.py").write_text("VALUE = 'sibling_ok'\n", encoding="utf-8")
+
+        _, py_bin, clean_env = self._build_isolated_venv_with_outer_sites(monkeypatch, outer_site)
+        probe = subprocess.run(
+            [
+                str(py_bin),
+                "-c",
+                "import json, sys, sibling_dep_5677; print(json.dumps({'sys_path': sys.path, 'value': sibling_dep_5677.VALUE}))",
+            ],
+            cwd=str(REPO_ROOT),
+            env=clean_env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert probe.returncode == 0, f"probe failed (stderr={probe.stderr!r}, stdout={probe.stdout!r})"
+        payload = json.loads(probe.stdout.strip().splitlines()[-1])
+        assert str(outer_site) in payload["sys_path"]
+        assert payload["value"] == "sibling_ok"
+
+    def test_isolated_venv_keeps_pth_site_directory_with_dist_info_and_reports_leak(self, tmp_path: Path, monkeypatch):
+        """N-2 (#5707, layout L2): A .pth path-line directory with *.dist-info or *.egg-info is kept so dependencies import and the isolation check reports any leak."""
+        outer_site = tmp_path / "outer_site"
+        outer_site.mkdir()
+
+        dep_site = tmp_path / "dep_venv_site"
+        (dep_site / "data_sheets_schema").mkdir(parents=True)
+        (dep_site / "dep_standin_r2-1.0.dist-info").mkdir(parents=True)
+        (dep_site / "dep_standin_r2.py").write_text("VALUE = 'dep_site_ok'\n", encoding="utf-8")
+
+        egg_site = tmp_path / "egg_venv_site"
+        (egg_site / "data_sheets_schema").mkdir(parents=True)
+        (egg_site / "egg_standin_r2-1.0.egg-info").mkdir(parents=True)
+        (egg_site / "egg_standin_r2.py").write_text("VALUE = 'egg_site_ok'\n", encoding="utf-8")
+
+        (outer_site / "u3a_paths.pth").write_text(f"{dep_site}\n{egg_site}\n", encoding="utf-8")
+
+        _, py_bin, clean_env = self._build_isolated_venv_with_outer_sites(monkeypatch, outer_site)
+        probe = subprocess.run(
+            [
+                str(py_bin),
+                "-c",
+                (
+                    "import json, sys, dep_standin_r2, egg_standin_r2\n"
+                    "print(json.dumps({\n"
+                    "    'sys_path': sys.path,\n"
+                    "    'dep': dep_standin_r2.VALUE,\n"
+                    "    'egg': egg_standin_r2.VALUE,\n"
+                    "}))\n"
+                ),
+            ],
+            cwd=str(REPO_ROOT),
+            env=clean_env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert probe.returncode == 0, f"probe failed (stderr={probe.stderr!r}, stdout={probe.stdout!r})"
+        payload = json.loads(probe.stdout.strip().splitlines()[-1])
+        assert str(dep_site) in payload["sys_path"]
+        assert str(egg_site) in payload["sys_path"]
+        assert payload["dep"] == "dep_site_ok"
+        assert payload["egg"] == "egg_site_ok"
+
+        with pytest.raises(LauncherError) as exc_info:
+            run_import_check(py_bin, REPO_ROOT, clean_env)
+        msg = str(exc_info.value)
+        assert "No module named" not in msg
+        assert str((dep_site / "data_sheets_schema").resolve()) in msg or str(dep_site / "data_sheets_schema") in msg
+
+    def test_isolated_venv_skips_outer_pth_import_startup_hooks(self, tmp_path: Path, monkeypatch):
+        """P2-1: Outer .pth import startup hooks never execute in the nested venv while path lines still apply."""
+        outer_site = tmp_path / "outer_site"
+        outer_site.mkdir()
+        pth_dep_dir = tmp_path / "pth_dep"
+        pth_dep_dir.mkdir()
+        (pth_dep_dir / "d4d_pth_probe_5676.py").write_text("MARKER = 'pth_dep_ok'\n", encoding="utf-8")
+
+        marker_file = tmp_path / "outer_startup_hook_ran.marker"
+        (outer_site / "hook_and_paths.pth").write_text(
+            "# comment line in outer .pth\n"
+            "\n"
+            f"import pathlib; pathlib.Path({str(marker_file)!r}).write_text('hook_space', encoding='utf-8')\n"
+            f"import\tpathlib; pathlib.Path({str(marker_file)!r}).write_text('hook_tab', encoding='utf-8')\n"
+            f"{pth_dep_dir}\n",
+            encoding="utf-8",
+        )
+
+        _, py_bin, clean_env = self._build_isolated_venv_with_outer_sites(monkeypatch, outer_site)
+        run_import_check(py_bin, REPO_ROOT, clean_env)
+
+        probe = subprocess.run(
+            [str(py_bin), "-c", "import d4d_pth_probe_5676; print(d4d_pth_probe_5676.MARKER)"],
+            cwd=str(REPO_ROOT),
+            env=clean_env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert probe.returncode == 0, f"probe failed (stderr={probe.stderr!r}, stdout={probe.stdout!r})"
+        assert probe.stdout.strip() == "pth_dep_ok"
+        assert not marker_file.exists(), f"Outer .pth startup hook unexpectedly executed: {marker_file.read_text(encoding='utf-8')}"
 
 
 class TestLauncherCLI:
