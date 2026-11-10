@@ -32,3 +32,18 @@ is safely saved. The helper refuses reused identities and records resumption in
 the journals. If a process has exited, inspect the journal and current process
 table rather than guessing a replacement PID. The recorded wall-clock pause
 must remain visible when interpreting affected jobs' timings.
+
+## Recovery completed
+
+The final U3-M report was atomically published at 05:36 UTC and independently
+verified against SHA-256
+`e994010eae8c965a8d8bf746f969aac4f8853b103efb1bad49256789e04098dd`.
+The private configurations were restored and the report retains the diagnostic
+as resource-aborted with freshness unknown.
+
+The lead resumed the website process at 05:38:02 UTC and the 14 PFAS processes
+at 05:38:05 UTC using the identity-checking helper. A subsequent process-table
+read verified that all 15 recorded PIDs were present and none had a stopped
+state. Both JSON journals contain their resumption timestamps. No termination
+or deletion occurred. Disk space remained volatile, so the recovery does not
+authorize new expensive D4D validation runs.

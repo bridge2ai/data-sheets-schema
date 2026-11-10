@@ -94,3 +94,35 @@ restoration still proceed. This does not waive the blocked acceptance checks.
 The next WP1 handoff is prepared in
 `codex_native_wp1_assignment_2026-11-10.md`. It remains undispatched until the
 lead reviews final U3-M evidence, including the scheduling amendment.
+
+## Resource interruption and handoffs, 2026-11-10 05:40 UTC
+
+The pre-reservation diagnostic could not persist its terminal artifacts after
+the host exhausted free disk space. U3-M stopped under the lead's resource
+amendment, restored its private configurations and published the final report
+at `d4d-executions/plans/reviews/native_u3m_2026-11-09.md` in the sibling tree.
+Its SHA-256 is
+`e994010eae8c965a8d8bf746f969aac4f8853b103efb1bad49256789e04098dd`.
+A separate read-only review found no new reporting inconsistencies: the rollup
+has 12 certified invocations, 2,155 passes, two failures and one skip; it excludes
+two uncertified partial invocations. Freshness remains unknown. The 17 dependent
+failure cases, two public checks and eight independent groups remain outstanding.
+Native acceptance has not been established.
+
+With the owner's explicit permission, the lead temporarily paused the identified
+PFAS and CultureBotAI website Python jobs while the recovery checkpoint was
+saved. All 15 processes were resumed and verified at 05:38 UTC. The journals and
+recovery record are in `live-resource-pause-20261110/`. No cleanup was authorized
+or performed. The shared STATUS publication hold is released.
+
+| Worker | Current handoff or work | Resource limit |
+|---|---|---|
+| agy1 | Fix remaining scanner alias findings under issue 5724; preserve exact witnesses | Source edits and review only until focused tests are cleared |
+| agy2 | Session exited to shell during resource pressure; last pushed docs head 137616945 | Restart or transfer publication after resources stabilize |
+| agy3 | Validation-only Zenodo fixes, reusing locked tomli 2.0.1 | No metadata/authorship edits; focused tests held |
+| agy4 | Correct PR 5710's inaccurate description from the saved review and verify every path/test claim | Metadata work only; issue 5727 stays open until review |
+| native Codex | Final U3-M handoff complete at local head 61d870418; read-only WP1 readiness review assigned | No implementation, composition, archive or tests yet |
+
+The terminal monitor now reads bounded viewports with a per-window timeout.
+Scrolled viewports can be stale; the lead corroborates them with process state,
+artifact timestamps and worker messages. Low disk space is still unresolved.
