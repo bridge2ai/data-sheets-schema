@@ -69,3 +69,16 @@ releases:
       BC1 sizing does not migrate historical inputs: scalar cardinality is
       refused during owner traversal, so migrate the sizing record first.
       Historical schema hashes stay unchanged.
+  - version: 3.2.1
+    declared: 2026-11-10
+    full_source_sha256: 3cc458d7554e543fb3684d5718b226e03a64b3c3141d92977d53a0cb9733422d
+    full_merged_sha256: bc560a3cd5d04c49e95fcbf33fa8ac349171df1a877e7e0882827bd526a95214
+    core_source_sha256: 49044208a00774adaa02d3d0936b2c7d1c01253bd5629a3400c5e99f4c413117
+    core_merged_sha256: e174a7a6ec1b5eccef5ee4a8b9f8f773f48243c2d6012ff8a1b846b45a40d088
+    note: >-
+      Aligns FileCollection.collection_type description in
+      D4D_FileCollection.yaml with its scalar FileCollectionTypeEnum
+      declaration (#2975): each FileCollection has one collection_type
+      value, and differently classified file groups use separate
+      FileCollection entries in file_collections. Neither profile's API
+      schema_digest md5 moved. Historical schema hashes stay unchanged.
