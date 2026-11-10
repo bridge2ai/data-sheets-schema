@@ -141,8 +141,16 @@ def test_round7_refresh_preserves_history_and_excludes_dedicated_sg2():
     assert set(refresh['file_seconds']) == additions | {'tests/test_bc1_pipeline.py'}
     assert refresh['previous_file_seconds'] == {
         'tests/test_pr5531_regressions.py': None, 'tests/test_bc1_pipeline.py': 47.963}
-    for name, seconds in refresh['file_seconds'].items():
-        assert seconds > 0
+    ci_refresh = data['source']['pr5531_ci_refresh_5602_20261110']
+    assert ci_refresh['run_id'] == 42534095997
+    assert ci_refresh['commit'] == '4ac73609c328bce8d7a48469eba4a0c73a07ee49'
+    assert ci_refresh['previous_file_seconds'] == refresh['file_seconds']
+    assert ci_refresh['file_seconds'] == {
+        'tests/test_pr5531_regressions.py': 963.687,
+        'tests/test_bc1_pipeline.py': 1337.314,
+    }
+    for name, seconds in ci_refresh['file_seconds'].items():
+        assert seconds > refresh['file_seconds'][name] > 0
         assert data['file_seconds'][name] == seconds
     assert proof['run_id'] == 41990198212
     assert len(proof['sg2_local_seconds']) == 3
