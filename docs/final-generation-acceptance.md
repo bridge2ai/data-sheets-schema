@@ -4,6 +4,9 @@ Operator acceptance checklist for final D4D record generation on the pinned inte
 
 ## 1. Freeze Prerequisites Before Generation
 
+Run every command from the pinned checkout. When reusing an environment, record imported-module and resolved-schema paths to verify that they also point into that checkout (#5803).
+
+
 1. **Schema and synchronization state:** Confirm the repository is on the pinned release commit and schema artifacts are synchronized:
    ```bash
    make check-sync
