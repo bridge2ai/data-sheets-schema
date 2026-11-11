@@ -95,11 +95,9 @@ def _read(path, limit):
     return raw
 
 
-def _authority(registration_raw, review_bundle_raw, launch_word_raw, directory):
-    from . import native_shared_registration_orchestration as registration
+def _authority_from_value(value, registration_raw, review_bundle_raw, launch_word_raw, directory):
     from .native_launch_review import validate_bundle
     from .native_u4b_runtime import validate_prepared_runtime
-    value = registration.verified(registration_raw)
     statement = validate_bundle(registration_raw, review_bundle_raw, launch_word_raw)
     runtime = value['runtime']
     validate_prepared_runtime(runtime)
@@ -138,6 +136,26 @@ def _authority(registration_raw, review_bundle_raw, launch_word_raw, directory):
                'launch_word_sha256': sha(launch_word_raw), 'runtime_sha256': sha(canonical(runtime)),
                'request_sha256': sha(canonical(request)), 'attempt_id': value['attempt_id']}
     return value, statement, word, binding
+
+
+def _authority(registration_raw, review_bundle_raw, launch_word_raw, directory):
+    from . import native_shared_registration_orchestration as registration
+    value = registration.verified(registration_raw)
+    return _authority_from_value(
+        value, registration_raw, review_bundle_raw, launch_word_raw, directory)
+
+
+def _recheck_authority(initial_authority, registration_raw, review_bundle_raw, launch_word_raw, directory):
+    from . import native_shared_registration_orchestration as registration
+    if type(initial_authority) is not tuple or len(initial_authority) != 4:
+        raise ValueError('capture authority recheck requires the initial authority tuple')
+    initial_value = initial_authority[0]
+    value = registration._recheck_verified(registration_raw, initial_value)
+    authority = _authority_from_value(
+        value, registration_raw, review_bundle_raw, launch_word_raw, directory)
+    if authority != initial_authority:
+        raise ValueError('capture authority changed during event lookup')
+    return authority
 
 
 def _invocation(runtime, directory):
@@ -584,16 +602,7 @@ def _read_root(authority, registration_raw, launch_word_raw, require_current):
     return root
 
 
-def read_capture(manifest_path, *, registration_raw, review_bundle_raw, launch_word_raw,
-                 require_current=False):
-    """Offline byte reconstruction; a retained failure never becomes admission.
-
-    RunSpec boundary: validated-caller
-
-    RunSpec precondition: Caller supplies a saved manifest path and serialized
-    authorities; _authority reconstructs guarded preparation before reading
-    claims/results and comparing saved capture bytes.
-    """
+def _capture_manifest_root(manifest_path, registration_raw, review_bundle_raw, launch_word_raw):
     path = _path(manifest_path)
     if path.name != 'capture.json':
         raise ValueError('capture readback requires the fixed manifest path')
@@ -603,7 +612,11 @@ def read_capture(manifest_path, *, registration_raw, review_bundle_raw, launch_w
     from .native_launch_review import validate_bundle
     terms = validate_bundle(registration_raw, review_bundle_raw, launch_word_raw)
     root = _path(terms['quota_capture']['directory'])
-    authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, root)
+    return path, directory, root
+
+
+def _read_capture_records(path, directory, authority, *, registration_raw, launch_word_raw,
+                          require_current):
     value, statement, word, binding = authority
     root = _read_root(authority, registration_raw, launch_word_raw, require_current)
     journal_claim = None
@@ -657,6 +670,37 @@ def read_capture(manifest_path, *, registration_raw, review_bundle_raw, launch_w
     return result
 
 
+def _read_capture_with_authority(manifest_path, initial_authority, *, registration_raw,
+                                 review_bundle_raw, launch_word_raw, require_current=False):
+    path, directory, root = _capture_manifest_root(
+        manifest_path, registration_raw, review_bundle_raw, launch_word_raw)
+    authority = _recheck_authority(
+        initial_authority, registration_raw, review_bundle_raw, launch_word_raw, root)
+    return _read_capture_records(
+        path, directory, authority,
+        registration_raw=registration_raw, launch_word_raw=launch_word_raw,
+        require_current=require_current)
+
+
+def read_capture(manifest_path, *, registration_raw, review_bundle_raw, launch_word_raw,
+                 require_current=False):
+    """Offline byte reconstruction; a retained failure never becomes admission.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies a saved manifest path and serialized
+    authorities; _authority reconstructs guarded preparation before reading
+    claims/results and comparing saved capture bytes.
+    """
+    path, directory, root = _capture_manifest_root(
+        manifest_path, registration_raw, review_bundle_raw, launch_word_raw)
+    authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, root)
+    return _read_capture_records(
+        path, directory, authority,
+        registration_raw=registration_raw, launch_word_raw=launch_word_raw,
+        require_current=require_current)
+
+
 def read_capture_for_event(directory, *, registration_raw, review_bundle_raw, launch_word_raw,
                            event_json, event_sha256, captured_at, require_current=False):
     """Join a guard to its exact retained capture, without a mutable latest pointer.
@@ -691,7 +735,8 @@ def read_capture_for_event(directory, *, registration_raw, review_bundle_raw, la
         if (type(selected) is not dict or any(selected.get(key) != item for key, item in expected.items())):
             continue
         # Matching text alone is never proof: run genuine saved reconstruction.
-        matches.append(read_capture(path, registration_raw=registration_raw,
+        matches.append(_read_capture_with_authority(
+            path, authority, registration_raw=registration_raw,
             review_bundle_raw=review_bundle_raw, launch_word_raw=launch_word_raw,
             require_current=require_current))
     if len(matches) != 1:
