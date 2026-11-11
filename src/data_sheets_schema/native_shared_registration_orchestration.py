@@ -139,6 +139,136 @@ def verified(raw):
     return _require_runtime_observation(value)
 
 
+def _recheck_verified(raw, value):
+    """Recheck live source, preparation/composition pins and runtime for a verified body."""
+    from pathlib import Path
+    import sys
+    from .native_shared_runtime_values import validate_runtime_v2 as validate_runtime
+    _require_integrated_gate_implementation()
+    envelope = c.strict_json(raw, 'v2 authority envelope', execution_v2.MAX_WIRE_BYTES)
+    if (type(envelope) is not dict
+            or set(envelope) != {'authority_version', 'controller_sources_sha256', 'registration'}
+            or type(envelope['authority_version']) is not int or envelope['authority_version'] != VERSION
+            or type(envelope['controller_sources_sha256']) is not str
+            or envelope['controller_sources_sha256'] != authority.neutral.composition.SOURCES_SHA256
+            or type(envelope['registration']) is not dict
+            or type(envelope['registration'].get('schema_version')) is not int
+            or envelope['registration']['schema_version'] != VERSION
+            or c.canonical(envelope) != raw):
+        raise ValueError('v2 launch requires an exact v2 authority envelope')
+    body = envelope['registration']
+    execution_v2._closed_execution(body)
+    if type(value) is not dict or c.canonical(value) != c.canonical(body):
+        raise ValueError('v2 execution body differs from initial verification')
+    dependencies = authority.dependency_identity()
+    if body['dependencies'] != dependencies:
+        raise ValueError('v2 dependency identity mismatch')
+    authority.require_committed(dependencies)
+    controller_manifest = consumer.controller_sources()
+    cwd = str(Path.cwd().resolve())
+    if Path(cwd) != authority.ROOT or body['working_directory'] != cwd:
+        raise ValueError('v2 execution working_directory mismatch')
+    try:
+        origin_version = 0
+        if 'receipt_origin_reporting' in body:
+            declaration = body['receipt_origin_reporting']
+            if type(declaration) is not dict or type(declaration.get('version')) is not int or declaration['version'] != 1:
+                raise ValueError('v2 receipt origin declaration version mismatch')
+            origin_version = 1
+        paths = consumer.validate_arguments(body['composition'], body['system_path'],
+            permission_probe_path=body['permission_probe'], attempt_id=body['attempt_id'],
+            attempt_directory=body['attempt_directory'], evidence_directory=body['evidence_directory'],
+            max_draft_checks=body['max_draft_checks'], receipt_origin_version=origin_version)
+        if any(body[key] != expected_path for key, expected_path in paths.items()):
+            raise ValueError('v2 execution path binding mismatch')
+        preparation_raw = body['preparation_raw_json'].encode('utf-8')
+        if body['preparation_sha256'] != c.sha(preparation_raw):
+            raise ValueError('v2 preparation digest mismatch')
+        preparation = captured_composition.captured_preparation_body(preparation_raw)
+        execution_v2._job_id(preparation['job_id'])
+        if (preparation['job_id'] != body['job_id']
+                or preparation['dependencies'] != dependencies
+                or preparation['working_directory'] != cwd):
+            raise ValueError('v2 preparation binding mismatch')
+        captured_selection = execution_v2.selection.capture(preparation['selection']['path'])
+        selection_capture = captured_selection.registration
+        runtime_capture = execution_v2._read(preparation['runtime']['path'], 'runtime_declaration',
+                                             c.HARD_LIMITS['input_bytes'])
+        if (execution_v2._file_pin(selection_capture) != preparation['selection']
+                or execution_v2._file_pin(runtime_capture) != preparation['runtime']):
+            raise ValueError('v2 prepared selection or runtime changed before execution binding')
+        runtime = validate_runtime(c.strict_json(runtime_capture.raw, 'runtime declaration'))
+        executable_path = runtime['executable']['path']
+        if (type(preparation['pinned_files']) is not dict
+                or preparation['pinned_files'].get(executable_path) != runtime['executable']['sha256']):
+            raise ValueError('v2 prepared executable pin mismatch')
+        for pinned_path, expected_sha256 in preparation['pinned_files'].items():
+            if pinned_path == executable_path:
+                continue
+            captured_pin = execution_v2._read(pinned_path, 'pinned preparation input',
+                                              c.HARD_LIMITS['input_bytes'])
+            if captured_pin.pin.sha256 != expected_sha256:
+                raise ValueError('v2 pinned preparation input changed: ' + str(pinned_path))
+        expected_body = {'runtime': runtime,
+            'runtime_declaration_sha256': preparation['runtime']['sha256'],
+            'selection_sha256': preparation['selection']['sha256'],
+            'max_draft_checks': preparation['max_draft_checks'],
+            'instruction_sha256': preparation['instruction_sha256'],
+            'working_directory': preparation['working_directory']}
+        for key, wanted in expected_body.items():
+            if c.canonical(body[key]) != c.canonical(wanted):
+                raise ValueError('v2 execution ' + key + ' mismatch')
+        composition_file = execution_v2._read(body['composition'], 'composition',
+                                              c.HARD_LIMITS['request_bytes'])
+        composition_raw = body['composition_raw_json'].encode('utf-8')
+        if (composition_file.raw != composition_raw
+                or composition_file.pin.sha256 != body['composition_sha256']
+                or c.sha(composition_raw) != body['composition_sha256']):
+            raise ValueError('v2 composition digest mismatch')
+        selected = captured_composition.captured_composition(composition_raw)
+        if (selected['preparation_raw_json'].encode('utf-8') != preparation_raw
+                or selected['preparation_sha256'] != body['preparation_sha256']
+                or selected['dependencies'] != dependencies
+                or selected['selection_raw_json'].encode('utf-8') != selection_capture.raw
+                or selected['runtime_path'] != runtime_capture.pin.path
+                or selected['runtime_raw_json'].encode('utf-8') != runtime_capture.raw
+                or selected['max_draft_checks'] != body['max_draft_checks']
+                or selected['working_directory'] != cwd
+                or selected['python'] != sys.executable
+                or selected['python_version'] != sys.version
+                or c.canonical(selected['controller_sources']) != c.canonical(controller_manifest)):
+            raise ValueError('v2 composition binding mismatch')
+        expected_composition = {'render_spec': preparation['render_spec'],
+            'instruction_sha256': preparation['instruction_sha256'],
+            'selection_sha256': preparation['selection']['sha256'],
+            'runtime_sha256': preparation['runtime']['sha256']}
+        for key, wanted in expected_composition.items():
+            if c.canonical(selected[key]) != c.canonical(wanted):
+                raise ValueError('v2 composition ' + key + ' mismatch')
+        instruction_file = execution_v2._read(selected['instruction_path'], 'instruction',
+                                              c.HARD_LIMITS['request_bytes'])
+        if (instruction_file.raw != preparation['instruction'].encode('utf-8')
+                or instruction_file.pin.sha256 != preparation['instruction_sha256']
+                or instruction_file.pin.sha256 != body['instruction_sha256']):
+            raise ValueError('v2 instruction digest mismatch')
+        system_file = execution_v2._read(body['system_path'], 'system',
+                                         c.HARD_LIMITS['input_bytes'])
+        if (not system_file.raw.decode('utf-8').strip()
+                or system_file.pin.sha256 != body['system_sha256']):
+            raise ValueError('v2 system digest mismatch')
+        probe_file = execution_v2._read(body['permission_probe'], 'saved permission',
+                                        c.HARD_LIMITS['permission_wire_bytes'])
+        if probe_file.pin.sha256 != body['permission_probe_sha256']:
+            raise ValueError('v2 permission probe digest mismatch')
+    except (KeyError, TypeError, AttributeError, UnicodeDecodeError) as exc:
+        raise ValueError('incomplete v2 shared execution binding') from exc
+    execution_paths_v2(body, fresh=False, extra_protected=())
+    if authority.dependency_identity() != dependencies:
+        raise ValueError('v2 execution authority changed during verification')
+    return _require_runtime_observation(
+        c.strict_json(c.canonical(body), 'verified v2 execution', execution_v2.MAX_WIRE_BYTES))
+
+
 def _require_runtime_observation(value):
     """Require U4b's observed registration fields at the host-reading boundary.
 

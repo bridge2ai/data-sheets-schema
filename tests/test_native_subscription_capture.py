@@ -97,7 +97,18 @@ def component(tmp_path, monkeypatch, *, mode='success', deadline=5):
         assert submitted == raw, 'component isolation cannot accept substituted registration bytes'
         return deepcopy(value)
 
+    def fixture_recheck(submitted, initial):
+        envelope = capture.strict_json(submitted)
+        if (envelope != {'authority_version': 2, 'controller_sources_sha256': 'f' * 64,
+                         'registration': initial}
+                or capture.canonical(envelope) != submitted):
+            raise ValueError('component isolation rejected mismatched registration recheck')
+        if submitted == raw and initial != value:
+            raise ValueError('component registration value changed during event lookup')
+        return deepcopy(value if submitted == raw else initial)
+
     monkeypatch.setattr(registration, 'verified', fixture_reconstruction)
+    monkeypatch.setattr(registration, '_recheck_verified', fixture_recheck)
     return {'registration_raw': raw, 'review_bundle_raw': bundle_raw,
             'launch_word_raw': word_raw, 'directory': directory}, value
 
@@ -264,3 +275,176 @@ def test_registration_reconstruction_refusal_prevents_capture(tmp_path, monkeypa
     with pytest.raises(ValueError, match='registration gate'):
         capture.capture_subscription(**arguments)
     assert not arguments['directory'].exists()
+
+
+def test_read_capture_for_event_rechecks_authority_after_slot_scan_without_repeating_full_verified(
+        tmp_path, monkeypatch):
+    arguments, _ = component(tmp_path, monkeypatch)
+    manifest = capture.capture_subscription(**arguments)
+    saved = capture.read_capture(manifest, **read_arguments(arguments), require_current=True)
+    event = saved['selected_event']
+    trace = []
+    base_verified = registration.verified
+    base_recheck = registration._recheck_verified
+    base_claims = capture._claims
+
+    def traced_verified(submitted):
+        trace.append('verified')
+        return base_verified(submitted)
+
+    def traced_recheck(submitted, initial):
+        trace.append('recheck_verified')
+        return base_recheck(submitted, initial)
+
+    def traced_claims(root, *authority):
+        trace.append('outer-claims' if 'recheck_verified' not in trace else 'inner-claims')
+        return base_claims(root, *authority)
+
+    monkeypatch.setattr(registration, 'verified', traced_verified)
+    monkeypatch.setattr(registration, '_recheck_verified', traced_recheck)
+    monkeypatch.setattr(capture, '_claims', traced_claims)
+    matched = capture.read_capture_for_event(
+        arguments['directory'], **read_arguments(arguments), require_current=True,
+        **{key: event[key] for key in ('event_json', 'event_sha256', 'captured_at')})
+    assert matched == saved
+    assert trace == ['verified', 'outer-claims', 'recheck_verified', 'inner-claims']
+
+    trace.clear()
+    direct = capture.read_capture(manifest, **read_arguments(arguments), require_current=True)
+    assert direct == saved
+    assert trace == ['verified', 'inner-claims']
+
+
+@pytest.mark.parametrize('mutation', [
+    'binary', 'observation_probe', 'review_document', 'registration_recheck',
+    'initial_value', 'overlap_input',
+])
+def test_read_capture_for_event_refuses_mutations_between_outer_authority_and_inner_slot_recheck(
+        tmp_path, monkeypatch, mutation):
+    arguments, value = component(tmp_path, monkeypatch)
+    manifest = capture.capture_subscription(**arguments)
+    saved = capture.read_capture(manifest, **read_arguments(arguments), require_current=True)
+    event = saved['selected_event']
+    trace = []
+    base_verified = registration.verified
+    base_recheck = registration._recheck_verified
+    base_claims = capture._claims
+
+    def single_verified(submitted):
+        assert 'verified' not in trace, 'read_capture_for_event repeated full registration.verified'
+        trace.append('verified')
+        return base_verified(submitted)
+
+    def traced_recheck(submitted, initial):
+        trace.append('recheck_verified')
+        if mutation == 'registration_recheck':
+            raise ValueError('pinned preparation input changed between outer and inner authority checks')
+        return base_recheck(submitted, initial)
+
+    def mutate_after_outer_authority(root, *authority):
+        if 'mutated' not in trace:
+            trace.append('mutated')
+            if mutation == 'binary':
+                Path(value['runtime']['executable']['path']).write_bytes(b'changed during slot scan')
+            elif mutation == 'observation_probe':
+                basis = json.loads(value['runtime']['limits_basis'])
+                Path(basis['observation_probe']['path']).write_bytes(b'{"corrupted":true}\n')
+            elif mutation == 'review_document':
+                bundle = capture.strict_json(arguments['review_bundle_raw'])
+                Path(bundle['reviews'][0]['document']['path']).write_bytes(b'changed review document\n')
+            elif mutation == 'initial_value':
+                value['attempt_id'] = 'mutated-during-slot-scan'
+            elif mutation == 'overlap_input':
+                value['composition_raw_json'] = json.dumps({'policy': {'readonly_lookups': {
+                    'inputs': [str(arguments['directory'])],
+                    'output_directories': [str(tmp_path / 'outputs')]}}})
+        return base_claims(root, *authority)
+
+    monkeypatch.setattr(registration, 'verified', single_verified)
+    monkeypatch.setattr(registration, '_recheck_verified', traced_recheck)
+    monkeypatch.setattr(capture, '_claims', mutate_after_outer_authority)
+    with pytest.raises(ValueError):
+        capture.read_capture_for_event(
+            arguments['directory'], **read_arguments(arguments), require_current=True,
+            **{key: event[key] for key in ('event_json', 'event_sha256', 'captured_at')})
+    assert trace[:2] == ['verified', 'mutated']
+    assert 'recheck_verified' in trace
+    assert trace.count('verified') == 1
+
+
+def test_genuine_registration_read_capture_for_event_rechecks_live_selection_and_stage_root(
+        tmp_path, monkeypatch):
+    from tests.test_native_shared_execution import make_case
+    monkeypatch.chdir(registration.authority.ROOT)
+    original_popen = subprocess.Popen
+
+    def git_only(argv, *args, **kwargs):
+        assert not kwargs.get('shell'), 'genuine registration witness must not launch a shell'
+        assert isinstance(argv, (list, tuple)) and Path(argv[0]).name == 'git', (
+            'genuine registration witness must not execute a native, auth, provider or peer child')
+        return original_popen(argv, *args, **kwargs)
+
+    monkeypatch.setattr(subprocess, 'Popen', git_only)
+    case = make_case((tmp_path / 'case').resolve())
+    raw = case['raw']
+    value = case['value']
+    review_raw = case['kwargs']['review_path'].read_bytes()
+    word_raw = case['kwargs']['launch_word_path'].read_bytes()
+    guard_doc = capture.strict_json(case['kwargs']['subscription_guard_path'].read_bytes())
+    basis = capture.strict_json(value['runtime']['limits_basis'].encode())
+    capture_dir = Path(basis['admission']['capture_state_directory'])
+    manifest = capture_dir / 'captures' / capture.sha(word_raw) / 'capture-1' / 'capture.json'
+    expected_record = capture.read_capture(
+        manifest, registration_raw=raw, review_bundle_raw=review_raw,
+        launch_word_raw=word_raw, require_current=True)
+    stage_root = Path(case['selection'].document()['stage_root'])
+    assert not stage_root.exists()
+
+    trace = []
+    real_verified = registration.verified
+    real_recheck = registration._recheck_verified
+    real_claims = capture._claims
+    mutate_stage_root = [False]
+
+    def traced_verified(submitted):
+        trace.append('verified')
+        return real_verified(submitted)
+
+    def traced_recheck(submitted, initial):
+        trace.append('recheck_verified')
+        return real_recheck(submitted, initial)
+
+    def traced_claims(root, *authority):
+        phase = 'outer-claims' if 'recheck_verified' not in trace else 'inner-claims'
+        trace.append(phase)
+        result = real_claims(root, *authority)
+        if phase == 'outer-claims' and mutate_stage_root[0]:
+            stage_root.parent.mkdir(parents=True, exist_ok=True)
+            stage_root.write_bytes(b'regular file blocking stage root\n')
+        return result
+
+    monkeypatch.setattr(registration, 'verified', traced_verified)
+    monkeypatch.setattr(registration, '_recheck_verified', traced_recheck)
+    monkeypatch.setattr(capture, '_claims', traced_claims)
+
+    matched = capture.read_capture_for_event(
+        capture_dir, registration_raw=raw, review_bundle_raw=review_raw,
+        launch_word_raw=word_raw, require_current=True,
+        event_json=guard_doc['event_json'], event_sha256=guard_doc['event_sha256'],
+        captured_at=guard_doc['captured_at'])
+    assert matched == expected_record
+    assert trace == ['verified', 'outer-claims', 'recheck_verified', 'inner-claims']
+
+    trace.clear()
+    mutate_stage_root[0] = True
+    with pytest.raises(ValueError, match='native stage root is not a directory'):
+        capture.read_capture_for_event(
+            capture_dir, registration_raw=raw, review_bundle_raw=review_raw,
+            launch_word_raw=word_raw, require_current=True,
+            event_json=guard_doc['event_json'], event_sha256=guard_doc['event_sha256'],
+            captured_at=guard_doc['captured_at'])
+    assert trace == ['verified', 'outer-claims', 'recheck_verified']
+    with pytest.raises(ValueError, match='native stage root is not a directory'):
+        real_verified(raw)
+    with pytest.raises(ValueError, match='native stage root is not a directory'):
+        real_recheck(raw, deepcopy(value))
