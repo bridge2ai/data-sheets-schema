@@ -21,6 +21,28 @@ _LOCK = threading.RLock()
 _PROBE_EVENT = 'd4d.wp1.profile_stability_probe'
 _REFUSED_EVENTS = frozenset(('sys.setprofile', 'sys.settrace',
                              'sys.monitoring.register_callback'))
+_PROFILER_CONFLICT = 'Another profiling tool is already active'
+
+
+def _raised(code, offset, exception):
+    """Retain caught CPython profiler conflicts without replacing the exception.
+
+    #5745: reservation prevents acquisition, but enable() does not audit its
+    failed attempt. RAISE observes the exception reaching Python, including a
+    call through a saved method or C adapter. CALL-only matching misses those
+    adapters. An identical user-raised ValueError conservatively invalidates
+    this diagnostic too; the event is evidence of a conflict, not provenance
+    that uniquely identifies a caller or a hostile-extension security boundary.
+    """
+    active = _ACTIVE
+    if (active is not None and type(exception) is ValueError
+            and len(exception.args) == 1 and type(exception.args[0]) is str
+            and exception.args[0] == _PROFILER_CONFLICT):
+        active['attempts'].append({
+            'event': 'profiler_acquisition_conflict',
+            'thread': threading.get_ident(),
+            'exception_type': 'ValueError', 'exception_message': _PROFILER_CONFLICT,
+        })
 
 
 def _audit(event, arguments):
@@ -65,7 +87,8 @@ def profile_stability_scope():
 
     On the pinned CPython 3.13 runtime, legacy and all-thread profile setters
     audit before C hook-state writes. cProfile instead claims public tool 2;
-    reserving it with zero events refuses acquisition before callback setup.
+    reserving it refuses acquisition before callback setup. Its RAISE callback
+    retains the exact conflict even when the observed body catches the error.
     Reserving 2 alone does not protect the internal legacy profiling tool 6.
 
     This boundary does not enforce arbitrary hostile C memory writes or transient
@@ -78,6 +101,7 @@ def profile_stability_scope():
     tool = monitor.PROFILER_ID
     result = {'kind': 'wp1_profile_stability', 'installation_verified': False,
               'reserved_profiler_tool': tool, 'attempts': [], 'audit_events': 0,
+              'profiler_conflict_observer': 'sys.monitoring.RAISE',
               'body_error': None, 'restored': False, 'completed': False,
               'stable': False, 'drift': [],
               'scope': 'Common audit guard overhead is included; no general observer equivalence or security claim.'}
@@ -93,14 +117,30 @@ def profile_stability_scope():
             raise RuntimeError('WP1 profiler reservation requires free tool 2')
         owner = 'd4d-wp1-profile-stability-' + str(id(result))
         monitor.use_tool_id(tool, owner)
+        callback_installed = False
+        previous_callback = None
+
+        def release_profiler_tool():
+            try:
+                monitor.set_events(tool, 0)
+            finally:
+                try:
+                    if callback_installed:
+                        monitor.register_callback(tool, monitor.events.RAISE, previous_callback)
+                finally:
+                    monitor.free_tool_id(tool)
+
         try:
             if monitor.get_events(tool) != 0:
                 raise RuntimeError('WP1 profiler reservation must have zero events')
+            previous_callback = monitor.register_callback(tool, monitor.events.RAISE, _raised)
+            callback_installed = True
+            monitor.set_events(tool, monitor.events.RAISE)
             expected_tools = _tools(monitor)
             _ACTIVE = result
         except BaseException:
             if monitor.get_tool(tool) == owner:
-                monitor.free_tool_id(tool)
+                release_profiler_tool()
             raise
     try:
         yield result
@@ -133,8 +173,7 @@ def profile_stability_scope():
                 if monitor.get_tool(tool) != owner:
                     result['drift'].append('reserved_tool_ownership')
                 else:
-                    monitor.set_events(tool, 0)
-                    monitor.free_tool_id(tool)
+                    release_profiler_tool()
             result['restored'] = (sys.getprofile() is expected_profile
                 and threading.getprofile() is expected_future
                 and sys.gettrace() is expected_trace and monitor.get_tool(tool) is None)

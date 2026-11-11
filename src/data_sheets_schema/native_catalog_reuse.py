@@ -10,6 +10,7 @@ import _json
 import functools
 import json
 import os
+import posixpath
 import types
 
 try:
@@ -269,6 +270,7 @@ def _native_path_state():
     """
     module = os.path
     if (snapshots.os is not os or snapshots.os.path is not module
+            or module is not posixpath or posixpath.os is not os
             or snapshots.Namespaces is not Namespaces):
         raise TypeError('native schema path or namespace alias differs')
     functions = []
@@ -298,7 +300,7 @@ def _native_path_state():
         functions.append((function, function.__code__,
                           setting_key(function.__defaults__),
                           setting_key(function.__kwdefaults__)))
-    return os, module, _native_posix, fspath, snapshots.Namespaces, tuple(functions)
+    return os, module, posixpath.os, _native_posix, fspath, snapshots.Namespaces, tuple(functions)
 
 
 def _bound_schema_state():
@@ -329,7 +331,8 @@ def _state():
     # Fixed bindings actually used by the two schema producers. Unfamiliar
     # replacements cannot become bound merely by being the first observation.
     if (omissions.yaml is not yaml or snapshots.yaml is not yaml or views.yaml is not yaml
-            or omissions.json is not json or contract.json is not json):
+            or omissions.json is not json or snapshots.json is not json or contract.json is not json
+            or snapshots.SchemaDefinition is not meta.SchemaDefinition):
         raise TypeError('schema producer module alias differs')
     functions = tuple(_FUNCTIONS.key(fn) for fn in (
         omissions._schema, omissions._schema_product, omissions._schema_with_root_bases,
@@ -343,6 +346,12 @@ def _state():
         duplicate_keys.nesting_exceeds, support_targets._validate_json,
         grounding.declared_bases_of,
         snapshots.capture_schema, snapshots._capture_schema, snapshots._capture_native_schema,
+        snapshots._cold_metadata, snapshots._launch_cached_metadata,
+        snapshots._lossless_json_tree, snapshots._ordered_json_equal,
+        snapshots._encode_metadata_fields, snapshots._decode_metadata_fields,
+        snapshots._MetadataDerivationCache._key, snapshots._MetadataDerivationCache.get,
+        snapshots._MetadataDerivationCache.put, snapshots._MetadataDerivationCache.snapshot,
+        snapshots._MetadataDerivationCache.clear,
         snapshots._metadata_document,
         snapshots.resolve_import_path, snapshots.map_import,
         views.captured_view, views.resolve_import_path,
@@ -399,6 +408,9 @@ def _state():
         'native_events': (events.MAX_ENTRIES, events.MAX_EVENTS_PER_ENTRY,
                           events.MAX_TOTAL_EVENTS, events.MAX_EVENT_CHARS,
                           events.MAX_PAYLOAD_BYTES, events.MAX_INPUT_BYTES),
+        'metadata_cache': (snapshots._METADATA_FIELDS,
+                           snapshots._METADATA_CACHE_ENTRIES,
+                           snapshots._METADATA_CACHE_BYTES),
     })
     _loader_handlers()
     return (functions, _explicit_loader_parse(), _bound_schema_state(), _metadata(),
@@ -441,6 +453,33 @@ def runtime_token():
     return None
 
 
+def schema_metadata_state(*, metadata, metadata_document, schema_definition,
+                          yaml_alias, json_alias):
+    """Pure recognized state for YAML import-metadata reuse; no filesystem I/O."""
+    try:
+        if (metadata is not snapshots._metadata
+                or metadata_document is not snapshots._metadata_document
+                or schema_definition is not snapshots.SchemaDefinition
+                or schema_definition is not meta.SchemaDefinition
+                or yaml_alias is not yaml
+                or json_alias is not json
+                or snapshots.yaml is not yaml
+                or snapshots.json is not json
+                or snapshots.Path is not views.Path
+                or snapshots.deepcopy is not copy.deepcopy
+                or type(snapshots._METADATA_DERIVATIONS) is not snapshots._MetadataDerivationCache):
+            return None
+        marker = runtime_token()
+        if marker is None:
+            return None
+        phase = initialization.phase()
+        if initialization.marker() is not marker:
+            return None
+        return phase, marker
+    except Exception:
+        return None
+
+
 def schema_derivation_state(*, capture, view, contract_alias, path_alias):
     """Pure recognized state for schema metadata; no filesystem or resolver reads.
 
@@ -456,13 +495,13 @@ def schema_derivation_state(*, capture, view, contract_alias, path_alias):
                 or snapshots.Path is not views.Path
                 or snapshots.deepcopy is not copy.deepcopy):
             return None
-        marker = runtime_token()
-        if marker is None:
-            return None
-        phase = initialization.phase()
-        if initialization.marker() is not marker:
-            return None
-        return phase, marker
+        return schema_metadata_state(
+            metadata=snapshots._metadata,
+            metadata_document=snapshots._metadata_document,
+            schema_definition=snapshots.SchemaDefinition,
+            yaml_alias=snapshots.yaml,
+            json_alias=snapshots.json,
+        )
     except Exception:
         return None
 
