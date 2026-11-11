@@ -23,7 +23,8 @@ def _file_identity(path):
     path = Path(path)
     if not path.is_absolute() or path.is_symlink() or path != path.resolve(strict=True) or not path.is_file():
         raise ValueError('physical absolute file required: ' + str(path))
-    raw = path.read_bytes()
+    with path.open('rb') as handle:
+        raw = handle.read(MAX_JSON_BYTES + 1)
     if not (0 < len(raw) <= MAX_JSON_BYTES):
         raise ValueError('empty or oversized file: ' + str(path))
     return raw, {
