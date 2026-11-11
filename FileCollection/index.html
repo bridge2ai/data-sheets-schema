@@ -397,7 +397,7 @@
 <tr>
 <td><a href="../collection_type/">collection_type</a></td>
 <td>0..1 <br/> <a href="../FileCollectionTypeEnum/">FileCollectionTypeEnum</a></td>
-<td>Type(s) of content in this file collection</td>
+<td>Primary content classification for this file collection from FileCollectionTy...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -678,9 +678,9 @@ slot_usage:
 attributes:
   collection_type:
     name: collection_type
-    description: Type(s) of content in this file collection. A collection may have
-      multiple types, for example a collection containing both raw_data and documentation
-      files would have both types listed.
+    description: Primary content classification for this file collection from FileCollectionTypeEnum.
+      Each FileCollection has one collection_type value; represent differently classified
+      file groups as separate FileCollection entries in the dataset's file_collections.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
     rank: 1000
     slot_uri: d4d:collectionType
@@ -764,9 +764,9 @@ slot_usage:
 attributes:
   collection_type:
     name: collection_type
-    description: Type(s) of content in this file collection. A collection may have
-      multiple types, for example a collection containing both raw_data and documentation
-      files would have both types listed.
+    description: Primary content classification for this file collection from FileCollectionTypeEnum.
+      Each FileCollection has one collection_type value; represent differently classified
+      file groups as separate FileCollection entries in the dataset's file_collections.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
     rank: 1000
     slot_uri: d4d:collectionType

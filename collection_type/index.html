@@ -384,7 +384,7 @@
 
 
 <h1 id="slot-collection_type">Slot: collection_type</h1>
-<p><em>Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed.</em></p>
+<p><em>Primary content classification for this file collection from FileCollectionTypeEnum. Each FileCollection has one collection_type value; represent differently classified file groups as separate FileCollection entries in the dataset's file_collections.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/collectionType">d4d:collectionType</a>
 Alias: collection_type</p>
 <!-- no inheritance hierarchy -->
@@ -438,9 +438,9 @@ Alias: collection_type</p>
 <details>
 
 <pre><code class="language-yaml">name: collection_type
-description: Type(s) of content in this file collection. A collection may have multiple
-  types, for example a collection containing both raw_data and documentation files
-  would have both types listed.
+description: Primary content classification for this file collection from FileCollectionTypeEnum.
+  Each FileCollection has one collection_type value; represent differently classified
+  file groups as separate FileCollection entries in the dataset's file_collections.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:collectionType

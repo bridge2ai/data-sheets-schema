@@ -1351,6 +1351,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/final-generation-acceptance/</loc>
+         <lastmod>2026-11-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/format/</loc>
          <lastmod>2026-11-11</lastmod>
          <changefreq>daily</changefreq>
