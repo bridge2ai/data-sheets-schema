@@ -63,7 +63,26 @@ partition, compared with approximately 697.3 seconds per weighted shard.
 These are estimates of test work, not wall-clock predictions; fixture reuse,
 runner load and changed tests can affect the actual result.
 
-The current snapshot uses PR run
+The latest complete refresh uses successful PR run
+[42916359440](https://github.com/bridge2ai/data-sheets-schema/actions/runs/42916359440)
+at `6792947ea6558d10c85106065b023cb57838835a`: all eight ordinary-shard
+JUnit artifacts, with 23,270 testcase occurrences in 676 files (23,222 passes
+and 48 skips). The two PR5808 readiness files are included in the measurements;
+the base main checkout has 674 of these measured files. Obsolete entries are
+ignored by the scheduler, and genuinely new collected files retain its median
+fallback. The seven dedicated cases stay in their existing lanes.
+
+The [refresh helper](../scripts/adhoc/refresh_ci_timings_42916359440_20261111.py)
+uses the existing updater and preserves the prior weights and provenance. Its
+new source block distinguishes locally computed XML hashes from API-reported
+archive digests. Replaying this run's measured work with the previous weights
+assigns approximately 4,514–8,125 case-seconds per PR shard; the refreshed
+assignment is approximately 6,390 per shard. These sums overlap across workers
+and do not predict wall time. A subsequent CI run must establish the observed
+effect on completion time. Shard counts, test collection and required checks
+are unchanged.
+
+The November 4 snapshot uses PR run
 [41438863804](https://github.com/bridge2ai/data-sheets-schema/actions/runs/41438863804)
 at `80fbca8b746ac411bbe96ea9de8543a6f3a7b821`: 21,882 ordinary testcase
 occurrences in 607 files. Five shards supplied completed JUnit files. Shard 4
