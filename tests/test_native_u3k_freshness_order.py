@@ -99,9 +99,11 @@ def prepared_frontdoor(root, monkeypatch, entry):
     _, base_value = component(root, monkeypatch)
     runtime_path = root / 'base-runtime.json'
     runtime_path.write_bytes(guard.canonical(base_value['runtime']))
+    synthetic_root = root / 'synthetic-root'
+    synthetic_root.mkdir()
     value = deepcopy(base_value)
     value['runtime'] = synthetic_fixture.runtime_for(
-        {'runtime_path': runtime_path}, root / 'synthetic-root')
+        {'runtime_path': runtime_path}, synthetic_root)
     registration_raw = guard.canonical({
         'authority_version': 2, 'controller_sources_sha256': 'f' * 64,
         'registration': value})
@@ -184,7 +186,9 @@ def test_frontdoor_refuses_expired_or_spent_capture_before_engine_without_loadin
         monkeypatch.setattr(guard, '_now', lambda: captured + 301)
     elif defect == 'superseded':
         renewed = newer(args)
-        capture.activate_capture_word(**read_arguments(renewed))
+        renewed_now = guard._timestamp(
+            guard.strict_json(renewed['launch_word_raw'])['authorized_at'], 'authorized_at')
+        capture.activate_capture_word(**read_arguments(renewed), now=renewed_now)
     else:
         paths['guard'].write_bytes(raw + b' ')
     def forbidden(*args, **kwargs):
