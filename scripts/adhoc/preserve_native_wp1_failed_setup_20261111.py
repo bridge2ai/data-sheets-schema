@@ -21,10 +21,17 @@ ROOT = Path(__file__).resolve().parents[2].parent
 SOURCE = ROOT / 'codex-native-u1u3'
 PARENT = ROOT / 'scratch-native-u1u3/u3m'
 FAILED = PARENT / 'composition-01bdcb22dad6'
-RETAINED = PARENT / 'composition-01bdcb22dad6.failed-preparation-0a3d023b4'
+RETAINED = PARENT / 'composition-01bdcb22dad6.failed-preparation-c8cc4b711'
 HEAD = '01bdcb22dad66da1a167595251b23e6352c97ab7'
-MANIFEST_SHA = '985e31929f02cd7ac0e77b57e7f81cc5209747f9896bb810545c75739b2d8d3c'
-DIAGNOSIS_SHA = '529e4a80b6c51c1b95cb328c7acf8706bed63678cd638406351c95456296c9aa'
+PRIVATE_HEAD = '6572481c714772402491198f60cd7e3016acb907'
+MANIFEST_SHA = 'e6c2c2667c3e3b3412a53ce5e8de45b2eb0b7174971b17993affc40b79c8c63d'
+DIAGNOSIS_SHA = '8cdc060a36d5b40378e642afbb2f2c07df56ebe7ed70c83c12da3e0075b4c6b1'
+POSTIMAGES = {
+    'src/data_sheets_schema/shared_generation.py': '2ec18e60316423035f88a2a30263c56385bfbbc587303e84e805a8349ab4f781',
+    'src/data_sheets_schema/api_runner.py': '830eec1e12e96f807fa76ea26e066a1923b60380013c424cfa99f0012af0a881',
+    'src/download/prompts/canonical_hashes.yaml': '543e5cd6dc0da0f622ba2cd11a16a90732e9302a1ed0a4700efb61971299d252',
+    'tests/utils/run_spec_boundary_contracts.json': 'b1e0cbd14c533a51b88eacb84b974cb93963e18d8f1fb71ae4ed3228f784d1ce',
+}
 ENV = {'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'GIT_NO_LAZY_FETCH': '1',
        'GIT_ALLOW_PROTOCOL': '', 'GIT_OPTIONAL_LOCKS': '0',
        'GIT_CONFIG_SYSTEM': '/dev/null', 'GIT_CONFIG_GLOBAL': '/dev/null'}
@@ -69,21 +76,25 @@ def main():
     need(FAILED.resolve(strict=True) == FAILED and FAILED.is_dir()
          and not os.path.lexists(RETAINED), 'exact fresh preservation destination required')
     need(digest(FAILED / 'composition.json') == MANIFEST_SHA
-         and digest(FAILED / 'sparse-index-diagnosis.json') == DIAGNOSIS_SHA,
+         and digest(FAILED / 'stat-cache-diagnosis.json') == DIAGNOSIS_SHA,
          'failed evidence identity differs')
     value = json.loads((FAILED / 'composition.json').read_bytes())
-    need(value['status'] == 'refused' and value['reason'] == 'sparse index differs from sized selection'
+    need(value['status'] == 'refused' and value['reason'] == 'local Git failed: diff-index --quiet ' + PRIVATE_HEAD + ' --\n'
          and value['source_commit'] == HEAD and value['preparation_tools_commit']
-         == '0a3d023b4fa0eb29bdc455813d02debeb39a48b0', 'not the one authorized failed setup')
+         == 'c8cc4b7113d4a9abee9ba4464b1462a02f5124a1', 'not the one authorized failed setup')
     need(git(SOURCE, 'rev-parse', 'HEAD').decode().strip() == HEAD
          and not git(SOURCE, 'status', '--porcelain').strip(), 'frozen source changed')
     need(all(digest(SOURCE / path) == expected
              for path, expected in value['protected_preimages_sha256'].items()),
          'assigned-source protected preimages differ')
     tree = FAILED / 'tree'
-    need(git(tree, 'rev-parse', 'HEAD').decode().strip() == HEAD
-         and not git(tree, 'diff', '--cached', '--name-only', HEAD).strip(),
+    need(git(tree, 'rev-parse', 'HEAD').decode().strip() == PRIVATE_HEAD
+         and not git(tree, 'diff', '--cached', '--name-only', PRIVATE_HEAD).strip()
+         and set(git(tree, 'diff', '--cached', '--name-only', HEAD).decode().splitlines()) == set(POSTIMAGES),
          'private index/HEAD changed after the failed attempt')
+    need(all(digest(tree / path) == expected
+             and hashlib.sha256(git(tree, 'show', PRIVATE_HEAD + ':' + path)).hexdigest() == expected
+             for path, expected in POSTIMAGES.items()), 'private four-packet postimages differ')
     need(not os.path.lexists(tree / '.git/worktrees')
          and not os.path.lexists(PARENT / 'worktree-01bdcb22dad6')
          and not os.path.lexists(PARENT / 'wp1-contract-01bdcb22dad6.json'),
@@ -109,11 +120,13 @@ def main():
     need(before == after and RETAINED.stat().st_ino == directory_identity.st_ino
          and RETAINED.stat().st_dev == directory_identity.st_dev, 'relocated content/identity changed')
     need(digest(RETAINED / 'composition.json') == MANIFEST_SHA
-         and digest(RETAINED / 'sparse-index-diagnosis.json') == DIAGNOSIS_SHA,
+         and digest(RETAINED / 'stat-cache-diagnosis.json') == DIAGNOSIS_SHA,
          'historical evidence changed during preservation')
     witness = dict(original_directory=str(FAILED), retained_directory=str(RETAINED),
         source_commit=HEAD, manifest_sha256=MANIFEST_SHA, diagnosis_sha256=DIAGNOSIS_SHA,
         original_record_paths_unchanged=True, original_status='refused',
+        private_head=PRIVATE_HEAD, private_packet_postimages_unchanged=True,
+        prior_diagnosis_refreshed_stat_cache=True,
         census_unchanged=True, entries=before, source_packet_preimages_unchanged=True,
         helper_sha256=digest(Path(__file__)), ended_utc=datetime.now(timezone.utc).isoformat(),
         scope='Preservation only; no retry, deletion, acceptance or protected installation.')

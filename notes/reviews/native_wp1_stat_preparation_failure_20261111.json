@@ -1,0 +1,18 @@
+{
+  "byte_or_executable_mode_mismatches": [],
+  "content_aware_status": "",
+  "content_diff_stat": "",
+  "diff_index_raw_entries": 2337,
+  "diff_index_raw_sha256": "6244e9a82e81850360018cce3f0f4a8c927174027beb385c35261db08a7801fe",
+  "index_debug_examples": "src/data_sheets_schema/api_runner.py\n  ctime: 1794364525:343346297\n  mtime: 1794364525:343346297\n  dev: 16777230\tino: 780598528\n  uid: 501\tgid: 20\n  size: 491071\tflags: 0\ntests/utils/native_profile_stability.py\n  ctime: 1794364524:955674298\n  mtime: 1794364524:955674298\n  dev: 16777230\tino: 780598455\n  uid: 501\tgid: 20\n  size: 8127\tflags: 0\n",
+  "index_sha256": "d4aa9cab719f2da5432ffff8d31be3de02aa553d58ff4649fb30bed816c2489f",
+  "index_unchanged": false,
+  "manifest_sha256": "e6c2c2667c3e3b3412a53ce5e8de45b2eb0b7174971b17993affc40b79c8c63d",
+  "manifest_unchanged": true,
+  "private_head": "6572481c714772402491198f60cd7e3016acb907",
+  "scope": "Read-only artifact diagnosis; no index refresh, test, setup or retry.",
+  "script_sha256": "a561c1ba24f8b2f63790a0f3ab92def40a4b33b558ac60b84d624861b66063dc",
+  "selected_bytes": 38711064,
+  "selected_regular_files": 2341,
+  "selected_roster_exact": true
+}

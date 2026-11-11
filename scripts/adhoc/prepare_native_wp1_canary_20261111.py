@@ -152,6 +152,10 @@ def prepare(args):
         # sparse-set may already materialize some entries; force the same pinned
         # bytes there while retaining the default skip-worktree exclusions.
         git('checkout-index', '--all', '--force', cwd=path)
+        # checkout-index without -u leaves zero/stale stat entries; diff-index
+        # otherwise refuses unchanged source. Refresh only this new owned index
+        # after materialization; the exact roster and byte checks still apply.
+        git('update-index', '--refresh', cwd=path)
 
     evidence = m.OUT / ('composition-' + args.source[:12])
     tree = evidence / 'tree'
