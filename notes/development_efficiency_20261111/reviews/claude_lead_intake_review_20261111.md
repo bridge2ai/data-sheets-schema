@@ -267,3 +267,17 @@ Written 2026-11-11T16:58:25Z.
 - `tmp/diagnostic-result-20261111/result-analysis.json` sha256 `4b104257ec4a752c71adddc1ddf739893dafdd7a83e3f67fbb18de27e5875c6f`
 
 Written 2026-11-11T19:51:51Z.
+
+## Seventh round: the stop rule rehearsed offline
+
+The launch packet's stop command and the lead's watcher had never been exercised. `scripts/adhoc/a21_stop_rehearsal_20261111.sh` rehearses them in a sparse scratch checkout of the merge commit (`d4d-executions/claude-a21-stop-rehearsal-20261111`, `src` and `scripts` only), against `a21_stop_rehearsal_fake_sweep_20261111.py`, a stand-in that claims a label prefix with the production `run_lock.acquire` and then sleeps. No provider call; the launch base's status and lock directory were unchanged.
+
+- **First attempt, two failures, both the lead's.** The rehearsal script waited on its own background process (a command substitution held open), and after that was fixed the launcher refused the scratch checkout because the borrowed environment's packages resolve to `launch-a21`. In that attempt the watcher also reported a sweep still running after the stand-in had been killed by hand: it treated any status output other than "No sweep is running." as a live sweep, and a stopped sweep leaves a stale lock. On launch day that would have kept the watcher from ever reporting the run as ended after a stop or a crash.
+- **Fixes.** The watcher now counts only the status lines that list a live sweep for its own prefix and reports a stale lock separately. For the rehearsal only, it runs `d4d api stop` without the launcher.
+- **Second attempt, three cases pass.** Dollar trigger: the readout exits 1, the stop command signals the stand-in, the watcher confirms no live sweep and exits 21. Clock: the same after 13 s, exit 22. Launcher: the packet's exact stop command, through the launcher, in the real launch base with nothing running: exit 0, "No running sweep holds", no signal sent.
+- **Not exercised:** the launcher form of the stop command against a live process, and stopping a real generation run in the middle of a provider call.
+- The readout priced the copied 10-22a ledger at $15.17 in the scratch checkout and $17.95 in place: the difference is the abandoned-attempts journal beside the original, which was not copied.
+
+Evidence: `claude-a21-stop-rehearsal-20261111/rehearsal-logs/result.txt` sha256 `03da095fcfce34637d656911387fda684cc398fba7e5495d8b4be7b385645fee`. Launch packet after this round: sha256 `8f365c8db05512b85697661d45ae874ff052019a01b8aacf5cd0d4183b2f7447`.
+
+Written 2026-11-11T20:09:19Z.

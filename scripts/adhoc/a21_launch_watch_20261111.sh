@@ -15,6 +15,10 @@
 # Inputs (environment, with defaults): CAP=60.00 TRIGGER=51 MAX_SECONDS=10800
 #   INTERVAL=30 WAIT_START=7200. METADATA_DIR overrides the run's core
 #   directory (used to test `once` against an archived run).
+#   For an offline rehearsal only: A21_LB (another checkout of the same
+#   commit), A21_VENV (the virtual environment to use with it), A21_PREFIX
+#   (a rehearsal label prefix) and A21_LOGS (where the launch and watch logs
+#   are). With none of these set, every command is the launch packet's.
 # Outputs: lines on stdout, also appended to
 #   plans/codex_logs/chorus_a21_<label>.watch.log. Reads the launch log, the
 #   usage ledger, the latch journal and `d4d api status`. Writes nothing else.
@@ -27,13 +31,18 @@ set -u
 set -o pipefail
 
 EXEC=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions
-LB=$EXEC/launch-a21
-PY=$LB/.venv/bin/python
-P=2026-11-11a_claude-opus-5-api-bc1-a21
+LB=${A21_LB:-$EXEC/launch-a21}
+VENV=${A21_VENV:-$LB/.venv}
+PY=$VENV/bin/python
+P=${A21_PREFIX:-2026-11-11a_claude-opus-5-api-bc1-a21}
 L=${P}_rep1
 CORE=${METADATA_DIR:-$LB/data/d4d_concatenated/claudecode_api_core/$L}
-LAUNCH_LOG=$EXEC/plans/codex_logs/chorus_a21_${L}.log
-WATCH_LOG=$EXEC/plans/codex_logs/chorus_a21_${L}.watch.log
+LOGS=${A21_LOGS:-$EXEC/plans/codex_logs}
+LAUNCH_LOG=$LOGS/chorus_a21_${L}.log
+WATCH_LOG=$LOGS/chorus_a21_${L}.watch.log
+# --venv is passed to the launcher only in a rehearsal; the launch packet's
+# stop command has no such option.
+VENV_OPT=(); [ -n "${A21_VENV:-}" ] && VENV_OPT=(--venv "$VENV")
 CAP=${CAP:-60.00}; TRIGGER=${TRIGGER:-51}; MAX_SECONDS=${MAX_SECONDS:-10800}
 INTERVAL=${INTERVAL:-30}; WAIT_START=${WAIT_START:-7200}
 MODE=${1:-watch}
@@ -41,12 +50,20 @@ case "$MODE" in once|watch|watch-and-stop) ;; *) echo "usage: $0 [once|watch|wat
 
 stamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 say() { if [ "$MODE" = once ]; then echo "[$(stamp)] $*"; else echo "[$(stamp)] $*" | tee -a "$WATCH_LOG"; fi; }
-noenv() { env -u CBORG_API_KEY -u ANTHROPIC_API_KEY -u D4D_MANIFEST "$@"; }
+# Read-only calls run without provider keys and without writing bytecode
+# caches into the checkout.
+noenv() { env -u CBORG_API_KEY -u ANTHROPIC_API_KEY -u D4D_MANIFEST PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$LB/src" "$@"; }
 
-sweep_running() {  # read-only; true when `d4d api status` reports a sweep
-  local out; out=$( cd "$LB" && noenv "$LB/.venv/bin/d4d" api status 2>&1 )
-  ! printf '%s' "$out" | /usr/bin/grep -q "No sweep is running"
+STATUS_TEXT=""
+sweep_running() {  # read-only; true only when `d4d api status` lists a LIVE sweep for this prefix
+  # A stopped or crashed sweep leaves a stale lock, which status reports on a
+  # line starting with a middle dot; live sweeps are the lines starting with
+  # the play mark. Matching "No sweep is running" alone would read a stale
+  # lock as a running sweep (found in the rehearsal of 2026-11-11).
+  STATUS_TEXT=$( cd "$LB" && noenv "$VENV/bin/d4d" api status 2>&1 )
+  printf '%s\n' "$STATUS_TEXT" | /usr/bin/grep -F -- "  $P  " | /usr/bin/grep -q "^▶"
 }
+stale_note() { printf '%s\n' "$STATUS_TEXT" | /usr/bin/grep -F -- "$P" | /usr/bin/grep "^·" | /usr/bin/cut -c1-200; }
 
 READING=""; RC=0
 reading() {  # sets READING (one line) and RC (0 ok, 1 trigger, 2 cap, 9 no ledger yet)
@@ -76,7 +93,7 @@ journal_head() {
 
 if [ "$MODE" = once ]; then
   reading; say "$READING (readout exit $RC); $(journal_head)"
-  if sweep_running; then say "a sweep is running"; else say "no sweep is running"; fi
+  if sweep_running; then say "a sweep is running for $P"; else say "no live sweep for $P; $(stale_note)"; fi
   exit 0
 fi
 
@@ -94,9 +111,16 @@ stop_now() {  # $1 reason code (11 or 12), $2 text
   say "STOP RULE MET: $2; $(journal_head)"
   if [ "$MODE" = watch-and-stop ]; then
     say "running the stop command"
-    ( cd "$LB" && "$PY" "$LB/scripts/api_launcher.py" --worktree "$LB" -- d4d api stop --label-prefix "$P" ) 2>&1 | tee -a "$WATCH_LOG"
+    if [ -n "${A21_STOP_DIRECT:-}" ]; then
+      # Rehearsal only: the launcher refuses a checkout whose packages come
+      # from another checkout's environment, so the same subcommand is run
+      # without it.
+      ( cd "$LB" && noenv "$PY" -m data_sheets_schema.cli api stop --label-prefix "$P" ) 2>&1 | tee -a "$WATCH_LOG"
+    else
+      ( cd "$LB" && "$PY" "$LB/scripts/api_launcher.py" --worktree "$LB" ${VENV_OPT[@]+"${VENV_OPT[@]}"} -- d4d api stop --label-prefix "$P" ) 2>&1 | tee -a "$WATCH_LOG"
+    fi
     sleep 5
-    if sweep_running; then say "A SWEEP IS STILL RUNNING AFTER THE STOP COMMAND"; else say "no sweep is running after the stop command"; fi
+    if sweep_running; then say "A SWEEP IS STILL RUNNING AFTER THE STOP COMMAND"; else say "no live sweep after the stop command; $(stale_note)"; fi
     say "$(journal_head)"
     exit $(( $1 + 10 ))
   fi
@@ -113,7 +137,7 @@ while :; do
   if [ "$RC" = 1 ] || [ "$RC" = 2 ]; then stop_now 11 "settled plus pending worst case reached the trigger or cap (readout exit $RC)"; fi
   if [ "$running" = 1 ] && [ "$elapsed" -ge "$MAX_SECONDS" ]; then stop_now 12 "the ${MAX_SECONDS}s clock"; fi
   if [ "$running" = 0 ] && { [ "$seen_running" = 1 ] || [ "$elapsed" -ge 120 ]; }; then
-    say "run ended: no sweep is running; $(journal_head)"; /usr/bin/tail -5 "$LAUNCH_LOG" | /usr/bin/cut -c1-400 | tee -a "$WATCH_LOG"; exit 0
+    say "run ended: no live sweep; $(stale_note) $(journal_head)"; /usr/bin/tail -5 "$LAUNCH_LOG" | /usr/bin/cut -c1-400 | tee -a "$WATCH_LOG"; exit 0
   fi
   sleep "$INTERVAL"
 done
