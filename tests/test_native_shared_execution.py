@@ -36,50 +36,51 @@ def make_case(root, *, fixture='neutral', receipt_origin_version=0):
     parent = data['runtime_path'].parent
     runtime = runtime_for(data, root)
     runtime_path = parent / 'runtime-execution.json'; runtime_path.write_bytes(c.canonical(runtime))
-    prepared = preparation.prepare_synthetic(data['selection'].registration.pin.path, runtime_path,
-        job_id='synthetic-native-execution', run_date='2026-10-05', max_draft_checks=3)
-    preparation_raw = c.canonical(prepared)
-    (parent / 'preparation-execution.json').write_bytes(preparation_raw)
-    instruction = parent / 'instruction-execution.md'
-    instruction.write_text(prepared['registration']['instruction'])
-    selected = composition.compose(preparation_raw, instruction_path=instruction)
-    _, spec, captured_selection = composition.reconstruct_composition(c.canonical(selected))
-    assert captured_selection == data['selection']
-    comp = parent / 'composition-execution.json'; comp.write_bytes(c.canonical(selected))
-    (parent / 'synthetic-seeds.json').write_bytes(c.canonical({'full': data['full_raw'].decode(),
-        'receipt': data['receipt_raw'].decode(), 'source_text': data['source_text'],
-        'chunk_id': data['chunk_id'], 'correction': True, 'answer_fixture': fixture}))
-    system = parent / 'system.txt'; system.write_text('Explicitly synthetic Python software test. No actual native or provider.\n')
-    attempt = root / 'native-attempt'; output = root / 'native-evidence'
-    dependencies = authority.dependency_identity()
-    expected = registration.permission_expectation(runtime, selected, spec,
-        system.read_text() + command_guidance(selected['policy']), attempt / 'cli_config', dependencies)
-    probe = bound_permission_for(expected, data['selection'].document(), spec.bundle.read_bytes())
-    envelope = registration.synthetic_registration(comp, system, permission_probe_path=probe,
-        attempt_id=attempt.name, attempt_directory=attempt, evidence_directory=output, max_draft_checks=3,
-        receipt_origin_version=receipt_origin_version)
-    raw = c.canonical(envelope)
-    value = registration.verified(raw)
-    binding = {'registration_sha256': c.sha(raw), 'attempt_id': value['attempt_id'],
-        'source_commit': value['dependencies']['base']['source_commit'],
-        'dependencies_sha256': c.sha(c.canonical(value['dependencies']))}
-    # Fabricated offline CI declaration only: no workflow or Actions run was
-    # requested or observed. Manual CI tests the exact source commit without
-    # inventing a PR merge object; separate A3 tests cover real PR Git topology.
-    workflow_event = 'workflow_dispatch'
-    source_commit = binding['source_commit']
-    # The canonical URL is schema-conforming synthetic data, never fetched and
-    # never evidence that run 1 exists or ran these tests.
-    details_url = preparation._ci_repository_url() + '/actions/runs/1'
-    ci = {**binding, 'kind': 'd4d_native_execution_ci_v2', 'version': 2,
-        'workflow_event': workflow_event, 'workflow_ref': 'refs/heads/synthetic-native-software-test',
-        'tested_commit': source_commit,
-        'workflow_sha256': preparation._workflow_sha(source_commit, source_commit, workflow_event), 'checks': {
-        name: {'head_sha': binding['source_commit'], 'status': 'completed', 'conclusion': 'success',
-            'details_url': details_url}
-        for name in preparation.required_checks(workflow_event)}}
-    ci_path = parent / 'invented-ci.json'; ci_path.write_bytes(c.canonical(ci))
-    kwargs = authority_for(raw, ci_path, parent)
+    with authority.launch_derivations():
+        prepared = preparation.prepare_synthetic(data['selection'].registration.pin.path, runtime_path,
+            job_id='synthetic-native-execution', run_date='2026-10-05', max_draft_checks=3)
+        preparation_raw = c.canonical(prepared)
+        (parent / 'preparation-execution.json').write_bytes(preparation_raw)
+        instruction = parent / 'instruction-execution.md'
+        instruction.write_text(prepared['registration']['instruction'])
+        selected = composition.compose(preparation_raw, instruction_path=instruction)
+        _, spec, captured_selection = composition.reconstruct_composition(c.canonical(selected))
+        assert captured_selection == data['selection']
+        comp = parent / 'composition-execution.json'; comp.write_bytes(c.canonical(selected))
+        (parent / 'synthetic-seeds.json').write_bytes(c.canonical({'full': data['full_raw'].decode(),
+            'receipt': data['receipt_raw'].decode(), 'source_text': data['source_text'],
+            'chunk_id': data['chunk_id'], 'correction': True, 'answer_fixture': fixture}))
+        system = parent / 'system.txt'; system.write_text('Explicitly synthetic Python software test. No actual native or provider.\n')
+        attempt = root / 'native-attempt'; output = root / 'native-evidence'
+        dependencies = authority.dependency_identity()
+        expected = registration.permission_expectation(runtime, selected, spec,
+            system.read_text() + command_guidance(selected['policy']), attempt / 'cli_config', dependencies)
+        probe = bound_permission_for(expected, data['selection'].document(), spec.bundle.read_bytes())
+        envelope = registration.synthetic_registration(comp, system, permission_probe_path=probe,
+            attempt_id=attempt.name, attempt_directory=attempt, evidence_directory=output, max_draft_checks=3,
+            receipt_origin_version=receipt_origin_version)
+        raw = c.canonical(envelope)
+        value = registration.verified(raw)
+        binding = {'registration_sha256': c.sha(raw), 'attempt_id': value['attempt_id'],
+            'source_commit': value['dependencies']['base']['source_commit'],
+            'dependencies_sha256': c.sha(c.canonical(value['dependencies']))}
+        # Fabricated offline CI declaration only: no workflow or Actions run was
+        # requested or observed. Manual CI tests the exact source commit without
+        # inventing a PR merge object; separate A3 tests cover real PR Git topology.
+        workflow_event = 'workflow_dispatch'
+        source_commit = binding['source_commit']
+        # The canonical URL is schema-conforming synthetic data, never fetched and
+        # never evidence that run 1 exists or ran these tests.
+        details_url = preparation._ci_repository_url() + '/actions/runs/1'
+        ci = {**binding, 'kind': 'd4d_native_execution_ci_v2', 'version': 2,
+            'workflow_event': workflow_event, 'workflow_ref': 'refs/heads/synthetic-native-software-test',
+            'tested_commit': source_commit,
+            'workflow_sha256': preparation._workflow_sha(source_commit, source_commit, workflow_event), 'checks': {
+            name: {'head_sha': binding['source_commit'], 'status': 'completed', 'conclusion': 'success',
+                'details_url': details_url}
+            for name in preparation.required_checks(workflow_event)}}
+        ci_path = parent / 'invented-ci.json'; ci_path.write_bytes(c.canonical(ci))
+        kwargs = authority_for(raw, ci_path, parent)
     return {**data, 'root': root, 'spec': spec, 'value': value, 'raw': raw,
         'kwargs': kwargs}
 
