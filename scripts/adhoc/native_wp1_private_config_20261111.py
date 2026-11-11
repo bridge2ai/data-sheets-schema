@@ -23,7 +23,7 @@ SOURCE = TOOLS.parent / 'codex-native-u1u3'
 SCRATCH = TOOLS.parent / 'scratch-native-u1u3/u3m'
 HEAD = '3cc113e2606c563236d9c06098c5329ddd027a38'
 COMPOSITION = SCRATCH / 'composition-3cc113e2606c'
-EVIDENCE = COMPOSITION / 'cpu-diagnostic-config'
+EVIDENCE = COMPOSITION / 'cpu-diagnostic-config-r2'
 CONFIG = COMPOSITION / 'tree/.git/config'
 BACKUP = CONFIG.with_name('config.bak-u3m-20261109')
 ORIGINAL = '95a1f7d19be439847af9384dfe1a1f7678aa0902b1601b24c56cc60d783388b1'
@@ -106,7 +106,7 @@ def main():
         candidate = EVIDENCE / 'config-configured.bin'
         write_new(candidate, original)
         git('config', '--no-includes', '--file', str(candidate),
-            'd4d.cirepositoryurl', 'https://github.com/bridge2ai/data-sheets-schema.git')
+            'd4d.ciRepositoryUrl', 'https://github.com/bridge2ai/data-sheets-schema.git')
         target = regular(candidate)
         need(sha(target) == CONFIGURED, 'exact prior configured bytes required')
     else:

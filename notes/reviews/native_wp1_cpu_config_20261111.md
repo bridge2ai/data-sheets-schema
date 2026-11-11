@@ -1,5 +1,15 @@
 # Exact private configuration reuse for E1
 
+The first activation at tools `ddc881d81d757444a3c348a097ef2cecc18f04b0`
+stopped before replacing the private config: the lowercase key spelling generated
+candidate SHA `f8bc6808c376fbfbc4f806805338a5495782fbc87e645ab7de2660e8103e9d9e`,
+not the exact configured hash. The retained composer and prior cleanup helper use
+`d4d.ciRepositoryUrl`; the correction adopts that exact spelling. Failed original
+and candidate bytes remain in `cpu-diagnostic-config/`. The corrected helper uses
+fresh `cpu-diagnostic-config-r2/`, preserving that failure. Live config still equals
+the original backup (`95a1f7d19be439847af9384dfe1a1f7678aa0902b1601b24c56cc60d783388b1`).
+No arm ran. The corrected retry awaits review/runtime clearance.
+
 The 3cc113e2606c same-manifest canary passed and its private config was restored.
 The lead authorized preparation of one `cpu-legacy` diagnostic, capped at 900s,
 using that same composition and canary; launch awaits the shared runtime slot.
