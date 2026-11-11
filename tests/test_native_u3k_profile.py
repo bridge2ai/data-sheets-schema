@@ -213,7 +213,7 @@ def test_neutral_pre_reservation_diagnostic(tmp_path, monkeypatch):
         'consumer_observer_arm': arm, 'metrics_profile_mode': recorder.mode,
         'general_replacement_equivalence': False,
         'known_observer_limitation': 'WP1-L1: body sys.setprofile mutation changes observation and refusal behavior differently between arms.',
-        'observer_stability_boundary': 'Common worker-wide audited mutation refusal plus zero-event reservation of profiler tool 2; exact runtime capability validation required. Audit overhead is included.',
+        'observer_stability_boundary': 'Common worker-wide audited mutation refusal plus reserved profiler tool 2 with sticky RAISE conflict accounting; exact runtime capability validation required. Audit and exception-observer overhead are included.',
         'consumer_observer_targets': [list(key) for key in forbidden],
         'attempt_limit_seconds': 900, 'helper_limit_seconds': 180,
         'capture_timestamp': guard['captured_at'],

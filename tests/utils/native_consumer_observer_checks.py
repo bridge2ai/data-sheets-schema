@@ -413,6 +413,8 @@ def check_profile_stability_guards():
     """Synthetic guard checks only; no native fixture, Recorder or source loader."""
     import cProfile
     import _lsprof
+    from functools import partial
+    from operator import methodcaller
     from tests.utils.native_profile_stability import ProfileMutationRefused, profile_stability_scope
     assert sys.getprofile() is None
     initial_slots = _slots(sys.monitoring)
@@ -435,7 +437,7 @@ def check_profile_stability_guards():
             active_hook = sys.getprofile()
             with profile_stability_scope() as state:
                 assert sys.monitoring.get_tool(2) is not None
-                assert sys.monitoring.get_events(2) == 0
+                assert sys.monitoring.get_events(2) == sys.monitoring.events.RAISE
                 assert entry(30, [], flag=False) == (30, False)
             completed(state, True)
             assert state['attempts'] == [] and sys.getprofile() is active_hook
@@ -479,21 +481,70 @@ def check_profile_stability_guards():
 
         for name, constructor in (('cProfile', cProfile.Profile), ('_lsprof', _lsprof.Profiler)):
             profiler = constructor()
+            saved_enable = profiler.enable
+            routes = {
+                'direct': lambda: profiler.enable(),
+                'saved_alias': saved_enable,
+                'descriptor': lambda: _lsprof.Profiler.enable(profiler),
+                'partial': partial(saved_enable),
+                'methodcaller': partial(methodcaller('enable'), profiler),
+                'map': lambda: list(map(saved_enable, [False])),
+            }
+            for route, enable in routes.items():
+                with observe_consumer_calls(targets, arm=arm):
+                    active_hook = sys.getprofile()
+                    with pytest.raises(ProfileMutationRefused):
+                        with profile_stability_scope() as state:
+                            reserved = _slots(sys.monitoring)
+                            with pytest.raises(ValueError) as caught:
+                                enable()
+                            error = caught.value
+                            assert error.args == ('Another profiling tool is already active',)
+                            assert _slots(sys.monitoring) == reserved
+                            assert sys.getprofile() is active_hook
+                    completed(state, False)
+                    assert state['stable'] is False and sys.getprofile() is active_hook
+                    assert state['attempts'] and all(
+                        attempt['event'] == 'profiler_acquisition_conflict'
+                        for attempt in state['attempts'])
+                cases.append({'arm': arm, 'case': name + '_enable_refused',
+                              'route': route, 'state': state,
+                              'exception_type': type(error).__name__,
+                              'exception_message': str(error)})
             with observe_consumer_calls(targets, arm=arm):
                 active_hook = sys.getprofile()
-                with profile_stability_scope() as state:
-                    reserved = _slots(sys.monitoring)
-                    with pytest.raises((ValueError, RuntimeError)) as caught:
+                with pytest.raises(ProfileMutationRefused):
+                    with profile_stability_scope() as state:
                         profiler.enable()
-                    error = caught.value
-                    assert 'profil' in str(error).lower()
-                    assert _slots(sys.monitoring) == reserved
-                    assert sys.getprofile() is active_hook
-                completed(state, True)
-                assert state['attempts'] == [] and sys.getprofile() is active_hook
-            cases.append({'arm': arm, 'case': name + '_enable_refused', 'state': state,
-                          'exception_type': type(error).__name__, 'exception_message': str(error)})
+                completed(state, False)
+                assert state['body_error'] == 'ValueError' and state['attempts']
+                assert sys.getprofile() is active_hook
+            cases.append({'arm': arm, 'case': name + '_uncaught_conflict', 'state': state})
+
             del profiler
+
+        # Exception observation is selective; an unrelated caught error does
+        # not invalidate a stable body. The exact conflict text fails closed
+        # even when raised explicitly, and is not proof of profiler provenance.
+        for conflict in (False, True):
+            with observe_consumer_calls(targets, arm=arm):
+                active_hook = sys.getprofile()
+                try:
+                    with profile_stability_scope() as state:
+                        try:
+                            raise ValueError('Another profiling tool is already active'
+                                             if conflict else 'unrelated synthetic exception')
+                        except ValueError:
+                            pass
+                except ProfileMutationRefused:
+                    assert conflict
+                else:
+                    assert not conflict
+                completed(state, not conflict)
+                assert bool(state['attempts']) is conflict
+                assert sys.getprofile() is active_hook
+            cases.append({'arm': arm, 'case': 'synthetic_exception',
+                          'same_conflict_text': conflict, 'state': state})
 
         ready, release = threading.Event(), threading.Event()
         thread_errors = []
