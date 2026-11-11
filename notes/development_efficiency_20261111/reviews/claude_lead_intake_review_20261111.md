@@ -281,3 +281,14 @@ The launch packet's stop command and the lead's watcher had never been exercised
 Evidence: `claude-a21-stop-rehearsal-20261111/rehearsal-logs/result.txt` sha256 `03da095fcfce34637d656911387fda684cc398fba7e5495d8b4be7b385645fee`. Launch packet after this round: sha256 `8f365c8db05512b85697661d45ae874ff052019a01b8aacf5cd0d4183b2f7447`.
 
 Written 2026-11-11T20:09:19Z.
+
+## Eighth round: the native launch verification audit (Codex helper)
+
+Asked, after the diagnostic, whether any of the repeated verifications in one launch on 382f could safely be replaced by the narrowed recheck the capture work introduced (`assignments/claude-lead-codex-native-launch-verification-audit.md`). Source reading only; no run.
+
+- `handoffs/codex-native-launch-verification-audit.md` (sha256 `cda53553a43331051c684231a3f27ebb4625043283d9ef0ba0ed7b87a44f920f`) confirms AGY4's counts and totals from the measurement rows (nine shared-registration, fourteen execution and twenty-one preparation verifications, one prewarm) and corrects several of AGY4's details, including its estimate of 40 to 50 s saved, which the rows do not establish.
+- **Finding: no additional call site for which the narrowed recheck is demonstrably sufficient. Proven savings 0 s against about 44.2 s needed.** On the available evidence this route cannot reach the 210-second target on its own. It is not a proof that every repeat is irreducible: some intervals remain unproved and the prewarm's 57 s outside monitored children has no applicable retained profile.
+- It also names a source-level counterexample to treating the narrowed recheck as equivalent in general (the environment's `VIRTUAL_ENV` is derived from `sys.prefix`, which the narrowed path does not re-derive); unexecuted, and not evidence that the diagnostic changed it.
+- The lead's reading: the measurement confirms where the launch time goes and does not change the earlier conclusion that no material, safely established reduction is available by this route. The native target stays unmet; nothing on the API route depends on it.
+
+Written 2026-11-11T20:19:53Z.
