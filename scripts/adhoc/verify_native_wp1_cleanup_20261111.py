@@ -235,8 +235,12 @@ def main():
                     worker = same_process(pid, known[pid])
                     need(worker is not None, 'sandbox already retired before injection')
                     ancestors = worker.parents()
-                    need((child.pid, created) in {(p.pid, p.create_time()) for p in ancestors},
-                         'sandbox is not below owned outer')
+                    owned_ancestor_end = next((i for i, p in enumerate(ancestors)
+                        if (p.pid, p.create_time()) == (child.pid, created)), None)
+                    need(owned_ancestor_end is not None, 'sandbox is not below owned outer')
+                    # Command inspection belongs only to this invocation. Never
+                    # inspect unrelated shell/launchd ancestors above its root.
+                    ancestors = ancestors[:owned_ancestor_end + 1]
                     cmd = worker.cmdline()
                     plan = json.loads(regular(out / 'plan.json'))
                     need(cmd == plan['command'][3:] and plan['workers'] == 1

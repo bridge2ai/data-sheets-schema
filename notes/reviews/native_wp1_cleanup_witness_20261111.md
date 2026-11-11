@@ -54,3 +54,15 @@ terminal result cannot stand in for observed driver loss. The final 75-second
 handler now exits unconditionally without a fresh psutil traversal; rescue
 stays within the earlier five-second cleanup reserve. Missing terminal evidence
 never certifies cleanup and may require explicit retained-state recovery.
+
+First actual `sigint` attempt at tools `447b8a28abaf4cff49b358b96aabd0b49128bbbc`
+refused before injection: `AccessDenied: (pid=1)` while inspecting command lines
+above its owned outer ancestor. Its result is retained under
+`scratch-native-u1u3/u3m/cleanup-witness-e1-cleanup-sigint-447b8a28abaf/`,
+SHA-256 `10215d2f7defaa665d66c36f19e3998201ef6f0dcae84135186a6cc53cf1a8b4`.
+The external helper rescued only observed owned processes; final owned-session
+census was empty, config was restored, source/interpreter/inputs unchanged.
+Elapsed 9.214230458019301 seconds; no injected SIGINT or scenario pass.
+The narrow correction truncates ancestor command inspection at the verified
+owned outer identity. This retains the ancestry and exact-command checks and
+avoids querying unrelated launchd/shell ancestors. No prior evidence is altered.
