@@ -87,36 +87,98 @@ def test_late_acceptance_rechecks_newer_current_word(tmp_path, monkeypatch):
     assert not Path(value['attempt_directory']).exists()
 
 
-def test_frontdoor_defers_capture_without_loading_a_guard(tmp_path, monkeypatch):
-    args, value, paths, raw = prepared(tmp_path, monkeypatch)
-    calls = []
-    def forbidden(*args, **kwargs):
-        pytest.fail('front door accepted a capture before engine preflight')
-    def isolated_engine(registration_raw, **kwargs):
-        # Boundary forwarding only; this stub grants no engine admission.
-        selected = kwargs['effects'].launch_guard
-        assert type(selected) is subscription.CurrentSelection
-        assert selected.registration_raw == registration_raw == args['registration_raw']
-        assert selected.expected_sha256 == guard.sha(raw)
-        calls.append(selected)
-        return 'unaccepted-selection-observed'
+def prepared_frontdoor(root, monkeypatch, entry):
+    root.mkdir(parents=True, exist_ok=True)
+    if entry == 'launch':
+        args, value, paths, raw = prepared(root, monkeypatch)
+        return args, value, paths, raw, native.launch, 'launch'
+    from copy import deepcopy
+    from data_sheets_schema import native_shared_registration_orchestration as registration
+    from tests.test_native_subscription_capture import component
+    from tests.utils import native_synthetic_evidence as synthetic_fixture
+    _, base_value = component(root, monkeypatch)
+    runtime_path = root / 'base-runtime.json'
+    runtime_path.write_bytes(guard.canonical(base_value['runtime']))
+    value = deepcopy(base_value)
+    value['runtime'] = synthetic_fixture.runtime_for(
+        {'runtime_path': runtime_path}, root / 'synthetic-root')
+    registration_raw = guard.canonical({
+        'authority_version': 2, 'controller_sources_sha256': 'f' * 64,
+        'registration': value})
+    monkeypatch.setattr(registration, 'verified',
+        lambda submitted: deepcopy(value) if submitted == registration_raw
+        else (_ for _ in ()).throw(AssertionError('unexpected registration bytes')))
+    monkeypatch.setattr(capture.subprocess, 'Popen',
+        lambda *a, **k: pytest.fail('synthetic front-door fixture spawned a process'))
+    ci = root / 'seed-ci.json'
+    ci.write_bytes(b'{"synthetic_component_only":true}')
+    issued = synthetic_fixture.authority_for(registration_raw, ci, root)
+    paths = {'guard': issued['subscription_guard_path'],
+             'word': issued['launch_word_path'],
+             'review': issued['review_path']}
+    raw = paths['guard'].read_bytes()
+    basis = guard.strict_json(value['runtime']['limits_basis'].encode())
+    args = {'registration_raw': registration_raw,
+            'review_bundle_raw': paths['review'].read_bytes(),
+            'launch_word_raw': paths['word'].read_bytes(),
+            'directory': Path(basis['admission']['capture_state_directory'])}
+    return args, value, paths, raw, native.synthetic_launch, 'synthetic_launch'
+
+
+def _trap_frontdoor_reconstruction(monkeypatch, args, value, forbidden):
+    from copy import deepcopy
+    from data_sheets_schema import native_shared_registration_orchestration as registration
+    verified_calls = []
+    def single_frontdoor_verified(submitted):
+        assert submitted == args['registration_raw']
+        if verified_calls:
+            pytest.fail('front-door preflight repeated registration.verified')
+        verified_calls.append(submitted)
+        return deepcopy(value)
+    monkeypatch.setattr(registration, 'verified', single_frontdoor_verified)
     monkeypatch.setattr(subscription, 'load_current', forbidden)
-    monkeypatch.setattr(engine, 'launch', isolated_engine)
-    result = native.launch(args['registration_raw'], review_path=paths['review'],
-        launch_word_path=paths['word'], ci_path=tmp_path/'unread-ci.json',
-        subscription_guard_path=paths['guard'], subscription_guard_sha256=guard.sha(raw))
-    assert result == 'unaccepted-selection-observed' and len(calls) == 1
-    assert not Path(value['attempt_directory']).exists()
+    monkeypatch.setattr(subscription, 'context', forbidden)
+    monkeypatch.setattr(capture, 'read_capture_for_event', forbidden)
+    monkeypatch.setattr(capture, 'read_capture', forbidden)
+    return verified_calls
 
 
+def test_frontdoor_defers_capture_without_loading_a_guard(tmp_path, monkeypatch):
+    for entry in ('launch', 'synthetic_launch'):
+        case_dir = tmp_path / entry
+        with monkeypatch.context() as patch:
+            args, value, paths, raw, invoke, engine_name = prepared_frontdoor(
+                case_dir, patch, entry)
+            calls = []
+            def forbidden(*args, **kwargs):
+                pytest.fail('front door accepted or reconstructed a capture before engine preflight')
+            def isolated_engine(registration_raw, **kwargs):
+                # Boundary forwarding only; this stub grants no engine admission.
+                selected = kwargs['effects'].launch_guard
+                assert type(selected) is subscription.CurrentSelection
+                assert selected.registration_raw == registration_raw == args['registration_raw']
+                assert selected.expected_sha256 == guard.sha(raw)
+                calls.append(selected)
+                return 'unaccepted-selection-observed'
+            verified_calls = _trap_frontdoor_reconstruction(patch, args, value, forbidden)
+            patch.setattr(engine, engine_name, isolated_engine)
+            result = invoke(args['registration_raw'], review_path=paths['review'],
+                launch_word_path=paths['word'], ci_path=case_dir / 'unread-ci.json',
+                subscription_guard_path=paths['guard'], subscription_guard_sha256=guard.sha(raw))
+            assert result == 'unaccepted-selection-observed'
+            assert len(calls) == 1 and len(verified_calls) == 1
+            assert not Path(value['attempt_directory']).exists()
+
+
+@pytest.mark.parametrize('entry', ['launch', 'synthetic_launch'])
 @pytest.mark.parametrize('defect,match', [
     ('expired', 'stale or future-dated'),
     ('superseded', 'superseded'),
-    ('guard_sha', 'sha256 mismatch'),
+    ('guard_sha', 'subscription guard bytes differ from selected SHA256'),
 ])
 def test_frontdoor_refuses_expired_or_spent_capture_before_engine_without_loading_guard(
-        tmp_path, monkeypatch, defect, match):
-    args, value, paths, raw = prepared(tmp_path, monkeypatch)
+        tmp_path, monkeypatch, entry, defect, match):
+    args, value, paths, raw, invoke, _ = prepared_frontdoor(tmp_path, monkeypatch, entry)
     if defect == 'expired':
         captured = guard._timestamp(guard.strict_json(raw)['captured_at'], 'captured_at')
         monkeypatch.setattr(guard, '_now', lambda: captured + 301)
@@ -126,13 +188,17 @@ def test_frontdoor_refuses_expired_or_spent_capture_before_engine_without_loadin
     else:
         paths['guard'].write_bytes(raw + b' ')
     def forbidden(*args, **kwargs):
-        pytest.fail('invalid front-door capture reached load_current or engine.launch')
-    monkeypatch.setattr(subscription, 'load_current', forbidden)
+        pytest.fail('invalid front-door capture reached reconstruction, load_current or engine')
+    verified_calls = _trap_frontdoor_reconstruction(monkeypatch, args, value, forbidden)
+    if defect == 'guard_sha':
+        monkeypatch.setattr(subscription.review, 'validate_bundle', forbidden)
     monkeypatch.setattr(engine, 'launch', forbidden)
+    monkeypatch.setattr(engine, 'synthetic_launch', forbidden)
     with pytest.raises(ValueError, match=match):
-        native.launch(args['registration_raw'], review_path=paths['review'],
+        invoke(args['registration_raw'], review_path=paths['review'],
             launch_word_path=paths['word'], ci_path=tmp_path / 'unread-ci.json',
             subscription_guard_path=paths['guard'], subscription_guard_sha256=guard.sha(raw))
+    assert len(verified_calls) == 1
     assert not Path(value['attempt_directory']).exists()
 
 

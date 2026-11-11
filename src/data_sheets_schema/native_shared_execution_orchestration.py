@@ -88,7 +88,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
             registration_raw=registration_raw, runtime=value['runtime'],
             launch_word_path=launch_word_path, review_path=review_path)
         preflight_current_selection(
-            guard, registration_raw=registration_raw, runtime=value['runtime'])
+            guard, registration_raw=registration_raw, value=value)
         contract, effects = _engine_bindings(launch_guard=guard)
         return execute(registration_raw, review_path=review_path, ci_path=ci_path,
             launch_word_path=launch_word_path, contract=contract, effects=effects)
@@ -121,7 +121,7 @@ def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path
             registration_raw=registration_raw, runtime=value['runtime'],
             launch_word_path=launch_word_path, review_path=review_path)
         preflight_current_selection(
-            guard, registration_raw=registration_raw, runtime=value['runtime'])
+            guard, registration_raw=registration_raw, value=value)
         contract, effects = _engine_bindings(launch_guard=guard)
         effects = replace(effects, probe_runtime=_synthetic_runtime_observation)
         return execute(registration_raw, review_path=review_path, ci_path=ci_path,

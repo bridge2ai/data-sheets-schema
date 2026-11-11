@@ -35,29 +35,34 @@ def select_current(path, expected_sha256, *, registration_raw, runtime,
         str(Path(launch_word_path).absolute()), str(Path(review_path).absolute()))
 
 
-def preflight_current_selection(selection, *, registration_raw, runtime):
+def preflight_current_selection(selection, *, registration_raw, value):
     """Refuse stale, spent or mismatched capture inputs before engine entry.
 
     RunSpec boundary: validated-caller
 
-    RunSpec precondition: Caller supplies execution bytes and the runtime from
-    registration.verified; context reconstructs current capture preparation and
-    checks live guard freshness without returning or accepting a guard.
+    RunSpec precondition: Caller supplies execution bytes and the already-verified
+    registration value from the front door; this refusal-only check validates
+    guard SHA, bundle/word bindings, live clock freshness and current journal
+    state without reconstructing capture slots or returning a guard.
     """
-    if (type(selection) is not CurrentSelection
+    from . import native_capture_words as words
+    if (type(value) is not dict or type(value.get('runtime')) is not dict
+            or type(selection) is not CurrentSelection
             or selection.registration_raw != registration_raw
-            or selection.runtime_json != v1.canonical(runtime)):
+            or selection.runtime_json != v1.canonical(value['runtime'])):
         raise ValueError('deferred subscription selection differs from launch authority')
     raw = v1.read_regular(selection.path)
+    if v2.sha(raw) != selection.expected_sha256:
+        raise ValueError('subscription guard bytes differ from selected SHA256')
     word = v1.read_regular(selection.launch_word_path)
     bundle = v1.read_regular(selection.review_path)
-    module, extra = context(raw, registration_raw=registration_raw, runtime=runtime,
-        launch_word_raw=word, review_bundle_raw=bundle, current=True)
-    if module is not v2:
-        raise ValueError('current native launch requires subscription guard v2')
-    module.SubscriptionGuard(raw, expected_sha256=selection.expected_sha256,
-        registration_raw=registration_raw, runtime=runtime, launch_word_raw=word,
-        check_freshness=True, **extra)
+    terms = review.validate_bundle(registration_raw, bundle, word)
+    v2.SubscriptionGuard(raw, expected_sha256=selection.expected_sha256,
+        registration_raw=registration_raw, runtime=value['runtime'],
+        launch_word_raw=word, owner_statement=terms, check_freshness=True)
+    words.require_unspent(value)
+    with words.locked(value, registration_raw, create=False) as journal:
+        journal.require(word, current=True)
 
 
 def _selection_inputs(selection, registration_raw, runtime, authorization):
