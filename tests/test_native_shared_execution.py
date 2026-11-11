@@ -166,14 +166,22 @@ def test_actual_public_correction_three_workers_and_saved_completion(tmp_path, m
 def test_launch_case_routes_guarded_monitoring_on_cpython313_and_legacy_elsewhere(tmp_path, monkeypatch):
     from contextlib import contextmanager
     from types import SimpleNamespace
+    module = sys.modules[__name__]
     events = []
     fail_guard_exit = False
+    hook = {'active': None}
+    sys_proxy = SimpleNamespace(
+        implementation=SimpleNamespace(name='cpython'),
+        version_info=(3, 13, 0, 'final', 0),
+        getprofile=lambda: hook['active'],
+    )
     case = {'root': tmp_path, 'raw': b'{"synthetic":true}', 'kwargs': {'marker': 'ok'}}
     forbidden = {key: () for key in (
         ('prepare_direct', 'auth_evidence'), ('run_direct_canary', 'main'),
         ('run_api_canary', 'main'), ('budgeted_cborg', 'cborg_client'))}
 
-    def _fake_observe(targets, *, refuse=None, forbid=False, arm='legacy'):
+    @contextmanager
+    def fake_observe(targets, *, refuse=None, forbid=False, arm='legacy'):
         assert targets == forbidden and forbid is True and refuse is None
         events.append(('enter_observe', arm))
         try:
@@ -182,7 +190,8 @@ def test_launch_case_routes_guarded_monitoring_on_cpython313_and_legacy_elsewher
             events.append(('exit_observe', arm))
             assert not (tmp_path / 'actual-result.json').exists()
 
-    def _fake_guard():
+    @contextmanager
+    def fake_guard():
         assert events[-1] == ('enter_observe', 'monitoring')
         events.append('enter_guard')
         try:
@@ -193,23 +202,18 @@ def test_launch_case_routes_guarded_monitoring_on_cpython313_and_legacy_elsewher
         if fail_guard_exit:
             raise RuntimeError('guard exit invalidated')
 
-    fake_observe = contextmanager(_fake_observe)
-    fake_guard = contextmanager(_fake_guard)
-
-    monkeypatch.setattr(sys, 'implementation', SimpleNamespace(name='cpython'))
-    monkeypatch.setattr(sys, 'version_info', (3, 13, 0, 'final', 0))
-    monkeypatch.setattr(sys.modules[__name__], 'observe_consumer_calls', fake_observe)
-    monkeypatch.setattr(sys.modules[__name__], 'profile_stability_scope', fake_guard)
+    monkeypatch.setattr(module, 'sys', sys_proxy)
+    monkeypatch.setattr(module, 'observe_consumer_calls', fake_observe)
+    monkeypatch.setattr(module, 'profile_stability_scope', fake_guard)
     monkeypatch.setattr(execute, 'synthetic_launch',
         lambda raw, **kwargs: (events.append(('launch', raw, kwargs)), {'ok': 1})[1])
 
-    prior = sys.getprofile()
-    sys.setprofile(lambda frame, event, arg: None)
+    hook['active'] = object()
     try:
         with pytest.raises(RuntimeError, match='no inherited profile hook'):
             launch_case(case, monkeypatch)
     finally:
-        sys.setprofile(prior)
+        hook['active'] = None
     assert events == [] and not (tmp_path / 'actual-result.json').exists()
 
     assert launch_case(case, monkeypatch) == {'ok': 1}
@@ -254,15 +258,15 @@ def test_launch_case_routes_guarded_monitoring_on_cpython313_and_legacy_elsewher
         events.clear()
         if (tmp_path / 'actual-result.json').exists():
             (tmp_path / 'actual-result.json').unlink()
-        monkeypatch.setattr(sys, 'implementation', SimpleNamespace(name=impl_name))
-        monkeypatch.setattr(sys, 'version_info', ver)
+        sys_proxy.implementation = SimpleNamespace(name=impl_name)
+        sys_proxy.version_info = ver
         monkeypatch.setattr(execute, 'synthetic_launch',
             lambda raw, **kwargs: (events.append(('launch_fallback', raw, kwargs)), {'ok': 2})[1])
-        sys.setprofile(lambda frame, event, arg: None)
+        hook['active'] = object()
         try:
             assert launch_case(case, monkeypatch) == {'ok': 2}
         finally:
-            sys.setprofile(prior)
+            hook['active'] = None
         assert events == [
             ('enter_observe', 'legacy'),
             ('launch_fallback', b'{"synthetic":true}', {'marker': 'ok'}),
