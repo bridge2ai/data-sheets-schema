@@ -104,13 +104,17 @@ def prepare(args):
     # Exact non-cone selection includes root files, the named source trees and
     # 15 controller files. Never include all notes/ or parent-directory siblings.
     # Size that selection using object metadata before materializing a Git tree.
-    selected = []
+    selected, gitlinks = [], {}
     for row in git('ls-tree', '-r', '-l', '-z', args.source).split(b'\0'):
         if not row:
             continue
         metadata, raw_path = row.split(b'\t', 1)
         path = raw_path.decode('utf-8')
         mode, kind, oid, size = metadata.split()
+        if kind == b'commit':
+            need(mode == b'160000', 'unexpected non-blob Git entry')
+            gitlinks[path] = oid.decode()
+            continue
         included = ('/' not in path or path in CONTROLLER_FILES
                     or any(path.startswith(prefix + '/') for prefix in SPARSE))
         if included and kind == b'blob':
@@ -133,9 +137,17 @@ def prepare(args):
         need(all(row[:2] in (b'H ', b'S ') for row in rows if row),
              'unexpected sparse index state')
         present = {row[2:].decode() for row in rows if row.startswith(b'H ')}
-        # A gitlink has no blob payload and is never hydrated here.
-        present.discard('fairscape_models')
-        need(present == {name for name, _ in selected}, 'sparse index differs from sized selection')
+        # Classify every committed gitlink (including aurelian), not just the
+        # FAIRSCAPE dependency. Verify exact mode/object/stage before excluding
+        # those zero-payload entries; never hydrate or ignore regular files.
+        entries = git('ls-files', '--stage', '-z', '--', *sorted(gitlinks), cwd=path).split(b'\0')
+        expected_links = {('160000 ' + oid + ' 0\t' + name).encode()
+                          for name, oid in gitlinks.items()}
+        need({entry for entry in entries if entry} == expected_links, 'committed gitlink identities differ')
+        present.difference_update(gitlinks)
+        expected = {name for name, _ in selected}
+        need(present == expected, 'sparse index differs from sized selection: extra='
+             + repr(sorted(present - expected)) + ', missing=' + repr(sorted(expected - present)))
         # These directories are exclusively new and owned by this preparation.
         # sparse-set may already materialize some entries; force the same pinned
         # bytes there while retaining the default skip-worktree exclusions.
@@ -158,6 +170,7 @@ def prepare(args):
         preparation_tools_commit=tool_commit, preparation_tools_worktree=str(TOOLS_ROOT),
         helper_sha256=b.sha(Path(__file__).read_bytes()),
         sparse_directories=list(SPARSE), sparse_controller_files=list(CONTROLLER_FILES),
+        unhydrated_gitlinks=gitlinks,
         sparse_patterns=list(PATTERNS), materialized_source_bytes_per_tree=total,
         materialized_source_files_per_tree=len(selected),
         maximum_source_bytes_per_tree=MAX_TREE_BYTES, preparation_seconds=PREPARATION_SECONDS,

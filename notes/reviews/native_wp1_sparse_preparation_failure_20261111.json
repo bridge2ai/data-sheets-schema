@@ -1,0 +1,22 @@
+{
+  "actual_non_skip_entries": 2343,
+  "contract_exists": false,
+  "expected_regular_files": 2341,
+  "index_delta": [],
+  "linked_worktree_exists": false,
+  "manifest_sha256": "985e31929f02cd7ac0e77b57e7f81cc5209747f9896bb810545c75739b2d8d3c",
+  "old_rule_extra": [
+    "aurelian"
+  ],
+  "old_rule_missing": [],
+  "private_head": "01bdcb22dad66da1a167595251b23e6352c97ab7",
+  "regular_roster_equal_after_gitlink_classification": true,
+  "scope": "Static Git/index/artifact diagnosis only; no new materialization or validation run.",
+  "script_sha256": "306a2d81f83e33d2a7d011a978452beb703628ec36f63673e0c0149ca11ae58e",
+  "selected_gitlinks": {
+    "aurelian": "05741290eb26e88e40dc43440940b228db8741cd",
+    "fairscape_models": "8c80311d7d8b0fadac07dca9567d632103691f48"
+  },
+  "source_commit": "01bdcb22dad66da1a167595251b23e6352c97ab7",
+  "source_manifest_unchanged": true
+}
