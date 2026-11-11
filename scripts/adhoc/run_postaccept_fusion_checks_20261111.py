@@ -18,7 +18,7 @@ import time
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
-BASE = ROOT.parent / 'scratch-native-postaccept-fusion-v2-20261111'
+BASE = ROOT.parent / 'scratch-native-postaccept-fusion-v3-20261111'
 # #5869: fixed Git entry, selected target and approved Apple selector helper.
 # Dependency allowance, not a claim that all three have been observed executing.
 GIT_EXECUTABLES = ('/usr/bin/git', '/Library/Developer/CommandLineTools/usr/bin/git',
@@ -75,6 +75,9 @@ def main():
         if prior.get('passed') is not True or prior.get('selected_file_sha256') != identity:
             raise ValueError('same-source certified singleton canary required')
     out = BASE / mode
+    case_prefix = str(out / 'cases')
+    if re.fullmatch(r'/[A-Za-z0-9_/-]+', case_prefix) is None:
+        raise ValueError('fixed sandbox peer prefix contains regex metacharacters')
     out.mkdir(parents=True, exist_ok=False)
     for name in ('home', 'tmp'):
         (out / name).mkdir()
@@ -86,7 +89,9 @@ def main():
     # The canonical Python target is included for interpreter symlink resolution.
     permitted = sorted({str(Path(sys.executable).absolute()), str(Path(sys.executable).resolve()),
                         *GIT_EXECUTABLES})
-    peer_pattern = '^' + re.escape(str(out / 'cases')) + '/[^/]+/durable-copy$'
+    # #5870: this validated prefix has no regex/string metacharacters. Avoid
+    # re.escape -> JSON doubled backslashes before otherwise literal hyphens.
+    peer_pattern = '^' + case_prefix + '/[^/]+/durable-copy$'
     profile.write_text('(version 1)\n(allow default)\n(deny network*)\n'
         '(deny process-exec (require-all ' + ' '.join(
             '(require-not (literal ' + json.dumps(path) + '))' for path in permitted)
