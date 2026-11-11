@@ -10,6 +10,7 @@ import pytest
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_shared_selection as ordinary
 from data_sheets_schema import api_runner as fixture_api
+from tests.test_native_execution_authority_v2 import isolated_modules
 from tests.test_native_shared_selection import declaration, pin, save
 
 
@@ -629,3 +630,80 @@ def test_metadata_cache_two_entry_bound_and_three_document_eviction(declaration)
             with counted_metadata_calls() as evicted_calls:
                 assert second_snapshots._metadata(docs[0])[0] == 'doc0'
             assert evicted_calls['safe_load'] == 1
+
+
+def test_loaded_controls_nested_dependencies_late_render_import_binds_verified_snapshot(
+    declaration, isolated_modules, monkeypatch,
+):
+    import importlib
+    from data_sheets_schema import native_shared_controls_orchestration as control_loading
+    from data_sheets_schema import schema_snapshot as ordinary_snapshots
+
+    identity = authority.dependency_identity()
+    source_pins = identity['base']['package_sources']
+    snapshot_relative = 'src/data_sheets_schema/schema_snapshot.py'
+    expected_snapshot_identity = {
+        'name': 'data_sheets_schema.schema_snapshot',
+        'path': str(authority.ROOT / snapshot_relative),
+        'sha256': source_pins[snapshot_relative],
+    }
+    raw = b'id: https://example.org/controls-nested\nname: controls_nested\n'
+    with authority.launch_derivations():
+        memo = authority._LAUNCH_DERIVATIONS.memo
+        with loaded(source_pins) as first:
+            expected_capture = warm(first, declaration)
+            first_snapshots = first._schema_dependencies.snapshots
+            first_snapshots._metadata(raw)
+        assert memo.donor is first
+        assert authority._VERIFIED_PACKAGE_MODULES == {}
+        with control_loading.loaded_controls(identity):
+            assert 'data_sheets_schema.schema_snapshot' not in sys.modules
+            assert 'data_sheets_schema.schema_snapshot' not in authority._VERIFIED_PACKAGE_MODULES
+            with authority.loaded_dependencies(identity):
+                pass
+            with authority.loaded_dependencies(identity):
+                pass
+            nonconsumer_snapshots = sys.modules.get('data_sheets_schema.schema_snapshot')
+            parent_attr = getattr(sys.modules.get('data_sheets_schema'), 'schema_snapshot', None)
+            registry_entry = authority._VERIFIED_PACKAGE_MODULES.get('data_sheets_schema.schema_snapshot')
+            assert nonconsumer_snapshots is not None
+            assert nonconsumer_snapshots is not ordinary_snapshots
+            assert nonconsumer_snapshots is not first_snapshots
+            assert parent_attr is nonconsumer_snapshots
+            assert registry_entry is None
+            assert authority.module_source_identity(nonconsumer_snapshots) == expected_snapshot_identity
+            controls_module = sys.modules['data_sheets_schema.native_shared_controls']
+            with pytest.raises(ValueError, match='module was not compiled from verified source bytes'):
+                authority._verified_snapshot_identity(ordinary_snapshots, source_pins)
+            with pytest.raises(ValueError, match='verified schema snapshot binding differs from catalog guard'):
+                authority._verified_snapshot_identity(controls_module, source_pins)
+            with pytest.raises(ValueError, match='verified schema snapshot binding differs from catalog guard'):
+                authority._verified_snapshot_identity(
+                    nonconsumer_snapshots,
+                    {**source_pins, snapshot_relative: '0' * 64},
+                )
+            loaded_api = importlib.import_module('data_sheets_schema.api_runner')
+            render = importlib.import_module('data_sheets_schema.native_shared_render')
+            late_selection = render.selection
+            guard = late_selection._schema_dependencies
+            assert guard is not None
+            assert guard.snapshots is nonconsumer_snapshots
+            assert late_selection._capture_native_schema is nonconsumer_snapshots._capture_native_schema
+            assert authority.module_source_identity(guard.snapshots) == expected_snapshot_identity
+            assert memo.donor is first
+            assert nonconsumer_snapshots._SCHEMA_LAUNCH_CONTEXT[1] is True
+            with counted_metadata_calls() as calls:
+                assert nonconsumer_snapshots._metadata(raw)[0] == 'controls_nested'
+            assert calls['safe_load'] == 0
+            with monkeypatch.context() as roots:
+                for name in ('FULL_SCHEMA_PATH', 'CORE_SCHEMA_PATH'):
+                    roots.setattr(loaded_api, name, getattr(fixture_api, name))
+                with counted_derivations() as schema_calls:
+                    actual_capture = late_selection.capture(declaration['registration_path'])
+                assert not schema_calls
+                assert actual_capture.document() == expected_capture.document()
+    assert sys.modules.get('data_sheets_schema.schema_snapshot') is ordinary_snapshots
+    assert getattr(sys.modules.get('data_sheets_schema'), 'schema_snapshot', None) is ordinary_snapshots
+    assert authority._VERIFIED_PACKAGE_MODULES == {}
+    assert nonconsumer_snapshots._SCHEMA_LAUNCH_CONTEXT is None
+    assert nonconsumer_snapshots._METADATA_DERIVATIONS.snapshot() == ()
