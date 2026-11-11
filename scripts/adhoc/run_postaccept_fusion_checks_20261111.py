@@ -18,29 +18,38 @@ import time
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
-BASE = ROOT.parent / 'scratch-native-postaccept-fusion-v3-20261111'
+BASE = ROOT.parent / 'scratch-native-postaccept-fusion-v4-20261111'
 # #5869: fixed Git entry, selected target and approved Apple selector helper.
 # Dependency allowance, not a claim that all three have been observed executing.
 GIT_EXECUTABLES = ('/usr/bin/git', '/Library/Developer/CommandLineTools/usr/bin/git',
                    '/usr/bin/xcrun')
 RESERVATION = 'tests/test_native_u4b_a3_reservation.py'
 CAPTURES = 'tests/test_native_u4b_a3_captures.py'
-# (module, function, expected parameterized cases); no caller-supplied node IDs.
+# (module, exact case, count=1); no caller-supplied node IDs or grouped runs.
 SELECTIONS = {
     'canary': [(RESERVATION, 'test_deferred_capture_acceptance_exact_order_to_real_reservation', 1)],
-    'values': [(RESERVATION, 'test_fused_lease_compares_original_current_and_fresh_execution', 3),
-               (RESERVATION, 'test_fused_lease_refuses_engine_mutation_during_authorization_read', 1)],
-    'inputs': [(RESERVATION, 'test_fused_lease_uses_actual_shared_input_checks', 3)],
-    'direct': [(RESERVATION, 'test_registered_90_second_margin_permits_first_real_reservation_only', 1),
-               (RESERVATION, 'test_registered_89_second_margin_refuses_before_any_attempt_directory', 1),
-               (RESERVATION, 'test_source_recapture_time_is_charged_before_measuring_reservation_margin', 2)],
-    'margin': [(RESERVATION, 'test_fused_lease_charges_controls_before_margin', 2)],
-    'admission': [(RESERVATION, 'test_admission_changes_after_initial_join_refuse_before_attempt_reservation', 2),
-                  (RESERVATION, 'test_deferred_capture_late_load_refuses_admission_mutation', 2)],
+    'values-current': [(RESERVATION, 'test_fused_lease_compares_original_current_and_fresh_execution[current]', 1)],
+    'values-fresh': [(RESERVATION, 'test_fused_lease_compares_original_current_and_fresh_execution[fresh]', 1)],
+    'values-both': [(RESERVATION, 'test_fused_lease_compares_original_current_and_fresh_execution[both]', 1)],
+    'values-during-read': [(RESERVATION, 'test_fused_lease_refuses_engine_mutation_during_authorization_read', 1)],
+    'inputs-changed-bytes': [(RESERVATION, 'test_fused_lease_uses_actual_shared_input_checks[changed-bytes]', 1)],
+    'inputs-read-failure': [(RESERVATION, 'test_fused_lease_uses_actual_shared_input_checks[read-failure]', 1)],
+    'inputs-platform': [(RESERVATION, 'test_fused_lease_uses_actual_shared_input_checks[platform]', 1)],
+    'direct-90': [(RESERVATION, 'test_registered_90_second_margin_permits_first_real_reservation_only', 1)],
+    'direct-89': [(RESERVATION, 'test_registered_89_second_margin_refuses_before_any_attempt_directory', 1)],
+    'direct-recapture-90': [(RESERVATION, 'test_source_recapture_time_is_charged_before_measuring_reservation_margin[90-refuse]', 1)],
+    'direct-recapture-91': [(RESERVATION, 'test_source_recapture_time_is_charged_before_measuring_reservation_margin[91-reserve]', 1)],
+    'margin-90': [(RESERVATION, 'test_fused_lease_charges_controls_before_margin[90-refuse]', 1)],
+    'margin-91': [(RESERVATION, 'test_fused_lease_charges_controls_before_margin[91-reserve]', 1)],
+    'admission-direct-superseded': [(RESERVATION, 'test_admission_changes_after_initial_join_refuse_before_attempt_reservation[superseded]', 1)],
+    'admission-direct-poison': [(RESERVATION, 'test_admission_changes_after_initial_join_refuse_before_attempt_reservation[poison]', 1)],
+    'admission-deferred-superseded': [(RESERVATION, 'test_deferred_capture_late_load_refuses_admission_mutation[superseded]', 1)],
+    'admission-deferred-poison': [(RESERVATION, 'test_deferred_capture_late_load_refuses_admission_mutation[poison]', 1)],
     'lease': [(CAPTURES, 'test_admission_lease_excludes_word_renewal_during_reservation', 1)],
 }
-PEER_COUNTS = {'canary': 1, 'values': 4, 'inputs': 3, 'direct': 4,
-               'margin': 2, 'admission': 6, 'lease': 0}
+FAILED_PEER_COUNTS = {'admission-direct-poison': 1, 'admission-deferred-poison': 1}
+PEER_COUNTS = {mode: 1 for mode in SELECTIONS}
+PEER_COUNTS.update({'admission-direct-poison': 2, 'admission-deferred-poison': 2, 'lease': 0})
 PINNED = (RESERVATION, CAPTURES, 'tests/test_native_subscription_capture.py',
     'tests/test_native_u4b_runtime.py', 'tests/conftest.py', 'tests/utils/subprocess_deadline.py',
     'src/data_sheets_schema/native_execution_orchestration.py',
@@ -131,7 +140,7 @@ def main():
     for module, name, count in SELECTIONS[mode]:
         classname = module[:-3].replace('/', '.')
         matched = [case for case in cases if case.get('classname') == classname and
-                   (case.get('name') == name or case.get('name', '').startswith(name + '['))]
+                   case.get('name') == name]
         exact_cases = exact_cases and len(matched) == count
     peers = []
     for path in sorted((out / 'cases').rglob('capture.json')):
@@ -150,7 +159,7 @@ def main():
         peers.append(dict(path=str(path), lifecycle=lifecycle, status=captured.get('status'), verified=valid))
     failed = sum(peer['status'] == 'failed' for peer in peers)
     peer_checks = (len(peers) == PEER_COUNTS[mode] and all(peer['verified'] for peer in peers)
-                   and failed == (2 if mode == 'admission' else 0)
+                   and failed == FAILED_PEER_COUNTS.get(mode, 0)
                    and all(peer['status'] in ('captured', 'failed') for peer in peers))
     elapsed = time.monotonic() - began
     passed = (result.returncode == 0 and not result.expired and elapsed <= 30 and exact_cases

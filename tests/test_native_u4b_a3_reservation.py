@@ -358,7 +358,8 @@ def test_registered_89_second_margin_refuses_before_any_attempt_directory(tmp_pa
     assert 'margin-passed' not in trace and 'first-mkdir-fsynced' not in trace
 
 
-@pytest.mark.parametrize('remaining,permits_reservation', [(90, False), (91, True)])
+@pytest.mark.parametrize('remaining,permits_reservation', [(90, False), (91, True)],
+                         ids=['90-refuse', '91-reserve'])
 def test_source_recapture_time_is_charged_before_measuring_reservation_margin(
         tmp_path, monkeypatch, remaining, permits_reservation):
     """One synthetic second models source recapture; no sleeping or native call."""
@@ -382,7 +383,8 @@ def test_source_recapture_time_is_charged_before_measuring_reservation_margin(
 
 
 @pytest.mark.parametrize('change,reason', [('superseded', 'superseded'),
-                                        ('poison', 'registration permanently refused')])
+                                        ('poison', 'registration permanently refused')],
+                         ids=['superseded', 'poison'])
 def test_admission_changes_after_initial_join_refuse_before_attempt_reservation(
         tmp_path, monkeypatch, change, reason):
     invoke, _, value, watched, trace, active = reservation_case(
@@ -426,7 +428,8 @@ def test_deferred_capture_acceptance_exact_order_to_real_reservation(tmp_path, m
 
 
 @pytest.mark.parametrize('change,reason', [('superseded', 'superseded'),
-                                        ('poison', 'registration permanently refused')])
+                                        ('poison', 'registration permanently refused')],
+                         ids=['superseded', 'poison'])
 def test_deferred_capture_late_load_refuses_admission_mutation(tmp_path, monkeypatch, change, reason):
     invoke, _, value, watched, trace, active = reservation_case(
         tmp_path, monkeypatch, remaining=90, deferred_selection=True, change_at_admit=change)
@@ -474,7 +477,7 @@ def test_fused_lease_refuses_engine_mutation_during_authorization_read(tmp_path,
     ('changed-bytes', ValueError, 'external native shared launch authority changed'),
     ('read-failure', FileNotFoundError, 'authority-ci.json'),
     ('platform', ValueError, 'registered execution host differs'),
-])
+], ids=['changed-bytes', 'read-failure', 'platform'])
 def test_fused_lease_uses_actual_shared_input_checks(tmp_path, monkeypatch, failure, error, reason):
     invoke, _, value, watched, trace, active = reservation_case(
         tmp_path, monkeypatch, remaining=90, deferred_selection=True, tail_failure=failure)
@@ -488,7 +491,8 @@ def test_fused_lease_uses_actual_shared_input_checks(tmp_path, monkeypatch, fail
     assert not watched.dispatched and not active[0]
 
 
-@pytest.mark.parametrize('remaining,permits_reservation', [(90, False), (91, True)])
+@pytest.mark.parametrize('remaining,permits_reservation', [(90, False), (91, True)],
+                         ids=['90-refuse', '91-reserve'])
 def test_fused_lease_charges_controls_before_margin(tmp_path, monkeypatch, remaining, permits_reservation):
     """Synthetic clock cost checks order, not measured elapsed freshness."""
     invoke, _, value, watched, trace, active = reservation_case(
