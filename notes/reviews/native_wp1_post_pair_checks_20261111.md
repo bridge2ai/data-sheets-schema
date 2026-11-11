@@ -42,3 +42,28 @@ Parent source-helper imports use a fresh cache prefix; `-B` prevents writing it.
 The finding is recorded in the lead handoff for the issue ledger; no GitHub write
 occurred here. Final helper SHA-256:
 `9b0ff58bf1ab8d2797deb8966855f41ab9933b888b45b84545d8df3ca31dfdda`.
+
+## Executed result
+
+Tools `8005c3ce66ba0c47363c279f503eb5c7fec7891b` ran the fixed pair once.
+Both exact one-test units passed, first verified before second, in
+**13.111741207976593 seconds combined**. JUnit suite times were3.392s and6.247s;
+no failures/errors/skips, expired deadline or cleanup signal. Both workers
+recorded OS network denial and API/authority origins inside native7ee4; source
+remained clean with unchanged protected hashes. No composition or genuine run.
+
+Evidence is retained under `scratch-native-u1u3/u3m/refusals-7ee4cd8ba4fa-20261111/`:
+
+| File | SHA-256 |
+| --- | --- |
+| `outcome.json` | `d31d318df45cdda03ccdced1d0f0beece5312dc41820c411ad12d167c1333db5` |
+| `plan.json` | `5afb630350d2e35b3ec00ca0dd8f5929bf92f406d9cf2108d7a7fa4ce438bc57` |
+| `0/pytest.xml` | `6d7300f2af46e0dec68bb1966c391de75e4ee6907831c0f234a959202ba0eb12` |
+| `1/pytest.xml` | `d28807b1d7476868b9f7e9274d4a59dd7c0535f906ec3a4233a9bcaa3bd0f5c8` |
+| Each `worker.json` | `a6aa7f45fc8c69955fd70ef9fe2de14a8c895c56690ef25ad3851c29d3dff548` |
+| `0/deadline/deadline.json` | `3a29fc7d9b1cf815a41a184ec6fee0d8a30ac78acbe3816b49f74ce5cf83d6f5` |
+| `1/deadline/deadline.json` | `137f636319d127b02ebb99109554617a8eba1e565c5724e43e2df162ebbd5b16` |
+
+No further runtime is authorized before the separately owned WP3 candidate and
+the final combined head/command review. A cheap refusal pass is not fresh-capture
+completion or a real native binary/provider run.
