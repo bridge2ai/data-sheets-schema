@@ -331,7 +331,7 @@ def test_unready_guard_is_cold_and_cannot_satisfy_hit_canary(declaration, monkey
                 assert calls
 
 
-@pytest.mark.parametrize('dependency', ('normpath', 'abspath', 'Namespaces', 'deepcopy'))
+@pytest.mark.parametrize('dependency', ('normpath', 'abspath', 'posixpath_os', 'Namespaces', 'deepcopy'))
 def test_warm_pure_rebuild_keeps_effective_producer_refusal(
         declaration, monkeypatch, dependency):
     doc = deepcopy(declaration)
@@ -356,6 +356,24 @@ def test_warm_pure_rebuild_keeps_effective_producer_refusal(
                 raise ValueError('effective producer dependency refused')
             if dependency in ('normpath', 'abspath'):
                 changed.setattr(snapshots.os.path, dependency, reject)
+            elif dependency == 'posixpath_os':
+                real_os = snapshots.os
+
+                class _StrBytesOnlyOS:
+                    def __getattr__(self, name):
+                        return getattr(real_os, name)
+
+                    @staticmethod
+                    def fspath(value):
+                        if isinstance(value, (str, bytes)):
+                            return value
+                        if isinstance(value, real_os.PathLike):
+                            reject(value)
+                        return real_os.fspath(value)
+
+                changed.setattr(snapshots.os.path, 'os', _StrBytesOnlyOS())
+                assert snapshots.os.path.abspath(str(root)) == str(root)
+                assert snapshots.os.path.abspath(real_os.fsencode(str(root))) == real_os.fsencode(str(root))
             elif dependency == 'Namespaces':
                 changed.setattr(snapshots, 'Namespaces', reject)
             else:

@@ -10,6 +10,7 @@ import _json
 import functools
 import json
 import os
+import posixpath
 import types
 
 try:
@@ -269,6 +270,7 @@ def _native_path_state():
     """
     module = os.path
     if (snapshots.os is not os or snapshots.os.path is not module
+            or module is not posixpath or posixpath.os is not os
             or snapshots.Namespaces is not Namespaces):
         raise TypeError('native schema path or namespace alias differs')
     functions = []
@@ -298,7 +300,7 @@ def _native_path_state():
         functions.append((function, function.__code__,
                           setting_key(function.__defaults__),
                           setting_key(function.__kwdefaults__)))
-    return os, module, _native_posix, fspath, snapshots.Namespaces, tuple(functions)
+    return os, module, posixpath.os, _native_posix, fspath, snapshots.Namespaces, tuple(functions)
 
 
 def _bound_schema_state():
