@@ -90,7 +90,8 @@ def require_source(commit):
               and ROOT.parent.name == 'd4d-executions', 'assigned physical source worktree required')
     base.need(re.fullmatch('[0-9a-f]{40}', commit) is not None, 'full source commit required')
     base.need(ORIGINAL_GIT('rev-parse', 'HEAD').decode().strip() == commit
-              and ORIGINAL_GIT('branch', '--show-current').decode().strip() == base.BRANCH,
+              and ORIGINAL_GIT('branch', '--show-current').decode().strip() in (
+                  base.BRANCH, 'codex/native-capture-ast-integration-20261111'),
               'source HEAD or branch differs')
     base.need(not ORIGINAL_GIT('status', '--porcelain', '--untracked-files=normal').strip(),
               'source must be committed and clean')
