@@ -35,6 +35,31 @@ def select_current(path, expected_sha256, *, registration_raw, runtime,
         str(Path(launch_word_path).absolute()), str(Path(review_path).absolute()))
 
 
+def preflight_current_selection(selection, *, registration_raw, runtime):
+    """Refuse stale, spent or mismatched capture inputs before engine entry.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies execution bytes and the runtime from
+    registration.verified; context reconstructs current capture preparation and
+    checks live guard freshness without returning or accepting a guard.
+    """
+    if (type(selection) is not CurrentSelection
+            or selection.registration_raw != registration_raw
+            or selection.runtime_json != v1.canonical(runtime)):
+        raise ValueError('deferred subscription selection differs from launch authority')
+    raw = v1.read_regular(selection.path)
+    word = v1.read_regular(selection.launch_word_path)
+    bundle = v1.read_regular(selection.review_path)
+    module, extra = context(raw, registration_raw=registration_raw, runtime=runtime,
+        launch_word_raw=word, review_bundle_raw=bundle, current=True)
+    if module is not v2:
+        raise ValueError('current native launch requires subscription guard v2')
+    module.SubscriptionGuard(raw, expected_sha256=selection.expected_sha256,
+        registration_raw=registration_raw, runtime=runtime, launch_word_raw=word,
+        check_freshness=True, **extra)
+
+
 def _selection_inputs(selection, registration_raw, runtime, authorization):
     if (type(selection) is not CurrentSelection
             or selection.registration_raw != registration_raw

@@ -109,6 +109,33 @@ def test_frontdoor_defers_capture_without_loading_a_guard(tmp_path, monkeypatch)
     assert not Path(value['attempt_directory']).exists()
 
 
+@pytest.mark.parametrize('defect,match', [
+    ('expired', 'stale or future-dated'),
+    ('superseded', 'superseded'),
+    ('guard_sha', 'sha256 mismatch'),
+])
+def test_frontdoor_refuses_expired_or_spent_capture_before_engine_without_loading_guard(
+        tmp_path, monkeypatch, defect, match):
+    args, value, paths, raw = prepared(tmp_path, monkeypatch)
+    if defect == 'expired':
+        captured = guard._timestamp(guard.strict_json(raw)['captured_at'], 'captured_at')
+        monkeypatch.setattr(guard, '_now', lambda: captured + 301)
+    elif defect == 'superseded':
+        renewed = newer(args)
+        capture.activate_capture_word(**read_arguments(renewed))
+    else:
+        paths['guard'].write_bytes(raw + b' ')
+    def forbidden(*args, **kwargs):
+        pytest.fail('invalid front-door capture reached load_current or engine.launch')
+    monkeypatch.setattr(subscription, 'load_current', forbidden)
+    monkeypatch.setattr(engine, 'launch', forbidden)
+    with pytest.raises(ValueError, match=match):
+        native.launch(args['registration_raw'], review_path=paths['review'],
+            launch_word_path=paths['word'], ci_path=tmp_path / 'unread-ci.json',
+            subscription_guard_path=paths['guard'], subscription_guard_sha256=guard.sha(raw))
+    assert not Path(value['attempt_directory']).exists()
+
+
 @pytest.mark.parametrize('refuse', [False, True])
 def test_callback_prewarm_closes_scope_without_activation(monkeypatch, refuse):
     adapter = object.__new__(controller.CallbackAdapter)
