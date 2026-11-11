@@ -17,3 +17,19 @@ Measured CI baseline: run42916359440 took36m37s; all18 test jobs started within2
 Initial host snapshot: approximately30GiB free; load14.82 on10logicalCPUs and several foreign busy processes. This is not a qualified quiet window. Do not pause system services or unrelated jobs, change scientific/native freshness limits, weaken validation, or call models/providers. Native timing qualification uses the existing protocol and records actual evidence; ordinary correctness checks need not be mislabeled timing experiments.
 
 No new environments or full corpus copies. Branch before edits; helpers stay under scripts/adhoc. Exactly one tiny canary before broader affected checks; stop failed prerequisites and retain outputs. Preserve protected-file packet boundaries; prepare exact necessary changes for lead review instead of silently applying old pending approvals. Merge remains subject to the user's per-PR rule. Deferred schema/Core/RO-Crate work remains outside this task.
+
+## Runtime ledger
+
+- 2026-11-11 02:17 UTC: E2/agy1 has the serial local slot for one existing updater/partition canary (30s), then bounded snapshot construction/calculation and affected checks (300s total) only after success. Native remains source-only. XML mapping must use actual run6792947ea's source tree, including the two readiness tests absent from main7233; no recorded cases may be silently dropped.
+
+## Lead review and scope clarification (2026-11-11 UTC)
+
+- Independent read-only review of native01bdcb22d found no concrete new defect in the #5745 correction. Actual event delivery, restoration and matched timing remain unrun.
+- CI historical-test coupling is recorded in issue5809; E2 may adjust that existing test while preserving historical evidence and validating the new snapshot.
+- E3 fixture-report scope/count/path corrections are recorded in issue5810. The proposed preparation-only derivation scope does not establish integrated acceptance or solve the post-acceptance cascades.
+- The protected-installation restriction concerns assigned source installation. U3-M's retained report (lines27–61,338) distinguishes that still-pending approval from private measurement compositions already using the exact proposed830eec API postimage. This task authorizes recreating that exact private offline proposal for validation; it does not approve source installation, change owner-approval records or authorize generation. Do not manufacture a new human approval requirement merely from the preparation helper's acknowledgement flag.
+- Preparation must remain sparse, bounded and independently reviewed; E2 still owns the runtime slot until handoff/release. The genuine observer canary precedes any matched arms.
+
+- E2 confirmed release at2026-11-11T02:27:50Z. Its baseline canary retained15 passes/4.62s; the initial Git-configuration refusal remains saved. Native now owns one sparse preparation (180s cap) followed only on success by one genuine equivalence canary (60s cap). No measured arms are granted yet. Other projects have active pytest workloads; no quiet-host claim is made and none were paused.
+- AGY2 is preparing the fixture-only reuse patch on an isolated branch from01bdcb22d; it must not change the frozen observer baseline. E3's anticipated reduction is unmeasured.
+- Independent WP3 source review confirms four full post-acceptance verification cascades. Existing Admission and derivation scopes do not permit simply dropping them: mutable authorization/capture/source inputs must still be checked. A narrowly reviewed input-snapshot/reconstruction split may help later, but remains outside the current fixture-only patch and is not reported complete.
