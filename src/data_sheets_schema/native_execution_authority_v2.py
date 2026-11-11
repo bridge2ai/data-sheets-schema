@@ -394,6 +394,11 @@ class _LaunchDerivations:
         self.modules = WeakKeyDictionary()
         self.snapshots = WeakKeyDictionary()
 
+    def _clear_snapshot_lrus(self):
+        for snapshots in list(self.snapshots):
+            snapshots._METADATA_DERIVATIONS.clear()
+            snapshots._metadata.cache_clear()
+
     def current_donor(self):
         if self.donor is None:
             return None
@@ -401,10 +406,12 @@ class _LaunchDerivations:
         if state is None:
             self.payload = ()
             self.metadata_payload = ()
+            self._clear_snapshot_lrus()
             return None
         if state[0] != self.phase:
             self.payload = ()
             self.metadata_payload = ()
+            self._clear_snapshot_lrus()
             self.phase = state[0]
         return state
 

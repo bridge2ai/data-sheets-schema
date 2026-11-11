@@ -559,7 +559,7 @@ def test_tampered_snapshot_binding_refuses_source_identity(monkeypatch):
                 authority.module_source_identity(snapshots)
 
 
-def test_context_transitions_retire_local_metadata_lru_on_retained_module(declaration):
+def test_context_transitions_retire_local_metadata_lru_on_retained_module(declaration, monkeypatch):
     original = pins()
     changed = dict(original)
     non_python = next(path for path in changed if not path.endswith('.py'))
@@ -574,6 +574,21 @@ def test_context_transitions_retire_local_metadata_lru_on_retained_module(declar
             assert same_domain is first
             assert same_domain._schema_dependencies.snapshots is snapshots
             assert snapshots._metadata.cache_info().currsize > 0
+        original_safe_load = snapshots.yaml.safe_load
+        with monkeypatch.context() as mutated:
+            def replacement(*args, **kwargs):
+                return original_safe_load(*args, **kwargs)
+            mutated.setattr(snapshots.yaml, 'safe_load', replacement)
+            with loaded(original) as same_domain_mutated:
+                assert same_domain_mutated is first
+                assert same_domain_mutated._schema_dependencies.snapshots is snapshots
+                assert snapshots._METADATA_DERIVATIONS.snapshot() == ()
+                assert snapshots._metadata.cache_info().currsize == 0
+                with counted_metadata_calls() as mutated_calls:
+                    assert snapshots._metadata(raw)[0] == 'retained'
+                assert mutated_calls['safe_load'] == 1
+        snapshots._metadata(raw)
+        assert snapshots._metadata.cache_info().currsize > 0
         with loaded(changed) as nested:
             assert nested is first
             assert nested._schema_dependencies.snapshots is snapshots
