@@ -1,0 +1,606 @@
+/dev/ttys048
+1 -o tmp_path_retention_policy=none tests/test_schema_snapshot_compatibility.py
+    tests/test_imported_schema_snapshot.py tests/test_schema_snapshot_cache.py
+    --junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-expi
+    red-capture-order-20261111/tmp/wp3-metadata-reuse-20261111/compatibility.junit.xml >
+    /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-expired-capture
+    -order-20261111/tmp/wp3-metadata-reuse-20261111/compatibility.log 2>&1
+  ──────
+  #### 2. Read-Only Call-Chain Analysis Against Base 001a80ee1a33b0bdd7eef8ec4d83e82823f8f096
+  1. In test_vocabulary_replacement_after_hashing_cannot_poison_cache, the "vocabulary"
+  parameter branch calls digest.vocabularies()["TEST"]["TEST:1"] directly at line 64 — it
+  never calls schema_snapshot or capture_schema.
+  2. schema_digest.vocabularies() resolves prof = profile or active_profile() (line 180) and
+  data = vocabulary_bytes(prof) (line 181).
+  3. profiles.active_profile() -> select_profile("default") -> default_manifest() checks p.
+  exists() on data/preprocessed/source_manifest.yaml.
+  4. Because /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-
+  expired-capture-order-20261111 is a selective --no-checkout worktree where
+  data/preprocessed/source_manifest.yaml is not checked out on disk (file does not exist),
+  default_manifest() returns None and select_profile() returns Selection(NEUTRAL, "no
+  manifest") (profiles.py` line 253).
+  5. NEUTRAL has vocabulary_pin=None (profiles.py` line 140), so vocabulary_bytes(NEUTRAL)
+  returns b"" and digest.vocabularies() returns {} at line 183 before consulting digest.
+  VOCABULARY_PIN.
+  ──────
+  #### 3. Classification
+  • Not a WP3 regression: WP3 (001a80ee1..e282f0596) modifies only schema_snapshot.py,
+  native_catalog_reuse.py, native_execution_authority_v2.py, and
+  test_native_launch_schema_metadata.py. The failing code path (digest.vocabularies()) does
+  not touch schema_snapshot at all and behaves identically on base
+  001a80ee1a33b0bdd7eef8ec4d83e82823f8f096.
+  • Root cause: **Selective (--no-checkout) worktree missing
+  data/preprocessed/source_manifest.yaml + preexisting test assumption in
+  test_vocabulary_replacement_after_hashing_cannot_poison_cache** that ambient
+  active_profile() resolves to BRIDGE2AI via data/preprocessed/source_manifest.yaml (rather
+  than passing D4D_PROFILE=bridge2ai or monkeypatching D4D_PROFILE). All 26 schema-snapshot
+  tests executed before that vocabulary test (all 13 in test_schema_snapshot_compatibility.py,
+  all 10 in test_imported_schema_snapshot.py, and all 3
+  test_schema_replacement_after_hashing_cannot_poison_cache cases in
+  test_schema_snapshot_cache.py:31-48) passed.
+  ──────
+  #### 4. Retained Evidence Digests (sha256)
+
+  • canary.log (1 passed in 3.25s):
+  02975ca47eed5d3da65bd3ae7e393d3720c1892a152a66ecc1384358c28f45e4
+  • canary.junit.xml: 03b82bed3f31dc14c59812d4e73d912008a9fb216868de63e916dd75b1d0c65f
+  • module.log (36 passed in 40.09s):
+  4d9b5ac63972e11f4ce1005106d5df64c16857e946dc4708043c0eadb9f49869
+  • module.junit.xml: 14b22f7b1b563c3ec64b41f2b5aa8eb68b0350cc3aefb40dff014d0358b34caa
+  • compatibility.log (26 passed, 1 failed in 0.75s):
+  2d73435e04d43a62f77840c112e4be71ae9c113de65936b7313645c83a6c36e3
+  • compatibility.junit.xml: 5dce00720751ff60695e6327bd70d9dc7995a503a2b7bf1661375d6e4d8656c0
+  • Updated handoff: agy2-wp3.md
+  Runtime slot is released and code remains frozen at
+  e282f05960a2b397844acb3ac5f140b1fe192cd8.
+
+────────────────────────────────────────────────────────────
+> Independent read-only review finds likely existing ambient-profile mismatch:
+  schema_digest/profiles/failing test unchanged from001a; neutral returns{} before
+  schema_snapshot. Keep native89 frozen. Authorized tiny diagnosis: one exact vocabulary node on
+  preserved E3 worktree b563 with D4D_PROFILE=neutral (30s; expected reproduction, save
+  separately), after verify relevant files equal001a. Then on WP3e282 run only same vocabulary
+  node with D4D_PROFILE=bridge2ai (30s); if pass, run remaining unexecuted text parametrization
+  and final relative-import node with bridge2ai (30s). No source edits or repeated26pass cases.
+  Record explicit profile, original invocation env if available, baseline/current heads,
+  artifacts. This independent fixture issue must not block WP3 if confirmed.
+
+○ Thought for 1m 42s (Validating File Content)
+● Ran 2 commands (shasum -a 256 /Users... · cd /Users/marcin/Doc...: failed)
+● Explored 2 files (e3_vocab_neutral.log, e3_vocab_neutral.junit.xml)
+… 7 more actions (4 reads, 3 commands) …
+● Edited 1 file (agy2-wp3.md)
+● Ran (grep -c '@' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d...) (ctrl+o to expand)
+
+  ### Ambient-Profile Diagnosis & Remaining Compatibility Nodes Completed
+  All authorized checks passed and confirmed that the single KeyError: 'TEST' in
+  test_vocabulary_replacement_after_hashing_cannot_poison_cache[vocabulary]
+  file:///Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-expired-
+  capture-order-20261111/tests/test_schema_snapshot_cache.py#L51-L70 was caused by ambient
+  NEUTRAL profile selection in the --no-checkout worktree (where
+  data/preprocessed/source_manifest.yaml is absent on disk and D4D_PROFILE was unset). Zero
+  source or test files were modified, and none of the 26 already-passed cases were rerun.
+  #### 1. File Identity Verification (E3 b5633e153 vs WP2 001a80ee1 vs WP3 e282f0596)
+  All four relevant files are byte-for-byte identical across E3
+  (b5633e15375adad19434b0b217901f3c4c84dbf2), WP2 (001a80ee1a33b0bdd7eef8ec4d83e82823f8f096),
+  and WP3 (e282f05960a2b397844acb3ac5f140b1fe192cd8):
+  • test_schema_snapshot_cache.py:
+  50a485393fdf8bb0d5b5d5b2e59747eebe60304fa3d11a139ad1afd7e6c434bf
+  • schema_digest.py: c30d59fe48ee9bed78bd24bc89366e926e88dbefeba228ff132335066c0af54c
+  • profiles.py: a36848bfbad70c5a42ad1d8a94b213b8019b222ae686ebd7e12b125782ad67fd
+  • corpus.py: 16b90dc728960a0d001f98a45bf250906aeae51885aee7a52b7226324f5e2089
+  ──────
+  #### 2. Diagnostic & Completion Runs
+  1. Baseline Reproduction on E3 (b5633e15375adad19434b0b217901f3c4c84dbf2) with
+  D4D_PROFILE=neutral:
+      • Worktree: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-
+      fixture-reuse-20261111
+      • Env: D4D_PROFILE=neutral TMPDIR=/tmp/agy-wp3-basetemp-20261111 PYTHONPATH=src
+      • Node: tests/test_schema_snapshot_cache.
+      py::test_vocabulary_replacement_after_hashing_cannot_poison_cache[vocabulary]
+      • Result: 1 failed in 0.55s (tests="1" errors="0" failures="1" skipped="0" time="0.554",
+      exact same KeyError: 'TEST' at line 64)
+      • Log: e3_vocab_neutral.log (sha256:
+      3d5c4f09f7db31d38f5b1781c4f71b6c4e0a3c70866d6d1a86876534f2c5cff0)
+      • JUnit XML: e3_vocab_neutral.junit.xml (sha256:
+      afb4fe3b339e12aaee74b954fd4deb314daa1ff3cae2d2ba5dee1e644316db99)
+  2. WP3 (e282f05960a2b397844acb3ac5f140b1fe192cd8) Same Vocabulary Node with
+  D4D_PROFILE=bridge2ai:
+      • Worktree: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-
+      expired-capture-order-20261111
+      • Env: D4D_PROFILE=bridge2ai TMPDIR=/tmp/agy-wp3-basetemp-20261111 PYTHONPATH=src
+      • Node: tests/test_schema_snapshot_cache.
+      py::test_vocabulary_replacement_after_hashing_cannot_poison_cache[vocabulary]
+      • Result: 1 passed in 0.71s (tests="1" errors="0" failures="0" skipped="0" time="0.709")
+      • Log: wp3_vocab_bridge2ai.log (sha256:
+      7b2f9754d54c18c2d90b46c88b04fe5fe4cca4a09888a066310f7735933c1b84)
+      • JUnit XML: wp3_vocab_bridge2ai.junit.xml (sha256:
+      09fa240685edaea151f1a1035cf44deab091a30541a9c7657bf3b6ecd0027194)
+  3. WP3 (e282f05960a2b397844acb3ac5f140b1fe192cd8) Remaining 2 Unexecuted Nodes with
+  D4D_PROFILE=bridge2ai:
+      • Worktree: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-
+      expired-capture-order-20261111
+      • Env: D4D_PROFILE=bridge2ai TMPDIR=/tmp/agy-wp3-basetemp-20261111 PYTHONPATH=src
+      • Nodes:
+          • tests/test_schema_snapshot_cache.
+	  py::test_vocabulary_replacement_after_hashing_cannot_poison_cache[text]
+          • tests/test_schema_snapshot_cache.
+          py::test_snapshot_view_resolves_relative_imports_from_the_original_directory
+      • Result: 2 passed in 0.44s (tests="2" errors="0" failures="0" skipped="0" time="0.444")
+      • Log: wp3_remaining_bridge2ai.log (sha256:
+      6d2a1eaa6cd4076e4237c296c92cb9ec642f92239dffb566be067355733d8def)
+      • JUnit XML: wp3_remaining_bridge2ai.junit.xml (sha256:
+      0d75acf85a6ba5cc2ce141626df5f93a8a1db0a7401cd36d04ec5eb253084d39)
+  ──────
+  #### 3. Updated Handoff & Status
+
+  • Handoff Note: agy2-wp3.md (sha256:
+  13a6cbf2a9eb7de7c4128c076c5990e9eb7786eaddb13c4ac31f7d6f1b3a1dc0, @ count = 0)
+  • All 36 tests in test_native_launch_schema_metadata.py and all 29 tests across
+  test_schema_snapshot_compatibility.py, test_imported_schema_snapshot.py, and
+  test_schema_snapshot_cache.py are verified passing on
+  e282f05960a2b397844acb3ac5f140b1fe192cd8.
+  • Runtime slot is released; WP3 branch agy/native-schema-metadata-reuse-20261111 remains
+  frozen at e282f05960a2b397844acb3ac5f140b1fe192cd8.
+
+────────────────────────────────────────────────────────────
+> Actual combined89 diagnostic failed in fixture before reservation: _LaunchDerivations.bind
+  line478, verified schema snapshot binding differs from catalog guard (new
+  _VERIFIED_PACKAGE_MODULES snapshot equality). Evidence
+  scratch-native-u1u3/u3m/wp1-89c28cb97dea-cpu-monitoring-post-wp3-20261111/pytest.log. Root
+  filed issue; number follows. After finishing profile confirmation handoff, own minimal source
+  correction on current WP3branch e282. First trace exact producer/registry lifetime and propose
+  tiny real-loader ordering reproducer; independent reviewer also diagnosing. No runtime/source
+  edit until cause concrete; no weakened attestation or ordinary/foreign producer fallback.
+  Native89 stays frozen, priorfailure retained. No repeat long diagnostic.
+
+○ Thought for 2m 10s (Investigating Snapshot Mismatch)
+● Explored 11 files (pytest.log, native_execution_authority_v2.py, test...) (ctrl+o to expand)
+
+────────────────────────────────────────────────────────────
+> Issue is5834. Reviewer trace: _SOURCE_MODULES attests every verified compilation;
+  _VERIFIED_PACKAGE_MODULES only consumer=True and scope exits restore it. loaded_dependencies
+  uses consumer=False and retained package refs can survive. Registry equality is stronger than
+  source provenance; savedtrace alone cannot identify missing vsdifferent entry. Candidate:
+  attest exact guard.snapshots via SAME authority module_source_identity; require canonical
+  snapshot name/path/hash against current complete package_sources/fresh pinned reads, retain
+  existing producer-alias cold fallback, never replace snapshot or rebind original donor. Tiny
+  witness: retained donor via source-loaded selection, then genuine loaded_controls and late
+  api_runner/native_shared_render imports; no make_case. You may prepare this narrow correction
+  plus meaningful witness now, no runtime until freeze/source review. Preserve
+  ordinary/cross-authority/mutated refusals and add only missing coverage.
+
+○ Thought for 1m 58s (Analyzing Loading Sequence)
+● Explored 5 files (schema_snapshot.py, native_shared_controller_orches...) (ctrl+o to expand)
+
+────────────────────────────────────────────────────────────
+> Native owner has refined the cheap5834 sequence in TOP of handoffs/native.md: inside
+  launch_derivations use actual loaded_controls(identity), then TWO nested real
+  loaded_dependencies entry/exits while controls remains open (verified._wire then
+  verify_preparer._wire), then api_runner +late native_shared_render import. If import-only does
+  not reproduce, retain negative result and add actual selection.capture using existing tiny
+  declaration. No RunSpec/fullmake_case. Record guard snapshot,sys.modules,parentattr,registry
+  andsame-Aidentity; nofabricatedregistry/rebinding. This missing two-nested-scope sequence is
+  absent fromlight tests. Use this to establish actualcase before claimingfix coverage.
+
+○ Thought for 2m 9s (Analyzing Imports)
+● Explored 11 files (native.md, native_execution_registration_v2.py, na...) (ctrl+o to expand)
+
+────────────────────────────────────────────────────────────
+> Coordination refinement to reduce delay: you may run the ONE import-only real-loader
+  reproducer while implementing,30s cap, no providers/fullmake_case, save command+log+source
+  identity. You need not wait for frozen-source review before this tiny diagnostic. If it fails
+  to reproduce, retain that result and refine once with existing tiny declaration capture
+  under30s; do not substitute a big fixture. Once cause observed, implementminimalfix and run
+  that same focused regression once onchangedsource. Freeze for independentreview before
+  integration or any broader/long run. Keep prior evidence and native89 unchanged. No new
+  generalized runner/framework.
+
+○ Thought for 4m 25s (Verifying fix success)
+● Explored 3 files (test_native_launch_schema_metadata.py, test_native_shared_controls.py, t...)
+● Ran 2 commands (shasum -a 256 /Users... · mkdir -p /Users/marc...)
+… 3 more actions (1 read, 2 edits) …
+● Ran (cd /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-...) failed
+● Explored 3 files (reproducer_5834_pre_fix.log, reproducer_5834_pre_fi...) (ctrl+o to expand)
+
+────────────────────────────────────────────────────────────
+> Parallel split to accelerate5834: independent coding reviewer now owns ONLY
+  scripts/adhoc/lead_probe_loader_lifetime_5834_20261111.py plus tmp/lead-loader-5834 in your
+  current worktree, for one real import-only probe. Do not edit that helper or commit it while
+  it runs. You retain production source and regression tests; no checkout. It will check source
+  stability and report before any refinement. Avoid duplicate standalone probe helper; use its
+  evidence when available. Continue your minimal correction/test preparation, and report before
+  committing if source edits overlap the probe window.
+  Actual probe now REPRODUCES5834 in4.280s, source/HEAD unchanged at e282. Read
+  tmp/lead-loader-5834/probe.json+supervisor.json. It is a MISSING registry entry: first nested
+  loaded_dependencies compiles canonical schema_snapshot with successful SAME-A
+  module_source_identity, absent from _VERIFIED_PACKAGE_MODULES; same object survives both
+  exits. Atlate render failure guard.snapshots IS canonical snapshot,
+  selection._capture_native_schema IS its producer, registry remains absent, donor stillNone
+  becausefirstbind fails. No fabricated state/fixture/model. Helper
+  SHA7b4dda1015ac9f811e21992e32f9689218f885d0a594496c41601c9059f79a10. This establishes
+  exactcase; implement attested-unregistered correction and your regression, preserving
+  wrong-origin/ordinary/cross-A refusal. Avoid another unchanged baseline probe; run same new
+  focused regression afterfix,30s, thenfreeze.
+
+○ Thought for 4m 3s (Verifying Commit Integrity)
+● Explored 3 files (probe.json, supervisor.json, native_execution_authority_v2.py)
+● Edited 2 files (native_execution_authority_v2.py, test_native_launch_schema_metadata.py)
+… 4 more actions (2 reads, 2 commands: 1 failed) …
+● Edited 1 file (test_native_launch_schema_metadata.py)
+● Ran 4 commands (GIT_CONFIG_GLOBAL=/d... ×2: failed · git -C · shasum...) (ctrl+o to expand)
+
+────────────────────────────────────────────────────────────
+> Lead: confirmed #5834 regression passes, JUnit 1/0/0/0 in 3.777s. Independent source review
+  has no substantive finding. Commit the production fix, regression, and the preserved lead
+  probe helper plus its provenance note together; do not change executed helper bytes. Then run
+  the affected metadata module once (37 cases expected), one worker, 90s cap, fresh output
+  filenames; stop at first failure and preserve results. No repeat of unchanged snapshot
+  compatibility cohorts. Report frozen SHA and artifacts for final review/integration.
+
+──────────────────────────────────── Conversation compacted ────────────────────────────────────
+
+○ Thought for 12.4s (Evaluating Current Worktree)
+● Ran (GIT_CONFIG_GLOBAL=/dev/null git -C /Users/marcin/Documents/VIMSS...) (ctrl+o to expand)
+
+────────────────────────────────────────────────────────────
+> Lead: stop retrying Git/index-lock operations or seeking a sandbox bypass. I will commit the
+  four reviewed files using the approved scoped Git operation. Keep source frozen and proceed
+  with the already authorized single affected-module test, 90s cap; report result. Do not commit
+  concurrently.
+
+○ Thought for 11.9s (Committing Reviewed Files)
+● Ran (cd /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executio...) (ctrl+o to expand)
+
+▸ Thought for 5s, 154 tokens
+  Source is frozen and no Git operations will be run concurrently. I have launched the single
+  37-case test_native_launch_schema_metadata.py execution into module_5834.log and
+  module_5834.junit.xml and will report the results as soon as it finishes.
+
+○ Thought for 58.8s (Exploring Relevant Data)
+● Explored 2 files (module_5834.log, module_5834.junit.xml)
+● Ran 2 commands (shasum -a 256 /Users... · GIT_CONFIG_GLOBAL=/d...)
+● Explored 1 file (agy2-wp3.md)
+● Ran (GIT_CONFIG_GLOBAL=/dev/null git -C /Users/marcin/Documents/VIMSS...) (ctrl+o to expand)
+
+  ### #5834 Affected-Module Verification & Frozen State Report
+
+  #### 1. Frozen Branch & Commits (agy/native-schema-metadata-reuse-20261111)
+
+  • Worktree: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-
+  expired-capture-order-20261111 (clean, frozen)
+  • Frozen HEAD: d398f7bee0a141c516ebcad223030f07ce20fa0c (Preserve the actual-loader
+  reproduction and provenance for #5834)
+  • Parent (#5834 production fix + regression): d6f51f8ed3da7928e66e81fa48f47722a77bbdf5
+  (Attest guard.snapshots via authority source identity for nonconsumer loads (#5834))
+  • Prior WP3 Base: e282f05960a2b397844acb3ac5f140b1fe192cd8
+  • Reviewed File SHA-256 Digests:
+      • native_execution_authority_v2.py:
+      9b7a2d3842a007bae35f2d079e6ffa631190e7d2f4b5f10aad9a6d1243407687
+      • test_native_launch_schema_metadata.py:
+      03f8b89bac29070cf874fc3876727366cd894a96fe719534b7bc703531fc08da
+      • lead_probe_loader_lifetime_5834_20261111.py:
+      7b4dda1015ac9f811e21992e32f9689218f885d0a594496c41601c9059f79a10
+      • native_loader_probe_5834_20261111.md:
+      a62f2f39ce4c95c62878d0ecf6eec9b26ea9b6b55487256411966a6d586f2a2b
+  #### 2. 37-Case Affected Metadata Module Run (test_native_launch_schema_metadata.py)
+  • Command:
+    cd
+    /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-expired-capture
+    -order-20261111 && GIT_CONFIG_GLOBAL=/dev/null TMPDIR=/tmp/agy-wp3-basetemp-20261111
+    PYTHONPATH=src
+    /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/pytest -q
+    --maxfail=1 -o tmp_path_retention_policy=none tests/test_native_launch_schema_metadata.py
+    --junitxml=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-expi
+    red-capture-order-20261111/tmp/wp3-metadata-reuse-20261111/module_5834.junit.xml >
+    /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-expired-capture
+    -order-20261111/tmp/wp3-metadata-reuse-20261111/module_5834.log 2>&1
+
+  • Outcome: 37 passed, 1 warning in 59.01s (tests="37" errors="0" failures="0" skipped="0"
+  time="59.012", including
+  test_loaded_controls_nested_dependencies_late_render_import_binds_verified_snapshot in 3.
+  930s)
+  • Preserved Artifacts:
+      • Log: module_5834.log (sha256:
+      e16b83344169b0f92cddffce6837198a6143ce7aa1cd3fa31949db16c23cecd3)
+      • JUnit XML: module_5834.junit.xml (sha256:
+      998962e0d76657c57f5da0c44c23cec8c4928798e4610981420a85a6afa6b048)
+      • Focused Pre-Fix Reproducer: reproducer_5834_pre_fix.log (sha256:
+      a1b048b239abd9f9b2db4b0ad6be80f4726f7648b79b172540180833ab2b3476) /
+      reproducer_5834_pre_fix.junit.xml (sha256:
+      edf81db35c40a5060cc77f125aa8db4409f8dea8566365263316fd210d02a7fb)
+      • Focused Post-Fix Regression: reproducer_5834_post_fix.log (sha256:
+      27f57cde6e36275909a2962ce84705a6614d589b42163a6f1fe8b35de16a41c3) /
+      reproducer_5834_post_fix.junit.xml (sha256:
+      2a2200c84bf0de2ae8c17d8af1f0eba2e771f96f3738779e207208ea100072a2)
+  Runtime slot is released and the worktree remains frozen at
+  d398f7bee0a141c516ebcad223030f07ce20fa0c for final review and combined integration.
+
+────────────────────────────────────────────────────────────
+> Lead verified all37 metadata tests pass59.012s. Root committed unchanged probe+note as
+  d398f7bee0a141c516ebcad223030f07ce20fa0c above your d6f51f8 fix. Native owner is integrating
+  that exact donor. Finish handoff with these identities and results, then stop; no more test
+  runs or edits needed on this slice.
+
+▸ Thought for 11s
+  ### Final WP3 (#5826–#5830, #5834) Handoff Summary
+  #### 1. Frozen Donor Branch & Commit Lineage
+  • Worktree: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-
+  expired-capture-order-20261111 (clean, frozen)
+  • Donor Branch: agy/native-schema-metadata-reuse-20261111
+  • Frozen HEAD (#5834 probe + provenance note): d398f7bee0a141c516ebcad223030f07ce20fa0c
+  (Preserve the actual-loader reproduction and provenance for #5834)
+  • Parent (#5834 production fix + regression): d6f51f8ed3da7928e66e81fa48f47722a77bbdf5
+  (Attest guard.snapshots via authority source identity for nonconsumer loads (#5834))
+  • Prior WP3 Base (#5826–#5830): e282f05960a2b397844acb3ac5f140b1fe192cd8 (Clear tracked
+  snapshot metadata LRUs when donor state or phase changes (#5827))
+  • Preserved WP2 Branch (#5816, #5821, #5822): agy/native-expired-capture-order-20261111 at
+  001a80ee1a33b0bdd7eef8ec4d83e82823f8f096
+  • Preserved E3 Worktree (#5810): /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-
+  executions/agy-native-fixture-reuse-20261111 (agy/native-fixture-reuse-20261111 at
+  b5633e15375adad19434b0b217901f3c4c84dbf2)
+  #### 2. Frozen Donor File SHA-256 Identities (d398f7bee0a141c516ebcad223030f07ce20fa0c)
+  • schema_snapshot.py: 6332f5557c160ef7191529460e33159b32fdbf5697a40dd8b7f51ff018e5ef05
+  • native_catalog_reuse.py: 997dd6b60934cf33be4e902d2651f33be747b051763d1aa82707cf154994022f
+  • native_execution_authority_v2.py:
+  9b7a2d3842a007bae35f2d079e6ffa631190e7d2f4b5f10aad9a6d1243407687
+  • test_native_launch_schema_metadata.py:
+  03f8b89bac29070cf874fc3876727366cd894a96fe719534b7bc703531fc08da
+  • lead_probe_loader_lifetime_5834_20261111.py:
+  7b4dda1015ac9f811e21992e32f9689218f885d0a594496c41601c9059f79a10
+  • native_loader_probe_5834_20261111.md:
+  a62f2f39ce4c95c62878d0ecf6eec9b26ea9b6b55487256411966a6d586f2a2b
+  #### 3. Verification Artifacts & SHA-256 Digests
+  • Final 37-Case Metadata Module (d398f7bee0a141c516ebcad223030f07ce20fa0c /
+  d6f51f8ed3da7928e66e81fa48f47722a77bbdf5):
+      • Outcome: 37 passed, 1 warning in 59.01s (tests="37" errors="0" failures="0"
+      skipped="0" time="59.012")
+      • Log: module_5834.log (sha256:
+      e16b83344169b0f92cddffce6837198a6143ce7aa1cd3fa31949db16c23cecd3)
+      • JUnit XML: module_5834.junit.xml (sha256:
+      998962e0d76657c57f5da0c44c23cec8c4928798e4610981420a85a6afa6b048)
+  • #5834 Pre-Fix & Post-Fix Single-Node Evidence:
+      • Lead Standalone Probe (e282f05960a2b397844acb3ac5f140b1fe192cd8): probe.json (4.280s
+      reproduction of non-consumer loaded_dependencies compilation leaving
+      _VERIFIED_PACKAGE_MODULES['data_sheets_schema.schema_snapshot'] absent)
+      • Pre-Fix Pytest Reproducer (e282f05960a2b397844acb3ac5f140b1fe192cd8):
+      reproducer_5834_pre_fix.log (sha256:
+      a1b048b239abd9f9b2db4b0ad6be80f4726f7648b79b172540180833ab2b3476) /
+      reproducer_5834_pre_fix.junit.xml (sha256:
+      edf81db35c40a5060cc77f125aa8db4409f8dea8566365263316fd210d02a7fb, 1 failed in 5.26s)
+      • Post-Fix Pytest Regression (d6f51f8ed3da7928e66e81fa48f47722a77bbdf5):
+      reproducer_5834_post_fix.log (sha256:
+      27f57cde6e36275909a2962ce84705a6614d589b42163a6f1fe8b35de16a41c3) /
+      reproducer_5834_post_fix.junit.xml (sha256:
+      2a2200c84bf0de2ae8c17d8af1f0eba2e771f96f3738779e207208ea100072a2, 1 passed in 3.78s)
+  • Retained Prior WP3 Evidence (e282f05960a2b397844acb3ac5f140b1fe192cd8):
+      • 1-Case Canary: canary.log (sha256:
+      02975ca47eed5d3da65bd3ae7e393d3720c1892a152a66ecc1384358c28f45e4) / canary.junit.xml
+      (sha256: 03b82bed3f31dc14c59812d4e73d912008a9fb216868de63e916dd75b1d0c65f, 1 passed in 
+      3.25s)
+      • 36-Case Metadata Module: module.log (sha256:
+      4d9b5ac63972e11f4ce1005106d5df64c16857e946dc4708043c0eadb9f49869) / module.junit.xml
+      (sha256: 14b22f7b1b563c3ec64b41f2b5aa8eb68b0350cc3aefb40dff014d0358b34caa, 36 passed in
+      40.09s)
+      • Snapshot Compatibility & Ambient-Profile Verification: compatibility.log (sha256:
+      2d73435e04d43a62f77840c112e4be71ae9c113de65936b7313645c83a6c36e3), e3_vocab_neutral.log
+      (sha256: 3d5c4f09f7db31d38f5b1781c4f71b6c4e0a3c70866d6d1a86876534f2c5cff0),
+      wp3_vocab_bridge2ai.log (sha256:
+      7b2f9754d54c18c2d90b46c88b04fe5fe4cca4a09888a066310f7735933c1b84),
+      wp3_remaining_bridge2ai.log (sha256:
+      6d2a1eaa6cd4076e4237c296c92cb9ec642f92239dffb566be067355733d8def)
+
+
+  Work on this slice is complete and stopped with agy/native-schema-metadata-reuse-20261111
+  frozen at d398f7bee0a141c516ebcad223030f07ce20fa0c.
+────────────────────────────────────────────────────────────
+> Lead reassignment: read-only adversarial readiness review of current PR5808 only, against its
+  exact head and current base. This is the final-generation artifact acceptance/scope-control
+  PR, not the native stack. Verify outstanding review findings, existing test evidence and
+  actual CI state; report concrete remaining code defects or that it is ready for a merge
+  decision with any limits. No tests, edits, pushes, comments or merge. Give exact head, blocker
+  list and smallest action needed. AGY3 separately owns generation owner decisions, so do not
+  duplicate that. Acknowledge and return terminal handoff for lead review.
+
+○ Thought for 2m 36s (Searching for CI Results)
+● Ran 5 commands (GIT_CONFIG_GLOBAL=/d... ×5: failed)
+● Explored 4 files (PR_BODY.md, RESULTS.md, REVIEW_LEDGER.md, +1)
+… 10 more actions (6 reads, 4 commands) …
+● Ran 2 commands (GIT_CONFIG_GLOBAL=/d... ×2)
+● Explored 4 files (output.txt, agy1-ci-result.md, agy1.md, +1) (ctrl+o to expand)
+
+────────────────────────────────────────────────────────────
+> Lead live gh read succeeded at 07:14 UTC: PR5808 head6792947ea6558d10c85106065b023cb57838835a,
+  base7233f193ad102a8488b31ec7333662c8fefaa996, non-draft. All applicable build/test/large-file
+  checks SUCCESS; only mention/publish/report/schema-examples skipped. Mergeability currently
+  UNKNOWN. Avoid repeated failed network reads; finish source/evidence review using these exact
+  identities, noting root supplied live check state.
+  Lead clarification: GitHub PR baseRefOid reports original 7233f193, but current main ref is
+  925d726d67cdd03fe28fdeafdde60fa27df57205 (verified through git/ref/heads/main). PR5808 now
+  reports CLEAN and MERGEABLE. Review current-main integration compatibility separately from the
+  older green PR CI; do not claim its checks reran against 925d. No extra tests yet.
+
+○ Thought for 3m 3s (Finding Untagged Files)
+● Explored 2 files (test_ci_timing_update.py, final-generation-acceptance.md)
+● Ran (GIT_CONFIG_GLOBAL=/dev/null git -C /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d...)
+… 22 more actions (19 reads, 3 commands) …
+● Ran (GIT_CONFIG_GLOBAL=/dev/null git -C /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d...)
+● Explored 2 files (agy4-plan-review.md, agy4-components-review.md) (ctrl+o to expand)
+
+▸ Thought for 55s
+  ### Read-Only Adversarial Readiness Review — PR #5808 (Terminal Handoff)
+  • Reviewer: agy2 (read-only adversarial review; 0 tests run, 0 edits, 0 pushes, 0 comments,
+  0 merges)
+  • PR: #5808 (codex/final-generation-readiness-20261110, non-draft)
+  • Exact PR Head (headRefOid): 6792947ea6558d10c85106065b023cb57838835a
+  • PR Merge-Base (baseRefOid at CI execution): 7233f193ad102a8488b31ec7333662c8fefaa996
+  • Current main (refs/heads/main): 925d726d67cdd03fe28fdeafdde60fa27df57205 (7233f193ad +
+  #5814 95969b5d508577c6e740a16e7acc364379bb40b6 + #5835
+  925d726d67cdd03fe28fdeafdde60fa27df57205)
+  • Live GitHub Merge State (supplied by Lead at 07:14 UTC): CLEAN / MERGEABLE
+  • Verdict: READY FOR MERGE DECISION — 0 remaining code, schema, test, or scope defects.
+  ──────
+  ### 1. Verification of Outstanding Review Findings (#2975, #5792–#5807, #5582–#5590)
+  All findings recorded in REVIEW_LEDGER.md and
+  notes/final_generation_readiness_20261110/issues/*.md are resolved in
+  6792947ea6558d10c85106065b023cb57838835a:
+  1. Schema 3.2.1 & #2975 Scalar collection_type Closure (#2975, #5799, #5800, #5801, #5803):
+      • D4D_FileCollection.yaml:133-140 replaces the contradictory list wording on
+      FileCollection.collection_type with scalar-consistent prose while preserving range:
+      FileCollectionTypeEnum and single-valued cardinality.
+      • Version 3.2.1 is synchronized across data_sheets_schema.yaml:27-31 (sha256:
+      3cc458d7554e543fb3684d5718b226e03a64b3c3141d92977d53a0cb9733422d),
+      data_sheets_schema_all.yaml:8 (sha256:
+      bc560a3cd5d04c49e95fcbf33fa8ac349171df1a877e7e0882827bd526a95214),
+      data_sheets_schema_core.yaml:17 (sha256:
+      49044208a00774adaa02d3d0936b2c7d1c01253bd5629a3400c5e99f4c413117),
+      data_sheets_schema_core_all.yaml:21 (sha256:
+      e174a7a6ec1b5eccef5ee4a8b9f8f773f48243c2d6012ff8a1b846b45a40d088), D4D_Core.yaml:11,
+      data_sheets_schema.py:97, data_sheets_schema.schema.json:8622,
+      data_sheets_schema.jsonld:9 (with repo-relative "project/jsonld/data_sheets_schema.
+      context.jsonld" at line 14394 per #5799), CITATION.cff:6, and
+      test_schema_release_identity.py:31.
+      • release_history.yaml:72-84 (sha256:
+      749d8fe23bcaf50b0773d507956afb3b7764ec40eba950af7868e849cc2f741c) preserves 2.0.0–3.2.0
+      byte-for-byte (prefix sha256:
+      83be0fe4f69a6fc8cfe9154cfd25518190c0648022616e0aa120e60005ddcc42) and records matching
+      3.2.1 SHA-256 digests; g2-release.json verifies all four neutral/Bridge2AI
+      Dataset/CoreDataset API schema digests are unchanged (#5800).
+  2. Generated-Product Isomorphism & SSSOM Verification (#5804, #5805, #5807):
+      • check_final_generation_products_20261110.py (sha256:
+      a9bc499be7db73be08993c3c90fd2af8c97267e1ed5516778bdf0fd7e3f1c853, matching
+      product-check-helper.sha256) calls rdflib.compare.isomorphic once with rdflib.
+      NORMALIZE_LITERALS = False under an in-process 120s SIGALRM deadline, compares all #
+      comment header lines (compare_comment_headers), and checks truncated d4d_description
+      (desc[:100] + "...").
+      • generated-products.json (overall_passed: true) confirms 7,758 OWL triples and graph
+      isomorphism after the two expected literal substitutions (pav:version 3.2.0 -> 3.2.1 and
+      collection_type skos:definition), plus complete 301-row and header agreement on both
+      comprehensive SSSOM TSVs (free_text: 13 -> 12, unmapped: 84 -> 85, retaining
+      sssom:NoTermFound).
+  3. Synthetic Shape/Pair/HTML Acceptance & Portable Component Limits (#5792, #5793, #5798,
+  #5802, #5803):
+      • test_final_generation_acceptance.py anchors module/schema paths to REPO_ROOT,
+      validates the positive full Dataset and derived CoreDataset under 3.2.1, verifies full-
+      record immutability and HTML/CSS output, and verifies the four single-field negative
+      mutations fail exclusively at /description, /creators/0/principal_investigator,
+      /license_and_use_terms/data_use_permission, and /file_collections/0/collection_type.
+      • test_final_record_component_limits.py:92-98 asserts checked_block["findings"] == [] in
+      both receipt cases (#5802) and remains self-contained without importing native-only
+      modules (#5792/#5793 stay on the separate native branch).
+  4. Operator Acceptance Guide & Route Scope (#5794, #5795, #5796, #5797, #5806, #5582–#5590):
+      • final-generation-acceptance.md, PLAN.md:70, RESULTS.md, and PR_BODY.md accurately
+      reflect CLI arguments, Person/Maintainer paths, component-only limits, the unchanged 9
+      historical controller findings (#5582–#5590 in specificity-summary.json), and the
+      distinction that native-only lifecycle gates apply to native runs rather than API-only
+      runs.
+  5. Protected Files & Hygiene:
+      • Zero edits to api_runner.py, shared_generation.py, canonical_hashes.yaml, 
+      run_spec_boundary_contracts.json, scan.py, pyproject.toml (version = "0.1.0"), or
+      poetry.lock.
+      • Zero @-mentions across all 68 changed files; git diff --check
+      7233f193ad102a8488b31ec7333662c8fefaa996..6792947ea6558d10c85106065b023cb57838835a is  
+      clean (0 errors).
+  ──────
+  ### 2. Hosted CI State vs. Current-main (925d726d67cdd03fe28fdeafdde60fa27df57205)          
+  Compatibility
+
+  1. Hosted PR CI on 6792947ea6558d10c85106065b023cb57838835a (against original base
+  7233f193ad102a8488b31ec7333662c8fefaa996):
+      • GitHub Actions run 42916359440 completed SUCCESS across all 18 Python test jobs (23,
+      270 ordinary-shard testcase occurrences across 676 files: 23,222 passed, 48 skipped, 0
+      failures/errors; plus all 4 dedicated API lanes, all 3 dedicated SG2 lanes, offline-
+      canary, offline-audit, and offline-evaluation), aggregate test, check-large-files, and
+      build/docs checks; only conditional mention/publish/report/schema-examples jobs were
+      SKIPPED.
+  2. Current-main (925d726d67cdd03fe28fdeafdde60fa27df57205) Integration Compatibility:
+      • Two commits landed on main after 7233f193ad102a8488b31ec7333662c8fefaa996: #5814
+      (95969b5d508577c6e740a16e7acc364379bb40b6, 16 files refreshing CI shard timings from run
+      42916359440) and #5835 (925d726d67cdd03fe28fdeafdde60fa27df57205, 6 files pinning
+      D4D_PROFILE=bridge2ai in tests/test_schema_snapshot_cache.py and preserving CI analysis).
+      • Zero path overlap: The 22 files changed in 7233f193ad..925d726d67 and the 68 files
+      changed in 7233f193ad..6792947ea6 are completely disjoint (0 shared file paths),
+      consistent with GitHub's live CLEAN / MERGEABLE state.
+      • Semantic compatibility: ci_test_durations.json and test_ci_timing_update.py:209-223 on
+      925d726d67cdd03fe28fdeafdde60fa27df57205 were generated from PR #5808's own run
+      42916359440 and already include weights for tests/test_final_generation_acceptance.py
+      (5.725s) and tests/test_final_record_component_limits.py (0.023s) without requiring
+      those files to be absent from main.
+      • Explicit CI boundary: Hosted PR CI (42916359440) ran against base
+      7233f193ad102a8488b31ec7333662c8fefaa996 and was not rerun against
+      925d726d67cdd03fe28fdeafdde60fa27df57205 (nor did the PR event run the push-only schema-
+      examples job).
+
+  ──────
+  ### 3. Blocker List & Smallest Action Needed
+
+  • Code / Schema / Evidence Blockers: None (0).
+  • Preserved Non-Code Limits:
+      • PR #5808 establishes schema 3.2.1, offline full/Core/HTML shape and projection
+      acceptance, and isolated receipt/source-review component limits; it does not claim
+      scientific completeness, clean global specificity-audit exit (9 unchanged historical
+      controller findings remain in #5582–#5590), or whole-native runtime acceptance.
+      • Downstream native branches remain on 3.2.0 until main is integrated into the native
+      stack.
+  • Smallest Action Needed:
+      1. Request the user's explicit per-PR merge approval for PR #5808
+      (6792947ea6558d10c85106065b023cb57838835a into main at
+      925d726d67cdd03fe28fdeafdde60fa27df57205).
+      2. After explicit user approval, merge PR #5808, delete branch codex/final-generation-
+      readiness-20261110 (remote and local), and monitor the post-merge main workflow run
+      (including schema-examples).
+
+────────────────────────────────────────────────────────────
+> User has transferred lead responsibility to a new Claude session; this Codex lead becomes a
+  helper. Finish only your currently assigned bounded read-only task, preserve source/evidence,
+  and give the completed handoff to the incoming Claude lead. Do not start follow-ups, tests,
+  edits, pushes, merge or generation. Transfer prompt is
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-2
+  0261111/notes/development_efficiency_20261111/handoffs/claude-lead-handoff-20261111.md.
+  New lead will refresh your tab; no need to repeat completed work.
+
+▸ Thought for 9s
+  Acknowledged. agy2's assigned bounded read-only review of PR #5808 is complete, and all
+  source trees and evidence directories remain frozen and untouched (0 active processes, 0
+  edits, 0 tests, 0 pushes, 0 merges):
+  ### agy2 Preserved State & Completed Handoffs for Incoming Claude Lead
+  1. Completed Read-Only Adversarial Review of PR #5808 (above):
+      • PR #5808 Head (codex/final-generation-readiness-20261110):
+      6792947ea6558d10c85106065b023cb57838835a (non-draft; GitHub CLEAN / MERGEABLE).
+      • Original PR Base (baseRefOid): 7233f193ad102a8488b31ec7333662c8fefaa996 (all
+      applicable hosted CI checks in run 42916359440 passed SUCCESS, 23,270 ordinary-shard
+      testcase occurrences: 23,222 passed, 48 skipped, 0 failures/errors; conditional
+      mention/publish/report/schema-examples skipped).
+      • Current main (refs/heads/main): 925d726d67cdd03fe28fdeafdde60fa27df57205 (7233f193ad +
+      #5814 95969b5d50 + #5835 925d726d67; 0 overlapping changed paths with PR #5808;
+      utils/ci_test_durations.json on 925d726d67 already includes the two PR #5808 test files
+      from run 42916359440; hosted CI was not rerun against 925d726d67).
+      • Verdict: READY FOR MERGE DECISION (0 remaining code, schema, test, or scope defects;
+      smallest action needed is explicit human per-PR merge approval for PR #5808, followed by
+      merge, branch deletion, and post-merge main CI verification including schema-examples).
+  2. Preserved agy2 Donor Worktrees & Earlier Handoffs (Frozen):
+      • Unit G2 (#2975, #5799–#5801, #5803):
+      /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-collection-type-
+      prose-2975-20261110 on branch agy/collection-type-prose-2975-20261110 at
+      db7ce7c108cdd9c8106376a145e822ebcceeaee0 (integrated into PR #5808; handoff at agy2.md).
+      • Unit E3 (#5810): /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-
+      native-fixture-reuse-20261111 on branch agy/native-fixture-reuse-20261111 at
+      b5633e15375adad19434b0b217901f3c4c84dbf2 (handoff at agy2-implementation.md).
+      • Unit WP2 (#5816, #5821, #5822): branch agy/native-expired-capture-order-20261111 at
+      001a80ee1a33b0bdd7eef8ec4d83e82823f8f096 (handoff at agy2-wp2.md).
+      • Unit WP3 + #5834 (#5826–#5830, #5834): 
+      /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-expired-
+      capture-order-20261111 on branch agy/native-schema-metadata-reuse-20261111 at
+      d398f7bee0a141c516ebcad223030f07ce20fa0c (parent 
+      d6f51f8ed3da7928e66e81fa48f47722a77bbdf5; 37/37 metadata tests passed in 59.01s; handoff
+      at agy2-wp3.md and transfer summary at claude-lead-handoff-20261111.md).
+
+
+  Standing by for the incoming Claude lead.
+
+─────────────────────────────────────────────────────────────────────────────────────────────────
+>
+─────────────────────────────────────────────────────────────────────────────────────────────────
+? for shortcuts                                                             Gemini 4 Argon · high
+
+
