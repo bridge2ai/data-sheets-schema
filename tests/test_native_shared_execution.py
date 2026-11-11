@@ -20,6 +20,7 @@ from data_sheets_schema import native_shared_execution_orchestration as execute
 from data_sheets_schema import native_shared_policy as policy
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_execution_registration_v2 as preparation
+from tests.utils.native_profile_stability import profile_stability_scope
 from tests.utils.native_shared_consumer_scope import command_guidance, observe_consumer_calls
 from tests.utils.native_synthetic_evidence import runtime_for, bound_permission_for, authority_for
 
@@ -89,8 +90,11 @@ def launch_case(case, monkeypatch):
     forbidden = {key: () for key in (
         ('prepare_direct', 'auth_evidence'), ('run_direct_canary', 'main'),
         ('run_api_canary', 'main'), ('budgeted_cborg', 'cborg_client'))}
-    with observe_consumer_calls(forbidden, forbid=True):
-        result = execute.synthetic_launch(case['raw'], **case['kwargs'])
+    if sys.getprofile() is not None:
+        raise RuntimeError('launch_case monitoring observer requires no inherited profile hook')
+    with observe_consumer_calls(forbidden, forbid=True, arm='monitoring'):
+        with profile_stability_scope():
+            result = execute.synthetic_launch(case['raw'], **case['kwargs'])
     (case['root'] / 'actual-result.json').write_bytes(c.canonical(result))
     return result
 
