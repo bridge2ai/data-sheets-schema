@@ -21,9 +21,11 @@ from __future__ import annotations
 
 import argparse
 import builtins
+from collections import Counter
 import hashlib
 import importlib.util
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -44,7 +46,14 @@ CANARY = 'tests/test_native_u3k_profile.py::test_consumer_observer_equivalence_c
 DIAGNOSTIC = 'tests/test_native_u3k_profile.py::test_neutral_pre_reservation_diagnostic'
 KINDS = {'canary': (CANARY, 'legacy', 60),
          'legacy': (DIAGNOSTIC, 'legacy', 900),
-         'monitoring': (DIAGNOSTIC, 'monitoring', 900)}
+         'monitoring': (DIAGNOSTIC, 'monitoring', 900),
+         'cpu-legacy': (DIAGNOSTIC, 'legacy', 900),
+         'cpu-monitoring': (DIAGNOSTIC, 'monitoring', 900)}
+QUALIFIED_KINDS = frozenset({'legacy', 'monitoring'})
+CPU_DIAGNOSTIC_KINDS = frozenset({'cpu-legacy', 'cpu-monitoring'})
+NO_LEASE_KINDS = frozenset({'canary', 'cpu-legacy', 'cpu-monitoring'})
+CPU_COMPARE_FIELDS = ('thread_cpu', 'process_cpu', 'self_user_cpu',
+                      'self_system_cpu', 'reaped_child_user_cpu', 'reaped_child_system_cpu')
 REQUIRED_FILES = frozenset({
     'tests/utils/native_shared_consumer_scope.py', 'tests/test_native_u3k_profile.py',
     'tests/utils/native_consumer_observer_checks.py',
@@ -227,6 +236,252 @@ def require_canary(path, manifest_sha):
         raise ValueError('WP1 canary is not a certified one-test pass on this identity')
 
 
+def read_qualification_witness(out):
+    path = Path(out).with_suffix('.qualification') / 'qualification.json'
+    if not path.is_file() or path.is_symlink():
+        return None
+    try:
+        value = json.loads(path.read_bytes())
+    except (OSError, ValueError):
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def measurement_classification(kind, *, qualification=None, certified=False, final_owner=False):
+    if kind not in KINDS:
+        raise ValueError('unrecognized WP1 kind: ' + repr(kind))
+    if kind == 'canary':
+        return {'measurement_class': 'equivalence_canary', 'host_qualified': False,
+                'wall_time_freshness_qualified': False, 'accepted_quiet_host_timing': False}
+    if kind in CPU_DIAGNOSTIC_KINDS:
+        return {'measurement_class': 'unqualified_contended_cpu_diagnostic', 'host_qualified': False,
+                'wall_time_freshness_qualified': False, 'accepted_quiet_host_timing': False}
+    qual_passed = (
+        isinstance(qualification, dict)
+        and qualification.get('qualification_passed') is True
+        and qualification.get('cleanup_verified') is True
+    )
+    stage_qualified = bool(certified and qual_passed)
+    accepted = bool(final_owner and stage_qualified)
+    return {'measurement_class': 'qualified_quiet_window', 'host_qualified': stage_qualified,
+            'wall_time_freshness_qualified': accepted, 'accepted_quiet_host_timing': accepted}
+
+
+def require_accepted_measurement(record):
+    """Accept only a certified final-owner quiet-host qualified legacy or monitoring record."""
+    if (not isinstance(record, dict)
+            or record.get('kind') not in QUALIFIED_KINDS
+            or record.get('measurement_class') != 'qualified_quiet_window'
+            or record.get('host_qualified') is not True
+            or record.get('wall_time_freshness_qualified') is not True
+            or record.get('accepted_quiet_host_timing') is not True
+            or record.get('cleanup_verified') is not True
+            or record.get('returncode') != 0):
+        raise ValueError('WP1 record is not an accepted quiet-host qualified measurement')
+    qual = record.get('qualification')
+    if (not isinstance(qual, dict)
+            or qual.get('qualification_passed') is not True
+            or qual.get('cleanup_verified') is not True):
+        raise ValueError('WP1 record lacks a passed quiet-host qualification witness')
+    return True
+
+
+def _terminal_call_outcome(value):
+    return isinstance(value, str) and (
+        value == 'return'
+        or (value.startswith('exception:') and bool(value[len('exception:'):].strip()))
+    )
+
+
+def _terminal_phase_outcome(value):
+    return value in {'return', 'exception'}
+
+
+def _arm_interpreter(arm):
+    harness = arm.get('harness')
+    if isinstance(harness, dict) and 'interpreter' in harness:
+        return harness.get('interpreter')
+    return arm.get('interpreter')
+
+
+def _valid_arm_identity(arm):
+    manifest_sha = arm.get('manifest_sha256')
+    source_commit = arm.get('source_commit')
+    interpreter = _arm_interpreter(arm)
+    return (
+        isinstance(manifest_sha, str) and bool(re.fullmatch('[0-9a-f]{64}', manifest_sha))
+        and isinstance(source_commit, str) and bool(re.fullmatch('[0-9a-f]{40}', source_commit))
+        and isinstance(interpreter, dict) and set(interpreter) == {'path', 'sha256', 'version'}
+        and isinstance(interpreter.get('path'), str) and bool(interpreter['path'].strip())
+        and Path(interpreter['path']).is_absolute()
+        and isinstance(interpreter.get('sha256'), str)
+        and bool(re.fullmatch('[0-9a-f]{64}', interpreter['sha256']))
+        and isinstance(interpreter.get('version'), str) and bool(interpreter['version'].strip())
+        and arm.get('node') == DIAGNOSTIC
+        and arm['measurement'].get('mode') == 'control'
+    )
+
+
+def _extract_cpu_phase(measurement, name):
+    calls = measurement.get('calls')
+    phases = measurement.get('phases')
+    if not isinstance(calls, list) or not isinstance(phases, list):
+        raise ValueError('CPU diagnostic measurement requires phases and calls lists')
+    matches = [row for row in phases if isinstance(row, dict) and row.get('name') == name]
+    if len(matches) != 1:
+        return None
+    phase = matches[0]
+    start, stop = phase.get('first_call_row'), phase.get('last_call_row_exclusive')
+    if type(start) is not int or type(stop) is not int or not 0 <= start <= stop <= len(calls):
+        raise ValueError('invalid phase call slice in CPU diagnostic measurement')
+    selected = calls[start:stop]
+    if any(not isinstance(row, dict) or row.get('phase') != name for row in selected):
+        raise ValueError('phase call slice crosses phase boundary')
+    balanced = (
+        _terminal_phase_outcome(phase.get('outcome'))
+        and all(_terminal_call_outcome(row.get('outcome')) for row in selected)
+    )
+    roster = [(row.get('label'), row.get('name'), row.get('first_line'), row.get('outcome'))
+              for row in selected]
+    return {
+        'name': name,
+        'outcome': phase.get('outcome'),
+        'error': phase.get('error'),
+        'elapsed': dict(phase.get('elapsed') or {}),
+        'balanced': balanced,
+        'call_counts': dict(Counter(row.get('label') for row in selected)),
+        'ordered_call_roster': roster,
+    }
+
+
+def compare_cpu_diagnostic_arms(legacy_arm, monitoring_arm):
+    """Compare unqualified cpu-legacy and cpu-monitoring arms on equal completed work."""
+    if not isinstance(legacy_arm, dict) or not isinstance(monitoring_arm, dict):
+        raise ValueError('CPU diagnostic comparison requires legacy and monitoring arm dicts')
+    if (legacy_arm.get('kind') != 'cpu-legacy' or legacy_arm.get('arm') != 'legacy'
+            or monitoring_arm.get('kind') != 'cpu-monitoring' or monitoring_arm.get('arm') != 'monitoring'):
+        raise ValueError('CPU diagnostic comparison requires explicit cpu-legacy and cpu-monitoring arms')
+    for arm in (legacy_arm, monitoring_arm):
+        if (arm.get('measurement_class') != 'unqualified_contended_cpu_diagnostic'
+                or arm.get('host_qualified') is not False
+                or arm.get('wall_time_freshness_qualified') is not False
+                or arm.get('accepted_quiet_host_timing') is not False
+                or arm.get('qualification') is not None):
+            raise ValueError('CPU diagnostic arm cannot claim quiet-host or wall-time qualification')
+        diag = arm.get('diagnostic')
+        meas = arm.get('measurement')
+        if (not isinstance(diag, dict) or not isinstance(meas, dict)
+                or diag.get('measurement_class') != 'unqualified_contended_cpu_diagnostic'
+                or diag.get('host_qualified') is not False
+                or diag.get('wall_time_freshness_qualified') is not False
+                or diag.get('accepted_quiet_host_timing') is not False):
+            raise ValueError('CPU diagnostic payload lacks unqualified diagnostic classification')
+    same_identity = (
+        _valid_arm_identity(legacy_arm)
+        and _valid_arm_identity(monitoring_arm)
+        and legacy_arm['manifest_sha256'] == monitoring_arm['manifest_sha256']
+        and legacy_arm['source_commit'] == monitoring_arm['source_commit']
+        and _arm_interpreter(legacy_arm) == _arm_interpreter(monitoring_arm)
+    )
+    arms_clean = all(
+        arm.get('cleanup_verified') is True and arm.get('returncode') == 0
+        and arm['measurement'].get('open_call_rows') == 0
+        and all(_terminal_call_outcome(row.get('outcome')) for row in arm['measurement'].get('calls', ()))
+        and all(_terminal_phase_outcome(phase.get('outcome')) for phase in arm['measurement'].get('phases', ()))
+        and arm['diagnostic'].get('open_call_rows') == 0
+        and arm['diagnostic'].get('open_thread_stacks') == 0
+        and isinstance(arm['diagnostic'].get('profile_stability'), dict)
+        and arm['diagnostic']['profile_stability'].get('stable') is True
+        and arm['diagnostic']['profile_stability'].get('restored') is True
+        for arm in (legacy_arm, monitoring_arm)
+    )
+    same_outcome = (
+        legacy_arm['diagnostic'].get('outcome') in {'reached_reservation_without_effect', 'genuine_refusal'}
+        and (legacy_arm['diagnostic'].get('outcome'), legacy_arm['diagnostic'].get('error'))
+        == (monitoring_arm['diagnostic'].get('outcome'), monitoring_arm['diagnostic'].get('error'))
+    )
+    phases = []
+    for name in ('fixture', 'launch'):
+        left = _extract_cpu_phase(legacy_arm['measurement'], name)
+        right = _extract_cpu_phase(monitoring_arm['measurement'], name)
+        reasons = []
+        if not same_identity:
+            reasons.append('pair_identity_differs')
+        if not arms_clean:
+            reasons.append('arm_cleanup_or_open_calls_unverified')
+        if name == 'launch' and not same_outcome:
+            reasons.append('diagnostic_outcome_differs')
+        if left is None or right is None:
+            reasons.append('phase_missing')
+        elif not left['balanced'] or not right['balanced']:
+            reasons.append('phase_has_open_observations')
+        elif (left['outcome'], left['error'], left['call_counts'], left['ordered_call_roster']) != (
+                right['outcome'], right['error'], right['call_counts'], right['ordered_call_roster']):
+            reasons.append('phase_outcome_or_call_roster_differs')
+        relative_cpu = None
+        diagnostic_wall = None
+        if not reasons:
+            relative_cpu = {}
+            for key in CPU_COMPARE_FIELDS:
+                before = left['elapsed'].get(key)
+                after = right['elapsed'].get(key)
+                if type(before) not in (int, float) or type(after) not in (int, float) or not (
+                        math.isfinite(before) and math.isfinite(after) and before >= 0 and after >= 0):
+                    raise ValueError('invalid phase CPU metric: ' + key)
+                relative_cpu[key] = {
+                    'legacy': before, 'monitoring': after, 'difference': after - before,
+                    'monitoring_over_legacy_ratio': after / before if before > 0 else None,
+                    'fractional_change': (after - before) / before if before > 0 else None,
+                }
+            left_wall = left['elapsed'].get('wall_monotonic')
+            right_wall = right['elapsed'].get('wall_monotonic')
+            if type(left_wall) in (int, float) and type(right_wall) in (int, float):
+                diagnostic_wall = {
+                    'legacy': left_wall, 'monitoring': right_wall,
+                    'difference': right_wall - left_wall, 'qualified': False,
+                }
+        phases.append({
+            'phase': name, 'comparable': not reasons, 'reasons': reasons,
+            'relative_cpu': relative_cpu, 'diagnostic_wall_monotonic': diagnostic_wall,
+            'legacy': left, 'monitoring': right,
+        })
+    equal_completed_work = bool(phases) and all(row['comparable'] for row in phases) and same_outcome
+    total_explicit_phase_cpu = None
+    if equal_completed_work:
+        total_explicit_phase_cpu = {}
+        for key in ('thread_cpu', 'process_cpu'):
+            before = sum(row['legacy']['elapsed'][key] for row in phases)
+            after = sum(row['monitoring']['elapsed'][key] for row in phases)
+            total_explicit_phase_cpu[key] = {
+                'legacy': before, 'monitoring': after, 'difference': after - before,
+                'monitoring_over_legacy_ratio': after / before if before > 0 else None,
+                'fractional_change': (after - before) / before if before > 0 else None,
+            }
+    return {
+        'kind': 'wp1_contended_cpu_diagnostic_comparison',
+        'measurement_class': 'unqualified_contended_cpu_diagnostic',
+        'host_qualified': False,
+        'wall_time_freshness_qualified': False,
+        'accepted_quiet_host_timing': False,
+        'same_identity': same_identity,
+        'arms_clean': arms_clean,
+        'same_diagnostic_outcome': same_outcome,
+        'equal_completed_work': equal_completed_work,
+        'phases': phases,
+        'total_explicit_phase_cpu': total_explicit_phase_cpu,
+        'host_contention': {
+            'legacy': legacy_arm.get('host_contention'),
+            'monitoring': monitoring_arm.get('host_contention'),
+        },
+        'cpu_policy': (
+            'Relative thread/process/self/child CPU is reported only when both arms complete '
+            'the same phases, call counts, ordered call rosters and diagnostic outcomes with '
+            'zero open call rows. Divergent work emits no total or phase ratio. Nested '
+            'inclusive function times overlap and are never summed across labels.'
+        ),
+    }
+
+
 def arguments():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('kind', choices=tuple(KINDS))
@@ -363,9 +618,11 @@ class _SandboxHandoff:
 
 def supervised_main(args):
     node, arm, limit = KINDS[args.kind]
+    classification = measurement_classification(args.kind)
     started = float(os.environ['U3WP1_STARTED_MONOTONIC'])
     deadline = float(os.environ['U3WP1_HARD_DEADLINE'])
     if (int(os.environ['U3WP1_SUPERVISOR_PID']) != os.getppid()
+            or os.environ.get('U3WP1_MEASUREMENT_CLASS') != classification['measurement_class']
             or deadline - started != limit or not started <= time.monotonic() < deadline):
         raise ValueError('WP1 preflight requires its live bounded outer supervisor')
     if not (sys.flags.no_site and sys.flags.safe_path and sys.dont_write_bytecode):
@@ -387,10 +644,10 @@ def supervised_main(args):
     import psutil
     quiet = wp1_helper('quiet')
     lease = None
-    if args.kind == 'canary':
+    if args.kind in NO_LEASE_KINDS:
         quiet.refuse_existing(QUIET_LOCK)
         if 'U3WP1_LEASE_FD' in os.environ:
-            raise ValueError('canary cannot borrow a measured-arm lease')
+            raise ValueError(args.kind + ' cannot borrow a measured-arm lease')
     else:
         lease = read_quiet_lease(quiet, psutil, 'supervised', manifest_sha, value)
         if lease.output != out:
@@ -401,6 +658,7 @@ def supervised_main(args):
            'PYTEST_ADDOPTS': '', 'UV_OFFLINE': '1', 'PIP_NO_INDEX': '1',
            'U3WP1_MANIFEST': str(manifest), 'U3WP1_MANIFEST_SHA': manifest_sha,
            'U3WP1_KIND': args.kind, 'U3WP1_CONSUMER_ARM': arm,
+           'U3WP1_MEASUREMENT_CLASS': classification['measurement_class'],
            'U3WP1_STARTED_MONOTONIC': repr(started), 'U3WP1_HARD_DEADLINE': repr(deadline),
            'U3WP1_READY_FD': os.environ['U3WP1_READY_FD'],
            'U3WP1_RELEASE_FD': os.environ['U3WP1_RELEASE_FD'],
@@ -423,6 +681,10 @@ def supervised_main(args):
     post_observer_cleanup_pids = []
     interrupted = None
     timed_out = False
+    host_samples = []
+    logical_cpus = os.cpu_count() or 1
+    psutil.cpu_percent(interval=None)
+    next_host_sample = time.monotonic()
 
     def observe():
         while not stop.wait(0.1):
@@ -495,6 +757,16 @@ def supervised_main(args):
             while child.poll() is None:
                 if lease is not None:
                     lease.validate()
+                now_mono = time.monotonic()
+                if now_mono >= next_host_sample:
+                    load1, load5, load15 = os.getloadavg()
+                    host_samples.append({
+                        'monotonic': now_mono,
+                        'cpu_percent': psutil.cpu_percent(interval=None),
+                        'load': [load1, load5, load15],
+                        'one_minute_load_per_cpu': load1 / logical_cpus,
+                    })
+                    next_host_sample = now_mono + 1.0
                 if time.monotonic() >= deadline - 3:
                     raise subprocess.TimeoutExpired(command, limit)
                 time.sleep(min(0.1, max(0, deadline - 3 - time.monotonic())))
@@ -543,12 +815,36 @@ def supervised_main(args):
     elapsed = time.monotonic() - started
     outcome_path = out / 'outcome.json'
     outcome = json.loads(outcome_path.read_bytes()) if outcome_path.is_file() else None
+    harness_path = out / 'wp1-harness.json'
+    harness = json.loads(harness_path.read_bytes()) if harness_path.is_file() else None
+    qual_witness = read_qualification_witness(out) if args.kind in QUALIFIED_KINDS else None
+    expected_harness_class = measurement_classification(
+        args.kind, qualification=qual_witness, certified=True, final_owner=False
+    )
     certified = (child is not None and child.returncode == 0 and interrupted is None
                  and observer_joined and not post_observer_cleanup_pids
                  and not survivors_before_cleanup and not survivors and not errors_snapshot
-                 and elapsed <= limit and outcome is not None and outcome.get('cleanup_verified') is True)
+                 and elapsed <= limit and outcome is not None and outcome.get('cleanup_verified') is True
+                 and harness is not None
+                 and harness.get('measurement_class') == classification['measurement_class']
+                 and harness.get('host_qualified') is expected_harness_class['host_qualified']
+                 and harness.get('wall_time_freshness_qualified') is False
+                 and harness.get('accepted_quiet_host_timing') is False)
+    outer_class = measurement_classification(
+        args.kind, qualification=qual_witness, certified=certified, final_owner=False
+    )
     code = 124 if timed_out else (0 if certified else 125)
+    host_contention = {
+        'qualified': False,
+        'samples': len(host_samples),
+        'logical_cpus': logical_cpus,
+        'mean_cpu_percent': (sum(row['cpu_percent'] for row in host_samples) / len(host_samples)) if host_samples else None,
+        'peak_cpu_percent': max((row['cpu_percent'] for row in host_samples), default=None),
+        'max_one_minute_load_per_cpu': max((row['one_minute_load_per_cpu'] for row in host_samples), default=None),
+        'scope': 'Diagnostic during-run host CPU/load observations; not a quiet-host qualification gate.',
+    }
     write_new(out.with_suffix('.outer.json'), dict(kind=args.kind, arm=arm, node=node,
+        **outer_class, host_contention=host_contention,
         manifest=str(manifest), manifest_sha256=manifest_sha, source_commit=value['source_commit'],
         command=command, seconds=elapsed, limit_seconds=limit, returncode=code,
         child_returncode=None if child is None else child.returncode, timed_out=timed_out,
@@ -569,9 +865,10 @@ def main():
     # Arm the hard cap BEFORE any preflight. The outer owner, independent of
     # the driver/watchdog, admits one detached sandbox through inherited pipes.
     _, _, limit = KINDS[args.kind]
+    classification = measurement_classification(args.kind)
     started = time.monotonic()
     acquisition_started = started
-    phase_limit = limit if args.kind == 'canary' else QUALIFICATION_LIMIT
+    phase_limit = limit if args.kind in NO_LEASE_KINDS else QUALIFICATION_LIMIT
     deadline = started + phase_limit
     child = None
     handoff = None
@@ -653,8 +950,15 @@ def main():
         sys.path.append(str(site))  # Never evaluate .pth or editable hooks.
         import psutil
         quiet = wp1_helper('quiet')
-        if args.kind == 'canary':
+        if args.kind in NO_LEASE_KINDS:
             quiet.refuse_existing(QUIET_LOCK)
+            if 'U3WP1_LEASE_FD' in os.environ:
+                raise ValueError(args.kind + ' cannot borrow a measured-arm lease')
+            if args.kind in CPU_DIAGNOSTIC_KINDS:
+                manifest, manifest_sha, value = contract()
+                if args.canary_out is None:
+                    raise ValueError('CPU diagnostic arm requires its exact completed canary')
+                require_canary(args.canary_out, manifest_sha)
         else:
             manifest, manifest_sha, value = contract()
             if args.canary_out is None:
@@ -681,6 +985,7 @@ def main():
         env = {**GIT_ENV, 'LANG': 'en_US.UTF-8', 'PYTHONNOUSERSITE': '1',
                'PYTHONSAFEPATH': '1', 'PYTHONDONTWRITEBYTECODE': '1',
                'U3WP1_MANIFEST': str(manifest), 'U3WP1_SUPERVISOR_PID': str(os.getpid()),
+               'U3WP1_MEASUREMENT_CLASS': classification['measurement_class'],
                'U3WP1_STARTED_MONOTONIC': repr(started), 'U3WP1_HARD_DEADLINE': repr(deadline),
                'U3WP1_READY_FD': str(handoff.ready_write),
                'U3WP1_RELEASE_FD': str(handoff.release_read),
@@ -793,11 +1098,18 @@ def main():
                 and ownership['admitted'] and not ownership['errors']
                 and not ownership['observed_surviving_pids']
                 and inner is not None and inner['returncode'] == 0 and inner['cleanup_verified']
+                and inner.get('measurement_class') == classification['measurement_class']
+                and inner.get('accepted_quiet_host_timing') is False
+                and inner.get('wall_time_freshness_qualified') is False
                 and (lease is None or lease_release.get('released') is True)
                 and time.monotonic() < deadline)
+            supervisor_class = measurement_classification(
+                args.kind, qualification=qualification, certified=certified, final_owner=True
+            )
             result = 0 if certified else (124 if interrupted == 'outer_deadline' else 125)
             if out is not None:
                 write_new(out.with_suffix('.supervisor.json'), dict(kind=args.kind,
+                    **supervisor_class,
                     manifest=str(manifest), manifest_sha256=sha(manifest),
                     returncode=result, cleanup_verified=certified, forced_cleanup=forced,
                     interrupted=interrupted, errors=errors, sandbox_handoff=ownership,

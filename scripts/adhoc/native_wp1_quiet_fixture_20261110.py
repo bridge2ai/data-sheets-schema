@@ -474,6 +474,193 @@ def qualification_cases():
             'scope': 'Pure synthetic sample evaluation; no real host observation, settling or qualification occurred.'}
 
 
+def cpu_diagnostic_cases(validator):
+    assert validator.KINDS['cpu-legacy'] == (validator.DIAGNOSTIC, 'legacy', 900)
+    assert validator.KINDS['cpu-monitoring'] == (validator.DIAGNOSTIC, 'monitoring', 900)
+    assert validator.QUALIFIED_KINDS == frozenset({'legacy', 'monitoring'})
+    assert validator.CPU_DIAGNOSTIC_KINDS == frozenset({'cpu-legacy', 'cpu-monitoring'})
+    assert validator.NO_LEASE_KINDS == frozenset({'canary', 'cpu-legacy', 'cpu-monitoring'})
+    passed_witness = {'qualification_passed': True, 'cleanup_verified': True}
+    unverified_classes = {kind: validator.measurement_classification(kind) for kind in validator.KINDS}
+    for kind, row in unverified_classes.items():
+        assert row['host_qualified'] is False
+        assert row['wall_time_freshness_qualified'] is False
+        assert row['accepted_quiet_host_timing'] is False
+    failed_default_class = validator.measurement_classification(
+        'legacy', qualification=passed_witness, certified=False, final_owner=True
+    )
+    assert failed_default_class['host_qualified'] is False
+    assert failed_default_class['wall_time_freshness_qualified'] is False
+    assert failed_default_class['accepted_quiet_host_timing'] is False
+    intermediate_default_class = validator.measurement_classification(
+        'legacy', qualification=passed_witness, certified=True, final_owner=False
+    )
+    assert intermediate_default_class['host_qualified'] is True
+    assert intermediate_default_class['wall_time_freshness_qualified'] is False
+    assert intermediate_default_class['accepted_quiet_host_timing'] is False
+    final_classes = {
+        kind: validator.measurement_classification(
+            kind, qualification=passed_witness, certified=True, final_owner=True
+        )
+        for kind in validator.KINDS
+    }
+    for kind in ('canary', 'cpu-legacy', 'cpu-monitoring'):
+        assert final_classes[kind]['host_qualified'] is False
+        assert final_classes[kind]['wall_time_freshness_qualified'] is False
+        assert final_classes[kind]['accepted_quiet_host_timing'] is False
+    for kind in ('legacy', 'monitoring'):
+        assert final_classes[kind]['measurement_class'] == 'qualified_quiet_window'
+        assert final_classes[kind]['host_qualified'] is True
+        assert final_classes[kind]['wall_time_freshness_qualified'] is True
+        assert final_classes[kind]['accepted_quiet_host_timing'] is True
+    accepted_sample = {
+        'kind': 'legacy', **final_classes['legacy'], 'cleanup_verified': True,
+        'returncode': 0, 'qualification': dict(passed_witness),
+    }
+    assert validator.require_accepted_measurement(accepted_sample) is True
+    cpu_refused = {
+        kind: refused(ValueError, lambda kind=kind: validator.require_accepted_measurement({
+            'kind': kind, **final_classes[kind], 'cleanup_verified': True,
+            'returncode': 0, 'qualification': dict(passed_witness),
+        }))
+        for kind in ('canary', 'cpu-legacy', 'cpu-monitoring')
+    }
+    failed_default_refused = refused(
+        ValueError,
+        lambda: validator.require_accepted_measurement({
+            'kind': 'legacy', **failed_default_class, 'cleanup_verified': False,
+            'returncode': 125, 'qualification': dict(passed_witness),
+        }),
+    )
+    intermediate_default_refused = refused(
+        ValueError,
+        lambda: validator.require_accepted_measurement({
+            'kind': 'legacy', **intermediate_default_class, 'cleanup_verified': True,
+            'returncode': 0, 'qualification': dict(passed_witness),
+        }),
+    )
+    missing_witness_refused = refused(
+        ValueError,
+        lambda: validator.require_accepted_measurement(
+            {key: value for key, value in accepted_sample.items() if key != 'qualification'}
+        ),
+    )
+    failed_qual_refused = refused(
+        ValueError,
+        lambda: validator.require_accepted_measurement(
+            dict(accepted_sample, qualification={'qualification_passed': False, 'cleanup_verified': True})
+        ),
+    )
+
+    def synthetic_arm(kind, arm, thread_cpu_launch):
+        return {
+            'kind': kind, 'arm': arm, 'node': validator.DIAGNOSTIC,
+            **final_classes[kind],
+            'manifest_sha256': 'a' * 64, 'source_commit': 'b' * 40,
+            'harness': {'interpreter': {'path': '/venv/bin/python', 'sha256': 'c' * 64, 'version': '3.13'}},
+            'cleanup_verified': True, 'returncode': 0, 'qualification': None,
+            'host_contention': {'qualified': False, 'samples': 3, 'mean_cpu_percent': 42.0,
+                                'peak_cpu_percent': 55.0, 'max_one_minute_load_per_cpu': 1.25},
+            'diagnostic': {
+                'wp1_kind': kind, **final_classes[kind],
+                'outcome': 'reached_reservation_without_effect', 'error': 'stopped at mkdir',
+                'open_call_rows': 0, 'open_thread_stacks': 0,
+                'profile_stability': {'stable': True, 'restored': True},
+            },
+            'measurement': {
+                'mode': 'control', 'open_call_rows': 0,
+                'phases': [
+                    {'name': 'fixture', 'outcome': 'return', 'error': None,
+                     'first_call_row': 0, 'last_call_row_exclusive': 1,
+                     'elapsed': {'wall_monotonic': 1.5, 'thread_cpu': 1.0, 'process_cpu': 1.0,
+                                 'self_user_cpu': 0.8, 'self_system_cpu': 0.2,
+                                 'reaped_child_user_cpu': 0.0, 'reaped_child_system_cpu': 0.0}},
+                    {'name': 'launch', 'outcome': 'exception', 'error': '_ReachedReservation: stopped',
+                     'first_call_row': 1, 'last_call_row_exclusive': 3,
+                     'elapsed': {'wall_monotonic': 12.0, 'thread_cpu': thread_cpu_launch,
+                                 'process_cpu': thread_cpu_launch, 'self_user_cpu': thread_cpu_launch - 0.5,
+                                 'self_system_cpu': 0.5, 'reaped_child_user_cpu': 0.0,
+                                 'reaped_child_system_cpu': 0.0}},
+                ],
+                'calls': [
+                    {'phase': 'fixture', 'label': 'public_fixture', 'name': 'make_case',
+                     'first_line': 10, 'outcome': 'return', 'inclusive_thread_cpu': 1.0},
+                    {'phase': 'launch', 'label': 'public_launch', 'name': 'synthetic_launch',
+                     'first_line': 20, 'outcome': 'exception:_ReachedReservation',
+                     'inclusive_thread_cpu': thread_cpu_launch},
+                    {'phase': 'launch', 'label': 'attempt_mkdir', 'name': 'mkdir',
+                     'first_line': 30, 'outcome': 'exception:_ReachedReservation',
+                     'inclusive_thread_cpu': 0.01},
+                ],
+            },
+        }
+
+    legacy_arm = synthetic_arm('cpu-legacy', 'legacy', 10.0)
+    monitoring_arm = synthetic_arm('cpu-monitoring', 'monitoring', 8.0)
+    comparable = validator.compare_cpu_diagnostic_arms(legacy_arm, monitoring_arm)
+    assert comparable['equal_completed_work'] is True
+    assert comparable['host_qualified'] is False and comparable['accepted_quiet_host_timing'] is False
+    assert comparable['total_explicit_phase_cpu']['thread_cpu']['difference'] == -2.0
+    assert all('within_label_inclusive_thread_cpu' not in row['legacy'] for row in comparable['phases'])
+    comparison_refused_as_accepted = refused(
+        ValueError, lambda: validator.require_accepted_measurement(comparable)
+    )
+    divergent_outcome = deepcopy(monitoring_arm)
+    divergent_outcome['diagnostic']['outcome'] = 'genuine_refusal'
+    divergent_outcome['diagnostic']['error'] = 'subscription pre-reservation freshness margin is insufficient'
+    divergent_outcome['measurement']['phases'][1]['error'] = 'ValueError: freshness margin insufficient'
+    divergent_outcome['measurement']['phases'][1]['last_call_row_exclusive'] = 2
+    divergent_outcome['measurement']['calls'] = divergent_outcome['measurement']['calls'][:2]
+    divergent_outcome['measurement']['calls'][1]['outcome'] = 'exception:ValueError'
+    divergent = validator.compare_cpu_diagnostic_arms(legacy_arm, divergent_outcome)
+    assert divergent['equal_completed_work'] is False
+    assert divergent['total_explicit_phase_cpu'] is None
+    assert divergent['phases'][0]['phase'] == 'fixture' and divergent['phases'][0]['comparable'] is True
+    assert divergent['phases'][0]['relative_cpu']['thread_cpu']['difference'] == 0.0
+    assert divergent['phases'][1]['phase'] == 'launch' and divergent['phases'][1]['comparable'] is False
+    assert divergent['phases'][1]['relative_cpu'] is None
+    missing_identity_left = deepcopy(legacy_arm)
+    missing_identity_right = deepcopy(monitoring_arm)
+    del missing_identity_left['harness']
+    del missing_identity_right['harness']
+    missing_identity = validator.compare_cpu_diagnostic_arms(missing_identity_left, missing_identity_right)
+    assert missing_identity['same_identity'] is False
+    assert missing_identity['equal_completed_work'] is False
+    assert missing_identity['total_explicit_phase_cpu'] is None
+    assert all('pair_identity_differs' in row['reasons'] and row['relative_cpu'] is None
+               for row in missing_identity['phases'])
+    nonterminal_left = deepcopy(legacy_arm)
+    nonterminal_right = deepcopy(monitoring_arm)
+    nonterminal_left['measurement']['calls'][0]['outcome'] = None
+    nonterminal_right['measurement']['calls'][0]['outcome'] = None
+    nonterminal = validator.compare_cpu_diagnostic_arms(nonterminal_left, nonterminal_right)
+    assert nonterminal['arms_clean'] is False
+    assert nonterminal['equal_completed_work'] is False
+    assert nonterminal['total_explicit_phase_cpu'] is None
+    assert all(row['relative_cpu'] is None for row in nonterminal['phases'])
+    forged_qualified_refused = refused(
+        ValueError,
+        lambda: validator.compare_cpu_diagnostic_arms(dict(legacy_arm, host_qualified=True), monitoring_arm),
+    )
+    return {
+        'cpu_kinds_refused_as_accepted': cpu_refused,
+        'failed_default_arm_refused': failed_default_refused,
+        'intermediate_default_arm_refused': intermediate_default_refused,
+        'missing_qualification_witness_refused': missing_witness_refused,
+        'failed_qualification_refused': failed_qual_refused,
+        'comparable_pair_equal_work': comparable['equal_completed_work'],
+        'comparison_refused_as_accepted': comparison_refused_as_accepted,
+        'divergent_launch_retains_equal_fixture_prefix': divergent['phases'][0]['comparable'],
+        'divergent_launch_suppresses_launch_and_total': (
+            divergent['phases'][1]['relative_cpu'] is None and divergent['total_explicit_phase_cpu'] is None
+        ),
+        'missing_identity_on_both_refused': not missing_identity['same_identity'],
+        'nonterminal_outcome_on_both_refused': not nonterminal['arms_clean'],
+        'forged_qualification_refused': forged_qualified_refused,
+        'scope': 'Pure classification and equal-work CPU diagnostic comparison checks (#5817/#5818/#5819/#5820).',
+    }
+
+
 def role_environment(root, source, lease, extra=None):
     additions = dict(lease.environment())
     for name in ('WP1_FIXTURE_READY_FD', 'WP1_FIXTURE_RELEASE_FD', 'WP1_FIXTURE_NONCE'):
@@ -596,6 +783,7 @@ def outer(args):
     try:
         result['pure_cases'] = pure_cases(root, args.source, manifest_sha, psutil, quiet, validator)
         result['qualification_fixtures'] = qualification_cases()
+        result['cpu_diagnostic_fixtures'] = cpu_diagnostic_cases(validator)
         owner = acquisition(quiet, psutil, root, 'tree', manifest_sha, args.source)
         output = owner.output
         result['outer_witness'] = owner.witness()

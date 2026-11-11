@@ -181,6 +181,19 @@ def test_neutral_pre_reservation_diagnostic(tmp_path, monkeypatch):
     arm = os.environ.get('U3WP1_CONSUMER_ARM')
     if arm not in {'legacy', 'monitoring'}:
         raise ValueError('U3WP1_CONSUMER_ARM must be explicitly legacy or monitoring')
+    kind = os.environ.get('U3WP1_KIND', arm)
+    if kind not in {'legacy', 'monitoring', 'cpu-legacy', 'cpu-monitoring'}:
+        raise ValueError('U3WP1_KIND must be legacy, monitoring, cpu-legacy or cpu-monitoring')
+    if (kind in {'legacy', 'cpu-legacy'}) != (arm == 'legacy'):
+        raise ValueError('U3WP1_KIND and U3WP1_CONSUMER_ARM must select the same observer arm')
+    measurement_class = os.environ.get(
+        'U3WP1_MEASUREMENT_CLASS',
+        'unqualified_contended_cpu_diagnostic' if kind.startswith('cpu-') else 'qualified_quiet_window',
+    )
+    if measurement_class not in {'qualified_quiet_window', 'unqualified_contended_cpu_diagnostic'}:
+        raise ValueError('U3WP1_MEASUREMENT_CLASS must be qualified_quiet_window or unqualified_contended_cpu_diagnostic')
+    if kind.startswith('cpu-') != (measurement_class == 'unqualified_contended_cpu_diagnostic'):
+        raise ValueError('U3WP1_KIND and U3WP1_MEASUREMENT_CLASS disagree on diagnostic qualification')
     assert recorder.mode == 'control', 'WP1 measured arms must use control profiling'
     assert sys.getprofile() is None, 'WP1 measured arms require no inherited profile hook'
     from tests.test_native_shared_execution import make_case
@@ -210,6 +223,11 @@ def test_neutral_pre_reservation_diagnostic(tmp_path, monkeypatch):
 
     monkeypatch.setattr(Path, 'mkdir', stop_at_exact_attempt)
     result = {'profile': 'synthetic-software-test', 'fixture': 'neutral',
+        'wp1_kind': kind, 'measurement_class': measurement_class,
+        'host_qualified': False,
+        'wall_time_freshness_qualified': False,
+        'accepted_quiet_host_timing': False,
+        'qualification_authority': 'outer_supervisor_only',
         'consumer_observer_arm': arm, 'metrics_profile_mode': recorder.mode,
         'general_replacement_equivalence': False,
         'known_observer_limitation': 'WP1-L1: body sys.setprofile mutation changes observation and refusal behavior differently between arms.',

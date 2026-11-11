@@ -36,8 +36,11 @@ contract_module = load('native_wp1_contract', ROOT / 'scripts/adhoc/native_wp1_v
 MANIFEST, MANIFEST_SHA, CONTRACT = contract_module.contract()
 KIND = os.environ['U3WP1_KIND']
 if KIND not in contract_module.KINDS:
-    raise ValueError('WP1 admits only the fixed equivalence canary and two arms')
+    raise ValueError('WP1 admits only the fixed equivalence canary and arms')
 NODE, ARM, LIMIT = contract_module.KINDS[KIND]
+CLASSIFICATION = contract_module.measurement_classification(KIND)
+if os.environ.get('U3WP1_MEASUREMENT_CLASS') != CLASSIFICATION['measurement_class']:
+    raise ValueError('WP1 measurement class must match the selected kind')
 if os.environ.get('U3WP1_CONSUMER_ARM') != ARM or os.environ.get('U3K_PROFILE') != 'control':
     raise ValueError('WP1 arm and control metrics selection must be explicit')
 STARTED = float(os.environ['U3WP1_STARTED_MONOTONIC'])
@@ -48,10 +51,10 @@ if (not math.isfinite(STARTED) or not math.isfinite(HARD_DEADLINE)
     raise ValueError('WP1 absolute invocation deadline is missing, invalid or expired')
 quiet = contract_module.wp1_helper('quiet')
 LEASE = None
-if KIND == 'canary':
+if KIND in contract_module.NO_LEASE_KINDS:
     quiet.refuse_existing(contract_module.QUIET_LOCK)
     if 'U3WP1_LEASE_FD' in os.environ:
-        raise ValueError('canary cannot borrow a measured-arm lease')
+        raise ValueError(KIND + ' cannot borrow a measured-arm lease')
 else:
     sys.path.append(str(contract_module.dependency_site()))
     import psutil
@@ -109,7 +112,8 @@ def environment(out, interpreter_directory):
     result = original_environment(out, interpreter_directory)
     # The inherited allowlist removes credentials before any Python child starts.
     result.update(U3WP1_MANIFEST=str(MANIFEST), U3WP1_MANIFEST_SHA=MANIFEST_SHA,
-        U3WP1_KIND=KIND, U3WP1_CONSUMER_ARM=ARM, U3K_PROFILE='control',
+        U3WP1_KIND=KIND, U3WP1_CONSUMER_ARM=ARM,
+        U3WP1_MEASUREMENT_CLASS=CLASSIFICATION['measurement_class'], U3K_PROFILE='control',
         U3WP1_STARTED_MONOTONIC=repr(STARTED), U3WP1_HARD_DEADLINE=repr(HARD_DEADLINE),
         U3M_OBSERVE='1')
     if result.get('PYTEST_PLUGINS') != 'scripts.adhoc.u3m_metrics_plugin_20261109':
@@ -218,7 +222,8 @@ def supervised(args):
             runner.save(args.out / 'host-load.json', dict(before=before,
                 after={'load': os.getloadavg()}, scope='instant samples; not an idle-host gate'))
             runner.save(args.out / 'wp1-quiet-lease.json',
-                dict(kind=KIND, lease=None if LEASE is None else LEASE.witness()))
+                dict(kind=KIND, **CLASSIFICATION,
+                     lease=None if LEASE is None else LEASE.witness()))
     return 125 if watchdog_events or time.monotonic() > HARD_DEADLINE else code
 
 
@@ -232,7 +237,12 @@ def parent(args):
     current = contract_module.contract()
     unchanged = current[:2] == (MANIFEST, MANIFEST_SHA) and current[2] == CONTRACT
     if args.out.is_dir():
+        harness_ok = (code == 0 and unchanged and time.monotonic() <= HARD_DEADLINE)
+        harness_class = contract_module.measurement_classification(
+            KIND, qualification=contract_module.read_qualification_witness(args.out),
+            certified=harness_ok, final_owner=False)
         runner.save(args.out / 'wp1-harness.json', dict(kind=KIND, arm=ARM, node=NODE,
+            **harness_class,
             manifest=str(MANIFEST), manifest_sha256=MANIFEST_SHA,
             composition_manifest=CONTRACT['composition_manifest'],
             composition_manifest_sha256=CONTRACT['composition_manifest_sha256'],
@@ -240,8 +250,10 @@ def parent(args):
             implementation_sha256=CONTRACT['implementation_sha256'],
             interpreter=CONTRACT['interpreter'], invocation_limit_seconds=LIMIT,
             seconds=time.monotonic() - STARTED, metrics_profile='control',
-            quiet_window='canary refuses any lock' if LEASE is None else LEASE.witness(),
-            scope='Observer diagnostic only; no production or native acceptance'))
+            quiet_window=(KIND + ' refuses any lock') if LEASE is None else LEASE.witness(),
+            scope=('Unqualified contended relative CPU/call-count diagnostic only; wall time and freshness non-authoritative, no quiet-host, production or native acceptance'
+                   if KIND in contract_module.CPU_DIAGNOSTIC_KINDS
+                   else 'Observer diagnostic only; no production or native acceptance')))
     return code if unchanged and time.monotonic() <= HARD_DEADLINE else 125
 
 
