@@ -6,7 +6,7 @@ Purpose:
   JUnit XML artifacts of GitHub Actions run 42916359440 (commit
   6792947ea6558d10c85106065b023cb57838835a, PR #5808) using the existing
   utils.update_ci_shard_timings.build implementation against the actual run
-  checkout root so all 663 collected test files (including the two readiness
+  checkout root so all 676 collected test files (including the two readiness
   test files added on 6792947ea) map cleanly with zero dropped testcases.
   Compare old vs. new predicted shard assignments against the same measured
   run 42916359440 durations while preserving historical provenance in
