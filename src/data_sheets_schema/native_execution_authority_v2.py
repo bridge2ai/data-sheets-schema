@@ -9,6 +9,8 @@ from __future__ import annotations
 from contextlib import contextmanager
 from copy import deepcopy
 import ast
+import builtins
+import collections
 import hashlib
 import importlib
 import importlib.abc
@@ -20,12 +22,14 @@ import stat
 import subprocess
 import sys
 import threading
-from types import FunctionType, ModuleType
+import types
+from types import FunctionType, ModuleType, GenericAlias, GetSetDescriptorType, MemberDescriptorType
 from weakref import WeakKeyDictionary
 
 from data_sheets_schema import native_attribution_registration_v2 as draft
 from data_sheets_schema import native_supervisor_authority_v2 as neutral
 from data_sheets_schema.resources import git_env
+from data_sheets_schema.cache_dependencies import FunctionBindings, setting_key
 
 ROOT = neutral.ROOT
 VERSION = 2
@@ -76,6 +80,245 @@ def _import_time_nodes(tree):
     if not isinstance(tree, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
         for child in ast.iter_child_nodes(tree):
             yield from _import_time_nodes(child)
+
+
+def _import_facts(source, filename, owned):
+    """Immutable syntax facts only; graph resolution and lint decisions stay live."""
+    tree = ast.parse(source, filename=filename)
+    nodes = list(ast.walk(tree) if owned else _import_time_nodes(tree))
+    aliases = {'__builtins__': 'builtins'}
+    for node in nodes:
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                aliases[alias.asname or alias.name.split('.')[0]] = (
+                    alias.name if alias.asname else alias.name.split('.')[0])
+        elif isinstance(node, ast.ImportFrom) and node.level == 0:
+            for alias in node.names:
+                aliases[alias.asname or alias.name] = (node.module or '') + '.' + alias.name
+
+    def qualified(node):
+        if isinstance(node, ast.Name):
+            return aliases.get(node.id, node.id)
+        if isinstance(node, ast.Attribute):
+            return qualified(node.value) + '.' + node.attr
+        return ''
+
+    facts = []
+    for node in nodes:
+        if isinstance(node, ast.Name):
+            facts.append(('name', node.id, qualified(node)))
+        elif isinstance(node, ast.Attribute):
+            facts.append(('attribute', node.attr, qualified(node),
+                          qualified(node.value).split('.')[0], isinstance(node.ctx, ast.Store)))
+        elif isinstance(node, ast.Call):
+            # Native AST constants are immutable. Only strings can match the
+            # closed attribute-name sets; other literal values are irrelevant.
+            attribute = (node.args[1].value if len(node.args) >= 2
+                         and isinstance(node.args[1], ast.Constant) else None)
+            facts.append(('call', qualified(node.func).split('.')[-1], len(node.args),
+                          attribute if type(attribute) is str else None,
+                          qualified(node.args[0]).split('.')[0] if node.args else ''))
+        elif isinstance(node, ast.Import):
+            facts.append(('import', tuple(alias.name for alias in node.names)))
+        elif isinstance(node, ast.ImportFrom):
+            facts.append(('from', node.level, node.module or '', tuple(alias.name for alias in node.names)))
+    return tuple(facts)
+
+
+_IMPORT_FACT_FUNCTIONS = FunctionBindings(
+    additional_modules=frozenset({'ast', __name__}), callable_defaults=True)
+_IMPORT_FACT_TYPE_ALIASES = (GenericAlias,) + ((types.UnionType,) if hasattr(types, 'UnionType') else ())
+
+
+def _import_fact_setting(value):
+    """Freeze the small stdlib AST producer's effective bindings, not its output."""
+    if isinstance(value, type):
+        return type, value
+    if type(value) in _IMPORT_FACT_TYPE_ALIASES:
+        return type(value), getattr(value, '__origin__', None), tuple(value.__args__)
+    if type(value) in (GetSetDescriptorType, MemberDescriptorType):
+        return type(value), value
+    if type(value) in (tuple, list):
+        return type(value), tuple(_import_fact_setting(item) for item in value)
+    if type(value) is dict:
+        return dict, tuple((key, _import_fact_setting(item)) for key, item in value.items())
+    if isinstance(value, (staticmethod, classmethod)):
+        return type(value), _IMPORT_FACT_FUNCTIONS.key(value.__func__)
+    if isinstance(value, property):
+        return property, tuple(_IMPORT_FACT_FUNCTIONS.key(fn) for fn in
+                               (value.fget, value.fset, value.fdel))
+    if callable(value):
+        return _IMPORT_FACT_FUNCTIONS.key(value)
+    return setting_key(value)
+
+
+def _import_fact_state():
+    if type(ast) is not ModuleType or type(collections) is not ModuleType:
+        raise TypeError('unfamiliar parser dependency module')
+    functions = (ast.parse, ast.walk, ast.iter_child_nodes, ast.iter_fields,
+                 _import_time_nodes, _import_facts)
+    keys = tuple(_IMPORT_FACT_FUNCTIONS.key(fn) for fn in functions)
+    # ast.parse uses effective globals/builtins, and ast.walk imports deque at
+    # call time. Function identity alone would miss these mutable bindings.
+    names = ('compile', '__import__', 'isinstance', 'getattr', 'list', 'tuple', 'len', 'str', 'type')
+    globals_ = tuple(tuple(_import_fact_setting(fn.__globals__.get(
+        name, fn.__builtins__.get(name))) for name in names) for fn in functions)
+    # CPython 3.13 keeps the private _ast_Ellipsis alias (ast.py:633). It is
+    # not an effective parser/classifier name; public AST aliases remain bound.
+    ast_classes = tuple((name, cls) for name, cls in vars(ast).items()
+                        if not name.startswith('_') and isinstance(cls, type)
+                        and issubclass(cls, ast.AST))
+    if any(cls.__name__ != name or cls.__module__ not in {'ast', '_ast'}
+           for name, cls in ast_classes):
+        raise TypeError('unfamiliar AST class binding')
+    classes = tuple((name, cls, cls.__bases__, tuple(
+        (key, _import_fact_setting(value)) for key, value in vars(cls).items()))
+        for name, cls in ast_classes)
+    flags = tuple((name, _import_fact_setting(getattr(ast, name, None))) for name in
+                  ('PyCF_ONLY_AST', 'PyCF_TYPE_COMMENTS', 'PyCF_OPTIMIZED_AST'))
+    deque_state = (collections.deque, collections.deque.__bases__, tuple(
+        (key, _import_fact_setting(value)) for key, value in vars(collections.deque).items()))
+    return (keys, globals_, classes, flags, ast.AST, collections.deque,
+            sys.modules.get('collections') is collections, deque_state,
+            _IMPORT_FACT_FUNCTIONS.key(collections.deque.popleft),
+            _IMPORT_FACT_FUNCTIONS.key(collections.deque.extend),
+            _IMPORT_FACT_FUNCTIONS.key(builtins.compile))
+
+
+_IMPORT_FACT_STATE = None
+_IMPORT_FACT_BINDING_ERROR = None
+
+
+def _bind_import_facts():
+    global _IMPORT_FACT_STATE, _IMPORT_FACT_BINDING_ERROR
+    try:
+        _IMPORT_FACT_STATE = _import_fact_state()
+    except Exception as exc:
+        # FunctionBindings deliberately keeps unfamiliar producers cold. Keep
+        # its diagnostic available without treating cold operation as reuse.
+        _IMPORT_FACT_BINDING_ERROR = type(exc).__name__ + ': ' + str(exc)
+        raise
+
+
+_IMPORT_FACT_FUNCTIONS.bind(_bind_import_facts)
+# Bound retention, not an exact RSS claim: sources + text + row/entry counts.
+_IMPORT_FACTS = collections.OrderedDict()
+_IMPORT_FACT_LIMITS = (256, 8_000_000, 131_072, 8_000_000)
+_IMPORT_FACT_TOTALS = (0, 0, 0)
+_IMPORT_FACT_LOCK = threading.RLock()
+
+
+def _current_import_facts():
+    """Unrecognized producer state uses the original cold implementation."""
+    global _IMPORT_FACT_TOTALS
+    try:
+        supported = (_IMPORT_FACT_FUNCTIONS.ready
+                     and _import_fact_state() == _IMPORT_FACT_STATE)
+    except Exception:
+        supported = False
+    if not supported:
+        with _IMPORT_FACT_LOCK:
+            _IMPORT_FACTS.clear()
+            _IMPORT_FACT_TOTALS = (0, 0, 0)
+    return supported
+
+
+def _cached_import_facts(source, filename, owned):
+    global _IMPORT_FACT_TOTALS
+    # Avoid guard overhead on small sources after the measured tiny regression.
+    # This byte-size heuristic keeps the original AST path, not a universal optimum.
+    if len(source) < 4096:
+        return None
+    if not _current_import_facts():
+        return None
+    key = (source, filename, owned)
+    with _IMPORT_FACT_LOCK:
+        if key in _IMPORT_FACTS:
+            facts, _ = _IMPORT_FACTS[key]
+            _IMPORT_FACTS.move_to_end(key)
+            return facts
+    facts = _import_facts(source, filename, owned)
+    # Strings/tuples only, with integers/bools used solely as syntax fields.
+    def text_size(value):
+        if type(value) is str:
+            return len(value.encode('utf-8', 'surrogatepass'))
+        if type(value) is tuple:
+            return sum(text_size(item) for item in value)
+        if value is None or type(value) in (int, bool):
+            return 0
+        raise TypeError('import facts contain a mutable or unsupported value')
+    sizes = (len(source) + len(filename.encode('utf-8', 'surrogatepass')), len(facts), text_size(facts))
+    if not _current_import_facts():
+        return None
+    if any(size > bound for size, bound in zip(sizes, _IMPORT_FACT_LIMITS[1:])):
+        return facts
+    with _IMPORT_FACT_LOCK:
+        if key in _IMPORT_FACTS:
+            return _IMPORT_FACTS[key][0]
+        while _IMPORT_FACTS and (len(_IMPORT_FACTS) >= _IMPORT_FACT_LIMITS[0]
+                or any(total + size > bound for total, size, bound in
+                       zip(_IMPORT_FACT_TOTALS, sizes, _IMPORT_FACT_LIMITS[1:]))):
+            _, (_, old) = _IMPORT_FACTS.popitem(last=False)
+            _IMPORT_FACT_TOTALS = tuple(total - size for total, size in zip(_IMPORT_FACT_TOTALS, old))
+        _IMPORT_FACTS[key] = facts, sizes
+        _IMPORT_FACT_TOTALS = tuple(total + size for total, size in zip(_IMPORT_FACT_TOTALS, sizes))
+    return facts
+
+
+def _fact_targets(facts, *, module, package, owned, package_sources,
+                  dynamic_names, dynamic_attributes, introspection):
+    """Apply current lint policy and resolve imports; no decision is cached."""
+    machinery = {'importlib', 'builtins', 'runpy', 'pkgutil', 'pydoc', 'zipimport'}
+    targets = []
+    for fact in facts:
+        kind = fact[0]
+        dynamic = False
+        if kind == 'name':
+            _, name, qualified = fact
+            dynamic = name in dynamic_names or qualified.split('.')[-1] in dynamic_names
+            if owned and qualified.split('.')[-1] in introspection:
+                raise ValueError('consumer lint forbids introspection or signature assignment: ' + module)
+        elif kind == 'attribute':
+            _, attribute, qualified, receiver, stored = fact
+            dynamic = attribute in dynamic_attributes or attribute == '__dict__' and receiver in machinery
+            if owned:
+                if attribute in introspection or attribute == '__signature__' and stored:
+                    raise ValueError('consumer lint forbids introspection or signature assignment: ' + module)
+                if any(qualified == legacy or qualified.startswith(legacy + '.')
+                       for legacy in _LEGACY_CONSUMER_MODULES):
+                    raise ValueError('consumer imports forbidden v1 execution authority: ' + module)
+        elif kind == 'call':
+            _, operation, count, attribute, receiver = fact
+            if operation in {'getattr', 'hasattr'} and count >= 2:
+                dynamic = attribute in dynamic_names | dynamic_attributes | introspection or receiver in machinery
+            elif operation == 'vars' and count:
+                dynamic = receiver in machinery
+        if owned and dynamic:
+            raise ValueError('consumer import graph contains dynamic loading or evaluation: ' + module)
+        if kind == 'import':
+            targets.extend(fact[1])
+        elif kind == 'from':
+            _, level, imported, names = fact
+            if owned and '*' in names:
+                raise ValueError('consumer import graph contains an ambiguous star import: ' + module)
+            if owned and any(name in dynamic_names | dynamic_attributes for name in names):
+                raise ValueError('consumer import graph contains dynamic loading or evaluation: ' + module)
+            if level:
+                try:
+                    imported = importlib.util.resolve_name('.' * level + imported, package)
+                except (ImportError, ValueError) as exc:
+                    raise ValueError('consumer import graph has invalid relative import: ' + module) from exc
+            imported = _canonical_import(imported)
+            if imported == 'data_sheets_schema':
+                targets.extend(imported + '.' + name for name in names)
+            else:
+                targets.append(imported)
+                for name in names:
+                    child = imported + '.' + name
+                    stem = 'src/' + child.replace('.', '/')
+                    if stem + '.py' in package_sources or stem + '/__init__.py' in package_sources:
+                        targets.append(child)
+    return targets
 
 
 def _package_name(path):
@@ -201,84 +444,93 @@ def refuse_legacy_consumer_imports(raw, *, name, package_sources):
         visited[module] = digest
         owned = module in CONSUMER_OWNED_MODULES
         try:
-            tree = ast.parse(source, filename=str(ROOT / relative))
+            facts = _cached_import_facts(source, str(ROOT / relative), owned)
         except (SyntaxError, ValueError) as exc:
             raise ValueError('consumer source has no inspectable import graph: ' + module) from exc
         package = module if relative.endswith('/__init__.py') else module.rpartition('.')[0]
-        targets = []
-        aliases = {'__builtins__': 'builtins'}
-        nodes = list(ast.walk(tree) if owned else _import_time_nodes(tree))
-        for node in nodes:
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    aliases[alias.asname or alias.name.split('.')[0]] = (
-                        alias.name if alias.asname else alias.name.split('.')[0])
-            elif isinstance(node, ast.ImportFrom) and node.level == 0:
-                for alias in node.names:
-                    aliases[alias.asname or alias.name] = (node.module or '') + '.' + alias.name
-
-        def qualified(node):
-            if isinstance(node, ast.Name):
-                return aliases.get(node.id, node.id)
-            if isinstance(node, ast.Attribute):
-                return qualified(node.value) + '.' + node.attr
-            return ''
-
-        def import_machinery(node):
-            return qualified(node).split('.')[0] in {'importlib', 'builtins', 'runpy',
-                'pkgutil', 'pydoc', 'zipimport'}
-
-        for node in nodes:
-            dynamic = (isinstance(node, ast.Name) and
-                       (node.id in dynamic_names or qualified(node).split('.')[-1] in dynamic_names)
-                       or isinstance(node, ast.Attribute) and
-                       (node.attr in dynamic_attributes or
-                        node.attr == '__dict__' and import_machinery(node.value)))
-            if isinstance(node, ast.Call):
-                operation = qualified(node.func).split('.')[-1]
-                if operation in {'getattr', 'hasattr'} and len(node.args) >= 2:
-                    attribute = node.args[1]
-                    dynamic |= (isinstance(attribute, ast.Constant) and
-                                attribute.value in dynamic_names | dynamic_attributes | introspection)
-                    dynamic |= import_machinery(node.args[0])
-                elif operation == 'vars' and node.args:
-                    dynamic |= import_machinery(node.args[0])
-            if owned and isinstance(node, ast.Attribute):
-                if (node.attr in introspection
-                        or node.attr == '__signature__' and isinstance(node.ctx, ast.Store)):
-                    raise ValueError('consumer lint forbids introspection or signature assignment: ' + module)
-                if any(qualified(node) == legacy or qualified(node).startswith(legacy + '.')
-                       for legacy in _LEGACY_CONSUMER_MODULES):
-                    raise ValueError('consumer imports forbidden v1 execution authority: ' + module)
-            if owned and isinstance(node, ast.Name) and qualified(node).split('.')[-1] in introspection:
-                raise ValueError('consumer lint forbids introspection or signature assignment: ' + module)
-            if owned and dynamic:
-                raise ValueError('consumer import graph contains dynamic loading or evaluation: ' + module)
-            if isinstance(node, ast.Import):
-                targets.extend(alias.name for alias in node.names)
-            elif isinstance(node, ast.ImportFrom):
-                if owned and any(alias.name == '*' for alias in node.names):
-                    raise ValueError('consumer import graph contains an ambiguous star import: ' + module)
-                if owned and any(alias.name in dynamic_names | dynamic_attributes for alias in node.names):
-                    raise ValueError('consumer import graph contains dynamic loading or evaluation: ' + module)
-                imported = node.module or ''
-                if node.level:
-                    try:
-                        imported = importlib.util.resolve_name('.' * node.level + imported, package)
-                    except (ImportError, ValueError) as exc:
-                        raise ValueError('consumer import graph has invalid relative import: ' + module) from exc
-                imported = _canonical_import(imported)
-                if imported == 'data_sheets_schema':
-                    targets.extend(imported + '.' + alias.name for alias in node.names)
-                else:
-                    targets.append(imported)
-                    # A package import may name a child module rather than a
-                    # symbol. Traverse declared children as well as its init.
+        if facts is not None:
+            targets = _fact_targets(facts, module=module, package=package, owned=owned,
+                package_sources=package_sources, dynamic_names=dynamic_names,
+                dynamic_attributes=dynamic_attributes, introspection=introspection)
+        else:
+            # Preserve the original AST path for unfamiliar effective producer
+            # state, including replacements installed before the first lookup.
+            try:
+                tree = ast.parse(source, filename=str(ROOT / relative))
+            except (SyntaxError, ValueError) as exc:
+                raise ValueError('consumer source has no inspectable import graph: ' + module) from exc
+            targets = []
+            aliases = {'__builtins__': 'builtins'}
+            nodes = list(ast.walk(tree) if owned else _import_time_nodes(tree))
+            for node in nodes:
+                if isinstance(node, ast.Import):
                     for alias in node.names:
-                        child = imported + '.' + alias.name
-                        stem = 'src/' + child.replace('.', '/')
-                        if stem + '.py' in package_sources or stem + '/__init__.py' in package_sources:
-                            targets.append(child)
+                        aliases[alias.asname or alias.name.split('.')[0]] = (
+                            alias.name if alias.asname else alias.name.split('.')[0])
+                elif isinstance(node, ast.ImportFrom) and node.level == 0:
+                    for alias in node.names:
+                        aliases[alias.asname or alias.name] = (node.module or '') + '.' + alias.name
+
+            def qualified(node):
+                if isinstance(node, ast.Name):
+                    return aliases.get(node.id, node.id)
+                if isinstance(node, ast.Attribute):
+                    return qualified(node.value) + '.' + node.attr
+                return ''
+
+            def import_machinery(node):
+                return qualified(node).split('.')[0] in {'importlib', 'builtins', 'runpy',
+                    'pkgutil', 'pydoc', 'zipimport'}
+
+            for node in nodes:
+                dynamic = (isinstance(node, ast.Name) and
+                           (node.id in dynamic_names or qualified(node).split('.')[-1] in dynamic_names)
+                           or isinstance(node, ast.Attribute) and
+                           (node.attr in dynamic_attributes or
+                            node.attr == '__dict__' and import_machinery(node.value)))
+                if isinstance(node, ast.Call):
+                    operation = qualified(node.func).split('.')[-1]
+                    if operation in {'getattr', 'hasattr'} and len(node.args) >= 2:
+                        attribute = node.args[1]
+                        dynamic |= (isinstance(attribute, ast.Constant) and
+                                    attribute.value in dynamic_names | dynamic_attributes | introspection)
+                        dynamic |= import_machinery(node.args[0])
+                    elif operation == 'vars' and node.args:
+                        dynamic |= import_machinery(node.args[0])
+                if owned and isinstance(node, ast.Attribute):
+                    if (node.attr in introspection
+                            or node.attr == '__signature__' and isinstance(node.ctx, ast.Store)):
+                        raise ValueError('consumer lint forbids introspection or signature assignment: ' + module)
+                    if any(qualified(node) == legacy or qualified(node).startswith(legacy + '.')
+                           for legacy in _LEGACY_CONSUMER_MODULES):
+                        raise ValueError('consumer imports forbidden v1 execution authority: ' + module)
+                if owned and isinstance(node, ast.Name) and qualified(node).split('.')[-1] in introspection:
+                    raise ValueError('consumer lint forbids introspection or signature assignment: ' + module)
+                if owned and dynamic:
+                    raise ValueError('consumer import graph contains dynamic loading or evaluation: ' + module)
+                if isinstance(node, ast.Import):
+                    targets.extend(alias.name for alias in node.names)
+                elif isinstance(node, ast.ImportFrom):
+                    if owned and any(alias.name == '*' for alias in node.names):
+                        raise ValueError('consumer import graph contains an ambiguous star import: ' + module)
+                    if owned and any(alias.name in dynamic_names | dynamic_attributes for alias in node.names):
+                        raise ValueError('consumer import graph contains dynamic loading or evaluation: ' + module)
+                    imported = node.module or ''
+                    if node.level:
+                        try:
+                            imported = importlib.util.resolve_name('.' * node.level + imported, package)
+                        except (ImportError, ValueError) as exc:
+                            raise ValueError('consumer import graph has invalid relative import: ' + module) from exc
+                    imported = _canonical_import(imported)
+                    if imported == 'data_sheets_schema':
+                        targets.extend(imported + '.' + alias.name for alias in node.names)
+                    else:
+                        targets.append(imported)
+                        for alias in node.names:
+                            child = imported + '.' + alias.name
+                            stem = 'src/' + child.replace('.', '/')
+                            if stem + '.py' in package_sources or stem + '/__init__.py' in package_sources:
+                                targets.append(child)
         for target in sorted(set(targets), reverse=True):
             target = _canonical_import(target)
             if target == 'data_sheets_schema':
