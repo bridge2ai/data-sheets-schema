@@ -188,7 +188,8 @@ def test_frontdoor_refuses_expired_or_spent_capture_before_engine_without_loadin
         renewed = newer(args)
         renewed_now = guard._timestamp(
             guard.strict_json(renewed['launch_word_raw'])['authorized_at'], 'authorized_at')
-        capture.activate_capture_word(**read_arguments(renewed), now=renewed_now)
+        capture.activate_capture_word(
+            **read_arguments(renewed), now=max(guard._now(), renewed_now))
     else:
         paths['guard'].write_bytes(raw + b' ')
     def forbidden(*args, **kwargs):
