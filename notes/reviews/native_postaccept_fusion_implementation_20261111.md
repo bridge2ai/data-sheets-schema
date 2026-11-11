@@ -123,7 +123,7 @@ reconstructions instead of weakening it.
    must precede lock/reservation when applicable; journal refusals stay under
    their genuine lock.
 3. Keep direct-guard reservation nodes at lines262/279/291 and
-   `test_native_subscription_capture.py::test_admission_lease_excludes_word_renewal_during_reservation`
+   `test_native_u4b_a3_captures.py::test_admission_lease_excludes_word_renewal_during_reservation`
    as unchanged public/direct witnesses. They isolate full registration and use
    an ordinary-Python capture peer; they do not prove genuine reconstruction or
    native execution. No such peer has been run here.
