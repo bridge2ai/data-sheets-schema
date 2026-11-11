@@ -29,7 +29,6 @@ from data_sheets_schema import native_subscription_capture as capture
 from data_sheets_schema import native_subscription_admission as subscription
 from data_sheets_schema import native_subscription_guard_v2 as guard
 from tests.test_native_subscription_capture import component, read_arguments
-from tests import test_native_subscription_capture as capture_component
 from tests.test_native_subscription_guard_v2 import timestamp
 
 
@@ -40,21 +39,14 @@ class FirstReservationObserved(RuntimeError):
 def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
                      source_check_seconds=0, deferred_selection=False,
                      mutate_values=None, tail_failure=None):
-    # Declare the real host before minting this synthetic fixture's runtime.
-    # The production shared _platform function remains unmodified on success.
-    actual_runtime_inputs = capture_component.runtime_inputs
-
-    def host_runtime_inputs(*args, **kwargs):
-        runtime, arguments = actual_runtime_inputs(*args, **kwargs)
-        if native._platform() != runtime['keep_awake']['host_platform']:
-            runtime['keep_awake'] = {'policy': 'not_applicable',
-                'host_platform': native._platform(),
-                'basis': 'Synthetic reservation component on this actual host'}
-        return runtime, arguments
-
-    monkeypatch.setattr(capture_component, 'runtime_inputs', host_runtime_inputs)
     arguments, value = component(tmp_path, monkeypatch,
         mode='second_mismatch' if change_at_admit == 'poison' else 'success')
+    # The observation and production policy already bind this Darwin fixture.
+    # Keep both intact. Non-Darwin components isolate only the host prerequisite;
+    # they do not establish native portability. Darwin keeps the actual function.
+    declared_platform = value['runtime']['keep_awake']['host_platform']
+    if native._platform() != declared_platform:
+        monkeypatch.setattr(native, '_platform', lambda: declared_platform)
     raw = arguments['registration_raw']
     ci_raw = b'{"scope":"isolated CI prerequisite, not launch acceptance"}'
     word = guard.strict_json(arguments['launch_word_raw'])

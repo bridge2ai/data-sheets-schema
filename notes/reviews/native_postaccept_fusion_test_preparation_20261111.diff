@@ -166,7 +166,7 @@ index 000000000..281c62995
 +if __name__ == '__main__':
 +    main()
 diff --git a/tests/test_native_u4b_a3_reservation.py b/tests/test_native_u4b_a3_reservation.py
-index 88d4d3b94..6c42e2e92 100644
+index 88d4d3b94..45aa1251c 100644
 --- a/tests/test_native_u4b_a3_reservation.py
 +++ b/tests/test_native_u4b_a3_reservation.py
 @@ -4,7 +4,10 @@ The public engine.launch and its first real mkdir/fsync execute. Unavailable
@@ -181,38 +181,25 @@ index 88d4d3b94..6c42e2e92 100644
  after the first generation-directory reservation. No native executable, network
  provider, keep-awake acquisition or runtime probe is reached.
  """
-@@ -26,6 +29,7 @@ from data_sheets_schema import native_subscription_capture as capture
- from data_sheets_schema import native_subscription_admission as subscription
- from data_sheets_schema import native_subscription_guard_v2 as guard
- from tests.test_native_subscription_capture import component, read_arguments
-+from tests import test_native_subscription_capture as capture_component
- from tests.test_native_subscription_guard_v2 import timestamp
- 
- 
-@@ -34,7 +38,21 @@ class FirstReservationObserved(RuntimeError):
+@@ -34,9 +37,16 @@ class FirstReservationObserved(RuntimeError):
  
  
  def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
 -                     source_check_seconds=0, deferred_selection=False):
 +                     source_check_seconds=0, deferred_selection=False,
 +                     mutate_values=None, tail_failure=None):
-+    # Declare the real host before minting this synthetic fixture's runtime.
-+    # The production shared _platform function remains unmodified on success.
-+    actual_runtime_inputs = capture_component.runtime_inputs
-+
-+    def host_runtime_inputs(*args, **kwargs):
-+        runtime, arguments = actual_runtime_inputs(*args, **kwargs)
-+        if native._platform() != runtime['keep_awake']['host_platform']:
-+            runtime['keep_awake'] = {'policy': 'not_applicable',
-+                'host_platform': native._platform(),
-+                'basis': 'Synthetic reservation component on this actual host'}
-+        return runtime, arguments
-+
-+    monkeypatch.setattr(capture_component, 'runtime_inputs', host_runtime_inputs)
      arguments, value = component(tmp_path, monkeypatch,
          mode='second_mismatch' if change_at_admit == 'poison' else 'success')
++    # The observation and production policy already bind this Darwin fixture.
++    # Keep both intact. Non-Darwin components isolate only the host prerequisite;
++    # they do not establish native portability. Darwin keeps the actual function.
++    declared_platform = value['runtime']['keep_awake']['host_platform']
++    if native._platform() != declared_platform:
++        monkeypatch.setattr(native, '_platform', lambda: declared_platform)
      raw = arguments['registration_raw']
-@@ -44,6 +62,8 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
+     ci_raw = b'{"scope":"isolated CI prerequisite, not launch acceptance"}'
+     word = guard.strict_json(arguments['launch_word_raw'])
+@@ -44,6 +54,8 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
      arguments['launch_word_raw'] = guard.canonical(word)
      manifest = capture.capture_subscription(**arguments)
      recorded = capture.read_capture(manifest, **read_arguments(arguments))
@@ -221,7 +208,7 @@ index 88d4d3b94..6c42e2e92 100644
      selected = recorded['selected_event']
      owner = review.validate_bundle(**read_arguments(arguments))
      clock = [guard._timestamp(selected['captured_at'], 'captured_at') + 300 - remaining]
-@@ -70,6 +90,8 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
+@@ -70,6 +82,8 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
      trace, classifier = [], object()
      active = [False]
      entering_lease = [False]
@@ -230,7 +217,7 @@ index 88d4d3b94..6c42e2e92 100644
      admitted_guard = [watched]
      if deferred_selection:
          guard_path = tmp_path / 'authority-guard.json'
-@@ -141,6 +163,28 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
+@@ -141,6 +155,28 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
          assert all(Path(path).read_bytes() == bodies[name] for name, path in inputs.items())
          trace.append('isolated-source-recapture')
  
@@ -259,7 +246,7 @@ index 88d4d3b94..6c42e2e92 100644
      def isolated_admit(submitted, *, review_path, ci_path, launch_word_path, classifier_projection):
          assert submitted == raw and classifier_projection is classifier and not active[0]
          assert (review_path, ci_path, launch_word_path) == tuple(inputs.values())
-@@ -164,7 +208,8 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
+@@ -164,7 +200,8 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
      actual_load_current = subscription.load_current
      actual_join = engine._join_subscription_authority
      actual_require = words.Journal.require
@@ -269,7 +256,7 @@ index 88d4d3b94..6c42e2e92 100644
  
      def traced_load_current(*args, **kwargs):
          assert deferred_selection and not active[0] and not entering_lease[0]
-@@ -188,11 +233,35 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
+@@ -188,11 +225,35 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
          result = actual_join(*args, **kwargs)
          if current:
              trace.append('current-join-passed')
@@ -306,7 +293,7 @@ index 88d4d3b94..6c42e2e92 100644
              trace.append('lease-current-enter')
          result = actual_require(self, *args, **kwargs)
          if entering_lease[0]:
-@@ -200,20 +269,26 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
+@@ -200,20 +261,26 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
          return result
  
      @contextmanager
@@ -336,7 +323,7 @@ index 88d4d3b94..6c42e2e92 100644
              trace.append('lease-exit')
  
      actual_margin = guard.SubscriptionGuard.before_reservation
-@@ -240,11 +315,15 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
+@@ -240,11 +307,15 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
      monkeypatch.setattr(subscription, 'load_current', traced_load_current)
      monkeypatch.setattr(engine, '_join_subscription_authority', traced_join)
      monkeypatch.setattr(words.Journal, 'require', traced_require)
@@ -353,7 +340,7 @@ index 88d4d3b94..6c42e2e92 100644
      monkeypatch.setattr(guard.SubscriptionGuard, 'before_reservation', traced_margin)
      monkeypatch.setattr(engine, '_execute_child', forbidden)
      effects = replace(effects, authorizations=isolated_authorizations, unchanged=isolated_unchanged,
-@@ -337,13 +416,15 @@ def test_deferred_capture_acceptance_exact_order_to_real_reservation(tmp_path, m
+@@ -337,13 +408,15 @@ def test_deferred_capture_acceptance_exact_order_to_real_reservation(tmp_path, m
          'controller-construct', 'controller-prewarm-closed',
          'load-current-enter', 'load-current-accepted',
          'current-join-enter', 'current-join-passed',
@@ -371,7 +358,7 @@ index 88d4d3b94..6c42e2e92 100644
      assert Path(value['attempt_directory']).is_dir()
      assert not Path(value['evidence_directory']).exists()
      assert not watched.dispatched and not active[0]
-@@ -365,3 +446,73 @@ def test_deferred_capture_late_load_refuses_admission_mutation(tmp_path, monkeyp
+@@ -365,3 +438,73 @@ def test_deferred_capture_late_load_refuses_admission_mutation(tmp_path, monkeyp
      assert not Path(value['attempt_directory']).exists()
      assert not Path(value['evidence_directory']).exists()
      assert not watched.dispatched and not active[0]

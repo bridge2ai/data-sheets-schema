@@ -9,10 +9,10 @@ review before any imports, compilation, pytest, capture peer or other runtime.
 
 | Artifact | SHA-256 |
 |---|---|
-| tests/test_native_u4b_a3_reservation.py | `8c3ea4ad660515de88f87f7c0be943b88138f3b889d6d79a0903903b3281f732` |
+| tests/test_native_u4b_a3_reservation.py | `eb0522c4da33b24040cb2e10657b7e97b09a43a51fbf86d19b4c8af043899f96` |
 | scripts/adhoc/run_postaccept_fusion_checks_20261111.py | `7975260d7299f2f3f6dee0dfeb98c3f055f7a756050ac63c0bbb2b252894132c` |
-| Exact tests/helper diff, notes/reviews/native_postaccept_fusion_test_preparation_20261111.diff | `3cc63daf282507d0a6981e538fe3883793c46e86322b8424b09c192b6cdc10c4` |
-| Corrected prior implementation report | `0e74274c3e12e90ba68e30dd56f43abe20ed7f87f9bb8101b6cfd43f17dbf6d7` |
+| Exact tests/helper diff, notes/reviews/native_postaccept_fusion_test_preparation_20261111.diff | `e3e3b9a5ed3fbbf5da0a5fdffc967e7a753e2492be8f722620e0d4a07fc58025` |
+| Corrected prior implementation report | `5f1b3ff0e20c3cbf41ed495973f5d255d98286948e14fa179b4c42b3a01f4ece` |
 | Unchanged tests/utils/subprocess_deadline.py | `876c91d211f4870c5622e7403310200b37028a3287c2b94e468a4c9d084b01b7` |
 
 Frozen production postimages remain:
@@ -37,10 +37,13 @@ The public lease is no longer replaced by a tracing wrapper.
 
 The actual shared `_unchanged_inputs` body executes on the fused route. Its
 `require_committed` prerequisite alone is isolated. `_file` observations delegate
-to the real reader, and the success path uses the actual `_platform`. The
-synthetic runtime declaration is prepared for the actual host before minting;
-on non-macOS it uses the supported not_applicable keep-awake declaration. This
-changes fixture data, not the production platform function or validator.
+to the real reader. Darwin success uses the actual `_platform` function.
+Following #5868, the original consistent Darwin runtime, minted observation and
+production policy remain untouched. Only on non-Darwin hosts, the component
+fixture explicitly isolates the platform prerequisite by returning its declared
+Darwin platform. This is not native portability evidence. No policy/validator
+is weakened, no observation is re-minted and no cases are skipped. The later
+platform-mismatch test still injects its deliberate mismatch on either host.
 The pre-admission/direct `effects.unchanged` component isolation remains explicit.
 
 The new focused cases cover:
@@ -135,7 +138,19 @@ separate affected-group release.
 
 ## Stop boundary
 
-`git diff --check` passes. No syntax check, import, collection, pytest or runtime
+The #5868 correction removes the runtime rewrite performed after
+`runtime_inputs` had already minted its observation. A re-mint would still
+conflict with the production Darwin policy, so no runtime or policy bytes are
+rewritten. The only new isolation is the non-Darwin host prerequisite described
+above; all19 proposed cases remain and no skip is added. The earlier invalid
+proposal and its exact diff remain recoverable at
+`1768e6a32ff1aad9f82cda71ce6430c523c3e919`; it was never executed. The separately
+reviewed helper remains byte-identical. The #5867 whitespace claim is now scoped
+explicitly, without stripping normal context whitespace from the patch archive.
+
+`git diff --check` scoped to source/test/helper/document files passes. The
+whole-commit check flags normal space-only context lines in the exact archived
+`.diff`; those patch bytes remain intact. No syntax check, import, collection, pytest or runtime
 has occurred; behavioral results remain unknown. Production stays frozen at6c1719;
 original native382f/tools7043/helper8bb and restored configuration/evidence are
 preserved. No push/merge or provider/native call. This is prepared work for

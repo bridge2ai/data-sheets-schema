@@ -136,8 +136,10 @@ reconstructions instead of weakening it.
 
 No test command is offered as already approved. No tests, Python imports,
 compilation, profiling, captures, native/provider calls, preparation or config
-rearm ran. The only mechanical check was `git diff --check`, which passed;
-it is a whitespace check, not syntax or behavioral validation.
+rearm ran. `git diff --check` scoped to the source/test/helper/document files
+passes; it is a whitespace check, not syntax or behavioral validation. A
+whole-commit check also flags space-only context lines inside the exact archived
+`.diff` files. Those are retained patch-format bytes, not source whitespace.
 
 ## Preserved state and handoff
 
