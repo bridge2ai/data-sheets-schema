@@ -474,10 +474,11 @@ def compare_cpu_diagnostic_arms(legacy_arm, monitoring_arm):
             'monitoring': monitoring_arm.get('host_contention'),
         },
         'cpu_policy': (
-            'Relative thread/process/self/child CPU is reported only when both arms complete '
-            'the same phases, call counts, ordered call rosters and diagnostic outcomes with '
-            'zero open call rows. Divergent work emits no total or phase ratio. Nested '
-            'inclusive function times overlap and are never summed across labels.'
+            'Relative thread/process/self/child CPU is reported per phase when both arms '
+            'share verified identity and closed terminal observations with matching phase '
+            'outcomes, call counts and ordered call rosters. Divergent aggregate or later-phase '
+            'work suppresses those ratios while identical completed prefixes remain comparable. '
+            'Nested inclusive function times overlap and are never summed.'
         ),
     }
 
