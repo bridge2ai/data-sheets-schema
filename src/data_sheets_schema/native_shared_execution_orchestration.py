@@ -37,6 +37,16 @@ def _file(path, name):
 def _unchanged(value, raw, authorization):
     if registration.verified(raw) != value:
         raise ValueError('native shared execution selection changed')
+    _unchanged_inputs(value, authorization)
+
+
+def _unchanged_inputs(value, authorization):
+    """Live refusal checks only; this does not verify or admit an execution.
+
+    Keep the shared route's actual source, file and platform dependencies here.
+    The launch-local reservation path separately reconstructs execution through
+    full current capture authority before it can acquire the reservation lease.
+    """
     authority.require_committed(value['dependencies'])
     for name, path in authorization['inputs'].items():
         if _file(path, name + ' evidence') != authorization['raw'][name]:

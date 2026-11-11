@@ -6,6 +6,7 @@ aggregation and publication; selected adapters supply semantic reconstruction.
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 import stat
@@ -326,6 +327,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     if contract.kind == 'd4d_native_shared_attempt' and launch_guard is None:
         raise ValueError('shared native launch requires a subscription guard')
     value = registration.verified(registration_raw)
+    original_execution = c.canonical(value)  # Invocation-local comparison bytes, never authority.
     _require_launch_profile(value['runtime'], expected_profile)
     authorization = authorizations(registration_raw, value, review_path=review_path,
                                   ci_path=ci_path, launch_word_path=launch_word_path)
@@ -362,23 +364,49 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     # never keep a consumer finder active across live bootstrap orchestration.
     adapter = contract.make_controller(value, registration_raw)
     contract.prewarm_controller(adapter)
+    accepted_current_selection = False
     if type(launch_guard) is CurrentSelection:
         launch_guard = accept_current_selection(launch_guard,
             registration_raw=registration_raw, runtime=value['runtime'],
             authorization=authorization)
+        accepted_current_selection = contract.kind == 'd4d_native_shared_attempt'
     _join_subscription_authority(
         launch_guard, registration_raw, value, authorization, current_launch=True)
-    _unchanged(value, registration_raw, authorization)
-    # These real verifications continue on freshly checked identical bytes.
-    # They must now reuse only exact-byte derivations, never a prior verdict.
-    # The original captured_at and all current-word/freshness checks survive.
-    # The actual dispatch still performs its one-use check.
+    if accepted_current_selection:
+        # Skip this effects.unchanged invocation only on the actual accepted
+        # shared selection route. Its complete reconstruction/equality check is
+        # joined to the fresh lease authority below; these input checks retain
+        # the shared route's actual _file, _platform and source dependencies.
+        from .native_shared_execution_orchestration import _unchanged_inputs
+        _unchanged_inputs(value, authorization)
+    else:
+        _unchanged(value, registration_raw, authorization)
     from .native_subscription_capture import capture_admission_lease
+
+    @contextmanager
+    def reservation_lease():
+        if not accepted_current_selection:
+            with capture_admission_lease(registration_raw=registration_raw,
+                    review_bundle_raw=authorization['raw']['review'],
+                    launch_word_raw=authorization['raw']['launch_word']) as current:
+                yield current
+            return
+        # This input-only entry performs the full fresh preparation/consumer
+        # reconstruction and current-protocol check. Neither saved bytes nor a
+        # previous value supplies admission, and no loader scope is revived.
+        from .native_subscription_capture import _current_authority
+        from . import native_capture_words as words
+        fresh_value, _, _, _ = _current_authority(registration_raw,
+            authorization['raw']['review'], authorization['raw']['launch_word'])
+        if (c.canonical(fresh_value) != original_execution
+                or c.canonical(value) != original_execution):
+            raise ValueError('native shared execution selection changed before reservation')
+        with words.locked(fresh_value, registration_raw, create=False) as journal:
+            yield journal.require(authorization['raw']['launch_word'])
+
     # Hold the registration-wide word/limits lock through the first reservation
     # effect. A renewal cannot supersede the word between checking and mkdir.
-    with capture_admission_lease(registration_raw=registration_raw,
-            review_bundle_raw=authorization['raw']['review'],
-            launch_word_raw=authorization['raw']['launch_word']):
+    with reservation_lease():
         controls.require_complete()
         # Source recapture can be slow: measure the preparation margin only
         # after it, immediately before the attempt identity is consumed.
