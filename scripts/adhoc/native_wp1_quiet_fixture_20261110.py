@@ -479,7 +479,7 @@ def cpu_diagnostic_cases(validator):
     assert validator.KINDS['cpu-monitoring'] == (validator.DIAGNOSTIC, 'monitoring', 900)
     assert validator.QUALIFIED_KINDS == frozenset({'legacy', 'monitoring'})
     assert validator.CPU_DIAGNOSTIC_KINDS == frozenset({'cpu-legacy', 'cpu-monitoring'})
-    assert validator.NO_LEASE_KINDS == frozenset({'canary', 'cpu-legacy', 'cpu-monitoring'})
+    assert validator.NO_LEASE_KINDS == frozenset({'canary', 'cpu-legacy', 'cpu-monitoring', 'capture-recheck'})
     passed_witness = {'qualification_passed': True, 'cleanup_verified': True}
     unverified_classes = {kind: validator.measurement_classification(kind) for kind in validator.KINDS}
     for kind, row in unverified_classes.items():
@@ -504,7 +504,7 @@ def cpu_diagnostic_cases(validator):
         )
         for kind in validator.KINDS
     }
-    for kind in ('canary', 'cpu-legacy', 'cpu-monitoring'):
+    for kind in ('canary', 'cpu-legacy', 'cpu-monitoring', 'capture-recheck'):
         assert final_classes[kind]['host_qualified'] is False
         assert final_classes[kind]['wall_time_freshness_qualified'] is False
         assert final_classes[kind]['accepted_quiet_host_timing'] is False
@@ -523,7 +523,7 @@ def cpu_diagnostic_cases(validator):
             'kind': kind, **final_classes[kind], 'cleanup_verified': True,
             'returncode': 0, 'qualification': dict(passed_witness),
         }))
-        for kind in ('canary', 'cpu-legacy', 'cpu-monitoring')
+        for kind in ('canary', 'cpu-legacy', 'cpu-monitoring', 'capture-recheck')
     }
     failed_default_refused = refused(
         ValueError,

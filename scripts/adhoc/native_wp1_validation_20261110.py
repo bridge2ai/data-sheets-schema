@@ -44,17 +44,21 @@ QUIET_LOCK = ROOT.parent / 'plans/native_quiet_window.lock'
 QUALIFICATION_LIMIT = 150
 CANARY = 'tests/test_native_u3k_profile.py::test_consumer_observer_equivalence_canary'
 DIAGNOSTIC = 'tests/test_native_u3k_profile.py::test_neutral_pre_reservation_diagnostic'
+CAPTURE_RECHECK = ('tests/test_native_subscription_capture.py::'
+    'test_genuine_registration_read_capture_for_event_rechecks_live_selection_and_stage_root')
 KINDS = {'canary': (CANARY, 'legacy', 60),
          'legacy': (DIAGNOSTIC, 'legacy', 900),
          'monitoring': (DIAGNOSTIC, 'monitoring', 900),
          'cpu-legacy': (DIAGNOSTIC, 'legacy', 900),
-         'cpu-monitoring': (DIAGNOSTIC, 'monitoring', 900)}
+         'cpu-monitoring': (DIAGNOSTIC, 'monitoring', 900),
+         'capture-recheck': (CAPTURE_RECHECK, 'monitoring', 900)}
 QUALIFIED_KINDS = frozenset({'legacy', 'monitoring'})
 CPU_DIAGNOSTIC_KINDS = frozenset({'cpu-legacy', 'cpu-monitoring'})
-NO_LEASE_KINDS = frozenset({'canary', 'cpu-legacy', 'cpu-monitoring'})
+NO_LEASE_KINDS = frozenset({'canary', 'cpu-legacy', 'cpu-monitoring', 'capture-recheck'})
 CPU_COMPARE_FIELDS = ('thread_cpu', 'process_cpu', 'self_user_cpu',
                       'self_system_cpu', 'reaped_child_user_cpu', 'reaped_child_system_cpu')
 REQUIRED_FILES = frozenset({
+    'tests/test_native_subscription_capture.py',
     'tests/utils/native_shared_consumer_scope.py', 'tests/test_native_u3k_profile.py',
     'tests/utils/native_consumer_observer_checks.py',
     'tests/utils/native_profile_stability.py',
@@ -236,6 +240,50 @@ def require_canary(path, manifest_sha):
         raise ValueError('WP1 canary is not a certified one-test pass on this identity')
 
 
+def require_prerequisite_canary(args, manifest_sha):
+    """Both entry layers require the same immutable completed canary."""
+    if args.kind == 'canary':
+        if args.canary_out is not None:
+            raise ValueError('canary cannot borrow prior canary evidence')
+    elif args.canary_out is None:
+        raise ValueError('WP1 non-canary kind requires its exact completed canary')
+    else:
+        require_canary(args.canary_out, manifest_sha)
+
+
+def capture_recheck_claim(out, manifest_sha, source_commit, *, create=False):
+    """One attempt per source/contract/node, even if its label changes."""
+    if (not re.fullmatch('[0-9a-f]{64}', manifest_sha)
+            or not re.fullmatch('[0-9a-f]{40}', source_commit)
+            or out.parent != SCRATCH or out.parent.resolve(strict=True) != SCRATCH):
+        raise ValueError('capture recheck claim identity differs')
+    path = SCRATCH / ('capture-recheck-' + source_commit + '-' + manifest_sha + '.once.json')
+    expected = dict(node=CAPTURE_RECHECK, source_commit=source_commit,
+                    manifest_sha256=manifest_sha, output=str(out))
+    if create:
+        write_new(path, expected)
+    if json.loads(physical(path).read_bytes()) != expected:
+        raise ValueError('capture recheck claim differs from this invocation')
+
+
+def require_capture_recheck_result(out, manifest_sha, source_commit):
+    """A skipped or substituted test cannot certify the fixed software witness."""
+    harness = json.loads(physical(out / 'wp1-harness.json').read_bytes())
+    expected = dict(kind='capture-recheck', node=CAPTURE_RECHECK,
+                    manifest_sha256=manifest_sha, source_commit=source_commit,
+                    invocation_limit_seconds=900, source_unchanged=True)
+    if type(harness) is not dict or any(
+            harness.get(key) != value or type(harness.get(key)) is not type(value)
+            for key, value in expected.items()):
+        raise ValueError('capture recheck result identity differs')
+    xml = ET.parse(physical(out / 'pytest.xml')).getroot()
+    cases = list(xml.iter('testcase'))
+    if (len(cases) != 1 or cases[0].get('name') != CAPTURE_RECHECK.split('::')[1]
+            or cases[0].get('classname') != 'tests.test_native_subscription_capture'
+            or any(list(xml.iter(tag)) for tag in ('failure', 'error', 'skipped'))):
+        raise ValueError('capture recheck requires its exact one-test pass')
+
+
 def read_qualification_witness(out):
     path = Path(out).with_suffix('.qualification') / 'qualification.json'
     if not path.is_file() or path.is_symlink():
@@ -252,6 +300,9 @@ def measurement_classification(kind, *, qualification=None, certified=False, fin
         raise ValueError('unrecognized WP1 kind: ' + repr(kind))
     if kind == 'canary':
         return {'measurement_class': 'equivalence_canary', 'host_qualified': False,
+                'wall_time_freshness_qualified': False, 'accepted_quiet_host_timing': False}
+    if kind == 'capture-recheck':
+        return {'measurement_class': 'capture_readback_integration_canary', 'host_qualified': False,
                 'wall_time_freshness_qualified': False, 'accepted_quiet_host_timing': False}
     if kind in CPU_DIAGNOSTIC_KINDS:
         return {'measurement_class': 'unqualified_contended_cpu_diagnostic', 'host_qualified': False,
@@ -631,13 +682,10 @@ def supervised_main(args):
     if not re.fullmatch('[a-zA-Z0-9_-]+', args.label):
         raise ValueError('literal WP1 label required')
     manifest, manifest_sha, value = contract()
-    if args.kind == 'canary' and args.canary_out is not None:
-        raise ValueError('canary cannot borrow prior canary evidence')
-    if args.kind != 'canary':
-        if args.canary_out is None:
-            raise ValueError('both arms require --canary-out')
-        require_canary(args.canary_out, manifest_sha)
+    require_prerequisite_canary(args, manifest_sha)
     out = SCRATCH / ('wp1-' + value['source_commit'][:12] + '-' + args.kind + '-' + args.label)
+    if args.kind == 'capture-recheck':
+        capture_recheck_claim(out, manifest_sha, value['source_commit'])
     if any(os.path.lexists(path) for path in (out, out.with_suffix('.outer.json'), out.with_suffix('.outer.log'))):
         raise ValueError('WP1 evidence label is already occupied')
     dependencies = dependency_site()
@@ -818,6 +866,11 @@ def supervised_main(args):
     outcome = json.loads(outcome_path.read_bytes()) if outcome_path.is_file() else None
     harness_path = out / 'wp1-harness.json'
     harness = json.loads(harness_path.read_bytes()) if harness_path.is_file() else None
+    if args.kind == 'capture-recheck':
+        try:
+            require_capture_recheck_result(out, manifest_sha, value['source_commit'])
+        except (OSError, ValueError, ET.ParseError) as exc:
+            errors_snapshot.append('capture_recheck_result:' + type(exc).__name__ + ':' + str(exc))
     qual_witness = read_qualification_witness(out) if args.kind in QUALIFIED_KINDS else None
     expected_harness_class = measurement_classification(
         args.kind, qualification=qual_witness, certified=True, final_owner=False
@@ -955,11 +1008,11 @@ def main():
             quiet.refuse_existing(QUIET_LOCK)
             if 'U3WP1_LEASE_FD' in os.environ:
                 raise ValueError(args.kind + ' cannot borrow a measured-arm lease')
-            if args.kind in CPU_DIAGNOSTIC_KINDS:
+            if args.kind in CPU_DIAGNOSTIC_KINDS or args.kind == 'capture-recheck':
                 manifest, manifest_sha, value = contract()
-                if args.canary_out is None:
-                    raise ValueError('CPU diagnostic arm requires its exact completed canary')
-                require_canary(args.canary_out, manifest_sha)
+                require_prerequisite_canary(args, manifest_sha)
+                if args.kind == 'capture-recheck':
+                    capture_recheck_claim(out, manifest_sha, value['source_commit'], create=True)
         else:
             manifest, manifest_sha, value = contract()
             if args.canary_out is None:
