@@ -204,3 +204,66 @@ Hashes generated when this section was written:
 - `claude-pr5808-combined-20261111/tmp/a21-builder-rehearsal-20261111/rehearsal.log` sha256 `335d8a04eea6528b8c8b693231ead6108409c0514f82a31e68fae4203367b3ed`
 
 Written 2026-11-11T08:44:04Z.
+
+## Fifth round: the owner's answers, the merge, the A21 rebuild and the one native diagnostic
+
+**The owner's words (2026-11-11).** At 16:11:12Z, to the line about AGY4's proposed diagnostic: "yes". At 16:12:28Z, to the three numbered questions (merge PR 5808 at the named head; release the "native first" hold; the budget as an either/or): "yes yes yes", then "give decisions and recommendations". Recorded as D130 to D132 in `data-sheets-schema/notes/coordination/STATUS.md`. The budget answer does not pick a figure; the lead recommends $60 with a $51 stop and leaves it to the launch word.
+
+**PR 5808.** Merged 16:14:19Z as `7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1` (merge commit, `--match-head-commit 6792947e…`). Its tree `3bb94f5c2abc5e7ac9f7f333949597f1a7e43c9d` equals the tested preview's. Main CI run 43056320723 on it is green on all 18 jobs (16:14Z to 16:57Z), including the push-only `schema-examples` at 3.2.1.
+
+**A21 rebuild** (`scripts/adhoc/a21_rebuild_on_merged_main_20261111.sh`; logs beside the packet in `d4d-executions/plans/`).
+- `launch-a21` moved from M4 to the merge commit; status `?? poetry.toml` only. `poetry install` was not run: the only lock change is the content hash, for a dependency restricted to Python below 3.11, and the launch base runs 3.13.
+- Label `2026-11-11a_claude-opus-5-api-bc1-a21_rep1`: roster `d49cc3529a11e60716cde4affc6f5deec521b861576fcae6b961e2f74060dd63`, registration `55691023e1d75c3bf5f9df09dcb524b4536870b93a4a3dde67306276f082aa1a`, sizing `0ae32356404e52d28acf0ff9ae8e39707947664df7506104a52fbab438465c87`.
+- Offline `--check` passed; the launcher dry-run of the exact batch command exited 0 and wrote nothing.
+- The lead's leaf comparison against M4 (`scripts/adhoc/a21_registration_leaf_diff_20261111.py`, output `tmp/a21-rebuild-review-20261111/leaf_diff_m4_vs_rebuild.json`): registration 367 to 351 leaves, 14 changed, 2 added, 18 removed; every one is a hash of one of six files, a schema byte count, the label, or the term-policy context moving from v1 to v2.
+- AGY2's independent identity review: 0 unexplained differences; its 173 leaf differences equal the lead's value for value; the lead checked the line numbers it cites.
+- The Codex helper's payload review (`plans/reviews/a21_registration_review_2026-11-11/codex_payload_review.md`): 0 unexplained payload bytes over 20 requests; re-priced expected $31.71, at caps $43.23 and $44.31, worst call $8.65.
+- Its tree-preservation gate failed on one ignored cache file born 16:45:05Z in the launch base. The lead had AGY3 running `--help` commands there at that time, and `python -m <package>` writes exactly such a file (checked on a scratch package). The lead's scheduling error.
+- Launch packet: `d4d-executions/plans/a21_launch_packet_2026-11-11.md`.
+
+**Three errors in AGY3's runbook, found by executing it.** The monitoring command exits 1 (issue 5873; the 2026-11-05 packet had the same line); the post-run list names files the code does not write; and the import proof expects a `__file__` that a namespace package does not have.
+
+**The one native diagnostic (D132).** Run by `scripts/adhoc/run_native_cpu_monitoring_once_20261111.sh` with `native_private_config_rearm_restore_20261111.py`.
+- The run needs `d4d.ciRepositoryUrl` in the private composition's Git config, which the composer's write-once cleanup had removed. The helper set it and restored it, as the previous lead's `native_wp1_private_config_20261111.py` did for 3cc113. Armed 16:38:01Z to 16:45:46Z; the config is back at `95a1f7d1…`.
+- A 12-second `canary` kind passed through the lead's shell first. The diagnostic started at 16:38:13Z at 1.44 load per CPU; the maximum during the run was 2.74.
+- It completed normally: 452.4 s, return code 0, cleanup verified, one test passed, both phase-metric files written.
+- Outcome `genuine_refusal` ("subscription observation is stale or future-dated"), no reservation boundary. Launch-phase process CPU 243.40 s (458887: 237.96 s; 3cc113: 275.66 s); fixture 110.88 s (119.92 s; 149.13 s).
+- Reading: the earlier 382f cutoff was contention, not a regression; and in this instrumented run the launch phase's CPU alone exceeds the 210-second target, so lower host load would not have produced a reservation here. The figure includes the observer's own overhead (13.3 million audit events), so it does not bound an uninstrumented launch. One contended sample; no quiet-host or speedup claim.
+- AGY4's packet agreed on the invocation but cited defaults and variable names that are not in the code; nothing was run from it.
+
+Written 2026-11-11T16:58:25Z.
+
+## Sixth round: the last two worker notes, and a correction to the lead's first reading
+
+- **Main CI on the merge commit is green** (run 43056320723, 18 jobs).
+- **AGY3's post-run checklist** (`handoffs/agy3-a21-post-run-checklist.md`): its tables of output directories and file names agree with the code, the archived 10-22a listing and the ledger-name formula (the formula reproduces `90e59e50c9d423fe` for 10-22a and gives `e4c1f42d7aa2a317` for the new label). Its after-run command lines do not all exist as written: `d4d api verdict` has no `--registration` or `--json` and requires `--canary-baseline`; `d4d runs check` has no `--require-complete`; `d4d provenance validate-records` takes only `--strict` and `--label`; and `check_final_generation_products_20261110.py` is a schema-product comparison with no record arguments. The launch packet carries only lines the lead checked against `--help`, which are those of `docs/final-generation-acceptance.md` sections 3 to 5.
+- **AGY4's analysis of the diagnostic** (`handoffs/agy4-diagnostic-result-analysis.md`) corrects the lead's first reading. Equal launch CPU on 382f and 458887 does not mean no change: 382f does more in that time. The lead re-derived the key rows with `scripts/adhoc/lead_check_freshness_rows_20261111.py`:
+
+  | Source | Refused at | Capture age at the refusal | Limit there |
+  |---|---|---:|---:|
+  | `3cc113e2606c` | dispatch check | 318.89 s | 300 s |
+  | `458887766eff` | second dispatch check | 334.86 s | 300 s |
+  | `382f0dfd1ce8` | pre-reservation check, after three passed dispatch checks (38.53 s, 259.40 s, 279.56 s) | 306.53 s | 210 s |
+
+  382f is the first source to reach the pre-reservation check; it arrives 96.5 s late. Its launch starts 10.8 s after capture, so with wall time equal to CPU time this instrumented launch would still need about 44 s less CPU.
+- AGY4 attributes the launch CPU mostly to repeated full registration and preparer verification (nine `shared_registration_verified` calls, 108 s inclusive) and one controller prewarm (64 s inclusive), and proposes a static audit of those call sites as a next step that needs no run. Those attributions are AGY4's, from its script's JSON; the lead has not re-derived them. Its text names PR 5835 as the source of 382f's change, which is wrong (5835 is the vocabulary-test fix); the change is the capture work in draft 5857.
+- AGY3 and AGY4 were both interrupted by a network error for about 2.5 hours and resumed on a relayed message.
+
+**Evidence kept outside git, hashed when this section was written:**
+
+- `plans/a21_launch_packet_2026-11-11.md` sha256 `5d63c4a4817bc29c9d55d888c97132f04141bc97a0f96f77eb20c39ef9e0a1f1`
+- `plans/a21_registration_2026-11-11a_claude-opus-5-api-bc1-a21_rep1.preflight.log` sha256 `1523bc1fd80155bdeb8fc1e5a2da7a7136c485fc9f02d7bfc60f177e6d85410e`
+- `…builder.log` sha256 `16aa43656587f3551d4b95740607576f058673d039dbd69d6202b4d10ee3d125`
+- `…check.log` sha256 `e1c7c0f8262f016743752c9ff7ddc85f0447450d334a3f7735181b1d9fe53994`
+- `…dryrun.log` sha256 `3b24c2a31f3b576212df3d99c4edb4af9daacfc6625ba5e7b5b682cbad8a237b`
+- `tmp/a21-rebuild-review-20261111/leaf_diff_m4_vs_rebuild.json` sha256 `c6f4ecee267cfc686acd0fce4825bd39876193cfd9fb07f7ab6b95ae6d7e7c7f`
+- `tmp/a21-rebuild-review-20261111/agy2/a21_rebuild_identity_review.json` sha256 `23f96bb28e2c4b186239180217f67349b50e11947f5e5c453d5b44ec94ba4119`
+- `plans/reviews/a21_registration_review_2026-11-11/codex_payload_review.md` sha256 `366b79edc1f3faaec3256dbffa4b659677007ff1974d275f5372fa31f72d9b8c`
+- `plans/reviews/a21_registration_review_2026-11-11/evidence-manifest.json` sha256 `d56c652c697e8e591e2d85ab2cc149b6b2c81f4713a962351d0479713fb9cc12`
+- `scratch-native-u1u3/u3m/wp1-382f0dfd1ce8-cpu-monitoring-lead-rerun-20261111.supervisor.json` sha256 `32404f066fcbc25341f3f25e5d7da0dc59ea2588c66afd93c47116114e1743ac`
+- `…/phase-metrics/67941-diagnostic.json` sha256 `33b032291d891f06249596da823d2a6f26d87d59317388f078b3a399ffc21cba`
+- `…/phase-metrics/67941-measurement.json` sha256 `12cba82d359f98d39220db521d8920130da94f863b554d265c0116736738a31d`
+- `scratch-native-u1u3/u3m/lead-cpu-monitoring-rerun-382f0dfd1ce8-20261111.log` sha256 `ca316e23d3b543a4f121af3a3f3892fe87c05a1aba33666beafb7eff2e45389a`
+- `tmp/diagnostic-result-20261111/result-analysis.json` sha256 `4b104257ec4a752c71adddc1ddf739893dafdd7a83e3f67fbb18de27e5875c6f`
+
+Written 2026-11-11T19:51:51Z.
