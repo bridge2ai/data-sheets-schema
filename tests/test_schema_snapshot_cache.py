@@ -50,6 +50,8 @@ def test_schema_replacement_after_hashing_cannot_poison_cache(tmp_path, monkeypa
 
 @pytest.mark.parametrize("consumer", ["vocabulary", "text"])
 def test_vocabulary_replacement_after_hashing_cannot_poison_cache(tmp_path, monkeypatch, consumer):
+    # Exercise the vocabulary race independently of a checkout's default manifest (#5833).
+    monkeypatch.setenv("D4D_PROFILE", "bridge2ai")
     path = tmp_path / "schema.yaml"
     path.write_bytes(schema("alpha").replace(b"alpha: {}", b"alpha:\n        values_from: [TEST]"))
     pin = tmp_path / "vocabularies.yaml"
