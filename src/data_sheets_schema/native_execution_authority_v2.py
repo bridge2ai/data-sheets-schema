@@ -43,6 +43,7 @@ _VERIFIED_PACKAGE_MODULES = {}
 _SCHEMA_BINDINGS = WeakKeyDictionary()
 _LAUNCH_DERIVATIONS = threading.local()
 _SELECTION_MODULE = 'data_sheets_schema.native_shared_selection'
+_SNAPSHOT_MODULE = 'data_sheets_schema.schema_snapshot'
 _LEGACY_CONSUMER_MODULES = frozenset('data_sheets_schema.' + name for name in (
     'native_execution', 'native_execution_registration', 'native_execution_authority',
     'native_supervisor', 'native_attempt_supervisor', 'native_supervisor_authority', 'native_attribution_registration',
@@ -357,19 +358,41 @@ def _schema_memo_state(module):
     if guard is None:
         return None
     module_source_identity(guard)
+    snapshots = getattr(guard, 'snapshots', None)
+    if snapshots is None:
+        return None
+    module_source_identity(snapshots)
+    if (vars(snapshots).get('_schema_dependencies') is not guard
+            or vars(module).get('_capture_native_schema') is not vars(snapshots).get('_capture_native_schema')):
+        return None
     return guard.schema_derivation_state(
         capture=module._capture_native_schema, view=module.captured_view,
         contract_alias=module.contract, path_alias=module.Path)
 
 
+def _snapshot_domain(package_sources, selection_identity, snapshot_identity):
+    return repr((
+        'native_launch_schema_import_metadata_v1', str(ROOT),
+        tuple(sorted(package_sources.items())),
+        tuple(sorted(selection_identity.items())),
+        tuple(sorted(snapshot_identity.items())),
+        'schema_snapshot._metadata_v1',
+        sys.implementation.name, sys.implementation.cache_tag, sys.version,
+    )).encode('utf-8')
+
+
 class _LaunchDerivations:
-    """One bounded immutable payload; the original donor guard is never rebound."""
+    """Bounded immutable payloads; the original donor guard is never rebound."""
     def __init__(self):
         self.donor = None
         self.phase = None
         self.payload = ()
+        self.metadata_payload = ()
         self.domain = None
+        self.metadata_domain = None
+        self.disabled = False
         self.modules = WeakKeyDictionary()
+        self.snapshots = WeakKeyDictionary()
 
     def current_donor(self):
         if self.donor is None:
@@ -377,9 +400,11 @@ class _LaunchDerivations:
         state = _schema_memo_state(self.donor)
         if state is None:
             self.payload = ()
+            self.metadata_payload = ()
             return None
         if state[0] != self.phase:
             self.payload = ()
+            self.metadata_payload = ()
             self.phase = state[0]
         return state
 
@@ -389,6 +414,7 @@ class _LaunchDerivations:
         self.current_donor()
 
     def bind(self, module, package_sources):
+        self.current_donor()
         identity = module_source_identity(module)
         # Includes ALL declared source pins, the executing source identity,
         # physical root and interpreter identity; schema raw bytes form the
@@ -400,50 +426,99 @@ class _LaunchDerivations:
         )).encode('utf-8')
         prior = self.modules.get(module)
         if prior is not None:
-            if prior[0] == domain:
-                return
+            guard = module._schema_dependencies
+            snapshots = getattr(guard, 'snapshots', None)
+            if (prior[0] == domain and prior[1] and not self.disabled
+                    and guard is not None and snapshots in self.snapshots
+                    and self.snapshots[snapshots][1]):
+                module_source_identity(guard)
+                snapshot_identity = module_source_identity(snapshots)
+                if self.snapshots[snapshots][0] == _snapshot_domain(
+                        package_sources, identity, snapshot_identity):
+                    return
             # Nested loaders can reuse the same attested selection object.
             # A changed full package domain must not inherit its earlier cache.
-            # Keep this object cold for the remainder of this launch, including
+            # Keep both caches cold for the remainder of this launch, including
             # when the outer scope resumes; no per-scope context restoration.
+            self.disabled = True
             context = (domain, False)
             module._SCHEMA_DERIVATIONS.clear()
             module._SCHEMA_LAUNCH_CONTEXT = context
-            _SCHEMA_BINDINGS[module] = (context, module._schema_dependencies)
+            _SCHEMA_BINDINGS[module] = (context, guard)
             self.modules[module] = context
+            if snapshots is not None:
+                snapshot_identity = module_source_identity(snapshots)
+                snapshot_domain = _snapshot_domain(package_sources, identity, snapshot_identity)
+                snapshot_context = (snapshot_domain, False)
+                snapshots._METADATA_DERIVATIONS.clear()
+                snapshots._metadata.cache_clear()
+                snapshots._SCHEMA_LAUNCH_CONTEXT = snapshot_context
+                _SCHEMA_BINDINGS[snapshots] = (snapshot_context, guard)
+                self.snapshots[snapshots] = snapshot_context
             self.payload = ()
+            self.metadata_payload = ()
             self.domain = None
+            self.metadata_domain = None
             return
         # Fixed neutral dependency, loaded through the already-installed A
         # source finder. This is not a verifier callback and consumers never
         # import authority. The guard has finished loading before association.
         guard = importlib.import_module('data_sheets_schema.native_catalog_reuse')
         module_source_identity(guard)
+        snapshots = getattr(guard, 'snapshots', None)
+        if (snapshots is None
+                or _VERIFIED_PACKAGE_MODULES.get(_SNAPSHOT_MODULE) is not snapshots):
+            raise ValueError('verified schema snapshot binding differs from catalog guard')
+        snapshot_identity = module_source_identity(snapshots)
+        snapshot_domain = _snapshot_domain(package_sources, identity, snapshot_identity)
+        prior_snapshot = self.snapshots.get(snapshots)
+        if prior_snapshot is not None:
+            self.disabled = True
+        _SCHEMA_BINDINGS.pop(snapshots, None)
         module._schema_dependencies = guard
+        snapshots._schema_dependencies = guard
         current = _schema_memo_state(module)
         if self.donor is None:
             self.donor = module
             self.phase = None if current is None else current[0]
         donor = self.current_donor()
-        enabled = current is not None and donor is not None and current[0] == donor[0]
+        enabled = (not self.disabled and current is not None and donor is not None
+                   and current[0] == donor[0])
         context = (domain, enabled)
+        snapshot_context = (snapshot_domain, enabled)
         module._SCHEMA_DERIVATIONS.clear()
         module._SCHEMA_LAUNCH_CONTEXT = context
         _SCHEMA_BINDINGS[module] = (context, guard)
         self.modules[module] = context
+        snapshots._METADATA_DERIVATIONS.clear()
+        snapshots._metadata.cache_clear()
+        snapshots._SCHEMA_LAUNCH_CONTEXT = snapshot_context
+        _SCHEMA_BINDINGS[snapshots] = (snapshot_context, guard)
+        self.snapshots[snapshots] = snapshot_context
         if enabled and self.domain == domain:
             for key, metadata in self.payload:
                 module._SCHEMA_DERIVATIONS.put(key, metadata)
+        if enabled and self.metadata_domain == snapshot_domain:
+            for key, metadata in self.metadata_payload:
+                snapshots._METADATA_DERIVATIONS.put(key, metadata)
 
     def publish(self, module):
         context = self.modules.get(module)
         if context is None:
             return
         module_source_identity(module)
+        guard = module._schema_dependencies
+        snapshots = getattr(guard, 'snapshots', None) if guard is not None else None
+        snapshot_context = self.snapshots.get(snapshots) if snapshots is not None else None
         current, donor = _schema_memo_state(module), self.current_donor()
-        if (not context[1] or current is None or donor is None
-                or current[0] != donor[0]):
+        if (self.disabled or not context[1] or snapshot_context is None or not snapshot_context[1]
+                or current is None or donor is None or current[0] != donor[0]):
+            if snapshots is not None:
+                snapshots._metadata.cache_clear()
             self.payload = ()
+            self.metadata_payload = ()
+            self.domain = None
+            self.metadata_domain = None
             return
         rows = module._SCHEMA_DERIVATIONS.snapshot()
         prefix = context[0] + b'\nphase:' + str(current[0]).encode('ascii') + b'\n'
@@ -451,18 +526,38 @@ class _LaunchDerivations:
         self.payload = tuple((key, metadata) for key, metadata in rows
                              if key[0].startswith(prefix))
         self.domain = context[0]
+        metadata_rows = snapshots._METADATA_DERIVATIONS.snapshot()
+        metadata_prefix = (
+            snapshot_context[0]
+            + b'\nproducer:schema_snapshot._metadata_v1\nphase:'
+            + str(current[0]).encode('ascii')
+            + b'\n'
+        )
+        self.metadata_payload = tuple((key, metadata) for key, metadata in metadata_rows
+                                      if key[0].startswith(metadata_prefix))
+        self.metadata_domain = snapshot_context[0]
 
     def close(self):
-        for module, context in list(self.modules.items()):
+        for module in list(self.modules):
             module._SCHEMA_DERIVATIONS.clear()
             module._SCHEMA_LAUNCH_CONTEXT = None
             module._schema_dependencies = None
             _SCHEMA_BINDINGS.pop(module, None)
+        for snapshots in list(self.snapshots):
+            snapshots._METADATA_DERIVATIONS.clear()
+            snapshots._metadata.cache_clear()
+            snapshots._SCHEMA_LAUNCH_CONTEXT = None
+            snapshots._schema_dependencies = None
+            _SCHEMA_BINDINGS.pop(snapshots, None)
         self.modules.clear()
+        self.snapshots.clear()
         self.payload = ()
+        self.metadata_payload = ()
         self.domain = None
+        self.metadata_domain = None
         self.donor = None
         self.phase = None
+        self.disabled = False
 
 
 @contextmanager
