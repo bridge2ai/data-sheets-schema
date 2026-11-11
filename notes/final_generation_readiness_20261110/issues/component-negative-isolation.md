@@ -1,0 +1,3 @@
+Independent review of `422f79605`, `tests/test_final_record_component_limits.py`, found that the unattested receipt case asserts its vacuity floor but does not explicitly require an otherwise clean checker result.
+
+Add an assertion that the checked receipt has no findings (for both tiny variants if appropriate). This makes the negative case diagnostic: it is refused specifically for attestation vacuity, not an unrelated receipt/manifest error. The original native canary observed no findings, so this is regression-strengthening rather than a newly observed production failure. Keep the fixture and component-only scope unchanged.

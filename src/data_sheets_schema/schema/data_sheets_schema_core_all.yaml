@@ -15,7 +15,7 @@ see_also:
 - https://bridge2ai.github.io/data-sheets-schema
 - src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl
 id: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
-version: 3.2.0
+version: 3.2.1
 license: MIT
 prefixes:
   AIO:

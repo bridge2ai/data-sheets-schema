@@ -1,0 +1,52 @@
+{
+  "artifacts": {
+    "core_yaml": {
+      "bytes": 2511,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-g1-final-generation-20261110/combined-canary-1/work/synthetic_acceptance_core.yaml",
+      "sha256": "c7ad763aa0ce4e619cf933b3c1e6d47d6a83bb484d329b913fb0186c5e718373"
+    },
+    "full_yaml": {
+      "bytes": 2831,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-g1-final-generation-20261110/combined-canary-1/work/synthetic_acceptance_full.yaml",
+      "sha256": "9d21d213722f7f8050f8718d64a7d68f24faaf685d16e8ccb2d802ef2fcfd6cb"
+    },
+    "rendered_css": {
+      "bytes": 9893,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-g1-final-generation-20261110/combined-canary-1/work/rendered/datasheet-common.css",
+      "sha256": "0e4525b56114355cf0cc51c24e98fd8a7b0bba3d6fe59de3031b8bd43f797cd0"
+    },
+    "rendered_html": {
+      "bytes": 12374,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-g1-final-generation-20261110/combined-canary-1/work/rendered/synthetic_acceptance_full.html",
+      "sha256": "2de9c3fff5f68a04148a9ed0a1f97b85421fa1d92c2d2b2b9c155c450dc817e1"
+    }
+  },
+  "checks_passed": [
+    "test_positive_full_to_core_pair_and_html_acceptance"
+  ],
+  "code": {
+    "modules": {
+      "data_sheets_schema.d4d_pair_consistency": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/final-generation-readiness-verification-20261110/src/data_sheets_schema/d4d_pair_consistency.py",
+      "data_sheets_schema.derive_core": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/final-generation-readiness-verification-20261110/src/data_sheets_schema/derive_core.py",
+      "data_sheets_schema.instance_lint": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/final-generation-readiness-verification-20261110/src/data_sheets_schema/instance_lint.py",
+      "data_sheets_schema.rendering.human_readable_renderer": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/final-generation-readiness-verification-20261110/src/data_sheets_schema/rendering/human_readable_renderer.py",
+      "data_sheets_schema.resources": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/final-generation-readiness-verification-20261110/src/data_sheets_schema/resources.py"
+    },
+    "repo_root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/final-generation-readiness-verification-20261110",
+    "test_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/final-generation-readiness-verification-20261110/tests/test_final_generation_acceptance.py"
+  },
+  "interpreter": {
+    "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "version": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]"
+  },
+  "mode": "positive-canary",
+  "schema": {
+    "core_schema_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/final-generation-readiness-verification-20261110/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+    "core_schema_sha256": "e174a7a6ec1b5eccef5ee4a8b9f8f773f48243c2d6012ff8a1b846b45a40d088",
+    "core_schema_version": "3.2.1",
+    "full_schema_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/final-generation-readiness-verification-20261110/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+    "full_schema_sha256": "bc560a3cd5d04c49e95fcbf33fa8ac349171df1a877e7e0882827bd526a95214",
+    "full_schema_version": "3.2.1"
+  },
+  "work_unit": "G1"
+}

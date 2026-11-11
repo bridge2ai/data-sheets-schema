@@ -1,0 +1,26 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.12, pytest-7.4.4, pluggy-1.3.0 -- /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+rootdir: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/final-generation-readiness-verification-20261110
+configfile: pyproject.toml
+plugins: typeguard-4.2.0, xdist-3.8.0, anyio-4.10.0
+collecting ... collected 6 items
+
+tests/test_final_generation_acceptance.py::test_positive_full_to_core_pair_and_html_acceptance PASSED [ 16%]
+tests/test_final_generation_acceptance.py::test_negative_shape_mutations_fail_for_exact_field PASSED [ 33%]
+tests/test_final_record_component_limits.py::test_receipt_v4_distinguishes_unattested_stub_from_identifier_attestation PASSED [ 50%]
+tests/test_final_record_component_limits.py::test_source_review_covers_id_claim_without_proving_omission_recall PASSED [ 66%]
+tests/test_pr5531_regressions.py::test_scalar_permission_normalises_and_linkml_validates PASSED [ 83%]
+tests/test_cli/test_render.py::TestRenderCLI::test_render_html_honors_output_path_and_copies_css PASSED [100%]
+
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_final_generation_acceptance.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-g1-final-generation-20261110/combined-canary-1/focused-cohort.junit.xml -
+======================= 6 passed, 13 warnings in 12.89s ========================

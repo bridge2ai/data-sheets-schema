@@ -1,0 +1,3 @@
+Read-only review of commit `41e0d1c1330d52f4bee34d018a8a958fffb99315`, `scripts/adhoc/native_final_record_acceptance_20261110.py:117–135`, found that interpreter identity is captured only before execution. The after-run comparison checks source files and Git state, despite the handoff requiring stable interpreter identity.
+
+Record and compare the resolved interpreter path and digest after execution, save the result, and refuse a stability claim if they differ. This is a diagnostic-evidence defect; no interpreter change was observed in the passing receipt canary. Scope is the new component-check wrapper, not runtime redesign.

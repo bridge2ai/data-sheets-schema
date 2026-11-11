@@ -6,7 +6,7 @@
     "https://bridge2ai.github.io/data-sheets-schema"
   ],
   "id": "https://w3id.org/bridge2ai/data-sheets-schema",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "imports": [
     "linkml:types",
     "D4D_Base_import",
@@ -8694,7 +8694,7 @@
     },
     {
       "name": "fileCollection__collection_type",
-      "description": "Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed.",
+      "description": "Primary content classification for this file collection from FileCollectionTypeEnum. Each FileCollection has one collection_type value; represent differently classified file groups as separate FileCollection entries in the dataset's file_collections.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/collectionType"
@@ -14343,7 +14343,7 @@
       "attributes": [
         {
           "name": "collection_type",
-          "description": "Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed.",
+          "description": "Primary content classification for this file collection from FileCollectionTypeEnum. Each FileCollection has one collection_type value; represent differently classified file groups as separate FileCollection entries in the dataset's file_collections.",
           "slot_uri": "d4d:collectionType",
           "range": "FileCollectionTypeEnum",
           "@type": "SlotDefinition"
@@ -14386,9 +14386,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-11-08T01:52:36",
-  "source_file_size": 35912,
-  "generation_date": "2026-11-08T01:53:36",
+  "source_file_date": "2026-11-10T14:01:59",
+  "source_file_size": 36135,
+  "generation_date": "2026-11-10T14:13:51",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
