@@ -44,6 +44,7 @@ _SCHEMA_BINDINGS = WeakKeyDictionary()
 _LAUNCH_DERIVATIONS = threading.local()
 _SELECTION_MODULE = 'data_sheets_schema.native_shared_selection'
 _SNAPSHOT_MODULE = 'data_sheets_schema.schema_snapshot'
+_SNAPSHOT_RELATIVE = 'src/data_sheets_schema/schema_snapshot.py'
 _LEGACY_CONSUMER_MODULES = frozenset('data_sheets_schema.' + name for name in (
     'native_execution', 'native_execution_registration', 'native_execution_authority',
     'native_supervisor', 'native_attempt_supervisor', 'native_supervisor_authority', 'native_attribution_registration',
@@ -381,6 +382,19 @@ def _snapshot_domain(package_sources, selection_identity, snapshot_identity):
     )).encode('utf-8')
 
 
+def _verified_snapshot_identity(snapshots, package_sources):
+    if snapshots is None or type(package_sources) is not dict:
+        raise ValueError('verified schema snapshot binding differs from catalog guard')
+    identity = module_source_identity(snapshots)
+    digest = package_sources.get(_SNAPSHOT_RELATIVE)
+    path = ROOT / _SNAPSHOT_RELATIVE
+    if (digest is None
+            or identity != {'name': _SNAPSHOT_MODULE, 'path': str(path), 'sha256': digest}):
+        raise ValueError('verified schema snapshot binding differs from catalog guard')
+    _verified_source_bytes(path, digest)
+    return identity
+
+
 class _LaunchDerivations:
     """Bounded immutable payloads; the original donor guard is never rebound."""
     def __init__(self):
@@ -439,7 +453,7 @@ class _LaunchDerivations:
                     and guard is not None and snapshots in self.snapshots
                     and self.snapshots[snapshots][1]):
                 module_source_identity(guard)
-                snapshot_identity = module_source_identity(snapshots)
+                snapshot_identity = _verified_snapshot_identity(snapshots, package_sources)
                 if self.snapshots[snapshots][0] == _snapshot_domain(
                         package_sources, identity, snapshot_identity):
                     return
@@ -473,13 +487,10 @@ class _LaunchDerivations:
         guard = importlib.import_module('data_sheets_schema.native_catalog_reuse')
         module_source_identity(guard)
         snapshots = getattr(guard, 'snapshots', None)
-        if (snapshots is None
-                or _VERIFIED_PACKAGE_MODULES.get(_SNAPSHOT_MODULE) is not snapshots):
-            raise ValueError('verified schema snapshot binding differs from catalog guard')
-        snapshot_identity = module_source_identity(snapshots)
+        snapshot_identity = _verified_snapshot_identity(snapshots, package_sources)
         snapshot_domain = _snapshot_domain(package_sources, identity, snapshot_identity)
         prior_snapshot = self.snapshots.get(snapshots)
-        if prior_snapshot is not None:
+        if prior_snapshot is not None and (prior_snapshot[0] != snapshot_domain or not prior_snapshot[1]):
             self.disabled = True
         _SCHEMA_BINDINGS.pop(snapshots, None)
         module._schema_dependencies = guard
