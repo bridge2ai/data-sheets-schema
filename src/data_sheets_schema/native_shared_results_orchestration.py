@@ -18,7 +18,7 @@ from . import native_attribution_results as inherited
 from . import native_supervisor_gates as shared
 
 from .native_shared_results import (Snapshot, _member, _captured_selection, rebuild,
-    validate_file_basis, _read_pool, POOL_NAME, REPORT_KIND)
+    validate_file_basis, validate_retained_artifacts, _read_pool, POOL_NAME, REPORT_KIND)
 
 
 def _require_reported_receipts(old, recomputed, runtime):
@@ -271,7 +271,7 @@ def check_capture(prepared, *, controls):
         'scope': 'Captured native stage/control completion, not scientific support or authenticated provider evidence.'}
 
 
-def incomplete_capture(composition_path, attempt, adapter, reason):
+def incomplete_capture(composition_path, attempt, adapter, reason, *, live_phase_report=None):
     """Retain bounded partial evidence; never promote a stopped capture."""
     snapshot = Snapshot(adapter.value['working_directory'])
     problems = [reason]
@@ -283,6 +283,42 @@ def incomplete_capture(composition_path, attempt, adapter, reason):
             _capture_member(snapshot, path, role, c.HARD_LIMITS['stream_bytes'])
         except (OSError, ValueError) as exc:
             problems.append(role + ': ' + str(exc))
+    retained = {}
+    phase_path = Path(attempt) / 'live-phase-report.json'
+    phase_problem = None
+    if live_phase_report is not None:
+        try:
+            from .native_attempt_supervisor import durable_new
+            if type(live_phase_report) is not dict:
+                raise ValueError('live phase report is not an object')
+            raw = c.canonical(live_phase_report)
+            if len(raw) > c.HARD_LIMITS['request_bytes']:
+                raise ValueError('live phase report exceeds its byte bound')
+            durable_new(phase_path, raw)
+        except (OSError, ValueError) as exc:
+            phase_problem = type(exc).__name__ + ': ' + str(exc)
+    artifact_paths = adapter.spec._agentic_artifact_paths
+    candidates = {name: str(artifact_paths[name]) for name in ('full', 'core', 'report')}
+    candidates['phase_report'] = str(phase_path)
+    for name, path in candidates.items():
+        try:
+            if name == 'phase_report' and phase_problem is not None:
+                raise ValueError(phase_problem)
+            member = evidence.read_regular(path, 'retained_' + name,
+                max_bytes=c.HARD_LIMITS['request_bytes'] if name == 'phase_report' else c.HARD_LIMITS['input_bytes'])
+            # Snapshot.add mutates before reporting aggregate overflow. Refuse
+            # optional evidence before adding it, so omission stays truthful.
+            if (len(snapshot.members) >= c.HARD_LIMITS['captured_members']
+                    or sum(map(len, snapshot.raw.values())) + member.captured.pin.bytes
+                    > c.HARD_LIMITS['evidence_raw_total_bytes']):
+                raise ValueError('retained artifact exceeds aggregate capture bounds')
+            snapshot.add(member)
+            retained[name] = {'path': path, 'kept': True, 'bytes': member.captured.pin.bytes,
+                              'sha256': member.captured.pin.sha256}
+        except (OSError, ValueError) as exc:
+            problem = type(exc).__name__ + ': ' + str(exc)
+            retained[name] = {'path': path, 'kept': False, 'reason': problem}
+            problems.append('retained_' + name + ': ' + problem)
     def rows(name):
         try:
             return inherited._rows(snapshot.read(Path(attempt) / name, name), name)
@@ -291,7 +327,28 @@ def incomplete_capture(composition_path, attempt, adapter, reason):
     snapshot.verify_unchanged(); snapshot.sealed = True
     return {'snapshot': snapshot, 'state': SimpleNamespace(spec=adapter.spec, reg=adapter.state.reg),
         'events': rows('transcript.jsonl'), 'records': rows('control.jsonl'), 'policy': adapter.policy,
-        'replay_complete': False, 'capture_problems': problems, 'record': None, 'final_result': None}
+        'replay_complete': False, 'capture_problems': problems, 'record': None, 'final_result': None,
+        'retained_artifacts': retained}
+
+
+def retention_manifest(prepared, projections):
+    """Bind optional failed-attempt copies to their existing flat catalog."""
+    out = deepcopy(prepared['retained_artifacts'])
+    for name, row in out.items():
+        if not row['kept']:
+            continue
+        target = projections.get(row['path'])
+        try:
+            if target is None:
+                raise ValueError('captured projection was not completed')
+            item = evidence.read_regular(str(target), 'retained_' + name,
+                max_bytes=max(1, row['bytes'])).captured
+            if item.pin.bytes != row['bytes'] or item.pin.sha256 != row['sha256']:
+                raise ValueError('captured projection differs from retained bytes')
+            row['retained_path'] = str(target)
+        except (OSError, ValueError) as exc:
+            out[name] = {'path': row['path'], 'kept': False, 'reason': type(exc).__name__ + ': ' + str(exc)}
+    return out
 
 
 project = shared.project
@@ -322,6 +379,8 @@ def require_saved_basis(value, result):
     """
     # The common reader has already checked a declared report from the bytes
     # retained by its file validation loop, including an unavailable capture.
+    if 'retained_artifacts' in result:
+        validate_retained_artifacts(value, result)
     if 'receipt_origin_reporting' not in value and 'receipt_origin' in result['gates']['receipts']:
         raise ValueError('undeclared receipt-origin gate extension')
     additional = result.get('additional_report')

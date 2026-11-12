@@ -169,6 +169,123 @@ def validate_file_basis(value, result, *, retain_paths=()):
         return retained
 
 
+def validate_retained_artifacts(value, result):
+    """Verify failed-attempt projections without needing mutable working files.
+
+    This checks byte identity only. It never establishes scientific eligibility,
+    schema validity, derivation, a passed coverage floor or runtime acceptance.
+    """
+    if result.get('state') != 'failed' or result.get('runtime_gates_passed') is not False:
+        raise ValueError('retained incomplete artifacts require a failed attempt')
+    rows = c.exact(result['retained_artifacts'], {'full', 'core', 'report', 'phase_report'}, 'retained artifacts')
+    composition = c.strict_json(value['composition_raw_json'].encode(), 'retained composition')
+    paths = {name: str(composition['render_spec']['agentic_artifact_paths'][name])
+             for name in ('full', 'core', 'report')}
+    paths['phase_report'] = str(Path(value['attempt_directory']) / 'live-phase-report.json')
+    files = result.get('captured_files')
+    if type(files) is not dict or len(files) > c.HARD_LIMITS['captured_members']:
+        raise ValueError('retained artifacts lack a bounded captured catalog')
+    ordered = sorted(files)
+    for name, row in rows.items():
+        if type(row) is not dict or row.get('path') != paths[name] or type(row.get('kept')) is not bool:
+            raise ValueError('retained artifact differs from its registered path')
+        c.canonical_path(row['path'], 'retained source')
+        if not row['kept']:
+            c.exact(row, {'path', 'kept', 'reason'}, 'unretained artifact')
+            if type(row['reason']) is not str or not row['reason']:
+                raise ValueError('unretained artifact requires a reason')
+            continue
+        c.exact(row, {'path', 'kept', 'bytes', 'sha256', 'retained_path'}, 'retained artifact')
+        pin = files.get(row['path'])
+        if (type(row['bytes']) is not int or not 0 <= row['bytes'] <= c.HARD_LIMITS['stream_bytes']
+                or type(pin) is not dict or type(pin.get('bytes')) is not int or pin.get('bytes') != row['bytes']
+                or pin.get('sha256') != row['sha256']
+                or type(pin.get('roles')) is not list or 'retained_' + name not in pin['roles']):
+            raise ValueError('retained artifact differs from the captured identity')
+        c.exact(pin, {'bytes', 'sha256', 'roles'}, 'retained catalog pin')
+        expected = Path(value['evidence_directory']) / 'captured' / str(ordered.index(row['path'])) / Path(row['path']).name
+        if row['retained_path'] != str(expected):
+            raise ValueError('retained artifact projection path differs')
+        actual = evidence.read_regular(str(expected), 'retained_' + name,
+            max_bytes=max(1, row['bytes'])).captured
+        if actual.pin.bytes != row['bytes'] or actual.pin.sha256 != row['sha256']:
+            raise ValueError('retained artifact bytes changed')
+    return rows
+
+
+def list_retained_records(registration_raw):
+    """List full/core evidence of a published failed or stopped attempt, read-only.
+
+    Call with the exact consumed execution-registration bytes. The final marker,
+    consumed registration/start identities and immutable projection hashes are
+    checked; current working records and live runtime validation are unnecessary.
+    Returns missing/unreadable reasons too. This is historical evidence inventory,
+    not a replacement for successful read_final or an eligibility decision.
+    """
+    envelope = c.strict_json(registration_raw, 'retained execution')
+    c.exact(envelope, {'authority_version', 'controller_sources_sha256', 'registration'}, 'retained envelope')
+    value = envelope['registration']
+    if (type(envelope['authority_version']) is not int or envelope['authority_version'] != 2
+            or type(value) is not dict or value.get('kind') != 'd4d_native_shared_execution_registration_v2'
+            or type(value.get('schema_version')) is not int or value['schema_version'] != 2):
+        raise ValueError('retained inventory requires shared execution v2')
+    for name in ('attempt_directory', 'evidence_directory'):
+        c.canonical_path(value[name], name)
+    attempt, directory = Path(value['attempt_directory']), Path(value['evidence_directory'])
+    def read(path):
+        return evidence.read_regular(str(path), 'retained_inventory', max_bytes=c.HARD_LIMITS['request_bytes']).captured.raw
+    final_raw, started = read(directory / 'final.json'), read(attempt / 'started.json')
+    final = c.strict_json(final_raw, 'retained final')
+    started_value = c.strict_json(started, 'retained start')
+    marker = c.strict_json(read(directory / 'published.json'), 'retained marker')
+    if (read(attempt / 'registration.json') != registration_raw
+            or marker != {'final_sha256': c.sha(final_raw), 'started_sha256': c.sha(started),
+                          'registration_sha256': c.sha(registration_raw)}
+            or final.get('kind') != 'd4d_native_shared_attempt'
+            or type(final.get('version')) is not int or final['version'] != 1
+            or final.get('attempt_id') != value['attempt_id']
+            or final.get('registration_sha256') != c.sha(registration_raw)
+            or final.get('started_sha256') != c.sha(started)
+            or final.get('composition_sha256') != value['composition_sha256']
+            or started_value.get('attempt_id') != value['attempt_id']
+            or started_value.get('registration_sha256') != c.sha(registration_raw)
+            or c.sha(value['composition_raw_json'].encode()) != value['composition_sha256']):
+        raise ValueError('retained inventory publication identity differs')
+    if (final.get('state') != 'failed' or final.get('runtime_gates_passed') is not False
+            or final.get('scientific_acceptance') != 'not_assessed'):
+        raise ValueError('retained inventory requires a failed, unaccepted attempt')
+    if 'retained_artifacts' not in final:
+        # A late failure can follow a complete capture. Those pre-existing
+        # projections use final_full/final_core roles, not the new manifest.
+        composition = c.strict_json(value['composition_raw_json'].encode(), 'retained composition')
+        files = final.get('captured_files')
+        if type(files) is not dict or len(files) > c.HARD_LIMITS['captured_members']:
+            raise ValueError('retained inventory lacks a bounded captured catalog')
+        ordered, rows = sorted(files), []
+        for name in ('full', 'core'):
+            path = composition['render_spec']['agentic_artifact_paths'][name]
+            c.canonical_path(path, 'retained source')
+            pin = files.get(path)
+            if pin is None:
+                rows.append({'role': name, 'path': path, 'kept': False,
+                             'reason': 'No captured record at the registered path.'})
+                continue
+            c.exact(pin, {'bytes', 'sha256', 'roles'}, 'retained complete catalog pin')
+            if (type(pin['bytes']) is not int or not 0 <= pin['bytes'] <= c.HARD_LIMITS['stream_bytes']
+                    or type(pin['roles']) is not list or 'final_' + name not in pin['roles']):
+                raise ValueError('retained complete record lacks its bounded final role')
+            target = directory / 'captured' / str(ordered.index(path)) / Path(path).name
+            actual = evidence.read_regular(str(target), 'final_' + name,
+                max_bytes=max(1, pin['bytes'])).captured
+            if actual.pin.bytes != pin['bytes'] or actual.pin.sha256 != pin['sha256']:
+                raise ValueError('retained complete record bytes changed')
+            rows.append({'role': name, 'path': path, 'kept': True, 'retained_path': str(target),
+                         'bytes': pin['bytes'], 'sha256': pin['sha256']})
+        return rows
+    rows = validate_retained_artifacts(value, final)
+    return [{'role': name, **rows[name]} for name in ('full', 'core')]
+
+
 def _read_pool(path, limit):
     # This role's wire ceiling exceeds an individual native stream ceiling.
     # The opened read remains bounded and metadata-stable before JSON decoding.

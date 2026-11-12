@@ -437,6 +437,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     for name, body in authorization['raw'].items():
         durable_new(attempt/(name + '.json'), body)
     status = first_stop = prepared = first_error = None
+    projections = {}
     signals = []
     observation = {'checked': False, 'passed': False, 'reason': 'native runtime not observed'}
     awake = {'passed': False, 'policy': value['runtime']['keep_awake'], 'state': 'not_acquired'}
@@ -508,7 +509,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                         first_error = exc
                     problem = f'capture: {type(exc).__name__}: {exc}'
                     stopped(problem)
-                    prepared = shared.incomplete_capture(value['composition'], attempt, adapter, problem)
+                    prepared = shared.incomplete_capture(value['composition'], attempt, adapter, problem,
+                        live_phase_report=live.get('phase_history'))
                 projections = shared.project(prepared, evidence/'captured')
                 if prepared.get('replay_complete'):
                     replay.write_report(prepared, additional_path)
@@ -624,6 +626,9 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
             if validation_failure is not None:
                 final['publication_validation_failure'] = validation_failure
                 final['failure_evidence'] = _failure_evidence(attempt)
+            if prepared is not None and 'retained_artifacts' in prepared:
+                final['retained_artifacts'] = shared.retention_manifest(prepared, projections)
+                final['capture_problems'] = list(prepared['capture_problems'])
             final_raw = draft._encoded(final)
             from .native_receipt_origin import check_final_bytes
             if KIND == 'd4d_native_shared_attempt':
@@ -773,6 +778,8 @@ def _read_failure_diagnostic(registration_raw, *, contract, file):
             or guard.get('registration_sha256') != c.sha(registration_raw)):
         raise ValueError('failure evidence differs from guard snapshot identity')
     contract.replay.validate_file_basis(value, result)
+    if 'retained_artifacts' in result:
+        contract.replay.validate_retained_artifacts(value, result)
     additional = result.get('additional_report')
     if additional is not None:
         if (type(additional) is not dict or additional.get('path') != str(evidence / 'attribution-replay.json')
