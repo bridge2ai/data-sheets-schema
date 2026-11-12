@@ -181,6 +181,11 @@ def _run_verified(argv, *, verified_script, entry_inputs):
         existed = {path for path in slots if os.path.lexists(path)}
         common = ['--registration', args.registration, '--review', args.review,
                   '--launch-word', args.launch_word, '--account-choice', args.account_choice]
+        pins = {name: {'path': str(_path(getattr(args, name))),
+                      'sha256': guard.sha(inputs[_path(getattr(args, name))])}
+                for name in ('registration', 'review', 'launch_word', 'account_choice', 'ci')}
+        def bound(extra=None):
+            return [*common, '--sequence-inputs', guard.canonical({**pins, **(extra or {})}).decode()]
         _unchanged(inputs)
         record['delegation_checked_at'] = _utc_now()
         _delegation(args.direction_recorded_at, args.host_confirmed_at, record['delegation_checked_at'])
@@ -188,7 +193,11 @@ def _run_verified(argv, *, verified_script, entry_inputs):
         record['start_claim'] = claim(inputs[Path(args.registration)],
             direction=args.direction_recorded_at, confirmation=args.host_confirmed_at,
             packet=packet, started_at=record['delegation_checked_at'])
-        captured = _run_step(COMMANDS[0], [*common, '--output-directory', str(capture_root)],
+        # Durable claiming is preflight too; it must not carry a start across
+        # either delegated deadline before the first child dispatch.
+        record['delegation_checked_at'] = _utc_now()
+        _delegation(args.direction_recorded_at, args.host_confirmed_at, record['delegation_checked_at'])
+        captured = _run_step(COMMANDS[0], [*bound(), '--output-directory', str(capture_root)],
                              outputs[0], record['steps'])
         manifest_value = captured.get('capture_manifest')
         if type(manifest_value) is not str:
@@ -201,7 +210,7 @@ def _run_verified(argv, *, verified_script, entry_inputs):
             raise ValueError('capture output digest differs from saved manifest')
         record['capture_manifest'] = str(manifest)
         _unchanged(inputs)
-        prepared = _run_step(COMMANDS[1], [*common, '--capture', str(manifest), '--output', str(guard_path)],
+        prepared = _run_step(COMMANDS[1], [*bound({'capture': {'path': str(manifest), 'sha256': guard.sha(manifest_raw)}}), '--capture', str(manifest), '--output', str(guard_path)],
                              outputs[1], record['steps'])
         if prepared.get('path') != str(guard_path):
             raise ValueError('guard output lacks the requested path')
@@ -212,7 +221,7 @@ def _run_verified(argv, *, verified_script, entry_inputs):
         _unchanged(inputs)
         if guard.read_regular(manifest, limit=MAX_COMMAND_OUTPUT_BYTES) != manifest_raw:
             raise ValueError('capture manifest changed before launch')
-        final = _run_step(COMMANDS[2], [*common, '--ci', args.ci, '--subscription-guard', str(guard_path),
+        final = _run_step(COMMANDS[2], [*bound({'subscription_guard': {'path': str(guard_path), 'sha256': digest}}), '--ci', args.ci, '--subscription-guard', str(guard_path),
                          '--subscription-guard-sha256', digest], outputs[2], record['steps'])
         if (final.get('state') != 'completed_pending_independent_review'
                 or final.get('runtime_gates_passed') is not True):

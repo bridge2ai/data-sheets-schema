@@ -252,7 +252,7 @@ def _guarded_classifier(adapter, budget_stop):
 
 
 def launch(registration_raw, *, review_path, ci_path, launch_word_path,
-           contract: ExecutionContract, effects: ExecutionEffects):
+           contract: ExecutionContract, effects: ExecutionEffects, expected_authority_sha256=None):
     """Consume one explicitly authorized native attempt, never retry or resume.
 
     This method can invoke the selected native executable. Calling it is a
@@ -273,7 +273,8 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
         with loaded_capabilities(value['dependencies']) as controls:
             return _launch(registration_raw, review_path=review_path, ci_path=ci_path,
                 launch_word_path=launch_word_path, contract=contract, effects=effects,
-                controls=controls, expected_profile=PRODUCTION_PROFILE)
+                controls=controls, expected_profile=PRODUCTION_PROFILE,
+                expected_authority_sha256=expected_authority_sha256)
 
 
 def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path,
@@ -314,7 +315,7 @@ def _execute_child(controls, argv, **kwargs):
 
 
 def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
-            contract, effects, controls, expected_profile='production'):
+            contract, effects, controls, expected_profile='production', expected_authority_sha256=None):
     controls.require_complete()
     registration, composition, authority = contract.registration, contract.composition, contract.authority
     gates, replay, shared = contract.gates, contract.replay, contract.shared
@@ -331,6 +332,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     _require_launch_profile(value['runtime'], expected_profile)
     authorization = authorizations(registration_raw, value, review_path=review_path,
                                   ci_path=ci_path, launch_word_path=launch_word_path)
+    from .native_sequence_inputs import check_authority
+    check_authority(expected_authority_sha256, authorization['raw'])
     from .native_subscription_admission import (
         CurrentSelection, inspect_current_selection, accept_current_selection)
     if type(launch_guard) is CurrentSelection:

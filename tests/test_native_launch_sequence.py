@@ -71,6 +71,13 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
         assert kwargs['cwd'] == seq.SOURCE_ROOT
         assert kwargs['env'] == seq.CHILD_ENV
         assert kwargs['stdout'].name is not None and kwargs['stderr'].name is not None
+        pins = guard.strict_json(command[command.index('--sequence-inputs') + 1].encode())
+        names = {'registration', 'review', 'launch_word', 'account_choice', 'ci'}
+        if name == seq.COMMANDS[1]: names.add('capture')
+        if name == seq.COMMANDS[2]: names.add('subscription_guard')
+        assert set(pins) == names
+        for key, pin in pins.items():
+            assert guard.sha(Path(pin['path']).read_bytes()) == pin['sha256']
         if fail_exception == name:
             raise OSError('PRIVATE sentinel must not be printed')
         if name == seq.COMMANDS[0]:

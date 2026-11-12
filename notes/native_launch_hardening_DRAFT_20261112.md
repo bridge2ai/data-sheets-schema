@@ -28,3 +28,15 @@ permit reuse. Capture/word and attempt reservations are separate and unchanged.
 No registered document kind or version changes. New records are local sequence
 start evidence, not an alternative authorization document. All source closure,
 permission and review pins must be derived from the eventual integrated source.
+
+Each sequence child receives `--sequence-inputs`, a closed mapping of the five
+input paths and their expected digests, plus the newly produced capture or guard
+when relevant. These are invocation arguments, not a new registered document.
+The child checks all named bytes before proceeding and compares the bytes it
+actually consumes. Launch carries the three authority digests to the engine's
+captured review/CI/word set before any reservation; guard preparation compares
+its actual locked capture-manifest read. Existing independent reconstruction,
+freshness, current-word, latest-claim and profile gates remain mandatory.
+Standalone command callers without these arguments retain their prior behavior;
+the reviewed sequence always supplies them. The final delegated-time check is
+after durable start claiming, so claim latency cannot carry dispatch past a limit.

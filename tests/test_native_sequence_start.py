@@ -52,3 +52,16 @@ def test_direction_claim_refuses_symlink_state(tmp_path):
         start.claim(p['registration'].read_bytes(),direction=None,confirmation=None,
                     packet=p['packet-directory'],started_at='2026-11-12T12:00:00Z')
     assert not list(elsewhere.iterdir())
+
+
+def test_claim_latency_cannot_cross_delegated_start_limit(tmp_path,monkeypatch):
+    p=fixtures.paths(tmp_path)
+    moments=iter(['2026-11-12T12:00:00Z','2026-11-12T12:00:00Z',
+                  '2026-11-12T12:00:01Z','2026-11-12T12:00:01Z'])
+    monkeypatch.setattr(seq,'_utc_now',lambda:next(moments))
+    assert fixtures.run_sequence([*fixtures.argv(p),
+        '--direction-recorded-at','2026-11-12T11:30:00Z',
+        '--host-confirmed-at','2026-11-12T11:30:00Z'])==1
+    saved=fixtures.record(p)
+    assert Path(saved['start_claim']).is_file() and saved['steps']==[]
+    assert not p['output-directory'].exists()
