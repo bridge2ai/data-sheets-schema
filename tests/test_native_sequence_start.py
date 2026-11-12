@@ -15,7 +15,7 @@ def test_different_packet_retry_needs_new_direction(tmp_path, monkeypatch):
     flags=['--direction-recorded-at','2026-11-12T11:59:00Z',
            '--host-confirmed-at','2026-11-12T11:59:00Z']
     calls=fixtures.fake_commands(monkeypatch,p,fail=seq.COMMANDS[0])
-    assert seq.main([*fixtures.argv(p),*flags])==1
+    assert fixtures.run_sequence([*fixtures.argv(p),*flags])==1
     assert len(calls)==1
     old=Path(fixtures.record(p)['start_claim']); raw=old.read_bytes()
     first_manifest=fixtures.manifest(p)
@@ -24,13 +24,13 @@ def test_different_packet_retry_needs_new_direction(tmp_path, monkeypatch):
     calls=fixtures.fake_commands(monkeypatch,p)
     # Equivalent UTC spelling and a refreshed host confirmation do not renew it.
     flags[1]='2026-11-12T11:59:00.000000Z'; flags[3]='2026-11-12T12:00:00Z'
-    assert seq.main([*fixtures.argv(p),*flags])==1
+    assert fixtures.run_sequence([*fixtures.argv(p),*flags])==1
     assert calls==[] and old.read_bytes()==raw
     p['packet-directory']=tmp_path/'third-packet'
     flags[1]='2026-11-12T11:59:01Z'
     monkeypatch.setattr(fixtures,'manifest',lambda paths:first_manifest.parent.parent/'capture-2/capture.json')
     calls=fixtures.fake_commands(monkeypatch,p)
-    assert seq.main([*fixtures.argv(p),*flags])==0
+    assert fixtures.run_sequence([*fixtures.argv(p),*flags])==0
     assert len(calls)==3 and old.read_bytes()==raw
     assert Path(fixtures.record(p)['start_claim']) != old
     assert not (tmp_path/'NEVER-RESERVED-ATTEMPT').exists()

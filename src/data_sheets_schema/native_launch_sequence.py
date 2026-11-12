@@ -132,7 +132,7 @@ def parser():
     return result
 
 
-def main(argv=None):
+def _run_verified(argv, *, verified_script, entry_inputs):
     args = parser().parse_args(argv)
     started = _utc_now()
     record = {'kind': SEQUENCE_KIND, 'version': SEQUENCE_VERSION, 'started_at': started,
@@ -166,11 +166,13 @@ def main(argv=None):
         _write_new(packet / START_FILENAME, guard.canonical({'started_at': started}))
         sequence = sequence_candidate
         script_path = packet / SCRIPT_FILENAME
-        _write_new(script_path, guard.read_regular(Path(__file__).resolve(), limit=MAX_COMMAND_OUTPUT_BYTES))
+        _write_new(script_path, verified_script)
         record['script_path'] = str(script_path)
         _delegation(args.direction_recorded_at, args.host_confirmed_at, started)
         for path in inputs:
             inputs[path] = guard.read_regular(path, limit=MAX_COMMAND_OUTPUT_BYTES)
+        if any(inputs.get(path) != raw for path, raw in entry_inputs.items()):
+            raise ValueError('sequence entry inputs changed before use')
         if capture_root.exists() and (not capture_root.is_dir() or capture_root.resolve() != capture_root):
             raise ValueError('capture root must be a resolved directory')
         word_raw = inputs[Path(args.launch_word)]
@@ -229,6 +231,13 @@ def main(argv=None):
                 record['status'] = 'stopped'
                 print('native launch sequence could not save its record', file=sys.stderr)
     return 0 if record['status'] == 'completed' else 1
+
+
+def main(argv=None):
+    # Compatibility route; the documented trusted entry avoids importing this
+    # implementation until after its byte check.
+    from .native_launch_entry import main as entry
+    return entry(argv)
 
 
 if __name__ == '__main__':
