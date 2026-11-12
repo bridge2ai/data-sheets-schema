@@ -292,3 +292,42 @@ Asked, after the diagnostic, whether any of the repeated verifications in one la
 - The lead's reading: the measurement confirms where the launch time goes and does not change the earlier conclusion that no material, safely established reduction is available by this route. The native target stays unmet; nothing on the API route depends on it.
 
 Written 2026-11-11T20:19:53Z.
+
+## Ninth round: the A21 launch and its outcome
+
+**The word.** The owner asked "give instructions for me". The lead wrote six numbered steps: the launch word (a line naming roster `d49cc352…`, a $60 slice, a $51 stop, no canary baseline and the watcher script as stop operator), the terminal checks, the launch command, the watcher, conduct during the run and the after-run checks. The owner answered "you should do 1-6" at 2026-11-12T03:30:53Z. The lead read that as the word by reference to step 1's line and as a delegation of the launch for this launch only, and recorded it as D133 in STATUS, marked as the lead's reading.
+
+**Free preflight** (`a21_launch_by_lead_20261111.sh preflight`): 0 failures. It repeats the quiet-state checks, both dry-runs and three provider reads: the key's and the account's limits (`a21_prelaunch_key_info_fields_20261111.py`; the repository's `scripts/check_budget.py` fails on a key without a per-key cap) and the route's price table for the registered model (`a21_prelaunch_route_pricing_20261111.py`), which equals the packet's rates with no higher tier for large requests. The account figures are in STATUS and are not repeated here.
+
+**The launch.** 2026-11-12T03:41:33Z, the packet's command unchanged; lock at 03:42:18Z; journal head at the start `8caeb2f7…`. The stop watcher ran in its own session.
+
+**The outcome.** The run ended by itself at about 03:57:48Z: 0 succeeded, 1 failed. The stop command was never run.
+
+| Call | Result |
+|---|---|
+| `full`, first delivery | cut by the provider after 367 s; kept as an abandoned attempt |
+| `full`, retry | `end_turn` after 816 s |
+| `full_receipt_completion` | `end_turn` after 14 s |
+| `typed_audit_worker`, `worker_0001` | `stop_reason: refusal` after 11.26 s, 0 output tokens, 439,858 input tokens written to the cache |
+
+- BC1 accepts only `end_turn` for a registered call, so the refusal was terminal: `typed_audit.state` is `failed`, and the other seven registered calls were never sent. Journal head at the stop `d191926a…`.
+- The full and core records and the coverage receipt exist and validate (0 errors, 2 warnings each). They are phase-1 records: no audit, reconciliation, report or provenance record.
+- **What the refused request held that nothing before it did:** 82.5% of it is the `BC1 COMPLETE CAPTURED SCHEMA CONTEXT` block (909,784 characters). No accepted request of this run and no saved request of any earlier run on disk contains it (`a21_refused_request_profile_20261111.py`; `grep -r` with ignored files included). The archived 10-22a run's three worker requests of about 139,000 tokens each, before BC1, ended `end_turn` on the same model and route.
+- **The cause is not established.** The response carries no reason. A word count for filter-sensitive vocabulary found nothing notable (`a21_refused_request_term_counts_20261111.sh`; a heuristic). Schema-context content, request size and an intermittent refusal are all still possible.
+- **What the canary proved:** credentials, the launcher path, the lock, the journal, the `full` phase at schema 3.2.1, receipt completion, and that the watcher sees a live sweep and its end. **What it did not reach:** any BC1 output, reconciliation, the report, the provenance record, and the stop rule firing on a real run.
+- No resume, relaunch or retry. Read from the code, not exercised: a resume would re-read the saved refusal and stop at the same check without buying the call again.
+- Issue #5874 records the finding. The run's evidence stays untracked in `launch-a21`; a hash manifest of its 33 files is in `plans/`.
+
+**One fault in the lead's tooling, found on the way:** the watcher treats "no live sweep after 120 s" as the end of the run. The run took 45 s to acquire its lock; on a slower start the watcher would have exited before the run began. Not fixed here.
+
+## Tenth round: can the native usage capture be taken closer to the reservation? (Codex helper)
+
+Asked because the owner asked where the native arm stands and the verification-trimming route is closed. Assignment `assignments/claude-lead-codex-native-capture-timing-question.md`; report `handoffs/codex-native-capture-timing-question.md` (sha256 `e6f3550305727bc181b7599fa9460ed2dce9c7b44f6aa272ecf71ba53cf59d16`); helper `scripts/adhoc/audit_native_capture_timing_20261111.py`. Source and records only. Not re-derived by the lead.
+
+- **The capture is a real model call,** not a passive reading: a separate owner-worded command runs one pinned native invocation with a fixed short prompt and records the rate-limit event it returns. A registration allows up to three capture claims under the same word.
+- **Taking a new observation later is not rejected by the records.** What they reject is resetting the age of an existing observation, accepting a supplied verification verdict, and a test-dependent bypass.
+- **It is not available in the present launch flow.** The launch freezes the selected guard at entry; a newer capture in the journal is not picked up, and a capture cannot be nested inside the final lease's lock. A later-acquisition route would be a reviewed change of ordering and selection, with five listed obligations (authority and selection, allowance and chronology, locking, exact new evidence and single use, and the time remaining after the event arrives).
+- **Draft PR 5871 removes 11.37 s of thread CPU** from the measured path (the lead had estimated about 10 s), against a deficit of 44.2 s on the optimistic CPU basis.
+- **For the owner:** no demonstrated route reaches the reservation on this host with the present implementation. A later genuine capture is a distinct, unproved route that needs a design change and an amendment to the recorded event order.
+
+Written 2026-11-12T04:05:48Z.
