@@ -92,7 +92,8 @@ def test_public_declared_runtime_failure_publishes_exact_readback(tmp_path, monk
     evidence = Path(case['value']['evidence_directory'])
     final_path, marker_path = evidence / 'final.json', evidence / 'published.json'
     saved_final, saved_marker = final_path.read_bytes(), marker_path.read_bytes()
-    for change in ('state', 'runtime_gates_passed', 'first_stop', 'all_gates'):
+    for change in ('state', 'runtime_gates_passed', 'first_stop', 'all_gates',
+                   'cleanup_assessment', 'lifecycle_hash', 'cleanup_gate', 'remove_diagnostic'):
         forged = deepcopy(result)
         if change == 'state':
             forged['state'] = 'completed_pending_independent_review'
@@ -100,13 +101,25 @@ def test_public_declared_runtime_failure_publishes_exact_readback(tmp_path, monk
             forged['runtime_gates_passed'] = True
         elif change == 'first_stop':
             forged['first_stop'] = None
-        else:
+        elif change == 'all_gates':
             forged['gates'] = {key: {'checked': True, 'passed': True} for key in engine.GATES}
+        elif change == 'cleanup_assessment':
+            forged['keep_awake']['passed'] = not forged['keep_awake']['passed']
+        elif change == 'lifecycle_hash':
+            forged['lifecycle_artifacts']['keep-awake.json']['sha256'] = '0' * 64
+        elif change == 'cleanup_gate':
+            forged['gates']['keep_awake']['passed'] = not forged['gates']['keep_awake']['passed']
+        else:
+            del forged['publication_validation_failure']
         final_path.write_bytes(c.canonical(forged))
         marker = c.strict_json(saved_marker)
         marker['final_sha256'] = c.sha(final_path.read_bytes())
         marker_path.write_bytes(c.canonical(marker))
-        with pytest.raises(ValueError, match='failure diagnostic'):
+        expected = ('cleanup evidence' if change in ('cleanup_assessment', 'cleanup_gate')
+                    else 'lifecycle pins' if change == 'lifecycle_hash'
+                    else 'synthetic HOME' if change == 'remove_diagnostic'
+                    else 'failure diagnostic')
+        with pytest.raises(ValueError, match=expected):
             execute.read_final(case['raw'])
     final_path.write_bytes(saved_final)
     marker_path.write_bytes(saved_marker)
@@ -119,6 +132,47 @@ def test_public_declared_runtime_failure_publishes_exact_readback(tmp_path, monk
             execute.read_final(case['raw'])
     finally:
         runtime_path.write_bytes(runtime_raw)
+    runtime_path.unlink()
+    with pytest.raises(ValueError, match='evidence cannot be read'):
+        execute.read_final(case['raw'])
+    replacement = attempt / 'replacement-runtime.json'
+    replacement.write_bytes(runtime_raw)
+    runtime_path.symlink_to(replacement)
+    with pytest.raises(ValueError, match='evidence cannot be read'):
+        execute.read_final(case['raw'])
+    runtime_path.unlink()
+    runtime_path.write_bytes(runtime_raw)
+    assert execute.read_final(case['raw']) == result
+
+
+def test_publication_pins_consumed_lifecycle_and_reports_later_change(tmp_path, monkeypatch):
+    from tests.test_native_shared_execution import make_case
+    from data_sheets_schema import native_shared_execution_orchestration as execute
+    from data_sheets_schema import native_execution_authority_v2 as authority
+    monkeypatch.chdir(authority.ROOT)
+    case = make_case(tmp_path / 'changed-cleanup')
+    attempt = Path(case['value']['attempt_directory'])
+    def invalidate_runtime(value):
+        (Path(value['environment']['HOME']) / 'declared-invalid-runtime').write_text('fixture')
+        raise RuntimeError('fixture runtime failure')
+    monkeypatch.setattr(execute, '_synthetic_runtime_observation', invalidate_runtime)
+    original = engine._publication_subscription
+    consumed = {}
+    def change_after_assessment(*args, **kwargs):
+        path = attempt / 'keep-awake.json'
+        consumed['raw'] = path.read_bytes()
+        path.write_bytes(consumed['raw'] + b' ')
+        return original(*args, **kwargs)
+    monkeypatch.setattr(engine, '_publication_subscription', change_after_assessment)
+    result = execute.synthetic_launch(case['raw'], **case['kwargs'])
+    pin = result['failure_evidence']['keep-awake.json']
+    assert result['state'] == 'failed'
+    assert pin['sha256'] == c.sha(consumed['raw'])
+    assert pin['sha256'] == result['lifecycle_artifacts']['keep-awake.json']['sha256']
+    assert pin['changed_after_consumption'] == 'disk bytes differ from consumed bytes'
+    with pytest.raises(ValueError, match='failure evidence'):
+        execute.read_final(case['raw'])
+    (attempt / 'keep-awake.json').write_bytes(consumed['raw'])
     assert execute.read_final(case['raw']) == result
 
 
