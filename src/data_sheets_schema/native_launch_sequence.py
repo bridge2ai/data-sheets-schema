@@ -23,6 +23,7 @@ SOURCE_ROOT = Path(__file__).resolve().parents[2]
 COMMANDS = ('capture-subscription-event', 'prepare-subscription-guard-v2', 'launch')
 OUTPUTS = ('capture-command.json', 'guard-command.json', 'launch-command.json')
 START_FILENAME = 'sequence-start.json'
+SCRIPT_FILENAME = 'sequence-script.py'
 # -I excludes ambient PYTHONPATH/cwd; explicitly select this file's checkout.
 BOOTSTRAP = ('import sys; sys.path.insert(0, sys.argv.pop(1)); '
              'from data_sheets_schema.native_generation import main; '
@@ -35,6 +36,25 @@ CHILD_ENV = {'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'HOME': '/nonexistent',
 
 def _utc_now():
     return datetime.now(timezone.utc).isoformat(timespec='microseconds').replace('+00:00', 'Z')
+
+
+def _strict_utc(value):
+    if type(value) is not str or re.fullmatch(
+            r'[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,6})?Z', value) is None:
+        raise ValueError('delegated start times must be strict UTC timestamps')
+    return datetime.fromisoformat(value[:-1] + '+00:00')
+
+
+def _delegation(direction, confirmation, now):
+    if (direction is None) != (confirmation is None):
+        raise ValueError('delegated start needs both recorded times')
+    if direction is None:
+        return
+    current = _strict_utc(now)
+    for value in (direction, confirmation):
+        seconds = (current - _strict_utc(value)).total_seconds()
+        if not 0 <= seconds <= 1800:
+            raise ValueError('delegated start must be within thirty minutes after both recorded times')
 
 
 def _path(value):
@@ -107,6 +127,8 @@ def parser():
         result.add_argument('--' + name, required=True)
     result.add_argument('--subscription-guard', '--output', dest='subscription_guard', required=True)
     result.add_argument('--packet-directory', '--packet', dest='packet_directory', required=True)
+    result.add_argument('--direction-recorded-at', help='Recorded UTC time of the owner direction')
+    result.add_argument('--host-confirmed-at', help='Recorded UTC time of the owner host-state confirmation')
     return result
 
 
@@ -115,7 +137,10 @@ def main(argv=None):
     started = _utc_now()
     record = {'kind': SEQUENCE_KIND, 'version': SEQUENCE_VERSION, 'started_at': started,
               'completed_at': None, 'status': 'stopped', 'stop_reason': None,
-              'capture_manifest': None, 'guard_sha256': None, 'steps': []}
+              'capture_manifest': None, 'guard_sha256': None, 'steps': [],
+              'direction_recorded_at': args.direction_recorded_at,
+              'host_confirmed_at': args.host_confirmed_at, 'delegation_checked_at': None,
+              'script_path': None}
     sequence = None
     try:
         inputs = {_path(getattr(args, name)): None for name in
@@ -131,7 +156,7 @@ def main(argv=None):
         outputs = [packet / name for name in OUTPUTS]
         sequence_candidate = packet / 'sequence.json'
         targets = [*outputs, *(p.with_suffix('.stderr.txt') for p in outputs),
-                   sequence_candidate, packet / START_FILENAME, guard_path]
+                   sequence_candidate, packet / START_FILENAME, packet / SCRIPT_FILENAME, guard_path]
         if len(set(targets)) != len(targets) or any(p in inputs for p in targets):
             raise ValueError('sequence output paths collide')
         for path in targets:
@@ -140,6 +165,10 @@ def main(argv=None):
         # Exclusive claim prevents concurrent starts sharing one packet.
         _write_new(packet / START_FILENAME, guard.canonical({'started_at': started}))
         sequence = sequence_candidate
+        script_path = packet / SCRIPT_FILENAME
+        _write_new(script_path, guard.read_regular(Path(__file__).resolve(), limit=MAX_COMMAND_OUTPUT_BYTES))
+        record['script_path'] = str(script_path)
+        _delegation(args.direction_recorded_at, args.host_confirmed_at, started)
         for path in inputs:
             inputs[path] = guard.read_regular(path, limit=MAX_COMMAND_OUTPUT_BYTES)
         if capture_root.exists() and (not capture_root.is_dir() or capture_root.resolve() != capture_root):
@@ -151,6 +180,8 @@ def main(argv=None):
         common = ['--registration', args.registration, '--review', args.review,
                   '--launch-word', args.launch_word, '--account-choice', args.account_choice]
         _unchanged(inputs)
+        record['delegation_checked_at'] = _utc_now()
+        _delegation(args.direction_recorded_at, args.host_confirmed_at, record['delegation_checked_at'])
         captured = _run_step(COMMANDS[0], [*common, '--output-directory', str(capture_root)],
                              outputs[0], record['steps'])
         manifest_value = captured.get('capture_manifest')

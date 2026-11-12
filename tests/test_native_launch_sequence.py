@@ -289,3 +289,82 @@ def test_no_new_run_spec_boundaries():
     from tests.utils.run_spec_boundaries import discover
     assert not [item for item in discover(seq.SOURCE_ROOT)
                 if item.path == 'src/data_sheets_schema/native_launch_sequence.py']
+
+
+def test_own_script_bytes_saved_before_any_command_without_self_hash(tmp_path, monkeypatch):
+    p = paths(tmp_path)
+    running_bytes = Path(seq.__file__).read_bytes()
+    seen = []
+    def inspect(name, doc):
+        saved = p['packet-directory'] / seq.SCRIPT_FILENAME
+        assert saved.read_bytes() == running_bytes
+        seen.append(name)
+    fake_commands(monkeypatch, p, mutate=inspect)
+    assert seq.main(argv(p)) == 0
+    doc = record(p)
+    assert len(seen) == 3
+    assert Path(doc['script_path']).read_bytes() == running_bytes
+    assert 'script_sha256' not in doc and 'self_sha256' not in doc
+    assert guard.sha(running_bytes) not in json.dumps(doc)
+
+
+@pytest.mark.parametrize('direction,confirmation,accepted', [
+    ('2026-11-12T11:59:00Z', '2026-11-12T11:58:00Z', True),
+    ('2026-11-12T11:30:00Z', '2026-11-12T11:30:00Z', True),
+    ('2026-11-12T12:00:00Z', '2026-11-12T12:00:00Z', True),
+    ('2026-11-12T11:29:59Z', '2026-11-12T11:59:00Z', False),
+    ('2026-11-12T11:59:00Z', '2026-11-12T11:29:59Z', False),
+    ('2026-11-12T12:00:01Z', '2026-11-12T11:59:00Z', False),
+    ('2026-11-12T11:59:00Z', '2026-11-12T12:00:01Z', False),
+    ('2026-11-12T11:59:00Z', None, False),
+    (None, '2026-11-12T11:59:00Z', False),
+    (None, None, True),
+])
+def test_delegated_start_requires_both_independent_windows(tmp_path, monkeypatch, direction, confirmation, accepted):
+    p = paths(tmp_path)
+    now = '2026-11-12T12:00:00Z'
+    monkeypatch.setattr(seq, '_utc_now', lambda: now)
+    calls = fake_commands(monkeypatch, p)
+    arguments = argv(p)
+    if direction is not None: arguments += ['--direction-recorded-at', direction]
+    if confirmation is not None: arguments += ['--host-confirmed-at', confirmation]
+    assert seq.main(arguments) == (0 if accepted else 1)
+    assert len(calls) == (3 if accepted else 0)
+    doc = record(p)
+    assert doc['direction_recorded_at'] == direction and doc['host_confirmed_at'] == confirmation
+    assert doc['started_at'] == now
+    if not accepted:
+        assert doc['steps'] == []
+        assert not p['output-directory'].exists()
+
+
+@pytest.mark.parametrize('timestamp', [
+    '2026-11-12', '2026-11-12 12:00:00Z', '2026-11-12T12:00:00+00:00',
+    '2026-11-12T12:00:00z', '2026-11-12T12:00Z', '2026-11-12T12:00:00.1234567Z',
+    '2026-02-30T12:00:00Z', '2026-11-12T12:00:60Z', '2026-11-12T24:00:00Z', '',
+])
+def test_delegation_refuses_non_strict_utc_without_commands(tmp_path, monkeypatch, timestamp):
+    p = paths(tmp_path)
+    monkeypatch.setattr(seq, '_utc_now', lambda: '2026-11-12T12:00:00Z')
+    assert seq.main([*argv(p), '--direction-recorded-at', timestamp,
+                     '--host-confirmed-at', '2026-11-12T11:59:00Z']) == 1
+    assert record(p)['steps'] == []
+
+
+def test_elapsed_preflight_cannot_cross_delegation_limit(tmp_path, monkeypatch):
+    p = paths(tmp_path)
+    times = iter(['2026-11-12T12:00:00Z', '2026-11-12T12:00:01Z', '2026-11-12T12:00:01Z'])
+    monkeypatch.setattr(seq, '_utc_now', lambda: next(times))
+    assert seq.main([*argv(p), '--direction-recorded-at', '2026-11-12T11:30:00Z',
+                     '--host-confirmed-at', '2026-11-12T11:30:00Z']) == 1
+    assert record(p)['steps'] == []
+    assert record(p)['delegation_checked_at'] == '2026-11-12T12:00:01Z'
+
+
+def test_existing_saved_script_refuses_without_overwrite_or_command(tmp_path):
+    p = paths(tmp_path)
+    p['packet-directory'].mkdir()
+    saved = p['packet-directory'] / seq.SCRIPT_FILENAME
+    saved.write_bytes(b'prior script')
+    assert seq.main(argv(p)) == 1
+    assert saved.read_bytes() == b'prior script'
