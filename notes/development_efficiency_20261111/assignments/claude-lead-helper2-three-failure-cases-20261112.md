@@ -1,4 +1,4 @@
-# Assignment to Codex helper 2: the three failure cases that did not pass, then a second set of run limits on a separate branch
+# Assignment to Codex helper 2: the three failure cases that did not pass, then the second set of run limits the owner decided
 
 From the Claude lead, 2026-11-12. Short names and rules are in `claude-lead-helper-context-20261112.md` beside this file. This follows `claude-lead-helper2-helper-cache-home-20261112.md`; do it after that one's repair and re-canary.
 
@@ -22,20 +22,20 @@ It expected the refusal `review independence, roles or decision differs` and got
 2. Decide which is right against amendment N1, draft v12, and the bundle's design: if the launch word binds the review's bytes, a changed review decision is correctly refused at the word first, and the test's expected reason is what has to change, to the reason a reader of the saved failure will actually see, with a second assertion that the review check itself still refuses when the word is made consistent with the changed review. If instead the order of checks was changed by accident, restore it.
 3. One commit, on your branch `codex/native-launch-sequence-20261112` or the cache branch, whichever carries the code concerned; say which.
 
-## Case C, prepared on a separate local branch: a second registered set of run limits (a decision is pending)
+## Case C: a second registered set of run limits (decided by the owner, D143)
 
-Added by the lead before this file was delivered. Do it after cases A and B.
+Added by the lead before this file was delivered. Do it after cases A and B. **The owner has decided** (coordination record, D143, 2026-11-12): two registered sets, the canary's ($90, 21,600 s) and one production set ($400, 43,200 s), and the source accepts exactly those two. So this is no longer "to be taken or dropped": it will be integrated after review. Still write it on its own branch so that it can be reviewed alone.
 
-**Why.** The source fixes two backstops for every non-synthetic run: the guard (`native_u4b_runtime.py`, `_profile`: `result['budget_guard_usd'] != '90'` refuses; the binary is started with `--max-budget-usd 90`, decision D110) and the deadline (`native_u4b_policy.py`: `N1_DEADLINE_SECONDS = 21600`, checked by `validate_runtime_terms`). Both were chosen for the CHORUS canary. The analysis plan's own estimates per run at API prices (`notes/generic_v10_analysis_plan.md` at main, lines 369 to 374) are about $37 for CHORUS, $83 for CM4AI, $96 for VOICE_PEDIATRIC, $105 for VOICE and $162 for AI_READI. On that proxy a $90 guard is expected to stop three of the five production projects. The lead is asking the owner to choose; the lead's recommendation is two registered sets of limits.
+**Why.** The source fixes two backstops for every non-synthetic run: the guard (`native_u4b_runtime.py`, `_profile`: `result['budget_guard_usd'] != '90'` refuses; the binary is started with `--max-budget-usd 90`, decision D110) and the deadline (`native_u4b_policy.py`: `N1_DEADLINE_SECONDS = 21600`, checked by `validate_runtime_terms`). Both were chosen for the CHORUS canary. The analysis plan's own estimates per run at API prices (`notes/generic_v10_analysis_plan.md` at main, lines 369 to 374) are about $37 for CHORUS, $83 for CM4AI, $96 for VOICE_PEDIATRIC, $105 for VOICE and $162 for AI_READI. On that proxy a $90 guard is expected to stop three of the five production projects. 
 
-**Prepare it, to be taken or dropped,** on a local branch `codex/native-production-run-limits-20261112` from the candidate's head:
+**Write it** on a local branch `codex/native-production-run-limits-20261112` from the candidate's head:
 
 1. The source accepts exactly two registered sets and nothing else: the canary's (guard `"90"`, deadline 21,600 s) and one production set (guard `"400"`, deadline 43,200 s). A registration declares one of them whole; a mixed pair refuses. No project is named in code, and nothing infers the set from the project, the bundle or the label: the registration says which, and the review bundle and the owner's word already pin the registration.
 2. Find every place that assumes the single value: the two validators above, the 86,400 s ceiling in `native_shared_runtime_values.py`, the launch argument construction, the freshness and margin arithmetic that speaks of "a run of up to 21,600 s", the keep-awake acquisition, the attempt supervisor's timers, the synthetic profile, the registration builder and its tests, and any document that records the terms (runtime declaration, registration, review bundle, owner terms). List each with its line and say whether it changes. If a registered document's kind or version must change, stop there and propose.
 3. Say what a 12-hour run changes operationally that a 6-hour run does not: usage windows crossed, the validity of the subscription observation at dispatch against a longer run, keep-awake, and anything in amendment N1, draft v12, that states 6 hours as a property of every native run and would then be wrong for production runs.
 4. Tests: each set accepted whole; a mixed pair, a third value and a missing value refused; the canary's set unchanged in every derived identity (show the canary's registration bytes are identical before and after the change for the same inputs).
 
-The values $400 and 43,200 s are the lead's proposal and may change with the owner's answer: keep them in one place.
+Keep the two sets' values in one place.
 
 ## Bounds
 

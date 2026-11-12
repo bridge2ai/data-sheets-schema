@@ -24,6 +24,10 @@ Tests: the replaced-directory case of the review, now against the journal (a rep
 
 As you described it, no further ruling needed: the verified entry establishes a per-invocation execution namespace; the body checks that entry-established identity before any packet effect; an ordinary imported call refuses; body fixtures go through the real entry with fixture source bytes pinned by fixture registration and review. Tests: the direct-import refusal and the loaded-A, retained-B refusal.
 
+## Owner decisions since your last assignment
+
+The owner decided on 2026-11-12 (coordination record, D141) that rejected and stopped runs keep their records: your retention branch is taken, once #6016 is repaired and the repair is reviewed. It is no longer optional. The owner also ratified amendment N1, draft v12, with all 34 items (D138), which includes the delegated start (item (aa)) and the one-script, no-retry sequence (item (z)) your hardening implements, and approved the four protected post-images (D139); the lead has applied them on the published candidate at `6561dac3c3af50cbfce1ba3c8b6ad21d9cd4b834`. Your branches still start from the earlier head; do not rebase them yourself, the integration is ordered by the lead.
+
 ## Order and carrying
 
 One commit per issue on `codex/native-launch-sequence-hardening-20261112`, #5992 first. Then carry both commits onto the failure-record branch and the retention branch by cherry-pick, record the resulting hashes, and rerun the affected whole test files on each. Give the lead the final head of each of the three branches.
