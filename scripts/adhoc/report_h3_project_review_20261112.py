@@ -24,11 +24,19 @@ base=rows.get('CHORUS')
 for project,row in rows.items():
     br=row['bundle']['bytes']/base['bundle']['bytes'] if base else None; cr=row['chunk_count']/base['chunk_count'] if base else None
     row['ratios_to_chorus']={'bundle_bytes':br,'chunk_count':cr}
-    lines.append(f"| {project} | {row['bundle']['bytes']} | {row['bundle_lines']} | {row['source_documents']} | {row['chunk_count']} | {row['largest_chunk_bytes']} / {row['largest_byte_chunk_lines']} | {row['maximum_chunk_lines']} | {len(row['oversize_chunks'])} | {br if br is not None else 'pending'} | {cr if cr is not None else 'pending'} |")
+    br_text=f'{br:.4f}' if br is not None else 'pending'; cr_text=f'{cr:.4f}' if cr is not None else 'pending'
+    lines.append(f"| {project} | {row['bundle']['bytes']} | {row['bundle_lines']} | {row['source_documents']} | {row['chunk_count']} | {row['largest_chunk_bytes']} / {row['largest_byte_chunk_lines']} | {row['maximum_chunk_lines']} | {len(row['oversize_chunks'])} | {br_text} | {cr_text} |")
 counts={grade:sum(f['grade']==grade for f in review['findings']) for grade in ('P1','P2','P3')}
 lines+=['','Review findings: '+', '.join(f'{n} {g}' for g,n in counts.items())+'. '+review['status']+'.','']
 for finding in review['findings']:
     lines += [f"- {finding['id']} {finding['grade']}: {finding['title']}"]
+if 'canonical_audits' in review:
+    lines += ['', '| Project | Canonical bundle audit exit | Baseline rebuild byte-identical | Chunk check exit |', '|---|---:|---|---:|']
+    for audit in review['canonical_audits']:
+        row=rows[audit['project']]
+        same=audit['original']['sha256']==audit['rebuilt']['sha256']
+        lines.append(f"| {audit['project']} | {audit['returncode']} | {same} | {row['checks'][1]['returncode']} |")
+    lines += ['', 'Canonical audit evidence: `'+review['canonical_audit_pin']['path']+'`. The original absolute-manifest audit outputs below are retained; their header-path differences are explained in Part A findings.']
 lines+=['','## Project readbacks','']
 for project,row in rows.items():
     lines+=[f'### {project}', '',f"Evidence: `{row['evidence']['path']}` SHA-256 `{row['evidence']['sha256']}`.",f"Profile `{row['profile']}`; source_dir `{row['source_dir']}`; {row['manifest_sources']} manifest source entries.",'Scope: '+json.dumps(row['scope'],sort_keys=True)+'.','Omission context: '+json.dumps(row['omission_context'],sort_keys=True)+'.','']
