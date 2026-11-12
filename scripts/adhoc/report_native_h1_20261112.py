@@ -125,6 +125,7 @@ def cohorts():
                     cases.append({'nodeid': canonical_node(case, root),
                         'junit_classname': case.get('classname', ''), 'name': case.get('name', ''),
                         'outcome': state, 'message': finding.get('message', '') if finding is not None else '',
+                        'temporary_layout_diagnostic_in_trace': 'no writable temporary directory outside d4d-executions' in trace,
                         'trace_sha256': sha(trace.encode()), 'seconds': case.get('time')})
             except ET.ParseError as exc:
                 parsing_error = str(exc)
@@ -139,13 +140,7 @@ def cohorts():
     return result
 
 
-def prior_reconciliation(current):
-    path = OUT / 'codex-g07-scanner-cohort-classification-20261112.json'
-    retained = read_json(path)
-    if retained is None:
-        return {'state': 'prior_evidence_missing', 'evidence': reference(path)}
-    old = retained['negatives']
-    assert len(old) == 96 and len({row['nodeid'] for row in old}) == 96
+def completed_witnesses(current):
     witnesses = {}
     for cohort in sorted(current, key=lambda row: row['ended_timestamp'] or 0):
         if cohort['state'] != 'completed':
@@ -155,6 +150,10 @@ def prior_reconciliation(current):
                 witnesses.setdefault(case['nodeid'], []).append(dict(case,
                     cohort=cohort['id'], source_commit=cohort['source_commit'],
                     evidence=cohort['evidence'], execution=cohort['outcome']))
+    return witnesses
+
+
+def reconciled_rows(old, witnesses):
     rows = []
     for before in old:
         observed = witnesses.get(before['nodeid'], [])
@@ -168,17 +167,59 @@ def prior_reconciliation(current):
             state = 'cleared' if verified else 'passed_without_verified_execution'
         rows.append({'nodeid': before['nodeid'], 'before': before,
                      'current_state': state, 'latest_witness': after, 'all_witnesses': observed})
+    return rows
+
+
+def prior_reconciliation(current):
+    path = OUT / 'codex-g07-scanner-cohort-classification-20261112.json'
+    retained = read_json(path)
+    if retained is None:
+        return {'state': 'prior_evidence_missing', 'evidence': reference(path)}
+    old = retained['negatives']
+    assert len(old) == 96 and len({row['nodeid'] for row in old}) == 96
+    rows = reconciled_rows(old, completed_witnesses(current))
     return {'state': 'reconciled_by_exact_node_identity', 'evidence': reference(path),
             'prior_count': len(old), 'counts': dict(Counter(row['current_state'] for row in rows)),
             'rows': rows,
             'scope': 'Passing tests establish only their own assertions; missing, skipped or unfinished cases never count as cleared.'}
 
 
+def ci_reconciliation(current, g07):
+    path = OUT / 'lead-ci-run-42976790438-failures-20261112.json'
+    classified = OUT / 'codex-g07-ci-cause-ledger-20261112.json'
+    inventory = read_json(path)
+    if inventory is None:
+        return {'state': 'prior_evidence_missing', 'evidence': reference(path)}
+    by_node = {}
+    for failure in inventory['failures']:
+        if 'v2 envelope authority source changed' not in failure['message']:
+            continue
+        node = failure['file'] + ('::' + failure['node'] if failure['node'] else '')
+        by_node.setdefault(node, {'nodeid': node, 'occurrences': []})['occurrences'].append(failure)
+    prior = read_json(classified)
+    classified_nodes = {item['nodeid'] for group in (prior or {}).get('groups', [])
+                        if group['cause'] == 'scanner_native_authority_source_pin'
+                        for item in group.get('nodes', [])}
+    rows = reconciled_rows(list(by_node.values()), completed_witnesses(current))
+    ci_ids = set(by_node)
+    g07_ids = {row['nodeid'] for row in g07.get('rows', [])}
+    return {'state': 'reconciled_by_exact_node_identity', 'evidence': reference(path),
+        'classification_evidence': reference(classified), 'historical_run_id': inventory['run_id'],
+        'historical_head': inventory['head'], 'prior_count': len(by_node),
+        'classification_identity_set_matches_inventory': classified_nodes == ci_ids,
+        'counts': dict(Counter(row['current_state'] for row in rows)), 'rows': rows,
+        'file_counts': dict(Counter(node.split('::')[0] for node in ci_ids)),
+        'overlap_with_g07': {'ci_is_subset_of_g07': ci_ids <= g07_ids,
+            'shared_nodeids': sorted(ci_ids & g07_ids), 'ci_only_nodeids': sorted(ci_ids - g07_ids),
+            'g07_only_nodeids': sorted(g07_ids - ci_ids)},
+        'scope': 'Retained CI authority-pin identities are reconciled separately from the G07 cohort. Only completed JUnit passes with verified cleanup and source origin count as cleared.'}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--phase', default='scanner commit; validation and integration in progress')
     parser.add_argument('--comparison', type=Path)
-    parser.add_argument('--helper-controls', type=Path,
+    parser.add_argument('--helper-controls', type=Path, default=SCRATCH / 'h1-comparison-self-check.json',
                         help='Saved comparison-helper controls; absent evidence leaves review findings pending')
     args = parser.parse_args()
     head = git('rev-parse', 'HEAD').decode().strip()
@@ -198,11 +239,16 @@ def main():
     compositions = [captured_json(path) for path in composition_paths]
     test_rows = cohorts()
     reconciled = prior_reconciliation(test_rows)
+    retained_ci = ci_reconciliation(test_rows, reconciled)
     audit_path = OUT / 'codex-h1-authority-audit-20261112.json'
     comparison = comparison_evidence(args.comparison) if args.comparison else {
         'state': 'pending', 'data': None,
         'scope': 'No complete current D128-form arrays have been supplied. Missing counts are not zero.'}
-    scan_complete = (comparison.get('data') or {}).get('status') == 'complete_diagnostic_not_owner_approval'
+    comparison['matches_current_branch_head'] = (comparison.get('data') or {}).get('source_branch_head') == head
+    if comparison.get('data'):
+        comparison['data']['matches_current_branch_head'] = comparison['matches_current_branch_head']
+    scan_complete = ((comparison.get('data') or {}).get('status') == 'complete_diagnostic_not_owner_approval'
+                     and comparison['matches_current_branch_head'])
     counts = reconciled.get('counts', {})
     answer = ('The scanner comparison is complete as diagnostic evidence; owner disposition remains pending. '
               if scan_complete else
@@ -210,14 +256,20 @@ def main():
     answer += ('Of the 96 retained scanner negatives, ' + str(counts.get('cleared', 0)) +
                ' have verified passing witnesses and ' + str(counts.get('unobserved', 0)) +
                ' remain unobserved. Detailed outcomes and integration status follow.')
-    finished = []
-    for donor in ('ddcadcdc2', 'ab07c81fe'):
-        full = git('rev-parse', donor).decode().strip()
-        subject = git('show', '-s', '--format=%s', donor).decode().strip()
-        matches = [row for row in history if row['subject'] == subject]
-        finished.append({'donor': full, 'subject': subject, 'subject_matches': matches,
-            'state': 'commit_subject_present_review_diff_and_tests' if matches else 'not_yet_present'})
-    restoration = [captured_json(path) for path in sorted(SCRATCH.glob('*/config-restored.json'))]
+    answer += (' Separately, ' + str(retained_ci.get('counts', {}).get('cleared', 0)) +
+               ' of ' + str(retained_ci.get('prior_count', 'unknown')) +
+               ' retained CI authority-pin identities have verified passing witnesses.')
+    broad = next((row for row in test_rows if row['id'] == 'h1-scanner-cohort'), None)
+    if broad is not None and broad['state'] == 'completed':
+        answer += (' The broader scanner cohort remains ' +
+                   str(broad['counts'].get('passed', 0)) + ' passed, ' +
+                   str(broad['counts'].get('failure', 0)) + ' failed, ' +
+                   str(broad['counts'].get('error', 0)) + ' errors and ' +
+                   str(broad['counts'].get('skipped', 0)) +
+                   ' skipped; clearing retained identities is not whole-cohort acceptance.')
+    finished = [integration_record(donor, history) for donor in
+                ('ddcadcdc2', 'ab07c81fe', '91fcdab33', '37a4aa5d0', '789778427')]
+    restoration = restoration_records()
     data = {'kind': 'native_h1_scanner_pin_and_integration_handoff',
         'generated_utc': datetime.now(timezone.utc).isoformat(), 'phase': args.phase,
         'answer': answer,
@@ -242,11 +294,15 @@ def main():
                 'tests/test_native_import_facts.py', 'tests/test_native_launch_schema_metadata.py']},
         'compositions': compositions, 'scanner_comparison': comparison, 'tests': test_rows,
         'prior_96_negatives': reconciled, 'integration': finished,
+        'retained_ci_authority_negatives': retained_ci,
         'private_configuration_restoration': restoration,
+        'report_helpers': report_helpers(),
+        'other_helpers': helper2_acceptance(finished[2:]),
+        'retained_scanner_comparisons': retained_comparison_refs(head),
         'composition_source_witnesses': source_witnesses(compositions),
         'findings': [
             {'id': 'H1-F1', 'state': 'runner_provenance_limitation', 'detail': 'The runner records HEAD and four protected hashes but does not itself attest the complete tracked working tree. Composition creation and final tracked-clean witnesses mitigate this gap; they do not establish a full before-run content manifest.'},
-            {'id': 'H1-F2', 'state': 'portability_validation_pending', 'detail': 'The test portability temp_base selection may reject TMPDIR under d4d-executions and choose system tmp outside the permitted scratch location. This is a risk to verify after the test-only cherry-picks, not an observed test failure yet.'},
+            portability_finding(test_rows),
             {'id': 'H1-F3', 'state': 'fix_controls_pending', 'detail': 'Independent pre-execution review found a false-completion risk when worker returncode is null but the OS exit is 1. The comparison helper must require matching, typed worker and process exit codes before treating arrays as complete. No run was claimed complete using this defect.'},
             {'id': 'H1-F4', 'state': 'fix_controls_pending', 'detail': 'Independent pre-execution review found that cleanup by numeric process-group ID risks signalling a reused group. The comparison helper must bind owned processes to their recorded identities and refuse signalling replacements. No affected helper run was performed.'}],
         'comparison_helper_controls': captured_json(args.helper_controls) if args.helper_controls else
@@ -254,10 +310,12 @@ def main():
         'findings_publication': 'These are local review findings for lead publication. No GitHub issues, comments or reviews were created during this offline assignment.',
         'owner_pending': [
             'The API packet postimage 830eec1e12e96f807fa76ea26e066a1923b60380013c424cfa99f0012af0a881 is not approved.',
-            'D136 settles freshness age 1200 seconds. Margin remains 90 seconds in code; N1 draft v10 proposes 300 seconds, awaiting the owner.',
+            'D136 settles freshness age 1200 seconds. Margin remains 90 seconds in code. N1 is at ballot draft v12 and is not ratified; its proposed 300-second margin still awaits the owner.',
             'The current complete D128-form comparison needs an explicit disposition; historical approval applies only to its frozen source pair.',
             'No launch, native canary, publication or scientific acceptance is claimed.'],
         'helper': reference(Path(__file__))}
+    data['findings'].append(ambiguous_alias_finding(test_rows))
+    data['findings'].append(retained_gap_finding(test_rows))
     for finding in data['findings']:
         finding['record_location'] = 'local_handoff_for_lead_publication'
     apply_control_dispositions(data)
@@ -293,11 +351,27 @@ def main():
               [('state', 'Current state'), ('count', 'Prior negative identities')]), '',
         'Every original negative identity and its current witnesses are retained in the JSON. '
         'Classnames are mapped through actual source files; absent or unfinished evidence cannot clear a case.', '',
+        '**Retained CI authority-pin failures**', '',
+        table([{'state': key, 'count': value} for key, value in retained_ci.get('counts', {}).items()],
+              [('state', 'Current state'), ('count', 'Retained CI identities')]), '',
+        table([{'path': key, 'count': value} for key, value in retained_ci.get('file_counts', {}).items()],
+              [('path', 'Retained CI module'), ('count', 'Distinct identities')]), '',
+        'Exact identity overlap with the prior G07 set: ' +
+        str(len(retained_ci.get('overlap_with_g07', {}).get('shared_nodeids', []))) +
+        '. CI identities are a subset of G07: ' +
+        str(retained_ci.get('overlap_with_g07', {}).get('ci_is_subset_of_g07', 'unknown')) +
+        '. All original CI job occurrences and exact current witnesses are retained in the JSON.', '',
         '**Scanner comparison**', '',
         comparison_text(data['scanner_comparison']), '',
         '**Findings and limits**', '', table(data['findings'],
              [('id', 'Finding'), ('state', 'Status'), ('detail', 'Evidence and limits')]), '',
         data['findings_publication'], '',
+        'H1-F2 observed temporary-layout negatives: ' + str(next(row for row in data['findings'] if row['id'] == 'H1-F2').get(
+            'observed_negative_count', 0)) + '. They are environment-scope refusals, not validated production failures.', '',
+        'H1-F2 recommendation: ' + next(row for row in data['findings'] if row['id'] == 'H1-F2').get(
+            'recommendation', 'Await completed portability validation.'), '',
+        ambiguous_alias_text(next(row for row in data['findings'] if row['id'] == 'H1-F5')), '',
+        retained_gap_text(next(row for row in data['findings'] if row['id'] == 'H1-F6')), '',
         'Comparison-helper control evidence: ' + str(data['comparison_helper_controls'].get('path', 'pending')) +
         '; SHA-256 ' + str(data['comparison_helper_controls'].get('sha256', 'pending')) + '.', '',
         '**Composition source witnesses**', '', table(data['composition_source_witnesses'],
@@ -305,6 +379,15 @@ def main():
               ('tracked_clean', 'Tracked clean'), ('scope', 'Scope')]), '',
         '**Integration**', '', table(data['integration'],
              [('donor', 'Donor commit'), ('subject_matches', 'Local matching commits'), ('state', 'Evidence state')]), '',
+        data['other_helpers']['scope'], '', 'Helper 2 observer/test integration state: ' + data['other_helpers']['state'] + '.', '',
+        'Lead acceptance evidence:', '', table(data['other_helpers']['status_evidence']['snippets'],
+            [('purpose', 'Purpose'), ('first_line', 'First line'), ('last_line', 'Last line'),
+             ('sha256', 'Exact snippet SHA-256'), ('text', 'Recorded text')]), '',
+        '**Retained comparison identities**', '', table(data['retained_scanner_comparisons'],
+            [('path', 'Comparison'), ('source_branch_head', 'Exact branch head'), ('status', 'Saved status'),
+             ('matches_current_branch_head', 'Current head'), ('sha256', 'SHA-256')]), '',
+        '**Report helpers retained locally**', '', table(data['report_helpers'],
+             [('path', 'Helper path'), ('sha256', 'SHA-256'), ('git_status', 'Local Git status')]), '',
         'Private configuration restoration receipts: ' + str(len(restoration)) + '. Exact receipts and all '
         'commands, origins, cleanup evidence, output hashes and test identities are retained in the JSON. '
         'This report does not execute tests. At-sign characters are represented as [at]; referenced raw evidence retains its original bytes.', '']
@@ -370,12 +453,53 @@ def comparison_evidence(path):
                 'exact_arrays_equal': ledger['exact_arrays_equal'],
                 'itemized_pointer': '/comparisons/' + str(index) + '/arrays/' + name})
     summary['d128_coverage'] = []
+    summary['d128_unmatched_deltas'] = []
+    summary['model_text_function_changes'] = []
+    summary['unmatched_approach_pair_context'] = []
     for name, ledger in (value.get('d128_coverage') or {}).get('arrays', {}).items():
         for kind, rows in ledger['delta_occurrences'].items():
             same = sum(row['exact_finite_object_delta_match'] is True for row in rows)
             summary['d128_coverage'].append({'array': name, 'kind': kind, 'total': len(rows),
                 'same_finite_object_delta': same, 'new_difference': len(rows) - same,
                 'itemized_pointer': '/d128_coverage/arrays/' + name + '/delta_occurrences/' + kind})
+            for index, row in enumerate(rows):
+                delta = row['current']
+                before, after = delta.get('before', {}), delta.get('after', {})
+                changed = delta.get('differing_fields', [])
+                brief = {'array': name, 'kind': kind, 'path': after.get('path', before.get('path')),
+                    'before_line': before.get('line'), 'after_line': after.get('line'),
+                    'differing_fields': changed,
+                    'before_changed_values': {field: {'present': field in before, 'value': before.get(field)} for field in changed},
+                    'after_changed_values': {field: {'present': field in after, 'value': after.get(field)} for field in changed},
+                    'exact_finite_object_delta_match': row['exact_finite_object_delta_match'],
+                    'itemized_pointer': '/d128_coverage/arrays/' + name + '/delta_occurrences/' + kind + '/' + str(index)}
+                if not row['exact_finite_object_delta_match']:
+                    summary['d128_unmatched_deltas'].append(brief)
+                    if changed == ['approaches']:
+                        historical = value['frozen_approval']['arrays'][name]['changed_fields']
+                        related = [old for old in historical
+                            if old.get('differing_fields') == ['approaches']
+                            and old['before'].get('path') == before.get('path')
+                            and old['after'].get('path') == after.get('path')
+                            and old['before'].get('approaches') == before.get('approaches')
+                            and old['after'].get('approaches') == after.get('approaches')]
+                        if len(related) == 1:
+                            old = related[0]
+                            summary['unmatched_approach_pair_context'].append({
+                                'path': brief['path'], 'line': before.get('line'),
+                                'same_approaches_transition': True,
+                                'current_before': before, 'current_after': after,
+                                'historical_before': old['before'], 'historical_after': old['after'],
+                                'before_pair_differing_fields': object_differing_fields(old['before'], before),
+                                'after_pair_differing_fields': object_differing_fields(old['after'], after),
+                                'scope': 'Explanatory relationship only; full object pairs remain unequal and unapproved.'})
+                if 'model_text_function' in changed:
+                    summary['model_text_function_changes'].append(brief)
+    violation_ledgers = [item['arrays']['violations'] for item in value.get('comparisons', [])]
+    summary['ordered_violations_match_current_and_frozen'] = (
+        len(violation_ledgers) == 3 and all(item['exact_arrays_equal'] for item in violation_ledgers)
+        and len({item['after_sha256'] for item in violation_ledgers}) == 1)
+    summary['ordered_violation_count'] = violation_ledgers[0]['after_count'] if violation_ledgers else None
     summary['coverage_scope'] = 'Matching finite object deltas do not approve changed tool, source or array ordering. Every full occurrence object remains in the hash-linked itemized ledger.'
     return dict(record, data=summary)
 
@@ -408,7 +532,26 @@ def comparison_text(record):
         return ('The current scanner comparison is incomplete; no clean or accepted result is claimed. '
                 'Evidence: `' + record['path'] + '`; SHA-256 `' + record.get('sha256', '') + '`.\n\n' +
                 str(value.get('failure', value.get('error', 'See the retained incomplete comparison record.'))))
-    return '\n'.join(['Complete diagnostic arrays are available. They have not been approved by the owner.', '',
+    pair_notes = []
+    for row in value.get('unmatched_approach_pair_context', []):
+        states = [row[key] for key in ('historical_before', 'historical_after', 'current_before', 'current_after')]
+        unchanged_nongating = all(item.get('model_facing') is False and item.get('gates_in') == []
+                                 and item.get('violation') is False for item in states)
+        pair_notes.extend([
+            'The unmatched approach-label pair at `' + row['path'] + ':' + str(row['line']) +
+            '` has the same approaches-list transition as D128. It is still a different finite pair: '
+            'the current before/after role annotations are `' + str(row['current_before'].get('role')) + '` / `' +
+            str(row['current_after'].get('role')) + '`, whereas the historical annotations are `' +
+            str(row['historical_before'].get('role')) + '` / `' + str(row['historical_after'].get('role')) +
+            '`. Full before-object differences: ' + str(row['before_pair_differing_fields']) +
+            '; full after-object differences: ' + str(row['after_pair_differing_fields']) + '.', '',
+            'All four objects retain model_facing=false, empty gates_in and violation=false: ' +
+            str(unchanged_nongating) + '. This is not a new violation. The changed annotation is not normalized away '
+            'and no equivalence or approval is inferred.', ''])
+    comparison_scope = ('Complete diagnostic arrays for the current branch are available. They have not been approved by the owner.'
+                        if value.get('matches_current_branch_head') else
+                        'These complete diagnostic arrays belong to an earlier branch head and are retained as intermediate evidence. The current head still needs its own comparison; no owner approval is implied.')
+    return '\n'.join([comparison_scope, '',
         table(value['comparisons'], [('comparison', 'Source comparison'), ('array', 'Array'),
             ('before', 'Before'), ('after', 'After'), ('exact', 'Exact occurrences'),
             ('relocations', 'Line relocations'), ('field_changes', 'Field changes'),
@@ -416,11 +559,287 @@ def comparison_text(record):
         'Finite-delta comparison with D128:', '', table(value['d128_coverage'],
             [('array', 'Array'), ('kind', 'Delta type'), ('total', 'Current deltas'),
              ('same_finite_object_delta', 'Same finite D128 delta'), ('new_difference', 'New difference')]), '',
+        'Current deltas without an exact finite D128 match (coordinates are retained, not normalized or waived):', '',
+        table(value['d128_unmatched_deltas'], [('path', 'Path'), ('kind', 'Delta'),
+            ('before_line', 'Before line'), ('after_line', 'After line'), ('differing_fields', 'Changed fields'),
+            ('before_changed_values', 'Exact before values'), ('after_changed_values', 'Exact after values')]), '',
+        *pair_notes,
+        'Other current model-text function-coordinate changes, shown with their actual finite D128 matching status:', '',
+        table(value['model_text_function_changes'], [('path', 'Path'), ('before_line', 'Before line'),
+            ('after_line', 'After line'), ('differing_fields', 'Changed fields'),
+            ('before_changed_values', 'Exact before values'), ('after_changed_values', 'Exact after values'),
+            ('exact_finite_object_delta_match', 'Exact finite D128 match')]), '',
+        'The ordered violation arrays match across current main/candidate and both frozen D128 comparisons: ' +
+        str(value['ordered_violations_match_current_and_frozen']) + '; violation count ' +
+        str(value['ordered_violation_count']) + '. The complete hit arrays and scanner tool identities still changed. '
+        'Identical violation objects do not transfer approval or establish semantic equivalence for other differences.', '',
         value['coverage_scope'], '',
         'Complete occurrence objects, exact match indices, violations and ordering changes: `' + record['path'] +
         '`; SHA-256 `' + record['sha256'] + '`. JSON pointers in the report locate each itemized group.', '',
         'Approving the new comparison would address these new scanner findings and tool/source identities. '
         'It would not approve the API packet, the pending margin proposal or a native launch.'])
+
+
+def portability_finding(test_rows):
+    diagnostic = 'no writable temporary directory outside d4d-executions'
+    observed = []
+    for cohort in test_rows:
+        if cohort['state'] != 'completed':
+            continue
+        for case in cohort['cases']:
+            if case['outcome'] in ('error', 'failure') and (
+                    diagnostic in case['message'] or case.get('temporary_layout_diagnostic_in_trace')):
+                observed.append(dict(case, cohort=cohort['id'],
+                    source_commit=cohort['source_commit'], execution=cohort['outcome'],
+                    evidence=cohort['evidence']))
+    if not observed:
+        return {'id': 'H1-F2', 'state': 'portability_validation_pending',
+                'detail': 'The test portability temp_base selection may reject TMPDIR under d4d-executions and choose system tmp outside the permitted scratch location. No completed matching setup-error witness has been observed.'}
+    return {'id': 'H1-F2', 'state': 'observed_scope_layout_blocker',
+        'detail': 'Completed test evidence records temporary-layout refusals: the copied-helper fixtures reject the allowed TMPDIR under d4d-executions, while system tmp is outside the permitted sandbox scratch. This conflicts with the authorized test environment and is not a demonstrated production failure. The affected copied-helper assertions are not validated.',
+        'observed_negative_count': len(observed),
+        'observed_error_count': sum(row['outcome'] == 'error' for row in observed),
+        'observed_failure_count': sum(row['outcome'] == 'failure' for row in observed),
+        'observed_negatives': observed,
+        'recommendation': 'Request a narrow lead ruling on permitted temporary layout, or refactor the copied-helper fixtures to meet the approved layout while preserving production guards. No fixture assertion weakening, sandbox expansion or out-of-scope repair is authorized here.',
+        'changes_performed': 'None: failure retained, no guard relaxation or additional temporary write location.'}
+
+
+def object_differing_fields(left, right):
+    return sorted(key for key in set(left) | set(right)
+                  if key not in left or key not in right
+                  or json.dumps(left[key], sort_keys=True) != json.dumps(right[key], sort_keys=True))
+
+
+def ambiguous_alias_finding(test_rows):
+    path = OUT / 'codex-h1-ambiguous-table-finding-20261112.json'
+    value = read_json(path)
+    if value is None:
+        return {'id': 'H1-F5', 'state': 'classification_evidence_pending',
+                'detail': 'Two ambiguous argv alias expectations failed; classification remains pending.',
+                'evidence': reference(path)}
+    witnesses = completed_witnesses(test_rows)
+    cases = []
+    for observed in value['observed']['failures']:
+        element = ET.Element('testcase', observed['testcase'])
+        node = canonical_node(element, WT)
+        cases.append({'nodeid': node, 'message': observed['failure']['message'],
+                      'current_witnesses': witnesses.get(node, [])})
+    return {'id': 'H1-F5', 'state': 'requires_lead_contract_ruling', 'priority': 'P2',
+        'detail': 'Two observed ambiguous argv alias tests conflict with main scanner precision policy. '
+                  'Static source and AST comparisons show the four direct-call-path functions are identical '
+                  'from main through the pre-pin candidate and tested composition; this path does not read '
+                  'the native authority pin. This is a pre-existing integration contract disagreement, '
+                  'not a regression caused by the authority digest update. No historical test rerun was performed.',
+        'evidence': reference(path), 'observed_failed_tests': cases,
+        'observed_totals': value['observed']['totals'],
+        'source_comparisons': value['comparisons'], 'history': value['history_conclusion'],
+        'static_call_path': value['static_call_path'], 'recommendation': value['proposed_disposition'],
+        'changes_performed': 'None: no test deletion, xfail, assertion weakening or scanner behavior change.'}
+
+
+def retained_gap_finding(test_rows):
+    audit_path = OUT / 'codex-h1-retained-gap-finding-20261112.json'
+    audit = read_json(audit_path)
+    audit_paths = {
+        'F3d_module_helper_print': audit_path,
+        'B2_typed_container_alias_token': OUT / 'codex-h1-retained-container-finding-20261112.json',
+    }
+    witnesses = completed_witnesses(test_rows)
+    mismatch = []
+    baselines = []
+    ignored_aliases = []
+    seen_runs, seen_fixtures = set(), set()
+    for path in sorted((SCRATCH / 'tests/h1-ci-scanner/cases').glob('*/*/scanner/run.json')):
+        physical = path.resolve(strict=True)
+        if physical != path.absolute():
+            ignored_aliases.append({'path': str(path), 'physical_target': str(physical),
+                                    'reason': 'Symlink in leaf or parent path; not a distinct physical fixture run.'})
+            continue
+        assert physical not in seen_runs, 'duplicate physical fixture run: ' + str(path)
+        seen_runs.add(physical)
+        value = read_json(path)
+        assert value['fixture'] not in seen_fixtures, 'duplicate physical fixture identity: ' + value['fixture']
+        seen_fixtures.add(value['fixture'])
+        if value.get('fixture') == 'F0':
+            baselines.append(dict(reference(path), data=value))
+        expected, actual = value.get('expected_violations'), value.get('violation_count')
+        if type(expected) is not int or type(actual) is not int or expected == actual:
+            continue
+        node = 'tests/test_native_u3l_review_fixtures.py::test_retained_review_outcome[' + value['fixture'] + ']'
+        classified_path = audit_paths.get(value['fixture'])
+        classified = read_json(classified_path) if classified_path else None
+        classification = (dict(reference(classified_path), fixture_scope=value['fixture'],
+            summary={key: data for key, data in (classified or {}).items() if key != 'commands'})
+            if classified_path else {'state': 'pending', 'fixture_scope': value['fixture']})
+        mismatch.append({'nodeid': node, 'fixture': value['fixture'], 'expected_violations': expected,
+            'actual_violations': actual, 'fixture_run_status': value.get('status'),
+            'derivation_complete': value.get('derivation_complete'), 'failure': value.get('failure'),
+            'scan_run': dict(reference(path), data=value), 'scan_arrays': reference(path.parent / 'scan.json'),
+            'current_witnesses': witnesses.get(node, []), 'classification': classification})
+    return {'id': 'H1-F6', 'state': 'requires_lead_fixture_disposition' if mismatch else 'fixture_evidence_pending',
+        'priority': 'P2', 'detail': 'Retained historical known-gap fixture expectations disagree with the current complete scanner arrays. '
+        'Separate source-history audits establish that the F3d and B2 expectations predate intentional main scanner improvements. '
+        'The current positive controls support those bounded improvements; the historical fixture assertions still fail. Keep each failure visible and '
+        'do not change frozen fixtures or count retained CI identities as cleared without completed passing witnesses.',
+        'observed_mismatches': mismatch, 'unmutated_baseline_runs': baselines,
+        'ignored_alias_paths': ignored_aliases,
+        'physical_run_count': len(seen_runs), 'unique_physical_fixture_count': len(seen_fixtures),
+        'classification': dict(reference(audit_path), summary={key: value for key, value in (audit or {}).items() if key != 'commands'}),
+        'recommendation': 'Keep the known-gap expectation disagreement separate from the authority-pin repair. '
+        'Preserve the frozen U3-L fixture and D128 evidence. Subject to lead approval, version the current '
+        'expectation separately around the unmutated baseline plus the exact newly detected planted occurrences '
+        'and their actual gate membership, only after its own source-history classification and violation objects are reviewed. '
+        'Do not silently relax counts or mark the currently failing CI identity cleared by judgement.',
+        'changes_performed': 'None: no fixture edits, scanner behavior changes or new baseline runs by the report helper.'}
+
+
+def retained_gap_text(finding):
+    if not finding.get('observed_mismatches'):
+        return 'H1-F6 retained-gap fixture evidence remains pending.'
+    audits = [dict(fixture=row['fixture'], **row['classification']) for row in finding['observed_mismatches']]
+    classified_text = []
+    for row in finding['observed_mismatches']:
+        summary = row['classification'].get('summary') or {}
+        if not summary:
+            continue
+        explanation = summary.get('causal_explanation', summary.get('explanation', []))
+        recommendation = summary.get('recommendation') or {}
+        classified_text.extend(['**' + row['fixture'] + ' source evidence**', '',
+            *['- ' + text for text in explanation], '', recommendation.get('action', ''), '',
+            recommendation.get('restrictions', recommendation.get('prohibit', '')), ''])
+    return '\n'.join(['**H1-F6: retained known-gap fixture disagreements**', '', finding['detail'], '',
+        table(finding['observed_mismatches'], [('nodeid', 'Observed fixture'),
+            ('expected_violations', 'Expected violations'), ('actual_violations', 'Actual violations'),
+            ('derivation_complete', 'Scanner derivation complete'), ('fixture_run_status', 'Fixture run status'),
+            ('failure', 'Saved assertion')]), '',
+        'Exact scan arrays, command, stable-input census and completed-test witnesses are hash-linked in the JSON. '
+        'A saved fixture run does not substitute for the final cohort JUnit and cleanup evidence.', '',
+        'Per-fixture source-history classification:', '', table(audits,
+             [('fixture', 'Fixture'), ('state', 'Evidence state'), ('path', 'Audit'), ('sha256', 'SHA-256')]), '',
+        *classified_text, finding['recommendation']])
+
+
+def integration_record(donor, history):
+    full = git('rev-parse', donor).decode().strip()
+    subject = git('show', '-s', '--format=%s', donor).decode().strip()
+    matches = [row for row in history if row['subject'] == subject]
+    source_paths = git('diff', '--name-only', full + '^', full, '--').decode().splitlines()
+    source_diff = git('diff', '--binary', full + '^', full, '--', *source_paths)
+    verified = []
+    for matched in matches:
+        local = matched['commit']
+        local_paths = git('diff', '--name-only', local + '^', local, '--').decode().splitlines()
+        local_diff = git('diff', '--binary', local + '^', local, '--', *local_paths)
+        postimages = []
+        for path in sorted(set(source_paths) | set(local_paths)):
+            row = {'path': path}
+            for name, commit in (('donor', full), ('local', local)):
+                entry = git('ls-tree', commit, '--', path).decode().strip()
+                row[name + '_tree_entry'] = entry
+                row[name + '_blob_sha256'] = sha(git('show', commit + ':' + path)) if entry else None
+            row['postimage_equal'] = row['donor_tree_entry'] == row['local_tree_entry'] and row['donor_blob_sha256'] == row['local_blob_sha256']
+            postimages.append(row)
+        exact = (source_paths == local_paths and source_diff == local_diff
+                 and all(row['postimage_equal'] for row in postimages))
+        verified.append({'local_commit': local, 'donor_paths': source_paths, 'local_paths': local_paths,
+            'path_rosters_equal': source_paths == local_paths, 'postimages': postimages,
+            'donor_binary_diff_sha256': sha(source_diff), 'local_binary_diff_sha256': sha(local_diff),
+            'binary_diffs_equal': source_diff == local_diff, 'exact_cherry_pick_verified': exact})
+    return {'donor': full, 'subject': subject, 'subject_matches': matches, 'verification': verified,
+        'state': 'exact_cherry_pick_verified' if len(verified) == 1 and verified[0]['exact_cherry_pick_verified']
+                 else 'needs_diff_review' if matches else 'not_yet_present',
+        'scope': 'Commit identity, exact changed-path roster, modes/postimage bytes and binary patch verified independently of the subject. Test evidence remains separate.'}
+
+
+def report_helpers():
+    names = ('prepare_native_h1_helpers_20261112.py', 'restore_native_h1_config_20261112.py',
+             'report_native_h1_20261112.py', 'native_h1_authority_audit_20261112.py',
+             'native_h1_scanner_comparison_20261112.py', 'h1_ambiguous_table_finding_20261112.py',
+             'h1_retained_gap_finding_20261112.py', 'h1_retained_container_finding_20261112.py')
+    rows = []
+    for name in names:
+        path = DEV / 'scripts/adhoc' / name
+        command = ['/usr/bin/git', '-C', str(DEV), 'status', '--porcelain', '--', str(path.relative_to(DEV))]
+        status = subprocess.check_output(command, env=git_environment()).decode().strip()
+        rows.append(dict(reference(path), git_status=status,
+                         scope='Local provenance helper; this assignment does not commit or publish this report-worktree file.'))
+    return rows
+
+
+def helper2_acceptance(integrations):
+    status = EXEC.parent / 'data-sheets-schema/notes/coordination/STATUS.md'
+    raw = status.read_bytes()
+    lines = raw.splitlines(keepends=True)
+    marker = b'Helper 2, three handoffs, all accepted by the lead'
+    matches = [index for index, line in enumerate(lines) if marker in line]
+    snippets = []
+    accepted = False
+    if len(matches) == 1:
+        index = matches[0]
+        body = b''.join(lines[index:index + 2])
+        accepted = all(token in body for token in (b'91fcdab33', b'37a4aa5d0', b'789778427',
+                                                   b'codex-h2-observer-alias-20261112.md'))
+        snippets.append({'purpose': 'Lead acceptance of the original observer and test lane only',
+            'first_line': index + 1, 'last_line': index + 2, 'sha256': sha(body), 'text': body.decode()})
+        headers = [n for n in range(index) if b'2026-11-12T18:48:30Z' in lines[n]]
+        if headers:
+            start = headers[-1]
+            context = b''.join(lines[start:start + 2])
+            snippets.append({'purpose': 'Dated lead entry and N1 ballot v12 context',
+                'first_line': start + 1, 'last_line': start + 2,
+                'sha256': sha(context), 'text': context.decode()})
+    integrated = [item for item in integrations if item['state'] == 'exact_cherry_pick_verified']
+    state = ('lead_accepted_all_three_integrated_tests_reported_separately' if accepted and len(integrated) == 3
+             else 'lead_accepted_integration_in_progress' if accepted
+             else 'acceptance_evidence_not_verified')
+    return {'state': state, 'lead_acceptance_verified': accepted,
+        'status_evidence': {'path': str(status), 'sha256': sha(raw), 'bytes': len(raw),
+                            'state': 'present', 'snippets': snippets},
+        'authorized_donors': [item['donor'] for item in integrations],
+        'helper2_commits_integrated': [item['verification'][0]['local_commit'] for item in integrated],
+        'scope': 'Lead acceptance authorizes only the original observer repair and its two test commits, including public-completion verification in a protected-file scratch composition. The later launch-sequence and review-bundle lanes are not included or authorized by this report.'}
+
+
+def retained_comparison_refs(head):
+    rows = []
+    for path in sorted(SCRATCH.glob('*/comparison.json')):
+        value = read_json(path)
+        if value.get('kind') != 'native_h1_scanner_comparison':
+            continue
+        rows.append(dict(reference(path), status=value.get('status'),
+            source_branch_head=value.get('source_branch_head'),
+            matches_current_branch_head=value.get('source_branch_head') == head,
+            scope='Saved source-bound diagnostic; earlier complete comparisons remain intermediate evidence.'))
+    return rows
+
+
+def restoration_records():
+    rows = []
+    for path in sorted(SCRATCH.glob('*/config-restored.json')):
+        value = read_json(path)
+        config = Path(value['config'])
+        current = reference(config)
+        rows.append(dict(reference(path), data=value, current_config=current,
+                         current_config_matches_restoration=current.get('sha256') == value.get('restored_sha256')))
+    return rows
+
+
+def ambiguous_alias_text(finding):
+    if finding.get('id') != 'H1-F5':
+        return ''
+    evidence = finding.get('evidence') or {}
+    if finding.get('state') == 'classification_evidence_pending':
+        return 'H1-F5 classification evidence is pending.'
+    recommendation = finding['recommendation']
+    return '\n'.join(['**H1-F5: unresolved scanner integration contract**', '',
+        finding['detail'], '',
+        table(finding['observed_failed_tests'], [('nodeid', 'Observed failed test'), ('message', 'Actual failure')]), '',
+        'Source-history classification: `' + evidence['path'] + '`; SHA-256 `' + evidence['sha256'] + '`.', '',
+        'Main changed this behavior deliberately in `' + finding['history']['main_behavior_change'] +
+        '`; the older native test contract originated in `' + finding['history']['test_contract_origin'] + '`.', '',
+        'Recommended separate follow-up, requiring lead disposition: ' + recommendation['recommendation'], '',
+        recommendation['scope'], '', finding['changes_performed']])
 
 
 def apply_control_dispositions(report):
