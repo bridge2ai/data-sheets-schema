@@ -13011,7 +13011,7 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     **_NATIVE_V2_RENDER_SOURCES,
     # U3-L: one integrated authority version, coupled to the complete producer
     # family below. The older contracts retain their original source identity.
-    'src/data_sheets_schema/native_execution_authority_v2.py': 'bfdb5c86feb4c071ebf17e6ececa8fd60f1bc23bda98fefd42c0c211ecd7511a',
+    'src/data_sheets_schema/native_execution_authority_v2.py': 'b2189db86428b5977bfcbaa72adc5f504f3449c31b583359555b074916a95558',
     # validate_runtime_v2 and the profile guards form a closed two-module
     # dispatcher. Pin their complete bodies, imports, constants and callees;
     # neither a profile label nor a function's spelling authenticates it.
