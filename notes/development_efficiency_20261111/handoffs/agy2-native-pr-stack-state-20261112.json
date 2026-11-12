@@ -1,0 +1,815 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "claude-lead-agy2-native-pr-stack-state-20261112",
+  "date": "2026-11-12",
+  "repository": "bridge2ai/data-sheets-schema",
+  "worktree_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111",
+  "gh_collection_mode": "captured_gh_cli_output",
+  "target_main_commit": "7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1",
+  "d127_protected_files": [
+    "src/data_sheets_schema/shared_generation.py",
+    "src/data_sheets_schema/api_runner.py",
+    "src/download/prompts/canonical_hashes.yaml",
+    "tests/utils/run_spec_boundary_contracts.json"
+  ],
+  "pr_numbers": [
+    5839,
+    5840,
+    5841,
+    5851,
+    5852,
+    5853,
+    5855,
+    5857,
+    5858,
+    5866,
+    5871,
+    5542,
+    4659
+  ],
+  "summary": {
+    "total_prs": 13,
+    "draft_count": 11,
+    "ready_count": 2,
+    "prs_with_stack_parent_in_list_count": 7,
+    "prs_is_ancestor_of_another_in_list_count": 2,
+    "prs_has_ancestor_in_list_count": 6,
+    "prs_touching_d127_protected_files_count": 0,
+    "prs_containing_main_7ad8c9e7_count": 0,
+    "total_workflow_runs_across_heads": 43
+  },
+  "pull_requests": [
+    {
+      "number": 5839,
+      "title": "Reduce native development overhead and fix nested snapshot reuse",
+      "isDraft": true,
+      "draft_or_ready": "draft",
+      "headRefName": "codex/native-u1u3-combined-20261108",
+      "headRefOid": "458887766effe38207a77fea2d8033f1f3e1c7f3",
+      "baseRefName": "codex/native-u1u3-wp1-base-20261110",
+      "baseRefOid": "5f4a8e211826fe7f83ec51e6262d750687216aba",
+      "stack_edge_parent_prs": [],
+      "stack_edge_child_prs": [
+        5841,
+        5851,
+        5852,
+        5855,
+        5857
+      ],
+      "base_oid_matches_stack_parent_head_oid": null,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "UNSTABLE",
+      "changedFiles": 16,
+      "gh_files_list_count": 16,
+      "git_three_dot_changed_files_count": 16,
+      "is_ancestor_of_prs": [
+        5851,
+        5852,
+        5855,
+        5857,
+        5866,
+        5871
+      ],
+      "has_ancestor_prs": [],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 42961942808,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T04:51:35Z",
+          "headSha": "458887766effe38207a77fea2d8033f1f3e1c7f3"
+        },
+        {
+          "databaseId": 42961942809,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T04:51:35Z",
+          "headSha": "458887766effe38207a77fea2d8033f1f3e1c7f3"
+        },
+        {
+          "databaseId": 42961942947,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T04:51:35Z",
+          "headSha": "458887766effe38207a77fea2d8033f1f3e1c7f3"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 5839 is draft on head codex/native-u1u3-combined-20261108 (458887766eff) targeting codex/native-u1u3-wp1-base-20261110 (stack parent in list: none), reports MERGEABLE/UNSTABLE with 16 changed file(s), is ancestor of PR 5851, PR 5852, PR 5855, PR 5857, PR 5866, PR 5871 (has ancestor in list: none), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: D4D AI Assistant GitHub Mentions (42961942808: completed/skipped); Check for large files (42961942809: completed/success); Build and test data_sheets_schema (42961942947: completed/cancelled)."
+    },
+    {
+      "number": 5840,
+      "title": "Preserve native WP1 preparation and diagnostic tooling",
+      "isDraft": true,
+      "draft_or_ready": "draft",
+      "headRefName": "codex/native-wp1-preparation-20261111",
+      "headRefOid": "7043f0be145d5a0922cdbd3a73f099e6e9a12a3c",
+      "baseRefName": "codex/native-wp1-tools-base-20261111",
+      "baseRefOid": "01bdcb22dad66da1a167595251b23e6352c97ab7",
+      "stack_edge_parent_prs": [],
+      "stack_edge_child_prs": [],
+      "base_oid_matches_stack_parent_head_oid": null,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "UNSTABLE",
+      "changedFiles": 13,
+      "gh_files_list_count": 13,
+      "git_three_dot_changed_files_count": 13,
+      "is_ancestor_of_prs": [],
+      "has_ancestor_prs": [],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 42962735300,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T04:59:17Z",
+          "headSha": "7043f0be145d5a0922cdbd3a73f099e6e9a12a3c"
+        },
+        {
+          "databaseId": 42962609511,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T04:58:01Z",
+          "headSha": "7043f0be145d5a0922cdbd3a73f099e6e9a12a3c"
+        },
+        {
+          "databaseId": 42962609470,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T04:58:01Z",
+          "headSha": "7043f0be145d5a0922cdbd3a73f099e6e9a12a3c"
+        },
+        {
+          "databaseId": 42962609355,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T04:58:01Z",
+          "headSha": "7043f0be145d5a0922cdbd3a73f099e6e9a12a3c"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 5840 is draft on head codex/native-wp1-preparation-20261111 (7043f0be145d) targeting codex/native-wp1-tools-base-20261111 (stack parent in list: none), reports MERGEABLE/UNSTABLE with 13 changed file(s), is ancestor of none (has ancestor in list: none), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: D4D AI Assistant GitHub Mentions (42962735300: completed/skipped); D4D AI Assistant GitHub Mentions (42962609511: completed/skipped); Check for large files (42962609470: completed/success); Build and test data_sheets_schema (42962609355: completed/cancelled)."
+    },
+    {
+      "number": 5841,
+      "title": "Add read-only WP1 contended CPU diagnostic comparison CLI helper",
+      "isDraft": true,
+      "draft_or_ready": "draft",
+      "headRefName": "agy/native-cpu-diagnostic-20261111",
+      "headRefOid": "a36c7174fb35c62a2499ee52918354e57a877d6a",
+      "baseRefName": "codex/native-u1u3-combined-20261108",
+      "baseRefOid": "458887766effe38207a77fea2d8033f1f3e1c7f3",
+      "stack_edge_parent_prs": [
+        5839
+      ],
+      "stack_edge_child_prs": [],
+      "base_oid_matches_stack_parent_head_oid": true,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "UNSTABLE",
+      "changedFiles": 1,
+      "gh_files_list_count": 1,
+      "git_three_dot_changed_files_count": 1,
+      "is_ancestor_of_prs": [],
+      "has_ancestor_prs": [],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 42964055551,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:11:03Z",
+          "headSha": "a36c7174fb35c62a2499ee52918354e57a877d6a"
+        },
+        {
+          "databaseId": 42964017920,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:10:44Z",
+          "headSha": "a36c7174fb35c62a2499ee52918354e57a877d6a"
+        },
+        {
+          "databaseId": 42964017924,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:10:44Z",
+          "headSha": "a36c7174fb35c62a2499ee52918354e57a877d6a"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 5841 is draft on head agy/native-cpu-diagnostic-20261111 (a36c7174fb35) targeting codex/native-u1u3-combined-20261108 (stack parent in list: PR 5839), reports MERGEABLE/UNSTABLE with 1 changed file(s), is ancestor of none (has ancestor in list: none), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: D4D AI Assistant GitHub Mentions (42964055551: completed/skipped); Check for large files (42964017920: completed/success); Build and test data_sheets_schema (42964017924: completed/cancelled)."
+    },
+    {
+      "number": 5851,
+      "title": "Reuse capture authority with fresh checks after slot discovery",
+      "isDraft": true,
+      "draft_or_ready": "draft",
+      "headRefName": "agy/native-capture-recheck-5838-20261111",
+      "headRefOid": "459e56bf896a29d854c5d250ce8632d7e2564427",
+      "baseRefName": "codex/native-u1u3-combined-20261108",
+      "baseRefOid": "458887766effe38207a77fea2d8033f1f3e1c7f3",
+      "stack_edge_parent_prs": [
+        5839
+      ],
+      "stack_edge_child_prs": [],
+      "base_oid_matches_stack_parent_head_oid": true,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "UNSTABLE",
+      "changedFiles": 3,
+      "gh_files_list_count": 3,
+      "git_three_dot_changed_files_count": 3,
+      "is_ancestor_of_prs": [],
+      "has_ancestor_prs": [
+        5839
+      ],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 42971427279,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T06:17:48Z",
+          "headSha": "459e56bf896a29d854c5d250ce8632d7e2564427"
+        },
+        {
+          "databaseId": 42967255110,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:40:09Z",
+          "headSha": "459e56bf896a29d854c5d250ce8632d7e2564427"
+        },
+        {
+          "databaseId": 42965552703,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:24:24Z",
+          "headSha": "459e56bf896a29d854c5d250ce8632d7e2564427"
+        },
+        {
+          "databaseId": 42965552735,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:24:24Z",
+          "headSha": "459e56bf896a29d854c5d250ce8632d7e2564427"
+        },
+        {
+          "databaseId": 42965552670,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:24:24Z",
+          "headSha": "459e56bf896a29d854c5d250ce8632d7e2564427"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 5851 is draft on head agy/native-capture-recheck-5838-20261111 (459e56bf896a) targeting codex/native-u1u3-combined-20261108 (stack parent in list: PR 5839), reports MERGEABLE/UNSTABLE with 3 changed file(s), is ancestor of none (has ancestor in list: PR 5839), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: D4D AI Assistant GitHub Mentions (42971427279: completed/skipped); D4D AI Assistant GitHub Mentions (42967255110: completed/skipped); Check for large files (42965552703: completed/success); Build and test data_sheets_schema (42965552735: completed/cancelled); D4D AI Assistant GitHub Mentions (42965552670: completed/skipped)."
+    },
+    {
+      "number": 5852,
+      "title": "Reuse native import facts while retaining live graph checks",
+      "isDraft": true,
+      "draft_or_ready": "draft",
+      "headRefName": "codex/native-import-facts-reuse-20261111",
+      "headRefOid": "89975411d65e42aae5baa2bb92276ad5f9fabf1a",
+      "baseRefName": "codex/native-u1u3-combined-20261108",
+      "baseRefOid": "458887766effe38207a77fea2d8033f1f3e1c7f3",
+      "stack_edge_parent_prs": [
+        5839
+      ],
+      "stack_edge_child_prs": [],
+      "base_oid_matches_stack_parent_head_oid": true,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "UNSTABLE",
+      "changedFiles": 11,
+      "gh_files_list_count": 11,
+      "git_three_dot_changed_files_count": 11,
+      "is_ancestor_of_prs": [],
+      "has_ancestor_prs": [
+        5839
+      ],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 42971424806,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T06:17:46Z",
+          "headSha": "89975411d65e42aae5baa2bb92276ad5f9fabf1a"
+        },
+        {
+          "databaseId": 42965805396,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:26:46Z",
+          "headSha": "89975411d65e42aae5baa2bb92276ad5f9fabf1a"
+        },
+        {
+          "databaseId": 42965805390,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:26:46Z",
+          "headSha": "89975411d65e42aae5baa2bb92276ad5f9fabf1a"
+        },
+        {
+          "databaseId": 42965805415,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:26:46Z",
+          "headSha": "89975411d65e42aae5baa2bb92276ad5f9fabf1a"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 5852 is draft on head codex/native-import-facts-reuse-20261111 (89975411d65e) targeting codex/native-u1u3-combined-20261108 (stack parent in list: PR 5839), reports MERGEABLE/UNSTABLE with 11 changed file(s), is ancestor of none (has ancestor in list: PR 5839), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: D4D AI Assistant GitHub Mentions (42971424806: completed/skipped); Check for large files (42965805396: completed/success); Build and test data_sheets_schema (42965805390: completed/cancelled); D4D AI Assistant GitHub Mentions (42965805415: completed/skipped)."
+    },
+    {
+      "number": 5853,
+      "title": "Preserve the native stale-refusal trace analysis",
+      "isDraft": true,
+      "draft_or_ready": "draft",
+      "headRefName": "codex/native-development-analysis-20261111",
+      "headRefOid": "76a443ee34103ed18f30041c111f9f2aae1af40e",
+      "baseRefName": "main",
+      "baseRefOid": "925d726d67cdd03fe28fdeafdde60fa27df57205",
+      "stack_edge_parent_prs": [],
+      "stack_edge_child_prs": [],
+      "base_oid_matches_stack_parent_head_oid": null,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "UNSTABLE",
+      "changedFiles": 2,
+      "gh_files_list_count": 2,
+      "git_three_dot_changed_files_count": 2,
+      "is_ancestor_of_prs": [],
+      "has_ancestor_prs": [],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 42966522511,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:33:21Z",
+          "headSha": "76a443ee34103ed18f30041c111f9f2aae1af40e"
+        },
+        {
+          "databaseId": 42966522496,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:33:21Z",
+          "headSha": "76a443ee34103ed18f30041c111f9f2aae1af40e"
+        },
+        {
+          "databaseId": 42966522505,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:33:21Z",
+          "headSha": "76a443ee34103ed18f30041c111f9f2aae1af40e"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 5853 is draft on head codex/native-development-analysis-20261111 (76a443ee3410) targeting main (stack parent in list: none), reports MERGEABLE/UNSTABLE with 2 changed file(s), is ancestor of none (has ancestor in list: none), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: D4D AI Assistant GitHub Mentions (42966522511: completed/skipped); Check for large files (42966522496: completed/success); Build and test data_sheets_schema (42966522505: completed/cancelled)."
+    },
+    {
+      "number": 5855,
+      "title": "Native validation: add one bounded capture-readback check",
+      "isDraft": true,
+      "draft_or_ready": "draft",
+      "headRefName": "codex/native-capture-recheck-adapter-20261111",
+      "headRefOid": "f82e451743086fc4ec45cda044577e7b587c57c1",
+      "baseRefName": "codex/native-u1u3-combined-20261108",
+      "baseRefOid": "458887766effe38207a77fea2d8033f1f3e1c7f3",
+      "stack_edge_parent_prs": [
+        5839
+      ],
+      "stack_edge_child_prs": [],
+      "base_oid_matches_stack_parent_head_oid": true,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "UNSTABLE",
+      "changedFiles": 5,
+      "gh_files_list_count": 5,
+      "git_three_dot_changed_files_count": 5,
+      "is_ancestor_of_prs": [],
+      "has_ancestor_prs": [
+        5839
+      ],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 42971551755,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T06:18:52Z",
+          "headSha": "f82e451743086fc4ec45cda044577e7b587c57c1"
+        },
+        {
+          "databaseId": 42967083141,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:38:29Z",
+          "headSha": "f82e451743086fc4ec45cda044577e7b587c57c1"
+        },
+        {
+          "databaseId": 42967083182,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:38:29Z",
+          "headSha": "f82e451743086fc4ec45cda044577e7b587c57c1"
+        },
+        {
+          "databaseId": 42967083167,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:38:29Z",
+          "headSha": "f82e451743086fc4ec45cda044577e7b587c57c1"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 5855 is draft on head codex/native-capture-recheck-adapter-20261111 (f82e45174308) targeting codex/native-u1u3-combined-20261108 (stack parent in list: PR 5839), reports MERGEABLE/UNSTABLE with 5 changed file(s), is ancestor of none (has ancestor in list: PR 5839), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: D4D AI Assistant GitHub Mentions (42971551755: completed/skipped); Build and test data_sheets_schema (42967083141: completed/cancelled); D4D AI Assistant GitHub Mentions (42967083182: completed/skipped); Check for large files (42967083167: completed/success)."
+    },
+    {
+      "number": 5857,
+      "title": "Native efficiency: integrate capture rechecks and import-fact reuse",
+      "isDraft": true,
+      "draft_or_ready": "draft",
+      "headRefName": "codex/native-capture-ast-integration-20261111",
+      "headRefOid": "382f0dfd1ce863fdf257a77e2bbb2637dbe2f67b",
+      "baseRefName": "codex/native-u1u3-combined-20261108",
+      "baseRefOid": "458887766effe38207a77fea2d8033f1f3e1c7f3",
+      "stack_edge_parent_prs": [
+        5839
+      ],
+      "stack_edge_child_prs": [
+        5866,
+        5871
+      ],
+      "base_oid_matches_stack_parent_head_oid": true,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "UNSTABLE",
+      "changedFiles": 21,
+      "gh_files_list_count": 21,
+      "git_three_dot_changed_files_count": 21,
+      "is_ancestor_of_prs": [
+        5866,
+        5871
+      ],
+      "has_ancestor_prs": [
+        5839
+      ],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 42971420248,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T06:17:44Z",
+          "headSha": "382f0dfd1ce863fdf257a77e2bbb2637dbe2f67b"
+        },
+        {
+          "databaseId": 42967472288,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:42:11Z",
+          "headSha": "382f0dfd1ce863fdf257a77e2bbb2637dbe2f67b"
+        },
+        {
+          "databaseId": 42967472478,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:42:11Z",
+          "headSha": "382f0dfd1ce863fdf257a77e2bbb2637dbe2f67b"
+        },
+        {
+          "databaseId": 42967472339,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T05:42:11Z",
+          "headSha": "382f0dfd1ce863fdf257a77e2bbb2637dbe2f67b"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 5857 is draft on head codex/native-capture-ast-integration-20261111 (382f0dfd1ce8) targeting codex/native-u1u3-combined-20261108 (stack parent in list: PR 5839), reports MERGEABLE/UNSTABLE with 21 changed file(s), is ancestor of PR 5866, PR 5871 (has ancestor in list: PR 5839), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: D4D AI Assistant GitHub Mentions (42971420248: completed/skipped); D4D AI Assistant GitHub Mentions (42967472288: completed/skipped); Check for large files (42967472478: completed/success); Build and test data_sheets_schema (42967472339: completed/cancelled)."
+    },
+    {
+      "number": 5858,
+      "title": "Record native efficiency results and remaining acceptance gates",
+      "isDraft": true,
+      "draft_or_ready": "draft",
+      "headRefName": "codex/native-efficiency-results-20261111",
+      "headRefOid": "418613e51a39dc18334f85cfb42f6479654e573e",
+      "baseRefName": "main",
+      "baseRefOid": "925d726d67cdd03fe28fdeafdde60fa27df57205",
+      "stack_edge_parent_prs": [],
+      "stack_edge_child_prs": [],
+      "base_oid_matches_stack_parent_head_oid": null,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "UNSTABLE",
+      "changedFiles": 84,
+      "gh_files_list_count": 84,
+      "git_three_dot_changed_files_count": 84,
+      "is_ancestor_of_prs": [],
+      "has_ancestor_prs": [],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 43152572419,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-12T04:06:20Z",
+          "headSha": "418613e51a39dc18334f85cfb42f6479654e573e"
+        },
+        {
+          "databaseId": 43152572403,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "event": "pull_request",
+          "createdAt": "2026-11-12T04:06:20Z",
+          "headSha": "418613e51a39dc18334f85cfb42f6479654e573e"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 5858 is draft on head codex/native-efficiency-results-20261111 (418613e51a39) targeting main (stack parent in list: none), reports MERGEABLE/UNSTABLE with 84 changed file(s), is ancestor of none (has ancestor in list: none), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: Check for large files (43152572419: completed/success); Build and test data_sheets_schema (43152572403: completed/cancelled)."
+    },
+    {
+      "number": 5866,
+      "title": "Preserve capture evidence and bounded private-config restoration",
+      "isDraft": true,
+      "draft_or_ready": "draft",
+      "headRefName": "codex/native-capture-cleanup-20261111",
+      "headRefOid": "8bb1e949ccf3ee6ce5698af301238a01935676b5",
+      "baseRefName": "codex/native-capture-ast-integration-20261111",
+      "baseRefOid": "382f0dfd1ce863fdf257a77e2bbb2637dbe2f67b",
+      "stack_edge_parent_prs": [
+        5857
+      ],
+      "stack_edge_child_prs": [],
+      "base_oid_matches_stack_parent_head_oid": true,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "UNSTABLE",
+      "changedFiles": 6,
+      "gh_files_list_count": 6,
+      "git_three_dot_changed_files_count": 6,
+      "is_ancestor_of_prs": [],
+      "has_ancestor_prs": [
+        5839,
+        5857
+      ],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 42971271403,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T06:16:26Z",
+          "headSha": "8bb1e949ccf3ee6ce5698af301238a01935676b5"
+        },
+        {
+          "databaseId": 42971271336,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T06:16:26Z",
+          "headSha": "8bb1e949ccf3ee6ce5698af301238a01935676b5"
+        },
+        {
+          "databaseId": 42971271366,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T06:16:26Z",
+          "headSha": "8bb1e949ccf3ee6ce5698af301238a01935676b5"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 5866 is draft on head codex/native-capture-cleanup-20261111 (8bb1e949ccf3) targeting codex/native-capture-ast-integration-20261111 (stack parent in list: PR 5857), reports MERGEABLE/UNSTABLE with 6 changed file(s), is ancestor of none (has ancestor in list: PR 5839, PR 5857), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: Build and test data_sheets_schema (42971271403: completed/cancelled); D4D AI Assistant GitHub Mentions (42971271336: completed/skipped); Check for large files (42971271366: completed/success)."
+    },
+    {
+      "number": 5871,
+      "title": "Combine adjacent execution verification before native reservation",
+      "isDraft": true,
+      "draft_or_ready": "draft",
+      "headRefName": "codex/native-postaccept-fusion-20261111",
+      "headRefOid": "1a137b58860416a31618de44173180d021dfcc61",
+      "baseRefName": "codex/native-capture-ast-integration-20261111",
+      "baseRefOid": "382f0dfd1ce863fdf257a77e2bbb2637dbe2f67b",
+      "stack_edge_parent_prs": [
+        5857
+      ],
+      "stack_edge_child_prs": [],
+      "base_oid_matches_stack_parent_head_oid": true,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "UNSTABLE",
+      "changedFiles": 18,
+      "gh_files_list_count": 18,
+      "git_three_dot_changed_files_count": 18,
+      "is_ancestor_of_prs": [],
+      "has_ancestor_prs": [
+        5839,
+        5857
+      ],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 42976790492,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T07:04:06Z",
+          "headSha": "1a137b58860416a31618de44173180d021dfcc61"
+        },
+        {
+          "databaseId": 42976790518,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T07:04:06Z",
+          "headSha": "1a137b58860416a31618de44173180d021dfcc61"
+        },
+        {
+          "databaseId": 42976790438,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "event": "pull_request",
+          "createdAt": "2026-11-11T07:04:06Z",
+          "headSha": "1a137b58860416a31618de44173180d021dfcc61"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 5871 is draft on head codex/native-postaccept-fusion-20261111 (1a137b588604) targeting codex/native-capture-ast-integration-20261111 (stack parent in list: PR 5857), reports MERGEABLE/UNSTABLE with 18 changed file(s), is ancestor of none (has ancestor in list: PR 5839, PR 5857), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: Check for large files (42976790492: completed/success); D4D AI Assistant GitHub Mentions (42976790518: completed/skipped); Build and test data_sheets_schema (42976790438: completed/cancelled)."
+    },
+    {
+      "number": 5542,
+      "title": "Analysis plan amendment N1: native agentic arm (draft for ratification)",
+      "isDraft": false,
+      "draft_or_ready": "ready",
+      "headRefName": "agy/native-amendment-n1-20261108",
+      "headRefOid": "754fbfdae10dbe9fe3f4443725cf0fa2a696b49e",
+      "baseRefName": "main",
+      "baseRefOid": "cf50d9a1c059f3b5030103378ccef33619475dde",
+      "stack_edge_parent_prs": [],
+      "stack_edge_child_prs": [],
+      "base_oid_matches_stack_parent_head_oid": null,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "CLEAN",
+      "changedFiles": 1,
+      "gh_files_list_count": 1,
+      "git_three_dot_changed_files_count": 1,
+      "is_ancestor_of_prs": [],
+      "has_ancestor_prs": [],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 42466479858,
+          "workflowName": "D4D AI Assistant GitHub Mentions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "event": "pull_request",
+          "createdAt": "2026-11-08T09:16:27Z",
+          "headSha": "754fbfdae10dbe9fe3f4443725cf0fa2a696b49e"
+        },
+        {
+          "databaseId": 42466479330,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-08T09:16:26Z",
+          "headSha": "754fbfdae10dbe9fe3f4443725cf0fa2a696b49e"
+        },
+        {
+          "databaseId": 42466479333,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-11-08T09:16:26Z",
+          "headSha": "754fbfdae10dbe9fe3f4443725cf0fa2a696b49e"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 5542 is ready on head agy/native-amendment-n1-20261108 (754fbfdae10d) targeting main (stack parent in list: none), reports MERGEABLE/CLEAN with 1 changed file(s), is ancestor of none (has ancestor in list: none), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: D4D AI Assistant GitHub Mentions (42466479858: completed/skipped); Check for large files (42466479330: completed/success); Build and test data_sheets_schema (42466479333: completed/success)."
+    },
+    {
+      "number": 4659,
+      "title": "Reuse decoded native streams and retain precise CI failure evidence",
+      "isDraft": false,
+      "draft_or_ready": "ready",
+      "headRefName": "fix/4537-trace-single-decode",
+      "headRefOid": "17aac4c3c82c88cc80c4e1660a1349c1cce92beb",
+      "baseRefName": "review/4354-offline-acceptance",
+      "baseRefOid": "0125eebbc214d0907c3b69d23758cd9441911a78",
+      "stack_edge_parent_prs": [],
+      "stack_edge_child_prs": [],
+      "base_oid_matches_stack_parent_head_oid": null,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "UNSTABLE",
+      "changedFiles": 31,
+      "gh_files_list_count": 31,
+      "git_three_dot_changed_files_count": 31,
+      "is_ancestor_of_prs": [],
+      "has_ancestor_prs": [],
+      "workflow_runs_on_head": [
+        {
+          "databaseId": 39244230957,
+          "workflowName": "Check for large files",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "pull_request",
+          "createdAt": "2026-10-19T11:23:01Z",
+          "headSha": "17aac4c3c82c88cc80c4e1660a1349c1cce92beb"
+        },
+        {
+          "databaseId": 39244231119,
+          "workflowName": "Build and test data_sheets_schema",
+          "status": "completed",
+          "conclusion": "failure",
+          "event": "pull_request",
+          "createdAt": "2026-10-19T11:23:01Z",
+          "headSha": "17aac4c3c82c88cc80c4e1660a1349c1cce92beb"
+        }
+      ],
+      "d127_protected_files_touched": [],
+      "touches_d127_protected_files": false,
+      "contains_main_7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1": false,
+      "one_line_summary": "PR 4659 is ready on head fix/4537-trace-single-decode (17aac4c3c82c) targeting review/4354-offline-acceptance (stack parent in list: none), reports MERGEABLE/UNSTABLE with 31 changed file(s), is ancestor of none (has ancestor in list: none), touches none of the D127 protected files, contains main 7ad8c9e7295f: no, and has head workflow runs: Check for large files (39244230957: completed/success); Build and test data_sheets_schema (39244231119: completed/failure)."
+    }
+  ]
+}

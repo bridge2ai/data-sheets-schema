@@ -331,3 +331,30 @@ Asked because the owner asked where the native arm stands and the verification-t
 - **For the owner:** no demonstrated route reaches the reservation on this host with the present implementation. A later genuine capture is a distinct, unproved route that needs a design change and an amendment to the recorded event order.
 
 Written 2026-11-12T04:05:48Z.
+
+## Eleventh round: the owner makes the native arm the main result; the path to the first native canary
+
+**The owner's direction (D134 in STATUS):** the native agentic arm is the main result and the API route is for comparison only. The lead had recommended parking the native arm behind the API route's refusal; that recommendation is withdrawn, and no diagnostic is bought on the refusal.
+
+**What the lead found first.** Amendment N1 (PR 5542, unratified) marks both freshness terms as proposed, and says the 300-second value was written before any launch-path timing had been measured. The diagnostic of the Tenth round's subject is that measurement.
+
+**Four read-only assignments and their handoffs** (`assignments/claude-lead-*-20261112.md`, `handoffs/*-20261112.*`):
+
+| Worker | Handoff | What it establishes | Lead's check |
+|---|---|---|---|
+| Codex helper | `codex-native-critical-path-20261112.md` | 23 gates from today's source to an accepted first canary | Counts of amendment items and proposed clauses re-derived on the amendment text; pull-request facts agree with AGY2's data; the two active constants and the frozen guard v1 read in the source and in N1.9 item 2 |
+| AGY4 | `agy4-freshness-value-table-20261112.md` | Smallest value each retained diagnostic would have passed: 397 s, 335 s, 319 s | Script rerun reproduces the JSON byte for byte; the 382f rows equal the lead's earlier check |
+| AGY2 | `agy2-native-pr-stack-state-20261112.md` | 13 pull requests; no native head contains current main; every full CI run on a native head was cancelled | Heads and run ids agree with Codex's independent table |
+| AGY1 | `agy1-n1-ratification-items-20261112.md` | 24 lettered ratification items, all with a proposed clause | The lead's own `grep` counts agree |
+
+**The path, summed by `scripts/adhoc/sum_native_critical_path_hours_20261112.py`:** 35.6 to 101.75 hours for a clean first pass; the longest dependency chain is 28.85 to 83 hours; eight gates need the owner. Besides the freshness value it contains: reconciling the native stack with current main, re-approving changed protected files, revising and ratifying the amendment (it still names schema 3.2.0), the two real-binary probes, a production registration that has never been built, and the uncertified public-completion and failure cases.
+
+**Corrections to the lead's own statements.** The value lives in two active places, not three: guard v1 is kept byte-identical by the amendment. Six test files need edits, not twelve. The lead's "more than twice the measured time" for 900 seconds compared against the synthetic diagnostic only; production has four further full verifications after the capture event, estimated by Codex at 58 to 309 seconds. The lead now recommends 1200 seconds.
+
+**Lead dispositions (Codex's gate G02):** the later-capture redesign, the cheaper post-acceptance verifier (issue 5722) and any N=10 campaign are follow-ups; the landing is one main-targeted combined pull request; the native offline test cohorts are no longer stopped. The owner's word is still needed for private-composition arming, the diagnostic, the probes and any model call.
+
+**Next assignments:** Codex builds the main-targeted candidate (gates G04 and G05) in a new worktree, unpublished; AGY2 extracts the launch commands' inputs and the builders that exist. The lead re-ran the cancelled full CI run 42976790438 on the stack top for an early signal.
+
+**One tooling fault:** the 5-second and 10-second relay scripts timed out against a slow Terminal and delivered nothing. Copies with a 90-second timeout delivered.
+
+Written 2026-11-12T07:13:24Z.
