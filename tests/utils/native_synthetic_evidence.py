@@ -42,7 +42,8 @@ def runtime_for(data, root):
         auth={'loggedIn': False, 'authMethod': SYNTHETIC_PROFILE, 'apiProvider': 'scripted-local',
             'subscriptionType': SYNTHETIC_PROFILE, 'expected_api_key_source': 'none'},
         environment={'PATH': str(Path(sys.executable).parent) + ':/usr/bin:/bin',
-            'HOME': str(home), 'CLAUDE_SECURESTORAGE_CONFIG_DIR': '',
+            'HOME': str(home), 'PYSTOW_HOME': str(root / 'native-attempt' / 'helper-cache'),
+            'CLAUDE_SECURESTORAGE_CONFIG_DIR': '',
             'CLAUDE_CODE_DISABLE_1M_CONTEXT': '0'},
         limits_basis=c.canonical({'kind': aliases.PROVISIONAL_KIND, 'version': 1,
             'model_aliases': pair, 'profile': SYNTHETIC_PROFILE}).decode())

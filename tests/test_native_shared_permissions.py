@@ -207,7 +207,7 @@ def fixture(tmp_path_factory, request):
             selected = capture.document()
             expected = shared_registration.permission_expectation(runtime, composed, replay,
                 'Synthetic saved observations only.' + command_guidance(composed['policy']),
-                root / 'future-config', authority.dependency_identity())
+                root / 'attempt' / 'cli_config', authority.dependency_identity())
             source_raw = capture.raw(selected['inputs']['bundle']['path'])
             value = fabricated_manifest(expected, selected, root / 'isolated-probes', source_raw)
             yield {'root': root, 'expected': expected, 'selection': selected,

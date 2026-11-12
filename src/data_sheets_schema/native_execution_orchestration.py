@@ -451,6 +451,9 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 for directory in outputs:
                     _mkdir_durable(directory)
                 _mkdir_durable(attempt/'cli_config')
+                if contract.kind == 'd4d_native_shared_attempt':
+                    from .native_helper_cache import create_for_attempt
+                    create_for_attempt(value)
                 _unchanged(value, registration_raw, authorization)
                 if value['runtime']['keep_awake']['policy'] == 'macos_iokit_ims_v1':
                     guard = controls['run_direct_canary_awake'].KeepAwake()

@@ -144,12 +144,14 @@ def _runtime(value):
               and auth['expected_api_key_source'] == 'none', 'unsupported selected auth declaration')
     _text(auth['subscriptionType'], 'subscription type')
     env = value['environment']
-    _need(type(env) is dict and not set(env) - runtime_values.BASE_ENV_KEYS
-          and runtime_values.ENV_REQUIRED <= set(env), 'runtime environment shape differs')
+    _need(type(env) is dict and not set(env) - runtime_values.V2_BASE_ENV_KEYS
+          and runtime_values.V2_ENV_REQUIRED <= set(env), 'runtime environment shape differs')
     for key,text in env.items():
         _need(type(text) is str and len(text) <= 16384 and not any(ch in text for ch in ('\0','\n','\r'))
               and (bool(text.strip()) or key == 'CLAUDE_SECURESTORAGE_CONFIG_DIR'), 'invalid runtime environment text')
     _path(env['HOME'])
+    from .native_helper_cache import declared_path
+    declared_path(env)
     for path in env['PATH'].split(':'):
         _path(path)
     _need(env['CLAUDE_CODE_DISABLE_1M_CONTEXT'] in ('0','1'), 'context environment selection differs')
@@ -242,6 +244,7 @@ def recipe(expected):
 
 def _source_closure(expected):
     from . import native_runtime_profiles as profiles
+    from . import native_helper_cache as helper_cache
     contract, effects = _dependencies()
     rows = expected['production_sources']
     _need(type(rows) is list and 0 < len(rows) <= 640, 'invalid production source closure')
@@ -259,6 +262,7 @@ def _source_closure(expected):
                          ('data_sheets_schema.native_shared_policy', command_policy.__file__),
                          ('data_sheets_schema.native_shared_runtime_values', runtime_values.__file__),
                          ('data_sheets_schema.native_runtime_profiles', profiles.__file__),
+                         ('data_sheets_schema.native_helper_cache', helper_cache.__file__),
                          ('data_sheets_schema.native_model_aliases', native_model_aliases.__file__),
                          ('data_sheets_schema.native_shared_permission_protocol', _permission_protocol().__file__)]:
         raw = Path(file).read_bytes()
@@ -316,6 +320,14 @@ def _authority(expected, selection, controller_sources):
           'production environment has missing or extra fields')
     _need(all(env[key] == value for key,value in {**runtime['environment'], **runtime_values.POLICY_ENV}.items()),
           'fixed or selected environment differs')
+    from .native_helper_cache import for_attempt
+    cache = for_attempt(runtime['environment'], _path(env['CLAUDE_CONFIG_DIR']).parent)
+    protected_cache = [policy['readonly_lookups']['repository'], *policy['readonly_lookups']['inputs'],
+                       *policy['readonly_lookups']['output_directories'], env['CLAUDE_CONFIG_DIR']]
+    for item in protected_cache:
+        other = _path(item)
+        _need(cache != other and cache not in other.parents and other not in cache.parents,
+              'helper cache overlaps model file authority or source')
     _need(env['D4D_PROFILE'] == selection['inputs']['profile']['name'], 'environment profile differs')
     manifest = selection['inputs']['source_manifest']
     _need(env['D4D_MANIFEST'] == (manifest['path'] if manifest else 'None'), 'environment source manifest differs')
@@ -404,7 +416,7 @@ def _roots(expected, selection, launch):
                  *expected['policy']['readonly_lookups']['inputs'],
                  *expected['policy']['readonly_lookups']['output_directories']]
     protected += [value for key,value in expected['permission_environment'].items()
-                  if key in ('CLAUDE_CONFIG_DIR', 'D4D_LAUNCH_INSTRUCTION') and value.startswith('/')]
+                  if key in ('CLAUDE_CONFIG_DIR', 'D4D_LAUNCH_INSTRUCTION', 'PYSTOW_HOME') and value.startswith('/')]
     protected_paths = [_path(x) for x in protected]
     for number, root in enumerate(roots):
         for other in roots[number+1:] + protected_paths:
