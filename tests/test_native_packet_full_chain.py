@@ -124,7 +124,14 @@ def test_complete_review_ci_word_admission_without_reservation(complete_chain):
     joined=execution.authorizations(case['reg'].read_bytes(),case['value'],
         review_path=case['review'],ci_path=case['ci'],launch_word_path=case['word'])
     assert joined
-    (case['root']/'admission-join.json').write_bytes(c.canonical({'scope':LABEL,'review_ci_word_join_validated':True,'reservation_performed':False}))
+    from data_sheets_schema.native_shared_controls_orchestration import loaded_controls
+    with loaded_controls(case['value']['dependencies']) as controls:
+        admitted=preparation.admit(case['reg'].read_bytes(),review_path=case['review'],
+            ci_path=case['ci'],launch_word_path=case['word'],classifier_projection=controls)
+    assert all(not path.exists() for path in admitted.reservations)
+    (case['root']/'admission-join.json').write_bytes(c.canonical({'scope':LABEL,'review_ci_word_join_validated':True,
+        'fresh_admit_validated':True,'future_reservations':[str(path) for path in admitted.reservations],
+        'reservation_performed':False}))
 
 
 @pytest.mark.parametrize('command',['capture-subscription-event','prepare-subscription-guard-v2','launch'])
@@ -164,7 +171,7 @@ def test_guard_pure_builder_and_latest_capture_refusal(complete_chain):
         owner_statement=terms,capture_index=1,capture_claim_count=1)
     (root/'synthetic-unclaimed-guard.json').write_bytes(raw)
     with pytest.raises((ValueError,FileNotFoundError)) as refused:
-        with capture.current_guard_preparation(root/'NO-CAPTURE.json',registration_raw=case['reg'].read_bytes(),
+        with capture.current_guard_preparation(root/'synthetic-capture'/'captures'/c.sha(case['word'].read_bytes())/'capture-1'/'capture.json',registration_raw=case['reg'].read_bytes(),
                 review_bundle_raw=case['review'].read_bytes(),launch_word_raw=case['word'].read_bytes()):
             pytest.fail('nonexistent capture accepted')
     (root/'latest-capture-refusal.json').write_bytes(c.canonical({'scope':LABEL,'refusal':str(refused.value),'guard_scope':'pure synthetic guard only; no actual claim or current capture','reservation_performed':False}))
