@@ -56,3 +56,24 @@ def test_project_prefix(tmp_path,project):
         assert all((tmp_path/'packet'/name).stat().st_size for name in status['completed'])
     else:
         assert status['status']=='production_refusal'
+
+
+def test_canonical_bundle_audit(tmp_path):
+    """Distinguish real staleness from explicit absolute manifest header drift."""
+    import difflib
+    reg=load_registry(ROOT/'data/preprocessed/source_manifest.yaml')
+    records=[]
+    for project in reg.projects():
+        cmd=[sys.executable,'-P','-B','-m','data_sheets_schema.cli','download','audit-bundles','--project',project,'--strict']
+        got=subprocess.run(cmd,cwd=ROOT,text=True,capture_output=True,timeout=240)
+        rebuilt=tmp_path/(project+'-rebuilt.txt')
+        source=reg.source_dir(project) or Path('data/preprocessed/individual')/project
+        build=[sys.executable,'-P','-B',str(ROOT/'src/download/concatenate_documents.py'),'-i',str(source),'-o',str(rebuilt),'-e','.txt','--manifest','data/preprocessed/source_manifest.yaml','--project',project]
+        made=subprocess.run(build,cwd=ROOT,text=True,capture_output=True,timeout=120)
+        original=reg.bundle(project).resolve()
+        diff=''.join(difflib.unified_diff(original.read_text().splitlines(True),rebuilt.read_text().splitlines(True),fromfile=str(original),tofile=str(rebuilt))) if rebuilt.exists() else None
+        records.append({'project':project,'command':cmd,'returncode':got.returncode,'stdout':got.stdout,'stderr':got.stderr,
+                        'rebuild_command':build,'rebuild_returncode':made.returncode,'rebuild_stdout':made.stdout,'rebuild_stderr':made.stderr,
+                        'original':pin(original),'rebuilt':pin(rebuilt) if rebuilt.exists() else None,'diff':diff})
+    (tmp_path/'canonical-audits.json').write_text(json.dumps(records,indent=2)+'\n')
+    assert all(r['rebuild_returncode']==0 and r['rebuilt'] for r in records)
