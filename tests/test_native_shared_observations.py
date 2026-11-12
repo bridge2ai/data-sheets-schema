@@ -165,3 +165,78 @@ def test_tool_observation_requires_the_real_parent_runtime_before_join(change):
     with pytest.raises(ValueError):
         observed.Trace(prefix('transcript',initialized+native),prefix('control',sent+parent),
             session_id=session,policy=POLICY,runtime=runtime)
+
+
+def alias_trace_frames():
+    from data_sheets_schema import native_model_aliases as aliases
+    initialized, sent, runtime = initial()
+    runtime.update(model=aliases.REQUESTED, auxiliary_models=[], limits_basis=json.dumps({
+        'kind': aliases.KIND, 'version': 2, 'model_aliases': {
+            'requested': aliases.REQUESTED, 'returned': aliases.RETURNED}}))
+    initialized[1]['model'] = aliases.REQUESTED
+    native, parent, _ = events()
+    native[0]['message']['model'] = aliases.RETURNED
+    native[-1]['model'] = aliases.REQUESTED
+    native.append({'type': 'result', 'session_id': SESSION, 'model': aliases.REQUESTED})
+    return initialized + native, sent + parent, runtime
+
+
+@pytest.mark.parametrize('location', ['frame', 'message', 'both'])
+def test_trace_accepts_declared_returned_assistant_label(location):
+    from data_sheets_schema import native_model_aliases as aliases
+    native, parent, runtime = alias_trace_frames()
+    if location in ('frame', 'both'):
+        native[2]['model'] = aliases.RETURNED
+    if location == 'frame':
+        del native[2]['message']['model']
+    value = observed.Trace(prefix('transcript', native), prefix('control', parent),
+        session_id=SESSION, policy=POLICY, runtime=runtime)
+    assert value.settled('tool-1').call.tool_use_id == 'tool-1'
+    assert value.terminal == len(native)
+
+
+@pytest.mark.parametrize('kind', ['assistant', 'user', 'result'])
+@pytest.mark.parametrize('location', ['frame', 'message'])
+@pytest.mark.parametrize('label', ['other', 'opposite', None])
+def test_trace_refuses_wrong_frame_specific_model(kind, location, label):
+    from data_sheets_schema import native_model_aliases as aliases
+    native, parent, runtime = alias_trace_frames()
+    frame = next(row for row in native if row.get('type') == kind)
+    if label == 'opposite':
+        label = aliases.REQUESTED if kind == 'assistant' else aliases.RETURNED
+    target = frame if location == 'frame' else frame.setdefault('message', {})
+    target['model'] = label
+    with pytest.raises(ValueError, match='native frame contradicts its declared model alias'):
+        observed.Trace(prefix('transcript', native), prefix('control', parent),
+            session_id=SESSION, policy=POLICY, runtime=runtime)
+
+
+def test_trace_refuses_missing_returned_assistant_label():
+    native, parent, runtime = alias_trace_frames()
+    del native[2]['message']['model']
+    with pytest.raises(ValueError, match='native assistant frame lacks its declared returned model observation'):
+        observed.Trace(prefix('transcript', native), prefix('control', parent),
+            session_id=SESSION, policy=POLICY, runtime=runtime)
+
+
+def test_trace_init_still_requires_requested_label():
+    from data_sheets_schema import native_model_aliases as aliases
+    native, parent, runtime = alias_trace_frames()
+    native[1]['model'] = aliases.RETURNED
+    with pytest.raises(ValueError, match='native init differs from selected runtime'):
+        observed.Trace(prefix('transcript', native), prefix('control', parent),
+            session_id=SESSION, policy=POLICY, runtime=runtime)
+
+
+@pytest.mark.parametrize('label', [None, 'fixture-model', 'wrong-model'])
+def test_trace_historical_identical_alias_keeps_optional_labels(label):
+    native, parent, _ = events()
+    if label is not None:
+        for frame in (native[0], native[-1]):
+            frame['model'] = label
+            frame['message']['model'] = label
+    if label == 'wrong-model':
+        with pytest.raises(ValueError, match='model alias'):
+            trace(native, parent)
+    else:
+        assert trace(native, parent).settled('tool-1').call.tool_use_id == 'tool-1'

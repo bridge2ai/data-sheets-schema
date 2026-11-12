@@ -9,6 +9,7 @@ from dataclasses import dataclass
 import json
 
 from data_sheets_schema import native_shared_contract as c
+from data_sheets_schema import native_model_aliases
 from data_sheets_schema.native_shared_evidence import (
     _EVENT_HASH_CACHE,
     _line_raw,
@@ -118,6 +119,7 @@ class Trace:
         self.calls={};self.callbacks={};self.results={};self.decisions={}
         self.frames={};self.terminal=None
         self._req_cache={};self._adm_cache={};self._set_cache={}
+        aliases=native_model_aliases.model_aliases(runtime)
         callback_ids=set()
         for number,raw,value in native:
             self.frames[number]=value
@@ -125,10 +127,7 @@ class Trace:
             if value.get('parent_tool_use_id') is not None:
                 raise ValueError('native prefix contains a child-session frame')
             if kind in ('assistant','user','result'):
-                message=value.get('message')
-                if value.get('model',runtime['model'])!=runtime['model'] or (
-                        type(message) is dict and message.get('model',runtime['model'])!=runtime['model']):
-                    raise ValueError('native event contradicts the selected model')
+                native_model_aliases.require_frame_models(value,aliases)
             if self.terminal is not None:
                 raise ValueError('native events appear after terminal completion')
             if kind=='control_cancel_request':
