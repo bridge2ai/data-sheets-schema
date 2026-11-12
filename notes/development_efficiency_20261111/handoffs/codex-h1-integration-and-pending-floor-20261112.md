@@ -1,8 +1,89 @@
 # Native integration and pending receipt floor — 2026-11-12
 
-Reviewed integration: 3 of 3 groups verified on the candidate (8 raw-identical donor patches; 2 context-preserving composed text patches, without postimage-equality claims). Pending-floor defect: reproduced_and_repaired_404_focused_tests_pass_public_blocked_by_owned_HOME_issue. Registered-basis proposal: separate_local_proposal_217_focused_tests_pass_not_approved. The model-facing asset and protected hashes remain subject to owner approval; no launch or scientific acceptance is claimed.
+Issue 5994 repair commit `9016fb757b89a91a786c08f31929ccec3ad6cdcb` carries the freshly reconstructed native selection into recorded final-floor checks, with or without the selection flag. Issue 5995 tests at `ba1f56e4a9460fe87c1e0ea3cb35ed2d7405cfa0` have saved after-fix outcomes {"passed": 289}; the exact CLI case list and separate canary are below. Candidate head: `ba1f56e4a9460fe87c1e0ea3cb35ed2d7405cfa0`. No new integration or publication occurred; public completion and owner gates remain pending.
 
-Phase: Bounded assignment complete; public acceptance remains blocked; all attempted cohorts stopped and private configurations restored. Candidate: `2be7c3d769ee2d23cb117b9177aa45cef22f746d`.
+Phase: issues-5994-5995-complete-reviewed-integrations-pending. Candidate: `ba1f56e4a9460fe87c1e0ea3cb35ed2d7405cfa0`.
+
+**Issues 5994 and 5995 — recorded native receipt follow-up**
+
+Test-first commit: `62573a68b5b5866a6abe981440abda62ef053335`. The saved baseline contains five failures and twelve passes; the single pending record-only canary first reproduced exit 1 where exit 0 was required.
+
+The new recorded companion returns the assessment and exact captured selection from one fresh reconstruction. The CLI demands validation for a native declaration or outcome, selects the native policy only from validated render metadata, compares any explicit selection and run identity, and passes the reconstructed selection to `final_receipt_floors`. Pending remains pending and false. Invalid or missing native authority refuses before a generic predicate.
+
+A sole exact integer-zero native axis remains on the API path. API records keep `block_for` and `strict_failure`, including malformed API reporting with and without strict mode. Neither a pending bit nor an outcome marker grants an exception.
+
+| Cohort | Saved JUnit outcomes | Runner origin/exit/outer cleanup verified | JUnit artifact |
+| --- | --- | --- | --- |
+| h1-floor-review-after | {"passed": 289} | True | {"path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-h1-scanner-20261112/tests/h1-floor-review-after/pytest.xml", "state": "present", "bytes": 44718, "sha256": "48c1a1cb50a815debca79e20b22506dd823abd6d568ce9480fb1ad5657b52655"} |
+| h1-floor-review-after-canary | {"passed": 1} | True | {"path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-h1-scanner-20261112/tests/h1-floor-review-after-canary/pytest.xml", "state": "present", "bytes": 391, "sha256": "7ed3b1ea179b752b8b58f2279431588125fd7ca21791364998fa803b2fafe0a4"} |
+| h1-floor-review-before | {"failure": 5, "passed": 12} | True | {"path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-h1-scanner-20261112/tests/h1-floor-review-before/pytest.xml", "state": "present", "bytes": 15561, "sha256": "87fc0a1703131d2511acfe40c4b80667350a00a9b1fca1140592fa3350bea804"} |
+| h1-floor-review-before-canary | {"failure": 1} | True | {"path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-h1-scanner-20261112/tests/h1-floor-review-before-canary/pytest.xml", "state": "present", "bytes": 3586, "sha256": "6069f77123a836c9a0b08896706a6461344c11effaf44eecc96358ce3c574608"} |
+
+| Requested CLI regression | Saved outcome |
+| --- | --- |
+| test_recorded_native_cli_uses_selected_final_floors[pending-record-only] | passed |
+| test_recorded_native_cli_uses_selected_final_floors[pending-explicit-selection] | passed |
+| test_recorded_native_cli_uses_selected_final_floors[pending-structural-failure-record-only] | passed |
+| test_recorded_native_cli_uses_selected_final_floors[pending-structural-failure-explicit-selection] | passed |
+| test_recorded_native_cli_uses_selected_final_floors[registered-pass-record-only] | passed |
+| test_recorded_native_cli_uses_selected_final_floors[registered-pass-explicit-selection] | passed |
+| test_recorded_native_cli_uses_selected_final_floors[registered-fail-record-only] | passed |
+| test_recorded_native_cli_uses_selected_final_floors[registered-fail-explicit-selection] | passed |
+| test_invalid_recorded_native_selection_refuses_without_api_fallback[record-selection-hash] | passed |
+| test_invalid_recorded_native_selection_refuses_without_api_fallback[missing-record-selection] | passed |
+| test_invalid_recorded_native_selection_refuses_without_api_fallback[reconstruction-refusal] | passed |
+| test_invalid_recorded_native_selection_refuses_without_api_fallback[lost-declaration] | passed |
+| test_recorded_api_cli_retains_generic_strict_route[pending-stays-strict] | passed |
+| test_recorded_api_cli_retains_generic_strict_route[registered-pass] | passed |
+| test_recorded_api_cli_retains_generic_strict_route[registered-fail] | passed |
+| test_native_selection_flag_cannot_override_api_record | passed |
+| test_matching_native_cli_names_cannot_override_api_policy | passed |
+| test_malformed_saved_api_policy_keeps_unchecked_cli_semantics[strict-refuses] | passed |
+| test_malformed_saved_api_policy_keeps_unchecked_cli_semantics[non-strict-reports-unchecked] | passed |
+| test_exact_integer_disabled_native_axis_keeps_valid_api_route | passed |
+| test_invalid_native_demand_cannot_fall_back_to_api[boolean-false-is-not-disabled-strict] | passed |
+| test_invalid_native_demand_cannot_fall_back_to_api[boolean-false-is-not-disabled-non-strict] | passed |
+| test_invalid_native_demand_cannot_fall_back_to_api[partial-native-selection-strict] | passed |
+| test_invalid_native_demand_cannot_fall_back_to_api[partial-native-selection-non-strict] | passed |
+| test_record_only_native_selection_must_match_requested_run[method] | passed |
+| test_record_only_native_selection_must_match_requested_run[label] | passed |
+| test_record_only_native_selection_must_match_requested_run[project] | passed |
+| test_explicit_selection_must_equal_fresh_recorded_selection | passed |
+| test_recorded_companion_returns_independent_blocks_from_one_reconstruction | passed |
+
+These CLI tests replace the native reconstruction boundary with an explicit fixture carrying a genuinely captured selection and real receipt accounting. They do not establish a completed public native run. The prior HOME failure remains retained.
+
+Independent read-only review: `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/notes/development_efficiency_20261111/handoffs/codex-h1-pending-review-independent-20261112.md`, SHA-256 `994033128909bd1f849581639f0b032bc4b2f5e70bf92a3bfa2f768d42cfaa1e`. Two intermediate API regressions were found and corrected before the after-fix validation; their regression controls remain in the test file.
+
+**Scanner refresh for this candidate**
+
+Comparison refreshed because the scanned input inventory changed since `df0122254cc7c9fe10470ee9eabc26c71a411a14`. No fixed scanner authority pin changed: all eight integrated rendering pins and the parser pin still match: True.
+
+| Changed scanned source | Prior SHA-256 | Current SHA-256 |
+| --- | --- | --- |
+| src/data_sheets_schema/cli/receipts.py | a79503a471fdac905cc2660aa71acd4a31d2b7459614f5a319591530b241377a | e7e2e1b146f53690c5651d11cc3ca129a6ede9c3c05029d229d40e2475262e37 |
+| src/data_sheets_schema/native_execution_orchestration.py | d1388b630fd20ee8b185a30a4fb738472f313e42eeb9c3e971b92e586b79ff6e | 7519d595b7fd49ac5e7111ccc5ea4587139ca00e72e6558e6fce30ff4de879cf |
+| src/data_sheets_schema/native_execution_registration_v2.py | 6476bb41c18e5bef38b21f8bf71befb784d960ddccda2f2f54072f95350e6e5a | b94f91ca092c2a7dea99bd3f70c3ed63c7756ce8bd7025e7f70969e3a9737bff |
+| src/data_sheets_schema/native_generation.py | 31c0ee811cdfb2f909d2144ecfb98e9d189f8b9e9bd4d5645a0af48ab1b51491 | 18ff77511603ab0b0cd2e5e6a1b3ed808dce683938d05d9bac62ac5b0c6af507 |
+| src/data_sheets_schema/native_launch_review.py | 66d4be4d9f47e9f4611efad4a5f0edc862f49ca32edd934f6ba59c2cfcbe625a | 36104b62c772c0248ddc4496cb2f8735914d2e6ed75a39b4a4238e4dd26f6b6c |
+| src/data_sheets_schema/native_launch_sequence.py | None | 763a55f9558088731d2d28326b91c1de9287e212775f5c40473a0b470e39320d |
+| src/data_sheets_schema/native_shared_capture_orchestration.py | 8ed4dc8bd30832f1f17f113910b1cfa921b2343d01745e54435054daaab085c1 | e961799d9f757b524258021e7b5cad85744de02b54492db976eafb47ecc90319 |
+| src/data_sheets_schema/native_shared_gates.py | c75d4817985aa6eee88b073cd1cfe20e32fa60300e037653b2de0499fd9b8766 | 9452d7aee45e26e3355e72e0fc7ee18305c6b674e69ba26b8314ba938761dfc3 |
+| src/data_sheets_schema/native_shared_receipts.py | 3c15420f2a7997bc2423b7826377f46f15c6873012cf7436fdf8a55ddab68824 | 8a7c2c91fc8a28cadf27cf38277c24a97a2be5218aeb8db636f4f8240ac75a78 |
+| src/data_sheets_schema/native_subscription_admission.py | 07914146b71bf9d6c97a59714f49a4206bca52d5c0e694cb0bb7b7485e215311 | 8cedf2ebc373533feca05d41b791348aebe3e8a95afd7ce13393b527bd57d524 |
+| src/data_sheets_schema/native_subscription_capture.py | 654b20e02c323772aae293831a89c361ef0e69c3abd033349a1f016d795dd9f2 | cc706616cdb378dd58bb26bc819a0890f39c9acb0e18863d4a74ed99ca4e8924 |
+
+Fresh comparison: `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-h1-scanner-20261112/h1-floor-review-comparison/comparison.json`, SHA-256 `117e16229148ab94ebd67d68bbfe507532ae9eae5258ee70016f23b2d3375797`. Saved current-head identity checks: True. D128 acceptance remains `False`; this diagnostic refresh transfers no approval.
+
+| Scan | Source commit | Scanner JSON SHA-256 | Complete array counts/digests |
+| --- | --- | --- | --- |
+| baseline | 7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1 | b8aa41e4dbd2ff6d4fe3fd9ad67da258febbe6929ec9cee0863ef0d653e152a9 | {"hits": {"count": 5307, "canonical_typed_sha256": "8e58045c4f50ef3e8094ac4ab8bc71e92bf42aff3e0908f39af99fe569a686fa"}, "violations": {"count": 9, "canonical_typed_sha256": "94d31d83e75467a6f2d1b71de760b9bea6fc2ae20462272da5b356801dafcc47"}, "test_dependencies": {"count": 101, "canonical_typed_sha256": "4b0ec2ff4ebada85e10fcdd20fb707b130b9eb1ecc6363b573a63a0bff770e1b"}} |
+| candidate | d57943646624d25c46e1b97fcfaef7e86adb7f51 | 107cfdd435ce44cbe4f8e2132bab3a2df49c25323fc1a3db515e1b727a441f2d | {"hits": {"count": 5308, "canonical_typed_sha256": "060f2498b12896f075f2cfd37788efe79a98a1c7bcf4c50a759f53d824fcb659"}, "violations": {"count": 9, "canonical_typed_sha256": "94d31d83e75467a6f2d1b71de760b9bea6fc2ae20462272da5b356801dafcc47"}, "test_dependencies": {"count": 103, "canonical_typed_sha256": "634879ba8dedffb3431100880b14f0484abbea6123a10d8a28c28739b326a31f"}} |
+
+No subsequent branch was integrated. Launch-sequence findings 5992/5993, HOME repair 5966 and failed-record repair 5967 remain with their assigned lanes until reviewed commit identities are supplied. This candidate remains local.
+
+The accepted pre-follow-up handoff is preserved at `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/notes/development_efficiency_20261111/handoffs/codex-h1-integration-and-pending-floor-20261112.before-5994.md` and its JSON sibling, with digests retained in this report.
+
 
 **Reviewed integration**
 
@@ -87,6 +168,10 @@ Explicitly enumerated donor/local pair only. Strip index old/new hashes and nume
 | h1-floor-group3-canary | completed | 544781df54ad15465f1cc213549dc440fe0f164c | 7ecbc6d865288bec9ff1ac1f9f9cbaedf868a272 | True | {"passed": 1} | True |
 | h1-floor-group3-collection | completed | 544781df54ad15465f1cc213549dc440fe0f164c | 7ecbc6d865288bec9ff1ac1f9f9cbaedf868a272 | True | {} | True |
 | h1-floor-public | completed | f0d418396a3b34359d76581f132b483848ef4602 | dd791a99c86e2693c04d133d09c77243ba0c30ba | True | {"failure": 1} | True |
+| h1-floor-review-after | completed | d57943646624d25c46e1b97fcfaef7e86adb7f51 | ba1f56e4a9460fe87c1e0ea3cb35ed2d7405cfa0 | True | {"passed": 289} | True |
+| h1-floor-review-after-canary | completed | d57943646624d25c46e1b97fcfaef7e86adb7f51 | ba1f56e4a9460fe87c1e0ea3cb35ed2d7405cfa0 | True | {"passed": 1} | True |
+| h1-floor-review-before | completed | b4249fd38331b8edfb1676d9e22e3d8b530488e8 | 62573a68b5b5866a6abe981440abda62ef053335 | True | {"failure": 5, "passed": 12} | True |
+| h1-floor-review-before-canary | completed | b4249fd38331b8edfb1676d9e22e3d8b530488e8 | 62573a68b5b5866a6abe981440abda62ef053335 | True | {"failure": 1} | True |
 | h1-floor-test-rulings | completed | 7f45a5974bc69cb6bc843a1f63c14b067d89016c | 2be7c3d769ee2d23cb117b9177aa45cef22f746d | True | {"passed": 93} | True |
 | h1-floor-test-rulings-canary | completed | 7f45a5974bc69cb6bc843a1f63c14b067d89016c | 2be7c3d769ee2d23cb117b9177aa45cef22f746d | True | {"passed": 1} | True |
 
@@ -102,6 +187,8 @@ Read-only, report-time verification of the complete committed Git tree against i
 | /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-h1-scanner-20261112/h1-floor-group2/tree | f5a6f5ceaa574f76af503af75d617b18d47fa158 | ae051c767cec9bad2b7a68d9eb89f05cf5ef2da4 | verified_committed_tree_and_physical_src_tests |  |
 | /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-h1-scanner-20261112/h1-floor-group3/tree | 544781df54ad15465f1cc213549dc440fe0f164c | 7ecbc6d865288bec9ff1ac1f9f9cbaedf868a272 | verified_committed_tree_and_physical_src_tests |  |
 | /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-h1-scanner-20261112/h1-floor-public/tree | f0d418396a3b34359d76581f132b483848ef4602 | dd791a99c86e2693c04d133d09c77243ba0c30ba | verified_committed_tree_and_physical_src_tests |  |
+| /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-h1-scanner-20261112/h1-floor-review-after/tree | d57943646624d25c46e1b97fcfaef7e86adb7f51 | ba1f56e4a9460fe87c1e0ea3cb35ed2d7405cfa0 | verified_committed_tree_and_physical_src_tests |  |
+| /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-h1-scanner-20261112/h1-floor-review-before/tree | b4249fd38331b8edfb1676d9e22e3d8b530488e8 | 62573a68b5b5866a6abe981440abda62ef053335 | verified_committed_tree_and_physical_src_tests |  |
 | /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-h1-scanner-20261112/h1-floor-test-rulings/tree | 7f45a5974bc69cb6bc843a1f63c14b067d89016c | 2be7c3d769ee2d23cb117b9177aa45cef22f746d | verified_committed_tree_and_physical_src_tests |  |
 
 A mapped branch source is credited to a test only when its private HEAD, immediate parent, entire committed tree, four protected postimages and physical src/tests census all verify. Git ancestry errors are unavailable, not proof of non-ancestry. Observed passes remain visible even when lineage cannot be verified.
@@ -142,7 +229,7 @@ Preserve the original failure even if the ordinary Group 3 cohort later passes t
 
 **Pending floor and asset proposal**
 
-Issue 5939 is reproduced and repaired on the native route locally. Before the repair the native final CLI, its phase milestone, and the independent receipt gate fail on pending coverage despite passing structural floors. The repaired single-test canary and all 404 focused tests pass, including API controls, registered floors, structural refusals and policy/identity mutation tests. The one public pending attempt failed at the known synthetic-HOME refusal before final receipts, with a secondary publication failure and no saved final result. No public completion or launch acceptance is claimed.
+Prior issue 5939 evidence, before the recorded-route follow-up above: Issue 5939 is reproduced and repaired on the native route locally. Before the repair the native final CLI, its phase milestone, and the independent receipt gate fail on pending coverage despite passing structural floors. The repaired single-test canary and all 404 focused tests pass, including API controls, registered floors, structural refusals and policy/identity mutation tests. The one public pending attempt failed at the known synthetic-HOME refusal before final receipts, with a secondary publication failure and no saved final result. No public completion or launch acceptance is claimed.
 
 The native-only final predicate revalidates the captured selection, both policy identities, completed final stage, history-hash shape and the recomputed coverage reading. It removes only the registered-coverage gate for the exact pending diagnostic declaration. The same predicate now serves the explicit native final CLI, independently reconstructed receipt gate and live recorder. Coverage remains state pending and passed false. Callers remain responsible for reconstructing observed history; this helper does not authenticate a supplied history hash in isolation. Shared/API strict predicates and registered arithmetic remain unchanged.
 
@@ -150,10 +237,10 @@ The reproduction used a real receipt assessment and native capture with supplied
 
 Remaining blockers from the supplied section:
 
-- Public next blocker reproduced: native shared observation failed: ValueError: synthetic HOME must contain no account or configuration artifacts. The trace shows the full-terms result followed by runtime revalidation refusal; the initial receipts command is observed without a result, final receipts/recorder/independent saved gates are not reached. A secondary publication ValueError leaves no final.json/published.json/actual-result.json. Helper-cache HOME and failed-readback fixes remain owned by helper 2 and have not been integrated without a reviewed handoff. Retain this failing test for the subsequent integration; do not weaken it or treat the missing final as success.
+- Public next blocker reproduced: native shared observation failed: ValueError: synthetic HOME must contain no account or configuration artifacts. The trace shows the full-terms result followed by runtime revalidation refusal; the initial receipts command is observed without a result, final receipts/recorder/independent saved gates are not reached. A secondary publication ValueError leaves no final.json/published.json/actual-result.json. The HOME repair remains with helper 2; the failed-record repair remains with helper 3; both repairs remain separate and have not been integrated without a reviewed handoff. Retain this failing test for the subsequent integration; do not weaken it or treat the missing final as success.
 - Model-facing policy sentence contradicts D109 and is deliberately unchanged pending owner-approved wording and successor pins.
 - The API packet postimage and margin decision remain unapproved; no packet is applied to the integration branch.
-- Fresh final-source scanner comparison and acceptance/CI evidence are still needed after integration; prior source-pinned reports are not relabelled as current.
+- The current-candidate scanner comparison is refreshed above; exact-array acceptance and CI remain pending. Any later integration needs a successor comparison rather than relabelling these source-pinned arrays.
 
 Implementation status supplied: `reproduced_and_repaired_404_focused_tests_pass_public_blocked_by_owned_HOME_issue`; detailed author evidence and independent checks are in the JSON.
 
@@ -211,7 +298,7 @@ The frozen fixture and D128 approval remain byte-identical. F3d requires the com
 
 Remaining blockers from the supplied section:
 
-- These tests do not extend owner D128 approval or replace a fresh final-source same-tool comparison and CI acceptance. Historical source-pinned arrays remain historical.
+- These tests and the scanner evidence do not extend owner D128 approval or establish final CI acceptance. Historical source-pinned arrays remain historical.
 
 | Finding | Authorized test changes |
 | --- | --- |
@@ -232,11 +319,11 @@ Remaining blockers from the supplied section:
 - The prior public completion failed on nonempty synthetic HOME. Cache isolation and failed readback belong to another assigned lane; this report does not clear that gate.
 - The pending-floor repair must retain structural gates, registered-floor gating and API behavior; missing tests do not prove these obligations.
 - The policy sentence and its canonical pin are owner-review proposals only; the API postimage and margin decisions remain pending unless separately supplied owner evidence says otherwise.
-- A fresh same-tool D128-form comparison is required for the final integrated source and its successor protected-packet composition: complete source inventory, ordered complete arrays, exact differences and retained approval coverage. Prior source-pinned arrays are historical evidence, not final-source validation.
 - Changed scanner tool/source identities and new or changed complete findings require owner review; preserving old fixture bytes or passing new expectations does not extend D128 approval.
 - Final acceptance and CI on the final candidate remain separate obligations. Focused passes, a public synthetic attempt, a proposal branch or scanner comparisons do not establish final CI or native-launch acceptance.
 - Read-only, report-time verification of the complete committed Git tree against its branch-source parent, with exactly the four registered protected postimages; physical blobs and modes are checked exhaustively only below src/ and tests/, including ignored/untracked extras and without following symlinks. Physical Fairscape, other sparse/exported paths, dependencies and runtime environment bytes are outside this census. This is not a full physical-checkout claim, a before-run snapshot or owner acceptance.
 - N1, the registered coverage basis and a native launch require the appropriate owner decisions. No provider or native executable has been run by this generator.
+- The fresh same-tool D128 comparison is diagnostic evidence only; retained exact-array acceptance and owner review remain unmet.
 
 Prior H1 evidence: `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/notes/development_efficiency_20261111/handoffs/codex-h1-scanner-pin-20261112.json`; SHA-256 `0f0d82d058384d58b3da7e5ac3b986154b7ac2e85ae19a15eb527cd023816c1e`.
 
