@@ -1,20 +1,42 @@
 # Native CHORUS canary runbook — DRAFT, 2026-11-12
 
 This is preparation, not permission to execute any live step. The offline prefix
-was exercised on real CHORUS inputs. Full registration is blocked on this base
-by the protected RunSpec constructor. The synthetic routing tests stop before
-capture, guard preparation or launch implementations, and before any reservation.
-They do not establish full-chain registration, CI, real account state, permission
-behavior or scientific acceptance.
+was exercised on real CHORUS inputs. The authorized scratch composition now
+builds synthetic preparation, composition, seven-trace saved permission evidence,
+execution registration and the current review/owner join through production
+functions. The public commands still refuse the synthetic profile at the Max
+subscription gate; no gate is stubbed to get past it. No capture, word journal or
+attempt reservation is made. This establishes saved-document construction, not
+real account state, observed permission behavior, actual CI or scientific acceptance.
 
-Source baseline: `058de60779412150c529e41c86c5cfe9047014da`. N1 reference:
+Composition baseline: `79089536b698dd2dd968233da4eadc8841f76b10`, the three
+observer commits, helper2 head `d2efa55014e131f92733bf2c3a90c0830214dc89`, the
+builder commits and the four hash-verified protected post-images. The detached
+composition and exact receipts live under
+`../scratch-h3-packet-builder-20261112/composition-a/`; no protected branch file
+was changed. N1 reference:
 `c289eed19e37e227e04dd5e0c4fc077da54184aa`, draft v12. Ratification, independent
 reviews, approved protected integration, successful full CI and merge remain
-separate prerequisites. This branch has review bundle v2, owner terms v1,
-1200-second freshness and a 90-second pre-reservation margin. N1 v12 proposes
-300 seconds and helper2 is preparing bundle v3 / terms v2. **Do not register a
-production packet against this mismatch.** Switch the review adapter and rerun
-all saved-input tests on the reviewed merged source first.
+separate prerequisites. The composition has review bundle v3, owner terms v2,
+`sequence_script_sha256` and `account_quiet`. The adapter reads all versions and
+admission terms from the source it runs against, including the receipt instrument
+constraint where no public constant exists. Its inventory records the observed
+source contract. The owner has not decided the margin: the observed source value
+is not a decision. Do not replace it with N1's proposed value or freeze a production
+packet before ratification and matching source exist.
+
+N1.9 lists engineering prerequisites, not the event sequence. N1.5 contains the
+ordered events. This runbook uses the following crosswalk:
+
+| This runbook | N1.9 prerequisite | N1.5 event |
+|---|---|---|
+| Merged source and complete-path review | 1–11 | Before event 1 |
+| Durable executable and observation/final runtime | 5, 6, 7 | Before event 1 |
+| Registration timestamp/addition commit and independent review | 4, 5 | Before event 1 can be complete |
+| Owner terms and frozen bundle with sequence bytes | 4, 10 | Events 2 and 3 |
+| Owner one-attempt word | 4 | Event 4 |
+| Single reviewed sequence: capture, latest guard, launch | 2, 3, 10 | Events 5 and 6 |
+| Reservation-to-dispatch measurement | 11 | Engineering prerequisite, not exercised by this no-reservation rehearsal |
 
 ## Explicit locations
 
@@ -127,8 +149,10 @@ any later replicate plan need their own ratification.
    `admission_policy`. Values come from actual saved observation/owner inputs.
    The admission object contains the ratified quota limits, freshness, margin,
    capture state directory and fourteen-day validity interval. Its dates must
-   later agree with the actual registration-addition commit; do not invent them
-   or adjust a committed packet to mask a mismatch.
+   later agree with the registration-addition commit's explicit author date.
+   Read `valid_from` from this frozen document at step 11; never choose a second
+   date or adjust the runtime to mask a mismatch. Use whole-second UTC precision:
+   Git author timestamps cannot represent fractional seconds.
 
    ```sh
    "$PYTHON" -P -B "$CHECKOUT/scripts/native_canary_saved_step.py" \
@@ -151,9 +175,9 @@ any later replicate plan need their own ratification.
    ```
 
    Outputs: preparation envelope and exact derived instruction bytes, verified
-   with `verify_preparer`. On this branch the protected RunSpec constructor
-   refuses `native_shared_generation_version`; stop without patches or fallback.
-   After merged integration this needs a fresh complete rehearsal.
+   with `verify_preparer`. The protected-main branch still refuses native fields;
+   the authorized scratch post-images make this stage pass in the rehearsal.
+   Production must use the independently reviewed merged implementation.
 
 7. **Worker then independent reviewers.** Supply `composition-inputs.json` with
    `preparation_path` and `instruction_path`; compose through the shared-native
@@ -225,30 +249,48 @@ any later replicate plan need their own ratification.
     branch, then record repository,
     relative path and commit in the review bundle. The author date anchors the
     registered validity interval. The lead's normal reviewed publication is
-    separate; this worker does not publish. **Timestamp procedure needs lead and
-    owner review before production:** the runtime already embeds `valid_from`,
-    and the validator requires exact equality with the registration commit's
-    author timestamp. An ordinary later `git commit` will generally differ.
-    The recommendation is an explicitly agreed registration-authoring timestamp,
-    preserved as the commit author date; never silently backdate or mint a date
-    to make a failing packet pass. No timestamp is selected by this runbook.
-    After that procedure is approved, assign `REGISTRATION_AUTHOR_DATE` to that
-    exact reviewed UTC value and use these archival commands only once exact
-    bytes are staged at the agreed evidence path:
+    separate; this worker does not publish. **Settled timestamp procedure:** the
+    lead reads `valid_from` from the frozen runtime embedded in the registration,
+    supplies that value explicitly as the Git author date, then calls the
+    production equality validator on the actual commit. The lead does not select
+    a new date, alter the runtime or claim that author time is the wall-clock
+    instant when Git wrote the object. The committer time remains normal Git
+    metadata. `native_registration_timestamp.py` demonstrates creation only for
+    synthetic documents in a new scratch repository; its read-only date and
+    verification modes also support the lead's reviewed production procedure.
+
+    The scratch test passes for matching bytes/date and refuses a commit exactly
+    one second off. No production timestamp or production commit was made.
+    This is N1.9 prerequisites 4/5, before N1.5 event 1 (the registration and its
+    reviews complete) and before events 2/3 freeze owner terms and the bundle.
+    N1 v12's equality/order need no normative change. Clarifying that the author
+    date is explicitly preserved from `valid_from`, not a newly observed commit
+    time, would prevent an operator from using an ordinary later timestamp.
 
     ```sh
+    REGISTRATION_AUTHOR_DATE="$("$PYTHON" -P -B "$CHECKOUT/scripts/native_registration_timestamp.py" --registration "$PACKET/registration/registration.json" --author-date-only)"
     git -C /ABS/REGISTRATION-EVIDENCE-REPOSITORY add -- /ABS/REGISTRATION-EVIDENCE-REPOSITORY/registration.json
     git -C /ABS/REGISTRATION-EVIDENCE-REPOSITORY commit --date "$REGISTRATION_AUTHOR_DATE" -m 'Archive exact native CHORUS canary registration'
     git -C /ABS/REGISTRATION-EVIDENCE-REPOSITORY rev-parse HEAD
+    "$PYTHON" -P -B "$CHECKOUT/scripts/native_registration_timestamp.py" \
+      --registration "$PACKET/registration/registration.json" \
+      --verify-evidence "$INPUTS/registration-commit.json"
     ```
+
+    `registration-commit.json` contains exactly `repository`, relative `path`
+    and the actual full `commit` SHA just created. Verification re-reads the
+    commit object, non-merge addition, regular-file blob, exact registration bytes
+    and author date through `native_launch_review._registration_commit`.
+    A refusal leaves the commit/evidence intact and stops bundle construction.
 
     Reviewers provide their own pinned documents; the owner provides terms and
     capture request. The lead assembles the bundle without inventing decisions.
     Bundle author/operator/reviewers must meet independence rules. Supply real
     CI evidence for exact source, not a URL-shaped invented success. Reconcile
-    bundle v3/terms v2 and the reviewed three-command sequence byte pin before
-    using the forthcoming helper2 route. This base's v2 adapter cannot assert
-    those future requirements were checked.
+    source-derived current bundle/terms and the reviewed sequence byte pin.
+    The current bundle binds the actual dependency-pinned sequence source;
+    owner terms require boolean `account_quiet: true`. These are declarations,
+    not authenticated owner identity or account telemetry.
 
 12. **Owner; OWNER ONE-ATTEMPT WORD REQUIRED.** Review the concrete registration,
     runtime, CI, permission result and two-review bundle. Supply
@@ -273,34 +315,38 @@ any later replicate plan need their own ratification.
     and stand down every session using the registered account, including
     monitoring. N1 v12's delegation is for one exact registration and lapses
     after thirty minutes; use the final ratified terms. Review and pin the
-    helper2 sequence artifact, not these three stand-alone commands. They show
-    the exact CLI inputs on this base and must execute as one authorized
-    capture → guard → launch sequence without pause or unreviewed retry:
+    actual `native_launch_sequence.py` artifact. This is N1.9 prerequisite 10
+    and N1.5 events 5–6: one authorized capture → latest guard → launch sequence
+    without pause or retry. The delegated-start command is:
 
     ```sh
-    "$PYTHON" -P -B -m data_sheets_schema.native_generation capture-subscription-event \
-      --registration "$PACKET/registration/registration.json" \
-      --review "$INPUTS/review.json" --launch-word "$INPUTS/launch-word.json" \
-      --output-directory "$INPUTS/EXACT-REGISTERED-CAPTURE-DIRECTORY" \
-      --account-choice "$INPUTS/registration-account-choice.json"
-    "$PYTHON" -P -B -m data_sheets_schema.native_generation prepare-subscription-guard-v2 \
-      --registration "$PACKET/registration/registration.json" \
-      --review "$INPUTS/review.json" --launch-word "$INPUTS/launch-word.json" \
-      --capture "$INPUTS/EXACT-LATEST-CAPTURE-MANIFEST.json" \
-      --output "$INPUTS/NEW-GUARD.json" --account-choice "$INPUTS/registration-account-choice.json"
-    "$PYTHON" -P -B -m data_sheets_schema.native_generation launch \
+    "$PYTHON" -P -B -m data_sheets_schema.native_launch_sequence \
       --registration "$PACKET/registration/registration.json" \
       --review "$INPUTS/review.json" --ci "$INPUTS/ci.json" \
-      --launch-word "$INPUTS/launch-word.json" --subscription-guard "$INPUTS/NEW-GUARD.json" \
-      --subscription-guard-sha256 EXACT-GUARD-SHA256 \
-      --account-choice "$INPUTS/registration-account-choice.json"
+      --launch-word "$INPUTS/launch-word.json" \
+      --output-directory "$INPUTS/EXACT-REGISTERED-CAPTURE-DIRECTORY" \
+      --subscription-guard "$INPUTS/NEW-GUARD.json" \
+      --packet-directory "$INPUTS/NEW-SEQUENCE-PACKET" \
+      --account-choice "$INPUTS/registration-account-choice.json" \
+      --direction-recorded-at OWNER_RECORDED_UTC \
+      --host-confirmed-at OWNER_HOST_CONFIRMATION_UTC
     ```
+
+    Both timestamps are actual owner records, not generated defaults. For the
+    owner's own start, omit both delegated flags. The script checks both
+    thirty-minute windows at entry and immediately before capture. It retains
+    its exact bytes as `sequence-script.py`, exclusively claims the sequence
+    packet, saves command outputs/times and stops on any refusal. Reviewers
+    recompute the saved script hash and compare it with the bundle's
+    `sequence_script_sha256`; `sequence.json` is not a self-authenticating hash.
+    This script itself creates a sequence-start claim, so it is not invoked in
+    this no-reservation rehearsal.
 
     Capture creates its claim/reservation before contacting the subscription.
     It is not an offline readiness check. Guard preparation must select the
     latest claim, and launch checks freshness plus pre-reservation margin again.
-    Resolve the actual returned capture path and guard digest inside the reviewed
-    sequence. Do not manually pause to fill these placeholders at launch time.
+    The reviewed sequence resolves the actual returned capture path and guard
+    digest internally. No manual pause or substitute capture is allowed.
     Up to three captures in D115 is a bound, not permission here to retry; retain
     every failure/stop and obey the final sequence policy and owner word. A
     generation attempt is one-use. The second attempt, if any, needs its separately
@@ -320,11 +366,51 @@ any later replicate plan need their own ratification.
 
 ## Rehearsal limits and retained evidence
 
-The new saved-step helper makes the library producers addressable without inline
-Python snippets. Only its review join and refusal boundaries have been exercised
-on this base. Runtime production evidence, composition/expectation/registration
-construction, full CI admission, real permissions and the final sequence need
-rehearsal after protected integration; this document does not certify them.
+The synthetic composition exercises production preparation, composition,
+permission-expectation construction, saved seven-trace verification, execution
+registration, current review terms and review/CI/word joins. The pure guard
+builder can serialize a synthetic event; current guard preparation still needs
+a recorded word state and an actual latest capture claim. No such state was
+fabricated. All three public CLI commands refuse the synthetic subscription at
+the D106 Max gate with genuine registration verification and no gate stubs.
+This is an intentional production/synthetic boundary, not a reason to change
+the synthetic auth fields into a claimed real account. The exact refusal and
+all remaining per-document limits are in the full-chain handoff.
+
+The timestamp procedure's source anchors are
+`native_launch_review.py:67` (commit/addition/blob checks) and line 137 (exact
+`valid_from` equality) in the pinned composition. `native_u4b_policy.py:46`
+requires the fourteen-day interval; `native_capture_words.py:76` requires
+`valid_from <= authorized_at <= now < valid_until`. Review timestamps cannot
+follow the launch word (`native_launch_review.py:328`). Capture chronology is
+checked against the word (`native_subscription_guard_v2.py:387`); freshness and
+margin use capture time and the current clock, not the Git author time.
+
+## Owner probe packet (draft only)
+
+`scripts/draft_native_probe_packet.py` generates field-by-field drafts and their
+source/owner/observation provenance. The retained real-binary-byte draft is under
+`../scratch-h3-packet-builder-20261112/probe-packet-draft-v2/`:
+`provisional-runtime.DRAFT.json`, `authorization.DRAFT.json`, and
+`probe-packet.DRAFT.json`/`.md`. They have invalid draft wrappers and the nested
+word `DRAFT_NOT_AUTHORIZED`; neither the wrapper nor the nested candidate is an
+approval. No binary version is inferred from its updater filename.
+
+The owner must supply/approve durable binary location, actual saved version/init
+and account facts, explicit environment, provisional limits, fresh evidence
+directory, both deadlines, owner identity, actual UTC time and D117 word.
+Final limits/thinking come from the saved observation. The source-derived
+margin is reported only; the outstanding owner decision is not supplied here.
+
+The two probe commands in steps 4 and 9 make nine native-process executions on
+the successful path: one observation, one version check and seven permission
+traces. All intended model traffic goes to the scripted loopback provider;
+bound permission tool results can include CHORUS source content in that local
+provider's saved traces. The version check uses a disabled loopback endpoint.
+No external model call or account usage is intended by these invocations; no
+claim about actual binary behavior is made without the separately authorized
+probe. The saved validator runs no native process. A failure can stop earlier
+and never grants a retry.
 
 The map is generated by `scripts/adhoc/map_native_packet_20261112.py` from source
 signatures and declared input origins. The offline test runner and the final

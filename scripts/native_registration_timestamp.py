@@ -64,9 +64,23 @@ def archive_synthetic(registration_raw, repository):
 def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__,allow_abbrev=False)
     p.add_argument('--registration',type=Path,required=True)
-    p.add_argument('--scratch-repository',type=Path,required=True)
+    action=p.add_mutually_exclusive_group(required=True)
+    action.add_argument('--scratch-repository',type=Path)
+    action.add_argument('--verify-evidence',type=Path)
+    action.add_argument('--author-date-only',action='store_true')
     a=p.parse_args(argv)
-    print(json.dumps(archive_synthetic(a.registration.read_bytes(),a.scratch_repository)))
+    raw=a.registration.read_bytes()
+    if a.author_date_only:
+        from data_sheets_schema.native_launch_review import registration_fields
+        from data_sheets_schema.native_u4b_policy import registered_policy, timestamp
+        value=registered_policy(registration_fields(raw)['runtime'])['valid_from']
+        if timestamp(value,'valid_from') != int(timestamp(value,'valid_from')):
+            raise ValueError('Git author time has whole-second resolution; supplied valid_from is fractional')
+        print(value)
+    elif a.verify_evidence:
+        print(json.dumps(verify(raw,json.loads(a.verify_evidence.read_bytes()))))
+    else:
+        print(json.dumps(archive_synthetic(raw,a.scratch_repository)))
 
 if __name__=='__main__':
     sys.dont_write_bytecode=True
