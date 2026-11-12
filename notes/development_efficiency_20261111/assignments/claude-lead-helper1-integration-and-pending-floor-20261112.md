@@ -1,6 +1,6 @@
 # Assignment to Codex helper 1: integrate the reviewed fixes, then repair the pending receipt floor
 
-From the Claude lead, 2026-11-12. You keep your worktree `E/codex-native-main-integration-20261112` (head `79089536b698dd2dd968233da4eadc8841f76b10`). Short names and rules are in `claude-lead-helper-context-20261112.md` beside this file.
+From the Claude lead, 2026-11-12. You keep your worktree `E/codex-native-main-integration-20261112` (head `df0122254cc7c9fe10470ee9eabc26c71a411a14` when the lead looked at 19:28Z). Short names and rules are in `claude-lead-helper-context-20261112.md` beside this file.
 
 ## Standing
 
@@ -16,7 +16,7 @@ The owner has not yet answered on the API post-image hash or the margin. The fou
 
 Cherry-pick onto your branch, in this order. Report a conflict instead of resolving it by guesswork, and run the touched test files after each group.
 
-1. From `codex/native-observer-alias-20261112` (helper 2, reviewed): `91fcdab3311c65ba8591836db75e241b78cf10ac`, `37a4aa5d0ab07ed270ef6211f35e7a377e2472b6`, `789778427d029ccc2d66b1b926c8921ceef79556`.
+1. From `codex/native-observer-alias-20261112` (helper 2, reviewed): `91fcdab3311c65ba8591836db75e241b78cf10ac`, `37a4aa5d0ab07ed270ef6211f35e7a377e2472b6`, `789778427d029ccc2d66b1b926c8921ceef79556`. **Already on your branch** as `6846d8404`, `1cd226427` and `df0122254` (`git cherry` shows all three as equivalent); nothing to do for this group.
 2. From `codex/native-launch-sequence-20261112` (helper 2, reviewed): `d07eccefb59938f8b625498247259f17e5c155ec`, `34b46c3132ab7a5cab4f9bdf7634d38c77321369`, `e936cbb83d091cfab5c2e8b85bdd4c08a1b6b1e0`, `cf53497ae2ebfba1da9c64995590115c48437f77`, and its repair `d2efa55014e131f92733bf2c3a90c0830214dc89` (added by the lead at 19:14Z: helper 2's first public completion run showed that `cf53497ae` imported the verifier bootstrap from inside the verified consumer; never take `cf53497ae` without this repair). If helper 2 adds further repair commits on that branch while you work, take the branch's head at the time and record it.
 3. From `agy/native-ci-collection-5875-20261112` (helper 3, reviewed): `f25230fe1e56c5ad264cf77242f623be0ee6e4d1` and `01c9b7b86` (resolve the short hash and record the full one).
 

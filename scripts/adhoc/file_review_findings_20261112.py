@@ -19,11 +19,16 @@ Inputs (arguments):
   --subject TEXT        one sentence naming the reviewed file, commit and branch.
   --next TEXT           one sentence saying which draft responds.
   --expect-claude N, --expect-codex N   asserted counts.
+  --redact OLD=>NEW     (repeatable) a literal text replaced in every issue title
+                        and body before filing, for a figure that stays out of
+                        public records; each OLD must occur at least once, and
+                        the footer then says that the filed copy withholds text.
   --out DIR, --map FILE, --dry-run.
 Outputs: with --dry-run, titles and body sizes on stdout and the bodies under
 --out. Without it, one `gh issue create` per issue and a JSON map at --map.
 Refuses to run twice (the map file must not exist) and refuses any body or
-title containing an at-sign.
+title containing an at-sign. A Claude finding's body ends at the next heading
+of level two or three that is not a finding (for example a closing note).
 Serves: owner direction D134; amendments N1 and NP1. Date: 2026-11-12.
 """
 import argparse
@@ -46,7 +51,7 @@ def claude_findings(text: str, key_pattern: str) -> dict[str, tuple[str, str]]:
     parts = re.split(rf"^### ({key_pattern})\. ", text, flags=re.M)
     for i in range(1, len(parts), 2):
         key, rest = parts[i], parts[i + 1]
-        rest = re.split(r"^## ", rest, flags=re.M)[0].rstrip()
+        rest = re.split(r"^#{2,3} ", rest, flags=re.M)[0].rstrip()
         title, _, body = rest.partition("\n")
         out[key] = (title.strip(), body.strip())
     return out
@@ -82,6 +87,7 @@ def main() -> int:
     ap.add_argument("--next", required=True, dest="next_text")
     ap.add_argument("--expect-claude", type=int, default=0)
     ap.add_argument("--expect-codex", type=int, required=True)
+    ap.add_argument("--redact", action="append", default=[])
     ap.add_argument("--out", required=True)
     ap.add_argument("--map", required=True)
     ap.add_argument("--dry-run", action="store_true")
@@ -114,6 +120,15 @@ def main() -> int:
     if not args.no_claude:
         foot += f"- Claude report: `{sha(Path(args.claude))}`\n"
     foot += f"- Codex CLI report: `{sha(Path(args.codex))}`\n\n{args.next_text}"
+    redactions = []
+    for item in args.redact:
+        old, sep, new = item.partition("=>")
+        if not sep or not old:
+            print(f"refusing: --redact needs OLD=>NEW, got {item!r}", file=sys.stderr)
+            return 7
+        redactions.append([old, new, 0])
+    withheld = ("\n\nThis filed copy withholds a figure that is kept out of public records; "
+                "the review file has the original words.")
     issues = []
     for key, (title, body) in claude.items():
         grade = "P2" if key.startswith("N") else key.split("-")[0]
@@ -129,6 +144,21 @@ def main() -> int:
             grade, _, rest = ctitle.partition(": ")
             issues.append((f"codex-{number}", f"[{args.label} Codex {grade}] {rest}",
                            intro + f"## Codex CLI report, finding {number} ({ctitle})\n\n{cbody}" + foot))
+    redacted_issues = []
+    for key, title, body in issues:
+        touched = False
+        for entry in redactions:
+            old, new, _ = entry
+            count = title.count(old) + body.count(old)
+            if count:
+                entry[2] += count
+                title, body, touched = title.replace(old, new), body.replace(old, new), True
+        redacted_issues.append((key, title, body + (withheld if touched else "")))
+    for old, _, count in redactions:
+        if count == 0:
+            print(f"refusing: --redact text not found anywhere: {old!r}", file=sys.stderr)
+            return 7
+    issues = redacted_issues
     result = {}
     for key, title, body in issues:
         if "@" in title or "@" in body:
