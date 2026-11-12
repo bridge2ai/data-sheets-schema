@@ -17,9 +17,19 @@ The four approved post-images are applied and published: commit `6561dac3c3af50c
 
 **First step for you:** fast-forward your local branch to the lead's local head `a23ebf753` (see Part 3), which contains `6561dac3c`. If you have local commits after `ba1f56e4a`, do not merge or rebase by guesswork: list them and stop for the lead's order.
 
-## What happens to the CI triage
+## What happens to the CI triage: CI has answered, five tests are left
 
-The question of that assignment ("would CI be green with the post-images applied") is now being answered by CI itself. Write down what your CI-equivalent run has established so far (your finding that the 78 recorder ids are the same protected-file gap is accepted), then stop extending it. When the real run finishes the lead will send its inventory; what is left after that is the triage that remains.
+Real CI ran on `6561dac3c` with the four post-images applied (run 43319698046; inventory `R/notes/development_efficiency_20261111/handoffs/lead-ci-run-43319698046-failures-20261112.json`). **593 failing ids became 5.** Your finding that the recorder class was the protected-file gap is confirmed. Stop the offline triage; write down what it established, and take these five instead, one commit per cause:
+
+1. `tests/test_wave7_5213_d76_round4_inventory.py::test_every_public_runspec_boundary_has_an_explicit_contract`: "src/data_sheets_schema/native_shared_capture_orchestration.py:528 … recorded_receipt_assessment: needs exactly one RunSpec boundary declaration". Your #5994 repair added a public function that takes a RunSpec boundary. The contracts live in `tests/utils/run_spec_boundary_contracts.json`, which is a protected file. **First choice: change the repair so that it adds no new public RunSpec boundary** (for example by reaching the recorded assessment through a boundary that is already declared, or by keeping the new function out of the public boundary inventory in the way the inventory itself defines). Only if that is impossible, prepare the successor post-image of the contracts file in scratch with its sha256 and say why, and the lead takes it to the owner.
+2. `tests/test_native_pending_public_completion.py::test_pending_floor_public_completion_retains_diagnostic_reading`: "native controller dependency imported from another origin: prepare_registration". Your new test needs the import-origin isolation the other native test files received in `f25230fe1`.
+3. `tests/test_native_shared_owner_delivery.py::test_replay_owner_reuses_catalog_and_unknown_initialization_is_fresh[case0]`: `assert (None is None and None is not None)`. Not seen before; find the cause from the CI log, do not guess.
+4. `tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses`: "subscription observation is stale or future-dated". In CI this public completion test stops on freshness before it reaches anything else. Helpers 2 and 3 saw the same on this machine. Helper 2 is asked for the fixture's slack; if you get there first, establish from the fixture how many seconds a slow host has before the synthetic observation goes stale, and propose the smallest fixture change that keeps the freshness check real. Do not change the production check.
+5. `tests/test_native_d128_scanner_comparison.py::test_d128_final_composition_has_only_the_finite_approved_scanner_differences`: "D128 requires the exact approved scanner assets". Expected until the owner disposes of the new scanner comparison; produce that comparison in the D128 form at the integrated head so that the lead can put it to the owner, and say exactly which scanner assets differ from the approved ones.
+
+**Shard time.** Shards 1 and 4 were cancelled at the 45-minute limit, and shards 5, 8 and 3 took 42.6, 42.3 and 39.9 minutes. The lead is asking the owner for more shards. Say which test files dominate shards 1 and 4, from the weights and from this run's logs.
+
+You have a local commit `767eca31e` after `ba1f56e4a`, so your branch and the lead's have diverged. Do not rebase the lead's commits (the registry pin names `a23ebf753` by hash). List your local commits in the handoff; the lead will order the integration, most likely by cherry-picking yours onto its head.
 
 ## Part 1: the margin (D138, item (u))
 

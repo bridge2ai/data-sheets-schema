@@ -1,0 +1,209 @@
+{
+  "run_id": "43319698046",
+  "head": "6561dac3c3af50cbfce1ba3c8b6ad21d9cd4b834",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 131536811405,
+      "name": "Python 3.12 / offline canary controls",
+      "conclusion": "success",
+      "seconds": 968.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536811783,
+      "name": "Python 3.12 / offline evaluation",
+      "conclusion": "success",
+      "seconds": 203.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536811813,
+      "name": "Python 3.12 / API case routing-default-layout",
+      "conclusion": "success",
+      "seconds": 793.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536811834,
+      "name": "Python 3.12 / offline audit and finalization",
+      "conclusion": "success",
+      "seconds": 538.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536811857,
+      "name": "Python 3.12 / SG2 case sg2-conventional",
+      "conclusion": "success",
+      "seconds": 806.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536811892,
+      "name": "Python 3.12 / SG2 case sg2-explicit",
+      "conclusion": "success",
+      "seconds": 571.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536811912,
+      "name": "Python 3.12 / shard 3",
+      "conclusion": "success",
+      "seconds": 2396.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536811928,
+      "name": "Python 3.12 / API case routing-regate",
+      "conclusion": "success",
+      "seconds": 717.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536811974,
+      "name": "Python 3.12 / API case routing-dispatch",
+      "conclusion": "success",
+      "seconds": 729.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536811989,
+      "name": "Python 3.12 / API case routing-portable",
+      "conclusion": "success",
+      "seconds": 1851.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536812102,
+      "name": "Python 3.12 / SG2 case sg2-none",
+      "conclusion": "success",
+      "seconds": 669.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536812188,
+      "name": "Python 3.12 / shard 1",
+      "conclusion": "cancelled",
+      "seconds": 2719.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536812264,
+      "name": "Python 3.12 / shard 4",
+      "conclusion": "cancelled",
+      "seconds": 2717.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536812367,
+      "name": "Python 3.12 / shard 7",
+      "conclusion": "success",
+      "seconds": 2140.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536812380,
+      "name": "Python 3.12 / shard 6",
+      "conclusion": "success",
+      "seconds": 1388.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536812434,
+      "name": "Python 3.12 / shard 8",
+      "conclusion": "failure",
+      "seconds": 2539.0,
+      "summary_lines": 1,
+      "pytest_tail": "1 failed, 3886 passed, 7 skipped, 44 warnings in 2502.29s (0:41:42)"
+    },
+    {
+      "id": 131536812525,
+      "name": "Python 3.12 / shard 5",
+      "conclusion": "failure",
+      "seconds": 2556.0,
+      "summary_lines": 1,
+      "pytest_tail": "1 failed, 3329 passed, 15 skipped, 585 warnings in 2510.81s (0:41:50)"
+    },
+    {
+      "id": 131536813753,
+      "name": "schema-examples",
+      "conclusion": "skipped",
+      "seconds": -1.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131536814334,
+      "name": "Python 3.12 / shard 2",
+      "conclusion": "failure",
+      "seconds": 2070.0,
+      "summary_lines": 3,
+      "pytest_tail": "3 failed, 2860 passed, 10 skipped, 37 warnings in 2038.51s (0:33:58)"
+    },
+    {
+      "id": 131560357750,
+      "name": "test",
+      "conclusion": "failure",
+      "seconds": 2.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    }
+  ],
+  "failures": [
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_owner_delivery.py",
+      "node": "test_replay_owner_reuses_catalog_and_unknown_initialization_is_fresh[case0]",
+      "message": "assert (None is None and None is not None)",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 5",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_execution_variant.py",
+      "node": "test_actual_public_merged_omissions_and_all_chunk_statuses",
+      "message": "ValueError: subscription observation is stale or future-dated",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_pending_public_completion.py",
+      "node": "test_pending_floor_public_completion_retains_diagnostic_reading",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_wave7_5213_d76_round4_inventory.py",
+      "node": "test_every_public_runspec_boundary_has_an_explicit_contract",
+      "message": "AssertionError: src/data_sheets_schema/native_shared_capture_orchestration.py:528 data_sheets_schema.native_shared_capture_orchestration.recorded_receipt_assessment: needs exactly one RunSpec boundary declaration",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_d128_scanner_comparison.py",
+      "node": "test_d128_final_composition_has_only_the_finite_approved_scanner_differences",
+      "message": "ValueError: D128 requires the exact approved scanner assets",
+      "class": "other"
+    }
+  ]
+}
