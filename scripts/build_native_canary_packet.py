@@ -84,6 +84,8 @@ def parser():
 
 
 def build(args):
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from native_packet_review_inputs import source_contract
     from data_sheets_schema import api_runner, chunking, native_shared_contract as c
     from data_sheets_schema import native_shared_selection as selection
     from data_sheets_schema.profiles import declared_profile, profile_named
@@ -116,7 +118,8 @@ def build(args):
     assets = selection.capture_assets()
     receipt = {'kind': c.KINDS['receipt_policy'], 'version': c.VERSION,
         'registration_id': args.registration_id, 'condition': c.CONDITION,
-        'runtime_policy_sha256': selection.RECEIPT_POLICY_SHA256, 'receipt_instrument_version': 4,
+        'runtime_policy_sha256': selection.RECEIPT_POLICY_SHA256,
+        'receipt_instrument_version': source_contract()['receipt_instrument_version'],
         'coverage_floor': {'state': 'pending', 'mode': 'diagnostic_pilot'}}
     receipt_raw = c.canonical(receipt)
     c.parse_receipt_policy(receipt_raw, selection.RECEIPT_POLICY_SHA256)
@@ -143,6 +146,7 @@ def build(args):
     captured = selection.capture(selection_path)
     # Full production capture rereads all exact pins and validates schema/context/assets.
     snapshot = {'scope': 'DRAFT OFFLINE INPUTS ONLY; NOT REGISTRATION OR AUTHORIZATION',
+        'running_source_contract': source_contract(),
         'selection': pin(selection_path), 'receipt_policy': pin(receipt_path),
         'descriptor_sha256': captured.descriptor.sha256,
         'schema_sources': {role: value['sources'] for role, value in schemas.items()},
