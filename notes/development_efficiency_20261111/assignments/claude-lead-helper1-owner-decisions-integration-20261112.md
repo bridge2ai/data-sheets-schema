@@ -15,7 +15,7 @@ From the Claude lead, 2026-11-12. Short names and rules are in `claude-lead-help
 
 The four approved post-images are applied and published: commit `6561dac3c3af50cbfce1ba3c8b6ad21d9cd4b834`, one commit on top of your `ba1f56e4a9460fe87c1e0ea3cb35ed2d7405cfa0`, made in the lead's worktree `E/claude-native-candidate-20261112` and pushed to `codex/native-main-integration-20261112` (draft PR #5968). Each file was copied from your verified packet composition after checking the pre-image and the approved sha256. A real CI run on that head is in progress.
 
-**First step for you:** in your worktree, `git fetch origin` and fast-forward your local branch to `6561dac3c` (`git merge --ff-only`). If you have local commits after `ba1f56e4a`, do not merge or rebase by guesswork: list them and stop for the lead's order.
+**First step for you:** fast-forward your local branch to the lead's local head `a23ebf753` (see Part 3), which contains `6561dac3c`. If you have local commits after `ba1f56e4a`, do not merge or rebase by guesswork: list them and stop for the lead's order.
 
 ## What happens to the CI triage
 
@@ -29,18 +29,20 @@ The question of that assignment ("would CI be green with the post-images applied
 
 Bring `codex/native-floor-basis-d37-20261112` onto the candidate, with one ruling that changes your proposal: **for a registered (numeric) native floor the basis is mandatory and must be `receipted_part`.** A registration with a numeric floor and no basis refuses; it does not fall back to the final-record fraction. A pending registration is unchanged and may carry the at-receipt counters as a diagnostic reading. The API evaluator stays untouched. Tests for the refusal and for the deletion case (removing unreceipted leaves does not raise the fraction).
 
-## Part 3: the policy asset, prepared as a successor packet for the owner (D142, D140)
+## Part 3: the policy asset: the lead has prepared it; you validate it (D142, D140)
 
-Do not change the asset or `canonical_hashes.yaml` on the branch yet: the new post-image hash of `canonical_hashes.yaml` has to be approved by the owner as a number first.
+Changed by the lead before this file was delivered. The lead made the asset change itself, so that the owner could be asked for the new hash today.
 
-Prepare, in scratch, the asset `src/download/prompts/native_shared_receipt_policy_v1.md` with exactly these two changes in its last paragraph, keeping the file's line wrapping style and changing nothing else:
+- Local commit `a23ebf75391170de924cf023727ae103d60fc13d` on the lead's branch `claude/native-candidate-20261112`, one commit on top of `6561dac3c`, **not pushed**: the asset `src/download/prompts/native_shared_receipt_policy_v1.md` with its last paragraph's two sentences changed (the owner's sentence of D142, and the lead's sentence for the at-receipt basis), and `native_shared_selection.RECEIPT_POLICY_SHA256` moved to the asset's new sha256 `8b0695212d94380949ddc523963021b1edcb3ebb9b6a52291d36238a92779f1c` (2,510 bytes).
+- The successor post-image of the protected `canonical_hashes.yaml`, made by `d4d api prompts pin` at that commit and kept in `E/scratch-lead-policy-packet-20261112/` (`canonical_hashes.postimage`, sha256 `d0de85f3da4bfa29a4bfc7ad6158abad5b3373a937a4e7e3b360217fa4eaf57f`; its `README.md` says how it was made). One registry entry changes. `d4d api prompts check --strict` reports 28 prompt files, 0 not at their pin, with it applied. It is **not** on any branch: the owner has to approve that sha256 first.
 
-- replace the sentence "The registered production floor is the exact integer fraction with_receipt / receiptable on the final record, using the unchanged receipt counters." by: "The registered production floor is the exact integer fraction with_receipt_at_receipt / receiptable_at_receipt: the coverage of the sealed phase-1 record under the completed effective receipt (basis receipted_part). Later edits of the record cannot change it."
-- replace the sentence "A pending floor remains a diagnostic pilot and cannot satisfy strict completion." by the owner's sentence of D142, exactly as quoted above.
+Your first step therefore becomes: fast-forward your local branch to `a23ebf753` (the lead's local branch is visible from your worktree; `git merge --ff-only claude/native-candidate-20261112`).
 
-The first replacement is the lead's wording and goes to the owner with the hash; the second is the owner's.
+Then validate, in a scratch composition with the successor post-image applied (copy its exact bytes; do not re-run the pin command, which writes the day's date):
 
-Report: the full new last paragraph as it will read; the asset's whole-file sha256, prompt-body sha256 and byte count; the successor `canonical_hashes.yaml` post-image (built by the same packet tooling as the approved one, on top of the approved post-image `543e5cd6dc0da0f622ba2cd11a16a90732e9302a1ed0a4700efb61971299d252` now on the branch) with its sha256 and its diff against the approved post-image; and every other pin or constant in source that names the asset's hash and must move in the same commit (`native_shared_selection.RECEIPT_POLICY_SHA256`, `ASSET_HASHES`, and whatever else your inventory found). Then run the affected test files in a scratch composition with the successor applied and report from saved output.
+1. every other pin or derived identity that names the asset and must move in the same change. The lead found one in source (`RECEIPT_POLICY_SHA256`) and one stale copy in `scripts/adhoc/native_u1_packets/canonical_hashes.patch`, which is historical. Your earlier inventory named more (the receipt registration and selection identities, the render and execution authority, scanner evidence): say for each whether it is a stored value that must be edited or a value derived at run time;
+2. the test files that read the asset, its hash or a registration built from it: run them whole and report from saved output. Fix fixtures that embed the old identity, in their own commit, without weakening what they assert;
+3. whether the asset's new sentence on the basis says exactly what Part 2's code does. If the code and the sentence differ in any case, say which and propose the smallest change to the code, not to the sentence (a change to the sentence changes the hash the owner is approving).
 
 ## Part 4: integration, when the lead names the commits
 
@@ -56,4 +58,4 @@ As before. Offline; no provider, model or native-binary execution; nothing pushe
 
 ## Handoff
 
-`R/notes/development_efficiency_20261111/handoffs/codex-h1-owner-decisions-integration-20261112.md` with its JSON. Answer first: your branch head after the fast-forward and each part's commit; the successor packet's numbers (Part 3) in a block the lead can show the owner; the tests from saved output. Write a first version when Part 3's numbers exist, since the owner's approval waits on them.
+`R/notes/development_efficiency_20261111/handoffs/codex-h1-owner-decisions-integration-20261112.md` with its JSON. Answer first: your branch head after the fast-forward and each part's commit; the successor packet's numbers (Part 3) in a block the lead can show the owner; the tests from saved output. Write a first version when Part 3's validation is done, since the lead applies the successor post-image as soon as the owner approves its hash.
