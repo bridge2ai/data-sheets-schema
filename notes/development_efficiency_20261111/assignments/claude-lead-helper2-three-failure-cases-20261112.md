@@ -1,4 +1,4 @@
-# Assignment to Codex helper 2: the three failure cases that did not pass, then the second set of run limits the owner decided
+# Assignment to Codex helper 2: two review findings on the cache repair, the three failure cases that did not pass, then the second set of run limits the owner decided
 
 From the Claude lead, 2026-11-12. Short names and rules are in `claude-lead-helper-context-20261112.md` beside this file. This follows `claude-lead-helper2-helper-cache-home-20261112.md`; do it after that one's repair and re-canary.
 
@@ -21,6 +21,15 @@ It expected the refusal `review independence, roles or decision differs` and got
 1. Find which commit changed the first refusal: run or read the same id at the candidate's base before your bundle version 3 commit (`cf53497ae`) and after it.
 2. Decide which is right against amendment N1, draft v12, and the bundle's design: if the launch word binds the review's bytes, a changed review decision is correctly refused at the word first, and the test's expected reason is what has to change, to the reason a reader of the saved failure will actually see, with a second assertion that the review check itself still refuses when the word is made consistent with the changed review. If instead the order of checks was changed by accident, restore it.
 3. One commit, on your branch `codex/native-launch-sequence-20261112` or the cache branch, whichever carries the code concerned; say which.
+
+## Case 0, first: two review findings on your cache repair (issues #6030 and #6031)
+
+Added by the lead before this file was delivered. An independent read-only Codex CLI review of `e079e2f3a` (`E/plans/reviews/native_helper_cache_e079e2f3_codex_review_2026-11-12.md`, SHA-256 `f3c030d41663e54a5a7d9da1d71db1ff2fd4ba05fb8844e03d8092cab11138cb`) says: acceptable after listed fixes, no P1, all five rules met. Two test gaps, one commit on `codex/native-helper-cache-home-20261112`:
+
+- **#6030 (P2):** extend the public-lifetime test to assert that the cache holds the expected dependency artifacts, HOME stays empty, and no cache member appears in the captured file identities, metadata, aliases, the saved pool or the published projections; and add a focused capture test with a hidden cache entry, so that the exclusion cannot depend on glob behaviour.
+- **#6031 (P3):** add classifier assertions that the model's Bash tool is refused a literal read of a cache file, a listing of the directory, an environment expansion of the variable, and a lookup through an output-directory symlink pointing into the cache; keep one positive registered-input lookup as the control.
+
+Then cases A and B below.
 
 ## Case C: a second registered set of run limits (decided by the owner, D143)
 
