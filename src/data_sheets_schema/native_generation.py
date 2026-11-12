@@ -218,11 +218,10 @@ def main(argv=None):
     if args.command in ("capture-subscription-event", "prepare-subscription-guard-v2", 'record-capture-word'):
         from . import native_launch_review as review
         from . import native_subscription_capture as capture
-        from . import native_subscription_guard_v2 as guard_v2
         from .native_u4b_runtime import validate_prepared_runtime
         validate_prepared_runtime(value['runtime'])
         bundle_raw, word_raw = _read(args.review), _read(args.launch_word)
-        terms = review.validate_bundle(subject_raw, bundle_raw, word_raw)
+        review.validate_bundle(subject_raw, bundle_raw, word_raw)
         captures.extend([(args.review, bundle_raw, SUBJECT_LIMIT),
                          (args.launch_word, word_raw, SUBJECT_LIMIT)])
         _unchanged(*captures)
@@ -234,16 +233,10 @@ def main(argv=None):
                 review_bundle_raw=bundle_raw, launch_word_raw=word_raw, directory=args.output_directory)
             result = {"capture_manifest": str(path), "sha256": guard.sha(_read(path))}
         else:
-            saved = capture.read_capture(args.capture, registration_raw=subject_raw,
-                review_bundle_raw=bundle_raw, launch_word_raw=word_raw, require_current=True)
-            event = saved['selected_event']
-            raw = guard_v2.prepare_guard(registration_raw=subject_raw, runtime=value['runtime'],
-                launch_word_raw=word_raw, event_raw=event['event_json'].encode(),
-                captured_at=event['captured_at'], owner_statement=terms,
-                maximum_starting_utilization=terms['max_starting_weekly_utilization'],
-                max_age_seconds=terms['max_age_seconds'])
-            _unchanged(*captures)
-            _new_file(args.output, raw)
+            with capture.current_guard_preparation(args.capture, registration_raw=subject_raw,
+                    review_bundle_raw=bundle_raw, launch_word_raw=word_raw) as raw:
+                _unchanged(*captures)
+                _new_file(args.output, raw)
             result = {"guard_sha256": guard.sha(raw), "path": args.output}
         _emit(result, choice_raw, command=args.command)
     elif args.command == "prepare-subscription-guard":

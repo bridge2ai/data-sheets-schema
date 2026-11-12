@@ -6,7 +6,6 @@ readback execute. No full registration or scientific acceptance is claimed.
 from copy import deepcopy
 from pathlib import Path
 import pytest
-from data_sheets_schema import native_launch_review as review
 from data_sheets_schema import native_subscription_admission as admission
 from data_sheets_schema import native_subscription_guard_v2 as guard
 from data_sheets_schema import native_subscription_capture as capture
@@ -17,17 +16,9 @@ from tests.test_native_subscription_capture import component, read_arguments, wo
 def prepared(tmp_path, monkeypatch):
     arguments, value = component(tmp_path, monkeypatch)
     path = capture.capture_subscription(**arguments)
-    saved = capture.read_capture(path, **read_arguments(arguments))
-    terms = review.validate_bundle(arguments['registration_raw'], arguments['review_bundle_raw'],
-                                   arguments['launch_word_raw'])
-    event = saved['selected_event']
-    raw = guard.prepare_guard(registration_raw=arguments['registration_raw'], runtime=value['runtime'],
-        launch_word_raw=arguments['launch_word_raw'], event_raw=event['event_json'].encode(),
-        captured_at=event['captured_at'], owner_statement=terms,
-        maximum_starting_utilization=terms['max_starting_weekly_utilization'],
-        max_age_seconds=terms['max_age_seconds'])
     paths = {name: tmp_path / (name + '.json') for name in ('guard', 'word', 'review')}
-    paths['guard'].write_bytes(raw)
+    with capture.current_guard_preparation(path, **read_arguments(arguments)) as raw:
+        paths['guard'].write_bytes(raw)
     paths['word'].write_bytes(arguments['launch_word_raw'])
     paths['review'].write_bytes(arguments['review_bundle_raw'])
     return arguments, value, paths, raw

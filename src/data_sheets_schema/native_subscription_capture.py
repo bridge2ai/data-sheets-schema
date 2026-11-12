@@ -454,7 +454,8 @@ def activate_capture_word(*, registration_raw, review_bundle_raw, launch_word_ra
 
 
 @contextmanager
-def capture_admission_lease(*, registration_raw, review_bundle_raw, launch_word_raw, now=None):
+def capture_admission_lease(*, registration_raw, review_bundle_raw, launch_word_raw, now=None,
+                            guard_raw=None):
     """Hold current-word/refusal state stable through generation reservation.
 
     RunSpec boundary: validated-caller
@@ -462,11 +463,81 @@ def capture_admission_lease(*, registration_raw, review_bundle_raw, launch_word_
     RunSpec precondition: Caller supplies serialized registration/review/word;
     _current_authority reconstructs guarded preparation before locking or
     yielding current-word authority.
+
+    When current execution supplies guard_raw, recheck its recorded selection
+    inside the held lock. A word-only lease remains useful for current-word
+    checks but is not a substitute for the engine's capture/guard admission.
     """
     from . import native_capture_words as words
-    value, _, _, _ = _current_authority(registration_raw, review_bundle_raw, launch_word_raw)
+    authority = _current_authority(registration_raw, review_bundle_raw, launch_word_raw)
+    value = authority[0]
     with words.locked(value, registration_raw) as journal:
-        yield journal.require(launch_word_raw, now)
+        current = journal.require(launch_word_raw, now)
+        if guard_raw is not None:
+            _require_latest_guard_claim(guard_raw, authority, journal, launch_word_raw)
+        yield current
+
+
+def _checked_claim_selection(root, authority, index):
+    """Compare the index with the actual journal under its caller's word lock."""
+    _, claims = _claims(root, *authority)
+    if type(index) is not int or not 1 <= index <= MAX_CAPTURES or index != len(claims):
+        raise ValueError('subscription guard must use the last claimed capture under the word')
+    return {'capture_index': index, 'capture_claim_count': len(claims)}
+
+
+def _require_latest_guard_claim(guard_raw, authority, journal, launch_word_raw):
+    """Recheck a current guard inside the already-held reservation word lock.
+
+    The caller has reconstructed authority with _current_authority, acquired
+    words.locked and required the current word. Never reacquire that lock here.
+    The guard's event is independently reconstructed by the current admission
+    join; these numbers cannot provide that authority or consume an attempt.
+    """
+    from .native_subscription_guard_v2 import capture_selection
+    selected = capture_selection(strict_json(guard_raw), required=True)
+    root = _path(authority[1]['quota_capture']['directory'])
+    if (journal.root != root or journal.header['registration_sha256'] != authority[3]['registration_sha256']
+            or authority[3]['launch_word_sha256'] != sha(launch_word_raw)):
+        raise ValueError('capture selection differs from the held registration authority')
+    checked = _checked_claim_selection(root / 'captures' / sha(launch_word_raw),
+                                       authority, selected['capture_index'])
+    if selected != checked:
+        raise ValueError('subscription guard capture selection differs from the current claim count')
+    return checked
+
+
+@contextmanager
+def current_guard_preparation(manifest_path, *, registration_raw, review_bundle_raw, launch_word_raw):
+    """Prepare current guard bytes while retaining the word lock through publication.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Serialized registration/review/word and a manifest path
+    are inputs only; _current_authority reconstructs guarded preparation before
+    the lock, claim reconstruction or guard construction. The caller writes the
+    returned bytes inside this scope. No capture or generation claim is made.
+    """
+    from . import native_capture_words as words
+    from . import native_subscription_guard_v2 as guard
+    path, directory, root = _capture_manifest_root(
+        manifest_path, registration_raw, review_bundle_raw, launch_word_raw)
+    authority = _current_authority(registration_raw, review_bundle_raw, launch_word_raw)
+    value, statement, _, _ = authority
+    if root != _path(statement['quota_capture']['directory']):
+        raise ValueError('guard capture root differs from reconstructed authority')
+    with words.locked(value, registration_raw) as journal:
+        journal.require(launch_word_raw)
+        capture_root = root / 'captures' / sha(launch_word_raw)
+        saved = _read_capture_records_at_root(path, directory, authority, capture_root,
+                                             require_latest=True)
+        selection = _checked_claim_selection(capture_root, authority, saved['capture_index'])
+        event = saved['selected_event']
+        yield guard.prepare_guard(registration_raw=registration_raw, runtime=value['runtime'],
+            launch_word_raw=launch_word_raw, event_raw=event['event_json'].encode(),
+            captured_at=event['captured_at'], owner_statement=statement,
+            maximum_starting_utilization=statement['max_starting_weekly_utilization'],
+            max_age_seconds=statement['max_age_seconds'], **selection)
 
 
 def require_current_capture_authority(*, registration_raw, review_bundle_raw, launch_word_raw, now=None):
@@ -617,8 +688,19 @@ def _capture_manifest_root(manifest_path, registration_raw, review_bundle_raw, l
 
 def _read_capture_records(path, directory, authority, *, registration_raw, launch_word_raw,
                           require_current):
-    value, statement, word, binding = authority
     root = _read_root(authority, registration_raw, launch_word_raw, require_current)
+    return _read_capture_records_at_root(path, directory, authority, root,
+                                         require_latest=require_current)
+
+
+def _read_capture_records_at_root(path, directory, authority, root, *, require_latest=False):
+    """Reconstruct saved bytes after the caller validates the word/root authority.
+
+    Current guard preparation holds words.locked across this call and guard
+    publication. Ordinary historical readers first resolve _read_root; current
+    execution independently repeats latest selection under its reservation lock.
+    """
+    value, statement, word, binding = authority
     journal_claim = None
     if statement['quota_capture']['kind'] in (REQUEST_KIND, PREVIOUS_REQUEST_KIND):
         reservation_raw, claims = _claims(root, value, statement, word, binding)
@@ -628,6 +710,8 @@ def _read_capture_records(path, directory, authority, *, registration_raw, launc
         index = int(directory.name.rsplit('-', 1)[1])
         if index > len(claims):
             raise ValueError('capture slot has no durable reservation claim')
+        if require_latest and index != len(claims):
+            raise ValueError('subscription guard must use the last claimed capture under the word')
         binding = _slot_binding(binding, index, reservation_raw, claims[index - 2] if index > 1 else None)
         journal_claim = claims[index - 1]
     elif directory != root:
@@ -705,8 +789,9 @@ def read_capture_for_event(directory, *, registration_raw, review_bundle_raw, la
                            event_json, event_sha256, captured_at, require_current=False):
     """Join a guard to its exact retained capture, without a mutable latest pointer.
 
-    Failed/incomplete slots stay spent but cannot supply admission evidence. A
-    later re-capture does not rewrite the saved event chosen by an earlier guard.
+    Failed/incomplete slots stay spent but cannot supply admission evidence.
+    Historical lookup preserves the event chosen by an earlier guard; current
+    lookup additionally requires the last claimed slot, including failed claims.
     Freshness and window admission are checked independently by the guard.
 
     RunSpec boundary: validated-caller

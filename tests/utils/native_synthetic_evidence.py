@@ -113,7 +113,6 @@ def bound_permission_for(expected, selection, source_raw):
 def authority_for(registration_raw, ci_path, directory):
     """Mint fresh labelled review/capture/guard bytes; use genuine saved readers."""
     from data_sheets_schema import native_subscription_capture as capture
-    from data_sheets_schema import native_subscription_guard_v2 as guard
     from data_sheets_schema import native_launch_review as review
     from data_sheets_schema import native_shared_registration_orchestration as registration
     from tests.utils.native_u4b_fixtures import bundle_for
@@ -173,17 +172,12 @@ def authority_for(registration_raw, ci_path, directory):
         (slot / name).write_bytes(raw)
     manifest = slot / 'capture.json'
     manifest.write_bytes(c.canonical(result))
-    captured = capture.read_capture(manifest, registration_raw=registration_raw,
-        review_bundle_raw=review_raw, launch_word_raw=word_raw, require_current=True)
-    selected = captured['selected_event']
-    guard_raw = guard.prepare_guard(registration_raw=registration_raw, runtime=runtime,
-        launch_word_raw=word_raw, event_raw=selected['event_json'].encode(),
-        captured_at=selected['captured_at'], owner_statement=terms,
-        maximum_starting_utilization=terms['max_starting_weekly_utilization'],
-        max_age_seconds=terms['max_age_seconds'])
     review_path, word_path, guard_path = (directory / name for name in (
         'invented-review.json', 'invented-owner.json', 'invented-subscription.json'))
-    for path, raw in ((review_path, review_raw), (word_path, word_raw), (guard_path, guard_raw)):
+    with capture.current_guard_preparation(manifest, registration_raw=registration_raw,
+            review_bundle_raw=review_raw, launch_word_raw=word_raw) as guard_raw:
+        guard_path.write_bytes(guard_raw)
+    for path, raw in ((review_path, review_raw), (word_path, word_raw)):
         path.write_bytes(raw)
     (directory / 'SYNTHETIC-AUTHORITY.txt').write_text(
         'Fabricated software-test review, CI, word, capture and quota declarations.\n'

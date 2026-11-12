@@ -388,21 +388,26 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         if not accepted_current_selection:
             with capture_admission_lease(registration_raw=registration_raw,
                     review_bundle_raw=authorization['raw']['review'],
-                    launch_word_raw=authorization['raw']['launch_word']) as current:
+                    launch_word_raw=authorization['raw']['launch_word'],
+                    guard_raw=launch_guard.raw if launch_guard is not None else None) as current:
                 yield current
             return
         # This input-only entry performs the full fresh preparation/consumer
         # reconstruction and current-protocol check. Neither saved bytes nor a
         # previous value supplies admission, and no loader scope is revived.
-        from .native_subscription_capture import _current_authority
+        from .native_subscription_capture import _current_authority, _require_latest_guard_claim
         from . import native_capture_words as words
-        fresh_value, _, _, _ = _current_authority(registration_raw,
+        fresh_authority = _current_authority(registration_raw,
             authorization['raw']['review'], authorization['raw']['launch_word'])
+        fresh_value = fresh_authority[0]
         if (c.canonical(fresh_value) != original_execution
                 or c.canonical(value) != original_execution):
             raise ValueError('native shared execution selection changed before reservation')
         with words.locked(fresh_value, registration_raw, create=False) as journal:
-            yield journal.require(authorization['raw']['launch_word'])
+            current = journal.require(authorization['raw']['launch_word'])
+            _require_latest_guard_claim(launch_guard.raw, fresh_authority, journal,
+                                        authorization['raw']['launch_word'])
+            yield current
 
     # Hold the registration-wide word/limits lock through the first reservation
     # effect. A renewal cannot supersede the word between checking and mkdir.

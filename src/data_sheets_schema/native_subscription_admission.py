@@ -1,7 +1,8 @@
 """Version dispatch and raw authority joins for native subscription evidence.
 
-Historical guard readback remains v1; current U4b launch requires v2. Neither
-a saved verdict nor a caller-supplied statement is launch authority.
+Historical v1 and v2 guard readback remains available; current U4b launch
+requires v2 with checked capture selection. Neither a saved verdict nor a
+caller-supplied statement is launch authority.
 """
 from dataclasses import dataclass
 from pathlib import Path
@@ -60,6 +61,7 @@ def preflight_current_selection(selection, *, registration_raw, value):
     v2.SubscriptionGuard(raw, expected_sha256=selection.expected_sha256,
         registration_raw=registration_raw, runtime=value['runtime'],
         launch_word_raw=word, owner_statement=terms, check_freshness=True)
+    v2.capture_selection(v2.strict_json(raw), required=True)
     words.require_unspent(value)
     with words.locked(value, registration_raw, create=False) as journal:
         journal.require(word, current=True)
@@ -140,6 +142,7 @@ def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_ra
         return v1, {}
     if value['version'] != 2:
         raise ValueError('unknown subscription guard version')
+    selected = v2.capture_selection(value, required=current)
     from .native_u4b_runtime import validate_prepared_runtime
     from .native_subscription_capture import read_capture_for_event
     validate_prepared_runtime(runtime)
@@ -152,6 +155,8 @@ def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_ra
     event = capture['selected_event']
     if any(value[key] != event[key] for key in ('event_json', 'event_sha256', 'captured_at')):
         raise ValueError('guard differs from the selected registered capture')
+    if selected and selected['capture_index'] != capture.get('capture_index'):
+        raise ValueError('guard capture index differs from the selected registered capture')
     return v2, {'owner_statement': terms}
 
 

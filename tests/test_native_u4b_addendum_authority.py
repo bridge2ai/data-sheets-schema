@@ -111,13 +111,9 @@ def test_expired_capture_stays_spent_and_refuses_before_generation_reservation(t
     terms = review.validate_bundle(arguments['registration_raw'], arguments['review_bundle_raw'],
                                    arguments['launch_word_raw'])
     event = saved['selected_event']
-    raw = guard.prepare_guard(registration_raw=arguments['registration_raw'], runtime=value['runtime'],
-        launch_word_raw=arguments['launch_word_raw'], owner_statement=terms,
-        event_raw=event['event_json'].encode(), captured_at=event['captured_at'],
-        maximum_starting_utilization=terms['max_starting_weekly_utilization'],
-        max_age_seconds=terms['max_age_seconds'])
     paths = {name: tmp_path / (name + '-input.json') for name in ('guard', 'review', 'word')}
-    paths['guard'].write_bytes(raw)
+    with capture.current_guard_preparation(manifest, **read_arguments(arguments)) as raw:
+        paths['guard'].write_bytes(raw)
     paths['review'].write_bytes(arguments['review_bundle_raw'])
     paths['word'].write_bytes(arguments['launch_word_raw'])
     before = {path.name: path.read_bytes() for path in manifest.parent.iterdir() if path.is_file()}

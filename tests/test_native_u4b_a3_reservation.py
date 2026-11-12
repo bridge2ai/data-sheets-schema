@@ -61,11 +61,8 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
     clock = [guard._timestamp(selected['captured_at'], 'captured_at')
              + owner['max_age_seconds'] - remaining]
     monkeypatch.setattr(guard, '_now', lambda: clock[0])
-    guard_raw = guard.prepare_guard(registration_raw=raw, runtime=value['runtime'],
-        launch_word_raw=arguments['launch_word_raw'], owner_statement=owner,
-        event_raw=selected['event_json'].encode(), captured_at=selected['captured_at'],
-        maximum_starting_utilization=owner['max_starting_weekly_utilization'],
-        max_age_seconds=owner['max_age_seconds'])
+    with capture.current_guard_preparation(manifest, **read_arguments(arguments)) as guard_raw:
+        pass
     watched = guard.SubscriptionGuard(guard_raw, expected_sha256=guard.sha(guard_raw),
         registration_raw=raw, runtime=value['runtime'],
         launch_word_raw=arguments['launch_word_raw'], owner_statement=owner)

@@ -25,12 +25,14 @@ MAX_AGE_SECONDS = 1200
 WINDOWS = ("five_hour", "seven_day")
 MAX_WINDOWS = 64
 SAFE_STATUSES = ("allowed", "allowed_warning")
-KEYS = frozenset({
+HISTORICAL_KEYS = frozenset({
     "kind", "version", "registration_sha256", "runtime_sha256",
     "launch_word_sha256", "owner_statement_sha256", "max_starting_weekly_utilization",
     "max_starting_five_hour_utilization", "max_age_seconds", "pre_reservation_margin_seconds",
     "captured_at", "event_json", "event_sha256",
 })
+CAPTURE_SELECTION_KEYS = frozenset({'capture_index', 'capture_claim_count'})
+KEYS = HISTORICAL_KEYS | CAPTURE_SELECTION_KEYS
 WORD_KEYS = frozenset({
     "kind", "version", "registration_sha256", "attempt_id", "source_commit",
     "dependencies_sha256", "owner", "authorized_at", "word", "review_sha256",
@@ -302,13 +304,34 @@ def _record_opaque(windows, recorded, event_index):
         row["last"] = value
 
 
+def capture_selection(value, *, required=False):
+    """Read the closed selection shape; recorded numbers are never authority.
+
+    Old v2 bytes remain readable as historical quota evidence. Current callers
+    require the new shape and independently join it to the locked claim journal.
+    """
+    if type(required) is not bool or type(value) is not dict:
+        raise ValueError('subscription capture selection must be an object')
+    if set(value) == HISTORICAL_KEYS and not required:
+        return {}
+    _closed(value, KEYS, 'current v2 subscription guard capture selection')
+    if (value['kind'] != KIND or type(value['version']) is not int
+            or value['version'] != VERSION):
+        raise ValueError('unsupported subscription guard protocol')
+    selection = {key: value[key] for key in CAPTURE_SELECTION_KEYS}
+    if (any(type(item) is not int or not 1 <= item <= 3 for item in selection.values())
+            or selection['capture_index'] != selection['capture_claim_count']):
+        raise ValueError('subscription capture selection must name the last claimed capture')
+    return selection
+
+
 def _admission(raw, expected_sha256, registration_raw, runtime, launch_word_raw, owner_statement):
     if type(registration_raw) is not bytes or not registration_raw or type(runtime) is not dict:
         raise ValueError("subscription admission requires captured registration bytes and runtime object")
     if type(raw) is not bytes or not 0 < len(raw) <= MAX_BYTES or sha(raw) != expected_sha256:
         raise ValueError("subscription guard bytes differ from selected SHA256")
     value = strict_json(raw)
-    _closed(value, KEYS, "v2 subscription guard")
+    capture_selection(value)
     if value["kind"] != KIND or type(value["version"]) is not int or value["version"] != VERSION:
         raise ValueError("unsupported subscription guard protocol")
     word, authorized = _word(launch_word_raw, registration_raw)
@@ -482,6 +505,7 @@ class SubscriptionGuard:
     def snapshot(self):
         bound = self._static()
         return {"kind": KIND, "version": VERSION, "guard_sha256": sha(self._raw),
+            **capture_selection(bound["value"]),
             "registration_sha256": bound["value"]["registration_sha256"],
             "observation_sha256": bound["value"]["event_sha256"],
             "owner_statement_sha256": bound["value"]["owner_statement_sha256"],
@@ -676,11 +700,16 @@ def validate_saved_observations(raw, snapshot, *, registration_raw, runtime,
 
 def prepare_guard(*, registration_raw, runtime, launch_word_raw, event_raw, captured_at,
                   maximum_starting_utilization, max_age_seconds, owner_statement, clock=None,
-                  maximum_starting_five_hour_utilization=None, pre_reservation_margin_seconds=None):
+                  maximum_starting_five_hour_utilization=None, pre_reservation_margin_seconds=None,
+                  capture_index=None, capture_claim_count=None):
     """Bind an observation and registered policy, without selecting numeric defaults.
 
     Raw bundle validation must precede this helper. Omitted new arguments are
     read from the required registered admission object, never ambient policy.
+    Without capture selection this only produces historical quota-component
+    bytes, which current execution refuses. Current guard preparation uses
+    native_subscription_capture.current_guard_preparation to reconstruct the
+    capture and obtain both selection numbers under the registration lock.
     """
     if type(event_raw) is not bytes:
         raise ValueError("subscription event must be captured bytes")
@@ -698,6 +727,8 @@ def prepare_guard(*, registration_raw, runtime, launch_word_raw, event_raw, capt
         "pre_reservation_margin_seconds": pre_reservation_margin_seconds,
         "max_age_seconds": max_age_seconds, "captured_at": captured_at,
         "event_json": event_raw.decode("utf-8"), "event_sha256": sha(event_raw)}
+    if capture_index is not None or capture_claim_count is not None:
+        document.update(capture_index=capture_index, capture_claim_count=capture_claim_count)
     raw = canonical(document)
     SubscriptionGuard(raw, expected_sha256=sha(raw), registration_raw=registration_raw,
         runtime=runtime, launch_word_raw=launch_word_raw, owner_statement=owner_statement, clock=clock)
