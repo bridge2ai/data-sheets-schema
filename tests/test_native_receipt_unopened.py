@@ -58,3 +58,12 @@ def test_new_registered_report_cannot_remove_marker_or_change_count(mutation):
     runtime = {'limits_basis': '{"kind":"d4d_native_u4b_runtime_basis","version":1}'}
     with pytest.raises(ValueError, match='observation differs'):
         _require_reported_receipts(old, fresh, runtime)
+
+
+# The pinned v1 and v2 closures intentionally share bare module names. Isolate
+# each case from collection imports and earlier v1 cases without relaxing the
+# production origin check (including deliberate foreign imports in test bodies).
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: E402,F401
+import pytest as _origin_pytest  # noqa: E402
+
+pytestmark = _origin_pytest.mark.usefixtures("isolated_modules")

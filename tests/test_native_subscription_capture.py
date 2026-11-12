@@ -454,3 +454,12 @@ def test_genuine_registration_read_capture_for_event_rechecks_live_selection_and
         real_verified(raw)
     with pytest.raises(ValueError, match='native stage root is not a directory'):
         real_recheck(raw, deepcopy(value))
+
+
+# The pinned v1 and v2 closures intentionally share bare module names. Isolate
+# each case from collection imports and earlier v1 cases without relaxing the
+# production origin check (including deliberate foreign imports in test bodies).
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: E402,F401
+import pytest as _origin_pytest  # noqa: E402
+
+pytestmark = _origin_pytest.mark.usefixtures("isolated_modules")

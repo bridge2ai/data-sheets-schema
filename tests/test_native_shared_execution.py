@@ -274,3 +274,12 @@ def test_launch_case_routes_guarded_monitoring_on_cpython313_and_legacy_elsewher
             ('exit_observe', 'legacy'),
         ]
         assert c.strict_json((tmp_path / 'actual-result.json').read_bytes()) == {'ok': 2}
+
+
+# The pinned v1 and v2 closures intentionally share bare module names. Isolate
+# each case from collection imports and earlier v1 cases without relaxing the
+# production origin check (including deliberate foreign imports in test bodies).
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: E402,F401
+import pytest as _origin_pytest  # noqa: E402
+
+pytestmark = _origin_pytest.mark.usefixtures("isolated_modules")

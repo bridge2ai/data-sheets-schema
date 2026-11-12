@@ -209,3 +209,12 @@ def test_actual_pinned_helper_ignores_scratch_forged_cache(tmp_path, monkeypatch
     record_property('actual_helper_sha256', pin(original))
     record_property('forged_cache_sha256', pin(raw))
     record_property('executed_forged_bytecode', False)
+
+
+# The pinned v1 and v2 closures intentionally share bare module names. Isolate
+# each case from collection imports and earlier v1 cases without relaxing the
+# production origin check (including deliberate foreign imports in test bodies).
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: E402,F401
+import pytest as _origin_pytest  # noqa: E402
+
+pytestmark = _origin_pytest.mark.usefixtures("isolated_modules")

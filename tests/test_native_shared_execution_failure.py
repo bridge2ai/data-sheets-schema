@@ -221,3 +221,12 @@ def test_saved_readback_revalidates_consumed_v2_approvals(execution_case, monkey
     path.write_bytes(c.canonical(changed))
     with pytest.raises(ValueError, match=expected):
         execute.read_final(case['raw'])
+
+
+# The pinned v1 and v2 closures intentionally share bare module names. Isolate
+# each case from collection imports and earlier v1 cases without relaxing the
+# production origin check (including deliberate foreign imports in test bodies).
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: E402,F401
+import pytest as _origin_pytest  # noqa: E402
+
+pytestmark = _origin_pytest.mark.usefixtures("isolated_modules")

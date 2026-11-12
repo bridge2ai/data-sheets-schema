@@ -208,3 +208,12 @@ def test_shared_front_door_refuses_foreign_authority_before_any_effect(tmp_path,
             launch_word_path=tmp_path/'word', subscription_guard_path=tmp_path/'guard',
             subscription_guard_sha256='f'*64)
     assert tuple(tmp_path.iterdir()) == before
+
+
+# The pinned v1 and v2 closures intentionally share bare module names. Isolate
+# each case from collection imports and earlier v1 cases without relaxing the
+# production origin check (including deliberate foreign imports in test bodies).
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: E402,F401
+import pytest as _origin_pytest  # noqa: E402
+
+pytestmark = _origin_pytest.mark.usefixtures("isolated_modules")
