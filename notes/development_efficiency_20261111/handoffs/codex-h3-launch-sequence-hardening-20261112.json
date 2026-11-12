@@ -1,0 +1,247 @@
+{
+  "phase": "final",
+  "commits": [
+    {
+      "commit": "b832233b798da1f350a764f49f19039195fab4c5",
+      "subject": "fix(native): consume delegated directions across packet paths (#5989)",
+      "files": [
+        "scripts/adhoc/prepare_h3_hardening_runner_20261112.py",
+        "scripts/adhoc/report_h3_hardening_20261112.py",
+        "scripts/adhoc/run_h3_hardening_tests_20261112.py",
+        "src/data_sheets_schema/native_launch_sequence.py",
+        "src/data_sheets_schema/native_sequence_start.py",
+        "tests/test_native_launch_sequence.py",
+        "tests/test_native_sequence_start.py"
+      ]
+    },
+    {
+      "commit": "9abf48b31122da7a89ba462274a8e3980d1b7973",
+      "subject": "fix(native): execute and retain the once-verified sequence bytes (#5990)",
+      "files": [
+        "notes/native_launch_hardening_DRAFT_20261112.md",
+        "scripts/adhoc/update_h3_sequence_entry_tests_20261112.py",
+        "src/data_sheets_schema/native_launch_entry.py",
+        "src/data_sheets_schema/native_launch_sequence.py",
+        "tests/test_native_launch_entry.py",
+        "tests/test_native_launch_sequence.py",
+        "tests/test_native_sequence_start.py"
+      ]
+    },
+    {
+      "commit": "c1ad9baa19a5b938d7976541bed27a73eee32d8c",
+      "subject": "fix(native): bind child consumption to parent input digests (#5991)",
+      "files": [
+        "notes/native_launch_hardening_DRAFT_20261112.md",
+        "src/data_sheets_schema/native_execution_orchestration.py",
+        "src/data_sheets_schema/native_generation.py",
+        "src/data_sheets_schema/native_launch_sequence.py",
+        "src/data_sheets_schema/native_sequence_inputs.py",
+        "src/data_sheets_schema/native_shared_execution_orchestration.py",
+        "src/data_sheets_schema/native_subscription_capture.py",
+        "tests/test_native_launch_sequence.py",
+        "tests/test_native_sequence_inputs.py",
+        "tests/test_native_sequence_start.py"
+      ]
+    }
+  ],
+  "cohorts": [
+    {
+      "name": "direction-canary",
+      "cases": 1,
+      "failures": 0,
+      "errors": 0,
+      "returncode": 0,
+      "cleanup_verified": true,
+      "junit": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/direction-canary/pytest.xml",
+        "sha256": "89d08692abd566da1c0e32e5055dd6bc2a92f97c9b41085de32ad27fc54b5eb0",
+        "bytes": 360
+      },
+      "log": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/direction-canary/pytest.log",
+        "sha256": "30431f70d2da6a02f79f0f230b21d7b22e69220edf6f3b678acf9daa9a578ed8",
+        "bytes": 257
+      },
+      "outcome": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/direction-canary/outcome.json",
+        "sha256": "9abfcfccc6d2c73ebac3b233e098fbc09b6b6c311b97a6a238736a2a9b9225a9",
+        "bytes": 487
+      }
+    },
+    {
+      "name": "direction-full",
+      "cases": 107,
+      "failures": 1,
+      "errors": 0,
+      "returncode": 1,
+      "cleanup_verified": true,
+      "junit": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/direction-full/pytest.xml",
+        "sha256": "894319ebc4d04c380db739d86d2597ec8e034f081e53b99cd113c930f3e172c1",
+        "bytes": 19011
+      },
+      "log": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/direction-full/pytest.log",
+        "sha256": "ab92a69cc5cbe1884b8a1ed2ee90f55826c0479717a39b9ba7ba26541eff21b3",
+        "bytes": 2586
+      },
+      "outcome": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/direction-full/outcome.json",
+        "sha256": "d2d96ac24ddb8862a2c6d2dc1e73f3ba324913b7f1b2febd64797c1a65453ee9",
+        "bytes": 486
+      }
+    },
+    {
+      "name": "entry-full",
+      "cases": 111,
+      "failures": 0,
+      "errors": 0,
+      "returncode": 0,
+      "cleanup_verified": true,
+      "junit": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/entry-full/pytest.xml",
+        "sha256": "1cd1bcfe8171531ef0ab8f04486ca7ac518f9f5127151928ec4b1db37867c9a4",
+        "bytes": 16812
+      },
+      "log": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/entry-full/pytest.log",
+        "sha256": "28583ee910215e7047c6f8ea00c41ff008a2af2f960640e5b1dafcb452ff2a58",
+        "bytes": 333
+      },
+      "outcome": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/entry-full/outcome.json",
+        "sha256": "ad78619a83e4da6d3b10c7bfa85ea44e8c32a60fe1d59aa0a5356637cac82e7a",
+        "bytes": 536
+      }
+    },
+    {
+      "name": "final-candidate-regressions",
+      "cases": 150,
+      "failures": 0,
+      "errors": 0,
+      "returncode": 0,
+      "cleanup_verified": true,
+      "junit": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/final-candidate-regressions/pytest.xml",
+        "sha256": "31e12225f35a9c34f17a63525986aa5f07d3a05626075fbc5fcd7783830106ed",
+        "bytes": 21868
+      },
+      "log": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/final-candidate-regressions/pytest.log",
+        "sha256": "2c49824c5e745e85be74e39d61e04cbdd00b3d9dc79d9d80395870f055d68e3a",
+        "bytes": 1088
+      },
+      "outcome": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/final-candidate-regressions/outcome.json",
+        "sha256": "bb7bb88c50d6d5b2ba96a0e35dc5dbbd19cbe9a36f33367affeaa334193f3bd8",
+        "bytes": 2179
+      }
+    },
+    {
+      "name": "final-touched",
+      "cases": 125,
+      "failures": 0,
+      "errors": 0,
+      "returncode": 0,
+      "cleanup_verified": true,
+      "junit": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/final-touched/pytest.xml",
+        "sha256": "e89a471b3973d651e16e55f74f05007c504ae39046bd9f093109ee33d40936f2",
+        "bytes": 18755
+      },
+      "log": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/final-touched/pytest.log",
+        "sha256": "ae7ca37fe525cf06213d38f78f7e0383e792755c5d586939cbe4621846ed441a",
+        "bytes": 993
+      },
+      "outcome": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/final-touched/outcome.json",
+        "sha256": "4074301f57b2e01f90a38ec378eb55e886619674c28f89abd6bce3bf19542fbf",
+        "bytes": 535
+      }
+    },
+    {
+      "name": "inputs-canary",
+      "cases": 1,
+      "failures": 1,
+      "errors": 0,
+      "returncode": 1,
+      "cleanup_verified": true,
+      "junit": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/inputs-canary/pytest.xml",
+        "sha256": "f42a700ef0e33f01460b3ed2a64d0b4853546e89762a0fb5c69203bece97b177",
+        "bytes": 6052
+      },
+      "log": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/inputs-canary/pytest.log",
+        "sha256": "ac0733d42ca1ccfc726ada293f01b4a1149dfebffdedbc961209cce6780461d2",
+        "bytes": 6693
+      },
+      "outcome": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/inputs-canary/outcome.json",
+        "sha256": "9a88f2b6b8cf676140e0604d3095f5f8ae1aba1701976c2786c3d88414b25497",
+        "bytes": 637
+      }
+    },
+    {
+      "name": "inputs-canary-02",
+      "cases": 1,
+      "failures": 0,
+      "errors": 0,
+      "returncode": 0,
+      "cleanup_verified": true,
+      "junit": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/inputs-canary-02/pytest.xml",
+        "sha256": "8eb190345ea876cb5709924b972092023708dc0d65f32be045ea3b47ec329890",
+        "bytes": 379
+      },
+      "log": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/inputs-canary-02/pytest.log",
+        "sha256": "a0ca6339255f85560bc22500170e28df9c7e023e905af8b265835cb3666e40bb",
+        "bytes": 914
+      },
+      "outcome": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/inputs-canary-02/outcome.json",
+        "sha256": "3746be4bc18a25e72435aefb466e5dc52865185b7dfd435c9a8cc4a6c9dcadc0",
+        "bytes": 486
+      }
+    },
+    {
+      "name": "inputs-full",
+      "cases": 124,
+      "failures": 1,
+      "errors": 0,
+      "returncode": 1,
+      "cleanup_verified": true,
+      "junit": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/inputs-full/pytest.xml",
+        "sha256": "ffa341b5ba8c289471ddaa56b26190af0a9ef3ba7643ce2a2b0d5bb389950bb2",
+        "bytes": 24293
+      },
+      "log": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/inputs-full/pytest.log",
+        "sha256": "96006604f45019840bf7b0e32a0df9ae801853dfcb3cdd03e2b2c41751a56175",
+        "bytes": 6779
+      },
+      "outcome": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/inputs-full/outcome.json",
+        "sha256": "32f6837e223c05df230bb5dbfb6ac9c7ffda91c8edbd5fdb01e46610d1d3a3dd",
+        "bytes": 635
+      }
+    }
+  ],
+  "registered_document_versions_changed": false,
+  "scope": "Offline synthetic engineering tests only; no native executable, real capture or attempt reservation; no push or GitHub write.",
+  "trusted_after_5990": [
+    "Python interpreter and site startup",
+    "native_launch_entry.py",
+    "pure wire reader",
+    "local operating system and filesystem"
+  ],
+  "protected_files_unchanged": true,
+  "guard_v1_unchanged": true,
+  "entry_sha256": "2fa0f9a4a0e2a487bc86b3855ac10762f0975e7e880477de16cdec5056a964b2",
+  "sequence_sha256": "07cc728df6c5b3cf6fcb26804f557cc2a0261b6af6a7cf0615e32c7b8ae3bc0d",
+  "guard_v1_sha256": "ab72f90faf0b4ba6150a5dd53d1f832feb4f0f5496485734228b00c613c65edc",
+  "details_markdown": "## Result and trust boundary\n\nAll three requested repairs are implemented in separate commits, in issue order. After the third commit, every touched test file ran whole: 125 passed. The subsequent required candidate launch-sequence and review-bundle files ran whole: 150 passed. Counts overlap across cohorts; they are not distinct-test totals. Final runner results report successful source-origin checks, cleanup verified and no observed survivors.\n\nAfter #5990 the interpreter and site startup, the small native_launch_entry.py entry, the pure wire reader, and local OS/filesystem remain trusted. The reviewed sequence is not imported by that entry: one captured byte string is compared with the registration package-source pin and current review pin, compiled, executed and handed to the body for retention. The entry checks the review's registration binding before executing it. The old sequence main delegates to the entry for compatibility; the documented entry is native_launch_entry, and the private verified-body API is not an operator entry. This does not defend against arbitrary code already controlling Python or authenticate a human, host confirmation, direction or quiet account.\n\nNo review-bundle, owner-terms or execution-registration kind/version changed. The direction claims are local start records, and sequence-inputs is a closed invocation argument, not registered authorization. The existing real command consumers still perform full reconstruction and current authority checks. No verifier-bootstrap import was added inside the verified consumer; native_launch_review.py remains unchanged. Existing document versions do not make old source pins reusable: new package/dependency/permission/review pins must be derived from the eventual integrated source.\n\n## Repair details\n\n### #5989\n\nA start record lives under the registered attempt parent, at .native-sequence-starts/<registration-sha256>/. The recorded direction UTC instant is the direction identity within that registration, normalized so different fractional spellings cannot bypass the exclusive claim. A host confirmation update cannot renew it. The exclusive direction claim is independent of the packet directory, fsynced and kept after failure; partial claims are not cleared. New recorded directions must have distinct recorded times, supplied by the owner rather than invented by the helper. Owner starts, with neither delegated flag, retain separate unique records and remain repeatable. The capture limits-mismatch latch and capture/word/attempt reservation code are unchanged.\n\nThe regression simulates a transient capture-command refusal, retries with a different packet and equivalent direction timestamp plus refreshed host confirmation, and verifies zero further command calls. A newly recorded direction reaches the three fabricated commands and retains the first claim. Separate tests cover repeatable owner starts, a symlinked state directory, and claim latency crossing a delegated deadline. The last delegated-time check now occurs after durable start claiming and immediately before the first child command.\n\n### #5990\n\nThe load-A/replace-with-B witness reads A, replaces disk with reviewed B, then proves the captured A is refused before execution, packet creation, start claiming or capture. A complementary inert-body witness proves the verified capture is what executes and is passed for retention even if disk changes afterwards. The actual sequence body is tested through the entry with fabricated child commands, and the candidate copied-package subprocess test also traverses the entry. The retained bytes are never supplied by rereading __file__ inside the executing body.\n\nCandidate sequence unit tests exercise the private body with explicitly captured fixture bytes so clock and command substitutions remain local to those tests. This is not a claim that their fixtures authenticate the entry; the independent entry tests and copied-package subprocess cover that boundary. The output-order test spy now observes command-output JSON only, preserving its assertions that all three outputs exist before parsing.\n\n### #5991\n\nEvery child receives the five original input paths and digests (registration, review, word, account choice and CI), plus the saved capture manifest for guard preparation or the guard for launch. The closed roster and argument-path equality are checked before consumer work. The child compares the exact registration/account-choice/review/word bytes consumed, not only an earlier preflight read. Guard reconstruction compares the actual capture-manifest bytes under its current-word lock. The launch entry carries expected review/CI/word digests through native_shared_execution_orchestration.launch and native_execution_orchestration.launch into the engine's recaptured authority, before any reservation; existing fresh-admission equality then keeps later captures joined to those bytes. The guard's existing expected digest remains required. Standalone callers without sequence input pins keep their existing behavior; the reviewed sequence always supplies them.\n\nThe replacement canary constructs two review/word joins accepted by the genuine current bundle validator, replaces both after the parent's saved check, and proves the child refuses before registration admission or any capture actuator. This is component evidence with synthetic registration/review fixtures, not an actual production registration or full live admission. Other tests cover every original input, replacement after child preflight, the engine's actual authority comparison before effects, the capture-manifest reader, malformed/extra/missing pins, and digest forwarding by all three sequence commands.\n\n## Retained failures and limits\n\nThe direction-full cohort initially had 106 passes and one failure: its broad JSON spy assumed the newly added registration parse was command output. That fixture was narrowed to command-output documents, retaining all original output-persistence assertions. The first input replacement canary and inputs-full cohort correctly refused the changed launch word, but the test expected the review to be reported first. Input checking now follows the declared BASE order rather than JSON key order; the exact review-refusal assertion is unchanged. Both failed logs and reruns are retained, and all final whole-file cohorts pass.\n\nNo real executable, provider/model call, real capture, word/attempt reservation, or production sequence start was performed. Synthetic direction/start records and invented command outputs are test artifacts under this helper's scratch only. No paid probe, complete production registration, full CI, scanner clearance or scientific acceptance is claimed. These repairs now need independent review because helper3 is their author.\n\n## Integration and final state\n\nBranch codex/native-launch-sequence-hardening-20261112 starts at published candidate 0fc003a86081891abbe8e130ac760c01da06423e. Exact commit-to-file mappings are above and in the JSON. No edits were made to helper1's pending-floor files (cli/receipts.py, native_shared_capture_orchestration.py, native_shared_gates.py), helper2's worktree, or its native controller environment construction. The common execution and capture orchestration files listed in #5991 should be included in the lead's integration ordering.\n\nGit comparison confirms the four protected files equal main 7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1, and guard v1 equals the published candidate. Guard-v1 SHA-256 is ab72f90faf0b4ba6150a5dd53d1f832feb4f0f5496485734228b00c613c65edc. The worktree is clean. The copied runner retains its original trailing blank line; whole-branch git diff --check reports that one cosmetic EOF warning at scripts/adhoc/run_h3_hardening_tests_20261112.py:419. No source/test whitespace errors were reported. Nothing was pushed or published.\n\nTest evidence root: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-launch-hardening-20261112/tests/. Each cohort has its log, JUnit, origin witnesses and outcome/cleanup record; JSON pins every log, JUnit and outcome. The first handoff was written when #5989 was committed. The committed report helper reconstructs this final handoff with --final using the retained final-details.json.\n"
+}

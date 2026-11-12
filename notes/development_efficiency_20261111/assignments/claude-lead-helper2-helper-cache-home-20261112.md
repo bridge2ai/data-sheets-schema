@@ -1,4 +1,4 @@
-# Assignment to Codex helper 2: repair the two defects your public completion run found, then finish the proof
+# Assignment to Codex helper 2: repair the HOME cache defect your public completion run found, then finish the proof
 
 From the Claude lead, 2026-11-12. Short names and rules are in `claude-lead-helper-context-20261112.md` beside this file. This extends `claude-lead-helper2-public-path-proof-20261112.md`; its bounds and its handoff file stay.
 
@@ -6,7 +6,7 @@ From the Claude lead, 2026-11-12. Short names and rules are in `claude-lead-help
 
 Your incremental handoff is read. The repair `d2efa55014e131f92733bf2c3a90c0830214dc89` of your own commit is accepted and is on helper 1's integration list. Helper 1 reached the same HOME refusal independently in its own composition at `df0122254cc7c9fe10470ee9eabc26c71a411a14` and saved the evidence (`handoffs/codex-h1-public-home-finding-20261112.json`): the `full_terms` helper imports the term validator, which imports oaklib, which imports PyStow; PyStow writes `.data/README.md` and `.data/oaklib/` under HOME at import. Two independent observations, same cause.
 
-The earlier rule "fix only your own commits" is lifted for the two defects below. You own both repairs. Helper 1 does not work on them.
+The earlier rule "fix only your own commits" is lifted for defect 1 below. You own that repair. Helper 1 does not work on it.
 
 ## Where you work
 
@@ -34,21 +34,9 @@ The lead's rulings on the repair:
 
 Tests: one that fails at the old head with the HOME refusal and passes with the repair; one that the directory is fresh per attempt; one that the guard still refuses a HOME with an entry in it.
 
-## Defect 2: no exact failed readback when runtime revalidation itself fails (required)
+## Defects 2 and 3 are reassigned to helper 3 (changed by the lead at 20:13Z, before this file was delivered)
 
-Your second finding: when the runtime revalidation fails during failure publication, the attempt keeps its early evidence but writes no `final.json`, `published.json` or `actual-result.json`, so the failure cannot be read back exactly. Amendment N1.4(A) item 6 requires "an exact failed readback".
-
-Repair it as its own commit with tests: a failure whose cause is the runtime validation must still be published as a failure and read back exactly, stating that the runtime validation failed and why. Acceptance and the readback verification stay fail-closed: nothing in the repair may let a run with a failed runtime validation be published as anything but a failure, and no check is skipped on the success path. If the cleanest repair needs a design choice you are unsure of, write the two options and your recommendation in the handoff and implement the one that changes least.
-
-## Defect 3: prepare, on a separate local branch, the retention of the record on an incomplete capture (a decision is pending)
-
-A Claude review of the production amendment (`E/plans/reviews/np1v3_27429678_claude_review_2026-11-12.md`, finding P1-1) reads the source at `5d63d0a77` this way: the end capture records the full record only if the recorder's output and the report exist (`native_shared_results_orchestration.py`, about lines 68 to 74 and 208); otherwise it falls back to `incomplete_capture`, which keeps only the streams (about lines 274 to 294; `native_execution_orchestration.py`, about 500 to 508); and the recorder runs only after every final check has passed (`native_shared_phase.py`, lines 111 to 113 and 212 to 214), which includes the registered floor and schema validation. If so, a rejected attempt leaves no pinned full record, and the set of records the analysis may use is gated on acceptance and on the coverage floor. The analysis plan refuses that (`notes/generic_v10_analysis_plan.md` at main, lines 799 to 800 and 1163). It also extends what your own eligibility audit found.
-
-1. **Confirm or refute the reading** at the candidate's head, with the lines.
-2. **If it holds, implement on a separate local branch** from your repair branch's head, named `codex/native-incomplete-capture-retention-20261112`, so that it can be taken or dropped: an incomplete capture also keeps the current full record and the current core record, if each exists as a regular file at its registered path, with their sizes and SHA-256, bound into the same published failure evidence as the streams. It keeps them as evidence of a failed attempt: nothing in the change may make a failed attempt count as accepted, and a record that is missing or unreadable is recorded as such, not as an error that prevents publication. With tests: a failure before any record exists, a failure after the full record exists, a failure after both exist, and a floor failure at the final stage.
-3. Say what a reader of the evidence would call to list the retained records of rejected and stopped attempts, and whether that reader exists.
-
-The owner decides whether this is taken; the lead is asking. Do this after defects 1 and 2 and before the long failure-case cohorts if those are still running.
+Your second finding (no failure record when the runtime revalidation itself fails, issue #5967) and the retention of the record on an incomplete capture are now helper 3's, on its own branches, because helper 3 is free and both changes are in the failure-publication code. Do not work on them. Your repair is defect 1 only (issue #5966). Keep out of `native_shared_results_orchestration.py` and `native_execution_orchestration.py` where you can; if defect 1 needs a change there, say so in the handoff.
 
 ## Then finish the proof
 
@@ -62,4 +50,4 @@ As before: offline only; no provider, model or native-binary execution; no `cpu-
 
 ## Handoff
 
-Update `R/notes/development_efficiency_20261111/handoffs/codex-h2-public-path-proof-20261112.md` and its JSON. Answer first: the two repair commits and what they change; every declared identity that moves; do the two public completions now pass and where does each stop if not; the failure cases' count.
+Update `R/notes/development_efficiency_20261111/handoffs/codex-h2-public-path-proof-20261112.md` and its JSON. Answer first: the repair commit and what it changes; every declared identity that moves; do the two public completions now pass and where does each stop if not; the failure cases' count.
