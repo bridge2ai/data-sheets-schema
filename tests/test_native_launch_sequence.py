@@ -4,6 +4,7 @@ The subprocess witness copies only the sequence and pure wire helper into an
 isolated test package with a fabricated native_generation module.
 """
 from pathlib import Path
+import builtins
 import json
 import os
 import subprocess
@@ -12,15 +13,14 @@ import sys
 import pytest
 
 from data_sheets_schema import native_launch_sequence as seq
+from data_sheets_schema import native_launch_entry as entry
 from data_sheets_schema import native_subscription_guard as guard
 
 REAL_RUN = subprocess.run
 
 
 def run_sequence(arguments):
-    # Unit tests exercise the reviewed body with an explicit fixture byte capture.
-    # The trusted public entry has separate load/replace and subprocess coverage.
-    return seq._run_verified(arguments, verified_script=Path(seq.__file__).read_bytes(), entry_inputs={})
+    return entry.main(arguments)
 
 
 @pytest.fixture(autouse=True)
@@ -28,6 +28,12 @@ def deny_real_commands(monkeypatch):
     def refuse(*args, **kwargs):
         pytest.fail('test must not execute native_generation or any native binary')
     monkeypatch.setattr(seq.subprocess, 'run', refuse)
+    # Test-only clock substitution AFTER the entry verifies and compiles the
+    # real fixture-pinned bytes. Production has no clock/verification bypass.
+    def fixture_exec(code, namespace):
+        builtins.exec(code, namespace)
+        namespace['_utc_now'] = seq._utc_now
+    monkeypatch.setattr(entry, 'exec', fixture_exec, raising=False)
 
 
 def paths(tmp_path):
@@ -286,7 +292,8 @@ def test_saved_output_exists_before_parse(tmp_path, monkeypatch):
     assert run_sequence(argv(p)) == 0 and len(seen) == 3
 
 
-def test_isolated_real_subprocess_uses_only_copied_fake_command(tmp_path):
+@pytest.mark.parametrize('entry_module', ['native_launch_sequence', 'native_launch_entry'])
+def test_isolated_real_subprocess_uses_only_copied_fake_command(tmp_path, entry_module):
     p = paths(tmp_path)
     root = tmp_path / 'isolated'
     package = root / 'src/data_sheets_schema'
@@ -319,8 +326,8 @@ def main():
     print(json.dumps({'command': name, 'result': body}))
     return 0
 ''')
-    bootstrap = 'import sys; sys.path.insert(0, sys.argv.pop(1)); from data_sheets_schema.native_launch_sequence import main; raise SystemExit(main())'
-    result = REAL_RUN([sys.executable, '-I', '-B', '-c', bootstrap, str(root / 'src'), *argv(p)],
+    bootstrap = "import sys,runpy; sys.path.insert(0,sys.argv.pop(1)); name=sys.argv.pop(1); runpy.run_module(name,run_name='__main__',alter_sys=True)"
+    result = REAL_RUN([sys.executable, '-I', '-B', '-c', bootstrap, str(root / 'src'), 'data_sheets_schema.' + entry_module, *argv(p)],
                       env={'PRIVATE_TOKEN': 'secret', 'PYTHONPATH': '/foreign'},
                       cwd=root, capture_output=True, timeout=20)
     assert result.returncode == 0, result.stderr

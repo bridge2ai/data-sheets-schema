@@ -14,6 +14,16 @@ SEQUENCE_PATH=Path(__file__).resolve().with_name('native_launch_sequence.py')
 SEQUENCE_KEY='src/data_sheets_schema/native_launch_sequence.py'
 
 
+_ACTIVE_INVOCATIONS = {}
+
+
+def _require_invocation(namespace, args, raw, inputs):
+    binding = _ACTIVE_INVOCATIONS.pop(id(namespace), None)
+    if binding is None or not all(left is right for left, right in
+            zip(binding, (namespace, args, raw, inputs))):
+        raise ValueError('sequence body requires a live verified entry namespace')
+
+
 def main(argv=None):
     args=list(sys.argv[1:] if argv is None else argv)
     parser=argparse.ArgumentParser(add_help=False,allow_abbrev=False)
@@ -33,10 +43,15 @@ def main(argv=None):
     if wire.sha(raw)!=expected or review.get('sequence_script_sha256')!=expected:
         raise ValueError('captured sequence bytes differ from the reviewed registration pin')
     namespace={'__name__':'data_sheets_schema._verified_launch_sequence',
-               '__package__':'data_sheets_schema','__file__':str(SEQUENCE_PATH)}
+               '__package__':'data_sheets_schema','__file__':str(SEQUENCE_PATH),
+               '_entry_invocation':_require_invocation}
     exec(compile(raw,str(SEQUENCE_PATH),'exec'),namespace)
-    return namespace['_run_verified'](args,verified_script=raw,
-        entry_inputs={Path(selected.registration):registration_raw,Path(selected.review):review_raw})
+    inputs={Path(selected.registration):registration_raw,Path(selected.review):review_raw}
+    _ACTIVE_INVOCATIONS[id(namespace)]=(namespace,args,raw,inputs)
+    try:
+        return namespace['_run_verified'](args,verified_script=raw,entry_inputs=inputs)
+    finally:
+        _ACTIVE_INVOCATIONS.pop(id(namespace),None)
 
 
 if __name__=='__main__':

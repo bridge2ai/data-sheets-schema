@@ -133,6 +133,10 @@ def parser():
 
 
 def _run_verified(argv, *, verified_script, entry_inputs):
+    invocation = globals().get('_entry_invocation')
+    if not callable(invocation):
+        raise ValueError('sequence body requires a live verified entry namespace')
+    invocation(globals(), argv, verified_script, entry_inputs)
     args = parser().parse_args(argv)
     started = _utc_now()
     record = {'kind': SEQUENCE_KIND, 'version': SEQUENCE_VERSION, 'started_at': started,

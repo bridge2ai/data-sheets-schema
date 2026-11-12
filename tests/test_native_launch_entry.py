@@ -71,3 +71,44 @@ def test_entry_requires_both_source_pins_before_any_effect(tmp_path,monkeypatch)
     with pytest.raises(ValueError,match='captured sequence bytes'):
         entry.main(fixture.argv(p))
     assert not p['packet-directory'].exists()
+
+
+@pytest.mark.parametrize('bound_inputs', [False, True])
+@pytest.mark.parametrize('retained_b', [False, True])
+def test_imported_body_refuses_even_with_reviewed_retained_bytes(tmp_path, monkeypatch, bound_inputs, retained_b):
+    from data_sheets_schema import native_launch_sequence as loaded_a
+    raw = Path(loaded_a.__file__).read_bytes()
+    if retained_b:
+        raw += b'\n# distinct retained reviewed source B\n'
+        p, _ = setup_source(tmp_path, monkeypatch, raw)
+    else:
+        p = fixture.paths(tmp_path)
+    before = {str(path): path.read_bytes() for path in (tmp_path / 'word-state').rglob('*.json')}
+    inputs = {p[name]: p[name].read_bytes() for name in ('registration', 'review')} if bound_inputs else {}
+    with pytest.raises(ValueError, match='live verified entry namespace'):
+        loaded_a._run_verified(fixture.argv(p), verified_script=raw, entry_inputs=inputs)
+    assert not p['packet-directory'].exists()
+    assert not p['output-directory'].exists()
+    assert before == {str(path): path.read_bytes() for path in (tmp_path / 'word-state').rglob('*.json')}
+
+
+def test_verified_body_cannot_be_reused_after_entry_returns(tmp_path, monkeypatch):
+    p = fixture.paths(tmp_path)
+    fixture.fake_commands(monkeypatch, p)
+    execute = entry.exec
+    captured = []
+    def retain(code, namespace):
+        execute(code, namespace)
+        body = namespace['_run_verified']
+        def record(args, *, verified_script, entry_inputs):
+            captured.append((body, args, verified_script, entry_inputs))
+            return body(args, verified_script=verified_script, entry_inputs=entry_inputs)
+        namespace['_run_verified'] = record
+    monkeypatch.setattr(entry, 'exec', retain)
+    assert entry.main(fixture.argv(p)) == 0
+    body, args, raw, inputs = captured[0]
+    before = {str(path): path.read_bytes() for path in tmp_path.rglob('*') if path.is_file()}
+    with pytest.raises(ValueError, match='live verified entry namespace'):
+        body(args, verified_script=raw, entry_inputs=inputs)
+    assert before == {str(path): path.read_bytes() for path in tmp_path.rglob('*') if path.is_file()}
+    assert entry._ACTIVE_INVOCATIONS == {}
