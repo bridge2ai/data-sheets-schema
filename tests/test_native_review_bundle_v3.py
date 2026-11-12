@@ -112,7 +112,7 @@ def test_source_mutation_refuses_current_but_preserves_readback(current_evidence
     copied = tmp_path / 'source' / review.SEQUENCE_SOURCE
     copied.parent.mkdir(parents=True)
     copied.write_bytes((authority.ROOT / review.SEQUENCE_SOURCE).read_bytes())
-    monkeypatch.setattr(authority, 'ROOT', tmp_path / 'source')
+    monkeypatch.setattr(review, 'SOURCE_ROOT', tmp_path / 'source')
     assert review.validate_bundle(*current_evidence, require_current=True)['account_quiet'] is True
     copied.write_bytes(copied.read_bytes() + b'\n# mutation\n')
     with pytest.raises(ValueError, match='source bytes'):
@@ -332,3 +332,14 @@ def test_guard_v2_hashes_complete_new_terms_and_preserves_old_replay(historical_
     incomplete = saved(case, old, transcript, snapshot=old_snapshot, complete=False)
     assert incomplete['checked'] is False and incomplete['passed'] is False
     assert incomplete['transcript_diagnostic']['observed_rate_limit_events'] == 1
+
+
+def test_current_review_never_imports_verifier_bootstrap(current_evidence, monkeypatch):
+    import builtins
+    original = builtins.__import__
+    def guarded(name, globals=None, locals=None, fromlist=(), level=0):
+        if name.endswith('native_execution_authority_v2') or 'native_execution_authority_v2' in (fromlist or ()):
+            pytest.fail('current review crossed the verifier bootstrap boundary')
+        return original(name, globals, locals, fromlist, level)
+    monkeypatch.setattr(builtins, '__import__', guarded)
+    assert review.validate_bundle(*current_evidence, require_current=True)['account_quiet'] is True

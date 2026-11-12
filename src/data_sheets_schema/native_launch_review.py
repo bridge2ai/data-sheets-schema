@@ -18,6 +18,7 @@ TERMS_KIND = 'd4d_native_owner_launch_terms_v1'
 CURRENT_KIND = 'd4d_native_execution_review_bundle_v3'
 CURRENT_TERMS_KIND = 'd4d_native_owner_launch_terms_v2'
 SEQUENCE_SOURCE = 'src/data_sheets_schema/native_launch_sequence.py'
+SOURCE_ROOT = Path(__file__).resolve().parents[2]
 CAPTURE_KIND = 'd4d_native_subscription_capture_request_v3'
 PREVIOUS_CAPTURE_KIND = 'd4d_native_subscription_capture_request_v2'
 LEGACY_CAPTURE_KIND = 'd4d_native_subscription_capture_request_v1'
@@ -289,8 +290,13 @@ def validate_bundle(registration_raw, review_bundle_raw, launch_word_raw, *, req
         if registered != digest:
             raise ValueError('sequence script differs from registered source pin')
         if require_current:
-            from . import native_execution_authority_v2 as authority
-            authority._verified_source_bytes(authority.ROOT / SEQUENCE_SOURCE, digest)
+            # This reader also runs inside the verified input-only consumer,
+            # which must never import the verifier bootstrap. Its own pinned
+            # physical source location selects the checkout; the stable regular
+            # read independently checks the registered script's actual bytes.
+            script = wire.read_regular(SOURCE_ROOT / SEQUENCE_SOURCE)
+            if wire.sha(script) != digest:
+                raise ValueError('sequence source bytes differ from their registered pin')
     if any(bundle[key] != expected for key, expected in binding.items()):
         raise ValueError('review bundle differs from exact registration/source')
     for key in ('author', 'operator'):
