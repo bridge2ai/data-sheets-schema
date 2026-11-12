@@ -182,6 +182,10 @@ def main(argv=None):
         _unchanged(inputs)
         record['delegation_checked_at'] = _utc_now()
         _delegation(args.direction_recorded_at, args.host_confirmed_at, record['delegation_checked_at'])
+        from .native_sequence_start import claim
+        record['start_claim'] = claim(inputs[Path(args.registration)],
+            direction=args.direction_recorded_at, confirmation=args.host_confirmed_at,
+            packet=packet, started_at=record['delegation_checked_at'])
         captured = _run_step(COMMANDS[0], [*common, '--output-directory', str(capture_root)],
                              outputs[0], record['steps'])
         manifest_value = captured.get('capture_manifest')
