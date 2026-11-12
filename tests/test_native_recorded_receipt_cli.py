@@ -74,7 +74,8 @@ def checked_cli_block(calls):
 @pytest.fixture
 def native_recorded_case(declaration, monkeypatch, route_spies):
     """Construct policy before capture; simulate only recorded reconstruction."""
-    def prepare(*, floor=None, structural_failure=False, uncovered=False, invalid=None):
+    def prepare(*, floor=None, structural_failure=False, uncovered=False, invalid=None,
+                cli_run_updates=None, reconstructed_selection_mismatch=False):
         manifest, texts = _manifest_and_texts()
         for name, raw in (('bundle', BUNDLE.encode()), ('chunk_manifest', contract.canonical(manifest))):
             path = Path(declaration['inputs'][name]['path'])
@@ -88,6 +89,16 @@ def native_recorded_case(declaration, monkeypatch, route_spies):
         declaration['receipt_policy'] = pin(policy_path, policy_raw)
         save(declaration)
         selected = native_selection.capture(declaration['registration_path'])
+        reconstructed_selection = selected
+        if reconstructed_selection_mismatch:
+            # A second, genuinely captured selection tests the consumer's
+            # explicit-selection comparison. No captured object is mutated.
+            other = deepcopy(declaration)
+            other['registration_id'] = 'different-reconstructed-selection'
+            other['registration_path'] = str(Path(declaration['registration_path']).with_name('other-selection.json'))
+            save(other)
+            reconstructed_selection = native_selection.capture(other['registration_path'])
+        requested_run = {**declaration['run'], **(cli_run_updates or {})}
         render = policy.native_render_declaration(selected)
         chosen = policy.select_policy(render)
         full = deepcopy(FULL)
@@ -107,7 +118,7 @@ def native_recorded_case(declaration, monkeypatch, route_spies):
             return block
 
         assessment = build_assessment()
-        project = declaration['run']['project']
+        project = requested_run['project']
         root = Path(declaration['registration_path']).parent / 'recorded-output'
         root.mkdir()
         paths = {'full': root / f'{project}_d4d.yaml',
@@ -130,7 +141,7 @@ def native_recorded_case(declaration, monkeypatch, route_spies):
         elif invalid not in (None, 'reconstruction-refusal'):
             raise ValueError('Unknown boundary fixture mutation')
         paths['provenance'].write_text(yaml.safe_dump(record))
-        run = SimpleNamespace(selection=selected)
+        run = SimpleNamespace(selection=reconstructed_selection)
         boundary_calls = []
         deliveries = []
 
@@ -154,7 +165,9 @@ def native_recorded_case(declaration, monkeypatch, route_spies):
             return block, None, None
 
         def run_paths(method, label, name):
-            assert (method, label, name) == tuple(declaration['run'][key] for key in ('method', 'label', 'project'))
+            # The path boundary deliberately delivers the stored record even
+            # for a conflicting requested run in the identity-refusal tests.
+            assert (method, label, name) == tuple(requested_run[key] for key in ('method', 'label', 'project'))
             return paths
 
         def selected_paths(path):
@@ -171,8 +184,8 @@ def native_recorded_case(declaration, monkeypatch, route_spies):
              Path(declaration['inputs']['chunk_manifest']['path']))}
 
         def invoke(with_selection=False):
-            args = ['check', '--method', declaration['run']['method'], '--label', declaration['run']['label'],
-                    '--project', project, '--strict']
+            args = ['check', '--method', requested_run['method'], '--label', requested_run['label'],
+                    '--project', requested_run['project'], '--strict']
             if with_selection:
                 args.extend(['--native-shared-selection', declaration['registration_path']])
             result = CliRunner().invoke(cli.receipts, args)
@@ -180,7 +193,8 @@ def native_recorded_case(declaration, monkeypatch, route_spies):
             return result
 
         return SimpleNamespace(invoke=invoke, selected=selected, assessment=assessment,
-            boundary_calls=boundary_calls, calls=route_spies, paths=paths, deliveries=deliveries)
+            boundary_calls=boundary_calls, calls=route_spies, paths=paths, deliveries=deliveries,
+            reconstructed_selection=reconstructed_selection)
 
     return prepare
 
@@ -242,12 +256,13 @@ def test_invalid_recorded_native_selection_refuses_without_api_fallback(native_r
 
 @pytest.fixture
 def api_recorded_case(api_disk, tmp_path, monkeypatch, route_spies):
-    def prepare(*, floor, uncovered=False):
+    def prepare(*, floor, uncovered=False, spec_updates=None):
         if uncovered:
             full = yaml.safe_load(api_disk['full_path'].read_text())
             full['license'] = 'CC-BY'
             api_disk['full_path'].write_text(yaml.safe_dump(full))
         selected = api_declaration(api_registration(deepcopy(floor)))
+        selected.update(deepcopy(spec_updates or {}))
         paths = {'core_dir': tmp_path, 'full': api_disk['full_path'],
                  'receipt': api_disk['receipt'], 'provenance': tmp_path / 'P_provenance.yaml'}
         record = {'run': {'method': 'claudecode_api', 'label': 'L', 'project': 'P'},
@@ -271,9 +286,11 @@ def api_recorded_case(api_disk, tmp_path, monkeypatch, route_spies):
         preserved = {path: path.read_bytes() for path in
             (paths['full'], paths['receipt'], paths['provenance'], api_disk['bundle'], api_disk['manifest'])}
 
-        def invoke(extra=()):
-            result = CliRunner().invoke(cli.receipts, ['check', '--method', 'claudecode_api',
-                '--label', 'L', '--project', 'P', '--strict', *extra])
+        def invoke(extra=(), *, strict=True):
+            args = ['check', '--method', 'claudecode_api', '--label', 'L', '--project', 'P']
+            if strict:
+                args.append('--strict')
+            result = CliRunner().invoke(cli.receipts, [*args, *extra])
             assert {path: path.read_bytes() for path in preserved} == preserved
             return result
 
@@ -327,3 +344,106 @@ def test_matching_native_cli_names_cannot_override_api_policy(api_recorded_case,
     assert case_data.paths['provenance'].read_bytes() == before
     assert case_data.calls['blocks'] == [] and case_data.calls['native'] == [] and case_data.calls['api'] == []
     assert case_data.native_boundaries == []
+
+
+@pytest.mark.parametrize('strict', [True, False], ids=['strict-refuses', 'non-strict-reports-unchecked'])
+def test_malformed_saved_api_policy_keeps_unchecked_cli_semantics(api_recorded_case, strict):
+    case_data = api_recorded_case(floor=REGISTERED,
+        spec_updates={'receipt_completion_policy_sha256': '0' * 64})
+    result = case_data.invoke(strict=strict)
+    assert result.exit_code == (1 if strict else 0), result.output
+    if strict:
+        assert isinstance(result.exception, SystemExit), repr(result.exception)
+    else:
+        assert result.exception is None, repr(result.exception)
+    assert len(case_data.calls['blocks']) == 1
+    observed = case_data.calls['blocks'][0]
+    assert observed['value'] == observed['before']
+    assert observed['value']['expected'] is True
+    assert observed['value']['checked'] is False
+    assert 'receipt policy selection refused' in observed['value']['reason']
+    assert 'unchecked' in result.output
+    assert 'coverage_floor' not in observed['value']
+    assert case_data.calls['native'] == [] and case_data.calls['api'] == []
+    assert case_data.native_boundaries == []
+
+
+def test_exact_integer_disabled_native_axis_keeps_valid_api_route(api_recorded_case):
+    case_data = api_recorded_case(floor=REGISTERED,
+        spec_updates={'native_shared_generation_version': 0})
+    assert type(case_data.record['prompts']['request']['spec']['native_shared_generation_version']) is int
+    result = case_data.invoke()
+    assert result.exit_code == 0 and result.exception is None, result.output
+    block = checked_cli_block(case_data.calls)
+    assert block['coverage_floor']['state'] == 'passed'
+    assert block['coverage_floor']['passed'] is True
+    assert block['coverage_floor'] == policy.evaluate_floor(block['slots'], policy.select_policy(record=case_data.record))
+    assert case_data.calls['api'] and case_data.calls['native'] == []
+    assert case_data.native_boundaries == []
+    assert 'native receipt stage' not in result.output
+
+
+@pytest.mark.parametrize('strict', [True, False], ids=['strict', 'non-strict'])
+@pytest.mark.parametrize('spec_updates', [
+    {'native_shared_generation_version': False},
+    {'native_shared_generation_registration': {'sha256': '0' * 64, 'raw_json': '{}'}},
+], ids=['boolean-false-is-not-disabled', 'partial-native-selection'])
+def test_invalid_native_demand_cannot_fall_back_to_api(api_recorded_case, strict, spec_updates):
+    case_data = api_recorded_case(floor=REGISTERED, spec_updates=spec_updates)
+    result = case_data.invoke(strict=strict)
+    assert result.exit_code == 1 and isinstance(result.exception, SystemExit), result.output
+    assert 'native' in result.output and 'refused' in result.output
+    assert case_data.calls['blocks'] == [], 'Invalid native authority reached the API block reader'
+    assert case_data.calls['native'] == [] and case_data.calls['api'] == []
+    assert case_data.native_boundaries == []
+
+
+@pytest.mark.parametrize('cli_run_updates', [
+    {'method': 'claudecode_api'}, {'label': 'another-label'}, {'project': 'OTHER'},
+], ids=['method', 'label', 'project'])
+def test_record_only_native_selection_must_match_requested_run(native_recorded_case, cli_run_updates):
+    case_data = native_recorded_case(cli_run_updates=cli_run_updates)
+    result = case_data.invoke(with_selection=False)
+    assert result.exit_code == 1 and isinstance(result.exception, SystemExit), result.output
+    assert 'native' in result.output and 'refused' in result.output
+    assert case_data.calls['native'] == [], 'Conflicting run identity reached the native floor predicate'
+    assert case_data.calls['api'] == [], 'Conflicting native run identity reached the API predicate'
+
+
+def test_explicit_selection_must_equal_fresh_recorded_selection(native_recorded_case):
+    case_data = native_recorded_case(reconstructed_selection_mismatch=True)
+    assert type(case_data.reconstructed_selection) is contract.NativeSelectionCapture
+    assert case_data.reconstructed_selection.registration.raw != case_data.selected.registration.raw
+    # Keep the policy identical so policy-only comparison cannot satisfy this
+    # test: the explicit and freshly reconstructed selection must also agree.
+    assert case_data.reconstructed_selection.receipt_policy.raw == case_data.selected.receipt_policy.raw
+    result = case_data.invoke(with_selection=True)
+    assert result.exit_code == 1 and isinstance(result.exception, SystemExit), result.output
+    assert 'native' in result.output and 'refused' in result.output
+    assert case_data.boundary_calls[0] == 'recorded_run'
+    assert case_data.calls['native'] == [], 'A different reconstructed selection reached the final predicate'
+    assert case_data.calls['api'] == []
+
+
+def test_recorded_companion_returns_independent_blocks_from_one_reconstruction(native_recorded_case):
+    case_data = native_recorded_case()
+    saved_record = yaml.safe_load(case_data.paths['provenance'].read_text())
+    result = capture.recorded_receipt_assessment(record=saved_record,
+        full_path=case_data.paths['full'], receipt_path=case_data.paths['receipt'])
+    assert result.selection is case_data.selected
+    original_raw = result.raw
+    first = result.block()
+    assert first == case_data.assessment
+    first['coverage_floor']['passed'] = True
+    first['coverage_floor']['state'] = 'passed'
+    first['slots']['with_receipt'] = 0
+    second = result.block()
+    assert first != second
+    assert second == case_data.assessment
+    assert second['coverage_floor']['state'] == 'pending'
+    assert second['coverage_floor']['passed'] is False
+    assert result.raw == original_raw == contract.canonical(case_data.assessment)
+    assert case_data.boundary_calls == ['recorded_run', 'receipt_assessment']
+    assert len(case_data.deliveries) == 1
+    assert case_data.deliveries[0]['value'] == case_data.deliveries[0]['before'] == case_data.assessment
+    assert case_data.calls == {'blocks': [], 'native': [], 'api': []}
