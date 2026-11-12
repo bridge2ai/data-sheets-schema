@@ -115,7 +115,7 @@ def authority_for(registration_raw, ci_path, directory):
     from data_sheets_schema import native_subscription_capture as capture
     from data_sheets_schema import native_launch_review as review
     from data_sheets_schema import native_shared_registration_orchestration as registration
-    from tests.utils.native_u4b_fixtures import bundle_for
+    from tests.utils.native_review_v3_fixtures import current_bundle_for as bundle_for
 
     value = registration.verified(registration_raw)
     runtime = value['runtime']

@@ -57,7 +57,7 @@ def preflight_current_selection(selection, *, registration_raw, value):
         raise ValueError('subscription guard bytes differ from selected SHA256')
     word = v1.read_regular(selection.launch_word_path)
     bundle = v1.read_regular(selection.review_path)
-    terms = review.validate_bundle(registration_raw, bundle, word)
+    terms = review.validate_bundle(registration_raw, bundle, word, require_current=True)
     v2.SubscriptionGuard(raw, expected_sha256=selection.expected_sha256,
         registration_raw=registration_raw, runtime=value['runtime'],
         launch_word_raw=word, owner_statement=terms, check_freshness=True)
@@ -137,7 +137,7 @@ def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_ra
         raise ValueError('subscription guard requires an explicit version')
     if value['version'] == 1:
         from .native_u4b_runtime import is_prepared_runtime
-        if is_prepared_runtime(runtime):
+        if current or is_prepared_runtime(runtime):
             raise ValueError('U4b runtime cannot use a historical v1 guard')
         return v1, {}
     if value['version'] != 2:
@@ -146,7 +146,8 @@ def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_ra
     from .native_u4b_runtime import validate_prepared_runtime
     from .native_subscription_capture import read_capture_for_event
     validate_prepared_runtime(runtime)
-    terms = review.validate_bundle(registration_raw, review_bundle_raw, launch_word_raw)
+    terms = review.validate_bundle(registration_raw, review_bundle_raw, launch_word_raw,
+                                   require_current=current)
     capture = read_capture_for_event(Path(terms['quota_capture']['directory']),
         registration_raw=registration_raw, review_bundle_raw=review_bundle_raw,
         launch_word_raw=launch_word_raw,

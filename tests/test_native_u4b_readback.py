@@ -25,7 +25,7 @@ from data_sheets_schema import native_subscription_guard as legacy_guard
 from data_sheets_schema import native_subscription_guard_v2 as guard
 from tests.test_native_subscription_capture import component, read_arguments
 from tests.test_native_subscription_guard import build as build_legacy, case as legacy_case
-from tests.utils.native_u4b_fixtures import bundle_for
+from tests.utils.native_review_v3_fixtures import current_bundle_for as bundle_for
 
 
 def publication(tmp_path, monkeypatch, mode='buffered'):

@@ -123,7 +123,7 @@ def authorizations(raw, value, *, review_path, ci_path, launch_word_path, contra
         if admission.verified(raw, classifier_projection=classifier_projection) != value:
             raise ValueError('authorization caller differs from fresh v2 execution')
     evidence = admission._authorizations(raw, value, review_path=inputs['review'],
-        ci_path=inputs['ci'], launch_word_path=inputs['launch_word'])
+        ci_path=inputs['ci'], launch_word_path=inputs['launch_word'], require_current=True)
     captured = {name: item.raw for name, item in evidence.items()}
     records = {name: c.strict_json(body, name + ' evidence') for name, body in captured.items()}
     binding = {'registration_sha256': c.sha(raw), 'attempt_id': value['attempt_id'],

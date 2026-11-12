@@ -540,31 +540,36 @@ def _text(value, label):
         raise ValueError(label + ' must be explicit bounded single-line text')
 
 
-def _authorizations(raw, value, *, review_path, ci_path, launch_word_path):
+def _authorizations(raw, value, *, review_path, ci_path, launch_word_path, require_current=False):
+    if type(require_current) is not bool:
+        raise ValueError('current execution authorization selection must be boolean')
     paths = {'review': str(review_path), 'ci': str(ci_path), 'launch_word': str(launch_word_path)}
     captured = {key: _read(path, key + ' evidence') for key, path in paths.items()}
     records = {key: c.strict_json(item.raw, key + ' evidence') for key, item in captured.items()}
     binding = {'registration_sha256': c.sha(raw), 'attempt_id': value['attempt_id'],
         'source_commit': value['dependencies']['base']['source_commit'],
         'dependencies_sha256': c.sha(c.canonical(value['dependencies']))}
+    from . import native_launch_review as launch_review
     for name, record in records.items():
         if (type(record) is not dict or type(record.get('version')) is not int
-                or record['version'] != VERSION or any(record.get(k) != v for k, v in binding.items())):
+                or record['version'] != (3 if name == 'review' and
+                    record.get('kind') == launch_review.CURRENT_KIND else VERSION)
+                or any(record.get(k) != v for k, v in binding.items())):
             raise ValueError(name + ' must bind this exact v2 execution, attempt and source')
     review = records['review']
-    from . import native_launch_review as launch_review
     from .native_u4b_runtime import is_prepared_runtime
-    if review.get('kind') == launch_review.KIND:
-        launch_review.validate_bundle(raw, captured['review'].raw, captured['launch_word'].raw)
+    if review.get('kind') in (launch_review.KIND, launch_review.CURRENT_KIND):
+        launch_review.validate_bundle(raw, captured['review'].raw, captured['launch_word'].raw,
+                                      require_current=require_current)
     else:
         # Historical approval-only parser callers supply binding fields.
         # Current execution independently requires its complete U4b runtime
         # before admission; this does not make a partial body executable.
-        if is_prepared_runtime(value.get('runtime')):
+        if require_current or is_prepared_runtime(value.get('runtime')):
             raise ValueError('U4b requires its two-review owner-terms bundle')
         c.exact(review, set(binding) | {'kind', 'version', 'reviewer', 'author', 'independent',
             'decision', 'reviewed_at', 'evidence'}, 'v2 independent review')
-        if review['kind'] != 'd4d_native_execution_review_v2':
+        if review['kind'] != 'd4d_native_execution_review_v2' or review['version'] != VERSION:
             raise ValueError('v2 review kind is not independent review evidence')
         for key in ('reviewer', 'author', 'reviewed_at', 'evidence'):
             _text(review[key], key)
@@ -667,7 +672,7 @@ def admit(raw, *, review_path, ci_path, launch_word_path, classifier_projection)
         raise ValueError('v2 execution admission requires the main thread')
     value = verified(raw, classifier_projection=classifier_projection)
     evidence = _authorizations(raw, value, review_path=review_path, ci_path=ci_path,
-                               launch_word_path=launch_word_path)
+                               launch_word_path=launch_word_path, require_current=True)
     runtime = validate_runtime(value['runtime'])
     if runtime['keep_awake']['host_platform'] != sys.platform:
         raise ValueError('v2 execution host differs from the registered host')

@@ -14,6 +14,10 @@ from . import native_subscription_guard as wire
 
 KIND = 'd4d_native_execution_review_bundle_v2'
 TERMS_KIND = 'd4d_native_owner_launch_terms_v1'
+# Historical names remain stable for retained evidence and fixtures.
+CURRENT_KIND = 'd4d_native_execution_review_bundle_v3'
+CURRENT_TERMS_KIND = 'd4d_native_owner_launch_terms_v2'
+SEQUENCE_SOURCE = 'src/data_sheets_schema/native_launch_sequence.py'
 CAPTURE_KIND = 'd4d_native_subscription_capture_request_v3'
 PREVIOUS_CAPTURE_KIND = 'd4d_native_subscription_capture_request_v2'
 LEGACY_CAPTURE_KIND = 'd4d_native_subscription_capture_request_v1'
@@ -149,14 +153,24 @@ def _version(value, kind, version):
         raise ValueError('unknown native authorization kind/version')
 
 
-def validate_terms(statement, runtime, *, word_owner):
+def validate_terms(statement, runtime, *, word_owner, require_current=False):
     """Validate exact declared terms; raw bundle/word joining is separate."""
     from . import native_runtime_profiles as profiles
     synthetic = profiles.profile_name(runtime) == profiles.SYNTHETIC_PROFILE
     if synthetic:
         profiles.require_synthetic_declarations(runtime)
-    _exact(statement, TERMS_KEYS, 'owner launch terms')
-    _version(statement, TERMS_KIND, 1)
+    if type(require_current) is not bool:
+        raise ValueError('current owner terms selection must be boolean')
+    current = type(statement) is dict and statement.get('kind') == CURRENT_TERMS_KIND
+    _exact(statement, TERMS_KEYS | ({'account_quiet'} if current else set()), 'owner launch terms')
+    _version(statement, CURRENT_TERMS_KIND if current else TERMS_KIND, 2 if current else 1)
+    if require_current and not current:
+        raise ValueError('historical owner terms are readback only')
+    # Owner declaration, not authenticated account telemetry: every session on
+    # the registered account stands down before capture through attempt end,
+    # including sessions that would monitor account utilization.
+    if current and statement['account_quiet'] is not True:
+        raise ValueError('owner must explicitly confirm account_quiet as boolean true')
     _text(statement['owner'], 'owner')
     if statement['owner'] != word_owner:
         raise ValueError('owner statement differs from coded word owner')
@@ -225,12 +239,14 @@ def validate_terms(statement, runtime, *, word_owner):
     return wire.strict_json(wire.canonical(statement))
 
 
-def validate_bundle(registration_raw, review_bundle_raw, launch_word_raw):
+def validate_bundle(registration_raw, review_bundle_raw, launch_word_raw, *, require_current=False):
     """Join two independent declared reviews and terms to unchanged word bytes.
 
     Does not reconstruct a registration or validate the separately bound CI.
     Every production caller must perform its complete admission chain too.
     """
+    if type(require_current) is not bool:
+        raise ValueError('current review selection must be boolean')
     value = registration_fields(registration_raw)
     bundle = wire.strict_json(review_bundle_raw)
     word = wire.strict_json(launch_word_raw)
@@ -255,9 +271,26 @@ def validate_bundle(registration_raw, review_bundle_raw, launch_word_raw):
     if (type(word['ci_sha256']) is not str or len(word['ci_sha256']) != 64
             or any(ch not in '0123456789abcdef' for ch in word['ci_sha256'])):
         raise ValueError('coded word requires its separately validated CI digest')
+    current = type(bundle) is dict and bundle.get('kind') == CURRENT_KIND
     _exact(bundle, BINDING_KEYS | {'kind', 'version', 'author', 'operator', 'reviews',
-                                 'owner_statement', 'registration_commit'}, 'review bundle')
-    _version(bundle, KIND, 2)
+                                 'owner_statement', 'registration_commit'} |
+           ({'sequence_script_sha256'} if current else set()), 'review bundle')
+    _version(bundle, CURRENT_KIND if current else KIND, 3 if current else 2)
+    if require_current and not current:
+        raise ValueError('historical review bundles are readback only')
+    if current:
+        digest = bundle['sequence_script_sha256']
+        if type(digest) is not str or re.fullmatch('[0-9a-f]{64}', digest) is None:
+            raise ValueError('sequence script requires lowercase sha256')
+        try:
+            registered = value['dependencies']['base']['package_sources'][SEQUENCE_SOURCE]
+        except (KeyError, TypeError) as exc:
+            raise ValueError('registration lacks the sequence script source pin') from exc
+        if registered != digest:
+            raise ValueError('sequence script differs from registered source pin')
+        if require_current:
+            from . import native_execution_authority_v2 as authority
+            authority._verified_source_bytes(authority.ROOT / SEQUENCE_SOURCE, digest)
     if any(bundle[key] != expected for key, expected in binding.items()):
         raise ValueError('review bundle differs from exact registration/source')
     for key in ('author', 'operator'):
@@ -289,7 +322,10 @@ def validate_bundle(registration_raw, review_bundle_raw, launch_word_raw):
         if _timestamp(review['reviewed_at'], 'review reviewed_at') > authorized_at:
             raise ValueError('owner word precedes an independent review')
         _review_document(review['document'])
-    statement = validate_terms(bundle['owner_statement'], runtime, word_owner=word['owner'])
+    statement = validate_terms(bundle['owner_statement'], runtime, word_owner=word['owner'],
+                               require_current=current)
+    if not current and statement['kind'] != TERMS_KIND:
+        raise ValueError('historical review bundle requires historical owner terms')
     _registration_commit(bundle['registration_commit'], registration_raw, runtime)
     capture = Path(statement['quota_capture']['directory'])
     for key in ('attempt_directory', 'evidence_directory'):
@@ -299,6 +335,22 @@ def validate_bundle(registration_raw, review_bundle_raw, launch_word_raw):
             if overlaps(capture, other):
                 raise ValueError('quota capture must be separate from attempt/evidence directories')
     return statement
+
+
+def validate_packet_script(packet_directory, *, registration_raw, review_bundle_raw, launch_word_raw):
+    """Verify retained script bytes against a v3 bundle, without current admission.
+
+    A sequence record's asserted digest/path is never used. This proves only
+    the copied script binding; it does not approve the packet or its execution.
+    """
+    validate_bundle(registration_raw, review_bundle_raw, launch_word_raw)
+    bundle = wire.strict_json(review_bundle_raw)
+    if bundle['kind'] != CURRENT_KIND:
+        raise ValueError('historical review bundle has no sequence script pin')
+    raw = wire.read_regular(Path(packet_directory) / 'sequence-script.py')
+    if wire.sha(raw) != bundle['sequence_script_sha256']:
+        raise ValueError('saved packet sequence script differs from the review bundle')
+    return bundle['sequence_script_sha256']
 
 
 def registration_fields(raw):

@@ -407,9 +407,10 @@ def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw
     any capture reservation or process.
     """
     directory = _path(directory)
-    from .native_launch_review import registration_fields
+    from .native_launch_review import registration_fields, validate_bundle
     from .native_runtime_profiles import require_production
     require_production(registration_fields(registration_raw)['runtime'])
+    validate_bundle(registration_raw, review_bundle_raw, launch_word_raw, require_current=True)
     authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, directory)
     value, statement, word, binding = authority
     if statement['quota_capture']['kind'] != REQUEST_KIND:
@@ -429,7 +430,7 @@ def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw
 
 def _current_authority(registration_raw, review_bundle_raw, launch_word_raw):
     from .native_launch_review import validate_bundle
-    statement = validate_bundle(registration_raw, review_bundle_raw, launch_word_raw)
+    statement = validate_bundle(registration_raw, review_bundle_raw, launch_word_raw, require_current=True)
     if statement['quota_capture']['kind'] != REQUEST_KIND:
         raise ValueError('current capture authority requires the registered v3 protocol')
     return _authority(registration_raw, review_bundle_raw, launch_word_raw,
@@ -778,7 +779,9 @@ def read_capture(manifest_path, *, registration_raw, review_bundle_raw, launch_w
     """
     path, directory, root = _capture_manifest_root(
         manifest_path, registration_raw, review_bundle_raw, launch_word_raw)
-    authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, root)
+    authority = (_current_authority(registration_raw, review_bundle_raw, launch_word_raw)
+                 if require_current else
+                 _authority(registration_raw, review_bundle_raw, launch_word_raw, root))
     return _read_capture_records(
         path, directory, authority,
         registration_raw=registration_raw, launch_word_raw=launch_word_raw,
@@ -802,7 +805,11 @@ def read_capture_for_event(directory, *, registration_raw, review_bundle_raw, la
     checked by read_capture.
     """
     directory = _path(directory)
-    authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, directory)
+    authority = (_current_authority(registration_raw, review_bundle_raw, launch_word_raw)
+                 if require_current else
+                 _authority(registration_raw, review_bundle_raw, launch_word_raw, directory))
+    if directory != _path(authority[1]['quota_capture']['directory']):
+        raise ValueError('capture directory differs from the owner statement')
     directory = _read_root(authority, registration_raw, launch_word_raw, require_current)
     if authority[1]['quota_capture']['kind'] == LEGACY_REQUEST_KIND:
         paths = [directory / 'capture.json']

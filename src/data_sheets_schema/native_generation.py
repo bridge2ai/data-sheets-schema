@@ -221,7 +221,7 @@ def main(argv=None):
         from .native_u4b_runtime import validate_prepared_runtime
         validate_prepared_runtime(value['runtime'])
         bundle_raw, word_raw = _read(args.review), _read(args.launch_word)
-        review.validate_bundle(subject_raw, bundle_raw, word_raw)
+        review.validate_bundle(subject_raw, bundle_raw, word_raw, require_current=True)
         captures.extend([(args.review, bundle_raw, SUBJECT_LIMIT),
                          (args.launch_word, word_raw, SUBJECT_LIMIT)])
         _unchanged(*captures)

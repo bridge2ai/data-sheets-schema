@@ -19,7 +19,7 @@ from data_sheets_schema import native_subscription_capture as capture
 from data_sheets_schema import native_shared_registration_orchestration as registration
 from data_sheets_schema import native_u4b_runtime as runtime_evidence
 from tests.test_native_u4b_runtime import runtime_inputs
-from tests.utils.native_u4b_fixtures import bundle_for
+from tests.utils.native_review_v3_fixtures import current_bundle_for as bundle_for
 
 
 def peer(mode):
@@ -65,6 +65,7 @@ if MODE == 'mismatch_nonzero':
 
 
 def component(tmp_path, monkeypatch, *, mode='success', deadline=5):
+    from tests.utils.native_review_v3_fixtures import sequence_pin
     # Capture traps/counters must observe the capture child, not mutate the
     # shared stdlib module used by genuine registration-commit Git reads.
     monkeypatch.setattr(capture, 'subprocess', SimpleNamespace(
@@ -81,7 +82,8 @@ def component(tmp_path, monkeypatch, *, mode='success', deadline=5):
         'permission_probe': str(tmp_path / 'permission.json'), 'permission_probe_sha256': '2' * 64,
         'composition_raw_json': json.dumps({'policy': {'readonly_lookups': {
             'inputs': [str(source)], 'output_directories': [str(tmp_path / 'outputs')]}}}),
-        'dependencies': {'base': {'source_commit': 'a' * 40}}}
+        'dependencies': {'base': {'source_commit': 'a' * 40,
+                                  'package_sources': sequence_pin()}}}
     raw = capture.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,
                              'registration': value})
     directory = tmp_path / 'one-capture'
