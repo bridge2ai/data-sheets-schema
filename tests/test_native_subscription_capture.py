@@ -312,7 +312,7 @@ def test_read_capture_for_event_rechecks_authority_after_slot_scan_without_repea
     trace.clear()
     direct = capture.read_capture(manifest, **read_arguments(arguments), require_current=True)
     assert direct == saved
-    assert trace == ['verified', 'inner-claims']
+    assert trace == ['verified', 'outer-claims']
 
 
 @pytest.mark.parametrize('mutation', [
@@ -363,13 +363,17 @@ def test_read_capture_for_event_refuses_mutations_between_outer_authority_and_in
     monkeypatch.setattr(registration, 'verified', single_verified)
     monkeypatch.setattr(registration, '_recheck_verified', traced_recheck)
     monkeypatch.setattr(capture, '_claims', mutate_after_outer_authority)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as refused:
         capture.read_capture_for_event(
             arguments['directory'], **read_arguments(arguments), require_current=True,
             **{key: event[key] for key in ('event_json', 'event_sha256', 'captured_at')})
-    assert trace[:2] == ['verified', 'mutated']
-    assert 'recheck_verified' in trace
-    assert trace.count('verified') == 1
+    if mutation == 'review_document':
+        assert str(refused.value) == 'review document differs from its pinned bytes'
+        assert trace == ['verified', 'mutated']
+    else:
+        assert trace[:2] == ['verified', 'mutated']
+        assert 'recheck_verified' in trace
+        assert trace.count('verified') == 1
 
 
 def test_genuine_registration_read_capture_for_event_rechecks_live_selection_and_stage_root(
