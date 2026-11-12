@@ -6,6 +6,7 @@ Call from the pinned repository root with the explicit registered interpreter.
 The fresh root is consumed once; failed preparation is retained, never removed.
 """
 from pathlib import Path
+from copy import deepcopy
 import hashlib
 import json
 import sys
@@ -86,12 +87,15 @@ class _Answers:
         raise ValueError('fixture has no answer for cursor kind ' + str(kind))
 
 
-def build_native_fixture(root: Path, *, registered_python: str) -> dict:
+def build_native_fixture(root: Path, *, registered_python: str, coverage_floor=None) -> dict:
     """Create S/R/instruction/C authority only; return untouched output seeds.
 
     Numbers are explicit synthetic test choices. The dummy executable is never
     invoked. Stage/output directories remain absent for the actual consumer.
+    A supplied floor is copied before any policy bytes or identities are minted.
     """
+    selected_coverage_floor = deepcopy(coverage_floor) if coverage_floor is not None else {
+        'state': 'registered', 'numerator': 0, 'denominator': 1}
     from data_sheets_schema import api_runner as api
     from data_sheets_schema import native_shared_contract as c
     from data_sheets_schema import native_shared_selection as selected
@@ -164,7 +168,7 @@ def build_native_fixture(root: Path, *, registered_python: str) -> dict:
         schemas[kind + '_schema'] = {'root': str(snapshot.sources[0][1]), 'root_class': cls,
             'sources': [{'name': str(name), **_pin(path, raw)} for name, path, raw in snapshot.sources]}
     synthetic = {'purpose': 'ordinary-Python software fixture; no scientific or execution acceptance',
-        'coverage_floor': {'state': 'registered', 'numerator': 0, 'denominator': 1},
+        'coverage_floor': selected_coverage_floor,
         'max_draft_checks': 3, 'runtime_limits': {'contextWindow': 900000, 'maxOutputTokens': 4000},
         'bounds': {**dict(c.BOUND_CEILINGS), 'max_paths_per_worker': 3, 'max_workers': 16}}
     receipt_policy = {'kind': c.KINDS['receipt_policy'], 'version': 1,
