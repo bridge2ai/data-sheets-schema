@@ -801,7 +801,12 @@ def parse_receipt_policy(raw: bytes, policy_sha256: Optional[str] = None) -> dic
         if floor != {"state": "pending", "mode": "diagnostic_pilot"}:
             raise ValueError("pending coverage floor requires diagnostic_pilot")
     elif floor.get("state") == "registered":
-        exact(floor, {"state", "numerator", "denominator"}, "coverage floor")
+        keys = {"state", "numerator", "denominator"}
+        if "basis" in floor:
+            keys.add("basis")
+            if type(floor["basis"]) is not str or floor["basis"] != "receipted_part":
+                raise ValueError("native registered floor basis must be receipted_part")
+        exact(floor, keys, "coverage floor")
         _nonnegative(floor["numerator"], "floor numerator")
         positive_int(floor["denominator"], "floor denominator")
         if floor["numerator"] > floor["denominator"]:
