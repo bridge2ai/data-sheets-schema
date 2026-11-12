@@ -489,21 +489,59 @@ def test_model_named_table_direct_argv_alias_is_followed(tmp_path, binding):
     assert facts['src/data_sheets_schema/second_command/__main__.py']['approaches'] == ['native_agentic']
 
 
+def _materialized_named_command_table(tmp_path, bindings):
+    for name in ('second_command', 'third_command'):
+        package = tmp_path / 'src/data_sheets_schema' / name
+        package.mkdir(parents=True)
+        (package / '__init__.py').write_text('')
+        (package / '__main__.py').write_text("print('a helper')\n")
+    source = tmp_path / 'src/data_sheets_schema/table_fixture.py'
+    source.write_text(bindings + "\nCOMMANDS = {'advance': args}\n")
+    surfaces = scan.Surfaces()
+    surfaces.add(source.relative_to(tmp_path).as_posix(), 'native_agentic', 'model_facing',
+                 'live', 'materialized named table', runs=False)
+    return surfaces
+
+
 @pytest.mark.parametrize('bindings', [
     "args = ('python', '-m', 'data_sheets_schema.second_command')\n"
     "args = ('python', '-m', 'data_sheets_schema.third_command')\n",
     "first = ('python', '-m', 'data_sheets_schema.second_command')\n"
     "second = ('python', '-m', 'data_sheets_schema.third_command')\n"
     "args = first\nargs = second\n",
-])
-def test_model_named_table_ambiguous_argv_alias_refuses(tmp_path, bindings):
-    source = tmp_path / 'src/data_sheets_schema/table_fixture.py'
-    source.parent.mkdir(parents=True)
-    source.write_text(bindings + "COMMANDS = {'advance': args}\n")
-    surfaces = scan.Surfaces()
-    surfaces.add(source.relative_to(tmp_path).as_posix(), 'native_agentic', 'model_facing',
-                 'live', 'ambiguous named table', runs=False)
-    with pytest.raises(scan.ConfigError, match='ambiguous argv alias: args'):
+], ids=('rebound_literal_argv', 'rebound_argv_aliases'))
+def test_model_named_table_complete_argv_alias_alternatives_are_followed(tmp_path, bindings):
+    surfaces = _materialized_named_command_table(tmp_path, bindings)
+    facts = scan.discover_model_commands(tmp_path, {}, surfaces)
+    targets = {
+        f'src/data_sheets_schema/{name}/__main__.py': name
+        for name in ('second_command', 'third_command')
+    }
+    assert set(facts) == set(targets)
+    for relative, name in targets.items():
+        assert facts[relative]['approaches'] == ['native_agentic']
+        assert any(f'runs `-m data_sheets_schema.{name}`' in command
+                   for command in facts[relative]['commands'])
+        assert surfaces.files[relative].roles == {'native_agentic': 'model_facing'}
+        assert surfaces.files[relative].runs == {'native_agentic'}
+
+
+@pytest.mark.parametrize('bindings,diagnostic', [
+    (
+        "args = ('python', '-m', 'data_sheets_schema.second_command')\n"
+        "args = unresolved\n",
+        'unresolvable argv slot',
+    ),
+    (
+        "module = 'data_sheets_schema.second_command'\n"
+        "module = 'data_sheets_schema.third_command'\n"
+        "args = ('python', '-m', module)\n",
+        'unresolvable -m operand',
+    ),
+], ids=('unresolved_argv_alternative', 'ambiguous_m_operand'))
+def test_model_named_table_unresolved_argv_or_m_operand_refuses(tmp_path, bindings, diagnostic):
+    surfaces = _materialized_named_command_table(tmp_path, bindings)
+    with pytest.raises(scan.ConfigError, match=diagnostic):
         scan.discover_model_commands(tmp_path, {}, surfaces)
 
 
