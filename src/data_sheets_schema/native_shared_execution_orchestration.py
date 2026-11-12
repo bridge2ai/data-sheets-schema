@@ -157,7 +157,7 @@ def _synthetic_runtime_observation(value):
 def read_final(registration_raw):
     """RunSpec boundary: validated-caller
 
-    RunSpec precondition: Caller supplies exact execution-registration bytes; the fixed shared-v2 readback delegation freshly verifies guarded preparation before saved publication-evidence reads.
+    RunSpec precondition: Caller supplies exact execution-registration bytes; the fixed shared-v2 delegation freshly verifies guarded preparation for ordinary results. Explicit validation-failure diagnostics verify failed historical bytes only and cannot assert completion or authority.
     """
     from .native_execution_orchestration import read_final as read
     contract, effects = _engine_bindings()
