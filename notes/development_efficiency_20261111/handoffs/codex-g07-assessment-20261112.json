@@ -1,0 +1,91 @@
+{
+  "scanner_comparison": {
+    "state": "blocked_before_complete_arrays",
+    "current_main": "7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1",
+    "current_candidate": "7e4ec62c28226b595e91565f0f0bc3ce47b7bc0d",
+    "exact": null,
+    "line_relocations": null,
+    "field_changes": null,
+    "additions": null,
+    "removals": null,
+    "violations": null,
+    "reason": "The complete-array scanner invocation exited 2: separate native shared render route could not be derived because native_execution_authority_v2.py differs from the scanner's pinned source. Null means unavailable, not zero, clean, or approved.",
+    "log": "scratch-native-main-integration-20261112/tests/g07-scanner-current/pytest.log",
+    "authority_expected_sha256": "bfdb5c86feb4c071ebf17e6ececa8fd60f1bc23bda98fefd42c0c211ecd7511a",
+    "authority_actual_sha256": "b2189db86428b5977bfcbaa72adc5f504f3449c31b583359555b074916a95558",
+    "protected_packet_scope": "The four packets do not change this authority module or scanner contract. No blind pin update, fallback or synthetic comparison was used.",
+    "retained_d128": {
+      "main": "cf50d9a1c059f3b5030103378ccef33619475dde",
+      "candidate": "660b2d884c3032f0eca61fcfd3ae523fcbbe9614",
+      "tool": "e0b964b0e182548411045c5f6186b7d4ee64b8ec",
+      "counts": {"exact": 5229, "line_relocations": 57, "field_changes": 6, "additions": 1, "removals": 0, "identical_ordered_violations": 9, "added_test_dependencies": 2},
+      "itemized_ledger": "scratch-native-u1u3/u3h/itemized-scanner-comparison.json",
+      "itemized_ledger_sha256": "98e6d082db4df2176a452ab60bc83280406333ba339a96e30ae501aeb6957ada",
+      "main_array_file": "scratch-native-u1u3/u3h/scan-main/scanner.json",
+      "main_array_sha256": "4cc276122e34f6557ef6b04ff6597eb04dafe5b2b458509f294114a58bd4b06f",
+      "candidate_array_file": "scratch-native-u1u3/u3h/scan-candidate/scanner.json",
+      "candidate_array_sha256": "ec8109a80e4e406ffcafe378409eed266de54173fcc84bd0b4336095f792d924",
+      "scope": "D128 covers these exact retained objects and differences only. The current scanner and skill bytes differ. No current delta or violation object has been shown covered by D128."
+    },
+    "required_followup": "Review the authority closure against the scanner contract, then obtain complete same-tool main and candidate scans. Itemize current-main to current-candidate, retained-main to current-main, and retained-candidate to current-candidate with duplicate occurrences, ordered indices, field differences and every violation object. Do not approve by aggregate counts alone."
+  },
+  "capture_selection": {
+    "state": "implemented; bounded validation complete; public success blocked by a pre-existing observer defect",
+    "commit": "5d63d0a77dc43c064cfc2b376355f98009dd5b6e",
+    "finding_confirmed": "Before this change, read_capture_for_event could join an earlier successful slot after a later durable claim. The current-word and freshness checks did not require that slot to be the last claimed capture. Both launch reservation routes were inspected.",
+    "implementation": [
+      "Current guard preparation reconstructs the capture under the existing word lock and retains that lock through guard publication.",
+      "Strict integer capture_index and capture_claim_count are recorded in current guard bytes and their saved snapshot.",
+      "Both actual reservation routes recheck the pair against the durable claim journal under the existing word lock before margin validation and attempt.mkdir.",
+      "The event is independently reconstructed and joined to its capture index; rehashed metadata is not authority.",
+      "Historical exact v2 guard shape remains readable, while current admission requires the new checked selection."
+    ],
+    "design_ruling": "No new lock order, journal event, capture charge or generation-attempt consumption was introduced. No additional owner design decision was needed within this assignment.",
+    "validation": "The canary passed. All 21 new latest-claim tests passed. The 13-module core regression cohort has 532 passes and two pre-existing assertion failures already present, with identical messages, in retained CI on native1a137. Independent review found no correctness blocker in Part B; the bounded core cohort introduced no new negative test identities. The public-path cohort has 60 passes and one failure: a pre-existing observer rejects the correctly declared returned-model alias. Public successful completion remains unproved.",
+    "coverage_limit": "Component tests deliberately isolate outer registration reconstruction and use scripted Python peers; they are not native-account or launch evidence. The new producer helper and actual reservation branches are exercised; a full prepare-subscription-guard-v2 CLI-body test is not yet included."
+  },
+  "review": {
+    "packets": "Independent read-only review found no packet derivation defect or report overclaim. The private commit changes exactly four protected files, three postimages equal D127, and the API postimage equals the retained U3-M proposal. Assigned branch protected bytes remain pinned-main bytes.",
+    "capture_selection": "Independent read-only review found no correctness blocker in the stable Part B patch. It checked caller coverage, existing lock order through reservation, failed/interrupted claims, strict/rehashed metadata, historical readback, and unchanged charging. Tests were pending at review time."
+  },
+  "test_adjudications": {
+    "g07-constructor-canary": "One genuine native construction/replay selection canary passed on the first successful composition. Synthetic software evidence only.",
+    "g07-execution": "554 passed on g07-b, ba279821f79fef1650b2ea8c972a8702323f6b17, before Part B. Every one of the original 62 native-constructor errors and 44 source/basetemp-isolation failures passes there. No production guard was weakened.",
+    "g07-shared-policy": "423 passed. All 112 original shared-policy constructor errors now pass. This cohort used the composition before the separate capture-selection commit.",
+    "g07-scanner-current": "Exit 2: no complete scan arrays. Exact current authority-source pin refusal retained. Not a clean scan.",
+    "g07-scanner-cohort": "Scanner module: 285 passed, 44 failed, 52 errors; all 96 negatives explicitly identify the pre-existing authority source-pin drift. Schema neutrality: 7 passed; external onboarding: 26 passed; profiles: 81 passed, 9 skipped for fixture artifacts unavailable in this composition. No neutrality failure/error. All original missing-route signatures are gone, but the same 96 scanner test identities remain negative.",
+    "g07-capture-canary": "One current guard canary passed, verifying persisted selection pair, snapshot/readback, exclusion of another capture while the reservation word lock is held, and no generation reservation.",
+    "g07-capture-regressions": "532 passed, 2 failed. All 21 new latest-claim tests pass. Independent review confirms the two negatives are unchanged CI instrumentation defects; this bounded cohort introduced no new negative identities. No broad passing-suite claim.",
+    "g07-ci-selectors": "All 27 exact retained selector-shape CI failures pass locally with the four protected packets. This establishes local clearance of those nodes, not a GitHub CI result.",
+    "g07-ci-residual-canaries": "The closed-registry and owner-delivery canaries pass locally; the native-authority scanner representative still errors on its source pin. Two passes and one setup error; no CI-green claim.",
+    "g07-metadata": "All 38 metadata tests pass in the isolated CPython 3.13 environment, including the 29 retained closed-registry failures and metadata assertion case. This is local evidence, not proof that the protected packets caused the improvement or that CI now passes.",
+    "g07-public-paths": "60 passed, 1 failed. The saved synthetic public lifetime reaches observation, then correctly declared assistant returned-model bytes are rejected by an unchanged requested-only comparison in native_shared_observations.Trace. This pre-existing observer integration defect is separate from Part B; successful public completion remains unproved. No CPU-monitoring diagnostic or real native execution was run."
+  },
+  "ci_classes": [
+    {"id": "selector_shape", "count": 27, "evidence": "All 27 exact retained failing nodes pass in g07-ci-selectors. The API packet makes shared selection unconditional while preserving native validation in the shared hook.", "disposition": "Locally resolved by the integrated selector shape; obtain a real CI rerun after authorized integration."},
+    {"id": "authority_source_pin", "count": 44, "evidence": "The complete scan exits 2, all 96 scanner-cohort negatives cite this pin, and the retained CI representative still errors. The same stale pin and authority bytes already coexist on native1a137.", "disposition": "Not resolved by the four packets. Review/update scanner derivation and produce new complete D128 comparison arrays."},
+    {"id": "closed_dependency_registry", "count": 29, "evidence": "The canary and complete 38-test metadata module pass locally; all 29 retained failed identities are included.", "disposition": "Locally green under isolated CPython 3.13; no causal credit assigned to protected packets and no assertion that the CI environment is repaired. Real CI verification remains."},
+    {"id": "import_origin", "count": 37, "evidence": "Retained failures consistently concern prepare_registration import origin. The controlled local runner verifies imports from the explicit tree, but this does not repair CI startup.", "disposition": "Separate assigned CI/environment work. Do not claim these 37 resolved from a packet or origin witness alone."},
+    {"id": "host_layout", "count": 7, "evidence": "Retained CI inventory has six external-schema-fixture failures and one snapshot-layout failure. Moving local basetemp outside source does clear the separate 44 G04 execution-isolation negatives.", "disposition": "Separate assigned host-layout work; no blanket CI clearance."},
+    {"id": "collection_layout", "count": 2, "evidence": "One retained collection error and one helper-layout error. The separately prepared collection fix was not merged into this candidate.", "disposition": "Separate collection/layout work. No full CI collection or full-suite green result claimed here."},
+    {"id": "other", "count": 6, "evidence": "Two capture-instrumentation assertions remain failed and are independently classified as pre-existing. The selected native construction/replay test, metadata readiness assertion and owner-delivery canary pass locally. The remaining native-scanner prefix-regex case was not separately rerun.", "disposition": "Retain the two test repairs and scanner regex follow-up; do not infer clearance for an untested node."},
+    {"id": "cancelled_shards", "count": 2, "evidence": "The retained CI run cancelled two shards at the 45-minute limit.", "disposition": "Separate shard-time work; cancelled shards are not passing evidence and are not part of the 152 unique failed/error IDs."}
+  ],
+  "findings": [
+    {"id": "G07-F1", "count": 1, "evidence": "Current complete-array scanner exits 2 on the native authority source pin; this invocation did not produce complete D128 arrays.", "disposition": "Keep scanner comparison and approval pending. Review and update derivation separately, then repeat the itemized comparison. Do not treat this packet as scanner approval."},
+    {"id": "G07-F2", "count": 1, "evidence": "API postimage SHA-256 830eec1e12e96f807fa76ea26e066a1923b60380013c424cfa99f0012af0a881 differs from D127 only by main's declared-type/enum multivalued handling.", "disposition": "Owner exact-hash review remains required. Four protected files remain untouched on the branch; scratch application is not approval."},
+    {"id": "G07-F3", "count": 1, "evidence": "D136 settles 1200 seconds and unchanged 90-second margin. N1 draft v8 as a whole remains unratified.", "disposition": "Retain N1 ratification and complete final-source review, CI, registration and separately authorized native checks as later gates. No provider, model, native executable, push or GitHub action occurred."},
+    {"id": "G07-F4", "count": 2, "evidence": "Unchanged test_native_subscription_capture.py assertions at lines 315 and 371 fail with the same messages as native1a137 CI. The direct-read tracer labels claims outer, not inner; a changed review document correctly refuses in validate_bundle before the later recheck hook.", "disposition": "Separate test repair: expect verified then outer-claims for the direct read while preserving the event-lookup four-step assertion. For review_document, assert the exact pinned-review refusal and earlier trace; retain recheck assertions for other mutations. No production guard should be weakened."},
+    {"id": "G07-F5", "count": 1, "evidence": "The new producer helper and reservation paths are tested, but the complete prepare-subscription-guard-v2 CLI body has only parser coverage in the existing suite; historical CLI preparation tests exercise v1.", "disposition": "Add a focused current-v2 CLI routing/publication test in a later test-only follow-up. This bounded result does not claim a real CLI/account/native launch acceptance run."},
+    {"id": "G07-F6", "count": 1, "evidence": "The public completion test fails on the first assistant tool-use frame. Runtime declares requested synthetic-native-model and returned synthetic-native-returned-model; transcript lines 2 and 3 use those exact respective labels. native_shared_observations.py:129-131 incorrectly compares the assistant label with runtime.model. Observer, alias helper, peer, public test and runtime_for are unchanged from native1a137 and pre-B5fa. Observer SHA-256 is 41459563575a0c9e0c396c488cb25afbd0f8421896b904ecfc290972ca1b3ae2.", "disposition": "Separate native-readiness blocker. Have Trace derive the closed alias pair through native_model_aliases.model_aliases(runtime) and use require_frame_models for the same frame types; preserve requested-model initialization. Review pure-graph closure impact and test declared returned assistant labels, wrong/missing labels, wrong requested-frame labels, and historical identical-label behavior. Rerun the single public completion case. Do not change the peer to hide the defect or allow either label everywhere."}
+  ],
+  "public_failure_evidence": {
+    "root": "scratch-native-main-integration-20261112/tests/g07-public-paths/cases/popen-gw0/test_actual_public_correction_0/native26",
+    "runtime": "authority/runtime-execution.json",
+    "runtime_sha256": "6a679c6b3ba4175575b706431cfe299b0ba9e45fdcdfe6066610db14581dc45d",
+    "transcript": "native-attempt/transcript.jsonl",
+    "transcript_sha256": "3d6bddf326f882cd907235c189f9f18578c845f95d517b0d1da00db4014dfb1d",
+    "pytest_xml_sha256": "62054e2e74c7642791373ab4c09823e72a1dc2924e372fba7a4b1c9d0946be0f",
+    "scope": "Static source comparison plus this saved software-test execution. No additional pre-B public replay or native/model/provider call was performed."
+  }
+}

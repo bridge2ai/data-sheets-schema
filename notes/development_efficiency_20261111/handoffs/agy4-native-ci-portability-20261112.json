@@ -1,0 +1,450 @@
+{
+  "assignment": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/notes/development_efficiency_20261111/assignments/claude-lead-agy4-native-ci-portability-20261112.md",
+  "base_commit": "ddcadcdc20ce40cdeb6eb92645c17883f2060be6",
+  "branch": "agy/native-ci-collection-5875-20261112",
+  "ci_sim_tree": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305",
+  "commands": [
+    {
+      "collected": 8,
+      "command": "PYTHONPATH=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/src /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m pytest -v -rs -p no:cacheprovider --basetemp /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part1-worktree-target-nodes /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_u3c_round4_helpers.py::test_parent_worker_and_subprocess_reenter_c4_wrapper /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_u3d_runner_evidence.py /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_u5_external_schema.py",
+      "duration_seconds": 16.84,
+      "errors": 0,
+      "exit_code": 0,
+      "failed": 0,
+      "id": "part1_worktree_target_nodes",
+      "location": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112",
+      "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part1-worktree-target-nodes.log",
+      "log_sha256": "3abbc181c5cf56a294f1e06596a04b190e80c17963f147f313083e48664f5aca",
+      "notes": "7 passed, 1 skipped (test_same_external_320_api_instruction_before_after skips naming missing baseline-d258611c5/tree/.claude/agents/_preimages.json removed by 2026-11-11 deduplication; both modular and merged external 3.2.0 catalog tests run and pass).",
+      "part": "Part 1",
+      "passed": 7,
+      "skipped": 1
+    },
+    {
+      "collected": 10,
+      "command": "GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null PYTHONPATH=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/src:/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112:/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -S -m pytest -v -rs -p no:cacheprovider --basetemp /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part1-worktree-full-files /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_u3c_round4_helpers.py /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_u3d_runner_evidence.py /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_u5_external_schema.py",
+      "duration_seconds": 19.47,
+      "errors": 0,
+      "exit_code": 0,
+      "failed": 0,
+      "id": "part1_worktree_full_files",
+      "location": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112",
+      "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part1-worktree-full-files.log",
+      "log_sha256": "e107dc1290a935eef211f34cdb811839b74f4a2e228690807e8961538e347277",
+      "notes": "All 3 complete Part 1 test files (10 items) run in worktree with -S to avoid editable .pth namespace mixing from primary repo: 9 passed, 1 skipped.",
+      "part": "Part 1",
+      "passed": 9,
+      "skipped": 1
+    },
+    {
+      "collected": 8,
+      "command": "PYTHONPATH=/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/src /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m pytest -v -rs -p no:cacheprovider --basetemp /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part1-cisim-target-nodes /Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_u3c_round4_helpers.py::test_parent_worker_and_subprocess_reenter_c4_wrapper /Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_u3d_runner_evidence.py /Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_u5_external_schema.py",
+      "duration_seconds": 1.06,
+      "errors": 0,
+      "exit_code": 0,
+      "failed": 0,
+      "id": "part1_cisim_target_nodes",
+      "location": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305",
+      "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part1-cisim-target-nodes.log",
+      "log_sha256": "1f7368c364f1f915b4946ef7de2cd3b004a34b0b818518912cf957309cfd6f6b",
+      "notes": "Outside d4d-executions: 5 passed (u3c wrapper, u3d snapshot, and all 3 u5 scratch-root refusals) and 3 skipped honestly naming missing schema-5e382f0c4/manifest.json and baseline-d258611c5/manifest.json.",
+      "part": "Part 1",
+      "passed": 5,
+      "skipped": 3
+    },
+    {
+      "collected": 10,
+      "command": "GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null PYTHONPATH=/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/src:/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305:/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -S -m pytest -v -rs -p no:cacheprovider --basetemp /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part1-cisim-full-files /Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_u3c_round4_helpers.py /Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_u3d_runner_evidence.py /Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_u5_external_schema.py",
+      "duration_seconds": 1.3,
+      "errors": 0,
+      "exit_code": 1,
+      "failed": 1,
+      "id": "part1_cisim_full_files",
+      "location": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305",
+      "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part1-cisim-full-files.log",
+      "log_sha256": "bd7b0d17ce5d0f84125c4628e612a579f7effaa02b157d9427ec4fbc256a796a",
+      "notes": "All 8 Part 1 target items pass/skip (6 passed including test_current_census_refuses_existing_output_without_overwriting, 3 skipped); only test_current_integrated_c_and_d_graphs_are_accepted fails in ci-sim-b11931410305 because ci-sim-b11931410305 was unpacked from git archive without a .git directory (it passed on the real CI runner checkout in run 42976790438).",
+      "part": "Part 1",
+      "passed": 6,
+      "skipped": 3
+    },
+    {
+      "collected": 1,
+      "command": "GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null GIT_DIR=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.git PYTHONPATH=/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/src /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m pytest -v -p no:cacheprovider --basetemp /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step1-gitdir /Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_execution_round5_v2.py::test_actual_pinned_helper_ignores_scratch_forged_cache",
+      "duration_seconds": 0.2,
+      "errors": 0,
+      "exit_code": 1,
+      "failed": 1,
+      "id": "part2_step1_cisim_alone",
+      "location": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305",
+      "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step1-gitdir.log",
+      "log_sha256": "077a12037b4d8c1529aa763c226dcb993a5596612aaf6fa3ecb1274d356ca2bd",
+      "notes": "Single test in ci-sim-b11931410305: controller_sources() at native_attribution_controller_v2.py:42 PASSES (no prepare_registration origin error); fails later at native_supervisor_authority_v2.py:25 (git rev-parse HEAD) only because ci-sim-b11931410305 has no .git and resources.git_env() strips GIT_DIR.",
+      "part": "Part 2",
+      "passed": 0,
+      "skipped": 0
+    },
+    {
+      "collected": 1,
+      "command": "GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null PYTHONPYCACHEPREFIX=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/pycache PYTHONPATH=/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/src /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m pytest -v -p no:cacheprovider --basetemp /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step2-pycache /Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_execution_round5_v2.py::test_actual_pinned_helper_ignores_scratch_forged_cache",
+      "duration_seconds": 0.2,
+      "errors": 0,
+      "exit_code": 1,
+      "failed": 1,
+      "id": "part2_step2_cisim_pycacheprefix",
+      "location": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305",
+      "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step2-pycache.log",
+      "log_sha256": "8cb1910135d15d8fbaf69f9d6f0efd6b97df0667e754d88dbb51c978be628dea",
+      "notes": "Adding CI's PYTHONPYCACHEPREFIX does NOT trigger the prepare_registration origin error; controller_sources() at line 42 still passes.",
+      "part": "Part 2",
+      "passed": 0,
+      "skipped": 0
+    },
+    {
+      "collected": 1,
+      "command": "GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null PYTHONPYCACHEPREFIX=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/pycache CI=true GITHUB_ACTIONS=true RUNNER_OS=Linux PYTHONPATH=/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/src /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m pytest -v -p no:cacheprovider --basetemp /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step3-cienv /Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_execution_round5_v2.py::test_actual_pinned_helper_ignores_scratch_forged_cache",
+      "duration_seconds": 0.2,
+      "errors": 0,
+      "exit_code": 1,
+      "failed": 1,
+      "id": "part2_step3_cisim_ci_env",
+      "location": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305",
+      "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step3-cienv.log",
+      "log_sha256": "c5bdd7b497d1d0d08b2e6adb02bf051a2b37e300d75342b9f4393679744fb37e",
+      "notes": "Adding CI=true GITHUB_ACTIONS=true RUNNER_OS=Linux does NOT trigger the prepare_registration origin error; controller_sources() at line 42 still passes.",
+      "part": "Part 2",
+      "passed": 0,
+      "skipped": 0
+    },
+    {
+      "collected": 38,
+      "command": "PYTHONPATH=/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/src /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m pytest -v -p no:cacheprovider --basetemp /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step4-collect-leak /Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_audit_recall_leak_rendered.py /Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_execution_round5_v2.py::test_actual_pinned_helper_ignores_scratch_forged_cache -k test_actual_pinned_helper_ignores_scratch_forged_cache",
+      "duration_seconds": 0.99,
+      "errors": 0,
+      "exit_code": 1,
+      "failed": 1,
+      "id": "part2_step4_cisim_collect_leak",
+      "location": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305",
+      "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step4-collect-leak.log",
+      "log_sha256": "cc2184c7242996a10be10e4f828383bd3aff2ee45ded11cddb8a35cb9c0b2020",
+      "notes": "REPRODUCED in ci-sim-b11931410305: collecting tests/test_audit_recall_leak_rendered.py (even with all 37 of its tests deselected via -k) imports v1 prepare_registration.py into sys.modules['prepare_registration'] at collection time, causing test_actual_pinned_helper_ignores_scratch_forged_cache to fail at native_attribution_controller_v2.py:42 with ValueError: native controller dependency imported from another origin: prepare_registration.",
+      "part": "Part 2",
+      "passed": 0,
+      "skipped": 0
+    },
+    {
+      "collected": 1,
+      "command": "GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null PYTHONPYCACHEPREFIX=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/pycache CI=true GITHUB_ACTIONS=true RUNNER_OS=Linux PYTHONPATH=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/src /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m pytest -v -p no:cacheprovider --basetemp /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step5-worktree-alone /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_execution_round5_v2.py::test_actual_pinned_helper_ignores_scratch_forged_cache",
+      "duration_seconds": 1.98,
+      "errors": 0,
+      "exit_code": 0,
+      "failed": 0,
+      "id": "part2_step5_worktree_alone_ci_env",
+      "location": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112",
+      "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step5-worktree-alone.log",
+      "log_sha256": "25a0f500092954360cafb9e9231d3f5afd4818507b4324bae8fa03e95caf7978",
+      "notes": "In worktree (with .git present), running the test alone with PYTHONPYCACHEPREFIX and CI env vars PASSES (1 passed).",
+      "part": "Part 2",
+      "passed": 1,
+      "skipped": 0
+    },
+    {
+      "collected": 38,
+      "command": "GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null PYTHONPATH=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/src /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m pytest -v -p no:cacheprovider --basetemp /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step6-worktree-collect-leak /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_audit_recall_leak_rendered.py /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_execution_round5_v2.py::test_actual_pinned_helper_ignores_scratch_forged_cache -k test_actual_pinned_helper_ignores_scratch_forged_cache",
+      "duration_seconds": 1.2,
+      "errors": 0,
+      "exit_code": 1,
+      "failed": 1,
+      "id": "part2_step6_worktree_collect_leak",
+      "location": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112",
+      "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step6-worktree-collect-leak.log",
+      "log_sha256": "ce2cf8eb1554611defa7c6c195b4413c9c711882d2dd08b9976ed812500aad4b",
+      "notes": "REPRODUCED in worktree: collecting tests/test_audit_recall_leak_rendered.py in the same pytest invocation makes test_actual_pinned_helper_ignores_scratch_forged_cache fail with ValueError: native controller dependency imported from another origin: prepare_registration.",
+      "part": "Part 2",
+      "passed": 0,
+      "skipped": 0
+    },
+    {
+      "collected": 2,
+      "command": "GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null PYTHONPATH=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/src /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m pytest -v -p no:cacheprovider --basetemp /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step7-worktree-v1-then-v2 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_attribution_controller.py::test_composition_can_prepare_and_matches_every_selected_command /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_execution_round5_v2.py::test_actual_pinned_helper_ignores_scratch_forged_cache",
+      "duration_seconds": 4.09,
+      "errors": 0,
+      "exit_code": 1,
+      "failed": 1,
+      "id": "part2_step7_worktree_v1_then_v2",
+      "location": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112",
+      "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step7-worktree-v1-then-v2.log",
+      "log_sha256": "9487c7a5f65ff24fb671d04bb97391efd07d994994f9e4ad4896873fe5e8b6cb",
+      "notes": "REPRODUCED via execution order in worktree: running a v1 controller test (test_native_attribution_controller.py) before the v2 test loads v1 prepare_registration.py into sys.modules['prepare_registration'], causing the v2 test to fail with the same ValueError.",
+      "part": "Part 2",
+      "passed": 1,
+      "skipped": 0
+    }
+  ],
+  "date": "2026-11-12",
+  "diff_summary": {
+    "deletions": 41,
+    "edited_files": [
+      {
+        "change_summary": "Add _temp_base() and optional root parameter on helper(name, root=ROOT); in test_parent_worker_and_subprocess_reenter_c4_wrapper(), build a temporary d4d-executions directory with plans/ and checkout/, copy run_native_u3c_round4_20261107.py, run_native_u3a_tests_20261107.py, hydrate_native_u3c_round4_fairscape_20261107.py, and tests/test_native_u3b_reuse.py into checkout/, load the wrapper from checkout, and run all existing assertions.",
+        "cisim_path": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_u3c_round4_helpers.py",
+        "deletions": 15,
+        "insertions": 43,
+        "relative_path": "tests/test_native_u3c_round4_helpers.py",
+        "sha256": "c043936a03291468135557c1e850bda5c2cc8b7f14971584b51d8d11eb8abce9",
+        "worktree_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_u3c_round4_helpers.py"
+      },
+      {
+        "change_summary": "Add _temp_base() and copy scripts/adhoc/run_native_u3d_tests_20261107.py into a temporary d4d-executions/checkout/scripts/adhoc/ tree outside d4d-executions before exec_module so len(_executions) == 1 holds regardless of checkout or --basetemp location; pass GIT_CONFIG_GLOBAL=/dev/null and GIT_CONFIG_SYSTEM=/dev/null in the test git environment.",
+        "cisim_path": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_u3d_runner_evidence.py",
+        "deletions": 5,
+        "insertions": 26,
+        "relative_path": "tests/test_native_u3d_runner_evidence.py",
+        "sha256": "1a058700a89d7142cea14b3da7356a888e9998feb7447b79b182720beac37e13",
+        "worktree_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_u3d_runner_evidence.py"
+      },
+      {
+        "change_summary": "In checked_input(label, expected_commit, *, require_present=False), skip with the exact missing path when manifest.json or a listed tree file is absent on initial input check while enforcing require_present=True on post-test integrity re-checks; in test_api_comparison_refuses_other_scratch_roots, stage a temporary d4d-executions/checkout/scripts/adhoc/native_u5_api_render_20261108.py and scratch-native-u5-prep directory under _temp_base() so the test reaches and verifies the 'named U4b/U5 scratch roots' refusal message on any checkout path.",
+        "cisim_path": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305/tests/test_native_u5_external_schema.py",
+        "deletions": 21,
+        "insertions": 51,
+        "relative_path": "tests/test_native_u5_external_schema.py",
+        "sha256": "a325c87617b596e6900565da6f92daa68f9d46c10388c959f2f755d06cf19ff4",
+        "worktree_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/tests/test_native_u5_external_schema.py"
+      }
+    ],
+    "files_changed": 3,
+    "insertions": 120,
+    "untouched_scripts": [
+      {
+        "relative_path": "scripts/adhoc/run_native_u3a_tests_20261107.py",
+        "sha256": "762f49f58d73eaffb3a0b570377f8c5f572a951f170e9da44a7ac032a80f8591",
+        "worktree_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/scripts/adhoc/run_native_u3a_tests_20261107.py"
+      },
+      {
+        "relative_path": "scripts/adhoc/run_native_u3c_round4_20261107.py",
+        "sha256": "1e19e9dc90e6733b08f901b1d5160963f8e57c57c18cbb4248d54a7d150d3d04",
+        "worktree_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/scripts/adhoc/run_native_u3c_round4_20261107.py"
+      },
+      {
+        "relative_path": "scripts/adhoc/hydrate_native_u3c_round4_fairscape_20261107.py",
+        "sha256": "d14ac6637bb2526a9d133a97025682b5bfcb4357fbcf3f0ac000d76b6e03183c",
+        "worktree_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/scripts/adhoc/hydrate_native_u3c_round4_fairscape_20261107.py"
+      },
+      {
+        "relative_path": "scripts/adhoc/census_native_u3c_round4_20261107.py",
+        "sha256": "05f6a84e47ed92dfb0a39ed5ec0fd2fb87c839a41b72052d3e44c90913edf08d",
+        "worktree_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/scripts/adhoc/census_native_u3c_round4_20261107.py"
+      },
+      {
+        "relative_path": "scripts/adhoc/run_native_u3d_tests_20261107.py",
+        "sha256": "c345bf333200ae8e2d76655f84555abf68c018035c85e00ac28cf9c39fae841c",
+        "worktree_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/scripts/adhoc/run_native_u3d_tests_20261107.py"
+      },
+      {
+        "relative_path": "scripts/adhoc/native_u5_api_render_20261108.py",
+        "sha256": "9796e7da849ccd3b309bc35fbc3425c0bb2232515d866de058a8589a3c8dbecf",
+        "worktree_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112/scripts/adhoc/native_u5_api_render_20261108.py"
+      }
+    ]
+  },
+  "part1_ci_failures_addressed": [
+    {
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time",
+      "file": "tests/test_native_u3d_runner_evidence.py",
+      "job": "Python 3.12 / shard 4",
+      "kind": "FAILED",
+      "message": "RuntimeError: expected one enclosing d4d-executions directory",
+      "node": "test_source_snapshot_binds_tracked_and_untracked_bytes"
+    },
+    {
+      "class": "collection: script requires the d4d-executions layout (issue 5875)",
+      "file": "tests/test_native_u3c_round4_helpers.py",
+      "job": "Python 3.12 / shard 4",
+      "kind": "FAILED",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "node": "test_parent_worker_and_subprocess_reenter_c4_wrapper"
+    },
+    {
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time",
+      "file": "tests/test_native_u5_external_schema.py",
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: '/home/runner/work/data-sheets-schema/scratch-native-u5-prep/schema-5e382f0c4/manifest.json'",
+      "node": "test_external_320_capture_rebuild_and_cold_warm_catalog[modular]"
+    },
+    {
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time",
+      "file": "tests/test_native_u5_external_schema.py",
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: '/home/runner/work/data-sheets-schema/scratch-native-u5-prep/schema-5e382f0c4/manifest.json'",
+      "node": "test_external_320_capture_rebuild_and_cold_warm_catalog[merged]"
+    },
+    {
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time",
+      "file": "tests/test_native_u5_external_schema.py",
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: '/home/runner/work/data-sheets-schema/scratch-native-u5-prep/baseline-d258611c5/manifest.json'",
+      "node": "test_same_external_320_api_instruction_before_after"
+    },
+    {
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time",
+      "file": "tests/test_native_u5_external_schema.py",
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "message": "assert b'named U4b/U5 scratch roots' in b'Traceback (most recent call last):\\n  File \"/home/runner/work/data-sheets-schema/data-sheets-schema/scripts/adhoc/native_u5_api_render_20261108.py\", line 103, in <module>\\n    main()\\n  File \"/home/runner/work/data-sheets-schema/data-sheets-schema/scripts/ad",
+      "node": "test_api_comparison_refuses_other_scratch_roots[outside]"
+    },
+    {
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time",
+      "file": "tests/test_native_u5_external_schema.py",
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "message": "assert b'named U4b/U5 scratch roots' in b'Traceback (most recent call last):\\n  File \"/home/runner/work/data-sheets-schema/data-sheets-schema/scripts/adhoc/native_u5_api_render_20261108.py\", line 103, in <module>\\n    main()\\n  File \"/home/runner/work/data-sheets-schema/data-sheets-schema/scripts/ad",
+      "node": "test_api_comparison_refuses_other_scratch_roots[relative]"
+    },
+    {
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time",
+      "file": "tests/test_native_u5_external_schema.py",
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "message": "assert b'named U4b/U5 scratch roots' in b'Traceback (most recent call last):\\n  File \"/home/runner/work/data-sheets-schema/data-sheets-schema/scripts/adhoc/native_u5_api_render_20261108.py\", line 103, in <module>\\n    main()\\n  File \"/home/runner/work/data-sheets-schema/data-sheets-schema/scripts/ad",
+      "node": "test_api_comparison_refuses_other_scratch_roots[alias]"
+    }
+  ],
+  "part2_diagnosis": {
+    "check_locations": [
+      {
+        "expected_path_for_prepare_registration": "notes/matched_cborg_2026-09-13/prepare_registration_v2.py",
+        "file": "src/data_sheets_schema/native_attribution_controller_v2.py",
+        "function": "controller_sources",
+        "line": 42,
+        "manifest_file": "src/data_sheets_schema/native_controller_sources_v2.json"
+      },
+      {
+        "expected_path_for_prepare_registration": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+        "file": "src/data_sheets_schema/native_attribution_controller.py",
+        "function": "controller_sources",
+        "line": 40,
+        "manifest_file": "src/data_sheets_schema/native_controller_sources_v1.json"
+      }
+    ],
+    "ci_failure_count": 37,
+    "ci_failures_by_file": [
+      {
+        "count": 1,
+        "file": "tests/test_native_execution_engine.py"
+      },
+      {
+        "count": 2,
+        "file": "tests/test_native_execution_round3_v2.py"
+      },
+      {
+        "count": 13,
+        "file": "tests/test_native_execution_round5_v2.py"
+      },
+      {
+        "count": 3,
+        "file": "tests/test_native_receipt_unopened.py"
+      },
+      {
+        "count": 1,
+        "file": "tests/test_native_shared_execution.py"
+      },
+      {
+        "count": 15,
+        "file": "tests/test_native_shared_execution_failure.py"
+      },
+      {
+        "count": 1,
+        "file": "tests/test_native_shared_execution_variant.py"
+      },
+      {
+        "count": 1,
+        "file": "tests/test_native_subscription_capture.py"
+      }
+    ],
+    "collection_time_polluter": {
+      "file": "tests/test_audit_recall_leak_rendered.py",
+      "lines": "100-112",
+      "loaded_module_name": "prepare_registration",
+      "loaded_module_origin": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+      "only_collection_time_polluter_in_tests_suite": true
+    },
+    "existing_isolation_fixture": {
+      "file": "tests/test_native_execution_registration_v2.py",
+      "fixture_name": "isolated_modules",
+      "lines": "26-43"
+    },
+    "step_by_step_experiments": [
+      {
+        "change_tested": "Baseline single test outside d4d-executions (default environment)",
+        "controller_sources_line_42_outcome": "PASSED (no prepare_registration origin error)",
+        "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step1-gitdir.log",
+        "overall_pytest_outcome": "FAILED at native_supervisor_authority_v2.py:25 (git rev-parse HEAD) because ci-sim archive has no .git",
+        "step": "1",
+        "tree": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305",
+        "triggered_target_value_error": false
+      },
+      {
+        "change_tested": "Add PYTHONPYCACHEPREFIX=<scratch>/pycache (matching CI job log)",
+        "controller_sources_line_42_outcome": "PASSED (no prepare_registration origin error)",
+        "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step2-pycache.log",
+        "overall_pytest_outcome": "FAILED at native_supervisor_authority_v2.py:25 (git rev-parse HEAD)",
+        "step": "2",
+        "tree": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305",
+        "triggered_target_value_error": false
+      },
+      {
+        "change_tested": "Add CI=true GITHUB_ACTIONS=true RUNNER_OS=Linux (matching CI job log)",
+        "controller_sources_line_42_outcome": "PASSED (no prepare_registration origin error)",
+        "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step3-cienv.log",
+        "overall_pytest_outcome": "FAILED at native_supervisor_authority_v2.py:25 (git rev-parse HEAD)",
+        "step": "3",
+        "tree": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305",
+        "triggered_target_value_error": false
+      },
+      {
+        "change_tested": "Collect tests/test_audit_recall_leak_rendered.py in the same pytest process (-k test_actual_pinned_helper_ignores_scratch_forged_cache, matching full-suite collection before --ci-shard=3/8 filtering)",
+        "controller_sources_line_42_outcome": "FAILED: ValueError: native controller dependency imported from another origin: prepare_registration",
+        "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step4-collect-leak.log",
+        "overall_pytest_outcome": "FAILED at native_attribution_controller_v2.py:42",
+        "step": "4",
+        "tree": "/Users/marcin/agent-work/data-sheets-schema/ci-sim-b11931410305",
+        "triggered_target_value_error": true
+      },
+      {
+        "change_tested": "Control in git worktree: single test with PYTHONPYCACHEPREFIX + CI=true GITHUB_ACTIONS=true RUNNER_OS=Linux",
+        "controller_sources_line_42_outcome": "PASSED",
+        "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step5-worktree-alone.log",
+        "overall_pytest_outcome": "PASSED (1 passed in 1.98s)",
+        "step": "5",
+        "tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112",
+        "triggered_target_value_error": false
+      },
+      {
+        "change_tested": "Collect tests/test_audit_recall_leak_rendered.py in the same pytest process in git worktree (-k test_actual_pinned_helper_ignores_scratch_forged_cache)",
+        "controller_sources_line_42_outcome": "FAILED: ValueError: native controller dependency imported from another origin: prepare_registration",
+        "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step6-worktree-collect-leak.log",
+        "overall_pytest_outcome": "FAILED at native_attribution_controller_v2.py:42",
+        "step": "6",
+        "tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112",
+        "triggered_target_value_error": true
+      },
+      {
+        "change_tested": "Run v1 test (tests/test_native_attribution_controller.py::test_composition_can_prepare_and_matches_every_selected_command) before the v2 test in the same pytest process",
+        "controller_sources_line_42_outcome": "FAILED: ValueError: native controller dependency imported from another origin: prepare_registration",
+        "log_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112/part2-step7-worktree-v1-then-v2.log",
+        "overall_pytest_outcome": "FAILED at native_attribution_controller_v2.py:42 (1 failed, 1 passed)",
+        "step": "7",
+        "tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112",
+        "triggered_target_value_error": true
+      }
+    ]
+  },
+  "scratch_dir": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-agy4-ci-portability-20261112",
+  "worker": "agy4",
+  "worktree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-ci-collection-20261112"
+}
