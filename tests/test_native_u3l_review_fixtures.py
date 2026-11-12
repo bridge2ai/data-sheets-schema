@@ -2,8 +2,8 @@
 
 Each case scans a fresh committed composition export. The frozen mutations and
 outcomes come from scratch-u3f-review; neither that runner nor generation code
-is imported. F3d has a separately versioned current expectation; its historical
-N1 gap remains in the frozen fixture. B2 retains its historical expectation.
+is imported. F3d and B2 have separately versioned current expectations; their
+historical N1 and #5657 gaps remain in the frozen fixture.
 """
 from collections import Counter
 import hashlib
@@ -84,6 +84,24 @@ F3D_CURRENT_VIOLATION = {
     'status': 'live',
     'violation': True,
 }
+B2_CURRENT_VIOLATION = {
+    'approaches': ['api', 'native_agentic', 'deterministic', 'github_assistant'],
+    'category': 'gc_project',
+    'code': False,
+    'context': 'string_literal',
+    'exception': None,
+    'gates_in': ['api', 'deterministic', 'github_assistant', 'native_agentic'],
+    'line': 5,
+    'match': 'CHORUS',
+    'model_facing': True,
+    'model_text_function': 'project_hint() (its value reaches _derive_uncached())',
+    'path': 'src/data_sheets_schema/project_hints.py',
+    'pattern': 'CHo?RUS',
+    'role': 'model_facing',
+    'snippet': HINT,
+    'status': 'live',
+    'violation': True,
+}
 CURRENT_EXPECTATIONS = {
     'F3d_module_helper_print': {
         'version': 2,
@@ -95,6 +113,17 @@ CURRENT_EXPECTATIONS = {
         'extra_violations': [F3D_CURRENT_VIOLATION, F3D_CURRENT_VIOLATION],
         'evidence_name': 'codex-h1-retained-gap-finding-20261112.json',
         'evidence_sha256': 'a74ce1bbbf8df2855ef0608d0d9446ad9fd432848e599df4594d8b7a3bde5f7a',
+    },
+    'B2_typed_container_alias_token': {
+        'version': 2,
+        'historical_known_gap': '#5657',
+        'historical_expected_exit': 1,
+        'historical_expected_violations': 9,
+        'expected_exit': 1,
+        'expected_violations': 10,
+        'extra_violations': [B2_CURRENT_VIOLATION],
+        'evidence_name': 'codex-h1-retained-container-finding-20261112.json',
+        'evidence_sha256': '3661f9ec60752c9a7aafe12d0683f8683c4be622b3eb075760a2125db950b28b',
     },
 }
 
