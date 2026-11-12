@@ -9258,6 +9258,987 @@
         "tests/test_wave7_bc1_formatter_cache.py": 0.582,
         "tests/test_wcrate_copies.py": 0.495
       }
+    },
+    "native_ci_h3_20261112": {
+      "run_id": 42976790438,
+      "commit": "1a137b58860416a31618de44173180d021dfcc61",
+      "artifacts": [
+        {
+          "path": "/Users/marcin/agent-work/data-sheets-schema/ci-run-42976790438/tests-py3.12-shard1/pytest.xml",
+          "sha256": "487afc45a0285cf12524426263050c779df8fe3c7e7d36454a43f0e617fe0d00"
+        },
+        {
+          "path": "/Users/marcin/agent-work/data-sheets-schema/ci-run-42976790438/tests-py3.12-shard2/pytest.xml",
+          "sha256": "d0a9173df93b192d6bfc5362333d42a944508fcfe3db9782a5f5472b3e78a0d1"
+        },
+        {
+          "path": "/Users/marcin/agent-work/data-sheets-schema/ci-run-42976790438/tests-py3.12-shard3/pytest.xml",
+          "sha256": "75aba5c427f8cab907a6df1b8838ae8b99406b98a6b65a608682578acc1441d9"
+        },
+        {
+          "path": "/Users/marcin/agent-work/data-sheets-schema/ci-run-42976790438/tests-py3.12-shard4/pytest.xml",
+          "sha256": "baccd85f007c9a926390a09e876aafd758ca57fd9adea119e8aca60e34766b59"
+        },
+        {
+          "path": "/Users/marcin/agent-work/data-sheets-schema/ci-run-42976790438/logs/shard5.log",
+          "sha256": "3d849f1367cce692480cf67fb56a001c51786257a16004f6f385e3b461244d31"
+        },
+        {
+          "path": "/Users/marcin/agent-work/data-sheets-schema/ci-run-42976790438/tests-py3.12-shard6/pytest.xml",
+          "sha256": "e3822aadf3345e36162bcc12281c4ce0ae8ed28afc13458a5e250618bbda0106"
+        },
+        {
+          "path": "/Users/marcin/agent-work/data-sheets-schema/ci-run-42976790438/tests-py3.12-shard7/pytest.xml",
+          "sha256": "3a9a6b372fd959e195a3d7e6936f775497b96b1501f20a37d0b4defb25a6a592"
+        },
+        {
+          "path": "/Users/marcin/agent-work/data-sheets-schema/ci-run-42976790438/logs/shard8.log",
+          "sha256": "7579bf6f9e907362f1c8549fe5e3a7c28dfc92ae727bc576d6bb778be63a44c6"
+        }
+      ],
+      "files": {
+        "tests/test_native_attempt_supervisor.py": {
+          "seconds": 1120.107,
+          "completed_cases": 87,
+          "expected_cases_in_original_run": 87,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_attribution_controller.py": {
+          "seconds": 128.234,
+          "completed_cases": 43,
+          "expected_cases_in_original_run": 43,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_attribution_results.py": {
+          "seconds": 260.669,
+          "completed_cases": 87,
+          "expected_cases_in_original_run": 87,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_authority_replay_v1.py": {
+          "seconds": 0.027,
+          "completed_cases": 1,
+          "expected_cases_in_original_run": 1,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_authority_v2.py": {
+          "seconds": 13.6,
+          "completed_cases": 12,
+          "expected_cases_in_original_run": 12,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_ci_evidence.py": {
+          "seconds": 0.125,
+          "completed_cases": 19,
+          "expected_cases_in_original_run": 19,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_ci_evidence_adversarial.py": {
+          "seconds": 0.56,
+          "completed_cases": 6,
+          "expected_cases_in_original_run": 6,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_execution.py": {
+          "seconds": 1153.036,
+          "completed_cases": 73,
+          "expected_cases_in_original_run": 73,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_execution_authority_v2.py": {
+          "seconds": 4.426,
+          "completed_cases": 29,
+          "expected_cases_in_original_run": 29,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_execution_bridge_v2.py": {
+          "seconds": 72.262,
+          "completed_cases": 42,
+          "expected_cases_in_original_run": 42,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_execution_ci_v2.py": {
+          "seconds": 10.105,
+          "completed_cases": 74,
+          "expected_cases_in_original_run": 74,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_execution_engine.py": {
+          "seconds": 0.041,
+          "completed_cases": 15,
+          "expected_cases_in_original_run": 15,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_execution_gates.py": {
+          "seconds": 15.787,
+          "completed_cases": 72,
+          "expected_cases_in_original_run": 72,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_execution_observation.py": {
+          "seconds": 0.099,
+          "completed_cases": 18,
+          "expected_cases_in_original_run": 18,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_execution_permissions.py": {
+          "seconds": 11.36,
+          "completed_cases": 151,
+          "expected_cases_in_original_run": 151,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_execution_registration_v2.py": {
+          "seconds": 102.234,
+          "completed_cases": 65,
+          "expected_cases_in_original_run": 65,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_execution_round3_v2.py": {
+          "seconds": 9.131,
+          "completed_cases": 21,
+          "expected_cases_in_original_run": 21,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_execution_round5_v2.py": {
+          "seconds": 8.932,
+          "completed_cases": 30,
+          "expected_cases_in_original_run": 30,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_execution_verified_loader_v2.py": {
+          "seconds": 5.077,
+          "completed_cases": 35,
+          "expected_cases_in_original_run": 35,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_full_schema_profile_boundaries.py": {
+          "seconds": 5.389,
+          "completed_cases": 132,
+          "expected_cases_in_original_run": 132,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_full_schema_profile_evidence.py": {
+          "seconds": 5.127,
+          "completed_cases": 106,
+          "expected_cases_in_original_run": 106,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_full_schema_profile_operations.py": {
+          "seconds": 4.237,
+          "completed_cases": 87,
+          "expected_cases_in_original_run": 87,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_full_schema_profile_runtime.py": {
+          "seconds": 3.025,
+          "completed_cases": 46,
+          "expected_cases_in_original_run": 46,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_generation_frontdoor.py": {
+          "seconds": 227.028,
+          "completed_cases": 40,
+          "expected_cases_in_original_run": 41,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_import_facts.py": {
+          "seconds": 0.303,
+          "completed_cases": 27,
+          "expected_cases_in_original_run": 27,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_incomplete_evidence.py": {
+          "seconds": 0.712,
+          "completed_cases": 50,
+          "expected_cases_in_original_run": 50,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_initial_structure_mode.py": {
+          "seconds": 0.662,
+          "completed_cases": 29,
+          "expected_cases_in_original_run": 29,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_launch_review.py": {
+          "seconds": 1.512,
+          "completed_cases": 47,
+          "expected_cases_in_original_run": 47,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_launch_schema_metadata.py": {
+          "seconds": 111.115,
+          "completed_cases": 38,
+          "expected_cases_in_original_run": 38,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_lexical_ancestry.py": {
+          "seconds": 0.24,
+          "completed_cases": 36,
+          "expected_cases_in_original_run": 36,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_permission_probe.py": {
+          "seconds": 210.622,
+          "completed_cases": 65,
+          "expected_cases_in_original_run": 65,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_permission_projection_derivation.py": {
+          "seconds": 316.246,
+          "completed_cases": 9,
+          "expected_cases_in_original_run": 9,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_phase_scope_rendering.py": {
+          "seconds": 0.125,
+          "completed_cases": 4,
+          "expected_cases_in_original_run": 4,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_preparer_v2_boundaries.py": {
+          "seconds": 9.291,
+          "completed_cases": 12,
+          "expected_cases_in_original_run": 12,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_preparer_v2_equivalence.py": {
+          "seconds": 21.073,
+          "completed_cases": 1,
+          "expected_cases_in_original_run": 1,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_receipt_origin_reporting.py": {
+          "seconds": 467.966,
+          "completed_cases": 76,
+          "expected_cases_in_original_run": 76,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_receipt_origin_stage_join.py": {
+          "seconds": 26.532,
+          "completed_cases": 1,
+          "expected_cases_in_original_run": 1,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_receipt_unopened.py": {
+          "seconds": 0.034,
+          "completed_cases": 7,
+          "expected_cases_in_original_run": 7,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_registered_provenance.py": {
+          "seconds": 5.901,
+          "completed_cases": 7,
+          "expected_cases_in_original_run": 7,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_schema_metadata_reuse.py": {
+          "seconds": 36.536,
+          "completed_cases": 38,
+          "expected_cases_in_original_run": 38,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_shared_attribution.py": {
+          "seconds": 3828.03,
+          "completed_cases": 48,
+          "expected_cases_in_original_run": 48,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_shared_callback_preloading.py": {
+          "seconds": 175.346,
+          "completed_cases": 18,
+          "expected_cases_in_original_run": 18,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_shared_capture_integration.py": {
+          "seconds": 33.071,
+          "completed_cases": 6,
+          "expected_cases_in_original_run": 6,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_shared_capture_split.py": {
+          "seconds": 0.002,
+          "completed_cases": 2,
+          "expected_cases_in_original_run": 2,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_shared_consumer_census.py": {
+          "seconds": 11.471,
+          "completed_cases": 16,
+          "expected_cases_in_original_run": 16,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_shared_contract.py": {
+          "seconds": 0.225,
+          "completed_cases": 39,
+          "expected_cases_in_original_run": 39,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_shared_controller.py": {
+          "seconds": 669.859,
+          "completed_cases": 47,
+          "expected_cases_in_original_run": 47,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_shared_current.py": {
+          "seconds": 0.08,
+          "completed_cases": 8,
+          "expected_cases_in_original_run": 8,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_shared_effects.py": {
+          "seconds": 0.63,
+          "completed_cases": 119,
+          "expected_cases_in_original_run": 119,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_shared_evidence.py": {
+          "seconds": 0.037,
+          "completed_cases": 22,
+          "expected_cases_in_original_run": 22,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_shared_execution.py": {
+          "seconds": 10.44,
+          "completed_cases": 2,
+          "expected_cases_in_original_run": 2,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_shared_execution_failure.py": {
+          "seconds": 54.005,
+          "completed_cases": 17,
+          "expected_cases_in_original_run": 17,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_shared_execution_variant.py": {
+          "seconds": 16.738,
+          "completed_cases": 1,
+          "expected_cases_in_original_run": 1,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_shared_gate_primitives.py": {
+          "seconds": 0.076,
+          "completed_cases": 52,
+          "expected_cases_in_original_run": 52,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_shared_initial_receipts.py": {
+          "seconds": 0.574,
+          "completed_cases": 10,
+          "expected_cases_in_original_run": 10,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_shared_layer_split.py": {
+          "seconds": 0.107,
+          "completed_cases": 10,
+          "expected_cases_in_original_run": 10,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_shared_live_capture.py": {
+          "seconds": 639.377,
+          "completed_cases": 5,
+          "expected_cases_in_original_run": 5,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_shared_observations.py": {
+          "seconds": 0.082,
+          "completed_cases": 49,
+          "expected_cases_in_original_run": 49,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_shared_owner_delivery.py": {
+          "seconds": 27.013,
+          "completed_cases": 2,
+          "expected_cases_in_original_run": 2,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_shared_permission_protocol.py": {
+          "seconds": 2.332,
+          "completed_cases": 26,
+          "expected_cases_in_original_run": 26,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_shared_permission_split.py": {
+          "seconds": 0.071,
+          "completed_cases": 30,
+          "expected_cases_in_original_run": 30,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_shared_phase.py": {
+          "seconds": 0.591,
+          "completed_cases": 98,
+          "expected_cases_in_original_run": 98,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_shared_projection_handoff.py": {
+          "seconds": 12.25,
+          "completed_cases": 4,
+          "expected_cases_in_original_run": 4,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_shared_provenance.py": {
+          "seconds": 741.746,
+          "completed_cases": 3,
+          "expected_cases_in_original_run": 3,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_shared_publication.py": {
+          "seconds": 0.676,
+          "completed_cases": 7,
+          "expected_cases_in_original_run": 7,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_shared_receipt_delivery.py": {
+          "seconds": 0.582,
+          "completed_cases": 11,
+          "expected_cases_in_original_run": 11,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_shared_receipt_readers.py": {
+          "seconds": 91.561,
+          "completed_cases": 3,
+          "expected_cases_in_original_run": 3,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_shared_record_contract.py": {
+          "seconds": 0.016,
+          "completed_cases": 5,
+          "expected_cases_in_original_run": 5,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_shared_render.py": {
+          "seconds": 3.039,
+          "completed_cases": 39,
+          "expected_cases_in_original_run": 39,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_shared_results.py": {
+          "seconds": 602.254,
+          "completed_cases": 11,
+          "expected_cases_in_original_run": 12,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_shared_runtime_constants.py": {
+          "seconds": 0.014,
+          "completed_cases": 8,
+          "expected_cases_in_original_run": 8,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_shared_runtime_values.py": {
+          "seconds": 0.256,
+          "completed_cases": 73,
+          "expected_cases_in_original_run": 73,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_shared_saved_advance.py": {
+          "seconds": 10.001,
+          "completed_cases": 28,
+          "expected_cases_in_original_run": 28,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_shared_saved_pool_bound.py": {
+          "seconds": 367.41,
+          "completed_cases": 1,
+          "expected_cases_in_original_run": 1,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_shared_schema_derivation_once.py": {
+          "seconds": 0.348,
+          "completed_cases": 6,
+          "expected_cases_in_original_run": 6,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_shared_selection.py": {
+          "seconds": 1.033,
+          "completed_cases": 26,
+          "expected_cases_in_original_run": 26,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_shared_stages.py": {
+          "seconds": 84.406,
+          "completed_cases": 18,
+          "expected_cases_in_original_run": 18,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_shared_stream_diagnostics.py": {
+          "seconds": 0.049,
+          "completed_cases": 26,
+          "expected_cases_in_original_run": 26,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_shared_stream_diagnostics_adversarial.py": {
+          "seconds": 0.026,
+          "completed_cases": 15,
+          "expected_cases_in_original_run": 15,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_shared_streams.py": {
+          "seconds": 0.225,
+          "completed_cases": 32,
+          "expected_cases_in_original_run": 32,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_source_attribution.py": {
+          "seconds": 12.489,
+          "completed_cases": 118,
+          "expected_cases_in_original_run": 118,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_source_roster.py": {
+          "seconds": 19.753,
+          "completed_cases": 38,
+          "expected_cases_in_original_run": 38,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_subscription_capture.py": {
+          "seconds": 9.739,
+          "completed_cases": 32,
+          "expected_cases_in_original_run": 32,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_subscription_guard.py": {
+          "seconds": 0.037,
+          "completed_cases": 35,
+          "expected_cases_in_original_run": 35,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_synthetic_evidence.py": {
+          "seconds": 0.46,
+          "completed_cases": 1,
+          "expected_cases_in_original_run": 1,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_synthetic_profiles.py": {
+          "seconds": 0.353,
+          "completed_cases": 46,
+          "expected_cases_in_original_run": 46,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_synthetic_startup.py": {
+          "seconds": 0.032,
+          "completed_cases": 1,
+          "expected_cases_in_original_run": 1,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_temperature.py": {
+          "seconds": 0.763,
+          "completed_cases": 7,
+          "expected_cases_in_original_run": 7,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_trace_comparison.py": {
+          "seconds": 0.212,
+          "completed_cases": 47,
+          "expected_cases_in_original_run": 47,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_trace_comparison_adversarial.py": {
+          "seconds": 3.828,
+          "completed_cases": 79,
+          "expected_cases_in_original_run": 79,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_trace_prefix_profile.py": {
+          "seconds": 0.053,
+          "completed_cases": 24,
+          "expected_cases_in_original_run": 24,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_trace_profile_runtime.py": {
+          "seconds": 0.614,
+          "completed_cases": 34,
+          "expected_cases_in_original_run": 34,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_u1_api_parity.py": {
+          "seconds": 71.297,
+          "completed_cases": 14,
+          "expected_cases_in_original_run": 14,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_u1_scanner_contracts.py": {
+          "seconds": 86.855,
+          "completed_cases": 77,
+          "expected_cases_in_original_run": 77,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_u1_selector_refusals.py": {
+          "seconds": 1.306,
+          "completed_cases": 32,
+          "expected_cases_in_original_run": 32,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_u3a_test_driver.py": {
+          "seconds": 0.169,
+          "completed_cases": 11,
+          "expected_cases_in_original_run": 11,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_u3c_round4_helpers.py": {
+          "seconds": 13.599,
+          "completed_cases": 3,
+          "expected_cases_in_original_run": 3,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_u3d_guard_contract.py": {
+          "seconds": 4.727,
+          "completed_cases": 16,
+          "expected_cases_in_original_run": 16,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_u3d_prompt_cli.py": {
+          "seconds": 2.654,
+          "completed_cases": 3,
+          "expected_cases_in_original_run": 3,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_u3d_receipt_policy.py": {
+          "seconds": 0.411,
+          "completed_cases": 17,
+          "expected_cases_in_original_run": 17,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_u3d_round9_arguments.py": {
+          "seconds": 0.02,
+          "completed_cases": 5,
+          "expected_cases_in_original_run": 5,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_u3d_round9_boundaries.py": {
+          "seconds": 26.628,
+          "completed_cases": 9,
+          "expected_cases_in_original_run": 9,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_u3d_round9_capabilities.py": {
+          "seconds": 4.988,
+          "completed_cases": 14,
+          "expected_cases_in_original_run": 14,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_u3d_round9_preparation.py": {
+          "seconds": 45.802,
+          "completed_cases": 1,
+          "expected_cases_in_original_run": 1,
+          "source": "worker_completion_intervals",
+          "shard": 8
+        },
+        "tests/test_native_u3d_runner_evidence.py": {
+          "seconds": 0.01,
+          "completed_cases": 1,
+          "expected_cases_in_original_run": 1,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_u3f2_construction.py": {
+          "seconds": 194.932,
+          "completed_cases": 4,
+          "expected_cases_in_original_run": 4,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_u3j2_metrics_canary.py": {
+          "seconds": 0.001,
+          "completed_cases": 1,
+          "expected_cases_in_original_run": 1,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_u3k_freshness_order.py": {
+          "seconds": 6.619,
+          "completed_cases": 18,
+          "expected_cases_in_original_run": 18,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_u3k_profile.py": {
+          "seconds": 0.008,
+          "completed_cases": 4,
+          "expected_cases_in_original_run": 4,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_u3l_review_fixtures.py": {
+          "seconds": 1846.102,
+          "completed_cases": 13,
+          "expected_cases_in_original_run": 13,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_u3l_scanner.py": {
+          "seconds": 82.582,
+          "completed_cases": 50,
+          "expected_cases_in_original_run": 50,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_u4b_a3_frontdoor.py": {
+          "seconds": 0.144,
+          "completed_cases": 5,
+          "expected_cases_in_original_run": 5,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_u4b_a3_policy.py": {
+          "seconds": 3.157,
+          "completed_cases": 50,
+          "expected_cases_in_original_run": 50,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_u4b_a3_reservation.py": {
+          "seconds": 12.028,
+          "completed_cases": 18,
+          "expected_cases_in_original_run": 18,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_u4b_a4_cross_word.py": {
+          "seconds": 0.633,
+          "completed_cases": 2,
+          "expected_cases_in_original_run": 2,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_u4b_a4_packet.py": {
+          "seconds": 0.006,
+          "completed_cases": 4,
+          "expected_cases_in_original_run": 4,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_u4b_a4_paths.py": {
+          "seconds": 0.052,
+          "completed_cases": 14,
+          "expected_cases_in_original_run": 14,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_u4b_a4_producer.py": {
+          "seconds": 0.128,
+          "completed_cases": 18,
+          "expected_cases_in_original_run": 18,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_u4b_a4_review.py": {
+          "seconds": 2.03,
+          "completed_cases": 63,
+          "expected_cases_in_original_run": 63,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_u4b_a5_producer_integration.py": {
+          "seconds": 183.542,
+          "completed_cases": 18,
+          "expected_cases_in_original_run": 18,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_u4b_a5_reasons.py": {
+          "seconds": 0.807,
+          "completed_cases": 19,
+          "expected_cases_in_original_run": 19,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_u4b_a5_scanner.py": {
+          "seconds": 30.82,
+          "completed_cases": 23,
+          "expected_cases_in_original_run": 23,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_u4b_addendum_authority.py": {
+          "seconds": 1.543,
+          "completed_cases": 15,
+          "expected_cases_in_original_run": 15,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_u4b_admission.py": {
+          "seconds": 3.732,
+          "completed_cases": 11,
+          "expected_cases_in_original_run": 11,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_u4b_audit_counts.py": {
+          "seconds": 363.27,
+          "completed_cases": 25,
+          "expected_cases_in_original_run": 25,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_u4b_probe_sequence.py": {
+          "seconds": 182.672,
+          "completed_cases": 57,
+          "expected_cases_in_original_run": 57,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_u4b_readback.py": {
+          "seconds": 5.379,
+          "completed_cases": 15,
+          "expected_cases_in_original_run": 15,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        },
+        "tests/test_native_u4b_registration_observation.py": {
+          "seconds": 1.121,
+          "completed_cases": 32,
+          "expected_cases_in_original_run": 32,
+          "source": "junit",
+          "shard": 7
+        },
+        "tests/test_native_u4b_runtime.py": {
+          "seconds": 1.261,
+          "completed_cases": 70,
+          "expected_cases_in_original_run": 70,
+          "source": "junit",
+          "shard": 6
+        },
+        "tests/test_native_u4b_toolchain.py": {
+          "seconds": 0.381,
+          "completed_cases": 9,
+          "expected_cases_in_original_run": 9,
+          "source": "junit",
+          "shard": 2
+        },
+        "tests/test_native_u4b_windows_v2.py": {
+          "seconds": 4.058,
+          "completed_cases": 67,
+          "expected_cases_in_original_run": 67,
+          "source": "junit",
+          "shard": 1
+        },
+        "tests/test_native_u5_external_schema.py": {
+          "seconds": 0.176,
+          "completed_cases": 6,
+          "expected_cases_in_original_run": 6,
+          "source": "junit",
+          "shard": 3
+        },
+        "tests/test_native_u5_scanner_comparison.py": {
+          "seconds": 0.067,
+          "completed_cases": 19,
+          "expected_cases_in_original_run": 19,
+          "source": "junit",
+          "shard": 4
+        },
+        "tests/test_native_wp1_capture_recheck.py": {
+          "seconds": 0.434,
+          "completed_cases": 33,
+          "expected_cases_in_original_run": 33,
+          "source": "worker_completion_intervals",
+          "shard": 5
+        }
+      },
+      "method": "Failed run; JUnit failure times are not successful full-path times. Shards 5 and 8 use completion intervals including idle/scheduling gaps, not JUnit durations. Unfinished cases absent. Predictions are summed weights and ideal four-worker averages, never wall-time guarantees.",
+      "updater_refusal": "use a successful run for timing estimates",
+      "producer": "scripts/adhoc/h3_ci_weights_20261112.py"
     }
   },
   "method": "Sum JUnit case times by collected file, with a 0.001-second floor. These are scheduling estimates, not wall-clock predictions or a test allowlist. Untimed collected files use the median known duration; obsolete entries are ignored. Missing-shard observations use elapsed time between consecutive results on each CI worker (first result measured from pytest session start; includes setup, prior teardown and scheduling delay). Unfinished cases use completed local JUnit times listed in source.supplement. Unmeasured prior entries retain their exact values. BC1/G2 additions (2026-11-03) only fill previously unweighted files: sum one complete source per current collected file, preferring run 41707437114, then run 41700664435 for G1 files, then round-2 local with-mode JUnit (macOS Python 3.13, two workers). Exact case-occurrence multisets and pinned XML SHA256 values are checked; 0.001-second floor, no local-time scaling. Completed failures/skips remain timing observations, not evidence of CI success. Original provenance and every existing weight are retained. Follow-up: measured-ratio scaling (2026-11-03) supersedes only the six initial local-source weights with local sum x 2.729, the larger of two observed complete-file Linux-CI/local ratios rounded to three decimals, as authorized by the lead. These six weights are derived, not measured; source.bc1_g2_measured_ratio_scaling_20261103 records each local sum, multiplier and both paired measurements with XML hashes. All other weights and the prior measured provenance remain unchanged. All-file BC1/G2 refresh (2026-11-04): use run 41735860489, then 41707437114, then retain current weight, requiring an exact current case-occurrence multiset within one shard XML per file. Preserve all earlier provenance. Completed failures/skips are timing observations. Inputs are SHA256-pinned in the new source block. Complete 8-shard ordinary CI refresh (2026-11-11): build active file_seconds from run 42916359440 at commit 6792947ea6558d10c85106065b023cb57838835a via utils.update_ci_shard_timings.build against the run checkout root, preserving prior weights and historical provenance under source.ci_refresh_42916359440_20261111.",
@@ -9632,32 +10613,140 @@
     "tests/test_model_disclosure.py": 1.05,
     "tests/test_name_grounding.py": 274.77,
     "tests/test_name_grounding_schema_scope.py": 2.824,
-    "tests/test_native_attempt_supervisor.py": 750.861,
-    "tests/test_native_attribution_controller.py": 90.018,
-    "tests/test_native_attribution_results.py": 250.525,
-    "tests/test_native_authority_replay_v1.py": 0.048,
-    "tests/test_native_authority_v2.py": 11.0,
-    "tests/test_native_execution.py": 1402.26,
-    "tests/test_native_execution_gates.py": 19.942,
-    "tests/test_native_execution_observation.py": 0.044,
-    "tests/test_native_execution_permissions.py": 16.45,
-    "tests/test_native_full_schema_profile_boundaries.py": 5.218,
-    "tests/test_native_full_schema_profile_evidence.py": 5.263,
-    "tests/test_native_full_schema_profile_operations.py": 4.024,
-    "tests/test_native_full_schema_profile_runtime.py": 2.665,
-    "tests/test_native_incomplete_evidence.py": 0.481,
-    "tests/test_native_phase_scope_rendering.py": 0.137,
-    "tests/test_native_preparer_v2_boundaries.py": 12.675,
-    "tests/test_native_preparer_v2_equivalence.py": 19.157,
-    "tests/test_native_receipt_origin_reporting.py": 780.934,
-    "tests/test_native_registered_provenance.py": 6.272,
-    "tests/test_native_source_attribution.py": 10.73,
-    "tests/test_native_source_roster.py": 12.908,
-    "tests/test_native_temperature.py": 0.666,
-    "tests/test_native_trace_comparison.py": 0.238,
-    "tests/test_native_trace_comparison_adversarial.py": 3.853,
-    "tests/test_native_trace_prefix_profile.py": 0.227,
-    "tests/test_native_trace_profile_runtime.py": 0.591,
+    "tests/test_native_attempt_supervisor.py": 1120.107,
+    "tests/test_native_attribution_controller.py": 128.234,
+    "tests/test_native_attribution_results.py": 260.669,
+    "tests/test_native_authority_replay_v1.py": 0.027,
+    "tests/test_native_authority_v2.py": 13.6,
+    "tests/test_native_ci_evidence.py": 0.125,
+    "tests/test_native_ci_evidence_adversarial.py": 0.56,
+    "tests/test_native_execution.py": 1153.036,
+    "tests/test_native_execution_authority_v2.py": 4.426,
+    "tests/test_native_execution_bridge_v2.py": 72.262,
+    "tests/test_native_execution_ci_v2.py": 10.105,
+    "tests/test_native_execution_engine.py": 0.041,
+    "tests/test_native_execution_gates.py": 15.787,
+    "tests/test_native_execution_observation.py": 0.099,
+    "tests/test_native_execution_permissions.py": 11.36,
+    "tests/test_native_execution_registration_v2.py": 102.234,
+    "tests/test_native_execution_round3_v2.py": 9.131,
+    "tests/test_native_execution_round5_v2.py": 8.932,
+    "tests/test_native_execution_verified_loader_v2.py": 5.077,
+    "tests/test_native_full_schema_profile_boundaries.py": 5.389,
+    "tests/test_native_full_schema_profile_evidence.py": 5.127,
+    "tests/test_native_full_schema_profile_operations.py": 4.237,
+    "tests/test_native_full_schema_profile_runtime.py": 3.025,
+    "tests/test_native_generation_frontdoor.py": 227.028,
+    "tests/test_native_import_facts.py": 0.303,
+    "tests/test_native_incomplete_evidence.py": 0.712,
+    "tests/test_native_initial_structure_mode.py": 0.662,
+    "tests/test_native_launch_review.py": 1.512,
+    "tests/test_native_launch_schema_metadata.py": 111.115,
+    "tests/test_native_lexical_ancestry.py": 0.24,
+    "tests/test_native_permission_probe.py": 210.622,
+    "tests/test_native_permission_projection_derivation.py": 316.246,
+    "tests/test_native_phase_scope_rendering.py": 0.125,
+    "tests/test_native_preparer_v2_boundaries.py": 9.291,
+    "tests/test_native_preparer_v2_equivalence.py": 21.073,
+    "tests/test_native_receipt_origin_reporting.py": 467.966,
+    "tests/test_native_receipt_origin_stage_join.py": 26.532,
+    "tests/test_native_receipt_unopened.py": 0.034,
+    "tests/test_native_registered_provenance.py": 5.901,
+    "tests/test_native_schema_metadata_reuse.py": 36.536,
+    "tests/test_native_shared_attribution.py": 3828.03,
+    "tests/test_native_shared_callback_preloading.py": 175.346,
+    "tests/test_native_shared_capture_integration.py": 33.071,
+    "tests/test_native_shared_capture_split.py": 0.002,
+    "tests/test_native_shared_consumer_census.py": 11.471,
+    "tests/test_native_shared_contract.py": 0.225,
+    "tests/test_native_shared_controller.py": 669.859,
+    "tests/test_native_shared_current.py": 0.08,
+    "tests/test_native_shared_effects.py": 0.63,
+    "tests/test_native_shared_evidence.py": 0.037,
+    "tests/test_native_shared_execution.py": 10.44,
+    "tests/test_native_shared_execution_failure.py": 54.005,
+    "tests/test_native_shared_execution_variant.py": 16.738,
+    "tests/test_native_shared_gate_primitives.py": 0.076,
+    "tests/test_native_shared_initial_receipts.py": 0.574,
+    "tests/test_native_shared_layer_split.py": 0.107,
+    "tests/test_native_shared_live_capture.py": 639.377,
+    "tests/test_native_shared_observations.py": 0.082,
+    "tests/test_native_shared_owner_delivery.py": 27.013,
+    "tests/test_native_shared_permission_protocol.py": 2.332,
+    "tests/test_native_shared_permission_split.py": 0.071,
+    "tests/test_native_shared_phase.py": 0.591,
+    "tests/test_native_shared_projection_handoff.py": 12.25,
+    "tests/test_native_shared_provenance.py": 741.746,
+    "tests/test_native_shared_publication.py": 0.676,
+    "tests/test_native_shared_receipt_delivery.py": 0.582,
+    "tests/test_native_shared_receipt_readers.py": 91.561,
+    "tests/test_native_shared_record_contract.py": 0.016,
+    "tests/test_native_shared_render.py": 3.039,
+    "tests/test_native_shared_results.py": 602.254,
+    "tests/test_native_shared_runtime_constants.py": 0.014,
+    "tests/test_native_shared_runtime_values.py": 0.256,
+    "tests/test_native_shared_saved_advance.py": 10.001,
+    "tests/test_native_shared_saved_pool_bound.py": 367.41,
+    "tests/test_native_shared_schema_derivation_once.py": 0.348,
+    "tests/test_native_shared_selection.py": 1.033,
+    "tests/test_native_shared_stages.py": 84.406,
+    "tests/test_native_shared_stream_diagnostics.py": 0.049,
+    "tests/test_native_shared_stream_diagnostics_adversarial.py": 0.026,
+    "tests/test_native_shared_streams.py": 0.225,
+    "tests/test_native_source_attribution.py": 12.489,
+    "tests/test_native_source_roster.py": 19.753,
+    "tests/test_native_subscription_capture.py": 9.739,
+    "tests/test_native_subscription_guard.py": 0.037,
+    "tests/test_native_synthetic_evidence.py": 0.46,
+    "tests/test_native_synthetic_profiles.py": 0.353,
+    "tests/test_native_synthetic_startup.py": 0.032,
+    "tests/test_native_temperature.py": 0.763,
+    "tests/test_native_trace_comparison.py": 0.212,
+    "tests/test_native_trace_comparison_adversarial.py": 3.828,
+    "tests/test_native_trace_prefix_profile.py": 0.053,
+    "tests/test_native_trace_profile_runtime.py": 0.614,
+    "tests/test_native_u1_api_parity.py": 71.297,
+    "tests/test_native_u1_scanner_contracts.py": 86.855,
+    "tests/test_native_u1_selector_refusals.py": 1.306,
+    "tests/test_native_u3a_test_driver.py": 0.169,
+    "tests/test_native_u3c_round4_helpers.py": 13.599,
+    "tests/test_native_u3d_guard_contract.py": 4.727,
+    "tests/test_native_u3d_prompt_cli.py": 2.654,
+    "tests/test_native_u3d_receipt_policy.py": 0.411,
+    "tests/test_native_u3d_round9_arguments.py": 0.02,
+    "tests/test_native_u3d_round9_boundaries.py": 26.628,
+    "tests/test_native_u3d_round9_capabilities.py": 4.988,
+    "tests/test_native_u3d_round9_preparation.py": 45.802,
+    "tests/test_native_u3d_runner_evidence.py": 0.01,
+    "tests/test_native_u3f2_construction.py": 194.932,
+    "tests/test_native_u3j2_metrics_canary.py": 0.001,
+    "tests/test_native_u3k_freshness_order.py": 6.619,
+    "tests/test_native_u3k_profile.py": 0.008,
+    "tests/test_native_u3l_review_fixtures.py": 1846.102,
+    "tests/test_native_u3l_scanner.py": 82.582,
+    "tests/test_native_u4b_a3_frontdoor.py": 0.144,
+    "tests/test_native_u4b_a3_policy.py": 3.157,
+    "tests/test_native_u4b_a3_reservation.py": 12.028,
+    "tests/test_native_u4b_a4_cross_word.py": 0.633,
+    "tests/test_native_u4b_a4_packet.py": 0.006,
+    "tests/test_native_u4b_a4_paths.py": 0.052,
+    "tests/test_native_u4b_a4_producer.py": 0.128,
+    "tests/test_native_u4b_a4_review.py": 2.03,
+    "tests/test_native_u4b_a5_producer_integration.py": 183.542,
+    "tests/test_native_u4b_a5_reasons.py": 0.807,
+    "tests/test_native_u4b_a5_scanner.py": 30.82,
+    "tests/test_native_u4b_addendum_authority.py": 1.543,
+    "tests/test_native_u4b_admission.py": 3.732,
+    "tests/test_native_u4b_audit_counts.py": 363.27,
+    "tests/test_native_u4b_probe_sequence.py": 182.672,
+    "tests/test_native_u4b_readback.py": 5.379,
+    "tests/test_native_u4b_registration_observation.py": 1.121,
+    "tests/test_native_u4b_runtime.py": 1.261,
+    "tests/test_native_u4b_toolchain.py": 0.381,
+    "tests/test_native_u4b_windows_v2.py": 4.058,
+    "tests/test_native_u5_external_schema.py": 0.176,
+    "tests/test_native_u5_scanner_comparison.py": 0.067,
+    "tests/test_native_wp1_capture_recheck.py": 0.434,
     "tests/test_nested_ancestor_receipts.py": 4.889,
     "tests/test_nested_ranges.py": 8.368,
     "tests/test_nested_string_lists.py": 0.361,

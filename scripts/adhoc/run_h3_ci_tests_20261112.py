@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Offline G07 packet and capture test runner, 2026-11-12.
+"""Offline H3 import-origin and timing test runner, 2026-11-12.
 
-Purpose: validate the assigned branch or its exact private packet composition.
-Inputs: this assigned worktree, a physical dependency venv, explicit tests/ nodes.
-Outputs: new sibling scratch-native-main-integration-20261112/tests cohorts, with isolated venv, logs, JUnit, origin/network and cleanup evidence.
-Adapted from run_native_u3a_tests_20261107.py; no provider or real native binary.
+Purpose: validate the CI-portability branch and the lead's exported CI tree.
+Inputs: assigned worktree or CI archive, physical dependency venv, tests/ nodes.
+Outputs: sibling scratch-h3-ci-20261112/tests cohorts with isolated venv,
+logs, JUnit, origin/network and cleanup evidence, for the helper3 assignment.
+Adapted from run_native_g07_tests_20261112.py; no provider or real native binary.
 Invoke with the dependency venv Python -S -P -B. The caller runs cohorts serially.
 """
 from __future__ import annotations

@@ -202,7 +202,16 @@ def test_round7_refresh_preserves_history_and_excludes_dedicated_sg2():
         and item['errors'] == 0
         for item in current_refresh['artifacts']
     )
-    assert current_refresh['file_seconds'] == data['file_seconds']
+    native_refresh = data['source']['native_ci_h3_20261112']
+    assert native_refresh['run_id'] == 42976790438
+    assert native_refresh['commit'] == '1a137b58860416a31618de44173180d021dfcc61'
+    assert native_refresh['updater_refusal'] == 'use a successful run for timing estimates'
+    native_weights = {name: row['seconds'] for name, row in native_refresh['files'].items()}
+    assert len(native_weights) == 134
+    assert all(name.startswith('tests/test_native_') for name in native_weights)
+    assert {row['source'] for row in native_refresh['files'].values()} == {
+        'junit', 'worker_completion_intervals'}
+    assert data['file_seconds'] == {**current_refresh['file_seconds'], **native_weights}
     assert set(current_refresh['retired_prior_files']) == set(
         data['local_overrides'][1]['retired_modules']
     )
@@ -210,12 +219,12 @@ def test_round7_refresh_preserves_history_and_excludes_dedicated_sg2():
         'tests/test_final_generation_acceptance.py',
         'tests/test_final_record_component_limits.py',
     }
-    assert set(data['file_seconds']) == (
+    assert set(current_refresh['file_seconds']) == (
         (set(prior_weights) - set(current_refresh['retired_prior_files']))
         | set(current_refresh['newly_timed_main_files'])
         | set(current_refresh['readiness_only_files'])
     )
-    assert len(data['file_seconds']) == (
+    assert len(current_refresh['file_seconds']) == (
         len(prior_weights)
         - len(current_refresh['retired_prior_files'])
         + len(current_refresh['newly_timed_main_files'])
