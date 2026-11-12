@@ -33,7 +33,7 @@ def test_project_prefix(tmp_path,project):
     checks=[]
     for options in [['download','audit-bundles','--manifest',str(reg.path),'--project',project,'--strict'],
                     ['bundle','chunk','--manifest',str(reg.path),'--project',project,'--check','--strict']]:
-        cmd=[sys.executable,'-P','-B','-m','data_sheets_schema',*options]
+        cmd=[sys.executable,'-P','-B','-m','data_sheets_schema.cli',*options]
         got=subprocess.run(cmd,cwd=ROOT,text=True,capture_output=True,timeout=240)
         checks.append({'command':cmd,'returncode':got.returncode,'stdout':got.stdout,'stderr':got.stderr})
     evidence={'project':project,'source_commit':subprocess.check_output(['/usr/bin/git','-C',str(ROOT),'rev-parse','HEAD']).decode().strip(),

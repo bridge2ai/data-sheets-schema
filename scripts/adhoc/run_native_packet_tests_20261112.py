@@ -391,7 +391,7 @@ def main():
         if tree.name != 'tree' or tree.parent.parent != SCRATCH_BASE:
             parser.error('only assigned branch or private G07 composition is allowed')
         manifest = json.loads((tree.parent / 'composition.json').read_bytes())
-        if manifest.get('status') != 'composed_not_tested' or manifest.get('tree') != str(tree):
+        if manifest.get('status') not in ('composed_not_tested', 'focused_rehearsal_passed_with_documented_refusals') or manifest.get('tree') != str(tree):
             parser.error('private composition manifest is not ready')
         commit = subprocess.check_output(['/usr/bin/git', 'rev-parse', 'HEAD'], cwd=tree, text=True).strip()
         if commit != manifest['composition_commit']:
