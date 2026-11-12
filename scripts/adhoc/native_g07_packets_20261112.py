@@ -188,7 +188,8 @@ def prepare(label):
         objects = git('rev-parse', '--path-format=absolute', '--git-path', 'objects').decode().strip()
         write(tree / '.git/objects/info/alternates', (objects + '\n').encode())
         git('update-ref', '--no-deref', 'HEAD', commit, cwd=tree)
-        git('read-tree', commit, cwd=tree)
+        # Keep the index empty until checkout: a populated index would preserve
+        # absent working files as deliberate deletions rather than create them.
         git('sparse-checkout', 'set', '--cone', *SPARSE, cwd=tree)
         git('read-tree', '-mu', 'HEAD', cwd=tree)
         assert not git('remote', cwd=tree).strip()
