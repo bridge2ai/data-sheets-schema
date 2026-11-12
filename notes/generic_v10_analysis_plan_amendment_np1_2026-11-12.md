@@ -1,19 +1,31 @@
 # generic_v10 analysis plan, amendment NP1: native production cells
 
-**Status: draft v1, written by claude (lead) on 2026-11-12.**
+**Status: draft v2, written by claude (lead) on 2026-11-12.**
+- **v1** (commit `b98b285d0fb75e5a86340980db377ac89aa93b9b`, file sha256 `79948599629f0ef5ee93ca5530b7bbbba03caa41448b22b054dd3d12c1759297`): reviewed by a Codex CLI pass (review sha256 `29efb19f481ab37064f4d8b4ddfe365f97c2c4f012d4a00bfdf8a0e1eddce296`): ratifiable after listed fixes, with 3 P1 and 9 P2, filed as #5914 to #5925. The Claude review of v1 did not complete.
+- **v1 → v2** responds to every one of those findings. Besides wording, it:
+  - requires this amendment to be ratified **before the N1 canary launches**, because the canary supplies the floor rule's input (NP1.5, NP1.7);
+  - names one floor statistic, the final-record reading, and says which readings are not used (NP1.5);
+  - limits the exception that keeps a changed procedure in the same stratum (NP1.7);
+  - fixes the AI_READI comparator branch at NP1b, so that K_native cannot move afterwards (NP1.3);
+  - states the CHORUS-only API set as a supersession of the API arm's scope rule, not as its consequence (NP1.8);
+  - says when the AI_READI pilot cell is concluded (NP1.5);
+  - separates the receipt policy's model-facing asset from the registration that carries the floor (NP1.5);
+  - names the native eligibility witness (NP1.4);
+  - gives each decision its own letter (NP1.10).
+- **v2 has not been reviewed.**
 - **It is not binding until:**
   - a Claude reviewer and a Codex CLI pass review it, with each finding filed;
-  - amendment N1 has been ratified, because NP1 builds on N1's ratified text and names that file's sha256 at its own ratification;
-  - the owner ratifies it by naming this file's sha256 at a commit and answering each lettered item of NP1.10;
-  - and it merges only after that word, and before any native pilot or production registration.
+  - amendment N1 has been ratified, because NP1 builds on N1's ratified text and names that file's sha256 at its own ratification. NP1 is reconciled against the answers the owner actually gave to N1's lettered items before its own ratification;
+  - the owner ratifies it by naming this file's sha256 at a commit and answering each lettered item of NP1.10, **before the N1 canary launches** (NP1.5 says why; amendment N1 proposes the same as its item (ah));
+  - and it merges only after that word.
 - **Values marked [proposed]** are the lead's choices. They take effect only through NP1.10. Unmarked rules are the owner's decisions, the plan's own text or amendment N1's text, each cited.
 - **It is prospective.** No native record exists under this condition: the native canary has not run and amendment N1 is not ratified. Every rule here is fixed before any native outcome it governs, as the plan requires of its own stages ("No rule is chosen after an outcome it governs", staged sequence step 2, lines 271–272).
 - **What the lead had in view when writing it:**
   - the plan's "Known v10 values on the predicted metrics" (lines 178–252), which are the two assisted API canaries';
-  - the API run A21 of 2026-11-11, which ended at its first typed-audit call and left a phase-1 full record and core record. The lead read their validation result (0 errors; two warnings: no `title`, and an empty `Distribution`) and their file sizes, and no metric of this amendment;
+  - the API run A21 of 2026-11-11, which ended at its first typed-audit call and left a phase-1 full record and core record. The lead read their validation result (0 errors; two warnings: no `title`, and an empty `Distribution`) and their file sizes. Validation is row 6's invariant, so that is outcome information of a kind this amendment reports. The lead did not compute or inspect a populated-leaf count, a coverage fraction, a recall counter or a rating for those records;
   - no value from any native run under this condition.
 - **Line numbers** are those of `notes/generic_v10_analysis_plan.md` at main `7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1`, where the file's sha256 is the ratified `b4a4f9a596173d3bdeb817b01ea53fb1a1d77574e121c7cecaf6f63b67fd4b4b`.
-- **Section numbers of amendment N1** are those of its draft v7 (commit `2fb0503757db041e009f21dd02a1d57a45a75a88`, file sha256 `8a644c0efb968da23f45c533e757fcd06af495c3d15c73c442c9d4a8c5566a60`), which is unratified and under revision after its re-review. Where N1's ratified text differs, N1's ratified text governs.
+- **Section numbers of amendment N1** are those of its draft v10 (commit `127cc0bd69d73fcd21d94978bf5e0ee60e0e950c`, file sha256 `e50777af1aa70b73ec9ab041f0d23c581cbcb56f35d3cb615221ae44f333489f`), which is unratified. Its sections N1.1 to N1.9 and rows B0 to B7 have kept their numbers since v7. Where N1's ratified text differs, N1's ratified text governs.
 - **Source references** are to commit `1a137b58860416a31618de44173180d021dfcc61` of the native branches, read with `git show`. That source is unmerged.
 
 ## Authority
@@ -57,7 +69,7 @@
   - **Whole projects only.** A project is in or out with all its cells. Replicates are never trimmed inside a project.
   - **The evidence is usage, fit and stop outcomes:** the accepted canary's measured-usage packet (NP1.7) and each project's fit against the registered runtime limits at its registration. It is never a quality metric of the canary, or of any v10 record, against v8 (lines 337–339).
   - **The order** is the plan's (lines 340–344): CHORUS ×3 → CM4AI ×3 → VOICE ×3 → AI_READI (pilot + ×3) → VOICE_PEDIATRIC ×1 → Kids First ×1. Under NP1.7 the AI_READI pilot, if there is one, runs before the floor is registered and so before any production cell, as the plan's own pilot does (lines 307–312).
-  - **D135 puts the four three-replicate projects in scope.** One of them leaves scope only as infeasible: its inputs are refused by the registered limits at its registration, or the owner descopes it at NP1b on the usage packet.
+  - **D135 names the four three-replicate projects as the scope this amendment plans.** One of them leaves scope only as infeasible: its inputs are refused by the registered limits at its registration, or the owner descopes it at NP1b on the usage packet.
   - **A descoped project is "out of scope (NP1b)", not missing.** It is not counted in K_native (NP1.3), and plan §7's missing-cell rules apply only to in-scope cells (lines 347–349).
   - **With CHORUS alone in scope,** every native verdict is a single-project result, written "holds for CHORUS" (lines 352–353).
 - **VOICE_PEDIATRIC and Kids First** [proposed]: each is in scope unless NP1b descopes it on usage or fit.
@@ -78,7 +90,7 @@
 - **Role** [proposed]: native production cells are the study's primary generic_v10 cells (D134).
   - Each rule the plan fixed for a v10-against-v8 comparison is applied to them unchanged: metric, instrument, analysis set, tolerance and missingness rule.
   - Every result is reported under the label **"native v10 against v8 API: package and runtime"**. A prediction's overall statement reads "holds in k of K_native projects (package and runtime)".
-  - **K_native** counts the in-scope native projects among CHORUS, CM4AI and VOICE, and AI_READI only under option (d) of D64, item 14.
+  - **K_native** counts the in-scope native projects among CHORUS, CM4AI and VOICE, and AI_READI only when its comparator's record hashes are pinned at NP1b (below). It is fixed at NP1b and does not change afterwards. The n=1 cells and a descriptive project are never in it.
   - A native result is never pooled with an API v10 cell and never reported as the plan's package effect.
   - **If the answer is no:** native production is descriptive only: per project, native values beside v8's with mean, SD and range, and no verdict (the default the plan describes at lines 822–824).
 - **What carries over, what is restated and what cannot be claimed:**
@@ -93,46 +105,58 @@
 | Prediction 1, populated leaves | Rule unchanged, under the label above |
 | Prediction 2, pre-completion coverage | Rule unchanged. It needs the native pre-completion reading (NP1.4); a run without one is metric-missing |
 | Predictions 3 and 3a, recall targets | Rules unchanged. The adapter that applies the counters is pinned by sha256 in NP1b, before any production record exists, as the plan requires of P4b |
-| Prediction 4, review-pass rates (E2) | **Not measured under NP1** [proposed]: deferred (NP1.9) |
-| Prediction 5, rubric20 Q11 and Q19 (E5) | **Cannot be claimed.** The plan's rule excludes native records from these means (line 1876: "No pilot, re-canary, with-crate, native or calibration record enters these means"), and N1.6 defers native ratings. Not measured under NP1 [proposed] |
+| Prediction 4, review-pass rates (E2) | **Not measured for this cohort** [proposed] (NP1.9) |
+| Prediction 5, rubric20 Q11 and Q19 (E5) | **Cannot be claimed.** The plan's rule excludes native records from these means (line 1876: "No pilot, re-canary, with-crate, native or calibration record enters these means"), and N1.6 defers native ratings. Not measured for this cohort [proposed] (NP1.9) |
 | Row 6, the validation and duplicate-key invariant | Unchanged, read on native acceptance |
 | Rows 7 and 8, report findings and structure | Unchanged: descriptive, no direction |
 
 - **The AI_READI comparator** [proposed]: D64, item 14 stands unchanged for native cells (lines 495–523).
   - Under option (d), the comparator is the new no-crate v8 API run, used only if its render diff passes. Otherwise AI_READI is descriptive, option (b), and outside K_native.
-  - That run is API work with its own registration, allocation and owner word. **It is not a prerequisite for native AI_READI cells.** If it does not exist when the analysis is made, AI_READI is descriptive.
-  - The plan's option (c), the 2026-10-14b no-crate agentic rerun (line 522), is not adopted here. It shares the Claude Code runtime with the native arm, but it ran a different harness and its records are not on main. The owner may choose it instead by answering no to NP1.10(e) and naming it.
+  - That run is API work with its own registration, allocation and owner word. **It is not a prerequisite for native AI_READI cells.**
+  - **The branch is fixed at NP1b,** before any native AI_READI registration. If the no-crate v8 API run exists by then and its render diff has passed, NP1b pins its record hashes in the comparator manifest and AI_READI is in K_native. If it does not, AI_READI is descriptive for this analysis, whatever is produced later, and the comparator manifest has no AI_READI rows. Nothing about a native AI_READI outcome can move the branch.
+  - The plan's option (c), the 2026-10-14b no-crate agentic rerun (line 522), is not adopted here. It shares the Claude Code runtime with the native arm, but it ran a different harness and its records are not on main. The owner may choose it instead by answering no to NP1.10(f) and naming it.
 
 ## NP1.4 Analysis sets for native records
 - **Set A** keeps the plan's two definitions, with definition (2) primary and (1) reported beside it (lines 681–712).
 - **An eligible native full record** [proposed]. The plan fixes eligibility by a completion event of the API runner, `reconcile_full` in the run's snapshot index (lines 721–757). The native arm writes no such index. The plan already lets a run's own completion evidence be the one "that run's runner writes, which its registration review identifies" (lines 766–768). For the native arm:
-  - an attempt's full record is eligible when its saved result shows that the native protocol's final reconciliation and its final core derivation completed, and an independent `read_final` reconstructs that full record by sha256;
-  - it is eligible whether or not the attempt is later accepted, as in the plan;
-  - an attempt without that evidence has no eligible full record and is artifact-missing for Set A;
-  - **the exact saved field and event are named in NP1b,** from the merged source, before any production record exists.
-  - **What the lead read and did not read.** The native recipe is named `source_receipt_derive_audit_reconcile_attribution_record_v1` (`native_attempt_supervisor.py:29`). The phase rules name a final reconciliation in which the core is derived by `derive_final_core`, and the final core checks require that derivation (`native_shared_phase.py:198–206`). The lead did not verify the saved field names.
-- **The native pre-completion reading** [proposed, with the item above]: prediction 2 reads the plan's `O,R0` pair (§3a, lines 871–889). On the native arm that is the receipt-completion stage's `before` block, which the completion result saves beside its `after` block (`native_shared_receipts.py`). A run that saves no `before` reading is metric-missing for prediction 2; the `after` value never replaces it.
+  - **The witness** is a settled `derive_final_core` helper check in the attempt's saved phase history. The phase rules admit that helper only after the checked audit and the observed stage assembly, and name it as what final reconciliation requires (`native_shared_phase.py:195–206`); it covers the full record and the core derived from it (`native_shared_phase.py:92`).
+  - **The eligible record** is the full record bound, by sha256, to the last settled `derive_final_core` check. This is the plan's "last full-record snapshot … identified by its sha256" read for the native arm.
+  - **Later failure does not remove eligibility.** A final check, the report, the recorder or a runtime gate that fails afterwards, a rejection, and a stop all leave that record eligible, as in the plan. A record that fails schema validation is eligible for Set A, and Set B removes it.
+  - **An interrupted rewrite.** If the full record on disk no longer has the bound sha256, the eligible record is the bound bytes, recovered by sha256 from the attempt's retained evidence. If they cannot be recovered, the attempt is artifact-missing for Set A.
+  - **Overall success is never the test.** `runtime_gates_passed` and the saved result's completion state are not used for eligibility: they would drop the rejected attempts the plan keeps.
+  - **An attempt with no settled `derive_final_core` check** has no eligible full record and is artifact-missing for Set A.
+  - **What the lead read and did not read.** The lead read the phase rules cited above. The lead did not verify how a settled check's file hashes are saved, or that a reader can recover an eligible record from a rejected attempt. **Both are confirmed from the candidate source by a reviewer before this amendment is ratified;** if either fails, this item is restated first. NP1b then names the exact fields from the merged source as a conformance check, not as a choice.
+- **The native pre-completion reading** [proposed]: prediction 2 reads the plan's `O,R0` pair (§3a, lines 871–889). On the native arm that is the receipt-completion stage's `before` block, which the completion result saves beside its `after` block (`native_shared_receipts.py`). A run that saves no `before` reading is metric-missing for prediction 2; the `after` value never replaces it.
 - **Set B** is unchanged (lines 783–807): validation passed under the native arm's registered schema closure; duplicate keys 0; the five receipt floors at 0; one common checker, the v4 receipts checker at a pinned source hash, run on copies of both sides' records. The coverage floor is applied to neither side. The checker's source hash, the schema closures and the snapshot identities are bound in NP1b, where the plan binds them in P4b.
 - **Missing data, n=3 and n=1** are unchanged (lines 844–855): a primary verdict for a project needs complete n=3 on each side under definition (2); the three kinds of missing are kept apart; n=1 cells (the canary, the pilot, VOICE_PEDIATRIC and Kids First) are descriptive only.
 
 ## NP1.5 The native receipt floor for replicates
 - **What D109 requires:** the canary's floor stays pending and its reading is reported; "The measured value informs a registered native floor before any native replicate. No API threshold is copied".
-- **What a registered native floor is in the code.** The native receipt policy is a selected asset pinned by sha256. Its `coverage_floor` is either `{state: pending, mode: diagnostic_pilot}` or `{state: registered, numerator, denominator}` (`native_shared_contract.py`, `parse_receipt_policy`). A registered floor passes when `with_receipt × denominator ≥ receiptable × numerator` (`native_shared_receipts.py:296–307`). Registering a value therefore makes a new receipt policy asset with a new sha256, which each production registration selects.
+- **What a registered native floor is in the code.** Two identities are involved, and only one changes:
+  - **the policy asset,** `native_shared_receipt_policy_v1.md`, a model-facing file selected and pinned by sha256;
+  - **the receipt-policy registration,** a separate JSON document that names the asset by `runtime_policy_sha256` and carries `coverage_floor`, which is either `{state: pending, mode: diagnostic_pilot}` or `{state: registered, numerator, denominator}` (`native_shared_contract.py`, `parse_receipt_policy`).
+
+  A registered floor passes when `with_receipt × denominator ≥ receiptable × numerator` (`native_shared_receipts.py:296–307`). Registering a value makes new registration bytes with a new sha256, which each production registration selects. The policy asset does not change, so nothing model-facing changes.
+- **When the rule is fixed.** The plan fixes its floor rule "before any pilot runs", and the later amendment "only computes its value" (§8, lines 1117–1121 and 1159–1162). The N1 canary is the first pilot here: it supplies a reading this rule uses. So this amendment, with the rule and the reading it names, is ratified **before the canary launches.** That is why the header says so.
 - **The rule** [proposed]. It takes the form of the plan's floor rule (§8, lines 1125–1127) and no value from the API arm:
 
-> The registered native coverage floor is the lowest of the eligible native pilots' coverage fractions, `with_receipt / receiptable`, rounded down to a multiple of 1/20 and capped at 19/20.
+> The registered native coverage floor is the lowest of the eligible native pilots' final-record coverage fractions, `with_receipt / receiptable`, rounded down to a multiple of 1/20 and capped at 19/20.
 
   - **Eligible pilots:** the N1 canary and, if NP1.10(c) is yes and AI_READI is in scope, the AI_READI native pilot. Only an accepted attempt's saved result supplies a fraction; a rejected, stopped or assisted attempt never does (lines 1129–1133).
-  - **Which reading.** Each pilot contributes the lowest of the readings at which the native controller evaluates the floor for that attempt. In the source the lead read, the floor is evaluated at the receipt-completion stage and again at the final stage (`native_shared_receipts.py:463` and `:498`). Taking the lowest means a registered floor never asks more of a production record at a stage than the pilots met at that stage. Which readings gate under a registered floor is confirmed from the merged source in the floor's registration; the lead did not verify it.
+  - **Which reading: the final record's.** The policy asset fixes it: "The registered production floor is the exact integer fraction with_receipt / receiptable on the final record, using the unchanged receipt counters." Each pilot contributes one fraction: `with_receipt` over `receiptable` from the `coverage_floor` block of its final-stage receipt check, the block the controller writes with `native_receipt_stage: final` (`native_shared_receipts.py:486–500`), read from the accepted attempt's saved result.
+  - **Readings that are not used.** The controller also evaluates the floor at the initial receipt check, where it forces the state to pending (`:363–364`), and on the receipt-completion stage's `after` block (`:463`). Both are reported. Neither enters the rule, and neither gates a production record.
+  - **What gates in production:** the final-stage reading alone, against the registered fraction (NP1.6).
+  - **A pilot whose saved result has no final-stage reading** supplies no fraction, and the "no value" case below applies.
+  - **Conformance, not choice.** The floor's registration confirms from the merged source that these are still the fields. If the merged source differs, the rule yields no value until a prospective amendment restates it.
   - **Arithmetic:** exact integers, `floor(20 × with_receipt / receiptable) / 20`, then the minimum with 19/20, registered as a numerator over the denominator 20.
   - **Why the cap:** the plan's reason (lines 1134–1140). Receipt completion drives the ratio towards 1, and a floor of 1 would stop a replicate on one unreceipted leaf.
-  - **The AI_READI branch:** if the AI_READI pilot ends without acceptance for a cause that is not rule-level, AI_READI leaves scope as infeasible, reported as a feasibility result, and the canary alone sets the value (plan step 8, lines 307–312).
+  - **The AI_READI branch:** the pilot cell is concluded without acceptance when its second attempt ends without acceptance, or when the owner records a decision to forgo the second attempt (NP1.6 gives it two). At that point, and not after a first stop, if the cause is not rule-level AI_READI leaves scope as infeasible, reported as a feasibility result, and the canary alone sets the value (plan step 8, lines 307–312). A rule-level rejection is NP1.6's case.
   - **No value:** if a pilot the branch still requires has no accepted attempt, or a zero denominator, the rule yields no value. No production cell registers until a prospective amendment, reviewed as this one, supplies one. No other observed ratio is substituted (lines 1150–1152).
 - **How the value is registered** [proposed, NP1.7]: in a dated amendment that gets this amendment's review and the owner's ratification. It checks the arithmetic and the inputs and does not revisit the rule (lines 1159–1163).
 
 ## NP1.6 Acceptance, attempts and stops
 - **Each attempt is judged by N1.4(B)'s rows B0–B7,** as ratified, on the saved result after the attempt ends.
-- **For production cells, row B5 gates** [proposed]: the native policy floor must read `state: passed` under the registered floor. Pilots keep B5 reported and labelled UNMEASURABLE (D109). "Accepted" for a production cell then means B0–B7 all hold.
+- **For production cells, row B5 gates** [proposed]: the final-stage floor reading (NP1.5) must read `state: passed` under the registered floor. Pilots keep B5 reported and labelled UNMEASURABLE (D109). "Accepted" for a production cell then means B0–B7 all hold.
 - **Blind source review (B6) is per record** (D36): a fresh Claude session and a Codex CLI pass, neither of which generated or operated the run, with the second blind reviewer's recall seed pinned to `original_full` before anyone reads the audit.
 - **The owner signs each acceptance record** (D36). Its format is plan §6's (lines 1026–1048), with the native identities N1.6 lists in place of the API-only fields.
 - **Attempts** [proposed]:
@@ -159,7 +183,7 @@
 - **Missing cells** follow plan §7 unchanged (lines 1094–1108).
 
 ## NP1.7 Order of events and pacing
-1. **The canary is accepted under N1.** Amendment N1 is ratified, the native code is accepted and merged (N1.9), and the CHORUS canary is registered, run and accepted on N1.4(B)'s rows. **Nothing in NP1 starts before the canary's acceptance record is signed.** If the canary is rejected at rule level, D113 ends the native shared-v1 cell, and this amendment has nothing to apply to in this condition.
+1. **The canary is accepted under N1.** Amendment N1 is ratified, the native code is accepted and merged (N1.9), and the CHORUS canary is registered, run and accepted on N1.4(B)'s rows. **No pilot or production registration under NP1 is made before the canary's acceptance record is signed.** That governs when the production sequence runs. It does not govern when NP1 is reviewed and ratified: NP1 is ratified before the canary launches (NP1.5). If the canary is rejected at rule level, D113 ends the native shared-v1 cell, and this amendment has nothing to apply to in this condition.
 2. **The native measured-usage packet** [proposed], in the role of the plan's measured-cost packet (lines 290–299). From the accepted canary's saved result it reports:
    - the admission readings of each usage window, and the first, last and highest reading of each window during the run (N1.6);
    - the wall clock from dispatch to the end, against the deadline;
@@ -171,8 +195,9 @@
    It carries no quality comparison against v8.
 3. **NP1b** [proposed]: a dated amendment, reviewed as this one is and ratified by the owner by sha256 before any native pilot or production registration. "It applies rules; it does not invent them" (the plan on P4b, lines 304–305). It:
    - applies NP1.2's scope rule to the usage packet and to each project's fit;
-   - names the eligibility event and the pre-completion reading (NP1.4);
-   - pins the comparator manifest's record hashes, the recall adapter, the common checker's source hash and the schema closures;
+   - names, as a conformance check on the merged source, the exact saved fields of the eligibility witness and of the pre-completion reading (NP1.4);
+   - pins the comparator manifest's record hashes, which include AI_READI's only if that comparator exists by then (NP1.3), and fixes K_native;
+   - pins the recall adapter, the common checker's source hash and the schema closures;
    - states, from the usage packet, how many attempts the usage windows allow in a week;
    - registers the floor's value under NP1.5 when no pilot is pending.
 
@@ -190,15 +215,19 @@
 - **Pacing** [proposed]: N1.5's terms apply unchanged to every pilot and production attempt: the admission bounds, the deadline, the dollar guard, overage disabled, the keep-awake policy and the capture rules. One native attempt runs at a time on the account. No term is relaxed to shorten the batch; a change to any of them is a revision of N1, made before the cells it governs, and those cells form a new stratum (lines 321–325).
   - **The count:** up to 16 first attempts with the canary (1 canary, 1 pilot, 12 replicates and 2 descriptive cells), and at most one further attempt per cell.
   - **How many fit in a week is not known.** It follows from the usage packet and is stated in NP1b.
-- **One procedure** [proposed]: every native pilot and production cell runs the same merged source and the same selected assets, apart from the receipt policy's registered floor and each project's inputs. A later change to the native runner or to a model-facing asset makes the cells run after it a new stratum, unless byte parity of the complete effective instruction and of each stage request is shown on an already-run project and the owner separately authorizes a diagnostic canary. That is D35's rule (plan §11, lines 1399–1405) read for the native arm.
+- **One procedure** [proposed]: every native pilot and production cell runs the same merged source and the same selected assets, apart from the floor value in the receipt-policy registration (NP1.5) and each project's inputs.
+  - **A later change to the native runner or to a model-facing asset makes the cells run after it a new stratum.**
+  - **A change to how attempts are admitted, retried, stopped, selected or retained** is a change of scientific procedure. It is a new stratum and needs its own prospective amendment, whatever the bytes show. The plan says why: D35's parity test and diagnostic canary "show that the engineering is sound, not that a changed selection process has the same estimand" (lines 1221–1236).
+  - **The one exception** is a change shown to leave all of that untouched. Then byte parity of the complete effective instruction and of each stage request on an already-run project, with a diagnostic canary the owner separately authorizes, keeps the later cells in the same stratum. That is D35's rule (plan §11, lines 1399–1405) read for the native arm.
 
 ## NP1.8 The API arm under D134
 - **What D134 says:** the API route is needed only for comparison. The plan's API matrix (lines 552–560) stays in the plan's text, and its scope is P4b's to fix (lines 300–306).
 - **The comparison set** [proposed]: CHORUS only.
   - **The cells:** the clean CHORUS re-canary in plan A10's role (n=1, descriptive for good) and the three CHORUS replicate-gate cells (A16).
-  - **Everything else on the API arm is "out of scope":** CM4AI, VOICE, AI_READI, VOICE_PEDIATRIC and Kids First. This is the scope the plan's own rule yields for a budget that covers CHORUS alone (lines 335–353), and P4b records it.
+  - **Everything else on the API arm is "out of scope":** CM4AI, VOICE, AI_READI, VOICE_PEDIATRIC and Kids First.
+  - **This supersedes the API arm's scope rule; it does not follow from it.** The plan funds the longest affordable prefix of its order from measured costs (lines 335–346), so with a larger budget the plan's rule would add CM4AI and the rest. D134 says the API route is for comparison; it sets no budget and names no project. Fixing the set at CHORUS is the lead's proposal, and P4b records it if the owner adopts it.
   - **Why this set and not less:** one API record supports no contrast beyond one record beside another. Three cells on one project allow the plan's n=3 structure rule and per-project means on a matched project. CHORUS is first in the plan's order and its cheapest run (lines 369–377).
-  - **What it supports:** a descriptive native/API contrast for CHORUS: the two arms' values side by side on the plan's metrics, with N1.6's declared differences. No directional rule is added for it. Each arm's own comparison with v8 keeps its own label.
+  - **What it supports** [proposed]: a descriptive native/API contrast for CHORUS: the two arms' values side by side on the plan's metrics, with N1.6's declared differences. No directional rule is added for it. Each arm's own comparison with v8 keeps its own label.
   - **What a matched contrast requires,** from the plan (lines 583–592): the same frozen source bundle, manifest, source policy, schema closures, profile, omission context and scientific assets wherever the contrast claims they match; hashes of the complete effective instructions and of each stage request; and every remaining difference declared, not normalised away.
   - **If the answer is no:** the owner names the set. With the re-canary alone, the contrast is one API record beside the native cells. With the plan's full matrix, P4b fixes its scope as the plan says.
 - **None of this is a prerequisite for native production.** Native pilots and production cells proceed under NP1.7 whether or not any API cell has run.
@@ -206,11 +235,13 @@
   - the A21 run of 2026-11-11 ended at its first typed-audit call on a provider refusal (#5874). Its classification under plan §10 has not been recorded. By the lead's reading it used one of the re-canary cell's two attempts (plan §7);
   - a schema amendment. The API arm's ratified schema is 3.1.0 (D71(a), P4a amendment 1), and that registration was built on main at 3.2.1. A matched contrast needs the comparison registration on the native arm's release, by its own amendment (N1.1);
   - the provider account's budget has to cover the set, and it is read before any launch;
-  - the rebuild comes after native integration, and D35's freeze starts at that rebuilt registration (N1.6).
+  - the order of the rebuild and where D35's freeze starts depend on the owner's answer to amendment N1's item (y). With a yes, the rebuild comes after native integration and the freeze starts at that rebuilt registration. With a no, D131's freeze at the roster of 2026-11-11 stands, with D35's byte-parity test and diagnostic canary for native integration (N1.6).
 
 ## NP1.9 What is deferred, what this amendment does not change, and what it does
 **Deferred** [proposed]: none of these is a prerequisite for a native pilot or production cell.
-- **Native E2 and E5.** Prediction 4's review-pass instrument is P4b's open item 40, and N1.6 leaves native ratings to a separately ratified rating registration. Until a native evaluation registration is ratified, predictions 4 and 5 are "not measured" for the native arm.
+- **Native E2 and E5.** Prediction 4's review-pass instrument is P4b's open item 40, and N1.6 leaves native ratings to a separately ratified rating registration. Predictions 4 and 5 are "not measured" for this production cohort.
+  - **They are not revived later by a registration alone.** The plan freezes E2's protocol before confirmatory outcomes (lines 1455–1456) and requires E5's scientific instrument choice before confirmatory generation (lines 1469–1474 and 2402–2413). A prediction of this kind can be measured on native cells only if a separate prospective amendment fixes its scientific rules before the first outcome it governs.
+  - **Otherwise** a later native evaluation of these records is labelled descriptive or exploratory. It is not a registered prediction.
 - **BC1 parity for the native arm.** Production cells use the declared shared-v1 differences, as the canary does (D91). Adopting BC1 parity later is a change of procedure and a new stratum.
 - **Receipts v5.** v4 stays the registered, gating instrument (D105; plan §3a). The two D105 secondary measures are recorded under their own identities, as N1.1 says.
 - **Canonical marks for native cells** (plan item 42, lines 2417–2423). A mark never changes an estimate.
@@ -220,29 +251,36 @@
 - the plan file and its sha256;
 - P4a amendment 1, and amendment N1;
 - D22, D25, D109's pending floor for the canary, and D113;
-- any API-arm registration, and the rules the plan fixes for any API cell that runs;
+- any API-arm registration, and the rules the plan fixes for any API cell that runs, except the API arm's scope rule if NP1.10(t) is adopted;
 - any historical decision or record.
 
 **Changed, for readers of the amendment:**
 - the native column of the plan's matrix (NP1.1);
 - plan §1 item 5's statement that native production cells are unregistered: they are planned here, and each still needs its registration;
-- the API arm's scope, as a proposal for P4b (NP1.8).
+- the API arm's scope rule, superseded by a fixed CHORUS-only set if NP1.10(t) is adopted (NP1.8).
 
 ## NP1.10 Ratification: the owner names this file's sha256 at a commit, and answers each lettered item
-Each letter is one decision, and a "yes" adopts exactly the value given. The cells themselves are D135's and are not a lettered item.
+Each letter is one decision, and a "yes" adopts exactly the value given. The cells themselves are D135's scope and are not a lettered item. An item answered no is revised and re-submitted before any registration that depends on it.
 - **(a)** Scope and order for the native arm: whole projects only; the evidence is usage, fit and stop outcomes, never a quality value; the plan's order; a D135 project leaves scope only as infeasible or by the owner's descoping at NP1b (NP1.2).
 - **(b)** VOICE_PEDIATRIC and Kids First are each in scope, one descriptive cell, unless NP1b descopes them on usage or fit; Kids First runs last, with the neutral profile and its own omission context, under the registered native floor (NP1.2).
-- **(c)** One native AI_READI pilot, not a replicate, with the floor pending, accepted before the floor's value is computed; D113's rule applies to it (NP1.2, NP1.6).
-- **(d)** Role: native production cells are the primary generic_v10 cells; the plan's rules apply to them unchanged; every result carries the label "native v10 against v8 API: package and runtime" and counts in K_native; it is never pooled with an API cell or reported as the plan's package effect (NP1.3).
-- **(e)** The AI_READI comparator follows D64, item 14 unchanged; the no-crate v8 API run is not a prerequisite for native AI_READI cells, and without it AI_READI is descriptive (NP1.3).
-- **(f)** An eligible native full record is one whose saved result shows the final reconciliation and final core derivation completed and which `read_final` reconstructs; prediction 2 reads the completion stage's `before` block; NP1b names the exact fields from the merged source (NP1.4).
-- **(g)** Predictions 4 and 5 are not measured for the native arm under NP1; they wait for a separately ratified native evaluation registration (NP1.3, NP1.9).
-- **(h)** The floor rule: the lowest of the eligible native pilots' coverage fractions, each pilot's lowest evaluated reading, rounded down to a multiple of 1/20 and capped at 19/20; no value means no production registration (NP1.5).
-- **(i)** For production cells, N1.4(B)'s row B5 gates on the registered floor; pilots keep it reported (NP1.6).
-- **(j)** Attempts, classes and stop-loss: at most two attempts per native production cell; the plan's cause classes with NP1.6's native readings; two rejections with the same root cause end re-running in the native shared-v1 condition (NP1.6).
-- **(k)** The staged procedure: the measured-usage packet, then NP1b, then the floor's registration, each reviewed and ratified before the registrations that depend on it; NP1b applies rules and changes none (NP1.5, NP1.7).
-- **(l)** Reviews: both reviewers review every registration; one review document per reviewer may cover one project's three replicate registrations (NP1.7).
-- **(m)** Pacing: N1.5's terms unchanged for every pilot and production attempt, one native attempt at a time, and no term relaxed to shorten the batch (NP1.7).
-- **(n)** One procedure: a later change to the native runner or a model-facing asset is a new stratum, unless byte parity is shown and the owner authorizes a diagnostic canary (NP1.7).
-- **(o)** The API comparison set is CHORUS only: the clean re-canary and the three replicate-gate cells; every other API cell is out of scope; the contrast is descriptive; none of it is a prerequisite for native production (NP1.8).
-- **(p)** Nothing on NP1.9's deferred list is a prerequisite for a native pilot or production cell.
+- **(c)** One native AI_READI pilot, not a replicate, with the floor pending, accepted before the floor's value is computed; at most two attempts, concluded as NP1.5 says, with D113's rule applied to it (NP1.2, NP1.5, NP1.6).
+- **(d)** Role: native production cells are the primary generic_v10 cells; the plan's rules apply to them unchanged; every result carries the label "native v10 against v8 API: package and runtime"; a native result is never pooled with an API cell or reported as the plan's package effect (NP1.3).
+- **(e)** K_native counts the in-scope projects among CHORUS, CM4AI and VOICE, and AI_READI only when its comparator's record hashes are pinned at NP1b; it is fixed at NP1b (NP1.3).
+- **(f)** The AI_READI comparator follows D64, item 14; its branch is fixed at NP1b on whether the no-crate v8 API run exists then; that run is not a prerequisite for native AI_READI cells (NP1.3).
+- **(g)** An eligible native full record is the one bound by sha256 to the last settled `derive_final_core` check; later failure does not remove eligibility; overall runtime success is never the test (NP1.4).
+- **(h)** Prediction 2 reads the receipt-completion stage's `before` block; a run without one is metric-missing (NP1.4).
+- **(i)** Prediction 4 (E2) is not measured for this cohort, and is measured on native cells only under a separate prospective amendment made before the first outcome it governs (NP1.3, NP1.9).
+- **(j)** Prediction 5 (E5) is not measured for this cohort, on the same condition (NP1.3, NP1.9).
+- **(k)** The floor rule: the lowest of the eligible native pilots' final-record coverage fractions, rounded down to a multiple of 1/20 and capped at 19/20; the initial and completion-stage readings are reported and not used; no value means no production registration (NP1.5).
+- **(l)** For production cells, N1.4(B)'s row B5 gates on the final-stage reading against the registered floor; pilots keep it reported (NP1.6).
+- **(m)** At most two attempts per native production cell, counted across every label and registration (NP1.6).
+- **(n)** The plan's cause classes with NP1.6's native readings (NP1.6).
+- **(o)** Stop-loss: two rejections with the same root cause end re-running in the native shared-v1 condition; the count covers every native production cell and never resets (NP1.6).
+- **(p)** The staged procedure: the measured-usage packet, then NP1b, then the floor's registration, each reviewed and ratified before the registrations that depend on it; NP1b applies rules and changes none (NP1.5, NP1.7).
+- **(q)** Reviews: both reviewers review every registration; one review document per reviewer may cover one project's three replicate registrations (NP1.7).
+- **(r)** Pacing: N1.5's terms unchanged for every pilot and production attempt, one native attempt at a time, and no term relaxed to shorten the batch (NP1.7).
+- **(s)** One procedure: a later change to the native runner or a model-facing asset is a new stratum; a change to admission, retry, stopping, selection or retention always is, and needs a prospective amendment; byte parity with an authorized diagnostic canary keeps the stratum only for a change shown to leave those untouched (NP1.7).
+- **(t)** The API comparison set is CHORUS only, the clean re-canary and the three replicate-gate cells, with every other API cell out of scope. This supersedes the API arm's longest-affordable-prefix scope rule (NP1.8).
+- **(u)** The native/API contrast for CHORUS is descriptive, with no directional rule (NP1.8).
+- **(v)** No API cell and nothing on NP1.9's deferred list is a prerequisite for a native pilot or production cell (NP1.8, NP1.9).
+- **(w)** This amendment is ratified before the N1 canary launches, so that its floor rule and the reading it names are fixed before the canary's outcome exists (NP1.5). Amendment N1 proposes the same as its item (ah).
