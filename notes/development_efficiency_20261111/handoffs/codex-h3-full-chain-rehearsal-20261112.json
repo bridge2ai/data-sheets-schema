@@ -1,0 +1,696 @@
+{
+  "phase": "complete within offline/no-reservation bounds",
+  "answer": "The detached composition now builds and validates the synthetic chain through runtime, preparation, composition, seven-trace saved permission evidence, registration, current review/CI/word join and fresh admission without creating reservations. All three public launch commands genuinely stop at \"D106 requires the selected Max subscription\"; no gate was bypassed. The pure guard builder works, while current-guard preparation refuses \"capture registration has no recorded word state\"; no capture or launch was performed.",
+  "timestamp_procedure": "The lead reads valid_from from the frozen registration runtime and uses that exact whole-second UTC value as the registration-addition commit author date, without selecting another date. After committing the exact bytes on the evidence branch, scripts/native_registration_timestamp.py --verify-evidence invokes the production validator and stops on any bytes, addition or author-time mismatch. The scratch proof passes for equality and refuses a one-second mismatch; no production date or commit was made.",
+  "owner_inputs": "The owner must supply or approve identity, actual UTC authorization time and D117 word, durable binary location, saved version/init and account facts, explicit environment, provisional limits, both probe deadlines, fresh evidence directory and separate account-choice records; ratification and the margin decision remain outstanding. The draft wrappers and nested DRAFT_NOT_AUTHORIZED word cannot authorize a run.",
+  "composition": {
+    "applied": [
+      {
+        "commit": "91fcdab3311c65ba8591836db75e241b78cf10ac",
+        "patch_sha256": "76de8765455d1bce7f59be02322e64617440389899667bb2f9f0b98c7ff32a5c",
+        "private_commit": "5f6d6f1a427bd455df626122d7d2e9a416621eaf"
+      },
+      {
+        "commit": "37a4aa5d0ab07ed270ef6211f35e7a377e2472b6",
+        "patch_sha256": "17ea56363aac8783f401590c073849bd11c1086f06334f9bea1bcdaf41443385",
+        "private_commit": "1bf8797089497e5cd137ad46f07daa09a02cfdb2"
+      },
+      {
+        "commit": "789778427d029ccc2d66b1b926c8921ceef79556",
+        "patch_sha256": "154974b2d9ef7e07a61507a8399c07a2cac28c020854a06db78e61cb49914fe4",
+        "private_commit": "b72f4eca80bfadfe40eb7eeaf22b93d10579bc84"
+      },
+      {
+        "commit": "d07eccefb59938f8b625498247259f17e5c155ec",
+        "patch_sha256": "edcf36b07a214d1225ff71fb3ad1601b11659046f7ba0ef17f9d8ece7589112a",
+        "private_commit": "8fd9cd5ad55a7f6f6b86ca4f20cbfe47c1b6cc95"
+      },
+      {
+        "commit": "34b46c3132ab7a5cab4f9bdf7634d38c77321369",
+        "patch_sha256": "e91ab3630083520949af8dcd42b7459ae73ca56f6c7e8db86d834e0f044457b1",
+        "private_commit": "8b6b4b42a447ebe340f89ce71cb5e1ba1cb78cb3"
+      },
+      {
+        "commit": "e936cbb83d091cfab5c2e8b85bdd4c08a1b6b1e0",
+        "patch_sha256": "0c8955bdda3a30d9d291a9d6c08b58580e14b970c33c3efa89039ff336190321",
+        "private_commit": "616ecb9268c509b040b834cf4e7e6296d335f8d7"
+      },
+      {
+        "commit": "cf53497ae2ebfba1da9c64995590115c48437f77",
+        "patch_sha256": "7ca59fe942197ea0b82e01260b16ec1b3d8244589ff7f678c30cc6d737038766",
+        "private_commit": "defe0f3c91861c2165f9127322ae6656586d4450"
+      },
+      {
+        "commit": "d2efa55014e131f92733bf2c3a90c0830214dc89",
+        "patch_sha256": "e8b1c20b68d4fc0fedd52b149134e07b78900a62abc2736b1b80ba5456634917",
+        "private_commit": "be9fef81493e9c77b652a61c9769a09b3879360d"
+      },
+      {
+        "commit": "8567d54adf26bed0c3b6c681b4d9a2aa647dc32e",
+        "patch_sha256": "b72ff0d9f5c59605acd0691631764e7948c28f0e2c2963e34e5f1a82f65021db",
+        "private_commit": "0b4bc95dbcb0a46edcfb0eaa991102526c2bc1d8"
+      },
+      {
+        "commit": "5ca181793dc69d186c8cdcea35742afbca9d6d71",
+        "patch_sha256": "0fdcd898ed18dbe7f209d4e0b252c61f04bd32d48416f1fd061471e20628c080",
+        "private_commit": "8d98f81b670ede253993f427d275ab42466bf96d"
+      },
+      {
+        "commit": "c6b40e84e142e865ba0893e0e8dec66c261c7516",
+        "patch_sha256": "d48a08c9f69baff53f58d273b00d372e602072d97ce318bda55482b5a6b4ac44",
+        "private_commit": "64de04c9d4c5e6a7cdc0e46ac8c38c8219811c1e"
+      },
+      {
+        "commit": "7654650d1f6b8d82827b87d0047cb0f167e5b5b1",
+        "patch_sha256": "8c7611cf3d87e41d13929bfad5418e455cb7571c646533ebf3cf9e7ff1c6c96c",
+        "private_commit": "64eca22cda526b55c6060fd40c787a2592aa809b"
+      },
+      {
+        "commit": "02ad7c7aa667719576070d6aaa33489aca165382",
+        "patch_sha256": "f44157d6ff5414834baaf7f7bfe5db36ea89d728ceba45ae585fb9888207e129",
+        "private_commit": "21d8efa9476bc9576dafc80671d8c9164c22a718"
+      }
+    ],
+    "candidate": "79089536b698dd2dd968233da4eadc8841f76b10",
+    "composition_commit": "21d8efa9476bc9576dafc80671d8c9164c22a718",
+    "composition_tree": "72b1a9a44747143a3223b9b664ac8b199a914860",
+    "config_configured_sha256": "8a96cf34356a4adffb3c4cf8f07358fcde3857c9a2ed57a1c15cb9822f329b76",
+    "config_original_sha256": "95a1f7d19be439847af9384dfe1a1f7678aa0902b1601b24c56cc60d783388b1",
+    "config_restore_pending": false,
+    "fairscape_commit": "8c80311d7d8b0fadac07dca9567d632103691f48",
+    "packet_manifest_sha256": "b5162ad33a380bf4c9a519ec805d92901cb7fcf47a2dd2ffe4a0163dcc1b7c27",
+    "packets": [
+      {
+        "d127_approved_sha256": "2ec18e60316423035f88a2a30263c56385bfbbc587303e84e805a8349ab4f781",
+        "equals_d127": true,
+        "forward_reverse_verified": true,
+        "main_sha256": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",
+        "name": "shared_generation",
+        "patch": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/packets/shared_generation.patch",
+        "patch_sha256": "22b81b6cd63a708d82bfbd038b7e1d9aaf340bf1d86828f138b56dd9ef4756c5",
+        "path": "src/data_sheets_schema/shared_generation.py",
+        "postimage_sha256": "2ec18e60316423035f88a2a30263c56385bfbbc587303e84e805a8349ab4f781",
+        "since_d127_diff": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/packets/shared_generation.since-d127.diff"
+      },
+      {
+        "d127_approved_sha256": "3e8b7e5d3cc13c5ebc508e33f865e9ac484056fde16126118719d740656a4fb7",
+        "equals_d127": false,
+        "forward_reverse_verified": true,
+        "main_sha256": "23dcc828d171000173bd521edfbc55b38bfcf6c0adb41c6b962c10f381e911bb",
+        "name": "api_runner_companion",
+        "patch": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/packets/api_runner_companion.patch",
+        "patch_sha256": "b1931723bdb6866d3a794618c2b1e6e813bcadcf505422eb1007a71787710838",
+        "path": "src/data_sheets_schema/api_runner.py",
+        "postimage_sha256": "830eec1e12e96f807fa76ea26e066a1923b60380013c424cfa99f0012af0a881",
+        "since_d127_diff": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/packets/api_runner_companion.since-d127.diff"
+      },
+      {
+        "d127_approved_sha256": "543e5cd6dc0da0f622ba2cd11a16a90732e9302a1ed0a4700efb61971299d252",
+        "equals_d127": true,
+        "forward_reverse_verified": true,
+        "main_sha256": "39b93c009457681a1d8d8b8afee5a869bbd6f5e70b6f4332522db5d7e22d0584",
+        "name": "canonical_hashes",
+        "patch": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/packets/canonical_hashes.patch",
+        "patch_sha256": "91831c260862df355353c2e36ffabb9870005cbed07e602a77d69c1f65c907a3",
+        "path": "src/download/prompts/canonical_hashes.yaml",
+        "postimage_sha256": "543e5cd6dc0da0f622ba2cd11a16a90732e9302a1ed0a4700efb61971299d252",
+        "since_d127_diff": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/packets/canonical_hashes.since-d127.diff"
+      },
+      {
+        "d127_approved_sha256": "b1e0cbd14c533a51b88eacb84b974cb93963e18d8f1fb71ae4ed3228f784d1ce",
+        "equals_d127": true,
+        "forward_reverse_verified": true,
+        "main_sha256": "a7f96a253a37e994f0c62c7d9b2ab21b0a94d4f342975f84103cd274ef11af72",
+        "name": "run_spec_boundary_contracts",
+        "patch": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/packets/run_spec_boundary_contracts.patch",
+        "patch_sha256": "dc58e99f73fe5de1a4f6179639dd2cfd2215c0dd665319e8d15b148b1824509f",
+        "path": "tests/utils/run_spec_boundary_contracts.json",
+        "postimage_sha256": "b1e0cbd14c533a51b88eacb84b974cb93963e18d8f1fb71ae4ed3228f784d1ce",
+        "since_d127_diff": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/packets/run_spec_boundary_contracts.since-d127.diff"
+      }
+    ],
+    "private_git": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.git",
+    "status": "focused_rehearsal_passed_with_documented_refusals",
+    "tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree",
+    "config_restoration": {
+      "backup": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.git/config.bak-h3-full-chain-20261112",
+        "bytes": 173,
+        "sha256": "95a1f7d19be439847af9384dfe1a1f7678aa0902b1601b24c56cc60d783388b1"
+      },
+      "before_restore": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.git/config",
+        "bytes": 250,
+        "sha256": "8a96cf34356a4adffb3c4cf8f07358fcde3857c9a2ed57a1c15cb9822f329b76"
+      },
+      "restored": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.git/config",
+        "bytes": 173,
+        "sha256": "95a1f7d19be439847af9384dfe1a1f7678aa0902b1601b24c56cc60d783388b1"
+      },
+      "equal_original": true,
+      "private_ci_url_present_after": false
+    },
+    "sparse_materialization_added": [
+      "data/omission_contexts"
+    ]
+  },
+  "canary": {
+    "progress": {
+      "completed": [
+        {
+          "bytes": 4752,
+          "document": "synthetic-final-runtime",
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/cases/test_full_chain_canary0/SYNTHETIC-chain/synthetic-final-runtime.json",
+          "sha256": "d7b5070907a4a23796a7bb1c238170103d7e0a1f8a01192cff6866cb739876f0"
+        },
+        {
+          "bytes": 308350,
+          "document": "synthetic-preparation",
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/cases/test_full_chain_canary0/SYNTHETIC-chain/synthetic-preparation.json",
+          "sha256": "ad640f3cc0ad05bbac861e82fff4a8bd7ae47f0a2a59e2aefef8addd2b012b6a"
+        },
+        {
+          "bytes": 574218,
+          "document": "synthetic-composition",
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/cases/test_full_chain_canary0/SYNTHETIC-chain/synthetic-composition.json",
+          "sha256": "a8cf0cad3ba6f478645f1f21f26ab2fa126c60856cf29e7a2dfaae417c99d641"
+        },
+        {
+          "bytes": 306842,
+          "document": "synthetic-expectation",
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/cases/test_full_chain_canary0/SYNTHETIC-chain/synthetic-expectation.json",
+          "sha256": "072951b605a925b01560e04db0a1dd51089351ed5f3face001a1939a0ab6b44d"
+        },
+        {
+          "bytes": 415,
+          "document": "synthetic-permission-location",
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/cases/test_full_chain_canary0/SYNTHETIC-chain/synthetic-permission-location.json",
+          "sha256": "acbd89641f4c10074444989daf67a446084e6e2fd1fcaf9dd9e696e63c5ea9f5"
+        },
+        {
+          "bytes": 1214664,
+          "document": "synthetic-registration",
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/cases/test_full_chain_canary0/SYNTHETIC-chain/synthetic-registration.json",
+          "sha256": "e7dcab40b85b03c80b8013a24a4cffa73b65e16f18686db406ed67b7c5e11c20"
+        },
+        {
+          "bytes": 368,
+          "document": "source-contract",
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/cases/test_full_chain_canary0/SYNTHETIC-chain/source-contract.json",
+          "sha256": "8d9912fe5ae3c19a4fa9e8dba1820ebe7e5839bac224e7cffe8332bc8d67eab0"
+        },
+        {
+          "bytes": 4406,
+          "document": "SYNTHETIC-NOT-ACTUAL-CI",
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/cases/test_full_chain_canary0/SYNTHETIC-chain/SYNTHETIC-NOT-ACTUAL-CI.json",
+          "sha256": "e8e58f7b06b6cae063573acc1e0b1a67ded9827535635c6e5adda56f642a1667"
+        },
+        {
+          "bytes": 2878,
+          "document": "synthetic-review",
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/cases/test_full_chain_canary0/SYNTHETIC-chain/synthetic-review.json",
+          "sha256": "c6ae7f2924d35b149f66bf2a7f49ecfdfb0cf18abd6de654674740645cab2a38"
+        },
+        {
+          "bytes": 705,
+          "document": "synthetic-word",
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/cases/test_full_chain_canary0/SYNTHETIC-chain/synthetic-word.json",
+          "sha256": "c08cbef0e64a178e1fc18b39be912a4adfa270d687974669ce1e061d0ee9d01f"
+        }
+      ],
+      "reservation_performed": false,
+      "review_current_validated": true,
+      "scope": "SYNTHETIC FULL-CHAIN REHEARSAL; NOT ACTUAL CI, REVIEW, OWNER OR LAUNCH AUTHORITY",
+      "status": "registration_and_current_review_validated_no_reservation"
+    },
+    "progress_pin": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/cases/test_full_chain_canary0/SYNTHETIC-chain/chain-progress.json",
+      "bytes": 3572,
+      "sha256": "44cd1052a4f166ebaddf0169097de5d3722fd3b72520a55662f5e84d37664ce6"
+    },
+    "log": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/pytest.log",
+      "bytes": 1451,
+      "sha256": "ff4f170caa2f0b954ebd340d480c3287d4627d9b5e9ad3fcd015adb3b802919f"
+    },
+    "junit": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/pytest.xml",
+      "bytes": 341,
+      "sha256": "305de451e97fd00b072ff40d55a970209e79c90aafdfd06c1d504b04371f971a"
+    }
+  },
+  "counts": {
+    "canary_cases": 1,
+    "canary_failures": 0
+  },
+  "composition_pin": {
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/composition.json",
+    "bytes": 8563,
+    "sha256": "1d75dff053a1b4d69e9b0c6472f2857b4d9a67839026ce5f0b4874099ab6c354"
+  },
+  "protected_verification": [
+    {
+      "path": "src/data_sheets_schema/shared_generation.py",
+      "branch_sha256": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",
+      "scratch_sha256": "2ec18e60316423035f88a2a30263c56385bfbbc587303e84e805a8349ab4f781"
+    },
+    {
+      "path": "src/data_sheets_schema/api_runner.py",
+      "branch_sha256": "23dcc828d171000173bd521edfbc55b38bfcf6c0adb41c6b962c10f381e911bb",
+      "scratch_sha256": "830eec1e12e96f807fa76ea26e066a1923b60380013c424cfa99f0012af0a881"
+    },
+    {
+      "path": "src/download/prompts/canonical_hashes.yaml",
+      "branch_sha256": "39b93c009457681a1d8d8b8afee5a869bbd6f5e70b6f4332522db5d7e22d0584",
+      "scratch_sha256": "543e5cd6dc0da0f622ba2cd11a16a90732e9302a1ed0a4700efb61971299d252"
+    },
+    {
+      "path": "tests/utils/run_spec_boundary_contracts.json",
+      "branch_sha256": "a7f96a253a37e994f0c62c7d9b2ab21b0a94d4f342975f84103cd274ef11af72",
+      "scratch_sha256": "b1e0cbd14c533a51b88eacb84b974cb93963e18d8f1fb71ae4ed3228f784d1ce"
+    }
+  ],
+  "source_contract": {
+    "admission_terms": {
+      "max_age_seconds": 1200,
+      "max_starting_five_hour_utilization": 0.25,
+      "max_starting_weekly_utilization": 0.5,
+      "pre_reservation_margin_seconds": 90
+    },
+    "bundle_kind": "d4d_native_execution_review_bundle_v3",
+    "bundle_version": 3,
+    "receipt_instrument_version": 4,
+    "sequence_source": "src/data_sheets_schema/native_launch_sequence.py",
+    "terms_kind": "d4d_native_owner_launch_terms_v2",
+    "terms_version": 2
+  },
+  "tests": [
+    {
+      "name": "full-chain-canary-01",
+      "cases": 1,
+      "log": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/pytest.log",
+        "bytes": 1451,
+        "sha256": "ff4f170caa2f0b954ebd340d480c3287d4627d9b5e9ad3fcd015adb3b802919f"
+      },
+      "junit": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/pytest.xml",
+        "bytes": 341,
+        "sha256": "305de451e97fd00b072ff40d55a970209e79c90aafdfd06c1d504b04371f971a"
+      },
+      "outcome": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-canary-01/outcome.json",
+        "bytes": 1936,
+        "sha256": "dc15ed6dde8882651eb93d1aa92914fd79da9d4c410c41bae89fee0105579fd0"
+      },
+      "cleanup_verified": true
+    },
+    {
+      "name": "full-chain-rest-01",
+      "cases": 7,
+      "log": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/pytest.log",
+        "bytes": 1449,
+        "sha256": "c318ae3e584f58e6807a35d6065a702a0a9ef2caea1a3d94ddf611298b0c6d38"
+      },
+      "junit": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/pytest.xml",
+        "bytes": 1239,
+        "sha256": "d18da8077e337216c332150398f3d3242e471fe422d9312e5e429d524318998d"
+      },
+      "outcome": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/outcome.json",
+        "bytes": 3824,
+        "sha256": "f0ec69d4bfc52d85a41d0bb0253b270b46f688388a28f1b0200dee82ef935f9a"
+      },
+      "cleanup_verified": true
+    },
+    {
+      "name": "full-chain-final-01",
+      "cases": 4,
+      "log": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-final-01/pytest.log",
+        "bytes": 1450,
+        "sha256": "456b20ceca26939546d4ef7ed2ee868cfe1ab28f6fb11ab36ddcef76e13ef973"
+      },
+      "junit": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-final-01/pytest.xml",
+        "bytes": 745,
+        "sha256": "04ffa4ca146c8af3367ccc70b40e01281b506df817fb80e975918a912bf0b6f5"
+      },
+      "outcome": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-final-01/outcome.json",
+        "bytes": 3482,
+        "sha256": "baa36b273eaf63beb9dab5ca298fecba6d60d799fd91fadd8bf7f754c3f40226"
+      },
+      "cleanup_verified": true
+    }
+  ],
+  "document_outcomes": [
+    {
+      "document": "Source manifest",
+      "outcome": "Validated repository input through real CHORUS prefix and synthetic selection capture.",
+      "synthetic_inputs_and_limits": "Real CHORUS manifest in prefix; invented manifest in synthetic chain."
+    },
+    {
+      "document": "Source bundle",
+      "outcome": "Validated source bytes/mapping; existing input, not a generated source.",
+      "synthetic_inputs_and_limits": "Real baseline CHORUS bytes in prefix; fixture source in full chain."
+    },
+    {
+      "document": "Chunk manifest",
+      "outcome": "Built/validated manifest mapping in production selection path.",
+      "synthetic_inputs_and_limits": "Real CHORUS declared chunks in prefix; fixture chunks in full chain."
+    },
+    {
+      "document": "Omission context",
+      "outcome": "Validated by selection capture.",
+      "synthetic_inputs_and_limits": "Real CHORUS omission context in prefix; fixture context in synthetic chain."
+    },
+    {
+      "document": "Schema closure",
+      "outcome": "Captured/validated via production schema closure path.",
+      "synthetic_inputs_and_limits": "Installed schema assets; fixture selection declares synthetic inputs."
+    },
+    {
+      "document": "Prompt assets and profile vocabulary",
+      "outcome": "Captured installed assets and validated profile.",
+      "synthetic_inputs_and_limits": "Real bridge2ai prefix; neutral fixture profile in synthetic chain."
+    },
+    {
+      "document": "Receipt policy",
+      "outcome": "Built and parsed through production receipt policy parser.",
+      "synthetic_inputs_and_limits": "Draft registration identity; source-derived instrument; fixture policy in full chain."
+    },
+    {
+      "document": "Selection",
+      "outcome": "Built and validated through parse_selection and capture.",
+      "synthetic_inputs_and_limits": "Real CHORUS prefix with draft locations; invented full-chain registration and locations."
+    },
+    {
+      "document": "Provisional runtime",
+      "outcome": "Synthetic provisional runtime consumed by prepare_synthetic and saved observation validation; real draft deliberately invalid.",
+      "synthetic_inputs_and_limits": "Inert peer bytes, invented model/account/environment/limits; no binary observed."
+    },
+    {
+      "document": "D117 probe authorization",
+      "outcome": "Synthetic saved authorization validated as part of observation/bound sequence; real draft deliberately invalid.",
+      "synthetic_inputs_and_limits": "Fixture owner/time/word and authorization; not an owner act."
+    },
+    {
+      "document": "Account choice",
+      "outcome": "Constructed for CLI rehearsal; account-choice validator not reached because D106 gate refuses first.",
+      "synthetic_inputs_and_limits": "Fixture subject/runtime hashes and declarations; no owner choice inferred."
+    },
+    {
+      "document": "Observation manifest and transcript/request",
+      "outcome": "Fabricated saved records passed production observation validator and final-runtime preparation.",
+      "synthetic_inputs_and_limits": "All observation/transcript/request/process evidence invented; no probe ran."
+    },
+    {
+      "document": "Final runtime",
+      "outcome": "Built by native_u4b_runtime.prepare_synthetic and validated downstream.",
+      "synthetic_inputs_and_limits": "Inert peer copies, fake observation, model/account/limits and fixture validity interval."
+    },
+    {
+      "document": "Preparation envelope and instruction",
+      "outcome": "Built by prepare_synthetic, checked by verify_preparer; fresh admit also passes.",
+      "synthetic_inputs_and_limits": "Synthetic selection/runtime/job identifier; real source-derived instruction."
+    },
+    {
+      "document": "Composition",
+      "outcome": "Built by compose and validated by reconstruct_composition.",
+      "synthetic_inputs_and_limits": "Synthetic preparation and exact derived instruction; real dependency closure."
+    },
+    {
+      "document": "System instructions",
+      "outcome": "Saved fixture text accepted in permission/registration path; no production system approval.",
+      "synthetic_inputs_and_limits": "Explicit SYNTHETIC label and command guidance from source."
+    },
+    {
+      "document": "Permission expectation and recipe",
+      "outcome": "Built by permission_expectation and consumed by actual bound-probe verifier.",
+      "synthetic_inputs_and_limits": "Synthetic runtime/source/paths; actual installed command policy."
+    },
+    {
+      "document": "Bound permission manifest and sequence completion",
+      "outcome": "Seven fabricated traces and completion pass validate_bound_probe and registration verification.",
+      "synthetic_inputs_and_limits": "Every trace/outcome fabricated; saved probe claims only, no execution or capture reservation."
+    },
+    {
+      "document": "Execution registration",
+      "outcome": "Built by synthetic_registration and checked by verified plus fresh admit.",
+      "synthetic_inputs_and_limits": "Synthetic runtime, source, saved permissions, future attempt/evidence paths absent."
+    },
+    {
+      "document": "Registration-addition commit evidence",
+      "outcome": "Production commit/addition/blob/date validator passes scratch proof and rejects author time one second off.",
+      "synthetic_inputs_and_limits": "New scratch registration-evidence repository and synthetic registration only."
+    },
+    {
+      "document": "CI evidence",
+      "outcome": "Declared CI schema passes genuine authorizations and fresh admit; no actual CI certified.",
+      "synthetic_inputs_and_limits": "Invented workflow run URL/ref and successful check claims, explicitly labelled synthetic."
+    },
+    {
+      "document": "Independent component review documents",
+      "outcome": "Fixture review documents pass genuine current bundle validator.",
+      "synthetic_inputs_and_limits": "Invented independent reviewer identities, decisions and timestamps; not real reviews."
+    },
+    {
+      "document": "Owner launch terms and quota request",
+      "outcome": "Fixture current terms/request pass bundle validation; no capture state created.",
+      "synthetic_inputs_and_limits": "Invented owner/time, account_quiet true and requested directory; terms/margin read from source."
+    },
+    {
+      "document": "Review bundle",
+      "outcome": "Current bundle passes production adapter and admission, including sequence source pin.",
+      "synthetic_inputs_and_limits": "Fixture reviews/owner plus actual dependency source hash; current kind/version source-derived."
+    },
+    {
+      "document": "Coded launch word",
+      "outcome": "Fixture word passes review/CI/word join and fresh admit; no journal written.",
+      "synthetic_inputs_and_limits": "Invented owner/time/word; actual fixture artifact hashes."
+    },
+    {
+      "document": "Quota capture manifest and event",
+      "outcome": "No capture manifest built: public capture refuses D106 requires the selected Max subscription. Pure invented quota event feeds guard builder only.",
+      "synthetic_inputs_and_limits": "Quota event invented; no recorded word state, capture claim, provider or account observation."
+    },
+    {
+      "document": "Subscription guard",
+      "outcome": "Pure prepare_guard succeeds; current_guard_preparation refuses: capture registration has no recorded word state. No current guard admitted.",
+      "synthetic_inputs_and_limits": "Invented quota event, capture index/count and fixture terms; no latest claim fabricated."
+    }
+  ],
+  "document_outcomes_pin": {
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/full-chain-document-outcomes.json",
+    "bytes": 7932,
+    "sha256": "86aa61191de67adbe45706ea6468a7c59ef3812f197d202c9912a927ab16cf6a"
+  },
+  "timestamp": {
+    "evidence": {
+      "commit": "d4489bdbf45b834bf8904ddbb50ecbf27531ca0f",
+      "path": "registration.json",
+      "repository": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-timestamp-proof"
+    },
+    "production_date_chosen": false,
+    "refusal": "registered validity must start at the registration commit author date",
+    "scope": "SYNTHETIC FULL-CHAIN REHEARSAL; NOT ACTUAL CI, REVIEW, OWNER OR LAUNCH AUTHORITY",
+    "success": {
+      "checked": true,
+      "commit": "d4489bdbf45b834bf8904ddbb50ecbf27531ca0f",
+      "scope": "Commit bytes/addition/author-time equality only; not launch authorization.",
+      "valid_from": "2026-11-11T00:00:00Z"
+    },
+    "wrong_commit": "59b58e9d25e0acbea21b3d01cc3af4a3da36090d"
+  },
+  "timestamp_cli_checks": {
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/timestamp-cli-checks.json",
+    "bytes": 1594,
+    "sha256": "23d722c565637e68b57b947e3eaf409139c263c79e46066933536f8e1204a979"
+  },
+  "source_evidence": [
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/native_launch_review.py",
+        "bytes": 22500,
+        "sha256": "36104b62c772c0248ddc4496cb2f8735914d2e6ed75a39b4a4238e4dd26f6b6c"
+      },
+      "line": 67,
+      "meaning": "Exact registration-addition commit/blob/parent checks"
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/native_launch_review.py",
+        "bytes": 22500,
+        "sha256": "36104b62c772c0248ddc4496cb2f8735914d2e6ed75a39b4a4238e4dd26f6b6c"
+      },
+      "line": 137,
+      "meaning": "valid_from equals commit author time"
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/native_u4b_policy.py",
+        "bytes": 4075,
+        "sha256": "9db9d274530e7a7c011364da3ddad22d6ef92f944fecb7a3c2bd9cb67c8e3774"
+      },
+      "line": 46,
+      "meaning": "Fourteen-day validity interval"
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/native_capture_words.py",
+        "bytes": 14935,
+        "sha256": "1cbae116513c616f579959d12e7c6a110bb0360b79542bc41bbbd3df6c999cf1"
+      },
+      "line": 76,
+      "meaning": "valid_from <= word authorized_at <= now < valid_until"
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/native_launch_review.py",
+        "bytes": 22500,
+        "sha256": "36104b62c772c0248ddc4496cb2f8735914d2e6ed75a39b4a4238e4dd26f6b6c"
+      },
+      "line": 328,
+      "meaning": "Review time cannot follow launch word"
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/native_subscription_guard_v2.py",
+        "bytes": 40735,
+        "sha256": "f614a45a61105c304aacec8da007d3978e1642c66ee1e50df61905ebdccc1546"
+      },
+      "line": 337,
+      "meaning": "Guard terms equal registered terms"
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/native_subscription_guard_v2.py",
+        "bytes": 40735,
+        "sha256": "f614a45a61105c304aacec8da007d3978e1642c66ee1e50df61905ebdccc1546"
+      },
+      "line": 364,
+      "meaning": "Capture/word chronology, current-clock freshness and margin"
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/native_launch_sequence.py",
+        "bytes": 11498,
+        "sha256": "763a55f9558088731d2d28326b91c1de9287e212775f5c40473a0b470e39320d"
+      },
+      "line": 56,
+      "meaning": "Delegation thirty-minute checks at entry and before capture"
+    }
+  ],
+  "cli_refusals": [
+    {
+      "command": [
+        "capture-subscription-event",
+        "--registration",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-registration.json",
+        "--review",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-review.json",
+        "--launch-word",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-word.json",
+        "--account-choice",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-account-choice.json",
+        "--output-directory",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-capture"
+      ],
+      "no_gate_stubbed": true,
+      "refusal": "D106 requires the selected Max subscription",
+      "reservation_performed": false,
+      "scope": "SYNTHETIC FULL-CHAIN REHEARSAL; NOT ACTUAL CI, REVIEW, OWNER OR LAUNCH AUTHORITY"
+    },
+    {
+      "command": [
+        "prepare-subscription-guard-v2",
+        "--registration",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-registration.json",
+        "--review",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-review.json",
+        "--launch-word",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-word.json",
+        "--account-choice",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-account-choice.json",
+        "--capture",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/NO-CAPTURE.json",
+        "--output",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/NO-GUARD.json"
+      ],
+      "no_gate_stubbed": true,
+      "refusal": "D106 requires the selected Max subscription",
+      "reservation_performed": false,
+      "scope": "SYNTHETIC FULL-CHAIN REHEARSAL; NOT ACTUAL CI, REVIEW, OWNER OR LAUNCH AUTHORITY"
+    },
+    {
+      "command": [
+        "launch",
+        "--registration",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-registration.json",
+        "--review",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-review.json",
+        "--launch-word",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-word.json",
+        "--account-choice",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/synthetic-account-choice.json",
+        "--ci",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/SYNTHETIC-NOT-ACTUAL-CI.json",
+        "--subscription-guard",
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/NO-GUARD.json",
+        "--subscription-guard-sha256",
+        "0000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "no_gate_stubbed": true,
+      "refusal": "D106 requires the selected Max subscription",
+      "reservation_performed": false,
+      "scope": "SYNTHETIC FULL-CHAIN REHEARSAL; NOT ACTUAL CI, REVIEW, OWNER OR LAUNCH AUTHORITY"
+    }
+  ],
+  "guard_refusal": {
+    "guard_scope": "pure synthetic guard only; no actual claim or current capture",
+    "refusal": "capture registration has no recorded word state",
+    "reservation_performed": false,
+    "scope": "SYNTHETIC FULL-CHAIN REHEARSAL; NOT ACTUAL CI, REVIEW, OWNER OR LAUNCH AUTHORITY"
+  },
+  "admission": {
+    "fresh_admit_validated": true,
+    "future_reservations": [
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-final-01/cases/full-chain-cohort0/SYNTHETIC-chain/NEVER-RESERVED-ATTEMPT",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-final-01/cases/full-chain-cohort0/SYNTHETIC-chain/NEVER-RESERVED-EVIDENCE",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-final-01/cases/full-chain-cohort0/SYNTHETIC-chain/data/d4d_concatenated/claudecode_direct/offline-neutral",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-final-01/cases/full-chain-cohort0/SYNTHETIC-chain/data/d4d_concatenated/claudecode_direct_core/offline-neutral",
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-final-01/cases/full-chain-cohort0/SYNTHETIC-chain/fresh-attempt/stages"
+    ],
+    "reservation_performed": false,
+    "review_ci_word_join_validated": true,
+    "scope": "SYNTHETIC FULL-CHAIN REHEARSAL; NOT ACTUAL CI, REVIEW, OWNER OR LAUNCH AUTHORITY"
+  },
+  "probe_drafts": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/probe-packet-draft-v2/authorization.DRAFT.json",
+      "bytes": 847,
+      "sha256": "3819fde10e944855575545f85f7d1dd826d829ea2c794c55147dd60974d6d125"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/probe-packet-draft-v2/probe-packet.DRAFT.json",
+      "bytes": 21627,
+      "sha256": "e772a71f1cf79fc3461b6abaa772f1e970bf94a833dc94b10218182659a6e865"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/probe-packet-draft-v2/probe-packet.DRAFT.md",
+      "bytes": 10361,
+      "sha256": "3ea29ddc47ff1851c55c0933914d17f5d5d5ff8a97da85ae2f40d7d813c9db03"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/probe-packet-draft-v2/provisional-runtime.DRAFT.json",
+      "bytes": 1812,
+      "sha256": "5f4ba264e4a19e4b29d0f65567cf2a0b44132cd8081b49649c38b0652940cd14"
+    }
+  ],
+  "branch_commit": "7e6b994f8aaf861d5e5cc6bbbad9cbba85080367",
+  "details_markdown": "## Evidence and boundaries\n\nBranch: `codex/native-packet-builder-20261112`; final branch commit `7e6b994f8aaf861d5e5cc6bbbad9cbba85080367`. Composition `21d8efa9476bc9576dafc80671d8c9164c22a718` uses candidate `79089536b698dd2dd968233da4eadc8841f76b10`, observer commits and helper2 head `d2efa55014e131f92733bf2c3a90c0830214dc89`; exact patch/post-image hashes are in `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/composition.json`. Four protected branch files equal the recorded main bytes; protected post-images exist only in scratch. No conflicts were resolved.\n\nFocused cohorts passed 1, 7 and 4 cases respectively (12 test executions, including repeated admission/guard checks). All runner outcomes report cleanup verified and no observed survivors; origin checks passed. This is not full CI, live permissions, identity authentication, quota observation or scientific acceptance. Production functions were exercised directly; the saved-step wrapper was not exercised end to end for every step.\n\nCurrent source contract: `{\"admission_terms\": {\"max_age_seconds\": 1200, \"max_starting_five_hour_utilization\": 0.25, \"max_starting_weekly_utilization\": 0.5, \"pre_reservation_margin_seconds\": 90}, \"bundle_kind\": \"d4d_native_execution_review_bundle_v3\", \"bundle_version\": 3, \"receipt_instrument_version\": 4, \"sequence_source\": \"src/data_sheets_schema/native_launch_sequence.py\", \"terms_kind\": \"d4d_native_owner_launch_terms_v2\", \"terms_version\": 2}`. The observed margin is not an owner decision. The historical map is retained; the table below supplements it against the composed source.\n\n| Document | Outcome | Synthetic inputs and limits |\n|---|---|---|\n| Source manifest | Validated repository input through real CHORUS prefix and synthetic selection capture. | Real CHORUS manifest in prefix; invented manifest in synthetic chain. |\n| Source bundle | Validated source bytes/mapping; existing input, not a generated source. | Real baseline CHORUS bytes in prefix; fixture source in full chain. |\n| Chunk manifest | Built/validated manifest mapping in production selection path. | Real CHORUS declared chunks in prefix; fixture chunks in full chain. |\n| Omission context | Validated by selection capture. | Real CHORUS omission context in prefix; fixture context in synthetic chain. |\n| Schema closure | Captured/validated via production schema closure path. | Installed schema assets; fixture selection declares synthetic inputs. |\n| Prompt assets and profile vocabulary | Captured installed assets and validated profile. | Real bridge2ai prefix; neutral fixture profile in synthetic chain. |\n| Receipt policy | Built and parsed through production receipt policy parser. | Draft registration identity; source-derived instrument; fixture policy in full chain. |\n| Selection | Built and validated through parse_selection and capture. | Real CHORUS prefix with draft locations; invented full-chain registration and locations. |\n| Provisional runtime | Synthetic provisional runtime consumed by prepare_synthetic and saved observation validation; real draft deliberately invalid. | Inert peer bytes, invented model/account/environment/limits; no binary observed. |\n| D117 probe authorization | Synthetic saved authorization validated as part of observation/bound sequence; real draft deliberately invalid. | Fixture owner/time/word and authorization; not an owner act. |\n| Account choice | Constructed for CLI rehearsal; account-choice validator not reached because D106 gate refuses first. | Fixture subject/runtime hashes and declarations; no owner choice inferred. |\n| Observation manifest and transcript/request | Fabricated saved records passed production observation validator and final-runtime preparation. | All observation/transcript/request/process evidence invented; no probe ran. |\n| Final runtime | Built by native_u4b_runtime.prepare_synthetic and validated downstream. | Inert peer copies, fake observation, model/account/limits and fixture validity interval. |\n| Preparation envelope and instruction | Built by prepare_synthetic, checked by verify_preparer; fresh admit also passes. | Synthetic selection/runtime/job identifier; real source-derived instruction. |\n| Composition | Built by compose and validated by reconstruct_composition. | Synthetic preparation and exact derived instruction; real dependency closure. |\n| System instructions | Saved fixture text accepted in permission/registration path; no production system approval. | Explicit SYNTHETIC label and command guidance from source. |\n| Permission expectation and recipe | Built by permission_expectation and consumed by actual bound-probe verifier. | Synthetic runtime/source/paths; actual installed command policy. |\n| Bound permission manifest and sequence completion | Seven fabricated traces and completion pass validate_bound_probe and registration verification. | Every trace/outcome fabricated; saved probe claims only, no execution or capture reservation. |\n| Execution registration | Built by synthetic_registration and checked by verified plus fresh admit. | Synthetic runtime, source, saved permissions, future attempt/evidence paths absent. |\n| Registration-addition commit evidence | Production commit/addition/blob/date validator passes scratch proof and rejects author time one second off. | New scratch registration-evidence repository and synthetic registration only. |\n| CI evidence | Declared CI schema passes genuine authorizations and fresh admit; no actual CI certified. | Invented workflow run URL/ref and successful check claims, explicitly labelled synthetic. |\n| Independent component review documents | Fixture review documents pass genuine current bundle validator. | Invented independent reviewer identities, decisions and timestamps; not real reviews. |\n| Owner launch terms and quota request | Fixture current terms/request pass bundle validation; no capture state created. | Invented owner/time, account_quiet true and requested directory; terms/margin read from source. |\n| Review bundle | Current bundle passes production adapter and admission, including sequence source pin. | Fixture reviews/owner plus actual dependency source hash; current kind/version source-derived. |\n| Coded launch word | Fixture word passes review/CI/word join and fresh admit; no journal written. | Invented owner/time/word; actual fixture artifact hashes. |\n| Quota capture manifest and event | No capture manifest built: public capture refuses D106 requires the selected Max subscription. Pure invented quota event feeds guard builder only. | Quota event invented; no recorded word state, capture claim, provider or account observation. |\n| Subscription guard | Pure prepare_guard succeeds; current_guard_preparation refuses: capture registration has no recorded word state. No current guard admitted. | Invented quota event, capture index/count and fixture terms; no latest claim fabricated. |\n\n## Timestamp source and placement\n\n- `src/data_sheets_schema/native_launch_review.py:67`: Exact registration-addition commit/blob/parent checks.\n- `src/data_sheets_schema/native_launch_review.py:137`: valid_from equals commit author time.\n- `src/data_sheets_schema/native_u4b_policy.py:46`: Fourteen-day validity interval.\n- `src/data_sheets_schema/native_capture_words.py:76`: valid_from <= word authorized_at <= now < valid_until.\n- `src/data_sheets_schema/native_launch_review.py:328`: Review time cannot follow launch word.\n- `src/data_sheets_schema/native_subscription_guard_v2.py:337`: Guard terms equal registered terms.\n- `src/data_sheets_schema/native_subscription_guard_v2.py:364`: Capture/word chronology, current-clock freshness and margin.\n- `src/data_sheets_schema/native_launch_sequence.py:56`: Delegation thirty-minute checks at entry and before capture.\n\nThe committer timestamp remains normal Git metadata; the author date preserves the already frozen runtime value. Fractional seconds are refused rather than truncated. Capture age and margin use capture time/current clock, not commit time; word renewal requires a later authorization time. The procedure belongs to N1.9 prerequisites 4/5, before N1.5 event 1 completes; events 2/3 freeze owner terms and bundle. No normative N1 v12 change is needed; an author-date-versus-wall-clock clarification is useful. The runbook is updated with the procedure and helper2 sequence at N1.9 prerequisite 10 / N1.5 events 5\u20136.\n\nExact success/refusal evidence: `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/full-chain-rest-01/cases/full-chain-cohort0/SYNTHETIC-chain/timestamp-results.json`. Both read-only CLI modes also passed; evidence `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/timestamp-cli-checks.json`.\n\n## Owner probe packet\n\nField-by-field values/placeholders, provenance, owner commitments, exact commands, expected files and refusal checks: `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/probe-packet-draft-v2/probe-packet.DRAFT.md` and its JSON. The candidate documents are `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/probe-packet-draft-v2/provisional-runtime.DRAFT.json` and `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/probe-packet-draft-v2/authorization.DRAFT.json`. Tests confirm production readers reject these drafts.\n\nSuccessful D117 probes would execute the native binary nine times: one observation, one version check and seven bound permission traces; saved validation executes it zero times. Observation uses the fixed OK prompt with a scripted loopback provider; bound permission traces can include CHORUS source/tool content locally. The version check targets a disabled loopback endpoint. No actual binary behavior or absence of unsolicited traffic has been established. The installed binary was only read and hashed; neither its updater filename nor its bytes establish an observed version or account state. No durable copy was selected or made.\n\n## Findings and restoration\n\nH3-R1: the three CLI routes intentionally reject synthetic runtime at D106 before their account-choice validation or reservation path. Recommendation: preserve the production Max gate; a deeper public-route rehearsal needs separately authorized synthetic reservation coverage, not altered auth claims. H3-R2: latest-capture admission cannot succeed without recorded word/capture state, forbidden by this assignment; retain this explicit limit. Neither finding establishes a source defect outside this helper. Existing issue 5965 remains for complete CI; these focused tests do not settle it.\n\nTest-only Git configuration was confined to `/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.git/config` and restored byte-for-byte from its adjacent backup; restored SHA-256 `95a1f7d19be439847af9384dfe1a1f7678aa0902b1601b24c56cc60d783388b1`. Scratch has no remote and its tracked tree is clean. The extra sparse materialization was `data/omission_contexts`; it changes neither source HEAD nor protected content. No native process, model/provider call, capture/attempt/word reservation, sequence-start claim, push or GitHub write occurred. Synthetic saved probe claims are fixture evidence, not capture or launch reservations.\n"
+}

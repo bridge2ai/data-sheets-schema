@@ -10,6 +10,8 @@ Your scanner handoff is accepted (`handoffs/codex-h1-scanner-pin-20261112.md`, S
 - **H1-F5 (two ambiguous-alias tests):** your recommendation is accepted. Main's precision behaviour stands. Replace the two old unconditional-refusal expectations as you proposed: first add the positive witnesses with both target modules materialised, keep the negatives for unresolved alternatives and ambiguous `-m` operands. One commit, tests only.
 - **H1-F6 (retained known-gap fixtures):** classify each fixture from your two audits. Where the scanner now reports a violation that the fixture recorded as a known gap, the fixture's expectation is updated to what the scanner reports, in its own commit per fixture, with the evidence that the extra violations are the ones the fixture describes. Where you cannot show that, leave the fixture failing and say why. No xfail, no deletion.
 
+- **Your public-home finding** (`handoffs/codex-h1-public-home-finding-20261112.json`): accepted as evidence. Helper 2 saw the same refusal independently and owns both repairs (the helper cache location, and the missing failed readback when runtime revalidation fails), on `codex/native-helper-cache-home-20261112`. Do not work on them; the lead will give you the commits to integrate when they are reviewed.
+
 The owner has not yet answered on the API post-image hash or the margin. The four protected files stay equal to main on the branch.
 
 ## Part 1: integrate the reviewed commits (do this first)
