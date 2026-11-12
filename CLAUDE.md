@@ -137,7 +137,10 @@ root; corpus data stays with the caller's selected tree.
 - Prefer `schema_cache.load_yaml` for schema/provenance reads; preserve its copy
   and invalidation contract. Read-after-write verification must observe new bytes,
   not a stale cache. Do not cache away fresh evidence or validation requirements.
-- Prompt files are pinned in `src/download/prompts/canonical_hashes.yaml`.
+- Prompt files are pinned in `src/download/prompts/canonical_hashes.yaml`
+  (`pinned_in_repository` is `.` when the prompt and registry share a git
+  repository, including linked worktrees, and the absolute `--show-toplevel`
+  path otherwise).
   Commit an authorized prompt change before rotating its pin with an explicit
   reason; changing a registered instrument requires its declared version boundary.
   Preserve immutable playbook versions and original captured instruction bytes.

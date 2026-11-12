@@ -1,0 +1,342 @@
+{
+  "task": "check_final_generation_products_20261110",
+  "overall_passed": true,
+  "timeout_seconds": 120,
+  "base_rev": "7233f193ad102a8488b31ec7333662c8fefaa996",
+  "base_commit_sha": "7233f193ad102a8488b31ec7333662c8fefaa996",
+  "git_repo": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-final-generation-readiness-20261110",
+  "g2_root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-final-generation-readiness-20261110",
+  "g2_head_sha": "2e9469852b09150a998793a552ffe8926bf95754",
+  "output_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-final-readiness-lead-20261110/products-2.json",
+  "owl_rdf_isomorphism": {
+    "relpath": "project/owl/data_sheets_schema.owl.ttl",
+    "g2_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-final-generation-readiness-20261110/project/owl/data_sheets_schema.owl.ttl",
+    "passed": true,
+    "normalize_literals": false,
+    "base_triple_count": 7758,
+    "g2_triple_count": 7758,
+    "expected_substitutions": [
+      {
+        "subject": "https://w3id.org/bridge2ai/data-sheets-schema",
+        "predicate": "http://purl.org/pav/version",
+        "old_literal": "3.2.0",
+        "new_literal": "3.2.1"
+      },
+      {
+        "subject": "https://w3id.org/bridge2ai/data-sheets-schema/collection_type",
+        "predicate": "http://www.w3.org/2004/02/skos/core#definition",
+        "old_literal": "Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed.",
+        "new_literal": "Primary content classification for this file collection from FileCollectionTypeEnum. Each FileCollection has one collection_type value; represent differently classified file groups as separate FileCollection entries in the dataset's file_collections."
+      }
+    ],
+    "ground_triples_only_in_base": [
+      {
+        "subject": "https://w3id.org/bridge2ai/data-sheets-schema",
+        "predicate": "http://purl.org/pav/version",
+        "object": "3.2.0",
+        "object_type": "literal"
+      },
+      {
+        "subject": "https://w3id.org/bridge2ai/data-sheets-schema/collection_type",
+        "predicate": "http://www.w3.org/2004/02/skos/core#definition",
+        "object": "Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed.",
+        "object_type": "literal"
+      }
+    ],
+    "ground_triples_only_in_g2": [
+      {
+        "subject": "https://w3id.org/bridge2ai/data-sheets-schema",
+        "predicate": "http://purl.org/pav/version",
+        "object": "3.2.1",
+        "object_type": "literal"
+      },
+      {
+        "subject": "https://w3id.org/bridge2ai/data-sheets-schema/collection_type",
+        "predicate": "http://www.w3.org/2004/02/skos/core#definition",
+        "object": "Primary content classification for this file collection from FileCollectionTypeEnum. Each FileCollection has one collection_type value; represent differently classified file groups as separate FileCollection entries in the dataset's file_collections.",
+        "object_type": "literal"
+      }
+    ],
+    "unexpected_ground_triples_in_base": [],
+    "unexpected_ground_triples_in_g2": [],
+    "isomorphic_after_expected_substitutions": true
+  },
+  "sssom_comprehensive": {
+    "relpath": "src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_comprehensive.tsv",
+    "g2_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-final-generation-readiness-20261110/src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_comprehensive.tsv",
+    "passed": true,
+    "row_count_base": 301,
+    "row_count_g2": 301,
+    "fieldnames_identical": true,
+    "row_key_order_identical": true,
+    "ignored_columns": [
+      "mapping_date"
+    ],
+    "comment_header_comparison": {
+      "passed": true,
+      "base_comment_lines": [
+        "# Comprehensive SSSOM Mapping - ALL D4D Slots",
+        "# One row per schema slot name. Precedence: SKOS alignment TTL, schema slot_uri/*_mappings, URI recommendations, keyword heuristics",
+        "# Date: 2026-11-08",
+        "# Total attributes: 301",
+        "#",
+        "# Status breakdown:",
+        "#   free_text: 13",
+        "#   mapped: 176",
+        "#   novel_d4d: 27",
+        "#   recommended: 1",
+        "#   unmapped: 84",
+        "#"
+      ],
+      "g2_comment_lines": [
+        "# Comprehensive SSSOM Mapping - ALL D4D Slots",
+        "# One row per schema slot name. Precedence: SKOS alignment TTL, schema slot_uri/*_mappings, URI recommendations, keyword heuristics",
+        "# Date: 2026-11-10",
+        "# Total attributes: 301",
+        "#",
+        "# Status breakdown:",
+        "#   free_text: 12",
+        "#   mapped: 176",
+        "#   novel_d4d: 27",
+        "#   recommended: 1",
+        "#   unmapped: 85",
+        "#"
+      ],
+      "allowed_comment_diffs": [
+        {
+          "line": 3,
+          "kind": "date",
+          "base": "# Date: 2026-11-08",
+          "g2": "# Date: 2026-11-10"
+        },
+        {
+          "line": 7,
+          "kind": "status_free_text",
+          "base": "#   free_text: 13",
+          "g2": "#   free_text: 12"
+        },
+        {
+          "line": 11,
+          "kind": "status_unmapped",
+          "base": "#   unmapped: 84",
+          "g2": "#   unmapped: 85"
+        }
+      ],
+      "unexpected_comment_diffs": [],
+      "saw_exact_free_text_13_to_12": true,
+      "saw_exact_unmapped_84_to_85": true
+    },
+    "header_date": {
+      "base": "2026-11-08",
+      "g2": "2026-11-10"
+    },
+    "status_breakdown": {
+      "base": {
+        "free_text": 13,
+        "mapped": 176,
+        "novel_d4d": 27,
+        "recommended": 1,
+        "unmapped": 84
+      },
+      "g2": {
+        "free_text": 12,
+        "mapped": 176,
+        "novel_d4d": 27,
+        "recommended": 1,
+        "unmapped": 85
+      },
+      "expected_free_text_to_unmapped_shift_verified": true
+    },
+    "non_collection_type_changed_row_count": 0,
+    "non_collection_type_changed_rows": [],
+    "collection_type_row_key": "d4d:collection_type",
+    "collection_type_observed_changes_ignoring_mapping_date": {
+      "comment": {
+        "base": "Free text/narrative field - no URI needed; TTL names only D4D terms, which are not alignments",
+        "g2": "Unmapped - needs vocabulary research; TTL names only D4D terms, which are not alignments"
+      },
+      "mapping_status": {
+        "base": "free_text",
+        "g2": "unmapped"
+      },
+      "mapping_source": {
+        "base": "heuristic",
+        "g2": "none"
+      },
+      "heuristic_hint": {
+        "base": "free_text",
+        "g2": ""
+      },
+      "d4d_description": {
+        "base": "Type(s) of content in this file collection. A collection may have multiple types, for example a coll...",
+        "g2": "Primary content classification for this file collection from FileCollectionTypeEnum. Each FileCollec..."
+      }
+    },
+    "unexpected_collection_type_changes": {},
+    "missing_expected_collection_type_changes": {},
+    "collection_type_heuristic_transition": {
+      "mapping_status": {
+        "base": "free_text",
+        "g2": "unmapped"
+      },
+      "mapping_source": {
+        "base": "heuristic",
+        "g2": "none"
+      },
+      "heuristic_hint": {
+        "base": "free_text",
+        "g2": ""
+      },
+      "same_no_term_found": true,
+      "new_curated_mapping_introduced": false,
+      "invariant_alignment_fields": {
+        "predicate_id": "skos:exactMatch",
+        "object_id": "sssom:NoTermFound",
+        "mapping_justification": "semapv:UnspecifiedMatching",
+        "confidence": "0.0",
+        "other_curated_mappings": "skos:exactMatch d4d:collectionType (ttl d4d:FileCollection_collection_type)"
+      },
+      "cause": "Old collection_type description contained the substring \"documentation\" (matched by FREE_TEXT_KEYWORDS in src/semantic_exchange/generate_comprehensive_sssom.py); new collection_type description does not, so the unmapped row is classified as unmapped/none instead of free_text/heuristic while retaining sssom:NoTermFound."
+    }
+  },
+  "sssom_uri_comprehensive": {
+    "relpath": "src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_comprehensive.tsv",
+    "g2_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-final-generation-readiness-20261110/src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_comprehensive.tsv",
+    "passed": true,
+    "row_count_base": 301,
+    "row_count_g2": 301,
+    "fieldnames_identical": true,
+    "row_key_order_identical": true,
+    "ignored_columns": [
+      "mapping_date"
+    ],
+    "comment_header_comparison": {
+      "passed": true,
+      "base_comment_lines": [
+        "# Comprehensive URI-level SSSOM - ALL D4D Slots",
+        "# Shows the declared and the resolved slot_uri for every schema slot name (same resolution as d4d_rocrate_sssom_comprehensive.tsv)",
+        "# Date: 2026-11-08",
+        "# Total attributes: 301",
+        "#",
+        "# Status breakdown:",
+        "#   free_text: 13",
+        "#   mapped: 176",
+        "#   novel_d4d: 27",
+        "#   recommended: 1",
+        "#   unmapped: 84",
+        "#",
+        "# Current slot_uri coverage: 290/301 (96.3%)",
+        "# Attributes needing slot_uri: 0/301 (0.0%)",
+        "#"
+      ],
+      "g2_comment_lines": [
+        "# Comprehensive URI-level SSSOM - ALL D4D Slots",
+        "# Shows the declared and the resolved slot_uri for every schema slot name (same resolution as d4d_rocrate_sssom_comprehensive.tsv)",
+        "# Date: 2026-11-10",
+        "# Total attributes: 301",
+        "#",
+        "# Status breakdown:",
+        "#   free_text: 12",
+        "#   mapped: 176",
+        "#   novel_d4d: 27",
+        "#   recommended: 1",
+        "#   unmapped: 85",
+        "#",
+        "# Current slot_uri coverage: 290/301 (96.3%)",
+        "# Attributes needing slot_uri: 0/301 (0.0%)",
+        "#"
+      ],
+      "allowed_comment_diffs": [
+        {
+          "line": 3,
+          "kind": "date",
+          "base": "# Date: 2026-11-08",
+          "g2": "# Date: 2026-11-10"
+        },
+        {
+          "line": 7,
+          "kind": "status_free_text",
+          "base": "#   free_text: 13",
+          "g2": "#   free_text: 12"
+        },
+        {
+          "line": 11,
+          "kind": "status_unmapped",
+          "base": "#   unmapped: 84",
+          "g2": "#   unmapped: 85"
+        }
+      ],
+      "unexpected_comment_diffs": [],
+      "saw_exact_free_text_13_to_12": true,
+      "saw_exact_unmapped_84_to_85": true
+    },
+    "header_date": {
+      "base": "2026-11-08",
+      "g2": "2026-11-10"
+    },
+    "status_breakdown": {
+      "base": {
+        "free_text": 13,
+        "mapped": 176,
+        "novel_d4d": 27,
+        "recommended": 1,
+        "unmapped": 84
+      },
+      "g2": {
+        "free_text": 12,
+        "mapped": 176,
+        "novel_d4d": 27,
+        "recommended": 1,
+        "unmapped": 85
+      },
+      "expected_free_text_to_unmapped_shift_verified": true
+    },
+    "non_collection_type_changed_row_count": 0,
+    "non_collection_type_changed_rows": [],
+    "collection_type_row_key": "collection_type",
+    "collection_type_observed_changes_ignoring_mapping_date": {
+      "comment": {
+        "base": "Free text/narrative field - no slot_uri needed; TTL names only D4D terms, which are not alignments",
+        "g2": "Unmapped - needs vocabulary research for slot_uri; TTL names only D4D terms, which are not alignments"
+      },
+      "mapping_status": {
+        "base": "free_text",
+        "g2": "unmapped"
+      },
+      "mapping_source": {
+        "base": "heuristic",
+        "g2": "none"
+      },
+      "heuristic_hint": {
+        "base": "free_text",
+        "g2": ""
+      }
+    },
+    "unexpected_collection_type_changes": {},
+    "missing_expected_collection_type_changes": {},
+    "collection_type_heuristic_transition": {
+      "mapping_status": {
+        "base": "free_text",
+        "g2": "unmapped"
+      },
+      "mapping_source": {
+        "base": "heuristic",
+        "g2": "none"
+      },
+      "heuristic_hint": {
+        "base": "free_text",
+        "g2": ""
+      },
+      "same_no_term_found": true,
+      "new_curated_mapping_introduced": false,
+      "invariant_alignment_fields": {
+        "predicate_id": "skos:exactMatch",
+        "object_id": "sssom:NoTermFound",
+        "mapping_justification": "semapv:UnspecifiedMatching",
+        "confidence": "0.0",
+        "other_curated_mappings": "skos:exactMatch d4d:collectionType (ttl d4d:FileCollection_collection_type)"
+      },
+      "cause": "Old collection_type description contained the substring \"documentation\" (matched by FREE_TEXT_KEYWORDS in src/semantic_exchange/generate_comprehensive_sssom.py); new collection_type description does not, so the unmapped row is classified as unmapped/none instead of free_text/heuristic while retaining sssom:NoTermFound."
+    }
+  }
+}

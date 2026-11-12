@@ -5,6 +5,7 @@ Output: scratch-pr5531-fix/fix-d-ci-files.json; no network or test execution.
 """
 from collections import defaultdict
 import json
+import os
 from pathlib import Path
 import subprocess
 import xml.etree.ElementTree as ET
@@ -12,8 +13,8 @@ import xml.etree.ElementTree as ET
 from utils.pytest_shard import balanced_files
 
 ROOT = Path(__file__).resolve().parents[2]
-SCRATCH = ROOT.parent / 'scratch-pr5531-fix'
-ARTIFACTS = ROOT.parent / 'scratch-pr5531-rereview/ci-artifacts'
+SCRATCH = Path(os.environ.get('D4D_PR5531_FIX_SCRATCH', ROOT.parent / 'scratch-pr5531-fix'))
+ARTIFACTS = Path(os.environ.get('D4D_PR5531_CI_ARTIFACTS', ROOT.parent / 'scratch-pr5531-rereview/ci-artifacts'))
 tracked = subprocess.check_output(['git', 'ls-files', 'tests'], text=True).splitlines()
 modules = {p[:-3].replace('/', '.'): p for p in tracked if p.endswith('.py')}
 cases = defaultdict(set)

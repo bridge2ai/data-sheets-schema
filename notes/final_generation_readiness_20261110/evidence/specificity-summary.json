@@ -1,0 +1,237 @@
+{
+  "commit": "2e9469852b09150a998793a552ffe8926bf95754",
+  "root": "codex-final-generation-readiness-20261110",
+  "exit": 1,
+  "self_test": {
+    "imported_from_neutrality_test": 36,
+    "passed": true,
+    "problems": [],
+    "token_counts": {
+      "biomedical_clinical": 25,
+      "bridge2ai_program": 9,
+      "gc_project": 65
+    }
+  },
+  "totals": {
+    "biomedical_clinical": {
+      "hits": 1748,
+      "model_facing": 1389,
+      "with_reason": 1349
+    },
+    "bridge2ai_program": {
+      "hits": 2444,
+      "model_facing": 2342,
+      "with_reason": 2335
+    },
+    "gc_project": {
+      "hits": 762,
+      "model_facing": 56,
+      "with_reason": 198
+    },
+    "violations": 9,
+    "violations_by_approach": {
+      "api": 0,
+      "deterministic": 0,
+      "github_assistant": 0,
+      "interactive_session": 0,
+      "legacy_monolithic": 0,
+      "native_agentic": 0,
+      "offline_draft": 0,
+      "other_model_client": 0,
+      "run_controllers": 9,
+      "shared_input": 0,
+      "shared_schema": 0
+    }
+  },
+  "violations": [
+    {
+      "approaches": [
+        "run_controllers"
+      ],
+      "category": "gc_project",
+      "code": true,
+      "context": "code_table",
+      "exception": null,
+      "gates_in": [
+        "run_controllers"
+      ],
+      "line": 348,
+      "match": "CHORUS",
+      "model_facing": false,
+      "path": "notes/claudecode_direct/prepare_direct.py",
+      "pattern": "CHo?RUS",
+      "role": "run_shaping",
+      "snippet": "parser.add_argument(\"--project\", default=\"CHORUS\")",
+      "status": "live",
+      "violation": true
+    },
+    {
+      "approaches": [
+        "run_controllers"
+      ],
+      "category": "gc_project",
+      "code": true,
+      "context": "code_table",
+      "exception": null,
+      "gates_in": [
+        "run_controllers"
+      ],
+      "line": 19,
+      "match": "CHORUS",
+      "model_facing": false,
+      "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+      "pattern": "CHo?RUS",
+      "role": "run_shaping",
+      "snippet": "DEFAULT_CANARY_ORDER = \"CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1\"",
+      "status": "live",
+      "violation": true
+    },
+    {
+      "approaches": [
+        "run_controllers"
+      ],
+      "category": "gc_project",
+      "code": true,
+      "context": "code_table",
+      "exception": null,
+      "gates_in": [
+        "run_controllers"
+      ],
+      "line": 19,
+      "match": "CHORUS",
+      "model_facing": false,
+      "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+      "pattern": "CHo?RUS",
+      "role": "run_shaping",
+      "snippet": "DEFAULT_CANARY_ORDER = \"CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1\"",
+      "status": "live",
+      "violation": true
+    },
+    {
+      "approaches": [
+        "run_controllers"
+      ],
+      "category": "gc_project",
+      "code": true,
+      "context": "code_table",
+      "exception": null,
+      "gates_in": [
+        "run_controllers"
+      ],
+      "line": 20,
+      "match": "CHORUS",
+      "model_facing": false,
+      "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+      "pattern": "CHo?RUS",
+      "role": "run_shaping",
+      "snippet": "PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"]",
+      "status": "live",
+      "violation": true
+    },
+    {
+      "approaches": [
+        "run_controllers"
+      ],
+      "category": "gc_project",
+      "code": true,
+      "context": "code_table",
+      "exception": null,
+      "gates_in": [
+        "run_controllers"
+      ],
+      "line": 20,
+      "match": "AI_READI",
+      "model_facing": false,
+      "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+      "pattern": "AI[-_ ]?READI",
+      "role": "run_shaping",
+      "snippet": "PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"]",
+      "status": "live",
+      "violation": true
+    },
+    {
+      "approaches": [
+        "run_controllers"
+      ],
+      "category": "gc_project",
+      "code": true,
+      "context": "code_table",
+      "exception": null,
+      "gates_in": [
+        "run_controllers"
+      ],
+      "line": 20,
+      "match": "CM4AI",
+      "model_facing": false,
+      "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+      "pattern": "CM4AI",
+      "role": "run_shaping",
+      "snippet": "PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"]",
+      "status": "live",
+      "violation": true
+    },
+    {
+      "approaches": [
+        "run_controllers"
+      ],
+      "category": "gc_project",
+      "code": true,
+      "context": "code_table",
+      "exception": null,
+      "gates_in": [
+        "run_controllers"
+      ],
+      "line": 20,
+      "match": "VOICE",
+      "model_facing": false,
+      "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+      "pattern": "(?-i:\\bVOICE\\b)",
+      "role": "run_shaping",
+      "snippet": "PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"]",
+      "status": "live",
+      "violation": true
+    },
+    {
+      "approaches": [
+        "run_controllers"
+      ],
+      "category": "gc_project",
+      "code": true,
+      "context": "code_table",
+      "exception": null,
+      "gates_in": [
+        "run_controllers"
+      ],
+      "line": 20,
+      "match": "VOICE_PEDIATRIC",
+      "model_facing": false,
+      "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+      "pattern": "VOICE_PEDIATRIC",
+      "role": "run_shaping",
+      "snippet": "PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"]",
+      "status": "live",
+      "violation": true
+    },
+    {
+      "approaches": [
+        "run_controllers"
+      ],
+      "category": "gc_project",
+      "code": true,
+      "context": "code_branch",
+      "exception": null,
+      "gates_in": [
+        "run_controllers"
+      ],
+      "line": 104,
+      "match": "CHORUS",
+      "model_facing": false,
+      "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+      "pattern": "CHo?RUS",
+      "role": "run_shaping",
+      "snippet": "\"canary\": replicate == 1 and case[\"project\"] in {\"CHORUS\", \"KIDS_FIRST\"},",
+      "status": "live",
+      "violation": true
+    }
+  ]
+}

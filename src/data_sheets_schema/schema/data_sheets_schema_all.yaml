@@ -5,7 +5,7 @@ title: data-sheets-schema
 see_also:
 - https://bridge2ai.github.io/data-sheets-schema
 id: https://w3id.org/bridge2ai/data-sheets-schema
-version: 3.2.0
+version: 3.2.1
 license: MIT
 prefixes:
   AIO:
@@ -48246,9 +48246,10 @@ classes:
     attributes:
       collection_type:
         name: collection_type
-        description: Type(s) of content in this file collection. A collection may
-          have multiple types, for example a collection containing both raw_data and
-          documentation files would have both types listed.
+        description: Primary content classification for this file collection from
+          FileCollectionTypeEnum. Each FileCollection has one collection_type value;
+          represent differently classified file groups as separate FileCollection
+          entries in the dataset's file_collections.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
         slot_uri: d4d:collectionType
         alias: collection_type

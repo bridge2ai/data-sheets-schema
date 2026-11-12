@@ -1,0 +1,973 @@
+{
+  "kind": "read_only_exact_download_archive_preflight",
+  "authorization": "NOT AUTHORIZED; explicit owner approval required",
+  "started_utc": "2026-11-10T05:45:29+00:00",
+  "ended_utc": "2026-11-10T05:45:48+00:00",
+  "source_note": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.temp/generation-eta-20261110/notes/reviews/python_download_cache_candidates_20261110.md",
+  "source_note_sha256": "2a8d7a92520a7009a922faf959009da7d1dadda591cf15654a622430725f3128",
+  "proposal_count": 26,
+  "proposal_allocated_bytes": 3254362112,
+  "proposal": [
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/e5/f5/87eaaa9422700271100321ec239674710dbe102ded2eae2c1e862673d3ebe2b80001f08f9659e7eac38c701efc8a6b17a2197e2e2b9ebebeb81fbc593715",
+      "sha256": "181d2eda8addbeca0b689c996df207293947928bdd9c88a097837ae1c7e69ca5",
+      "sha512": "e5f587eaaa9422700271100321ec239674710dbe102ded2eae2c1e862673d3ebe2b80001f08f9659e7eac38c701efc8a6b17a2197e2e2b9ebebeb81fbc593715",
+      "integrity": "sha512-5fWH6qqUInACcRADIewjlnRxDb4QLe0uriwehiZz0+viuAAB8I+WWefqw4xwHvyKaxeiGX4uK56+vrgfvFk3FQ==",
+      "allocated_bytes": 147079168,
+      "apparent_bytes": 147077955,
+      "device": 16777230,
+      "inode": 696398474,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-10-30T03:12:22+00:00",
+      "modified_utc": "2026-10-30T03:12:36+00:00",
+      "accessed_utc_before_read": "2026-10-30T03:12:36+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 268972064
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.166.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/c3/55/53b157ace4b815cecca5ad01bf71fe2bc96e4dd364876c3cceeea2ad79ed",
+          "index_sha256": "03827b11daa7e2e6c6b8fd710d97d5de7fb88116f58a85290fff2e70ae9c71b6"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/e5/f5/87eaaa9422700271100321ec239674710dbe102ded2eae2c1e862673d3ebe2b80001f08f9659e7eac38c701efc8a6b17a2197e2e2b9ebebeb81fbc593715 (140M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/a4/38/b380e500b6adff93701b5051db694d7d5a960a0a36bea05a4d4932caac3423e254d43520ee4cf262a78b90567dbfd448a941da50ac630e40156e235ce700",
+      "sha256": "9b5a35be1975ceb332eaf274032f375b017ab644ff0165737ead03277fae77cd",
+      "sha512": "a438b380e500b6adff93701b5051db694d7d5a960a0a36bea05a4d4932caac3423e254d43520ee4cf262a78b90567dbfd448a941da50ac630e40156e235ce700",
+      "integrity": "sha512-pDizgOUAtq3/k3AbUFHbaU19WpYKCja+oFpNSTLKrDQj4lTUNSDuTPJip4uQVn2/1EipQdpQrGMOQBVuI1znAA==",
+      "allocated_bytes": 140709888,
+      "apparent_bytes": 140709294,
+      "device": 16777230,
+      "inode": 665168177,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-10-25T05:03:23+00:00",
+      "modified_utc": "2026-10-25T05:03:35+00:00",
+      "accessed_utc_before_read": "2026-10-25T05:03:35+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 260293200
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.164.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/3f/08/d9425fa8e4e5effe23a951ea606fefea2821754b40ff7d23404161acd10c",
+          "index_sha256": "8df9b1076e73ac824e60a27009380f591fce43cfb3ad57b84be34cf9afbf70f7"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/a4/38/b380e500b6adff93701b5051db694d7d5a960a0a36bea05a4d4932caac3423e254d43520ee4cf262a78b90567dbfd448a941da50ac630e40156e235ce700 (134M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/8b/b0/f39366b96869ae18cf5a35981a5154e88d9ff86dce6545fa2ccfef98ed7d811a10e4cfe7324a06c3f8d612d693b17e6d1511b2e2f4f677a40ba523891c87",
+      "sha256": "1193ff4ce72387a5d6c34820b54a9dc57d007c67a958e8acb4715924facd3c31",
+      "sha512": "8bb0f39366b96869ae18cf5a35981a5154e88d9ff86dce6545fa2ccfef98ed7d811a10e4cfe7324a06c3f8d612d693b17e6d1511b2e2f4f677a40ba523891c87",
+      "integrity": "sha512-i7Dzk2a5aGmuGM9aNZgaUVTojZ/4bc5lRfosz++Y7X2BGhDkz+cySgbD+NYS1pOxfm0VEbLi9PZ3pAulI4kchw==",
+      "allocated_bytes": 137871360,
+      "apparent_bytes": 137871195,
+      "device": 16777230,
+      "inode": 631242060,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-10-16T22:39:37+00:00",
+      "modified_utc": "2026-10-16T22:39:49+00:00",
+      "accessed_utc_before_read": "2026-10-16T22:39:49+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 249952688
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.163.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/07/ce/44c9751998ab84591f5422258da78d33f5db0c1ad7098060d4e8709aa6a3",
+          "index_sha256": "f66d14eada36e9fdad11c9fcc115bec244de19d71be372ddd22720660f88e656"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/8b/b0/f39366b96869ae18cf5a35981a5154e88d9ff86dce6545fa2ccfef98ed7d811a10e4cfe7324a06c3f8d612d693b17e6d1511b2e2f4f677a40ba523891c87 (131M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/61/55/e9839ee2b41b90c63a1f6b2dca0c5e546e7645e18d5998d173502cf465089037e0e77713a337957ceeb9d7bcf682e2a08f3b6125ef80f37b0a013fc2723d",
+      "sha256": "fe0370027a05237adc0152b482ad8502321f6f9aff1baca3bfa56588923ba9ad",
+      "sha512": "6155e9839ee2b41b90c63a1f6b2dca0c5e546e7645e18d5998d173502cf465089037e0e77713a337957ceeb9d7bcf682e2a08f3b6125ef80f37b0a013fc2723d",
+      "integrity": "sha512-YVXpg57itBuQxjofay3KDF5UbnZF4Y1ZmNFzUCz0ZQiQN+DndxOjN5V87rnXvPaC4qCPO2El74DzewoBP8JyPQ==",
+      "allocated_bytes": 136605696,
+      "apparent_bytes": 136602385,
+      "device": 16777230,
+      "inode": 585964478,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-10-09T20:51:39+00:00",
+      "modified_utc": "2026-10-09T20:51:50+00:00",
+      "accessed_utc_before_read": "2026-10-09T20:51:50+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 246642624
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.162.1-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/b6/0a/166b4d8466676892a27b3670a5728e0f082f7390d1c7f2074b5542a22795",
+          "index_sha256": "5acc9234f77ed4dfb6af8c2466f73bc88ce7f8af236049e55d5f90ee5fa1577f"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/61/55/e9839ee2b41b90c63a1f6b2dca0c5e546e7645e18d5998d173502cf465089037e0e77713a337957ceeb9d7bcf682e2a08f3b6125ef80f37b0a013fc2723d (130M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/6a/bc/4a2d8077b8a8dec303a9185a39fcc19ef3ee09ccd075eca21806619f178937414f900b889e5d5530a879905f69d7ac1d41ccd30dd20b40826d401814e0f3",
+      "sha256": "21c99b848b25ed91b92afadabe3751cc33878d2684f3e2d01cc1782e6d0abc7a",
+      "sha512": "6abc4a2d8077b8a8dec303a9185a39fcc19ef3ee09ccd075eca21806619f178937414f900b889e5d5530a879905f69d7ac1d41ccd30dd20b40826d401814e0f3",
+      "integrity": "sha512-arxKLYB3uKjewwOpGFo5/MGe8+4JzNB17KIYBmGfF4k3QU+QC4ieXVUwqHmQX2nXrB1BzNMN0gtAgm1AGBTg8w==",
+      "allocated_bytes": 136093696,
+      "apparent_bytes": 136091525,
+      "device": 16777230,
+      "inode": 573036755,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-10-08T02:31:21+00:00",
+      "modified_utc": "2026-10-08T02:31:34+00:00",
+      "accessed_utc_before_read": "2026-10-08T02:31:34+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 245096256
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.161.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/2e/7e/5e56ea75ba565ecab189fcbd555fe336edb42bfaf55c49449fcc03d22d58",
+          "index_sha256": "be65acff091de83b3ba272bae5c1983b693f7aa64a7ff9c78601670f0605fe52"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/6a/bc/4a2d8077b8a8dec303a9185a39fcc19ef3ee09ccd075eca21806619f178937414f900b889e5d5530a879905f69d7ac1d41ccd30dd20b40826d401814e0f3 (130M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/e9/99/eef7b3bbf887bf727529b162f1e8d95c3dcec336e8fab00b39f31a6dd3fb4a460c78fb1804f7371ad58af0a905018d440ed477b1b9dca29a686966375694",
+      "sha256": "93121cae6c2fe77cdb20f88f611783dbec77a3e241948ad018da120480a6f296",
+      "sha512": "e999eef7b3bbf887bf727529b162f1e8d95c3dcec336e8fab00b39f31a6dd3fb4a460c78fb1804f7371ad58af0a905018d440ed477b1b9dca29a686966375694",
+      "integrity": "sha512-6Znu97O7+Ie/cnUpsWLx6NlcPc7DNuj6sAs58xpt0/tKRgx4+xgE9zca1YrwqQUBjUQO1HexudyimmhpZjdWlA==",
+      "allocated_bytes": 134324224,
+      "apparent_bytes": 134323627,
+      "device": 16777230,
+      "inode": 563466683,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-10-06T01:17:01+00:00",
+      "modified_utc": "2026-10-06T01:17:13+00:00",
+      "accessed_utc_before_read": "2026-11-10T05:40:21+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 241556032
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.160.1-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/2d/3c/b530c5679811a7c72022800881d1872152155fd7e10ed62d193bc117ceb4",
+          "index_sha256": "d3c8e3191c37d941c5f8c564861fae5eeb9cfe77a96e1348c019c6be5d83a6fe"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/e9/99/eef7b3bbf887bf727529b162f1e8d95c3dcec336e8fab00b39f31a6dd3fb4a460c78fb1804f7371ad58af0a905018d440ed477b1b9dca29a686966375694 (128M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/69/e7/d5e9ca9903644466047fff831cc97969ef32dc4ed8b8088dafde3f4856036774f06fda409e344733d3ba9e7a55dcc0e75214f50a6faae8038f2f6660e0ad",
+      "sha256": "fc789bcd655d903f92e1a23c8dc5315ba38f43b3586eafb7bd3b195970b57466",
+      "sha512": "69e7d5e9ca9903644466047fff831cc97969ef32dc4ed8b8088dafde3f4856036774f06fda409e344733d3ba9e7a55dcc0e75214f50a6faae8038f2f6660e0ad",
+      "integrity": "sha512-aefV6cqZA2REZgR//4McyXlp7zLcTti4CI2v3j9IVgNndPBv2kCeNEcz07qeelXcwOdSFPUKb6roA48vZmDgrQ==",
+      "allocated_bytes": 134311936,
+      "apparent_bytes": 134311083,
+      "device": 16777230,
+      "inode": 535599270,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-10-02T17:59:06+00:00",
+      "modified_utc": "2026-10-02T17:59:18+00:00",
+      "accessed_utc_before_read": "2026-11-10T05:40:21+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 241555024
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.160.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/95/50/38757d552ddaba26c32d6036105f2c396ab2e15c57b411caad8e7da336f6",
+          "index_sha256": "ec208f9947d3f324ad07aa89ae2f2a5e1c54fc27ac25954a11eaf86b0af98e45"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/69/e7/d5e9ca9903644466047fff831cc97969ef32dc4ed8b8088dafde3f4856036774f06fda409e344733d3ba9e7a55dcc0e75214f50a6faae8038f2f6660e0ad (128M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/68/8e/14635e185116312719d12be004e1053e69e9349a0b72ca8ed1c3dacd6c24146044d1434358749cd4f72b658c4446a4f961b777471c8d6ee0d86a1e80c90d",
+      "sha256": "b2838cc82cfd0a9253bab7abbadec09c71fba46b34742a1338b30ca255f41237",
+      "sha512": "688e14635e185116312719d12be004e1053e69e9349a0b72ca8ed1c3dacd6c24146044d1434358749cd4f72b658c4446a4f961b777471c8d6ee0d86a1e80c90d",
+      "integrity": "sha512-aI4UY14YURYxJxnRK+AE4QU+aek0mgtyyo7Rw9rNbCQUYETRQ0NYdJzU9ytljERGpPlht3dHHI1u4NhqHoDJDQ==",
+      "allocated_bytes": 133849088,
+      "apparent_bytes": 133847481,
+      "device": 16777230,
+      "inode": 503238270,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-10-01T01:37:25+00:00",
+      "modified_utc": "2026-10-01T01:37:36+00:00",
+      "accessed_utc_before_read": "2026-11-10T05:40:21+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 240351424
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.159.3-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/25/75/79d8a15432574386620cc910e1abf3ed8a113cea1ddbc0cd80ee8f2e051c",
+          "index_sha256": "54f14c1d7a15232e91e30ce81d0dd191715c1a3fd873f24f3a7c711ddd9c182b"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/68/8e/14635e185116312719d12be004e1053e69e9349a0b72ca8ed1c3dacd6c24146044d1434358749cd4f72b658c4446a4f961b777471c8d6ee0d86a1e80c90d (128M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/ed/23/da3c5534b5da9aa50e55120ac5fb06fea7d7717d67cb31730a64c44aa163e7fed2cc6a394c8d80419eef28e95b5a547d831d0ea4a67a794cc92fe5baafae",
+      "sha256": "4e491428fef0a676f8ed1c6b392183c24793940c958fa1e7bd99dbcb982d7cc6",
+      "sha512": "ed23da3c5534b5da9aa50e55120ac5fb06fea7d7717d67cb31730a64c44aa163e7fed2cc6a394c8d80419eef28e95b5a547d831d0ea4a67a794cc92fe5baafae",
+      "integrity": "sha512-7SPaPFU0tdqapQ5VEgrF+wb+p9dxfWfLMXMKZMRKoWPn/tLMajlMjYBBnu8o6VtaVH2DHQ6kpnp5TMkv5bqvrg==",
+      "allocated_bytes": 133844992,
+      "apparent_bytes": 133844825,
+      "device": 16777230,
+      "inode": 487834867,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-09-30T03:05:46+00:00",
+      "modified_utc": "2026-09-30T03:05:58+00:00",
+      "accessed_utc_before_read": "2026-11-10T05:40:21+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 240184096
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.159.2-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/25/52/ee0b74672a209c5a30d4106167b3a4889e0e4bee058c4214f2b12b13ebe5",
+          "index_sha256": "4956af4a3923698fd95b9251f8ebedbea41ed7d8c58f3ee728cb0454d4babfcb"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/ed/23/da3c5534b5da9aa50e55120ac5fb06fea7d7717d67cb31730a64c44aa163e7fed2cc6a394c8d80419eef28e95b5a547d831d0ea4a67a794cc92fe5baafae (128M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/d0/e2/928e5598d63e0b7757d3f3b42db4dc376364ad85c5e2e0672b5921e395e660d67f3a786dfeb21265e0fbfeb22526b012615a53669baad13b862ff19c902e",
+      "sha256": "7849f8aa87c3956823cef082d83b538980a0ced6e468cca4f39c1cf606ea8dae",
+      "sha512": "d0e2928e5598d63e0b7757d3f3b42db4dc376364ad85c5e2e0672b5921e395e660d67f3a786dfeb21265e0fbfeb22526b012615a53669baad13b862ff19c902e",
+      "integrity": "sha512-0OKSjlWY1j4Ld1fT87QttNw3Y2SthcXi4GcrWSHjleZg1n86eG3+shJl4Pv+siUmsBJhWlNmm6rRO4Yv8ZyQLg==",
+      "allocated_bytes": 133525504,
+      "apparent_bytes": 133524491,
+      "device": 16777230,
+      "inode": 479393834,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-09-29T06:34:51+00:00",
+      "modified_utc": "2026-09-29T06:35:02+00:00",
+      "accessed_utc_before_read": "2026-11-10T05:40:21+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 239662592
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.158.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/6a/92/314832f8def8431eaf3e05ea2400e3406f28a124b6fb4b5a2d7114b8a3b9",
+          "index_sha256": "da5bd6ea6c5a2e21bdcd19a1e46ef4ed5b83cdf9ba71960a24c036ff4c6b93a1"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/d0/e2/928e5598d63e0b7757d3f3b42db4dc376364ad85c5e2e0672b5921e395e660d67f3a786dfeb21265e0fbfeb22526b012615a53669baad13b862ff19c902e (127M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/99/c6/8b6d1fad4e2cccafb9f3c41b1c35f3e91ab7719accb20ea5e7a4f3dddb8d7d617a2b0e22c6a45e509ad036f60514160f69a638598ccf39e11e2d5cd1f355",
+      "sha256": "8ed1854086533492068d2c103e4b13c627b0def7716d038874f05474cb4fc718",
+      "sha512": "99c68b6d1fad4e2cccafb9f3c41b1c35f3e91ab7719accb20ea5e7a4f3dddb8d7d617a2b0e22c6a45e509ad036f60514160f69a638598ccf39e11e2d5cd1f355",
+      "integrity": "sha512-mcaLbR+tTizMr7nzxBscNfPpGrdxmsyyDqXnpPPd2419YXorDiLGpF5QmtA29gUUFg9ppjhZjM854R4tXNHzVQ==",
+      "allocated_bytes": 133013504,
+      "apparent_bytes": 133011685,
+      "device": 16777230,
+      "inode": 395881031,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-09-25T18:49:17+00:00",
+      "modified_utc": "2026-09-25T18:49:28+00:00",
+      "accessed_utc_before_read": "2026-11-10T05:40:21+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 238289440
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.157.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/ac/1f/c8774f0ff367c7a45863184a975dccfce073b7711d06280d6403db2b77d1",
+          "index_sha256": "b035787ee9d13fa3ff1efd91de7ef3c26fee6dbf4e284b095a87d5be0e2a3cae"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/99/c6/8b6d1fad4e2cccafb9f3c41b1c35f3e91ab7719accb20ea5e7a4f3dddb8d7d617a2b0e22c6a45e509ad036f60514160f69a638598ccf39e11e2d5cd1f355 (127M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/26/0e/b06dd57ec2631973387013be064b139811995588a5e7e8ac82c3fc9faf3dcf00a143d78c658ee3e8a66761582d7ef08294d9674de5f7665cd3eddaae073c",
+      "sha256": "89823dd350364d5e0cb8a74c1ea585ec2b7307931d9dc0ac4195b8bc8f9e2dfa",
+      "sha512": "260eb06dd57ec2631973387013be064b139811995588a5e7e8ac82c3fc9faf3dcf00a143d78c658ee3e8a66761582d7ef08294d9674de5f7665cd3eddaae073c",
+      "integrity": "sha512-Jg6wbdV+wmMZczhwE74GSxOYEZlViKXn6KyCw/yfrz3PAKFD14xljuPopmdhWC1+8IKU2WdN5fdmXNPt2q4HPA==",
+      "allocated_bytes": 131653632,
+      "apparent_bytes": 131652985,
+      "device": 16777230,
+      "inode": 388906454,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-09-23T18:11:11+00:00",
+      "modified_utc": "2026-09-23T18:11:23+00:00",
+      "accessed_utc_before_read": "2026-11-10T05:41:09+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 238138912
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.156.1-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/4d/98/679c897ca0a364871f02b527d1d67510c785b1ccd66e544dfa6fe25742f5",
+          "index_sha256": "302bc7c23ef3e5afa27aeb4516569096ebbcbde2a68c7fd0c5f6cf9f0a07a6c8"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/26/0e/b06dd57ec2631973387013be064b139811995588a5e7e8ac82c3fc9faf3dcf00a143d78c658ee3e8a66761582d7ef08294d9674de5f7665cd3eddaae073c (126M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/71/8c/7319c451a01ae77321e547c79de325f0728549642d698a91942d2c8990614a5c9c3f52ee7b06496fcdacae029b632488a96a69ce937d827d4924d45d1b2f",
+      "sha256": "93cc218b25b71c8da3edb50a013fbd22acf8f39058fb64083fefff638a084976",
+      "sha512": "718c7319c451a01ae77321e547c79de325f0728549642d698a91942d2c8990614a5c9c3f52ee7b06496fcdacae029b632488a96a69ce937d827d4924d45d1b2f",
+      "integrity": "sha512-cYxzGcRRoBrncyHlR8ed4yXwcoVJZC1pipGULSyJkGFKXJw/Uu57BklvzayuAptjJIipamnOk32CfUkk1F0bLw==",
+      "allocated_bytes": 127467520,
+      "apparent_bytes": 127465533,
+      "device": 16777230,
+      "inode": 374526712,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-09-20T03:40:33+00:00",
+      "modified_utc": "2026-09-20T03:40:44+00:00",
+      "accessed_utc_before_read": "2026-11-10T05:41:09+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 228803200
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.155.1-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/48/db/530dbccb853b5ca6cb9becb1712a59341128e800ecf1609965e0ce9cb3df",
+          "index_sha256": "0cb566d74db77312c53b7658a22e720b306b9f68f3d5a658a8a0384ff9b48990"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/71/8c/7319c451a01ae77321e547c79de325f0728549642d698a91942d2c8990614a5c9c3f52ee7b06496fcdacae029b632488a96a69ce937d827d4924d45d1b2f (122M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/73/4b/dbb76652e97897abd81090d89cb6eecf1f475e332abf6f0e086bd6dd8a15358891ee1aec02e6f0f8b30538c612d42a84ece2d30e1f061629aa1f15971546",
+      "sha256": "318f79a31f2c0974e0c942eeb11913c20ad292d29f6d704cbfe0a6cb43604cf6",
+      "sha512": "734bdbb76652e97897abd81090d89cb6eecf1f475e332abf6f0e086bd6dd8a15358891ee1aec02e6f0f8b30538c612d42a84ece2d30e1f061629aa1f15971546",
+      "integrity": "sha512-c0vbt2ZS6XiXq9gQkNictu7PH0deMyq/bw4Ia9bdihU1iJHuGuwC5vD4swU4xhLUKoTs4tMOHwYWKaofFZcVRg==",
+      "allocated_bytes": 127426560,
+      "apparent_bytes": 127426335,
+      "device": 16777230,
+      "inode": 372424437,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-09-18T00:16:56+00:00",
+      "modified_utc": "2026-09-18T00:17:07+00:00",
+      "accessed_utc_before_read": "2026-11-10T05:41:09+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 228770720
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.155.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/3d/9f/9c8882eee665937e191ed9b96add02c80856c6058f2d2dca40a3351327ce",
+          "index_sha256": "dcf6e838ea91a156c30b05e7a0dad710a2de8340c8d392f8f89c1358c60df985"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/73/4b/dbb76652e97897abd81090d89cb6eecf1f475e332abf6f0e086bd6dd8a15358891ee1aec02e6f0f8b30538c612d42a84ece2d30e1f061629aa1f15971546 (122M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/87/a6/90d14c6768ff2620cffdfea3c01fd30d911962268f3cb68ab54f7e88c4d3362f92525344c56a6bbe3199fb6241600ecae9d117e223ef7b4e6f00555c6ab4",
+      "sha256": "53ff1055d35ca3dc964e8bedc2431e46c00608f7c8e145b222122648a7a4e3e8",
+      "sha512": "87a690d14c6768ff2620cffdfea3c01fd30d911962268f3cb68ab54f7e88c4d3362f92525344c56a6bbe3199fb6241600ecae9d117e223ef7b4e6f00555c6ab4",
+      "integrity": "sha512-h6aQ0UxnaP8mIM/9/qPAH9MNkRliJo88toq1T36IxNM2L5JSU0TFamu+MZn7YkFgDsrp0RfiI+97Tm8AVVxqtA==",
+      "allocated_bytes": 124211200,
+      "apparent_bytes": 124209892,
+      "device": 16777230,
+      "inode": 159776123,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-07-22T23:48:54+00:00",
+      "modified_utc": "2026-07-22T23:48:56+00:00",
+      "accessed_utc_before_read": "2026-07-27T20:21:36+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 271134288
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.145.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/ed/4c/8a0496e9ce5d2d19d71f5427024bb08f88ca5790e893b2543ab88ce15ac8",
+          "index_sha256": "f412fe964aa71c4b8818e10d7870462bab15b00e9da67cfde1f25ad0e2c43b2c"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/87/a6/90d14c6768ff2620cffdfea3c01fd30d911962268f3cb68ab54f7e88c4d3362f92525344c56a6bbe3199fb6241600ecae9d117e223ef7b4e6f00555c6ab4 (118M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/83/b6/33a5a099182c35f51fe0972def44f8e72ea696ec970102ed96410e9ef0f225bc13e64bf80ca6521451132034eea08bc2ec3f376542d2ea930a1e38e94876",
+      "sha256": "93659b8bd69c4ecd28ae08e2960c668f64d4760480bebe98841904d447026740",
+      "sha512": "83b633a5a099182c35f51fe0972def44f8e72ea696ec970102ed96410e9ef0f225bc13e64bf80ca6521451132034eea08bc2ec3f376542d2ea930a1e38e94876",
+      "integrity": "sha512-g7YzpaCZGCw19R/gly3vRPjnLqaW7JcBAu2WQQ6e8PIlvBPmS/gMplIUURMgNO6gi8LsPzdlQtLqkwoeOOlIdg==",
+      "allocated_bytes": 120942592,
+      "apparent_bytes": 120938684,
+      "device": 16777230,
+      "inode": 311492711,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-08-30T19:05:44+00:00",
+      "modified_utc": "2026-08-30T19:05:47+00:00",
+      "accessed_utc_before_read": "2026-09-09T00:51:55+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 231563824
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.151.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/90/25/364a3f5e0740d1f2c029b68f6a8c9e875e3704d04bc1e8ab74062f215b7b",
+          "index_sha256": "9dc3444fbcc79d2087c07015ead6756828db4d8f0b41a4efd87a4b55ba1907ba"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/83/b6/33a5a099182c35f51fe0972def44f8e72ea696ec970102ed96410e9ef0f225bc13e64bf80ca6521451132034eea08bc2ec3f376542d2ea930a1e38e94876 (115M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/67/ad/7890a488dffa7e60ca2d04933109ce24bd1098120b159a76821ba53c1c3adaa9317161c41843bf41e3f1810814bcf3f2ad69c1c8eaace303ee0cbb90729c",
+      "sha256": "e5008a5b8d7a22e2ad2922a74783de8f7202b7b886a181e6ddbec7633609c885",
+      "sha512": "67ad7890a488dffa7e60ca2d04933109ce24bd1098120b159a76821ba53c1c3adaa9317161c41843bf41e3f1810814bcf3f2ad69c1c8eaace303ee0cbb90729c",
+      "integrity": "sha512-Z614kKSI3/p+YMotBJMxCc4kvRCYEgsVmnaCG6U8HDraqTFxYcQYQ79B4/GBCBS88/KtacHI6qzjA+4Mu5BynA==",
+      "allocated_bytes": 117538816,
+      "apparent_bytes": 117535191,
+      "device": 16777230,
+      "inode": 300656098,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-08-29T01:42:27+00:00",
+      "modified_utc": "2026-08-29T01:42:28+00:00",
+      "accessed_utc_before_read": "2026-09-09T00:51:56+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 228986048
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.150.1-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/44/eb/ae0ee866de4c172d375c9570afb74ce26fbb4575b42b16cf8bc20ca6fb94",
+          "index_sha256": "da3019568c6906b9dee4b2af84fc3cf12312b4b72240b3392d3606a666946da3"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/67/ad/7890a488dffa7e60ca2d04933109ce24bd1098120b159a76821ba53c1c3adaa9317161c41843bf41e3f1810814bcf3f2ad69c1c8eaace303ee0cbb90729c (112M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/1c/ff/ef2421ffb76841f4a83a868b4df548250a527aff3e7ce1f6a5e6510fd780bd80d0200104b8fe44d00bb97957e040dd3ab00cfc083528ee976f1c5fc0185e",
+      "sha256": "2a98662d79316a59993c7233e3e25a1aa1d42da4b45904585d33a5a7da1cade1",
+      "sha512": "1cffef2421ffb76841f4a83a868b4df548250a527aff3e7ce1f6a5e6510fd780bd80d0200104b8fe44d00bb97957e040dd3ab00cfc083528ee976f1c5fc0185e",
+      "integrity": "sha512-HP/vJCH/t2hB9Kg6hotN9UglClJ6/z584fal5lEP14C9gNAgAQS4/kTQC7l5V+BA3TqwDPwINSjul28cX8AYXg==",
+      "allocated_bytes": 116502528,
+      "apparent_bytes": 116501639,
+      "device": 16777230,
+      "inode": 341931425,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-09-11T01:47:52+00:00",
+      "modified_utc": "2026-09-11T01:48:02+00:00",
+      "accessed_utc_before_read": "2026-11-10T05:41:09+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 222655232
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.154.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/b8/f2/7929e597d9f5bb85e0feb29bee6b1488a2c3e63099f63a18cb3ec9c42d80",
+          "index_sha256": "94baa964c55cbf1dabdb19e31b726774ac40caeda1e3bfd01838b105c0078d99"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/1c/ff/ef2421ffb76841f4a83a868b4df548250a527aff3e7ce1f6a5e6510fd780bd80d0200104b8fe44d00bb97957e040dd3ab00cfc083528ee976f1c5fc0185e (111M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/07/5a/a13777dad5acb4474c06ce25ea8304a407989ca580a134a1e1b411df7ffd14b524c2ef3fa5f1a4edbcc9468c7dc4f0712f637fa78c825e94cf42000a155a",
+      "sha256": "535d301b49131abfda3264f959fb0defa40bbc306976d98ddbc15c424636c55c",
+      "sha512": "075aa13777dad5acb4474c06ce25ea8304a407989ca580a134a1e1b411df7ffd14b524c2ef3fa5f1a4edbcc9468c7dc4f0712f637fa78c825e94cf42000a155a",
+      "integrity": "sha512-B1qhN3fa1ay0R0wGziXqgwSkB5icpYChNKHhtBHff/0UtSTC7z+l8aTtvMlGjH3E8HEvY3+njIJelM9CAAoVWg==",
+      "allocated_bytes": 115675136,
+      "apparent_bytes": 115672312,
+      "device": 16777230,
+      "inode": 328765193,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-09-06T08:36:49+00:00",
+      "modified_utc": "2026-09-06T08:36:51+00:00",
+      "accessed_utc_before_read": "2026-09-09T00:51:56+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 220584000
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.153.4-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/fa/2a/e9d928439adaf9dae7a240e5b1793ae88f1ca4453e475ad3bf7b145e0d63",
+          "index_sha256": "3c7b08f4b5de15e86b500f5405fe65913c1e940bad4e777842fb9892f3a1a7f5"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/07/5a/a13777dad5acb4474c06ce25ea8304a407989ca580a134a1e1b411df7ffd14b524c2ef3fa5f1a4edbcc9468c7dc4f0712f637fa78c825e94cf42000a155a (110M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/f1/c1/0958e216e569d29f6f96d51523735b26dac3751fa34ff9c0ab39eef72266a6532db23a4dd02a364cd927e403d8dfddfaa0c2504d52c96118c7a7da899ce6",
+      "sha256": "151ecdd90b96af823a2828146bff056c8a5f42d2ab4da63a198fe8a4ad84990b",
+      "sha512": "f1c10958e216e569d29f6f96d51523735b26dac3751fa34ff9c0ab39eef72266a6532db23a4dd02a364cd927e403d8dfddfaa0c2504d52c96118c7a7da899ce6",
+      "integrity": "sha512-8cEJWOIW5WnSn2+W1RUjc1sm2sN1H6NP+cCrOe73ImamUy2yOk3QKjZM2SfkA9jf3fqgwlBNUslhGMen2omc5g==",
+      "allocated_bytes": 115671040,
+      "apparent_bytes": 115669249,
+      "device": 16777230,
+      "inode": 326828316,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-09-04T17:11:00+00:00",
+      "modified_utc": "2026-09-04T17:11:02+00:00",
+      "accessed_utc_before_read": "2026-09-09T00:51:55+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 220551344
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.153.2-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/f3/0a/77a912660595cef9147298a75e8aeccaa8969f5b12ca5b92e530b73ecb34",
+          "index_sha256": "a92c9a3e382f8625325d168213c2d8ce4eb04d36f5122f3a457e0ce09c2848f6"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/f1/c1/0958e216e569d29f6f96d51523735b26dac3751fa34ff9c0ab39eef72266a6532db23a4dd02a364cd927e403d8dfddfaa0c2504d52c96118c7a7da899ce6 (110M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/0c/e9/c303a10a3acf9a472b581f87df22e52eb6893da2fa6f08d6b1f1a69366f041d9b2943e352578bacfd6993e8466ab75da94d724aebd730e7e9eae7d7c8e55",
+      "sha256": "cc26642531cb490dec79e8fc1aace175065e4a9e47410628c869965d8d98d20f",
+      "sha512": "0ce9c303a10a3acf9a472b581f87df22e52eb6893da2fa6f08d6b1f1a69366f041d9b2943e352578bacfd6993e8466ab75da94d724aebd730e7e9eae7d7c8e55",
+      "integrity": "sha512-DOnDA6EKOs+aRytYH4ffIuUutok9ovpvCNax8aaTZvBB2bKUPjUleLrP1pk+hGarddqU1ySuvXMOfp6ufXyOVQ==",
+      "allocated_bytes": 114802688,
+      "apparent_bytes": 114800879,
+      "device": 16777230,
+      "inode": 318096178,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-09-01T19:52:44+00:00",
+      "modified_utc": "2026-09-01T19:53:46+00:00",
+      "accessed_utc_before_read": "2026-09-09T00:51:56+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 217812496
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.152.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/28/8c/b8abc2b9cc0e2cba215a1bce2eb02943912796f74ef52e32b889ec528c63",
+          "index_sha256": "ee34fc5387cdec3d2feb68ead408af122df907b6299a0f346a200836bff3d85c"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/0c/e9/c303a10a3acf9a472b581f87df22e52eb6893da2fa6f08d6b1f1a69366f041d9b2943e352578bacfd6993e8466ab75da94d724aebd730e7e9eae7d7c8e55 (109M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/1f/c8/b4b991c82ccd19d84a7e32bc82179ac65e65e39974f35dfe592ba6e86cab59736c9fa268b8d99ad05ae610e4fd361f4a0b1bb0798cb69259943e5458236c",
+      "sha256": "a780ff1a424724778f85c1ccb4de3b908ad1804ef09260cd8140a2ceb7e2ab12",
+      "sha512": "1fc8b4b991c82ccd19d84a7e32bc82179ac65e65e39974f35dfe592ba6e86cab59736c9fa268b8d99ad05ae610e4fd361f4a0b1bb0798cb69259943e5458236c",
+      "integrity": "sha512-H8i0uZHILM0Z2Ep+MryCF5rGXmXjmXTzXf5ZK6bobKtZc2yfomi42ZrQWuYQ5P02H0oLG7B5jLaSWZQ+VFgjbA==",
+      "allocated_bytes": 114790400,
+      "apparent_bytes": 114790306,
+      "device": 16777230,
+      "inode": 323916028,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-09-03T00:59:54+00:00",
+      "modified_utc": "2026-09-03T00:59:56+00:00",
+      "accessed_utc_before_read": "2026-09-09T00:51:56+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 217778592
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.152.1-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/f5/2a/2148c024814cf397b898f0d234bc975b7c99de34f312f317663656e35d66",
+          "index_sha256": "7471b569982b7f78ddaffa24993ca68bda90480a1ad84b555a06df2009b88cc4"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/1f/c8/b4b991c82ccd19d84a7e32bc82179ac65e65e39974f35dfe592ba6e86cab59736c9fa268b8d99ad05ae610e4fd361f4a0b1bb0798cb69259943e5458236c (109M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/e9/7f/3891309b9d380f209d8475c3ecaefc12d16c6caa96be6c2b301a645fe018e1710e673cc9c10bac8201a08c8febeb6d74078fe2fab1af45691e10926035ab",
+      "sha256": "151f8b96af0529c1267e7438d2cbc6d26213922fa017b96540abaf5f07d792d2",
+      "sha512": "e97f3891309b9d380f209d8475c3ecaefc12d16c6caa96be6c2b301a645fe018e1710e673cc9c10bac8201a08c8febeb6d74078fe2fab1af45691e10926035ab",
+      "integrity": "sha512-6X84kTCbnTgPIJ2EdcPsrvwS0Wxsqpa+bCswGmRf4BjhcQ5nPMnBC6yCAaCMj+vrbXQHj+L6sa9FaR4QkmA1qw==",
+      "allocated_bytes": 114155520,
+      "apparent_bytes": 114152335,
+      "device": 16777230,
+      "inode": 286250589,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-08-26T02:26:30+00:00",
+      "modified_utc": "2026-08-26T02:26:32+00:00",
+      "accessed_utc_before_read": "2026-09-09T00:51:55+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 220552944
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.149.1-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/a5/ed/fb56f586a88c727c80391b8e767f53730d6d17e1de930abfc8f74d827eb0",
+          "index_sha256": "d6205a853223a104ca2c8306de670e1bf92a7ac8236c8dc284b21db10dc8ff81"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/e9/7f/3891309b9d380f209d8475c3ecaefc12d16c6caa96be6c2b301a645fe018e1710e673cc9c10bac8201a08c8febeb6d74078fe2fab1af45691e10926035ab (109M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/1a/c6/496f3056883e3c4444eb3bc54718040d81f4ab515c48b57645783f3bc2cc1ab4f8b4fa52ae428f03c789cc626399859ad5b70af76a5fdf791ad9c670d5f1",
+      "sha256": "d1ebcae20ffd79f64db3ebc3141a90d269a67540927f4405dd4d1a752197a642",
+      "sha512": "1ac6496f3056883e3c4444eb3bc54718040d81f4ab515c48b57645783f3bc2cc1ab4f8b4fa52ae428f03c789cc626399859ad5b70af76a5fdf791ad9c670d5f1",
+      "integrity": "sha512-GsZJbzBWiD48RETrO8VHGAQNgfSrUVxItXZFeD87wswatPi0+lKuQo8Dx4nMYmOZhZrVtwr3al/feRrZxnDV8Q==",
+      "allocated_bytes": 114102272,
+      "apparent_bytes": 114101870,
+      "device": 16777230,
+      "inode": 233516914,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-08-21T01:41:32+00:00",
+      "modified_utc": "2026-08-21T01:41:34+00:00",
+      "accessed_utc_before_read": "2026-08-25T10:27:37+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 220538240
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.149.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/15/a5/10e9a788324e7316927ace9f8901faed19655e8388bb1d9db34252a81096",
+          "index_sha256": "dd2415a5990f921fea144392a4542f3bb33beefb9eb6ed03bb519c877a3b22f9"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/1a/c6/496f3056883e3c4444eb3bc54718040d81f4ab515c48b57645783f3bc2cc1ab4f8b4fa52ae428f03c789cc626399859ad5b70af76a5fdf791ad9c670d5f1 (109M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/04/45/15922396ee42dc472acc2df02bfe1f7017cb11549c990f2e8e1ed567e901835e2bf706f0195536353eef7117b29d21d9185dba78b9ac8dd1a0d041a01427",
+      "sha256": "493de2d788c6ff01de222307c767231c1e6c802d5dd808523550fad6d972f4d3",
+      "sha512": "044515922396ee42dc472acc2df02bfe1f7017cb11549c990f2e8e1ed567e901835e2bf706f0195536353eef7117b29d21d9185dba78b9ac8dd1a0d041a01427",
+      "integrity": "sha512-BEUVkiOW7kLcRyrMLfAr/h9wF8sRVJyZDy6OHtVn6QGDXiv3BvAZVTY1Pu9xF7KdIdkYXbp4uayN0aDQQaAUJw==",
+      "allocated_bytes": 111202304,
+      "apparent_bytes": 111199052,
+      "device": 16777230,
+      "inode": 216138321,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-08-18T01:23:17+00:00",
+      "modified_utc": "2026-08-18T01:23:19+00:00",
+      "accessed_utc_before_read": "2026-08-25T10:27:37+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 219997536
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.147.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/5a/4a/1b3013dbba90746fb058d9ca27976b438c97676d882938a40ca056a8dcc5",
+          "index_sha256": "850640c187bb75cd1d3b2101bca35b22d03732afcbf5667ad2ad0600b18c80de"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/04/45/15922396ee42dc472acc2df02bfe1f7017cb11549c990f2e8e1ed567e901835e2bf706f0195536353eef7117b29d21d9185dba78b9ac8dd1a0d041a01427 (106M)",
+        "stderr": ""
+      }
+    },
+    {
+      "path": "/Users/marcin/.npm/_cacache/content-v2/sha512/62/32/a6adeec394ab254158527e8707b1c8319ed64a6997352d0c922a1eeafa134bf2374af9cf2749649e3e2e7cdf2285348c59f19ff30a47b0b6314dbcea5089",
+      "sha256": "af1b4b0d57bce14da2b7f247ad49e484155a040d41f9fdf120e78795d8607195",
+      "sha512": "6232a6adeec394ab254158527e8707b1c8319ed64a6997352d0c922a1eeafa134bf2374af9cf2749649e3e2e7cdf2285348c59f19ff30a47b0b6314dbcea5089",
+      "integrity": "sha512-YjKmre7DlKslQVhSfocHscgxntZKaZc1LQySKh7q+hNL8jdK+c8nSWSePi583yKFNIxZ8Z/zCkewtjFNvOpQiQ==",
+      "allocated_bytes": 86990848,
+      "apparent_bytes": 86988487,
+      "device": 16777230,
+      "inode": 140673403,
+      "mode": "0o644",
+      "hardlinks": 1,
+      "birth_utc": "2026-06-08T18:12:29+00:00",
+      "modified_utc": "2026-06-08T18:12:37+00:00",
+      "accessed_utc_before_read": "2026-06-10T07:07:58+00:00",
+      "gzip_header": "1f8b080000000000",
+      "first_tar_member": {
+        "name": "package/vendor/aarch64-apple-darwin/bin/codex",
+        "type": "0",
+        "size": 200872576
+      },
+      "identity_stable": true,
+      "keys": [
+        {
+          "key": "make-fetch-happen:request-cache:https://registry.npmjs.org/@openai/codex/-/codex-0.137.0-darwin-arm64.tgz",
+          "index_path": "/Users/marcin/.npm/_cacache/index-v5/1a/0c/5f4cc9e8398e7194451fc5b0e9b7abb9975ae2bde051f5bdde99739eac6f",
+          "index_sha256": "7cb1815a9207df838a3f4126e521e8d7c8bd865e4e370992a9c0be19f57b4f58"
+        }
+      ],
+      "guarded_dry_run": {
+        "returncode": 0,
+        "stdout": "DRY-RUN ok: would delete /Users/marcin/.npm/_cacache/content-v2/sha512/62/32/a6adeec394ab254158527e8707b1c8319ed64a6997352d0c922a1eeafa134bf2374af9cf2749649e3e2e7cdf2285348c59f19ff30a47b0b6314dbcea5089 ( 83M)",
+        "stderr": ""
+      }
+    }
+  ],
+  "excluded_homebrew": [
+    {
+      "path": "/Users/marcin/Library/Caches/Homebrew/downloads/16fca3c6850968dd4f578d905c8a9af19cdd1accd73606674ece7764b3e8047b--llvm--23.1.3_1.arm64_tahoe.bottle.tar.gz",
+      "reason": "Excluded: Homebrew cache alias resolves to this archive; no permission to remove alias"
+    },
+    {
+      "path": "/Users/marcin/Library/Caches/Homebrew/downloads/cf1723dbb152ee4dc893a709c87f5e88b014e29e282cb8dc577d621bff2fc108--dssp--4.6.1.arm64_tahoe.bottle.tar.gz",
+      "reason": "Excluded: Homebrew cache alias resolves to this archive; no permission to remove alias"
+    },
+    {
+      "path": "/Users/marcin/Library/Caches/Homebrew/downloads/6442a2d950abe9d76d29f573a3b501a65765fb4d113113833733a833ce6abfde--boost--1.90.0_1.arm64_tahoe.bottle.tar.gz",
+      "reason": "Excluded: Homebrew cache alias resolves to this archive; no permission to remove alias"
+    }
+  ],
+  "inbound_symlinks": [
+    {
+      "path": "/Users/marcin/Library/Caches/Homebrew/dssp--4.6.1",
+      "target": "/Users/marcin/Library/Caches/Homebrew/downloads/cf1723dbb152ee4dc893a709c87f5e88b014e29e282cb8dc577d621bff2fc108--dssp--4.6.1.arm64_tahoe.bottle.tar.gz",
+      "raw": "downloads/cf1723dbb152ee4dc893a709c87f5e88b014e29e282cb8dc577d621bff2fc108--dssp--4.6.1.arm64_tahoe.bottle.tar.gz"
+    },
+    {
+      "path": "/Users/marcin/Library/Caches/Homebrew/boost--1.90.0_1",
+      "target": "/Users/marcin/Library/Caches/Homebrew/downloads/6442a2d950abe9d76d29f573a3b501a65765fb4d113113833733a833ce6abfde--boost--1.90.0_1.arm64_tahoe.bottle.tar.gz",
+      "raw": "downloads/6442a2d950abe9d76d29f573a3b501a65765fb4d113113833733a833ce6abfde--boost--1.90.0_1.arm64_tahoe.bottle.tar.gz"
+    },
+    {
+      "path": "/Users/marcin/Library/Caches/Homebrew/llvm--23.1.3_1",
+      "target": "/Users/marcin/Library/Caches/Homebrew/downloads/16fca3c6850968dd4f578d905c8a9af19cdd1accd73606674ece7764b3e8047b--llvm--23.1.3_1.arm64_tahoe.bottle.tar.gz",
+      "raw": "downloads/16fca3c6850968dd4f578d905c8a9af19cdd1accd73606674ece7764b3e8047b--llvm--23.1.3_1.arm64_tahoe.bottle.tar.gz"
+    }
+  ],
+  "inbound_search_roots": [
+    "/Users/marcin/.npm",
+    "/Users/marcin/Library/Caches/Homebrew",
+    "/Users/marcin/.nvm/versions/node/v22.16.0/lib/node_modules/@openai/codex"
+  ],
+  "inbound_entries_examined": 48140,
+  "text_reference_roots": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.temp/generation-eta-20261110/src",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.temp/generation-eta-20261110/scripts",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.temp/generation-eta-20261110/pyproject.toml",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.temp/generation-eta-20261110/Makefile",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.temp/generation-eta-20261110/poetry.lock"
+  ],
+  "text_reference_search_ignored_files_included": true,
+  "text_reference_result": {
+    "returncode": 1,
+    "paths": [],
+    "stderr": ""
+  },
+  "open_handles": {
+    "returncode": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "npm_index_before": "1e4fe96d91022aa5a54ee44f24d523aeb31eada063561e5d469caa712476edcd",
+  "npm_index_after": "1e4fe96d91022aa5a54ee44f24d523aeb31eada063561e5d469caa712476edcd",
+  "npm_index_files": 1303,
+  "installed_npm_version": "10.9.2",
+  "npm_source_hashes": {
+    "/Users/marcin/.nvm/versions/node/v22.16.0/lib/node_modules/npm/package.json": "9147a2f60170daeb373e6410793668cdb9528bd2860aef1a77619714b3dfb85e",
+    "/Users/marcin/.nvm/versions/node/v22.16.0/lib/node_modules/npm/lib/commands/cache.js": "c7aced5e5ab97d492529195f59db75e035a79f161a7939ed330a0eeff506184e",
+    "/Users/marcin/.nvm/versions/node/v22.16.0/lib/node_modules/npm/node_modules/cacache/lib/entry-index.js": "65cc91f2f1a2148e616969aa49dd75d61c8dfc913a2ed2fbb7e34eb50163e7fa",
+    "/Users/marcin/.nvm/versions/node/v22.16.0/lib/node_modules/npm/node_modules/cacache/lib/rm.js": "5155f5560ed63bea74732c87d6a10732d5c6e5639785dcfdcdcf93a01943abf6",
+    "/Users/marcin/.nvm/versions/node/v22.16.0/lib/node_modules/npm/node_modules/cacache/lib/content/rm.js": "f3f706375bbc097bc0fd091f0eea8d07b98b8e1f7a1d203f3b87337312272672"
+  },
+  "guarded_script": "/Users/marcin/.codex/skills/safe-delete/scripts/guarded_rm.sh",
+  "guarded_script_sha256": "7ef62cdef338d7c4b7b9e2539f5bd89fff4dd0e34dc50f59804b2ffbe03d3cce",
+  "blockers": [],
+  "available_bytes_observed": 3578388480,
+  "limitations": [
+    "No full-home search; unseen external references remain possible.",
+    "No archive extraction/full tar validation; all compressed bytes hashed and first tar member parsed.",
+    "lsof visibility and file/index identity are point-in-time observations.",
+    "APFS sharing means allocated bytes are not guaranteed reclaimed space.",
+    "No npm cache command was executed; cache clean does not implement a read-only dry-run in inspected code."
+  ]
+}

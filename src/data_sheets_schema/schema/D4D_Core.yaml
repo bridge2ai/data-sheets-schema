@@ -8,7 +8,7 @@ description: >-
   exchange layer alignment (mapped to schema.org, RAI, EVI, and DCAT).
   This is the primary datasheet format for cross-system interoperability.
   The full D4D schema (data_sheets_schema.yaml) is the extended reservoir.
-version: 3.2.0
+version: 3.2.1
 license: MIT
 see_also:
   - https://bridge2ai.github.io/data-sheets-schema

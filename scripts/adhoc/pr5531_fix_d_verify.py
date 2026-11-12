@@ -5,10 +5,16 @@ Output: scratch-pr5531-fix/fix-d-verification.json. Serves PR5531 fix D.
 """
 from collections import Counter
 import json
+import os
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
-SCRATCH = Path(__file__).resolve().parents[2].parent / 'scratch-pr5531-fix'
+SCRATCH = Path(
+    os.environ.get(
+        'D4D_PR5531_FIX_SCRATCH',
+        Path(__file__).resolve().parents[2].parent / 'scratch-pr5531-fix',
+    )
+)
 
 
 def results(name):

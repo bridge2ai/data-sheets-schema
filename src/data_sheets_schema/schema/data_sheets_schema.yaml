@@ -24,7 +24,11 @@ title: data-sheets-schema
 # A 3.1.0 record with scalar data_use_permission is invalid under 3.2.0:
 # migrate it to a one-element list. The API write-time normaliser wraps scalars;
 # BC1 sizing requires migrated lists and refuses scalar owner cardinality.
-version: 3.2.0
+#
+# 3.2.1 (#2975): aligns FileCollection.collection_type description with its
+# scalar FileCollectionTypeEnum declaration (one classification per
+# FileCollection; separate file groups use separate FileCollection entries).
+version: 3.2.1
 description: |-
   A LinkML schema for Datasheets for Datasets.
 license: MIT

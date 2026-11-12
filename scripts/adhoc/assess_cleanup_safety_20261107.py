@@ -605,14 +605,7 @@ def build_citations_map(roots: list[str]) -> dict[str, dict[str, Any]]:
     return result
 
 
-def load_subpath_citations_map() -> dict[str, dict[str, list[str]]]:
-    """Load precomputed sub-path citations map (`subpath_citations.json`), expanding brace ranges like `{1..6}`."""
-    if not os.path.exists(CACHED_SUBPATH_CITATIONS_JSON):
-        return {}
-    try:
-        raw = json.load(open(CACHED_SUBPATH_CITATIONS_JSON))
-    except Exception:
-        return {}
+def _expand_subpath_citations(raw: dict[str, Any]) -> dict[str, dict[str, list[str]]]:
     expanded: dict[str, dict[str, list[str]]] = {}
     brace_re = re.compile(r"\{(\d+)\.\.(\d+)\}")
     for root_base, sp_dict in raw.items():
@@ -629,11 +622,76 @@ def load_subpath_citations_map() -> dict[str, dict[str, list[str]]]:
                 if 0 <= (hi - lo) <= 50:
                     for idx in range(lo, hi + 1):
                         exp_p = sp_clean[: m.start()] + str(idx) + sp_clean[m.end() :]
-                        out_sp[exp_p] = cfiles
+                        out_sp[exp_p] = list(cfiles)
                     continue
-            out_sp[sp_clean] = cfiles
+            out_sp[sp_clean] = list(cfiles)
         expanded[root_base] = out_sp
     return expanded
+
+
+def load_subpath_citations_map(
+    roots: list[str] | None = None,
+    cached_json_path: str | None = None,
+    search_dirs: list[str] | None = None,
+) -> dict[str, dict[str, list[str]]]:
+    """Load precomputed sub-path citations map (`subpath_citations.json`), or build via live `rg` when absent."""
+    cache_path = cached_json_path if cached_json_path is not None else CACHED_SUBPATH_CITATIONS_JSON
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path) as f:
+                raw = json.load(f)
+            if isinstance(raw, dict):
+                return _expand_subpath_citations(raw)
+        except Exception:
+            pass
+
+    if not roots:
+        return {}
+    all_basenames = sorted({os.path.basename(os.path.normpath(r)) for r in roots if os.path.basename(os.path.normpath(r))})
+    if not all_basenames:
+        return {}
+
+    dirs = search_dirs if search_dirs is not None else [
+        os.path.join(EXECUTIONS_ROOT, "plans"),
+        os.path.join(PRIMARY_REPO, "notes"),
+        os.path.join(PRIMARY_REPO, "data"),
+    ]
+    dirs = [d for d in dirs if os.path.exists(d)]
+    if not dirs:
+        return {}
+
+    pat = r"(" + "|".join(re.escape(b) for b in all_basenames) + r")/[A-Za-z0-9_.\-/{}*]+"
+    wait_for_quiet_window()
+    raw_hits: dict[str, dict[str, set[str]]] = {}
+    try:
+        proc = subprocess.run(
+            ["rg", "--no-ignore", "--hidden", "--no-heading", "--with-filename", "-o", "-e", pat, *dirs],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        for line in proc.stdout.splitlines():
+            if ":" not in line:
+                continue
+            fpath, match_tok = line.rsplit(":", 1)
+            fpath = fpath.strip()
+            if any(excl in fpath for excl in SELF_CITATION_EXCLUDES):
+                continue
+            match_tok = match_tok.strip().rstrip(".,;:")
+            if "/" not in match_tok:
+                continue
+            rbase, subpath = match_tok.split("/", 1)
+            subpath = subpath.strip("/")
+            if rbase in all_basenames and subpath:
+                raw_hits.setdefault(rbase, {}).setdefault(subpath, set()).add(fpath)
+    except Exception:
+        return {}
+
+    raw_serializable = {
+        rbase: {sp: sorted(cfiles) for sp, cfiles in sp_map.items()}
+        for rbase, sp_map in raw_hits.items()
+    }
+    return _expand_subpath_citations(raw_serializable)
 
 
 def scan_all_alternates(
@@ -2051,7 +2109,12 @@ def assess_root(
     }
 
 
-def write_outputs(records: list[dict[str, Any]], out_dir: str, remote: str) -> dict[str, Any]:
+def write_outputs(
+    records: list[dict[str, Any]],
+    out_dir: str,
+    remote: str,
+    run_label: str | None = None,
+) -> dict[str, Any]:
     os.makedirs(out_dir, exist_ok=True)
     records_sorted = sorted(records, key=lambda r: r["rel_root"])
 
@@ -2200,8 +2263,19 @@ def write_outputs(records: list[dict[str, Any]], out_dir: str, remote: str) -> d
         json.dump(ledger_payload, f, indent=2)
 
     # 2. Write summary.md
+    gen_date = summary_meta["generated_at"][:10]
+    effective_label = (
+        os.path.basename(os.path.normpath(out_dir))
+        if run_label == "auto"
+        else run_label
+    )
+    summary_heading = (
+        f"# Read-Only Cleanup Safety Assessment ({effective_label}) — {gen_date}"
+        if effective_label
+        else "# Read-Only Cleanup Safety Assessment (Run 2 — Part 66 & Part 66b Fixes) — 2026-11-07"
+    )
     md_lines: list[str] = [
-        "# Read-Only Cleanup Safety Assessment (Run 2 — Part 66 & Part 66b Fixes) — 2026-11-07",
+        summary_heading,
         "",
         f"- **Generated**: `{summary_meta['generated_at']}`",
         f"- **Rules specification**: `notes/coordination/2026-11-07-cleanup-safety-system.md` + `2026-11-07-agy-prompt-part66.md` + `2026-11-07-agy-prompt-part66b.md`",
@@ -2389,7 +2463,14 @@ def write_outputs(records: list[dict[str, Any]], out_dir: str, remote: str) -> d
         f.write("\n".join(md_lines) + "\n")
 
     # 3. Write self-contained static sortable HTML page (`ledger.html`)
-    write_html(records_sorted, summary_meta, top10_safe_actions, r_local_roots, os.path.join(out_dir, "ledger.html"))
+    write_html(
+        records_sorted,
+        summary_meta,
+        top10_safe_actions,
+        r_local_roots,
+        os.path.join(out_dir, "ledger.html"),
+        run_label=effective_label,
+    )
     return summary_meta
 
 
@@ -2399,6 +2480,7 @@ def write_html(
     top10_safe_actions: list[dict[str, Any]],
     r_local_roots: list[dict[str, Any]],
     html_path: str,
+    run_label: str | None = None,
 ) -> None:
     ab = summary_meta["action_byte_totals"]
     ct = summary_meta["class_totals"]
@@ -2452,11 +2534,23 @@ def write_html(
         for act, cnt in sorted(summary_meta["action_root_counts"].items())
     )
 
+    gen_date = summary_meta["generated_at"][:10]
+    html_title = (
+        f"D4D Cleanup Safety Ledger ({html.escape(run_label)}) — {html.escape(gen_date)}"
+        if run_label
+        else "D4D Cleanup Safety Ledger (Run 2 — Part 66b) — 2026-11-07"
+    )
+    html_h1 = (
+        f"D4D Read-Only Cleanup Safety Assessment ({html.escape(run_label)}) — {html.escape(gen_date)}"
+        if run_label
+        else "D4D Read-Only Cleanup Safety Assessment (Run 2 — Part 66b) — 2026-11-07"
+    )
+
     doc = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>D4D Cleanup Safety Ledger (Run 2 — Part 66b) — 2026-11-07</title>
+<title>{html_title}</title>
 <style>
   :root {{
     --bg: #f8fafc; --card: #ffffff; --ink: #0f172a; --muted: #475569; --border: #cbd5e1;
@@ -2489,7 +2583,7 @@ def write_html(
 </style>
 </head>
 <body>
-<h1>D4D Read-Only Cleanup Safety Assessment (Run 2 — Part 66b) — 2026-11-07</h1>
+<h1>{html_h1}</h1>
 <p>Generated: <code>{html.escape(summary_meta['generated_at'])}</code> | Roots: <strong>{summary_meta['root_count']}</strong> | Files: <strong>{summary_meta['total_files']:,}</strong> | Total Size: <strong>{fmt_bytes(tot_b)}</strong> (<code>{tot_b:,} B</code>) | <strong>Read-Only (Nothing Deleted)</strong></p>
 
 <h2>Totals per Action</h2>
@@ -2652,6 +2746,7 @@ def main() -> int:
     parser.add_argument("--remote", default="origin", help="Git remote to check for reachability (default: origin).")
     parser.add_argument("--out", required=True, help="Output directory for ledger.json, summary.md, and ledger.html.")
     parser.add_argument("--workers", type=int, default=4, help="Max concurrent root workers (default: 4).")
+    parser.add_argument("--run-label", default=None, help="Optional run label for summary.md and ledger.html headings (or 'auto' to use --out basename).")
     args = parser.parse_args()
 
     t0 = time.time()
@@ -2680,7 +2775,7 @@ def main() -> int:
 
     live_procs = collect_live_processes()
     citations_map = build_citations_map(roots_list)
-    subpath_citations_map = load_subpath_citations_map()
+    subpath_citations_map = load_subpath_citations_map(roots_list)
     lender_to_borrowers, root_to_alternates = scan_all_alternates(list(all_roots_norm), PRIMARY_REPO)
     now_ts = time.time()
 
@@ -2742,7 +2837,7 @@ def main() -> int:
                         flush=True,
                     )
 
-    summary_meta = write_outputs(records, args.out, args.remote)
+    summary_meta = write_outputs(records, args.out, args.remote, run_label=args.run_label)
     dt = time.time() - t0
     ab = summary_meta["action_byte_totals"]
     print(

@@ -4789,7 +4789,7 @@
             "properties": {
                 "collection_type": {
                     "$ref": "#/$defs/FileCollectionTypeEnum",
-                    "description": "Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed."
+                    "description": "Primary content classification for this file collection from FileCollectionTypeEnum. Each FileCollection has one collection_type value; represent differently classified file groups as separate FileCollection entries in the dataset's file_collections."
                 },
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
@@ -8619,5 +8619,5 @@
     ],
     "title": "data-sheets-schema",
     "type": "object",
-    "version": "3.2.0"
+    "version": "3.2.1"
 }

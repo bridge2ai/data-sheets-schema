@@ -4,6 +4,7 @@ Inputs: focused JUnit and the same test files. Outputs: remaining-node manifest
 and JUnit under scratch-pr5531-fix. Run via pr5531_fix_a_run.py for the deadline.
 """
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -12,7 +13,8 @@ import xml.etree.ElementTree as ET
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-SCRATCH = ROOT.parent / 'scratch-pr5531-fix'
+SCRATCH = Path(os.environ.get('D4D_PR5531_FIX_SCRATCH', ROOT.parent / 'scratch-pr5531-fix'))
+LOCK = ROOT.parent / 'plans/native_quiet_window.lock'
 FILES = ['tests/test_source_heading_completed.py', 'tests/test_pr5531_regressions.py',
          'tests/test_download/test_api_runner.py', 'tests/test_removals.py',
          'tests/test_nested_string_lists.py', 'tests/test_identifier_form.py',
@@ -26,6 +28,7 @@ class Collection:
 
 
 def main():
+    assert not LOCK.exists()
     collection = Collection()
     result = pytest.main([*FILES, '--collect-only', '-q', '-p', 'no:cacheprovider'],
                          plugins=[collection])
@@ -52,7 +55,9 @@ def main():
                f'--basetemp={SCRATCH}/fix-d-remaining',
                f'--junitxml={SCRATCH}/fix-d-remaining.xml']
     print(repr(command), flush=True)
-    return subprocess.call(command)
+    assert not LOCK.exists()
+    env = {**os.environ, 'PYTHONDONTWRITEBYTECODE': '1'}
+    return subprocess.call(command, env=env)
 
 
 if __name__ == '__main__':

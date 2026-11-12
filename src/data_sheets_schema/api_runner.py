@@ -661,12 +661,6 @@ class RunSpec:
     receipt_completion_registration: str | None = None
     shared_generation_version: int = 0
     shared_generation_registration: str | None = None
-    native_shared_generation_version: int = 0
-    native_shared_generation_registration: str | None = None
-    _native_shared_generation_capture: Any = field(default=None, init=False, repr=False)
-    _native_shared_generation_metadata: bytes | None = field(default=None, init=False, repr=False)
-    _native_shared_runtime_capture: Any = field(default=None, init=False, repr=False)
-    _native_shared_max_draft_checks: int | None = field(default=None, init=False, repr=False)
     # Explicit binding for input-pinning registration builders that predate
     # shared generation/native attribution. A spelling contract only; it
     # grants no execution authority and changes none of their identity gates.
@@ -701,10 +695,8 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
-        from .native_shared_render import validate_spec as validate_native_shared
-        validate_native_shared(self)
         from data_sheets_schema.native_source_attribution import validate as validate_native_attribution
         validate_native_attribution(self.native_source_attribution_version, native=self.runtime in CLAUDE_CODE_RUNTIMES,
                                     renderer=self.render_version, max_checks=self.native_source_attribution_max_checks)
@@ -714,7 +706,7 @@ class RunSpec:
             raise ValueError("shared_generation_version must be 0, 1 or 2")
         from .bc1_selection import validate_spec_mode
         validate_spec_mode(self)
-        if self.condition == "generic_v10" and self.shared_generation_version != 1 and self.native_shared_generation_version != 1:
+        if self.condition == "generic_v10" and self.shared_generation_version != 1:
             raise ValueError("generic_v10 requires shared generation 1")
         if self.render_version == 25 and self.shared_generation_version != 1:
             raise ValueError("renderer 25 requires shared generation 1")
@@ -757,43 +749,39 @@ class RunSpec:
             raise ValueError("prompt_text_env applies only to agentic renderers 9 and later")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
-        if self.native_shared_generation_version == 1 and self._replay_only:
-            # Native replay restores captured paths below, without live discovery.
-            self._corpus_root = None
-        else:
-            self.manifest = select_manifest(self.project, self.bundle, self.manifest)
+        self.manifest = select_manifest(self.project, self.bundle, self.manifest)
+        if self.manifest is not None:
+            self.manifest = Path(self.manifest)
+        from data_sheets_schema.corpus import root
+        self._corpus_root = root(self.manifest)
+        if self._corpus_root != Path.cwd().resolve():
+            # CLI input paths belong to the launch directory, not to the
+            # manifest's output tree. Preserve that identity in the record.
+            if self.bundle is not None:
+                self.bundle = Path(self.bundle).absolute()
             if self.manifest is not None:
-                self.manifest = Path(self.manifest)
-            from data_sheets_schema.corpus import root
-            self._corpus_root = root(self.manifest)
-            if self._corpus_root != Path.cwd().resolve():
-                # CLI input paths belong to the launch directory, not to the
-                # manifest's output tree. Preserve that identity in the record.
-                if self.bundle is not None:
-                    self.bundle = Path(self.bundle).absolute()
-                if self.manifest is not None:
-                    self.manifest = self.manifest.absolute()
-                if self.chunk_manifest is not None:
-                    self.chunk_manifest = Path(self.chunk_manifest).absolute()
-            elif not self._replay_only and not provenance.registered_input_paths(vars(self)):
-                # Replay preserves the recorded spelling, even when inputs moved
-                # or the caller now runs from the original corpus root (#5213).
-                # D76 also preserves registered input spellings: the registration
-                # and completed-capture/native permission checks bind them exactly.
-                for _attr in ("bundle", "manifest", "chunk_manifest"):
-                    _val = getattr(self, _attr)
-                    if _val is not None and Path(_val).is_absolute():
-                        # A symlink before parent traversal can change the input
-                        # selected by abspath; preserve the original spelling.
-                        if ".." in Path(_val).parts:
-                            continue
-                        try:
-                            _lex = Path(os.path.abspath(_val))
-                            _rel = _lex.relative_to(self._corpus_root)
-                            _lex.resolve().relative_to(self._corpus_root)
-                            setattr(self, _attr, _rel)
-                        except (OSError, RuntimeError, ValueError):
-                            pass
+                self.manifest = self.manifest.absolute()
+            if self.chunk_manifest is not None:
+                self.chunk_manifest = Path(self.chunk_manifest).absolute()
+        elif not self._replay_only and not provenance.registered_input_paths(vars(self)):
+            # Replay preserves the recorded spelling, even when inputs moved
+            # or the caller now runs from the original corpus root (#5213).
+            # D76 also preserves registered input spellings: the registration
+            # and completed-capture/native permission checks bind them exactly.
+            for _attr in ("bundle", "manifest", "chunk_manifest"):
+                _val = getattr(self, _attr)
+                if _val is not None and Path(_val).is_absolute():
+                    # A symlink before parent traversal can change the input
+                    # selected by abspath; preserve the original spelling.
+                    if ".." in Path(_val).parts:
+                        continue
+                    try:
+                        _lex = Path(os.path.abspath(_val))
+                        _rel = _lex.relative_to(self._corpus_root)
+                        _lex.resolve().relative_to(self._corpus_root)
+                        setattr(self, _attr, _rel)
+                    except (OSError, RuntimeError, ValueError):
+                        pass
         if self.chunk_manifest is not None:
             self.chunk_manifest = Path(self.chunk_manifest)
         elif ((self.render_version >= 4 and self.is_agentic)
@@ -833,18 +821,14 @@ class RunSpec:
             if self.profile_basis is None:
                 self.profile_basis = "stated by the caller"       # the record says why, always (#1549)
 
-        if not self.native_shared_generation_version:
-            from .shared_generation import select as select_shared
-            select_shared(self)
+        from .shared_generation import select as select_shared
+        select_shared(self)
         registration = None
         if self.shared_generation_version:
             from .shared_generation import parse_registration, capture
             registration = parse_registration(self.shared_generation_registration.encode("utf-8"))
             if not self._replay_only:
                 capture(self)
-        if self.native_shared_generation_version:
-            from .native_shared_render import bind_selection
-            bind_selection(self)
         if not self._replay_only:
             # Retain the construction decision independently of mutable spec
             # attributes. Keep a private mirror for inspection, never authority.
@@ -963,9 +947,6 @@ class RunSpec:
         """
         if "registered_input_paths" in recorded and recorded["registered_input_paths"] is not True:
             raise ValueError("registered_input_paths is recorded only as true")
-        if any(k.startswith("native_shared_") for k in recorded):
-            from .native_shared_render import validate_metadata
-            validate_metadata(recorded)
         if any(k.startswith("receipt_completion_") for k in recorded):
             from data_sheets_schema.receipt_completion_policy import select_policy
             select_policy(render_spec=recorded)
@@ -990,8 +971,6 @@ class RunSpec:
                    receipt_completion_registration=(recorded.get("receipt_completion_registration") or {}).get("raw_json"),
                    shared_generation_version=recorded.get("shared_generation_version", 0),
                    shared_generation_registration=(recorded.get("shared_generation_registration") or {}).get("raw_json"),
-                   native_shared_generation_version=recorded.get("native_shared_generation_version", 0),
-                   native_shared_generation_registration=(recorded.get("native_shared_generation_registration") or {}).get("raw_json"),
                    registered_input_paths=recorded.get("registered_input_paths", False),
                    bounded_carry_version=recorded.get("bounded_carry_version", 0),
                    _replay_only=True)
@@ -1075,9 +1054,6 @@ class RunSpec:
         # Completed-capture subclasses intentionally skip live __post_init__.
         # Successful literal restoration establishes their origin here too.
         _remember_replay_origin(spec)
-        if spec.native_shared_generation_version:
-            from .native_shared_render import restore
-            restore(spec, recorded)
         return spec
 
     @property
@@ -1207,9 +1183,6 @@ class RunSpec:
         authorizes execution.
         """
         policy_metadata = {}
-        if self.native_shared_generation_version:
-            from .native_shared_render import metadata
-            policy_metadata.update(metadata(self))
         if self.bounded_carry_version:
             from .bc1_selection import identity as bc1_identity
             policy_metadata.update(bounded_carry_version=self.bounded_carry_version,
@@ -1384,9 +1357,6 @@ class RunSpec:
         before enumerating selected prompt assets; this list is not independent input or launch
         admission.
         """
-        if self.native_shared_generation_version:
-            from .native_shared_selection import capture_assets
-            return [Path(a.pin.role[len("asset:"):]) for a in capture_assets()]
         if self.shared_generation_version:
             from .shared_generation import captured_assets
             return [Path(name) for name in sorted(captured_assets())]
@@ -1494,7 +1464,7 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
     return out
 
 
-def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, removal_repair_version: int = 0, receipt_completion_version: int = 0, native_source_attribution_version: int = 0, shared_generation_version: int = 0, bounded_carry_version: int = 0, native_shared_generation_version: int = 0) -> dict[str, Any]:
+def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, removal_repair_version: int = 0, receipt_completion_version: int = 0, native_source_attribution_version: int = 0, shared_generation_version: int = 0, bounded_carry_version: int = 0) -> dict[str, Any]:
     """Fingerprint of how requests are assembled, for provenance (#353).
 
     The prompt-file and resolved-text hashes witness the arm prompt only. #352
@@ -1505,16 +1475,6 @@ def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, r
     instruction texts, report re-check headers and the order the parts are
     assembled in.
     """
-    if type(native_shared_generation_version) is not int or native_shared_generation_version not in (0, 1):
-        raise ValueError('unsupported native shared assembly version')
-    if native_shared_generation_version or render_version == 26:
-        axes = (api_playbook_version, removal_repair_version, receipt_completion_version,
-                native_source_attribution_version, shared_generation_version, bounded_carry_version)
-        if (native_shared_generation_version != 1 or type(render_version) is not int
-                or render_version != 26 or any(type(axis) is not int or axis != 0 for axis in axes)):
-            raise ValueError('native shared assembly requires its exact selected axes')
-        from .native_shared_render import assembly_digest as native_assembly
-        return native_assembly()
     instructions = {phase: phase_instruction(phase, render_version)
                     for phase in PHASE_INSTRUCTIONS}
     layout = ASSEMBLY_LAYOUT
@@ -1687,9 +1647,6 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
 
     RunSpec boundary: guarded
     """
-    if getattr(spec, "native_shared_generation_version", 0) or spec.render_version == 26:
-        from .native_shared_render import instruction
-        return instruction(spec)
     body = prompt_body(spec.base_prompt)
     if spec.api_playbook_version:
         from data_sheets_schema.api_playbook import adapt_template
@@ -3134,8 +3091,6 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
     RunSpec boundary: guarded
     """
     _require_registered_input_spellings(spec)
-    if getattr(spec, "native_shared_generation_version", 0) or spec.render_version == 26:
-        raise ValueError("native shared generation uses the registered native stage controller")
     if phase not in PHASES:
         raise ValueError(f"unknown phase {phase!r}")
     if spec.render_version >= 20 and phase == "audit":
@@ -7482,8 +7437,6 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
 
     RunSpec boundary: guarded
     """
-    if getattr(spec, "native_shared_generation_version", 0) or spec.render_version == 26:
-        raise ValueError("native shared generation requires its separate native execution registration")
     if spec.condition == "tuned":
         raise ValueError("tuned is retired for execution (D67); historical records remain readable")
     if spec._replay_only:

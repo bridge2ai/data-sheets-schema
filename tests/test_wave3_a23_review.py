@@ -77,14 +77,24 @@ def test_pediatric_ethics_and_assent_are_bound_to_the_cited_child_sources():
     assert 'South Florida' not in text
 
 
+def _quotes_for_chunk(text: str, chunk_id: str) -> list[str]:
+    return [
+        json.loads(match[2])
+        for match in re.finditer(r'\[chunks:\s*([^\]]+)\]\s*("(?:[^"\\]|\\.)*")', text)
+        if chunk_id in [item.strip() for item in match[1].split(',')]
+    ]
+
+
 def test_pediatric_free_speech_statement_keeps_the_release_qualification():
     text, ids, parts = evidence('VOICE_PEDIATRIC', 'data_processing')
     assert 'c003' in ids
     statement = 'releasing audio features for all free speech tasks that were manually checked'
     assert statement in parts['c003']
-    c003_quotes = [json.loads(match[1]) for match in re.finditer(
-        r'\[chunks: c003\] ("(?:[^"\\]|\\.)*")', text)]
+    c003_quotes = _quotes_for_chunk(text, 'c003')
     assert any('v1.1' in quote and 'manually checked' in quote for quote in c003_quotes)
+    assert _quotes_for_chunk('[chunks: c002, c003] "v1.1 manually checked"', 'c003') == [
+        'v1.1 manually checked'
+    ]
     assert 'unconsented speakers and PII' in text
     assert 'free-speech spectrograms are stripped' not in text
 

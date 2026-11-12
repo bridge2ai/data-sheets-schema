@@ -45,15 +45,22 @@ write('level3_top_reused_slots.tsv', ['Rank', 'Slot Name', 'Usage Count'], [(i, 
 write('level4_quality_metrics.tsv', ['Quality Check', 'Status', 'Count', 'Examples'], [(k.replace('_', ' ').capitalize(), 'PASS' if not q[k] else ('WARNING' if k == 'single_use_slots' else 'ISSUE'), q[k], ', '.join(q['examples'][k]) or 'None') for k in q if k != 'examples'], 'Level 4 Quality')
 # Preserve editorial recommendation wording, updating only measured counts.
 path = out / 'level4_recommendations.tsv'
-rows = list(csv.reader(path.open(), delimiter='\t'))
+with path.open(newline='') as handle:
+    rows = list(csv.reader(handle, delimiter='\t'))
 recommendation_keys = {
     'slots without explicit range': 'slots_without_range',
     'orphaned classes': 'orphaned_classes',
     'single-use slots': 'single_use_slots',
 }
+seen_labels = set()
 for row in rows[1:]:
     label = row[0].split(' ', 1)[1]
+    assert label not in seen_labels, f'Duplicate recommendation label: {label}'
+    seen_labels.add(label)
     row[0] = str(q[recommendation_keys[label]]) + ' ' + label
+assert seen_labels == set(recommendation_keys), (
+    f'Incomplete recommendation rows: {seen_labels} != {set(recommendation_keys)}'
+)
 write(path.name, rows[0], rows[1:], 'Level 4 Recommendations')
 with (out / 'ALL_STATS_COMBINED.tsv').open('w', newline='') as handle:
     writer = csv.writer(handle, delimiter='\t', lineterminator='\n')

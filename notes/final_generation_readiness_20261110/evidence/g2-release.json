@@ -1,0 +1,63 @@
+{
+  "release": "3.2.1",
+  "declared": "2026-11-10",
+  "bin_dir": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin",
+  "relative_schema_inputs": {
+    "full": "src/data_sheets_schema/schema/data_sheets_schema.yaml",
+    "core": "src/data_sheets_schema/schema/data_sheets_schema_core.yaml"
+  },
+  "jsonld_context_relocated_from": "file:///Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-g2-2975-20261110/stage/project/jsonld/data_sheets_schema.context.jsonld",
+  "jsonld_context_relocated_to": "project/jsonld/data_sheets_schema.context.jsonld",
+  "historical_prefix_sha256": "83be0fe4f69a6fc8cfe9154cfd25518190c0648022616e0aa120e60005ddcc42",
+  "hashes": {
+    "full_source_sha256": "3cc458d7554e543fb3684d5718b226e03a64b3c3141d92977d53a0cb9733422d",
+    "full_merged_sha256": "bc560a3cd5d04c49e95fcbf33fa8ac349171df1a877e7e0882827bd526a95214",
+    "core_source_sha256": "49044208a00774adaa02d3d0936b2c7d1c01253bd5629a3400c5e99f4c413117",
+    "core_merged_sha256": "e174a7a6ec1b5eccef5ee4a8b9f8f773f48243c2d6012ff8a1b846b45a40d088"
+  },
+  "baseline_api_schema_digests": {
+    "neutral": {
+      "Dataset": {
+        "md5": "94fb1b7b3e8ea42ac151bbe52b5f5f72",
+        "sha256": "438c9d3aa87fdf8b0560eb2a64aa5063e1bb6705ecf72b6973e3e257cb037360"
+      },
+      "CoreDataset": {
+        "md5": "47c578052bab48144fc2575826aef4c1",
+        "sha256": "c29406f5c8a1693c7d9edcba3c1a2942d16786af9d77239fa6dc7798627d3f6c"
+      }
+    },
+    "bridge2ai": {
+      "Dataset": {
+        "md5": "c807b62f37e927c5d49addf273957a34",
+        "sha256": "15dfcb238b8c8b51e84ad7921c928d299ce02d28df55cde855c6dc39bf4aae84"
+      },
+      "CoreDataset": {
+        "md5": "f3943c162b41d94850fd60dde7c41ba7",
+        "sha256": "bda503434266ec4be2cdf21c34fae3afa3fec486d3da2ca9c9d242851d696049"
+      }
+    }
+  },
+  "after_api_schema_digests": {
+    "neutral": {
+      "Dataset": {
+        "md5": "94fb1b7b3e8ea42ac151bbe52b5f5f72",
+        "sha256": "438c9d3aa87fdf8b0560eb2a64aa5063e1bb6705ecf72b6973e3e257cb037360"
+      },
+      "CoreDataset": {
+        "md5": "47c578052bab48144fc2575826aef4c1",
+        "sha256": "c29406f5c8a1693c7d9edcba3c1a2942d16786af9d77239fa6dc7798627d3f6c"
+      }
+    },
+    "bridge2ai": {
+      "Dataset": {
+        "md5": "c807b62f37e927c5d49addf273957a34",
+        "sha256": "15dfcb238b8c8b51e84ad7921c928d299ce02d28df55cde855c6dc39bf4aae84"
+      },
+      "CoreDataset": {
+        "md5": "f3943c162b41d94850fd60dde7c41ba7",
+        "sha256": "bda503434266ec4be2cdf21c34fae3afa3fec486d3da2ca9c9d242851d696049"
+      }
+    }
+  },
+  "api_schema_digests_unchanged": true
+}
