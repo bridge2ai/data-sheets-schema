@@ -31,7 +31,12 @@ Added by the lead before this file was delivered. An independent read-only Codex
 
 Then cases A and B below.
 
-## Case C: a second registered set of run limits (decided by the owner, D143)
+## Case C: a second registered set of run limits (decided by the owner, D143) — ON HOLD, read this first
+
+**Hold, added by the lead before delivery.** A review of the production amendment found, and the lead verified in source, that the run limits are written into the instruction the model reads: the recorder command carries `--render-spec-json`, which embeds the raw runtime declaration, and that declaration contains `deadline_seconds` and `budget_guard_usd` (`native_shared_render.py`, about lines 204 to 212 and 289 to 295; `native_shared_runtime_constants.py`, `RUNTIME_KEYS`). With two sets of limits the canary's instruction and a production run's instruction differ in those literal values, so the canary could not serve as the production pilot. The lead has put the choice back to the owner: keep two sets (this case as written), or one set for every run including the canary, which is a change of two constants and a revision of amendment N1. **Do not start Case C until the lead tells you which.** Do Case 0 and cases A and B, write the handoff, and stop.
+
+While you wait there is one thing to report for this case, read-only: every place where the runtime declaration, or any value in it, reaches something the model reads (the instruction, a stage request, a helper's output), with the line. The lead needs the list either way.
+
 
 Added by the lead before this file was delivered. Do it after cases A and B. **The owner has decided** (coordination record, D143, 2026-11-12): two registered sets, the canary's ($90, 21,600 s) and one production set ($400, 43,200 s), and the source accepts exactly those two. So this is no longer "to be taken or dropped": it will be integrated after review. Still write it on its own branch so that it can be reviewed alone.
 
