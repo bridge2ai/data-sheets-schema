@@ -7,11 +7,18 @@ with no overlap gets its own issue. This generalises the two one-off scripts
 file_n1v7_review_findings_20261112.py and file_n1v8_recheck_findings_20261112.py.
 
 Inputs (arguments):
-  --claude FILE         Claude report; findings are "### <KEY>. <title>" sections
-                        whose KEY matches --claude-key (a regular expression).
+  --claude FILE         Claude report; findings are "### <KEY>. <title>" or
+                        "### <KEY>: <title>" sections whose KEY matches
+                        --claude-key (a regular expression).
                         May be omitted with --no-claude.
   --codex FILE          Codex report; findings are lines "**<n>. P<g> — <title>**"
-                        or "<n>. **P<g> — <title>**", each followed by its body.
+                        or "<n>. **P<g> — <title>**", each followed by its body;
+                        or, when the report has none of those, headings
+                        "### P<g>-<n>: <title>" (the NP1 v3 brief's form). Those
+                        are numbered 1, 2, ... in report order for --overlap, and
+                        named by their own key ("P2-3") in titles, bodies and the
+                        map, so that they cannot be confused with a Claude
+                        finding that has the same key.
   --codex-end TEXT      a line of the Codex report after which no finding follows.
   --overlap MAP         for example "1:N1,2:,3:P3-5": Codex finding number to the
                         Claude key it overlaps; empty means its own issue.
@@ -48,7 +55,7 @@ def sha(path: Path) -> str:
 
 def claude_findings(text: str, key_pattern: str) -> dict[str, tuple[str, str]]:
     out = {}
-    parts = re.split(rf"^### ({key_pattern})\. ", text, flags=re.M)
+    parts = re.split(rf"^### ({key_pattern})[.:] ", text, flags=re.M)
     for i in range(1, len(parts), 2):
         key, rest = parts[i], parts[i + 1]
         rest = re.split(r"^#{2,3} ", rest, flags=re.M)[0].rstrip()
@@ -57,7 +64,9 @@ def claude_findings(text: str, key_pattern: str) -> dict[str, tuple[str, str]]:
     return out
 
 
-def codex_findings(text: str, end_marker: str | None) -> dict[int, tuple[str, str]]:
+def codex_findings(text: str, end_marker: str | None) -> dict[int, tuple[str, str, str]]:
+    """Number -> (graded title, body, label). The label is the number for the
+    numbered forms and the report's own key for the heading form."""
     head = text.split(end_marker)[0] if end_marker else text
     out = {}
     pattern = re.compile(r"^(?:\*\*(\d+)\. (P[123]) — (.*?)\*\*|(\d+)\. \*\*(P[123]) — (.*?)\*\*)\s*$", flags=re.M)
@@ -70,7 +79,16 @@ def codex_findings(text: str, end_marker: str | None) -> dict[int, tuple[str, st
         body = head[match.end():end]
         body = "\n".join(line[3:] if line.startswith("   ") else line[4:] if line.startswith("    ") else line
                          for line in body.splitlines()).strip()
-        out[number] = (f"{grade}: {title}", body)
+        out[number] = (f"{grade}: {title}", body, str(number))
+    if out:
+        return out
+    heading = re.compile(r"^### (P[123])-(\d+): (.*?)\s*$", flags=re.M)
+    matches = list(heading.finditer(head))
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(head)
+        body = re.split(r"^#{2,3} ", head[match.end():end], flags=re.M)[0].strip()
+        out[index + 1] = (f"{match.group(1)}: {match.group(3).strip().rstrip('.')}", body,
+                          f"{match.group(1)}-{match.group(2)}")
     return out
 
 
@@ -135,15 +153,15 @@ def main() -> int:
         extra = ""
         for number, target in overlap.items():
             if target == key:
-                ctitle, cbody = codex[number]
-                extra += f"\n\n## The Codex CLI report's finding {number} on the same point ({ctitle})\n\n{cbody}"
+                ctitle, cbody, clabel = codex[number]
+                extra += f"\n\n## The Codex CLI report's finding {clabel} on the same point ({ctitle})\n\n{cbody}"
         issues.append((f"claude-{key}", f"[{args.label} {grade} {key}] {title}", intro + f"## {key}. {title}\n\n{body}" + extra + foot))
     for number, target in overlap.items():
         if target is None:
-            ctitle, cbody = codex[number]
+            ctitle, cbody, clabel = codex[number]
             grade, _, rest = ctitle.partition(": ")
-            issues.append((f"codex-{number}", f"[{args.label} Codex {grade}] {rest}",
-                           intro + f"## Codex CLI report, finding {number} ({ctitle})\n\n{cbody}" + foot))
+            issues.append((f"codex-{clabel}", f"[{args.label} Codex {grade}] {rest}",
+                           intro + f"## Codex CLI report, finding {clabel} ({ctitle})\n\n{cbody}" + foot))
     redacted_issues = []
     for key, title, body in issues:
         touched = False
