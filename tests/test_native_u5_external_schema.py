@@ -3,8 +3,10 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
+import tempfile
 
 import pytest
 
@@ -22,14 +24,34 @@ SCHEMA_COMMIT = '5e382f0c423fa8b0a331340adcdfac5a328bd6b3'
 BASE_COMMIT = 'd258611c5381bd7cf973817ebd2b6a04f65818b3'
 
 
-def checked_input(label, expected_commit):
+def _temp_base():
+    for candidate in (Path(tempfile.gettempdir()), Path('/tmp')):
+        try:
+            resolved = candidate.resolve(strict=True)
+            if 'd4d-executions' in resolved.parts:
+                continue
+            with tempfile.TemporaryDirectory(dir=resolved):
+                pass
+            return resolved
+        except OSError:
+            continue
+    raise RuntimeError('no writable temporary directory outside d4d-executions')
+
+
+def checked_input(label, expected_commit, *, require_present=False):
     directory = SCRATCH / label
-    manifest = json.loads((directory / 'manifest.json').read_bytes())
+    manifest_path = directory / 'manifest.json'
+    if not manifest_path.is_file() and not require_present:
+        pytest.skip(f'missing U5 prepared input manifest: {manifest_path}')
+    manifest = json.loads(manifest_path.read_bytes())
     assert manifest['commit'] == expected_commit
     tree = directory / 'tree'
     assert manifest['tree'] == str(tree)
     for name, identity in manifest['files'].items():
-        raw = (tree / name).read_bytes()
+        path = tree / name
+        if not path.is_file() and not require_present:
+            pytest.skip(f'missing U5 prepared input file: {path}')
+        raw = path.read_bytes()
         assert len(raw) == identity['bytes']
         assert hashlib.sha256(raw).hexdigest() == identity['sha256']
     return tree, manifest
@@ -79,7 +101,7 @@ def test_external_320_capture_rebuild_and_cold_warm_catalog(declaration, monkeyp
     Path(declaration['inputs']['bundle']['path']).write_text('Live bundle changed after capture.\n')
     rebuilt = selection.rebuild(captured.registration, captured.authority, captured.schemas, captured.receipt_policy)
     assert rebuilt == captured
-    checked_input('schema-' + SCHEMA_COMMIT[:9], SCHEMA_COMMIT)
+    checked_input('schema-' + SCHEMA_COMMIT[:9], SCHEMA_COMMIT, require_present=True)
     witness = {'schema_commit': SCHEMA_COMMIT, 'shape': shape,
                'schema_files': manifest['files'], 'reuse_eligible': eligible,
                'catalog_sha256': hashlib.sha256(expected.encode()).hexdigest(),
@@ -113,24 +135,32 @@ def test_same_external_320_api_instruction_before_after(tmp_path):
         assert witness['source_root'] == str(source)
         assert witness['schema_directory'] == str(folder)
     assert (tmp_path / 'before/instruction.txt').read_bytes() == (tmp_path / 'after/instruction.txt').read_bytes()
-    checked_input('baseline-' + BASE_COMMIT[:9], BASE_COMMIT)
-    checked_input('schema-' + SCHEMA_COMMIT[:9], SCHEMA_COMMIT)
+    checked_input('baseline-' + BASE_COMMIT[:9], BASE_COMMIT, require_present=True)
+    checked_input('schema-' + SCHEMA_COMMIT[:9], SCHEMA_COMMIT, require_present=True)
 
 
 @pytest.mark.parametrize('kind', ['outside', 'relative', 'alias'])
 def test_api_comparison_refuses_other_scratch_roots(tmp_path, kind):
-    selected = tmp_path
-    if kind == 'relative':
-        selected = Path('relative')
-    elif kind == 'alias':
-        selected = tmp_path / 'alias'; selected.symlink_to(SCRATCH, target_is_directory=True)
-    helper = ROOT / 'scripts/adhoc/native_u5_api_render_20261108.py'
-    env = {k: os.environ[k] for k in ('PATH', 'HOME', 'TMPDIR', 'VIRTUAL_ENV') if k in os.environ}
-    env['PYTHONDONTWRITEBYTECODE'] = '1'
-    out = tmp_path / 'must-not-exist'
-    result = subprocess.run([sys.executable, '-P', '-B', str(helper), '--source-root', str(ROOT),
-        '--schema-dir', str(tmp_path), '--input-dir', str(tmp_path), '--out', str(out),
-        '--scratch-root', str(selected)], env=env, capture_output=True, timeout=30)
-    assert result.returncode != 0
-    assert b'named U4b/U5 scratch roots' in result.stderr
-    assert not out.exists()
+    with tempfile.TemporaryDirectory(dir=_temp_base()) as raw_temp:
+        executions = Path(raw_temp).resolve(strict=True) / 'd4d-executions'
+        checkout = executions / 'checkout'
+        scratch = executions / 'scratch-native-u5-prep'
+        scratch.mkdir(parents=True)
+        helper = checkout / 'scripts/adhoc/native_u5_api_render_20261108.py'
+        helper.parent.mkdir(parents=True)
+        shutil.copy2(ROOT / 'scripts/adhoc/native_u5_api_render_20261108.py', helper)
+        selected = tmp_path
+        if kind == 'relative':
+            selected = Path('relative')
+        elif kind == 'alias':
+            selected = tmp_path / 'alias'
+            selected.symlink_to(scratch, target_is_directory=True)
+        env = {k: os.environ[k] for k in ('PATH', 'HOME', 'TMPDIR', 'VIRTUAL_ENV') if k in os.environ}
+        env['PYTHONDONTWRITEBYTECODE'] = '1'
+        out = tmp_path / 'must-not-exist'
+        result = subprocess.run([sys.executable, '-P', '-B', str(helper), '--source-root', str(checkout),
+            '--schema-dir', str(tmp_path), '--input-dir', str(tmp_path), '--out', str(out),
+            '--scratch-root', str(selected)], env=env, capture_output=True, timeout=30)
+        assert result.returncode != 0
+        assert b'named U4b/U5 scratch roots' in result.stderr
+        assert not out.exists()

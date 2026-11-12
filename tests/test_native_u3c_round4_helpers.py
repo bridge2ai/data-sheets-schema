@@ -3,6 +3,8 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import shutil
+import tempfile
 
 import pytest
 
@@ -12,8 +14,22 @@ from tests.test_native_execution_registration_v2 import isolated_modules  # noqa
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def helper(name):
-    path = ROOT / 'scripts/adhoc' / name
+def _temp_base():
+    for candidate in (Path(tempfile.gettempdir()), Path('/tmp')):
+        try:
+            resolved = candidate.resolve(strict=True)
+            if 'd4d-executions' in resolved.parts:
+                continue
+            with tempfile.TemporaryDirectory(dir=resolved):
+                pass
+            return resolved
+        except OSError:
+            continue
+    raise RuntimeError('no writable temporary directory outside d4d-executions')
+
+
+def helper(name, root=ROOT):
+    path = root / 'scripts/adhoc' / name
     spec = importlib.util.spec_from_file_location(name.removesuffix('.py'), path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -21,19 +37,31 @@ def helper(name):
 
 
 def test_parent_worker_and_subprocess_reenter_c4_wrapper():
-    module = helper('run_native_u3c_round4_20261107.py')
-    executions = next(path for path in ROOT.parents if path.name == 'd4d-executions')
-    assert module.runner.SCRATCH == executions / 'scratch-native-u3c-r4'
-    assert module.runner.ROOT == ROOT
-    assert Path(module.runner.__file__) == Path(module.__file__)
-    assert module.runner.LOCK == executions / 'plans/native_quiet_window.lock'
-    assert module.runner.DEADLINE == 3600
-    env = module.runner.clean_environment(module.SCRATCH / 'synthetic', ROOT / 'venv/bin')
-    assert env['PYTHONPATH'] == str(ROOT / 'src') + ':' + str(ROOT)
-    assert not any('TOKEN' in name or 'KEY' in name or 'SECRET' in name for name in env)
-    assert '(deny network*)' in module.runner.PROFILE
-    assert '(deny file-write*' in module.runner.PROFILE
-    assert module.smoke_evidence()['destination'] == 'pytest tmp_path/cpu-smoke*.json'
+    with tempfile.TemporaryDirectory(dir=_temp_base()) as raw_temp:
+        executions = Path(raw_temp).resolve(strict=True) / 'd4d-executions'
+        (executions / 'plans').mkdir(parents=True)
+        checkout = executions / 'checkout'
+        for relative in (
+            'scripts/adhoc/run_native_u3c_round4_20261107.py',
+            'scripts/adhoc/run_native_u3a_tests_20261107.py',
+            'scripts/adhoc/hydrate_native_u3c_round4_fairscape_20261107.py',
+            'tests/test_native_u3b_reuse.py',
+        ):
+            destination = checkout / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(ROOT / relative, destination)
+        module = helper('run_native_u3c_round4_20261107.py', root=checkout)
+        assert module.runner.SCRATCH == executions / 'scratch-native-u3c-r4'
+        assert module.runner.ROOT == checkout
+        assert Path(module.runner.__file__) == Path(module.__file__)
+        assert module.runner.LOCK == executions / 'plans/native_quiet_window.lock'
+        assert module.runner.DEADLINE == 3600
+        env = module.runner.clean_environment(module.SCRATCH / 'synthetic', checkout / 'venv/bin')
+        assert env['PYTHONPATH'] == str(checkout / 'src') + ':' + str(checkout)
+        assert not any('TOKEN' in name or 'KEY' in name or 'SECRET' in name for name in env)
+        assert '(deny network*)' in module.runner.PROFILE
+        assert '(deny file-write*' in module.runner.PROFILE
+        assert module.smoke_evidence()['destination'] == 'pytest tmp_path/cpu-smoke*.json'
 
 
 def test_current_integrated_c_and_d_graphs_are_accepted(tmp_path, isolated_modules, record_property):
