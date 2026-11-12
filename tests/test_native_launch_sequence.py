@@ -39,10 +39,29 @@ def paths(tmp_path):
     digest=guard.sha(Path(seq.__file__).read_bytes())
     result['registration'].write_bytes(guard.canonical({'registration': {
         'attempt_directory': str(base / 'NEVER-RESERVED-ATTEMPT'),
+        'evidence_directory': str(base / 'NEVER-RESERVED-EVIDENCE'),
+        'attempt_id': 'sequence-fixture',
+        'runtime': {'deadline_seconds': 21600, 'model': 'fixture-model',
+            'limits': {'contextWindow': 100, 'maxOutputTokens': 10},
+            'keep_awake': {'policy': 'macos_iokit_ims_v1', 'host_platform': 'darwin', 'basis': 'offline fixture'},
+            'limits_basis': json.dumps({'kind': 'd4d_native_u4b_runtime_basis', 'version': 3,
+                'admission': {'capture_state_directory': str(base / 'word-state'),
+                    'valid_from': '2026-11-05T00:00:00Z', 'valid_until': '2026-11-19T00:00:00Z',
+                    'max_starting_weekly_utilization': 0.5, 'max_starting_five_hour_utilization': 0.25,
+                    'max_age_seconds': 1200, 'pre_reservation_margin_seconds': 90}})},
         'dependencies': {'base': {'package_sources': {'src/data_sheets_schema/native_launch_sequence.py': digest}}}}}))
     result['review'].write_bytes(guard.canonical({'kind': 'd4d_native_execution_review_bundle_v3',
         'version': 3, 'registration_sha256': guard.sha(result['registration'].read_bytes()),
         'sequence_script_sha256': digest}))
+    from data_sheets_schema import native_capture_words as words
+    reg_raw = result['registration'].read_bytes()
+    value = guard.strict_json(reg_raw)['registration']
+    word = {'authorized_at': '2026-11-11T00:00:00Z', 'attempt_id': value['attempt_id'],
+            'registration_sha256': guard.sha(reg_raw), 'review_sha256': guard.sha(result['review'].read_bytes())}
+    result['launch-word'].write_bytes(guard.canonical(word))
+    with words.locked(value, reg_raw, create=True) as journal:
+        journal.activate(result['launch-word'].read_bytes(), result['review'].read_bytes(), value,
+                         now=words._timestamp(word['authorized_at'], 'fixture word'))
     result.update({'output-directory': base / 'captures', 'subscription-guard': base / 'guard.json',
                    'packet-directory': base / 'packet'})
     return result
@@ -273,7 +292,9 @@ def test_isolated_real_subprocess_uses_only_copied_fake_command(tmp_path):
     package = root / 'src/data_sheets_schema'
     package.mkdir(parents=True)
     (package / '__init__.py').write_bytes(b'')
-    for name in ('native_launch_sequence', 'native_subscription_guard', 'native_sequence_start', 'native_launch_entry'):
+    for name in ('native_launch_sequence', 'native_subscription_guard', 'native_sequence_start', 'native_launch_entry',
+                 'native_capture_words', 'native_subscription_guard_v2', 'native_u4b_policy',
+                 'native_shared_runtime_values', 'native_runtime_profiles'):
         (package / (name + '.py')).write_bytes((seq.SOURCE_ROOT / 'src/data_sheets_schema' / (name + '.py')).read_bytes())
     (package / 'native_generation.py').write_text('''import json, hashlib, os, sys
 from pathlib import Path

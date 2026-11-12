@@ -190,7 +190,7 @@ def _run_verified(argv, *, verified_script, entry_inputs):
         record['delegation_checked_at'] = _utc_now()
         _delegation(args.direction_recorded_at, args.host_confirmed_at, record['delegation_checked_at'])
         from .native_sequence_start import claim
-        record['start_claim'] = claim(inputs[Path(args.registration)],
+        record['start_claim'] = claim(inputs[Path(args.registration)], launch_word_raw=word_raw,
             direction=args.direction_recorded_at, confirmation=args.host_confirmed_at,
             packet=packet, started_at=record['delegation_checked_at'])
         # Durable claiming is preflight too; it must not carry a start across

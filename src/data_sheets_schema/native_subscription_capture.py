@@ -667,7 +667,7 @@ def _read_root(authority, registration_raw, launch_word_raw, require_current):
     root = _path(statement['quota_capture']['directory'])
     if statement['quota_capture']['kind'] == REQUEST_KIND:
         from . import native_capture_words as words
-        with words.locked(value, registration_raw) as journal:
+        with words.locked(value, registration_raw, historical=not require_current) as journal:
             journal.require(launch_word_raw, current=require_current)
         return root / 'captures' / sha(launch_word_raw)
     if require_current:
