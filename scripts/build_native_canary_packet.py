@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the offline prefix of the native CHORUS canary packet (G13).
+"""Build the offline prefix of a manifest-declared native packet (G13).
 
 Explicit repository inputs -> validated receipt policy, selection and byte pins.
 Exit 2 is an expected dependency stop, 1 a refusal, 0 is reserved for completion.
@@ -95,11 +95,9 @@ def build(args):
 
     if physical(Path(api_runner.__file__)).parent.parent != args.checkout / 'src':
         raise ValueError('foreign project package namespace')
-    if args.project != 'CHORUS':
-        raise ValueError('this reviewed packet prefix is scoped to CHORUS')
     registry = load_registry(args.source_manifest)
     if not registry.declares(args.project) or registry.bundle(args.project).resolve() != args.bundle:
-        raise ValueError('bundle differs from manifest CHORUS baseline declaration')
+        raise ValueError('project or bundle differs from the selected manifest declaration')
     if declared_profile(args.source_manifest) != args.profile:
         raise ValueError('explicit profile differs from source manifest declaration')
     profile = profile_named(args.profile)  # Deliberately never select_profile/env.
