@@ -1,6 +1,6 @@
 # generic_v10 analysis plan, amendment N1: the native agentic (direct) arm
 
-**Status: draft v6.1, written by claude (lead) on 2026-11-08.**
+**Status: draft v7, written by claude (lead) on 2026-11-12. Drafts v1 to v6.1 were written on 2026-11-08.**
 - **v1:** an in-place edit of the plan file (PR #5542 head `b187e7160`), reviewed by Claude (review sha256 `6f09cc8e…`).
 - **v2:** a separate file (`bc53c1ce…`), re-reviewed by Claude (`37309f2d…`) and Codex CLI (`d49ed159…`).
 - **v3:** `e8b475c4…`.
@@ -16,7 +16,15 @@
   - Claude re-review: 0 P1, 1 P2, 7 P3; all 15 prior findings resolved.
 - **v5 → v6:** fixes that P2 and the seven P3s, and nothing else.
 - **v6:** `18f29f83…`. Both narrow re-checks found it ratifiable as is: Claude with three optional wording nits, Codex with none.
-- **v6.1:** applies those three wording nits only.
+- **v6.1:** applies those three wording nits only. Its file sha256 is `741677373008237020d409a7f79365b3e2d0f188a16d996b5defb3a14af050aa`, at commit `754fbfdae10dbe9fe3f4443725cf0fa2a696b49e`. It was never ratified.
+- **v6.1 → v7:** written after the owner's direction D134 and the first launch-path timing (D132). It changes six things and nothing else:
+  - **the freshness age,** from 300 s to 1200 s, with the timing and its limits stated (N1.5, N1.8(o), N1.9 item 2);
+  - **the schema release,** from 3.2.0 to 3.2.1 (N1.1, N1.6, N1.8(h));
+  - **the absolute-path difference** the owner accepted in D126, with its redaction (N1.6);
+  - **the sequencing,** restated after D131, D133 and D134 (N1.6, new N1.8(y));
+  - **who runs the registered commands** after the word, and that they run as one sequence (N1.3, N1.5, new N1.8(z));
+  - **N1.9's opening sentence,** which predated the code.
+- **v7 has not been re-reviewed.** The findings and verdicts listed above are on earlier drafts.
 - **It is not binding until:**
   - a Claude reviewer and a Codex CLI pass re-review it, with each finding filed;
   - the owner ratifies it by naming this file's sha256 at a commit and answering each lettered item of N1.8;
@@ -72,6 +80,9 @@
     - **The bound permission probe,** under the final runtime, has a `limits_basis` that names the observation probe's saved bytes.
     - The first live capture's terminal `modelUsage` limits must equal the registered limits, or the attempt is refused before its reservation.
   - **D118:** admission also requires five-hour utilisation ≤ 0.25, alongside seven-day ≤ 0.50. A mid-run five-hour exhaustion is still possible; it is a usage stop that counts as an attempt.
+  - **D126:** "Accept, declare, redact." The native arm keeps absolute local paths in its model-facing instruction; the difference is declared, and the paths are redacted in anything published.
+  - **D132:** one native diagnostic run, with no provider or model call. It is the launch-path timing N1.5 cites.
+  - **D134:** "we dont even need the API route except for comparison, the native agentic is the main result".
   - **D36:** "Models review; you sign; seed (Recommended)".
     - A fresh Claude session does the blind source review, with a Codex CLI pass. Neither generated nor operated the run.
     - The owner signs each acceptance record.
@@ -84,8 +95,8 @@
     - D65 and D71;
     - D89 (native first);
     - D91 (the declared shared-v1 differences);
-    - D93 and D35 (sequencing);
-    - D98, D99 and D108 (schema 3.2.0's content).
+    - D93 and D35 (sequencing), with D129, D131 and D133 (N1.6);
+    - D98, D99 and D108 (schema 3.2.0's content). Release 3.2.1 adds one description alignment (#2975), merged with PR #5808 under D130.
 
 ## Decision status (moved here from the plan's decision table)
 | Item | Status after ratification |
@@ -107,8 +118,8 @@ The plan's own rows (D29 "Pending owner"; D25 and item 43 "Pending: the native a
   - receipt checker instrument 4.
 
   The first four exist today on native branches only. Their binding bytes are those of **the accepted U1+U3 merge commit on main** (the readiness plan's gate G0), which the registration names. The first native canary uses the declared shared-v1 differences (D91), not BC1 parity.
-- **Schema** [proposed]: the released 3.2.0 (content: D98, D99, D108), once it has merged and the native integration has been re-validated on it.
-  - For the native arm, this **supersedes D71(a)** ("Schema 3.1.0 as the v10 condition's schema"). The API arm's schema is unchanged by this amendment; A21's rebuild needs its own amendment if it moves to 3.2.0.
+- **Schema** [proposed]: the released 3.2.1, the release on main at `7ad8c9e7295f1575ae9108ea62c12c83b1dd4db1`. Its content is 3.2.0's (D98, D99, D108) plus one description alignment (#2975, `FileCollection.collection_type`), which moved neither profile's schema-digest md5 (`release_history.yaml`). The native integration is re-validated on it before registration.
+  - For the native arm, this **supersedes D71(a)** ("Schema 3.1.0 as the v10 condition's schema"). The API arm's schema is unchanged by this amendment. Whether the rebuilt comparison registration needs its own amendment for the release it uses is decided with that registration.
   - **P4a amendment 1's native hand-offs are taken up here:**
     - the native arm reads the schema files directly;
     - it has **no write-time normaliser**, so a resolver URL or an EDAM URL written where a CURIE is required stays in the record and is counted as a finding, not rewritten.
@@ -155,7 +166,7 @@ The plan's own rows (D29 "Pending owner"; D25 and item 43 "Pending: the native a
 | Item | Ruling |
 |---|---|
 | **D09 remainder** | The direct-arm pause applies only to the old generic_v9 arm. It does not apply to this arm (D107). |
-| **D12** | The owner is the operator: the owner holds the account, gives the launch word and launches (D43). claude orchestrates. The registration and its packet get an independent Claude review plus an independent Codex CLI review, by neither its author nor its operator (D107). This supersedes generation plan N9's "codex-operator". |
+| **D12** | The owner is the operator: the owner holds the account, gives the launch word and launches (D43). claude orchestrates. The registration and its packet get an independent Claude review plus an independent Codex CLI review, by neither its author nor its operator (D107). This supersedes generation plan N9's "codex-operator".<br>[proposed] After giving the word, the owner may direct the lead to start the registered command sequence of N1.5 on the owner's host, as the owner did for A21 (D133). The acceptance record then names who started it, and neither reviewer may be that session. Without that direction D43 stands: the owner runs it. |
 | **D13** | The registration pins:<br>• the **toolchain exposure**, narrowed to the generation agents under D114 (#4019);<br>• the **tool allow-list**;<br>• [proposed] the **literal launch argv, recorded verbatim** (#4162's recorded-argv option), including `--safe-mode`;<br>• the **runtime-closure fix**, PR #2922 (#2714), merged 2026-10-17;<br>• the **transcript-based receipt origin** (#4445).<br>[proposed] Any change to these is a new registration. |
 | **D14** | The budget is subscription usage, plus a dollar backstop.<br>• **Re-validation, done by this amendment.** The 2026-10-25 packet's sources recommended a starting seven-day utilisation ≤ 0.80, an overage stop or overage disabled, a $90 guard and a 21,600 s deadline. Since then:<br>&nbsp;&nbsp;– the seven-day window was exhausted on 2026-10-24;<br>&nbsp;&nbsp;– D106 named the account;<br>&nbsp;&nbsp;– D110 set the guard;<br>&nbsp;&nbsp;– D111 disabled overage;<br>&nbsp;&nbsp;– D112 chose the 1M context, which spends headroom faster.<br>• **The result is N1.5's terms.** Any later change to them is a revision of this amendment, which the owner approves. |
 | **D18** | [proposed] D18's original subject, a time box for #4354's offline acceptance, is closed by this amendment.<br>[proposed] D18 now means a **two-week validity window** for the native registration, counted from the **author date** of the commit that adds the reviewed registration file. A rebase or cherry-pick keeps the author date. After the window, the registration expires and a new one is needed. |
@@ -252,13 +263,18 @@ These are quoted verbatim from #4354; the body sha256 is above. They are softwar
      - **[proposed] both windows are allowed.** A nested window is allowed when its `utilization` is a finite JSON number, not a boolean, with 0 ≤ utilisation < 1, and its `resetsAt` is after both capture and dispatch. Saved nested windows carry no per-window status;
      - **[proposed] a further window type is judged by the same rule when it carries `utilization`, and is recorded but not refused when it doesn't;**
      - the top-level status is allowed or allowed_warning, and overage is explicitly false;
-     - **[proposed] One freshness rule with two values:** `captured_at` is no earlier than the word's `authorized_at`, and dispatch occurs within `max_age_seconds` = 300 of `captured_at`. 300 is the code's maximum. The launch path re-verifies the registration several times before the freshness check, and no launch-path timing has been measured yet; U6 may measure one and propose a smaller value as a revision;
+     - **[proposed] One freshness rule with two values:** `captured_at` is no earlier than the word's `authorized_at`, and dispatch occurs within `max_age_seconds` = 1200 of `captured_at`.
+       - **Why not 300.** v6.1 proposed 300, the guard's maximum at the time, before any launch-path timing existed. One timing now exists (D132, 2026-11-11, source `382f0dfd1ce8`): the launch reached the pre-reservation check with the observation 306.53 s old and refused itself. Two earlier sources were refused at a dispatch check, at 318.89 s and 334.86 s. Under 300 no launch passes on this host.
+       - **What that timing is.** It is one run of a synthetic software diagnostic on a loaded host. It is not a quiet-host measurement and not a production sequence: it starts its launch 10.8 s after a synthetic capture. After a real capture event, production also runs the capture command's own re-verification, the guard command and the launch command's entry verification. None of those has been timed. The working estimate is 1 to 5 minutes more.
+       - **Why 1200.** With the 90 s margin it allows the reservation up to 1110 s after the capture event, against roughly 6 to 10 minutes on that estimate. The reading guards a run of up to 21,600 s against starting above the admission bounds; its greatest age at dispatch moves from 5 minutes to 20.
+       - **Tightening.** The first live attempt reports its capture-to-reservation and capture-to-dispatch ages. A smaller value may then be proposed as a revision;
      - **[proposed] a margin at the reservation:** at the pre-reservation check, `captured_at + max_age_seconds − now` is at least 90 s. That covers what runs after the reservation and before dispatch: keep-awake acquisition, the runtime probe (`--version` and `auth status`, each with a 30 s timeout) and the binary hash;
      - the capture's terminal `modelUsage` limits equal the registered limits (D117; every capture is checked, as in N1.2);
      - the capture was made under the word the guard binds;
      - **every launch value equals the statement's** (N1.9 item 4). All of these are registration values, and the guard is prepared from them:
        - the guard's seven-day maximum, five-hour maximum, `max_age_seconds` and 90 s margin;
        - the runtime's budget, deadline, keep-awake and context mode.
+  - [proposed] **Steps 5 and 6 run as one reviewed sequence:** the capture command, the guard command and the launch command, each stopping the sequence on any refusal or error, with no retry and no pause between them. The time between the capture event and the reservation is then the commands' own work. Who starts it is N1.3's D12 row.
   - **A capture that fails the margin** is refused before the attempt's reservation, so it doesn't spend the attempt, and the owner re-captures within D115's three.
     - The margin makes a stale-at-dispatch capture unlikely, not impossible.
     - A capture that is fresh at the reservation but stale at dispatch stops the attempt after its reservation. That is an environment stop, an admission failure at the guard's one-use dispatch check, and it counts as an attempt (D113).
@@ -321,13 +337,16 @@ These are quoted verbatim from #4354; the body sha256 is above. They are softwar
 - **tools:** Read, Write and Bash plus the permitted read-only lookups, against the API arm's no-tool boundary;
 - **staged exposure:** the typed-helper phases, against the API arm's phase requests;
 - **context:** 1M (D112), against the API arm's room;
-- **schema:** 3.2.0, against the API arm's ratified 3.1.0, unless A21 moves by its own amendment;
+- **schema:** 3.2.1, against the API arm's ratified 3.1.0, unless the comparison registration moves by its own amendment. The A21 registration of 2026-11-11 was built on main at 3.2.1;
 - **normalisation:** none at write time on the native arm, against the API arm's write-time normaliser;
+- **paths:** the native instruction carries absolute local paths: the bundle, the manifest and the chunk manifest, and the interpreter, schema and stage paths. The command-permission and replay contracts require those exact paths (D126). In anything published (records, reviews, papers) they are redacted, and the redaction is recorded (D126);
 - **protocol:** the D91 shared-v1 differences.
 
 **Native ratings** stay deferred until a native canary is accepted under N1.4(B). Their route is chosen by a separately ratified rating registration, not here.
 
-**Sequencing (D93, D35):** native integration lands first, then A21 is rebuilt on native-integrated main. D35's freeze starts at that rebuilt registration.
+**Sequencing** [proposed]: native integration lands first, and the API comparison registration is then rebuilt on native-integrated main (D89, D93, D129). D35's freeze starts at that rebuilt registration.
+- **What happened in between.** D131 (2026-11-11) released the hold for one rebuild. The A21 registration (roster `d49cc3529a11e60716cde4affc6f5deec521b861576fcae6b961e2f74060dd63`) was built on main `7ad8c9e72` and launched once (D133). It ended on a provider refusal at its first typed-audit call (#5874) and is spent. D134 (2026-11-12) then directed that the native arm is the main result and the API route is for comparison.
+- **The lead reads D134 as restoring the order above.** The owner has not said so in those words, so it is a lettered item (N1.8(y)).
 
 ## N1.7 What this amendment does not change, and what it does
 **Unchanged:**
@@ -339,7 +358,8 @@ These are quoted verbatim from #4354; the body sha256 is above. They are softwar
 
 **Changed, for the native arm only:**
 - D71(a)'s schema, under N1.1 [proposed];
-- generation plan N9's keep-awake form and operator, under N1.5.
+- generation plan N9's keep-awake form and operator, under N1.5;
+- D43's rule on who runs the registered commands, under N1.3's D12 row [proposed], and only when the owner directs it.
 
 ## N1.8 Ratification: the owner names this file's sha256 at a commit, and answers each lettered item
 Each letter is one decision, and a "yes" adopts exactly the value given.
@@ -350,14 +370,14 @@ Each letter is one decision, and a "yes" adopts exactly the value given.
 - **(e)** D13: the transcript-based receipt origin is the "receipt origin" D107 names (N1.1).
 - **(f)** D18: its old meaning (the #4354 offline time box) is closed.
 - **(g)** D18: the registration is valid for two weeks from its registration commit's author date.
-- **(h)** Schema 3.2.0 for the native arm, superseding D71(a) for that arm only (N1.1).
+- **(h)** Schema 3.2.1 for the native arm, superseding D71(a) for that arm only (N1.1).
 - **(i)** The N1.4(B) row set, B0–B7.
 - **(j)** B3: the typed-protocol ordering mapping, with `receipt_chunks_unopened` reported only.
 - **(k)** B4: the native clean checks and their evidence.
 - **(l)** Admission: starting seven-day utilisation ≤ 0.50. D118's record restates this value; a "no" here supersedes D118's restated 0.50 for this amendment.
 - **(m)** Admission: a window is allowed when its utilisation is a finite non-boolean number with 0 ≤ u < 1 and its reset is after capture and dispatch. D118 sets the five-hour bound, and presence of both windows is implied by it.
 - **(n)** Admission: a further window judged by the same rule when it carries `utilization`, and recorded but not refused otherwise.
-- **(o)** Freshness, one rule with two values: `captured_at` ≥ the word's `authorized_at`, and `max_age_seconds` = 300.
+- **(o)** Freshness, one rule with two values: `captured_at` ≥ the word's `authorized_at`, and `max_age_seconds` = 1200 (v6.1 proposed 300; N1.5 gives the timing).
 - **(p)** Deadline: 21,600 s.
 - **(q)** Host: keep-awake `macos_iokit_ims_v1` on AC power, accepting that mid-run loss is undetected.
 - **(r)** Host: the quiet-window lock held by the operator for the attempt.
@@ -367,9 +387,11 @@ Each letter is one decision, and a "yes" adopts exactly the value given.
 - **(v)** After three failed captures: a new word for the same registration within its validity window, with no attempt consumed. This extends D115, and the newer word supersedes the earlier one.
 - **(w)** The owner statement is how the word states D110's and D111's terms, bound through the review bundle.
 - **(x)** Every capture's limits are cross-checked, not only the first (stricter than D117).
+- **(y)** Sequencing: native integration lands first, and the API comparison registration is rebuilt on native-integrated main afterwards (N1.6). This is the lead's reading of D134.
+- **(z)** Operation: the capture, guard and launch commands run as one reviewed sequence with no retry (N1.5). After giving the word, the owner may direct the lead to start it; without that direction the owner runs it (N1.3, D43).
 
 ## N1.9 Code that must exist and be accepted before registration
-These are engineering prerequisites, not choices. They are **to be built** as native unit U4b on the U5 preparation line; at the time of writing, none is delivered. The registration cites each one's merged commit.
+These are engineering prerequisites, not choices. Drafts v1 to v6.1 said they were to be built as native unit U4b and that none was delivered. As of v7 the U4b work is on the native branches (source `382f0dfd1ce8`), unmerged and without a completed full CI run. Which of the nine items below are complete there is established by the final integrated review (N1.4(A) item 7), not by this sentence. The registration cites each one's merged commit.
 
 **The U4b work files** are in `notes/coordination/`. They're not in the repository's tracked tree, so they're cited by sha256:
 - the brief `2026-11-08-codex-native-u4b.md`: `af5cb901c0a77f75926d0c6f0e14c6d198ce3415a5cbe87fbce57f567818037e`;
@@ -381,7 +403,7 @@ Addenda 2 and 3 and D115–D117 supersede the brief's items 3, 5 and 6 and adden
 1. **D114:** `toolchain()` narrowed to the generation agents for the native shared route; the specificity scanner run over the exposed set.
 2. **Subscription guard v2** (v1 kept byte-identical):
    - admission requires the seven-day (≤ 0.50) and five-hour (≤ 0.25) windows and applies N1.5's window rule and domain;
-   - the 90 s margin at the pre-reservation check;
+   - a largest `max_age_seconds` of 1200 (N1.8(o); it was 300), and the 90 s margin at the pre-reservation check;
    - the capture-limits cross-check on every capture (D117), whose mismatch refuses the registration before any reservation;
    - refusal of a capture made under a word other than the one the guard binds;
    - the chronology check against a parsed `authorized_at`;
