@@ -7,7 +7,7 @@ successful replay verdict is cached as authority.
 """
 from __future__ import annotations
 
-from dataclasses import asdict, replace
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path, PurePosixPath
 import shlex
 import threading
@@ -507,13 +507,41 @@ def _recorded_run(spec, record):
     return run
 
 
+@dataclass(frozen=True)
+class _NativeReceiptAssessment:
+    """One reconstruction's assessment and selection, never a stored verdict."""
+    raw: bytes
+    selection: c.NativeSelectionCapture
+
+    def block(self):
+        import json
+        return json.loads(self.raw)
+
+
+def _selected_receipt_assessment(run, *, full_path, receipt_path):
+    if type(run.selection) is not c.NativeSelectionCapture:
+        raise ValueError('native receipt assessment requires its reconstructed selection')
+    block = _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
+    return _NativeReceiptAssessment(c.canonical(block), run.selection)
+
+
+def recorded_receipt_assessment(*, record, full_path, receipt_path):
+    """Carry the selection from the same fresh recorded reconstruction to its gate.
+
+    The saved receipt block is not authority. _recorded_run validates the saved
+    selection and observed execution before either result is returned.
+    """
+    run = _recorded_run(None, record)
+    return _selected_receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)
+
+
 def recorded_receipt_block(spec, *, record, full_path, receipt_path):
     """    RunSpec boundary: validated-caller
 
     RunSpec precondition: Caller supplies a validated spec or None plus explicit recorded provenance; _recorded_run reconstructs the recorded selection and compares render_spec before assessment.
     """
     run = _recorded_run(spec, record)
-    return _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
+    return _selected_receipt_assessment(run, full_path=full_path, receipt_path=receipt_path).block()
 
 
 def recorded_receipt_claims(spec, *, record, full_path, receipt_path, expected_block):

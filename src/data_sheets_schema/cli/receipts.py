@@ -215,7 +215,44 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
         except (OSError, ValueError) as exc:
             raise click.ClickException(f"receipt completion registration refused: {exc}") from exc
         recovery["receipt_render_spec"] = declaration
-    assessment_block = rc.block_for(p["full"], receipt_file, bundle, md5, expected, **recovery)
+    from data_sheets_schema import receipt_completion_policy as cp
+    # A native claim demands reconstruction; it never grants permission. The
+    # exact integer-zero axis alone is the ordinary API/default declaration.
+    recorded_native_claim = False
+    if record is not None:
+        recorded_native_claim = native_capture is not None or 'native_shared_generation' in record
+        prompts = record.get('prompts')
+        request = prompts.get('request') if isinstance(prompts, dict) else None
+        recorded_spec = request.get('spec') if isinstance(request, dict) else None
+        if isinstance(recorded_spec, dict):
+            native_keys = {key for key in recorded_spec
+                           if isinstance(key, str) and key.startswith('native_shared_')}
+            neutral_axis = (native_keys == {'native_shared_generation_version'}
+                            and type(recorded_spec['native_shared_generation_version']) is int
+                            and recorded_spec['native_shared_generation_version'] == 0)
+            recorded_native_claim = recorded_native_claim or (bool(native_keys) and not neutral_axis)
+    try:
+        if recorded_native_claim:
+            selected_policy = cp.select_policy(
+                render_spec=recovery.get('receipt_render_spec'), record=record)
+            if selected_policy is None or selected_policy['registration'].get('kind') != 'd4d_native_shared_receipt_policy':
+                raise ValueError('native recorded outcome lacks its authoritative selection')
+            from data_sheets_schema import native_shared_capture_orchestration as native_shared_capture
+            assessed = native_shared_capture.recorded_receipt_assessment(
+                record=record, full_path=p['full'], receipt_path=receipt_file)
+            if native_capture is not None and native_capture != assessed.selection:
+                raise ValueError('explicit native selection differs from recorded reconstruction')
+            native_capture = assessed.selection
+            chosen = native_capture.document()
+            if (project, label, method) != tuple(chosen['run'][key] for key in ('project', 'label', 'method')):
+                raise ValueError('recorded native selection belongs to another project, label or method')
+            cp.select_policy(render_spec=cp.native_render_declaration(native_capture), record=record)
+            assessment_block = assessed.block()
+            cp.policy_from_block(assessment_block, policy=selected_policy)
+        else:
+            assessment_block = rc.block_for(p["full"], receipt_file, bundle, md5, expected, **recovery)
+    except (OSError, TypeError, ValueError, KeyError) as exc:
+        raise click.ClickException(f'receipt assessment refused: {exc}') from exc
     if initial_structure:
         import json
         result = rc.initial_structure_result(assessment_block)
