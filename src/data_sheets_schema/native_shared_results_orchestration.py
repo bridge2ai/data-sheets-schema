@@ -284,6 +284,8 @@ def incomplete_capture(composition_path, attempt, adapter, reason, *, live_phase
         except (OSError, ValueError) as exc:
             problems.append(role + ': ' + str(exc))
     retained = {}
+    required_members = tuple(snapshot.members.values())
+    optional_members = {}
     phase_path = Path(attempt) / 'live-phase-report.json'
     phase_problem = None
     if live_phase_report is not None:
@@ -313,6 +315,7 @@ def incomplete_capture(composition_path, attempt, adapter, reason, *, live_phase
                     > c.HARD_LIMITS['evidence_raw_total_bytes']):
                 raise ValueError('retained artifact exceeds aggregate capture bounds')
             snapshot.add(member)
+            optional_members[name] = member
             retained[name] = {'path': path, 'kept': True, 'bytes': member.captured.pin.bytes,
                               'sha256': member.captured.pin.sha256}
         except (OSError, ValueError) as exc:
@@ -324,7 +327,22 @@ def incomplete_capture(composition_path, attempt, adapter, reason, *, live_phase
             return inherited._rows(snapshot.read(Path(attempt) / name, name), name)
         except (OSError, ValueError, UnicodeError):
             return []
-    snapshot.verify_unchanged(); snapshot.sealed = True
+    # Required streams keep their strict verification. Optional failure
+    # evidence is independent: losing one record must not discard the others.
+    stable = Snapshot(adapter.value['working_directory'], required_members)
+    stable.verify_unchanged()
+    for name, member in optional_members.items():
+        try:
+            Snapshot(adapter.value['working_directory'], (member,)).verify_unchanged()
+            stable.add(member)
+        except (OSError, ValueError) as exc:
+            problem = type(exc).__name__ + ': ' + str(exc)
+            retained[name] = {'path': member.captured.pin.path, 'kept': False, 'reason': problem}
+            problems.append('retained_' + name + ': ' + problem)
+    # Rebuilding also removes omitted members from raw, aliases, roles and
+    # metadata; no stale optional pin can survive in the published catalog.
+    snapshot = stable
+    snapshot.sealed = True
     return {'snapshot': snapshot, 'state': SimpleNamespace(spec=adapter.spec, reg=adapter.state.reg),
         'events': rows('transcript.jsonl'), 'records': rows('control.jsonl'), 'policy': adapter.policy,
         'replay_complete': False, 'capture_problems': problems, 'record': None, 'final_result': None,

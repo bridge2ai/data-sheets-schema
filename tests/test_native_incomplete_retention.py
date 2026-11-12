@@ -156,18 +156,32 @@ def test_reader_never_lists_a_forged_success_as_failed_evidence(tmp_path, field,
         reader.list_retained_records(raw)
 
 
-def test_public_failed_attempt_retains_records_and_reads_back_exactly(tmp_path, monkeypatch):
+@pytest.mark.parametrize('changing_full', [False, True])
+def test_public_failed_attempt_retains_records_and_reads_back_exactly(tmp_path, monkeypatch, changing_full):
     """Actual public finalizer; declared invalid runtime, no peer dispatch."""
     from tests.test_native_shared_execution import make_case
     from data_sheets_schema import native_shared_execution_orchestration as execute
     from data_sheets_schema import native_execution_authority_v2 as authority
     monkeypatch.chdir(authority.ROOT)
     fixture = make_case(tmp_path / 'retained-runtime-failure')
+    attempt = Path(fixture['value']['attempt_directory'])
+    full = str(fixture['spec']._agentic_artifact_paths['full'])
+    original_read = capture.evidence.read_regular
+    changed = []
+    def change_optional_after_read(path, role, **kwargs):
+        member = original_read(path, role, **kwargs)
+        if changing_full and role == 'retained_phase_report' and not changed:
+            Path(full).write_bytes(b'X' + Path(full).read_bytes()[1:])
+            changed.append(True)
+        return member
+    monkeypatch.setattr(capture.evidence, 'read_regular', change_optional_after_read)
     def stop_after_records(value):
         for name in ('full', 'core'):
             path = Path(fixture['spec']._agentic_artifact_paths[name])
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes((name + ' failed fixture\n').encode())
+        for name in ('transcript.jsonl', 'control.jsonl', 'stderr.txt'):
+            (attempt / name).write_bytes(b'{}\n')
         (Path(value['environment']['HOME']) / 'declared-invalid-runtime').write_text('offline fixture\n')
         raise RuntimeError('declared failure after writing both records, before any peer dispatch')
     monkeypatch.setattr(execute, '_synthetic_runtime_observation', stop_after_records)
@@ -177,11 +191,98 @@ def test_public_failed_attempt_retains_records_and_reads_back_exactly(tmp_path, 
     assert result['retained_artifacts']['phase_report']['kept'] is True
     assert result['retained_artifacts']['report']['kept'] is False
     assert result['capture_problems']
+    for name in ('transcript.jsonl', 'control.jsonl', 'stderr.txt'):
+        assert result['captured_files'][str(attempt / name)]['sha256'] == c.sha(b'{}\n')
+    if changing_full:
+        assert changed == [True]
+        assert result['retained_artifacts']['full']['kept'] is False
+        assert 'changed before publication' in result['retained_artifacts']['full']['reason']
+        for catalog in ('captured_files', 'captured_aliases', 'captured_metadata', 'captured_alias_metadata'):
+            assert full not in result[catalog]
     assert execute.read_final(fixture['raw']) == result
     rows = reader.list_retained_records(fixture['raw'])
-    assert {row['role'] for row in rows if row['kept']} == {'full', 'core'}
+    assert {row['role'] for row in rows if row['kept']} == ({'core'} if changing_full else {'full', 'core'})
     for row in rows:
-        assert row['sha256'] == c.sha((row['role'] + ' failed fixture\n').encode())
+        if row['kept']:
+            assert row['sha256'] == c.sha((row['role'] + ' failed fixture\n').encode())
+
+
+@pytest.mark.parametrize('mutation', ['modify', 'remove', 'symlink'])
+def test_optional_instability_removes_every_snapshot_reference(tmp_path, monkeypatch, mutation):
+    value, adapter, composition = case(tmp_path)
+    full, core = (Path(adapter.spec._agentic_artifact_paths[name]) for name in ('full', 'core'))
+    full.write_bytes(b'full'); core.write_bytes(b'core')
+    original = capture.evidence.read_regular
+    changed = []
+    def mutate_after_reads(path, role, **kwargs):
+        member = original(path, role, **kwargs)
+        if role == 'retained_phase_report' and not changed:
+            changed.append(True)
+            if mutation == 'modify':
+                full.write_bytes(b'evil')
+            else:
+                full.unlink()
+                if mutation == 'symlink':
+                    full.symlink_to(core)
+        return member
+    monkeypatch.setattr(capture.evidence, 'read_regular', mutate_after_reads)
+    prepared = capture.incomplete_capture(composition, value['attempt_directory'], adapter,
+                                          'fixture failure', live_phase_report={'passed': False})
+    snap = prepared['snapshot']
+    assert str(full) not in snap.raw and str(core) in snap.raw
+    assert all(member.captured.pin.path != str(full) for member in snap.members.values())
+    for mapping in (snap.roles, snap.aliases, snap.metadata, snap.alias_metadata):
+        assert str(full) not in mapping
+    raw, result = publish(value, prepared)
+    assert result['retained_artifacts']['full']['kept'] is False
+    assert result['retained_artifacts']['full']['reason']
+    assert result['retained_artifacts']['phase_report']['kept'] is True
+    assert reader.list_retained_records(raw)[1]['kept'] is True
+
+
+def test_public_finalization_after_injected_final_floor_failure(tmp_path, monkeypatch):
+    """Public lifetime with an injected final-stage outcome, not a live helper run."""
+    from tests.test_native_shared_execution import make_case
+    from tests.test_native_shared_phase import Trace
+    from data_sheets_schema import native_shared_execution_orchestration as execute
+    from data_sheets_schema import native_execution_authority_v2 as authority
+    from data_sheets_schema import native_execution_orchestration as engine
+    from data_sheets_schema import native_shared_controller_orchestration as controller
+    monkeypatch.chdir(authority.ROOT)
+    fixture = make_case(tmp_path / 'public-final-floor')
+    phase = {}
+    original_report = controller.CallbackAdapter.report
+    def report(self, *args, **kwargs):
+        result = original_report(self, *args, **kwargs)
+        if phase:
+            result['phase_history'] = phase['report']
+        return result
+    monkeypatch.setattr(controller.CallbackAdapter, 'report', report)
+    def final_floor_failure(controls, argv, **kwargs):
+        trace = Trace(); trace.assembly(); trace.final_checks()
+        trace.helper('final_receipts', code=1)
+        phase['report'] = trace.state.report(complete=True)
+        assert phase['report']['passed'] is False
+        assert 'final_receipts' not in phase['report']['current_checks']
+        for name in ('full', 'core'):
+            path = Path(fixture['spec']._agentic_artifact_paths[name])
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes((name + ' final floor failure\n').encode())
+        attempt = Path(fixture['value']['attempt_directory'])
+        for name in ('transcript.jsonl', 'control.jsonl', 'stderr.txt'):
+            (attempt / name).write_bytes(b'{}\n')
+        kwargs['record_stop']('injected final-stage receipt coverage-floor failure')
+        return 1
+    monkeypatch.setattr(engine, '_execute_child', final_floor_failure)
+    result = execute.synthetic_launch(fixture['raw'], **fixture['kwargs'])
+    assert phase, 'public lifetime never reached the injected final-stage failure'
+    assert result['state'] == 'failed' and result['runtime_gates_passed'] is False
+    assert 'coverage-floor failure' in result['first_stop']
+    assert all(result['retained_artifacts'][name]['kept'] for name in ('full', 'core', 'phase_report'))
+    saved_phase = Path(result['retained_artifacts']['phase_report']['retained_path']).read_bytes()
+    assert c.strict_json(saved_phase) == phase['report']
+    assert execute.read_final(fixture['raw']) == result
+    assert {row['role'] for row in reader.list_retained_records(fixture['raw']) if row['kept']} == {'full', 'core'}
 
 
 def test_reader_also_lists_existing_complete_capture_of_a_late_failure(tmp_path):
