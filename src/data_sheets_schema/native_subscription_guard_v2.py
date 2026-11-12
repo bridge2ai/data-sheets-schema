@@ -21,7 +21,7 @@ import stat
 KIND = "d4d_native_subscription_guard"
 VERSION = 2
 MAX_BYTES = 65536
-MAX_AGE_SECONDS = 300
+MAX_AGE_SECONDS = 1200
 WINDOWS = ("five_hour", "seven_day")
 MAX_WINDOWS = 64
 SAFE_STATUSES = ("allowed", "allowed_warning")
@@ -340,7 +340,7 @@ def _admission(raw, expected_sha256, registration_raw, runtime, launch_word_raw,
                                  "maximum starting five-hour utilization")
     age = value["max_age_seconds"]
     if type(age) is not int or not 0 < age <= MAX_AGE_SECONDS:
-        raise ValueError("subscription freshness must be 1..300 seconds")
+        raise ValueError(f"subscription freshness must be 1..{MAX_AGE_SECONDS} seconds")
     margin = value["pre_reservation_margin_seconds"]
     if type(margin) is not int or not 0 < margin <= age:
         raise ValueError("subscription pre-reservation margin must be an integer within capture age")

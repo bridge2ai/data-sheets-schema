@@ -59,7 +59,7 @@ def test_rehashed_guard_cannot_substitute_owner_or_capture(tmp_path, monkeypatch
     args, value, paths, raw = prepared(tmp_path, monkeypatch)
     doc = guard.strict_json(raw)
     if mutation == 'maximum': doc['max_starting_weekly_utilization'] = 0.99
-    elif mutation == 'age': doc['max_age_seconds'] = 299
+    elif mutation == 'age': doc['max_age_seconds'] -= 1
     elif mutation == 'capture_event':
         event = guard.strict_json(doc['event_json'])
         event['rate_limit_info']['unifiedWindows']['seven_day']['utilization'] = 0.01

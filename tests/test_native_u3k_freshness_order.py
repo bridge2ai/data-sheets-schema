@@ -53,8 +53,9 @@ def test_selection_is_data_only_and_late_acceptance_keeps_original_timestamp(tmp
 def test_static_inspection_does_not_make_expired_capture_fresh(tmp_path, monkeypatch):
     args, value, paths, raw, selection, kwargs = selection_case(tmp_path, monkeypatch)
     subscription.inspect_current_selection(selection, **kwargs)
-    captured = guard._timestamp(guard.strict_json(raw)['captured_at'], 'captured_at')
-    monkeypatch.setattr(guard, '_now', lambda: captured + 301)
+    document = guard.strict_json(raw)
+    captured = guard._timestamp(document['captured_at'], 'captured_at')
+    monkeypatch.setattr(guard, '_now', lambda: captured + document['max_age_seconds'] + 1)
     with pytest.raises(ValueError, match='stale or future-dated'):
         subscription.accept_current_selection(selection, **kwargs)
     assert not Path(value['attempt_directory']).exists()
@@ -182,8 +183,9 @@ def test_frontdoor_refuses_expired_or_spent_capture_before_engine_without_loadin
         tmp_path, monkeypatch, entry, defect, match):
     args, value, paths, raw, invoke, _ = prepared_frontdoor(tmp_path, monkeypatch, entry)
     if defect == 'expired':
-        captured = guard._timestamp(guard.strict_json(raw)['captured_at'], 'captured_at')
-        monkeypatch.setattr(guard, '_now', lambda: captured + 301)
+        document = guard.strict_json(raw)
+        captured = guard._timestamp(document['captured_at'], 'captured_at')
+        monkeypatch.setattr(guard, '_now', lambda: captured + document['max_age_seconds'] + 1)
     elif defect == 'superseded':
         renewed = newer(args)
         renewed_now = guard._timestamp(

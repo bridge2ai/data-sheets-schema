@@ -3,6 +3,7 @@ from copy import deepcopy
 import pytest
 from data_sheets_schema import native_launch_review as review
 from data_sheets_schema import native_subscription_guard as wire
+from data_sheets_schema.native_u4b_policy import TERM_VALUES
 from tests.utils.native_u4b_fixtures import bundle_for
 
 
@@ -17,9 +18,7 @@ def evidence(tmp_path):
     # Deliberately minimal parser evidence, not a validated executable runtime.
     value['runtime']['limits_basis'] = wire.canonical({
         'kind': 'd4d_native_u4b_runtime_basis', 'version': 3, 'admission': {
-            'max_starting_weekly_utilization': 0.5,
-            'max_starting_five_hour_utilization': 0.25,
-            'max_age_seconds': 300, 'pre_reservation_margin_seconds': 90,
+            **TERM_VALUES,
             'capture_state_directory': str(tmp_path.resolve() / 'capture'),
             'valid_from': '2026-11-08T00:00:00Z', 'valid_until': '2026-11-22T00:00:00Z'}}).decode()
     raw = wire.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,

@@ -10,6 +10,7 @@ import pytest
 
 from data_sheets_schema import native_launch_review as review
 from data_sheets_schema import native_subscription_guard_v2 as guard
+from data_sheets_schema.native_u4b_policy import TERM_VALUES
 from tests.test_native_subscription_guard_v2 import (
     build, case, event_document, saved, timestamp,
 )
@@ -18,9 +19,15 @@ from tests.test_native_subscription_guard_v2 import (
 TERMS = {
     'max_starting_weekly_utilization': 0.5,
     'max_starting_five_hour_utilization': 0.25,
-    'max_age_seconds': 300,
+    'max_age_seconds': 1200,
     'pre_reservation_margin_seconds': 90,
 }
+
+
+def test_registered_terms_pin_provisional_age_and_unchanged_margin():
+    # Independent pin: deriving every assertion from production would hide drift.
+    assert TERM_VALUES == TERMS
+    assert guard.MAX_AGE_SECONDS == TERMS['max_age_seconds']
 
 
 @pytest.mark.parametrize('window,utilization,passes', [
@@ -41,10 +48,10 @@ def test_starting_window_inclusive_registered_boundary(case, window, utilization
             build(case, document=event_document(case, event))
 
 
-@pytest.mark.parametrize('remaining,passes', [(300, True), (91, True), (90, True),
+@pytest.mark.parametrize('remaining,passes', [(TERMS['max_age_seconds'], True), (91, True), (90, True),
                                             (89, False), (1, False), (0, False)])
 def test_pre_reservation_margin_90_seconds_is_inclusive_without_dispatch(case, remaining, passes):
-    value = build(case, now=case['now'] + 300 - remaining)
+    value = build(case, now=case['now'] + case['owner']['max_age_seconds'] - remaining)
     before = value.snapshot()
     if passes:
         assert value.before_reservation() is None
@@ -56,13 +63,14 @@ def test_pre_reservation_margin_90_seconds_is_inclusive_without_dispatch(case, r
 
 
 def test_margin_check_does_not_consume_dispatch_or_apply_again_after_preparation(case):
-    clock = [case['now'] + 210]
+    clock = [case['now'] + case['owner']['max_age_seconds']
+             - case['owner']['pre_reservation_margin_seconds']]
     value = guard.SubscriptionGuard(case['raw'], expected_sha256=guard.sha(case['raw']),
         registration_raw=case['registration'], runtime=case['runtime'], launch_word_raw=case['word'],
         owner_statement=case['owner'], clock=lambda: clock[0])
     value.before_reservation()
     assert not value.dispatched
-    clock[0] = case['now'] + 299
+    clock[0] = case['now'] + case['owner']['max_age_seconds'] - 1
     value.before_dispatch()
     assert value.dispatched and value.snapshot()['dispatched_at'] == timestamp(clock[0])
     with pytest.raises(ValueError, match='already consumed'):
@@ -72,7 +80,8 @@ def test_margin_check_does_not_consume_dispatch_or_apply_again_after_preparation
 def test_missing_margin_stops_caller_before_its_reservation_marker(case):
     # This marker demonstrates pure caller ordering only, not a live reservation.
     reserved = []
-    value = build(case, now=case['now'] + 211)
+    value = build(case, now=case['now'] + case['owner']['max_age_seconds']
+                  - case['owner']['pre_reservation_margin_seconds'] + 1)
     with pytest.raises(ValueError, match='pre-reservation freshness margin'):
         value.before_reservation()
         reserved.append('would reserve after guard')
@@ -160,7 +169,7 @@ def test_prepare_guard_explicit_terms_must_equal_registered_values(case, field, 
     kwargs = {'registration_raw': case['registration'], 'runtime': case['runtime'],
         'launch_word_raw': case['word'], 'event_raw': guard.canonical(case['event']),
         'captured_at': timestamp(case['now']), 'owner_statement': case['owner'],
-        'maximum_starting_utilization': 0.5, 'max_age_seconds': 300,
+        'maximum_starting_utilization': 0.5, 'max_age_seconds': case['owner']['max_age_seconds'],
         'clock': lambda: case['now'], field: value}
     with pytest.raises(ValueError):
         guard.prepare_guard(**kwargs)

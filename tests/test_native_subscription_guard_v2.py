@@ -10,6 +10,7 @@ import pytest
 
 from data_sheets_schema import native_launch_review as review
 from data_sheets_schema import native_subscription_guard_v2 as guard
+from data_sheets_schema.native_u4b_policy import TERM_VALUES
 from tests.utils.native_u4b_fixtures import bundle_for
 
 
@@ -30,9 +31,7 @@ def case(tmp_path):
     # or proof of the complete executable/observation admission chain.
     runtime['limits_basis'] = guard.canonical({
         'kind': 'd4d_native_u4b_runtime_basis', 'version': 3, 'admission': {
-            'max_starting_weekly_utilization': 0.5,
-            'max_starting_five_hour_utilization': 0.25,
-            'max_age_seconds': 300, 'pre_reservation_margin_seconds': 90,
+            **TERM_VALUES,
             'capture_state_directory': str(tmp_path.resolve() / 'unused-capture'),
             'valid_from': timestamp(now - 60), 'valid_until': timestamp(now - 60 + 14 * 86400)}}).decode()
     value = {'attempt_id': 'invented-guard-component', 'runtime': runtime,
@@ -142,8 +141,9 @@ def test_top_and_nested_window_aliases_must_agree(case, window, mutation):
         build(case, document=event_document(case, event))
 
 
-@pytest.mark.parametrize('captured_delta,dispatch_delta,passes', [(-11, 0, False), (-10, 0, True),
-                                                              (0, 300, True), (0, 301, False), (1, 0, False)])
+@pytest.mark.parametrize('captured_delta,dispatch_delta,passes', [
+    (-11, 0, False), (-10, 0, True), (0, TERM_VALUES['max_age_seconds'], True),
+    (0, TERM_VALUES['max_age_seconds'] + 1, False), (1, 0, False)])
 def test_word_capture_and_actual_dispatch_chronology(case, captured_delta, dispatch_delta, passes):
     document = {**case['document'], 'captured_at': timestamp(case['now'] + captured_delta)}
     if passes:
@@ -209,7 +209,8 @@ def test_rehashed_word_cannot_relax_closed_protocol_or_owner_binding(case, key, 
 
 
 @pytest.mark.parametrize('key,value', [('version', 1), ('version', True), ('max_age_seconds', True),
-    ('max_age_seconds', 121), ('max_age_seconds', 301), ('max_starting_weekly_utilization', 0.8),
+    ('max_age_seconds', TERM_VALUES['max_age_seconds'] - 1),
+    ('max_age_seconds', guard.MAX_AGE_SECONDS + 1), ('max_starting_weekly_utilization', 0.8),
     ('max_starting_weekly_utilization', True), ('owner_statement_sha256', '0' * 64), ('extra', 1)])
 def test_rehashed_guard_cannot_choose_weaker_terms_or_other_version(case, key, value):
     with pytest.raises(ValueError):
@@ -237,7 +238,7 @@ def test_public_values_do_not_mutate_admission_or_lifecycle(case):
     value.reading['utilization'] = 0
     value.owner_statement['budget_guard_usd'] = '900'
     value.snapshot()['observed_windows']['seven_day']['count'] = 99
-    assert value.max_age == 300 and value.reading['utilization'] == 0.3
+    assert value.max_age == case['owner']['max_age_seconds'] and value.reading['utilization'] == 0.3
     assert value.owner_statement['budget_guard_usd'] == '90' and value.observed_events == 0
     for attribute, replacement in [('raw', b'new'), ('maximum', 1), ('dispatched', True), ('stop_reason', None)]:
         with pytest.raises(AttributeError):

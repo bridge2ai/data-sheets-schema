@@ -58,7 +58,8 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
         'cleanup': {'child_started': True, 'leader_reaped': True, 'group_absent': True}}
     selected = recorded['selected_event']
     owner = review.validate_bundle(**read_arguments(arguments))
-    clock = [guard._timestamp(selected['captured_at'], 'captured_at') + 300 - remaining]
+    clock = [guard._timestamp(selected['captured_at'], 'captured_at')
+             + owner['max_age_seconds'] - remaining]
     monkeypatch.setattr(guard, '_now', lambda: clock[0])
     guard_raw = guard.prepare_guard(registration_raw=raw, runtime=value['runtime'],
         launch_word_raw=arguments['launch_word_raw'], owner_statement=owner,

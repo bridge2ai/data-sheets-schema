@@ -147,7 +147,8 @@ def test_saved_snapshot_cannot_rewrite_dispatch_or_record_only_evidence(case, mu
     snapshot = value.snapshot()
     if mutation == 'missing_dispatch': del snapshot['dispatched_at']
     elif mutation == 'earlier_dispatch': snapshot['dispatched_at'] = timestamp(case['now'] - 1)
-    elif mutation == 'late_dispatch': snapshot['dispatched_at'] = timestamp(case['now'] + 301)
+    elif mutation == 'late_dispatch':
+        snapshot['dispatched_at'] = timestamp(case['now'] + case['owner']['max_age_seconds'] + 1)
     elif mutation == 'boolean_dispatch': snapshot['dispatched_at'] = False
     elif mutation == 'offset_dispatch': snapshot['dispatched_at'] = timestamp(case['now']).replace('Z', '+00:00')
     elif mutation == 'invented_verified': snapshot['after_readings_verified'] = True
