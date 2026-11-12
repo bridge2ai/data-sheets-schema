@@ -150,7 +150,7 @@ def tool_history(prepared):
 
 
 def receipt_gate(prepared):
-    from . import canary, native_shared_receipts as receipts, native_shared_stage as stage
+    from . import native_shared_receipts as receipts, native_shared_stage as stage
     run = _run(prepared)
     if run.phase1 is None or run.phase1.core is None:
         raise ValueError('native final receipts precede actual original seals')
@@ -170,7 +170,7 @@ def receipt_gate(prepared):
         final_full=_final(prepared, 'final_full'), final_receipt=effective.raw)
     if block.get('checked') is not True or block.get('final_stage_complete') is not True:
         raise ValueError('native final receipt instrument did not complete')
-    floors = canary.receipt_floors(block)
+    floors = receipts.final_receipt_floors(block, run.selection)
     return {'passed': not any(floors.values()), 'floors': floors, 'receipts': block,
             'original_receipt': c.pin_dict(original.pin), 'effective_receipt': c.pin_dict(effective.pin),
             'snapshot_basis': {'state': 'usable', 'path': run.phase1.full.pin.path,

@@ -476,8 +476,8 @@ def live_provenance_block(selection_registration_path):
         raise ValueError('recorder current captured evidence did not pass')
     paths = run.spec._agentic_artifact_paths
     block, _, _ = _receipt_assessment(run, full_path=paths['full'], receipt_path=paths['receipt'])
-    from .canary import receipt_floors
-    if any(receipt_floors(block).values()):
+    from .native_shared_receipts import final_receipt_floors
+    if any(final_receipt_floors(block, run.selection).values()):
         raise ValueError('recorder current selected receipt floors did not pass')
     result = _provenance_block(run)
     return result

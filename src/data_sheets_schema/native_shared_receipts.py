@@ -307,6 +307,42 @@ def floor(coverage, selection):
     return {**result, 'state': 'passed' if passed else 'failed', 'passed': passed}
 
 
+def final_receipt_floors(block, selection):
+    """Gate a freshly reconstructed native final receipt under its exact selection.
+
+    D109 leaves a diagnostic pilot's coverage pending, never passed. Its
+    structural receipt defects still gate completion. The caller reconstructs
+    observed stage history; this pure check binds the resulting assessment to
+    that captured selection and refuses incomplete or inconsistent reports.
+    Shared/API receipt predicates retain their existing strict semantics.
+    """
+    from . import canary, receipt_completion_policy as completion_policy
+
+    if type(selection) is not contract.NativeSelectionCapture:
+        raise ValueError('native final receipt floors require a captured selection')
+    if (type(block) is not dict or block.get('expected') is not True
+            or block.get('checked') is not True
+            or block.get('native_receipt_stage') != 'final'
+            or block.get('final_stage_complete') is not True):
+        raise ValueError('native final receipt floors require a completed checked final assessment')
+    contract._hash(block.get('native_stage_completion_history_sha256'),
+                   'native final receipt history hash')
+    selected = completion_policy.select_policy(
+        completion_policy.native_render_declaration(selection))
+    completion_policy.policy_from_block(block, policy=selected)
+    if contract.canonical(block.get('native_shared_receipt_policy')) != contract.canonical(selected['identity']):
+        raise ValueError('native final receipt policy differs from the captured selection')
+    measured = floor(block.get('slots'), selection)
+    if contract.canonical(block.get('coverage_floor')) != contract.canonical(measured):
+        raise ValueError('native final coverage report differs from recomputed selected counters')
+    floors = canary.receipt_floors(block)
+    if selected['registration']['coverage_floor'] == {'state': 'pending', 'mode': 'diagnostic_pilot'}:
+        # Omit only this gate, not its reported measurement or any structural
+        # floor. A stored label or pass bit cannot select this exception.
+        del floors['registered receipt coverage']
+    return floors
+
+
 def _inputs(selection, phase1, *, _catalogs=None):
     return _raw_inputs(selection, phase1.full.raw, phase1.original_receipt.raw, _catalogs=_catalogs)
 

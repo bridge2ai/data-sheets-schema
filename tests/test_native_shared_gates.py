@@ -311,15 +311,17 @@ def test_receipt_gate_checks_effective_bytes_and_preserves_original(receipt_prep
 
 
 @pytest.mark.parametrize('captured_run', [{'state': 'pending', 'mode': 'diagnostic_pilot'}], indirect=True)
-def test_pending_registered_floor_never_becomes_strict_receipt_success(receipt_prepared):
+def test_pending_floor_keeps_coverage_unaccepted_while_structural_gate_passes(receipt_prepared):
     prepared, calls = receipt_prepared
     result = gates.receipt_gate(prepared)
     assert calls == ['fresh reconstruction']
     assert result['receipts']['checked'] is True
     assert result['receipts']['final_stage_complete'] is True
     assert result['receipts']['coverage_floor']['state'] == 'pending'
-    assert result['passed'] is False
-    assert result['floors']['registered receipt coverage'] == 1
+    assert result['receipts']['coverage_floor']['passed'] is False
+    assert result['passed'] is True
+    assert 'registered receipt coverage' not in result['floors']
+    assert not any(result['floors'].values())
 
 
 def test_final_evidence_rechecks_identical_bytes_after_earlier_result(captured_run, monkeypatch):

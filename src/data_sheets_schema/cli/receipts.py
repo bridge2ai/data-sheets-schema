@@ -302,7 +302,15 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     # block is not a metric for it (#727). Expected-and-unchecked is.
     if strict and block.get("expected") and not block.get("checked"):
         sys.exit(1)
-    if strict and block.get("checked") and strict_failure(block):
+    native_floors = None
+    if strict and block.get("checked") and native_capture is not None:
+        from data_sheets_schema.native_shared_receipts import final_receipt_floors
+        try:
+            native_floors = final_receipt_floors(block, native_capture)
+        except (TypeError, ValueError) as exc:
+            raise click.ClickException(f'native final receipt floors refused: {exc}') from exc
+    if strict and block.get("checked") and (
+            strict_failure(block) if native_floors is None else any(native_floors.values())):
         # An initial structural check cannot certify a pending coverage floor.
         # Only --initial-structure reports structural success separately.
         sys.exit(1)
@@ -318,8 +326,10 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             click.echo(f"· native receipt stage: {block.get('native_receipt_stage', 'unknown')}")
         if (block.get('native_receipt_stage') == 'phase1_initial'
                 or (native_selected and block.get('final_stage_complete') is not True)
-                or (block.get('coverage_floor') or {}).get('state') == 'pending'):
+                or (native_floors is None and (block.get('coverage_floor') or {}).get('state') == 'pending')):
             sys.exit(1)
+        if native_floors is not None and (block.get('coverage_floor') or {}).get('state') == 'pending':
+            click.echo('· native coverage floor: pending (reported only; no coverage acceptance claimed)')
 
 
 def strict_failure(block: dict) -> bool:
