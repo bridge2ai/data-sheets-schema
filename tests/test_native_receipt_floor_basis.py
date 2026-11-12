@@ -84,6 +84,50 @@ def test_real_receipt_deletion_trap_gates_one_of_two_not_final_one_of_one(select
     assert native.floor(slots, legacy)['passed'] is True
 
 
+def test_completed_receipt_additions_count_against_unchanged_original_snapshot(selected):
+    manifest, texts = _manifest_and_texts()
+    initial = _receipt(manifest['bundle_md5'])
+    initial['chunks'][1]['extracted'] = [{'slot': 'name', 'snippet': 'AI-READI dataset'}]
+    original = {'name': 'AI-READI', 'description': 'a longitudinal, multimodal study',
+                'license': 'An unreceipted licence term.'}
+    # Immutable snapshot bytes model the already sealed phase-1 record. This
+    # arithmetic test does not claim that an observer actually published a seal.
+    original_raw, initial_raw = c.canonical(original), c.canonical(initial)
+    before = rc.check(initial, manifest, texts, original, manifest['bundle_md5'],
+                      c.strict_json(original_raw), instrument_version=4)
+    assert (before['slots']['with_receipt_at_receipt'],
+            before['slots']['receiptable_at_receipt']) == (1, 3)
+    completed = rc.apply_rereceipt(initial, c.strict_json(original_raw), [
+        {'path': 'description', 'receipt': {'chunk': 'c002',
+            'snippet': 'a longitudinal, multimodal study'}},
+        {'path': 'license', 'unsupported': True, 'reason': 'No matching passage is supplied.'},
+    ], texts, listed=['description', 'license'], instrument_version=4)
+    assert completed['added'] == 1 and completed['unsupported'] == 1
+    assert completed['rejected'] == 0 and completed['rejections'] == []
+    effective = completed['receipt']
+    retained = rc.check(effective, manifest, texts, c.strict_json(original_raw),
+                        manifest['bundle_md5'], c.strict_json(original_raw), instrument_version=4)
+    # This hypothetical deletion tests the denominator; an unsupported answer
+    # never authorizes deleting the value or establishes scientific acceptance.
+    final = {key: value for key, value in original.items() if key != 'license'}
+    deleted = rc.check(effective, manifest, texts, final, manifest['bundle_md5'],
+                       c.strict_json(original_raw), instrument_version=4)
+    assert (retained['slots']['with_receipt'], retained['slots']['receiptable']) == (2, 3)
+    assert (deleted['slots']['with_receipt'], deleted['slots']['receiptable']) == (2, 2)
+    captured = selected(BASIS)
+    assert native.floor(before['slots'], captured)['passed'] is False
+    for block in (retained, deleted):
+        assert (block['slots']['with_receipt_at_receipt'],
+                block['slots']['receiptable_at_receipt']) == (2, 3)
+        result = native.floor(block['slots'], captured)
+        assert result['basis'] == 'receipted_part' and result['passed'] is True
+        assert (result['with_receipt_at_receipt'], result['receiptable_at_receipt']) == (2, 3)
+    # The new quoted addition changes the numerator, while neither that addition
+    # nor the final deletion alters or replaces the original sealed denominator.
+    assert c.canonical(original) == original_raw
+    assert c.canonical(initial) == initial_raw
+
+
 @pytest.mark.parametrize('covered,eligible,expected', [(1, 3, False), (2, 3, True), (3, 3, True)])
 def test_registered_snapshot_threshold_matches_unchanged_api(selected, covered, eligible, expected):
     slots = {'with_receipt': 1, 'receiptable': 1,
