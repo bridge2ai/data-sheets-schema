@@ -19,13 +19,14 @@ def pin(path):
 @pytest.mark.parametrize('project',['CM4AI','VOICE','AI_READI','VOICE_PEDIATRIC','CHORUS'])
 def test_project_prefix(tmp_path,project):
     reg=load_registry(ROOT/'data/preprocessed/source_manifest.yaml')
-    bundle=reg.bundle(project); chunks=ROOT/'data/preprocessed/chunks'/f'{project}_chunks.yaml'
+    bundle=reg.bundle(project).resolve(); chunks=ROOT/'data/preprocessed/chunks'/f'{project}_chunks.yaml'
     context=ROOT/'data/omission_contexts'/f'{project.lower()}_omission_context.json'
     args=command(tmp_path/'packet')
     for key,value in {'project':project,'bundle':bundle,'chunk-manifest':chunks,'context':context,
                       'registration-id':'DRAFT-OFFLINE-'+project+'-NOT-AUTHORITY'}.items():
         args[args.index('--'+key)+1]=str(value)
     result=subprocess.run(args,cwd=ROOT,text=True,capture_output=True,timeout=240)
+    (tmp_path/'builder-process.json').write_text(json.dumps({'command':args,'returncode':result.returncode,'stdout':result.stdout,'stderr':result.stderr},indent=2)+'\n')
     status=json.loads((tmp_path/'packet/status.json').read_bytes())
     raw=bundle.read_bytes(); mapping=chunking.load_manifest(chunks)
     rows=mapping['chunks']; longest=max(rows,key=lambda r:r['bytes'])
