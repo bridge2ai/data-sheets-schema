@@ -46,6 +46,72 @@ def test_reference_build_precedes_canary_and_no_later_build_can_skip_it(cohort):
     assert set(stage['verify_predecessors'](cohort, 'build', 'later')) == {'canary', 'build-reference'}
 
 
+def test_private_controls_require_canary_before_any_launch_or_output(cohort, monkeypatch):
+    record(cohort, 'setup-peer')
+    record(cohort, 'build-reference')
+    monkeypatch.setitem(stage, 'load_cohort', lambda *args: ({'cohort': str(cohort)}, {}))
+    monkeypatch.setitem(stage, 'source_module', lambda *args: pytest.fail('pre-canary refusal must precede source loading'))
+    monkeypatch.setattr(stage['subprocess'], 'Popen', lambda *args, **kwargs: pytest.fail('pre-canary refusal must precede launch'))
+    with pytest.raises(FileNotFoundError):
+        stage['run_stage'](cohort, '0' * 40, 'private-controls', None, 60)
+    assert not (cohort / 'stages/private-controls').exists()
+
+
+def test_private_controls_follow_clean_canary_without_later_packets_or_snapshots(cohort):
+    for name in ('setup-peer', 'build-reference', 'canary'):
+        record(cohort, name)
+    assert set(stage['verify_predecessors'](cohort, 'private-controls')) == {'canary'}
+    assert {path.name for path in (cohort / 'stages').iterdir()} == {'setup-peer', 'build-reference', 'canary'}
+
+
+@pytest.mark.parametrize('defect', ['held', 'foreign_config', 'changed_artifact'])
+def test_early_private_controls_still_require_valid_same_cohort_canary(cohort, defect):
+    other = stage['save'](cohort / 'foreign-config.json', {'SYNTHETIC': 'other'})
+    artifact = record(cohort, 'canary', status='held' if defect == 'held' else 'passed',
+                      configuration=other if defect == 'foreign_config' else None)
+    if defect == 'changed_artifact':
+        path = Path(artifact['path']); path.chmod(0o644); path.write_text('changed')
+    with pytest.raises(ValueError):
+        stage['verify_predecessors'](cohort, 'private-controls')
+
+
+@pytest.mark.parametrize('role,previous', [
+    ('later', 'reference'), ('AI_READI', 'later'), ('CM4AI', 'AI_READI'),
+    ('VOICE', 'CM4AI'), ('VOICE_PEDIATRIC', 'VOICE'),
+    ('registered', 'VOICE_PEDIATRIC'), ('expired', 'registered')])
+def test_private_controls_cannot_skip_any_later_main_build(cohort, role, previous):
+    record(cohort, 'canary')
+    record(cohort, 'private-controls')
+    with pytest.raises(FileNotFoundError):
+        stage['verify_predecessors'](cohort, 'build', role)
+    record(cohort, 'build-' + previous)
+    assert set(stage['verify_predecessors'](cohort, 'build', role)) == {'canary', 'build-' + previous}
+
+
+@pytest.mark.parametrize('completed', [(), ('private-controls',), ('snapshots',)])
+def test_assembly_cannot_start_with_either_branch_missing(cohort, completed):
+    for name in completed:
+        record(cohort, name)
+    with pytest.raises(FileNotFoundError):
+        stage['verify_predecessors'](cohort, 'assemble-report')
+
+
+def test_assembly_requires_both_completed_snapshot_and_private_branches(cohort):
+    record(cohort, 'private-controls')
+    record(cohort, 'snapshots')
+    assert set(stage['verify_predecessors'](cohort, 'assemble-report')) == {'snapshots', 'private-controls'}
+    assert stage['predecessors']('snapshots') == ['build-expired']
+    assert stage['predecessors']('full') == ['assemble-report']
+
+
+@pytest.mark.parametrize('held', ['private-controls', 'snapshots'])
+def test_assembly_refuses_either_held_branch(cohort, held):
+    for name in ('private-controls', 'snapshots'):
+        record(cohort, name, status='held' if name == held else 'passed')
+    with pytest.raises(ValueError, match='did not complete cleanly'):
+        stage['verify_predecessors'](cohort, 'assemble-report')
+
+
 def test_held_predecessor_cannot_become_acceptance(cohort):
     record(cohort, 'build-reference', status='held')
     with pytest.raises(ValueError, match='did not complete cleanly'):

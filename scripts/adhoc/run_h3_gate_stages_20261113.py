@@ -167,7 +167,7 @@ def predecessors(action, role=None):
         index = ROLES.index(role)
         return ['setup-peer'] if index == 0 else ['canary', 'build-' + ROLES[index - 1]]
     return {'canary': ['build-reference'], 'snapshots': ['build-expired'],
-        'private-controls': ['snapshots'], 'assemble-report': ['private-controls'],
+        'private-controls': ['canary'], 'assemble-report': ['snapshots', 'private-controls'],
         'full': ['assemble-report']}[action]
 
 
