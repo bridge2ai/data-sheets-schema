@@ -1,0 +1,226 @@
+{
+  "status": "work-in-progress-not-valid-for-pilot-disposition",
+  "commit": null,
+  "base": "6561dac3c3af50cbfce1ba3c8b6ad21d9cd4b834",
+  "files": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-equivalence-comparison-20261112/scripts/native_equivalence_compare.py",
+      "sha256": "450f69fe7a726b574fced79a162d9709ef3b77be520b991a24b32ba25906b9e6"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-equivalence-comparison-20261112/scripts/native_equivalence_compare.json",
+      "sha256": "ee0fd408d76d421bc6368aaa45e3aa6be4a7933b4c26ce9ddfd38252a3152834"
+    }
+  ],
+  "permitted_locations": 23,
+  "rule_objects": 6825,
+  "canaries": [
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/producer-canary-01/comparison.json",
+        "sha256": "9e7c3781e77e6e93f048a40ae0d85e363ee44a847f92ba46da417fa254bb1ebb"
+      },
+      "result": {
+        "differences": [],
+        "disposition": "A hold never licenses a pilot rerun. No result is launch authority.",
+        "holds": [
+          "[Errno 2] No such file or directory: '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/producer-canary-01/replay/source'"
+        ],
+        "inputs_sha256": "09062e7c3fc745184ff92b478db43460df69c37515a6c04bba240b639400ec0f",
+        "left_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "policy_sha256": "d63225f31ead52e025eba9d5a8e9be6cb793675e6d2c448e070e64a03961f178",
+        "right_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "rules": null,
+        "status": "cannot_decide"
+      }
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/producer-canary-02/comparison.json",
+        "sha256": "701d8af41941dfbad3c3900cb184679ff28bc1a81759822f087c04fd130f7028"
+      },
+      "result": {
+        "differences": [],
+        "disposition": "A hold never licenses a pilot rerun. No result is launch authority.",
+        "holds": [
+          "left artifact production failed; see saved stderr"
+        ],
+        "inputs_sha256": "09062e7c3fc745184ff92b478db43460df69c37515a6c04bba240b639400ec0f",
+        "left_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "policy_sha256": "d63225f31ead52e025eba9d5a8e9be6cb793675e6d2c448e070e64a03961f178",
+        "right_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "rules": null,
+        "status": "cannot_decide"
+      }
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/producer-canary-03/comparison.json",
+        "sha256": "701d8af41941dfbad3c3900cb184679ff28bc1a81759822f087c04fd130f7028"
+      },
+      "result": {
+        "differences": [],
+        "disposition": "A hold never licenses a pilot rerun. No result is launch authority.",
+        "holds": [
+          "left artifact production failed; see saved stderr"
+        ],
+        "inputs_sha256": "09062e7c3fc745184ff92b478db43460df69c37515a6c04bba240b639400ec0f",
+        "left_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "policy_sha256": "d63225f31ead52e025eba9d5a8e9be6cb793675e6d2c448e070e64a03961f178",
+        "right_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "rules": null,
+        "status": "cannot_decide"
+      }
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/producer-canary-04/comparison.json",
+        "sha256": "701d8af41941dfbad3c3900cb184679ff28bc1a81759822f087c04fd130f7028"
+      },
+      "result": {
+        "differences": [],
+        "disposition": "A hold never licenses a pilot rerun. No result is launch authority.",
+        "holds": [
+          "left artifact production failed; see saved stderr"
+        ],
+        "inputs_sha256": "09062e7c3fc745184ff92b478db43460df69c37515a6c04bba240b639400ec0f",
+        "left_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "policy_sha256": "d63225f31ead52e025eba9d5a8e9be6cb793675e6d2c448e070e64a03961f178",
+        "right_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "rules": null,
+        "status": "cannot_decide"
+      }
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/producer-canary-05/comparison.json",
+        "sha256": "701d8af41941dfbad3c3900cb184679ff28bc1a81759822f087c04fd130f7028"
+      },
+      "result": {
+        "differences": [],
+        "disposition": "A hold never licenses a pilot rerun. No result is launch authority.",
+        "holds": [
+          "left artifact production failed; see saved stderr"
+        ],
+        "inputs_sha256": "09062e7c3fc745184ff92b478db43460df69c37515a6c04bba240b639400ec0f",
+        "left_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "policy_sha256": "d63225f31ead52e025eba9d5a8e9be6cb793675e6d2c448e070e64a03961f178",
+        "right_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "rules": null,
+        "status": "cannot_decide"
+      }
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/producer-canary-06/comparison.json",
+        "sha256": "701d8af41941dfbad3c3900cb184679ff28bc1a81759822f087c04fd130f7028"
+      },
+      "result": {
+        "differences": [],
+        "disposition": "A hold never licenses a pilot rerun. No result is launch authority.",
+        "holds": [
+          "left artifact production failed; see saved stderr"
+        ],
+        "inputs_sha256": "09062e7c3fc745184ff92b478db43460df69c37515a6c04bba240b639400ec0f",
+        "left_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "policy_sha256": "d63225f31ead52e025eba9d5a8e9be6cb793675e6d2c448e070e64a03961f178",
+        "right_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "rules": null,
+        "status": "cannot_decide"
+      }
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/producer-canary-07/comparison.json",
+        "sha256": "701d8af41941dfbad3c3900cb184679ff28bc1a81759822f087c04fd130f7028"
+      },
+      "result": {
+        "differences": [],
+        "disposition": "A hold never licenses a pilot rerun. No result is launch authority.",
+        "holds": [
+          "left artifact production failed; see saved stderr"
+        ],
+        "inputs_sha256": "09062e7c3fc745184ff92b478db43460df69c37515a6c04bba240b639400ec0f",
+        "left_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "policy_sha256": "d63225f31ead52e025eba9d5a8e9be6cb793675e6d2c448e070e64a03961f178",
+        "right_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "rules": null,
+        "status": "cannot_decide"
+      }
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/producer-canary-08/comparison.json",
+        "sha256": "8f22b73a9cec25c5d7f305237ffdbe44f5b7a5dbefbd50560807d012cd6a40eb"
+      },
+      "result": {
+        "differences": [],
+        "disposition": "A hold never licenses a pilot rerun. No result is launch authority.",
+        "holds": [
+          "artifact roster differs: missing=[]; unlisted=['artifact/0', 'artifact/1', 'artifact/10', 'artifact/11', 'artifact/12', 'artifact/13', 'artifact/14', 'artifact/15', 'artifact/2', 'artifact/3', 'artifact/4', 'artifact/5', 'artifact/6', 'artifact/7', 'artifact/8', 'artifact/9', 'assets/.claude/agents/d4d-provenance-guard-v2.md', 'assets/.claude/commands/d4d-agent-v2.md', 'assets/.claude/commands/d4d-full-core-v2.md', 'assets/.claude/commands/d4d-uniform-rules-v2.md', 'assets/src/data_sheets_schema/omission_inventory_v1/context.schema.json', 'assets/src/data_sheets_schema/omission_inventory_v1/policy.md', 'assets/src/data_sheets_schema/omission_inventory_v1/response.schema.json', 'assets/src/download/prompts/d4d_generic_arm_prompt_v10.md', 'assets/src/download/prompts/evidence_protocol_v7.md', 'assets/src/download/prompts/native_shared_generation_v1.md', 'assets/src/download/prompts/native_shared_receipt_policy_v1.md', 'assets/src/download/prompts/native_source_attribution_v1.md', 'assets/src/download/prompts/shared_generation_v1.md', 'binding', 'commands', 'execution', 'helper/final_receipts', 'helper/final_source_inventory', 'helper/initial_receipts', 'helper/original_source_inventory', 'helper_cli/advance', 'helper_cli/audit_evidence', 'helper_cli/chunk_check', 'helper_cli/core_schema', 'helper_cli/derive_core', 'helper_cli/derive_final_core', 'helper_cli/draft', 'helper_cli/final_evidence', 'helper_cli/final_receipts', 'helper_cli/final_scope', 'helper_cli/final_source_inventory', 'helper_cli/full_schema', 'helper_cli/full_terms', 'helper_cli/original_source_inventory', 'helper_cli/pair', 'helper_cli/phase1_receipts', 'helper_cli/recorder', 'helper_cli/source_scope', 'history/0', 'history/1', 'history/2', 'history/3', 'history/4', 'history_prefix/0', 'history_prefix/1', 'history_prefix/10', 'history_prefix/11', 'history_prefix/12', 'history_prefix/13', 'history_prefix/14', 'history_prefix/15', 'history_prefix/16', 'history_prefix/17', 'history_prefix/18', 'history_prefix/2', 'history_prefix/3', 'history_prefix/4', 'history_prefix/5', 'history_prefix/6', 'history_prefix/7', 'history_prefix/8', 'history_prefix/9', 'initial_full', 'initial_receipt', 'instruction', 'permission_expectation', 'phase1_seal', 'production_schema/all/data-sheets-schema', 'production_schema/core_all/data-sheets-schema-core', 'receipt_request', 'record/0', 'record/1', 'record/10', 'record/11', 'record/12', 'record/13', 'record/14', 'record/15', 'record/16', 'record/17', 'record/2', 'record/3', 'record/4', 'record/5', 'record/6', 'record/7', 'record/8', 'record/9', 'render_spec', 'request/0', 'request/2', 'request/3', 'request/4', 'runtime', 'selection', 'stage_receipt_policy', 'stage_selection', 'started', 'tool_policy', 'tool_policy_text']"
+        ],
+        "inputs_sha256": "09062e7c3fc745184ff92b478db43460df69c37515a6c04bba240b639400ec0f",
+        "left_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "policy_sha256": "d63225f31ead52e025eba9d5a8e9be6cb793675e6d2c448e070e64a03961f178",
+        "right_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "rules": {
+          "changed": [],
+          "equal": true,
+          "missing": [],
+          "module_context_differences": [],
+          "review_required": false,
+          "unlisted": []
+        },
+        "status": "cannot_decide"
+      }
+    },
+    {
+      "file": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/producer-canary-09/comparison.json",
+        "sha256": "f31ab082c8a172bdb435c0d092693c18674270d20b1b07bb9ba3fa7b1d7b11bc"
+      },
+      "result": {
+        "differences": [],
+        "disposition": "A hold never licenses a pilot rerun. No result is launch authority.",
+        "holds": [
+          "artifact roster differs: missing=[]; unlisted=['artifact/0', 'artifact/1', 'artifact/10', 'artifact/11', 'artifact/12', 'artifact/13', 'artifact/14', 'artifact/15', 'artifact/2', 'artifact/3', 'artifact/4', 'artifact/5', 'artifact/6', 'artifact/7', 'artifact/8', 'artifact/9', 'assets/.claude/agents/d4d-provenance-guard-v2.md', 'assets/.claude/commands/d4d-agent-v2.md', 'assets/.claude/commands/d4d-full-core-v2.md', 'assets/.claude/commands/d4d-uniform-rules-v2.md', 'assets/src/data_sheets_schema/omission_inventory_v1/context.schema.json', 'assets/src/data_sheets_schema/omission_inventory_v1/policy.md', 'assets/src/data_sheets_schema/omission_inventory_v1/response.schema.json', 'assets/src/download/prompts/d4d_generic_arm_prompt_v10.md', 'assets/src/download/prompts/evidence_protocol_v7.md', 'assets/src/download/prompts/native_shared_generation_v1.md', 'assets/src/download/prompts/native_shared_receipt_policy_v1.md', 'assets/src/download/prompts/native_source_attribution_v1.md', 'assets/src/download/prompts/shared_generation_v1.md', 'binding', 'commands', 'execution', 'helper/final_receipts', 'helper/final_source_inventory', 'helper/initial_receipts', 'helper/original_source_inventory', 'helper_cli/advance', 'helper_cli/audit_evidence', 'helper_cli/chunk_check', 'helper_cli/core_schema', 'helper_cli/derive_core', 'helper_cli/derive_final_core', 'helper_cli/draft', 'helper_cli/final_evidence', 'helper_cli/final_receipts', 'helper_cli/final_scope', 'helper_cli/final_source_inventory', 'helper_cli/full_schema', 'helper_cli/full_terms', 'helper_cli/original_source_inventory', 'helper_cli/pair', 'helper_cli/phase1_receipts', 'helper_cli/recorder', 'helper_cli/source_scope', 'history/0', 'history/1', 'history/2', 'history/3', 'history/4', 'history_prefix/0', 'history_prefix/1', 'history_prefix/10', 'history_prefix/11', 'history_prefix/12', 'history_prefix/13', 'history_prefix/14', 'history_prefix/15', 'history_prefix/16', 'history_prefix/17', 'history_prefix/18', 'history_prefix/2', 'history_prefix/3', 'history_prefix/4', 'history_prefix/5', 'history_prefix/6', 'history_prefix/7', 'history_prefix/8', 'history_prefix/9', 'initial_full', 'initial_receipt', 'instruction', 'permission_expectation', 'phase1_seal', 'production_schema/all/data-sheets-schema', 'production_schema/core_all/data-sheets-schema-core', 'receipt_request', 'record/0', 'record/1', 'record/10', 'record/11', 'record/12', 'record/13', 'record/14', 'record/15', 'record/16', 'record/17', 'record/2', 'record/3', 'record/4', 'record/5', 'record/6', 'record/7', 'record/8', 'record/9', 'render_spec', 'request/0', 'request/2', 'request/3', 'request/4', 'runtime', 'selection', 'source_code/notes/matched_cborg_2026-09-13/budget_amendment.py', 'source_code/notes/matched_cborg_2026-09-13/budgeted_cborg.py', 'source_code/notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py', 'source_code/notes/matched_cborg_2026-09-13/native_controls/native_control.py', 'source_code/notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py', 'source_code/notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py', 'source_code/notes/matched_cborg_2026-09-13/native_controls/native_proxy.py', 'source_code/notes/matched_cborg_2026-09-13/native_controls/native_readonly.py', 'source_code/notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py', 'source_code/notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py', 'source_code/notes/matched_cborg_2026-09-13/prepare_registration_v2.py', 'source_code/notes/matched_cborg_2026-09-13/run_api_canary.py', 'source_code/src/data_sheets_schema/_receipt_regex.py', 'source_code/src/data_sheets_schema/_version.py', 'source_code/src/data_sheets_schema/absence_lint.py', 'source_code/src/data_sheets_schema/agent_pin.py', 'source_code/src/data_sheets_schema/agentic_observed.py', 'source_code/src/data_sheets_schema/agentic_runtime.py', 'source_code/src/data_sheets_schema/agreement.py', 'source_code/src/data_sheets_schema/american_spelling.py', 'source_code/src/data_sheets_schema/anonymous_removals.py', 'source_code/src/data_sheets_schema/api_launcher.py', 'source_code/src/data_sheets_schema/api_playbook.py', 'source_code/src/data_sheets_schema/api_runner.py', 'source_code/src/data_sheets_schema/attainability.py', 'source_code/src/data_sheets_schema/attainability_aggregation.py', 'source_code/src/data_sheets_schema/attainability_figure.py', 'source_code/src/data_sheets_schema/audit_batch_context.py', 'source_code/src/data_sheets_schema/audit_batch_format.py', 'source_code/src/data_sheets_schema/audit_batches.py', 'source_code/src/data_sheets_schema/audit_grammar.py', 'source_code/src/data_sheets_schema/audit_omissions.py', 'source_code/src/data_sheets_schema/audit_protocol.py', 'source_code/src/data_sheets_schema/audit_recall.py', 'source_code/src/data_sheets_schema/awards.py', 'source_code/src/data_sheets_schema/backfill_checks.py', 'source_code/src/data_sheets_schema/bc1_audit.py', 'source_code/src/data_sheets_schema/bc1_codec.py', 'source_code/src/data_sheets_schema/bc1_context.py', 'source_code/src/data_sheets_schema/bc1_registration.py', 'source_code/src/data_sheets_schema/bc1_runtime.py', 'source_code/src/data_sheets_schema/bc1_selection.py', 'source_code/src/data_sheets_schema/cache_dependencies.py', 'source_code/src/data_sheets_schema/canary.py', 'source_code/src/data_sheets_schema/chunking.py', 'source_code/src/data_sheets_schema/cli/__init__.py', 'source_code/src/data_sheets_schema/cli/__main__.py', 'source_code/src/data_sheets_schema/cli/_repo_utils.py', 'source_code/src/data_sheets_schema/cli/agents.py', 'source_code/src/data_sheets_schema/cli/api.py', 'source_code/src/data_sheets_schema/cli/bundle.py', 'source_code/src/data_sheets_schema/cli/cross_family_judges.py', 'source_code/src/data_sheets_schema/cli/cross_family_panel.py', 'source_code/src/data_sheets_schema/cli/derive.py', 'source_code/src/data_sheets_schema/cli/download.py', 'source_code/src/data_sheets_schema/cli/enrich.py', 'source_code/src/data_sheets_schema/cli/evaluate.py', 'source_code/src/data_sheets_schema/cli/fitness_results.py', 'source_code/src/data_sheets_schema/cli/healthsheet.py', 'source_code/src/data_sheets_schema/cli/method.py', 'source_code/src/data_sheets_schema/cli/prompt.py', 'source_code/src/data_sheets_schema/cli/provenance.py', 'source_code/src/data_sheets_schema/cli/receipts.py', 'source_code/src/data_sheets_schema/cli/render.py', 'source_code/src/data_sheets_schema/cli/review.py', 'source_code/src/data_sheets_schema/cli/rocrate.py', 'source_code/src/data_sheets_schema/cli/runs.py', 'source_code/src/data_sheets_schema/cli/schema.py', 'source_code/src/data_sheets_schema/cli/support_calibration.py', 'source_code/src/data_sheets_schema/cli/support_execution.py', 'source_code/src/data_sheets_schema/cli/support_results.py', 'source_code/src/data_sheets_schema/cli/utils.py', 'source_code/src/data_sheets_schema/cli/validate.py', 'source_code/src/data_sheets_schema/constants/__init__.py', 'source_code/src/data_sheets_schema/constants/evaluation.py', 'source_code/src/data_sheets_schema/constants/methods.py', 'source_code/src/data_sheets_schema/constants/projects.py', 'source_code/src/data_sheets_schema/constants/schemas.py', 'source_code/src/data_sheets_schema/corpus.py', 'source_code/src/data_sheets_schema/crate_generation_comparison.py', 'source_code/src/data_sheets_schema/cross_family_judge_analysis.py', 'source_code/src/data_sheets_schema/cross_family_judge_panel.py', 'source_code/src/data_sheets_schema/cross_family_panel.py', 'source_code/src/data_sheets_schema/cross_family_panel_analysis.py', 'source_code/src/data_sheets_schema/cross_family_panel_results.py', 'source_code/src/data_sheets_schema/d4d_pair_consistency.py', 'source_code/src/data_sheets_schema/datamodel/__init__.py', 'source_code/src/data_sheets_schema/datamodel/data_sheets_schema.py', 'source_code/src/data_sheets_schema/derive_core.py', 'source_code/src/data_sheets_schema/deterministic_publication.py', 'source_code/src/data_sheets_schema/dollar_readout.py', 'source_code/src/data_sheets_schema/duplicate_keys.py', 'source_code/src/data_sheets_schema/enumeration.py', 'source_code/src/data_sheets_schema/evaluation/__init__.py', 'source_code/src/data_sheets_schema/evaluation/arm_comparison.py', 'source_code/src/data_sheets_schema/evaluation/blind_review_pack.py', 'source_code/src/data_sheets_schema/evaluation/cohort_manifest.py', 'source_code/src/data_sheets_schema/evaluation/evaluate_d4d.py', 'source_code/src/data_sheets_schema/evaluation/evaluate_d4d_llm.py', 'source_code/src/data_sheets_schema/evaluation/evaluation_identity.py', 'source_code/src/data_sheets_schema/evaluation/historical_eval_binding.py', 'source_code/src/data_sheets_schema/evaluation/registered_eval_runner.py', 'source_code/src/data_sheets_schema/evaluation/run_identity.py', 'source_code/src/data_sheets_schema/evaluation/validate.py', 'source_code/src/data_sheets_schema/evaluation_context.py', 'source_code/src/data_sheets_schema/evaluation_model.py', 'source_code/src/data_sheets_schema/evaluation_plan.py', 'source_code/src/data_sheets_schema/evidence_assertions.py', 'source_code/src/data_sheets_schema/evidence_score.py', 'source_code/src/data_sheets_schema/fairscape_forward_types.py', 'source_code/src/data_sheets_schema/fairscape_route_assertions.py', 'source_code/src/data_sheets_schema/fetch.py', 'source_code/src/data_sheets_schema/field_agent_contract.py', 'source_code/src/data_sheets_schema/figure_publication.py', 'source_code/src/data_sheets_schema/fitness_schema.py', 'source_code/src/data_sheets_schema/form_defects.py', 'source_code/src/data_sheets_schema/grounding.py', 'source_code/src/data_sheets_schema/healthsheet.py', 'source_code/src/data_sheets_schema/historical_digest.py', 'source_code/src/data_sheets_schema/identifiers.py', 'source_code/src/data_sheets_schema/instance_lint.py', 'source_code/src/data_sheets_schema/judge_contract.py', 'source_code/src/data_sheets_schema/latch_journal.py', 'source_code/src/data_sheets_schema/legacy_creator_references.py', 'source_code/src/data_sheets_schema/legacy_creators.py', 'source_code/src/data_sheets_schema/legacy_description_lists.py', 'source_code/src/data_sheets_schema/legacy_documentary.py', 'source_code/src/data_sheets_schema/legacy_doi.py', 'source_code/src/data_sheets_schema/legacy_publication.py', 'source_code/src/data_sheets_schema/legacy_root_identity.py', 'source_code/src/data_sheets_schema/legacy_route_dispositions.py', 'source_code/src/data_sheets_schema/legacy_sensitive_elements.py', 'source_code/src/data_sheets_schema/legacy_update_plan.py', 'source_code/src/data_sheets_schema/lexicon.py', 'source_code/src/data_sheets_schema/merge.py', 'source_code/src/data_sheets_schema/model_disclosure.py', 'source_code/src/data_sheets_schema/name_grounding.py', 'source_code/src/data_sheets_schema/native_attempt_supervisor.py', 'source_code/src/data_sheets_schema/native_attribution_controller.py', 'source_code/src/data_sheets_schema/native_attribution_controller_v2.py', 'source_code/src/data_sheets_schema/native_attribution_registration.py', 'source_code/src/data_sheets_schema/native_attribution_registration_v2.py', 'source_code/src/data_sheets_schema/native_attribution_results.py', 'source_code/src/data_sheets_schema/native_capture_words.py', 'source_code/src/data_sheets_schema/native_catalog_initialization.py', 'source_code/src/data_sheets_schema/native_catalog_reuse.py', 'source_code/src/data_sheets_schema/native_execution.py', 'source_code/src/data_sheets_schema/native_execution_authority.py', 'source_code/src/data_sheets_schema/native_execution_authority_v2.py', 'source_code/src/data_sheets_schema/native_execution_capabilities.py', 'source_code/src/data_sheets_schema/native_execution_engine.py', 'source_code/src/data_sheets_schema/native_execution_gates.py', 'source_code/src/data_sheets_schema/native_execution_orchestration.py', 'source_code/src/data_sheets_schema/native_execution_permissions.py', 'source_code/src/data_sheets_schema/native_execution_registration.py', 'source_code/src/data_sheets_schema/native_execution_registration_v2.py', 'source_code/src/data_sheets_schema/native_gate_engine.py', 'source_code/src/data_sheets_schema/native_generation.py', 'source_code/src/data_sheets_schema/native_launch_review.py', 'source_code/src/data_sheets_schema/native_launch_sequence.py', 'source_code/src/data_sheets_schema/native_model_aliases.py', 'source_code/src/data_sheets_schema/native_neutral_runtime_v1.py', 'source_code/src/data_sheets_schema/native_path_identity.py', 'source_code/src/data_sheets_schema/native_permission_probe.py', 'source_code/src/data_sheets_schema/native_probe_provider.py', 'source_code/src/data_sheets_schema/native_receipt_origin.py', 'source_code/src/data_sheets_schema/native_runtime_profiles.py', 'source_code/src/data_sheets_schema/native_schema_event_reuse.py', 'source_code/src/data_sheets_schema/native_shared_attribution.py', 'source_code/src/data_sheets_schema/native_shared_attribution_orchestration.py', 'source_code/src/data_sheets_schema/native_shared_authority_wire.py', 'source_code/src/data_sheets_schema/native_shared_callback_capture.py', 'source_code/src/data_sheets_schema/native_shared_callback_io.py', 'source_code/src/data_sheets_schema/native_shared_callback_orchestration.py', 'source_code/src/data_sheets_schema/native_shared_capture.py', 'source_code/src/data_sheets_schema/native_shared_capture_orchestration.py', 'source_code/src/data_sheets_schema/native_shared_contract.py', 'source_code/src/data_sheets_schema/native_shared_controller.py', 'source_code/src/data_sheets_schema/native_shared_controller_orchestration.py', 'source_code/src/data_sheets_schema/native_shared_controls.py', 'source_code/src/data_sheets_schema/native_shared_controls_orchestration.py', 'source_code/src/data_sheets_schema/native_shared_current.py', 'source_code/src/data_sheets_schema/native_shared_effects.py', 'source_code/src/data_sheets_schema/native_shared_evidence.py', 'source_code/src/data_sheets_schema/native_shared_execution.py', 'source_code/src/data_sheets_schema/native_shared_execution_orchestration.py', 'source_code/src/data_sheets_schema/native_shared_gate_primitives.py', 'source_code/src/data_sheets_schema/native_shared_gates.py', 'source_code/src/data_sheets_schema/native_shared_observations.py', 'source_code/src/data_sheets_schema/native_shared_permission_orchestration.py', 'source_code/src/data_sheets_schema/native_shared_permission_protocol.py', 'source_code/src/data_sheets_schema/native_shared_permission_protocol_orchestration.py', 'source_code/src/data_sheets_schema/native_shared_permissions.py', 'source_code/src/data_sheets_schema/native_shared_phase.py', 'source_code/src/data_sheets_schema/native_shared_policy.py', 'source_code/src/data_sheets_schema/native_shared_publication.py', 'source_code/src/data_sheets_schema/native_shared_publication_orchestration.py', 'source_code/src/data_sheets_schema/native_shared_receipts.py', 'source_code/src/data_sheets_schema/native_shared_registration.py', 'source_code/src/data_sheets_schema/native_shared_registration_orchestration.py', 'source_code/src/data_sheets_schema/native_shared_render.py', 'source_code/src/data_sheets_schema/native_shared_results.py', 'source_code/src/data_sheets_schema/native_shared_results_orchestration.py', 'source_code/src/data_sheets_schema/native_shared_runtime_constants.py', 'source_code/src/data_sheets_schema/native_shared_runtime_values.py', 'source_code/src/data_sheets_schema/native_shared_schema_gates.py', 'source_code/src/data_sheets_schema/native_shared_selection.py', 'source_code/src/data_sheets_schema/native_shared_stage/__init__.py', 'source_code/src/data_sheets_schema/native_shared_stage/__main__.py', 'source_code/src/data_sheets_schema/native_shared_streams.py', 'source_code/src/data_sheets_schema/native_source_attribution.py', 'source_code/src/data_sheets_schema/native_subscription_admission.py', 'source_code/src/data_sheets_schema/native_subscription_capture.py', 'source_code/src/data_sheets_schema/native_subscription_guard.py', 'source_code/src/data_sheets_schema/native_subscription_guard_v2.py', 'source_code/src/data_sheets_schema/native_supervisor_authority.py', 'source_code/src/data_sheets_schema/native_supervisor_authority_v2.py', 'source_code/src/data_sheets_schema/native_supervisor_gates.py', 'source_code/src/data_sheets_schema/native_u4b_policy.py', 'source_code/src/data_sheets_schema/native_u4b_probe_sequence.py', 'source_code/src/data_sheets_schema/native_u4b_runtime.py', 'source_code/src/data_sheets_schema/nested_support_execution.py', 'source_code/src/data_sheets_schema/nested_support_plan.py', 'source_code/src/data_sheets_schema/nested_support_results.py', 'source_code/src/data_sheets_schema/org_registry.py', 'source_code/src/data_sheets_schema/output_ownership.py', 'source_code/src/data_sheets_schema/profile_identity.py', 'source_code/src/data_sheets_schema/profiles.py', 'source_code/src/data_sheets_schema/prompt_registry.py', 'source_code/src/data_sheets_schema/provedown.py', 'source_code/src/data_sheets_schema/provenance.py', 'source_code/src/data_sheets_schema/q19_rationale_lint.py', 'source_code/src/data_sheets_schema/reasoning.py', 'source_code/src/data_sheets_schema/receipt_completion.py', 'source_code/src/data_sheets_schema/receipt_completion_policy.py', 'source_code/src/data_sheets_schema/receipt_origin.py', 'source_code/src/data_sheets_schema/receipt_origin_record.py', 'source_code/src/data_sheets_schema/receipt_readdress.py', 'source_code/src/data_sheets_schema/receipt_sources.py', 'source_code/src/data_sheets_schema/receipts.py', 'source_code/src/data_sheets_schema/reconstructed_bytes.py', 'source_code/src/data_sheets_schema/record_schema.py', 'source_code/src/data_sheets_schema/redundancy.py', 'source_code/src/data_sheets_schema/registry.py', 'source_code/src/data_sheets_schema/related_dataset_diagnostics.py', 'source_code/src/data_sheets_schema/related_datasets.py', 'source_code/src/data_sheets_schema/release_inventory.py', 'source_code/src/data_sheets_schema/removal_repair.py', 'source_code/src/data_sheets_schema/removals.py', 'source_code/src/data_sheets_schema/rendering/__init__.py', 'source_code/src/data_sheets_schema/rendering/human_readable_renderer.py', 'source_code/src/data_sheets_schema/rendering/normalization.py', 'source_code/src/data_sheets_schema/rendering/process_text_files.py', 'source_code/src/data_sheets_schema/rendering/rubric10_semantic.py', 'source_code/src/data_sheets_schema/rendering/rubric20_semantic.py', 'source_code/src/data_sheets_schema/replicate_structure.py', 'source_code/src/data_sheets_schema/report_audit_totals.py', 'source_code/src/data_sheets_schema/report_claims.py', 'source_code/src/data_sheets_schema/rereceipt.py', 'source_code/src/data_sheets_schema/resources.py', 'source_code/src/data_sheets_schema/review_pack.py', 'source_code/src/data_sheets_schema/rocrate_assertions.py', 'source_code/src/data_sheets_schema/rocrate_map.py', 'source_code/src/data_sheets_schema/rocrate_normalize.py', 'source_code/src/data_sheets_schema/rocrate_parent_admission.py', 'source_code/src/data_sheets_schema/rocrate_sources.py', 'source_code/src/data_sheets_schema/routing_diagnostics.py', 'source_code/src/data_sheets_schema/rubric_association.py', 'source_code/src/data_sheets_schema/rubric_pooling.py', 'source_code/src/data_sheets_schema/run_guard.py', 'source_code/src/data_sheets_schema/run_lock.py', 'source_code/src/data_sheets_schema/run_pair_schema.py', 'source_code/src/data_sheets_schema/run_schema.py', 'source_code/src/data_sheets_schema/run_telemetry.py', 'source_code/src/data_sheets_schema/runs.py', 'source_code/src/data_sheets_schema/schema_cache.py', 'source_code/src/data_sheets_schema/schema_digest.py', 'source_code/src/data_sheets_schema/schema_semantics.py', 'source_code/src/data_sheets_schema/schema_snapshot.py', 'source_code/src/data_sheets_schema/schema_sync.py', 'source_code/src/data_sheets_schema/schema_view.py', 'source_code/src/data_sheets_schema/scope.py', 'source_code/src/data_sheets_schema/self_disclaimed.py', 'source_code/src/data_sheets_schema/semantic_comparison.py', 'source_code/src/data_sheets_schema/semantic_evidence.py', 'source_code/src/data_sheets_schema/semantic_evidence_authority.py', 'source_code/src/data_sheets_schema/semantic_evidence_reporting.py', 'source_code/src/data_sheets_schema/semantic_instrument.py', 'source_code/src/data_sheets_schema/semantic_scope.py', 'source_code/src/data_sheets_schema/semantic_taxonomy_figure.py', 'source_code/src/data_sheets_schema/shared_generation.py', 'source_code/src/data_sheets_schema/shared_generation_resources.py', 'source_code/src/data_sheets_schema/shared_write_footprint.py', 'source_code/src/data_sheets_schema/snapshot_store.py', 'source_code/src/data_sheets_schema/source_attribution_preflight.py', 'source_code/src/data_sheets_schema/source_heading_admission.py', 'source_code/src/data_sheets_schema/source_heading_completed.py', 'source_code/src/data_sheets_schema/source_heading_routing.py', 'source_code/src/data_sheets_schema/source_heading_runtime.py', 'source_code/src/data_sheets_schema/source_metadata.py', 'source_code/src/data_sheets_schema/source_priority.py', 'source_code/src/data_sheets_schema/source_review.py', 'source_code/src/data_sheets_schema/spelling.py', 'source_code/src/data_sheets_schema/status_context.py', 'source_code/src/data_sheets_schema/stream_evidence.py', 'source_code/src/data_sheets_schema/support_calibration.py', 'source_code/src/data_sheets_schema/support_judge.py', 'source_code/src/data_sheets_schema/support_plan.py', 'source_code/src/data_sheets_schema/support_targets.py', 'source_code/src/data_sheets_schema/top_level_fitness_results.py', 'source_code/src/data_sheets_schema/transformation_measure.py', 'source_code/src/data_sheets_schema/transformation_measure_io.py', 'source_code/src/data_sheets_schema/transformation_receipts.py', 'source_code/src/data_sheets_schema/typed_audit.py', 'source_code/src/data_sheets_schema/typed_audit_figure.py', 'source_code/src/data_sheets_schema/typed_audit_report.py', 'source_code/src/data_sheets_schema/typed_audit_runtime.py', 'source_code/src/data_sheets_schema/usage_ledger.py', 'source_code/src/data_sheets_schema/verifiable.py', 'stage_receipt_policy', 'stage_selection', 'started', 'tool_policy', 'tool_policy_text']"
+        ],
+        "inputs_sha256": "09062e7c3fc745184ff92b478db43460df69c37515a6c04bba240b639400ec0f",
+        "left_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "policy_sha256": "d63225f31ead52e025eba9d5a8e9be6cb793675e6d2c448e070e64a03961f178",
+        "right_tree": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-equivalence-20261112/candidate",
+        "rules": {
+          "changed": [],
+          "equal": true,
+          "missing": [],
+          "module_context_differences": [],
+          "review_required": false,
+          "unlisted": []
+        },
+        "status": "cannot_decide"
+      }
+    }
+  ],
+  "six_demonstrations_complete": false,
+  "first_demonstration": {
+    "differences": [],
+    "holds": [],
+    "normalized_sha256": {
+      "left": "f60969a9bb0dc508e2c4d592034b4717680449852141f2955963c2b9ba80ea66",
+      "right": "f60969a9bb0dc508e2c4d592034b4717680449852141f2955963c2b9ba80ea66"
+    },
+    "rules": {
+      "changed": [],
+      "equal": true,
+      "missing": [],
+      "module_context_differences": [],
+      "review_required": false,
+      "unlisted": []
+    },
+    "status": "equal"
+  },
+  "limitations": [
+    "Candidate self comparison is equal; five mutation demonstrations remain.",
+    "No pilot disposition may use this provisional comparator."
+  ]
+}
