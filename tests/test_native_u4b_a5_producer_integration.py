@@ -133,11 +133,14 @@ def test_historical_discriminators_keep_pre_hook_instruction_and_only_d76_record
     """With out-of-checkout inputs, D76 adds one model-facing recorder field.
 
     Compare the real producer with an independent pre-D114 construction using
-    its new default registered-path setting. Keep a separate old-false reference
-    and require one exact JSON-field insertion in its embedded recorder command;
-    no text or metadata normalization is permitted. This fixture's corpus root
-    differs from cwd, so it does not exercise the in-checkout spelling change;
-    the D126 discriminator below covers that separate condition.
+    its new default registered-path setting. Keep a separate old-false reference.
+    Since #6065 the recorder command carries the render specification's sha256
+    (--render-spec-sha256), not its JSON, so D76's one field reaches the model
+    only through that digest: require exactly one digest replacement on the
+    recorder line; no text or metadata normalization is permitted. This
+    fixture's corpus root differs from cwd, so it does not exercise the
+    in-checkout spelling change; the D126 discriminator below covers that
+    separate condition.
     """
     selected = deepcopy(inputs['runtime'])
     selected['limits_basis'] = basis
@@ -160,16 +163,19 @@ def test_historical_discriminators_keep_pre_hook_instruction_and_only_d76_record
     expected = pre_hook.instruction
     assert 'registered_input_paths' not in historical.render_spec()
     assert pre_hook.render_spec() == {**historical.render_spec(), 'registered_input_paths': True}
-    recorder = [line for line in historical_instruction.splitlines() if '--render-spec-json' in line]
+    assert '--render-spec-json' not in historical_instruction
+    recorder = [line for line in historical_instruction.splitlines() if '--render-spec-sha256' in line]
     assert len(recorder) == 1 and 'provenance record' in recorder[0]
-    anchor = ',"render_version":26,'
-    insertion = ',"registered_input_paths":true'
-    assert recorder[0].count(anchor) == historical_instruction.count(anchor) == 1
-    assert insertion not in historical_instruction
-    # Whole-instruction byte equality after exactly this one insertion also
-    # forbids an unreported directive, roster, whitespace or other JSON delta.
+    before_digest = c.sha(c.canonical(historical.render_spec()))
+    after_digest = c.sha(c.canonical(pre_hook.render_spec()))
+    assert before_digest != after_digest
+    assert recorder[0].count('--render-spec-sha256 ' + before_digest) == 1
+    assert historical_instruction.count(before_digest) == 1
+    assert after_digest not in historical_instruction
+    # Whole-instruction byte equality after exactly this one replacement also
+    # forbids an unreported directive, roster, whitespace or other delta.
     assert expected.encode() == historical_instruction.encode().replace(
-        anchor.encode(), (insertion + anchor).encode(), 1)
+        before_digest.encode(), after_digest.encode(), 1)
     calls = []
     real = tools.toolchain
     def count(**kwargs):
@@ -302,10 +308,13 @@ def test_d126_in_checkout_manifest_pins_every_native_instruction_delta(inputs, u
             assert words[position] == relative[field]
             words[position] = absolute[field]
         if name == 'recorder':
-            assert words.count('--render-spec-json') == 1
-            position = words.index('--render-spec-json') + 1
-            assert words[position] == json.dumps(before_spec, sort_keys=True, separators=(',', ':'))
-            words[position] = json.dumps(expected_spec, sort_keys=True, separators=(',', ':'))
+            # Since #6065 the command binds the specification by its digest;
+            # the JSON reaches the recorder through the controller's environment.
+            assert words.count('--render-spec-json') == 0
+            assert words.count('--render-spec-sha256') == 1
+            position = words.index('--render-spec-sha256') + 1
+            assert words[position] == c.sha(c.canonical(before_spec))
+            words[position] = c.sha(c.canonical(expected_spec))
         edits.append(('helper:' + name, old, shlex.join(words).encode('utf-8')))
 
     before_lines, after_lines = before.splitlines(keepends=True), after.splitlines(keepends=True)
