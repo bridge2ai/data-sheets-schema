@@ -44,6 +44,11 @@ def cohort(path):
 def main(label):
     cohorts = [cohort(p) for p in sorted((BASE / 'tests').iterdir()) if p.is_dir()]
     source = json.loads((BASE / 'source-audit-final.json').read_bytes())
+    assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip() == source['head']
+    subprocess.run(['git', 'diff', '--exit-code', 'HEAD'], cwd=ROOT, check=True, capture_output=True)
+    tested = json.loads((BASE / (label + '.json')).read_bytes())
+    subprocess.run(['git', 'diff', '--exit-code', tested['commit'], source['head'], '--',
+                    '.', ':(exclude)scripts/adhoc'], cwd=ROOT, check=True, capture_output=True)
     public = []
     for item in cohorts:
         if not any(item['name'].endswith('-' + name) for name in ('correction', 'omissions', 'pending')):
@@ -57,13 +62,22 @@ def main(label):
             'result_paths': [r['path'] for r in results], 'sidecars': summary.get('sidecars', [])})
     required = [label + '-' + name for name in ('unit-canary', 'native', 'audit', 'budget', 'focused',
         'dependents', 'scanner', 'guards', 'correction', 'omissions', 'pending')]
-    completed = {item['name'] for item in cohorts if item.get('outcome', {}).get('cleanup_verified')}
+    completed = {item['name'] for item in cohorts if item.get('outcome', {}).get('cleanup_verified')
+                 and (sum(item.get('counts', {}).values()) > 0 or 'scanner.json_pin' in item)}
     not_run = sorted(set(required) - completed)
     failed = [item['name'] for item in cohorts if item['name'] in required
               and item.get('outcome', {}).get('returncode') not in (None, 0)]
     record = {'source': source, 'required_not_completed': not_run, 'required_failed': failed,
-        'cohorts': cohorts, 'public': public,
+        'cohorts': cohorts, 'public': public, 'tested_export': tested,
+        'tested_export_pin': pin(BASE / (label + '.json')),
+        'tested_non_provenance_bytes_match_final_head': True,
         'issue_snapshots': [pin(path) for path in sorted((BASE / 'issues').glob('*.json'))],
+        'held_exports': [pin(BASE / (label + '.hold.json')) for label in ('fixed4', 'fixed6')],
+        'process_state_preflight': pin(BASE / 'process-state-preflight/result.json'),
+        'unused_ps_copy_attempt': pin(BASE / 'unprivileged-ps-preflight/result.json'),
+        'approval_review': {'rejected_action': 'proposed UDP peer selection to a nonlocal documentation address',
+            'reason': 'external network activity is outside the offline-only scope', 'executed': False,
+            'safe_alternative': pin(BASE / 'loopback-preflight-local-v2/result.json')},
         'compatibility_proof': pin(BASE / 'checkpoint-compatibility.json'),
         'docs_audit': pin(BASE / 'run-limit-audit-final/run-limit-audit.json'),
         'boundary': 'offline local synthetic fixtures; no real native/provider/model calls, capture, reservation, push or GitHub write',
@@ -73,6 +87,7 @@ def main(label):
     lines = [answer, '',
         'The callback preload repair and the assigned CI, alarm, timing-sidecar, test and documentation changes are committed locally. Nothing was published; no production authority is claimed.', '',
         f"Source branch: `codex/native-h2-integration-fixes-20261113`; head `{source['head']}`; base `{source['base']}`.", '',
+        f"Final validation export: `{tested['commit']}`. Production code, tests, documentation and CI configuration match the handoff head; only provenance scripts may differ.", '',
         '## Changes and review', '',
         '- 6200: source-verified admission preloads host-power and timing utilities for the full callback lifetime. The regression forbids any module load on the exercised historical worker.',
         '- 6201/6202: event-driven deadline fixtures now drive the enforced continuous clock and anchor at dispatch. Existing early/late limits, interrupt checks, delayed-close negative control and reason-source assertions remain. The checkpoint allowlist update is backed by exact-byte comparison of every extracted definition and constant against accepted fc00ce654; historical v2 and v3-refusal tests remain.',
@@ -83,6 +98,7 @@ def main(label):
         'The four protected files and guard v1 match the assigned base. ' +
         ('A controller pin proposal is required; see the JSON census.' if source['pin_proposal_required'] else
          'All controller source-manifest entries still match; no pin proposal or scanner pin rotation was needed or applied.'), '',
+        'The separate read-only review traced callback utility lifetimes, timer ownership and exceptional cleanup, timing-scope placement outside registration locks, queue bounds and failure handling, the exact-byte compatibility proof, and the unchanged dispatch/deadline assertions. No additional source defect was identified in that pass. Failed validation and its limits are reported below; this review does not substitute for the lead’s independent review.', '',
         '## Saved JUnit counts', '', '| Cohort | Passed | Failed | Errors | Skipped | Cleanup verified |',
         '| --- | ---: | ---: | ---: | ---: | --- |']
     for item in cohorts:
@@ -91,6 +107,11 @@ def main(label):
             for name in ('passed', 'failure', 'error', 'skipped')) + ' | ' +
             str(item.get('outcome', {}).get('cleanup_verified', False)) + ' |')
     lines += ['', 'The JSON handoff preserves exact commands, CI step environment, source/export identity, XML hashes, failures and cleanup records. CI lane HTTP fixtures use loopback only; external networking and real native binaries are denied. Local macOS CPython 3.13 does not establish Ubuntu CPython 3.12 equivalence.', '',
+              'The initial preload-canary attempt failed during runner bootstrap because its copied command named an unavailable timing plugin; it collected no test result. The runner was corrected and preload-canary2 passed. The original failure and its incomplete cleanup receipt remain in the evidence. The unused fixed2 and fixed3 queues were superseded before starting any tests, with exact-process receipts retained.', '',
+              'The fixed4 CI steps failed before pytest because the sandbox used an invalid literal-IP rule. The local-only replacement verifies a localhost exchange and a denied Unix-domain listener. The fixed5 canary then exposed a missing argument in the child-origin witness, also before pytest; that caller was repaired. These are retained harness failures, not product-test failures.', '',
+              'The fixed4 focused XML records 210 passes, 14 assertion failures and one worker error. Process-wide signal injection in the new fixtures reached xdist threads, leaving alarm ownership disturbed and causing later admission refusals. The fixtures now direct signals to the blocked test thread. The shared-engine fixture also tried to patch the restricted capability projection; it now injects only a clock into the underlying source-loaded controller. The original failed artifacts are retained. Summarization now records intentional malformed or symlink sidecar fixtures instead of failing on them.', '',
+              'The fixed6 native lane recorded 974 passes and 27 failures associated with macOS refusing setuid ps inside the sandbox. The five assigned deadline/reason-source cases passed. A byte-identical ps copy with privilege bits removed was killed before producing output and is not used. The macOS fixture fallback now reads independent status and parent metadata with the existing psutil dependency; an own-child zombie/parent preflight passed inside the unchanged sandbox. The Linux /proc path, controller exit checks and signal assertions remain unchanged. No CPU or load measurements were requested.', '',
+              'The fixed6 audit lane passed all 2,168 tests. After its verified cleanup, the held queue stopped before launching its next cohort; the driver’s missing-directory error records that deliberate stop. The revised export then started independently after that cleanup receipt.', '',
               'The five native-lane deadline/reason-source failures and the audit deadline-receipt failure were stale test clock injection: the fixtures replaced time.monotonic while production now enforced elapsed_ns. Only the fixture clock binding changed. The checkpoint failures were an omitted compatibility admission, corrected after exact-byte proof. No deadline, interrupt or delayed-close assertion was weakened.', '',
               '## Public completion and capture-to-reservation', '', '| Cohort | Outcome | Continuous span seconds |', '| --- | --- | ---: |']
     for item in public:
@@ -105,13 +126,18 @@ def main(label):
               f"- Compatibility proof: `{BASE / 'checkpoint-compatibility.json'}`.",
               f"- Source and protected-file audit: `{BASE / 'source-audit-final.json'}`.",
               f"- Integrated documentation inventory: `{BASE / 'run-limit-audit-final/run-limit-audit.json'}`.", '',
-              'Nothing pushed; no GitHub writes. Stop after this handoff.', '']
+              'Nothing pushed; no GitHub writes. Stop after this handoff.', '',
+              'Automatic approval review rejected the proposed external-address UDP witness because it was outside the offline scope. It was not run. The replacement local-only sandbox checks passed; their receipt is retained in the JSON handoff.', '']
     markdown = '\n'.join(lines)
     assert '@' not in markdown
     md = REPORT / 'codex-h2-integration-fixes-20261113.md'
     js = md.with_suffix('.json')
-    md.write_text(markdown)
-    js.write_text(json.dumps(record, indent=2).replace('@', '\\u0040') + '\n')
+    if md.exists() or js.exists():
+        raise FileExistsError('retain any existing handoff; choose a new reviewed destination')
+    with md.open('x') as stream:
+        stream.write(markdown)
+    with js.open('x') as stream:
+        stream.write(json.dumps(record, indent=2).replace('@', '\\u0040') + '\n')
     print(json.dumps({'markdown': pin(md), 'json': pin(js)}, indent=2))
 
 
