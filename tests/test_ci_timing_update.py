@@ -211,7 +211,20 @@ def test_round7_refresh_preserves_history_and_excludes_dedicated_sg2():
     assert all(name.startswith('tests/test_native_') for name in native_weights)
     assert {row['source'] for row in native_refresh['files'].values()} == {
         'junit', 'worker_completion_intervals'}
-    assert data['file_seconds'] == {**current_refresh['file_seconds'], **native_weights}
+    # D147's first 12-shard run (2026-11-13) raises underweighted files only.
+    twelve = data['source']['ci_12_shards_43383271447_20261113']
+    assert twelve['run_id'] == 43383271447
+    assert twelve['commit'] == 'f7f8e8bff6ea14006957d8631f66346d91bcddcd'
+    assert twelve['updater_refusal'] == 'use a successful run for timing estimates'
+    raised = {name: row['seconds'] for name, row in twelve['files'].items()}
+    assert len(raised) == 79
+    assert {row['source'] for row in twelve['files'].values()} == {
+        'junit', 'worker_completion_intervals'}
+    base = {**current_refresh['file_seconds'], **native_weights}
+    for name, row in twelve['files'].items():
+        assert row['previous'] == base.get(name)
+        assert row['previous'] is None or row['seconds'] > row['previous']
+    assert data['file_seconds'] == {**base, **raised}
     assert set(current_refresh['retired_prior_files']) == set(
         data['local_overrides'][1]['retired_modules']
     )

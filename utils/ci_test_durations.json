@@ -10239,6 +10239,445 @@
       "method": "Failed run; JUnit failure times are not successful full-path times. Shards 5 and 8 use completion intervals including idle/scheduling gaps, not JUnit durations. Unfinished cases absent. Predictions are summed weights and ideal four-worker averages, never wall-time guarantees.",
       "updater_refusal": "use a successful run for timing estimates",
       "producer": "scripts/adhoc/h3_ci_weights_20261112.py"
+    },
+    "ci_12_shards_43383271447_20261113": {
+      "run_id": 43383271447,
+      "commit": "f7f8e8bff6ea14006957d8631f66346d91bcddcd",
+      "url": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/43383271447",
+      "conclusion": "failure; shards 3 and 10 cancelled at the 45-minute limit",
+      "updater_refusal": "use a successful run for timing estimates",
+      "method": "Per-file sums of this run's JUnit case times for completed shards (source junit); for the cancelled shards 3 and 10, elapsed time between consecutive results on each xdist worker from the job log, plus, for a test still running at cancellation, the time from its start line to the cancellation as a lower bound (source worker_completion_intervals). A weight is raised to the measured value, rounded up, only when that exceeds the recorded weight by more than 25 percent and is at least 30 s; no weight is lowered. A suspected stall is reported and never becomes a weight.",
+      "junit_sha256": {
+        "shard1": "f08a3d4949ee84489e9b5bf80d2784483b587b47f89bdcd940e4e51e75679211",
+        "shard11": "6b42b41819b51dfeb59bb97eaed72a634ded71c6f44ee84cecd70745596efd88",
+        "shard12": "98bcf7cd673c85f828d1960e0619cff9dee1cabdc54f3cc1ae5cca99dccf8448",
+        "shard2": "e321713d4776431c5a3975d94cf20b66be92c87f97587e546aea9ebc319c8b0c",
+        "shard4": "505b8217ab877ca1e5c19b5a9f277a40ad457a6353fbc17f819e0f83dd7bade3",
+        "shard5": "fc3c581c90156509e2c8412b8c4e7ac088b66d971f1c620654268e01ed45902d",
+        "shard6": "266d836a657cafe3ffa9348f65cb3c1c21281b8b00db2df8710e3de048f8de34",
+        "shard7": "adb3da0049c8524622b3ddeb1fb6ea7ec7a6337802528fe84c4f3bbea7d05704",
+        "shard8": "5c756f09b051b8c164922354acade2263172a4e1d708d747072888bac7e3d6ae",
+        "shard9": "72f3abab74cb7e6e0cd0aca5e839113b6b2a077e537128354096a5b747ada48e"
+      },
+      "log_sha256": {
+        "shard10": "4a7ccb03c7e5706377c71e626ea84ca4ff00f8e38f62f0390406edd7a1c8d948",
+        "shard3": "41e16eec900f944927831b12a9a0f93992512da63409349ddc5cb6d0e33cb81c"
+      },
+      "unfinished_lower_bound_seconds": {
+        "shard10": {
+          "tests/test_native_shared_execution_failure.py::test_public_pre_dispatch_failure_is_readable_and_cannot_resume": 346.696999,
+          "tests/test_native_shared_execution_failure.py::test_subscription_expiring_during_admission_refuses_before_reservation": 106.914599,
+          "tests/test_native_shared_execution_failure.py::test_v2_partial_reservation_stays_spent_without_probe[started.json]": 105.424845
+        },
+        "shard3": {
+          "tests/test_native_pending_public_completion.py::test_pending_floor_public_completion_retains_diagnostic_reading": 1661.717285
+        }
+      },
+      "suspected_hang_seconds": {
+        "shard10": {},
+        "shard3": {
+          "tests/test_native_execution_engine.py::test_shared_front_door_refuses_foreign_authority_before_any_effect[{\"authority_version\":true,\"controller_sources_sha256\":\"wrong\",\"registration\":{}}]": 1330.045812
+        }
+      },
+      "producer": "scripts/adhoc/ci_shard_timing_from_run_43383271447_20261113.py",
+      "producer_sha256": "950d8161d2293a7965acbccd0f4230f24612d4ce367c4e273566c85ec5091d38",
+      "files": {
+        "tests/test_assistant_generation_integration.py": {
+          "seconds": 415,
+          "previous": 307.404,
+          "source": "junit"
+        },
+        "tests/test_attainability.py": {
+          "seconds": 64,
+          "previous": 47.07,
+          "source": "worker_completion_intervals"
+        },
+        "tests/test_bc1_planline_cli.py": {
+          "seconds": 53,
+          "previous": 37.14,
+          "source": "junit"
+        },
+        "tests/test_build_api_registrations.py": {
+          "seconds": 213,
+          "previous": 148.928,
+          "source": "junit"
+        },
+        "tests/test_canonical_resolver.py": {
+          "seconds": 49,
+          "previous": 29.678,
+          "source": "junit"
+        },
+        "tests/test_cborg_completed_reporting.py": {
+          "seconds": 42,
+          "previous": 32.855,
+          "source": "worker_completion_intervals"
+        },
+        "tests/test_ci_sharding.py": {
+          "seconds": 307,
+          "previous": 237.149,
+          "source": "junit"
+        },
+        "tests/test_claudecode_direct_arm.py": {
+          "seconds": 64,
+          "previous": 44.535,
+          "source": "junit"
+        },
+        "tests/test_completed_surviving_usage.py": {
+          "seconds": 179,
+          "previous": 123.702,
+          "source": "junit"
+        },
+        "tests/test_d68_legacy_readonly.py": {
+          "seconds": 312,
+          "previous": 182.071,
+          "source": "junit"
+        },
+        "tests/test_d69_round4_ownership.py": {
+          "seconds": 435,
+          "previous": 262.714,
+          "source": "junit"
+        },
+        "tests/test_data_standards.py": {
+          "seconds": 32,
+          "previous": 21.189,
+          "source": "junit"
+        },
+        "tests/test_derive_core_selected_schemas.py": {
+          "seconds": 93,
+          "previous": null,
+          "source": "junit"
+        },
+        "tests/test_deterministic_arm_validity.py": {
+          "seconds": 306,
+          "previous": 209.632,
+          "source": "junit"
+        },
+        "tests/test_download/test_receipt_readdress.py": {
+          "seconds": 109,
+          "previous": 25.584,
+          "source": "junit"
+        },
+        "tests/test_e3x_guard_kills.py": {
+          "seconds": 52,
+          "previous": 36.941,
+          "source": "junit"
+        },
+        "tests/test_evaluation/test_support_execution_index.py": {
+          "seconds": 64,
+          "previous": 30.998,
+          "source": "junit"
+        },
+        "tests/test_execute_returns_record_usage.py": {
+          "seconds": 37,
+          "previous": 11.541,
+          "source": "junit"
+        },
+        "tests/test_figure_publication.py": {
+          "seconds": 51,
+          "previous": 32.717,
+          "source": "junit"
+        },
+        "tests/test_fresh_orphan_partial_generation.py": {
+          "seconds": 51,
+          "previous": 20.685,
+          "source": "junit"
+        },
+        "tests/test_generation_record_schema.py": {
+          "seconds": 128,
+          "previous": 82.446,
+          "source": "junit"
+        },
+        "tests/test_generation_specificity_delegated.py": {
+          "seconds": 436,
+          "previous": 344.607,
+          "source": "junit"
+        },
+        "tests/test_generation_specificity_skill.py": {
+          "seconds": 3133,
+          "previous": 1803.166,
+          "source": "junit"
+        },
+        "tests/test_instrument_provenance.py": {
+          "seconds": 113,
+          "previous": 61.546,
+          "source": "junit"
+        },
+        "tests/test_manifest_corpus_review_r14.py": {
+          "seconds": 37,
+          "previous": 18.741,
+          "source": "junit"
+        },
+        "tests/test_manifest_corpus_review_r15.py": {
+          "seconds": 40,
+          "previous": 31.605,
+          "source": "junit"
+        },
+        "tests/test_manifest_corpus_review_r16.py": {
+          "seconds": 57,
+          "previous": 44.338,
+          "source": "junit"
+        },
+        "tests/test_manifest_corpus_review_r4.py": {
+          "seconds": 33,
+          "previous": 26.287,
+          "source": "junit"
+        },
+        "tests/test_midnight_resume.py": {
+          "seconds": 771,
+          "previous": 183.591,
+          "source": "worker_completion_intervals"
+        },
+        "tests/test_native_execution.py": {
+          "seconds": 1973,
+          "previous": 1153.036,
+          "source": "worker_completion_intervals"
+        },
+        "tests/test_native_execution_round3_v2.py": {
+          "seconds": 53,
+          "previous": 9.131,
+          "source": "junit"
+        },
+        "tests/test_native_failure_publication.py": {
+          "seconds": 766,
+          "previous": null,
+          "source": "junit"
+        },
+        "tests/test_native_incomplete_retention.py": {
+          "seconds": 36,
+          "previous": null,
+          "source": "junit"
+        },
+        "tests/test_native_launch_schema_metadata.py": {
+          "seconds": 183,
+          "previous": 111.115,
+          "source": "junit"
+        },
+        "tests/test_native_model_aliases.py": {
+          "seconds": 127,
+          "previous": null,
+          "source": "junit"
+        },
+        "tests/test_native_pending_public_completion.py": {
+          "seconds": 1662,
+          "previous": null,
+          "source": "worker_completion_intervals"
+        },
+        "tests/test_native_permission_probe.py": {
+          "seconds": 291,
+          "previous": 210.622,
+          "source": "junit"
+        },
+        "tests/test_native_preparer_v2_equivalence.py": {
+          "seconds": 40,
+          "previous": 21.073,
+          "source": "junit"
+        },
+        "tests/test_native_receipt_origin_reporting.py": {
+          "seconds": 1062,
+          "previous": 467.966,
+          "source": "junit"
+        },
+        "tests/test_native_receipt_origin_stage_join.py": {
+          "seconds": 44,
+          "previous": 26.532,
+          "source": "worker_completion_intervals"
+        },
+        "tests/test_native_schema_metadata_reuse.py": {
+          "seconds": 49,
+          "previous": 36.536,
+          "source": "junit"
+        },
+        "tests/test_native_shared_capture_integration.py": {
+          "seconds": 95,
+          "previous": 33.071,
+          "source": "junit"
+        },
+        "tests/test_native_shared_controller.py": {
+          "seconds": 917,
+          "previous": 669.859,
+          "source": "worker_completion_intervals"
+        },
+        "tests/test_native_shared_execution.py": {
+          "seconds": 1465,
+          "previous": 10.44,
+          "source": "junit"
+        },
+        "tests/test_native_shared_execution_failure.py": {
+          "seconds": 3270,
+          "previous": 54.005,
+          "source": "worker_completion_intervals"
+        },
+        "tests/test_native_shared_execution_variant.py": {
+          "seconds": 1237,
+          "previous": 16.738,
+          "source": "junit"
+        },
+        "tests/test_native_shared_live_capture.py": {
+          "seconds": 897,
+          "previous": 639.377,
+          "source": "junit"
+        },
+        "tests/test_native_shared_receipt_readers.py": {
+          "seconds": 152,
+          "previous": 91.561,
+          "source": "junit"
+        },
+        "tests/test_native_shared_registration.py": {
+          "seconds": 2168,
+          "previous": null,
+          "source": "junit"
+        },
+        "tests/test_native_shared_results.py": {
+          "seconds": 1309,
+          "previous": 602.254,
+          "source": "junit"
+        },
+        "tests/test_native_subscription_capture.py": {
+          "seconds": 250,
+          "previous": 9.739,
+          "source": "junit"
+        },
+        "tests/test_native_u1_api_parity.py": {
+          "seconds": 127,
+          "previous": 71.297,
+          "source": "junit"
+        },
+        "tests/test_native_u3b_reuse.py": {
+          "seconds": 65,
+          "previous": null,
+          "source": "junit"
+        },
+        "tests/test_native_u3d_round9_preparation.py": {
+          "seconds": 60,
+          "previous": 45.802,
+          "source": "junit"
+        },
+        "tests/test_native_u3l_scanner.py": {
+          "seconds": 104,
+          "previous": 82.582,
+          "source": "junit"
+        },
+        "tests/test_native_u4b_a5_scanner.py": {
+          "seconds": 54,
+          "previous": 30.82,
+          "source": "worker_completion_intervals"
+        },
+        "tests/test_native_u4b_audit_counts.py": {
+          "seconds": 876,
+          "previous": 363.27,
+          "source": "worker_completion_intervals"
+        },
+        "tests/test_native_u5_scanner.py": {
+          "seconds": 109,
+          "previous": null,
+          "source": "junit"
+        },
+        "tests/test_pr5212_round7_journal.py": {
+          "seconds": 668,
+          "previous": 435.419,
+          "source": "worker_completion_intervals"
+        },
+        "tests/test_profiles.py": {
+          "seconds": 278,
+          "previous": 178.461,
+          "source": "junit"
+        },
+        "tests/test_receipt_sources.py": {
+          "seconds": 55,
+          "previous": 32.029,
+          "source": "junit"
+        },
+        "tests/test_registration_input_sizing.py": {
+          "seconds": 144,
+          "previous": 93.537,
+          "source": "junit"
+        },
+        "tests/test_removals.py": {
+          "seconds": 326,
+          "previous": 247.4,
+          "source": "junit"
+        },
+        "tests/test_replicate_structure.py": {
+          "seconds": 45,
+          "previous": 29.734,
+          "source": "junit"
+        },
+        "tests/test_report_audit_totals.py": {
+          "seconds": 39,
+          "previous": 16.671,
+          "source": "junit"
+        },
+        "tests/test_rocrate/test_provenance.py": {
+          "seconds": 66,
+          "previous": 41.495,
+          "source": "junit"
+        },
+        "tests/test_routing_diagnostics.py": {
+          "seconds": 32,
+          "previous": 19.341,
+          "source": "junit"
+        },
+        "tests/test_schema/test_datacite_relationships.py": {
+          "seconds": 81,
+          "previous": 63.87,
+          "source": "junit"
+        },
+        "tests/test_scope.py": {
+          "seconds": 179,
+          "previous": 118.715,
+          "source": "junit"
+        },
+        "tests/test_shared_generation_capture.py": {
+          "seconds": 63,
+          "previous": 46.518,
+          "source": "junit"
+        },
+        "tests/test_shared_generation_condition_compatibility.py": {
+          "seconds": 42,
+          "previous": 19.62,
+          "source": "junit"
+        },
+        "tests/test_shared_output_ownership_entrypoints.py": {
+          "seconds": 204,
+          "previous": 159.998,
+          "source": "worker_completion_intervals"
+        },
+        "tests/test_shared_schema_sync_resources.py": {
+          "seconds": 160,
+          "previous": 119.156,
+          "source": "junit"
+        },
+        "tests/test_thinking_request.py": {
+          "seconds": 39,
+          "previous": 23.418,
+          "source": "junit"
+        },
+        "tests/test_wave4_5095_review.py": {
+          "seconds": 70,
+          "previous": 54.115,
+          "source": "junit"
+        },
+        "tests/test_wave5_5095_review.py": {
+          "seconds": 78,
+          "previous": 60.931,
+          "source": "junit"
+        },
+        "tests/test_wave7_5213_d76_integration_ordering.py": {
+          "seconds": 236,
+          "previous": 187.482,
+          "source": "junit"
+        },
+        "tests/test_wave7_5213_d76_round2_recorder.py": {
+          "seconds": 51,
+          "previous": 35.574,
+          "source": "junit"
+        },
+        "tests/test_wave7_5213_d76_round3_binding.py": {
+          "seconds": 735,
+          "previous": 545.039,
+          "source": "junit"
+        }
+      }
     }
   },
   "method": "Sum JUnit case times by collected file, with a 0.001-second floor. These are scheduling estimates, not wall-clock predictions or a test allowlist. Untimed collected files use the median known duration; obsolete entries are ignored. Missing-shard observations use elapsed time between consecutive results on each CI worker (first result measured from pytest session start; includes setup, prior teardown and scheduling delay). Unfinished cases use completed local JUnit times listed in source.supplement. Unmeasured prior entries retain their exact values. BC1/G2 additions (2026-11-03) only fill previously unweighted files: sum one complete source per current collected file, preferring run 41707437114, then run 41700664435 for G1 files, then round-2 local with-mode JUnit (macOS Python 3.13, two workers). Exact case-occurrence multisets and pinned XML SHA256 values are checked; 0.001-second floor, no local-time scaling. Completed failures/skips remain timing observations, not evidence of CI success. Original provenance and every existing weight are retained. Follow-up: measured-ratio scaling (2026-11-03) supersedes only the six initial local-source weights with local sum x 2.729, the larger of two observed complete-file Linux-CI/local ratios rounded to three decimals, as authorized by the lead. These six weights are derived, not measured; source.bc1_g2_measured_ratio_scaling_20261103 records each local sum, multiplier and both paired measurements with XML hashes. All other weights and the prior measured provenance remain unchanged. All-file BC1/G2 refresh (2026-11-04): use run 41735860489, then 41707437114, then retain current weight, requiring an exact current case-occurrence multiset within one shard XML per file. Preserve all earlier provenance. Completed failures/skips are timing observations. Inputs are SHA256-pinned in the new source block. Complete 8-shard ordinary CI refresh (2026-11-11): build active file_seconds from run 42916359440 at commit 6792947ea6558d10c85106065b023cb57838835a via utils.update_ci_shard_timings.build against the run checkout root, preserving prior weights and historical provenance under source.ci_refresh_42916359440_20261111.",
@@ -10270,11 +10709,11 @@
     "tests/test_arm_confounds.py": 0.372,
     "tests/test_assembly_axis.py": 0.075,
     "tests/test_assistant_bundle.py": 0.21,
-    "tests/test_assistant_generation_integration.py": 307.404,
+    "tests/test_assistant_generation_integration.py": 415,
     "tests/test_assistant_request.py": 0.595,
     "tests/test_assistant_trusted_gate.py": 15.139,
     "tests/test_assistant_workflow.py": 207.479,
-    "tests/test_attainability.py": 47.07,
+    "tests/test_attainability.py": 64,
     "tests/test_attainability_aggregation.py": 84.927,
     "tests/test_attainability_check_gate.py": 1.925,
     "tests/test_attainability_figure.py": 109.425,
@@ -10312,7 +10751,7 @@
     "tests/test_bc1_g2_round2.py": 239.563,
     "tests/test_bc1_generality.py": 3.254,
     "tests/test_bc1_pipeline.py": 1912.934,
-    "tests/test_bc1_planline_cli.py": 37.14,
+    "tests/test_bc1_planline_cli.py": 53,
     "tests/test_bc1_registration.py": 349.318,
     "tests/test_bc1_resources.py": 0.509,
     "tests/test_bc1_runtime.py": 143.614,
@@ -10321,7 +10760,7 @@
     "tests/test_blind_review_pack.py": 6.253,
     "tests/test_british_instrument.py": 0.356,
     "tests/test_british_normaliser.py": 0.226,
-    "tests/test_build_api_registrations.py": 148.928,
+    "tests/test_build_api_registrations.py": 213,
     "tests/test_build_draft_contexts.py": 13.812,
     "tests/test_bundle_md5_recovery.py": 13.619,
     "tests/test_cache_dependencies_dataclass_repr.py": 0.018,
@@ -10329,16 +10768,16 @@
     "tests/test_canary_budget_continuation.py": 0.129,
     "tests/test_canary_controller_receipts.py": 46.324,
     "tests/test_canary_gate.py": 7.067,
-    "tests/test_canonical_resolver.py": 29.678,
-    "tests/test_cborg_completed_reporting.py": 32.855,
+    "tests/test_canonical_resolver.py": 49,
+    "tests/test_cborg_completed_reporting.py": 42,
     "tests/test_cborg_report_publication.py": 0.081,
     "tests/test_check_large_files.py": 0.54,
     "tests/test_chunking.py": 0.943,
     "tests/test_ci_bytecode_hygiene.py": 0.294,
-    "tests/test_ci_sharding.py": 237.149,
+    "tests/test_ci_sharding.py": 307,
     "tests/test_ci_timing_update.py": 0.175,
     "tests/test_claim_clarification_renderer.py": 1.462,
-    "tests/test_claudecode_direct_arm.py": 44.535,
+    "tests/test_claudecode_direct_arm.py": 64,
     "tests/test_cli/test_bundle_drift.py": 6.629,
     "tests/test_cli/test_download_cli.py": 0.204,
     "tests/test_cli/test_evaluate_cli.py": 0.018,
@@ -10362,7 +10801,7 @@
     "tests/test_cli/test_utils_cli.py": 0.14,
     "tests/test_cli/test_validate_cli.py": 9.961,
     "tests/test_cli/test_verdict_pins_schema.py": 0.057,
-    "tests/test_completed_surviving_usage.py": 123.702,
+    "tests/test_completed_surviving_usage.py": 179,
     "tests/test_context_evidence_verbatim.py": 1.766,
     "tests/test_context_facts.py": 11.794,
     "tests/test_core_exchange_completeness.py": 17.861,
@@ -10375,18 +10814,18 @@
     "tests/test_d4d_to_synapse_table.py": 0.424,
     "tests/test_d52_publication_labels.py": 0.929,
     "tests/test_d52_scoring.py": 2.284,
-    "tests/test_d68_legacy_readonly.py": 182.071,
+    "tests/test_d68_legacy_readonly.py": 312,
     "tests/test_d69_artifact_completeness.py": 1522.922,
     "tests/test_d69_fail_closed.py": 18.138,
-    "tests/test_d69_round4_ownership.py": 262.714,
+    "tests/test_d69_round4_ownership.py": 435,
     "tests/test_d69_round5_boundaries.py": 448.768,
     "tests/test_d69_round5_launch.py": 189.043,
     "tests/test_d70_record_age.py": 1.253,
     "tests/test_data.py": 0.013,
-    "tests/test_data_standards.py": 21.189,
+    "tests/test_data_standards.py": 32,
     "tests/test_dc_output_caps.py": 0.027,
     "tests/test_derive_core.py": 5.201,
-    "tests/test_deterministic_arm_validity.py": 209.632,
+    "tests/test_deterministic_arm_validity.py": 306,
     "tests/test_deterministic_publication.py": 0.305,
     "tests/test_digest_isolation.py": 4.307,
     "tests/test_direct_keep_awake.py": 2.193,
@@ -10407,13 +10846,13 @@
     "tests/test_download/test_preprocess.py": 0.06,
     "tests/test_download/test_prompt_components.py": 0.388,
     "tests/test_download/test_prompt_self_identification.py": 0.044,
-    "tests/test_download/test_receipt_readdress.py": 25.584,
+    "tests/test_download/test_receipt_readdress.py": 109,
     "tests/test_download/test_validate_quality.py": 0.058,
     "tests/test_draft_grammar_protocol.py": 0.667,
     "tests/test_duplicate_keys.py": 73.628,
     "tests/test_e3x_blinding_fixes.py": 29.327,
     "tests/test_e3x_fixes.py": 39.025,
-    "tests/test_e3x_guard_kills.py": 36.941,
+    "tests/test_e3x_guard_kills.py": 52,
     "tests/test_e3x_receipt_fixes.py": 39.212,
     "tests/test_e3x_rereview_fixes.py": 93.74,
     "tests/test_e3x_rereview_kills.py": 22.03,
@@ -10479,7 +10918,7 @@
     "tests/test_evaluation/test_support_calibration.py": 40.498,
     "tests/test_evaluation/test_support_calibration_adversarial.py": 156.231,
     "tests/test_evaluation/test_support_calibration_cli.py": 9.64,
-    "tests/test_evaluation/test_support_execution_index.py": 30.998,
+    "tests/test_evaluation/test_support_execution_index.py": 64,
     "tests/test_evaluation/test_support_execution_index_adversarial.py": 117.461,
     "tests/test_evaluation/test_support_judge.py": 0.284,
     "tests/test_evaluation/test_support_plan.py": 2.29,
@@ -10501,7 +10940,7 @@
     "tests/test_evidence_assertions.py": 8.925,
     "tests/test_evidence_generation_gate.py": 17.565,
     "tests/test_evidence_phase_contract.py": 2.68,
-    "tests/test_execute_returns_record_usage.py": 11.541,
+    "tests/test_execute_returns_record_usage.py": 37,
     "tests/test_extend_observed.py": 2.652,
     "tests/test_external_dataset_onboarding.py": 12.905,
     "tests/test_fairscape_integration/test_canonical_routes.py": 0.457,
@@ -10524,7 +10963,7 @@
     "tests/test_fairscape_integration/test_validator.py": 0.02,
     "tests/test_fig09_mapping_revision_display.py": 5.349,
     "tests/test_fig09_portable_locators.py": 3.374,
-    "tests/test_figure_publication.py": 32.717,
+    "tests/test_figure_publication.py": 51,
     "tests/test_figure_set_2303_updates.py": 25.682,
     "tests/test_file_collection.py": 0.016,
     "tests/test_final_generation_acceptance.py": 5.725,
@@ -10537,7 +10976,7 @@
     "tests/test_form_defects.py": 28.304,
     "tests/test_form_instrument_snapshot.py": 0.182,
     "tests/test_form_subtype_class_scope.py": 0.433,
-    "tests/test_fresh_orphan_partial_generation.py": 20.685,
+    "tests/test_fresh_orphan_partial_generation.py": 51,
     "tests/test_g2_comparator.py": 0.23,
     "tests/test_g2_round2.py": 12.57,
     "tests/test_generality_context.py": 0.063,
@@ -10550,11 +10989,11 @@
     "tests/test_generality_substrate.py": 34.768,
     "tests/test_generality_tuned.py": 0.056,
     "tests/test_generation_manifest_identity.py": 64.619,
-    "tests/test_generation_record_schema.py": 82.446,
+    "tests/test_generation_record_schema.py": 128,
     "tests/test_generation_recovery_review.py": 59.106,
     "tests/test_generation_snapshot_ownership.py": 33.994,
-    "tests/test_generation_specificity_delegated.py": 344.607,
-    "tests/test_generation_specificity_skill.py": 1803.166,
+    "tests/test_generation_specificity_delegated.py": 436,
+    "tests/test_generation_specificity_skill.py": 3133,
     "tests/test_generic_v10_r9_enum_criteria.py": 0.064,
     "tests/test_github_assistant_generation.py": 71.172,
     "tests/test_grounding.py": 0.814,
@@ -10577,7 +11016,7 @@
     "tests/test_installed_wheel.py": 0.008,
     "tests/test_instrument_archive_history.py": 0.164,
     "tests/test_instrument_prompt_identity.py": 0.116,
-    "tests/test_instrument_provenance.py": 61.546,
+    "tests/test_instrument_provenance.py": 113,
     "tests/test_latch_journal.py": 2.958,
     "tests/test_legacy_migration.py": 0.006,
     "tests/test_legacy_renderer_commands.py": 3.185,
@@ -10589,12 +11028,12 @@
     "tests/test_manifest_corpus_review_r11.py": 2.417,
     "tests/test_manifest_corpus_review_r12.py": 1.25,
     "tests/test_manifest_corpus_review_r13.py": 15.545,
-    "tests/test_manifest_corpus_review_r14.py": 18.741,
-    "tests/test_manifest_corpus_review_r15.py": 31.605,
-    "tests/test_manifest_corpus_review_r16.py": 44.338,
+    "tests/test_manifest_corpus_review_r14.py": 37,
+    "tests/test_manifest_corpus_review_r15.py": 40,
+    "tests/test_manifest_corpus_review_r16.py": 57,
     "tests/test_manifest_corpus_review_r17.py": 0.09,
     "tests/test_manifest_corpus_review_r3.py": 9.51,
-    "tests/test_manifest_corpus_review_r4.py": 26.287,
+    "tests/test_manifest_corpus_review_r4.py": 33,
     "tests/test_manifest_corpus_review_r5.py": 0.32,
     "tests/test_manifest_corpus_review_r6.py": 12.06,
     "tests/test_manifest_corpus_review_r7.py": 0.179,
@@ -10609,7 +11048,7 @@
     "tests/test_merge_selection_provenance.py": 2.37,
     "tests/test_method_resolution.py": 10.354,
     "tests/test_method_split.py": 0.003,
-    "tests/test_midnight_resume.py": 183.591,
+    "tests/test_midnight_resume.py": 771,
     "tests/test_model_disclosure.py": 1.05,
     "tests/test_name_grounding.py": 274.77,
     "tests/test_name_grounding_schema_scope.py": 2.824,
@@ -10620,7 +11059,7 @@
     "tests/test_native_authority_v2.py": 13.6,
     "tests/test_native_ci_evidence.py": 0.125,
     "tests/test_native_ci_evidence_adversarial.py": 0.56,
-    "tests/test_native_execution.py": 1153.036,
+    "tests/test_native_execution.py": 1973,
     "tests/test_native_execution_authority_v2.py": 4.426,
     "tests/test_native_execution_bridge_v2.py": 72.262,
     "tests/test_native_execution_ci_v2.py": 10.105,
@@ -10629,7 +11068,7 @@
     "tests/test_native_execution_observation.py": 0.099,
     "tests/test_native_execution_permissions.py": 11.36,
     "tests/test_native_execution_registration_v2.py": 102.234,
-    "tests/test_native_execution_round3_v2.py": 9.131,
+    "tests/test_native_execution_round3_v2.py": 53,
     "tests/test_native_execution_round5_v2.py": 8.932,
     "tests/test_native_execution_verified_loader_v2.py": 5.077,
     "tests/test_native_full_schema_profile_boundaries.py": 5.389,
@@ -10641,35 +11080,35 @@
     "tests/test_native_incomplete_evidence.py": 0.712,
     "tests/test_native_initial_structure_mode.py": 0.662,
     "tests/test_native_launch_review.py": 1.512,
-    "tests/test_native_launch_schema_metadata.py": 111.115,
+    "tests/test_native_launch_schema_metadata.py": 183,
     "tests/test_native_lexical_ancestry.py": 0.24,
-    "tests/test_native_permission_probe.py": 210.622,
+    "tests/test_native_permission_probe.py": 291,
     "tests/test_native_permission_projection_derivation.py": 316.246,
     "tests/test_native_phase_scope_rendering.py": 0.125,
     "tests/test_native_preparer_v2_boundaries.py": 9.291,
-    "tests/test_native_preparer_v2_equivalence.py": 21.073,
-    "tests/test_native_receipt_origin_reporting.py": 467.966,
-    "tests/test_native_receipt_origin_stage_join.py": 26.532,
+    "tests/test_native_preparer_v2_equivalence.py": 40,
+    "tests/test_native_receipt_origin_reporting.py": 1062,
+    "tests/test_native_receipt_origin_stage_join.py": 44,
     "tests/test_native_receipt_unopened.py": 0.034,
     "tests/test_native_registered_provenance.py": 5.901,
-    "tests/test_native_schema_metadata_reuse.py": 36.536,
+    "tests/test_native_schema_metadata_reuse.py": 49,
     "tests/test_native_shared_attribution.py": 3828.03,
     "tests/test_native_shared_callback_preloading.py": 175.346,
-    "tests/test_native_shared_capture_integration.py": 33.071,
+    "tests/test_native_shared_capture_integration.py": 95,
     "tests/test_native_shared_capture_split.py": 0.002,
     "tests/test_native_shared_consumer_census.py": 11.471,
     "tests/test_native_shared_contract.py": 0.225,
-    "tests/test_native_shared_controller.py": 669.859,
+    "tests/test_native_shared_controller.py": 917,
     "tests/test_native_shared_current.py": 0.08,
     "tests/test_native_shared_effects.py": 0.63,
     "tests/test_native_shared_evidence.py": 0.037,
-    "tests/test_native_shared_execution.py": 10.44,
-    "tests/test_native_shared_execution_failure.py": 54.005,
-    "tests/test_native_shared_execution_variant.py": 16.738,
+    "tests/test_native_shared_execution.py": 1465,
+    "tests/test_native_shared_execution_failure.py": 3270,
+    "tests/test_native_shared_execution_variant.py": 1237,
     "tests/test_native_shared_gate_primitives.py": 0.076,
     "tests/test_native_shared_initial_receipts.py": 0.574,
     "tests/test_native_shared_layer_split.py": 0.107,
-    "tests/test_native_shared_live_capture.py": 639.377,
+    "tests/test_native_shared_live_capture.py": 897,
     "tests/test_native_shared_observations.py": 0.082,
     "tests/test_native_shared_owner_delivery.py": 27.013,
     "tests/test_native_shared_permission_protocol.py": 2.332,
@@ -10679,10 +11118,10 @@
     "tests/test_native_shared_provenance.py": 741.746,
     "tests/test_native_shared_publication.py": 0.676,
     "tests/test_native_shared_receipt_delivery.py": 0.582,
-    "tests/test_native_shared_receipt_readers.py": 91.561,
+    "tests/test_native_shared_receipt_readers.py": 152,
     "tests/test_native_shared_record_contract.py": 0.016,
     "tests/test_native_shared_render.py": 3.039,
-    "tests/test_native_shared_results.py": 602.254,
+    "tests/test_native_shared_results.py": 1309,
     "tests/test_native_shared_runtime_constants.py": 0.014,
     "tests/test_native_shared_runtime_values.py": 0.256,
     "tests/test_native_shared_saved_advance.py": 10.001,
@@ -10695,7 +11134,7 @@
     "tests/test_native_shared_streams.py": 0.225,
     "tests/test_native_source_attribution.py": 12.489,
     "tests/test_native_source_roster.py": 19.753,
-    "tests/test_native_subscription_capture.py": 9.739,
+    "tests/test_native_subscription_capture.py": 250,
     "tests/test_native_subscription_guard.py": 0.037,
     "tests/test_native_synthetic_evidence.py": 0.46,
     "tests/test_native_synthetic_profiles.py": 0.353,
@@ -10705,7 +11144,7 @@
     "tests/test_native_trace_comparison_adversarial.py": 3.828,
     "tests/test_native_trace_prefix_profile.py": 0.053,
     "tests/test_native_trace_profile_runtime.py": 0.614,
-    "tests/test_native_u1_api_parity.py": 71.297,
+    "tests/test_native_u1_api_parity.py": 127,
     "tests/test_native_u1_scanner_contracts.py": 86.855,
     "tests/test_native_u1_selector_refusals.py": 1.306,
     "tests/test_native_u3a_test_driver.py": 0.169,
@@ -10716,14 +11155,14 @@
     "tests/test_native_u3d_round9_arguments.py": 0.02,
     "tests/test_native_u3d_round9_boundaries.py": 26.628,
     "tests/test_native_u3d_round9_capabilities.py": 4.988,
-    "tests/test_native_u3d_round9_preparation.py": 45.802,
+    "tests/test_native_u3d_round9_preparation.py": 60,
     "tests/test_native_u3d_runner_evidence.py": 0.01,
     "tests/test_native_u3f2_construction.py": 194.932,
     "tests/test_native_u3j2_metrics_canary.py": 0.001,
     "tests/test_native_u3k_freshness_order.py": 6.619,
     "tests/test_native_u3k_profile.py": 0.008,
     "tests/test_native_u3l_review_fixtures.py": 1846.102,
-    "tests/test_native_u3l_scanner.py": 82.582,
+    "tests/test_native_u3l_scanner.py": 104,
     "tests/test_native_u4b_a3_frontdoor.py": 0.144,
     "tests/test_native_u4b_a3_policy.py": 3.157,
     "tests/test_native_u4b_a3_reservation.py": 12.028,
@@ -10734,10 +11173,10 @@
     "tests/test_native_u4b_a4_review.py": 2.03,
     "tests/test_native_u4b_a5_producer_integration.py": 183.542,
     "tests/test_native_u4b_a5_reasons.py": 0.807,
-    "tests/test_native_u4b_a5_scanner.py": 30.82,
+    "tests/test_native_u4b_a5_scanner.py": 54,
     "tests/test_native_u4b_addendum_authority.py": 1.543,
     "tests/test_native_u4b_admission.py": 3.732,
-    "tests/test_native_u4b_audit_counts.py": 363.27,
+    "tests/test_native_u4b_audit_counts.py": 876,
     "tests/test_native_u4b_probe_sequence.py": 182.672,
     "tests/test_native_u4b_readback.py": 5.379,
     "tests/test_native_u4b_registration_observation.py": 1.121,
@@ -10771,13 +11210,13 @@
     "tests/test_pr5212_r3_fixes.py": 36.195,
     "tests/test_pr5212_r4_fixes.py": 343.711,
     "tests/test_pr5212_round6_startup.py": 144.824,
-    "tests/test_pr5212_round7_journal.py": 435.419,
+    "tests/test_pr5212_round7_journal.py": 668,
     "tests/test_pr5531_regressions.py": 1010.513,
     "tests/test_preflight_resource_authority.py": 276.723,
     "tests/test_presence_scoping.py": 14.918,
     "tests/test_profile_review_r8.py": 1.037,
     "tests/test_profile_review_r9.py": 1.502,
-    "tests/test_profiles.py": 178.461,
+    "tests/test_profiles.py": 278,
     "tests/test_projects_registry.py": 0.005,
     "tests/test_prompt_registry.py": 2.754,
     "tests/test_prompt_render_alias.py": 0.088,
@@ -10804,7 +11243,7 @@
     "tests/test_receipt_readdress_input_snapshots.py": 0.034,
     "tests/test_receipt_rereceipt.py": 39.481,
     "tests/test_receipt_resolve_indices.py": 0.128,
-    "tests/test_receipt_sources.py": 32.029,
+    "tests/test_receipt_sources.py": 55,
     "tests/test_receipts.py": 0.538,
     "tests/test_receipts_v5_merge_n1.py": 6.112,
     "tests/test_receipts_v5_merge_n3.py": 1.966,
@@ -10824,21 +11263,21 @@
     "tests/test_reference_rescore_cborg_deadline.py": 0.874,
     "tests/test_reference_rescore_cborg_validator_status.py": 0.615,
     "tests/test_registered_eval_runner.py": 377.169,
-    "tests/test_registration_input_sizing.py": 93.537,
+    "tests/test_registration_input_sizing.py": 144,
     "tests/test_registry_audit_and_prompt_replay.py": 0.741,
     "tests/test_registry_prefixes.py": 0.359,
     "tests/test_related_dataset_diagnostics.py": 15.949,
     "tests/test_release_inventory.py": 9.377,
     "tests/test_removal_repair.py": 102.033,
-    "tests/test_removals.py": 247.4,
+    "tests/test_removals.py": 326,
     "tests/test_removals_identifier_basis.py": 2.077,
     "tests/test_removals_person_schema.py": 4.024,
     "tests/test_rendered_provenance.py": 1.418,
     "tests/test_renderer_contract_captures.py": 11.849,
-    "tests/test_replicate_structure.py": 29.734,
+    "tests/test_replicate_structure.py": 45,
     "tests/test_repo_relative_paths.py": 0.446,
     "tests/test_report_admission.py": 5162.752,
-    "tests/test_report_audit_totals.py": 16.671,
+    "tests/test_report_audit_totals.py": 39,
     "tests/test_report_claims.py": 1.759,
     "tests/test_report_claims_corpus.py": 111.711,
     "tests/test_report_claims_v7.py": 1.043,
@@ -10893,14 +11332,14 @@
     "tests/test_rocrate/test_production_root_gates.py": 1.698,
     "tests/test_rocrate/test_profile_root_policy.py": 4.638,
     "tests/test_rocrate/test_profile_unavailable.py": 2.224,
-    "tests/test_rocrate/test_provenance.py": 41.495,
+    "tests/test_rocrate/test_provenance.py": 66,
     "tests/test_rocrate/test_root_scope.py": 0.061,
     "tests/test_rocrate/test_runs.py": 1.348,
     "tests/test_rocrate/test_source_snapshot.py": 0.101,
     "tests/test_rocrate/test_transform_api.py": 2.655,
     "tests/test_rocrate_file_collection.py": 9.871,
     "tests/test_routed_condition_reporting.py": 598.424,
-    "tests/test_routing_diagnostics.py": 19.341,
+    "tests/test_routing_diagnostics.py": 32,
     "tests/test_rubric10_element4_gate.py": 0.09,
     "tests/test_run_guard.py": 0.105,
     "tests/test_run_lock.py": 0.3,
@@ -10908,7 +11347,7 @@
     "tests/test_run_schema.py": 12.473,
     "tests/test_run_telemetry.py": 2.796,
     "tests/test_runtime_library_identity.py": 0.019,
-    "tests/test_schema/test_datacite_relationships.py": 63.87,
+    "tests/test_schema/test_datacite_relationships.py": 81,
     "tests/test_schema/test_filecollection_resources.py": 21.67,
     "tests/test_schema/test_schema_digest_optional.py": 0.321,
     "tests/test_schema/test_schema_stats.py": 2.091,
@@ -10924,7 +11363,7 @@
     "tests/test_schema_sync.py": 83.444,
     "tests/test_schema_sync_stability.py": 5.559,
     "tests/test_schema_view.py": 17.959,
-    "tests/test_scope.py": 118.715,
+    "tests/test_scope.py": 179,
     "tests/test_scope_block.py": 0.588,
     "tests/test_selected_priority_and_scope.py": 2.126,
     "tests/test_self_disclaimed.py": 7.662,
@@ -10939,10 +11378,10 @@
     "tests/test_semantic_v4_reporting_controller.py": 13.211,
     "tests/test_shared_generation_assets.py": 1.44,
     "tests/test_shared_generation_batch_authority.py": 408.248,
-    "tests/test_shared_generation_capture.py": 46.518,
+    "tests/test_shared_generation_capture.py": 63,
     "tests/test_shared_generation_cli.py": 166.632,
     "tests/test_shared_generation_completed_replay.py": 4.598,
-    "tests/test_shared_generation_condition_compatibility.py": 19.62,
+    "tests/test_shared_generation_condition_compatibility.py": 42,
     "tests/test_shared_generation_provenance.py": 2.073,
     "tests/test_shared_generation_resources.py": 212.422,
     "tests/test_shared_generation_runtime.py": 2999.822,
@@ -10950,8 +11389,8 @@
     "tests/test_shared_generation_selection.py": 61.85,
     "tests/test_shared_line_join_replay.py": 0.192,
     "tests/test_shared_output_ownership.py": 0.891,
-    "tests/test_shared_output_ownership_entrypoints.py": 159.998,
-    "tests/test_shared_schema_sync_resources.py": 119.156,
+    "tests/test_shared_output_ownership_entrypoints.py": 204,
+    "tests/test_shared_schema_sync_resources.py": 160,
     "tests/test_shared_write_footprint.py": 59.04,
     "tests/test_smaller_defects.py": 4.201,
     "tests/test_snapshot_attempt_recovery.py": 24.215,
@@ -10975,7 +11414,7 @@
     "tests/test_subprocess_deadline.py": 0.736,
     "tests/test_suite_does_not_mutate_the_schema.py": 39.845,
     "tests/test_term_validator_hook.py": 0.134,
-    "tests/test_thinking_request.py": 23.418,
+    "tests/test_thinking_request.py": 39,
     "tests/test_thinking_tokens.py": 0.022,
     "tests/test_transformation_measure.py": 216.955,
     "tests/test_transformation_measure_cli.py": 42.493,
@@ -10998,22 +11437,22 @@
     "tests/test_wave3_receipts_core.py": 0.065,
     "tests/test_wave3_watermark_transform.py": 3.45,
     "tests/test_wave4_5094_review.py": 0.128,
-    "tests/test_wave4_5095_review.py": 54.115,
+    "tests/test_wave4_5095_review.py": 70,
     "tests/test_wave4_a14_review.py": 0.207,
     "tests/test_wave4_a17_a13_integration.py": 44.514,
     "tests/test_wave5_5094_legacy_snapshots.py": 0.606,
-    "tests/test_wave5_5095_review.py": 60.931,
+    "tests/test_wave5_5095_review.py": 78,
     "tests/test_wave6_a14_a17_sizing.py": 87.38,
     "tests/test_wave7_5213_d76_arm_paths.py": 0.103,
     "tests/test_wave7_5213_d76_binding_records.py": 0.626,
-    "tests/test_wave7_5213_d76_integration_ordering.py": 187.482,
+    "tests/test_wave7_5213_d76_integration_ordering.py": 236,
     "tests/test_wave7_5213_d76_legacy_registration.py": 0.226,
     "tests/test_wave7_5213_d76_recorder.py": 48.101,
     "tests/test_wave7_5213_d76_registration.py": 31.32,
     "tests/test_wave7_5213_d76_relative_registration.py": 129.759,
     "tests/test_wave7_5213_d76_round2_binding.py": 864.589,
-    "tests/test_wave7_5213_d76_round2_recorder.py": 35.574,
-    "tests/test_wave7_5213_d76_round3_binding.py": 545.039,
+    "tests/test_wave7_5213_d76_round2_recorder.py": 51,
+    "tests/test_wave7_5213_d76_round3_binding.py": 735,
     "tests/test_wave7_5213_d76_round3_copy_origin.py": 31.051,
     "tests/test_wave7_5213_d76_round3_recorder.py": 35.192,
     "tests/test_wave7_5213_d76_round3_replay_flag.py": 14.485,
@@ -11026,7 +11465,15 @@
     "tests/test_wave7_a17_vocabulary_warning.py": 4.49,
     "tests/test_wave7_bc1_d63_calibration.py": 21.77,
     "tests/test_wave7_bc1_formatter_cache.py": 0.582,
-    "tests/test_wcrate_copies.py": 0.495
+    "tests/test_wcrate_copies.py": 0.495,
+    "tests/test_derive_core_selected_schemas.py": 93,
+    "tests/test_native_failure_publication.py": 766,
+    "tests/test_native_incomplete_retention.py": 36,
+    "tests/test_native_model_aliases.py": 127,
+    "tests/test_native_pending_public_completion.py": 1662,
+    "tests/test_native_shared_registration.py": 2168,
+    "tests/test_native_u3b_reuse.py": 65,
+    "tests/test_native_u5_scanner.py": 109
   },
   "local_overrides": [
     {
