@@ -1,0 +1,3502 @@
+{
+  "base": "7b851213f3492144cfd5b83d6bbd9a8a040e9132",
+  "bounds": {
+    "bytes": 44253,
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/scripts/adhoc/h3_gate_bounds_20261113.json",
+    "sha256": "c43cc147d4a8b52093d0c41aacd809bb0ca9fc6fd40f72bf41d79299333a16dc"
+  },
+  "branch": "codex/native-environment-manifest-20261113",
+  "changed_test_paths": [
+    "tests/native_shared_fixture.py",
+    "tests/native_shared_omission_fixture.py",
+    "tests/test_native_environment_dependencies.py",
+    "tests/test_native_environment_dispatch.py",
+    "tests/test_native_environment_manifest.py",
+    "tests/test_native_environment_registration.py",
+    "tests/test_native_execution_registration_v2.py",
+    "tests/test_native_failure_publication.py",
+    "tests/test_native_incomplete_retention.py",
+    "tests/test_native_shared_execution.py",
+    "tests/test_native_synthetic_profiles.py",
+    "tests/test_native_u3d_prompt_cli.py",
+    "tests/test_native_u4b_readback.py",
+    "tests/utils/native_execution_carrier_v2.py"
+  ],
+  "commits": [
+    "a3a79c06f37fd48c5ca2352231e5e8a9309d10ed Bind v3 native registrations to installed environment metadata",
+    "8529be7a1549068f9374ef2533e7eabd61e57fd2 Move current native registration fixtures to v3 manifest pins",
+    "69d1cd8ee6bc750c06f6daaf2863f591510302f3 Record synthetic test bootstrap installation metadata explicitly",
+    "6a4f1ece8186e74825b39cb07ebce1909b9057b9 Distinguish importable bytecode from pytest cache artifacts",
+    "8aeb19e0bf6900c1c3edd8dbdda85690ecac5522 Migrate remaining shared fixture builders and retention carriers",
+    "eba6698673d924cd5a6a05ffbdab573fc7d75136 Refuse environment changes during metadata ownership census",
+    "9727895740b05b25cad6f46fc1a36572eaaaec85 Expose manifest writer and exercise the v3 dispatch recheck",
+    "36dbca6f80ab2e3cba0e694d043f8715df55b291 Keep environment dispatch fixture outside capture authority setup",
+    "9afd6d64a242f8b42e0657d60ff62ce2460eaf68 Test live metadata drift without changing the registered manifest",
+    "ecb628c68328397ae1b4f31b76a57df63e87a89c Restore import paths before verifying the registered environment"
+  ],
+  "controller_authority_version": 2,
+  "findings": [
+    {
+      "finding": "Discovery missed missing entire dist-info; strict import ownership census added.",
+      "id": "H3-EM1",
+      "status": "fixed"
+    },
+    {
+      "finding": "Pytest rewrite bytecode was misclassified; only importable cache spellings count.",
+      "id": "H3-EM2",
+      "status": "fixed"
+    },
+    {
+      "finding": "Synthetic, retention, neutral and omission fixtures needed explicit manifest migration.",
+      "id": "H3-EM3",
+      "status": "fixed"
+    },
+    {
+      "finding": "Reference source origin and candidate host identity needed separation.",
+      "id": "H3-EM4",
+      "owner_reply": "Approve reference-only validation context",
+      "status": "design_approved_implementation_elsewhere"
+    },
+    {
+      "finding": "Primary virtualenv bootstrap lacks RECORD ownership; isolated tests add synthetic bootstrap metadata and leave primary untouched.",
+      "id": "H3-EM5",
+      "status": "production_environment_hold"
+    },
+    {
+      "finding": "Metadata could change during census; captured RECORD ownership, rediscovery and directory checks close that race.",
+      "id": "H3-EM6",
+      "status": "fixed"
+    },
+    {
+      "finding": "Dispatch fixture continued into unrelated synthetic authority setup; dedicated regression now omits it.",
+      "id": "H3-EM7",
+      "status": "fixed"
+    },
+    {
+      "finding": "Dispatch must regenerate installed metadata even when manifest bytes are unchanged.",
+      "id": "H3-EM8",
+      "status": "passed_current_control"
+    },
+    {
+      "finding": "Earlier retention selection included public launch tests; interrupted cohorts remain nonacceptance and final selectors name read-only nodes.",
+      "id": "H3-EM9",
+      "status": "corrected_selection"
+    },
+    {
+      "finding": "Frozen helper imports expanded sys.path with unpinned historical code; strict census correctly refused dispatch-live-01.",
+      "fix_commit": "ecb628c68328397ae1b4f31b76a57df63e87a89c",
+      "id": "H3-EM10",
+      "original_failure_cohort": "dispatch-live-01",
+      "repair": "Restore caller sys.path before loaded_dependencies yields while retaining exact byte finder. No census exemption.",
+      "required_controls": [
+        "test_loaded_dependency_scope_preserves_manifest_and_pinned_imports",
+        "test_dispatch_recheck_rejects_changed_environment"
+      ],
+      "status": "fixed_targeted_verification_passed"
+    }
+  ],
+  "fixture_files": [
+    {
+      "bytes": 15479,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/native_shared_fixture.py",
+      "registration_builders_or_fixtures": [
+        {
+          "line": 90,
+          "name": "build_native_fixture"
+        }
+      ],
+      "sha256": "1e8f81742ac39eb53de3499389338dc1dfa79bb8d032220ce5f845aee4fceefe"
+    },
+    {
+      "bytes": 18349,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/native_shared_omission_fixture.py",
+      "registration_builders_or_fixtures": [
+        {
+          "line": 117,
+          "name": "build_native_fixture"
+        }
+      ],
+      "sha256": "11a66c6ed3157d452b6e7ca4d7a0a47ce23307538aaccf0e19e2009a73796ed7"
+    },
+    {
+      "bytes": 1745,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/test_native_environment_dependencies.py",
+      "registration_builders_or_fixtures": [],
+      "sha256": "d877a34ac5aa0fd1376b98414b05138c713d65cf1a1b7d90fdfecda62a3c36ad"
+    },
+    {
+      "bytes": 2375,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/test_native_environment_dispatch.py",
+      "registration_builders_or_fixtures": [],
+      "sha256": "cd6aa56ede43fc07a5f9ad5307980713f138f1f86af67c8485e5bdfec715b826"
+    },
+    {
+      "bytes": 12836,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/test_native_environment_manifest.py",
+      "registration_builders_or_fixtures": [
+        {
+          "line": 32,
+          "name": "installed"
+        }
+      ],
+      "sha256": "0c45a756d9708c545992d50f77c68ec88cfa22a71faefd0e5d77b91a0b371530"
+    },
+    {
+      "bytes": 1791,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/test_native_environment_registration.py",
+      "registration_builders_or_fixtures": [],
+      "sha256": "9c8054aa7dc2e9ce78a26bc92894b95a8ce2b31392d51f50782b4afea13143d4"
+    },
+    {
+      "bytes": 34757,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/test_native_execution_registration_v2.py",
+      "registration_builders_or_fixtures": [
+        {
+          "line": 27,
+          "name": "isolated_modules"
+        },
+        {
+          "line": 46,
+          "name": "inputs"
+        },
+        {
+          "line": 148,
+          "name": "prepared"
+        },
+        {
+          "line": 521,
+          "name": "fabricated_authorizations"
+        }
+      ],
+      "sha256": "954c1e9942b5ba9125c31adbbf2bb351b7f55448490beecda4b1f49ad69b4145"
+    },
+    {
+      "bytes": 12556,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/test_native_failure_publication.py",
+      "registration_builders_or_fixtures": [],
+      "sha256": "a2e2ea253ef19ede4ab7c34707f23bb87a8dc57739cd8ab374690ac0496f5c56"
+    },
+    {
+      "bytes": 17820,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/test_native_incomplete_retention.py",
+      "registration_builders_or_fixtures": [],
+      "sha256": "b93966c98f78e84565290d4b502735bcf3af3e07de9d510a9d571c5e2f6753b5"
+    },
+    {
+      "bytes": 14777,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/test_native_shared_execution.py",
+      "registration_builders_or_fixtures": [
+        {
+          "line": 28,
+          "name": "make_case"
+        }
+      ],
+      "sha256": "8578ac54676647001c7a5cc126b07478d1df1a86a2a73819c2ea909652a4eaee"
+    },
+    {
+      "bytes": 16059,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/test_native_synthetic_profiles.py",
+      "registration_builders_or_fixtures": [
+        {
+          "line": 19,
+          "name": "no_process_or_provider"
+        },
+        {
+          "line": 28,
+          "name": "runtime"
+        },
+        {
+          "line": 94,
+          "name": "test_pinned_answer_classes_preserve_original_ast"
+        }
+      ],
+      "sha256": "57fc6ed2aa44665b7515316379a0c35b27fa83efa1499d2e5c5bed874166dc82"
+    },
+    {
+      "bytes": 2273,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/test_native_u3d_prompt_cli.py",
+      "registration_builders_or_fixtures": [],
+      "sha256": "36fa4cc712f871b3dbdb5ae513630d57a199a8370e55ad8475b6b7bb1c7ed827"
+    },
+    {
+      "bytes": 13515,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/test_native_u4b_readback.py",
+      "registration_builders_or_fixtures": [],
+      "sha256": "0ef35e2d302214d59ea5f541f98bf4141174fe9196536058c138bb06198e810e"
+    },
+    {
+      "bytes": 1849,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/tests/utils/native_execution_carrier_v2.py",
+      "registration_builders_or_fixtures": [],
+      "sha256": "d76f4658fe948a6b9a1f2a1428a13b10b038ae6e44bbad4bd8056e6f964e7a78"
+    }
+  ],
+  "generator": {
+    "bytes": 11331,
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/scripts/adhoc/report_h3_environment_ruling_20261113.py",
+    "sha256": "b8917029d3e35bb70aabcebf13861d79318633293596677c827e44f6ee4a8daa"
+  },
+  "head": "ecb628c68328397ae1b4f31b76a57df63e87a89c",
+  "kind": "h3_environment_manifest_ruling_evidence",
+  "limits": [
+    "No aggregate total across overlapping cohorts is an acceptance claim.",
+    "Interrupted, incomplete and failed cohorts remain nonacceptance.",
+    "Passing cohorts establish only selected controls at their recorded source commit.",
+    "RECORD hashes bind installation metadata, not newly computed hashes of every installed payload.",
+    "This N exporter claims neither a gate schema nor a two-project demonstration; G supplies that evidence.",
+    "No provider, model, native binary, probe, capture, reservation or publication is performed by this exporter."
+  ],
+  "persisted_environment_manifests": [
+    {
+      "bytes": 35435,
+      "cohort": "preparation-03",
+      "distribution_count": 283,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-03/cases/test_prepare_rederives_real_na0/environment-manifest.json",
+      "scope": "Persisted isolated test-environment artifact; cohort outcome is separate.",
+      "sha256": "02f0f57599eeb20a7a15888ca7f0b0ba9023450b845669aa754f4dfda2799174"
+    },
+    {
+      "bytes": 35435,
+      "cohort": "preparation-03",
+      "distribution_count": 283,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-03/cases/test_prepare_rederives_real_nacurrent/environment-manifest.json",
+      "scope": "Persisted isolated test-environment artifact; cohort outcome is separate.",
+      "sha256": "02f0f57599eeb20a7a15888ca7f0b0ba9023450b845669aa754f4dfda2799174"
+    },
+    {
+      "bytes": 35435,
+      "cohort": "race-01",
+      "distribution_count": 283,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/race-01/cases/test_prepare_rederives_real_na0/environment-manifest.json",
+      "scope": "Persisted isolated test-environment artifact; cohort outcome is separate.",
+      "sha256": "02f0f57599eeb20a7a15888ca7f0b0ba9023450b845669aa754f4dfda2799174"
+    },
+    {
+      "bytes": 35435,
+      "cohort": "race-01",
+      "distribution_count": 283,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/race-01/cases/test_prepare_rederives_real_nacurrent/environment-manifest.json",
+      "scope": "Persisted isolated test-environment artifact; cohort outcome is separate.",
+      "sha256": "02f0f57599eeb20a7a15888ca7f0b0ba9023450b845669aa754f4dfda2799174"
+    }
+  ],
+  "protected_and_guard_sha256": {
+    "src/data_sheets_schema/api_runner.py": "830eec1e12e96f807fa76ea26e066a1923b60380013c424cfa99f0012af0a881",
+    "src/data_sheets_schema/native_subscription_guard.py": "ab72f90faf0b4ba6150a5dd53d1f832feb4f0f5496485734228b00c613c65edc",
+    "src/data_sheets_schema/shared_generation.py": "2ec18e60316423035f88a2a30263c56385bfbbc587303e84e805a8349ab4f781",
+    "src/download/prompts/canonical_hashes.yaml": "d0de85f3da4bfa29a4bfc7ad6158abad5b3373a937a4e7e3b360217fa4eaf57f",
+    "tests/utils/run_spec_boundary_contracts.json": "b1e0cbd14c533a51b88eacb84b974cb93963e18d8f1fb71ae4ed3228f784d1ce"
+  },
+  "registered_kinds": [
+    {
+      "kind": "d4d_native_shared_preparation_v3",
+      "source": {
+        "bytes": 41318,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/src/data_sheets_schema/native_execution_registration_v2.py",
+        "sha256": "93097782abd7fa37a4f5976f46e324cd20598534bc06fadca98b84cb317cb41d"
+      },
+      "version": 3
+    },
+    {
+      "kind": "d4d_native_shared_execution_registration_v3",
+      "source": {
+        "bytes": 41318,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/src/data_sheets_schema/native_execution_registration_v2.py",
+        "sha256": "93097782abd7fa37a4f5976f46e324cd20598534bc06fadca98b84cb317cb41d"
+      },
+      "version": 3
+    },
+    {
+      "kind": "d4d_native_environment_manifest",
+      "source": {
+        "bytes": 12938,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/src/data_sheets_schema/native_environment_manifest.py",
+        "sha256": "8eec306880f73a10bd50ec472807eda1ffa971aca73b6cb45c6813c6d29adbb8"
+      },
+      "version": 1
+    }
+  ],
+  "source_package_tree": "5082ce013f15af7961aa23caa013a723bef032d5",
+  "status": "local_environment_evidence_export_not_gate_proof",
+  "tests": {
+    "dependency-dispatch-01": {
+      "acceptance_for_selected_checks": true,
+      "cases": [
+        {
+          "classname": "tests.test_native_environment_dependencies",
+          "name": "test_loaded_dependency_scope_preserves_manifest_and_pinned_imports",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_dispatch",
+          "name": "test_dispatch_recheck_rejects_changed_environment",
+          "status": "passed"
+        }
+      ],
+      "counts": {
+        "errors": 0,
+        "failures": 0,
+        "passed": 2,
+        "skipped": 0,
+        "tests": 2
+      },
+      "evidence": [
+        {
+          "bytes": 2314,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dependency-dispatch-01/bootstrap.json",
+          "sha256": "ce034a38dee0e217d7b7690040d243c4a675c3faa8ea26689ca47801d081be12"
+        },
+        {
+          "bytes": 105,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dependency-dispatch-01/network.json",
+          "sha256": "3e5e83d06c00ee2657ddb264a4c7527a7abf87f75d6b89d5ae910e969dee320e"
+        },
+        {
+          "bytes": 1622,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dependency-dispatch-01/origins-after.json",
+          "sha256": "e624f6309bf86ac5c42354a24b4a404ea38038cf72316a2e43a65a98dad2745c"
+        },
+        {
+          "bytes": 1508,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dependency-dispatch-01/origins-before.json",
+          "sha256": "5bcf0203834516810dfb93da55aad4444d07e213becfdc952a4a0c4a847f8838"
+        },
+        {
+          "bytes": 2317,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dependency-dispatch-01/outcome.json",
+          "sha256": "8fb47c75bc0ab674b625d3309cd368a8aaede58ab13222df6fd5539df8fee0a2"
+        },
+        {
+          "bytes": 2793,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dependency-dispatch-01/plan.json",
+          "sha256": "865a16774bce4a53e737b0c7b42d931b2863a8684bb5aabd8a67f1a6101d1f5b"
+        },
+        {
+          "bytes": 1499,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dependency-dispatch-01/pytest.log",
+          "sha256": "9d6473e086c105efbd80db23c73d8989fe37a3d41071bec5f6c59ed821992336"
+        },
+        {
+          "bytes": 527,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dependency-dispatch-01/pytest.xml",
+          "sha256": "9efd5198211cd3d27e6704047c6ba05bcbc1e4379a0f20f72ab3558b4f9e9b06"
+        },
+        {
+          "bytes": 61,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dependency-dispatch-01/worker-outcome.json",
+          "sha256": "3a6f47e3cf840287c25e6681f2df01c9850d48838a7f78b2a23e3ed3279efa8e"
+        }
+      ],
+      "matches_current_package_tree": true,
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            459,
+            1794549222.630802
+          ],
+          [
+            3064,
+            1794549254.424503
+          ],
+          [
+            3752,
+            1794549257.646064
+          ],
+          [
+            3816,
+            1794549257.806445
+          ],
+          [
+            3844,
+            1794549258.224659
+          ],
+          [
+            3870,
+            1794549259.146695
+          ],
+          [
+            3876,
+            1794549259.298369
+          ],
+          [
+            3880,
+            1794549259.632738
+          ],
+          [
+            6469,
+            1794549291.147948
+          ],
+          [
+            6725,
+            1794549295.538911
+          ],
+          [
+            7579,
+            1794549308.072259
+          ],
+          [
+            8799,
+            1794549319.616805
+          ],
+          [
+            8802,
+            1794549319.809734
+          ],
+          [
+            45820,
+            1794548704.172962
+          ],
+          [
+            45854,
+            1794548704.686673
+          ],
+          [
+            46856,
+            1794548716.48432
+          ],
+          [
+            46869,
+            1794548717.426726
+          ],
+          [
+            56962,
+            1794548792.332444
+          ],
+          [
+            56967,
+            1794548792.796804
+          ],
+          [
+            61208,
+            1794548833.618926
+          ],
+          [
+            61210,
+            1794548833.915395
+          ],
+          [
+            61656,
+            1794548842.316464
+          ],
+          [
+            63895,
+            1794548872.950071
+          ],
+          [
+            64033,
+            1794548873.41021
+          ],
+          [
+            79885,
+            1794548987.00477
+          ],
+          [
+            83080,
+            1794549009.79563
+          ],
+          [
+            85184,
+            1794549017.831617
+          ],
+          [
+            85803,
+            1794549025.456542
+          ],
+          [
+            91981,
+            1794549092.935171
+          ],
+          [
+            93524,
+            1794549117.341539
+          ],
+          [
+            93623,
+            1794549121.453526
+          ],
+          [
+            93630,
+            1794549121.675101
+          ],
+          [
+            93641,
+            1794549122.03029
+          ],
+          [
+            95947,
+            1794549143.472494
+          ],
+          [
+            96438,
+            1794549151.697088
+          ],
+          [
+            96835,
+            1794549159.521239
+          ],
+          [
+            98320,
+            1794549184.767013
+          ],
+          [
+            98329,
+            1794549184.829525
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 0,
+        "seconds": 616.9306645420002,
+        "worker": {
+          "returncode": 0,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 0
+      },
+      "source_commit": "ecb628c68328397ae1b4f31b76a57df63e87a89c",
+      "source_package_tree": "5082ce013f15af7961aa23caa013a723bef032d5",
+      "status": "passed_selected_checks"
+    },
+    "dispatch-live-01": {
+      "acceptance_for_selected_checks": false,
+      "cases": [
+        {
+          "classname": "tests.test_native_environment_dispatch",
+          "message": "ValueError: importable code has missing distribution RECORD ownership: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py",
+          "name": "test_dispatch_recheck_rejects_changed_environment",
+          "status": "failed",
+          "traceback": "tmp_path = PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dispatch-live-01/cases/popen-gw0/test_dispatch_recheck_rejects_0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10486e060>\nisolated_modules = {'budget_amendment', 'budgeted_cborg', 'native_command_policy', 'native_control', 'native_file_policy', 'native_phase_history', ...}\n\n    def test_dispatch_recheck_rejects_changed_environment(tmp_path, monkeypatch, isolated_modules):\n        monkeypatch.chdir(registration.authority.ROOT)\n        installed = tmp_path / 'SYNTHETIC-installed-metadata'\n        info = installed / 'h3_dispatch_synthetic-1.dist-info'\n        info.mkdir(parents=True)\n        (info / 'METADATA').write_text('Metadata-Version: 2.1\\nName: h3-dispatch-synthetic\\nVersion: 1\\n')\n        record = info / 'RECORD'\n        record.write_text('h3_dispatch_synthetic-1.dist-info/METADATA,,\\n'\n                          'h3_dispatch_synthetic-1.dist-info/RECORD,,\\n')\n        monkeypatch.syspath_prepend(str(installed))\n        # The recheck needs the registered inputs only. The existing public-launch\n        # fixture's later review/capture/guard construction is outside this test.\n        monkeypatch.setattr(fixture, 'authority_for', lambda *args, **kwargs: {})\n>       case = fixture.make_case(tmp_path / 'SYNTHETIC-environment-only')\n\ntests/test_native_environment_dispatch.py:23: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ntests/test_native_shared_execution.py:67: in make_case\n    value = registration.verified(raw)\nsrc/data_sheets_schema/native_shared_registration_orchestration.py:136: in verified\n    value = execution_v2.verified(raw, classifier_projection=controls)\nsrc/data_sheets_schema/native_execution_registration_v2.py:514: in verified\n    preparation = verify_preparer(preparation_raw, job_id=body['job_id'])\nsrc/data_sheets_schema/native_execution_registration_v2.py:409: in verify_preparer\n    native_environment_manifest.verify(body['environment_manifest'])\nsrc/data_sheets_schema/native_environment_manifest.py:266: in verify\n    if captured.raw != c.canonical(generate()):\nsrc/data_sheets_schema/native_environment_manifest.py:242: in generate\n    directories = _require_owned_import_roots(paths, captures)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\npaths = ['/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/notes/mat...4d-executions/codex-native-environment-manifest-20261113', '/opt/homebrew/Caskroom/miniforge/base/lib/python3.13', ...]\ncaptures = [{'metadata': (('Metadata-Version', '2.4'), ('Name', 'airium'), ('Version', '0.2.7'), ('Summary', 'Easy and quick html...nyio', 'record_sha256': 'e5bf3f46a71520d5ea33b19b59cc7397962c9dbd041303aaa812ce629dd22a7c', 'version': '4.10.0'}}, ...]\n\n    def _require_owned_import_roots(paths, captures):\n        \"\"\"Hold for code with no installation metadata, including namespace portions.\n    \n        Every importable code file in a third-party root needs a RECORD entry;\n        ownership of only the top-level namespace is insufficient. Ordinary cached\n        bytecode may use its RECORD-owned source. This checks metadata coverage,\n        not installed file contents. Standard-library and exact repository roots\n        have their own interpreter/source authority and are excluded explicitly.\n        \"\"\"\n        exempt = _first_party_roots() | _stdlib_roots()\n        owned = _owned_files(captures)\n        visited = set()\n        snapshots = {}\n        count = 0\n        pending = [Path(path) for path in paths if Path(path) not in exempt]\n        while pending:\n            directory = pending.pop()\n            if directory in visited:\n                continue\n            visited.add(directory)\n            if not directory.is_dir():\n                raise ValueError('unsupported archive or non-directory third-party import root: ' + str(directory))\n            snapshots[directory] = _directory_identity(directory)\n            with os.scandir(directory) as iterator:\n                entries = sorted(iterator, key=lambda entry: entry.name)\n            for entry in entries:\n                count += 1\n                if count > MAX_IMPORT_ENTRIES:\n                    raise ValueError('third-party import ownership census exceeds its entry bound')\n                path = Path(entry.path)\n                if entry.is_dir():\n                    if entry.is_symlink():\n                        raise ValueError('unsupported symlinked third-party import directory: ' + str(path))\n                    if not entry.name.endswith(('.dist-info', '.egg-info')):\n                        pending.append(path)\n                elif _requires_owner(path):\n                    if path.suffix == '.pyc' and path.parent.name == '__pycache__':\n                        # Python's import machinery does not load pytest's tagged\n                        # rewrite caches or caches for another interpreter here.\n                        # Loose sourceless .pyc files outside __pycache__ still need\n                        # their own RECORD entry, regardless of their filename.\n                        tag = sys.implementation.cache_tag\n                        if tag is None or re.fullmatch(\n                                r'.+\\.' + re.escape(tag) + r'(?:\\.opt-[0-9]+)?\\.pyc',\n                                path.name) is None:\n                            continue\n                    physical = path.resolve(strict=True)\n                    if physical in owned:\n                        continue\n                    if path.suffix == '.pyc' and path.parent.name == '__pycache__':\n                        try:\n                            source = Path(source_from_cache(str(path))).resolve(strict=True)\n                        except (ValueError, FileNotFoundError):\n                            source = None\n                        if source in owned:\n                            continue\n>                   raise ValueError('importable code has missing distribution RECORD ownership: ' + str(path))\nE                   ValueError: importable code has missing distribution RECORD ownership: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py\n\nsrc/data_sheets_schema/native_environment_manifest.py:226: ValueError"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_pinned_answer_classes_preserve_original_ast[native_shared_omission_fixture.py-_OmissionAnswers]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_pinned_peer_never_imports_test_code_and_guards_before_fixture_selection",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_repinning_changed_answer_code_or_peer_bytes_never_admits[neutral_answer]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_repinning_changed_answer_code_or_peer_bytes_never_admits[omission_answer]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_repinning_changed_answer_code_or_peer_bytes_never_admits[trailing_byte]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[production_model]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[real_auth]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[real_provider]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[logged_in]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[real_subscription]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[provider_key]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[deadline]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[budget]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[auxiliary]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[keep_awake]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[account_home]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[secure_storage]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[inherited_key]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[different_peer]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[wrong_shebang]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[hard_link]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[symlink]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[home_artifact]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[missing_profile]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[unknown_profile]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_cannot_name_real_account_executable_or_loosen_bounds[wrong_alias]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_reserved_synthetic_labels_never_fall_back_to_production[historical text]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_reserved_synthetic_labels_never_fall_back_to_production[{}]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_reserved_synthetic_labels_never_fall_back_to_production[{\"profile\":\"production\"}]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_legacy_production_validation_and_profile_bytes_unchanged",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_real_preparation_refuses_synthetic_before_constructing_selection",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_malformed_historical_basis_exception_never_downgrades_synthetic_markers[model]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_malformed_historical_basis_exception_never_downgrades_synthetic_markers[provider]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_malformed_historical_basis_exception_never_downgrades_synthetic_markers[auth]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_malformed_historical_basis_exception_never_downgrades_synthetic_markers[profile]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_malformed_historical_basis_exception_never_downgrades_synthetic_markers[kind]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_real_registration_refuses_before_observation",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_real_launch_refuses_before_loading_guard",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_real_capture_refuses_before_authority_or_reservation",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_real_probe_producers_refuse_synthetic[observation]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_real_probe_producers_refuse_synthetic[permission]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_failed_public_readback_preserves_unverified_diagnostic[buffered]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_failed_public_readback_preserves_unverified_diagnostic[malformed]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_failed_public_readback_preserves_unverified_diagnostic[absent]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_failed_public_readback_refuses_changed_transcript_basis[bytes]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_failed_public_readback_refuses_changed_transcript_basis[digest]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_failed_public_readback_refuses_changed_transcript_basis[size]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_failed_public_readback_refuses_changed_transcript_basis[missing_pin]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_failed_public_readback_refuses_changed_transcript_basis[diagnostic]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_transcript_absence_never_opens_an_uncaptured_file[False]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_transcript_absence_never_opens_an_uncaptured_file[True]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_invalid_transcript_size_refuses_before_open[True]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_invalid_transcript_size_refuses_before_open[-1]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_invalid_transcript_size_refuses_before_open[384000001]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_empty_captured_transcript_remains_bytes_not_absence",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u4b_readback",
+          "name": "test_legacy_failed_replay_ignores_retained_transcript_as_before",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_failure_retains_every_existing_record_without_acceptance[present0]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_failure_retains_every_existing_record_without_acceptance[present1]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_failure_retains_every_existing_record_without_acceptance[present2]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_final_floor_failure_keeps_both_records_and_live_phase",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_nonregular_or_unreadable_record_is_reported_without_blocking_publication[symlink]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_nonregular_or_unreadable_record_is_reported_without_blocking_publication[directory]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_nonregular_or_unreadable_record_is_reported_without_blocking_publication[unreadable]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_reader_is_read_only_uses_retained_copies_and_rejects_tampering",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_reader_never_lists_a_forged_success_as_failed_evidence[state-completed_pending_independent_review]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_reader_never_lists_a_forged_success_as_failed_evidence[runtime_gates_passed-True]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_reader_never_lists_a_forged_success_as_failed_evidence[scientific_acceptance-accepted]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_optional_instability_removes_every_snapshot_reference[modify]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_optional_instability_removes_every_snapshot_reference[remove]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_optional_instability_removes_every_snapshot_reference[symlink]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_incomplete_retention",
+          "name": "test_reader_also_lists_existing_complete_capture_of_a_late_failure",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u3d_prompt_cli",
+          "name": "test_actual_v2_cli_renders_exact_preparation_to_new_file",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u3d_prompt_cli",
+          "name": "test_v2_cli_conflicting_runtime_option_refuses_before_write[--provider]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_u3d_prompt_cli",
+          "name": "test_v2_cli_conflicting_runtime_option_refuses_before_write[--reasoning-effort]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_shared_controller",
+          "name": "test_real_v2_composition_roundtrip_joins_preparation_and_preserves_loader",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_explicit_synthetic_profile_is_distinct_and_preserves_900_180",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_peer_refuses_changed_startup_even_with_recomputed_hash[missing_safe_path]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_peer_refuses_changed_startup_even_with_recomputed_hash[foreign_interpreter]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_synthetic_peer_refuses_changed_startup_even_with_recomputed_hash[extra_options]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_synthetic_profiles",
+          "name": "test_pinned_answer_classes_preserve_original_ast[native_shared_fixture.py-_NeutralAnswers]",
+          "status": "passed"
+        }
+      ],
+      "counts": {
+        "errors": 0,
+        "failures": 1,
+        "passed": 80,
+        "skipped": 0,
+        "tests": 81
+      },
+      "evidence": [
+        {
+          "bytes": 2278,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dispatch-live-01/bootstrap.json",
+          "sha256": "f7295ef06369c765f11ceee0466692ab09a872410045b7010cad3a626f5cb67c"
+        },
+        {
+          "bytes": 105,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dispatch-live-01/network.json",
+          "sha256": "1716b0afbbc7a0f1efc84c198f433f8a871cd7418bb0d0795506084561222f2a"
+        },
+        {
+          "bytes": 1604,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dispatch-live-01/origins-after.json",
+          "sha256": "dc5c74be001c730f0176061f7717a336cf333fbe8c5554739dde672f78f883a0"
+        },
+        {
+          "bytes": 1490,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dispatch-live-01/origins-before.json",
+          "sha256": "6481155f70056e0d196b6e970e9e7f06111984a8e4cab159471c5f01c953f322"
+        },
+        {
+          "bytes": 6770,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dispatch-live-01/outcome.json",
+          "sha256": "51f8aa42c57e317013ecaedf84c65ce6ade06812e5f91c246b0f626d04f06a48"
+        },
+        {
+          "bytes": 3759,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dispatch-live-01/plan.json",
+          "sha256": "8f3ebf841a55b85dba7fc9b3d668d16e0b1dcfc23b4fab9fa4ef50a66595cbf1"
+        },
+        {
+          "bytes": 8681,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dispatch-live-01/pytest.log",
+          "sha256": "4275008957bddc9a363274f3b7f74ed2f81b38cd2843f6c367770e20faa37187"
+        },
+        {
+          "bytes": 19619,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dispatch-live-01/pytest.xml",
+          "sha256": "4453aed8d79e5dfd84f86743eb0da7beb958baa64716f9ce7c171e8742c42d70"
+        },
+        {
+          "bytes": 61,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/dispatch-live-01/worker-outcome.json",
+          "sha256": "9e17b7d3a8b0517d14d2eea6b8c7b9bf0cdff8913849fcd1ead54533ec530fe0"
+        }
+      ],
+      "matches_current_package_tree": false,
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            6450,
+            1794548352.642317
+          ],
+          [
+            6465,
+            1794548352.977585
+          ],
+          [
+            10041,
+            1794548386.405235
+          ],
+          [
+            12270,
+            1794548404.756755
+          ],
+          [
+            13738,
+            1794548414.677244
+          ],
+          [
+            17572,
+            1794548449.609519
+          ],
+          [
+            19426,
+            1794548459.109703
+          ],
+          [
+            22876,
+            1794548476.507061
+          ],
+          [
+            25573,
+            1794548486.180009
+          ],
+          [
+            25585,
+            1794547679.284587
+          ],
+          [
+            25763,
+            1794547680.161673
+          ],
+          [
+            25854,
+            1794547680.455278
+          ],
+          [
+            26359,
+            1794547687.950107
+          ],
+          [
+            26388,
+            1794547688.71556
+          ],
+          [
+            26414,
+            1794547689.231748
+          ],
+          [
+            26423,
+            1794547689.707945
+          ],
+          [
+            26456,
+            1794547690.365471
+          ],
+          [
+            26473,
+            1794547691.071304
+          ],
+          [
+            26481,
+            1794547691.398337
+          ],
+          [
+            26525,
+            1794547692.40733
+          ],
+          [
+            26538,
+            1794547692.77836
+          ],
+          [
+            26576,
+            1794547693.55222
+          ],
+          [
+            26588,
+            1794547693.895658
+          ],
+          [
+            26597,
+            1794547694.200161
+          ],
+          [
+            26689,
+            1794547695.269317
+          ],
+          [
+            27037,
+            1794547696.403062
+          ],
+          [
+            27145,
+            1794547697.467342
+          ],
+          [
+            27153,
+            1794547697.795471
+          ],
+          [
+            27166,
+            1794547698.120997
+          ],
+          [
+            27196,
+            1794547699.109053
+          ],
+          [
+            27212,
+            1794547699.440555
+          ],
+          [
+            27223,
+            1794547699.820622
+          ],
+          [
+            27244,
+            1794547700.519319
+          ],
+          [
+            27250,
+            1794547700.835419
+          ],
+          [
+            27256,
+            1794547701.136226
+          ],
+          [
+            27263,
+            1794547701.475641
+          ],
+          [
+            27272,
+            1794547701.820533
+          ],
+          [
+            27300,
+            1794547702.82808
+          ],
+          [
+            27307,
+            1794547703.122975
+          ],
+          [
+            27321,
+            1794547703.46384
+          ],
+          [
+            27376,
+            1794547704.558193
+          ],
+          [
+            27386,
+            1794547704.841329
+          ],
+          [
+            27393,
+            1794547705.162633
+          ],
+          [
+            27402,
+            1794547705.48996
+          ],
+          [
+            27433,
+            1794547706.568277
+          ],
+          [
+            27456,
+            1794547707.240844
+          ],
+          [
+            27475,
+            1794547707.550546
+          ],
+          [
+            27563,
+            1794547709.032582
+          ],
+          [
+            27579,
+            1794547709.406502
+          ],
+          [
+            27580,
+            1794548513.420933
+          ],
+          [
+            27589,
+            1794547709.719728
+          ],
+          [
+            27594,
+            1794548513.655593
+          ],
+          [
+            27596,
+            1794547710.010656
+          ],
+          [
+            27609,
+            1794547710.540938
+          ],
+          [
+            27646,
+            1794547711.376508
+          ],
+          [
+            27678,
+            1794547711.995458
+          ],
+          [
+            27684,
+            1794547712.323804
+          ],
+          [
+            27720,
+            1794547713.363715
+          ],
+          [
+            27744,
+            1794547713.725966
+          ],
+          [
+            27790,
+            1794547714.374928
+          ],
+          [
+            27803,
+            1794547714.689966
+          ],
+          [
+            27831,
+            1794547715.367704
+          ],
+          [
+            27846,
+            1794547715.693418
+          ],
+          [
+            27867,
+            1794547716.007012
+          ],
+          [
+            27892,
+            1794547716.337246
+          ],
+          [
+            27921,
+            1794547717.118739
+          ],
+          [
+            27935,
+            1794547717.430992
+          ],
+          [
+            27947,
+            1794547717.786803
+          ],
+          [
+            27961,
+            1794547718.085197
+          ],
+          [
+            27969,
+            1794547718.373927
+          ],
+          [
+            27977,
+            1794547718.698413
+          ],
+          [
+            27987,
+            1794547719.015008
+          ],
+          [
+            28415,
+            1794547722.510465
+          ],
+          [
+            28505,
+            1794547723.480896
+          ],
+          [
+            28565,
+            1794547723.817425
+          ],
+          [
+            28625,
+            1794547724.160304
+          ],
+          [
+            28854,
+            1794547724.893241
+          ],
+          [
+            28876,
+            1794547725.175903
+          ],
+          [
+            28888,
+            1794547725.489911
+          ],
+          [
+            28895,
+            1794547725.820365
+          ],
+          [
+            28904,
+            1794547726.33854
+          ],
+          [
+            28940,
+            1794547727.750842
+          ],
+          [
+            29146,
+            1794547729.641962
+          ],
+          [
+            29253,
+            1794547729.99164
+          ],
+          [
+            29380,
+            1794547730.349726
+          ],
+          [
+            29457,
+            1794547731.062731
+          ],
+          [
+            29478,
+            1794547731.396038
+          ],
+          [
+            29559,
+            1794547732.506813
+          ],
+          [
+            29584,
+            1794547732.820057
+          ],
+          [
+            29614,
+            1794547733.163881
+          ],
+          [
+            29637,
+            1794547733.514656
+          ],
+          [
+            29668,
+            1794547733.82426
+          ],
+          [
+            29692,
+            1794547734.189728
+          ],
+          [
+            29713,
+            1794547734.568425
+          ],
+          [
+            29730,
+            1794547734.862607
+          ],
+          [
+            29742,
+            1794547735.207365
+          ],
+          [
+            29762,
+            1794547735.51619
+          ],
+          [
+            29777,
+            1794547735.787559
+          ],
+          [
+            29824,
+            1794547736.197199
+          ],
+          [
+            29938,
+            1794547736.937895
+          ],
+          [
+            30044,
+            1794547737.303104
+          ],
+          [
+            30341,
+            1794547738.370149
+          ],
+          [
+            30426,
+            1794547738.678237
+          ],
+          [
+            30512,
+            1794547738.929689
+          ],
+          [
+            30626,
+            1794547739.356679
+          ],
+          [
+            36002,
+            1794547792.735962
+          ],
+          [
+            40156,
+            1794547838.466768
+          ],
+          [
+            40231,
+            1794547846.321231
+          ],
+          [
+            40238,
+            1794547846.55337
+          ],
+          [
+            42087,
+            1794547873.348487
+          ],
+          [
+            42091,
+            1794547873.660366
+          ],
+          [
+            43132,
+            1794547894.937687
+          ],
+          [
+            43311,
+            1794547902.23343
+          ],
+          [
+            51215,
+            1794547954.272073
+          ],
+          [
+            57164,
+            1794547982.763939
+          ],
+          [
+            63338,
+            1794548006.294076
+          ],
+          [
+            68589,
+            1794548030.57691
+          ],
+          [
+            69359,
+            1794548032.421622
+          ],
+          [
+            72014,
+            1794548054.851793
+          ],
+          [
+            72043,
+            1794548055.439241
+          ],
+          [
+            72123,
+            1794548057.238798
+          ],
+          [
+            72210,
+            1794548059.635894
+          ],
+          [
+            77365,
+            1794548098.593609
+          ],
+          [
+            82134,
+            1794548146.246266
+          ],
+          [
+            82996,
+            1794548148.986439
+          ],
+          [
+            83026,
+            1794548149.301883
+          ],
+          [
+            86160,
+            1794548173.218551
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 1,
+        "seconds": 863.1955508329993,
+        "worker": {
+          "returncode": 1,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 1
+      },
+      "source_commit": "9afd6d64a242f8b42e0657d60ff62ce2460eaf68",
+      "source_package_tree": "b2db3ad2238ac0530d0aa1a74ec0f2834e292877",
+      "status": "failed_nonacceptance"
+    },
+    "final-boundaries-01": {
+      "acceptance_for_selected_checks": false,
+      "cases": [],
+      "counts": null,
+      "evidence": [
+        {
+          "bytes": 2296,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-01/bootstrap.json",
+          "sha256": "e256bc7f626410951c46c44a3020cd3df3c6ea8c358b61077dbf98fc61bd9bdf"
+        },
+        {
+          "bytes": 1117,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-01/interruption-request.json",
+          "sha256": "901245de108a6c98610c93825a9108c6a4bcd4de915d42974b3945f7c3859a65"
+        },
+        {
+          "bytes": 105,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-01/network.json",
+          "sha256": "a942dd15f4ddfe5477ddcf18fe447b442d8d55c99145284dc984909cae3f18e3"
+        },
+        {
+          "bytes": 1499,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-01/origins-before.json",
+          "sha256": "7d457fcccf89b67324a6a4a5c3d0b7aa0309681162bcce10d2c4a9eb74093c23"
+        },
+        {
+          "bytes": 592,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-01/outcome.json",
+          "sha256": "aa055c686b988cb417cb08a29d45e9fb273449c6ce1506c069214a04b2484b73"
+        },
+        {
+          "bytes": 3023,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-01/plan.json",
+          "sha256": "38ba4ea4764e23fe7c468cc3bbee14c38688963675e5deda34723c98075b60e9"
+        },
+        {
+          "bytes": 95,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-01/pytest.log",
+          "sha256": "6fc5878d4c643cb5ccca113a226aed1bda9e8b64deca6178d07440ed8f719ee8"
+        }
+      ],
+      "matches_current_package_tree": false,
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": false,
+        "forced_cleanup": true,
+        "interrupted": "KeyboardInterrupt",
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            66204,
+            1794546802.388682
+          ],
+          [
+            66207,
+            1794546802.812379
+          ],
+          [
+            66209,
+            1794546803.00275
+          ],
+          [
+            67899,
+            1794546860.535727
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 125,
+        "seconds": 59.39719808299924,
+        "worker": null,
+        "worker_returncode": -15
+      },
+      "source_commit": "9727895740b05b25cad6f46fc1a36572eaaaec85",
+      "source_package_tree": "b2db3ad2238ac0530d0aa1a74ec0f2834e292877",
+      "status": "interrupted_nonacceptance"
+    },
+    "final-boundaries-02": {
+      "acceptance_for_selected_checks": false,
+      "cases": [],
+      "counts": null,
+      "evidence": [
+        {
+          "bytes": 2296,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-02/bootstrap.json",
+          "sha256": "b0a12ae1007c9597256c6caca96de1a5b2a250d2e8715db492c37d445dcf7ea3"
+        },
+        {
+          "bytes": 1116,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-02/interruption-request.json",
+          "sha256": "88e72e0929debc1ffcfb8050df64d7c51d4e942f53ebfc7b91e8a0f6cd2dd853"
+        },
+        {
+          "bytes": 105,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-02/network.json",
+          "sha256": "ab62a3c6474712d06a8ed4ba58b4dfd718e02fe6b11135f41613f33b11796d4d"
+        },
+        {
+          "bytes": 1499,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-02/origins-before.json",
+          "sha256": "460aacfa7e4960659504297ee8e3e261923207ad0bfe2a6b9fdc7241f594d6e6"
+        },
+        {
+          "bytes": 2533,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-02/outcome.json",
+          "sha256": "90913c1798a3ae0f4eee03b62505acd53cd4d721b1f4829d8410b97befe50761"
+        },
+        {
+          "bytes": 3023,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-02/plan.json",
+          "sha256": "d721133bedfe4943bb1fc11a771982105ab891a6dbd98b64066487aa22f5429e"
+        },
+        {
+          "bytes": 95,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/final-boundaries-02/pytest.log",
+          "sha256": "6fc5878d4c643cb5ccca113a226aed1bda9e8b64deca6178d07440ed8f719ee8"
+        }
+      ],
+      "matches_current_package_tree": false,
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": false,
+        "forced_cleanup": true,
+        "interrupted": "KeyboardInterrupt",
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            3169,
+            1794547443.637653
+          ],
+          [
+            4012,
+            1794547450.174148
+          ],
+          [
+            4073,
+            1794547453.806708
+          ],
+          [
+            7889,
+            1794547483.171554
+          ],
+          [
+            10049,
+            1794547505.553673
+          ],
+          [
+            13648,
+            1794547532.125104
+          ],
+          [
+            13773,
+            1794547532.884823
+          ],
+          [
+            13824,
+            1794547533.207335
+          ],
+          [
+            13994,
+            1794547533.922239
+          ],
+          [
+            14615,
+            1794547535.740656
+          ],
+          [
+            14706,
+            1794547536.11182
+          ],
+          [
+            14728,
+            1794547536.216889
+          ],
+          [
+            19775,
+            1794547576.210122
+          ],
+          [
+            19822,
+            1794547577.446305
+          ],
+          [
+            22854,
+            1794547603.489906
+          ],
+          [
+            23926,
+            1794547618.159092
+          ],
+          [
+            23929,
+            1794547618.437437
+          ],
+          [
+            24330,
+            1794547622.933433
+          ],
+          [
+            24343,
+            1794547624.506765
+          ],
+          [
+            67993,
+            1794546882.26756
+          ],
+          [
+            67997,
+            1794546882.966982
+          ],
+          [
+            68001,
+            1794546883.139799
+          ],
+          [
+            68100,
+            1794546924.897924
+          ],
+          [
+            68142,
+            1794546939.88813
+          ],
+          [
+            68244,
+            1794546957.481273
+          ],
+          [
+            68245,
+            1794546957.591181
+          ],
+          [
+            68258,
+            1794546958.723616
+          ],
+          [
+            68925,
+            1794547006.363461
+          ],
+          [
+            69374,
+            1794547017.062378
+          ],
+          [
+            69376,
+            1794547017.459527
+          ],
+          [
+            69381,
+            1794547019.814139
+          ],
+          [
+            72674,
+            1794547069.964098
+          ],
+          [
+            72677,
+            1794547070.260855
+          ],
+          [
+            72678,
+            1794547070.610225
+          ],
+          [
+            72681,
+            1794547070.878238
+          ],
+          [
+            72710,
+            1794547074.853717
+          ],
+          [
+            72725,
+            1794547075.275773
+          ],
+          [
+            74406,
+            1794547117.676698
+          ],
+          [
+            76279,
+            1794547133.242735
+          ],
+          [
+            76393,
+            1794547133.880373
+          ],
+          [
+            77644,
+            1794547139.6608
+          ],
+          [
+            79814,
+            1794547161.470134
+          ],
+          [
+            99682,
+            1794547423.49104
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 125,
+        "seconds": 768.2666974999993,
+        "worker": null,
+        "worker_returncode": -15
+      },
+      "source_commit": "36dbca6f80ab2e3cba0e694d043f8715df55b291",
+      "source_package_tree": "b2db3ad2238ac0530d0aa1a74ec0f2834e292877",
+      "status": "interrupted_nonacceptance"
+    },
+    "focused-01": {
+      "acceptance_for_selected_checks": false,
+      "cases": [],
+      "counts": null,
+      "evidence": [
+        {
+          "bytes": 2242,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/focused-01/bootstrap.json",
+          "sha256": "e3174b98624f98823fdea60dce6eb6466065ef5dfe13f42a085864661f44afea"
+        },
+        {
+          "bytes": 1102,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/focused-01/interruption-request.json",
+          "sha256": "8e2b0d026b18f109c0ca86b5e9f4ba49247bfae1ec3b19f6759314f841c89e53"
+        },
+        {
+          "bytes": 105,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/focused-01/network.json",
+          "sha256": "c3ec85f2359fe10dbe79e2ab7d150f3f2db9103a3dae8b04e2d3c099154fadf2"
+        },
+        {
+          "bytes": 1472,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/focused-01/origins-before.json",
+          "sha256": "fea1a361ff4956ae9d4101ecaaa2d7bee07b80e1058cc5cdc1f6890a7f96bd45"
+        },
+        {
+          "bytes": 6081,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/focused-01/outcome.json",
+          "sha256": "b63ed55acc370ee317349c030616db7be96dc38ace8c9761a2260e25ab9e667a"
+        },
+        {
+          "bytes": 2958,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/focused-01/plan.json",
+          "sha256": "b71a3d68b48abdc2ca355fce13bb03d95010fe4247e0616b2067b2389271c89d"
+        },
+        {
+          "bytes": 125,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/focused-01/pytest.log",
+          "sha256": "d43f406fcdd456459ac29f9f33719a72fd441d4aab169e67964e261495c368b9"
+        }
+      ],
+      "matches_current_package_tree": false,
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": false,
+        "forced_cleanup": true,
+        "interrupted": "KeyboardInterrupt",
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            28668,
+            1794545610.227522
+          ],
+          [
+            28672,
+            1794545610.895362
+          ],
+          [
+            28677,
+            1794545611.084407
+          ],
+          [
+            28698,
+            1794545611.617861
+          ],
+          [
+            30502,
+            1794545632.683356
+          ],
+          [
+            30510,
+            1794545632.997513
+          ],
+          [
+            33312,
+            1794545655.223601
+          ],
+          [
+            33318,
+            1794545656.392534
+          ],
+          [
+            33341,
+            1794545662.609001
+          ],
+          [
+            34161,
+            1794545673.095837
+          ],
+          [
+            34164,
+            1794545673.239129
+          ],
+          [
+            36074,
+            1794545716.203403
+          ],
+          [
+            36134,
+            1794545716.573348
+          ],
+          [
+            37956,
+            1794545736.740601
+          ],
+          [
+            37962,
+            1794545737.028835
+          ],
+          [
+            39321,
+            1794545765.34692
+          ],
+          [
+            39333,
+            1794545765.883012
+          ],
+          [
+            39335,
+            1794545766.26936
+          ],
+          [
+            39388,
+            1794545774.893579
+          ],
+          [
+            39883,
+            1794545793.788707
+          ],
+          [
+            41257,
+            1794545818.135727
+          ],
+          [
+            42361,
+            1794545852.005738
+          ],
+          [
+            42372,
+            1794545852.915357
+          ],
+          [
+            43078,
+            1794545884.591672
+          ],
+          [
+            43079,
+            1794545884.651505
+          ],
+          [
+            43084,
+            1794545885.097369
+          ],
+          [
+            43156,
+            1794545898.992536
+          ],
+          [
+            44133,
+            1794545943.061129
+          ],
+          [
+            44139,
+            1794545943.576388
+          ],
+          [
+            44145,
+            1794545944.658141
+          ],
+          [
+            44180,
+            1794545953.54526
+          ],
+          [
+            44599,
+            1794545964.55495
+          ],
+          [
+            45168,
+            1794545979.091593
+          ],
+          [
+            45743,
+            1794546014.049766
+          ],
+          [
+            45744,
+            1794546014.120799
+          ],
+          [
+            46284,
+            1794546034.794459
+          ],
+          [
+            46870,
+            1794546082.683969
+          ],
+          [
+            46882,
+            1794546083.45931
+          ],
+          [
+            46927,
+            1794546091.331173
+          ],
+          [
+            46947,
+            1794546097.068325
+          ],
+          [
+            46951,
+            1794546097.461565
+          ],
+          [
+            46955,
+            1794546097.75468
+          ],
+          [
+            47007,
+            1794546107.653042
+          ],
+          [
+            47023,
+            1794546108.277071
+          ],
+          [
+            47679,
+            1794546139.833008
+          ],
+          [
+            47902,
+            1794546158.012296
+          ],
+          [
+            47905,
+            1794546158.427138
+          ],
+          [
+            47921,
+            1794546162.336842
+          ],
+          [
+            47926,
+            1794546162.63985
+          ],
+          [
+            48011,
+            1794546176.157094
+          ],
+          [
+            48030,
+            1794546178.602619
+          ],
+          [
+            48037,
+            1794546179.675175
+          ],
+          [
+            48040,
+            1794546179.979718
+          ],
+          [
+            48043,
+            1794546180.329799
+          ],
+          [
+            48239,
+            1794546227.614914
+          ],
+          [
+            48241,
+            1794546227.767977
+          ],
+          [
+            48767,
+            1794546238.138731
+          ],
+          [
+            49216,
+            1794546255.776576
+          ],
+          [
+            49350,
+            1794546259.683792
+          ],
+          [
+            49358,
+            1794546259.960902
+          ],
+          [
+            49455,
+            1794546260.788013
+          ],
+          [
+            50810,
+            1794546295.66904
+          ],
+          [
+            51071,
+            1794546300.611855
+          ],
+          [
+            51074,
+            1794546300.93486
+          ],
+          [
+            51119,
+            1794546309.727154
+          ],
+          [
+            51662,
+            1794546332.219395
+          ],
+          [
+            51673,
+            1794546333.221751
+          ],
+          [
+            51870,
+            1794546362.377568
+          ],
+          [
+            51893,
+            1794546368.225501
+          ],
+          [
+            51898,
+            1794546368.621109
+          ],
+          [
+            51902,
+            1794546369.224111
+          ],
+          [
+            51908,
+            1794546369.860101
+          ],
+          [
+            51910,
+            1794546370.257565
+          ],
+          [
+            51983,
+            1794546393.726943
+          ],
+          [
+            51985,
+            1794546394.727444
+          ],
+          [
+            59902,
+            1794546440.823954
+          ],
+          [
+            59904,
+            1794546441.163677
+          ],
+          [
+            59906,
+            1794546441.473997
+          ],
+          [
+            59909,
+            1794546441.793223
+          ],
+          [
+            59915,
+            1794546442.384732
+          ],
+          [
+            59917,
+            1794546442.977782
+          ],
+          [
+            59922,
+            1794546443.344748
+          ],
+          [
+            59927,
+            1794546443.684828
+          ],
+          [
+            59938,
+            1794546451.30961
+          ],
+          [
+            59983,
+            1794546470.436302
+          ],
+          [
+            59984,
+            1794546470.540019
+          ],
+          [
+            59987,
+            1794546471.103013
+          ],
+          [
+            59991,
+            1794546471.538349
+          ],
+          [
+            59993,
+            1794546472.016104
+          ],
+          [
+            60566,
+            1794546499.937091
+          ],
+          [
+            60847,
+            1794546501.31014
+          ],
+          [
+            61620,
+            1794546518.557046
+          ],
+          [
+            61870,
+            1794546525.147071
+          ],
+          [
+            61981,
+            1794546533.817231
+          ],
+          [
+            62030,
+            1794546534.165622
+          ],
+          [
+            62127,
+            1794546534.473018
+          ],
+          [
+            62206,
+            1794546534.752228
+          ],
+          [
+            62341,
+            1794546543.745081
+          ],
+          [
+            63180,
+            1794546562.377508
+          ],
+          [
+            63187,
+            1794546563.264177
+          ],
+          [
+            63202,
+            1794546564.836598
+          ],
+          [
+            63205,
+            1794546565.130774
+          ],
+          [
+            63278,
+            1794546577.076953
+          ],
+          [
+            63329,
+            1794546585.385464
+          ],
+          [
+            63342,
+            1794546589.335269
+          ],
+          [
+            63353,
+            1794546594.042006
+          ],
+          [
+            63375,
+            1794546597.70905
+          ],
+          [
+            63381,
+            1794546598.041032
+          ],
+          [
+            63385,
+            1794546598.357863
+          ],
+          [
+            63523,
+            1794546624.707526
+          ],
+          [
+            63544,
+            1794546626.806846
+          ],
+          [
+            63554,
+            1794546627.488116
+          ],
+          [
+            63560,
+            1794546627.827112
+          ],
+          [
+            63640,
+            1794546639.801283
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 125,
+        "seconds": 1033.671278959002,
+        "worker": null,
+        "worker_returncode": -15
+      },
+      "source_commit": "8aeb19e0bf6900c1c3edd8dbdda85690ecac5522",
+      "source_package_tree": "2c7eadab20c7a6390720d406f9d147a928a1debf",
+      "status": "interrupted_nonacceptance"
+    },
+    "preparation-01": {
+      "acceptance_for_selected_checks": false,
+      "cases": [
+        {
+          "classname": "tests.test_native_execution_registration_v2",
+          "message": "failed on setup with \"ValueError: importable code has missing distribution RECORD ownership: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/_virtualenv.pth\"",
+          "name": "test_prepare_rederives_real_native26_and_all_pins_without_effects",
+          "status": "error",
+          "traceback": "native_spec = RunSpec(project='SYNTHETIC', arm='BASELINE (input documents only)', method='claudecode_direct', bundle=PosixPath('/Use..._prepare_rederives_real_na0/fresh-attempt/stages\",\"version\":1}', registered_input_paths=False, bounded_carry_version=0)\nisolated_modules = {'budget_amendment', 'budgeted_cborg', 'native_command_policy', 'native_control', 'native_file_policy', 'native_phase_history', ...}\ntmp_path = PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-01/cases/test_prepare_rederives_real_na0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105ddfbb0>\n\n    @pytest.fixture\n    def inputs(native_spec, isolated_modules, tmp_path, monkeypatch):\n        \"\"\"A real captured S plus an R accepted by unpatched runtime validation.\"\"\"\n        monkeypatch.chdir(registration.authority.ROOT)\n        executable = tmp_path.resolve() / 'fingerprint-only-not-a-native-program'\n        executable.write_bytes(b'Fingerprint-only test fixture. Not an executable program.\\n')\n        executable.chmod(0o700)\n        runtime = c.strict_json(native_spec._native_shared_runtime_capture.raw)\n        runtime['executable'].update(path=str(executable), sha256=c.sha(executable.read_bytes()))\n        runtime['auth'] = {'loggedIn': True, 'authMethod': 'claude.ai', 'apiProvider': 'firstParty',\n            'subscriptionType': 'historical-software-test', 'expected_api_key_source': 'none'}\n        runtime['environment'] = {'PATH': '/usr/bin:/bin', 'HOME': str(tmp_path.resolve() / 'runtime-home'),\n            'PYSTOW_HOME': str(tmp_path.resolve() / 'attempt' / 'helper-cache'),\n            'CLAUDE_SECURESTORAGE_CONFIG_DIR': '', 'CLAUDE_CODE_DISABLE_1M_CONTEXT': '1'}\n        runtime['keep_awake']['host_platform'] = sys.platform\n        runtime_path = Path(native_spec._native_shared_runtime_capture.pin.path)\n        runtime_path.write_bytes(c.canonical(runtime))\n        source = native_spec._native_shared_generation_capture\n        if source is None:\n            source = selection.capture(c.strict_json(\n                native_spec.native_shared_generation_registration.encode())['registration_path'])\n        selection_path = Path(source.registration.pin.path)\n        from data_sheets_schema import native_environment_manifest\n        environment_path = tmp_path.resolve() / \"environment-manifest.json\"\n>       native_environment_manifest.write(environment_path)\n\ntests/test_native_execution_registration_v2.py:69: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nsrc/data_sheets_schema/native_environment_manifest.py:220: in write\n    raw = c.canonical(generate())\nsrc/data_sheets_schema/native_environment_manifest.py:189: in generate\n    _require_owned_import_roots(paths, distributions)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\npaths = ['/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113', '/Users...te-packages', '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages']\ndistributions = [<importlib.metadata.PathDistribution object at 0x105d22bc0>, <importlib.metadata.PathDistribution object at 0x105e093...lib.metadata.PathDistribution object at 0x105e09310>, <importlib.metadata.PathDistribution object at 0x105e09040>, ...]\n\n    def _require_owned_import_roots(paths, distributions):\n        \"\"\"Hold for code with no installation metadata, including namespace portions.\n    \n        Every importable code file in a third-party root needs a RECORD entry;\n        ownership of only the top-level namespace is insufficient. Ordinary cached\n        bytecode may use its RECORD-owned source. This checks metadata coverage,\n        not installed file contents. Standard-library and exact repository roots\n        have their own interpreter/source authority and are excluded explicitly.\n        \"\"\"\n        exempt = _first_party_roots() | _stdlib_roots()\n        owned = _owned_files(distributions)\n        visited = set()\n        count = 0\n        pending = [Path(path) for path in paths if Path(path) not in exempt]\n        while pending:\n            directory = pending.pop()\n            if directory in visited:\n                continue\n            visited.add(directory)\n            if not directory.is_dir():\n                raise ValueError('unsupported archive or non-directory third-party import root: ' + str(directory))\n            with os.scandir(directory) as iterator:\n                entries = sorted(iterator, key=lambda entry: entry.name)\n            for entry in entries:\n                count += 1\n                if count > MAX_IMPORT_ENTRIES:\n                    raise ValueError('third-party import ownership census exceeds its entry bound')\n                path = Path(entry.path)\n                if entry.is_dir():\n                    if entry.is_symlink():\n                        raise ValueError('unsupported symlinked third-party import directory: ' + str(path))\n                    if not entry.name.endswith(('.dist-info', '.egg-info')):\n                        pending.append(path)\n                elif _requires_owner(path):\n                    physical = path.resolve(strict=True)\n                    if physical in owned:\n                        continue\n                    if path.suffix == '.pyc' and path.parent.name == '__pycache__':\n                        try:\n                            source = Path(source_from_cache(str(path))).resolve(strict=True)\n                        except (ValueError, FileNotFoundError):\n                            source = None\n                        if source in owned:\n                            continue\n>                   raise ValueError('importable code has missing distribution RECORD ownership: ' + str(path))\nE                   ValueError: importable code has missing distribution RECORD ownership: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/_virtualenv.pth\n\nsrc/data_sheets_schema/native_environment_manifest.py:168: ValueError"
+        }
+      ],
+      "counts": {
+        "errors": 1,
+        "failures": 0,
+        "passed": 0,
+        "skipped": 0,
+        "tests": 1
+      },
+      "evidence": [
+        {
+          "bytes": 1714,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-01/bootstrap.json",
+          "sha256": "95d7b299b6307bd4794b6a2c1235e00b6c73468db893a8e16296118930bd8237"
+        },
+        {
+          "bytes": 105,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-01/network.json",
+          "sha256": "7a468ce74a38c0bddc080c6e9902870d0e9d60deb534df885c157c50a8b0b745"
+        },
+        {
+          "bytes": 11180,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-01/origins-after.json",
+          "sha256": "2aa4eb8ce2af5317340654f970e22abc7f571c885d115fd2d15e6428fad7c016"
+        },
+        {
+          "bytes": 1484,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-01/origins-before.json",
+          "sha256": "ed1965a32951fbcb5feeff73ed0fa919a97dfa117bd04adc9b91fe1ef2dd782e"
+        },
+        {
+          "bytes": 486,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-01/outcome.json",
+          "sha256": "1cb1e592f0ac26e1e22ab0d166b1924d57bd4c1b83f62bdda9918e37f7149e16"
+        },
+        {
+          "bytes": 2764,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-01/plan.json",
+          "sha256": "d1371d22bcea299e67dcd4aaf654428ebb77aa5c87368959d72c6f7f2e24e5f8"
+        },
+        {
+          "bytes": 7440,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-01/pytest.log",
+          "sha256": "9c987857f25c2cdef939050191ee4d96e2bbe53bd15fcbb08fef37d866d39f42"
+        },
+        {
+          "bytes": 6832,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-01/pytest.xml",
+          "sha256": "336df4f31a54ce5b5b5c3806746f504424a9d44e4bd9cc5e163b5aea1f6b7723"
+        },
+        {
+          "bytes": 61,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-01/worker-outcome.json",
+          "sha256": "9e17b7d3a8b0517d14d2eea6b8c7b9bf0cdff8913849fcd1ead54533ec530fe0"
+        }
+      ],
+      "matches_current_package_tree": false,
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            20161,
+            1794545452.392704
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 1,
+        "seconds": 9.644534209000994,
+        "worker": {
+          "returncode": 1,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 1
+      },
+      "source_commit": "8529be7a1549068f9374ef2533e7eabd61e57fd2",
+      "source_package_tree": "b0090e9c94a6a001824294ef9ebb968c73d41426",
+      "status": "failed_nonacceptance"
+    },
+    "preparation-02": {
+      "acceptance_for_selected_checks": false,
+      "cases": [
+        {
+          "classname": "tests.test_native_execution_registration_v2",
+          "message": "failed on setup with \"ValueError: importable code has missing distribution RECORD ownership: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/xdist/scheduler/__pycache__/__init__.cpython-313-pytest-7.4.4.pyc\"",
+          "name": "test_prepare_rederives_real_native26_and_all_pins_without_effects",
+          "status": "error",
+          "traceback": "native_spec = RunSpec(project='SYNTHETIC', arm='BASELINE (input documents only)', method='claudecode_direct', bundle=PosixPath('/Use..._prepare_rederives_real_na0/fresh-attempt/stages\",\"version\":1}', registered_input_paths=False, bounded_carry_version=0)\nisolated_modules = {'budget_amendment', 'budgeted_cborg', 'native_command_policy', 'native_control', 'native_file_policy', 'native_phase_history', ...}\ntmp_path = PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-02/cases/test_prepare_rederives_real_na0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1085dfa80>\n\n    @pytest.fixture\n    def inputs(native_spec, isolated_modules, tmp_path, monkeypatch):\n        \"\"\"A real captured S plus an R accepted by unpatched runtime validation.\"\"\"\n        monkeypatch.chdir(registration.authority.ROOT)\n        executable = tmp_path.resolve() / 'fingerprint-only-not-a-native-program'\n        executable.write_bytes(b'Fingerprint-only test fixture. Not an executable program.\\n')\n        executable.chmod(0o700)\n        runtime = c.strict_json(native_spec._native_shared_runtime_capture.raw)\n        runtime['executable'].update(path=str(executable), sha256=c.sha(executable.read_bytes()))\n        runtime['auth'] = {'loggedIn': True, 'authMethod': 'claude.ai', 'apiProvider': 'firstParty',\n            'subscriptionType': 'historical-software-test', 'expected_api_key_source': 'none'}\n        runtime['environment'] = {'PATH': '/usr/bin:/bin', 'HOME': str(tmp_path.resolve() / 'runtime-home'),\n            'PYSTOW_HOME': str(tmp_path.resolve() / 'attempt' / 'helper-cache'),\n            'CLAUDE_SECURESTORAGE_CONFIG_DIR': '', 'CLAUDE_CODE_DISABLE_1M_CONTEXT': '1'}\n        runtime['keep_awake']['host_platform'] = sys.platform\n        runtime_path = Path(native_spec._native_shared_runtime_capture.pin.path)\n        runtime_path.write_bytes(c.canonical(runtime))\n        source = native_spec._native_shared_generation_capture\n        if source is None:\n            source = selection.capture(c.strict_json(\n                native_spec.native_shared_generation_registration.encode())['registration_path'])\n        selection_path = Path(source.registration.pin.path)\n        from data_sheets_schema import native_environment_manifest\n        environment_path = tmp_path.resolve() / \"environment-manifest.json\"\n>       native_environment_manifest.write(environment_path)\n\ntests/test_native_execution_registration_v2.py:69: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nsrc/data_sheets_schema/native_environment_manifest.py:220: in write\n    raw = c.canonical(generate())\nsrc/data_sheets_schema/native_environment_manifest.py:189: in generate\n    _require_owned_import_roots(paths, distributions)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\npaths = ['/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113', '/Users...te-packages', '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages']\ndistributions = [<importlib.metadata.PathDistribution object at 0x10860b7f0>, <importlib.metadata.PathDistribution object at 0x10860ad...lib.metadata.PathDistribution object at 0x107f8d4f0>, <importlib.metadata.PathDistribution object at 0x107f8d2c0>, ...]\n\n    def _require_owned_import_roots(paths, distributions):\n        \"\"\"Hold for code with no installation metadata, including namespace portions.\n    \n        Every importable code file in a third-party root needs a RECORD entry;\n        ownership of only the top-level namespace is insufficient. Ordinary cached\n        bytecode may use its RECORD-owned source. This checks metadata coverage,\n        not installed file contents. Standard-library and exact repository roots\n        have their own interpreter/source authority and are excluded explicitly.\n        \"\"\"\n        exempt = _first_party_roots() | _stdlib_roots()\n        owned = _owned_files(distributions)\n        visited = set()\n        count = 0\n        pending = [Path(path) for path in paths if Path(path) not in exempt]\n        while pending:\n            directory = pending.pop()\n            if directory in visited:\n                continue\n            visited.add(directory)\n            if not directory.is_dir():\n                raise ValueError('unsupported archive or non-directory third-party import root: ' + str(directory))\n            with os.scandir(directory) as iterator:\n                entries = sorted(iterator, key=lambda entry: entry.name)\n            for entry in entries:\n                count += 1\n                if count > MAX_IMPORT_ENTRIES:\n                    raise ValueError('third-party import ownership census exceeds its entry bound')\n                path = Path(entry.path)\n                if entry.is_dir():\n                    if entry.is_symlink():\n                        raise ValueError('unsupported symlinked third-party import directory: ' + str(path))\n                    if not entry.name.endswith(('.dist-info', '.egg-info')):\n                        pending.append(path)\n                elif _requires_owner(path):\n                    physical = path.resolve(strict=True)\n                    if physical in owned:\n                        continue\n                    if path.suffix == '.pyc' and path.parent.name == '__pycache__':\n                        try:\n                            source = Path(source_from_cache(str(path))).resolve(strict=True)\n                        except (ValueError, FileNotFoundError):\n                            source = None\n                        if source in owned:\n                            continue\n>                   raise ValueError('importable code has missing distribution RECORD ownership: ' + str(path))\nE                   ValueError: importable code has missing distribution RECORD ownership: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/xdist/scheduler/__pycache__/__init__.cpython-313-pytest-7.4.4.pyc\n\nsrc/data_sheets_schema/native_environment_manifest.py:168: ValueError"
+        }
+      ],
+      "counts": {
+        "errors": 1,
+        "failures": 0,
+        "passed": 0,
+        "skipped": 0,
+        "tests": 1
+      },
+      "evidence": [
+        {
+          "bytes": 2266,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-02/bootstrap.json",
+          "sha256": "e9d0216801f30daf9fece056009c3a79a8dfbc38bceef67b25a313757ece8349"
+        },
+        {
+          "bytes": 105,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-02/network.json",
+          "sha256": "72e556691e0f93d5ca511e6ae49f4808fe8ce75140c64bdeb05b7acb79dff96e"
+        },
+        {
+          "bytes": 11180,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-02/origins-after.json",
+          "sha256": "0641a88ce8ddda345df856bd228c8c86e24d9ed23ad6cb0c8f03ccb31fe9680c"
+        },
+        {
+          "bytes": 1484,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-02/origins-before.json",
+          "sha256": "ee112c3c287439511d0fadc36d0407f1d9aaea8b01134fcf45b031f1a441cd38"
+        },
+        {
+          "bytes": 486,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-02/outcome.json",
+          "sha256": "dff08b522f04ad56444b9c475c70cfe1297bf426b204cf0aa42c1b64c224ffee"
+        },
+        {
+          "bytes": 2764,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-02/plan.json",
+          "sha256": "df3be6e80cac5a31bf91fab84031fc553c7bf956f076b97223bd1b672ed281b2"
+        },
+        {
+          "bytes": 7490,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-02/pytest.log",
+          "sha256": "e76b090b8edf777d47517d583e1e777a703140146e9fb5cb99bc147a11486e98"
+        },
+        {
+          "bytes": 6932,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-02/pytest.xml",
+          "sha256": "d80150e395997a680627e1033adf20a5593b10b209ba8e3542c1179263c7f517"
+        },
+        {
+          "bytes": 61,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-02/worker-outcome.json",
+          "sha256": "9e17b7d3a8b0517d14d2eea6b8c7b9bf0cdff8913849fcd1ead54533ec530fe0"
+        }
+      ],
+      "matches_current_package_tree": false,
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            22421,
+            1794545490.620387
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 1,
+        "seconds": 5.929009167000913,
+        "worker": {
+          "returncode": 1,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 1
+      },
+      "source_commit": "69d1cd8ee6bc750c06f6daaf2863f591510302f3",
+      "source_package_tree": "b0090e9c94a6a001824294ef9ebb968c73d41426",
+      "status": "failed_nonacceptance"
+    },
+    "preparation-03": {
+      "acceptance_for_selected_checks": true,
+      "cases": [
+        {
+          "classname": "tests.test_native_execution_registration_v2",
+          "name": "test_prepare_rederives_real_native26_and_all_pins_without_effects",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_generate_has_sorted_semantic_inventory",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_write_once_and_verify_exact_bytes",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_metadata_refuses[Name]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_metadata_refuses[Version]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_record_refuses[None]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_record_refuses[files1]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_record_refuses[files2]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_unreadable_record_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_duplicate_normalized_name_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_manifest_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_altered_manifest_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_rehashed_altered_manifest_still_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_stale_manifest_refuses[record]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_stale_manifest_refuses[version]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_stale_manifest_refuses[interpreter]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_closed_fields_and_exact_version",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_empty_inventory_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_whole_distribution_metadata_absent_holds",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_namespace_portion_needs_its_own_record_entry",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_repository_root_exempt_foreign_checkout_is_not",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_site_packages_not_exempted_by_stdlib_ancestor",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_archive_import_root_holds",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_duplicate_and_empty_import_path_entries",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_standard_bytecode_cache_uses_owned_source[]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_standard_bytecode_cache_uses_owned_source[.opt-1]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_standard_bytecode_cache_uses_owned_source[.opt-2]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_pytest_rewrite_cache_is_not_importable_by_python",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_loose_unowned_bytecode_still_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_standard_cache_without_owned_source_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_registration",
+          "name": "test_historical_evidence_cannot_be_registered[d4d_native_shared_preparation_v2-keys0-offline_inputs_only_not_permission_or_launch_authority]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_registration",
+          "name": "test_historical_evidence_cannot_be_registered[d4d_native_shared_execution_registration_v2-keys1-requires_exact_independent_review_ci_permission_and_owner_launch_evidence]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_registration",
+          "name": "test_current_preparation_requires_manifest_field",
+          "status": "passed"
+        }
+      ],
+      "counts": {
+        "errors": 0,
+        "failures": 0,
+        "passed": 33,
+        "skipped": 0,
+        "tests": 33
+      },
+      "evidence": [
+        {
+          "bytes": 2266,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-03/bootstrap.json",
+          "sha256": "e6ab487719bf4c11eefcc5b92cb5631a744fa25690836e8e1663018ca0330269"
+        },
+        {
+          "bytes": 105,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-03/network.json",
+          "sha256": "b4c0129ff842e68e82ca7f3128735381ec5fa4c84540e456affc5cc032bbd3af"
+        },
+        {
+          "bytes": 13839,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-03/origins-after.json",
+          "sha256": "ff51855e2989ec33e519d144659692f69af3a302926891e0dc5ea063277110e5"
+        },
+        {
+          "bytes": 1484,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-03/origins-before.json",
+          "sha256": "4928687182856e6c88cf9ad381fdb0e8bc011a24e9d676c6ad18590390c2e704"
+        },
+        {
+          "bytes": 487,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-03/outcome.json",
+          "sha256": "743c278ae9a4c91c46df1dac7fe3d1951c364d847b50795b4df38d686f132600"
+        },
+        {
+          "bytes": 2866,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-03/plan.json",
+          "sha256": "591c6676a82defc3d70ad91e23d6ad458ff06ca6e9eecc9c4925d81cb59f794e"
+        },
+        {
+          "bytes": 918,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-03/pytest.log",
+          "sha256": "629637a3140dce62e0df04dbe7932e9d021fcf2811aaad5850667964cd4d4d6c"
+        },
+        {
+          "bytes": 4684,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-03/pytest.xml",
+          "sha256": "1549b3763af022c47507f40f3a3d401a2b3a9a469bbf1070252d491f290ea8e9"
+        },
+        {
+          "bytes": 61,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/preparation-03/worker-outcome.json",
+          "sha256": "3a6f47e3cf840287c25e6681f2df01c9850d48838a7f78b2a23e3ed3279efa8e"
+        }
+      ],
+      "matches_current_package_tree": false,
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            25021,
+            1794545537.414993
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 0,
+        "seconds": 46.160433250002825,
+        "worker": {
+          "returncode": 0,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 0
+      },
+      "source_commit": "6a4f1ece8186e74825b39cb07ebce1909b9057b9",
+      "source_package_tree": "2c7eadab20c7a6390720d406f9d147a928a1debf",
+      "status": "passed_selected_checks"
+    },
+    "race-01": {
+      "acceptance_for_selected_checks": true,
+      "cases": [
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_generate_has_sorted_semantic_inventory",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_write_once_and_verify_exact_bytes",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_metadata_refuses[Name]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_metadata_refuses[Version]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_record_refuses[None]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_record_refuses[files1]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_record_refuses[files2]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_unreadable_record_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_duplicate_normalized_name_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_manifest_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_altered_manifest_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_rehashed_altered_manifest_still_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_stale_manifest_refuses[record]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_stale_manifest_refuses[version]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_stale_manifest_refuses[interpreter]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_closed_fields_and_exact_version",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_empty_inventory_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_whole_distribution_metadata_absent_holds",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_namespace_portion_needs_its_own_record_entry",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_repository_root_exempt_foreign_checkout_is_not",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_site_packages_not_exempted_by_stdlib_ancestor",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_archive_import_root_holds",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_duplicate_and_empty_import_path_entries",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_standard_bytecode_cache_uses_owned_source[]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_standard_bytecode_cache_uses_owned_source[.opt-1]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_standard_bytecode_cache_uses_owned_source[.opt-2]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_pytest_rewrite_cache_is_not_importable_by_python",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_loose_unowned_bytecode_still_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_standard_cache_without_owned_source_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_record_changes_during_census_refuse_registered_pin",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_duplicate_distribution_appears_during_census_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_metadata_changes_during_census_refuse",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_import_paths_change_during_census_refuse",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_unowned_code_added_to_scanned_directory_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_ownership_comes_from_hashed_record_not_second_files_read",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_registration",
+          "name": "test_historical_evidence_cannot_be_registered[d4d_native_shared_preparation_v2-keys0-offline_inputs_only_not_permission_or_launch_authority]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_registration",
+          "name": "test_historical_evidence_cannot_be_registered[d4d_native_shared_execution_registration_v2-keys1-requires_exact_independent_review_ci_permission_and_owner_launch_evidence]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_registration",
+          "name": "test_current_preparation_requires_manifest_field",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_execution_registration_v2",
+          "name": "test_prepare_rederives_real_native26_and_all_pins_without_effects",
+          "status": "passed"
+        }
+      ],
+      "counts": {
+        "errors": 0,
+        "failures": 0,
+        "passed": 39,
+        "skipped": 0,
+        "tests": 39
+      },
+      "evidence": [
+        {
+          "bytes": 2224,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/race-01/bootstrap.json",
+          "sha256": "74629f148876353eb637fd4104a4b43fbde0278ff6b010748c39b2cd0bfca4e0"
+        },
+        {
+          "bytes": 105,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/race-01/network.json",
+          "sha256": "c95d104234a17fb522e3025344456ae247af833966aa522d38cd728dcf5376fc"
+        },
+        {
+          "bytes": 13818,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/race-01/origins-after.json",
+          "sha256": "716ceeb0cb3691ad831c328833d5886f512d22c03b707d70f21c2e534aff63b2"
+        },
+        {
+          "bytes": 1463,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/race-01/origins-before.json",
+          "sha256": "f59eed9ff168d89cdfe59f395518f0fbd231f6e52b84f5c429ff0ab806053dd3"
+        },
+        {
+          "bytes": 536,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/race-01/outcome.json",
+          "sha256": "b4238d4b34c85534b5c404d275bb2379d0a0c3a7954df383090824adfefa9ae0"
+        },
+        {
+          "bytes": 2824,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/race-01/plan.json",
+          "sha256": "bd5d0513fdbf74fbbde1995627f46050907bb201f89c10bf7f05bc2cff118933"
+        },
+        {
+          "bytes": 921,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/race-01/pytest.log",
+          "sha256": "c3f80543e8bf277e72f10d32fd09754746eb8a9df4df0c3904fec1fad4b66fc0"
+        },
+        {
+          "bytes": 5500,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/race-01/pytest.xml",
+          "sha256": "1a16d5e470b728bc9f059727611d9a6a5be35ee52254537e7a436c961cb6c39a"
+        },
+        {
+          "bytes": 61,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/race-01/worker-outcome.json",
+          "sha256": "3a6f47e3cf840287c25e6681f2df01c9850d48838a7f78b2a23e3ed3279efa8e"
+        }
+      ],
+      "matches_current_package_tree": false,
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            64378,
+            1794546709.789872
+          ],
+          [
+            65332,
+            1794546751.033612
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 0,
+        "seconds": 73.97542983400126,
+        "worker": {
+          "returncode": 0,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 0
+      },
+      "source_commit": "9727895740b05b25cad6f46fc1a36572eaaaec85",
+      "source_package_tree": "b2db3ad2238ac0530d0aa1a74ec0f2834e292877",
+      "status": "passed_selected_checks"
+    },
+    "unit-01": {
+      "acceptance_for_selected_checks": true,
+      "cases": [
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_generate_has_sorted_semantic_inventory",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_write_once_and_verify_exact_bytes",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_metadata_refuses[Name]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_metadata_refuses[Version]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_record_refuses[None]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_record_refuses[files1]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_record_refuses[files2]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_unreadable_record_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_duplicate_normalized_name_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_manifest_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_altered_manifest_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_rehashed_altered_manifest_still_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_stale_manifest_refuses[record]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_stale_manifest_refuses[version]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_stale_manifest_refuses[interpreter]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_closed_fields_and_exact_version",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_empty_inventory_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_registration",
+          "name": "test_historical_evidence_cannot_be_registered[d4d_native_shared_preparation_v2-keys0-offline_inputs_only_not_permission_or_launch_authority]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_registration",
+          "name": "test_historical_evidence_cannot_be_registered[d4d_native_shared_execution_registration_v2-keys1-requires_exact_independent_review_ci_permission_and_owner_launch_evidence]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_registration",
+          "name": "test_current_preparation_requires_manifest_field",
+          "status": "passed"
+        }
+      ],
+      "counts": {
+        "errors": 0,
+        "failures": 0,
+        "passed": 20,
+        "skipped": 0,
+        "tests": 20
+      },
+      "evidence": [
+        {
+          "bytes": 1686,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-01/bootstrap.json",
+          "sha256": "6325eae34f3a3e96b68cce3c8faaae023a348be3525111b5bd7ab412fd3d52a7"
+        },
+        {
+          "bytes": 105,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-01/network.json",
+          "sha256": "1ccaccc7d0d442d99f795c545542ab5e004142cc9fba20999adf9ce281f9cf2d"
+        },
+        {
+          "bytes": 6915,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-01/origins-after.json",
+          "sha256": "3adfc7e626ba5f645468b8d142ec375ec59cb779dcf201bd6685548cc9beb35f"
+        },
+        {
+          "bytes": 1463,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-01/origins-before.json",
+          "sha256": "15c0064b5a456cc7f54d989e74df8b2c276efddb6356e0de1b909bd52178e58e"
+        },
+        {
+          "bytes": 486,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-01/outcome.json",
+          "sha256": "a804b4e4f2e01569d085774678c7c7ee0efa8739d1847225ff63913dfbffa0ce"
+        },
+        {
+          "bytes": 2703,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-01/plan.json",
+          "sha256": "2a76bf87acca235c5cb969c14b978e9a221663293eab55db06d5bd5cd2a9853c"
+        },
+        {
+          "bytes": 910,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-01/pytest.log",
+          "sha256": "e67b30e0fa4d17df092df14876f0f46f580b1ab2799bb05e851ff41b9f6e0cfe"
+        },
+        {
+          "bytes": 2953,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-01/pytest.xml",
+          "sha256": "19d36ee65417ba8385eb07e5bb048b4dc76e6d2791f4b2ed4975c4737d745dd1"
+        },
+        {
+          "bytes": 61,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-01/worker-outcome.json",
+          "sha256": "3a6f47e3cf840287c25e6681f2df01c9850d48838a7f78b2a23e3ed3279efa8e"
+        }
+      ],
+      "matches_current_package_tree": false,
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            17003,
+            1794545397.515238
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 0,
+        "seconds": 3.022926624998945,
+        "worker": {
+          "returncode": 0,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 0
+      },
+      "source_commit": "7b851213f3492144cfd5b83d6bbd9a8a040e9132",
+      "source_package_tree": "b3102e6bc3928fcbc84b6e82c07e233df2f74a98",
+      "status": "passed_selected_checks"
+    },
+    "unit-02": {
+      "acceptance_for_selected_checks": true,
+      "cases": [
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_generate_has_sorted_semantic_inventory",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_write_once_and_verify_exact_bytes",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_metadata_refuses[Name]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_metadata_refuses[Version]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_record_refuses[None]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_record_refuses[files1]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_or_ambiguous_record_refuses[files2]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_unreadable_record_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_duplicate_normalized_name_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_missing_manifest_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_altered_manifest_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_rehashed_altered_manifest_still_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_stale_manifest_refuses[record]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_stale_manifest_refuses[version]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_stale_manifest_refuses[interpreter]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_closed_fields_and_exact_version",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_empty_inventory_refuses",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_whole_distribution_metadata_absent_holds",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_namespace_portion_needs_its_own_record_entry",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_repository_root_exempt_foreign_checkout_is_not",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_site_packages_not_exempted_by_stdlib_ancestor",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_archive_import_root_holds",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_manifest",
+          "name": "test_duplicate_and_empty_import_path_entries",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_registration",
+          "name": "test_historical_evidence_cannot_be_registered[d4d_native_shared_preparation_v2-keys0-offline_inputs_only_not_permission_or_launch_authority]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_registration",
+          "name": "test_historical_evidence_cannot_be_registered[d4d_native_shared_execution_registration_v2-keys1-requires_exact_independent_review_ci_permission_and_owner_launch_evidence]",
+          "status": "passed"
+        },
+        {
+          "classname": "tests.test_native_environment_registration",
+          "name": "test_current_preparation_requires_manifest_field",
+          "status": "passed"
+        }
+      ],
+      "counts": {
+        "errors": 0,
+        "failures": 0,
+        "passed": 26,
+        "skipped": 0,
+        "tests": 26
+      },
+      "evidence": [
+        {
+          "bytes": 1686,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-02/bootstrap.json",
+          "sha256": "c963ee652639f53db333e4b2a7a0ae9cc04fdbf67c2716f4c8f46ab3d2497ebe"
+        },
+        {
+          "bytes": 105,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-02/network.json",
+          "sha256": "50f4fa62b6b7a7ba82e12601f2f2e9cea0ca0474cc3588073601c36a82d4bb13"
+        },
+        {
+          "bytes": 6915,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-02/origins-after.json",
+          "sha256": "c2f9a83b055ec747d58f612c49f91411839a1aa56a77b54c901fe77970211de9"
+        },
+        {
+          "bytes": 1463,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-02/origins-before.json",
+          "sha256": "caabdf5dfba2e83a67761b1d8a9f216f24bc505ded612a05e3d816e576046cdc"
+        },
+        {
+          "bytes": 487,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-02/outcome.json",
+          "sha256": "61f8addb23050fb6560b938c528899ddd5b0c08dc0c863d2a7f909019b6a2022"
+        },
+        {
+          "bytes": 2703,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-02/plan.json",
+          "sha256": "90fdaa68af4a54da7951f40c9b75b001755bab73985541ed18455327c36e3506"
+        },
+        {
+          "bytes": 910,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-02/pytest.log",
+          "sha256": "47918dd07820e6e34a92d38e03dbff673bc27bc6a6814f69e2eb89e08f5349b9"
+        },
+        {
+          "bytes": 3726,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-02/pytest.xml",
+          "sha256": "6841173c49c6812eb92f124cb4a0ee097c6bd653f689aee1ea20d80d3c741125"
+        },
+        {
+          "bytes": 61,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-environment-manifest-20261113/tests/unit-02/worker-outcome.json",
+          "sha256": "3a6f47e3cf840287c25e6681f2df01c9850d48838a7f78b2a23e3ed3279efa8e"
+        }
+      ],
+      "matches_current_package_tree": false,
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            18060,
+            1794545431.042238
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 0,
+        "seconds": 2.4392011660020216,
+        "worker": {
+          "returncode": 0,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 0
+      },
+      "source_commit": "7b851213f3492144cfd5b83d6bbd9a8a040e9132",
+      "source_package_tree": "b3102e6bc3928fcbc84b6e82c07e233df2f74a98",
+      "status": "passed_selected_checks"
+    }
+  },
+  "validation_context_design": {
+    "bytes": 27228,
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/scripts/adhoc/h3_gate_validation_context_20261113.json",
+    "sha256": "48daf0913c5551942a2cdf347e8bf80866eba8c925ac7059f873141111953d3a"
+  },
+  "version": 1
+}

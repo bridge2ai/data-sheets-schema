@@ -1,0 +1,744 @@
+{
+  "bounds": [
+    {
+      "ceiling": 64000000,
+      "ceiling_headroom": 48000000,
+      "derivation": "Observed largest declared selection authority is 3440044 bytes. Allocate 16MB for that fixed schema/asset closure plus project input; factor 4.651. New environment pin is not yet in this measurement and must be checked in successor rehearsal.",
+      "key": "max_authority_bytes",
+      "proposed": 16000000
+    },
+    {
+      "ceiling": 512000000,
+      "ceiling_headroom": 256000000,
+      "derivation": "Planning budget: 32MB mandatory finalization reserve plus 224MB working evidence; 224MB exceeds 64 workers at a mean 3MB saved evidence each (192MB) by 32MB. This is a mean-envelope assumption, not 64 times every per-response maximum.",
+      "key": "max_evidence_bytes",
+      "proposed": 256000000
+    },
+    {
+      "ceiling": 64000000,
+      "ceiling_headroom": 16000000,
+      "derivation": "32MB mandatory finalization reserve plus 16MB working history; at 1023 working rows this allows a mean over 15KB per row before finalization. Individual 4MB record ceiling is not expected for every row.",
+      "key": "max_history_bytes",
+      "proposed": 48000000
+    },
+    {
+      "ceiling": 16384,
+      "ceiling_headroom": 15360,
+      "derivation": "64 worker allowance times 12 transition/receipt rows plus 255 additional rows and one finalization row = 1024. This is a planning allowance, not a measured transition count.",
+      "key": "max_history_records",
+      "proposed": 1024
+    },
+    {
+      "ceiling": 8000000,
+      "ceiling_headroom": 4000000,
+      "derivation": "4MB is 9.294 times the largest source bundle (430393 bytes), and admits all measured declared files (largest 1445211 bytes). It also admits the fixed 4MB original-full ceiling; equality to that separate hard ceiling is intentional.",
+      "key": "max_input_bytes",
+      "proposed": 4000000
+    },
+    {
+      "ceiling": 4000000,
+      "ceiling_headroom": 2000000,
+      "derivation": "2MB per worker allows a planning mean of 244 bytes per path at 8192 paths, or 488 bytes per path at half that occupancy. Source bytes do not bound serialized inventory expansion; rehearsal must measure it.",
+      "key": "max_inventory_bytes",
+      "proposed": 2000000
+    },
+    {
+      "ceiling": 100000,
+      "ceiling_headroom": 91808,
+      "derivation": "8192 paths permits 256 planning paths per largest source chunk count (28) with 1024 additional paths: 28*256+1024. Workers actually partition generated output fields, not source chunks; this is a capacity assumption.",
+      "key": "max_paths_per_worker",
+      "proposed": 8192
+    },
+    {
+      "ceiling": 100000,
+      "ceiling_headroom": 67232,
+      "derivation": "32768 permits 1024 planning generated paths per largest chunk count (28) with 4096 additional paths: 28*1024+4096. Prefix source evidence cannot establish generated path count.",
+      "key": "max_populated_paths",
+      "proposed": 32768
+    },
+    {
+      "ceiling": 64000000,
+      "ceiling_headroom": 32000000,
+      "derivation": "32MB exceeds 64 copies of the largest bundle (27545152 bytes) by 4454848 bytes. This conservatively allows repeated source/context plus envelope metadata; actual serialized requests remain to be measured.",
+      "key": "max_request_bytes",
+      "proposed": 32000000
+    },
+    {
+      "ceiling": 8000000,
+      "ceiling_headroom": 4000000,
+      "derivation": "4MB gives 9.294 times the largest bundle size; native typed responses have the stricter 2097152-byte hard limit. Actual generated response lengths are unknown before the model runs.",
+      "key": "max_response_bytes",
+      "proposed": 4000000
+    },
+    {
+      "ceiling": 4099,
+      "ceiling_headroom": 3971,
+      "derivation": "64 worker submissions plus three mandatory stage submissions leaves 61 additional submissions within 128. Additional correction/assembly cardinality is a planning allowance, not a measurement.",
+      "key": "max_submissions",
+      "proposed": 128
+    },
+    {
+      "ceiling": 4096,
+      "ceiling_headroom": 4032,
+      "derivation": "64 is the next power-of-two allowance above twice the largest source chunk count (28): 2*28=56, margin 8. AI_READI has 25 chunks and CHORUS has 8. Worker count is determined by generated populated paths/whole-field packing, so this is only a planning proxy.",
+      "key": "max_workers",
+      "proposed": 64
+    }
+  ],
+  "canary_admission": "All measured CHORUS declared selection files and complete declared authority fit the proposal. Full execution sufficiency is unverified: output inventory, workers, history, request/response and evidence growth require successor rehearsal and canary measurement.",
+  "inputs": [
+    {
+      "bytes": 255848,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/notes/development_efficiency_20261111/handoffs/codex-h3-all-project-prefix-and-cross-review-20261112.json",
+      "sha256": "fa2dcef4ae520c49f810becaa701800170f7f2aacd8e1e1c3b9992509d828b57"
+    },
+    {
+      "bytes": 40221,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/src/data_sheets_schema/native_shared_contract.py",
+      "sha256": "bfa0d8654f645adc5b34d738e2605859d03b0e2c011d45bd4b468b769e89a398"
+    }
+  ],
+  "largest_bundle": {
+    "bytes": 430393,
+    "chunks": 25,
+    "project": "AI_READI"
+  },
+  "largest_chunk_count": {
+    "chunks": 28,
+    "project": "CM4AI"
+  },
+  "limitations": [
+    "Input sizes do not mathematically bound generated populated paths, worker packing, response lengths, or all evidence growth.",
+    "Prefix evidence stops before runtime, preparation, composition, permission and execution registration; it does not measure those products.",
+    "Environment manifest is new and absent from the historical prefix measurements; check final-format authority totals before registration.",
+    "Per-artifact maxima are simultaneous refusal limits, not a guarantee that every artifact can saturate its maximum within aggregate budgets.",
+    "No real binary, provider, model, probe, capture, reservation or production module was executed for this proposal."
+  ],
+  "projects": [
+    {
+      "bundle_bytes": 320799,
+      "chunks": 28,
+      "declared_authority_bytes_including_selection": 3331273,
+      "declared_pins": [
+        {
+          "bytes": 320799,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+          "sha256": "5f81bb53f43f9ec6debc3ab7297bb3897d30c675888eefeaf840ebbbaca9ecc4"
+        },
+        {
+          "bytes": 5864,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/chunks/CM4AI_chunks.yaml",
+          "sha256": "3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4"
+        },
+        {
+          "bytes": 6560,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/omission_contexts/cm4ai_omission_context.json",
+          "sha256": "ef102ac9277928713c2d283874894cb3f9a7bd58eeec41d3448592f4a9a798f6"
+        },
+        {
+          "bytes": 1301823,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+          "sha256": "e174a7a6ec1b5eccef5ee4a8b9f8f773f48243c2d6012ff8a1b846b45a40d088"
+        },
+        {
+          "bytes": 1445211,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+          "sha256": "bc560a3cd5d04c49e95fcbf33fa8ac349171df1a877e7e0882827bd526a95214"
+        },
+        {
+          "bytes": 6115,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+          "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+        },
+        {
+          "bytes": 40869,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/source_manifest.yaml",
+          "sha256": "b28c300596cc9be964e93f1a21609f24a8b53d55302abc5fb45a29681e55cea8"
+        },
+        {
+          "bytes": 320,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/all-project-fixed-canary-01/cases/test_project_prefix_CM4AI_0/packet/receipt-policy.json",
+          "sha256": "b1c18991c8db9e29bae3f74608f9978d3f78de839b68fd8baf17898582d4b2f5"
+        },
+        {
+          "bytes": 6912,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/agents/d4d-provenance-guard-v2.md",
+          "sha256": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085"
+        },
+        {
+          "bytes": 12698,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-agent-v2.md",
+          "sha256": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299"
+        },
+        {
+          "bytes": 58267,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-full-core-v2.md",
+          "sha256": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124"
+        },
+        {
+          "bytes": 29867,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-uniform-rules-v2.md",
+          "sha256": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+        },
+        {
+          "bytes": 1493,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/context.schema.json",
+          "sha256": "4cb51a481905d272d24726dddd22ab91ed3e3ce1e6a23f37d50d2f1cefa9c2c8"
+        },
+        {
+          "bytes": 4068,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/policy.md",
+          "sha256": "0b197cf8bafe1f3df53f3c23922e9e38d514cca42979b90282022b8bef4c0b0d"
+        },
+        {
+          "bytes": 3834,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/response.schema.json",
+          "sha256": "90d9e0fcb50b391c9345b0150af2a43f7c3581673b89f35069a70f57046e6d07"
+        },
+        {
+          "bytes": 32568,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+          "sha256": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+        },
+        {
+          "bytes": 33464,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/evidence_protocol_v7.md",
+          "sha256": "72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6"
+        },
+        {
+          "bytes": 4084,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_shared_generation_v1.md",
+          "sha256": "ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c"
+        },
+        {
+          "bytes": 2336,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_shared_receipt_policy_v1.md",
+          "sha256": "de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a"
+        },
+        {
+          "bytes": 2047,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_source_attribution_v1.md",
+          "sha256": "e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761"
+        },
+        {
+          "bytes": 3569,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/shared_generation_v1.md",
+          "sha256": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+        }
+      ],
+      "largest_chunk_bytes": 29256,
+      "largest_declared_pin_bytes": 1445211,
+      "project": "CM4AI",
+      "selection": {
+        "bytes": 8505,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/all-project-fixed-canary-01/cases/test_project_prefix_CM4AI_0/packet/selection.json",
+        "sha256": "dfd19ab0ae51eb84c51d7b0ae446e4af70489f745d8a908a0a73f90926bfa878"
+      },
+      "source_documents": 10
+    },
+    {
+      "bundle_bytes": 430393,
+      "chunks": 25,
+      "declared_authority_bytes_including_selection": 3440044,
+      "declared_pins": [
+        {
+          "bytes": 430393,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+          "sha256": "b4a282fd5c44bc93a3bcd71a4c3ee53b36a0de31d105656b70c3e296cc02a956"
+        },
+        {
+          "bytes": 5082,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/chunks/AI_READI_chunks.yaml",
+          "sha256": "fc3631ad7e8de36c93d1ea5b299deff859c0ce20835c550d6f67280c6ec2e6c4"
+        },
+        {
+          "bytes": 6513,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/omission_contexts/ai_readi_omission_context.json",
+          "sha256": "15a12c02f569a22d2139e5123acc7e19f7fa650bcd03081a10f34e1a32709926"
+        },
+        {
+          "bytes": 1301823,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+          "sha256": "e174a7a6ec1b5eccef5ee4a8b9f8f773f48243c2d6012ff8a1b846b45a40d088"
+        },
+        {
+          "bytes": 1445211,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+          "sha256": "bc560a3cd5d04c49e95fcbf33fa8ac349171df1a877e7e0882827bd526a95214"
+        },
+        {
+          "bytes": 6115,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+          "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+        },
+        {
+          "bytes": 40869,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/source_manifest.yaml",
+          "sha256": "b28c300596cc9be964e93f1a21609f24a8b53d55302abc5fb45a29681e55cea8"
+        },
+        {
+          "bytes": 323,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/all-project-rest-01/cases/test_project_prefix_AI_READI_0/packet/receipt-policy.json",
+          "sha256": "86bcfcbb8dac175e4170e1433841d71ced3119255f7b8de22e153bdfacf421b5"
+        },
+        {
+          "bytes": 6912,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/agents/d4d-provenance-guard-v2.md",
+          "sha256": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085"
+        },
+        {
+          "bytes": 12698,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-agent-v2.md",
+          "sha256": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299"
+        },
+        {
+          "bytes": 58267,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-full-core-v2.md",
+          "sha256": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124"
+        },
+        {
+          "bytes": 29867,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-uniform-rules-v2.md",
+          "sha256": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+        },
+        {
+          "bytes": 1493,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/context.schema.json",
+          "sha256": "4cb51a481905d272d24726dddd22ab91ed3e3ce1e6a23f37d50d2f1cefa9c2c8"
+        },
+        {
+          "bytes": 4068,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/policy.md",
+          "sha256": "0b197cf8bafe1f3df53f3c23922e9e38d514cca42979b90282022b8bef4c0b0d"
+        },
+        {
+          "bytes": 3834,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/response.schema.json",
+          "sha256": "90d9e0fcb50b391c9345b0150af2a43f7c3581673b89f35069a70f57046e6d07"
+        },
+        {
+          "bytes": 32568,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+          "sha256": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+        },
+        {
+          "bytes": 33464,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/evidence_protocol_v7.md",
+          "sha256": "72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6"
+        },
+        {
+          "bytes": 4084,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_shared_generation_v1.md",
+          "sha256": "ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c"
+        },
+        {
+          "bytes": 2336,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_shared_receipt_policy_v1.md",
+          "sha256": "de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a"
+        },
+        {
+          "bytes": 2047,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_source_attribution_v1.md",
+          "sha256": "e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761"
+        },
+        {
+          "bytes": 3569,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/shared_generation_v1.md",
+          "sha256": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+        }
+      ],
+      "largest_chunk_bytes": 47999,
+      "largest_declared_pin_bytes": 1445211,
+      "project": "AI_READI",
+      "selection": {
+        "bytes": 8508,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/all-project-rest-01/cases/test_project_prefix_AI_READI_0/packet/selection.json",
+        "sha256": "3a7d11eaafedadb4d62b35bd3da94b25dac2651686800fcc40f7952642aa6df4"
+      },
+      "source_documents": 10
+    },
+    {
+      "bundle_bytes": 35920,
+      "chunks": 8,
+      "declared_authority_bytes_including_selection": 3042376,
+      "declared_pins": [
+        {
+          "bytes": 35920,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+          "sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c"
+        },
+        {
+          "bytes": 1945,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/chunks/CHORUS_chunks.yaml",
+          "sha256": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a"
+        },
+        {
+          "bytes": 6476,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/omission_contexts/chorus_omission_context.json",
+          "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"
+        },
+        {
+          "bytes": 1301823,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+          "sha256": "e174a7a6ec1b5eccef5ee4a8b9f8f773f48243c2d6012ff8a1b846b45a40d088"
+        },
+        {
+          "bytes": 1445211,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+          "sha256": "bc560a3cd5d04c49e95fcbf33fa8ac349171df1a877e7e0882827bd526a95214"
+        },
+        {
+          "bytes": 6115,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+          "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+        },
+        {
+          "bytes": 40869,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/source_manifest.yaml",
+          "sha256": "b28c300596cc9be964e93f1a21609f24a8b53d55302abc5fb45a29681e55cea8"
+        },
+        {
+          "bytes": 321,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/all-project-rest-01/cases/test_project_prefix_CHORUS_0/packet/receipt-policy.json",
+          "sha256": "d6894f793e0de41bd114bfddcf2a8660cc587b6fc92987679f57a912ad521346"
+        },
+        {
+          "bytes": 6912,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/agents/d4d-provenance-guard-v2.md",
+          "sha256": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085"
+        },
+        {
+          "bytes": 12698,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-agent-v2.md",
+          "sha256": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299"
+        },
+        {
+          "bytes": 58267,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-full-core-v2.md",
+          "sha256": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124"
+        },
+        {
+          "bytes": 29867,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-uniform-rules-v2.md",
+          "sha256": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+        },
+        {
+          "bytes": 1493,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/context.schema.json",
+          "sha256": "4cb51a481905d272d24726dddd22ab91ed3e3ce1e6a23f37d50d2f1cefa9c2c8"
+        },
+        {
+          "bytes": 4068,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/policy.md",
+          "sha256": "0b197cf8bafe1f3df53f3c23922e9e38d514cca42979b90282022b8bef4c0b0d"
+        },
+        {
+          "bytes": 3834,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/response.schema.json",
+          "sha256": "90d9e0fcb50b391c9345b0150af2a43f7c3581673b89f35069a70f57046e6d07"
+        },
+        {
+          "bytes": 32568,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+          "sha256": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+        },
+        {
+          "bytes": 33464,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/evidence_protocol_v7.md",
+          "sha256": "72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6"
+        },
+        {
+          "bytes": 4084,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_shared_generation_v1.md",
+          "sha256": "ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c"
+        },
+        {
+          "bytes": 2336,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_shared_receipt_policy_v1.md",
+          "sha256": "de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a"
+        },
+        {
+          "bytes": 2047,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_source_attribution_v1.md",
+          "sha256": "e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761"
+        },
+        {
+          "bytes": 3569,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/shared_generation_v1.md",
+          "sha256": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+        }
+      ],
+      "largest_chunk_bytes": 7961,
+      "largest_declared_pin_bytes": 1445211,
+      "project": "CHORUS",
+      "selection": {
+        "bytes": 8489,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/all-project-rest-01/cases/test_project_prefix_CHORUS_0/packet/selection.json",
+        "sha256": "ff635695742db56518449c0a3df1163c7c82ffd12119128ba9d43c387d923323"
+      },
+      "source_documents": 4
+    },
+    {
+      "bundle_bytes": 376446,
+      "chunks": 22,
+      "declared_authority_bytes_including_selection": 3386371,
+      "declared_pins": [
+        {
+          "bytes": 376446,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/concatenated/VOICE_preprocessed.txt",
+          "sha256": "7c4f71ab2e85d70396e479d39cb5db9454bd9f13c7274b51b4418fc2d452518c"
+        },
+        {
+          "bytes": 4680,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/chunks/VOICE_chunks.yaml",
+          "sha256": "f55de43646d5c4a6d61d6339f4d6f6adb3e50cef86d5dad1cb46a43a91fb38bc"
+        },
+        {
+          "bytes": 7219,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/omission_contexts/voice_omission_context.json",
+          "sha256": "0e4ee9fc73c4c587c143510058084c76e66b51e4e5db9ab9c5859606302776fb"
+        },
+        {
+          "bytes": 1301823,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+          "sha256": "e174a7a6ec1b5eccef5ee4a8b9f8f773f48243c2d6012ff8a1b846b45a40d088"
+        },
+        {
+          "bytes": 1445211,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+          "sha256": "bc560a3cd5d04c49e95fcbf33fa8ac349171df1a877e7e0882827bd526a95214"
+        },
+        {
+          "bytes": 6115,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+          "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+        },
+        {
+          "bytes": 40869,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/source_manifest.yaml",
+          "sha256": "b28c300596cc9be964e93f1a21609f24a8b53d55302abc5fb45a29681e55cea8"
+        },
+        {
+          "bytes": 320,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/all-project-rest-01/cases/test_project_prefix_VOICE_0/packet/receipt-policy.json",
+          "sha256": "0daefeb884ff15fdbc5571205058e45badbfc944ce62e04a2371f22c572b51be"
+        },
+        {
+          "bytes": 6912,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/agents/d4d-provenance-guard-v2.md",
+          "sha256": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085"
+        },
+        {
+          "bytes": 12698,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-agent-v2.md",
+          "sha256": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299"
+        },
+        {
+          "bytes": 58267,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-full-core-v2.md",
+          "sha256": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124"
+        },
+        {
+          "bytes": 29867,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-uniform-rules-v2.md",
+          "sha256": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+        },
+        {
+          "bytes": 1493,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/context.schema.json",
+          "sha256": "4cb51a481905d272d24726dddd22ab91ed3e3ce1e6a23f37d50d2f1cefa9c2c8"
+        },
+        {
+          "bytes": 4068,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/policy.md",
+          "sha256": "0b197cf8bafe1f3df53f3c23922e9e38d514cca42979b90282022b8bef4c0b0d"
+        },
+        {
+          "bytes": 3834,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/response.schema.json",
+          "sha256": "90d9e0fcb50b391c9345b0150af2a43f7c3581673b89f35069a70f57046e6d07"
+        },
+        {
+          "bytes": 32568,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+          "sha256": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+        },
+        {
+          "bytes": 33464,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/evidence_protocol_v7.md",
+          "sha256": "72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6"
+        },
+        {
+          "bytes": 4084,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_shared_generation_v1.md",
+          "sha256": "ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c"
+        },
+        {
+          "bytes": 2336,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_shared_receipt_policy_v1.md",
+          "sha256": "de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a"
+        },
+        {
+          "bytes": 2047,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_source_attribution_v1.md",
+          "sha256": "e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761"
+        },
+        {
+          "bytes": 3569,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/shared_generation_v1.md",
+          "sha256": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+        }
+      ],
+      "largest_chunk_bytes": 47946,
+      "largest_declared_pin_bytes": 1445211,
+      "project": "VOICE",
+      "selection": {
+        "bytes": 8481,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/all-project-rest-01/cases/test_project_prefix_VOICE_0/packet/selection.json",
+        "sha256": "2bb5de28986a4c5d4e031fcc82e0f18ca21ac110fd777bed275418f4b20623ea"
+      },
+      "source_documents": 11
+    },
+    {
+      "bundle_bytes": 206008,
+      "chunks": 13,
+      "declared_authority_bytes_including_selection": 3214048,
+      "declared_pins": [
+        {
+          "bytes": 206008,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt",
+          "sha256": "eb823708a16342a3b12cc1dabb57529cea4f95fd596abf9cbecd657a17d61e47"
+        },
+        {
+          "bytes": 2912,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/chunks/VOICE_PEDIATRIC_chunks.yaml",
+          "sha256": "a1fa4cf8d86c9feb79b8466f4f3af75c552a3bf0b76ae48b1b67955f28fba43a"
+        },
+        {
+          "bytes": 7020,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/omission_contexts/voice_pediatric_omission_context.json",
+          "sha256": "8f239e1130c0e10a74fa9432ee7ef0239828500da6f31ad66299626d3e4c164a"
+        },
+        {
+          "bytes": 1301823,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+          "sha256": "e174a7a6ec1b5eccef5ee4a8b9f8f773f48243c2d6012ff8a1b846b45a40d088"
+        },
+        {
+          "bytes": 1445211,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+          "sha256": "bc560a3cd5d04c49e95fcbf33fa8ac349171df1a877e7e0882827bd526a95214"
+        },
+        {
+          "bytes": 6115,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+          "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+        },
+        {
+          "bytes": 40869,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/data/preprocessed/source_manifest.yaml",
+          "sha256": "b28c300596cc9be964e93f1a21609f24a8b53d55302abc5fb45a29681e55cea8"
+        },
+        {
+          "bytes": 330,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/all-project-rest-01/cases/test_project_prefix_VOICE_PEDI0/packet/receipt-policy.json",
+          "sha256": "0fd4b020b7b95d1cbaecc4bf578ff94c4602da0d89619d828d1f53fdc130c786"
+        },
+        {
+          "bytes": 6912,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/agents/d4d-provenance-guard-v2.md",
+          "sha256": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085"
+        },
+        {
+          "bytes": 12698,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-agent-v2.md",
+          "sha256": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299"
+        },
+        {
+          "bytes": 58267,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-full-core-v2.md",
+          "sha256": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124"
+        },
+        {
+          "bytes": 29867,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/.claude/commands/d4d-uniform-rules-v2.md",
+          "sha256": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+        },
+        {
+          "bytes": 1493,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/context.schema.json",
+          "sha256": "4cb51a481905d272d24726dddd22ab91ed3e3ce1e6a23f37d50d2f1cefa9c2c8"
+        },
+        {
+          "bytes": 4068,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/policy.md",
+          "sha256": "0b197cf8bafe1f3df53f3c23922e9e38d514cca42979b90282022b8bef4c0b0d"
+        },
+        {
+          "bytes": 3834,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/data_sheets_schema/omission_inventory_v1/response.schema.json",
+          "sha256": "90d9e0fcb50b391c9345b0150af2a43f7c3581673b89f35069a70f57046e6d07"
+        },
+        {
+          "bytes": 32568,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+          "sha256": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+        },
+        {
+          "bytes": 33464,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/evidence_protocol_v7.md",
+          "sha256": "72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6"
+        },
+        {
+          "bytes": 4084,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_shared_generation_v1.md",
+          "sha256": "ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c"
+        },
+        {
+          "bytes": 2336,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_shared_receipt_policy_v1.md",
+          "sha256": "de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a"
+        },
+        {
+          "bytes": 2047,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/native_source_attribution_v1.md",
+          "sha256": "e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761"
+        },
+        {
+          "bytes": 3569,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/composition-a/tree/src/download/prompts/shared_generation_v1.md",
+          "sha256": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+        }
+      ],
+      "largest_chunk_bytes": 47946,
+      "largest_declared_pin_bytes": 1445211,
+      "project": "VOICE_PEDIATRIC",
+      "selection": {
+        "bytes": 8553,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h3-packet-builder-20261112/tests/all-project-rest-01/cases/test_project_prefix_VOICE_PEDI0/packet/selection.json",
+        "sha256": "1918ce6894bd3885bb63153d0024844d849c2f03524f97e5ab8cbc2dc8851717"
+      },
+      "source_documents": 6
+    }
+  ],
+  "script": {
+    "bytes": 8859,
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/scripts/adhoc/h3_gate_bounds_20261113.py",
+    "sha256": "b5b397a01efc89ae081fcc45dee856991e0dd097deb6e223f67b5b2e1b9f8e1d"
+  },
+  "status": "proposal_for_lead_decision_not_measured_execution_guarantee",
+  "values": {
+    "max_authority_bytes": 16000000,
+    "max_evidence_bytes": 256000000,
+    "max_history_bytes": 48000000,
+    "max_history_records": 1024,
+    "max_input_bytes": 4000000,
+    "max_inventory_bytes": 2000000,
+    "max_paths_per_worker": 8192,
+    "max_populated_paths": 32768,
+    "max_request_bytes": 32000000,
+    "max_response_bytes": 4000000,
+    "max_submissions": 128,
+    "max_workers": 64
+  }
+}

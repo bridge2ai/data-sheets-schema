@@ -1,0 +1,140 @@
+{
+  "alternative": "A path-preserving isolated filesystem could mount verified reference source bytes at registered paths while retaining original packet bytes. No such virtualization is implemented or demonstrated here; ordinary subprocess isolation alone is insufficient.",
+  "approval": {
+    "actor": "user",
+    "basis": "Explicit approval in the current conversation, reported by the parent agent.",
+    "reply": "Approve reference-only validation context",
+    "scope": "Implement the reference-only validation context; no launch or publication authorization."
+  },
+  "bounds_artifact": {
+    "bytes": 44253,
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/scripts/adhoc/h3_gate_bounds_20261113.json",
+    "sha256": "c43cc147d4a8b52093d0c41aacd809bb0ca9fc6fd40f72bf41d79299333a16dc"
+  },
+  "bounds_limit": "Historical prefix bounds data excludes the new environment manifest and runtime/preparation/composition/probe products; final-format totals must be measured before registration. Generated output/evidence budgets are planning assumptions, not measured guarantees.",
+  "current_supported_case": "Two project packets built in the same checkout and interpreter may have fresh IDs, labels, dates and artifact roots, provided all production checks pass. That case does not demonstrate the full allowed relocation class.",
+  "decision_requested": "Approve an explicit read-only production validation context separating trusted reference code origin from the candidate registered artifact/host identity, shared with the current production validators.",
+  "evidence": [
+    {
+      "bytes": 41318,
+      "end_line": 186,
+      "excerpt": "def _wire(raw):\n    \"\"\"Pure structural refusal precedes Git/imports; pinned U2 check follows.\"\"\"\n    from . import native_shared_authority_wire as wire\n    value = c.strict_json(raw, 'v3 registration envelope', MAX_WIRE_BYTES)\n    inner = wire.require_envelope(value)\n    identity = authority.dependency_identity()\n    authority.require_committed(identity)\n    with authority.loaded_dependencies(identity):\n        pass\n    return inner, identity",
+      "explanation": "Reads the envelope, obtains live dependency identity from the reference interpreter/ROOT and requires its committed closure.",
+      "function": "_wire",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/src/data_sheets_schema/native_execution_registration_v2.py",
+      "sha256": "93097782abd7fa37a4f5976f46e324cd20598534bc06fadca98b84cb317cb41d",
+      "start_line": 177
+    },
+    {
+      "bytes": 41318,
+      "end_line": 390,
+      "excerpt": "def _prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks, expected_profile,\n             environment_manifest_path):\n    \"\"\"Prepare the explicit shared-native input contract; perform no writes.\n\n    RunSpec boundary: validated-caller\n\n    RunSpec precondition: Caller supplies explicit selection and runtime paths, never a RunSpec argument; this factory constructs RunSpec and calls _require_registered_input_spellings before instruction, input_identity or render_spec access.\n    \"\"\"\n    from .api_runner import RunSpec, _require_registered_input_spellings\n    from .native_shared_evidence import read_regular as current_read_regular\n    _job_id(job_id)\n    c.positive_int(max_draft_checks, 'maximum draft checks')\n    if type(run_date) is not str or re.fullmatch(r'\\d{4}-\\d{2}-\\d{2}', run_date) is None:\n        raise ValueError('run_date must be an explicit ISO date')\n    from datetime import date\n    date.fromisoformat(run_date)\n    if Path.cwd().resolve() != authority.ROOT:\n        raise ValueError('v2 preparation requires its exact source checkout root')\n    captured = selection.capture(selection_path)\n    runtime_capture = current_read_regular(str(runtime_path), 'runtime_declaration',\n        max_bytes=c.HARD_LIMITS['input_bytes']).captured\n    runtime = validate_runtime(c.strict_json(runtime_capture.raw, 'runtime declaration'))\n    from .native_runtime_profiles import profile_name\n    if profile_name(runtime) != expected_profile:\n        raise ValueError('preparation entry differs from the explicitly selected runtime profile')\n    doc = captured.document()\n    inputs = doc['inputs']\n    manifest = inputs['source_manifest']\n    spec = RunSpec(**doc['run'], condition=c.CONDITION, render_version=c.RENDERER,\n        bundle=Path(inputs['bundle']['path']), chunk_manifest=Path(inputs['chunk_manifest']['path']),\n        manifest=None if manifest is None else Path(manifest['path']),\n        profile=inputs['profile']['name'], profile_basis=inputs['profile']['basis'],\n        runtime=c.RUNTIME, provider=runtime['provider'], reasoning_effort=runtime['effort'],\n        prompt_text_env=True, run_date=run_date, native_shared_generation_version=1,\n        native_shared_generation_registration=captured.registration.raw.decode('utf-8'),\n        registered_input_paths=True)\n    _require_registered_input_spellings(spec)\n    spec._native_shared_runtime_capture = runtime_capture\n    # D114 is an explicit U4b successor; historical shared-native stays literal.\n    basis = runtime['limits_basis']\n    if basis.lstrip().startswith('{'):\n        declared = c.strict_json(basis.encode('utf-8'), 'runtime profile basis', 16384)\n        if type(declared) is dict and declared.get('kind') == 'd4d_native_u4b_runtime_basis':\n            from .agentic_runtime import toolchain\n            spec._agentic_toolchain = toolchain(native_shared=True)\n    spec._native_shared_max_draft_checks = max_draft_checks\n    instruction = spec.instruction\n    dependencies = authority.dependency_identity()\n    pins = _pin_map(captured, runtime_capture, dependencies)\n    pins[runtime['executable']['path']] = runtime['executable']['sha256']\n    environment_pin = _environment_pin(environment_manifest_path, pins)\n    body = {'kind': PREPARATION_KIND, 'schema_version': VERSION, 'execution': PREPARATION_SCOPE,\n        'environment_manifest': environment_pin,\n        'job_id': job_id, 'working_directory': str(authority.ROOT), 'dependencies': dependencies,\n        'selection': _file_pin(captured.registration), 'runtime': _file_pin(runtime_capture),\n        'run_date': run_date, 'max_draft_checks': max_draft_checks, 'render_spec': spec.render_spec(),\n        'input_identity': spec.input_identity(), 'instruction': instruction,\n        'instruction_sha256': c.sha(instruction.encode('utf-8')),\n        'outputs': {name: str(Path(path).absolute()) for name, path in {\n            'full': spec.full_path, 'core': spec.core_path, 'report': spec.report_path,\n            'provenance': spec.provenance_path}.items()}, 'pinned_files': pins}\n    # Re-read every selected member, not a saved passed flag. Source identity is\n    # independently rechecked after rendering; source-commit proof is admission.\n    if (selection.capture(selection_path) != captured\n            or current_read_regular(str(runtime_path), 'runtime_declaration',\n                max_bytes=c.HARD_LIMITS['input_bytes']).captured != runtime_capture\n            or authority.dependency_identity() != dependencies):\n        raise ValueError('v2 preparation authority changed during capture')\n    from . import native_environment_manifest\n    native_environment_manifest.verify(environment_pin)\n    return _envelope(body, dependencies)",
+      "explanation": "Requires cwd equal authority.ROOT; constructs dependencies and pin map from that live source, then renders preparation.",
+      "function": "_prepare",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/src/data_sheets_schema/native_execution_registration_v2.py",
+      "sha256": "93097782abd7fa37a4f5976f46e324cd20598534bc06fadca98b84cb317cb41d",
+      "start_line": 320
+    },
+    {
+      "bytes": 41318,
+      "end_line": 421,
+      "excerpt": "def verify_preparer(raw, *, job_id):\n    \"\"\"Return a fresh rederived shared preparation, never a launch capability.\n\n    RunSpec boundary: validated-caller\n\n    RunSpec precondition: Caller supplies bounded preparation bytes and job identity; the profile-selected prepare or prepare_synthetic reconstructs and guards the fresh RunSpec before the full comparison.\n    \"\"\"\n    _job_id(job_id)\n    body, dependencies = _wire(raw)\n    c.exact(body, _PREPARATION_KEYS, 'shared-native v2 preparation')\n    if (body['kind'] != PREPARATION_KIND or body['execution'] != PREPARATION_SCOPE\n            or body['job_id'] != job_id):\n        raise ValueError('not the selected shared-native v2 preparation')\n    c.file_pin(body['selection'], 'selection pin')\n    c.file_pin(body['runtime'], 'runtime pin')\n    from . import native_environment_manifest\n    native_environment_manifest.verify(body['environment_manifest'])\n    from .native_runtime_profiles import profile_name, SYNTHETIC_PROFILE\n    runtime = c.strict_json(_read(body['runtime']['path'], 'runtime declaration',\n                                 c.HARD_LIMITS['input_bytes']).raw, 'runtime declaration')\n    preparer = prepare_synthetic if profile_name(runtime) == SYNTHETIC_PROFILE else prepare\n    expected = preparer(body['selection']['path'], body['runtime']['path'], job_id=job_id,\n                       run_date=body['run_date'], max_draft_checks=body['max_draft_checks'],\n                       environment_manifest_path=body['environment_manifest']['path'])\n    if c.canonical(body) != c.canonical(expected['registration']):\n        raise ValueError('v2 preparation differs from current pins, selection, runtime or rendering')\n    if body['dependencies'] != dependencies:\n        raise ValueError('v2 preparation source authority changed')\n    return expected['registration']",
+      "explanation": "Reconstructs preparation in that live context and compares its entire canonical body with the original candidate preparation; relocated host fields cause mismatch.",
+      "function": "verify_preparer",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/src/data_sheets_schema/native_execution_registration_v2.py",
+      "sha256": "93097782abd7fa37a4f5976f46e324cd20598534bc06fadca98b84cb317cb41d",
+      "start_line": 393
+    },
+    {
+      "bytes": 41318,
+      "end_line": 555,
+      "excerpt": "def verified(raw, *, classifier_projection):\n    \"\"\"Reconstruct v2 E through its fixed consumer; no reservation or dispatch.\n\n    C/D must check the full closed E, genuine C/policy/saved permission recipe,\n    and original/effective receipt authority from inputs only. The submitted\n    body's derived fields are never passed to the reconstruction consumer.\n    The live classifier projection is forwarded unchanged; C owns its validation.\n\n    RunSpec boundary: validated-caller\n\n    RunSpec precondition: Caller supplies execution bytes and an explicit classifier projection; verification rederives preparation through verify_preparer before consumer reconstruction.\n    \"\"\"\n    if classifier_projection is None:\n        raise ValueError('v2 execution requires an explicit classifier projection')\n    body, dependencies = _wire(raw)\n    _closed_execution(body)\n    try:\n        preparation_raw = body['preparation_raw_json'].encode('utf-8')\n        preparation = verify_preparer(preparation_raw, job_id=body['job_id'])\n        if body['preparation_sha256'] != c.sha(preparation_raw):\n            raise ValueError('v2 preparation digest mismatch')\n        if body['dependencies'] != dependencies or preparation['dependencies'] != dependencies:\n            raise ValueError('v2 dependency identity mismatch')\n        runtime_capture = _read(preparation['runtime']['path'], 'runtime_declaration',\n                                c.HARD_LIMITS['input_bytes'])\n        if _file_pin(runtime_capture) != preparation['runtime']:\n            raise ValueError('v2 prepared runtime changed before execution binding')\n        runtime = c.strict_json(runtime_capture.raw)\n        expected = {'runtime': runtime,\n            'runtime_declaration_sha256': preparation['runtime']['sha256'],\n            'selection_sha256': preparation['selection']['sha256'],\n            'max_draft_checks': preparation['max_draft_checks'],\n            'instruction_sha256': preparation['instruction_sha256'],\n            'working_directory': preparation['working_directory']}\n        for key, wanted in expected.items():\n            if c.canonical(body[key]) != c.canonical(wanted):\n                raise ValueError('v2 execution ' + key + ' mismatch')\n        composition_raw = body['composition_raw_json'].encode('utf-8')\n        composition = c.strict_json(composition_raw, 'v2 shared composition', MAX_WIRE_BYTES)\n        if c.sha(composition_raw) != body['composition_sha256']:\n            raise ValueError('v2 composition digest mismatch')\n        expected = {'render_spec': preparation['render_spec'],\n            'instruction_sha256': preparation['instruction_sha256'],\n            'selection_sha256': preparation['selection']['sha256'],\n            'runtime_sha256': preparation['runtime']['sha256']}\n        for key, wanted in expected.items():\n            if c.canonical(composition[key]) != c.canonical(wanted):\n                raise ValueError('v2 composition ' + key + ' mismatch')\n    except (KeyError, TypeError, AttributeError) as exc:\n        raise ValueError('incomplete v2 shared execution binding') from exc\n    authority.require_committed(dependencies)\n    with _consumer(dependencies) as consumer:\n        result = consumer.rebuild_v2_body(**_rebuild_inputs(body, preparation_raw),\n                                         classifier_projection=classifier_projection)\n    _closed_execution(result)\n    if c.canonical(result) != c.canonical(body):\n        raise ValueError('v2 execution consumer did not reconstruct the complete registration')\n    if authority.dependency_identity() != dependencies:\n        raise ValueError('v2 execution authority changed during verification')\n    return c.strict_json(c.canonical(result), 'verified v2 execution', MAX_WIRE_BYTES)",
+      "explanation": "Requires preparation and execution dependencies to equal the live identity, verifies dependent hashes, then reconstructs the full execution through the fixed consumer.",
+      "function": "verified",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/src/data_sheets_schema/native_execution_registration_v2.py",
+      "sha256": "93097782abd7fa37a4f5976f46e324cd20598534bc06fadca98b84cb317cb41d",
+      "start_line": 496
+    },
+    {
+      "bytes": 41318,
+      "end_line": 454,
+      "excerpt": "def _consumer(dependencies):\n    \"\"\"Only the fixed U3-D consumer may complete execution-body validation.\n\n    There is no callable/module supplied by an input, and no fallback to v1.\n    Until that module implements this exact contract, admission refuses.\n    \"\"\"\n    name = 'data_sheets_schema.native_shared_registration'\n    relative = 'src/data_sheets_schema/native_shared_registration.py'\n    expected = authority.ROOT / relative\n    digest = dependencies['base']['package_sources'].get(relative)\n    if digest is None:\n        raise ValueError('v2 execution requires the committed U3-C/D shared composition and permission consumer')\n    source = _read(str(expected), 'v2 execution consumer source', c.HARD_LIMITS['input_bytes'])\n    if source.pin.sha256 != digest:\n        raise ValueError('v2 execution consumer source differs from the committed package closure')\n    authority.refuse_legacy_consumer_imports(source.raw, name=name,\n        package_sources=dependencies['base']['package_sources'])\n    with authority.verified_source_module(name, path=expected, raw=source.raw, sha256=digest,\n            package_sources=dependencies['base']['package_sources']) as module:\n        identity = {'name': name, 'path': str(expected), 'sha256': digest}\n        if authority.module_source_identity(module) != identity:\n            raise ValueError('v2 execution consumer source identity mismatch')\n        if (type(getattr(module, 'AUTHORITY_VERSION', None)) is not int\n                or module.AUTHORITY_VERSION != AUTHORITY_VERSION):\n            raise ValueError('v2 execution consumer authority version mismatch')\n        _signature(module, 'rebuild_v2_body', (), _REBUILD_INPUTS)\n        _signature(module, 'execution_paths_v2', ('body',), ('fresh', 'extra_protected'))\n        yield module\n        if authority.module_source_identity(module) != identity:\n            raise ValueError('v2 execution consumer changed during verification')",
+      "explanation": "Loads verified consumer source only from authority.ROOT; this properly confines code origin but does not separate candidate registered host identity.",
+      "function": "_consumer",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/src/data_sheets_schema/native_execution_registration_v2.py",
+      "sha256": "93097782abd7fa37a4f5976f46e324cd20598534bc06fadca98b84cb317cb41d",
+      "start_line": 425
+    },
+    {
+      "bytes": 3957,
+      "end_line": 49,
+      "excerpt": "def dependency_identity():\n    \"\"\"Add to, never replace or rewrite, the released controller closure.\"\"\"\n    manifest = composition.controller_sources()\n    for name, pin in ADDITIONAL.items():\n        if draft._sha((ROOT/pin['path']).read_bytes()) != pin['sha256']:\n            raise ValueError(f'additive supervisor dependency differs from released bytes: {name}')\n    modules = {**manifest['modules'], **ADDITIONAL}\n    for name, pin in modules.items():\n        loaded = sys.modules.get(name)\n        if loaded is not None and Path(getattr(loaded, '__file__', '')).resolve() != (ROOT/pin['path']).resolve():\n            raise ValueError(f'supervisor dependency imported from another origin: {name}')\n    for name, loaded in list(sys.modules.items()):\n        if name == 'data_sheets_schema' or name.startswith('data_sheets_schema.'):\n            source = getattr(loaded, '__file__', None)\n            if source and not Path(source).resolve().is_relative_to(ROOT/'src/data_sheets_schema'):\n                raise ValueError(f'supervisor package imported from another origin: {name}')\n    interpreter = Path(sys.executable)\n    return {'authority_version': 2, 'controller_sources_sha256': composition.SOURCES_SHA256,\n            'source_commit': head(), 'modules': modules,\n            'package_sources': draft._code_pins(), 'python': str(interpreter),\n            'python_version': sys.version, 'python_sha256': draft._sha(interpreter.read_bytes())}",
+      "explanation": "Identity records live Git HEAD, package closure, sys.executable path, sys.version and interpreter bytes.",
+      "function": "dependency_identity",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/src/data_sheets_schema/native_supervisor_authority_v2.py",
+      "sha256": "9ade8c83d6fe3f0d874901ae62fcaeba115513328c77a3dbbc23e5230ea8221b",
+      "start_line": 29
+    },
+    {
+      "bytes": 66703,
+      "end_line": 1245,
+      "excerpt": "def require_committed(identity):\n    \"\"\"Require all consumed sources to equal the complete named Git closure.\n\n    Queries use local Git objects with replacement objects disabled. git_env\n    removes worktree/index selection overrides; object-store and other Git\n    configuration may remain, so the returned blobs are independently hashed.\n    Tests/docs outside the consumed closure do not affect admission. A v1\n    declaration cannot be upgraded by this check.\n    \"\"\"\n    _require_v2(identity)\n    if draft._encoded(dependency_identity()) != draft._encoded(identity):\n        raise ValueError('native execution dependency identity changed')\n    base = identity['base']\n    _require_package_roster(base['source_commit'], base['package_sources'])\n    paths = dict(base['package_sources'])\n    paths.update({pin['path']: pin['sha256'] for pin in base['modules'].values()})\n    paths.update({pin['path']: pin['sha256'] for pin in identity['additional_modules'].values()})\n    query = ''.join(f\"{base['source_commit']}:{path}\\n\" for path in sorted(paths)).encode()\n    proc = subprocess.run(['git', '--no-replace-objects', 'cat-file', '--batch'], cwd=ROOT,\n                          env=git_env(), input=query, capture_output=True, timeout=30, check=True)\n    offset = 0\n    for path in sorted(paths):\n        end = proc.stdout.find(b'\\n', offset)\n        if end < 0:\n            raise ValueError('incomplete source-object proof')\n        header = proc.stdout[offset:end].split(b' ')\n        if (len(header) != 3 or header[1] != b'blob'\n                or re.fullmatch(rb'[0-9a-f]{40}|[0-9a-f]{64}', header[0]) is None\n                or re.fullmatch(rb'0|[1-9][0-9]*', header[2]) is None):\n            raise ValueError(f'consumed source is not committed at the reviewed head: {path}')\n        size = int(header[2])\n        raw = proc.stdout[end + 1:end + 1 + size]\n        offset = end + size + 2\n        if (len(raw) != size or proc.stdout[offset - 1:offset] != b'\\n'\n                or hashlib.sha256(raw).hexdigest() != paths[path]):\n            raise ValueError(f'consumed source differs from the reviewed commit: {path}')\n    if offset != len(proc.stdout):\n        raise ValueError('unexpected source-object proof tail')",
+      "explanation": "Requires identity equal live dependency_identity before proving all named source bytes in the registered Git object.",
+      "function": "require_committed",
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/src/data_sheets_schema/native_execution_authority_v2.py",
+      "sha256": "f865fea7736d4c1531742ab5081bfa19b1c43ba123f3d233dc4816d7d5d2b79e",
+      "start_line": 1208
+    },
+    {
+      "bytes": 18196,
+      "explanation": "Captured verification independently requires the same live cwd/ROOT and interpreter path.",
+      "matching_lines": [
+        {
+          "line": 167,
+          "text": "if Path(cwd) != authority.ROOT or body['working_directory'] != cwd:"
+        },
+        {
+          "line": 238,
+          "text": "or selected['working_directory'] != cwd"
+        },
+        {
+          "line": 239,
+          "text": "or selected['python'] != sys.executable"
+        }
+      ],
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/src/data_sheets_schema/native_shared_registration_orchestration.py",
+      "sha256": "ebcbb866985c761546d15b5aa0c7326046f7a36819c88b74c45c278b7f7bf539"
+    }
+  ],
+  "finding": "Running existing production validators from the reference export does not validate an original candidate packet with different checkout or interpreter paths, even if all source and executable bytes are identical. They regenerate host-dependent identities from reference ROOT/sys.executable and require exact equality.",
+  "input_tuple_authority": "The admitted project input tuple comes from NP1b, not the floor-registration amendment, per the approved ruling; it pins whole source manifest, bundle, chunk manifest, omission context and scope by sha256.",
+  "kind": "h3_gate_validation_context_design_proposal",
+  "proposal_history": [
+    {
+      "decision_requested": "Approve an explicit read-only production validation context separating trusted reference code origin from the candidate registered artifact/host identity, shared with the current production validators.",
+      "document_sha256": "c09e5671fbf4a4c464c1f97f027c50152b5df9eb2fc8d97f8a20447693219ac6",
+      "status": "decision_required_not_a_gate_schema_or_equivalence_result",
+      "version": 1
+    }
+  ],
+  "recommendation": [
+    "Retain unmodified original packet bytes and bind them in the immutable comparison-input manifest. Never rewrite candidate paths, IDs or hashes to make current validation pass.",
+    "Keep interpreter/package imports and all consumer loading rooted exclusively in the verified reference export. Never add the candidate checkout to sys.path or import candidate modules.",
+    "Introduce an explicit immutable validation context supplying registered checkout/interpreter identity and artifact reads separately from trusted code origin. Do not monkeypatch module globals or skip existing checks.",
+    "Refactor preparation, composition, instruction, policy and permission reconstruction to consume that context. Current launch uses a live context; read-only gate validation uses the registered candidate context. Both retain the same semantic validators and hash rules.",
+    "Before reconstructing candidate data, verify the complete candidate source/asset/dependency closure against reference pins. Valid understood changed pins yield not_equal without executing candidate validation; invalid/incomplete evidence yields cannot_decide.",
+    "Verify candidate registered interpreter and environment-manifest identity from bound artifacts and explicit reference-safe metadata validation. Do not substitute reference host identity silently; specify how archived environments are validated before approving this context.",
+    "Prove candidate file bytes and immutable evidence through bounded stable reads; host device/inode/path differences remain recorded per-run values and their internal consistency checks remain active.",
+    "Add a refusal/equality matrix: same source at different checkout and interpreter paths, altered candidate source, forged interpreter identity, stale/missing environment manifest, altered derived hash, unknown field, and attempted candidate import. Confirm candidate code is never imported in every case."
+  ],
+  "remaining_work": "The context design is approved. The separate gate worktree implements it and the closed field schema, recomputes derived values and supplies CHORUS/AI_READI/mutant evidence. This historical design record is not proof of that implementation or any equality result.",
+  "scope": "Offline source inspection only; no provider, model, native binary, probe, capture, reservation or production validator executed by this script.",
+  "script": {
+    "bytes": 9048,
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-environment-manifest-20261113/scripts/adhoc/h3_gate_validation_context_20261113.py",
+    "sha256": "000245d0a792a2a2dcea0d2b5cd83cf1286c2657b9138ae1f638630a20bb0062"
+  },
+  "status": "design_approved_not_a_gate_schema_or_equivalence_result",
+  "version": 2,
+  "why_no_equal_claim": "An identity bypass or relocation/re-hashing preprocessing would validate changed evidence rather than the original candidate packet and would weaken the required full production validation. A same-checkout demonstration cannot establish distinct-checkout handling."
+}
