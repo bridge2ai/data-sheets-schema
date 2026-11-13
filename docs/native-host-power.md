@@ -45,6 +45,16 @@ acceptance, change runtime gate decisions, or authenticate the OS clock/log.
 A host sleep remains a host event; its acceptance disposition is for the owner.
 Retain the sidecars with the attempt for that review. Do not rewrite consumed
 attempts to add them retroactively.
+`host-controller-timing.jsonl` adds execute-child entry, dispatch origin and
+deadline, callback-response delivery, tool-result intake and model turn frames.
+Tool identifiers and command digests join these rows to the existing transcript
+and control journal. Helper durations span controller delivery to result intake;
+they include runtime/transport scheduling and are not subprocess CPU time. Model
+turn rows timestamp received assistant/user/result frames (and message start/stop
+frames when provided), not unobservable provider-side token generation. Missing
+endpoints remain missing, including a helper still unsettled at deadline. No
+registered document kind or version changes. Timing writes are bounded and
+observation failures cannot change execution decisions.
 Start, stage and end observation failures retain a separate observation-error
 diagnostic when possible, falling back to stderr. They cannot replace a launch
 failure, skip final publication or undo an already published journal stage.

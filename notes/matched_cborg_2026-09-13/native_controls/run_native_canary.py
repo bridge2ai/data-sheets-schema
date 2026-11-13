@@ -13,6 +13,7 @@ import time
 import traceback
 from contextlib import ExitStack
 from data_sheets_schema.native_elapsed import elapsed_ns
+from data_sheets_schema.native_attempt_timing import Timing
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -600,6 +601,8 @@ def record_then_close(proxy, record_stop, reason):
 
 def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None,
                   command_policy=None, phase_spec=None, command_classifier=None, event_observer=None):
+    timing = Timing(attempt)
+    timing.record('execute_child_entry')
     process = None
     control = None
     primary_error = None
@@ -626,6 +629,7 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                         'control_shutdown_complete': True, 'unfinished_control_workers': 0}
                 control = NativeControl(command_policy, command_classifier or _classify_command, env.get('CLAUDE_CONFIG_DIR'),
                                         event_observer=review_event if phase_review is not None or event_observer is not None else None)
+                control.timing = timing
                 if control.contract == HISTORY_CONTRACT:
                     proxy.control_shutdown = {'control_initialized': True,
                         'control_shutdown_complete': False, 'unfinished_control_workers': None}
@@ -635,9 +639,12 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
             verify_launch()  # Bind the executable immediately before Popen.
             # Dispatch origin includes process creation but excludes admission.
             # Unlike monotonic() on macOS, this clock includes host suspension.
-            deadline = elapsed_ns() + int(deadline_seconds * 1_000_000_000)
+            dispatch_ns = elapsed_ns()
+            deadline = dispatch_ns + int(deadline_seconds * 1_000_000_000)
             process = subprocess.Popen(argv, stdin=subprocess.PIPE if control else incoming, cwd=cwd,
                 env=env, stdout=subprocess.PIPE if control else out, stderr=err, start_new_session=True)
+            timing.record('child_dispatch', dispatch_elapsed_ns=dispatch_ns,
+                          deadline_elapsed_ns=deadline, deadline_seconds=deadline_seconds)
             if control:
                 control.start(process, out, evidence, incoming.read())
             # Watch for the exit without reaping: cleanup signals the group
@@ -670,6 +677,8 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
             record_then_close(proxy, record_stop, reason)
         raise
     finally:
+        timing.record('execute_child_cleanup_entry')
+        timing.close()
         # This runs INSIDE proxy.running(), before server/pool cleanup.
         if control is None or control.contract != HISTORY_CONTRACT:
             # Preserve the historical v2 cleanup ordering and exception shape.
