@@ -282,7 +282,7 @@ def api_recorded_case(api_disk, tmp_path, monkeypatch, route_spies):
         monkeypatch.setattr(capture, 'live_receipt_block', forbidden_native)
         # The planned recorded companion must stay unreachable from API too;
         # this negative sentinel does not provide a fake successful companion.
-        monkeypatch.setattr(capture, 'recorded_receipt_assessment', forbidden_native, raising=False)
+        monkeypatch.setattr(capture, '_recorded_receipt_assessment', forbidden_native, raising=False)
         preserved = {path: path.read_bytes() for path in
             (paths['full'], paths['receipt'], paths['provenance'], api_disk['bundle'], api_disk['manifest'])}
 
@@ -428,7 +428,7 @@ def test_explicit_selection_must_equal_fresh_recorded_selection(native_recorded_
 def test_recorded_companion_returns_independent_blocks_from_one_reconstruction(native_recorded_case):
     case_data = native_recorded_case()
     saved_record = yaml.safe_load(case_data.paths['provenance'].read_text())
-    result = capture.recorded_receipt_assessment(record=saved_record,
+    result = capture._recorded_receipt_assessment(record=saved_record,
         full_path=case_data.paths['full'], receipt_path=case_data.paths['receipt'])
     assert result.selection is case_data.selected
     original_raw = result.raw

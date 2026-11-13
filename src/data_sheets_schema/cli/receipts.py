@@ -238,7 +238,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             if selected_policy is None or selected_policy['registration'].get('kind') != 'd4d_native_shared_receipt_policy':
                 raise ValueError('native recorded outcome lacks its authoritative selection')
             from data_sheets_schema import native_shared_capture_orchestration as native_shared_capture
-            assessed = native_shared_capture.recorded_receipt_assessment(
+            assessed = native_shared_capture._recorded_receipt_assessment(
                 record=record, full_path=p['full'], receipt_path=receipt_file)
             if native_capture is not None and native_capture != assessed.selection:
                 raise ValueError('explicit native selection differs from recorded reconstruction')
