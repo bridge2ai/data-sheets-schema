@@ -1,6 +1,6 @@
 # Helper 3 recorder environment and pin comparison
 
-Part 1 commit: `c577c0eff176440206a93f6647d8fd2f19a6d224` on `codex/native-recorder-env-20261113`. Status: Part 1 committed; validation and Part 2 design ruling pending.
+Part 1 commit: `c577c0eff176440206a93f6647d8fd2f19a6d224` on `codex/native-recorder-env-20261113`. Status: Partial handoff: recorder code committed; full-path/replay validation held; Part 2 requires design ruling; Part 3 not started.
 
 The exact saved synthetic model-facing recorder line is 1806 characters (1806 UTF-8 bytes), excluding its newline:
 
@@ -14,11 +14,11 @@ Local review finding H3-RE1: initial commit f57ac61da lacked the digest anchor, 
 
 The 2282 notes show a literal environment-variable name was admitted while shell expansion was refused. This command uses no expansion and no inline JSON; an apostrophe inside the specification therefore never enters the command. Other independently supplied command paths still retain their existing spelling constraints. No runtime-permission admission is claimed without a real authorized probe.
 
-Changed model-facing artifacts: recorder command in initial instruction, registered helper command table, recorder command in tool policy and Bash allow rules, command guidance appended to the base system instructions, derived instruction/system/command hashes in stage requests. Permission expectation/environment and source pins are supporting changes. Replay confirmation is pending unless the companion JSON contains completed replay evidence; no claim is made from an unproduced snapshot.
+Changed model-facing artifacts: recorder command in initial instruction, registered helper command table, recorder command in tool policy and Bash allow rules, command guidance appended to the base system instructions, derived instruction/system/command hashes in stage requests and dependent history/receipt carriers, recorder refusal feedback for the deliberately missing-environment helper case. Permission expectation/environment and source pins are supporting changes. Replay confirmation is pending unless the companion JSON contains completed replay evidence; no claim is made from an unproduced snapshot.
 
 ## CI triage and launch carry
 
-The baseline readback file passed 15 tests. The merged export reproduced all eight closed-wire failures: the component fixture was intentionally incomplete, and the new diagnostic preflight checks that shape. The repair supplies the closed wire with explicit placeholders; all production checks and existing assertions remain intact. The failure-publication file did not exist at the baseline. At the merged head, its seven tests pass in isolation once local Git metadata is supplied; the reported foreign-origin failure depends on broader collection/prior-state. The isolation repair uses the established fixture, with a historical collection import included in the fixed export run.
+The baseline readback file passed 15 tests. The merged export reproduced all eight closed-wire failures: the component fixture was intentionally incomplete, and the new diagnostic preflight checks that shape. The repair supplies the closed wire with explicit placeholders; all production checks and existing assertions remain intact. The failure-publication file did not exist at the baseline. At the merged head, its seven tests pass in isolation once local Git metadata is supplied; the chosen historical collection-import pair also passed. Thus the exact CI foreign-origin failure was not locally reproduced. The isolation repair uses the established fixture to remove the conflicting bare aliases before each case, directly addressing the CI-reported condition without relaxing origin checks. The fixed export passed all 23 cases, including both whole failing files and the historical collection import; this does not certify the full CI collection order or its platform.
 
 Preserved original repairs `48cb2d1f494add9903851af3c3babce31213af79` and `ef193e4eabc65a1c7ab39ecc64ad2945889f3416`; added H3-LR1 as `a22c51a9d082cad64eccb64c2de900b32e8e2630`, without rewriting. Their carried hashes and the two separate CI fixture commits are below. Fetch was attempted but failed to resolve GitHub; base is the locally available published `8760de5efe88b5af62e9d77e6335fa7e248017b6`.
 
@@ -38,19 +38,25 @@ Preserved original repairs `48cb2d1f494add9903851af3c3babce31213af79` and `ef193
 - fixture-fixes: {"tests": 22, "failed": 1, "errors": 0, "skipped": 0}
 - merged-failing-files: {"tests": 22, "failed": 10, "errors": 0, "skipped": 0}
 - merged-failure-git: {"tests": 7, "failed": 0, "errors": 0, "skipped": 0}
-- merged-origin-collection: {"complete": false}
+- merged-origin-collection: {"tests": 2, "failed": 0, "errors": 0, "skipped": 0}
 - recorder-bound-digest-01: {"tests": 59, "failed": 0, "errors": 0, "skipped": 0}
 - recorder-focused-01: {"tests": 55, "failed": 0, "errors": 0, "skipped": 0}
-- recorder-public-native26: {"complete": false}
+- recorder-public-native26: {"tests": 2, "failed": 1, "errors": 0, "skipped": 0}
 
 The initial merged publication reproduction lacked Git metadata. The working-tree fixture run changed HEAD during registration reconstruction and is not acceptance. Both are retained, not relabelled as passes. The stable fixed export is the acceptance rerun.
+
+H3-RE2 is an unresolved validation finding: the full synthetic native26 public-path test failed at its declared 900-second deadline before the recorder was called (the other test in that file passed). The failure publication and verified cleanup are retained. No limit or assertion was weakened, and no corresponding full-path baseline was run; attribution to this recorder change is unresolved. The focused public CLI recorder test succeeds, but the requested complete native26 public-path success is NOT established. The lead must file this finding externally if required; no GitHub write was authorized.
 
 ## Part 2 decision required
 
 No pin-comparison gate or allowlist is presented. The existing production verifier loads the pinned consumer source through `_consumer` and `verified_source_module`, rederives preparation, and requires its exact checkout. Calling it violates the requested prohibition on executing either input tree; substituting a structural parser would silently weaken validation. A ruling was requested: add separately reviewed data-only production packet validation, or permit isolated existing production validation before a data-only comparison. No self/other-project/prompt/binary/floor equivalence demonstrations are claimed. Script/data hashes are therefore absent.
 
+There is also a missing registry boundary: the emitted `native_supervisor_authority_v2.dependency_identity` and `native_execution_authority_v2.dependency_identity` pin repository modules/package sources and interpreter bytes/version, but no third-party distribution contents. The rendered LinkML helper commands execute those external modules. The requested closed dependency registry needs an explicit packet binding; identical existing pins cannot establish it. The producer return shapes were inspected directly, and an ignore-independent package search found no relevant external distribution-content registry field. Recommendation: define a versioned closed-registry binding and a data-only packet validation interface first; then implement the comparison against that fixed contract. This is a design stop under the context instruction, not a request to weaken the gate.
+
 Part 3 has not started; it follows Part 2. The four protected files and guard v1 match the base byte for byte (computed hashes in JSON). No real native binary, provider/model call, probe, capture, reservation, push or GitHub write. Synthetic tests write only their own evidence. Other CI failures and cancelled shards remain untriaged here.
+
+The stop follows the helper context rule: "If a task needs a design decision, stop there and report the choice with your recommendation." The concrete recommendations above preserve the assignment's prohibition on executing input source trees and its demand for a closed dependency registry.
 
 ## Development replay reading
 
-The accepted aid produced both snapshots but retained cannot_decide because its old inventory lacks four merged support modules. That hold is preserved. The focused expected-change assertion reports explained_model_projection, 388 byte-identical artifacts, and model-unresolved artifacts []. It verifies the exact recorder substitution, lossless Bash rule spelling, source-byte hash preimages and dependent hash propagation. The deliberately missing-environment recorder fixture changes its expected refusal message; successful recording is tested separately. The permission expectation remains supporting evidence and its remaining metadata differences are retained explicitly. This establishes only the fixed synthetic model projection; it is not registration equivalence or an exhaustive behavioral proof.
+The accepted aid produced both snapshots but retained cannot_decide because its old inventory lacks four merged support modules. That hold is preserved. The focused expected-change assertion reports hold, 388 byte-identical artifacts, and model-unresolved artifacts []. It verifies the exact recorder substitution, lossless Bash rule spelling, source-byte hash preimages and dependent hash propagation. The deliberately missing-environment recorder fixture changes its expected refusal message; successful recording is tested separately. The permission expectation remains supporting evidence and its remaining metadata differences are retained explicitly. Five helper cases on each side retain uncaught exceptions under the accepted aid (6073), so the full requested unchanged-exposure confirmation is NOT established. The focused check explains captured bytes only and remains a hold because those intended helper observations are unavailable. It is not registration equivalence or an exhaustive behavioral proof.

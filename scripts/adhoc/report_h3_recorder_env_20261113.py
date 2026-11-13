@@ -41,7 +41,8 @@ for path in ('src/data_sheets_schema/shared_generation.py', 'src/data_sheets_sch
     actual = (W / path).read_bytes()
     assert actual == before
     protected[path] = sha(actual)
-report = {'status': 'Part 1 committed; validation and Part 2 design ruling pending',
+report = {'status': 'Partial handoff: recorder code committed; full-path/replay validation held; Part 2 requires design ruling; Part 3 not started',
+    'review': pin(E / 'plans/reviews/native_equivalence_e82c36ab_codex_review_2026-11-13.md'),
     'branch': git('branch', '--show-current'), 'head': git('rev-parse', 'HEAD'),
     'base': git('rev-parse', '8760de5ef'), 'fetch': 'Attempted as assigned; GitHub DNS resolution failed. No publication.',
     'commits': git('log', '--reverse', '--format=%H %s', '8760de5ef..HEAD').splitlines(),
@@ -54,13 +55,15 @@ report = {'status': 'Part 1 committed; validation and Part 2 design ruling pendi
     'recorder_line_evidence': pin(line_path), 'line_scope': 'Exact synthetic native26 model-facing line from the saved test; production paths remain registration-specific.',
     'model_facing_changes': ['recorder command in initial instruction', 'registered helper command table',
         'recorder command in tool policy and Bash allow rules', 'command guidance appended to the base system instructions',
-        'derived instruction/system/command hashes in stage requests'],
+        'derived instruction/system/command hashes in stage requests and dependent history/receipt carriers',
+        'recorder refusal feedback for the deliberately missing-environment helper case'],
     'supporting_changes': ['permission expectation recorder command and environment', 'production source pins'],
     'part2': {'status': 'design ruling requested; no gate implemented',
         'conflict': 'Existing production verified() reconstructs through pinned source execution and requires its exact checkout; data-only parsing is not equivalent validation.',
         'evidence': ['native_execution_registration_v2.py:_wire,verify_preparer,verified,_consumer',
             'native_execution_authority_v2.py:verified_source_module', 'native_shared_registration_orchestration.py:verified'],
         'choices': ['Add separately reviewed data-only production packet validation', 'Permit isolated existing production validation before data-only comparison'],
+        'dependency_registry_gap': 'The emitted dependency identity pins repository modules/package sources and interpreter bytes/version, but not third-party helper distribution contents. native_shared_render invokes LinkML modules from that environment. A separately bound closed dependency registry is needed; it cannot be inferred from identical current packet pins.',
         'script_sha256': None, 'data_sha256': None, 'demonstrations': 'Not run; no equivalence claim.'},
     'part3': {'status': 'not started; ordered after Part 2'}, 'cohorts': cohorts,
     'protected_and_guard_v1_sha256': protected,
@@ -68,6 +71,19 @@ report = {'status': 'Part 1 committed; validation and Part 2 design ruling pendi
         'Only assigned CI groups investigated; the remaining CI failures and timed-out shards are not cleared.',
         'fixture-fixes cohort is non-acceptance: HEAD changed during a genuine registration test; fixed-ci-export replaces it.',
         'First merged export omitted Git metadata; merged-failure-git replaces its publication results.']}
+assert report['review']['sha256'] == '47af856a4aa36c672ca25d2aa6d6f58b9bfbabbfa93c460fc0ee0a51c3c52918'
+public_root = S / 'tests/recorder-public-native26/cases/test_actual_public_correction_0/native26'
+final_path = public_root / 'native-evidence/final.json'
+if final_path.exists():
+    final = json.loads(final_path.read_bytes())
+    controls = [json.loads(line) for line in (public_root / 'native-attempt/control.jsonl').read_text().splitlines()]
+    calls = [row.get('request', {}).get('request', {}).get('input', {}).get('tool_input', {}).get('command', '') for row in controls]
+    recorder_calls = [line for line in calls if ' -m data_sheets_schema.cli provenance record ' in line]
+    report['public_path_finding'] = {'id': 'H3-RE2', 'status': 'unresolved validation finding; lead filing required',
+        'state': final['state'], 'first_stop': final['first_stop'], 'recorder_calls': recorder_calls,
+        'runtime_gates_passed': final['runtime_gates_passed'], 'final': pin(final_path),
+        'controls': pin(public_root / 'native-attempt/control.jsonl'),
+        'basis': 'Declared synthetic deadline was not increased. No matching full-path baseline was run, so attribution to the recorder change is unresolved. Successful native26 public recording is not established.'}
 for name in ('recorder-replay-01', 'recorder-replay-02'):
     p = S / name / 'manifest.json'
     if p.exists():
@@ -100,7 +116,7 @@ Changed model-facing artifacts: {', '.join(report['model_facing_changes'])}. Per
 
 ## CI triage and launch carry
 
-The baseline readback file passed 15 tests. The merged export reproduced all eight closed-wire failures: the component fixture was intentionally incomplete, and the new diagnostic preflight checks that shape. The repair supplies the closed wire with explicit placeholders; all production checks and existing assertions remain intact. The failure-publication file did not exist at the baseline. At the merged head, its seven tests pass in isolation once local Git metadata is supplied; the reported foreign-origin failure depends on broader collection/prior-state. The isolation repair uses the established fixture, with a historical collection import included in the fixed export run.
+The baseline readback file passed 15 tests. The merged export reproduced all eight closed-wire failures: the component fixture was intentionally incomplete, and the new diagnostic preflight checks that shape. The repair supplies the closed wire with explicit placeholders; all production checks and existing assertions remain intact. The failure-publication file did not exist at the baseline. At the merged head, its seven tests pass in isolation once local Git metadata is supplied; the chosen historical collection-import pair also passed. Thus the exact CI foreign-origin failure was not locally reproduced. The isolation repair uses the established fixture to remove the conflicting bare aliases before each case, directly addressing the CI-reported condition without relaxing origin checks. The fixed export passed all 23 cases, including both whole failing files and the historical collection import; this does not certify the full CI collection order or its platform.
 
 Preserved original repairs `48cb2d1f494add9903851af3c3babce31213af79` and `ef193e4eabc65a1c7ab39ecc64ad2945889f3416`; added H3-LR1 as `a22c51a9d082cad64eccb64c2de900b32e8e2630`, without rewriting. Their carried hashes and the two separate CI fixture commits are below. Fetch was attempted but failed to resolve GitHub; base is the locally available published `8760de5efe88b5af62e9d77e6335fa7e248017b6`.
 
@@ -111,11 +127,17 @@ for name, row in cohorts.items():
 text += '''
 The initial merged publication reproduction lacked Git metadata. The working-tree fixture run changed HEAD during registration reconstruction and is not acceptance. Both are retained, not relabelled as passes. The stable fixed export is the acceptance rerun.
 
+H3-RE2 is an unresolved validation finding: the full synthetic native26 public-path test failed at its declared 900-second deadline before the recorder was called (the other test in that file passed). The failure publication and verified cleanup are retained. No limit or assertion was weakened, and no corresponding full-path baseline was run; attribution to this recorder change is unresolved. The focused public CLI recorder test succeeds, but the requested complete native26 public-path success is NOT established. The lead must file this finding externally if required; no GitHub write was authorized.
+
 ## Part 2 decision required
 
 No pin-comparison gate or allowlist is presented. The existing production verifier loads the pinned consumer source through `_consumer` and `verified_source_module`, rederives preparation, and requires its exact checkout. Calling it violates the requested prohibition on executing either input tree; substituting a structural parser would silently weaken validation. A ruling was requested: add separately reviewed data-only production packet validation, or permit isolated existing production validation before a data-only comparison. No self/other-project/prompt/binary/floor equivalence demonstrations are claimed. Script/data hashes are therefore absent.
 
+There is also a missing registry boundary: the emitted `native_supervisor_authority_v2.dependency_identity` and `native_execution_authority_v2.dependency_identity` pin repository modules/package sources and interpreter bytes/version, but no third-party distribution contents. The rendered LinkML helper commands execute those external modules. The requested closed dependency registry needs an explicit packet binding; identical existing pins cannot establish it. The producer return shapes were inspected directly, and an ignore-independent package search found no relevant external distribution-content registry field. Recommendation: define a versioned closed-registry binding and a data-only packet validation interface first; then implement the comparison against that fixed contract. This is a design stop under the context instruction, not a request to weaken the gate.
+
 Part 3 has not started; it follows Part 2. The four protected files and guard v1 match the base byte for byte (computed hashes in JSON). No real native binary, provider/model call, probe, capture, reservation, push or GitHub write. Synthetic tests write only their own evidence. Other CI failures and cancelled shards remain untriaged here.
+
+The stop follows the helper context rule: "If a task needs a design decision, stop there and report the choice with your recommendation." The concrete recommendations above preserve the assignment's prohibition on executing input source trees and its demand for a closed dependency registry.
 '''
 if 'exposure_check' in report:
     check = report['exposure_check']['value']
@@ -126,7 +148,9 @@ if 'exposure_check' in report:
         'It verifies the exact recorder substitution, lossless Bash rule spelling, source-byte hash preimages and dependent hash propagation. '
         'The deliberately missing-environment recorder fixture changes its expected refusal message; successful recording is tested separately. '
         'The permission expectation remains supporting evidence and its remaining metadata differences are retained explicitly. '
-        'This establishes only the fixed synthetic model projection; it is not registration equivalence or an exhaustive behavioral proof.\n')
+        'Five helper cases on each side retain uncaught exceptions under the accepted aid (6073), so the full requested unchanged-exposure confirmation is NOT established. '
+        'The focused check explains captured bytes only and remains a hold because those intended helper observations are unavailable. '
+        'It is not registration equivalence or an exhaustive behavioral proof.\n')
 assert '@' not in text
 OUT.with_suffix('.md').write_text(text)
 print(json.dumps({suffix: pin(OUT.with_suffix(suffix)) for suffix in ('.md', '.json')}, indent=2))

@@ -33,18 +33,24 @@ def bash_rule(line):
 # Same lossless Bash-rule codec as the accepted replay aid.
 substitutions[bash_rule(old_line)] = bash_rule(new_line)
 hashes = {}
+def remember(before, after, basis, encoding):
+    key, value = sha(before), sha(after)
+    if key in hashes:
+        assert hashes[key]['right'] == value, 'conflicting dependent hash interpretation'
+    else:
+        hashes[key] = {'right': value, 'basis': basis, 'encoding': encoding}
 def bind(a, b, basis):
     for before, after in ((enc(a).encode(), enc(b).encode()),):
-        if before != after: hashes[sha(before)] = {'right': sha(after), 'basis': basis, 'encoding': 'canonical_json'}
+        if before != after: remember(before, after, basis, 'canonical_json')
     if isinstance(a, str) and isinstance(b, str) and a != b:
-        hashes[sha(a.encode())] = {'right': sha(b.encode()), 'basis': basis, 'encoding': 'utf8'}
+        remember(a.encode(), b.encode(), basis, 'utf8')
 def rewrite(text):
     for before, after in substitutions.items(): text = text.replace(before, after)
     for before, row in hashes.items(): text = text.replace(before, row['right'])
     return text
 def same(a, b):
-    if a == b: return True
     if type(a) is not type(b): return False
+    if enc(a) == enc(b): return True
     if isinstance(a, dict): return a.keys() == b.keys() and all(same(a[k], b[k]) for k in a)
     if isinstance(a, list):
         if a == old and b == new: return True
@@ -91,6 +97,10 @@ for iteration in range(100):
     if previous == (len(hashes), len(verified)): break
 remaining = [name for name in left if name not in verified]
 model_remaining = [name for name in remaining if name != 'permission_expectation']
+helper_exceptions = {side: [{'artifact': key, 'exception': value['uncaught_exception_type']}
+    for key, value in artifacts.items() if key.startswith('helper_cli/')
+    and value.get('uncaught_exception_type') is not None]
+    for side, artifacts in (('left', left), ('right', right))}
 unresolved_details = []
 def explain(a, b, location):
     if same(a,b): return
@@ -101,12 +111,17 @@ def explain(a, b, location):
     else: unresolved_details.append({'location': location, 'left': a, 'right': b})
 for name in remaining: explain(left_for_check[name], right[name], name)
 result = {'scope': 'Focused 6065 development assertion, not registration equivalence',
+    'checker_sha256': sha(Path(__file__).read_bytes()),
     'snapshots': {p.name: sha(p.read_bytes()) for p in paths}, 'iterations': iteration + 1,
-    'unchanged': sum(left[k] == right[k] for k in left), 'verified': verified,
+    'unchanged': sum(enc(left[k]) == enc(right[k]) for k in left), 'verified': verified,
     'hash_pairs': hashes, 'unresolved': remaining, 'unresolved_details': unresolved_details,
     'model_unresolved': model_remaining,
+    'helper_exceptions': helper_exceptions,
+    'captured_bytes_explained': not model_remaining,
     'supporting_unresolved': [name for name in remaining if name == 'permission_expectation'],
-    'status': 'explained_model_projection' if not model_remaining else 'hold',
-    'recorder_line': new_line, 'recorder_line_characters': len(new_line)}
+    'status': 'explained_model_projection' if not model_remaining and not any(helper_exceptions.values()) else 'hold',
+    'recorder_line': new_line, 'recorder_line_characters': len(new_line),
+    'previous_recorder_line_characters': len(old_line),
+    'instruction_bytes': {'before': len(left['instruction'].encode()), 'after': len(right['instruction'].encode())}}
 (OUT / 'exposure-check.json').write_text(json.dumps(result, indent=2) + '\n')
 print(json.dumps({key: result[key] for key in ('status', 'unchanged', 'unresolved', 'iterations', 'recorder_line_characters')}))
