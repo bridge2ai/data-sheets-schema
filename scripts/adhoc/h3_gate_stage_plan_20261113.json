@@ -1,0 +1,55 @@
+{
+  "kind": "SYNTHETIC-native-gate-stage-plan",
+  "version": 1,
+  "date": "2026-11-13",
+  "finding": "H3-RF17",
+  "status": "design-only; no stage launched by this plan",
+  "purpose": "Separate sandboxed offline packet builders from gate parents whose validation workers apply their own read-only sandbox.",
+  "current_frozen_source_commit": "f98435a0dac3591a2680c595fb7283101e644965",
+  "current_source_policy": "Do not modify G while its standalone reference canary is active. A later harness commit requires a fresh stratum and new registrations.",
+  "preserved_failures": [
+    "scratch-h3-gate-refinements-20261113/tests/final-format-01",
+    "scratch-h3-gate-refinements-20261113/tests/final-format-02"
+  ],
+  "rules": {
+    "source_commit": "One exact actual G HEAD throughout a fresh stratum; stable-read and verify declared source bytes before every stage and compilation.",
+    "environment": "One owned cohort venv, one exact interpreter spelling and prefix, fixed dependency roots and one fixed shared synthetic peer/home.",
+    "input_authority": "Closed data-only stage configuration; no caller-supplied callable, command, source substitution or arbitrary import root.",
+    "gate_parent": "No inherited OS sandbox. Compile checked fixed source and install denial/audit controls in each non-sandboxed Python parent bootstrap, not just the top-level orchestrator.",
+    "gate_worker": "Keep the existing macOS read-only, no-network, selected-interpreter/read-only-Git sandbox unchanged.",
+    "builder": "Use the existing no-network/no-native OS sandbox and retain the builder's output-only write guard. Do not invoke a gate parent within this sandbox.",
+    "canary": "Reference registration plus persisted equal self-gate must finish before any other original packet build.",
+    "proof": "Exclusive fresh stage artifacts, exact input/output pins, command/source/environment/origin evidence and observed-process cleanup evidence. A failed stage remains a failure and stops automatic progression.",
+    "reuse": "No cache, comparison-case reuse or old failed-cohort acceptance. A later separately bounded stage consumes predecessor artifacts only through pinned, verified stage outputs.",
+    "deadline": "Each active job is bounded by at most 14400 active seconds; a native quiet-window pause does not authorize a new stage.",
+    "concurrency": "One stage at a time; shared machine worker budget remains at most two.",
+    "side_effects": "No native binary, model/provider, real probe, capture, reservation, network or publication. Never move G/N HEAD for controls. Private same-tree HEAD moves are confined to the owned source export and always restored."
+  },
+  "stages": [
+    {"id": "bootstrap", "owner": "N fixed orchestrator", "process": "outside OS sandbox", "requires": [], "produces": "fresh cohort venv/bootstrap manifest via exact captured G runner setup"},
+    {"id": "setup-peer", "owner": "G fixed stage CLI", "process": "builder OS sandbox", "requires": ["bootstrap"], "produces": "one shared peer/updater/empty sibling synthetic-home using the exact cohort interpreter"},
+    {"id": "build-reference", "owner": "G fixed stage CLI", "process": "builder OS sandbox", "requires": ["setup-peer"], "role": "reference", "project": "CHORUS", "produces": "production-verified original reference packet/report/byte inventory"},
+    {"id": "gate-canary", "owner": "N fixed orchestrator plus exact G driver", "process": "gate parent outside OS sandbox; workers use their own OS sandbox", "requires": ["build-reference"], "produces": "fresh canary_passed aggregate and equal self-comparison with production verification"},
+    {"id": "build-later", "owner": "G fixed stage CLI", "process": "builder OS sandbox", "requires": ["gate-canary"], "role": "later", "project": "CHORUS"},
+    {"id": "build-ai-readi", "owner": "G fixed stage CLI", "process": "builder OS sandbox", "requires": ["build-later"], "role": "AI_READI", "project": "AI_READI"},
+    {"id": "build-cm4ai", "owner": "G fixed stage CLI", "process": "builder OS sandbox", "requires": ["build-ai-readi"], "role": "CM4AI", "project": "CM4AI"},
+    {"id": "build-voice", "owner": "G fixed stage CLI", "process": "builder OS sandbox", "requires": ["build-cm4ai"], "role": "VOICE", "project": "VOICE"},
+    {"id": "build-voice-pediatric", "owner": "G fixed stage CLI", "process": "builder OS sandbox", "requires": ["build-voice"], "role": "VOICE_PEDIATRIC", "project": "VOICE_PEDIATRIC"},
+    {"id": "build-registered", "owner": "G fixed stage CLI", "process": "builder OS sandbox", "requires": ["build-voice-pediatric"], "role": "registered", "project": "AI_READI"},
+    {"id": "build-expired", "owner": "G fixed stage CLI", "process": "builder OS sandbox", "requires": ["build-registered"], "role": "expired", "project": "CHORUS"},
+    {"id": "environment-snapshots", "owner": "G fixed stage CLI", "process": "builder OS sandbox", "requires": ["build-expired"], "produces": "distribution-version and installed-file manifests/provenance with independently checked restored baseline files"},
+    {"id": "private-reference", "owner": "fixed source-control helper", "process": "reference builder OS sandbox", "requires": ["environment-snapshots"], "produces": "faithful private source export, same-tree commits, private venv and production-verified reference"},
+    {"id": "private-self-gate", "owner": "fixed source-control helper", "process": "gate parent outside OS sandbox; workers use their own OS sandbox", "requires": ["private-reference"], "produces": "fresh equal private reference self-gate with exact tool pins"},
+    {"id": "private-candidate", "owner": "fixed source-control helper", "process": "candidate builder OS sandbox", "requires": ["private-self-gate"], "produces": "candidate built at private moved HEAD, followed by verified reference-HEAD restoration in finally"},
+    {"id": "assemble-report", "owner": "G fixed stage CLI", "process": "data-only bounded stage", "requires": ["private-candidate"], "produces": "fresh combined report pinning all eight original packets, environment snapshots and private source-commit controls"},
+    {"id": "gate-full", "owner": "N fixed orchestrator plus exact G driver", "process": "gate parent outside OS sandbox; workers use their own OS sandbox", "requires": ["assemble-report"], "produces": "28 fresh comparisons and immutable comparison-input manifests; no reused comparison results"}
+  ],
+  "implementation_dependencies": [
+    "Root explicitly releases G after the current frozen standalone canary ends.",
+    "Save the combined pytest producer byte-for-byte as historical adhoc provenance before replacing its orchestration.",
+    "Provide a fixed G stage CLI with closed role specifications and strict pinned configuration.",
+    "Split the source-control launcher by exact internal stage, retaining outer sandbox only for builder children.",
+    "Revise the unexecuted N continuation draft; its original outer sandbox around the gate driver must never be used.",
+    "Run cheap lifecycle/closed-command/no-nested-sandbox controls, independent review, source freeze and one real reference-build/self-gate canary before the remaining stages."
+  ]
+}
