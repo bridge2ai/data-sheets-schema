@@ -102,6 +102,8 @@ if __name__ == '__main__':
             command.append('tests/test_native_admission_timer.py::test_existing_signal_state_is_refused_and_preserved[pending]')
         elif cohort == 'admission-retry':
             command.append('tests/test_native_admission_failure.py::test_shared_engine_stalled_admission_publishes_and_stops_timing')
+        elif cohort == 'power-retry':
+            command.append('tests/test_native_attempt_deadline.py::test_unplug_after_sequence_start_refuses_public_dispatch[Battery Power]')
         elif cohort in ('budget', 'native', 'audit'):
             command += ['--lane', cohort]
         elif cohort == 'scanner':
