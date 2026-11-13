@@ -367,8 +367,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     # All cold controller/callback derivations finish before saved-capture
     # acceptance. The warmup closes its source-loader scope before returning:
     # never keep a consumer finder active across live bootstrap orchestration.
-    adapter = contract.make_controller(value, registration_raw)
     with pre_timing.step('controller_prewarm'):
+        adapter = contract.make_controller(value, registration_raw)
         contract.prewarm_controller(adapter)
     accepted_current_selection = False
     if type(launch_guard) is CurrentSelection:

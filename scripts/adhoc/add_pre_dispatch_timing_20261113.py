@@ -49,8 +49,9 @@ p = root / 'src/data_sheets_schema/native_execution_orchestration.py'
 text = add_import(p.read_text())
 text = replace_once(text, '    with controls.loaded_classifier() as classifier_projection:',
     "    with pre_timing.step('admission_with_classifier'), controls.loaded_classifier() as classifier_projection:")
-text = replace_once(text, '    contract.prewarm_controller(adapter)',
-    "    with pre_timing.step('controller_prewarm'):\n        contract.prewarm_controller(adapter)")
+text = replace_once(text, '    adapter = contract.make_controller(value, registration_raw)\n    contract.prewarm_controller(adapter)',
+    "    with pre_timing.step('controller_prewarm'):\n"
+    "        adapter = contract.make_controller(value, registration_raw)\n        contract.prewarm_controller(adapter)")
 text = replace_once(text, '    with reservation_lease():',
     "    with pre_timing.step('reservation'), reservation_lease():")
 text = replace_once(text, '        _sync_directory(attempt.parent)\n    durable_new',
