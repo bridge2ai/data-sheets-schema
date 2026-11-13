@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 import pytest
 import yaml
 
-from utils.pytest_shard import API_CASE_LANES, SG2_CASE_LANES, NATIVE_PUBLIC_CASE_LANES, DEDICATED_CASE_LANES, balanced_files, partition_lanes, read_weights, shard_for
+from utils.pytest_shard import API_CASE_LANES, SG2_CASE_LANES, NATIVE_PUBLIC_CASE_LANES, NATIVE_FAILURE_CASE_LANES, NATIVE_CASE_LANES, DEDICATED_CASE_LANES, balanced_files, partition_lanes, read_weights, shard_for
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,7 +57,7 @@ def _assert_complete_partition(tmp_path, weighted, total, lanes=False):
     whole = _run(tmp_path, "--junitxml=all.xml")
     assert whole.returncode == 0, whole.stdout + whole.stderr
     expected = _cases(tmp_path / "all.xml")
-    assert sum(expected.values()) == (188 if lanes else 172)
+    assert sum(expected.values()) == (205 if lanes else 172)
     flags = []
     if weighted:
         # Only about half the files have timings. Untimed files must still run;
@@ -298,6 +298,25 @@ def _lane_fixture(root, *, body="assert True", decorator="", fixture="", target=
             "import pytest\n" + (fixture if own else "") + (decorator if own else "")
             + f"def {name}():\n    " + (body if own else "assert True") + "\n"
         )
+    # Preserve exact real parameter IDs, including spaces and dots. Group by
+    # function so parameterized nodes are collected once rather than overwritten.
+    groups = {}
+    for lane, node in NATIVE_FAILURE_CASE_LANES.items():
+        relative, case = node.split("::")
+        name, bracket, parameter = case.partition("[")
+        groups.setdefault((relative, name), []).append((lane, parameter[:-1] if bracket else None))
+    text = "import pytest\n" + (fixture if target in NATIVE_FAILURE_CASE_LANES else "")
+    for (_, name), cases in groups.items():
+        own = any(lane == target for lane, _ in cases)
+        if cases[0][1] is not None:
+            ids = [parameter for _, parameter in cases]
+            text += f"@pytest.mark.parametrize('case_id', {ids!r}, ids={ids!r})\n"
+            args = "case_id"
+        else:
+            args = ""
+        text += (decorator if own else "") + f"def {name}({args}):\n    "
+        text += (body if own else "assert True") + "\n"
+    (root / "tests/test_native_shared_execution_failure.py").write_text(text)
     return path
 
 
@@ -360,7 +379,7 @@ def test_missing_dedicated_target_cannot_disappear_from_any_lane(tmp_path, lane)
      "@pytest.fixture\ndef broken():\n    yield\n    raise RuntimeError('teardown failure')\n", 1),
     ("pytest.exit('preserve actual exit', returncode=17)", "", "", 17),
 ])
-@pytest.mark.parametrize("lane", ["routing-dispatch", *SG2_CASE_LANES, "native-public-correction"])
+@pytest.mark.parametrize("lane", ["routing-dispatch", *SG2_CASE_LANES, "native-public-correction", "native-failure-16"])
 def test_dedicated_case_requires_real_unqualified_pass(tmp_path, body, decorator, fixture, code, lane):
     _lane_fixture(tmp_path, body=body, decorator=decorator, fixture=fixture, target=lane)
     result = _run(tmp_path, f"--ci-lane={lane}")
@@ -378,7 +397,7 @@ def test_dedicated_collect_only_does_not_pass_as_execution(tmp_path, lane):
 @pytest.mark.parametrize("job_name,lanes,artifact", [
     ("api-completion", API_CASE_LANES, "api"),
     ("sg2-completion", SG2_CASE_LANES, "sg2"),
-    ("native-public-completion", NATIVE_PUBLIC_CASE_LANES, "native"),
+    ("native-public-completion", NATIVE_CASE_LANES, "native"),
 ])
 def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job_name, lanes, artifact):
     jobs = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())["jobs"]
