@@ -12,6 +12,7 @@ from data_sheets_schema import native_helper_cache as cache
 from data_sheets_schema import native_runtime_profiles as profiles
 from data_sheets_schema import native_shared_runtime_values as values
 from tests.test_native_synthetic_profiles import runtime
+from tests.test_native_execution_authority_v2 import isolated_modules
 
 
 def reserved(runtime, root, name='attempt'):
@@ -105,3 +106,29 @@ def test_model_file_tools_cannot_read_or_write_helper_cache(runtime,tmp_path):
         for tool in ('Read','Write'):
             assert access.classify(tool,{'file_path':str(path/'README.md'),'content':'tamper'})[0]=='not_prescribed'
     finally:sys.path[:]=previous
+
+
+def test_model_bash_cannot_inspect_cache(runtime, tmp_path, isolated_modules):
+    """Issue 6031: real frozen lookup grammar resolves symlinks before admission."""
+    import shlex
+    value = reserved(runtime, tmp_path)
+    path = cache.create_for_attempt(value)
+    (path / 'README.md').write_text('private cache content')
+    output = tmp_path / 'outputs'; output.mkdir()
+    (output / 'cache-link').symlink_to(path, target_is_directory=True)
+    source = tmp_path / 'registered.txt'; source.write_text('registered input')
+    root = Path(__file__).parents[1]
+    from tests.test_native_shared_controls import authority, orchestration, _active_controls
+    identity = authority.dependency_identity()
+    policy = {'readonly_lookups': {'repository': str(root), 'inputs': [str(source)],
+              'output_directories': [str(output)]}, 'lookup_literal_admission': 1,
+              'programs': [], 'manifest_paths': []}
+    with orchestration.loaded_controls(identity) as projected:
+        controls = _active_controls(identity)
+        classify = lambda command: controls.classify_ordinary(command, sys.executable, set(), policy, projected)[0]
+        assert classify('cat ' + shlex.quote(str(source))) == 'prescribed'
+        for command in ('cat ' + shlex.quote(str(path / 'README.md')),
+                        'ls ' + shlex.quote(str(path)),
+                        'cat "$PYSTOW_HOME/README.md"',
+                        'cat ' + shlex.quote(str(output / 'cache-link/README.md'))):
+            assert classify(command) == 'not_prescribed', command

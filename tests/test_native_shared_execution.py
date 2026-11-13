@@ -111,6 +111,8 @@ def launch_case(case, monkeypatch):
 def assert_completed_case(case, result):
     """Both data variants require the same actual gates, readback and spent refusal."""
     assert result['runtime_gates_passed'], json.dumps(result, indent=2)
+    from tests.native_helper_cache_assertions import assert_public_cache_excluded
+    assert_public_cache_excluded(case['value'], result)
     assert result['profile'] == 'synthetic-software-test'
     assert result['state'] == 'completed_pending_independent_review'
     assert set(result['gates']) == set(execute.gates.GATES)
