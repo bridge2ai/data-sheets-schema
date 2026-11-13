@@ -78,6 +78,14 @@ def _append(selection, execution, history, kind, payload):
     for record in records:
         _create(selection, 'record', record.raw, ordinal=len(history.records))
     _replace_journal(Path(selection.role('journal')), history.journal, journal)
+    _host_stage_clock(execution, journal.pin.sha256)
+
+
+def _host_stage_clock(execution, journal_sha256):
+    from .native_shared_controller import captured_execution_body
+    from .native_host_power import checkpoint
+    value = captured_execution_body(execution.execution.raw)
+    checkpoint(value['attempt_directory'], 'stage-' + journal_sha256)
 
 
 def activate(selection, execution_raw, started_raw):
@@ -296,6 +304,7 @@ def publish_stage(invocation, proposal, *, _catalogs=None):
     if old != fresh:
         raise ValueError('selected capture changed before stage publication')
     result, _ = publish_derived(fresh, proposal, _catalogs=_catalogs)
+    _host_stage_clock(invocation.execution, result['after_history_sha256'])
     return result
 
 

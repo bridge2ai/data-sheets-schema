@@ -117,3 +117,22 @@ def test_observation_catalog_is_bounded_closed_namespace(case, tmp_path, kind):
 
 # Neutral carrier setup only; the three metadata cases never read registration.
 from tests.test_native_shared_stages import case, supplied
+
+
+def test_actual_session_publication_records_host_stage_clock(started, monkeypatch):
+    """Issue 6046: an actual controller journal publication gets both clocks."""
+    from data_sheets_schema import native_host_power as power
+    selected, value, composition, _, _ = started
+    attempt = Path(value['attempt_directory'])
+    monkeypatch.setattr(power, 'probe', lambda: {'source': 'ac', 'battery_percent': 90, 'lid': 'open'})
+    monkeypatch.setattr(power, 'sleep_events', lambda *a: {'status': 'read', 'events': [], 'intervals': []})
+    power.start_run(attempt)
+    transcript, control = native_init(selected, value, composition)
+    live_capture.initialize(selected.registration.pin.path, transcript_bytes=len(transcript),
+        control_bytes=len(control), **stream_capture(value))
+    journal = Path(selected.role('journal')).read_bytes()
+    clock_path = attempt / ('host-clock-stage-' + c.sha(journal) + '.json')
+    clock = json.loads(clock_path.read_bytes())
+    assert clock['wall_ns'] > 0 and clock['monotonic_ns'] > 0
+    result = power.finish_run(attempt)
+    assert {row['label'] for row in result['clocks']} == {'start', 'stage-' + c.sha(journal), 'end'}

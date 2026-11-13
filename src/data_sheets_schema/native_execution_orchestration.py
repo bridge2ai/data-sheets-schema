@@ -447,6 +447,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         nonlocal first_stop
         if first_stop is None:
             first_stop = str(message)
+    from . import native_host_power as host_power
+    host_power.start_run(attempt)
     with _signals(signals):
         proxy = controls['run_direct_canary'].NoProxy()
         guard = None
@@ -552,26 +554,27 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         finally:
             # This boundary also covers observation/failure-evidence writes:
             # persistence errors must never bypass acquired assertion cleanup.
-            pending_error = sys.exc_info()[1]
-            if guard is not None:
-                if guard.active:
-                    guard.close()
-                    awake.update(state='released_after_failure', passed=False)
-                awake.update(releases=guard.releases, released_at=guard.released_at,
-                             signals_received=list(signals))
-                try:
-                    if not (attempt/'keep-awake.json').exists():
-                        durable_new(attempt/'keep-awake.json', draft._encoded(awake))
-                except BaseException as cleanup_error:
-                    original = pending_error if pending_error is not None else first_error
-                    if original is None:
-                        raise
-                    # A link can exist even when its directory fsync failed;
-                    # that first error remains authoritative after its handler.
-                    note = 'keep-awake cleanup evidence failed: ' + type(cleanup_error).__name__
-                    original.__notes__ = [*getattr(original, '__notes__', []), note]
-                    if pending_error is None:
-                        raise original from cleanup_error
+            with host_power.finishing_run(attempt):
+                pending_error = sys.exc_info()[1]
+                if guard is not None:
+                    if guard.active:
+                        guard.close()
+                        awake.update(state='released_after_failure', passed=False)
+                    awake.update(releases=guard.releases, released_at=guard.released_at,
+                                 signals_received=list(signals))
+                    try:
+                        if not (attempt/'keep-awake.json').exists():
+                            durable_new(attempt/'keep-awake.json', draft._encoded(awake))
+                    except BaseException as cleanup_error:
+                        original = pending_error if pending_error is not None else first_error
+                        if original is None:
+                            raise
+                        # A link can exist even when its directory fsync failed;
+                        # that first error remains authoritative after its handler.
+                        note = 'keep-awake cleanup evidence failed: ' + type(cleanup_error).__name__
+                        original.__notes__ = [*getattr(original, '__notes__', []), note]
+                        if pending_error is None:
+                            raise original from cleanup_error
         try:
             # Cleanup failure is sticky even if another gate or a previous pass succeeds.
             if first_stop is not None:

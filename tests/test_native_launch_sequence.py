@@ -15,6 +15,7 @@ import pytest
 from data_sheets_schema import native_launch_sequence as seq
 from data_sheets_schema import native_launch_entry as entry
 from data_sheets_schema import native_subscription_guard as guard
+from data_sheets_schema import native_host_power as host_power
 
 REAL_RUN = subprocess.run
 
@@ -25,6 +26,8 @@ def run_sequence(arguments):
 
 @pytest.fixture(autouse=True)
 def deny_real_commands(monkeypatch):
+    monkeypatch.setattr(host_power, 'probe', lambda: {
+        'source': 'ac', 'battery_percent': 90, 'lid': 'closed'})
     def refuse(*args, **kwargs):
         pytest.fail('test must not execute native_generation or any native binary')
     monkeypatch.setattr(seq.subprocess, 'run', refuse)
@@ -301,7 +304,7 @@ def test_isolated_real_subprocess_uses_only_copied_fake_command(tmp_path, entry_
     (package / '__init__.py').write_bytes(b'')
     for name in ('native_launch_sequence', 'native_subscription_guard', 'native_sequence_start', 'native_launch_entry',
                  'native_capture_words', 'native_subscription_guard_v2', 'native_u4b_policy',
-                 'native_shared_runtime_values', 'native_runtime_profiles'):
+                 'native_shared_runtime_values', 'native_runtime_profiles', 'native_host_power'):
         (package / (name + '.py')).write_bytes((seq.SOURCE_ROOT / 'src/data_sheets_schema' / (name + '.py')).read_bytes())
     (package / 'native_generation.py').write_text('''import json, hashlib, os, sys
 from pathlib import Path
@@ -326,7 +329,10 @@ def main():
     print(json.dumps({'command': name, 'result': body}))
     return 0
 ''')
-    bootstrap = "import sys,runpy; sys.path.insert(0,sys.argv.pop(1)); name=sys.argv.pop(1); runpy.run_module(name,run_name='__main__',alter_sys=True)"
+    bootstrap = ("import sys,runpy; sys.path.insert(0,sys.argv.pop(1)); name=sys.argv.pop(1); "
+                 "from data_sheets_schema import native_host_power; "
+                 "native_host_power.probe=lambda: {'source':'ac','battery_percent':90,'lid':'closed'}; "
+                 "runpy.run_module(name,run_name='__main__',alter_sys=True)")
     result = REAL_RUN([sys.executable, '-I', '-B', '-c', bootstrap, str(root / 'src'), 'data_sheets_schema.' + entry_module, *argv(p)],
                       env={'PRIVATE_TOKEN': 'secret', 'PYTHONPATH': '/foreign'},
                       cwd=root, capture_output=True, timeout=20)
@@ -418,3 +424,16 @@ def test_existing_saved_script_refuses_without_overwrite_or_command(tmp_path):
     saved.write_bytes(b'prior script')
     assert run_sequence(argv(p)) == 1
     assert saved.read_bytes() == b'prior script'
+
+
+@pytest.mark.parametrize('source,expected,calls_expected', [('ac', 0, 3), ('battery', 1, 0), ('unknown', 1, 0)])
+def test_sequence_power_admission_retains_reading_before_any_child(tmp_path, monkeypatch, source, expected, calls_expected):
+    p = paths(tmp_path)
+    reading = {'source': source, 'battery_percent': 1, 'lid': 'closed'}
+    monkeypatch.setattr(host_power, 'probe', lambda: reading)
+    calls = fake_commands(monkeypatch, p)
+    assert run_sequence(argv(p)) == expected
+    assert len(calls) == calls_expected
+    start = json.loads((p['packet-directory'] / seq.START_FILENAME).read_bytes())
+    assert start['host_power'] == reading
+    assert set(start['clock']) == {'label', 'wall_ns', 'monotonic_ns'}

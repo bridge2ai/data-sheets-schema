@@ -1,0 +1,4 @@
+2026-11-12 15:26:23 -0800 Sleep               	Entering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:2%) 1252 secs 
+2026-11-12 15:47:15 -0800 Wake                	Wake from Deep Idle [CDNVA] : due to smc.sysState.Wake(0x70070000) lid SMC.OutboxNotEmpty/HID Activity Using BATT (Charge:2%) 209 secs  
+2026-11-12 15:50:44 -0800 Sleep               	Entering Sleep state due to 'Low Power Sleep':TCPKeepAlive=inactive Using Batt (Charge:1%) 7034 secs 
+2026-11-12 17:47:58 -0800 Wake                	Wake from Hibernate [CDNVA] : due to lid/UserActivity Assertion Using AC (Charge:1%)           
