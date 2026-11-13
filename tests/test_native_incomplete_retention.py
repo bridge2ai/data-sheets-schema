@@ -15,6 +15,11 @@ from data_sheets_schema import native_shared_gates as gates
 from data_sheets_schema.native_execution_engine import GATES, UNASSESSED
 from data_sheets_schema import native_shared_authority_wire as wire
 from tests.utils.native_execution_carrier_v2 import execution_body
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: F401
+
+# Historical and v2 closures share bare aliases. Preserve the production
+# origin refusal while isolating collection imports and prior test cases.
+pytestmark = pytest.mark.usefixtures('isolated_modules')
 
 
 def case(root):
