@@ -87,7 +87,10 @@ def test_primary_dependency_root_payload_inventory(tmp_path, monkeypatch):
         'scope': 'Primary dependency-root bytes read from an isolated offline process, with SYNTHETIC harness metadata excluded. No primary startup, environment modification, registration, probe or native execution.'}
     if value is not None:
         report['manifest'] = save(tmp_path / 'primary-dependency-environment-manifest.json', value, canonical=True)
-        report['unowned_files'] = value.get('unowned_files', [])
+        report['unowned_files'] = value['unowned_files']
+        report['excluded_roots'] = value['excluded_roots']
+        report['unowned_totals'] = {'count': len(value['unowned_files']),
+                                   'bytes': sum(row['bytes'] for row in value['unowned_files'])}
     saved = save(tmp_path / 'primary-dependency-payload-inventory.json', report)
     if error is not None:
         pytest.fail('primary dependency census held; saved partial evidence: ' + saved['path'] + '; ' + error['reason'])

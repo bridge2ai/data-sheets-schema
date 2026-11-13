@@ -2,7 +2,8 @@
 """Offline G07 packet and capture test runner, 2026-11-12.
 
 Purpose: validate the assigned branch or its exact private packet composition.
-Inputs: this assigned worktree, a physical dependency venv, explicit tests/ nodes.
+Inputs: this assigned worktree, a physical dependency venv, explicit tests/ nodes
+or the single named installed-payload diagnostic helper (never auto-collected).
 Outputs: new sibling scratch-h3-environment-manifest-20261113/tests cohorts, with isolated venv, logs, JUnit, origin/network and cleanup evidence.
 Adapted from run_native_u3a_tests_20261107.py; no provider or real native binary.
 Invoke with the dependency venv Python -S -P -B. The caller runs cohorts serially.
@@ -27,6 +28,7 @@ import venv
 
 SCRIPT_ROOT = Path(__file__).resolve().parents[2]
 ROOT = SCRIPT_ROOT
+DIAGNOSTIC = 'scripts/adhoc/check_h3_environment_payload_inventory_20261113.py'
 if SCRIPT_ROOT.name != "codex-native-environment-manifest-20261113":
     raise RuntimeError("runner helper must stay in the assigned branch")
 
@@ -430,8 +432,8 @@ def main():
         parser.error("--out and either explicit tests/ nodes or --scanner are required")
     for node in args.nodes:
         path = node.split("::", 1)[0]
-        if path != "tests" and (not path.startswith("tests/") or ".." in Path(path).parts):
-            parser.error("only repository-relative tests/ nodes are supported")
+        if path != DIAGNOSTIC and path != "tests" and (not path.startswith("tests/") or ".." in Path(path).parts):
+            parser.error("only repository-relative tests/ nodes or the named installed-payload diagnostic are supported")
     return worker(args) if args.worker else parent(args)
 
 

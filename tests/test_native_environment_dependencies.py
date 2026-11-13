@@ -2,8 +2,6 @@
 import importlib
 import sys
 
-import pytest
-
 from data_sheets_schema import native_environment_manifest as manifest
 from data_sheets_schema import native_execution_authority_v2 as authority
 from tests.test_native_execution_registration_v2 import isolated_modules
@@ -32,6 +30,9 @@ def test_loaded_dependency_scope_preserves_manifest_and_pinned_imports(tmp_path,
         foreign.mkdir()
         (foreign / 'SYNTHETIC_unowned.py').write_text('SYNTHETIC = True\n')
         sys.path.insert(0, str(foreign))
-        with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
-            manifest.generate()
+        changed = manifest.generate()
+        assert changed != before_manifest
+        assert [row for row in changed['unowned_files'] if row['root'] == str(foreign)] == [
+            {'root': str(foreign), 'path': 'SYNTHETIC_unowned.py',
+             'bytes': len(b'SYNTHETIC = True\n'), 'sha256': manifest.c.sha(b'SYNTHETIC = True\n')}]
     assert sys.path == before_path

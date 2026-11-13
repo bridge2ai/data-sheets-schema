@@ -314,17 +314,17 @@ def test_empty_inventory_refuses(monkeypatch):
         m.generate()
 
 
-def test_whole_distribution_metadata_absent_holds(installed):
+def test_whole_distribution_metadata_absent_is_explicitly_unowned(installed):
     # Existing unrelated metadata must not mask an importable package whose
     # entire dist-info directory is absent, so discovery never reports it.
     package = installed.root / 'unregistered_package'
     package.mkdir()
     (package / '__init__.py').write_text('SYNTHETIC = True\n')
-    with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
-        m.generate()
+    value = m.generate()
+    assert [row['path'] for row in value['unowned_files']] == ['unregistered_package/__init__.py']
 
 
-def test_namespace_portion_needs_its_own_record_entry(installed):
+def test_namespace_portion_without_record_entry_is_unowned(installed):
     namespace = installed.root / 'shared_namespace'
     namespace.mkdir()
     good = Path('shared_namespace/registered.py')
@@ -332,26 +332,32 @@ def test_namespace_portion_needs_its_own_record_entry(installed):
     installed.add_file(good)
     assert m.generate()
     (namespace / 'unregistered.py').write_text('SYNTHETIC = False\n')
-    with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
-        m.generate()
+    assert [row['path'] for row in m.generate()['unowned_files']] == ['shared_namespace/unregistered.py']
 
 
 def test_repository_root_exempt_foreign_checkout_is_not(installed, monkeypatch, tmp_path):
     monkeypatch.setattr(m.sys, 'path', [str(installed.root), str(m.ROOT), str(m.ROOT / 'src')])
-    assert m.generate()
+    value = m.generate()
+    assert value['excluded_roots'] == [
+        {'root': str(m.ROOT), 'reason': 'first_party_source_pins'},
+        {'root': str(m.ROOT / 'src'), 'reason': 'first_party_source_pins'}]
     foreign = tmp_path / 'foreign_checkout'
     foreign.mkdir()
     (foreign / 'foreign.py').write_text('SYNTHETIC = True\n')
     monkeypatch.setattr(m.sys, 'path', [str(installed.root), str(foreign)])
-    with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
-        m.generate()
+    value = m.generate()
+    assert value['excluded_roots'] == []
+    assert [(row['root'], row['path']) for row in value['unowned_files']] == [(str(foreign), 'foreign.py')]
 
 
 def test_site_packages_not_exempted_by_stdlib_ancestor(installed, monkeypatch):
     monkeypatch.setattr(m, '_stdlib_roots', lambda: {installed.root.parent})
     (installed.root / 'unowned.py').write_text('SYNTHETIC = True\n')
-    with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
-        m.generate()
+    monkeypatch.setattr(m.sys, 'path', [str(installed.root.parent), str(installed.root)])
+    value = m.generate()
+    assert value['excluded_roots'] == [{'root': str(installed.root.parent),
+                                       'reason': 'standard_library_interpreter_identity'}]
+    assert [row['path'] for row in value['unowned_files']] == ['unowned.py']
 
 
 def test_archive_import_root_holds(installed, monkeypatch, tmp_path):
@@ -385,26 +391,24 @@ def test_standard_bytecode_cache_uses_owned_source(installed, optimization):
     assert m.generate()
 
 
-def test_pytest_rewrite_cache_is_not_importable_by_python(installed):
+def test_nonstandard_rewrite_cache_is_an_explicit_unowned_file(installed):
     cache = installed.root / '__pycache__'
     cache.mkdir()
     # No source or RECORD entry: this is not a standard Python import cache.
     (cache / ('unregistered.' + m.sys.implementation.cache_tag + '-pytest-7.4.4.pyc')).write_bytes(b'synthetic pytest cache')
-    assert m.generate()
+    assert len(m.generate()['unowned_files']) == 1
 
 
-def test_loose_unowned_bytecode_still_refuses(installed):
+def test_loose_unowned_bytecode_is_listed(installed):
     (installed.root / 'unregistered.pyc').write_bytes(b'synthetic sourceless bytecode')
-    with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
-        m.generate()
+    assert [row['path'] for row in m.generate()['unowned_files']] == ['unregistered.pyc']
 
 
-def test_standard_cache_without_owned_source_refuses(installed):
+def test_standard_cache_without_source_is_listed(installed):
     cache = installed.root / '__pycache__'
     cache.mkdir()
     (cache / ('unregistered.' + m.sys.implementation.cache_tag + '.pyc')).write_bytes(b'synthetic cache')
-    with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
-        m.generate()
+    assert len(m.generate()['unowned_files']) == 1
 
 
 def test_record_changes_during_census_refuse_registered_pin(installed, tmp_path, monkeypatch):
@@ -474,5 +478,144 @@ def test_ownership_comes_from_hashed_record_not_second_files_read(installed):
     (installed.root / code).write_text('SYNTHETIC = True\n')
     # An inconsistent distribution API must not expand the hashed ownership.
     installed.files.append(code)
-    with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
+    assert [row['path'] for row in m.generate()['unowned_files']] == ['unrecorded.py']
+
+
+def test_unowned_bootstrap_and_data_are_pinned_without_importing(installed, tmp_path):
+    # Canary: code is data only, and .pth execution would fail immediately.
+    payloads = {'_virtualenv.py': b'raise RuntimeError("must not import")\n',
+                '_virtualenv.pth': b'import must_never_execute_this\n',
+                'synthetic.dist-info/extra.txt': b'metadata not named by RECORD',
+                'data.bin': b'\x00\xff\x00SYNTHETIC'}
+    for relative, raw in payloads.items():
+        (installed.root / relative).write_bytes(raw)
+    value = m.generate()
+    assert value['unowned_files'] == [
+        {'root': str(installed.root), 'path': relative, 'bytes': len(raw), 'sha256': c.sha(raw)}
+        for relative, raw in sorted(payloads.items())]
+    assert value['excluded_roots'] == []
+    pin = m.write(tmp_path / 'manifest.json')
+    assert m.verify(pin) == value
+
+
+@pytest.mark.parametrize('change', ['changed', 'new', 'deleted'])
+def test_unowned_change_invalidates_manifest(installed, tmp_path, change):
+    target = installed.root / 'unowned.txt'
+    target.write_bytes(b'SYNTHETIC original')
+    pin = m.write(tmp_path / 'manifest.json')
+    if change == 'changed':
+        target.write_bytes(b'SYNTHETIC modified')
+    elif change == 'new':
+        (installed.root / 'new.pth').write_bytes(b'new-path\n')
+    else:
+        target.unlink()
+    with pytest.raises(ValueError, match='stale'):
+        m.verify(pin)
+
+
+@pytest.mark.parametrize('optimization', ['', '.opt-1', '.opt-2'])
+def test_standard_cache_uses_listed_unowned_source(installed, optimization):
+    (installed.root / 'unregistered.py').write_bytes(b'SYNTHETIC = True\n')
+    cache = installed.root / '__pycache__'
+    cache.mkdir()
+    (cache / ('unregistered.' + m.sys.implementation.cache_tag + optimization + '.pyc')).write_bytes(b'cache')
+    assert [row['path'] for row in m.generate()['unowned_files']] == ['unregistered.py']
+
+
+def test_nested_import_roots_have_one_deepest_root_representation(installed, monkeypatch):
+    nested = installed.root / 'nested'
+    nested.mkdir()
+    (nested / 'data.txt').write_bytes(b'SYNTHETIC nested data')
+    monkeypatch.setattr(m.sys, 'path', [str(nested), str(installed.root), str(nested)])
+    first = m.generate()
+    assert first['unowned_files'] == [{'root': str(nested), 'path': 'data.txt',
+        'bytes': len(b'SYNTHETIC nested data'), 'sha256': c.sha(b'SYNTHETIC nested data')}]
+    monkeypatch.setattr(m.sys, 'path', [str(installed.root), str(nested)])
+    assert m.generate() == first
+
+
+def test_symlink_alias_to_owned_file_is_unowned(installed):
+    (installed.root / 'different_import.py').symlink_to(installed.root / 'file.py')
+    assert [row['path'] for row in m.generate()['unowned_files']] == ['different_import.py']
+
+
+def test_symlinked_import_directory_holds(installed, tmp_path):
+    target = tmp_path / 'elsewhere'
+    target.mkdir()
+    (installed.root / 'linked').symlink_to(target, target_is_directory=True)
+    with pytest.raises(ValueError, match='symlinked'):
         m.generate()
+
+
+def test_unowned_payload_mutation_during_recapture_holds(installed, monkeypatch):
+    target = installed.root / 'unowned.txt'
+    target.write_bytes(b'SYNTHETIC original')
+    capture = m._capture_environment
+    def changed(paths, **kwargs):
+        result = capture(paths, **kwargs)
+        if kwargs.get('verify_payloads') is False:
+            target.write_bytes(b'SYNTHETIC modified')
+        return result
+    monkeypatch.setattr(m, '_capture_environment', changed)
+    with pytest.raises(ValueError, match='payload changed during environment census'):
+        m.generate()
+
+
+def test_unowned_unreadable_file_holds(installed, monkeypatch):
+    target = installed.root / 'unowned.txt'
+    target.write_bytes(b'SYNTHETIC original')
+    original = m.os.open
+    def denied(path, *args, **kwargs):
+        if Path(path) == target:
+            raise PermissionError('SYNTHETIC unreadable')
+        return original(path, *args, **kwargs)
+    monkeypatch.setattr(m.os, 'open', denied)
+    with pytest.raises(ValueError, match='unreadable'):
+        m.generate()
+
+
+def test_unowned_bytes_have_file_and_aggregate_bounds(installed, monkeypatch):
+    (installed.root / 'unowned.dat').write_bytes(b'x' * 30)
+    monkeypatch.setattr(m, 'MAX_PAYLOAD_BYTES', 20)
+    with pytest.raises(ValueError, match='byte bound'):
+        m.generate()
+    monkeypatch.setattr(m, 'MAX_PAYLOAD_BYTES', 100)
+    monkeypatch.setattr(m, 'MAX_VERIFIED_BYTES', 40)
+    with pytest.raises(ValueError, match='aggregate byte bound'):
+        m.generate()
+
+
+@pytest.mark.parametrize('change', ['unknown', 'duplicate', 'relative_root', 'absolute_path',
+                                   'parent_path', 'dot_path', 'negative_bytes', 'boolean_bytes',
+                                   'unknown_exclusion', 'excluded_root'])
+def test_unowned_scope_closed_shape(installed, change):
+    (installed.root / 'unowned.txt').write_bytes(b'SYNTHETIC')
+    value = m.generate()
+    row = value['unowned_files'][0]
+    if change == 'unknown':
+        row['ignored'] = True
+    elif change == 'duplicate':
+        value['unowned_files'].append(dict(row))
+    elif change == 'relative_root':
+        row['root'] = 'relative'
+    elif change == 'absolute_path':
+        row['path'] = '/absolute'
+    elif change == 'parent_path':
+        row['path'] = '../outside'
+    elif change == 'dot_path':
+        row['path'] = '.'
+    elif change == 'negative_bytes':
+        row['bytes'] = -1
+    elif change == 'boolean_bytes':
+        row['bytes'] = True
+    else:
+        value['excluded_roots'] = [{'root': row['root'], 'reason':
+            'unknown' if change == 'unknown_exclusion' else 'first_party_source_pins'}]
+    with pytest.raises(ValueError):
+        m.validate(value)
+
+
+def test_manifest_inside_inventory_root_self_inclusion_holds(installed):
+    # No output exemption is invented for a third-party root.
+    with pytest.raises(ValueError, match='stale'):
+        m.write(installed.root / 'manifest.json')

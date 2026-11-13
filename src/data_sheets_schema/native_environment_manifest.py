@@ -12,7 +12,6 @@ import csv
 import hashlib
 import io
 from importlib import metadata
-from importlib.machinery import EXTENSION_SUFFIXES
 from importlib.util import source_from_cache
 import os
 from pathlib import Path
@@ -38,6 +37,7 @@ MAX_VERIFIED_BYTES = 32_000_000_000
 PAYLOAD_CHUNK_BYTES = 1_048_576
 OWN_DISTRIBUTION = 'data-sheets-schema'
 UNVERIFIED_KINDS = frozenset(('record', 'bytecode', 'other'))
+EXCLUDED_REASONS = frozenset(('first_party_source_pins', 'standard_library_interpreter_identity'))
 ROOT = Path(__file__).resolve().parents[2]
 _NAME = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*')
 
@@ -52,7 +52,8 @@ def _name(value):
 
 def validate(value):
     """Validate the closed data shape without querying an environment."""
-    c.exact(value, {'kind', 'version', 'interpreter', 'distributions'}, 'environment manifest')
+    c.exact(value, {'kind', 'version', 'interpreter', 'distributions', 'unowned_files', 'excluded_roots'},
+            'environment manifest')
     if (value['kind'] != KIND or type(value['version']) is not int
             or value['version'] != VERSION):
         raise ValueError('unknown environment manifest kind/version')
@@ -109,6 +110,39 @@ def validate(value):
         names.append(row['name'])
     if names != sorted(set(names)):
         raise ValueError('environment distributions must be sorted and unique')
+    exclusions = value['excluded_roots']
+    if type(exclusions) is not list or len(exclusions) > MAX_IMPORT_ENTRIES:
+        raise ValueError('environment exclusions require a bounded root inventory')
+    roots = []
+    for item in exclusions:
+        c.exact(item, {'root', 'reason'}, 'excluded import root')
+        c.canonical_path(_record_name(item['root']), 'excluded import root')
+        if item['reason'] not in EXCLUDED_REASONS:
+            raise ValueError('unknown excluded import root authority')
+        roots.append(item['root'])
+    if roots != sorted(set(roots)):
+        raise ValueError('excluded import roots must be sorted and unique')
+    unowned = value['unowned_files']
+    if type(unowned) is not list or len(unowned) > MAX_IMPORT_ENTRIES:
+        raise ValueError('unowned files require a bounded inventory')
+    keys, total_bytes = [], 0
+    for item in unowned:
+        c.exact(item, {'root', 'path', 'bytes', 'sha256'}, 'unowned file')
+        root = c.canonical_path(_record_name(item['root']), 'unowned import root')
+        path = _record_name(item['path'])
+        if (path in ('.', '..') or Path(path).is_absolute() or str(Path(path)) != path
+                or any(part in ('.', '..') for part in Path(path).parts)):
+            raise ValueError('unowned file path must be normalized and relative to its root')
+        if root in roots:
+            raise ValueError('unowned file cannot name an excluded import root')
+        if type(item['bytes']) is not int or not 0 <= item['bytes'] <= MAX_PAYLOAD_BYTES:
+            raise ValueError('unowned file exceeds its byte bound')
+        c._hash(item['sha256'], 'unowned file hash')
+        keys.append((root, path))
+        total_bytes += item['bytes']
+    if (keys != sorted(set(keys))
+            or total_bytes + sum(row['verified_files']['bytes'] for row in rows) > MAX_VERIFIED_BYTES):
+        raise ValueError('unowned file inventory is ambiguous or oversized')
     if len(c.canonical(value)) > MAX_BYTES:
         raise ValueError('environment manifest exceeds its byte bound')
     return value
@@ -202,6 +236,35 @@ def _require_stable_payloads(captures):
                 raise ValueError('installed payload changed during environment census: ' + str(path))
 
 
+def _capture_unowned_file(path):
+    """Fresh bounded hash, including stable physical and alias identities."""
+    physical = path.resolve(strict=True)
+    alias_identity = _file_identity(path.lstat())
+    descriptor = os.open(physical, os.O_RDONLY | os.O_NOFOLLOW)
+    digest = hashlib.sha256()
+    with os.fdopen(descriptor, 'rb') as stream:
+        before = os.fstat(stream.fileno())
+        if not stat.S_ISREG(before.st_mode) or not 0 <= before.st_size <= MAX_PAYLOAD_BYTES:
+            raise ValueError('unowned file is not regular or exceeds its byte bound: ' + str(path))
+        total = 0
+        while True:
+            chunk = stream.read(min(PAYLOAD_CHUNK_BYTES, before.st_size - total + 1))
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > before.st_size:
+                raise ValueError('unowned file grew during verification: ' + str(path))
+            digest.update(chunk)
+        after = os.fstat(stream.fileno())
+    if (total != before.st_size or _file_identity(before) != _file_identity(after)
+            or _file_identity(after) != _file_identity(physical.lstat())
+            or path.resolve(strict=True) != physical
+            or _file_identity(path.lstat()) != alias_identity):
+        raise ValueError('unowned file changed during verification: ' + str(path))
+    return {'path': str(path), 'physical': str(physical), 'identity': _file_identity(after),
+            'alias_identity': alias_identity, 'bytes': total, 'sha256': digest.hexdigest()}
+
+
 def _own_source_authority():
     package = sys.modules.get('data_sheets_schema')
     roots = getattr(package, '__path__', ())
@@ -262,7 +325,7 @@ def _capture_distribution(distribution, *, verify_payloads=True):
             raise ValueError('malformed distribution installation metadata: ' + name)
         if not own and origin.get('dir_info', {}).get('editable', False) is not False:
             raise ValueError('editable or development third-party distribution holds: ' + name)
-    owned, payloads, unverified, claims = set(), [], {}, []
+    owned, spellings, payloads, unverified, claims = set(), set(), [], {}, []
     verified_bytes = verified_count = 0
     for row in csv.reader(io.StringIO(raw.decode('utf-8'), newline=''), strict=True):
         if len(row) != 3:
@@ -276,6 +339,7 @@ def _capture_distribution(distribution, *, verify_payloads=True):
         if target in owned:
             raise ValueError('distribution has duplicate installed RECORD paths: ' + name)
         owned.add(target)
+        spellings.add(os.path.abspath(distribution.locate_file(row[0])))
         claims.append((str(target), row[1]))
         if len(owned) > MAX_IMPORT_ENTRIES:
             raise ValueError('distribution RECORD exceeds its entry count bound')
@@ -308,7 +372,8 @@ def _capture_distribution(distribution, *, verify_payloads=True):
                 'unverified_files': [{'kind': kind, 'count': len(entries), 'paths': sorted(entries)}
                                      for kind, entries in sorted(unverified.items())]},
             'record_path': str(path), 'metadata': tuple(message.items()),
-            'owned': tuple(sorted(str(item) for item in owned)), 'installation': installation,
+            'owned': tuple(sorted(str(item) for item in owned)), 'owned_spellings': tuple(sorted(spellings)),
+            'installation': installation,
             'payloads': payloads, 'claims': tuple(sorted(claims)), 'own_project': own}
 
 
@@ -378,32 +443,28 @@ def _owned_files(captures):
     return {Path(path) for capture in captures for path in capture['owned']}
 
 
-def _requires_owner(path):
-    name = path.name
-    return (name.endswith(('.py', '.pyc', '.pth'))
-            or any(name.endswith(suffix) for suffix in EXTENSION_SUFFIXES))
-
-
 def _require_owned_import_roots(paths, captures):
-    """Hold for code with no installation metadata, including namespace portions.
+    """Inventory every unowned file within the explicitly declared scope.
 
-    Every importable code file in a third-party root needs a RECORD entry;
-    ownership of only the top-level namespace is insufficient. Ordinary cached
-    bytecode may use its RECORD-owned source. Hashed owned files are separately
-    verified against installed contents. Standard-library and exact repository roots
-    have their own interpreter/source authority and are excluded explicitly.
+    The lead's scope ruling excludes exact first-party and standard-library
+    import roots. A separately listed site-packages root is never excluded by
+    its stdlib ancestor. Nested actual roots are traversed separately, giving
+    each file its deepest root. Ordinary caches use either their RECORD-owned
+    or inventoried unowned source; all other bytecode remains explicit.
     """
-    exempt = _first_party_roots() | _stdlib_roots()
+    actual = {Path(path) for path in paths}
+    first_party, stdlib = _first_party_roots(), _stdlib_roots()
+    exclusions = [{'root': str(root), 'reason': 'first_party_source_pins' if root in first_party
+                   else 'standard_library_interpreter_identity'}
+                  for root in sorted(actual & (first_party | stdlib))]
+    exempt = {Path(item['root']) for item in exclusions}
     owned = _owned_files(captures)
-    visited = set()
-    snapshots = {}
+    owned_spellings = {Path(path) for capture in captures for path in capture['owned_spellings']}
+    snapshots, files, unowned, payloads = {}, {}, [], []
     count = 0
-    pending = [Path(path) for path in paths if Path(path) not in exempt]
+    pending = [(root, root) for root in sorted(actual - exempt)]
     while pending:
-        directory = pending.pop()
-        if directory in visited:
-            continue
-        visited.add(directory)
+        root, directory = pending.pop()
         if not directory.is_dir():
             raise ValueError('unsupported archive or non-directory third-party import root: ' + str(directory))
         snapshots[directory] = _directory_identity(directory)
@@ -419,32 +480,40 @@ def _require_owned_import_roots(paths, captures):
             if entry.is_dir():
                 if entry.is_symlink():
                     raise ValueError('unsupported symlinked third-party import directory: ' + str(path))
-                if not entry.name.endswith(('.dist-info', '.egg-info')):
-                    pending.append(path)
-            elif _requires_owner(path):
-                if path.suffix == '.pyc' and path.parent.name == '__pycache__':
-                    # Python's import machinery does not load pytest's tagged
-                    # rewrite caches or caches for another interpreter here.
-                    # Loose sourceless .pyc files outside __pycache__ still need
-                    # their own RECORD entry, regardless of their filename.
-                    tag = sys.implementation.cache_tag
-                    if tag is None or re.fullmatch(
-                            r'.+\.' + re.escape(tag) + r'(?:\.opt-[0-9]+)?\.pyc',
-                            path.name) is None:
-                        continue
+                if path not in actual:
+                    pending.append((root, path))
+            else:
                 physical = path.resolve(strict=True)
-                if physical in owned:
-                    continue
-                if path.suffix == '.pyc' and path.parent.name == '__pycache__':
-                    try:
-                        source = Path(source_from_cache(str(path))).resolve(strict=True)
-                    except (ValueError, FileNotFoundError):
-                        source = None
-                    if source in owned:
-                        continue
-                raise ValueError('importable code has missing distribution RECORD ownership: ' + str(path))
+                if not path.is_file():
+                    raise ValueError('unsupported non-regular import-root file: ' + str(path))
+                files[path] = (root, physical)
+    total_bytes = sum(capture['row']['verified_files']['bytes'] for capture in captures)
+    for path, (root, physical) in sorted(files.items()):
+        # A newly added symlink to an owned payload is itself an unowned path:
+        # treating its target's ownership as its own would hide new imports.
+        if physical in owned and (not path.is_symlink() or path in owned_spellings):
+            continue
+        if path.suffix == '.pyc' and path.parent.name == '__pycache__':
+            try:
+                source = Path(source_from_cache(str(path))).resolve(strict=True)
+            except (ValueError, FileNotFoundError):
+                source = None
+            tag = sys.implementation.cache_tag
+            standard = tag is not None and re.fullmatch(
+                r'.+\.' + re.escape(tag) + r'(?:\.opt-[0-9]+)?\.pyc', path.name) is not None
+            if standard and (source in owned or source in files):
+                continue
+        captured = _capture_unowned_file(path)
+        payloads.append(captured)
+        total_bytes += captured['bytes']
+        if total_bytes > MAX_VERIFIED_BYTES:
+            raise ValueError('unowned inventory exceeds its aggregate byte bound')
+        unowned.append({'root': str(root), 'path': path.relative_to(root).as_posix(),
+                        'bytes': captured['bytes'], 'sha256': captured['sha256']})
     _require_stable_directories(snapshots)
-    return snapshots
+    return {'directories': snapshots, 'payloads': payloads,
+            'unowned_files': sorted(unowned, key=lambda item: (item['root'], item['path'])),
+            'excluded_roots': exclusions}
 
 
 def generate():
@@ -458,17 +527,18 @@ def generate():
         paths = _import_paths()
         identity = _interpreter_identity()
         captures = _capture_environment(paths)
-        directories = _require_owned_import_roots(paths, captures)
+        census = _require_owned_import_roots(paths, captures)
         # The census may be long. Re-discover the roster, metadata and RECORDs,
         # then recheck every freshly hashed payload identity. Only this call's
         # initial full content verification is reused, never a previous call.
         if (_import_paths() != paths or _interpreter_identity() != identity
                 or _metadata_snapshot(_capture_environment(paths, verify_payloads=False)) != _metadata_snapshot(captures)):
             raise ValueError('interpreter or distribution metadata changed during environment census')
-        _require_stable_directories(directories)
-        _require_stable_payloads(captures)
+        _require_stable_directories(census['directories'])
+        _require_stable_payloads([*captures, census])
         value = {'kind': KIND, 'version': VERSION, 'interpreter': identity,
-                 'distributions': [capture['row'] for capture in captures if not capture['own_project']]}
+                 'distributions': [capture['row'] for capture in captures if not capture['own_project']],
+                 'unowned_files': census['unowned_files'], 'excluded_roots': census['excluded_roots']}
         return validate(value)
     except (OSError, UnicodeError, TypeError, AttributeError, csv.Error) as exc:
         raise ValueError('environment metadata is missing, ambiguous or unreadable') from exc
