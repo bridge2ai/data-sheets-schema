@@ -23,6 +23,12 @@ def git(root, *args):
 def make_runner():
     source = ROOT.parent / 'codex-development-efficiency-20261111/scripts/adhoc/run_h2_pins_admission_20261113.py'
     raw = source.read_text()
+    raw = raw.replace('"-p", "h2_public_path_timing_20261112", ', '')
+    raw = raw.replace('def sandbox_profile():', 'def sandbox_profile(allow_loopback=False):')
+    raw = raw.replace("'(version 1)\\n(allow default)\\n(deny network*)\\n'", "'''(version 1)\\n(allow default)\\n(deny network*)\\n''' + ('''(allow network-bind (local ip \"127.0.0.1:*\"))\\n(allow network-inbound (local ip \"127.0.0.1:*\"))\\n(allow network-outbound (remote ip \"127.0.0.1:*\"))\\n''' if allow_loopback else '') +")
+    raw = raw.replace('profile.write_text(sandbox_profile(),', 'profile.write_text(sandbox_profile(allow_loopback=bool(args.lane)),')
+    raw = raw.replace('sock.bind(("127.0.0.1", 0))', 'sock.bind(("0.0.0.0", 0))')
+    raw = raw.replace('"scope": "inherited OS deny network*"', '"scope": "OS denies non-loopback networking; CI lane fixtures may use 127.0.0.1"')
     raw = raw.replace('codex-development-efficiency-20261111', ROOT.name)
     raw = raw.replace('helper2-pins-admission-20261113', BASE.name)
     raw = raw.replace("tree.name not in ('before', 'after', 'fixed', 'unaffected')", "not tree.name.replace('-', '').isalnum()")

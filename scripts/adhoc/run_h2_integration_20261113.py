@@ -59,12 +59,12 @@ NATIVE_PATHS = tuple(str(path) for name in ('claude', 'codex', 'gemini', 'agy')
     for path in (Path.home() / '.local/bin' / name, Path('/opt/homebrew/bin') / name, Path('/usr/local/bin') / name))
 
 
-def sandbox_profile():
+def sandbox_profile(allow_loopback=False):
     """Deny network/native execution and writes outside source plus sibling scratch."""
     paths = sorted({path for item in NATIVE_PATHS
                     for path in (item, str(Path(item).resolve()))})
     return (
-        '(version 1)\n(allow default)\n(deny network*)\n'
+        '''(version 1)\n(allow default)\n(deny network*)\n''' + ('''(allow network-bind (local ip "127.0.0.1:*"))\n(allow network-inbound (local ip "127.0.0.1:*"))\n(allow network-outbound (remote ip "127.0.0.1:*"))\n''' if allow_loopback else '') +
         '(deny process-exec (require-all (regex #"/(claude|codex|gemini|agy)(/|$)") (require-not (subpath ' + json.dumps(str(SCRATCH)) + '))))\n'
         '(deny process-exec\n'
         + ''.join('  (literal ' + json.dumps(path) + ')\n' for path in paths)
@@ -120,12 +120,12 @@ def network_witness():
     sock = socket.socket()
     try:
         try:
-            sock.bind(("127.0.0.1", 0))
+            sock.bind(("0.0.0.0", 0))
         except OSError as exc:
             if exc.errno != errno.EPERM:
                 raise
             return {"network_bind_denied": True, "errno": exc.errno,
-                    "pid": os.getpid(), "scope": "inherited OS deny network*"}
+                    "pid": os.getpid(), "scope": "OS denies non-loopback networking; CI lane fixtures may use 127.0.0.1"}
         raise RuntimeError("OS network denial self-check unexpectedly bound a socket")
     finally:
         sock.close()
@@ -159,7 +159,7 @@ def worker(args):
     os.environ["H2_PUBLIC_TIMING_DIR"] = str(out)
     import pytest
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    command = ["-q", "-p", "h2_public_path_timing_20261112", "-o", "addopts=", "-p", "no:cacheprovider",
+    command = ["-q", "-o", "addopts=", "-p", "no:cacheprovider",
                "--basetemp", str(out / "cases"),
                "--junitxml", str(out / "pytest.xml")]
     if args.workers:
@@ -315,7 +315,7 @@ def parent(args):
     elif args.lane == 'budget':
         env.pop('PYTHONPATH', None)
     profile = out / "network-denied.sb"
-    profile.write_text(sandbox_profile(), encoding="utf-8")
+    profile.write_text(sandbox_profile(allow_loopback=bool(args.lane)), encoding="utf-8")
     command = ["/usr/bin/sandbox-exec", "-f", str(profile), str(python),
                "-P", "-B", str(Path(__file__).resolve()), "--worker",
                "--tree", str(ROOT), "--out", str(out), "--workers", str(args.workers),
