@@ -42,7 +42,7 @@
     {"id": "private-self-gate", "owner": "fixed source-control helper", "process": "gate parent outside OS sandbox; workers use their own OS sandbox", "requires": ["private-reference"], "produces": "fresh equal private reference self-gate with exact tool pins"},
     {"id": "private-candidate", "owner": "fixed source-control helper", "process": "candidate builder OS sandbox", "requires": ["private-self-gate"], "produces": "candidate built at private moved HEAD, followed by verified reference-HEAD restoration in finally"},
     {"id": "assemble-report", "owner": "G fixed stage CLI", "process": "data-only bounded stage", "requires": ["private-candidate"], "produces": "fresh combined report pinning all eight original packets, environment snapshots and private source-commit controls"},
-    {"id": "gate-full", "owner": "N fixed orchestrator plus exact G driver", "process": "gate parent outside OS sandbox; workers use their own OS sandbox", "requires": ["assemble-report"], "produces": "28 fresh comparisons and immutable comparison-input manifests; no reused comparison results"}
+    {"id": "gate-full", "owner": "N fixed orchestrator plus exact G driver", "process": "gate parent outside OS sandbox; workers use their own OS sandbox", "requires": ["assemble-report"], "produces": "Every case in the exact frozen plan, currently 35 fresh comparisons and immutable comparison-input manifests; no reused comparison results"}
   ],
   "implementation_dependencies": [
     "Root explicitly releases G after the current frozen standalone canary ends.",

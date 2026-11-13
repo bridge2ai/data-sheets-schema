@@ -191,3 +191,19 @@ def test_foreign_valid_cohort_envelope_cannot_redirect_stage(tmp_path, monkeypat
     with pytest.raises(ValueError, match='another cohort configuration'):
         stage['load_cohort'](envelopes[1][0], '0' * 40)
     assert not (envelopes[0][0] / 'stages').exists() and not (envelopes[1][0] / 'stages').exists()
+
+
+def test_full_stage_uses_frozen_plan_count_instead_of_historical_28(cohort, monkeypatch):
+    directory = cohort / 'stages/full'; directory.mkdir()
+    destination = cohort / 'SYNTHETIC-full'; destination.mkdir()
+    plan = stage['save'](cohort / 'SYNTHETIC-case-plan.json', {'cases': [{'SYNTHETIC': number} for number in range(35)]})
+    stage['save'](destination / 'demonstration-results.json', {
+        'status': 'all_requested_demonstrations_passed', 'cases': [{'SYNTHETIC': number} for number in range(28)]})
+    monkeypatch.setitem(stage, 'load_cohort', lambda *args: None)
+    declaration = stage['finalize_stage'](directory, cohort=cohort, commit='0' * 40,
+        action='full', role=None, envelope={'config': stage['pin'](cohort / 'stage-config.json'),
+            'sources': {'scripts/adhoc/h3_refinement_cases_20261113.json': plan}}, prior={},
+        outcome={'interrupted': None, 'forced_cleanup': False, 'observed_surviving_pids': [], 'observation_errors': []},
+        returncode=0, destination=destination)
+    result = json.loads(stage['checked'](declaration))
+    assert result['status'] == 'held' and 'complete comparison proof' in result['proof_error']

@@ -466,7 +466,8 @@ def finalize_stage(stage, *, cohort, commit, action, role, envelope, prior, outc
             outcome['demonstration_proof'] = aggregate_pin
             aggregate = json.loads(checked(aggregate_pin))
             expected_status = 'canary_passed' if action == 'canary' else 'all_requested_demonstrations_passed'
-            expected_count = 1 if action == 'canary' else 28
+            expected_count = (1 if action == 'canary' else len(json.loads(checked(
+                envelope['sources']['scripts/adhoc/h3_refinement_cases_20261113.json']))['cases']))
             if aggregate.get('status') != expected_status or len(aggregate.get('cases', [])) != expected_count:
                 raise ValueError('fixed driver exit lacks its persisted complete comparison proof')
             if action == 'canary' and aggregate['cases'][0]['status'] != 'equal':
@@ -543,6 +544,7 @@ def child(inputs_pin):
     control = source_module(sources[CONTROL], 'fixed_stage_private_controls')
     result = control['prepare_control'](output, trusted_root=G, scratch=S,
         dependency_roots=[Path(config['dependency_roots'][-1])], bounds_path=Path(config['bounds']['path']),
+        main_reference_report=pin(Path(config['packet_root']) / 'reference-report.json'),
         timeout_seconds=3600)
     declaration = save(cohort / 'source-commit-controls.json', result)
     save(stage / 'origins-after.json', origin_witness(G))
