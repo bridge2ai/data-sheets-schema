@@ -69,27 +69,30 @@ class AdmissionTimer:
                 except BaseException as exc:
                     errors.append(exc)
             return False
-        attempt(lambda: signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM}))
-        if owned:
-            cancelled = attempt(lambda: signal.setitimer(signal.ITIMER_REAL, 0))
-            # XNU may post one already-dequeued callout after cancellation.
-            # Keep the alarm blocked and our handler inert through another tick.
+        def quiet_tick():
+            # Sampling the clock is also a raising teardown step. A retry
+            # waits a complete additional tick before restoring disposition.
             until = time.monotonic() + POLL_SECONDS
             while True:
-                try:
-                    remaining = until - time.monotonic()
-                    if remaining <= 0:
-                        break
-                    time.sleep(remaining)
-                except BaseException as exc:
-                    errors.append(exc)
-            def drain():
-                if signal.SIGALRM in signal.sigpending():
-                    signal.sigwait({signal.SIGALRM})
-            drained = attempt(drain)
-            if cancelled and drained:
-                attempt(lambda: signal.signal(signal.SIGALRM, previous))
-        attempt(lambda: signal.pthread_sigmask(signal.SIG_SETMASK, blocked))
+                remaining = until - time.monotonic()
+                if remaining <= 0:
+                    return
+                time.sleep(remaining)
+        def drain():
+            if signal.SIGALRM in signal.sigpending():
+                signal.sigwait({signal.SIGALRM})
+        try:
+            blocked_ok = attempt(lambda: signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM}))
+            if owned:
+                cancelled = attempt(lambda: signal.setitimer(signal.ITIMER_REAL, 0))
+                # XNU may post one already-dequeued callout after cancellation.
+                # Keep the alarm blocked and our handler inert for another tick.
+                quiet = attempt(quiet_tick)
+                drained = attempt(drain)
+                if blocked_ok and cancelled and quiet and drained:
+                    attempt(lambda: signal.signal(signal.SIGALRM, previous))
+        finally:
+            attempt(lambda: signal.pthread_sigmask(signal.SIG_SETMASK, blocked))
         if errors:
             raise errors[0]
 

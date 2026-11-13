@@ -116,13 +116,14 @@ def test_late_post_cancel_alarm_is_consumed_before_restoration(monkeypatch):
     assert signal.SIGALRM not in signal.pthread_sigmask(signal.SIG_BLOCK, ())
 
 
-@pytest.mark.parametrize('step', ['block', 'cancel', 'wait', 'pending', 'handler', 'mask'])
+@pytest.mark.parametrize('step', ['block', 'cancel', 'wait-clock', 'wait', 'pending', 'handler', 'mask'])
 def test_teardown_step_exception_does_not_skip_remaining_restoration(monkeypatch, step):
     from data_sheets_schema import native_admission_timer as module
     timer = AdmissionTimer(elapsed_ns())
     raised = []
     originals = {name: getattr(signal, name) for name in ('pthread_sigmask', 'setitimer', 'sigpending', 'signal')}
     original_sleep = time.sleep
+    original_monotonic = time.monotonic
     def interrupt(name, action, *args):
         result = action(*args)
         if timer._closing and name == step and not raised:
@@ -137,6 +138,7 @@ def test_teardown_step_exception_does_not_skip_remaining_restoration(monkeypatch
             monkeypatch.setattr(signal, 'sigpending', lambda: interrupt('pending', originals['sigpending']))
             monkeypatch.setattr(signal, 'signal', lambda *args: interrupt('handler', originals['signal'], *args))
             monkeypatch.setattr(module.time, 'sleep', lambda seconds: interrupt('wait', original_sleep, seconds))
+            monkeypatch.setattr(module.time, 'monotonic', lambda: interrupt('wait-clock', original_monotonic))
     assert raised == [step]
     assert signal.getitimer(signal.ITIMER_REAL) == (0.0, 0.0)
     assert signal.getsignal(signal.SIGALRM) == signal.SIG_DFL
