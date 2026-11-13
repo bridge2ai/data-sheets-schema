@@ -104,3 +104,18 @@ def test_standalone_capture_still_records_word_and_reserves_slot(tmp_path, monke
     result = capture.capture_subscription(**arguments)
     assert len(seen) == 1 and result.parent == seen[0]
     assert (root / 'authority.json').is_file()
+
+
+@pytest.mark.parametrize('reserved', ['attempt_directory', 'evidence_directory'])
+def test_sequence_rechecks_unspent_generation_under_capture_lock(tmp_path, monkeypatch, reserved):
+    arguments, value, pin = claimed(tmp_path, monkeypatch)
+    locked = words.locked
+    @contextmanager
+    def reserve_before_lock(*args, **kwargs):
+        Path(value[reserved]).mkdir()
+        with locked(*args, **kwargs) as journal:
+            yield journal
+    monkeypatch.setattr(words, 'locked', reserve_before_lock)
+    no_capture(monkeypatch)
+    with pytest.raises(ValueError, match='spent generation reservation'):
+        capture.capture_subscription(**arguments, sequence_start=pin)

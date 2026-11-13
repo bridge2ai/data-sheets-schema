@@ -424,6 +424,7 @@ def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw
     words.validate_window(value['runtime'], launch_word_raw)
     words.require_unspent(value)
     with words.locked(value, registration_raw, create=sequence_start is None) as journal:
+        words.require_unspent(value)
         if sequence_start is None:
             journal.activate(launch_word_raw, review_bundle_raw, value)
         else:
