@@ -90,6 +90,37 @@ def test_unknown_sleep_log_is_not_a_no_sleep_claim(monkeypatch):
     assert power.parse_sleep_events('unrecognized output', 0, 10)['status'] == 'unknown'
 
 
+def sleep_stamp(second):
+    return int(datetime.fromisoformat('2000-01-01T00:00:' + f'{second:02d}' + '+00:00').timestamp() * 10**9)
+
+
+def sleep_log(*rows):
+    return '\n'.join('2000-01-01 00:00:' + f'{second:02d}' + ' +0000 ' + event for second, event in rows)
+
+
+@pytest.mark.parametrize('text', [
+    sleep_log((0, 'Unfamiliar Entering Sleep'), (50, 'Unfamiliar Wake')),
+    sleep_log((15, 'Sleep Entering Sleep'), (25, 'Wake Wake from Normal Sleep')),
+    sleep_log((0, 'Wake Wake from Normal Sleep'), (50, 'Wake Wake from Normal Sleep')),
+    sleep_log((0, 'Sleep Entering Sleep'), (50, 'Sleep Entering Sleep')),
+    sleep_log((0, 'Unfamiliar status'), (50, 'Unfamiliar status')),
+])
+def test_unsupported_incomplete_and_unmatched_logs_are_unknown(text):
+    assert power.parse_sleep_events(text, sleep_stamp(10), sleep_stamp(30))['status'] == 'unknown'
+
+
+def test_covered_darkwake_and_covered_no_sleep_are_distinct():
+    text = sleep_log((0, 'Sleep Entering Sleep'), (20, 'DarkWake DarkWake from Normal Sleep'),
+                     (40, 'Sleep Entering Sleep'), (50, 'Wake Wake from Normal Sleep'))
+    slept = power.parse_sleep_events(text, sleep_stamp(10), sleep_stamp(30))
+    assert slept['status'] == 'read'
+    assert [row['event'] for row in slept['events']] == ['DarkWake']
+    assert slept['intervals'][0]['overlap_ns'] == 10 * 10**9
+    awake = power.parse_sleep_events(text, sleep_stamp(21), sleep_stamp(30))
+    assert awake['status'] == 'read' and awake['intervals'] == []
+    assert awake['coverage']['covers_interval'] is True
+
+
 def test_end_record_failure_does_not_replace_cleanup_failure(tmp_path, monkeypatch):
     def fail(*args): raise OSError('synthetic disk failure')
     monkeypatch.setattr(power, 'finish_run', fail)

@@ -173,35 +173,61 @@ def clock_gaps(records):
 
 
 def parse_sleep_events(text, start_ns, end_ns):
-    """Pair Sleep with the next Wake/DarkWake; retain overlapping intervals."""
-    if not re.search(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [+-]\d{4}\s+', text, re.M):
-        return {'status': 'unknown', 'reason': 'unrecognized or empty local sleep log',
-                'events': [], 'intervals': []}
-    events, intervals, sleeping = [], [], None
+    """No-sleep requires ordered, paired, recognized events bracketing the run.
+
+    Unknown formats and incomplete coverage retain any parsed positive evidence
+    but cannot certify absence. A DarkWake ends sleep just like a full Wake.
+    """
+    events, intervals, sleeping, stamps, problems = [], [], None, [], set()
+    if end_ns < start_ns:
+        problems.add('wall clock moved backwards')
     for line in text.splitlines():
         match = re.match(r'(.{25})\s+(Sleep|Wake|DarkWake)\s+(Entering Sleep|Wake from|DarkWake from)', line)
         if not match:
+            if re.search(r'sleep|wake', line, re.I) and not line.startswith('#'):
+                problems.add('unrecognized sleep-like record')
             continue
         try:
             instant = int(datetime.strptime(match[1], '%Y-%m-%d %H:%M:%S %z').timestamp() * 1_000_000_000)
         except ValueError:
+            problems.add('unrecognized sleep timestamp')
             continue
+        if stamps and instant < stamps[-1]:
+            problems.add('sleep log is not ordered')
+        stamps.append(instant)
+        if len(stamps) > MAX_EVENTS:
+            raise ValueError('sleep event count exceeds bound')
         kind = match[2]
+        if match[3] != {'Sleep': 'Entering Sleep', 'Wake': 'Wake from', 'DarkWake': 'DarkWake from'}[kind]:
+            problems.add('unrecognized sleep event wording')
         if start_ns <= instant <= end_ns:
             events.append({'wall_ns': instant, 'event': kind, 'raw': line[:2048]})
             if len(events) > MAX_EVENTS:
                 raise ValueError('sleep event count exceeds bound')
         if kind == 'Sleep':
+            if sleeping is not None:
+                problems.add('unmatched sleep event')
             sleeping = instant
         elif sleeping is not None:
             if sleeping <= end_ns and instant >= start_ns:
                 intervals.append({'sleep_wall_ns': sleeping, 'wake_wall_ns': instant,
                                   'overlap_ns': max(0, min(instant, end_ns) - max(sleeping, start_ns))})
             sleeping = None
+        else:
+            problems.add('unmatched wake event')
     if sleeping is not None and sleeping <= end_ns:
         intervals.append({'sleep_wall_ns': sleeping, 'wake_wall_ns': None,
                           'overlap_ns': max(0, end_ns - max(sleeping, start_ns))})
-    return {'status': 'read', 'events': events, 'intervals': intervals}
+    if sleeping is not None:
+        problems.add('unmatched sleep event')
+    covered = bool(stamps) and stamps[0] <= start_ns and stamps[-1] >= end_ns
+    if not covered:
+        problems.add('recognized log does not cover requested interval')
+    return {'status': 'unknown' if problems else 'read',
+            'reason': '; '.join(sorted(problems)) if problems else None,
+            'coverage': {'start_ns': stamps[0] if stamps else None,
+                         'end_ns': stamps[-1] if stamps else None, 'covers_interval': covered},
+            'events': events, 'intervals': intervals}
 
 
 def sleep_events(start_ns, end_ns):
@@ -231,7 +257,7 @@ def finish_run(directory):
     gaps = clock_gaps(records)
     result = {'scope': 'supplemental local host observations; no acceptance decision',
         'clocks': records, 'clock_gaps': gaps, 'system_sleep': events,
-        'host_slept': bool(events['intervals']) if events['status'] == 'read' else None,
+        'host_slept': any(row['overlap_ns'] > 0 for row in events['intervals']) if events['status'] == 'read' else None,
         'suspension_detected': bool(events['intervals']) or any(g['suspension_detected'] for g in gaps)}
     _write_new(directory / 'host-observation.json', result)
     return result
