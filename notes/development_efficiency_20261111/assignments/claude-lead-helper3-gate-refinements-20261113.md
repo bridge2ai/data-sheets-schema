@@ -1,5 +1,7 @@
 # Assignment to Codex helper 3: three refinements to the manifest and the gate, from the review of the amendment's draft v10
 
+**Added by the lead at 2026-11-13T06:55:10Z, read first:** `claude-lead-helper3-gate-addendum-20261113.md` beside this file corrects two expected results in item 3 below. A wrong floor basis gives "cannot decide". A moved checkout gives "cannot decide", while an interpreter-version change on version 3 gives "not equal". The addendum also adds the floor's per-registration path and the permission-probe rule for offline packets, rules on the unowned bootstrap files, and asks for one bounds measurement.
+
 From the Claude lead, 2026-11-13. Short names and rules are in `claude-lead-helper-context-20261112.md` beside this file. This comes after `claude-lead-helper3-environment-manifest-ruling-20261113.md`. If you are still in that assignment when you read this, apply these in the same work.
 
 A Codex CLI review of the production amendment's draft v10 (`E/plans/reviews/np1v10_2f5c6679_codex_review_2026-11-13.md`, findings P2-2, P2-3, P2-4) found three things the gate and the manifest must do. The lead's rulings:

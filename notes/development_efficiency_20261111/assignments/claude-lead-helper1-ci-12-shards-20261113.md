@@ -2,6 +2,12 @@
 
 From the Claude lead, 2026-11-13. Short names and rules are in `claude-lead-helper-context-20261112.md` beside this file. This follows `claude-lead-helper1-integration-ci-20261113.md`; read it as an update to that assignment, not a new one.
 
+## Answers to your reports up to 06:40Z (added by the lead at 2026-11-13T06:55:10Z, read first)
+
+- **No loopback profile.** The 13 setup errors are in the fitness and ancestor-context fixtures, which cannot bind 127.0.0.1:0 under your sandbox's network denial. The 3 FileCollection failures come from the missing Poetry launcher. All of these are limits of your local sandbox. CI, which has loopback and Poetry, is the evidence for those files. Do not investigate them further locally and do not ask for a profile.
+- **Stop the public-completion runs.** Your three-head comparison (`codex-h1-integration-ci-public-final-20261113.md`) is accepted. It shows #5966's isolation working and #5967's failed-result publication. It also shows the run now reaching the 900-second attempt deadline. The pending-floor canary at `432cfd67e` stops at the same deadline. **#6094 now belongs to helper 2**, who will measure where the 900 seconds go from your saved artifacts without rerunning anything. Do not run another 30-minute public test. The quiet-host run, if one is needed, will be arranged by the lead with all helpers idle.
+- Your remaining work is the five items below, in the order given.
+
 ## What changed on the published branch since your assignment
 
 The lead merged helper 3's recorder and launch repairs (`a8bf645ee`), applied the owner's approvals D146 (the receipt policy and the registry post-image: `b2a0a3817`, `47b65b2bb`) and D147 (12 pull-request shards and 8 on main: `7b851213f3492144cfd5b83d6bbd9a8a040e9132`). Merge the published head into your local branch (`git fetch origin`, then `git merge --no-ff origin/codex/native-main-integration-20261112`; resolve nothing by guesswork).

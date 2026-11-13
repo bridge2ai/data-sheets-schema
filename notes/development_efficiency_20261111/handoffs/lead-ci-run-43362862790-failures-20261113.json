@@ -1,0 +1,168 @@
+{
+  "run_id": "43362862790",
+  "head": "43f6d414550e34c15b332d07962d4b685515fd85",
+  "conclusion": "cancelled",
+  "jobs": [
+    {
+      "id": 131680226891,
+      "name": "Python 3.12 / offline evaluation",
+      "conclusion": "success",
+      "seconds": 184.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227188,
+      "name": "Python 3.12 / API case routing-dispatch",
+      "conclusion": "success",
+      "seconds": 570.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227204,
+      "name": "Python 3.12 / API case routing-portable",
+      "conclusion": "cancelled",
+      "seconds": 1270.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227217,
+      "name": "Python 3.12 / shard 7",
+      "conclusion": "cancelled",
+      "seconds": 1271.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227225,
+      "name": "Python 3.12 / offline canary controls",
+      "conclusion": "success",
+      "seconds": 790.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227236,
+      "name": "Python 3.12 / SG2 case sg2-explicit",
+      "conclusion": "success",
+      "seconds": 808.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227277,
+      "name": "Python 3.12 / offline audit and finalization",
+      "conclusion": "success",
+      "seconds": 530.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227301,
+      "name": "Python 3.12 / API case routing-default-layout",
+      "conclusion": "success",
+      "seconds": 746.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227356,
+      "name": "Python 3.12 / shard 3",
+      "conclusion": "cancelled",
+      "seconds": 1270.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227364,
+      "name": "Python 3.12 / SG2 case sg2-none",
+      "conclusion": "success",
+      "seconds": 775.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227371,
+      "name": "Python 3.12 / SG2 case sg2-conventional",
+      "conclusion": "success",
+      "seconds": 560.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227374,
+      "name": "Python 3.12 / API case routing-regate",
+      "conclusion": "success",
+      "seconds": 461.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227376,
+      "name": "Python 3.12 / shard 6",
+      "conclusion": "cancelled",
+      "seconds": 1270.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227431,
+      "name": "Python 3.12 / shard 2",
+      "conclusion": "cancelled",
+      "seconds": 1270.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227442,
+      "name": "Python 3.12 / shard 5",
+      "conclusion": "cancelled",
+      "seconds": 1267.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227465,
+      "name": "Python 3.12 / shard 4",
+      "conclusion": "cancelled",
+      "seconds": 1269.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227508,
+      "name": "Python 3.12 / shard 1",
+      "conclusion": "cancelled",
+      "seconds": 1268.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680227640,
+      "name": "Python 3.12 / shard 8",
+      "conclusion": "cancelled",
+      "seconds": 1270.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131680228369,
+      "name": "schema-examples",
+      "conclusion": "skipped",
+      "seconds": 0.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131687926145,
+      "name": "test",
+      "conclusion": "failure",
+      "seconds": 3.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    }
+  ],
+  "failures": []
+}
