@@ -456,6 +456,49 @@ def run_stage(cohort, commit, action, role, timeout):
         destination=destination if action in ('canary', 'full') else None)
 
 
+def authority_bounds_barrier(config, role):
+    """Read the finished packet authority before any later stage can launch."""
+    packet_root = Path(config['packet_root'])
+    report = json.loads(read(packet_root / (role + '-report.json')))
+    if report.get('status') != 'SYNTHETIC-registration-verified':
+        raise ValueError('bounds barrier requires a verified builder report')
+    packet = packet_root / (role + '-packet')
+    if report['registration']['path'] != str(packet / 'registration.json'):
+        raise ValueError('bounds barrier packet path differs')
+    execution = json.loads(checked(report['registration']))['registration']
+    prepared_raw = execution['preparation_raw_json'].encode()
+    if (hashlib.sha256(prepared_raw).hexdigest() != execution['preparation_sha256']
+            or read(packet / 'preparation.json') != prepared_raw):
+        raise ValueError('bounds barrier preparation binding differs')
+    prepared = json.loads(prepared_raw)['registration']
+    selection = json.loads(checked(prepared['selection']))
+    adopted = {row['key']: row['proposed'] for row in json.loads(checked(config['bounds']))['bounds']}
+    if selection['bounds'] != adopted:
+        raise ValueError('bounds barrier selection differs from adopted bounds')
+    inputs = selection['inputs']
+    declarations = [prepared['selection'], prepared['environment_manifest'], selection['receipt_policy'],
+                    *selection['selection']['assets'].values()]
+    declarations += [inputs[key] for key in ('bundle', 'chunk_manifest', 'context', 'source_manifest') if inputs[key] is not None]
+    if inputs['profile']['vocabulary'] is not None:
+        declarations.append(inputs['profile']['vocabulary'])
+    for name in ('full_schema', 'core_schema'):
+        declarations += [{key: row[key] for key in ('path', 'bytes', 'sha256')} for row in inputs[name]['sources']]
+    unique = {}
+    for declaration in declarations:
+        if declaration['path'] in unique and unique[declaration['path']] != declaration:
+            raise ValueError('bounds barrier has conflicting authority aliases')
+        checked(declaration)
+        unique[declaration['path']] = declaration
+    environment = prepared['environment_manifest']
+    if prepared['pinned_files'].get(environment['path']) != environment['sha256']:
+        raise ValueError('bounds barrier manifest is not in preparation closure')
+    total = sum(row['bytes'] for row in unique.values())
+    return dict(project=selection['run']['project'], role=role, total_bytes=total,
+                threshold_bytes=8_000_000, within_threshold=total <= 8_000_000,
+                environment=environment, registration=report['registration'],
+                authority_files=[unique[path] for path in sorted(unique)])
+
+
 def finalize_stage(stage, *, cohort, commit, action, role, envelope, prior, outcome, returncode, destination=None):
     """Always preserve attempted-stage outcome, even when child proof is absent."""
     outcome = dict(outcome)
@@ -492,11 +535,16 @@ def finalize_stage(stage, *, cohort, commit, action, role, envelope, prior, outc
         cleanup_verified=clean, result=result, proof_error=proof_error,
         cleanup_scope='observed PID/creation-time descendants only; no proof about never-observed orphans')
     try:
-        load_cohort(cohort, commit)
+        config, _ = load_cohort(cohort, commit)
         for item in prior.values():
             checked(item)
         for item in document.get('outputs', {}).values():
             checked(item)
+        if passed and action == 'build':
+            measurement = authority_bounds_barrier(config, role)
+            outcome['authority_bounds'] = save(stage / 'authority-bounds.json', measurement)
+            if not measurement['within_threshold']:
+                raise ValueError('selection authority including environment exceeds the lead 8000000-byte condition')
     except Exception as error:
         outcome.update(status='held', postflight_error=type(error).__name__ + ': ' + str(error))
     return save(stage / 'outcome.json', outcome)

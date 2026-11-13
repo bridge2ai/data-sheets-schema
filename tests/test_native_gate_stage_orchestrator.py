@@ -273,3 +273,38 @@ def test_full_stage_uses_frozen_plan_count_instead_of_historical_28(cohort, monk
         returncode=0, destination=destination)
     result = json.loads(stage['checked'](declaration))
     assert result['status'] == 'held' and 'complete comparison proof' in result['proof_error']
+
+
+def test_over_bound_builder_persists_measurement_and_blocks_canary(cohort, monkeypatch):
+    directory = cohort / 'stages/build-reference'; directory.mkdir()
+    configuration = stage['pin'](cohort / 'stage-config.json')
+    stage['save'](directory / 'result.json', dict(status='passed', action='build', role='reference',
+        config=configuration, outputs={}, side_effects=stage['COUNTERS']))
+    monkeypatch.setitem(stage, 'load_cohort', lambda *args: ({}, {}))
+    monkeypatch.setitem(stage, 'authority_bounds_barrier', lambda *args:
+        dict(total_bytes=8_000_001, threshold_bytes=8_000_000, within_threshold=False))
+    saved = stage['finalize_stage'](directory, cohort=cohort, commit='0' * 40,
+        action='build', role='reference', envelope={'config': configuration}, prior={},
+        outcome=dict(interrupted=None, forced_cleanup=False, observed_surviving_pids=[], observation_errors=[]), returncode=0)
+    outcome = json.loads(stage['checked'](saved))
+    assert outcome['status'] == 'held'
+    assert '8000000-byte' in outcome['postflight_error']
+    assert json.loads(stage['checked'](outcome['authority_bounds']))['total_bytes'] == 8_000_001
+    with pytest.raises(ValueError, match='did not complete cleanly'):
+        stage['verify_predecessors'](cohort, 'canary')
+
+
+def test_failed_bounds_readback_blocks_builder_acceptance(cohort, monkeypatch):
+    directory = cohort / 'stages/build-reference'; directory.mkdir()
+    configuration = stage['pin'](cohort / 'stage-config.json')
+    stage['save'](directory / 'result.json', dict(status='passed', action='build', role='reference',
+        config=configuration, outputs={}, side_effects=stage['COUNTERS']))
+    monkeypatch.setitem(stage, 'load_cohort', lambda *args: ({}, {}))
+    def failed(*args):
+        raise ValueError('authority pin changed')
+    monkeypatch.setitem(stage, 'authority_bounds_barrier', failed)
+    saved = stage['finalize_stage'](directory, cohort=cohort, commit='0' * 40,
+        action='build', role='reference', envelope={'config': configuration}, prior={},
+        outcome=dict(interrupted=None, forced_cleanup=False, observed_surviving_pids=[], observation_errors=[]), returncode=0)
+    outcome = json.loads(stage['checked'](saved))
+    assert outcome['status'] == 'held' and 'authority pin changed' in outcome['postflight_error']

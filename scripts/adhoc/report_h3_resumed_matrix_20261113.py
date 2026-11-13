@@ -19,6 +19,7 @@ G = E / 'codex-native-pin-comparison-20261113'
 R = E / 'codex-development-efficiency-20261111'
 S = E / 'scratch-h3-resume-matrix-20261113'
 OLD = E / 'scratch-h3-gate-refinements-20261113'
+CURRENT = 'final-format-07'
 HANDOFF = R / 'notes/development_efficiency_20261111/handoffs/codex-h3-final-format-matrix-20261113'
 PROTECTED = ['src/data_sheets_schema/shared_generation.py', 'src/data_sheets_schema/api_runner.py',
              'src/download/prompts/canonical_hashes.yaml', 'tests/utils/run_spec_boundary_contracts.json']
@@ -102,12 +103,13 @@ def fresh_bounds():
     helper = R / 'scripts/adhoc/measure_h3_final_authority_20261113.py'
     api = dict(__name__='resumed_authority_readback', __file__=str(helper))
     exec(compile(helper.read_bytes(), str(helper), 'exec'), api)
-    api['PACKETS'] = OLD / 'tests/final-format-06/cases/test_final_format_registration0'
+    api['PACKETS'] = OLD / 'tests' / CURRENT / 'cases/test_final_format_registration0'
     adopted = {row['key']: row['proposed'] for row in read(N / 'scripts/adhoc/h3_gate_bounds_20261113.json')['bounds']}
     rows = []
     for project, role in api['PROJECTS']:
         report = api['PACKETS'] / (role + '-report.json')
-        if report.exists():
+        outcome_path = OLD / 'tests' / CURRENT / 'stages' / ('build-' + role) / 'outcome.json'
+        if report.exists() and outcome_path.exists() and read(outcome_path).get('status') == 'passed' and read(outcome_path).get('cleanup_verified') is True:
             rows.append(api['project_row'](project, role, adopted))
     return dict(helper=pin(helper), packets_root=str(api['PACKETS']), rows=rows,
                 complete=len(rows) == len(api['PROJECTS']),
@@ -152,13 +154,13 @@ def main():
     args = parser.parse_args()
     plan_path = G / 'scripts/adhoc/h3_refinement_cases_20261113.json'
     plan = read(plan_path)
-    demonstration = OLD / 'demonstrations/final-format-06-full/demonstration-results.json'
+    demonstration = OLD / 'demonstrations' / (CURRENT + '-full') / 'demonstration-results.json'
     reporter = G / 'scripts/adhoc/h3_gate_addendum_report_20261113.py'
     namespace = dict(__name__='resumed_report_verifier', __file__=str(reporter))
     exec(compile(reporter.read_bytes(), str(reporter), 'exec'), namespace)
     final, verification, accepted = namespace['assess_final'](demonstration if demonstration.exists() else None)
     try:
-        terminal = verify_terminal(OLD / 'tests/final-format-06/stages/full', demonstration)
+        terminal = verify_terminal(OLD / 'tests' / CURRENT / 'stages/full', demonstration)
     except (OSError, ValueError, KeyError) as error:
         terminal = dict(status='held', error=str(error))
         accepted = False
@@ -177,7 +179,7 @@ def main():
     value = dict(answer=dict(cases_accepted=sum(row['accepted'] for row in cases), total_cases=len(cases),
                             verifier=verification, terminal=terminal, branch_readiness='reviewable; integration acceptance pending'),
                  cases=cases, case_plan=pin(plan_path), reporter=pin(reporter), bounds=bounds(), fresh_bounds=fresh_bounds(), branches=audit,
-                 cohorts={name: cohort(name) for name in ('final-format-04', 'final-format-05', 'final-format-06')},
+                 cohorts={name: cohort(name) for name in ('final-format-04', 'final-format-05', 'final-format-06', CURRENT)},
                  saved_manifest_tests=tests, manifest_test_report=pin(bytecode),
                  script=pin(Path(__file__)), fresh_runner=pin(N / 'scripts/adhoc/resume_h3_matrix_20261113.py'),
                  duplication_check=git(G, 'diff', '--exit-code', 'codex/native-environment-manifest-20261113', 'HEAD', '--',
@@ -200,7 +202,9 @@ def main():
                  'The prior final-format-04 cohort stopped at build-registered without a terminal outcome. '
                  'Its self-canary and completed builders are historical evidence, not an accepted matrix. '
                  'Fresh final-format-05 bootstrapped but nested sandbox setup failed. '
-                 'Fresh final-format-06 uses the existing network-denied builder/validator sandboxes through an escalated outer launch. '
+                 'Fresh final-format-06 was held after an orchestrator refinement made its captured launcher stale. '
+                 f'Fresh {CURRENT} uses the existing network-denied builder/validator sandboxes through an escalated outer launch, '
+                 'with an authority-size barrier after every main-cohort packet build and before subsequent stages. '
                  'No native binary, provider, model, probe, capture, reservation or GitHub operation was performed.', '',
                  'Verifier readback: ' + json.dumps(verification, sort_keys=True), '',
                  'Terminal cohort readback: ' + json.dumps(terminal, sort_keys=True), '',

@@ -13,8 +13,8 @@ import sys
 N = Path(__file__).resolve().parents[2]
 E = N.parent
 G = E / 'codex-native-pin-comparison-20261113'
-S = E / 'scratch-h3-resume-matrix-20261113/attempt03'
-C = E / 'scratch-h3-gate-refinements-20261113/tests/final-format-06'
+S = E / 'scratch-h3-resume-matrix-20261113/attempt04'
+C = E / 'scratch-h3-gate-refinements-20261113/tests/final-format-07'
 
 
 def main():

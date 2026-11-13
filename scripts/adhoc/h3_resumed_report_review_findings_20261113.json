@@ -5,7 +5,8 @@
   "findings": [
     {"id": "H3-RESUME-1", "priority": "P1", "finding": "Complete aggregate could be accepted before terminal cleanup and postflight.", "disposition": "Require successful full-stage outcome and result, configuration and demonstration pins, zero side effects; negative controls cover missing outcome, cleanup/postflight failure and changed aggregate."},
     {"id": "H3-RESUME-2", "priority": "P2", "finding": "Git inspection failure could render clean and protected-file match was unconditional.", "disposition": "Render inspection errors explicitly; committed and live protected-file claims depend on saved exit codes."},
-    {"id": "H3-RESUME-3", "priority": "P2", "finding": "Bounds statement was unconditional and only covered interrupted cohort.", "disposition": "Derive historical condition from byte readback and threshold; separately measure fresh completed packets with existing packing-free authority reader."},
-    {"id": "H3-RESUME-4", "priority": "P3", "finding": "Exact reproduction command names an already existing exclusive output.", "disposition": "Label it as the recorded generating command and require a fresh output filename for rerun."}
+    {"id": "H3-RESUME-3", "priority": "P2", "finding": "Bounds statement was unconditional and only covered interrupted cohort; continuation also lacked a size barrier.", "disposition": "Conditional historical and fresh reporting; main-cohort builders now save an authority measurement before continuation and hold on excess or failed readback. Saved old packets reproduce all five prior totals. Focused stage/reporter cohort has 55 passes. Read-only re-review found no blocking defect."},
+    {"id": "H3-RESUME-4", "priority": "P3", "finding": "Exact reproduction command names an already existing exclusive output.", "disposition": "Label it as the recorded generating command and require a fresh output filename for rerun."},
+    {"id": "H3-RESUME-5", "priority": "P3", "finding": "Every packet build overstates the main-cohort bounds barrier scope; private-control internal builders use a different path.", "disposition": "Wording narrowed to every main-cohort packet build."}
   ]
 }
