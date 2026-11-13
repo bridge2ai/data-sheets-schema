@@ -27,31 +27,29 @@ from tests.test_typed_audit import supplied, replies
 
 
 def _with_actual_policy(case):
-    """Keep the fictional stage fixture, but capture the real gate policy asset."""
+    """Capture the real gate descriptor/assets before the pure-operation barrier."""
     selected, binding, phase1, _ = case
-    raw = (Path(__file__).resolve().parents[1] / selection_api.RECEIPT_POLICY).read_bytes()
-    assert c.sha(raw) == selection_api.RECEIPT_POLICY_SHA256
-    old_asset = next(item for item in selected.authority if item.pin.role == 'native_policy')
-    asset = artifact(old_asset.pin.role, old_asset.pin.path, raw)
+    assets = selection_api.capture_assets()
+    asset = next(item for item in assets
+                 if item.pin.role == 'asset:' + selection_api.RECEIPT_POLICY)
+    assert asset.pin.sha256 == selection_api.RECEIPT_POLICY_SHA256
     policy = c.strict_json(selected.receipt_policy.raw)
     policy['runtime_policy_sha256'] = asset.pin.sha256
     policy_artifact = artifact(selected.receipt_policy.pin.role,
                                selected.receipt_policy.pin.path, c.canonical(policy))
-    descriptor = c.strict_json(selected.descriptor.raw)
-    name = descriptor['receipt_policy']['path']
-    descriptor['receipt_policy']['sha256'] = asset.pin.sha256
-    descriptor['assets'][name] = asset.pin.sha256
-    descriptor_raw = c.canonical(descriptor)
-    descriptor_capture = c.DescriptorCapture(descriptor_raw, c.sha(descriptor_raw))
+    descriptor_capture = selection_api.descriptor_capture()
     doc = selected.document()
     doc['selection']['descriptor_sha256'] = descriptor_capture.sha256
-    doc['selection']['assets'][name] = {key: getattr(asset.pin, key)
+    doc['selection']['assets'] = {
+        item.pin.role[len('asset:'):]: {key: getattr(item.pin, key)
                                       for key in ('path', 'bytes', 'sha256')}
+        for item in assets}
     doc['receipt_policy'] = {key: getattr(policy_artifact.pin, key)
                              for key in ('path', 'bytes', 'sha256')}
-    changed = {asset.pin.role: asset, policy_artifact.pin.role: policy_artifact}
+    changed = {policy_artifact.pin.role: policy_artifact}
     selected = replace(selected, descriptor=descriptor_capture, receipt_policy=policy_artifact,
-        authority=tuple(changed.get(item.pin.role, item) for item in selected.authority),
+        authority=tuple(changed.get(item.pin.role, item) for item in selected.authority
+                        if item.pin.role != 'native_policy') + assets,
         registration=artifact('selection', selected.registration.pin.path, c.canonical(doc)))
     binding = replace(binding, selection_sha256=selected.registration.pin.sha256)
     journal = artifact('journal', selected.role('journal'), stage.journal_bytes(
