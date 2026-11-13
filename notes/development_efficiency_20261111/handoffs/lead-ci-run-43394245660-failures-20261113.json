@@ -1,0 +1,265 @@
+{
+  "run_id": "43394245660",
+  "head": "fc00ce6544b002dc0e726cb196cb5939c8283092",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 131781204255,
+      "name": "Python 3.12 / offline canary controls",
+      "conclusion": "success",
+      "seconds": 713.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204474,
+      "name": "Python 3.12 / API case routing-dispatch",
+      "conclusion": "success",
+      "seconds": 827.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204493,
+      "name": "Python 3.12 / offline audit and finalization",
+      "conclusion": "success",
+      "seconds": 479.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204525,
+      "name": "Python 3.12 / SG2 case sg2-none",
+      "conclusion": "success",
+      "seconds": 930.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204573,
+      "name": "Python 3.12 / API case routing-portable",
+      "conclusion": "success",
+      "seconds": 1312.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204596,
+      "name": "Python 3.12 / offline evaluation",
+      "conclusion": "success",
+      "seconds": 245.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204602,
+      "name": "Python 3.12 / API case routing-default-layout",
+      "conclusion": "success",
+      "seconds": 941.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204614,
+      "name": "Python 3.12 / shard 11",
+      "conclusion": "failure",
+      "seconds": 1708.0,
+      "summary_lines": 1,
+      "pytest_tail": "1 failed, 3008 passed, 5 skipped, 56 warnings in 1673.50s (0:27:53)"
+    },
+    {
+      "id": 131781204625,
+      "name": "Python 3.12 / API case routing-regate",
+      "conclusion": "success",
+      "seconds": 661.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204650,
+      "name": "Python 3.12 / SG2 case sg2-conventional",
+      "conclusion": "success",
+      "seconds": 618.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204656,
+      "name": "Python 3.12 / shard 4",
+      "conclusion": "cancelled",
+      "seconds": 2723.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204663,
+      "name": "Python 3.12 / shard 3",
+      "conclusion": "success",
+      "seconds": 1340.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204676,
+      "name": "Python 3.12 / shard 1",
+      "conclusion": "success",
+      "seconds": 1943.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204689,
+      "name": "Python 3.12 / SG2 case sg2-explicit",
+      "conclusion": "success",
+      "seconds": 763.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204798,
+      "name": "Python 3.12 / shard 7",
+      "conclusion": "success",
+      "seconds": 1740.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204808,
+      "name": "Python 3.12 / shard 9",
+      "conclusion": "failure",
+      "seconds": 2086.0,
+      "summary_lines": 1,
+      "pytest_tail": "1 failed, 2337 passed, 1 skipped, 4 warnings in 2037.73s (0:33:57)"
+    },
+    {
+      "id": 131781204863,
+      "name": "Python 3.12 / shard 10",
+      "conclusion": "failure",
+      "seconds": 1284.0,
+      "summary_lines": 4,
+      "pytest_tail": "4 failed, 2256 passed, 4 skipped, 33 warnings in 1248.12s (0:20:48)"
+    },
+    {
+      "id": 131781204891,
+      "name": "Python 3.12 / shard 2",
+      "conclusion": "success",
+      "seconds": 1579.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204924,
+      "name": "Python 3.12 / shard 6",
+      "conclusion": "success",
+      "seconds": 1110.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781204957,
+      "name": "Python 3.12 / shard 8",
+      "conclusion": "success",
+      "seconds": 1418.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131781205012,
+      "name": "Python 3.12 / shard 12",
+      "conclusion": "failure",
+      "seconds": 1218.0,
+      "summary_lines": 1,
+      "pytest_tail": "1 failed, 1845 passed, 4 warnings in 1182.28s (0:19:42)"
+    },
+    {
+      "id": 131781205085,
+      "name": "Python 3.12 / shard 5",
+      "conclusion": "failure",
+      "seconds": 1912.0,
+      "summary_lines": 1,
+      "pytest_tail": "1 failed, 2368 passed, 4 skipped, 5 warnings in 1877.35s (0:31:17)"
+    },
+    {
+      "id": 131781206008,
+      "name": "schema-examples",
+      "conclusion": "skipped",
+      "seconds": 0.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131801441979,
+      "name": "test",
+      "conclusion": "failure",
+      "seconds": 2.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    }
+  ],
+  "failures": [
+    {
+      "job": "Python 3.12 / shard 11",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_execution.py",
+      "node": "test_actual_public_correction_three_workers_and_saved_completion",
+      "message": "ValueError: subscription pre-reservation freshness margin is insufficient",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 9",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_execution_variant.py",
+      "node": "test_actual_public_merged_omissions_and_all_chunk_statuses",
+      "message": "ValueError: subscription observation is stale or future-dated",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 10",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_owner_delivery.py",
+      "node": "test_replay_owner_reuses_catalog_and_unknown_initialization_is_fresh[case0]",
+      "message": "assert (None is None and None is not None)",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 10",
+      "kind": "FAILED",
+      "file": "tests/test_native_incomplete_retention.py",
+      "node": "test_public_failed_attempt_retains_records_and_reads_back_exactly[False]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 10",
+      "kind": "FAILED",
+      "file": "tests/test_native_incomplete_retention.py",
+      "node": "test_public_failed_attempt_retains_records_and_reads_back_exactly[True]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 10",
+      "kind": "FAILED",
+      "file": "tests/test_native_incomplete_retention.py",
+      "node": "test_public_finalization_after_injected_final_floor_failure",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 12",
+      "kind": "FAILED",
+      "file": "tests/test_native_pending_public_completion.py",
+      "node": "test_pending_floor_public_completion_retains_diagnostic_reading",
+      "message": "ValueError: subscription pre-reservation freshness margin is insufficient",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 5",
+      "kind": "FAILED",
+      "file": "tests/test_native_d128_scanner_comparison.py",
+      "node": "test_d128_final_composition_has_only_the_finite_approved_scanner_differences",
+      "message": "ValueError: D128 requires the exact approved scanner assets",
+      "class": "other"
+    }
+  ]
+}

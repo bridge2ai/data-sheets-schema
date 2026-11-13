@@ -38,6 +38,45 @@ The primary environment's virtualenv bootstrap files are owned by no `RECORD`. N
 
 Nothing has been registered on version 1 of the manifest yet, so this changes version 1 in place. That holds unless you have already pinned it somewhere outside your branches; if you have, say where. If the data file's field list changes, give it the new version your own rule requires.
 
+## Further corrections from the reviews of the amendment's draft v13 (added by the lead at 2026-11-13T08:26:25Z)
+
+1. **Bytecode.** Python writes `.pyc` files on import. In this checkout's environment, `linkml_runtime-1.9.4`'s `RECORD` lists none, yet 72 sit on disk. So `.pyc` files are excluded from the manifest's must-equal content: they are neither listed nor counted. Otherwise a first import after the reference's registration would change the manifest. The registered environment sets `PYTHONDONTWRITEBYTECODE=1` (candidate `native_shared_runtime_values.py:34`), so the native child and its helpers write none. Other uses of the same environment, such as tests and the API arm, can. Record, outside the pinned bytes, whatever bytecode diagnostics you find useful.
+2. **Paths your data file classes as per-run but the amendment holds identical.** `working_directory` (in the composition and the execution registration) and the environment's `PYTHONPATH` (`ROOT/src`) follow the checkout path, which is identical across the stratum. Class them must-equal.
+3. **More per-run per-registration files.** Add these to the per-run path list wherever a registration writes its own copy:
+   - the base system-instructions file (`system_path`);
+   - the observation probe's saved transcript, request and observation files (`native_u4b_runtime.py:280–299`).
+4. **An interpreter upgrade in place gives "cannot decide", not "not equal".** The validators run under the live interpreter and refuse the reference's own packet. A registration built under a changed interpreter, compared after the reference's interpreter is restored, gives "not equal" through the interpreter's sha256 pin and the manifest's pin. A rebuilt environment behaves the same way. The demonstration's changed-interpreter case, with the reference's interpreter in place, stays "not equal".
+5. **The other-commit case** is "a candidate built at another commit of the same checkout with no pinned file changed": "cannot decide". If that commit changes a pinned file, the result is "not equal".
+
+## Ruling on H3-RF19: the gate's precedence (added by the lead at 2026-11-13T08:48:36Z)
+
+Use the amendment's precedence (NP1 draft v15, commit `d44fe8283`, NP1.5). It differs from your recommended order in one place: the live HEAD belongs to step 1.
+
+1. **The reference's own validity on the live host comes first.** The gate runs on the reference's checkout path, interpreter (path, version and bytes), environment and HEAD. The reference's own packet must pass the unchanged validators there. If it does not — a moved checkout or interpreter, an interpreter upgraded in place, a rebuilt environment, or a live HEAD other than the reference's `source_commit` — the result is **"cannot decide"**. It is a hold until the host is restored, whatever pins differ.
+2. **Then valid must-equal pin differences: "not equal".** This applies only after step 1 has passed. It lists every differing pin, including the manifest's pin and the package-source pins.
+3. **Then the candidate's own validation and the field comparison.** A difference only in a path or a commit, where no pin differs, gives "cannot decide". Derived and per-run checks, project tuples and the floor transition follow the data file.
+
+Consequences for the demonstration:
+- **A moved checkout on version 3** changes the manifest's declared excluded roots. With the gate on the reference's restored host, the candidate's valid manifest pin therefore differs, and the result is **"not equal"** (step 2). Only a candidate whose sole difference is the path gives "cannot decide". Make the moved-checkout case a real move, and expect "not equal".
+- **Another commit with a changed pinned file:** while the live HEAD is moved, the result is "cannot decide" (step 1). Once the reference commit is checked out again, it is "not equal" (step 2). Item 5 of the corrections above meant the restored case. Show both.
+- **Another commit with no pinned file changed:** "cannot decide" (step 3), after restoration.
+
+The lead will put the moved-checkout consequence into the amendment's next draft.
+
+## Ruling on H3-RF25: proving a candidate's source pin from Git objects (added by the lead at 2026-11-13T10:55:32Z)
+
+Approved, narrowly. NP1 v16 already states the result this makes possible: a changed pinned file gives "cannot decide" while it is in place, and "not equal" after the reference's host is restored (draft line 38, NP1.5). Without a proof that does not read the live path, the restored case could only give "cannot decide". Both results hold the registration, so this proof route cannot let any registration go ahead.
+
+1. **When.** Only after step 1 has passed on the restored reference host (the H3-RF19 order is unchanged).
+2. **What is read.** The blob at the candidate's recorded `source_commit` and recorded path, from the reference checkout's own object store, with Git plumbing (`git cat-file`), replace objects disabled (`--no-replace-objects`, or `GIT_NO_REPLACE_OBJECTS=1`) and the full 40-hex commit id. No checkout, no worktree, no import and no execution of candidate code.
+3. **What must match.** Every alias that pins the same file: each recorded path and every packet field that carries its hash. Each of these must equal the blob's sha256.
+4. **Fail-closed.** Any of the following gives "cannot decide": a mismatch; a missing commit or blob; an abbreviated or ambiguous id; or a packet that records no commit. A candidate built from uncommitted bytes therefore gives "cannot decide", which is correct.
+5. **A difference only.** A Git-object proof can support "not equal", never "equal". "Equal" still requires every pin proved against the live files on the reference host, as now.
+6. **Disclosure.** The gate's result lists every pin proved this way, with its commit, path and blob sha256, marked "proved from Git objects, not from live files".
+7. **Versioning.** This is a proof route, not a new field, so the data file's field classes do not change. If it needs a schema or data-file revision, apply your own versioning rule.
+
+Then start the final-format matrix. Do the measurement below first if it is quicker. It is independent of this ruling, and the lead's decision on the twelve bounds waits on it.
+
 ## Before the lead decides the constant bounds: one offline measurement
 
 Your twelve proposed values are plausible. But the values for workers, submissions, history rows and inventory rest on planning proxies. If a real run exceeds a bound, the bound cannot be changed after the shakedown without a ratified amendment.
