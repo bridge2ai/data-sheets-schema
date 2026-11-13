@@ -183,11 +183,19 @@ def main():
         suites = [doc] if doc.tag == 'testsuite' else list(doc.findall('testsuite'))
         resume_tests.append(dict(name=name, xml=pin(path), log=pin(S / (name + '.log')),
             counts={key: sum(int(s.get(key, 0)) for s in suites) for key in ('tests', 'failures', 'errors', 'skipped')}))
+    gate_tests = []
+    for name in ('git-source-core-unit-02', 'rf25-driver-report-unit-02', 'private-import-unit-01', 'private-production-import-canary-01'):
+        path = OLD / 'tests' / name / 'pytest.xml'
+        doc = ET.fromstring(path.read_bytes())
+        suites = [doc] if doc.tag == 'testsuite' else list(doc.findall('testsuite'))
+        gate_tests.append(dict(name=name, xml=pin(path),
+            counts={key: sum(int(s.get(key, 0)) for s in suites) for key in ('tests', 'failures', 'errors', 'skipped')}))
     value = dict(answer=dict(cases_accepted=sum(row['accepted'] for row in cases), total_cases=len(cases),
                             verifier=verification, terminal=terminal, branch_readiness='reviewable; integration acceptance pending'),
                  cases=cases, case_plan=pin(plan_path), reporter=pin(reporter), bounds=bounds(), fresh_bounds=fresh_bounds(), branches=audit,
                  cohorts={name: cohort(name) for name in ('final-format-04', 'final-format-05', 'final-format-06', CURRENT)},
                  saved_manifest_tests=tests, manifest_test_report=pin(bytecode),
+                 saved_gate_tests=gate_tests,
                  resume_tests=resume_tests, review_findings=read(N / 'scripts/adhoc/h3_resumed_report_review_findings_20261113.json'),
                  bounds_barrier_readbacks=[pin(S / ('barrier-readback-' + role + '.json')) for role in
                      ('reference', 'AI_READI', 'CM4AI', 'VOICE', 'VOICE_PEDIATRIC')],
@@ -253,6 +261,9 @@ def main():
                   'Saved manifest validation (historical selections, not summed and not integrated-candidate validation):', '',
                   table(['Cohort', 'Tests', 'Failures', 'Errors', 'Skipped', 'Pinned XML matches'],
                         [[r['name'], *[r['counts'][k] for k in ('tests', 'failures', 'errors', 'skipped')], r['pinned_xml_matches']] for r in tests]), '',
+                  'Saved gate validation (historical focused controls; full-format acceptance is reported separately):', '',
+                  table(['Cohort', 'Tests', 'Failures', 'Errors', 'Skipped'],
+                        [[r['name'], *[r['counts'][k] for k in ('tests', 'failures', 'errors', 'skipped')]] for r in gate_tests]), '',
                   'Resume-tooling tests (overlapping selections, not summed):', '',
                   table(['Cohort', 'Tests', 'Failures', 'Errors', 'Skipped'],
                         [[r['name'], *[r['counts'][k] for k in ('tests', 'failures', 'errors', 'skipped')]] for r in resume_tests]), '',
