@@ -360,6 +360,7 @@ CONTROL_SHA = {
     'current': 'd83919c2afbf56fa79eacee7655635cd78b61079b4f106366ea103be6ce51fdc',
 }
 RESPONSIVE_CONTROL_SHA = 'e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36'
+TIMED_CONTROL_SHA = '25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488'
 
 
 def control_source(raw, version):
@@ -367,7 +368,7 @@ def control_source(raw, version):
     # No Git object or external execution checkout is needed by this fixture.
     assert version in CONTROL_SHA
     identity = hashlib.sha256(raw).hexdigest()
-    if identity == RESPONSIVE_CONTROL_SHA:
+    if identity in (RESPONSIVE_CONTROL_SHA, TIMED_CONTROL_SHA):
         # Exact public pre-v3 fixture retains both historical whole-file
         # compatibility cases without depending on Git history (#2422).
         raw = (SOURCE/'audit_controls/test_fixtures/native_control_v2.txt').read_bytes()

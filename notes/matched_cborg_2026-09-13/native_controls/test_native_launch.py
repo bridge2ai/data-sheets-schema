@@ -1070,9 +1070,9 @@ class EventClock:
     reading at or past that deadline. One whose deadline is more than UNDER_SECONDS
     short of it stops at its first check after the event, at a reading before it.
 
-    execute_child takes its deadline from its first reading, so `first` is that
-    deadline's base; an earlier reading would only put `deadline` before the
-    controller's. `jumped` is the real instant of the first reading after the
+    bind_runner anchors `first` at the continuous dispatch reading immediately
+    before Popen. Setup and admission readings do not consume child runtime.
+    `jumped` is the real instant of the first reading after the
     event, and `last` the value most recently returned. Durations the controller
     measures after the event, such as terminate_group's, are unchanged.
 
@@ -1102,6 +1102,29 @@ class EventClock:
             self._shift = max(0.0, self.first + self.offset - self.UNDER_SECONDS - now)
         self.last = now + self._shift
         return self.last
+
+    @contextmanager
+    def bind_runner(self, module):
+        """Drive the enforced clock and anchor it to the actual dispatch origin.
+
+        Keep the same event, early/late thresholds, interrupt and delayed-close
+        negative controls. Only the obsolete clock injection changes (#6201).
+        """
+        original_time, original_elapsed = module.time, module.elapsed_ns
+        original_popen = module.subprocess.Popen
+        def spawn(*args, **kwargs):
+            # execute_child sampled dispatch_ns immediately before this call.
+            assert self.jumped is None, 'fixture event preceded dispatch'
+            self.first = self.last
+            return original_popen(*args, **kwargs)
+        module.time = self
+        module.elapsed_ns = lambda: int(self.monotonic() * 1_000_000_000)
+        module.subprocess.Popen = spawn
+        try:
+            yield
+        finally:
+            module.time, module.elapsed_ns = original_time, original_elapsed
+            module.subprocess.Popen = original_popen
 
     @property
     def deadline(self):
@@ -1202,20 +1225,18 @@ def _deadline_while_counting(tmp_path, *, record_first, interrupt=None, close_de
              "time.sleep(30)\n") % (REQUEST,)
     record = (lambda reason: rnc.record_controller_stop(ledger, 'native-offline', {'reason': reason})) if record_first else None
     receipt = {}
-    real_time, rnc.time = rnc.time, clock
     try:
         with proxy.running() as url:
             env = dict(os.environ, URL=url, TOKEN=proxy.token)
-            rnc.execute_child([sys.executable, '-c', child], proxy=proxy, instruction=instruction, attempt=attempt,
-                              cwd=tmp_path, env=env, deadline_seconds=HANG_SECONDS, verify_launch=lambda: None,
-                              record_stop=record)
+            with clock.bind_runner(rnc):
+                rnc.execute_child([sys.executable, '-c', child], proxy=proxy, instruction=instruction, attempt=attempt,
+                                  cwd=tmp_path, env=env, deadline_seconds=HANG_SECONDS, verify_launch=lambda: None,
+                                  record_stop=record)
     except BaseException as exc:
         receipt.update(status='stopped', error_type=type(exc).__name__)
         receipt.update(rnc.stop_explanation(exc, ledger.path, 'native-offline', getattr(proxy, 'failure', None)))
         receipt.update(rnc.transcript_terminal_state(attempt / 'transcript.jsonl'))
         receipt.update(rnc.record_controller_stop(ledger, 'native-offline', receipt))
-    finally:
-        rnc.time = real_time
     assert counting.is_set() and calls == []
     if interrupt is None:
         clock.assert_stopped_at_the_deadline(at_close.get('clock'), at_close.get('closed'))   # due, after the count began

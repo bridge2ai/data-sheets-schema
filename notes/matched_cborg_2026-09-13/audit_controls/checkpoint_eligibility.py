@@ -33,7 +33,11 @@ SUPPORTED_SOURCES = {
         'd83919c2afbf56fa79eacee7655635cd78b61079b4f106366ea103be6ce51fdc',
         # The new implementation retains exact v2 projection semantics;
         # selected v3 source histories remain ineligible (#2422).
-        'e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36'}),
+        'e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36',
+        # #6202: controller timing hooks leave every executed definition and
+        # constant byte-identical. Reproduce the compatibility proof with
+        # scripts/adhoc/prove_checkpoint_compatibility_6202_20261113.py.
+        '25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488'}),
     # The #2369 version adds a literal-admission check; `_shell_tokens` and
     # `_simple_command`, the only definitions executed here, are byte-identical.
     'native_controls/native_command_policy.py': frozenset({
