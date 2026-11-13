@@ -38,6 +38,7 @@ prompt.add_command(render_prompt_cmd, name="render")
               help="Exact native shared-generation selection JSON.")
 @click.option("--runtime-declaration", required=True, type=click.Path(exists=True, dir_okay=False),
               help="Sole runtime declaration, checked without invoking the runtime.")
+@click.option("--environment-manifest", required=True, type=click.Path(exists=True, dir_okay=False))
 @click.option("--job-id", required=True, help="Explicit job identity for the v2 preparation.")
 @click.option("--provider", required=True, help="Must match the sole runtime declaration.")
 @click.option("--reasoning-effort", required=True, help="Must match the sole runtime declaration.")
@@ -45,7 +46,7 @@ prompt.add_command(render_prompt_cmd, name="render")
 @click.option("--run-date", required=True, type=click.DateTime(formats=["%Y-%m-%d"]))
 @click.option("--out", type=click.Path(dir_okay=False), help="Write a new instruction file; refuse an existing file.")
 def render_native_shared(selection, runtime_declaration, job_id, provider, reasoning_effort,
-                         max_draft_checks, run_date, out):
+                         max_draft_checks, run_date, out, environment_manifest):
     """Render genuine v2 preparation offline; this does not authorize execution.
 
     RunSpec boundary: validated-caller
@@ -58,6 +59,7 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
     from data_sheets_schema import native_shared_contract as contract
     try:
         envelope = preparation.prepare(selection, runtime_declaration, job_id=job_id,
+            environment_manifest_path=environment_manifest,
             run_date=run_date.strftime('%Y-%m-%d'), max_draft_checks=max_draft_checks)
         body = envelope['registration']
         spec = body['render_spec']
