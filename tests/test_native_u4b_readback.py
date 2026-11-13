@@ -31,7 +31,15 @@ from tests.utils.native_review_v3_fixtures import current_bundle_for as bundle_f
 def publication(tmp_path, monkeypatch, mode='buffered'):
     """Persist a synthetic failure; every copied authority byte is still joined."""
     arguments, original = component(tmp_path, monkeypatch)
-    value = deepcopy(original)
+    # The diagnostic-reader preflight now checks the closed execution wire
+    # before routing ordinary results to our isolated semantic verifier. Keep
+    # that production check real: this component supplies a complete wire shape
+    # with explicit placeholders, not an actual registration or launch authority.
+    value = dict.fromkeys(admission.EXECUTION_KEYS)
+    value.update(deepcopy(original))
+    value.update(kind=admission.EXECUTION_KIND, schema_version=2,
+        execution=admission.EXECUTION_SCOPE,
+        execution_gates=list(admission.EXECUTION_GATES))
     # This component retains the production-profile wire with invented runtime
     # observations; it does not exercise the separate synthetic launch route.
     profile = profile_name(value['runtime'])

@@ -75,7 +75,8 @@ def test_entry_requires_both_source_pins_before_any_effect(tmp_path,monkeypatch)
 
 @pytest.mark.parametrize('bound_inputs', [False, True])
 @pytest.mark.parametrize('retained_b', [False, True])
-def test_imported_body_refuses_even_with_reviewed_retained_bytes(tmp_path, monkeypatch, bound_inputs, retained_b):
+@pytest.mark.parametrize('injected', [False, True])
+def test_imported_body_refuses_even_with_reviewed_retained_bytes(tmp_path, monkeypatch, bound_inputs, retained_b, injected):
     from data_sheets_schema import native_launch_sequence as loaded_a
     raw = Path(loaded_a.__file__).read_bytes()
     if retained_b:
@@ -84,11 +85,19 @@ def test_imported_body_refuses_even_with_reviewed_retained_bytes(tmp_path, monke
     else:
         p = fixture.paths(tmp_path)
     before = {str(path): path.read_bytes() for path in (tmp_path / 'word-state').rglob('*.json')}
+    callbacks = []
+    if injected:
+        monkeypatch.setattr(loaded_a, '_entry_invocation', lambda *args: callbacks.append(args), raising=False)
+        # A second global with the trusted validator's name is not accepted
+        # either: the body resolves its local import from the trusted entry.
+        monkeypatch.setattr(loaded_a, '_require_invocation', lambda *args: callbacks.append(args), raising=False)
+        monkeypatch.setattr(loaded_a, '__package__', 'caller_supplied_package')
     inputs = {p[name]: p[name].read_bytes() for name in ('registration', 'review')} if bound_inputs else {}
     with pytest.raises(ValueError, match='live verified entry namespace'):
         loaded_a._run_verified(fixture.argv(p), verified_script=raw, entry_inputs=inputs)
     assert not p['packet-directory'].exists()
     assert not p['output-directory'].exists()
+    assert callbacks == []
     assert before == {str(path): path.read_bytes() for path in (tmp_path / 'word-state').rglob('*.json')}
 
 

@@ -237,8 +237,11 @@ def main(argv=None):
             result = capture.activate_capture_word(registration_raw=subject_raw,
                 review_bundle_raw=bundle_raw, launch_word_raw=word_raw)
         elif args.command == "capture-subscription-event":
+            dispatched = {} if sequence_inputs is None else {
+                'sequence_start': sequence_inputs['sequence_start']}
             path = capture.capture_subscription(registration_raw=subject_raw,
-                review_bundle_raw=bundle_raw, launch_word_raw=word_raw, directory=args.output_directory)
+                review_bundle_raw=bundle_raw, launch_word_raw=word_raw, directory=args.output_directory,
+                **dispatched)
             result = {"capture_manifest": str(path), "sha256": guard.sha(_read(path))}
         else:
             bound_capture = {} if sequence_inputs is None else {

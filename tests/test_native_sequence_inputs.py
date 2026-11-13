@@ -15,6 +15,10 @@ def arguments(tmp_path,bodies,command='capture-subscription-event'):
         path=tmp_path/(name+'.json'); path.write_bytes(bodies.get(name,b'{}'))
         mapping[name]={'path':str(path),'sha256':wire.sha(path.read_bytes())}
         if name!='ci': flags+=['--'+name.replace('_','-'),str(path)]
+    if command == 'capture-subscription-event':
+        path = tmp_path / 'synthetic-start.json'
+        path.write_bytes(b'{"synthetic":"start pin only"}')
+        mapping['sequence_start'] = {'path': str(path), 'sha256': wire.sha(path.read_bytes())}
     flags+=['--output-directory',str(tmp_path/'NEVER-CAPTURED'),'--sequence-inputs',wire.canonical(mapping).decode()]
     return flags,mapping
 
@@ -40,7 +44,7 @@ def test_replacement_with_another_valid_review_set_reaches_no_capture(current_ev
     assert not (tmp_path/'NEVER-CAPTURED').exists()
 
 
-@pytest.mark.parametrize('name',pins.BASE)
+@pytest.mark.parametrize('name',(*pins.BASE, 'sequence_start'))
 def test_every_parent_document_is_checked_before_registration_validation(tmp_path,monkeypatch,name):
     flags,mapping=arguments(tmp_path,{})
     Path(mapping[name]['path']).write_bytes(b'{"different":"valid JSON"}')
@@ -86,6 +90,40 @@ def test_actual_capture_manifest_read_is_pinned(tmp_path):
     with pytest.raises(ValueError,match='capture manifest differs from parent digest'):
         capture._read_capture_records_at_root(path,tmp_path,authority,tmp_path,
             expected_manifest_sha256=wire.sha(b'{"previous":"saved bytes"}'))
+
+
+@pytest.mark.parametrize('dispatched', [False, True])
+def test_cli_passes_start_pin_only_for_sequence_dispatch(tmp_path, monkeypatch, dispatched):
+    # Isolate only the CLI plumbing here; journal admission and the post-claim
+    # move race use real authority reconstruction in the capture-boundary tests.
+    from data_sheets_schema import native_shared_registration_orchestration as registration
+    from data_sheets_schema import native_shared_render as render
+    from data_sheets_schema import native_permission_probe as probe
+    from data_sheets_schema import native_u4b_runtime as runtime
+    from data_sheets_schema import native_launch_review as review
+    from data_sheets_schema import native_subscription_capture as capture
+    flags, mapping = arguments(tmp_path, {})
+    if not dispatched:
+        flags = flags[:-2]
+    monkeypatch.setattr(registration, 'verified', lambda raw: {'runtime': {}, 'selection': {'render_spec': {}}})
+    monkeypatch.setattr(render, 'validate_metadata', lambda value: None)
+    monkeypatch.setattr(probe, 'require_u4_runtime', lambda value: None)
+    monkeypatch.setattr(runtime, 'validate_prepared_runtime', lambda value: None)
+    monkeypatch.setattr(review, 'validate_bundle', lambda *args, **kwargs: None)
+    monkeypatch.setattr(cli, '_account_choice', lambda path, *args: Path(path).read_bytes())
+    seen = []
+    def fake_capture(**kwargs):
+        seen.append(kwargs)
+        path = tmp_path / 'synthetic-result.json'
+        path.write_bytes(b'{}')
+        return path
+    monkeypatch.setattr(capture, 'capture_subscription', fake_capture)
+    assert cli.main(flags) == 0
+    assert len(seen) == 1
+    if dispatched:
+        assert seen[0]['sequence_start'] == mapping['sequence_start']
+    else:
+        assert 'sequence_start' not in seen[0]
 
 
 @pytest.mark.parametrize('change',['missing','extra','path','digest'])
