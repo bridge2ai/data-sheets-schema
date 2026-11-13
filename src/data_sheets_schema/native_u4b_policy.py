@@ -16,7 +16,6 @@ TERM_VALUES = {'max_starting_weekly_utilization': 0.50,
                'max_age_seconds': 1200,
                'pre_reservation_margin_seconds': 300}
 POLICY_KEYS = {*TERM_VALUES, 'capture_state_directory', 'valid_from', 'valid_until'}
-N1_DEADLINE_SECONDS = 21600
 N1_VALIDITY_SECONDS = 14 * 24 * 60 * 60
 
 
@@ -51,16 +50,15 @@ def validate_policy(policy):
 
 
 def validate_runtime_terms(runtime):
-    """Fixed N1.8 runtime choices; declaration matching alone is insufficient."""
+    """Registered D143 pair and N1.8 keep-awake; equality alone is insufficient."""
     from . import native_runtime_profiles as profiles
     if profiles.profile_name(runtime) == profiles.SYNTHETIC_PROFILE:
         profiles.require_synthetic_declarations(runtime)
         return
     if type(runtime) is not dict:
         raise ValueError('registration requires an explicit runtime')
-    if (type(runtime.get('deadline_seconds')) is not int
-            or runtime['deadline_seconds'] != N1_DEADLINE_SECONDS):
-        raise ValueError('registered deadline must equal N1.8 21600 seconds')
+    from .native_run_limits import require_registered_pair
+    require_registered_pair(runtime)
     awake = runtime.get('keep_awake')
     _closed(awake, {'policy', 'host_platform', 'basis'}, 'registered keep-awake')
     _text(awake['basis'], 'registered keep-awake basis', 512)

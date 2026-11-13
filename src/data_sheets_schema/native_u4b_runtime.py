@@ -168,8 +168,10 @@ def _profile(runtime):
         return result
     if (result['model'] != MODEL or result['effort'] != 'high'
             or result['environment']['CLAUDE_CODE_DISABLE_1M_CONTEXT'] != '0'
-            or result['budget_guard_usd'] != '90' or result['auth']['subscriptionType'] != 'max'):
+            or result['auth']['subscriptionType'] != 'max'):
         raise ValueError('U4b requires D106 high/Max, D112 model/context and D110 decimal-string budget')
+    from .native_run_limits import require_registered_pair
+    require_registered_pair(result)
     return result
 
 

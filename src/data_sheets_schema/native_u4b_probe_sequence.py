@@ -89,9 +89,11 @@ def validate_provisional_runtime(value):
     synthetic = profiles.profile_name(runtime) == profiles.SYNTHETIC_PROFILE
     if not synthetic and (runtime['model'] != aliases.REQUESTED or runtime['auxiliary_models'] != []
             or runtime['effort'] != 'high' or runtime['auth']['subscriptionType'] != 'max'
-            or runtime['environment']['CLAUDE_CODE_DISABLE_1M_CONTEXT'] != '0'
-            or runtime['budget_guard_usd'] != '90'):
+            or runtime['environment']['CLAUDE_CODE_DISABLE_1M_CONTEXT'] != '0'):
         raise ValueError('provisional probe must retain the selected U4b runtime profile')
+    if not synthetic:
+        from .native_run_limits import require_registered_pair
+        require_registered_pair(runtime)
     basis = strict_json(runtime['limits_basis'])
     _closed(basis, {'kind', 'version', 'model_aliases'} | ({'profile'} if 'profile' in basis else set()),
             'provisional runtime basis')
