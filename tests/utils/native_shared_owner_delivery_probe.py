@@ -29,9 +29,10 @@ def main():
             (scenario.initialization, 'native_catalog_initialization.py'),
             (scenario.receipts, 'native_shared_receipts.py'),
             (scenario.events, 'native_schema_event_reuse.py'),
-            (scenario.stage, 'native_shared_stage.py'),
-            (scenario.typed, 'typed_audit/__init__.py')):
-        assert Path(module.__file__).resolve() == root / 'src/data_sheets_schema' / relative
+            (scenario.stage, 'native_shared_stage/__init__.py'),
+            (scenario.typed, 'typed_audit.py')):
+        assert Path(module.__file__).resolve() == root / 'src/data_sheets_schema' / relative, (
+            module.__name__, module.__file__, relative)
     assert scenario.catalogs.runtime_token() is not None
     fixture_root = args.output.parent / 'owner-delivery-child'
     fixture_root.mkdir()
