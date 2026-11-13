@@ -43,8 +43,7 @@ def main(argv=None):
     if wire.sha(raw)!=expected or review.get('sequence_script_sha256')!=expected:
         raise ValueError('captured sequence bytes differ from the reviewed registration pin')
     namespace={'__name__':'data_sheets_schema._verified_launch_sequence',
-               '__package__':'data_sheets_schema','__file__':str(SEQUENCE_PATH),
-               '_entry_invocation':_require_invocation}
+               '__package__':'data_sheets_schema','__file__':str(SEQUENCE_PATH)}
     exec(compile(raw,str(SEQUENCE_PATH),'exec'),namespace)
     inputs={Path(selected.registration):registration_raw,Path(selected.review):review_raw}
     _ACTIVE_INVOCATIONS[id(namespace)]=(namespace,args,raw,inputs)
@@ -55,4 +54,7 @@ def main(argv=None):
 
 
 if __name__=='__main__':
-    raise SystemExit(main())
+    # The body imports this canonical trusted entry. Module execution must
+    # populate the same invocation registry, not a second __main__ registry.
+    from data_sheets_schema.native_launch_entry import main as trusted_main
+    raise SystemExit(trusted_main())
