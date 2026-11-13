@@ -52,10 +52,13 @@ def test_replay_owner_reuses_catalog_and_unknown_initialization_is_fresh(case, m
     root = Path(__file__).resolve().parents[1]
     env = dict(os.environ, PYTHONPATH=os.pathsep.join((str(root / 'src'), str(root))),
                PYTHONDONTWRITEBYTECODE='1', PYTHONOPTIMIZE='0')
+    # Generous: the scenario takes about 15 s alone, but a contended CI shard
+    # runs such cases several times slower, and a timeout here would itself be
+    # a flaky failure (lead, 2026-11-13).
     result = subprocess.run(
         [sys.executable, '-P', '-B', '-m', 'tests.utils.native_shared_owner_delivery_probe',
          '--output', str(output)], cwd=root, env=env, capture_output=True,
-        text=True, timeout=120)
+        text=True, timeout=600)
     assert result.returncode == 0, result.stdout + result.stderr
     observed = json.loads(output.read_bytes())
     assert observed == json.loads(result.stdout)
