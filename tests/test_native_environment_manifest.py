@@ -1,5 +1,8 @@
 """Offline environment-manifest checks; all distribution metadata is synthetic."""
 from email.message import Message
+import base64
+import hashlib
+import json
 from pathlib import Path
 
 import pytest
@@ -9,7 +12,7 @@ from data_sheets_schema import native_shared_contract as c
 
 
 class Distribution:
-    def __init__(self, root, name='Synthetic.Package', version='1.2.3', record=b'file.py,sha256=synthetic,10\n'):
+    def __init__(self, root, name='Synthetic.Package', version='1.2.3', record=None):
         self.metadata = Message()
         self.metadata['Name'] = name
         self.metadata['Version'] = version
@@ -17,6 +20,11 @@ class Distribution:
         self.files = [Path('synthetic.dist-info/RECORD')]
         target = root / self.files[0]
         target.parent.mkdir(parents=True)
+        if record is None:
+            payload = b'SYNTHETIC = True\n'
+            (root / 'file.py').write_bytes(payload)
+            encoded = base64.urlsafe_b64encode(hashlib.sha256(payload).digest()).decode().rstrip('=')
+            record = ('file.py,sha256=' + encoded + ',' + str(len(payload)) + '\n').encode()
         target.write_bytes(record + b'synthetic.dist-info/RECORD,,\n')
 
     def add_file(self, item):
@@ -46,6 +54,122 @@ def test_generate_has_sorted_semantic_inventory(installed, monkeypatch, tmp_path
     assert doc['distributions'][1]['record_sha256'] == c.sha(installed.locate_file(installed.files[0]).read_bytes())
     assert set(doc['interpreter']) == {'implementation', 'version', 'build'}
     assert str(tmp_path) not in c.canonical(doc).decode()
+
+
+def test_generate_verifies_installed_payload_and_names_unverified_entries(installed):
+    installed.add_file(Path('cached.pyc'))
+    installed.add_file(Path('unverified-notes.txt'))
+    value = m.generate()
+    assert value['version'] == 2
+    row = value['distributions'][0]
+    assert row['verified_files'] == {'count': 1, 'bytes': len(b'SYNTHETIC = True\n')}
+    assert row['unverified_files'] == [
+        {'kind': 'bytecode', 'count': 1, 'paths': ['cached.pyc']},
+        {'kind': 'other', 'count': 1, 'paths': ['unverified-notes.txt']},
+        {'kind': 'record', 'count': 1, 'paths': ['synthetic.dist-info/RECORD']}]
+
+
+@pytest.mark.parametrize('change', ['same_size_content', 'missing', 'size'])
+def test_installed_payload_change_refuses_even_with_unchanged_record(installed, tmp_path, change):
+    pin = m.write(tmp_path / 'manifest.json')
+    target = installed.root / 'file.py'
+    record_before = installed.locate_file(installed.files[0]).read_bytes()
+    if change == 'missing':
+        target.unlink()
+    elif change == 'size':
+        target.write_bytes(b'changed size')
+    else:
+        target.write_bytes(b'SYNTHETIC = None\n')
+    assert installed.locate_file(installed.files[0]).read_bytes() == record_before
+    with pytest.raises(ValueError, match='payload|unreadable'):
+        m.verify(pin)
+
+
+def test_unreadable_installed_payload_refuses(installed, monkeypatch):
+    original = m.os.open
+    def denied(path, flags, *args, **kwargs):
+        if Path(path) == installed.root / 'file.py':
+            raise PermissionError('synthetic unreadable payload')
+        return original(path, flags, *args, **kwargs)
+    monkeypatch.setattr(m.os, 'open', denied)
+    with pytest.raises(ValueError, match='unreadable'):
+        m.generate()
+
+
+@pytest.mark.parametrize('digest', ['sha256=synthetic', 'sha256=', 'sha256=AA==', 'unknown=AAAA',
+                                   'sha256=++//', 'shake_128=AAAA'])
+def test_malformed_installed_record_hash_refuses(installed, digest):
+    record = installed.locate_file(installed.files[0])
+    record.write_text('file.py,' + digest + ',17\nsynthetic.dist-info/RECORD,,\n')
+    with pytest.raises(ValueError, match='RECORD hash'):
+        m.generate()
+
+
+def test_editable_third_party_refuses(installed):
+    direct = installed.locate_file(installed.files[0]).parent / 'direct_url.json'
+    direct.write_text(json.dumps({'url': installed.root.as_uri(), 'dir_info': {'editable': True}}))
+    with pytest.raises(ValueError, match='editable or development'):
+        m.generate()
+
+
+def test_development_egg_link_refuses(installed):
+    (installed.root / 'development.egg-link').write_text(str(installed.root))
+    with pytest.raises(ValueError, match='editable or development'):
+        m.generate()
+
+
+def test_own_project_excluded_only_with_exact_namespace(installed, monkeypatch, tmp_path):
+    own = Distribution(tmp_path / 'own', name='data_sheets_schema', record=b'')
+    monkeypatch.setattr(m.metadata, 'distributions', lambda **kwargs: [own, installed])
+    value = m.generate()
+    assert [row['name'] for row in value['distributions']] == ['synthetic-package']
+    package = m.sys.modules['data_sheets_schema']
+    monkeypatch.setattr(package, '__path__', [str(tmp_path)])
+    with pytest.raises(ValueError, match='exact pinned project namespace'):
+        m.generate()
+
+
+def test_own_distribution_name_cannot_hide_unrelated_payload(installed, monkeypatch, tmp_path):
+    own = Distribution(tmp_path / 'own', name='data_sheets_schema')
+    monkeypatch.setattr(m.metadata, 'distributions', lambda **kwargs: [own, installed])
+    with pytest.raises(ValueError, match='cannot own unrelated package files'):
+        m.generate()
+
+
+def test_old_manifest_shape_is_historical_only(installed):
+    old = m.generate()
+    old['version'] = 1
+    old['distributions'] = [{key: value for key, value in row.items()
+                             if key in {'name', 'version', 'record_sha256'}} for row in old['distributions']]
+    with pytest.raises(ValueError, match='kind/version'):
+        m.validate(old)
+
+
+@pytest.mark.parametrize('change', ['count', 'unknown_kind', 'duplicate', 'version'])
+def test_v2_payload_inventory_shape_is_closed(installed, change):
+    value = m.generate()
+    row = value['distributions'][0]
+    if change == 'count':
+        row['unverified_files'][0]['count'] += 1
+    elif change == 'unknown_kind':
+        row['unverified_files'][0]['kind'] = 'not_checked'
+    elif change == 'duplicate':
+        row['unverified_files'].append(dict(row['unverified_files'][0]))
+    else:
+        row['verified_files']['extra'] = True
+    with pytest.raises(ValueError):
+        m.validate(value)
+
+
+def test_payload_changes_during_census_hold(installed, monkeypatch):
+    original = m._require_owned_import_roots
+    def changed(paths, captures):
+        result = original(paths, captures)
+        (installed.root / 'file.py').write_bytes(b'SYNTHETIC = None\n')
+        return result
+    monkeypatch.setattr(m, '_require_owned_import_roots', changed)
+    with pytest.raises(ValueError, match='payload'):
+        m.generate()
 
 
 def test_write_once_and_verify_exact_bytes(installed, tmp_path):
