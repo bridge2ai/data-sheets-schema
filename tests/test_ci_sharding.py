@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 import pytest
 import yaml
 
-from utils.pytest_shard import API_CASE_LANES, SG2_CASE_LANES, DEDICATED_CASE_LANES, balanced_files, partition_lanes, read_weights, shard_for
+from utils.pytest_shard import API_CASE_LANES, SG2_CASE_LANES, NATIVE_PUBLIC_CASE_LANES, DEDICATED_CASE_LANES, balanced_files, partition_lanes, read_weights, shard_for
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,7 +57,7 @@ def _assert_complete_partition(tmp_path, weighted, total, lanes=False):
     whole = _run(tmp_path, "--junitxml=all.xml")
     assert whole.returncode == 0, whole.stdout + whole.stderr
     expected = _cases(tmp_path / "all.xml")
-    assert sum(expected.values()) == (185 if lanes else 172)
+    assert sum(expected.values()) == (188 if lanes else 172)
     flags = []
     if weighted:
         # Only about half the files have timings. Untimed files must still run;
@@ -170,7 +170,8 @@ def test_aggregate_check_rejects_failed_cancelled_and_skipped_dependencies(tmp_p
     gate = workflow["jobs"]["test"]
     assert gate["if"] == "always()"
     assert set(gate["needs"]) == {
-        "python-tests", "api-completion", "sg2-completion", "offline-canary", "offline-audit", "offline-evaluation", "schema-examples"
+        "python-tests", "api-completion", "sg2-completion", "native-public-completion",
+        "offline-canary", "offline-audit", "offline-evaluation", "schema-examples"
     }
     step = gate["steps"][0]
     statuses = ("success", "failure", "cancelled", "skipped")
@@ -189,11 +190,12 @@ def test_aggregate_check_rejects_failed_cancelled_and_skipped_dependencies(tmp_p
             expected_build = "skipped" if event == "pull_request" else "success"
             expected.append(
                 all(results[job] == "success" for job in
-                    ("python-tests", "api-completion", "sg2-completion", "offline-canary", "offline-audit", "offline-evaluation"))
+                    ("python-tests", "api-completion", "sg2-completion", "native-public-completion",
+                     "offline-canary", "offline-audit", "offline-evaluation"))
                 and results["schema-examples"] == expected_build
             )
             combinations.append(results)
-        # Preserve the exhaustive truth table without 49,152 shell startups.
+        # Preserve the exhaustive truth table without 196,608 shell startups.
         # The subshell is an unconditional command: placing it in `if` or `||`
         # would disable errexit inside the very gate we intend to exercise.
         harness = ('while IFS= read -r bindings; do\n(\neval "$bindings"\nset -e\n'
@@ -289,6 +291,13 @@ def _lane_fixture(root, *, body="assert True", decorator="", fixture="", target=
         + "def test_sg2_root_launch_completes_and_records_registered_paths(mode):\n    "
         + (body if target.startswith("sg2-") else "assert mode") + "\n"
     )
+    for lane, node in NATIVE_PUBLIC_CASE_LANES.items():
+        relative, name = node.split("::")
+        own = lane == target
+        (root / relative).write_text(
+            "import pytest\n" + (fixture if own else "") + (decorator if own else "")
+            + f"def {name}():\n    " + (body if own else "assert True") + "\n"
+        )
     return path
 
 
@@ -351,7 +360,7 @@ def test_missing_dedicated_target_cannot_disappear_from_any_lane(tmp_path, lane)
      "@pytest.fixture\ndef broken():\n    yield\n    raise RuntimeError('teardown failure')\n", 1),
     ("pytest.exit('preserve actual exit', returncode=17)", "", "", 17),
 ])
-@pytest.mark.parametrize("lane", ["routing-dispatch", *SG2_CASE_LANES])
+@pytest.mark.parametrize("lane", ["routing-dispatch", *SG2_CASE_LANES, "native-public-correction"])
 def test_dedicated_case_requires_real_unqualified_pass(tmp_path, body, decorator, fixture, code, lane):
     _lane_fixture(tmp_path, body=body, decorator=decorator, fixture=fixture, target=lane)
     result = _run(tmp_path, f"--ci-lane={lane}")
@@ -369,6 +378,7 @@ def test_dedicated_collect_only_does_not_pass_as_execution(tmp_path, lane):
 @pytest.mark.parametrize("job_name,lanes,artifact", [
     ("api-completion", API_CASE_LANES, "api"),
     ("sg2-completion", SG2_CASE_LANES, "sg2"),
+    ("native-public-completion", NATIVE_PUBLIC_CASE_LANES, "native"),
 ])
 def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job_name, lanes, artifact):
     jobs = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())["jobs"]
