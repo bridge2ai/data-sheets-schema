@@ -35,8 +35,14 @@ _COMMON_CHECKS = tuple('Python 3.12 / API case ' + name for name in (
     'routing-dispatch', 'routing-portable', 'routing-regate', 'routing-default-layout')) + tuple(
     'Python 3.12 / SG2 case ' + name for name in ('sg2-none', 'sg2-conventional', 'sg2-explicit')) + tuple(
     # #6191 (2026-11-13): each complete synthetic native launch has its own job.
-    'Python 3.12 / native public case ' + name for name in (
-        'native-public-correction', 'native-public-variant', 'native-public-pending')) + (
+    'Python 3.12 / native case ' + name for name in (
+        'native-public-correction', 'native-public-variant', 'native-public-pending',
+        'native-failure-01', 'native-failure-02', 'native-failure-03',
+        'native-failure-04', 'native-failure-05', 'native-failure-06',
+        'native-failure-07', 'native-failure-08', 'native-failure-09',
+        'native-failure-10', 'native-failure-11', 'native-failure-12',
+        'native-failure-13', 'native-failure-14', 'native-failure-15',
+        'native-failure-16', 'native-failure-17',)) + (
     'Python 3.12 / offline canary controls', 'Python 3.12 / offline audit and finalization',
     'Python 3.12 / offline evaluation', 'test')
 EXECUTION_GATES = ('terminal', 'shutdown', 'first_stop', 'live_attribution',
