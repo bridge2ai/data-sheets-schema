@@ -8,6 +8,8 @@ stale captures stay spent and retained, never retried in place.
 """
 from __future__ import annotations
 
+from . import native_pre_dispatch_timing as pre_timing
+
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import fcntl
@@ -243,6 +245,8 @@ def _supervise(invocation, deadline_seconds, outputs, observations, lifecycle):
                                     raise ValueError('capture observation count exceeds its bound')
                                 observations.append({'line': line_number, 'captured_at': _utc(),
                                     'event_sha256': sha(bytes(line)), 'event_json': line.decode()})
+                                pre_timing.record('capture_observed',
+                                    captured_at=observations[-1]['captured_at'], event_sha256=sha(bytes(line)))
             if pending:
                 raise ValueError('capture stdout ends with an incomplete JSON line')
             lifecycle['returncode'] = process.returncode
@@ -409,39 +413,41 @@ def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw
     start in existing current state; it never initializes or activates state.
     Standalone explicit capture retains word activation and the three-slot cap.
     """
-    directory = _path(directory)
-    from .native_launch_review import registration_fields, validate_bundle
-    from .native_runtime_profiles import require_production
-    require_production(registration_fields(registration_raw)['runtime'])
-    validate_bundle(registration_raw, review_bundle_raw, launch_word_raw, require_current=True)
-    authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, directory)
-    value, statement, word, binding = authority
-    if statement['quota_capture']['kind'] != REQUEST_KIND:
-        raise ValueError('historical capture requests are readback only')
-    if _timestamp(_utc()) < _timestamp(word['authorized_at']):
-        raise ValueError('capture cannot precede the owner authorization time')
-    from . import native_capture_words as words
-    words.validate_window(value['runtime'], launch_word_raw)
-    words.require_unspent(value)
-    with words.locked(value, registration_raw, create=sequence_start is None) as journal:
+    with pre_timing.scope(registration_raw):
+        directory = _path(directory)
+        from .native_launch_review import registration_fields, validate_bundle
+        from .native_runtime_profiles import require_production
+        require_production(registration_fields(registration_raw)['runtime'])
+        validate_bundle(registration_raw, review_bundle_raw, launch_word_raw, require_current=True)
+        authority = _authority(registration_raw, review_bundle_raw, launch_word_raw, directory)
+        value, statement, word, binding = authority
+        if statement['quota_capture']['kind'] != REQUEST_KIND:
+            raise ValueError('historical capture requests are readback only')
+        if _timestamp(_utc()) < _timestamp(word['authorized_at']):
+            raise ValueError('capture cannot precede the owner authorization time')
+        from . import native_capture_words as words
+        words.validate_window(value['runtime'], launch_word_raw)
         words.require_unspent(value)
-        if sequence_start is None:
-            journal.activate(launch_word_raw, review_bundle_raw, value)
-        else:
-            journal.require_start(launch_word_raw, sequence_start)
-        word_directory = directory / 'captures' / sha(launch_word_raw)
-        with _reserve(word_directory, value, statement, word, binding) as (slot, claim, bound):
-            return _perform_capture(slot, claim, bound, authority, word_directory,
-                registration_raw, review_bundle_raw, launch_word_raw, journal)
+        with words.locked(value, registration_raw, create=sequence_start is None) as journal:
+            words.require_unspent(value)
+            if sequence_start is None:
+                journal.activate(launch_word_raw, review_bundle_raw, value)
+            else:
+                journal.require_start(launch_word_raw, sequence_start)
+            word_directory = directory / 'captures' / sha(launch_word_raw)
+            with _reserve(word_directory, value, statement, word, binding) as (slot, claim, bound):
+                return _perform_capture(slot, claim, bound, authority, word_directory,
+                    registration_raw, review_bundle_raw, launch_word_raw, journal)
 
 
 def _current_authority(registration_raw, review_bundle_raw, launch_word_raw):
-    from .native_launch_review import validate_bundle
-    statement = validate_bundle(registration_raw, review_bundle_raw, launch_word_raw, require_current=True)
-    if statement['quota_capture']['kind'] != REQUEST_KIND:
-        raise ValueError('current capture authority requires the registered v3 protocol')
-    return _authority(registration_raw, review_bundle_raw, launch_word_raw,
-                      statement['quota_capture']['directory'])
+    with pre_timing.step('_current_authority'):
+        from .native_launch_review import validate_bundle
+        statement = validate_bundle(registration_raw, review_bundle_raw, launch_word_raw, require_current=True)
+        if statement['quota_capture']['kind'] != REQUEST_KIND:
+            raise ValueError('current capture authority requires the registered v3 protocol')
+        return _authority(registration_raw, review_bundle_raw, launch_word_raw,
+                          statement['quota_capture']['directory'])
 
 
 def activate_capture_word(*, registration_raw, review_bundle_raw, launch_word_raw, now=None):
@@ -527,26 +533,29 @@ def current_guard_preparation(manifest_path, *, registration_raw, review_bundle_
     the lock, claim reconstruction or guard construction. The caller writes the
     returned bytes inside this scope. No capture or generation claim is made.
     """
-    from . import native_capture_words as words
-    from . import native_subscription_guard_v2 as guard
-    path, directory, root = _capture_manifest_root(
-        manifest_path, registration_raw, review_bundle_raw, launch_word_raw)
-    authority = _current_authority(registration_raw, review_bundle_raw, launch_word_raw)
-    value, statement, _, _ = authority
-    if root != _path(statement['quota_capture']['directory']):
-        raise ValueError('guard capture root differs from reconstructed authority')
-    with words.locked(value, registration_raw) as journal:
-        journal.require(launch_word_raw)
-        capture_root = root / 'captures' / sha(launch_word_raw)
-        saved = _read_capture_records_at_root(path, directory, authority, capture_root,
-                                             require_latest=True, expected_manifest_sha256=expected_manifest_sha256)
-        selection = _checked_claim_selection(capture_root, authority, saved['capture_index'])
-        event = saved['selected_event']
-        yield guard.prepare_guard(registration_raw=registration_raw, runtime=value['runtime'],
-            launch_word_raw=launch_word_raw, event_raw=event['event_json'].encode(),
-            captured_at=event['captured_at'], owner_statement=statement,
-            maximum_starting_utilization=statement['max_starting_weekly_utilization'],
-            max_age_seconds=statement['max_age_seconds'], **selection)
+    with pre_timing.scope(registration_raw), pre_timing.step('current_guard_preparation'):
+        from . import native_capture_words as words
+        from . import native_subscription_guard_v2 as guard
+        path, directory, root = _capture_manifest_root(
+            manifest_path, registration_raw, review_bundle_raw, launch_word_raw)
+        authority = _current_authority(registration_raw, review_bundle_raw, launch_word_raw)
+        value, statement, _, _ = authority
+        if root != _path(statement['quota_capture']['directory']):
+            raise ValueError('guard capture root differs from reconstructed authority')
+        with words.locked(value, registration_raw) as journal:
+            journal.require(launch_word_raw)
+            capture_root = root / 'captures' / sha(launch_word_raw)
+            saved = _read_capture_records_at_root(path, directory, authority, capture_root,
+                                                 require_latest=True, expected_manifest_sha256=expected_manifest_sha256)
+            selection = _checked_claim_selection(capture_root, authority, saved['capture_index'])
+            event = saved['selected_event']
+            pre_timing.record('capture_selected', captured_at=event['captured_at'],
+                              event_sha256=event['event_sha256'])
+            yield guard.prepare_guard(registration_raw=registration_raw, runtime=value['runtime'],
+                launch_word_raw=launch_word_raw, event_raw=event['event_json'].encode(),
+                captured_at=event['captured_at'], owner_statement=statement,
+                maximum_starting_utilization=statement['max_starting_weekly_utilization'],
+                max_age_seconds=statement['max_age_seconds'], **selection)
 
 
 def require_current_capture_authority(*, registration_raw, review_bundle_raw, launch_word_raw, now=None):

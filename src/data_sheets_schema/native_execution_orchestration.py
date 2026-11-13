@@ -6,6 +6,8 @@ aggregation and publication; selected adapters supply semantic reconstruction.
 """
 from __future__ import annotations
 
+from . import native_pre_dispatch_timing as pre_timing
+
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
@@ -353,7 +355,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         raise ValueError('native launch requires the main thread')
     # This is the last check before the first effect. A prior verified value,
     # permission recipe or Admission object is never a launch capability.
-    with controls.loaded_classifier() as classifier_projection:
+    with pre_timing.step('admission_with_classifier'), controls.loaded_classifier() as classifier_projection:
         admitted = admission.admit(registration_raw, review_path=authorization['inputs']['review'],
             ci_path=authorization['inputs']['ci'], launch_word_path=authorization['inputs']['launch_word'],
             classifier_projection=classifier_projection)
@@ -366,7 +368,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     # acceptance. The warmup closes its source-loader scope before returning:
     # never keep a consumer finder active across live bootstrap orchestration.
     adapter = contract.make_controller(value, registration_raw)
-    contract.prewarm_controller(adapter)
+    with pre_timing.step('controller_prewarm'):
+        contract.prewarm_controller(adapter)
     accepted_current_selection = False
     if type(launch_guard) is CurrentSelection:
         launch_guard = accept_current_selection(launch_guard,
@@ -414,7 +417,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
 
     # Hold the registration-wide word/limits lock through the first reservation
     # effect. A renewal cannot supersede the word between checking and mkdir.
-    with reservation_lease():
+    with pre_timing.step('reservation'), reservation_lease():
         controls.require_complete()
         # Source recapture can be slow: measure the preparation margin only
         # after it, immediately before the attempt identity is consumed.
@@ -422,6 +425,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         _require_launch_profile(value['runtime'], expected_profile)
         attempt.mkdir(mode=0o700)  # Even a partial reservation consumes the identity.
         _sync_directory(attempt.parent)
+        pre_timing.record('attempt_reserved')
     durable_new(attempt/'registration.json', registration_raw)
     if launch_guard is not None:
         durable_new(attempt/'subscription-guard.json', launch_guard.raw)
