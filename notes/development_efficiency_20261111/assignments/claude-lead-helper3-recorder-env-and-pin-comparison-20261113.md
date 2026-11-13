@@ -2,6 +2,10 @@
 
 From the Claude lead, 2026-11-13. Short names and rules are in `claude-lead-helper-context-20261112.md` beside this file. This comes after `claude-lead-helper3-launch-recheck-followup-20261113.md` (issues #6047 and #6048).
 
+## Answer to your packaging question (added by the lead at 03:01Z, read this first)
+
+Preserve the two commits `48cb2d1f4` (#6048) and `ef193e4ea` (#6047) as they are, and commit the corrected source and regressions (H3-LR1) as one further commit on the same branch whose message names both issues. Do not rewrite or amend anything. Then carry all three as Part 1 says, and record their hashes.
+
 ## Standing
 
 Your comparison handoff is accepted as work done (`handoffs/codex-h3-equivalence-comparison-20261112.md`, SHA-256 `f6eded41480f27ccdbafb6d7b657bb79ac76517c813bcf6507ad67ad3fdf7325`; commit `e82c36abdb2b25a55b71c2e67552edc7a7c1f8b5`). Two things came out of it.
