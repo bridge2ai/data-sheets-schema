@@ -1,3 +1,15 @@
+# Gate-schema follow-up: explicit version-design stop (2026-11-13)
+
+Data-file SHA-256: not produced. Field counts: not computed. Demonstration results: not run. Constant bounds: not proposed. The assignment's explicit format-change stop applies before these deliverables.
+
+The lead's 04:21Z ruling resolves the previous validation question: production validation may run from the reference export in isolation. The new environment-manifest requirement cannot be bound through an existing arbitrary-artifact slot. Selection has exact fields and fixed artifact roles; preparation regenerates its pin map and compares the complete body; execution permits only its closed fields and the receipt-origin extension. An extra pinned_files entry or loose sidecar would fail verification or remain outside the registered authority. The companion JSON records source hashes and exact excerpts. An ignore-independent hidden-file search of the source package for environment_manifest, extra_artifacts and additional_artifacts returned no matches; this supports, but does not replace, the positive closed-schema evidence.
+
+Recommended smallest scoped change: introduce successor preparation and execution kinds/versions, leaving historical v2 unchanged. Add one required environment_manifest file pin to preparation and bind it transitively through the execution's embedded preparation. Its closed versioned document records interpreter identity and sorted unique distribution names, versions and installed RECORD hashes. Production preparation and verification must regenerate and check it. Missing or ambiguous metadata holds. A gate-only wrapper is insufficient because existing production validators would not bind its added artifact.
+
+The lead must approve that versioned change before implementation, as the assignment explicitly directs: "If it does not, stop and propose the smallest versioned change." Freeze manifest serialization and interpreter-path treatment with that decision: semantic interpreter identity is must-equal, while host paths are per-run. Then implement the schema and all requested rehearsals against that final format, including missing/altered/stale manifest controls. No source files or protected files were edited, no source branch was created, and no native binary, probe, capture, reservation, provider or model was run. Nothing was published. Prior handoff evidence follows unchanged.
+
+---
+
 # Helper 3 recorder environment and pin comparison
 
 Part 1 commit: `c577c0eff176440206a93f6647d8fd2f19a6d224` on `codex/native-recorder-env-20261113`. Status: Partial handoff: recorder code committed; full-path/replay validation held; Part 2 requires design ruling; Part 3 not started.
