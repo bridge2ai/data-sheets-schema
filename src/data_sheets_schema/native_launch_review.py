@@ -175,11 +175,14 @@ def validate_terms(statement, runtime, *, word_owner, require_current=False):
     _text(statement['owner'], 'owner')
     if statement['owner'] != word_owner:
         raise ValueError('owner statement differs from coded word owner')
-    budget = profiles.SYNTHETIC_BUDGET if synthetic else '90'
+    if synthetic:
+        budget, expected_deadline = profiles.SYNTHETIC_BUDGET, profiles.SYNTHETIC_DEADLINE_SECONDS
+    else:
+        from .native_run_limits import require_registered_pair
+        budget, expected_deadline = require_registered_pair(runtime)
     if statement['budget_guard_usd'] != budget or runtime.get('budget_guard_usd') != budget:
-        raise ValueError('owner/runtime budget must equal the D110 string 90')
+        raise ValueError('owner/runtime budget differs from the registered pair')
     deadline = statement['deadline_seconds']
-    expected_deadline = profiles.SYNTHETIC_DEADLINE_SECONDS if synthetic else 21600
     if (type(deadline) is not int or deadline != expected_deadline
             or type(runtime.get('deadline_seconds')) is not int
             or runtime['deadline_seconds'] != deadline):
