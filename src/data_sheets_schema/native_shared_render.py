@@ -291,7 +291,7 @@ def commands(spec):
         '--profile', spec.profile, '--chunk-manifest', str(spec.chunk_manifest),
         '--reasoning-effort', spec.reasoning_effort,
         *(item for path in selection.ASSET_HASHES for item in ('--prompt', path)),
-        '--render-spec-json', json.dumps(spec.render_spec(), sort_keys=True, separators=(',', ':')),
+        '--render-spec-env', 'D4D_RENDER_SPEC',
         '--prompt-text-env', 'D4D_LAUNCH_INSTRUCTION')
     return result
 

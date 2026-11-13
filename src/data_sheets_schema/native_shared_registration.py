@@ -38,6 +38,7 @@ def environment(runtime, selected, spec, config_directory):
         'CLAUDE_CONFIG_DIR': str(config_directory),
         'PYTHONPATH': str(ROOT / 'src'), 'VIRTUAL_ENV': sys.prefix,
         'D4D_LAUNCH_INSTRUCTION': selected['instruction_path'],
+        'D4D_RENDER_SPEC': c.canonical(spec.render_spec()).decode('utf-8'),
         'D4D_MANIFEST': str(spec.manifest), 'D4D_PROFILE': spec.profile}
 
 
