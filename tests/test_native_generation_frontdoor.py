@@ -7,6 +7,7 @@ Small dispatch tests explicitly stub registration verification; they prove
 argument routing/refusal only, never registration or launch acceptance.
 """
 from copy import deepcopy
+from pathlib import Path
 from datetime import datetime, timezone
 import json
 
