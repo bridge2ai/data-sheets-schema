@@ -27,8 +27,35 @@ def make_runner():
     raw = raw.replace('def sandbox_profile():', 'def sandbox_profile(allow_loopback=False):')
     raw = raw.replace("'(version 1)\\n(allow default)\\n(deny network*)\\n'", "'''(version 1)\\n(allow default)\\n(deny network*)\\n''' + ('''(allow network-bind (local ip \"localhost:*\"))\\n(allow network-inbound (local ip \"localhost:*\"))\\n(allow network-outbound (remote ip \"localhost:*\"))\\n''' if allow_loopback else '') +")
     raw = raw.replace('profile.write_text(sandbox_profile(),', 'profile.write_text(sandbox_profile(allow_loopback=bool(args.lane)),')
-    raw = raw.replace('sock.bind(("127.0.0.1", 0))', 'sock.bind(("0.0.0.0", 0))')
-    raw = raw.replace('"scope": "inherited OS deny network*"', '"scope": "OS denies non-loopback networking; CI lane fixtures may use 127.0.0.1"')
+    start = raw.index('def network_witness():')
+    end = raw.index('\n\ndef worker(args):', start)
+    raw = raw[:start] + '''def network_witness(out, allow_loopback=False):
+    previous = Path.cwd()
+    name = 'network-denial-witness.sock'
+    sock = socket.socket(socket.AF_UNIX if allow_loopback else socket.AF_INET)
+    try:
+        os.chdir(out)
+        try:
+            if allow_loopback:
+                sock.bind(name)
+                sock.listen(1)
+            else:
+                sock.bind(('127.0.0.1', 0))
+        except OSError as exc:
+            if exc.errno != errno.EPERM:
+                raise
+            return {'network_operation_denied': True, 'errno': exc.errno,
+                    'operation': 'Unix-domain listener' if allow_loopback else 'loopback bind',
+                    'pid': os.getpid(), 'external_address_attempted': False,
+                    'scope': 'OS deny network* with explicit CI localhost IP allowances only'}
+        raise RuntimeError('OS network denial self-check unexpectedly permitted the operation')
+    finally:
+        sock.close()
+        if allow_loopback:
+            (out / name).unlink(missing_ok=True)
+        os.chdir(previous)
+''' + raw[end:]
+    raw = raw.replace('network_witness())', 'network_witness(out, allow_loopback=bool(args.lane)))')
     raw = raw.replace('codex-development-efficiency-20261111', ROOT.name)
     raw = raw.replace('helper2-pins-admission-20261113', BASE.name)
     raw = raw.replace("tree.name not in ('before', 'after', 'fixed', 'unaffected')", "not tree.name.replace('-', '').isalnum()")

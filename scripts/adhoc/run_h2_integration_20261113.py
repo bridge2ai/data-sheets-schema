@@ -116,19 +116,31 @@ def origin_witness():
     return witness(ROOT)
 
 
-def network_witness():
-    sock = socket.socket()
+def network_witness(out, allow_loopback=False):
+    previous = Path.cwd()
+    name = 'network-denial-witness.sock'
+    sock = socket.socket(socket.AF_UNIX if allow_loopback else socket.AF_INET)
     try:
+        os.chdir(out)
         try:
-            sock.bind(("0.0.0.0", 0))
+            if allow_loopback:
+                sock.bind(name)
+                sock.listen(1)
+            else:
+                sock.bind(('127.0.0.1', 0))
         except OSError as exc:
             if exc.errno != errno.EPERM:
                 raise
-            return {"network_bind_denied": True, "errno": exc.errno,
-                    "pid": os.getpid(), "scope": "OS denies non-loopback networking; CI lane fixtures may use 127.0.0.1"}
-        raise RuntimeError("OS network denial self-check unexpectedly bound a socket")
+            return {'network_operation_denied': True, 'errno': exc.errno,
+                    'operation': 'Unix-domain listener' if allow_loopback else 'loopback bind',
+                    'pid': os.getpid(), 'external_address_attempted': False,
+                    'scope': 'OS deny network* with explicit CI localhost IP allowances only'}
+        raise RuntimeError('OS network denial self-check unexpectedly permitted the operation')
     finally:
         sock.close()
+        if allow_loopback:
+            (out / name).unlink(missing_ok=True)
+        os.chdir(previous)
 
 
 def worker(args):
@@ -139,7 +151,7 @@ def worker(args):
         raise RuntimeError("test child requires no-user-site, safe-path and no-bytecode")
     if Path(sys.prefix).resolve() != out / "venv":
         raise RuntimeError("test child is outside the isolated evidence venv")
-    save(out / "network.json", network_witness())
+    save(out / "network.json", network_witness(out, allow_loopback=bool(args.lane)))
     save(out / "origins-before.json", origin_witness())
     # Ordinary child startup is intentionally tested: it must not execute the
     # dependency venv's .pth files or fall back to its editable project checkout.
