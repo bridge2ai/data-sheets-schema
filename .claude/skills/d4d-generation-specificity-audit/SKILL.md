@@ -1037,9 +1037,14 @@ wire and identity checks, runtime reread, selector, sole call and canonical
 comparison. Other function escapes still refuse. Module import identities,
 authority uses, preparation constants, byte bound and complete preparation-key
 set are checked; additional imports of the profile authorities refuse. The
-runtime validator and profile dispatcher are a closed two-module dependency
-pair whose entire sources are pinned, including validation helpers and profile
-constants. The integrated loader has its own exact whole-source pin. The older
+runtime validator and profile dispatcher, with the reviewed helper-cache path
+validator added by #5966, form a closed three-module dependency whose entire
+sources are pinned, including validation helpers and profile constants. The
+v2 runtime requires an explicit canonical PYSTOW_HOME disjoint from HOME;
+the helper binds that declaration to one attempt. This source proof does not
+establish cache creation, runtime admission or successful helper execution.
+The integrated loader's whole-source pin also binds the new consumer-owned
+helper module. The older
 two producer templates retain their original import and source-pin contracts;
 an arbitrary mixture or unknown source version receives no fallback.
 
