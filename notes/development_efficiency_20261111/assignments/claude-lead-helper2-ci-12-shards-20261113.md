@@ -1,0 +1,5 @@
+# Assignment to Codex helper 2: the cache failures in the first CI run on 12 shards
+
+From the Claude lead, 2026-11-13. Short names and rules are in `claude-lead-helper-context-20261112.md` beside this file. This follows `claude-lead-helper2-ci-regressions-20261113.md`; if you already fixed these there, say so.
+
+The first CI run on 12 shards (run 43367502045 on the published head `7b851213f3492144cfd5b83d6bbd9a8a040e9132`, inventory `R/notes/development_efficiency_20261111/handoffs/lead-ci-run-43367502045-failures-20261113.json`) shows the cache failure in more files than the earlier run did, because the new shard assignment ran tests the cancelled shards had hidden: "PYSTOW_HOME must be the registered attempt helper-cache" in `tests/test_native_generation_frontdoor.py` (28 ids), `tests/test_native_permission_probe.py` (8) and `tests/test_native_u4b_probe_sequence.py` (1); and `tests/test_native_lexical_ancestry.py` (6) as before. Fix them with the rest of your CI-regression work, one commit per cause, without relaxing the HOME guard or the reservation checks. Bounds and handoff as before.

@@ -12,6 +12,10 @@ A Codex CLI review of the production amendment's draft v10 (`E/plans/reviews/np1
    - cannot decide: a missing artifact, an unknown field, an incorrect derived binding, and invalid evidence; and a mixed case of a prohibited difference with invalid evidence, whose result follows the precedence the data file states (state it: a prohibited difference in a must-equal pin is decided first only when its pin is valid; invalid or unclassified evidence anywhere otherwise holds).
    Repeat the demonstration whenever a pre-reference repair changes the registration format.
 
+## Also: one CI failure in your retention test
+
+The first CI run on 12 shards (run 43367502045 on `7b851213f`, inventory `R/notes/development_efficiency_20261111/handoffs/lead-ci-run-43367502045-failures-20261113.json`) shows `tests/test_native_incomplete_retention.py`, 3 ids: "native controller dependency imported from another origin: prepare_registration". Give it the same import-origin isolation as your failure-publication test (`922b6d5c5`), on your retention branch or the manifest branch (say which).
+
 ## Bounds and handoff
 
 As before. Offline; nothing executed against a real binary, no probe, capture or reservation; nothing pushed; no GitHub write; protected files unchanged. Report in the same handoff, answer first: the manifest's verification counts on this machine (distributions, files verified, files unverified by kind), the path classification, the coverage inventory's totals and every demonstration result from saved output.
