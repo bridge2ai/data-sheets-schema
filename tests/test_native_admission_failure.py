@@ -62,12 +62,12 @@ def test_stalled_launch_verification_refuses_dispatch_releases_and_publishes(tmp
 
 def test_shared_engine_stalled_admission_publishes_and_stops_timing(tmp_path, monkeypatch):
     import json
+    import sys
     from tests.test_native_shared_execution import make_case
     from data_sheets_schema import native_shared_execution_orchestration as execute
     from data_sheets_schema import native_execution_orchestration as engine
     from data_sheets_schema import native_execution_authority_v2 as authority
     from data_sheets_schema import native_pre_dispatch_timing as timing
-    from data_sheets_schema.native_elapsed import elapsed_ns
     monkeypatch.chdir(authority.ROOT)
     case = make_case(tmp_path / 'shared-stalled-admission')
     fifo = tmp_path / 'verification-no-writer'
@@ -81,9 +81,22 @@ def test_shared_engine_stalled_admission_publishes_and_stops_timing(tmp_path, mo
         handoff(trace)
     monkeypatch.setattr(timing, '_handoff', remember)
     def stalled(controls, *args, **kwargs):
-        runner = controls['run_native_canary']
+        # The engine receives a restricted capability projection. Inject the
+        # test clock into its active source-loaded module, retaining every
+        # projected function and the real timer class/handler/check methods.
+        controls.require_complete()
+        runner = sys.modules['run_native_canary']
+        real_timer = runner.AdmissionTimer
+        real_popen = runner.subprocess.Popen
         advance = [0]
         original_verify = kwargs['verify_launch']
+        def timer(start_ns, *, seconds, clock):
+            return real_timer(start_ns, seconds=seconds, clock=lambda: clock() + advance[0])
+        def popen(argv, *positional, **named):
+            if list(argv) == list(args[0]):
+                pytest.fail('admission dispatched')
+            # Real verification may inspect local Git state through subprocess.
+            return real_popen(argv, *positional, **named)
         def verify():
             entered.append(True)
             # Exercise the actual late registration.verified call sites. If
@@ -94,8 +107,8 @@ def test_shared_engine_stalled_admission_publishes_and_stops_timing(tmp_path, mo
             os.close(fd)
             pytest.fail('stalled shared verification returned')
         with monkeypatch.context() as patch:
-            patch.setattr(runner, 'elapsed_ns', lambda: elapsed_ns() + advance[0])
-            patch.setattr(runner.subprocess, 'Popen', lambda *a, **k: pytest.fail('admission dispatched'))
+            patch.setattr(runner, 'AdmissionTimer', timer)
+            patch.setattr(runner.subprocess, 'Popen', popen)
             kwargs['verify_launch'] = verify
             return original(controls, *args, **kwargs)
     monkeypatch.setattr(engine, '_execute_child', stalled)
