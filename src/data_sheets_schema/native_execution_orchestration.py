@@ -252,7 +252,7 @@ def _guarded_classifier(adapter, budget_stop):
 
 
 def launch(registration_raw, *, review_path, ci_path, launch_word_path,
-           contract: ExecutionContract, effects: ExecutionEffects):
+           contract: ExecutionContract, effects: ExecutionEffects, expected_authority_sha256=None):
     """Consume one explicitly authorized native attempt, never retry or resume.
 
     This method can invoke the selected native executable. Calling it is a
@@ -273,7 +273,8 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
         with loaded_capabilities(value['dependencies']) as controls:
             return _launch(registration_raw, review_path=review_path, ci_path=ci_path,
                 launch_word_path=launch_word_path, contract=contract, effects=effects,
-                controls=controls, expected_profile=PRODUCTION_PROFILE)
+                controls=controls, expected_profile=PRODUCTION_PROFILE,
+                expected_authority_sha256=expected_authority_sha256)
 
 
 def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path,
@@ -314,7 +315,7 @@ def _execute_child(controls, argv, **kwargs):
 
 
 def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
-            contract, effects, controls, expected_profile='production'):
+            contract, effects, controls, expected_profile='production', expected_authority_sha256=None):
     controls.require_complete()
     registration, composition, authority = contract.registration, contract.composition, contract.authority
     gates, replay, shared = contract.gates, contract.replay, contract.shared
@@ -331,6 +332,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     _require_launch_profile(value['runtime'], expected_profile)
     authorization = authorizations(registration_raw, value, review_path=review_path,
                                   ci_path=ci_path, launch_word_path=launch_word_path)
+    from .native_sequence_inputs import check_authority
+    check_authority(expected_authority_sha256, authorization['raw'])
     from .native_subscription_admission import (
         CurrentSelection, inspect_current_selection, accept_current_selection)
     if type(launch_guard) is CurrentSelection:
@@ -434,6 +437,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     for name, body in authorization['raw'].items():
         durable_new(attempt/(name + '.json'), body)
     status = first_stop = prepared = first_error = None
+    projections = {}
     signals = []
     observation = {'checked': False, 'passed': False, 'reason': 'native runtime not observed'}
     awake = {'passed': False, 'policy': value['runtime']['keep_awake'], 'state': 'not_acquired'}
@@ -505,7 +509,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                         first_error = exc
                     problem = f'capture: {type(exc).__name__}: {exc}'
                     stopped(problem)
-                    prepared = shared.incomplete_capture(value['composition'], attempt, adapter, problem)
+                    prepared = shared.incomplete_capture(value['composition'], attempt, adapter, problem,
+                        live_phase_report=live.get('phase_history'))
                 projections = shared.project(prepared, evidence/'captured')
                 if prepared.get('replay_complete'):
                     replay.write_report(prepared, additional_path)
@@ -588,29 +593,16 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 raise ValueError('consumed subscription guard changed before publication')
             completed = (set(results) == set(GATES)
                 and all(row.get('checked') is True and row.get('passed') is True for row in results.values()))
-            from .native_subscription_admission import context
-            guard_module, guard_extra = context(launch_guard.raw, registration_raw=registration_raw,
-                runtime=value['runtime'], launch_word_raw=authorization['raw']['launch_word'],
-                review_bundle_raw=authorization['raw']['review'])
-            validate_saved_observations = guard_module.validate_saved_observations
-            guard_snapshot = launch_guard.snapshot()
             transcript_raw = (prepared['snapshot'].raw.get(str(attempt/'transcript.jsonl'))
                               if prepared is not None else None)
-            try:
-                subscription_observation_verification = validate_saved_observations(
-                    launch_guard.raw, guard_snapshot, registration_raw=registration_raw,
-                    runtime=value['runtime'], launch_word_raw=authorization['raw']['launch_word'],
-                    transcript_raw=transcript_raw, complete=completed, **guard_extra)
-            except ValueError as exc:
-                if first_error is None:
-                    first_error = exc
-                stopped('subscription saved observation verification failed: ' + str(exc))
+            guard_snapshot, subscription_observation_verification, validation_failure = _publication_subscription(
+                launch_guard, registration_raw, value['runtime'], authorization, transcript_raw,
+                completed=completed)
+            if validation_failure is not None:
+                stopped('publication validation failed at ' + validation_failure['stage'] + ': '
+                        + validation_failure['reason'])
                 results['first_stop'] = {'checked': True, 'passed': False, 'reason': first_stop}
                 completed = False
-                subscription_observation_verification = validate_saved_observations(
-                    launch_guard.raw, guard_snapshot, registration_raw=registration_raw,
-                    runtime=value['runtime'], launch_word_raw=authorization['raw']['launch_word'],
-                    transcript_raw=transcript_raw, complete=False, **guard_extra)
             final = {'kind': KIND, 'version': VERSION, 'attempt_id': value['attempt_id'],
                 'profile': expected_profile,
                 'state': 'completed_pending_independent_review' if completed else 'failed',
@@ -631,6 +623,20 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
             if launch_guard is not None:
                 final['subscription_guard'] = guard_snapshot
                 final['subscription_observation_verification'] = subscription_observation_verification
+            if validation_failure is not None:
+                final['publication_validation_failure'] = validation_failure
+                consumed = {**lifecycle_raw, 'registration.json': registration_raw,
+                    'started.json': started_raw, 'subscription-guard.json': launch_guard.raw,
+                    **{name + '.json': raw for name, raw in authorization['raw'].items()}}
+                if prepared is not None:
+                    for name in _FAILURE_MEMBERS:
+                        body = prepared['snapshot'].raw.get(str(attempt / name))
+                        if body is not None:
+                            consumed.setdefault(name, body)
+                final['failure_evidence'] = _failure_evidence(attempt, consumed=consumed)
+            if prepared is not None and 'retained_artifacts' in prepared:
+                final['retained_artifacts'] = shared.retention_manifest(prepared, projections)
+                final['capture_problems'] = list(prepared['capture_problems'])
             final_raw = draft._encoded(final)
             from .native_receipt_origin import check_final_bytes
             if KIND == 'd4d_native_shared_attempt':
@@ -651,6 +657,164 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 raise first_error from publication_error
             raise
 
+
+
+def _publication_subscription(guard, registration_raw, runtime, authorization, transcript_raw, *, completed):
+    """A validation exception can produce diagnostics only, never completion.
+
+    Keep the successful path's context and observation checks intact. Do not
+    call the same failing runtime validator again to authorize a failure.
+    """
+    from .native_subscription_admission import context
+    snapshot = guard.snapshot()
+    stage = 'subscription_admission.context'
+    try:
+        module, extra = context(guard.raw, registration_raw=registration_raw,
+            runtime=runtime, launch_word_raw=authorization['raw']['launch_word'],
+            review_bundle_raw=authorization['raw']['review'])
+        stage = 'subscription_guard.validate_saved_observations'
+        verification = module.validate_saved_observations(guard.raw, snapshot,
+            registration_raw=registration_raw, runtime=runtime,
+            launch_word_raw=authorization['raw']['launch_word'],
+            transcript_raw=transcript_raw, complete=completed, **extra)
+        return snapshot, verification, None
+    except (ValueError, OSError) as exc:
+        failure = {'stage': stage, 'error_type': type(exc).__name__, 'reason': str(exc) or type(exc).__name__}
+        return snapshot, {'checked': False, 'passed': False, 'complete': False,
+            'basis': 'Failure diagnostic only; subscription observations not independently verified.'}, failure
+
+
+_FAILURE_MEMBERS = ('registration.json', 'started.json', 'review.json', 'ci.json',
+    'launch_word.json', 'subscription-guard.json', 'subscription-dispatched.json',
+    'runtime-observation.json', 'keep-awake.json', 'transcript.jsonl', 'control.jsonl',
+    'stderr.txt', 'native-shared-effect-stop.json')
+
+
+def _failure_evidence(attempt, *, consumed=None):
+    """Pin available early evidence without interpreting runtime authority."""
+    from .native_shared_evidence import read_regular
+    out = {}
+    consumed = consumed or {}
+    for name in _FAILURE_MEMBERS:
+        path = str(Path(attempt) / name)
+        try:
+            item = read_regular(path, name, max_bytes=c.HARD_LIMITS['stream_bytes']).captured
+            out[name] = {'path': path, 'bytes': item.pin.bytes, 'sha256': item.pin.sha256}
+        except (OSError, ValueError) as exc:
+            out[name] = {'path': path, 'not_kept': type(exc).__name__ + ': ' + str(exc)}
+        if name in consumed:
+            raw = consumed[name]
+            pin = {'path': path, 'bytes': len(raw), 'sha256': c.sha(raw)}
+            if out[name] != pin:
+                pin['changed_after_consumption'] = (
+                    out[name].get('not_kept') or 'disk bytes differ from consumed bytes')
+            out[name] = pin
+    return out
+
+
+def _read_failure_diagnostic(registration_raw, *, contract, file, expected_runtime_observation):
+    """Read historical failed bytes, expressly without verifying live authority.
+
+    This route cannot return success. Its input is a structurally closed v2
+    envelope, not a freshly validated RunSpec. Normal results return to the
+    existing full semantic reader, including its fresh registration check.
+    """
+    envelope = c.strict_json(registration_raw, 'failure registration', admission.MAX_WIRE_BYTES)
+    c.exact(envelope, {'authority_version', 'controller_sources_sha256', 'registration'}, 'failure envelope')
+    if type(envelope['authority_version']) is not int or envelope['authority_version'] != 2:
+        raise ValueError('failure diagnostic requires a v2 envelope')
+    value = envelope['registration']
+    admission._closed_execution(value)
+    for name in ('attempt_directory', 'evidence_directory'):
+        c.canonical_path(value[name], name)
+    attempt, evidence = Path(value['attempt_directory']), Path(value['evidence_directory'])
+    final_raw = file(evidence / 'final.json', 'final result')
+    result = c.strict_json(final_raw, 'final result')
+    if type(result) is not dict or 'publication_validation_failure' not in result:
+        return None
+    checks = result.get('gates')
+    if (result.get('state') != 'failed' or result.get('runtime_gates_passed') is not False
+            or type(result.get('first_stop')) is not str or not result['first_stop']
+            or type(checks) is not dict or set(checks) != set(GATES)
+            or any(type(row) is not dict or type(row.get('checked')) is not bool
+                   or type(row.get('passed')) is not bool for row in checks.values())
+            or checks['first_stop'].get('passed') is not False
+            or any(result.get(name) != expected for name, expected in UNASSESSED.items())):
+        raise ValueError('failure diagnostic cannot assert completion or acceptance')
+    failure = c.exact(result['publication_validation_failure'], {'stage', 'error_type', 'reason'}, 'failure diagnostic')
+    if (failure['stage'] not in ('subscription_admission.context', 'subscription_guard.validate_saved_observations')
+            or any(type(failure[key]) is not str or not failure[key] for key in failure)):
+        raise ValueError('failure diagnostic lacks its validation failure')
+    verification = result.get('subscription_observation_verification')
+    if (type(verification) is not dict
+            or any(verification.get(key) is not False for key in ('checked', 'passed', 'complete'))):
+        raise ValueError('failure diagnostic cannot claim subscription verification')
+    started_raw = file(attempt / 'started.json', 'started identity')
+    expected = {'final_sha256': c.sha(final_raw), 'started_sha256': c.sha(started_raw),
+                'registration_sha256': c.sha(registration_raw)}
+    if c.strict_json(file(evidence / 'published.json', 'publication marker')) != expected:
+        raise ValueError('failure diagnostic publication is incomplete or changed')
+    started = c.strict_json(started_raw, 'started identity')
+    if (result.get('kind') != contract.kind or type(result.get('version')) is not int or result['version'] != 1
+            or result.get('attempt_id') != value['attempt_id']
+            or result.get('composition_sha256') != value['composition_sha256']
+            or any(result.get(key) != expected[key] for key in ('started_sha256', 'registration_sha256'))
+            or file(attempt / 'registration.json', 'consumed registration') != registration_raw
+            or started.get('registration_sha256') != c.sha(registration_raw)
+            or started.get('attempt_id') != value['attempt_id']
+            or started.get('authority') != result.get('authority')):
+        raise ValueError('failure diagnostic differs from consumed attempt identity')
+    members = c.exact(result.get('failure_evidence'), set(_FAILURE_MEMBERS), 'failure evidence')
+    from .native_shared_evidence import read_regular
+    for name, pin in members.items():
+        if type(pin) is not dict or pin.get('path') != str(attempt / name):
+            raise ValueError('failure evidence path differs')
+        if 'not_kept' in pin:
+            c.exact(pin, {'path', 'not_kept'}, 'unavailable failure evidence')
+            if type(pin['not_kept']) is not str or not pin['not_kept']:
+                raise ValueError('failure evidence lacks unavailable reason')
+            continue
+        extra = {'changed_after_consumption'} if 'changed_after_consumption' in pin else set()
+        c.exact(pin, {'path', 'bytes', 'sha256'} | extra, 'failure evidence pin')
+        if extra and (type(pin['changed_after_consumption']) is not str or not pin['changed_after_consumption']):
+            raise ValueError('failure evidence lacks its post-consumption change reason')
+        if type(pin['bytes']) is not int or not 0 <= pin['bytes'] <= c.HARD_LIMITS['stream_bytes']:
+            raise ValueError('failure evidence has invalid byte bound')
+        try:
+            item = read_regular(pin['path'], name, max_bytes=max(1, pin['bytes'])).captured
+        except (OSError, ValueError) as exc:
+            raise ValueError('failure evidence cannot be read: ' + str(exc)) from exc
+        if item.pin.bytes != pin['bytes'] or item.pin.sha256 != pin['sha256']:
+            raise ValueError('failure evidence differs from its published pin')
+    for name in ('registration.json', 'started.json', 'review.json', 'ci.json', 'launch_word.json', 'subscription-guard.json'):
+        if 'not_kept' in members[name]:
+            raise ValueError('failure diagnostic lacks consumed identity evidence')
+    for name in ('review', 'ci', 'launch_word'):
+        if result['authority'][name]['sha256'] != members[name + '.json']['sha256']:
+            raise ValueError('failure evidence differs from consumed authority bytes')
+    guard = result.get('subscription_guard')
+    if (type(guard) is not dict or guard.get('guard_sha256') != members['subscription-guard.json']['sha256']
+            or guard.get('registration_sha256') != c.sha(registration_raw)):
+        raise ValueError('failure evidence differs from guard snapshot identity')
+    lifecycle = result.get('lifecycle_artifacts')
+    if type(lifecycle) is not dict:
+        raise ValueError('failure diagnostic lacks lifecycle identities')
+    for name in ('runtime-observation.json', 'keep-awake.json'):
+        pin = members[name]
+        if ('not_kept' not in pin) != (name in lifecycle):
+            raise ValueError('failure evidence and lifecycle membership disagree')
+        if name in lifecycle and lifecycle[name] != {'path': pin['path'], 'sha256': pin['sha256']}:
+            raise ValueError('failure evidence and lifecycle pins disagree')
+    _check_lifecycle(value, result, attempt, file, expected_runtime_observation, completion=False)
+    contract.replay.validate_file_basis(value, result)
+    if 'retained_artifacts' in result:
+        contract.replay.validate_retained_artifacts(value, result)
+    additional = result.get('additional_report')
+    if additional is not None:
+        if (type(additional) is not dict or additional.get('path') != str(evidence / 'attribution-replay.json')
+                or additional.get('sha256') != c.sha(file(evidence / 'attribution-replay.json', 'replay report'))):
+            raise ValueError('failure evidence replay report differs')
+    return result
 
 
 def _subscription_transcript(result, attempt):
@@ -683,15 +847,54 @@ def _subscription_transcript(result, attempt):
     return artifact.raw
 
 
+def _check_lifecycle(value, result, attempt, _file, expected_runtime_observation, *, completion):
+    """Apply identical byte-based lifecycle checks to ordinary and failed readback."""
+    checks = result['gates']
+    lifecycle = result.get('lifecycle_artifacts')
+    if (type(lifecycle) is not dict or not set(lifecycle) <= {'runtime-observation.json', 'keep-awake.json'}
+            or completion and set(lifecycle) != {'runtime-observation.json', 'keep-awake.json'}):
+        raise ValueError('final result lacks its runtime and cleanup identities')
+    lifecycle_raw = {}
+    for name, pin in lifecycle.items():
+        body = _file(attempt/name, 'lifecycle artifact')
+        if (type(pin) is not dict or set(pin) != {'path', 'sha256'} or pin['path'] != str(attempt/name)
+                or draft._sha(body) != pin['sha256']):
+            raise ValueError('runtime or cleanup evidence differs from the final identity')
+        lifecycle_raw[name] = body
+    runtime_gate = checks['runtime_authority']
+    if 'runtime-observation.json' in lifecycle_raw:
+        body = lifecycle_raw.get('runtime-observation.json')
+        recomputed = lifecycle_checks.runtime_observation_result(body, result.get('runtime_observation'),
+                                                     expected_runtime_observation(value))
+        if draft._encoded(runtime_gate) != draft._encoded(recomputed):
+            raise ValueError('runtime observation, captured authority gate and lifecycle record disagree')
+    elif (runtime_gate['checked'] is not False or runtime_gate['passed'] is not False or 'basis' in runtime_gate
+            or (attempt/'runtime-observation.json').exists() or (attempt/'runtime-observation.json').is_symlink()):
+        raise ValueError('runtime observation fallback requires an unchecked failed gate and no artifact')
+    cleanup_gate = checks['keep_awake']
+    if 'keep-awake.json' in lifecycle_raw:
+        recomputed = lifecycle_checks.cleanup_result(lifecycle_raw.get('keep-awake.json'),
+            result.get('keep_awake'), value['runtime']['keep_awake'])
+        if draft._encoded(cleanup_gate) != draft._encoded(recomputed):
+            raise ValueError('cleanup evidence, observed release outcome and gate disagree')
+    elif (cleanup_gate['checked'] is not False or cleanup_gate['passed'] is not False or 'basis' in cleanup_gate
+            or (attempt/'keep-awake.json').exists() or (attempt/'keep-awake.json').is_symlink()):
+        raise ValueError('cleanup fallback requires an unchecked failed gate and no artifact')
+
+
 def read_final(registration_raw, *, contract: ExecutionContract,
                effects: ExecutionEffects):
     """Check complete publication and immutable saved identities; never resume.
 
     RunSpec boundary: validated-caller
 
-    RunSpec precondition: Caller supplies exact execution-registration bytes and the fixed shared-v2 execution contract; its registration verifier reconstructs and guards a fresh RunSpec before saved publication evidence is read.
+    RunSpec precondition: Caller supplies exact execution-registration bytes and the fixed shared-v2 execution contract. Ordinary results reconstruct and guard a fresh RunSpec. Explicit validation-failure diagnostics verify only failed historical bytes and cannot assert completion or authority.
     """
     contract.require_fixed()
+    diagnostic = _read_failure_diagnostic(registration_raw, contract=contract, file=effects.file,
+        expected_runtime_observation=effects.expected_runtime_observation)
+    if diagnostic is not None:
+        return diagnostic
     registration, composition, authority = contract.registration, contract.composition, contract.authority
     gates, replay, shared = contract.gates, contract.replay, contract.shared
     KIND, VERSION = contract.kind, 1
@@ -808,36 +1011,7 @@ def read_final(registration_raw, *, contract: ExecutionContract,
     if 'receipt_origin_reporting' in value:
         from .native_receipt_origin import check_saved
         check_saved(value, checks['receipts'], raw=origin_raw, aliases=aliases, metadata=metadata)
-    lifecycle = result.get('lifecycle_artifacts')
-    if (type(lifecycle) is not dict or not set(lifecycle) <= {'runtime-observation.json', 'keep-awake.json'}
-            or completion and set(lifecycle) != {'runtime-observation.json', 'keep-awake.json'}):
-        raise ValueError('final result lacks its runtime and cleanup identities')
-    lifecycle_raw = {}
-    for name, pin in lifecycle.items():
-        body = _file(attempt/name, 'lifecycle artifact')
-        if (type(pin) is not dict or set(pin) != {'path', 'sha256'} or pin['path'] != str(attempt/name)
-                or draft._sha(body) != pin['sha256']):
-            raise ValueError('runtime or cleanup evidence differs from the final identity')
-        lifecycle_raw[name] = body
-    runtime_gate = checks['runtime_authority']
-    if 'runtime-observation.json' in lifecycle_raw:
-        body = lifecycle_raw.get('runtime-observation.json')
-        recomputed = lifecycle_checks.runtime_observation_result(body, result.get('runtime_observation'),
-                                                     expected_runtime_observation(value))
-        if draft._encoded(runtime_gate) != draft._encoded(recomputed):
-            raise ValueError('runtime observation, captured authority gate and lifecycle record disagree')
-    elif (runtime_gate['checked'] is not False or runtime_gate['passed'] is not False or 'basis' in runtime_gate
-            or (attempt/'runtime-observation.json').exists() or (attempt/'runtime-observation.json').is_symlink()):
-        raise ValueError('runtime observation fallback requires an unchecked failed gate and no artifact')
-    cleanup_gate = checks['keep_awake']
-    if 'keep-awake.json' in lifecycle_raw:
-        recomputed = lifecycle_checks.cleanup_result(lifecycle_raw.get('keep-awake.json'),
-            result.get('keep_awake'), value['runtime']['keep_awake'])
-        if draft._encoded(cleanup_gate) != draft._encoded(recomputed):
-            raise ValueError('cleanup evidence, observed release outcome and gate disagree')
-    elif (cleanup_gate['checked'] is not False or cleanup_gate['passed'] is not False or 'basis' in cleanup_gate
-            or (attempt/'keep-awake.json').exists() or (attempt/'keep-awake.json').is_symlink()):
-        raise ValueError('cleanup fallback requires an unchecked failed gate and no artifact')
+    _check_lifecycle(value, result, attempt, _file, expected_runtime_observation, completion=completion)
     additional = result.get('additional_report')
     if additional is None:
         if completion:

@@ -78,7 +78,7 @@ def authorizations(raw, value, *, review_path, ci_path, launch_word_path):
 
 
 def launch(registration_raw, *, review_path, ci_path, launch_word_path,
-           subscription_guard_path, subscription_guard_sha256):
+           subscription_guard_path, subscription_guard_sha256, expected_authority_sha256=None):
     """    RunSpec boundary: validated-caller
 
     RunSpec precondition: Caller supplies explicit execution registration; registration.verified reconstructs guarded preparation before creating fixed effects or dispatching.
@@ -101,7 +101,8 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
             guard, registration_raw=registration_raw, value=value)
         contract, effects = _engine_bindings(launch_guard=guard)
         return execute(registration_raw, review_path=review_path, ci_path=ci_path,
-            launch_word_path=launch_word_path, contract=contract, effects=effects)
+            launch_word_path=launch_word_path, contract=contract, effects=effects,
+            expected_authority_sha256=expected_authority_sha256)
 
 
 def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path,
@@ -156,7 +157,7 @@ def _synthetic_runtime_observation(value):
 def read_final(registration_raw):
     """RunSpec boundary: validated-caller
 
-    RunSpec precondition: Caller supplies exact execution-registration bytes; the fixed shared-v2 readback delegation freshly verifies guarded preparation before saved publication-evidence reads.
+    RunSpec precondition: Caller supplies exact execution-registration bytes; the fixed shared-v2 delegation freshly verifies guarded preparation for ordinary results. Explicit validation-failure diagnostics verify failed historical bytes only and cannot assert completion or authority.
     """
     from .native_execution_orchestration import read_final as read
     contract, effects = _engine_bindings()
