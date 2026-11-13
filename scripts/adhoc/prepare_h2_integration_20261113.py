@@ -56,6 +56,9 @@ def make_runner():
         os.chdir(previous)
 ''' + raw[end:]
     raw = raw.replace('network_witness())', 'network_witness(out, allow_loopback=bool(args.lane)))')
+    raw = raw.replace('str(ROOT), "--child-check"],', 'str(ROOT), "--child-check",\n         "--out", str(out), *(["--lane", args.lane] if args.lane else [])],')
+    raw = raw.replace('timeout=30, check=True)', "timeout=30, check=False)\n    save(out / 'subprocess-origin-result.json', {'returncode': witness.returncode,\n         'stdout': witness.stdout, 'stderr': witness.stderr})\n    witness.check_returncode()")
+    raw = raw.replace('"network": network_witness()', '"network": network_witness(\n            args.out.resolve(strict=True), allow_loopback=bool(args.lane))')
     raw = raw.replace('def parent(args):\n', "def parent(args):\n    hold = ROOT.with_name(ROOT.name + '.hold.json')\n    if hold.exists():\n        raise SystemExit('validation export held before launch: ' + str(hold))\n")
     raw = raw.replace('codex-development-efficiency-20261111', ROOT.name)
     raw = raw.replace('helper2-pins-admission-20261113', BASE.name)

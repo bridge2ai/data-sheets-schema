@@ -156,9 +156,13 @@ def worker(args):
     # Ordinary child startup is intentionally tested: it must not execute the
     # dependency venv's .pth files or fall back to its editable project checkout.
     witness = subprocess.run(
-        [sys.executable, "-P", "-B", str(Path(__file__).resolve()), "--tree", str(ROOT), "--child-check"],
+        [sys.executable, "-P", "-B", str(Path(__file__).resolve()), "--tree", str(ROOT), "--child-check",
+         "--out", str(out), *(["--lane", args.lane] if args.lane else [])],
         cwd=ROOT, env=os.environ.copy(), capture_output=True, text=True,
-        timeout=30, check=True)
+        timeout=30, check=False)
+    save(out / 'subprocess-origin-result.json', {'returncode': witness.returncode,
+         'stdout': witness.stdout, 'stderr': witness.stderr})
+    witness.check_returncode()
     save(out / "subprocess-origins.json", json.loads(witness.stdout))
     if args.scanner:
         command = [sys.executable, '-P', '-B', str(ROOT / '.claude/skills/d4d-generation-specificity-audit/scan.py'),
@@ -454,7 +458,8 @@ def main():
         parser.error('CI export HEAD differs from manifest')
     ROOT = tree
     if args.child_check:
-        print(json.dumps({"origins": origin_witness(), "network": network_witness()}))
+        print(json.dumps({"origins": origin_witness(), "network": network_witness(
+            args.out.resolve(strict=True), allow_loopback=bool(args.lane))}))
         return 0
     if not 1 <= args.timeout_seconds <= 14400:
         parser.error("--timeout-seconds must be between 1 and 14400")
