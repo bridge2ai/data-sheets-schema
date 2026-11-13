@@ -358,6 +358,8 @@ def bound_case(prepared, fixture):
     expected = deepcopy(fixture['expected'])
     expected['runtime'] = deepcopy(prepared['runtime'])
     expected['permission_environment'].update(prepared['runtime']['environment'])
+    expected['permission_environment']['CLAUDE_CONFIG_DIR'] = str(
+        Path(prepared['runtime']['environment']['PYSTOW_HOME']).parent / 'cli_config')
     return expected
 
 
