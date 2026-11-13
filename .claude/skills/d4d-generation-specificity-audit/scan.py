@@ -13020,6 +13020,15 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     'src/data_sheets_schema/native_shared_runtime_values.py': 'a0cffc3994ac38aa6879b3f710d1df40fd903f16093f7e35af841e59f2a027e3',
     'src/data_sheets_schema/native_runtime_profiles.py': 'e8a24b22475f4529aa372dfa67681fdab74dc73d1ac401f9420454e1bafed672',
     'src/data_sheets_schema/native_helper_cache.py': '0934f71630ab45e4670ffa0d14f90c1cfbb23a132a23ca8c6ccfcc0c58a52a95',
+    # Controller pin rotation for the issue 6094 timing hooks (lead,
+    # 2026-11-13; sources source_commit e648abe2a). Against the prior pins
+    # (1e1cc080 and 58d9be00), the attribution controller changes only its
+    # SOURCES_SHA256 constant, and the sources file only its source_commit
+    # and the native_control and run_native_canary hashes. These are identity
+    # data, not loader logic. The base summary keeps the earlier contract's
+    # identity.
+    'src/data_sheets_schema/native_attribution_controller_v2.py': '4cdfc7adb575d6572d76027c0e0d640876effd8c72c9ed1bc9798f6df060934a',
+    'src/data_sheets_schema/native_controller_sources_v2.json': 'd4ad9c21abc470bfffe6c68268ca5b343b548bea822fce19b5e6b9abb29c322b',
 }
 
 
