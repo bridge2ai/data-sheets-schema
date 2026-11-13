@@ -1,0 +1,2319 @@
+{
+  "conclusions": {
+    "code_attribution": "No measured step slowdown can be assigned to a commit from these artifacts. The inherited timer origin precedes launch verification, as the lead independently established; issue 6170 supplies the ruling to repair that.",
+    "dominant_steps": "Cannot isolate helper or verification costs from missing endpoints. Interdecision intervals combine classification, callbacks, helper work, model processing and any host suspension.",
+    "quiet_host_900_seconds": "Not established: no complete run, isolated helper duration series or remaining-tail timings. Total pytest time is not attempt duration.",
+    "recommendation": "Quiet-host run arranged by the lead, after issue 6170 fixes dispatch origin and suspend-inclusive timing. Retain entry/dispatch, helper start/end, turn boundaries and host observations. Do not change the synthetic deadline from this evidence."
+  },
+  "retained_sleep_excerpt": {
+    "basis": "Saved local Sleep/Wake event pair, battery 51 percent; no extrapolation to other runs.",
+    "file": {
+      "bytes": 3322,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-cache-gaps-20261113/audit/sleep-events-20261112.txt",
+      "sha256": "379356ae83f57cf33ea542bbcba0890f24f65a5d92799c4c1f83bffd5f95a5dc"
+    },
+    "matching_lines": [
+      "2026-11-12 14:10:39 -0800 Sleep               \tEntering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:51%) 679 secs  ",
+      "2026-11-12 14:21:58 -0800 Wake                \tWake from Deep Idle [CDNVA] : due to smc.sysState.Wake(0x70070000) lid SMC.OutboxNotEmpty/HID Activity Using BATT (Charge:51%)           "
+    ],
+    "overlap_seconds": 679,
+    "run": "public-omissions-cache"
+  },
+  "runs": [
+    {
+      "artifacts": [
+        {
+          "bytes": 66107,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/pytest.xml",
+          "sha256": "44cb6e7ba60a0bc5e8b2b4d6829b9ed0766c641d9e75c7d61072285967598ed8"
+        },
+        {
+          "bytes": 12320,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/outcome.json",
+          "sha256": "6334a8f4706e24a5a8fc827217d246869da8848d32d16a1f88750da10ed88d49"
+        },
+        {
+          "bytes": 2878,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/plan.json",
+          "sha256": "0a6cc56ecf9c40f5d0d5cb12abdea99a6bce04272301c1078d41168e130f1731"
+        },
+        {
+          "bytes": 25005,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/native-attempt/control.jsonl",
+          "sha256": "6cfd7c4580291ea63576a22de15efd197709d294b52567dafd42c8cfc89c2e60"
+        },
+        {
+          "bytes": 5504373,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/native-attempt/transcript.jsonl",
+          "sha256": "a86cec350a250853c43893594ed9f4bd2b1cac40cf05e20de18fa3b35109c086"
+        },
+        {
+          "bytes": 1632,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/native-attempt/started.json",
+          "sha256": "eeb2c520c17318b5558a01001c8e514a8b0827a1b921020f18470a26d0e6028b"
+        },
+        {
+          "bytes": 878,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/native-attempt/runtime-observation.json",
+          "sha256": "45e2c8f1eb0b596aef710d7cc131dad208e61917f6c7ec26fa19fb5f203c38df"
+        },
+        {
+          "bytes": 109,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/native-attempt/subscription-dispatched.json",
+          "sha256": "e56fb825477d93204fdbe719e1d60d163f8dec71e9069be23840cc9a697e3296"
+        },
+        {
+          "bytes": 2997,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/fresh-attempt/stages/journal.json",
+          "sha256": "dd9884cc3edfdc8afd673a3c0452b2f48c9fefdbba5d8c09cf6ddf8454531dcc"
+        },
+        {
+          "bytes": 19626,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/actual-result.json",
+          "sha256": "20ebea041341b7a97576eed8d389fe193d1bda25a4f4856a1fadaef00998c805"
+        }
+      ],
+      "calls": [
+        {
+          "command_kind": "a registered input the instruction reads",
+          "decision_at": "2026-11-12T21:36:55.644371+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-1",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a registered input the instruction reads",
+          "decision_at": "2026-11-12T21:37:00.687973+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-2",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a registered input the instruction reads",
+          "decision_at": "2026-11-12T21:37:05.308557+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-3",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "chunk_check",
+          "decision_at": "2026-11-12T21:37:10.037936+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-4",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "source_scope",
+          "decision_at": "2026-11-12T21:37:15.731773+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-5",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-12T21:37:21.449831+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-6",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-12T21:37:26.009586+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-7",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "full_schema",
+          "decision_at": "2026-11-12T21:37:30.578363+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-8",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "full_terms",
+          "decision_at": "2026-11-12T21:37:37.196831+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-9",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "phase1_receipts",
+          "decision_at": "2026-11-12T21:37:46.176350+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-10",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "advance",
+          "decision_at": "2026-11-12T21:39:22.532985+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-11",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-12T21:41:10.421973+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-12",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-12T21:41:30.039310+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-13",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "advance",
+          "decision_at": "2026-11-12T21:41:46.027425+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-14",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "derive_core",
+          "decision_at": "2026-11-12T21:44:11.647684+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-15",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "core_schema",
+          "decision_at": "2026-11-12T21:44:49.490506+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-16",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "pair",
+          "decision_at": "2026-11-12T21:45:15.637663+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-17",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "original_source_inventory",
+          "decision_at": "2026-11-12T21:46:06.621780+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-18",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "advance",
+          "decision_at": "2026-11-12T21:46:40.556615+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-19",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "no saved decision",
+          "decision_at": null,
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": null,
+          "result_recorded": false,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-20",
+          "wall_seconds": null
+        }
+      ],
+      "case": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26",
+      "disposition": "Stopped exact timing reconstruction for this run because required timing artifacts were never retained. No mtime inference or re-execution.",
+      "finished_at": null,
+      "first_control_at": "2026-11-12T21:36:41.410374+00:00",
+      "first_stop": "native attempt deadline elapsed; retain all incomplete charge reservations",
+      "guard_dispatched_at": null,
+      "heavy_test_overlap": "not established by retained handoff timestamps; activity timestamps are not measurements of concurrent heavy tests",
+      "host_observation_files": [],
+      "interdecision_intervals": [
+        {
+          "after_kind": "a registered input the instruction reads",
+          "after_tool": "shared-test-1",
+          "before_kind": "a registered input the instruction reads",
+          "before_tool": "shared-test-2",
+          "seconds": 5.043601989746094
+        },
+        {
+          "after_kind": "a registered input the instruction reads",
+          "after_tool": "shared-test-2",
+          "before_kind": "a registered input the instruction reads",
+          "before_tool": "shared-test-3",
+          "seconds": 4.620584011077881
+        },
+        {
+          "after_kind": "a registered input the instruction reads",
+          "after_tool": "shared-test-3",
+          "before_kind": "chunk_check",
+          "before_tool": "shared-test-4",
+          "seconds": 4.729378938674927
+        },
+        {
+          "after_kind": "chunk_check",
+          "after_tool": "shared-test-4",
+          "before_kind": "source_scope",
+          "before_tool": "shared-test-5",
+          "seconds": 5.69383692741394
+        },
+        {
+          "after_kind": "source_scope",
+          "after_tool": "shared-test-5",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-6",
+          "seconds": 5.718058109283447
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-6",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-7",
+          "seconds": 4.559755086898804
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-7",
+          "before_kind": "full_schema",
+          "before_tool": "shared-test-8",
+          "seconds": 4.568776845932007
+        },
+        {
+          "after_kind": "full_schema",
+          "after_tool": "shared-test-8",
+          "before_kind": "full_terms",
+          "before_tool": "shared-test-9",
+          "seconds": 6.6184680461883545
+        },
+        {
+          "after_kind": "full_terms",
+          "after_tool": "shared-test-9",
+          "before_kind": "phase1_receipts",
+          "before_tool": "shared-test-10",
+          "seconds": 8.979519128799438
+        },
+        {
+          "after_kind": "phase1_receipts",
+          "after_tool": "shared-test-10",
+          "before_kind": "advance",
+          "before_tool": "shared-test-11",
+          "seconds": 96.35663485527039
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-11",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-12",
+          "seconds": 107.88898801803589
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-12",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-13",
+          "seconds": 19.617336988449097
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-13",
+          "before_kind": "advance",
+          "before_tool": "shared-test-14",
+          "seconds": 15.988115072250366
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-14",
+          "before_kind": "derive_core",
+          "before_tool": "shared-test-15",
+          "seconds": 145.62025904655457
+        },
+        {
+          "after_kind": "derive_core",
+          "after_tool": "shared-test-15",
+          "before_kind": "core_schema",
+          "before_tool": "shared-test-16",
+          "seconds": 37.84282183647156
+        },
+        {
+          "after_kind": "core_schema",
+          "after_tool": "shared-test-16",
+          "before_kind": "pair",
+          "before_tool": "shared-test-17",
+          "seconds": 26.147156953811646
+        },
+        {
+          "after_kind": "pair",
+          "after_tool": "shared-test-17",
+          "before_kind": "original_source_inventory",
+          "before_tool": "shared-test-18",
+          "seconds": 50.98411703109741
+        },
+        {
+          "after_kind": "original_source_inventory",
+          "after_tool": "shared-test-18",
+          "before_kind": "advance",
+          "before_tool": "shared-test-19",
+          "seconds": 33.93483519554138
+        }
+      ],
+      "largest_interdecision_intervals": [
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-14",
+          "before_kind": "derive_core",
+          "before_tool": "shared-test-15",
+          "seconds": 145.62025904655457
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-11",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-12",
+          "seconds": 107.88898801803589
+        },
+        {
+          "after_kind": "phase1_receipts",
+          "after_tool": "shared-test-10",
+          "before_kind": "advance",
+          "before_tool": "shared-test-11",
+          "seconds": 96.35663485527039
+        }
+      ],
+      "launch_verification_seconds": null,
+      "missing_artifacts": [
+        "execute_child entry clock",
+        "child-dispatch/process-start clock paired to that entry",
+        "per-helper start/end and turn-gap clocks",
+        "run-specific power/sleep observation"
+      ],
+      "power_source": "unknown: no run-specific observation",
+      "pytest_seconds": 1510.514,
+      "required_helpers_not_observed": [
+        "recorder"
+      ],
+      "run": "public-correction-cache",
+      "runner_seconds": 1521.167353584,
+      "source_commit": "e526c5c732682ba0bcc47772404760989c7ae277",
+      "stages": [
+        {
+          "artifact": {
+            "bytes": 1063,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000000.json",
+            "sha256": "f28aa71e20946e7a8aa8965cd4658c6d53f1d33d32dfe85ffca536868fca658d"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "genesis",
+          "sequence": 0,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1165,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000001.json",
+            "sha256": "ed2a43f4b879ef4a594e2e4362f51d213c6c68ab3452f811afce6db12eaf56c8"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "session_bound",
+          "sequence": 1,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1856,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000002.json",
+            "sha256": "43491a80d3c3aa5780d5eafcb59bddd3fcf48ff5a28e7b846428b276b88b3255"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "phase1_sealed",
+          "sequence": 2,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1269,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000003.json",
+            "sha256": "f9c4266037f2777765c00cee5562fb684c2f49d672b27f1f7eb64d9b1cf9deef"
+          },
+          "cursor": {
+            "kind": "receipt",
+            "ordinal": 1,
+            "target_id": "receipt"
+          },
+          "end": null,
+          "record_type": "request_admitted",
+          "sequence": 3,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1672,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000004.json",
+            "sha256": "d7cf90085e1470965c0d67dc65b93266c1ec95dc730f8c1d6e7661693f84f1b8"
+          },
+          "cursor": {
+            "kind": "receipt",
+            "ordinal": 1,
+            "target_id": "receipt"
+          },
+          "end": null,
+          "record_type": "response_consumed",
+          "sequence": 4,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1765,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000005.json",
+            "sha256": "24e81667e775e1e2c73c5b1d4622b25504d6fd24dad9d47c669434b22d387a18"
+          },
+          "cursor": {
+            "kind": "receipt",
+            "ordinal": 1,
+            "target_id": "receipt"
+          },
+          "end": null,
+          "record_type": "stage_checked",
+          "sequence": 5,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1489,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000006.json",
+            "sha256": "647e0f5c3c795e116fb535b830d0d89212c8eda0acb141670fa27cba728e948b"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "core_sealed",
+          "sequence": 6,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1272,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-correction-cache/cases/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000007.json",
+            "sha256": "eaddae798a7a441b518dedb7acbc1274c1ea3673cd98263a8b73d5b0982357c1"
+          },
+          "cursor": {
+            "kind": "worker",
+            "ordinal": 2,
+            "target_id": "worker_0001"
+          },
+          "end": null,
+          "record_type": "request_admitted",
+          "sequence": 7,
+          "start": null,
+          "wall_seconds": null
+        }
+      ],
+      "started_at": "2026-11-12T21:34:36.805009+00:00",
+      "unsettled_tools": [
+        "shared-test-20"
+      ]
+    },
+    {
+      "artifacts": [
+        {
+          "bytes": 72319,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/pytest.xml",
+          "sha256": "44dfb16d1999846016f2ccaff70b3747a54b2e094b518efc5ba3505bf166a8e4"
+        },
+        {
+          "bytes": 14462,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/outcome.json",
+          "sha256": "e3be47a265fa2e92ca77aded581fe92534d98745b2915de9808e5941c3f2241a"
+        },
+        {
+          "bytes": 2874,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/plan.json",
+          "sha256": "12db7f31760a832bc00b37730df06082ff7e30590aac9c971e1c3c5f416b3da9"
+        },
+        {
+          "bytes": 25401,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/native-attempt/control.jsonl",
+          "sha256": "e6a960e99e4ff4bfa421b4e9e0ba530d64d41e886e73de2a212981bff482a212"
+        },
+        {
+          "bytes": 5503882,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/native-attempt/transcript.jsonl",
+          "sha256": "476a0165e32875aee2db526962b41a1db0c6a9fd44c91618076205091049da63"
+        },
+        {
+          "bytes": 1659,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/native-attempt/started.json",
+          "sha256": "e512b074e170f7143736764cc5521c4b70e60c37ee04169be2da33a2128edebc"
+        },
+        {
+          "bytes": 887,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/native-attempt/runtime-observation.json",
+          "sha256": "13fa9183de50b0ad7d4c4fb2d40b01b0b6305e8f722eedb875b82721ee27ecc6"
+        },
+        {
+          "bytes": 109,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/native-attempt/subscription-dispatched.json",
+          "sha256": "9411f6d1d5a9d24b66196bceb88748c8550a6eae4e45b1e5600d87015ee10553"
+        },
+        {
+          "bytes": 2729,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/fresh-attempt/stages/journal.json",
+          "sha256": "c4b0dcd3f6611557118f576012908b6ed3d5dca4f2d044a5676ce34a738fc455"
+        },
+        {
+          "bytes": 21979,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/actual-result.json",
+          "sha256": "8f08a30ebf6a2cac31ed8ed183876eeddc5a388c454234a48d0fdbef3e336667"
+        }
+      ],
+      "calls": [
+        {
+          "command_kind": "a registered input the instruction reads",
+          "decision_at": "2026-11-12T22:03:33.761378+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-1",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a registered input the instruction reads",
+          "decision_at": "2026-11-12T22:03:40.688164+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-2",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a registered input the instruction reads",
+          "decision_at": "2026-11-12T22:03:47.019186+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-3",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "chunk_check",
+          "decision_at": "2026-11-12T22:03:54.301327+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-4",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "source_scope",
+          "decision_at": "2026-11-12T22:04:01.820590+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-5",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-12T22:04:09.857059+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-6",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-12T22:04:17.407648+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-7",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "full_schema",
+          "decision_at": "2026-11-12T22:04:23.783009+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-8",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "full_terms",
+          "decision_at": "2026-11-12T22:04:32.558292+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-9",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "phase1_receipts",
+          "decision_at": "2026-11-12T22:04:43.029500+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-10",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "advance",
+          "decision_at": "2026-11-12T22:06:45.581110+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-11",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-12T22:08:54.242186+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-12",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-12T22:09:13.452658+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-13",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "advance",
+          "decision_at": "2026-11-12T22:09:29.251672+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-14",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "derive_core",
+          "decision_at": "2026-11-12T22:23:04.057942+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-15",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "core_schema",
+          "decision_at": "2026-11-12T22:23:37.742436+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-16",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "pair",
+          "decision_at": "2026-11-12T22:24:02.894894+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-17",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "original_source_inventory",
+          "decision_at": "2026-11-12T22:24:59.426975+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-18",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "advance",
+          "decision_at": "2026-11-12T22:26:08.618724+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": null,
+          "result_recorded": false,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-19",
+          "wall_seconds": null
+        }
+      ],
+      "case": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions",
+      "disposition": "Stopped exact timing reconstruction for this run because required timing artifacts were never retained. No mtime inference or re-execution.",
+      "finished_at": null,
+      "first_control_at": "2026-11-12T22:03:14.641284+00:00",
+      "first_stop": "native attempt deadline elapsed; retain all incomplete charge reservations",
+      "guard_dispatched_at": null,
+      "heavy_test_overlap": "not established by retained handoff timestamps; activity timestamps are not measurements of concurrent heavy tests",
+      "host_observation_files": [],
+      "interdecision_intervals": [
+        {
+          "after_kind": "a registered input the instruction reads",
+          "after_tool": "shared-test-1",
+          "before_kind": "a registered input the instruction reads",
+          "before_tool": "shared-test-2",
+          "seconds": 6.926785945892334
+        },
+        {
+          "after_kind": "a registered input the instruction reads",
+          "after_tool": "shared-test-2",
+          "before_kind": "a registered input the instruction reads",
+          "before_tool": "shared-test-3",
+          "seconds": 6.331022024154663
+        },
+        {
+          "after_kind": "a registered input the instruction reads",
+          "after_tool": "shared-test-3",
+          "before_kind": "chunk_check",
+          "before_tool": "shared-test-4",
+          "seconds": 7.2821409702301025
+        },
+        {
+          "after_kind": "chunk_check",
+          "after_tool": "shared-test-4",
+          "before_kind": "source_scope",
+          "before_tool": "shared-test-5",
+          "seconds": 7.519263029098511
+        },
+        {
+          "after_kind": "source_scope",
+          "after_tool": "shared-test-5",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-6",
+          "seconds": 8.036468982696533
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-6",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-7",
+          "seconds": 7.550589084625244
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-7",
+          "before_kind": "full_schema",
+          "before_tool": "shared-test-8",
+          "seconds": 6.37536096572876
+        },
+        {
+          "after_kind": "full_schema",
+          "after_tool": "shared-test-8",
+          "before_kind": "full_terms",
+          "before_tool": "shared-test-9",
+          "seconds": 8.775282859802246
+        },
+        {
+          "after_kind": "full_terms",
+          "after_tool": "shared-test-9",
+          "before_kind": "phase1_receipts",
+          "before_tool": "shared-test-10",
+          "seconds": 10.471208095550537
+        },
+        {
+          "after_kind": "phase1_receipts",
+          "after_tool": "shared-test-10",
+          "before_kind": "advance",
+          "before_tool": "shared-test-11",
+          "seconds": 122.55160999298096
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-11",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-12",
+          "seconds": 128.66107606887817
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-12",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-13",
+          "seconds": 19.210471868515015
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-13",
+          "before_kind": "advance",
+          "before_tool": "shared-test-14",
+          "seconds": 15.7990140914917
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-14",
+          "before_kind": "derive_core",
+          "before_tool": "shared-test-15",
+          "seconds": 814.8062698841095
+        },
+        {
+          "after_kind": "derive_core",
+          "after_tool": "shared-test-15",
+          "before_kind": "core_schema",
+          "before_tool": "shared-test-16",
+          "seconds": 33.68449401855469
+        },
+        {
+          "after_kind": "core_schema",
+          "after_tool": "shared-test-16",
+          "before_kind": "pair",
+          "before_tool": "shared-test-17",
+          "seconds": 25.15245795249939
+        },
+        {
+          "after_kind": "pair",
+          "after_tool": "shared-test-17",
+          "before_kind": "original_source_inventory",
+          "before_tool": "shared-test-18",
+          "seconds": 56.53208112716675
+        },
+        {
+          "after_kind": "original_source_inventory",
+          "after_tool": "shared-test-18",
+          "before_kind": "advance",
+          "before_tool": "shared-test-19",
+          "seconds": 69.19174909591675
+        }
+      ],
+      "largest_interdecision_intervals": [
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-14",
+          "before_kind": "derive_core",
+          "before_tool": "shared-test-15",
+          "seconds": 814.8062698841095
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-11",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-12",
+          "seconds": 128.66107606887817
+        },
+        {
+          "after_kind": "phase1_receipts",
+          "after_tool": "shared-test-10",
+          "before_kind": "advance",
+          "before_tool": "shared-test-11",
+          "seconds": 122.55160999298096
+        }
+      ],
+      "launch_verification_seconds": null,
+      "missing_artifacts": [
+        "execute_child entry clock",
+        "child-dispatch/process-start clock paired to that entry",
+        "per-helper start/end and turn-gap clocks",
+        "run-specific power/sleep observation"
+      ],
+      "power_source": "unknown: no run-specific observation",
+      "pytest_seconds": 1547.406,
+      "required_helpers_not_observed": [
+        "recorder"
+      ],
+      "run": "public-omissions-cache",
+      "runner_seconds": 1564.696364292,
+      "source_commit": "e526c5c732682ba0bcc47772404760989c7ae277",
+      "stages": [
+        {
+          "artifact": {
+            "bytes": 1081,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/fresh-attempt/stages/records/000000.json",
+            "sha256": "b6c8fcd0295bf000fdc7eb8e97431577bf1676364ee68c24aea12e255695e3fd"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "genesis",
+          "sequence": 0,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1183,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/fresh-attempt/stages/records/000001.json",
+            "sha256": "6a8edf673be384042c96c6ec8fc03eff472afb246ed74afc7b6a9533df7a80fe"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "session_bound",
+          "sequence": 1,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1892,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/fresh-attempt/stages/records/000002.json",
+            "sha256": "f567d7ace13db53ba27b7f41332693cbbe70ee73221f6031bf85f1074f61890a"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "phase1_sealed",
+          "sequence": 2,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1287,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/fresh-attempt/stages/records/000003.json",
+            "sha256": "48854cc5a5c4adab00f17a16ef3d60d77691c0a4b71bb59032b5a1587799e72d"
+          },
+          "cursor": {
+            "kind": "receipt",
+            "ordinal": 1,
+            "target_id": "receipt"
+          },
+          "end": null,
+          "record_type": "request_admitted",
+          "sequence": 3,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1699,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/fresh-attempt/stages/records/000004.json",
+            "sha256": "5b92598a4486f6dd8cff858803e57bad297907b288397f7d99f4710969efc765"
+          },
+          "cursor": {
+            "kind": "receipt",
+            "ordinal": 1,
+            "target_id": "receipt"
+          },
+          "end": null,
+          "record_type": "response_consumed",
+          "sequence": 4,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1792,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/fresh-attempt/stages/records/000005.json",
+            "sha256": "33939e2ba59a10b71d0edaaa5c5dccf41f8c830579c6839ead533f3dff60bab8"
+          },
+          "cursor": {
+            "kind": "receipt",
+            "ordinal": 1,
+            "target_id": "receipt"
+          },
+          "end": null,
+          "record_type": "stage_checked",
+          "sequence": 5,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1516,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-h2-helper-cache-20261112/tests/public-omissions-cache/cases/test_actual_public_merged_omis0/native26-omissions/fresh-attempt/stages/records/000006.json",
+            "sha256": "b7df9ebd3cec973f28c97a048fab0bc5b8b1da2658d4b41ce5bf48cbb4c6a444"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "core_sealed",
+          "sequence": 6,
+          "start": null,
+          "wall_seconds": null
+        }
+      ],
+      "started_at": "2026-11-12T22:01:05.042407+00:00",
+      "unsettled_tools": [
+        "shared-test-19"
+      ]
+    },
+    {
+      "artifacts": [
+        {
+          "bytes": 86369,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/pytest.xml",
+          "sha256": "6e418efd0129d728db3cef2c6c1a7dbd1ccfc8cbb75f599d1801fb0eac9600d6"
+        },
+        {
+          "bytes": 18341,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/outcome.json",
+          "sha256": "e5925ac66cda5f74f6402b1da00857ab577c0eecd3553ac5148c4e37a466ee0e"
+        },
+        {
+          "bytes": 2944,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/plan.json",
+          "sha256": "a1f53ac672fc173e17bf3627c02605206bf645d72411711e5089c4c21f674fa0"
+        },
+        {
+          "bytes": 24079,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/native-attempt/control.jsonl",
+          "sha256": "cb97fdcd5ab0757ef458c62c86bff1e4cc367809f51aac1e8d4b10b21ff51767"
+        },
+        {
+          "bytes": 5496316,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/native-attempt/transcript.jsonl",
+          "sha256": "328f93c5e32f1515fa4de86415ab71fc81300e8fd8f88c000ff5bad3467ae7fe"
+        },
+        {
+          "bytes": 1716,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/native-attempt/started.json",
+          "sha256": "001e05e691c9a251f17d78249fea576ff067334394ff4429d5087fe51d00dfcf"
+        },
+        {
+          "bytes": 906,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/native-attempt/runtime-observation.json",
+          "sha256": "3be65ae408def47a13935184b929ac36618c86bbef90938f629f77f41f9d2153"
+        },
+        {
+          "bytes": 109,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/native-attempt/subscription-dispatched.json",
+          "sha256": "908cc87b9b9fd738b4a7666e77c5683217b17a1532495d69dfa9da90606c55c6"
+        },
+        {
+          "bytes": 2503,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/fresh-attempt/stages/journal.json",
+          "sha256": "69368aabe4f8e7c8b05a3c138ff5d67ad332fcb7a3cd19a3b9e62355e8402499"
+        },
+        {
+          "bytes": 28528,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/actual-result.json",
+          "sha256": "7e84b71b8c8ad698135254b560547b10dc2cf69f72c24edc7418d0272c0e5867"
+        }
+      ],
+      "calls": [
+        {
+          "command_kind": "a registered input the instruction reads",
+          "decision_at": "2026-11-13T05:24:00.521618+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-1",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a registered input the instruction reads",
+          "decision_at": "2026-11-13T05:24:06.301000+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-2",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a registered input the instruction reads",
+          "decision_at": "2026-11-13T05:24:11.999803+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-3",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "chunk_check",
+          "decision_at": "2026-11-13T05:24:17.781924+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-4",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "source_scope",
+          "decision_at": "2026-11-13T05:24:24.731413+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-5",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-13T05:24:31.509316+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-6",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-13T05:24:37.457318+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-7",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "full_schema",
+          "decision_at": "2026-11-13T05:24:43.980052+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-8",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "full_terms",
+          "decision_at": "2026-11-13T05:24:51.477100+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-9",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "phase1_receipts",
+          "decision_at": "2026-11-13T05:25:01.157332+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-10",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "advance",
+          "decision_at": "2026-11-13T05:26:49.709676+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-11",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-13T05:29:38.214382+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-12",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-13T05:30:00.477911+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-13",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "advance",
+          "decision_at": "2026-11-13T05:30:18.303862+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-14",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "derive_core",
+          "decision_at": "2026-11-13T05:31:58.556040+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-15",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "core_schema",
+          "decision_at": "2026-11-13T05:32:19.822069+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-16",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "pair",
+          "decision_at": "2026-11-13T05:32:35.677455+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": null,
+          "result_recorded": false,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-17",
+          "wall_seconds": null
+        }
+      ],
+      "case": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26",
+      "disposition": "Stopped exact timing reconstruction for this run because required timing artifacts were never retained. No mtime inference or re-execution.",
+      "finished_at": null,
+      "first_control_at": "2026-11-13T05:23:41.605184+00:00",
+      "first_stop": "native attempt deadline elapsed; retain all incomplete charge reservations",
+      "guard_dispatched_at": null,
+      "heavy_test_overlap": "not established by retained handoff timestamps; activity timestamps are not measurements of concurrent heavy tests",
+      "host_observation_files": [],
+      "interdecision_intervals": [
+        {
+          "after_kind": "a registered input the instruction reads",
+          "after_tool": "shared-test-1",
+          "before_kind": "a registered input the instruction reads",
+          "before_tool": "shared-test-2",
+          "seconds": 5.779382228851318
+        },
+        {
+          "after_kind": "a registered input the instruction reads",
+          "after_tool": "shared-test-2",
+          "before_kind": "a registered input the instruction reads",
+          "before_tool": "shared-test-3",
+          "seconds": 5.698802947998047
+        },
+        {
+          "after_kind": "a registered input the instruction reads",
+          "after_tool": "shared-test-3",
+          "before_kind": "chunk_check",
+          "before_tool": "shared-test-4",
+          "seconds": 5.782120943069458
+        },
+        {
+          "after_kind": "chunk_check",
+          "after_tool": "shared-test-4",
+          "before_kind": "source_scope",
+          "before_tool": "shared-test-5",
+          "seconds": 6.949488878250122
+        },
+        {
+          "after_kind": "source_scope",
+          "after_tool": "shared-test-5",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-6",
+          "seconds": 6.777903079986572
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-6",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-7",
+          "seconds": 5.948002099990845
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-7",
+          "before_kind": "full_schema",
+          "before_tool": "shared-test-8",
+          "seconds": 6.522733926773071
+        },
+        {
+          "after_kind": "full_schema",
+          "after_tool": "shared-test-8",
+          "before_kind": "full_terms",
+          "before_tool": "shared-test-9",
+          "seconds": 7.4970479011535645
+        },
+        {
+          "after_kind": "full_terms",
+          "after_tool": "shared-test-9",
+          "before_kind": "phase1_receipts",
+          "before_tool": "shared-test-10",
+          "seconds": 9.680232048034668
+        },
+        {
+          "after_kind": "phase1_receipts",
+          "after_tool": "shared-test-10",
+          "before_kind": "advance",
+          "before_tool": "shared-test-11",
+          "seconds": 108.55234408378601
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-11",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-12",
+          "seconds": 168.5047059059143
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-12",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-13",
+          "seconds": 22.263529062271118
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-13",
+          "before_kind": "advance",
+          "before_tool": "shared-test-14",
+          "seconds": 17.825951099395752
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-14",
+          "before_kind": "derive_core",
+          "before_tool": "shared-test-15",
+          "seconds": 100.25217795372009
+        },
+        {
+          "after_kind": "derive_core",
+          "after_tool": "shared-test-15",
+          "before_kind": "core_schema",
+          "before_tool": "shared-test-16",
+          "seconds": 21.266028881072998
+        },
+        {
+          "after_kind": "core_schema",
+          "after_tool": "shared-test-16",
+          "before_kind": "pair",
+          "before_tool": "shared-test-17",
+          "seconds": 15.855386018753052
+        }
+      ],
+      "largest_interdecision_intervals": [
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-11",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-12",
+          "seconds": 168.5047059059143
+        },
+        {
+          "after_kind": "phase1_receipts",
+          "after_tool": "shared-test-10",
+          "before_kind": "advance",
+          "before_tool": "shared-test-11",
+          "seconds": 108.55234408378601
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-14",
+          "before_kind": "derive_core",
+          "before_tool": "shared-test-15",
+          "seconds": 100.25217795372009
+        }
+      ],
+      "launch_verification_seconds": null,
+      "missing_artifacts": [
+        "execute_child entry clock",
+        "child-dispatch/process-start clock paired to that entry",
+        "per-helper start/end and turn-gap clocks",
+        "run-specific power/sleep observation"
+      ],
+      "power_source": "unknown: no run-specific observation",
+      "pytest_seconds": 1535.728,
+      "required_helpers_not_observed": [
+        "recorder"
+      ],
+      "run": "h1-ci-8760-public-canary-20261113",
+      "runner_seconds": 1548.353302292002,
+      "source_commit": "8760de5efe88b5af62e9d77e6335fa7e248017b6",
+      "stages": [
+        {
+          "artifact": {
+            "bytes": 1119,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000000.json",
+            "sha256": "fc83eb280dabc38e99d5793bcf5ee753fbe772ecab846f808cf5ed107b661aa1"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "genesis",
+          "sequence": 0,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1221,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000001.json",
+            "sha256": "c5d7c7686b46673bfc1981959b28134c51cb808dcb79a81e91eb3862d5eff7f8"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "session_bound",
+          "sequence": 1,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1968,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000002.json",
+            "sha256": "0131ab68bf39083ddd873d3ad65542f98e703f223ed848def8b6d3eb48a01684"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "phase1_sealed",
+          "sequence": 2,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1325,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000003.json",
+            "sha256": "76dac7b833860326344d0b623259c67b2143b35c815ed0837c1cbcec55584cf3"
+          },
+          "cursor": {
+            "kind": "receipt",
+            "ordinal": 1,
+            "target_id": "receipt"
+          },
+          "end": null,
+          "record_type": "request_admitted",
+          "sequence": 3,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1756,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000004.json",
+            "sha256": "1dd8db28cc6dd4edd276f5e303f98295433af0a69443218a3ae2ae4d7cea5cc5"
+          },
+          "cursor": {
+            "kind": "receipt",
+            "ordinal": 1,
+            "target_id": "receipt"
+          },
+          "end": null,
+          "record_type": "response_consumed",
+          "sequence": 4,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1849,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-8760-public-canary-20261113/cases/popen-gw0/test_actual_public_correction_0/native26/fresh-attempt/stages/records/000005.json",
+            "sha256": "f34a738ca1c35d7cba06479a377c4962b12ba8890dd5ea7db08f72eb7fcf262d"
+          },
+          "cursor": {
+            "kind": "receipt",
+            "ordinal": 1,
+            "target_id": "receipt"
+          },
+          "end": null,
+          "record_type": "stage_checked",
+          "sequence": 5,
+          "start": null,
+          "wall_seconds": null
+        }
+      ],
+      "started_at": "2026-11-13T05:17:13.619318+00:00",
+      "unsettled_tools": [
+        "shared-test-17"
+      ]
+    },
+    {
+      "artifacts": [
+        {
+          "bytes": 90335,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/pytest.xml",
+          "sha256": "a998e7692c1d4c55500e53aa5f774bcca27a23530faca035918bb237b1a8e0b9"
+        },
+        {
+          "bytes": 14618,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/outcome.json",
+          "sha256": "a3e26e83ba9b50d7147b88fce5e0d84ae121f349adc76570a31d2dc508c69047"
+        },
+        {
+          "bytes": 4203,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/plan.json",
+          "sha256": "5bdda646975839f02e5bc9f6f94b72ca04376afd0ff61ba80bd0a5e7b7d5b358"
+        },
+        {
+          "bytes": 27934,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/native-attempt/control.jsonl",
+          "sha256": "a0dd921e567adc5a2ce7ff137f3ef87b0af9f7832a7730f33958e7a7315321f8"
+        },
+        {
+          "bytes": 8645164,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/native-attempt/transcript.jsonl",
+          "sha256": "35f65f4635e9292d9406821bdd53c369f0472907ecf9441ee0c338f61f42bf1a"
+        },
+        {
+          "bytes": 1752,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/native-attempt/started.json",
+          "sha256": "a978039b1264125f60510ad87e8c7b83fdccc8e63b9d99095e6930c6373ccb26"
+        },
+        {
+          "bytes": 918,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/native-attempt/runtime-observation.json",
+          "sha256": "2d16d8512cf819ca0c9443f2b02cc28d5ff3fe881f3740a9824c746d1a31befb"
+        },
+        {
+          "bytes": 109,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/native-attempt/subscription-dispatched.json",
+          "sha256": "db078839b76f94520f027f8a2fc1376f00e4c58a28cee9d443558555664c6d79"
+        },
+        {
+          "bytes": 3317,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/fresh-attempt/stages/journal.json",
+          "sha256": "93eeca25466fafbea1b79f3e7fb499c9d13b37abf0defbdf311ccf4e23f00e8b"
+        },
+        {
+          "bytes": 29499,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/actual-result.json",
+          "sha256": "9e9e5efdcb6f6232ddca75e9c16cf7216d439520f766b8c2397998863436c6fc"
+        }
+      ],
+      "calls": [
+        {
+          "command_kind": "a registered input the instruction reads",
+          "decision_at": "2026-11-13T05:47:46.033406+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-1",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a registered input the instruction reads",
+          "decision_at": "2026-11-13T05:47:51.918105+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-2",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a registered input the instruction reads",
+          "decision_at": "2026-11-13T05:47:57.937902+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-3",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "chunk_check",
+          "decision_at": "2026-11-13T05:48:03.944621+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-4",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "source_scope",
+          "decision_at": "2026-11-13T05:48:11.113969+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-5",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-13T05:48:17.795673+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-6",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-13T05:48:23.764222+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-7",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "full_schema",
+          "decision_at": "2026-11-13T05:48:29.693752+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-8",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "full_terms",
+          "decision_at": "2026-11-13T05:48:37.525201+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-9",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "phase1_receipts",
+          "decision_at": "2026-11-13T05:48:47.246854+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-10",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "advance",
+          "decision_at": "2026-11-13T05:50:11.835515+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-11",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-13T05:51:38.693915+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-12",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-13T05:51:50.975838+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-13",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "advance",
+          "decision_at": "2026-11-13T05:52:03.111475+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-14",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "derive_core",
+          "decision_at": "2026-11-13T05:53:44.741884+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-15",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "core_schema",
+          "decision_at": "2026-11-13T05:54:05.289325+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-16",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "pair",
+          "decision_at": "2026-11-13T05:54:24.213273+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-17",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "original_source_inventory",
+          "decision_at": "2026-11-13T05:54:56.860837+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-18",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "advance",
+          "decision_at": "2026-11-13T05:55:24.393200+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Bash",
+          "tool_id": "shared-test-19",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "a file inside the registered output directories",
+          "decision_at": "2026-11-13T05:58:34.412859+00:00",
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": false,
+          "result_recorded": true,
+          "start": null,
+          "tool": "Read",
+          "tool_id": "shared-test-20",
+          "wall_seconds": null
+        },
+        {
+          "command_kind": "no saved decision",
+          "decision_at": null,
+          "end": null,
+          "reason": "No helper invocation/completion clock or turn boundary timestamps were recorded.",
+          "result_error": null,
+          "result_recorded": false,
+          "start": null,
+          "tool": "Write",
+          "tool_id": "shared-test-21",
+          "wall_seconds": null
+        }
+      ],
+      "case": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending",
+      "disposition": "Stopped exact timing reconstruction for this run because required timing artifacts were never retained. No mtime inference or re-execution.",
+      "finished_at": null,
+      "first_control_at": "2026-11-13T05:47:32.597525+00:00",
+      "first_stop": "native attempt deadline elapsed; retain all incomplete charge reservations",
+      "guard_dispatched_at": null,
+      "heavy_test_overlap": "not established by retained handoff timestamps; activity timestamps are not measurements of concurrent heavy tests",
+      "host_observation_files": [],
+      "interdecision_intervals": [
+        {
+          "after_kind": "a registered input the instruction reads",
+          "after_tool": "shared-test-1",
+          "before_kind": "a registered input the instruction reads",
+          "before_tool": "shared-test-2",
+          "seconds": 5.884698867797852
+        },
+        {
+          "after_kind": "a registered input the instruction reads",
+          "after_tool": "shared-test-2",
+          "before_kind": "a registered input the instruction reads",
+          "before_tool": "shared-test-3",
+          "seconds": 6.019797086715698
+        },
+        {
+          "after_kind": "a registered input the instruction reads",
+          "after_tool": "shared-test-3",
+          "before_kind": "chunk_check",
+          "before_tool": "shared-test-4",
+          "seconds": 6.00671911239624
+        },
+        {
+          "after_kind": "chunk_check",
+          "after_tool": "shared-test-4",
+          "before_kind": "source_scope",
+          "before_tool": "shared-test-5",
+          "seconds": 7.1693480014801025
+        },
+        {
+          "after_kind": "source_scope",
+          "after_tool": "shared-test-5",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-6",
+          "seconds": 6.681703805923462
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-6",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-7",
+          "seconds": 5.968549013137817
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-7",
+          "before_kind": "full_schema",
+          "before_tool": "shared-test-8",
+          "seconds": 5.929530143737793
+        },
+        {
+          "after_kind": "full_schema",
+          "after_tool": "shared-test-8",
+          "before_kind": "full_terms",
+          "before_tool": "shared-test-9",
+          "seconds": 7.831449031829834
+        },
+        {
+          "after_kind": "full_terms",
+          "after_tool": "shared-test-9",
+          "before_kind": "phase1_receipts",
+          "before_tool": "shared-test-10",
+          "seconds": 9.72165298461914
+        },
+        {
+          "after_kind": "phase1_receipts",
+          "after_tool": "shared-test-10",
+          "before_kind": "advance",
+          "before_tool": "shared-test-11",
+          "seconds": 84.58866095542908
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-11",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-12",
+          "seconds": 86.85839986801147
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-12",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-13",
+          "seconds": 12.281923055648804
+        },
+        {
+          "after_kind": "a file inside the registered output directories",
+          "after_tool": "shared-test-13",
+          "before_kind": "advance",
+          "before_tool": "shared-test-14",
+          "seconds": 12.135637044906616
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-14",
+          "before_kind": "derive_core",
+          "before_tool": "shared-test-15",
+          "seconds": 101.63040900230408
+        },
+        {
+          "after_kind": "derive_core",
+          "after_tool": "shared-test-15",
+          "before_kind": "core_schema",
+          "before_tool": "shared-test-16",
+          "seconds": 20.547441005706787
+        },
+        {
+          "after_kind": "core_schema",
+          "after_tool": "shared-test-16",
+          "before_kind": "pair",
+          "before_tool": "shared-test-17",
+          "seconds": 18.923948049545288
+        },
+        {
+          "after_kind": "pair",
+          "after_tool": "shared-test-17",
+          "before_kind": "original_source_inventory",
+          "before_tool": "shared-test-18",
+          "seconds": 32.64756393432617
+        },
+        {
+          "after_kind": "original_source_inventory",
+          "after_tool": "shared-test-18",
+          "before_kind": "advance",
+          "before_tool": "shared-test-19",
+          "seconds": 27.532362937927246
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-19",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-20",
+          "seconds": 190.0196590423584
+        }
+      ],
+      "largest_interdecision_intervals": [
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-19",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-20",
+          "seconds": 190.0196590423584
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-14",
+          "before_kind": "derive_core",
+          "before_tool": "shared-test-15",
+          "seconds": 101.63040900230408
+        },
+        {
+          "after_kind": "advance",
+          "after_tool": "shared-test-11",
+          "before_kind": "a file inside the registered output directories",
+          "before_tool": "shared-test-12",
+          "seconds": 86.85839986801147
+        }
+      ],
+      "launch_verification_seconds": null,
+      "missing_artifacts": [
+        "execute_child entry clock",
+        "child-dispatch/process-start clock paired to that entry",
+        "per-helper start/end and turn-gap clocks",
+        "run-specific power/sleep observation"
+      ],
+      "power_source": "unknown: no run-specific observation",
+      "pytest_seconds": 1658.486,
+      "required_helpers_not_observed": [
+        "recorder"
+      ],
+      "run": "h1-ci-current-pending-public-20261113",
+      "runner_seconds": 1729.6106748330021,
+      "source_commit": "432cfd67ef1dcdb82e27575f8d87ef3040eb8975",
+      "stages": [
+        {
+          "artifact": {
+            "bytes": 1143,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/fresh-attempt/stages/records/000000.json",
+            "sha256": "93492725b776c71270b48fa59aa1e09f36ccfa65ca0666964be7c6c1b7c64dde"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "genesis",
+          "sequence": 0,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1245,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/fresh-attempt/stages/records/000001.json",
+            "sha256": "4715f51c19c29390d1b606c211a1c7b354c5c972cc58386cb4e886be4a3c4c54"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "session_bound",
+          "sequence": 1,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 2016,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/fresh-attempt/stages/records/000002.json",
+            "sha256": "042eb42d58fdca833366c92a3386b7a29f3c60abd1681c56c07420d5cbd913fe"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "phase1_sealed",
+          "sequence": 2,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1349,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/fresh-attempt/stages/records/000003.json",
+            "sha256": "5c31dc7aa7e32b6c1007aad20a75a2091d3378c30ce6afaf232f4c6fa9d44774"
+          },
+          "cursor": {
+            "kind": "receipt",
+            "ordinal": 1,
+            "target_id": "receipt"
+          },
+          "end": null,
+          "record_type": "request_admitted",
+          "sequence": 3,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1792,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/fresh-attempt/stages/records/000004.json",
+            "sha256": "c3bbf51401cee6147d08adbcbf6e07165d14bf7aab17b317587d0757596454b3"
+          },
+          "cursor": {
+            "kind": "receipt",
+            "ordinal": 1,
+            "target_id": "receipt"
+          },
+          "end": null,
+          "record_type": "response_consumed",
+          "sequence": 4,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1885,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/fresh-attempt/stages/records/000005.json",
+            "sha256": "13f2aa13a75d2daadea0580b3e3b568b2baf2c53b3a27e4a94e5c4aaa4ee6dbf"
+          },
+          "cursor": {
+            "kind": "receipt",
+            "ordinal": 1,
+            "target_id": "receipt"
+          },
+          "end": null,
+          "record_type": "stage_checked",
+          "sequence": 5,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1610,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/fresh-attempt/stages/records/000006.json",
+            "sha256": "719dcf8c77dfa007e17552ddcb4fe9aae60892e83be2ca4dca092c127d478de2"
+          },
+          "cursor": null,
+          "end": null,
+          "record_type": "core_sealed",
+          "sequence": 6,
+          "start": null,
+          "wall_seconds": null
+        },
+        {
+          "artifact": {
+            "bytes": 1352,
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/h1-ci-current-pending-public-20261113/cases/popen-gw0/test_pending_floor_public_comp0/native26-pending/fresh-attempt/stages/records/000007.json",
+            "sha256": "205eb3c0e3ca0ffe415f4a2874a69d1f25539e971c424661a18cb314171fe3a9"
+          },
+          "cursor": {
+            "kind": "worker",
+            "ordinal": 2,
+            "target_id": "worker_0001"
+          },
+          "end": null,
+          "record_type": "request_admitted",
+          "sequence": 7,
+          "start": null,
+          "wall_seconds": null
+        }
+      ],
+      "started_at": "2026-11-13T05:44:17.036650+00:00",
+      "unsettled_tools": [
+        "shared-test-21"
+      ]
+    }
+  ],
+  "scope": "Read-only saved artifacts only. Missing required endpoints stop reconstruction on each run. Filesystem census includes hidden and ignored entries. No current host probe, native call, public path rerun, source branch edit, publication or GitHub write."
+}

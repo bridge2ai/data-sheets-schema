@@ -1,0 +1,89 @@
+--- a/src/data_sheets_schema/native_controller_sources_v1.json
++++ b/src/data_sheets_schema/native_controller_sources_v1.json
+@@ -1,6 +1,6 @@
+ {
+   "version": 1,
+-  "source_commit": "253a436e47b828d72de99a674abcac95617666d6",
++  "source_commit": "916ad3af0adf278ab3bbde78be7c9fb3c4cc92f0",
+   "modules": {
+     "budget_amendment": {
+       "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
+@@ -16,7 +16,7 @@
+     },
+     "native_control": {
+       "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+-      "sha256": "e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36"
++      "sha256": "25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488"
+     },
+     "native_file_policy": {
+       "path": "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py",
+@@ -48,7 +48,7 @@
+     },
+     "run_native_canary": {
+       "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+-      "sha256": "7496a3ddb94ce480332efb7faeb3522f08aa3d3de724f9faa4662575802358e0"
++      "sha256": "f1c4cfac150eed2bd440e3ad6b18bd6e0b2633fcd24e40a00fe7af2935549857"
+     }
+   }
+ }
+--- a/src/data_sheets_schema/native_attribution_controller.py
++++ b/src/data_sheets_schema/native_attribution_controller.py
+@@ -21,7 +21,7 @@
+ VERSION = 1
+ EXECUTION = 'offline_composition_only_no_production_launcher'
+ SOURCES_PATH = Path('src/data_sheets_schema/native_controller_sources_v1.json')
+-SOURCES_SHA256 = 'e55f332b2cc4d679c2ffa9cba5d40acb8a333fd821e3b6d0f2746b8cba7f3971'
++SOURCES_SHA256 = '6cc0a4d0e5d0790e86bebd0da9e6184c0029077dec008f444fa4961c3278b10e'
+ ROOT = Path(__file__).resolve().parents[2]
+ 
+ 
+--- a/src/data_sheets_schema/native_controller_sources_v2.json
++++ b/src/data_sheets_schema/native_controller_sources_v2.json
+@@ -1,6 +1,6 @@
+ {
+   "version": 2,
+-  "source_commit": "9f05bcf1d16c3d62bc250b14b0d8b7a3a2fe1d45",
++  "source_commit": "916ad3af0adf278ab3bbde78be7c9fb3c4cc92f0",
+   "modules": {
+     "budget_amendment": {
+       "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
+@@ -16,7 +16,7 @@
+     },
+     "native_control": {
+       "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+-      "sha256": "e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36"
++      "sha256": "25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488"
+     },
+     "native_file_policy": {
+       "path": "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py",
+@@ -48,7 +48,7 @@
+     },
+     "run_native_canary": {
+       "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+-      "sha256": "7496a3ddb94ce480332efb7faeb3522f08aa3d3de724f9faa4662575802358e0"
++      "sha256": "f1c4cfac150eed2bd440e3ad6b18bd6e0b2633fcd24e40a00fe7af2935549857"
+     },
+     "prepare_registration_v2": {
+       "path": "notes/matched_cborg_2026-09-13/prepare_registration_v2.py",
+--- a/src/data_sheets_schema/native_attribution_controller_v2.py
++++ b/src/data_sheets_schema/native_attribution_controller_v2.py
+@@ -21,7 +21,7 @@
+ VERSION = 2
+ EXECUTION = 'offline_composition_only_no_production_launcher'
+ SOURCES_PATH = Path('src/data_sheets_schema/native_controller_sources_v2.json')
+-SOURCES_SHA256 = '58d9be00007719d2bc1247c7524256a60522d3d7bfedf39409341973c88c0a6c'
++SOURCES_SHA256 = '1b9c06a985f278d9f91d9535d7755bdf961484477abadcb587e9c090ae13e8ad'
+ ROOT = Path(__file__).resolve().parents[2]
+ 
+ 
+--- a/src/data_sheets_schema/native_shared_authority_wire.py
++++ b/src/data_sheets_schema/native_shared_authority_wire.py
+@@ -4,7 +4,7 @@
+ sources nor grant execution. The original A/v1 modules remain unmodified.
+ """
+ VERSION = 2
+-CONTROLLER_SOURCES_SHA256 = '58d9be00007719d2bc1247c7524256a60522d3d7bfedf39409341973c88c0a6c'
++CONTROLLER_SOURCES_SHA256 = '1b9c06a985f278d9f91d9535d7755bdf961484477abadcb587e9c090ae13e8ad'
+ PREPARATION_KIND = 'd4d_native_shared_preparation_v2'
+ EXECUTION_KIND = 'd4d_native_shared_execution_registration_v2'
+ PREPARATION_SCOPE = 'offline_inputs_only_not_permission_or_launch_authority'

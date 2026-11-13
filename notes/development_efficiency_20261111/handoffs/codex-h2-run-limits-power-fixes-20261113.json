@@ -1,0 +1,338 @@
+{
+  "answer": "Local implementation is committed, but the power branch is not ready to integrate: exact controller pins remain unchanged and block integrated deadline/timing validation. Automatic approval review rejected their update. No publication or native run occurred.",
+  "first_assignment": {
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/notes/development_efficiency_20261111/handoffs/codex-h2-6094-timing-20261113.md",
+    "sha256": "a422e9d18fb8653d3b6fed584dde674a7b6da019c9bd957cdd37a0c45d956a3b",
+    "bytes": 19145
+  },
+  "candidate": "f7f8e8bff6ea14006957d8631f66346d91bcddcd",
+  "branches": {
+    "cache": {
+      "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-helper-cache-home-20261112",
+      "branch": "codex/native-helper-cache-home-20261112",
+      "head": "9d743c87755030ddf687e3a5dd8a7a2b3b762437",
+      "candidate_is_ancestor": true,
+      "protected_equal_candidate": {
+        "src/data_sheets_schema/shared_generation.py": true,
+        "src/data_sheets_schema/api_runner.py": true,
+        "src/download/prompts/canonical_hashes.yaml": true,
+        "tests/utils/run_spec_boundary_contracts.json": true,
+        "src/data_sheets_schema/native_subscription_guard.py": true
+      },
+      "dirty": "",
+      "diff_check": "",
+      "commits": [
+        "9d743c87755030ddf687e3a5dd8a7a2b3b762437 Fix #6172: derive local native installation and evidence paths at runtime",
+        "9c1ebeabc9c65d2958ae65ffdb30004e5d1907da Merge published candidate for helper 2 review fixes"
+      ],
+      "personal_path_search": {
+        "includes_hidden_ignored": true,
+        "paths": [
+          "scripts/adhoc/run_cache_gaps_tests_20261113.py",
+          "scripts/adhoc/reconcile_cache_ci_12_shards_20261113.py"
+        ],
+        "returncode": 1,
+        "matches": ""
+      }
+    },
+    "limits": {
+      "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-production-run-limits-20261112",
+      "branch": "codex/native-production-run-limits-20261112",
+      "head": "0df39c077fb8125dc381302046f4cf7f92a60592",
+      "candidate_is_ancestor": true,
+      "protected_equal_candidate": {
+        "src/data_sheets_schema/shared_generation.py": true,
+        "src/data_sheets_schema/api_runner.py": true,
+        "src/download/prompts/canonical_hashes.yaml": true,
+        "tests/utils/run_spec_boundary_contracts.json": true,
+        "src/data_sheets_schema/native_subscription_guard.py": true
+      },
+      "dirty": "",
+      "diff_check": "",
+      "commits": [
+        "0df39c077fb8125dc381302046f4cf7f92a60592 Fix #6171: document candidate freshness margin and recorder digest transport",
+        "94378cd6240df3c2996ab3b370db5a862f8ead04 Fix #6169: prove provisional refusals depend on the registered pair check",
+        "8ba6285fad42e8a809bb0f65afcf1f849ca9ed74 Merge published candidate for helper 2 review fixes",
+        "31fc33c1c72f06f219810841e3cc683da8068b1c Retain offline D143 and cache-fixture composition provenance",
+        "ffaac90a32d1b01a08e50864e9e4c9e98994c49d Accept exactly the two declared D143 native run-limit pairs"
+      ]
+    },
+    "power": {
+      "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-host-power-20261113",
+      "branch": "codex/native-host-power-20261113",
+      "head": "916ad3af0adf278ab3bbde78be7c9fb3c4cc92f0",
+      "candidate_is_ancestor": true,
+      "protected_equal_candidate": {
+        "src/data_sheets_schema/shared_generation.py": true,
+        "src/data_sheets_schema/api_runner.py": true,
+        "src/download/prompts/canonical_hashes.yaml": true,
+        "tests/utils/run_spec_boundary_contracts.json": true,
+        "src/data_sheets_schema/native_subscription_guard.py": true
+      },
+      "dirty": "",
+      "diff_check": "scripts/adhoc/run_host_power_tests_20261113.py:420: new blank line at EOF.\n",
+      "commits": [
+        "916ad3af0adf278ab3bbde78be7c9fb3c4cc92f0 Fix #6172: use runtime installation paths and synthetic sleep-log evidence",
+        "a4f45bb93eeb843ae85bb5b5bc283a50ac0329c7 Address #6094: retain controller dispatch, helper and turn timing sidecars",
+        "feb1de3250bdefd6fd05bcc57ef513f63de0e9a7 Fix #6170: count suspension from child dispatch and recheck AC admission",
+        "f377dba1d94fbd84a146de729d0f6cfdd7b22087 Fix #6168: require recognized sleep-log coverage before reporting no sleep",
+        "2c158ddfce23285546b248a0b200437ad1feb2a7 Fix #6167: isolate supplemental host observation failures from publication",
+        "aa26bb7ad6173fb113736d95aaed39f19ff5abef Merge published candidate for helper 2 review fixes",
+        "7c1d972a1d92286bc791cca96f8dace0c18875e8 Require observed AC for launch sequences and retain host sleep evidence"
+      ],
+      "personal_path_search": {
+        "includes_hidden_ignored": true,
+        "paths": [
+          "scripts/adhoc/run_cache_gaps_tests_20261113.py",
+          "scripts/adhoc/reconcile_cache_ci_12_shards_20261113.py",
+          "scripts/adhoc/run_host_power_tests_20261113.py"
+        ],
+        "returncode": 1,
+        "matches": ""
+      }
+    }
+  },
+  "issues": [
+    {
+      "issue": "6167",
+      "commit": "2c158ddfce23285546b248a0b200437ad1feb2a7",
+      "branch": "power",
+      "change": "Supplemental start/stage/end persistence errors retain diagnostics and cannot replace launch errors or interrupt final publication.",
+      "tests": "test_native_failure_publication.py (start/end injected disk errors); test_native_shared_live_capture.py (committed stage with failed clock); test_native_host_power.py (active cleanup exception)"
+    },
+    {
+      "issue": "6168",
+      "commit": "f377dba1d94fbd84a146de729d0f6cfdd7b22087",
+      "branch": "power",
+      "change": "No-sleep requires recognized, ordered, matched events bracketing the interval. Unknown formats, gaps and unmatched events remain unknown; clock divergence stays separate.",
+      "tests": "test_native_host_power.py: timestamped unrecognized, incomplete coverage, DarkWake, unmatched events, covered no-sleep"
+    },
+    {
+      "issue": "6169",
+      "commit": "94378cd6240df3c2996ab3b370db5a862f8ead04",
+      "branch": "limits",
+      "change": "Provisional rejection begins with a valid accepted document, mutates only the pair, checks generic acceptance and pair-specific refusal. Removing the pair check in the test admits the five invalid pairs.",
+      "tests": "test_native_run_limits.py::test_provisional_refusal_depends_on_registered_pair_check (five cases; whole file also run)"
+    },
+    {
+      "issue": "6170",
+      "commit": "feb1de3250bdefd6fd05bcc57ef513f63de0e9a7",
+      "branch": "power",
+      "change": "Declared child deadline begins immediately before Popen after admission, uses suspension-inclusive elapsed time, and checks expiry even if the child exited while suspended. AC is checked last before dispatch.",
+      "tests": "test_native_attempt_deadline.py: six simulated-sleep cases, admission exclusion, macOS integer conversion, AC-to-battery/unknown public refusal. Integrated cases currently stop at controller pin verification."
+    },
+    {
+      "issue": "6171",
+      "commit": "0df39c077fb8125dc381302046f4cf7f92a60592",
+      "branch": "limits",
+      "change": "Generated documentation preserves 300-second reservation margin and recorder --render-spec-env D4D_RENDER_SPEC plus --render-spec-sha256. Pair selection changes the visible digest; runtime stays readable.",
+      "tests": "audit_run_limits_20261113.py source inventory regenerated to a new evidence directory; generator and document inspected"
+    },
+    {
+      "issue": "6172",
+      "commit": "916ad3af0adf278ab3bbde78be7c9fb3c4cc92f0",
+      "branch": "power",
+      "change": "Both reviewed runners derive local installation paths at runtime; reconciliation helper derives its home path. Sleep fixture is entirely synthetic with 1252-second and 7034-second intervals.",
+      "tests": "test_native_host_power.py synthetic fixture; hidden/ignored-inclusive personal-path search over edited helpers; AST parsing"
+    },
+    {
+      "issue": "6172 cache follow-up",
+      "commit": "9d743c87755030ddf687e3a5dd8a7a2b3b762437",
+      "branch": "cache",
+      "change": "Required separate cache-branch follow-up fixes the published cache runner and reconciliation helper.",
+      "tests": "Hidden/ignored-inclusive personal-path search and AST parsing; no behavioral cache changes"
+    },
+    {
+      "issue": "6094 / assignment item 7",
+      "commit": "a4f45bb93eeb843ae85bb5b5bc283a50ac0329c7",
+      "branch": "power",
+      "change": "Bounded supplemental host-controller-timing.jsonl records execute_child entry, dispatch origin/deadline, callback delivery, tool-result intake and model turn frames, joined by tool ID and command digest.",
+      "tests": "test_native_attempt_timing.py: partial-response and persistence-failure units pass; inert controller integration currently stops at exact-source verification"
+    }
+  ],
+  "cohorts": [
+    {
+      "name": "canary",
+      "counts": {
+        "failure": 1
+      },
+      "returncode": 1,
+      "seconds": 2.487635416997364,
+      "commit": "e351bb4e199573a528e901dc0d46695b3ef937bb",
+      "cleanup_verified": true,
+      "all_nonpasses_are_controller_pin_refusals": true
+    },
+    {
+      "name": "power-canary",
+      "counts": {
+        "passed": 1
+      },
+      "returncode": 0,
+      "seconds": 0.5559391670030891,
+      "commit": "229a3d3e7f72cbe72601344bceed465ddecee2a4",
+      "cleanup_verified": true,
+      "all_nonpasses_are_controller_pin_refusals": true
+    },
+    {
+      "name": "scanner",
+      "counts": {},
+      "returncode": 1,
+      "seconds": 109.57777545799763,
+      "commit": "229a3d3e7f72cbe72601344bceed465ddecee2a4",
+      "cleanup_verified": true,
+      "all_nonpasses_are_controller_pin_refusals": true
+    },
+    {
+      "name": "scanner-unaffected",
+      "counts": {},
+      "returncode": 1,
+      "seconds": 195.27051600000414,
+      "commit": "991c9b7f43d6daad93af11a20fc4d8a3c2a1f0e8",
+      "cleanup_verified": true,
+      "all_nonpasses_are_controller_pin_refusals": true
+    },
+    {
+      "name": "touched-files",
+      "counts": {
+        "passed": 80,
+        "failure": 16,
+        "error": 40
+      },
+      "returncode": 1,
+      "seconds": 44.40671962500346,
+      "commit": "229a3d3e7f72cbe72601344bceed465ddecee2a4",
+      "cleanup_verified": true,
+      "all_nonpasses_are_controller_pin_refusals": true
+    },
+    {
+      "name": "unaffected-canary",
+      "counts": {
+        "passed": 1
+      },
+      "returncode": 0,
+      "seconds": 488.07623504200455,
+      "commit": "991c9b7f43d6daad93af11a20fc4d8a3c2a1f0e8",
+      "cleanup_verified": true,
+      "all_nonpasses_are_controller_pin_refusals": true
+    }
+  ],
+  "clock": {
+    "interface": "mach_continuous_time with mach_timebase_info integer conversion",
+    "documentation": {
+      "path": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/mach_time.h",
+      "sha256": "d690e304ea595ca216ed51e20aa9747e0b3bcb07446d996abe0080a231c7065f",
+      "bytes": 2590
+    },
+    "excerpt": [
+      {
+        "line": 58,
+        "text": "/*"
+      },
+      {
+        "line": 59,
+        "text": " * like mach_absolute_time, but advances during sleep"
+      },
+      {
+        "line": 60,
+        "text": " */"
+      },
+      {
+        "line": 61,
+        "text": "__OSX_AVAILABLE(10.12) __IOS_AVAILABLE(10.0) __TVOS_AVAILABLE(10.0) __WATCHOS_AVAILABLE(3.0)"
+      },
+      {
+        "line": 62,
+        "text": "uint64_t                        mach_continuous_time(void);"
+      }
+    ],
+    "source": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-host-power-20261113/src/data_sheets_schema/native_elapsed.py",
+      "sha256": "df4225ee504541825f6d1de5932379cd5d75f61be1f6476ff841cfb334cdfd5c",
+      "bytes": 1392
+    },
+    "linux_interface": "clock_gettime_ns(CLOCK_BOOTTIME)",
+    "fallback": "none; unavailable clock refuses"
+  },
+  "audit": {
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/notes/development_efficiency_20261111/handoffs/codex-h2-review-fixes-audit-20261113.json",
+    "sha256": "b0933561ce08fd8f8b729b9ca412865645f56b6d0d3b890ee22d15d50a0c70e9",
+    "bytes": 74947
+  },
+  "pure_function_simulations": {
+    "results": {
+      "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/deadline-function/results.json",
+      "sha256": "cf4eeb58da6714cc294489879215abc9433825f963b52da6cb2f0e911699085a",
+      "bytes": 3338
+    },
+    "passed": 9,
+    "scope": "Pure execute_child function with synthetic clocks/process objects; NOT source-admitted integration"
+  },
+  "scanner_comparison": {
+    "scanner": {
+      "report": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner/scanner.md",
+        "sha256": "8f734a12d7aca180d8df234e37a220580b101c68d47c8a652db970e1ad0be819",
+        "bytes": 174213
+      },
+      "violation_rows": [
+        "| `notes/claudecode_direct/prepare_direct.py:348` | run_controllers | live | code_table | `CHORUS` | parser.add_argument(\"--project\", default=\"CHORUS\") |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:19` | run_controllers | live | code_table | `CHORUS` | DEFAULT_CANARY_ORDER = \"CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1\" |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:19` | run_controllers | live | code_table | `CHORUS` | DEFAULT_CANARY_ORDER = \"CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1\" |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `CHORUS` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `AI_READI` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `CM4AI` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `VOICE` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `VOICE_PEDIATRIC` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:104` | run_controllers | live | code_branch | `CHORUS` | \"canary\": replicate == 1 and case[\"project\"] in {\"CHORUS\", \"KIDS_FIRST\"}, |"
+      ]
+    },
+    "scanner-unaffected": {
+      "report": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner-unaffected/scanner.md",
+        "sha256": "4065e7db1daaba850238c2a4a1462fa878eff4707644a1573d58c1b5b203e530",
+        "bytes": 174218
+      },
+      "violation_rows": [
+        "| `notes/claudecode_direct/prepare_direct.py:348` | run_controllers | live | code_table | `CHORUS` | parser.add_argument(\"--project\", default=\"CHORUS\") |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:19` | run_controllers | live | code_table | `CHORUS` | DEFAULT_CANARY_ORDER = \"CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1\" |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:19` | run_controllers | live | code_table | `CHORUS` | DEFAULT_CANARY_ORDER = \"CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1\" |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `CHORUS` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `AI_READI` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `CM4AI` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `VOICE` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `VOICE_PEDIATRIC` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:104` | run_controllers | live | code_branch | `CHORUS` | \"canary\": replicate == 1 and case[\"project\"] in {\"CHORUS\", \"KIDS_FIRST\"}, |"
+      ]
+    },
+    "identical_violation_rows": true
+  },
+  "pin_proposal": {
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/notes/development_efficiency_20261111/handoffs/codex-h2-controller-pin-proposal-20261113.diff",
+    "sha256": "921eb9b024f7ab1a491b6d910aac4c1a880fed3477a9fba7330d2fc21d9695d7",
+    "bytes": 4065
+  },
+  "proposal_metadata": {
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/notes/development_efficiency_20261111/handoffs/codex-h2-controller-pin-proposal-20261113.json",
+    "sha256": "294f4716500c41e42619a88cc0ef33d52568e6782908592f0a607e5f9e5a2e54",
+    "bytes": 3079
+  },
+  "approval_rejection": "Controller manifest and authority digest updates were rejected as security-sensitive trust-pin changes reserved for the lead. No authority/scanner/prompt pin was edited, including in the private exports.",
+  "remaining": [
+    "Approve or have the lead apply the five-file pin proposal after source review.",
+    "Repeat the whole touched-file cohort against the admitted composition; start/stage publication failures, simulated deadline, AC-transition and controller timing integration have not yet reached their assertions there. The independent pre-clock end-failure canary passed.",
+    "Any quiet-host public completion run remains for the lead; the existing 900-second declaration is unchanged."
+  ],
+  "review": "Read-only diff review performed separately. No further implementation finding beyond the unapplied controller pins. Integrated behavior remains unverified where source admission stopped. One pre-existing blank EOF line remains in the power proof runner (reported by full-branch diff --check). No GitHub issue or review was written.",
+  "timing_limits": "Helper endpoints measure controller response delivery to result intake, including transport/scheduling; they are not actual subprocess start/exit or CPU time. Model boundaries are received CLI assistant/user/result frames, with message start/stop when supplied, not provider-internal token timing.",
+  "provenance_scripts": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/audit_h2_review_fixes_20261113.py",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/prepare_h2_review_fixes_20261113.py",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/refresh_h2_review_fixes_20261113.py",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/report_h2_review_fixes_20261113.py",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/run_h2_review_fixes_20261113.py",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/prepare_h2_unaffected_fixes_20261113.py",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/propose_h2_controller_pins_20261113.py",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/simulate_h2_deadline_function_20261113.py",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/bound_h2_failure_canary_20261113.py"
+  ]
+}
