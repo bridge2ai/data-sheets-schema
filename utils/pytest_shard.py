@@ -3,8 +3,9 @@
 Opt in with ``python -m pytest -p utils.pytest_shard --ci-shard=1/4``.
 Every collected file belongs to exactly one shard; new tests need no CI edit.
 Keeping a file together avoids multiplying its module/class fixture setup.
-Explicit ``--ci-lane`` isolates seven slow offline API/SG2 cases while retaining
-the complete collected suite across the ordinary shards and case lanes.
+Explicit ``--ci-lane`` isolates ten slow offline API, SG2 and native public-path
+cases while retaining the complete collected suite across the ordinary shards
+and case lanes.
 """
 
 import hashlib
@@ -29,7 +30,21 @@ SG2_CASE_LANES = {
     f"test_sg2_root_launch_completes_and_records_registered_paths[{mode}]"
     for mode in ("none", "conventional", "explicit")
 }
-DEDICATED_CASE_LANES = {**API_CASE_LANES, **SG2_CASE_LANES}
+# Each drives one complete synthetic native launch, from capture through
+# reservation and dispatch to the completion gates (#6191). Beside xdist
+# workers in an ordinary shard they miss the 900-second capture-to-reservation
+# window (1,200 s maximum age less the 300 s margin) and starve their shard.
+# Alone on the lead's host at load average 31, capture to reservation took
+# 246 s.
+NATIVE_PUBLIC_CASE_LANES = {
+    "native-public-correction": "tests/test_native_shared_execution.py::"
+    "test_actual_public_correction_three_workers_and_saved_completion",
+    "native-public-variant": "tests/test_native_shared_execution_variant.py::"
+    "test_actual_public_merged_omissions_and_all_chunk_statuses",
+    "native-public-pending": "tests/test_native_pending_public_completion.py::"
+    "test_pending_floor_public_completion_retains_diagnostic_reading",
+}
+DEDICATED_CASE_LANES = {**API_CASE_LANES, **SG2_CASE_LANES, **NATIVE_PUBLIC_CASE_LANES}
 
 
 def partition_lanes(nodeids):
