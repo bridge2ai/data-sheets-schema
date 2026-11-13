@@ -50,7 +50,9 @@ def paths(tmp_path):
         'attempt_directory': str(base / 'NEVER-RESERVED-ATTEMPT'),
         'evidence_directory': str(base / 'NEVER-RESERVED-EVIDENCE'),
         'attempt_id': 'sequence-fixture',
-        'runtime': {'deadline_seconds': 21600, 'model': 'fixture-model',
+        # The canary's registered pair (D143): native_run_limits refuses a
+        # deadline without its budget.
+        'runtime': {'budget_guard_usd': '90', 'deadline_seconds': 21600, 'model': 'fixture-model',
             'limits': {'contextWindow': 100, 'maxOutputTokens': 10},
             'keep_awake': {'policy': 'macos_iokit_ims_v1', 'host_platform': 'darwin', 'basis': 'offline fixture'},
             'limits_basis': json.dumps({'kind': 'd4d_native_u4b_runtime_basis', 'version': 3,
@@ -305,6 +307,8 @@ def test_isolated_real_subprocess_uses_only_copied_fake_command(tmp_path, entry_
     (package / '__init__.py').write_bytes(b'')
     for name in ('native_launch_sequence', 'native_subscription_guard', 'native_sequence_start', 'native_launch_entry',
                  'native_capture_words', 'native_subscription_guard_v2', 'native_u4b_policy',
+                 # native_u4b_policy checks the registered limits pair (D143).
+                 'native_run_limits',
                  'native_shared_runtime_values', 'native_runtime_profiles', 'native_host_power'):
         (package / (name + '.py')).write_bytes((seq.SOURCE_ROOT / 'src/data_sheets_schema' / (name + '.py')).read_bytes())
     (package / 'native_generation.py').write_text('''import json, hashlib, os, sys

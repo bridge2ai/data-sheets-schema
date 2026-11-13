@@ -177,7 +177,10 @@ def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls,
 def fixture(tmp_path_factory, request):
     """Build genuine S/R/preparation/C once; only the saved observations are synthetic."""
     root = tmp_path_factory.mktemp('fabricated-shared-permission').resolve()
-    isolation = isolated_modules.__wrapped__()
+    # isolated_modules takes monkeypatch since the #6170 power fix (host AC
+    # reading). A module-scoped caller supplies its own, undone after close.
+    host_patch = pytest.MonkeyPatch()
+    isolation = isolated_modules.__wrapped__(host_patch)
     names = next(isolation)
     try:
         with pytest.MonkeyPatch.context() as patch:
@@ -214,6 +217,7 @@ def fixture(tmp_path_factory, request):
                 'manifest': value, 'source_raw': source_raw}
     finally:
         isolation.close()
+        host_patch.undo()
 
 
 @pytest.fixture(autouse=True)

@@ -30,7 +30,10 @@ from tests.utils.native_shared_consumer_scope import observe_consumer_calls
 @pytest.fixture(scope="module")
 def saved_case(tmp_path_factory):
     root = tmp_path_factory.mktemp("u4-genuine-saved-probe").resolve()
-    isolation = isolated_modules.__wrapped__()
+    # isolated_modules takes monkeypatch since the #6170 power fix (host AC
+    # reading). A module-scoped caller supplies its own, undone after close.
+    host_patch = pytest.MonkeyPatch()
+    isolation = isolated_modules.__wrapped__(host_patch)
     names = next(isolation)
     try:
         with pytest.MonkeyPatch.context() as patch:
@@ -64,6 +67,7 @@ def saved_case(tmp_path_factory):
                    "render_spec": prepared["registration"]["render_spec"]}
     finally:
         isolation.close()
+        host_patch.undo()
 
 
 def choice_document(subject_raw, runtime):
