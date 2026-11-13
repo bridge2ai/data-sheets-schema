@@ -13,6 +13,7 @@ from tests.test_native_shared_selection import declaration
 
 def argv(inputs, out):
     return ['--selection', str(inputs['selection']), '--runtime-declaration', str(inputs['runtime_path']),
+        '--environment-manifest', str(inputs['kwargs']['environment_manifest_path']),
         '--job-id', inputs['kwargs']['job_id'], '--run-date', inputs['kwargs']['run_date'],
         '--max-draft-checks', str(inputs['kwargs']['max_draft_checks']),
         '--provider', inputs['runtime']['provider'], '--reasoning-effort', inputs['runtime']['effort'],
@@ -26,7 +27,7 @@ def test_actual_v2_cli_renders_exact_preparation_to_new_file(inputs):
     assert result.exit_code == 0, result.output
     assert out.read_bytes() == expected['registration']['instruction'].encode('utf-8')
     assert expected['registration']['instruction_sha256'] in result.output
-    assert 'Offline v2 preparation' in result.output
+    assert 'Offline v3 preparation' in result.output
     before = out.read_bytes()
     repeated = CliRunner().invoke(render_native_shared, argv(inputs, out))
     assert repeated.exit_code != 0

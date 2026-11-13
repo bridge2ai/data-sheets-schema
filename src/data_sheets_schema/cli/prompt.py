@@ -39,7 +39,7 @@ prompt.add_command(render_prompt_cmd, name="render")
 @click.option("--runtime-declaration", required=True, type=click.Path(exists=True, dir_okay=False),
               help="Sole runtime declaration, checked without invoking the runtime.")
 @click.option("--environment-manifest", required=True, type=click.Path(exists=True, dir_okay=False))
-@click.option("--job-id", required=True, help="Explicit job identity for the v2 preparation.")
+@click.option("--job-id", required=True, help="Explicit job identity for the v3 preparation.")
 @click.option("--provider", required=True, help="Must match the sole runtime declaration.")
 @click.option("--reasoning-effort", required=True, help="Must match the sole runtime declaration.")
 @click.option("--max-draft-checks", required=True, type=click.IntRange(min=1))
@@ -47,7 +47,7 @@ prompt.add_command(render_prompt_cmd, name="render")
 @click.option("--out", type=click.Path(dir_okay=False), help="Write a new instruction file; refuse an existing file.")
 def render_native_shared(selection, runtime_declaration, job_id, provider, reasoning_effort,
                          max_draft_checks, run_date, out, environment_manifest):
-    """Render genuine v2 preparation offline; this does not authorize execution.
+    """Render genuine v3 preparation offline; this does not authorize execution.
 
     RunSpec boundary: validated-caller
 
@@ -81,7 +81,7 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         raise click.ClickException(str(exc)) from exc
     raw = text.encode('utf-8')
     click.echo(f'# sha256 {hashlib.sha256(raw).hexdigest()}  ({len(raw)} bytes)', err=True)
-    click.echo('# Offline v2 preparation; execution requires separate registration and all admission gates.', err=True)
+    click.echo('# Offline v3 preparation; execution requires separate registration and all admission gates.', err=True)
     if out:
         click.echo(f'✓ {out}', err=True)
     else:
