@@ -64,9 +64,89 @@ def test_generate_verifies_installed_payload_and_names_unverified_entries(instal
     row = value['distributions'][0]
     assert row['verified_files'] == {'count': 1, 'bytes': len(b'SYNTHETIC = True\n')}
     assert row['unverified_files'] == [
-        {'kind': 'bytecode', 'count': 1, 'paths': ['cached.pyc']},
         {'kind': 'other', 'count': 1, 'paths': ['unverified-notes.txt']},
         {'kind': 'record', 'count': 1, 'paths': ['synthetic.dist-info/RECORD']}]
+
+
+def test_pyc_creation_change_and_removal_preserve_registered_manifest(installed, tmp_path):
+    record = installed.locate_file(installed.files[0])
+    digest = base64.urlsafe_b64encode(hashlib.sha256(b'old pyc').digest()).decode().rstrip('=')
+    with record.open('a') as stream:
+        stream.write('hashed.pyc,sha256=' + digest + ',7\nhashless.pyc,,\n')
+    record_bytes = record.read_bytes()
+    declaration = m.write(tmp_path / 'manifest.json')
+    original = m.verify(declaration)
+    assert original['distributions'][0]['verified_files'] == {'count': 1, 'bytes': 17}
+    assert original['distributions'][0]['unverified_files'] == [
+        {'kind': 'record', 'count': 1, 'paths': ['synthetic.dist-info/RECORD']}]
+    targets = [installed.root / name for name in ('hashed.pyc', 'hashless.pyc',
+               'loose.pyc', '__pycache__/absent.cpython-313-pytest-7.4.4.pyc')]
+    observations = []
+    for state, contents in (('created', b'SYNTHETIC cache'), ('changed', b'other cached bytes'),
+                            ('removed', None)):
+        for target in targets:
+            if contents is None:
+                target.unlink()
+            else:
+                target.parent.mkdir(exist_ok=True)
+                target.write_bytes(contents)
+        assert m.verify(declaration) == original
+        assert record.read_bytes() == record_bytes
+        observations.append({'state': state, 'pyc_files': sum(path.exists() for path in targets),
+                             'manifest_unchanged': True})
+    # Cache diagnostics are saved outside the registered manifest/import root.
+    (tmp_path / 'bytecode-diagnostics.json').write_text(json.dumps(observations))
+
+
+@pytest.mark.parametrize('recorded_hash,recorded_size', [('sha256=malformed', 'bad'), ('', '')])
+def test_pyc_payload_is_not_read_or_counted(installed, monkeypatch, recorded_hash, recorded_size):
+    with installed.locate_file(installed.files[0]).open('a') as stream:
+        stream.write('ignored.pyc,' + recorded_hash + ',' + recorded_size + '\n')
+    target = installed.root / 'ignored.pyc'
+    target.write_bytes(b'SYNTHETIC unreadable cache')
+    original_open = m.os.open
+    def deny_cache(path, flags, *args, **kwargs):
+        if Path(path) == target:
+            raise AssertionError('excluded bytecode must not be opened')
+        return original_open(path, flags, *args, **kwargs)
+    monkeypatch.setattr(m.os, 'open', deny_cache)
+    value = m.generate()
+    assert value['distributions'][0]['verified_files'] == {'count': 1, 'bytes': 17}
+    assert not value['unowned_files']
+
+
+@pytest.mark.parametrize('inventory', ['unowned', 'bytecode', 'other', 'record'])
+def test_closed_manifest_refuses_pyc_entries_in_any_inventory(installed, inventory):
+    value = m.generate()
+    if inventory == 'unowned':
+        value['unowned_files'] = [{'root': str(installed.root), 'path': 'excluded.pyc',
+                                  'bytes': 0, 'sha256': hashlib.sha256(b'').hexdigest()}]
+    else:
+        group = {'kind': inventory, 'count': 1, 'paths': ['excluded.pyc']}
+        if inventory == 'record':
+            value['distributions'][0]['unverified_files'] = [group]
+        else:
+            value['distributions'][0]['unverified_files'].insert(0, group)
+    with pytest.raises(ValueError, match='pyc bytecode is excluded'):
+        m.validate(value)
+
+
+def test_record_metadata_remains_pinned_when_only_pyc_record_row_changes(installed, tmp_path):
+    declaration = m.write(tmp_path / 'manifest.json')
+    installed.add_file(Path('new.pyc'))
+    with pytest.raises(ValueError, match='stale'):
+        m.verify(declaration)
+
+
+def test_pyo_and_files_under_pyc_named_directory_remain_in_scope(installed):
+    installed.add_file(Path('legacy.pyo'))
+    directory = installed.root / 'data.pyc'
+    directory.mkdir()
+    (directory / 'payload.txt').write_bytes(b'SYNTHETIC data')
+    value = m.generate()
+    assert value['distributions'][0]['unverified_files'][0] == {
+        'kind': 'bytecode', 'count': 1, 'paths': ['legacy.pyo']}
+    assert [item['path'] for item in value['unowned_files']] == ['data.pyc/payload.txt']
 
 
 @pytest.mark.parametrize('change', ['same_size_content', 'missing', 'size'])
@@ -391,24 +471,24 @@ def test_standard_bytecode_cache_uses_owned_source(installed, optimization):
     assert m.generate()
 
 
-def test_nonstandard_rewrite_cache_is_an_explicit_unowned_file(installed):
+def test_nonstandard_rewrite_cache_is_excluded(installed):
     cache = installed.root / '__pycache__'
     cache.mkdir()
     # No source or RECORD entry: this is not a standard Python import cache.
     (cache / ('unregistered.' + m.sys.implementation.cache_tag + '-pytest-7.4.4.pyc')).write_bytes(b'synthetic pytest cache')
-    assert len(m.generate()['unowned_files']) == 1
+    assert m.generate()['unowned_files'] == []
 
 
-def test_loose_unowned_bytecode_is_listed(installed):
+def test_loose_unowned_bytecode_is_excluded(installed):
     (installed.root / 'unregistered.pyc').write_bytes(b'synthetic sourceless bytecode')
-    assert [row['path'] for row in m.generate()['unowned_files']] == ['unregistered.pyc']
+    assert m.generate()['unowned_files'] == []
 
 
-def test_standard_cache_without_source_is_listed(installed):
+def test_standard_cache_without_source_is_excluded(installed):
     cache = installed.root / '__pycache__'
     cache.mkdir()
     (cache / ('unregistered.' + m.sys.implementation.cache_tag + '.pyc')).write_bytes(b'synthetic cache')
-    assert len(m.generate()['unowned_files']) == 1
+    assert m.generate()['unowned_files'] == []
 
 
 def test_record_changes_during_census_refuse_registered_pin(installed, tmp_path, monkeypatch):

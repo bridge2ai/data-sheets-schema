@@ -1,9 +1,11 @@
 """Versioned identity of the current interpreter's installed distributions.
 
 Discovery reads distribution metadata on every current import path; it never
-imports a third-party package or executes another interpreter. Every hashed
-RECORD entry is checked against fresh installed bytes; unhashed entries remain
-explicitly unverified. Repository sources have their separate source pins.
+imports a third-party package or executes another interpreter. Every non-pyc
+hashed RECORD entry is checked against fresh installed bytes; other unhashed
+entries remain explicitly unverified. All .pyc files are excluded from payload
+and unowned inventories and totals; the exact RECORD metadata stays pinned.
+Repository sources have their separate source pins.
 """
 from __future__ import annotations
 
@@ -12,7 +14,6 @@ import csv
 import hashlib
 import io
 from importlib import metadata
-from importlib.util import source_from_cache
 import os
 from pathlib import Path
 import platform
@@ -99,6 +100,8 @@ def validate(value):
                 raise ValueError('one distribution must have exactly one unverified RECORD')
             for path in paths:
                 _record_name(path)
+                if path.endswith('.pyc'):
+                    raise ValueError('pyc bytecode is excluded from the environment manifest')
             if paths != sorted(set(paths)):
                 raise ValueError('unverified installed file paths must be sorted and unique')
             kinds.append(kind)
@@ -130,6 +133,8 @@ def validate(value):
         c.exact(item, {'root', 'path', 'bytes', 'sha256'}, 'unowned file')
         root = c.canonical_path(_record_name(item['root']), 'unowned import root')
         path = _record_name(item['path'])
+        if path.endswith('.pyc'):
+            raise ValueError('pyc bytecode is excluded from the environment manifest')
         if (path in ('.', '..') or Path(path).is_absolute() or str(Path(path)) != path
                 or any(part in ('.', '..') for part in Path(path).parts)):
             raise ValueError('unowned file path must be normalized and relative to its root')
@@ -331,6 +336,11 @@ def _capture_distribution(distribution, *, verify_payloads=True):
         if len(row) != 3:
             raise ValueError('distribution has malformed installed RECORD: ' + name)
         entry = _record_name(row[0])
+        # Lead addendum 08:26:25Z: imports may create/change caches outside
+        # registered runs. Even a hashed or hashless RECORD cache contributes
+        # neither an entry nor a count; RECORD itself remains byte-exact.
+        if entry.endswith('.pyc'):
+            continue
         if not own and (Path(entry).name.startswith('__editable__') or entry.endswith('.egg-link')):
             raise ValueError('editable or development third-party distribution holds: ' + name)
         target = Path(distribution.locate_file(row[0])).resolve(strict=False)
@@ -361,7 +371,7 @@ def _capture_distribution(distribution, *, verify_payloads=True):
         else:
             if row[2] and re.fullmatch(r'0|[1-9][0-9]*', row[2]) is None:
                 raise ValueError('unhashed installed RECORD entry has a malformed size')
-            kind = 'record' if target == path else 'bytecode' if entry.endswith(('.pyc', '.pyo')) else 'other'
+            kind = 'record' if target == path else 'bytecode' if entry.endswith('.pyo') else 'other'
             unverified.setdefault(kind, []).append(entry)
     if path not in owned:
         raise ValueError('distribution RECORD must identify itself: ' + name)
@@ -449,8 +459,8 @@ def _require_owned_import_roots(paths, captures):
     The lead's scope ruling excludes exact first-party and standard-library
     import roots. A separately listed site-packages root is never excluded by
     its stdlib ancestor. Nested actual roots are traversed separately, giving
-    each file its deepest root. Ordinary caches use either their RECORD-owned
-    or inventoried unowned source; all other bytecode remains explicit.
+    each file its deepest root. All .pyc files are excluded, whether or not
+    they have a source file, standard cache tag or distribution RECORD entry.
     """
     actual = {Path(path) for path in paths}
     first_party, stdlib = _first_party_roots(), _stdlib_roots()
@@ -471,13 +481,16 @@ def _require_owned_import_roots(paths, captures):
         with os.scandir(directory) as iterator:
             entries = sorted(iterator, key=lambda entry: entry.name)
         for entry in entries:
+            is_directory = entry.is_dir()
+            if not is_directory and entry.name.endswith('.pyc'):
+                continue
             count += 1
             if count > MAX_IMPORT_ENTRIES:
                 raise ValueError('third-party import ownership census exceeds its entry bound')
             path = Path(entry.path)
             if entry.name.endswith('.egg-link'):
                 raise ValueError('editable or development import root holds: ' + str(path))
-            if entry.is_dir():
+            if is_directory:
                 if entry.is_symlink():
                     raise ValueError('unsupported symlinked third-party import directory: ' + str(path))
                 if path not in actual:
@@ -493,16 +506,6 @@ def _require_owned_import_roots(paths, captures):
         # treating its target's ownership as its own would hide new imports.
         if physical in owned and (not path.is_symlink() or path in owned_spellings):
             continue
-        if path.suffix == '.pyc' and path.parent.name == '__pycache__':
-            try:
-                source = Path(source_from_cache(str(path))).resolve(strict=True)
-            except (ValueError, FileNotFoundError):
-                source = None
-            tag = sys.implementation.cache_tag
-            standard = tag is not None and re.fullmatch(
-                r'.+\.' + re.escape(tag) + r'(?:\.opt-[0-9]+)?\.pyc', path.name) is not None
-            if standard and (source in owned or source in files):
-                continue
         captured = _capture_unowned_file(path)
         payloads.append(captured)
         total_bytes += captured['bytes']
