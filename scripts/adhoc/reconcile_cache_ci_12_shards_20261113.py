@@ -15,7 +15,7 @@ E = W.parent
 R = E / 'codex-development-efficiency-20261111'
 H = R / 'notes/development_efficiency_20261111/handoffs/codex-h2-public-path-proof-20261112'
 I = H.parent / 'lead-ci-run-43367502045-failures-20261113.json'
-B = Path('/Users/marcin/agent-work/data-sheets-schema/helper2-ci-20261113/tests/fixed-cache-final')
+B = Path.home() / 'agent-work/data-sheets-schema/helper2-ci-20261113/tests/fixed-cache-final'
 Q = E / 'scratch-h2-run-limits-20261113/tests/pair-composed-final'
 EXPECTED = {
     'tests/test_native_generation_frontdoor.py': 28,
