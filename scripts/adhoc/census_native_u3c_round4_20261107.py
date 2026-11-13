@@ -21,9 +21,9 @@ D_CONSUMERS = (
     'native_shared_publication', 'native_shared_registration',
     'native_shared_results', 'native_shared_schema_gates',
 )
-# U3-J2 revision, 2026-11-09: the closed runtime profile joins D's neutral support.
+# The closed runtime profile and reviewed helper-cache routing are D neutral support.
 D_SUPPORT = ('native_shared_gate_primitives', 'native_shared_runtime_values',
-             'native_runtime_profiles')
+             'native_runtime_profiles', 'native_helper_cache')
 C_CONSUMERS = (
     'native_shared_attribution', 'native_shared_capture', 'native_shared_controller',
     'native_shared_current', 'native_shared_effects', 'native_shared_observations',
@@ -124,7 +124,7 @@ def inspect_current(out):
         raise RuntimeError('A dependency pins do not cover the exact current source inventory')
     names = (*C_CONSUMERS, *D_CONSUMERS, *D_SUPPORT)
     owned = {'data_sheets_schema.' + name for name in names}
-    if len(names) != 29 or len(owned) != 29 or owned != authority.CONSUMER_OWNED_MODULES:
+    if len(names) != 30 or len(owned) != 30 or owned != authority.CONSUMER_OWNED_MODULES:
         raise RuntimeError('current C/D census roster differs from the closed A roster')
     imported_before = {name: sys.modules[name] for name in owned if name in sys.modules}
     save(out / 'manifest.json', {
