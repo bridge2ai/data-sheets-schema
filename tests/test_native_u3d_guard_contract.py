@@ -157,7 +157,8 @@ def test_execution_facade_requires_the_current_explicit_ci_event():
     manual = execution.required_checks('workflow_dispatch')
     assert manual == push
     assert set(pull) - set(push) == {
-        'Python 3.12 / shard 7', 'Python 3.12 / shard 8', 'large-files'}
+        'Python 3.12 / shard 9', 'Python 3.12 / shard 10', 'Python 3.12 / shard 11',
+        'Python 3.12 / shard 12', 'large-files'}
     assert set(push) - set(pull) == {'schema-examples (3.12)'}
     with pytest.raises(TypeError):
         execution.required_checks()

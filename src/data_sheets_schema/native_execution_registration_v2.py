@@ -63,7 +63,8 @@ def required_checks(event):
     if type(event) is not str or event not in ('pull_request', 'push', 'workflow_dispatch'):
         raise ValueError('CI workflow event must be pull_request, push or workflow_dispatch')
     pull = event == 'pull_request'
-    return (tuple(f'Python 3.12 / shard {n}' for n in range(1, 9 if pull else 7))
+    # D147 (2026-11-13): twelve pull-request shards, eight on main and manual runs.
+    return (tuple(f'Python 3.12 / shard {n}' for n in range(1, 13 if pull else 9))
             + _COMMON_CHECKS + (('large-files',) if pull else ('schema-examples (3.12)',)))
 
 
