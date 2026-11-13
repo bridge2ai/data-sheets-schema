@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import time
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -49,13 +50,23 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('export')
     parser.add_argument('cohorts', nargs='+')
+    parser.add_argument('--after', help='Wait for the named prior cohort cleanup receipt; never overlap public tests.')
+    parser.add_argument('--stop-on-failure', action='store_true')
     args = parser.parse_args()
+    if args.after:
+        receipt = BASE / 'tests' / args.after / 'outcome.json'
+        while not receipt.exists():
+            time.sleep(.5)
+        previous = json.loads(receipt.read_bytes())
+        assert previous['cleanup_verified'], 'prior cohort cleanup is not verified'
     for cohort in args.cohorts:
         out = BASE / 'tests' / (args.export + '-' + cohort)
         command = [sys.executable, '-S', '-P', '-B', str(ROOT / 'scripts/adhoc/run_h2_integration_20261113.py'),
                    '--tree', str(BASE / args.export), '--out', str(out), '--timeout-seconds', '14400']
         if cohort in PUBLIC:
             command.append(PUBLIC[cohort])
+        elif cohort == 'unit-canary':
+            command.append('tests/test_native_admission_timer.py::test_expiry_does_not_interrupt_slow_nested_cleanup')
         elif cohort in ('budget', 'native', 'audit'):
             command += ['--lane', cohort]
         elif cohort == 'scanner':
@@ -71,6 +82,11 @@ if __name__ == '__main__':
                 'test_native_admission_timer', 'test_native_admission_failure', 'test_native_attempt_deadline',
                 'test_native_pre_dispatch_timing', 'test_native_attempt_timing', 'test_native_host_power',
                 'test_native_shared_permission_protocol', 'test_native_launch_sequence')]
+        elif cohort == 'dependents':
+            command += ['tests/' + name + '.py' for name in ('test_native_subscription_capture',
+                'test_native_shared_registration', 'test_native_shared_capture_split',
+                'test_native_shared_capture_integration', 'test_native_failure_publication',
+                'test_native_execution_engine', 'test_native_shared_controller')]
         else:
             parser.error('unknown cohort: ' + cohort)
         with (BASE / (args.export + '-' + cohort + '-runner.log')).open('xb') as log:
@@ -78,3 +94,5 @@ if __name__ == '__main__':
         summary = summarize(out)
         print(json.dumps({'cohort': cohort, 'returncode': code, 'junit': summary.get('junit'),
                           'directory': str(out)}), flush=True)
+        if code and args.stop_on_failure:
+            raise SystemExit(code)

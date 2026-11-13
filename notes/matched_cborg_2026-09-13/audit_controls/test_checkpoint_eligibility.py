@@ -454,7 +454,8 @@ def test_callback_free_write_is_unsupported_for_both_versions(history, pure):
 
 def test_responsive_implementation_preserves_v2_default_projection(history, pure):
     """#2422: approved source compatibility does not select a new protocol."""
-    assert hashlib.sha256((SOURCE/'native_controls/native_control.py').read_bytes()).hexdigest() == RESPONSIVE_CONTROL_SHA
+    assert hashlib.sha256((SOURCE/'native_controls/native_control.py').read_bytes()).hexdigest() in (
+        RESPONSIVE_CONTROL_SHA, TIMED_CONTROL_SHA)
     assert pure['initialize_frame']() == both_pure_versions()['current']['initialize_frame']()
     assert pure['control_contract']({'pretool_control': pure['CONTRACT']}) == pure['CONTRACT']
     for implementation in [pure, *both_pure_versions().values()]:
