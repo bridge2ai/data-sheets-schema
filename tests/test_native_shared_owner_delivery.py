@@ -1,5 +1,10 @@
 """Invented C histories exercise real B reuse; they are not execution admission."""
 from functools import wraps
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
@@ -39,6 +44,28 @@ def typed_case(case):
 
 @pytest.mark.parametrize('case', [{'schema_raw': STANDALONE_SCHEMA}], indirect=True)
 def test_replay_owner_reuses_catalog_and_unknown_initialization_is_fresh(case, monkeypatch):
+    # This scenario asserts that optional reuse is enabled, so it needs an
+    # interpreter whose guarded dependencies have not been changed by earlier
+    # tests. Unknown parent state must keep disabling production reuse (#6192).
+    schema = next(row for row in case[0].schemas if row.kind == 'full')
+    output = Path(schema.sources[0].pin.path).parent / 'owner-delivery.json'
+    root = Path(__file__).resolve().parents[1]
+    env = dict(os.environ, PYTHONPATH=os.pathsep.join((str(root / 'src'), str(root))),
+               PYTHONDONTWRITEBYTECODE='1', PYTHONOPTIMIZE='0')
+    result = subprocess.run(
+        [sys.executable, '-P', '-B', '-m', 'tests.utils.native_shared_owner_delivery_probe',
+         '--output', str(output)], cwd=root, env=env, capture_output=True,
+        text=True, timeout=120)
+    assert result.returncode == 0, result.stdout + result.stderr
+    observed = json.loads(output.read_bytes())
+    assert observed == json.loads(result.stdout)
+    assert observed == {'source_root': str(root), 'reuse_initially_eligible': True,
+                        'original_owner_assertions_completed': True,
+                        'unknown_initialization_refused': True}
+
+
+def _assert_replay_owner_reuses_catalog_and_unknown_initialization_is_fresh(case, monkeypatch):
+    """Original warm/fresh/refusal scenario, executed by the isolated probe."""
     selected = typed_case(case)
     owner = receipts._ReceiptCatalogContext()
     replay = stage._Replay(*selected, _catalogs=owner).run()
@@ -75,6 +102,23 @@ def test_replay_owner_reuses_catalog_and_unknown_initialization_is_fresh(case, m
     assert events.counters()['documents'] > before
     assert typed.check_worker(fresh.packet, worker, valid, **fresh.options)['passed']
     assert not typed.check_worker(fresh.packet, worker, invalid, **fresh.options)['passed']
+
+
+@pytest.mark.parametrize('case', [{'schema_raw': STANDALONE_SCHEMA}], indirect=True)
+def test_owner_delivery_isolated_from_changed_parent_json_encoder(case, monkeypatch):
+    """A prior worker-local dependency change must not poison this scenario."""
+    original = json.JSONEncoder.default
+
+    def changed_default(self, value):
+        return original(self, value)
+
+    monkeypatch.setattr(json.JSONEncoder, 'default', changed_default)
+    monkeypatch.setenv('PYTHONOPTIMIZE', '1')
+    # The production guard must keep refusing this unfamiliar binding.
+    assert catalogs.runtime_token() is None
+    test_replay_owner_reuses_catalog_and_unknown_initialization_is_fresh(case, monkeypatch)
+    assert json.JSONEncoder.default is changed_default
+    assert catalogs.runtime_token() is None
 
 
 def test_complete_replay_threads_owner_to_every_typed_call_and_rechecks_final(case, monkeypatch):
