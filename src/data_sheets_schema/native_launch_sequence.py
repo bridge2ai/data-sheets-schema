@@ -16,6 +16,7 @@ import subprocess
 import sys
 
 from . import native_subscription_guard as guard
+from . import native_host_power as host_power
 
 SEQUENCE_KIND = 'd4d_native_launch_sequence'
 SEQUENCE_VERSION = 1
@@ -166,7 +167,7 @@ def _run_verified(argv, *, verified_script, entry_inputs):
             if os.path.lexists(path):
                 raise FileExistsError('sequence refuses an existing output')
         # Exclusive claim prevents concurrent starts sharing one packet.
-        _write_new(packet / START_FILENAME, guard.canonical({'started_at': started}))
+        host_power.sequence_start(packet / START_FILENAME, started)
         sequence = sequence_candidate
         script_path = packet / SCRIPT_FILENAME
         _write_new(script_path, verified_script)

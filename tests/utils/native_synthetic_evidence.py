@@ -143,6 +143,10 @@ def authority_for(registration_raw, ci_path, directory):
     # only now: do not age its observation by reusing that earlier word time.
     capture_now = datetime.now(timezone.utc)
     capture_stamp = capture_now.isoformat().replace('+00:00', 'Z')
+    from data_sheets_schema import native_pre_dispatch_timing as pre_timing
+    with pre_timing.scope(registration_raw):
+        pre_timing.bind(value)
+        pre_timing.record('capture_observed', captured_at=capture_stamp, synthetic=True)
     claim = capture._claim(slot, terms['quota_capture'], runtime, bound, capture_stamp)
     claim_raw = c.canonical(claim)
     (reservation / 'claim-1.json').write_bytes(claim_raw)

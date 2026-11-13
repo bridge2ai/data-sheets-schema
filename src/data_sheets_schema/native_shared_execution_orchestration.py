@@ -6,6 +6,8 @@ Preparation/readback and all selection helpers remain offline.
 """
 from __future__ import annotations
 
+from . import native_pre_dispatch_timing as pre_timing
+
 from pathlib import Path
 import sys
 
@@ -83,26 +85,27 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
 
     RunSpec precondition: Caller supplies explicit execution registration; registration.verified reconstructs guarded preparation before creating fixed effects or dispatching.
     """
-    from .native_execution_orchestration import launch as execute
-    from .native_subscription_admission import preflight_current_selection, select_current
-    from .native_u4b_runtime import validate_prepared_runtime
-    from .native_runtime_profiles import require_production
-    with authority.launch_derivations():
-        value = registration.verified(registration_raw)
-        require_production(value['runtime'])
-        validate_prepared_runtime(value['runtime'])
-        attempt = Path(value['attempt_directory'])
-        if attempt.exists() or attempt.is_symlink():
-            raise ValueError('native attempt must be new; spent identities cannot resume')
-        guard = select_current(subscription_guard_path, subscription_guard_sha256,
-            registration_raw=registration_raw, runtime=value['runtime'],
-            launch_word_path=launch_word_path, review_path=review_path)
-        preflight_current_selection(
-            guard, registration_raw=registration_raw, value=value)
-        contract, effects = _engine_bindings(launch_guard=guard)
-        return execute(registration_raw, review_path=review_path, ci_path=ci_path,
-            launch_word_path=launch_word_path, contract=contract, effects=effects,
-            expected_authority_sha256=expected_authority_sha256)
+    with pre_timing.scope(registration_raw):
+        from .native_execution_orchestration import launch as execute
+        from .native_subscription_admission import preflight_current_selection, select_current
+        from .native_u4b_runtime import validate_prepared_runtime
+        from .native_runtime_profiles import require_production
+        with authority.launch_derivations():
+            value = registration.verified(registration_raw)
+            require_production(value['runtime'])
+            validate_prepared_runtime(value['runtime'])
+            attempt = Path(value['attempt_directory'])
+            if attempt.exists() or attempt.is_symlink():
+                raise ValueError('native attempt must be new; spent identities cannot resume')
+            guard = select_current(subscription_guard_path, subscription_guard_sha256,
+                registration_raw=registration_raw, runtime=value['runtime'],
+                launch_word_path=launch_word_path, review_path=review_path)
+            preflight_current_selection(
+                guard, registration_raw=registration_raw, value=value)
+            contract, effects = _engine_bindings(launch_guard=guard)
+            return execute(registration_raw, review_path=review_path, ci_path=ci_path,
+                launch_word_path=launch_word_path, contract=contract, effects=effects,
+                expected_authority_sha256=expected_authority_sha256)
 
 
 def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path,
@@ -116,27 +119,28 @@ def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path
 
     RunSpec precondition: Caller supplies explicit synthetic execution-registration bytes; registration.verified reconstructs guarded preparation before creating fixed effects, and the common synthetic engine retains fresh admission before dispatch.
     """
-    from dataclasses import replace
-    from .native_execution_orchestration import synthetic_launch as execute
-    from .native_subscription_admission import preflight_current_selection, select_current
-    from .native_u4b_runtime import validate_prepared_runtime
-    from .native_runtime_profiles import require_synthetic
-    with authority.launch_derivations():
-        value = registration.verified(registration_raw)
-        require_synthetic(value['runtime'])
-        validate_prepared_runtime(value['runtime'])
-        attempt = Path(value['attempt_directory'])
-        if attempt.exists() or attempt.is_symlink():
-            raise ValueError('native attempt must be new; spent identities cannot resume')
-        guard = select_current(subscription_guard_path, subscription_guard_sha256,
-            registration_raw=registration_raw, runtime=value['runtime'],
-            launch_word_path=launch_word_path, review_path=review_path)
-        preflight_current_selection(
-            guard, registration_raw=registration_raw, value=value)
-        contract, effects = _engine_bindings(launch_guard=guard)
-        effects = replace(effects, probe_runtime=_synthetic_runtime_observation)
-        return execute(registration_raw, review_path=review_path, ci_path=ci_path,
-            launch_word_path=launch_word_path, contract=contract, effects=effects)
+    with pre_timing.scope(registration_raw):
+        from dataclasses import replace
+        from .native_execution_orchestration import synthetic_launch as execute
+        from .native_subscription_admission import preflight_current_selection, select_current
+        from .native_u4b_runtime import validate_prepared_runtime
+        from .native_runtime_profiles import require_synthetic
+        with authority.launch_derivations():
+            value = registration.verified(registration_raw)
+            require_synthetic(value['runtime'])
+            validate_prepared_runtime(value['runtime'])
+            attempt = Path(value['attempt_directory'])
+            if attempt.exists() or attempt.is_symlink():
+                raise ValueError('native attempt must be new; spent identities cannot resume')
+            guard = select_current(subscription_guard_path, subscription_guard_sha256,
+                registration_raw=registration_raw, runtime=value['runtime'],
+                launch_word_path=launch_word_path, review_path=review_path)
+            preflight_current_selection(
+                guard, registration_raw=registration_raw, value=value)
+            contract, effects = _engine_bindings(launch_guard=guard)
+            effects = replace(effects, probe_runtime=_synthetic_runtime_observation)
+            return execute(registration_raw, review_path=review_path, ci_path=ci_path,
+                launch_word_path=launch_word_path, contract=contract, effects=effects)
 
 
 def _synthetic_runtime_observation(value):

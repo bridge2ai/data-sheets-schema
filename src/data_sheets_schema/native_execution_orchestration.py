@@ -6,6 +6,8 @@ aggregation and publication; selected adapters supply semantic reconstruction.
 """
 from __future__ import annotations
 
+from . import native_pre_dispatch_timing as pre_timing
+
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
@@ -353,7 +355,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         raise ValueError('native launch requires the main thread')
     # This is the last check before the first effect. A prior verified value,
     # permission recipe or Admission object is never a launch capability.
-    with controls.loaded_classifier() as classifier_projection:
+    with pre_timing.step('admission_with_classifier'), controls.loaded_classifier() as classifier_projection:
         admitted = admission.admit(registration_raw, review_path=authorization['inputs']['review'],
             ci_path=authorization['inputs']['ci'], launch_word_path=authorization['inputs']['launch_word'],
             classifier_projection=classifier_projection)
@@ -365,8 +367,9 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     # All cold controller/callback derivations finish before saved-capture
     # acceptance. The warmup closes its source-loader scope before returning:
     # never keep a consumer finder active across live bootstrap orchestration.
-    adapter = contract.make_controller(value, registration_raw)
-    contract.prewarm_controller(adapter)
+    with pre_timing.step('controller_prewarm'):
+        adapter = contract.make_controller(value, registration_raw)
+        contract.prewarm_controller(adapter)
     accepted_current_selection = False
     if type(launch_guard) is CurrentSelection:
         launch_guard = accept_current_selection(launch_guard,
@@ -414,7 +417,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
 
     # Hold the registration-wide word/limits lock through the first reservation
     # effect. A renewal cannot supersede the word between checking and mkdir.
-    with reservation_lease():
+    with pre_timing.step('reservation'), reservation_lease():
         controls.require_complete()
         # Source recapture can be slow: measure the preparation margin only
         # after it, immediately before the attempt identity is consumed.
@@ -422,6 +425,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         _require_launch_profile(value['runtime'], expected_profile)
         attempt.mkdir(mode=0o700)  # Even a partial reservation consumes the identity.
         _sync_directory(attempt.parent)
+        pre_timing.record('attempt_reserved')
+    pre_timing.finish()
     durable_new(attempt/'registration.json', registration_raw)
     if launch_guard is not None:
         durable_new(attempt/'subscription-guard.json', launch_guard.raw)
@@ -447,6 +452,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         nonlocal first_stop
         if first_stop is None:
             first_stop = str(message)
+    from . import native_host_power as host_power
+    host_power.observe(attempt, 'start', host_power.start_run, attempt)
     with _signals(signals):
         proxy = controls['run_direct_canary'].NoProxy()
         guard = None
@@ -478,6 +485,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                     _admit_subscription_guard(launch_guard, attempt, _file, durable_new)
                     contract.activate_before_dispatch(adapter, started_raw)
                     _require_launch_profile(value['runtime'], expected_profile)
+                    host_power.dispatch_power()
                 observe = _guarded_observer(launch_guard, adapter, controls['run_native_canary'].BudgetStop)
                 status = _execute_child(controls, value['argv'], proxy=proxy,
                     instruction=Path(selected['instruction_path']), attempt=attempt,
@@ -552,26 +560,27 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         finally:
             # This boundary also covers observation/failure-evidence writes:
             # persistence errors must never bypass acquired assertion cleanup.
-            pending_error = sys.exc_info()[1]
-            if guard is not None:
-                if guard.active:
-                    guard.close()
-                    awake.update(state='released_after_failure', passed=False)
-                awake.update(releases=guard.releases, released_at=guard.released_at,
-                             signals_received=list(signals))
-                try:
-                    if not (attempt/'keep-awake.json').exists():
-                        durable_new(attempt/'keep-awake.json', draft._encoded(awake))
-                except BaseException as cleanup_error:
-                    original = pending_error if pending_error is not None else first_error
-                    if original is None:
-                        raise
-                    # A link can exist even when its directory fsync failed;
-                    # that first error remains authoritative after its handler.
-                    note = 'keep-awake cleanup evidence failed: ' + type(cleanup_error).__name__
-                    original.__notes__ = [*getattr(original, '__notes__', []), note]
-                    if pending_error is None:
-                        raise original from cleanup_error
+            with host_power.finishing_run(attempt):
+                pending_error = sys.exc_info()[1]
+                if guard is not None:
+                    if guard.active:
+                        guard.close()
+                        awake.update(state='released_after_failure', passed=False)
+                    awake.update(releases=guard.releases, released_at=guard.released_at,
+                                 signals_received=list(signals))
+                    try:
+                        if not (attempt/'keep-awake.json').exists():
+                            durable_new(attempt/'keep-awake.json', draft._encoded(awake))
+                    except BaseException as cleanup_error:
+                        original = pending_error if pending_error is not None else first_error
+                        if original is None:
+                            raise
+                        # A link can exist even when its directory fsync failed;
+                        # that first error remains authoritative after its handler.
+                        note = 'keep-awake cleanup evidence failed: ' + type(cleanup_error).__name__
+                        original.__notes__ = [*getattr(original, '__notes__', []), note]
+                        if pending_error is None:
+                            raise original from cleanup_error
         try:
             # Cleanup failure is sticky even if another gate or a previous pass succeeds.
             if first_stop is not None:

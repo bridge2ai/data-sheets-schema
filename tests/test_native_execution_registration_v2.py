@@ -24,7 +24,7 @@ from tests.test_native_shared_render import native_spec
 
 
 @pytest.fixture
-def isolated_modules():
+def isolated_modules(monkeypatch):
     """Explicit test isolation; production must refuse existing foreign aliases."""
     authority = registration.authority
     manifest = json.loads((authority.ROOT / controller.SOURCES_PATH).read_bytes())
@@ -32,6 +32,13 @@ def isolated_modules():
     absent = object()
     previous = {name: sys.modules.pop(name, absent) for name in names}
     old_path = list(sys.path)
+    # The native execution fixtures are offline: their host readings must be
+    # explicit on Linux CI as well as macOS. The production AC check still runs;
+    # tests exercising transitions replace these invented interface bytes.
+    from data_sheets_schema import native_host_power
+    monkeypatch.setattr(native_host_power, '_local', lambda *a, **k: {
+        'status': 'read', 'reason': None,
+        'text': "Now drawing from 'AC Power'\n -InternalBattery-0 90%; charging;\n"})
     try:
         yield names
     finally:

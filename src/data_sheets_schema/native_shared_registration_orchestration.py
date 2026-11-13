@@ -3,6 +3,8 @@
 Only this layer obtains fresh verifier identities and a live C projection.
 No authority is placed in serialized preparation or hidden process state.
 """
+
+from . import native_pre_dispatch_timing as pre_timing
 from . import native_execution_authority_v2 as authority
 from . import native_execution_registration_v2 as execution_v2
 from . import native_shared_contract as c
@@ -133,10 +135,13 @@ def verified(raw):
 
     RunSpec precondition: Caller supplies outer execution bytes; execution_v2.verified freshly rederives guarded preparation under verified controls.
     """
-    dependencies = authority.dependency_identity()
-    with control_loading.loaded_controls(dependencies) as controls:
-        value = execution_v2.verified(raw, classifier_projection=controls)
-    return _require_runtime_observation(value)
+    with pre_timing.step('registration.verified'):
+        dependencies = authority.dependency_identity()
+        with control_loading.loaded_controls(dependencies) as controls:
+            value = execution_v2.verified(raw, classifier_projection=controls)
+        result = _require_runtime_observation(value)
+        pre_timing.bind(result)
+        return result
 
 
 def _recheck_verified(raw, value):

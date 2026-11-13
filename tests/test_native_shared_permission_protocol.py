@@ -20,7 +20,11 @@ from data_sheets_schema import native_shared_permission_protocol_orchestration a
 from tests.test_native_execution_authority_v2 import isolated_modules
 
 
-CONTROL_SHA = 'e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36'
+# native_control.py rotated for the #6094 controller timing hooks (lead, 2026-11-13).
+# Only the NativeControl class changed; CONTRACT, HISTORY_CONTRACT, INIT_ID, digest,
+# initialize_frame and hook_output, which these tests compare, are byte-identical to
+# the e53f9627 oracle (AST comparison of every top-level definition).
+CONTROL_SHA = '25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488'
 POLICY_SHA = '99db1879752ea73fea0002ea5a3a2d8333365b4e3843abdab3e1a1f0008709cc'
 PROTOCOL_NAME = 'data_sheets_schema.native_shared_permission_protocol'
 PROTOCOL_PATH = 'src/data_sheets_schema/native_shared_permission_protocol.py'

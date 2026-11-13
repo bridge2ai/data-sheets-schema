@@ -16,6 +16,7 @@ import json
 import os
 from pathlib import Path
 import signal
+import shutil
 import socket
 import subprocess
 import sys
@@ -43,14 +44,20 @@ SCRATCH_BASE = EXECUTIONS / "scratch-h2-observer-alias-20261112"
 SCRATCH = SCRATCH_BASE / "tests"
 LOCK = EXECUTIONS / "plans/native_quiet_window.lock"
 DEFAULT_DEADLINE = 3600
-NATIVE_PATHS = (
-    "/Users/marcin/.local/bin/claude", "/Users/marcin/.local/bin/agy",
-    "/Users/marcin/.nvm/versions/node/v22.16.0/bin/codex",
-    "/Users/marcin/.nvm/versions/node/v22.16.0/bin/gemini",
-    "/opt/homebrew/bin/claude", "/opt/homebrew/bin/codex",
-    "/opt/homebrew/bin/gemini", "/usr/local/bin/claude",
-    "/usr/local/bin/codex", "/usr/local/bin/gemini",
-)
+def native_paths():
+    """Discover denied executable paths without invoking any executable."""
+    paths = set()
+    for name in ('claude', 'codex', 'gemini', 'agy'):
+        paths.update(str(directory / name) for directory in (
+            Path.home() / '.local/bin', Path('/opt/homebrew/bin'), Path('/usr/local/bin')))
+        paths.update(str(path) for path in Path.home().glob('.nvm/versions/node/*/bin/' + name))
+        found = shutil.which(name)
+        if found is not None:
+            paths.add(found)
+    return tuple(sorted(paths))
+
+
+NATIVE_PATHS = native_paths()
 
 
 def sandbox_profile():
