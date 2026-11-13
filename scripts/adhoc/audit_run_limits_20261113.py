@@ -5,7 +5,7 @@ and a line-addressed review document. Includes ignored/hidden source files.
 """
 from pathlib import Path
 import hashlib,json,re,subprocess
-W=Path(__file__).resolve().parents[2];S=W.parent/'scratch-h2-run-limits-20261113';S.mkdir(exist_ok=True)
+W=Path(__file__).resolve().parents[2];S=W.parent/'scratch-h2-run-limits-review-6171-20261113';S.mkdir(exist_ok=False)
 items=[
  ('native_run_limits.py','CANARY =','Changed: sole pair definitions and strict whole-pair validator.'),
  ('native_u4b_runtime.py','require_registered_pair(result)','Changed: final runtime profile admits only the declared pair.'),
@@ -20,7 +20,8 @@ items=[
  ('native_attempt_supervisor.py','<= 3600','Unchanged: separate synthetic fixture supervisor local bound, not the native execution deadline.'),
  ('native_runtime_profiles.py','SYNTHETIC_DEADLINE_SECONDS =','Unchanged: separately declared synthetic profile remains fixed.'),
  ('native_shared_runtime_constants.py',"'deadline_seconds', 'budget_guard_usd'",'Unchanged: both values are already explicit wire keys; no new discriminant.'),
- ('native_shared_render.py',"'native_shared_runtime_declaration': _raw_identity(runtime)",'Unchanged: raw runtime reaches model-visible rendered input; the two sets intentionally produce different instructions.'),
+ ('native_shared_render.py',"'native_shared_runtime_declaration': _raw_identity(runtime)",'Runtime identity is carried in render metadata; the environment specification transports the complete metadata.'),
+ ('native_shared_render.py',"'--render-spec-env'",'Candidate recorder reads D4D_RENDER_SPEC and binds it with --render-spec-sha256; selecting another pair changes the visible digest, not embedded budget/deadline literals.'),
  ('native_subscription_guard_v2.py','def _fresh(self):','Unchanged: age/reset checks repeat at dispatch; they do not certify quota throughout the longer run.'),
  ('native_subscription_guard_v2.py','def before_reservation(self):','Unchanged: the same registered reservation margin applies.'),
 ]
@@ -46,9 +47,9 @@ lines=['# Two registered native run-limit sets','',
 for row in rows:lines.append('| `'+row['path']+':'+','.join(map(str,row['lines']))+'` | '+row['finding']+' |')
 lines+=['','## Operational differences','',
  'A twelve-hour attempt spans more five-hour usage-window boundaries than a six-hour attempt: for fixed aligned five-hour windows, two or three rather than one or two, depending on dispatch phase. This is arithmetic, not a claim about provider reset scheduling. A weekly boundary may occur during either; the longer run has more exposure to one. Starting utilization is not a guarantee of twelve hours of available quota. Overage remains disabled and observed rate/quota stops remain sticky.','',
- 'The same 1200-second observation age and 90-second reservation margin apply at admission/dispatch. They bound evidence age at launch, not evidence freshness throughout the attempt; a twelve-hour deadline does not turn them into twelve-hour authority or refresh a consumed capture. The fourteen-day registered validity interval and exact owner-word joins remain unchanged.','',
+ 'The candidate retains a 1200-second maximum observation age and a 300-second pre-reservation margin (57bcc018b): reservation is allowed through age 900 seconds and dispatch through age 1200 seconds. They bound evidence age at launch, not evidence freshness throughout the attempt; a twelve-hour deadline does not turn them into twelve-hour authority or refresh a consumed capture. The fourteen-day registered validity interval and exact owner-word joins remain unchanged.','',
  'The three IOKit assertions must remain acquired through the longer attempt and released through the same cleanup. Idle-sleep assertions do not guarantee protection from lid sleep, power exhaustion or host interruption. Issue 6046 adds separately reviewed host-power evidence; this branch does not merge that change. The production dispatch passes the registered deadline into the existing monotonic timer; the separate local synthetic supervisor keeps its own one-hour bound. On hosts whose monotonic clock pauses in sleep, the existing timer can allow more wall time than the declaration describes. This pre-existing timer/wording discrepancy is retained for lead review, not silently changed by this pair-policy patch.','',
- 'Canary and production instructions differ because the raw runtime appears in rendered recorder commands and metadata. The canary is therefore a shakedown, not the frozen production reference. The later reference pilot must use production terms.','',
+ 'Canary and production instructions differ through runtime-dependent render metadata and its digest. On the candidate (c577c0eff), the recorder uses --render-spec-env D4D_RENDER_SPEC plus --render-spec-sha256. The command contains the digest instead of embedded runtime JSON; changing the pair changes that model-visible digest and exact-command policy. The runtime declaration remains a registered readable input. The canary is therefore a shakedown, not the frozen production reference. The later reference pilot must use production terms.','',
  'Same-input compatibility is checked against exact source from the published base: prepared canary runtime bytes remain identical, and the unchanged saved canary registration/review/word bytes validate with equal derived terms. That saved-registration fixture is deliberately parser-scoped. A newly built complete registration binds package-source identities, so its bytes necessarily change when code changes; this test does not claim fresh full-registration byte identity across source revisions. No source pins are restamped to manufacture that identity.','',
  '## Frozen draft v12 references requiring production qualification','',
  'The historical draft is retained unchanged. The lead must qualify its universal six-hour statements for production; historical D14 source recommendations remain historical. The matching lines below are derived from the local frozen draft, not edited here.','']
