@@ -41,7 +41,8 @@ def test_suspension_expires_every_registered_deadline(tmp_path, monkeypatch, sec
     assert closed and killed == [process]
 
 
-def test_admission_time_is_excluded_from_child_deadline(tmp_path, monkeypatch):
+@pytest.mark.parametrize('seconds', [900, 21600, 43200])
+def test_admission_time_is_excluded_from_child_deadline(tmp_path, monkeypatch, seconds):
     runner = runner_module()
     ticks = {'continuous': 0}
     instruction = tmp_path / 'instruction'; instruction.write_text('inert')
@@ -49,12 +50,48 @@ def test_admission_time_is_excluded_from_child_deadline(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, 'elapsed_ns', lambda: ticks['continuous'])
     monkeypatch.setattr(runner, 'exit_check_available', lambda: True)
     monkeypatch.setattr(runner, 'leader_exited', lambda p: True)
-    monkeypatch.setattr(runner.subprocess, 'Popen', lambda *a, **k: object())
+    def spawn(*args, **kwargs):
+        # Correct origin: child is still within its own budget. Wrong entry
+        # origin: admission plus child time is one second beyond the deadline.
+        ticks['continuous'] += (seconds - 898) * 10**9
+        return object()
+    monkeypatch.setattr(runner.subprocess, 'Popen', spawn)
     monkeypatch.setattr(runner, 'terminate_group', lambda p: None)
     monkeypatch.setattr(runner, 'exit_status', lambda p: 0)
     proxy = SimpleNamespace(failed=threading.Event(), failure=None, close_admission=lambda: None)
     assert runner.execute_child(['inert'], proxy=proxy, instruction=instruction, attempt=tmp_path,
-        cwd=tmp_path, env={}, deadline_seconds=900, verify_launch=verify) == 0
+        cwd=tmp_path, env={}, deadline_seconds=seconds, verify_launch=verify) == 0
+
+
+@pytest.mark.parametrize('admission_seconds', [900, 901])
+def test_dispatch_backstop_refuses_without_any_alarm_delivery(tmp_path, monkeypatch, admission_seconds):
+    from data_sheets_schema.native_admission_timer import AdmissionExpired
+    runner = runner_module()
+    ticks = [0]
+    instruction = tmp_path / 'instruction'; instruction.write_text('inert')
+    opened, closed, spawned = [], [], []
+    original_open = Path.open
+    def tracked_open(path, *args, **kwargs):
+        stream = original_open(path, *args, **kwargs)
+        if path in (instruction, tmp_path / 'transcript.jsonl', tmp_path / 'stderr.txt'):
+            opened.append(stream)
+        return stream
+    monkeypatch.setattr(Path, 'open', tracked_open)
+    monkeypatch.setattr(runner, 'elapsed_ns', lambda: ticks[0])
+    # Deliberately suppress delivery to isolate the authoritative synchronous
+    # check. Removing check(dispatch_ns) must make this regression fail.
+    monkeypatch.setattr(runner.AdmissionTimer, '_alarm', lambda *args: None)
+    monkeypatch.setattr(runner, 'exit_check_available', lambda: True)
+    monkeypatch.setattr(runner.subprocess, 'Popen', lambda *a, **k: spawned.append(True))
+    monkeypatch.setattr(runner, 'terminate_group', lambda process: None)
+    proxy = SimpleNamespace(failed=threading.Event(), failure=None, close_admission=lambda: closed.append(True))
+    def verify():
+        ticks[0] = admission_seconds * 10**9
+    with pytest.raises(AdmissionExpired, match='child was not dispatched'):
+        runner.execute_child(['inert'], proxy=proxy, instruction=instruction, attempt=tmp_path,
+            cwd=tmp_path, env={}, deadline_seconds=900, verify_launch=verify)
+    assert spawned == [] and closed
+    assert len(opened) == 3 and all(stream.closed for stream in opened)
 
 
 def test_macos_continuous_ticks_use_integer_timebase_and_no_wall_clock(monkeypatch):
