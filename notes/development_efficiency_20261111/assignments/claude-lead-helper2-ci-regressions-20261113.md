@@ -12,4 +12,6 @@ CI on the integrated head `8760de5efe88b5af62e9d77e6335fa7e248017b6` (run 433499
 2. For those that are yours, fix them on `codex/native-helper-cache-home-20261112`, one commit per cause, without weakening what any test asserts and without relaxing the HOME guard or the reservation's physical checks. For a production refusal that is right and a fixture that is wrong, fix the fixture and say so.
 3. Tell the lead which failures are not yours, with the evidence.
 
+**Then Case C of your previous assignment is released** (added by the lead at 03:05Z). The owner's decision D143 stands: two registered sets of run limits, the canary's ($90, 21,600 s) and one production set ($400, 43,200 s). The lead had recommended changing it to one set, and has withdrawn that recommendation: under one set the canary would become the stratum's frozen reference, so any repair the canary reveals would end the stratum, whereas with two sets the canary is a shakedown and repairs can go in before the CHORUS reference pilot. Write Case C as specified there, after the CI fixes above, on its own branch from the published head.
+
 Bounds and handoff as before: offline; nothing pushed; no GitHub write; protected files unchanged. Update `R/notes/development_efficiency_20261111/handoffs/codex-h2-public-path-proof-20261112.md` with a section for this, answer first.
