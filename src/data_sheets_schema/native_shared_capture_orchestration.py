@@ -534,7 +534,7 @@ def _selected_receipt_assessment(run, *, full_path, receipt_path):
     return _NativeReceiptAssessment(c.canonical(block), run.selection)
 
 
-def recorded_receipt_assessment(*, record, full_path, receipt_path):
+def _recorded_receipt_assessment(*, record, full_path, receipt_path):
     """Carry the selection from the same fresh recorded reconstruction to its gate.
 
     The saved receipt block is not authority. _recorded_run validates the saved

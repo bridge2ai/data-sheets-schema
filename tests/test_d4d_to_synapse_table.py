@@ -6,17 +6,29 @@ model calls or changes to historical publication assets are performed.
 """
 
 import asyncio
+from contextlib import contextmanager
 import csv
+from datetime import datetime
+import json
 from pathlib import Path
+import subprocess
+import sys
 from unittest.mock import Mock
 
 import pandas as pd
 import pytest
 import yaml
-from synapseclient import RowSet
-from synapseclient.table import CsvFileTable, TableQueryResult
+# The SDK installs a process-wide JSON encoder while importing. Retain its
+# real behavior for these tests without changing other modules at collection.
+_incoming_json_encoder = json.JSONEncoder.default
+try:
+    from synapseclient import RowSet
+    from synapseclient.core.models.custom_json import _json_encoder as _sdk_json_encoder
+    from synapseclient.table import CsvFileTable, TableQueryResult
 
-from utils import d4d_to_synapse_table as publisher
+    from utils import d4d_to_synapse_table as publisher
+finally:
+    json.JSONEncoder.default = _incoming_json_encoder
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +36,61 @@ FILES = [publisher.CSS_NAME] + [
     publisher.HTML_TEMPLATE.format(project=project)
     for project in publisher.ORG_ID_MAP
 ]
+
+
+@contextmanager
+def _sdk_json_encoding():
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(json.JSONEncoder, "default", _sdk_json_encoder)
+        yield
+
+
+@pytest.fixture(autouse=True)
+def scoped_sdk_json_encoding(monkeypatch):
+    # Share pytest's undo stack with each test and the repository fixtures.
+    # A separate stack can restore the SDK binding after our scope exits.
+    monkeypatch.setattr(json.JSONEncoder, "default", _sdk_json_encoder)
+
+
+def test_collection_preserves_json_encoder_and_native_registry(tmp_path):
+    output = tmp_path / "collection-isolation.json"
+    command = [sys.executable, "-P", "-B", str(
+        ROOT / "scripts/adhoc/check_synapse_collection_isolation_20261112.py"),
+        "--out", str(output)]
+    result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True,
+                            timeout=120, check=False)
+    assert result.returncode == 0, result.stdout + result.stderr
+    evidence = json.loads(output.read_text())
+    assert evidence["fresh_import_preserved_encoder"] is True
+    assert evidence["cached_import_preserved_encoder"] is True
+    assert evidence["native_registry_ready"] is True
+    assert evidence["source_origins_verified"] is True
+    assert evidence["scoped_tests_exitcode"] == 0
+    assert evidence["fixture_teardown_preserved_encoder"] is True
+
+
+def test_scoped_sdk_encoder_keeps_real_serialization():
+    class Serializable:
+        def to_json(self):
+            return {"answer": 42}
+
+    assert json.JSONEncoder.default is _sdk_json_encoder
+    assert json.loads(json.dumps(Serializable())) == {"answer": 42}
+    assert json.loads(json.dumps(datetime(2026, 11, 12))) == "2026-11-12 00:00:00.000"
+    with pytest.raises(TypeError):
+        json.dumps(object())
+
+
+def test_sdk_encoder_scope_restores_entry_binding_after_exception(monkeypatch):
+    def entered_binding(self, value):
+        raise AssertionError("the entry binding must not run inside the SDK scope")
+
+    monkeypatch.setattr(json.JSONEncoder, "default", entered_binding)
+    with pytest.raises(RuntimeError, match="synthetic scope failure"):
+        with _sdk_json_encoding():
+            assert json.JSONEncoder.default is _sdk_json_encoder
+            raise RuntimeError("synthetic scope failure")
+    assert json.JSONEncoder.default is entered_binding
 
 
 @pytest.fixture

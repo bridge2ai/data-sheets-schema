@@ -18,7 +18,8 @@ def selected(declaration, registered=False):
     if registered:
         path = Path(declaration['receipt_policy']['path'])
         value = c.strict_json(path.read_bytes())
-        value['coverage_floor'] = {'state': 'registered', 'numerator': 2, 'denominator': 3}
+        value['coverage_floor'] = {'state': 'registered', 'numerator': 2, 'denominator': 3,
+                                   'basis': 'receipted_part'}
         raw = c.canonical(value)
         path.write_bytes(raw)
         declaration['receipt_policy'] = pin(path, raw)
@@ -43,9 +44,12 @@ def test_native_registered_floor_uses_exact_counts_and_recorded_identity(declara
     record = {'prompts': {'request': {'spec': spec}}}
     chosen = policy.select_policy(spec, record)
     assert chosen == policy.select_policy(record=record)
-    assert policy.evaluate_floor({'with_receipt': 2, 'receiptable': 3}, chosen)['passed']
-    assert not policy.evaluate_floor({'with_receipt': 1, 'receiptable': 3}, chosen)['passed']
-    assert policy.evaluate_floor({'with_receipt': 0, 'receiptable': 0}, chosen)['state'] == 'not_applicable'
+    assert policy.evaluate_floor({'with_receipt': 2, 'receiptable': 3,
+        'with_receipt_at_receipt': 2, 'receiptable_at_receipt': 3}, chosen)['passed']
+    assert not policy.evaluate_floor({'with_receipt': 1, 'receiptable': 3,
+        'with_receipt_at_receipt': 1, 'receiptable_at_receipt': 3}, chosen)['passed']
+    assert policy.evaluate_floor({'with_receipt': 0, 'receiptable': 0,
+        'with_receipt_at_receipt': 0, 'receiptable_at_receipt': 0}, chosen)['state'] == 'not_applicable'
     changed = deepcopy(spec)
     changed['native_shared_receipt_policy']['raw_json'] += '\n'
     with pytest.raises(ValueError):

@@ -214,7 +214,7 @@ def test_claim_added_after_current_join_refuses_both_actual_reservation_routes(
         tmp_path, monkeypatch, deferred):
     actual_locked = words.locked
     invoke, arguments, value, _, trace, active = reservation_case(
-        tmp_path, monkeypatch, remaining=90, deferred_selection=deferred)
+        tmp_path, monkeypatch, remaining=300, deferred_selection=deferred)
     original = capture._current_authority
     claimed = []
 
@@ -243,7 +243,7 @@ def test_latest_check_lock_remains_held_through_actual_first_reservation(
         tmp_path, monkeypatch, deferred):
     actual_locked = words.locked
     invoke, arguments, value, _, trace, active = reservation_case(
-        tmp_path, monkeypatch, remaining=90, deferred_selection=deferred)
+        tmp_path, monkeypatch, remaining=300, deferred_selection=deferred)
     original = guard.SubscriptionGuard.before_reservation
     checked = []
 

@@ -59,13 +59,15 @@ def receipt_case(declaration):
                          full, instrument_version=4)
         floor = dict(PENDING)
         if threshold_delta is not None:
-            covered, eligible = block['slots']['with_receipt'], block['slots']['receiptable']
+            covered, eligible = (block['slots']['with_receipt_at_receipt'],
+                                 block['slots']['receiptable_at_receipt'])
             if empty:
-                floor = {'state': 'registered', 'numerator': 1, 'denominator': 1}
+                floor = {'state': 'registered', 'numerator': 1, 'denominator': 1,
+                         'basis': 'receipted_part'}
             else:
                 assert 0 < covered < eligible
                 floor = {'state': 'registered', 'numerator': covered + threshold_delta,
-                         'denominator': eligible}
+                         'denominator': eligible, 'basis': 'receipted_part'}
         path = Path(declaration['receipt_policy']['path'])
         registered = c.strict_json(path.read_bytes())
         registered['coverage_floor'] = floor

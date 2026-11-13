@@ -3,6 +3,7 @@
 Proposed amendment N1, not authorization to run. Inputs are explicit paths;
 children use this source checkout and a fixed environment. Raw command outputs
 are retained before interpretation. Completion still needs independent review.
+Rewriting the trusted entry itself or the Python interpreter is out of scope.
 """
 from __future__ import annotations
 
@@ -134,10 +135,8 @@ def parser():
 
 
 def _run_verified(argv, *, verified_script, entry_inputs):
-    invocation = globals().get('_entry_invocation')
-    if not callable(invocation):
-        raise ValueError('sequence body requires a live verified entry namespace')
-    invocation(globals(), argv, verified_script, entry_inputs)
+    from data_sheets_schema.native_launch_entry import _require_invocation
+    _require_invocation(globals(), argv, verified_script, entry_inputs)
     args = parser().parse_args(argv)
     started = _utc_now()
     record = {'kind': SEQUENCE_KIND, 'version': SEQUENCE_VERSION, 'started_at': started,
@@ -202,7 +201,9 @@ def _run_verified(argv, *, verified_script, entry_inputs):
         # either delegated deadline before the first child dispatch.
         record['delegation_checked_at'] = _utc_now()
         _delegation(args.direction_recorded_at, args.host_confirmed_at, record['delegation_checked_at'])
-        captured = _run_step(COMMANDS[0], [*bound(), '--output-directory', str(capture_root)],
+        start_pin = {'path': record['start_claim'],
+                     'sha256': guard.sha(guard.read_regular(record['start_claim'], limit=MAX_COMMAND_OUTPUT_BYTES))}
+        captured = _run_step(COMMANDS[0], [*bound({'sequence_start': start_pin}), '--output-directory', str(capture_root)],
                              outputs[0], record['steps'])
         manifest_value = captured.get('capture_manifest')
         if type(manifest_value) is not str:

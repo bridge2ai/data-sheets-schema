@@ -315,7 +315,7 @@ def _authority(expected, selection, controller_sources):
           'environment is not an exact string mapping')
     _need(not any(k in env for k in ('ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'OPENAI_API_KEY', 'CBORG_API_KEY')),
           'permission authority must not contain credentials')
-    derived_names = {'CLAUDE_CONFIG_DIR','PYTHONPATH','VIRTUAL_ENV','D4D_LAUNCH_INSTRUCTION','D4D_MANIFEST','D4D_PROFILE'}
+    derived_names = {'CLAUDE_CONFIG_DIR','PYTHONPATH','VIRTUAL_ENV','D4D_LAUNCH_INSTRUCTION','D4D_RENDER_SPEC','D4D_MANIFEST','D4D_PROFILE'}
     _need(set(env) == set(runtime['environment']) | set(runtime_values.POLICY_ENV) | derived_names,
           'production environment has missing or extra fields')
     _need(all(env[key] == value for key,value in {**runtime['environment'], **runtime_values.POLICY_ENV}.items()),

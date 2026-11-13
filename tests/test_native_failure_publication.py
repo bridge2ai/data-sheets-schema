@@ -8,6 +8,11 @@ import pytest
 from data_sheets_schema import native_execution_orchestration as engine
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_subscription_admission as subscription
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: F401
+
+# Historical and v2 closures share bare aliases. Preserve the production
+# origin refusal while isolating collection imports and prior test cases.
+pytestmark = pytest.mark.usefixtures('isolated_modules')
 
 
 @pytest.mark.parametrize('stage', ['context', 'observations'])

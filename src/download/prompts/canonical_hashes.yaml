@@ -566,14 +566,20 @@ files:
     reason: Native U1 shared-v1 declared-difference asset (#4354); no API asset rotation.
     sha256: ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c
   src/download/prompts/native_shared_receipt_policy_v1.md:
-    body_sha256: a2a3247204b5ec0b019bbfb6574aedeb32c296a61da41d7090bca2f749645476
-    bytes: 2336
-    pinned_at_commit: 41b7169f6296c69201fc46389082c441e7d7165c
+    body_sha256: 95798b7ae2856a8eee9fd7e43a5078129fdc02a7bc06c5d0884abb6c3e4ca227
+    bytes: 2510
+    pinned_at_commit: a23ebf75391170de924cf023727ae103d60fc13d
     pinned_blob_path: src/download/prompts/native_shared_receipt_policy_v1.md
     pinned_in_repository: .
-    pinned_on: '2026-11-05'
-    reason: Native U1 shared-v1 declared-difference asset (#4354); no API asset rotation.
-    sha256: de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a
+    pinned_on: '2026-11-12'
+    reason: Owner decisions D142 (pending-floor sentence) and D140 (at-receipt basis) of 2026-11-12;
+      successor of the native shared-v1 receipt policy, no API asset rotation.
+    sha256: 8b0695212d94380949ddc523963021b1edcb3ebb9b6a52291d36238a92779f1c
+    superseded:
+    - pinned_on: '2026-11-05'
+      reason: Native U1 shared-v1 declared-difference asset (#4354); no API asset rotation.
+      retired_on: '2026-11-12'
+      sha256: de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a
   src/download/prompts/native_source_attribution_v1.md:
     body_sha256: 88bd24829813e0970b1a95ee85f9e86495b8898ff4c7efc39042abf21e63932a
     bytes: 2047

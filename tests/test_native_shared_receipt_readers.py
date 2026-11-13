@@ -53,7 +53,8 @@ def completed_reader(case, declaration, supplied, tmp_path, monkeypatch):
         'sources': [{'name': str(name), **pin(path, raw)} for name, path, raw in snapshot.sources]}
     policy_path = Path(declaration['receipt_policy']['path'])
     policy = c.strict_json(policy_path.read_bytes())
-    policy['coverage_floor'] = {'state': 'registered', 'numerator': 0, 'denominator': 1}
+    policy['coverage_floor'] = {'state': 'registered', 'numerator': 0, 'denominator': 1,
+                                'basis': 'receipted_part'}
     policy_raw = c.canonical(policy)
     policy_path.write_bytes(policy_raw)
     declaration['receipt_policy'] = pin(policy_path, policy_raw)

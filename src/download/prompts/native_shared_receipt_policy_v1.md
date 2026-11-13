@@ -30,9 +30,12 @@ receipt lineage. Unsupported candidates are carried into the complete typed
 audit; they do not authorize automatic deletion. Helpers refuse drift and
 duplicate publication instead of merging the same addition twice.
 
-The registered production floor is the exact integer fraction with_receipt /
-receiptable on the final record, using the unchanged receipt counters. A zero
-denominator cannot become a fabricated 100 percent. A pending floor remains a
-diagnostic pilot and cannot satisfy strict completion. Receipt additions and
-coverage do not certify truth, resolve applicability or replace origin/padding
-diagnostics, independent audit or the final evidence checks.
+The registered production floor is the exact integer fraction
+with_receipt_at_receipt / receiptable_at_receipt: the coverage of the sealed
+phase-1 record under the completed effective receipt (basis receipted_part).
+Later edits of the record cannot change it. A zero denominator cannot become a
+fabricated 100 percent. A pending floor remains a diagnostic pilot: no coverage
+fraction is registered, and the measured coverage is recorded as a diagnostic
+reading. Receipt additions and coverage do not certify truth, resolve
+applicability or replace origin/padding diagnostics, independent audit or the
+final evidence checks.

@@ -266,9 +266,10 @@ def test_command_roster_uses_stage_originals_and_complete_recorded_context(nativ
     assert commands['recorder'][-2:] == ('--prompt-text-env', 'D4D_LAUNCH_INSTRUCTION')
     assert tuple(commands['recorder'][i + 1] for i, item in enumerate(commands['recorder'])
                  if item == '--prompt') == tuple(selected.ASSET_HASHES)
-    import json
-    recorded = json.loads(commands['recorder'][commands['recorder'].index('--render-spec-json') + 1])
-    assert recorded == native_spec.render_spec()
+    assert '--render-spec-json' not in commands['recorder']
+    assert commands['recorder'][-6:] == ('--render-spec-env', 'D4D_RENDER_SPEC',
+        '--render-spec-sha256', c.sha(c.canonical(native_spec.render_spec())),
+        '--prompt-text-env', 'D4D_LAUNCH_INSTRUCTION')
 
 
 def test_initial_and_final_receipt_commands_are_exact(native_spec, tmp_path):

@@ -199,7 +199,7 @@ def test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read(exe
 
 
 @pytest.mark.parametrize('role,expected', [
-    pytest.param('review', 'review independence, roles or decision differs',
+    pytest.param('review', 'coded word differs from exact review/registration/probe bytes',
                  id='review-independent v2 approval'),
     pytest.param('ci', 'v2 CI check roster differs from the exact required event roster',
                  id='ci-full v2 required CI'),
@@ -221,6 +221,16 @@ def test_saved_readback_revalidates_consumed_v2_approvals(execution_case, monkey
     path.write_bytes(c.canonical(changed))
     with pytest.raises(ValueError, match=expected):
         execute.read_final(case['raw'])
+    if role == 'review':
+        # N1 draft v12 binds exact review bytes in the owner's word. The saved
+        # reader must reject that changed digest first. Independently exercise
+        # the semantic review gate with a consistent invented word, without
+        # rewriting consumed authority or reauthorizing this spent attempt.
+        from data_sheets_schema import native_launch_review as review
+        word = c.strict_json((path.parent / 'launch_word.json').read_bytes())
+        word['review_sha256'] = c.sha(path.read_bytes())
+        with pytest.raises(ValueError, match='review independence, roles or decision differs'):
+            review.validate_bundle(case['raw'], path.read_bytes(), c.canonical(word))
 
 
 # The pinned v1 and v2 closures intentionally share bare module names. Isolate
