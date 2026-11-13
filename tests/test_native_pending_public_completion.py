@@ -43,3 +43,11 @@ def test_pending_floor_public_completion_retains_diagnostic_reading(tmp_path, mo
     assert saved['gates']['receipts']['receipts']['coverage_floor'] == reading
     assert saved['gates']['receipts']['receipts']['coverage_floor']['passed'] is False
     assert saved['scientific_acceptance'] == 'not_assessed'
+
+
+# Match the v1/v2 import-origin isolation used by the other public native cases.
+# Deliberate foreign-origin changes inside a test body still reach the guard.
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: E402,F401
+import pytest as _origin_pytest  # noqa: E402
+
+pytestmark = _origin_pytest.mark.usefixtures("isolated_modules")
