@@ -64,15 +64,25 @@ def test_deadline_closes_admission_and_kills_child_before_proxy_cleanup(tmp_path
 
 
 def process_state(pid):
-    """pid's state letters (Z for exited, unreaped), '' once it is reaped: from /proc where
-    there is one, else `ps`. Reading it never reaps, and it stays independent of the
-    os.waitid(WNOWAIT) check the controller under test uses (#2600, #2714)."""
+    """Independent state: Z for an unreaped exit, T for a stop, '' after reaping.
+
+    Use /proc where available and psutil's process metadata otherwise. macOS
+    installs ps setuid, which cannot execute inside the offline test sandbox.
+    Neither reader reaps or uses the controller's os.waitid check (#6201).
+    """
     try:
         return Path(f'/proc/{pid}/stat').read_text().rpartition(')')[2].split()[0]
     except (FileNotFoundError, ProcessLookupError, IndexError):
         if Path('/proc/self/stat').exists():
             return ''
-    return subprocess.run(['ps', '-o', 'stat=', '-p', str(pid)], capture_output=True, text=True).stdout.strip()
+    import psutil
+    try:
+        state = psutil.Process(pid).status()
+    except psutil.ZombieProcess:
+        return 'Z'
+    except psutil.NoSuchProcess:
+        return ''
+    return {psutil.STATUS_ZOMBIE: 'Z', psutil.STATUS_STOPPED: 'T'}.get(state, state)
 
 
 def parent_of(pid):
@@ -81,8 +91,13 @@ def parent_of(pid):
     except (FileNotFoundError, ProcessLookupError, IndexError, ValueError):
         if Path('/proc/self/stat').exists():
             return None
-    owner = subprocess.run(['ps', '-o', 'ppid=', '-p', str(pid)], capture_output=True, text=True).stdout.strip()
-    return int(owner) if owner.isdigit() else None
+    import psutil
+    try:
+        return psutil.Process(pid).ppid()
+    except psutil.ZombieProcess:
+        raise  # An unreadable zombie parent is not proof that the PID is gone.
+    except psutil.NoSuchProcess:
+        return None
 
 
 def wait_until_exited_unreaped(pid, timeout=30):
