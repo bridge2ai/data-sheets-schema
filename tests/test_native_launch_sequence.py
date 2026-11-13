@@ -54,7 +54,7 @@ def paths(tmp_path):
                 'admission': {'capture_state_directory': str(base / 'word-state'),
                     'valid_from': '2026-11-05T00:00:00Z', 'valid_until': '2026-11-19T00:00:00Z',
                     'max_starting_weekly_utilization': 0.5, 'max_starting_five_hour_utilization': 0.25,
-                    'max_age_seconds': 1200, 'pre_reservation_margin_seconds': 90}})},
+                    'max_age_seconds': 1200, 'pre_reservation_margin_seconds': 300}})},
         'dependencies': {'base': {'package_sources': {'src/data_sheets_schema/native_launch_sequence.py': digest}}}}}))
     result['review'].write_bytes(guard.canonical({'kind': 'd4d_native_execution_review_bundle_v3',
         'version': 3, 'registration_sha256': guard.sha(result['registration'].read_bytes()),
