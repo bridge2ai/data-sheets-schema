@@ -26,7 +26,7 @@ def test_suspension_expires_every_registered_deadline(tmp_path, monkeypatch, sec
     proxy = SimpleNamespace(failed=threading.Event(), failure=None, close_admission=lambda: closed.append(True))
     instruction = tmp_path / 'instruction'; instruction.write_text('inert fixture')
     def verify():
-        ticks['continuous'] += 2 * seconds * 10**9  # Slow admission must not consume child time.
+        ticks['continuous'] += 899 * 10**9  # Within admission's own bound; excluded from child time.
     def spawn(*a, **kw):
         ticks['continuous'] += (seconds + 1) * 10**9  # Suspend immediately at dispatch.
         return process
@@ -45,7 +45,7 @@ def test_admission_time_is_excluded_from_child_deadline(tmp_path, monkeypatch):
     runner = runner_module()
     ticks = {'continuous': 0}
     instruction = tmp_path / 'instruction'; instruction.write_text('inert')
-    def verify(): ticks['continuous'] += 10**15
+    def verify(): ticks['continuous'] += 899 * 10**9
     monkeypatch.setattr(runner, 'elapsed_ns', lambda: ticks['continuous'])
     monkeypatch.setattr(runner, 'exit_check_available', lambda: True)
     monkeypatch.setattr(runner, 'leader_exited', lambda p: True)
