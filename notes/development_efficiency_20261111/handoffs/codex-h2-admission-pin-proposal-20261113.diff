@@ -1,0 +1,71 @@
+--- a/src/data_sheets_schema/native_controller_sources_v1.json
++++ b/src/data_sheets_schema/native_controller_sources_v1.json
+@@ -1,6 +1,6 @@
+ {
+   "version": 1,
+-  "source_commit": "916ad3af0adf278ab3bbde78be7c9fb3c4cc92f0",
++  "source_commit": "e648abe2a384be9036fdd77ce239a6db3c311b03",
+   "modules": {
+     "budget_amendment": {
+       "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
+@@ -48,7 +48,7 @@
+     },
+     "run_native_canary": {
+       "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+-      "sha256": "f1c4cfac150eed2bd440e3ad6b18bd6e0b2633fcd24e40a00fe7af2935549857"
++      "sha256": "f2a019bed3ec9c2b15780a55f41b852a2c6990add47006a17e1f25f29cd37b1a"
+     }
+   }
+ }
+--- a/src/data_sheets_schema/native_attribution_controller.py
++++ b/src/data_sheets_schema/native_attribution_controller.py
+@@ -21,7 +21,7 @@
+ VERSION = 1
+ EXECUTION = 'offline_composition_only_no_production_launcher'
+ SOURCES_PATH = Path('src/data_sheets_schema/native_controller_sources_v1.json')
+-SOURCES_SHA256 = '6cc0a4d0e5d0790e86bebd0da9e6184c0029077dec008f444fa4961c3278b10e'
++SOURCES_SHA256 = '280bdcaeee2cd0a84751f6ed0162541250fa830b39f1169907054c124a010aa6'
+ ROOT = Path(__file__).resolve().parents[2]
+ 
+ 
+--- a/src/data_sheets_schema/native_controller_sources_v2.json
++++ b/src/data_sheets_schema/native_controller_sources_v2.json
+@@ -1,6 +1,6 @@
+ {
+   "version": 2,
+-  "source_commit": "916ad3af0adf278ab3bbde78be7c9fb3c4cc92f0",
++  "source_commit": "e648abe2a384be9036fdd77ce239a6db3c311b03",
+   "modules": {
+     "budget_amendment": {
+       "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
+@@ -48,7 +48,7 @@
+     },
+     "run_native_canary": {
+       "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+-      "sha256": "f1c4cfac150eed2bd440e3ad6b18bd6e0b2633fcd24e40a00fe7af2935549857"
++      "sha256": "f2a019bed3ec9c2b15780a55f41b852a2c6990add47006a17e1f25f29cd37b1a"
+     },
+     "prepare_registration_v2": {
+       "path": "notes/matched_cborg_2026-09-13/prepare_registration_v2.py",
+--- a/src/data_sheets_schema/native_attribution_controller_v2.py
++++ b/src/data_sheets_schema/native_attribution_controller_v2.py
+@@ -21,7 +21,7 @@
+ VERSION = 2
+ EXECUTION = 'offline_composition_only_no_production_launcher'
+ SOURCES_PATH = Path('src/data_sheets_schema/native_controller_sources_v2.json')
+-SOURCES_SHA256 = '1b9c06a985f278d9f91d9535d7755bdf961484477abadcb587e9c090ae13e8ad'
++SOURCES_SHA256 = 'd4ad9c21abc470bfffe6c68268ca5b343b548bea822fce19b5e6b9abb29c322b'
+ ROOT = Path(__file__).resolve().parents[2]
+ 
+ 
+--- a/src/data_sheets_schema/native_shared_authority_wire.py
++++ b/src/data_sheets_schema/native_shared_authority_wire.py
+@@ -4,7 +4,7 @@
+ sources nor grant execution. The original A/v1 modules remain unmodified.
+ """
+ VERSION = 2
+-CONTROLLER_SOURCES_SHA256 = '1b9c06a985f278d9f91d9535d7755bdf961484477abadcb587e9c090ae13e8ad'
++CONTROLLER_SOURCES_SHA256 = 'd4ad9c21abc470bfffe6c68268ca5b343b548bea822fce19b5e6b9abb29c322b'
+ PREPARATION_KIND = 'd4d_native_shared_preparation_v2'
+ EXECUTION_KIND = 'd4d_native_shared_execution_registration_v2'
+ PREPARATION_SCOPE = 'offline_inputs_only_not_permission_or_launch_authority'
