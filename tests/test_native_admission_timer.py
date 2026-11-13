@@ -102,7 +102,7 @@ def test_late_post_cancel_alarm_is_consumed_before_restoration(monkeypatch):
         assert timer._closing
         assert signal.SIGALRM in signal.pthread_sigmask(signal.SIG_BLOCK, ())
         assert signal.getitimer(signal.ITIMER_REAL) == (0.0, 0.0)
-        os.kill(os.getpid(), signal.SIGALRM)
+        signal.pthread_kill(threading.get_ident(), signal.SIGALRM)
         assert signal.SIGALRM in signal.sigpending()
         timer._alarm(signal.SIGALRM, None)
         seen.append(seconds)
@@ -150,7 +150,9 @@ def test_existing_signal_state_is_refused_and_preserved(ownership):
     mask = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM})
     try:
         if ownership == 'pending':
-            os.kill(os.getpid(), signal.SIGALRM)
+            # xdist has unblocked reader threads. Queue this synthetic alarm
+            # on the blocked admission thread, not an arbitrary process thread.
+            signal.pthread_kill(threading.get_ident(), signal.SIGALRM)
         elif ownership == 'timer':
             signal.setitimer(signal.ITIMER_REAL, 30)
             signal.pthread_sigmask(signal.SIG_SETMASK, mask)

@@ -25,7 +25,7 @@ def make_runner():
     raw = source.read_text()
     raw = raw.replace('"-p", "h2_public_path_timing_20261112", ', '')
     raw = raw.replace('def sandbox_profile():', 'def sandbox_profile(allow_loopback=False):')
-    raw = raw.replace("'(version 1)\\n(allow default)\\n(deny network*)\\n'", "'''(version 1)\\n(allow default)\\n(deny network*)\\n''' + ('''(allow network-bind (local ip \"127.0.0.1:*\"))\\n(allow network-inbound (local ip \"127.0.0.1:*\"))\\n(allow network-outbound (remote ip \"127.0.0.1:*\"))\\n''' if allow_loopback else '') +")
+    raw = raw.replace("'(version 1)\\n(allow default)\\n(deny network*)\\n'", "'''(version 1)\\n(allow default)\\n(deny network*)\\n''' + ('''(allow network-bind (local ip \"localhost:*\"))\\n(allow network-inbound (local ip \"localhost:*\"))\\n(allow network-outbound (remote ip \"localhost:*\"))\\n''' if allow_loopback else '') +")
     raw = raw.replace('profile.write_text(sandbox_profile(),', 'profile.write_text(sandbox_profile(allow_loopback=bool(args.lane)),')
     raw = raw.replace('sock.bind(("127.0.0.1", 0))', 'sock.bind(("0.0.0.0", 0))')
     raw = raw.replace('"scope": "inherited OS deny network*"', '"scope": "OS denies non-loopback networking; CI lane fixtures may use 127.0.0.1"')

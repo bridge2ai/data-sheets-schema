@@ -64,7 +64,7 @@ def sandbox_profile(allow_loopback=False):
     paths = sorted({path for item in NATIVE_PATHS
                     for path in (item, str(Path(item).resolve()))})
     return (
-        '''(version 1)\n(allow default)\n(deny network*)\n''' + ('''(allow network-bind (local ip "127.0.0.1:*"))\n(allow network-inbound (local ip "127.0.0.1:*"))\n(allow network-outbound (remote ip "127.0.0.1:*"))\n''' if allow_loopback else '') +
+        '''(version 1)\n(allow default)\n(deny network*)\n''' + ('''(allow network-bind (local ip "localhost:*"))\n(allow network-inbound (local ip "localhost:*"))\n(allow network-outbound (remote ip "localhost:*"))\n''' if allow_loopback else '') +
         '(deny process-exec (require-all (regex #"/(claude|codex|gemini|agy)(/|$)") (require-not (subpath ' + json.dumps(str(SCRATCH)) + '))))\n'
         '(deny process-exec\n'
         + ''.join('  (literal ' + json.dumps(path) + ')\n' for path in paths)
