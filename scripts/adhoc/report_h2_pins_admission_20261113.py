@@ -7,6 +7,7 @@ from collections import Counter, defaultdict
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 import xml.etree.ElementTree as ET
 
@@ -21,19 +22,40 @@ def cohort(name):
     root = B / 'tests' / name
     outcome = read(root / 'outcome.json')
     counts, failures = defaultdict(Counter), []
+    completed_nodes = {json.loads(line)['node'] for path in root.glob('timing*.jsonl')
+                       for line in path.read_text().splitlines()}
+    incomplete_nodes = []
     xml = root / 'pytest.xml'
     if xml.exists():
         for case in ET.parse(xml).iter('testcase'):
-            filename = case.get('file') or case.get('classname', 'unknown').replace('.', '/') + '.py'
+            if name == 'generation-guards' and case.get('name') is None:
+                incomplete_nodes.append({'unreported_junit_entry': dict(case.attrib)})
+                continue
+            parts = case.get('classname', 'unknown').split('.')
+            index = next((i for i, part in enumerate(parts) if part.startswith('test_')), len(parts)-1)
+            filename = case.get('file') or '/'.join(parts[:index+1]) + '.py'
             status = next((tag for tag in ('failure', 'error', 'skipped') if case.find(tag) is not None), 'passed')
+            node = filename + '::' + '::'.join(parts[index+1:] + [case.get('name', '<unreported>')])
+            if name == 'generation-guards' and status == 'passed' and node not in completed_nodes:
+                status = 'incomplete'
+                incomplete_nodes.append(node)
             counts[filename][status] += 1
             if status in ('failure', 'error'):
                 child = case.find(status)
                 text = child.text or ''
                 failures.append(dict(file=filename, test=case.get('name'), status=status,
-                    message=child.get('message'), tail=text[-2000:]))
+                    message=child.get('message'), tail=text[-2000:],
+                    mentions_scanner_contract_refusal='v2 envelope authority source changed' in text,
+                    mentions_controller_pin_refusal='frozen native controller bytes changed: run_native_canary' in text))
     assert outcome['cleanup_verified'] and not outcome['observed_surviving_pids'], name
+    if name == 'generation-guards':
+        reported = int(re.findall(r'\b(\d+) passed\b', (root / 'pytest.log').read_text())[-1])
+        assert sum(value['passed'] for value in counts.values()) == reported
     return dict(outcome=pin(root / 'outcome.json'), returncode=outcome['returncode'],
+        junit=pin(xml) if xml.exists() else None,
+        teardown_records=[pin(path) for path in sorted(root.glob('timing*.jsonl'))],
+        complete=name != 'generation-guards',
+        incomplete_junit_entries=incomplete_nodes,
         seconds=outcome['seconds'], cleanup_verified=outcome['cleanup_verified'],
         origins_passed=outcome['worker']['source_origin_checks_passed'],
         plan=read(root / 'plan.json'), counts_by_file=dict(counts), failures=failures,
@@ -55,7 +77,6 @@ scanner = B / 'tests/specificity/scanner.md'
 scan_text = scanner.read_text() if scanner.exists() else ''
 violation_rows = scan_text.split('## gc_project violations', 1)[-1].split('## Tracked categories', 1)[0]
 violation_rows = [line for line in violation_rows.splitlines() if line.startswith('| `')]
-old = read(H / 'codex-h2-review-fixes-audit-20261113.json')['scanner_comparison']['scanner']['violation_rows']
 scan_log = (B / 'tests/specificity/pytest.log').read_text().strip()
 baseline_log = (B / 'tests/admitted-scanner-baseline/pytest.log').read_text().strip()
 authority_path = 'src/data_sheets_schema/native_attribution_controller_v2.py'
@@ -74,6 +95,7 @@ answer = ('Lead pins were fast-forwarded into the power branch and the admitted 
     + '. Admission, documentation, personal-path and pre-reservation diagnostic changes are committed locally. '
     'The new controller pin proposal is unapplied; the stalled-verification publication integration awaits lead admission. '
     'The specificity scanner also needs review of its frozen authority-source contract. '
+    'The supplementary generation guard suite was stopped after repeated contract refusals; its reported counts are partial. '
     'Nothing was pushed or published; no live native/provider/model call or public completion test ran.')
 admission = ('900 seconds, as assigned: the earlier timing evidence lacks a measured admission interval that supports '
     'a different value. The bound starts at execute_child entry and ends at the dispatch origin on the existing '
@@ -110,8 +132,12 @@ reorder = ('A later capture is possible in principle without changing the 1200-s
     'explicit two-phase interface/source review; no reordering, retimestamping, recapture or limit relaxation '
     'was implemented.')
 record = dict(answer=answer, lead_pin_commit='a2db8ab6b403e5c70f1020c927dd6185fe8a574c',
+    report_generator=pin(Path(__file__).resolve()),
     branches=audit['heads'], admitted_export=read(B / 'fixed.json'),
     new_source_export=read(B / 'unaffected.json'), cohorts=cohorts,
+    test_duration_basis='Runner seconds use time.monotonic, not the continuous admission clock. They are not capture-to-reservation measurements or evidence of a quiet, unsuspended host.',
+    guard_failure_contract_mentions=sum(item['mentions_scanner_contract_refusal']
+        for item in cohorts['generation-guards']['failures']),
     source_audit=pin(B / 'source-audit.json'), admission=dict(seconds=900, mechanism=admission, limitations=limits),
     source_function_checks=dict(results=pin(B / 'admission-function/results.json'), passed=len(simulation['rows'])),
     capture_timing=capture, capture_reordering_proposal_only=reorder,
@@ -125,6 +151,8 @@ record = dict(answer=answer, lead_pin_commit='a2db8ab6b403e5c70f1020c927dd6185fe
         anchor_refusal=pin(B / 'docs-anchor-refusal.log'), historical_references_retained=True),
     daemon_recovery=dict(receipt=pin(B / 'queue-recovery.json'),
         note='The active admitted rerun survived daemon restart and was not restarted. Only its idle waiting validation driver was identity-checked and restarted with durable stdout. Saved worker/outcome files establish completion and cleanup.'),
+    supplementary_guard_interruption=dict(receipt=pin(B / 'blocked-guards-interruption.json'),
+        note='Only the supplementary generation-guard pytest controller received SIGINT after repeated source-contract failures. Pytest retained partial XML/logs, returned normally with interruption status, and the owner runner verified cleanup without forced termination. These counts are not a completed guard suite.'),
     integration_note='The final power-head delta after the unit export and proposal is only the stalled-publication test clock setup; all controller bytes are identical. That integration test remains unverified until new pins are applied.',
     merge_review='Automatic approval review rejected an additional power-to-limits branch merge as lacking explicit merge authorization. It was not retried. The documentation generator reads both source packets explicitly; their branches remain separate for lead integration.',
     review='Separate read-only diff review completed. Pending controller admission, the scanner authority-source contract refusal, and interruptibility limits are explicit findings for the lead; no review issue was published under the offline constraint. No authority, scanner or prompt pin was restamped.',
@@ -137,20 +165,26 @@ for name, head in audit['heads'].items(): lines.append('| ' + name + ' | `' + he
 lines += ['', 'The requested pin merge was a fast-forward. The four protected files and guard v1 remain equal to '
     'candidate f7f8e8bff; no primary-checkout edits. The cache branch has no new commit in this assignment; '
     'the three remaining runner fixes are in the power packet.', '',
+    'The admitted rerun used export commit `' + record['admitted_export']['commit'] + '`, composed from power `'
+    + record['admitted_export']['power'] + '` and limits `' + record['admitted_export']['limits'] + '`. '
+    'The new unit checks used source `' + record['new_source_export']['commit'] + '` with unchanged pins. '
+    'The admitted rerun does not certify the subsequent admission-controller change.', '',
     'Admitted rerun counts, derived from its saved JUnit XML:', '',
     '| File | Passed | Failures | Errors | Skipped |', '| --- | ---: | ---: | ---: | ---: |']
 for name, counts in sorted(cohorts['admitted-touched-files']['counts_by_file'].items()):
     lines.append('| `' + name + '` | ' + ' | '.join(str(counts.get(k, 0)) for k in ('passed','failure','error','skipped')) + ' |')
-lines += ['', 'Other saved checks:', '', '| Cohort | Counts | Seconds |', '| --- | --- | ---: |']
+lines += ['', 'Other saved checks:', '', '| Cohort | Counts | Runner seconds (monotonic) |', '| --- | --- | ---: |']
 for name, row in cohorts.items():
     if name == 'admitted-touched-files': continue
     count = Counter()
     for item in row['counts_by_file'].values(): count.update(item)
-    lines.append('| ' + name + ' | ' + (', '.join(str(v) + ' ' + k for k,v in sorted(count.items())) or 'scanner exit ' + str(row['returncode'])) + ' | ' + str(row['seconds']) + ' |')
+    label = name + (' (partial)' if not row['complete'] else '')
+    lines.append('| ' + label + ' | ' + (', '.join(str(v) + ' ' + k for k,v in sorted(count.items())) or 'scanner exit ' + str(row['returncode'])) + ' | ' + str(row['seconds']) + ' |')
 lines += ['', 'All cohorts use outside-execution exports, denied network/native execution and at most two xdist workers; '
     'origin and owned-process cleanup checks are saved. The actual-source FIFO canary proves alarm interruption. '
     'The additional ' + str(len(simulation['rows'])) + ' pure execute_child checks prove refusal, descriptor cleanup '
     'and child-clock separation without loading or admitting a registered controller. They do not prove failure publication.', '',
+    record['test_duration_basis'], '',
     admission, '', limits, '', capture, '', reorder, '',
     'Review-only pin proposal: `' + str(proposal) + '`. SHA-256 `' + record['new_pin_proposal']['sha256'] + '`. '
     'It contains both manifest rotations and their three authority constants. The test census includes ignored/hidden '
@@ -163,6 +197,11 @@ lines += ['', 'All cohorts use outside-execution exports, denied network/native 
     scanner_note, '',
     record['merge_review'], '', record['review'], '',
     record['daemon_recovery']['note'], '',
+    record['supplementary_guard_interruption']['note'], '',
+    str(record['guard_failure_contract_mentions']) + ' recorded guard failures/errors mention the frozen scanner contract refusal. '
+    'There are no completed results in this supplementary run for test_neutral_generation_schema.py, test_profiles.py '
+    'or test_external_dataset_onboarding.py; those checks remain pending. Two unnamed interrupted JUnit entries '
+    'are retained separately and are not counted as passes.', '',
     *[str(i) + '. ' + item for i,item in enumerate(record['remaining'],1)], '',
     'Detailed source checks: `' + str(B / 'source-audit.json') + '`, SHA-256 `' + record['source_audit']['sha256'] + '`.']
 body = '\n'.join(lines) + '\n'
