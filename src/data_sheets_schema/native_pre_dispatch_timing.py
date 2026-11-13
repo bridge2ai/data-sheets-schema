@@ -1,8 +1,9 @@
 """Supplemental capture-to-reservation timing. Never read for admission.
 
-Buffer until verification supplies an attempt parent; never write into the
-closed capture tree or consume an attempt. Independent CLI processes append
-to a registration-digest sidecar. Missing records mean unknown durations.
+Buffer throughout each capture, preparation or launch operation. Persist only
+when its outer scope exits, after its outcome and freshness decisions and after
+registration locks have unwound. Never write into the closed capture tree or
+consume an attempt. Missing records mean unknown durations.
 """
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -27,11 +28,12 @@ class Trace:
         self.path = None
         self.pending = []
         self.disabled = False
+        self.sealed = False
         self.sequence = 0
         self.trace_id = f'{os.getpid()}-{time.monotonic_ns()}'
 
     def record(self, boundary, **fields):
-        if self.disabled:
+        if self.disabled or self.sealed:
             return
         try:
             raw = json.dumps({'boundary': boundary, 'elapsed_ns': elapsed_ns(),
@@ -41,7 +43,10 @@ class Trace:
             if len(raw) > 4096 or len(self.pending) >= MAX_BUFFER:
                 raise ValueError('pre-dispatch timing buffer bound')
             self.pending.append(raw)
-            self.flush()
+        except InterruptedError:
+            self.disabled = True
+            self.pending.clear()
+            raise
         except Exception:
             self.disabled = True
             self.pending.clear()
@@ -52,32 +57,46 @@ class Trace:
         try:
             # Caller supplies a freshly verified registration, never parsed input.
             parent = Path(value['attempt_directory']).parent
-            if not parent.is_absolute() or parent.resolve(strict=True) != parent:
-                raise ValueError('noncanonical diagnostic parent')
+            if not parent.is_absolute():
+                raise ValueError('nonabsolute diagnostic parent')
             self.path = parent / ('host-pre-dispatch-' + self.identity + '.jsonl')
-            self.flush()
+        except InterruptedError:
+            self.disabled = True
+            self.pending.clear()
+            raise
         except Exception:
             self.disabled = True
             self.pending.clear()
 
     def flush(self):
-        if self.path is None or not self.pending:
+        """After the operation's outcome only; failures drop diagnostic rows."""
+        if self.disabled or self.path is None or not self.pending:
             return
-        fd = os.open(self.path, os.O_WRONLY | os.O_CREAT | os.O_APPEND |
-                     os.O_NOFOLLOW | os.O_NONBLOCK, 0o600)
         try:
-            info = os.fstat(fd)
-            if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_nlink != 1:
-                raise ValueError('unsafe diagnostic file')
-            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            body = b''.join(self.pending)
-            if os.fstat(fd).st_size + len(body) > MAX_BYTES:
-                raise ValueError('pre-dispatch timing file bound')
-            if os.write(fd, body) != len(body):
-                raise OSError('incomplete pre-dispatch timing write')
-            self.pending.clear()
+            parent = self.path.parent
+            if parent.resolve(strict=True) != parent:
+                raise ValueError('noncanonical diagnostic parent')
+            fd = os.open(self.path, os.O_WRONLY | os.O_CREAT | os.O_APPEND |
+                         os.O_NOFOLLOW | os.O_NONBLOCK, 0o600)
+            try:
+                info = os.fstat(fd)
+                if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_nlink != 1:
+                    raise ValueError('unsafe diagnostic file')
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                body = b''.join(self.pending)
+                if os.fstat(fd).st_size + len(body) > MAX_BYTES:
+                    raise ValueError('pre-dispatch timing file bound')
+                if os.write(fd, body) != len(body):
+                    raise OSError('incomplete pre-dispatch timing write')
+            finally:
+                os.close(fd)
+        except InterruptedError:
+            self.disabled = True
+            raise
+        except Exception:
+            self.disabled = True
         finally:
-            os.close(fd)
+            self.pending.clear()
 
 
 @contextmanager
@@ -90,6 +109,8 @@ def scope(registration_raw):
     # Ordinary registration/readback calls have no timing side effects.
     try:
         trace = Trace(registration_raw)
+    except InterruptedError:
+        raise
     except Exception:
         yield None
         return
@@ -98,6 +119,7 @@ def scope(registration_raw):
         yield trace
     finally:
         _active.reset(token)
+        trace.flush()
 
 
 def bind(value):
@@ -116,8 +138,7 @@ def finish():
     """End this launch's diagnostic window after the reservation span closes."""
     trace = _active.get()
     if trace is not None:
-        trace.disabled = True
-        trace.pending.clear()
+        trace.sealed = True
 
 
 @contextmanager
