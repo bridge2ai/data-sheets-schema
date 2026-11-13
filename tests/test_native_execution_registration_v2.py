@@ -274,7 +274,7 @@ def test_v1_execution_and_v2_envelope_cross_refuse(prepared):
     inputs, envelope = prepared
     before_files, before_entries = _files(inputs['root']), _entries(inputs['root'])
     v1 = {'kind': legacy.KIND, 'version': 1, 'execution': legacy.EXECUTION}
-    with pytest.raises(ValueError, match='v2 authority envelope'):
+    with pytest.raises(ValueError, match='current registration requires v3'):
         registration.verified(c.canonical(v1), classifier_projection=object())
     with pytest.raises(ValueError, match='not a supported explicit native execution registration'):
         legacy.verified(c.canonical(envelope))
@@ -328,11 +328,11 @@ def test_complete_valid_v1_execution_refused_by_v2_without_reservation(
         # The following refusal must be the actual wire/version boundary.
         for name in names:
             sys.modules.pop(name, None)
-        with pytest.raises(ValueError, match='v2 launch requires an exact v2 authority envelope'):
+        with pytest.raises(ValueError, match='current registration requires v3'):
             registration.verified(case['raw'], classifier_projection=object())
         assert _files(tmp_path) == before_files
         assert _entries(tmp_path) == before_entries
-        with pytest.raises(ValueError, match='v2 launch requires an exact v2 authority envelope'):
+        with pytest.raises(ValueError, match='current registration requires v3'):
             registration.admit(case['raw'], classifier_projection=object(), **case['kwargs'])
         assert _files(tmp_path) == before_files
         assert _entries(tmp_path) == before_entries

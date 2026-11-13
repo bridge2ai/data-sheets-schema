@@ -155,6 +155,16 @@ def _require_owned_import_roots(paths, distributions):
                 if not entry.name.endswith(('.dist-info', '.egg-info')):
                     pending.append(path)
             elif _requires_owner(path):
+                if path.suffix == '.pyc' and path.parent.name == '__pycache__':
+                    # Python's import machinery does not load pytest's tagged
+                    # rewrite caches or caches for another interpreter here.
+                    # Loose sourceless .pyc files outside __pycache__ still need
+                    # their own RECORD entry, regardless of their filename.
+                    tag = sys.implementation.cache_tag
+                    if tag is None or re.fullmatch(
+                            r'.+\.' + re.escape(tag) + r'(?:\.opt-[0-9]+)?\.pyc',
+                            path.name) is None:
+                        continue
                 physical = path.resolve(strict=True)
                 if physical in owned:
                     continue

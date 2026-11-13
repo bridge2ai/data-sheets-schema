@@ -199,3 +199,36 @@ def test_duplicate_and_empty_import_path_entries(installed, monkeypatch):
     monkeypatch.setattr(m.metadata, 'distributions', discover)
     assert m.generate()
     assert observed == [str(installed.root)]
+
+
+@pytest.mark.parametrize('optimization', ['', '.opt-1', '.opt-2'])
+def test_standard_bytecode_cache_uses_owned_source(installed, optimization):
+    source = Path('registered.py')
+    (installed.root / source).write_text('SYNTHETIC = True\n')
+    installed.files.append(source)
+    cache = installed.root / '__pycache__'
+    cache.mkdir()
+    (cache / ('registered.' + m.sys.implementation.cache_tag + optimization + '.pyc')).write_bytes(b'synthetic cache')
+    assert m.generate()
+
+
+def test_pytest_rewrite_cache_is_not_importable_by_python(installed):
+    cache = installed.root / '__pycache__'
+    cache.mkdir()
+    # No source or RECORD entry: this is not a standard Python import cache.
+    (cache / ('unregistered.' + m.sys.implementation.cache_tag + '-pytest-7.4.4.pyc')).write_bytes(b'synthetic pytest cache')
+    assert m.generate()
+
+
+def test_loose_unowned_bytecode_still_refuses(installed):
+    (installed.root / 'unregistered.pyc').write_bytes(b'synthetic sourceless bytecode')
+    with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
+        m.generate()
+
+
+def test_standard_cache_without_owned_source_refuses(installed):
+    cache = installed.root / '__pycache__'
+    cache.mkdir()
+    (cache / ('unregistered.' + m.sys.implementation.cache_tag + '.pyc')).write_bytes(b'synthetic cache')
+    with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
+        m.generate()
