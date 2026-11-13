@@ -480,6 +480,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                     _admit_subscription_guard(launch_guard, attempt, _file, durable_new)
                     contract.activate_before_dispatch(adapter, started_raw)
                     _require_launch_profile(value['runtime'], expected_profile)
+                    host_power.dispatch_power()
                 observe = _guarded_observer(launch_guard, adapter, controls['run_native_canary'].BudgetStop)
                 status = _execute_child(controls, value['argv'], proxy=proxy,
                     instruction=Path(selected['instruction_path']), attempt=attempt,

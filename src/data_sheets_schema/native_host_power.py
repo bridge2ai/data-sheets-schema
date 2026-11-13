@@ -83,6 +83,15 @@ def require_ac(reading):
         raise ValueError('host power must be positively observed as AC before sequence start')
 
 
+def dispatch_power():
+    """Read the power source last, without a subsequent slow lid query."""
+    battery = _local(['/usr/bin/pmset', '-g', 'batt'], limit=16384)
+    reading = parse_power(battery['text'], '')
+    if reading['source'] != 'ac' or battery['status'] != 'read':
+        raise ValueError('host power must be positively observed as AC immediately before dispatch')
+    return reading
+
+
 def clock_reading(label):
     return {'label': label, 'wall_ns': time.time_ns(), 'monotonic_ns': time.monotonic_ns()}
 

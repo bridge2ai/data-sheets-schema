@@ -12,6 +12,7 @@ import sys
 import time
 import traceback
 from contextlib import ExitStack
+from data_sheets_schema.native_elapsed import elapsed_ns
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -602,7 +603,6 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
     process = None
     control = None
     primary_error = None
-    deadline = time.monotonic() + deadline_seconds
     try:
         with ExitStack() as stack:
             incoming = stack.enter_context(Path(instruction).open('r'))
@@ -633,17 +633,23 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
             if not exit_check_available():
                 raise BudgetStop('native control needs a non-reaping exit check (os.waitid; macOS Python 3.13+)')
             verify_launch()  # Bind the executable immediately before Popen.
+            # Dispatch origin includes process creation but excludes admission.
+            # Unlike monotonic() on macOS, this clock includes host suspension.
+            deadline = elapsed_ns() + int(deadline_seconds * 1_000_000_000)
             process = subprocess.Popen(argv, stdin=subprocess.PIPE if control else incoming, cwd=cwd,
                 env=env, stdout=subprocess.PIPE if control else out, stderr=err, start_new_session=True)
             if control:
                 control.start(process, out, evidence, incoming.read())
             # Watch for the exit without reaping: cleanup signals the group
             # before the reap releases its id (#2714).
-            while not leader_exited(process) or (control and not control.stdout_closed):
+            while True:
                 if proxy.failed.is_set():
                     raise BudgetStop(proxy.failure)
-                if time.monotonic() >= deadline:
+                if elapsed_ns() >= deadline:
                     raise BudgetStop('native attempt deadline elapsed; retain all incomplete charge reservations')
+                # Check expiry even when the child exited while the host slept.
+                if leader_exited(process) and (not control or control.stdout_closed):
+                    break
                 if control:
                     control.service()
                 else:

@@ -5,6 +5,20 @@ claims its word or starts any native command. AC power must be positively
 reported. Battery and unknown power refuse. Battery percentage and lid state
 are recorded; a closed lid does not refuse AC operation. This check does not
 replace the owner's confirmation or prevent a later unplug or lid sleep.
+Issue 6170 repeats the positive-AC check after launch verification, immediately
+before dispatch, using only the bounded power-source query (no later lid query).
+Battery or unknown readings refuse, including after an AC sequence start.
+
+All declared child deadlines start immediately before `Popen`, after admission.
+macOS uses `mach_continuous_time` converted with `mach_timebase_info`; the installed
+Apple SDK's `usr/include/mach/mach_time.h` describes it as "like mach_absolute_time,
+but advances during sleep" (available since macOS 10.12). Linux uses
+`clock_gettime_ns(CLOCK_BOOTTIME)`. Unsupported clocks refuse; there is no fallback
+to adjustable time of day or suspension-excluding monotonic time. The controller
+checks expiry on resume even when the child exited during suspension. The
+900-second synthetic, 21,600-second canary and 43,200-second production declarations
+are unchanged. This deadline applies through child output drainage; admission
+and subsequent final evidence publication are outside its measured interval.
 
 The exclusive `sequence-start.json` contains the reading even on power refusal.
 The sequence source changes at its import and its one start-evidence call.
@@ -21,6 +35,9 @@ sleep/wake events intersecting that interval. DarkWake closes a sleep interval;
 subsequent maintenance sleep opens another. A wall-clock discontinuity alone
 cannot distinguish sleep from a clock adjustment. An unavailable system log is
 unknown, never evidence of no sleep.
+No-sleep requires recognized, ordered, matched sleep/wake events bracketing the
+requested interval. Unparsed sleep-like events, unmatched events and incomplete
+coverage yield unknown while retaining any positive intervals that were parsed.
 
 These local sidecars are supplemental host observations, not model inputs or
 an amendment to the closed captured-generation pool. They do not grant
@@ -28,6 +45,9 @@ acceptance, change runtime gate decisions, or authenticate the OS clock/log.
 A host sleep remains a host event; its acceptance disposition is for the owner.
 Retain the sidecars with the attempt for that review. Do not rewrite consumed
 attempts to add them retroactively.
+Start, stage and end observation failures retain a separate observation-error
+diagnostic when possible, falling back to stderr. They cannot replace a launch
+failure, skip final publication or undo an already published journal stage.
 
 The offline proof runner uses the same positive-AC check and clock/event
 recorder around each cohort. Its report distinguishes a stale observation after
