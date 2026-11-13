@@ -26,7 +26,9 @@ from . import native_shared_contract as c
 from .native_shared_evidence import read_regular
 
 KIND = 'd4d_native_environment_manifest'
-VERSION = 2
+# Lead addendum: no production registration used the earlier metadata-only
+# shape. Refine version 1 in place; saved synthetic older shapes stay historical.
+VERSION = 1
 MAX_BYTES = 8_000_000
 MAX_RECORD_BYTES = 32_000_000
 MAX_DISTRIBUTIONS = 10_000
@@ -149,14 +151,19 @@ def _record_hash(value):
     return digest, decoded
 
 
-def _verify_payload(path, recorded_hash, recorded_size):
-    """Stream one bounded payload and bind its hash to stable path/file identity."""
-    digest, expected = _record_hash(recorded_hash)
+def _record_size(recorded_size):
     if not re.fullmatch(r'0|[1-9][0-9]*', recorded_size):
         raise ValueError('hashed installed RECORD entry requires a canonical byte count')
     size = int(recorded_size)
     if not 0 <= size <= MAX_PAYLOAD_BYTES:
         raise ValueError('installed payload exceeds its file byte bound')
+    return size
+
+
+def _verify_payload(path, recorded_hash, recorded_size):
+    """Stream one bounded payload and bind its hash to stable path/file identity."""
+    digest, expected = _record_hash(recorded_hash)
+    size = _record_size(recorded_size)
     original = Path(path)
     physical = original.resolve(strict=True)
     alias_identity = _file_identity(original.lstat())
@@ -227,7 +234,7 @@ def _own_record_entry(target, record):
     raise ValueError('own distribution metadata cannot own unrelated package files: ' + str(target))
 
 
-def _capture_distribution(distribution):
+def _capture_distribution(distribution, *, verify_payloads=True):
     # Keep Name and Version from one metadata read, and derive ownership only
     # from the exact RECORD bytes whose digest is registered.
     message = distribution.metadata
@@ -255,8 +262,8 @@ def _capture_distribution(distribution):
             raise ValueError('malformed distribution installation metadata: ' + name)
         if not own and origin.get('dir_info', {}).get('editable', False) is not False:
             raise ValueError('editable or development third-party distribution holds: ' + name)
-    owned, payloads, unverified = set(), [], {}
-    verified_bytes = 0
+    owned, payloads, unverified, claims = set(), [], {}, []
+    verified_bytes = verified_count = 0
     for row in csv.reader(io.StringIO(raw.decode('utf-8'), newline=''), strict=True):
         if len(row) != 3:
             raise ValueError('distribution has malformed installed RECORD: ' + name)
@@ -269,12 +276,22 @@ def _capture_distribution(distribution):
         if target in owned:
             raise ValueError('distribution has duplicate installed RECORD paths: ' + name)
         owned.add(target)
+        claims.append((str(target), row[1]))
         if len(owned) > MAX_IMPORT_ENTRIES:
             raise ValueError('distribution RECORD exceeds its entry count bound')
         if row[1]:
-            payload = _verify_payload(distribution.locate_file(entry), row[1], row[2])
-            payloads.append(payload)
-            verified_bytes += payload['bytes']
+            # A generate call hashes each payload once. Its second capture
+            # rereads metadata/RECORD and the final pass checks every original
+            # file identity; no payload or metadata cache survives the call.
+            if verify_payloads:
+                payload = _verify_payload(distribution.locate_file(entry), row[1], row[2])
+                payloads.append(payload)
+                size = payload['bytes']
+            else:
+                _record_hash(row[1])
+                size = _record_size(row[2])
+            verified_count += 1
+            verified_bytes += size
             if verified_bytes > MAX_VERIFIED_BYTES:
                 raise ValueError('distribution payload exceeds its total byte bound')
         else:
@@ -287,20 +304,25 @@ def _capture_distribution(distribution):
     if 'record' not in unverified:
         raise ValueError('distribution RECORD must name itself without a recursive hash: ' + name)
     return {'row': {'name': name, 'version': version, 'record_sha256': c.sha(raw),
-                'verified_files': {'count': len(payloads), 'bytes': verified_bytes},
+                'verified_files': {'count': verified_count, 'bytes': verified_bytes},
                 'unverified_files': [{'kind': kind, 'count': len(entries), 'paths': sorted(entries)}
                                      for kind, entries in sorted(unverified.items())]},
             'record_path': str(path), 'metadata': tuple(message.items()),
             'owned': tuple(sorted(str(item) for item in owned)), 'installation': installation,
-            'payloads': payloads, 'own_project': own}
+            'payloads': payloads, 'claims': tuple(sorted(claims)), 'own_project': own}
 
 
-def _capture_environment(paths):
+def _capture_environment(paths, *, verify_payloads=True):
     captures = []
+    owners = {}
     total_files = total_bytes = 0
     for distribution in metadata.distributions(path=paths):
-        captured = _capture_distribution(distribution)
+        captured = _capture_distribution(distribution, verify_payloads=verify_payloads)
         captures.append(captured)
+        for path, declared_hash in captured['claims']:
+            if path in owners and owners[path] != declared_hash:
+                raise ValueError('ambiguous distribution RECORD ownership with different hashes: ' + path)
+            owners[path] = declared_hash
         total_files += len(captured['owned'])
         total_bytes += captured['row']['verified_files']['bytes']
         if total_files > MAX_IMPORT_ENTRIES or total_bytes > MAX_VERIFIED_BYTES:
@@ -312,6 +334,10 @@ def _capture_environment(paths):
     if names != sorted(set(names)):
         raise ValueError('environment distributions must be sorted and unique')
     return captures
+
+
+def _metadata_snapshot(captures):
+    return [{key: value for key, value in capture.items() if key != 'payloads'} for capture in captures]
 
 
 def _import_paths():
@@ -433,10 +459,11 @@ def generate():
         identity = _interpreter_identity()
         captures = _capture_environment(paths)
         directories = _require_owned_import_roots(paths, captures)
-        # The census may be long. Re-discover the roster, metadata and RECORDs;
-        # cached rows from before the census must never establish current state.
+        # The census may be long. Re-discover the roster, metadata and RECORDs,
+        # then recheck every freshly hashed payload identity. Only this call's
+        # initial full content verification is reused, never a previous call.
         if (_import_paths() != paths or _interpreter_identity() != identity
-                or _capture_environment(paths) != captures):
+                or _metadata_snapshot(_capture_environment(paths, verify_payloads=False)) != _metadata_snapshot(captures)):
             raise ValueError('interpreter or distribution metadata changed during environment census')
         _require_stable_directories(directories)
         _require_stable_payloads(captures)

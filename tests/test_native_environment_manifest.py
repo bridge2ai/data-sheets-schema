@@ -60,7 +60,7 @@ def test_generate_verifies_installed_payload_and_names_unverified_entries(instal
     installed.add_file(Path('cached.pyc'))
     installed.add_file(Path('unverified-notes.txt'))
     value = m.generate()
-    assert value['version'] == 2
+    assert value['version'] == 1
     row = value['distributions'][0]
     assert row['verified_files'] == {'count': 1, 'bytes': len(b'SYNTHETIC = True\n')}
     assert row['unverified_files'] == [
@@ -141,12 +141,12 @@ def test_old_manifest_shape_is_historical_only(installed):
     old['version'] = 1
     old['distributions'] = [{key: value for key, value in row.items()
                              if key in {'name', 'version', 'record_sha256'}} for row in old['distributions']]
-    with pytest.raises(ValueError, match='kind/version'):
+    with pytest.raises(ValueError, match='environment distribution'):
         m.validate(old)
 
 
 @pytest.mark.parametrize('change', ['count', 'unknown_kind', 'duplicate', 'version'])
-def test_v2_payload_inventory_shape_is_closed(installed, change):
+def test_payload_inventory_shape_is_closed(installed, change):
     value = m.generate()
     row = value['distributions'][0]
     if change == 'count':
@@ -170,6 +170,49 @@ def test_payload_changes_during_census_hold(installed, monkeypatch):
     monkeypatch.setattr(m, '_require_owned_import_roots', changed)
     with pytest.raises(ValueError, match='payload'):
         m.generate()
+
+
+def test_payload_mutation_during_metadata_recapture_holds(installed, monkeypatch):
+    original = m._capture_environment
+    def changed(paths, *, verify_payloads=True):
+        result = original(paths, verify_payloads=verify_payloads)
+        if not verify_payloads:
+            (installed.root / 'file.py').write_bytes(b'SYNTHETIC = None\n')
+        return result
+    monkeypatch.setattr(m, '_capture_environment', changed)
+    with pytest.raises(ValueError, match='payload changed during environment census'):
+        m.generate()
+
+
+def test_fresh_payload_hashes_once_per_generate_without_cross_call_cache(installed, monkeypatch):
+    original = m._verify_payload
+    calls = []
+    def observed(*args):
+        calls.append(args[0])
+        return original(*args)
+    monkeypatch.setattr(m, '_verify_payload', observed)
+    first = m.generate()
+    assert len(calls) == 1
+    assert m.generate() == first and len(calls) == 2
+    (installed.root / 'file.py').write_bytes(b'SYNTHETIC = None\n')
+    with pytest.raises(ValueError, match='payload hash'):
+        m.generate()
+    assert len(calls) == 3
+
+
+@pytest.mark.parametrize('same_hash', [False, True])
+def test_shared_record_ownership_requires_identical_hash(installed, monkeypatch, tmp_path, same_hash):
+    raw = (installed.root / 'file.py').read_bytes()
+    algorithm = 'sha256' if same_hash else 'md5'
+    digest = base64.urlsafe_b64encode(hashlib.new(algorithm, raw).digest()).decode().rstrip('=')
+    record = ('../installed/file.py,' + algorithm + '=' + digest + ',' + str(len(raw)) + '\n').encode()
+    second = Distribution(tmp_path / 'second', name='Other.Distribution', record=record)
+    monkeypatch.setattr(m.metadata, 'distributions', lambda **kwargs: [installed, second])
+    if same_hash:
+        assert len(m.generate()['distributions']) == 2
+    else:
+        with pytest.raises(ValueError, match='ambiguous distribution RECORD ownership'):
+            m.generate()
 
 
 def test_write_once_and_verify_exact_bytes(installed, tmp_path):
