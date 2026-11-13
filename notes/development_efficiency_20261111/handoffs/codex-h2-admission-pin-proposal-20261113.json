@@ -1,0 +1,407 @@
+{
+  "status": "proposal only; lead applies after review",
+  "source_head": "e648abe2a384be9036fdd77ce239a6db3c311b03",
+  "module_census": [
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "budget_amendment",
+      "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
+      "declared_sha256": "7347b407611871349a50cdb2e11ade7ace1f23dd703451dba5abd9f627cbd3f9",
+      "actual_sha256": "7347b407611871349a50cdb2e11ade7ace1f23dd703451dba5abd9f627cbd3f9"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "budgeted_cborg",
+      "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+      "declared_sha256": "0aef1b59d05fd9a1f7f6e2f83b863800fb48e6c35e22030cbcbcfc373c5375e2",
+      "actual_sha256": "0aef1b59d05fd9a1f7f6e2f83b863800fb48e6c35e22030cbcbcfc373c5375e2"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "native_command_policy",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py",
+      "declared_sha256": "99db1879752ea73fea0002ea5a3a2d8333365b4e3843abdab3e1a1f0008709cc",
+      "actual_sha256": "99db1879752ea73fea0002ea5a3a2d8333365b4e3843abdab3e1a1f0008709cc"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "native_control",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+      "declared_sha256": "25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488",
+      "actual_sha256": "25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "native_file_policy",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py",
+      "declared_sha256": "c6fc332b237fe06200437e4e899b0e6dbb2830b9a40d537b4e8db36bd5e5b33e",
+      "actual_sha256": "c6fc332b237fe06200437e4e899b0e6dbb2830b9a40d537b4e8db36bd5e5b33e"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "native_phase_history",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py",
+      "declared_sha256": "0a318e7bb3eea8d99067da168de09985d92f7f28c6ed0e0b01d7c01dcf85a1d6",
+      "actual_sha256": "0a318e7bb3eea8d99067da168de09985d92f7f28c6ed0e0b01d7c01dcf85a1d6"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "native_proxy",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py",
+      "declared_sha256": "21f2d16e6c9b93f033664c7b95521076b27786a2b1679c008713f2e40bf599b7",
+      "actual_sha256": "21f2d16e6c9b93f033664c7b95521076b27786a2b1679c008713f2e40bf599b7"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "native_readonly",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py",
+      "declared_sha256": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8",
+      "actual_sha256": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "prepare_overlay_roster",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py",
+      "declared_sha256": "36575c39ae3e291320513072337e1b22c890f4498746fa24289e67bf4ce45819",
+      "actual_sha256": "36575c39ae3e291320513072337e1b22c890f4498746fa24289e67bf4ce45819"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "prepare_registration",
+      "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+      "declared_sha256": "c01437f4da640632fcd2bfa50e1c89e60ada2c94a74c568bc04816c4216abe96",
+      "actual_sha256": "c01437f4da640632fcd2bfa50e1c89e60ada2c94a74c568bc04816c4216abe96"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "run_api_canary",
+      "path": "notes/matched_cborg_2026-09-13/run_api_canary.py",
+      "declared_sha256": "8b5ce15695b5808060edfb3d2fb85fd441244c4ee23ea8d8cf556352b8bbbbc4",
+      "actual_sha256": "8b5ce15695b5808060edfb3d2fb85fd441244c4ee23ea8d8cf556352b8bbbbc4"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "run_native_canary",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+      "declared_sha256": "f1c4cfac150eed2bd440e3ad6b18bd6e0b2633fcd24e40a00fe7af2935549857",
+      "actual_sha256": "f2a019bed3ec9c2b15780a55f41b852a2c6990add47006a17e1f25f29cd37b1a"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "budget_amendment",
+      "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
+      "declared_sha256": "7347b407611871349a50cdb2e11ade7ace1f23dd703451dba5abd9f627cbd3f9",
+      "actual_sha256": "7347b407611871349a50cdb2e11ade7ace1f23dd703451dba5abd9f627cbd3f9"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "budgeted_cborg",
+      "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+      "declared_sha256": "0aef1b59d05fd9a1f7f6e2f83b863800fb48e6c35e22030cbcbcfc373c5375e2",
+      "actual_sha256": "0aef1b59d05fd9a1f7f6e2f83b863800fb48e6c35e22030cbcbcfc373c5375e2"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "native_command_policy",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py",
+      "declared_sha256": "99db1879752ea73fea0002ea5a3a2d8333365b4e3843abdab3e1a1f0008709cc",
+      "actual_sha256": "99db1879752ea73fea0002ea5a3a2d8333365b4e3843abdab3e1a1f0008709cc"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "native_control",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+      "declared_sha256": "25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488",
+      "actual_sha256": "25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "native_file_policy",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py",
+      "declared_sha256": "c6fc332b237fe06200437e4e899b0e6dbb2830b9a40d537b4e8db36bd5e5b33e",
+      "actual_sha256": "c6fc332b237fe06200437e4e899b0e6dbb2830b9a40d537b4e8db36bd5e5b33e"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "native_phase_history",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py",
+      "declared_sha256": "0a318e7bb3eea8d99067da168de09985d92f7f28c6ed0e0b01d7c01dcf85a1d6",
+      "actual_sha256": "0a318e7bb3eea8d99067da168de09985d92f7f28c6ed0e0b01d7c01dcf85a1d6"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "native_proxy",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py",
+      "declared_sha256": "21f2d16e6c9b93f033664c7b95521076b27786a2b1679c008713f2e40bf599b7",
+      "actual_sha256": "21f2d16e6c9b93f033664c7b95521076b27786a2b1679c008713f2e40bf599b7"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "native_readonly",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py",
+      "declared_sha256": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8",
+      "actual_sha256": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "prepare_overlay_roster",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py",
+      "declared_sha256": "36575c39ae3e291320513072337e1b22c890f4498746fa24289e67bf4ce45819",
+      "actual_sha256": "36575c39ae3e291320513072337e1b22c890f4498746fa24289e67bf4ce45819"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "prepare_registration",
+      "path": "notes/matched_cborg_2026-09-13/prepare_registration_v2.py",
+      "declared_sha256": "6cb0a4a1b234cbe63272b48ea117a42efc9dfac04992d41050848b4412d2bbb7",
+      "actual_sha256": "6cb0a4a1b234cbe63272b48ea117a42efc9dfac04992d41050848b4412d2bbb7"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "run_api_canary",
+      "path": "notes/matched_cborg_2026-09-13/run_api_canary.py",
+      "declared_sha256": "8b5ce15695b5808060edfb3d2fb85fd441244c4ee23ea8d8cf556352b8bbbbc4",
+      "actual_sha256": "8b5ce15695b5808060edfb3d2fb85fd441244c4ee23ea8d8cf556352b8bbbbc4"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "run_native_canary",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+      "declared_sha256": "f1c4cfac150eed2bd440e3ad6b18bd6e0b2633fcd24e40a00fe7af2935549857",
+      "actual_sha256": "f2a019bed3ec9c2b15780a55f41b852a2c6990add47006a17e1f25f29cd37b1a"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "prepare_registration_v2",
+      "path": "notes/matched_cborg_2026-09-13/prepare_registration_v2.py",
+      "declared_sha256": "6cb0a4a1b234cbe63272b48ea117a42efc9dfac04992d41050848b4412d2bbb7",
+      "actual_sha256": "6cb0a4a1b234cbe63272b48ea117a42efc9dfac04992d41050848b4412d2bbb7"
+    }
+  ],
+  "test_pin_census": [
+    {
+      "path": "tests/test_native_shared_permission_protocol.py",
+      "line": 27,
+      "literal": "25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488",
+      "source": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+      "actual_sha256": "25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488",
+      "action": "unchanged; exact current source"
+    },
+    {
+      "path": "tests/test_native_shared_permission_protocol.py",
+      "line": 28,
+      "literal": "99db1879752ea73fea0002ea5a3a2d8333365b4e3843abdab3e1a1f0008709cc",
+      "source": "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py",
+      "actual_sha256": "99db1879752ea73fea0002ea5a3a2d8333365b4e3843abdab3e1a1f0008709cc",
+      "action": "unchanged; exact current source"
+    }
+  ],
+  "test_pin_context": [
+    {
+      "path": "tests/native_shared_captured_fixture.py",
+      "line": 28,
+      "text": "        'controller_sources_sha256': controller.wire.CONTROLLER_SOURCES_SHA256,"
+    },
+    {
+      "path": "tests/test_canary_controller_receipts.py",
+      "line": 230,
+      "text": "        from native_control import INIT_ID, digest, initialize_frame, hook_output"
+    },
+    {
+      "path": "tests/test_native_attribution_controller.py",
+      "line": 288,
+      "text": "\u0040pytest.mark.parametrize('field',['version','policy','policy_sha256','controller_sources','registration_sha256','instruction_sha256'])"
+    },
+    {
+      "path": "tests/test_native_authority_v2.py",
+      "line": 40,
+      "text": "    assert json.loads(raw)['controller_authority'] == {'version': 2, 'manifest': str(v2.SOURCES_PATH), 'sha256': v2.SOURCES_SHA256, 'sources': v2.controller_sources()}"
+    },
+    {
+      "path": "tests/test_native_authority_v2.py",
+      "line": 69,
+      "text": "                                    'sha256': v1.SOURCES_SHA256, 'sources': v1.controller_sources()}"
+    },
+    {
+      "path": "tests/test_native_authority_v2.py",
+      "line": 140,
+      "text": "        assert value['controller_sources_sha256'] == v2.SOURCES_SHA256"
+    },
+    {
+      "path": "tests/test_native_execution_engine.py",
+      "line": 195,
+      "text": "    b'{\"authority_version\":true,\"controller_sources_sha256\":\"wrong\",\"registration\":{}}',"
+    },
+    {
+      "path": "tests/test_native_execution_engine.py",
+      "line": 196,
+      "text": "    b'{\"authority_version\":2,\"controller_sources_sha256\":\"wrong\",\"registration\":{\"schema_version\":2}}',"
+    },
+    {
+      "path": "tests/test_native_execution_registration_v2.py",
+      "line": 162,
+      "text": "    assert envelope['controller_sources_sha256'] == controller.SOURCES_SHA256"
+    },
+    {
+      "path": "tests/test_native_execution_registration_v2.py",
+      "line": 198,
+      "text": "    value = {'authority_version': 2, 'controller_sources_sha256': controller.SOURCES_SHA256,"
+    },
+    {
+      "path": "tests/test_native_execution_registration_v2.py",
+      "line": 203,
+      "text": "    elif mutation == 'digest': value['controller_sources_sha256'] = '0' * 64"
+    },
+    {
+      "path": "tests/test_native_execution_registration_v2.py",
+      "line": 360,
+      "text": "    return {'authority_version': 2, 'controller_sources_sha256': controller.SOURCES_SHA256,"
+    },
+    {
+      "path": "tests/test_native_execution_round3_v2.py",
+      "line": 199,
+      "text": "        'controller_sources_sha256': authority.neutral.composition.SOURCES_SHA256,"
+    },
+    {
+      "path": "tests/test_native_failure_publication.py",
+      "line": 70,
+      "text": "    raw = c.canonical({'authority_version': 2, 'controller_sources_sha256': 'a' * 64,"
+    },
+    {
+      "path": "tests/test_native_failure_publication.py",
+      "line": 213,
+      "text": "    raw = c.canonical({'authority_version': 2, 'controller_sources_sha256': 'b' * 64, 'registration': body})"
+    },
+    {
+      "path": "tests/test_native_generation_guard_v2.py",
+      "line": 38,
+      "text": "    raw = capture.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,"
+    },
+    {
+      "path": "tests/test_native_incomplete_retention.py",
+      "line": 38,
+      "text": "    raw = c.canonical({'authority_version': 2, 'controller_sources_sha256': 'a' * 64, 'registration': value})"
+    },
+    {
+      "path": "tests/test_native_launch_review.py",
+      "line": 24,
+      "text": "    raw = wire.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,"
+    },
+    {
+      "path": "tests/test_native_preparer_v2_boundaries.py",
+      "line": 87,
+      "text": "        for invalid in (None, [], {'schema_version': 1}, {**record, 'authority_version': 1}, {**record, 'registration': {'schema_version': 2.0}}, {**record, 'controller_sources_sha256': '0'*64}):"
+    },
+    {
+      "path": "tests/test_native_shared_attribution.py",
+      "line": 76,
+      "text": "        'controller_sources_sha256': preparation['controller_sources_sha256'],"
+    },
+    {
+      "path": "tests/test_native_shared_attribution.py",
+      "line": 286,
+      "text": "    elif change == 'manifest': value['controller_sources_sha256'] = '0' * 64"
+    },
+    {
+      "path": "tests/test_native_shared_controller.py",
+      "line": 197,
+      "text": "    return {'authority_version': 2, 'controller_sources_sha256': controller.wire.CONTROLLER_SOURCES_SHA256,"
+    },
+    {
+      "path": "tests/test_native_shared_controller.py",
+      "line": 222,
+      "text": "    elif change == 'manifest': value['controller_sources_sha256'] = '0' * 64"
+    },
+    {
+      "path": "tests/test_native_shared_permission_protocol.py",
+      "line": 46,
+      "text": "    assert identity['base']['modules']['native_control']['sha256'] == CONTROL_SHA"
+    },
+    {
+      "path": "tests/test_native_subscription_capture.py",
+      "line": 87,
+      "text": "    raw = capture.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,"
+    },
+    {
+      "path": "tests/test_native_subscription_capture.py",
+      "line": 104,
+      "text": "        if (envelope != {'authority_version': 2, 'controller_sources_sha256': 'f' * 64,"
+    },
+    {
+      "path": "tests/test_native_subscription_guard_v2.py",
+      "line": 39,
+      "text": "    registration = guard.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,"
+    },
+    {
+      "path": "tests/test_native_u1_scanner_contracts.py",
+      "line": 282,
+      "text": "     '    return {\"authority_version\": 2, \"controller_sources_sha256\": SOURCES_SHA256,\\n'"
+    },
+    {
+      "path": "tests/test_native_u1_scanner_contracts.py",
+      "line": 287,
+      "text": "     '    return {\"authority_version\": 2, \"controller_sources_sha256\": SOURCES_SHA256,\\n'"
+    },
+    {
+      "path": "tests/test_native_u3k_freshness_order.py",
+      "line": 109,
+      "text": "        'authority_version': 2, 'controller_sources_sha256': 'f' * 64,"
+    },
+    {
+      "path": "tests/test_native_u3l_scanner.py",
+      "line": 138,
+      "text": "    ('_wire', \"value['controller_sources_sha256'] != authority.neutral.composition.SOURCES_SHA256\","
+    },
+    {
+      "path": "tests/test_native_u3l_scanner.py",
+      "line": 139,
+      "text": "     \"value['controller_sources_sha256'] == authority.neutral.composition.SOURCES_SHA256\"),"
+    },
+    {
+      "path": "tests/test_native_u4b_addendum_authority.py",
+      "line": 36,
+      "text": "    raw = guard.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,"
+    },
+    {
+      "path": "tests/test_native_u4b_readback.py",
+      "line": 47,
+      "text": "    raw = guard.canonical({'authority_version': 2, 'controller_sources_sha256': 'f' * 64,"
+    }
+  ],
+  "search_includes_hidden_ignored": true,
+  "test_python_files_examined": 871,
+  "permission_protocol_test": {
+    "path": "tests/test_native_shared_permission_protocol.py",
+    "line": 27,
+    "sha256": "25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488",
+    "action": "retain; native_control.py did not change in this assignment"
+  },
+  "historical_provenance": "Old protocol prose and saved historical fixtures remain unchanged.",
+  "files": [
+    {
+      "path": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "before_sha256": "6cc0a4d0e5d0790e86bebd0da9e6184c0029077dec008f444fa4961c3278b10e",
+      "proposed_sha256": "280bdcaeee2cd0a84751f6ed0162541250fa830b39f1169907054c124a010aa6"
+    },
+    {
+      "path": "src/data_sheets_schema/native_attribution_controller.py",
+      "before_sha256": "0547b4789fb755f85cd563f554cf4b5c401d19fc558cd7783582013a9a50de7b",
+      "proposed_sha256": "e83ccf3e6798abf5c924973b25b71084b83f5db305457f985465ac7a51180cb4"
+    },
+    {
+      "path": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "before_sha256": "1b9c06a985f278d9f91d9535d7755bdf961484477abadcb587e9c090ae13e8ad",
+      "proposed_sha256": "d4ad9c21abc470bfffe6c68268ca5b343b548bea822fce19b5e6b9abb29c322b"
+    },
+    {
+      "path": "src/data_sheets_schema/native_attribution_controller_v2.py",
+      "before_sha256": "3629c90eb3a693f85292d3c32d26a85961666f1d8ed03ed4f6d7fe3cf85d82eb",
+      "proposed_sha256": "4cdfc7adb575d6572d76027c0e0d640876effd8c72c9ed1bc9798f6df060934a"
+    },
+    {
+      "path": "src/data_sheets_schema/native_shared_authority_wire.py",
+      "before_sha256": "298d219c7a2b3f4d7dd46647d594397cdfac8b3a5afe9dce2ba113a4194ab963",
+      "proposed_sha256": "4f62ee4f36b5ee0e99279f326b9fd5293143affcdb517d1c43a0ac68ef6139ba"
+    }
+  ]
+}

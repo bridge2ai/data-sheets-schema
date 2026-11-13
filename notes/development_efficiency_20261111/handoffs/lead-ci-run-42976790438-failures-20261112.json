@@ -1,0 +1,1481 @@
+{
+  "run_id": "42976790438",
+  "head": "1a137b58860416a31618de44173180d021dfcc61",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 131032305278,
+      "name": "Python 3.12 / offline audit and finalization",
+      "conclusion": "success",
+      "seconds": 549.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131032305508,
+      "name": "Python 3.12 / API case routing-regate",
+      "conclusion": "failure",
+      "seconds": 83.0,
+      "summary_lines": 1,
+      "pytest_tail": "26624 deselected, 1 warning, 1 error in 44.52s"
+    },
+    {
+      "id": 131032305528,
+      "name": "Python 3.12 / SG2 case sg2-none",
+      "conclusion": "failure",
+      "seconds": 94.0,
+      "summary_lines": 1,
+      "pytest_tail": "26624 deselected, 1 warning, 1 error in 51.25s"
+    },
+    {
+      "id": 131032305566,
+      "name": "Python 3.12 / offline canary controls",
+      "conclusion": "success",
+      "seconds": 1210.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131032305567,
+      "name": "Python 3.12 / SG2 case sg2-conventional",
+      "conclusion": "failure",
+      "seconds": 103.0,
+      "summary_lines": 1,
+      "pytest_tail": "26624 deselected, 1 warning, 1 error in 54.61s"
+    },
+    {
+      "id": 131032305602,
+      "name": "Python 3.12 / SG2 case sg2-explicit",
+      "conclusion": "failure",
+      "seconds": 80.0,
+      "summary_lines": 1,
+      "pytest_tail": "26624 deselected, 1 warning, 1 error in 43.71s"
+    },
+    {
+      "id": 131032305612,
+      "name": "Python 3.12 / API case routing-portable",
+      "conclusion": "failure",
+      "seconds": 69.0,
+      "summary_lines": 1,
+      "pytest_tail": "26624 deselected, 1 warning, 1 error in 36.37s"
+    },
+    {
+      "id": 131032305656,
+      "name": "Python 3.12 / shard 4",
+      "conclusion": "failure",
+      "seconds": 2263.0,
+      "summary_lines": 4,
+      "pytest_tail": "3 failed, 3159 passed, 18 skipped, 565 warnings, 4 errors in 2225.19s (0:37:05)"
+    },
+    {
+      "id": 131032305669,
+      "name": "Python 3.12 / API case routing-dispatch",
+      "conclusion": "failure",
+      "seconds": 82.0,
+      "summary_lines": 1,
+      "pytest_tail": "26624 deselected, 1 warning, 1 error in 48.96s"
+    },
+    {
+      "id": 131032305713,
+      "name": "Python 3.12 / shard 3",
+      "conclusion": "failure",
+      "seconds": 1662.0,
+      "summary_lines": 49,
+      "pytest_tail": "36 failed, 3134 passed, 1 skipped, 41 warnings, 54 errors in 1625.60s (0:27:05)"
+    },
+    {
+      "id": 131032305714,
+      "name": "Python 3.12 / shard 6",
+      "conclusion": "failure",
+      "seconds": 1316.0,
+      "summary_lines": 12,
+      "pytest_tail": "23 failed, 3815 passed, 20 skipped, 42 warnings, 4 errors in 1277.98s (0:21:17)"
+    },
+    {
+      "id": 131032305716,
+      "name": "Python 3.12 / shard 7",
+      "conclusion": "failure",
+      "seconds": 1757.0,
+      "summary_lines": 1,
+      "pytest_tail": "2939 passed, 2 skipped, 322 warnings, 4 errors in 1724.64s (0:28:44)"
+    },
+    {
+      "id": 131032305731,
+      "name": "Python 3.12 / API case routing-default-layout",
+      "conclusion": "failure",
+      "seconds": 78.0,
+      "summary_lines": 1,
+      "pytest_tail": "26624 deselected, 1 warning, 1 error in 44.18s"
+    },
+    {
+      "id": 131032305768,
+      "name": "Python 3.12 / shard 5",
+      "conclusion": "cancelled",
+      "seconds": 2715.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131032305770,
+      "name": "Python 3.12 / offline evaluation",
+      "conclusion": "success",
+      "seconds": 264.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131032305812,
+      "name": "Python 3.12 / shard 8",
+      "conclusion": "cancelled",
+      "seconds": 2717.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131032305846,
+      "name": "Python 3.12 / shard 2",
+      "conclusion": "failure",
+      "seconds": 2452.0,
+      "summary_lines": 33,
+      "pytest_tail": "36 failed, 3495 passed, 7 skipped, 306 warnings, 17 errors in 2418.01s (0:40:18)"
+    },
+    {
+      "id": 131032306058,
+      "name": "Python 3.12 / shard 1",
+      "conclusion": "failure",
+      "seconds": 2543.0,
+      "summary_lines": 58,
+      "pytest_tail": "52 failed, 2816 passed, 25 skipped, 28 warnings, 19 errors in 2508.55s (0:41:48)"
+    },
+    {
+      "id": 131032306751,
+      "name": "schema-examples",
+      "conclusion": "skipped",
+      "seconds": 0.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131050538700,
+      "name": "test",
+      "conclusion": "failure",
+      "seconds": 4.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    }
+  ],
+  "failures": [
+    {
+      "job": "Python 3.12 / API case routing-regate",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / SG2 case sg2-none",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / SG2 case sg2-conventional",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / SG2 case sg2-explicit",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / API case routing-portable",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / shard 4",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3d_runner_evidence.py",
+      "node": "test_source_snapshot_binds_tracked_and_untracked_bytes",
+      "message": "RuntimeError: expected one enclosing d4d-executions directory",
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time"
+    },
+    {
+      "job": "Python 3.12 / shard 4",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3c_round4_helpers.py",
+      "node": "test_parent_worker_and_subprocess_reenter_c4_wrapper",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / shard 4",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_render.py",
+      "node": "test_native_construction_and_replay_use_validated_shared_admission",
+      "message": "assert [] == [1, 1]",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 4",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / API case routing-dispatch",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_enabled_initial_docstring_preserves_selectors_and_dispatch[d76_contract]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_actual_delegated_families_and_description_are_derived",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_enabled_initial_docstring_preserves_selectors_and_dispatch[no_docstring]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_enabled_non_docstring_statements_are_refused[later_string]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_enabled_non_docstring_statements_are_refused[second_initial_string]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_enabled_non_docstring_statements_are_refused[fstring_prefix]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_enabled_non_docstring_statements_are_refused[call_prefix]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_enabled_non_docstring_statements_are_refused[bytes_prefix]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_enabled_non_docstring_statements_are_refused[assignment_before_docstring]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_supported_literal_changes_are_read_not_hardcoded",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_dispatch_requires_effective_entry_definitions[decorated-typed_audit_runtime]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_dispatch_requires_effective_entry_definitions[decorated-bc1_runtime]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_dispatch_requires_effective_entry_definitions[duplicate-typed_audit_runtime]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_dispatch_requires_effective_entry_definitions[rebound-typed_audit_runtime]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_dispatch_requires_effective_entry_definitions[rebound-bc1_runtime]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_bc1_dispatch_requires_effective_entry_definitions[duplicate-bc1_runtime]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_generation_specificity_delegated.py",
+      "node": "test_combined_native_domain_proves_inactive_api_cases",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_u5_external_schema.py",
+      "node": "test_external_320_capture_rebuild_and_cold_warm_catalog[modular]",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: '/home/runner/work/data-sheets-schema/scratch-native-u5-prep/schema-5e382f0c4/manifest.json'",
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_u5_external_schema.py",
+      "node": "test_external_320_capture_rebuild_and_cold_warm_catalog[merged]",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: '/home/runner/work/data-sheets-schema/scratch-native-u5-prep/schema-5e382f0c4/manifest.json'",
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_u5_external_schema.py",
+      "node": "test_same_external_320_api_instruction_before_after",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: '/home/runner/work/data-sheets-schema/scratch-native-u5-prep/baseline-d258611c5/manifest.json'",
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_u5_external_schema.py",
+      "node": "test_api_comparison_refuses_other_scratch_roots[outside]",
+      "message": "assert b'named U4b/U5 scratch roots' in b'Traceback (most recent call last):\\n  File \"/home/runner/work/data-sheets-schema/data-sheets-schema/scripts/adhoc/native_u5_api_render_20261108.py\", line 103, in <module>\\n    main()\\n  File \"/home/runner/work/data-sheets-schema/data-sheets-schema/scripts/ad",
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_u5_external_schema.py",
+      "node": "test_api_comparison_refuses_other_scratch_roots[relative]",
+      "message": "assert b'named U4b/U5 scratch roots' in b'Traceback (most recent call last):\\n  File \"/home/runner/work/data-sheets-schema/data-sheets-schema/scripts/adhoc/native_u5_api_render_20261108.py\", line 103, in <module>\\n    main()\\n  File \"/home/runner/work/data-sheets-schema/data-sheets-schema/scripts/ad",
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_u5_external_schema.py",
+      "node": "test_api_comparison_refuses_other_scratch_roots[alias]",
+      "message": "assert b'named U4b/U5 scratch roots' in b'Traceback (most recent call last):\\n  File \"/home/runner/work/data-sheets-schema/data-sheets-schema/scripts/adhoc/native_u5_api_render_20261108.py\", line 103, in <module>\\n    main()\\n  File \"/home/runner/work/data-sheets-schema/data-sheets-schema/scripts/ad",
+      "class": "host layout: needs a d4d-executions directory or scratch roots at run time"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_review_src_alias_refused[False-native_attribution_registration]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_review_src_alias_refused[False-native_execution]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_review_src_alias_refused[False-native_execution_registration_v2]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_review_src_alias_refused[True-native_execution_registration]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_review_src_alias_refused[True-native_attribution_registration]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_review_src_alias_refused[True-native_execution]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_review_src_alias_refused[True-native_execution_registration_v2]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_runtime_alias_refusal_and_source_only_loading",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_from_src_namespace_gets_canonical_treatment[native_execution]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_from_src_namespace_gets_canonical_treatment[native_execution_registration_v2]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_from_src_namespace_gets_canonical_treatment[native_shared_contract]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_actual_pinned_helper_ignores_scratch_forged_cache",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round5_v2.py",
+      "node": "test_review_src_alias_refused[False-native_execution_registration]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3l_scanner.py",
+      "node": "test_integrated_profile_route_derives",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3l_scanner.py",
+      "node": "test_profile_entry_guards_and_dispatch_refuse_changes[prepare_synthetic-require_synthetic(c.strict_json(-require_production(c.strict_json(]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3l_scanner.py",
+      "node": "test_profile_entry_guards_and_dispatch_refuse_changes[prepare_synthetic-expected_profile=SYNTHETIC_PROFILE-expected_profile='production']",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3l_scanner.py",
+      "node": "test_verify_preparer_selector_arguments_and_comparison_are_exact[max_draft_checks=body['max_draft_checks']-max_draft_checks=1]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3l_scanner.py",
+      "node": "test_profile_wire_and_reader_helpers_are_exact[_read-max_bytes=maximum-max_bytes=1]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3l_scanner.py",
+      "node": "test_profile_wire_and_reader_helpers_are_exact[_read-).captured-)]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3l_scanner.py",
+      "node": "test_profile_wire_and_reader_helpers_are_exact[_wire-authority.require_committed(identity)-pass]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3l_scanner.py",
+      "node": "test_profile_reader_requires_its_bound_current_import",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3l_scanner.py",
+      "node": "test_profile_wire_and_reader_helpers_are_exact[_wire-controls['prepare_registration_v2'].require_envelope(value)-controls['prepare_registration_v2'].envelope(value)]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3l_scanner.py",
+      "node": "test_integrated_producer_cannot_borrow_legacy_runtime_validator",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3l_scanner.py",
+      "node": "test_legacy_producer_cannot_borrow_integrated_dispatcher[False]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3l_scanner.py",
+      "node": "test_legacy_producer_cannot_borrow_integrated_dispatcher[True]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_execution.py",
+      "node": "test_actual_public_correction_three_workers_and_saved_completion",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_engine.py",
+      "node": "test_engine_in_actual_source_closure_and_foreign_loaded_origin_refused",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_scanner.py",
+      "node": "test_exact_current_reader_and_u4b_producers_derive[True-prepare]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_scanner.py",
+      "node": "test_frozen_historical_producer_does_not_replace_current_reader_proof",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_scanner.py",
+      "node": "test_exact_current_reader_and_u4b_producers_derive[True-_prepare]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_scanner.py",
+      "node": "test_exact_current_reader_and_u4b_producers_derive[False-prepare]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_scanner.py",
+      "node": "test_exact_current_reader_and_u4b_producers_derive[False-_prepare]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_scanner.py",
+      "node": "test_d114_discriminator_bound_roster_and_order_are_exact[toolchain(native_shared=True)-toolchain(native_shared=False)-_prepare]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_scanner.py",
+      "node": "test_d114_discriminator_bound_roster_and_order_are_exact[toolchain(native_shared=True)-toolchain()-prepare]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_scanner.py",
+      "node": "test_d114_discriminator_bound_roster_and_order_are_exact[toolchain(native_shared=True)-toolchain(native_shared=False)-prepare]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_scanner.py",
+      "node": "test_d114_discriminator_bound_roster_and_order_are_exact[toolchain(native_shared=True)-toolchain()-_prepare]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / API case routing-default-layout",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_owner_delivery.py",
+      "node": "test_replay_owner_reuses_catalog_and_unknown_initialization_is_fresh[case0]",
+      "message": "assert (None is None and None is not None)",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_missing_external_gate_refuses_before_reservation_or_probe[ci_path]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_public_pre_dispatch_failure_is_readable_and_cannot_resume",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_missing_external_gate_refuses_before_reservation_or_probe[launch_word_path]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_missing_external_gate_refuses_before_reservation_or_probe[review_path]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_dispatch_with_caller_docstring_derives_api_scopes",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_complete_v2_route_derives",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_route_requires_later_cli_consumer",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_executable_validator_prefix_is_not_ignored[pass]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_v2_route_rejects_changed_producer[native_execution_registration_v2.py-_require_registered_input_spellings(spec)-pass]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_v2_route_rejects_changed_producer[cli/prompt.py-destination.open('x'-destination.open('w']",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_v2_route_rejects_changed_producer[native_execution_registration_v2.py-native_shared_generation_version=1-native_shared_generation_version=0]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_v2_route_rejects_changed_producer[native_execution_registration_v2.py-registered_input_paths=True-registered_input_paths=False]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_v2_import_shadow_refuses_with_configuration_error",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_v2_unused_import_shadow_reaches_binding_refusal",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_non_v2_route_retains_configuration_refusal",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_model_package_command_without_main_refuses",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_model_command_discovers_main_and_imports",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_model_command_import_closure_and_other_package_are_discovered",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_native_starred_cli_table_discovers_entry_but_not_every_group",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u1_scanner_contracts.py",
+      "node": "test_model_package_imports_preserve_upstream_stop",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#402",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_v2_partial_reservation_stays_spent_without_probe[started.json]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_v2_partial_reservation_stays_spent_without_probe[evidence_parent]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_subscription_expiring_during_admission_refuses_before_reservation",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_v2_signal_is_sticky_and_previous_handlers_are_restored",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_v2_partial_reservation_stays_spent_without_probe[attempt_parent]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_v2_injected_transport_timeout_keeps_registered_limit_and_failure",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_v2_publication_failure_preserves_first_error[final.json]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_v2_publication_failure_preserves_first_error[published.json]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read[runtime-observation.json]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read[keep-awake.json]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_shared_execution_failure.py",
+      "node": "test_v2_partial_reservation_stays_spent_without_probe[registration.json]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_execution_variant.py",
+      "node": "test_actual_public_merged_omissions_and_all_chunk_statuses",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_receipt_unopened.py",
+      "node": "test_native_receipt_and_manifest_are_actually_consumed[Read-True-1]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_receipt_unopened.py",
+      "node": "test_native_receipt_and_manifest_are_actually_consumed[Bash-False-1]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_receipt_unopened.py",
+      "node": "test_native_receipt_and_manifest_are_actually_consumed[Read-False-0]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3l_review_fixtures.py",
+      "node": "test_retained_review_outcome[F0]",
+      "message": "AssertionError: configuration error (exit 2, the scan did not happen): api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.p",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3l_review_fixtures.py",
+      "node": "test_retained_review_outcome[F2a_envelope_control_token]",
+      "message": "AssertionError: assert 'v2 envelope authority source changed: notes/matched_cborg_2026-09-13/prepare_registration_v2.py' in 'configuration error (exit 2, the scan did not happen): api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_sche",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3l_review_fixtures.py",
+      "node": "test_retained_review_outcome[F3a2_stage_branch_no_options]",
+      "message": "AssertionError: configuration error (exit 2, the scan did not happen): api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.p",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3l_review_fixtures.py",
+      "node": "test_retained_review_outcome[F3a_stage_branch]",
+      "message": "AssertionError: assert 'native packet options are replaced, mutated or aliased' in 'configuration error (exit 2, the scan did not happen): api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3l_review_fixtures.py",
+      "node": "test_retained_review_outcome[F3b_stage_options_subscript]",
+      "message": "AssertionError: assert 'native packet options are replaced, mutated or aliased' in 'configuration error (exit 2, the scan did not happen): api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3l_review_fixtures.py",
+      "node": "test_retained_review_outcome[F3c_stage_main_branch]",
+      "message": "AssertionError: configuration error (exit 2, the scan did not happen): api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.p",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round3_v2.py",
+      "node": "test_package_guard_census_admits_shared_and_u2_dependencies",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round3_v2.py",
+      "node": "test_real_shared_and_u2_imports_are_source_loaded_and_restored",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_subscription_capture.py",
+      "node": "test_read_capture_for_event_rechecks_authority_after_slot_scan_without_repeating_full_verified",
+      "message": "AssertionError: assert ['verified', 'outer-claims'] == ['verified', 'inner-claims']",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_subscription_capture.py",
+      "node": "test_read_capture_for_event_refuses_mutations_between_outer_authority_and_inner_slot_recheck[review_document]",
+      "message": "AssertionError: assert 'recheck_verified' in ['verified', 'mutated']",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_subscription_capture.py",
+      "node": "test_genuine_registration_read_capture_for_event_rechecks_live_selection_and_stage_root",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3l_review_fixtures.py",
+      "node": "test_retained_review_outcome[F3d_module_helper_print]",
+      "message": "AssertionError: configuration error (exit 2, the scan did not happen): api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.p",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_two_real_loaded_modules_share_metadata_not_carrier_classes",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_exception_clears_transfer_without_exporting_partial_scope",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_nested_launch_shares_memo_and_next_launch_is_cold",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_scoped_rebuild_is_pure_and_unscoped_rebuild_stays_cold",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_changed_same_size_live_bytes_still_refuse_after_hit",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_changed_valid_bytes_rekey_then_missing_class_still_refuses",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_full_package_domain_includes_non_python_pins",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_bound_view_projection_matches_existing_dependency_tuple",
+      "message": "AssertionError: assert False",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_original_donor_mutation_cannot_be_rebound_by_new_import",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_warm_cache_keeps_schema_declaration_refusals[name]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3l_review_fixtures.py",
+      "node": "test_retained_review_outcome[B2_typed_container_alias_token]",
+      "message": "AssertionError: configuration error (exit 2, the scan did not happen): api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.p",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_changed_imported_capture_alias_disables_local_reuse",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_warm_cache_keeps_schema_declaration_refusals[missing_import]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_warm_cache_keeps_schema_declaration_refusals[unused_source]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_warm_cache_keeps_schema_declaration_refusals[root_class]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_unready_guard_is_cold_and_cannot_satisfy_hit_canary",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_warm_pure_rebuild_keeps_effective_producer_refusal[normpath]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_nested_changed_domain_cannot_inherit_or_restore_original_cache",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_warm_pure_rebuild_keeps_effective_producer_refusal[abspath]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_warm_pure_rebuild_keeps_effective_producer_refusal[posixpath_os]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_warm_pure_rebuild_keeps_effective_producer_refusal[Namespaces]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_warm_pure_rebuild_keeps_effective_producer_refusal[deepcopy]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_cross_loaded_module_metadata_reuses_yaml_parse_and_preserves_prefix_order",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_same_length_changed_imports_and_prefixes_miss_metadata_transfer",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_donor_or_parser_mutation_disables_metadata_transfer[_metadata_document]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_donor_or_parser_mutation_disables_metadata_transfer[_encode_metadata_fields]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_donor_or_parser_mutation_disables_metadata_transfer[SchemaDefinition]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_donor_or_parser_mutation_disables_metadata_transfer[safe_load]",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_context_transitions_retire_local_metadata_lru_on_retained_module",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_metadata_cache_two_entry_bound_and_three_document_eviction",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_launch_schema_metadata.py",
+      "node": "test_loaded_controls_nested_dependencies_late_render_import_binds_verified_snapshot",
+      "message": "AssertionError: closed dependency registry is not ready",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3l_review_fixtures.py",
+      "node": "test_retained_review_outcome[B3_typed_container_direct_token]",
+      "message": "AssertionError: configuration error (exit 2, the scan did not happen): api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.p",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "ERROR",
+      "file": "tests/test_native_u3c_test_driver.py",
+      "node": "",
+      "message": "RuntimeError: source must be below the canonical d4d-executions root",
+      "class": "collection: script requires the d4d-executions layout (issue 5875)"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "ERROR",
+      "file": "tests/test_bc1_g2_round2.py",
+      "node": "test_integrated_dispatch_derives_and_cites_its_actual_line[integrated]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "ERROR",
+      "file": "tests/test_bc1_g2_round2.py",
+      "node": "test_integrated_dispatch_derives_and_cites_its_actual_line[guard_prefix]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "ERROR",
+      "file": "tests/test_bc1_g2_round2.py",
+      "node": "test_duplicated_dispatch_refuses",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "ERROR",
+      "file": "tests/test_bc1_g2_round2.py",
+      "node": "test_dispatch_names_cannot_be_rebound_later[spec]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "ERROR",
+      "file": "tests/test_bc1_g2_round2.py",
+      "node": "test_dispatch_names_cannot_be_rebound_later[carry]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "ERROR",
+      "file": "tests/test_bc1_g2_round2.py",
+      "node": "test_dispatch_names_cannot_be_rebound_later[client]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "ERROR",
+      "file": "tests/test_bc1_g2_round2.py",
+      "node": "test_dispatch_names_cannot_be_rebound_later[settings]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "ERROR",
+      "file": "tests/test_bc1_g2_round2.py",
+      "node": "test_dispatch_names_cannot_be_rebound_later[usage]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    },
+    {
+      "job": "Python 3.12 / shard 1",
+      "kind": "ERROR",
+      "file": "tests/test_bc1_g2_round2.py",
+      "node": "test_dispatch_names_cannot_be_rebound_later[selected]",
+      "message": "delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "class": "scanner: specificity scanner could not derive a meaning"
+    }
+  ]
+}

@@ -1,0 +1,473 @@
+{
+  "run_id": "43383271447",
+  "head": "f7f8e8bff6ea14006957d8631f66346d91bcddcd",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 131745744150,
+      "name": "Python 3.12 / offline evaluation",
+      "conclusion": "success",
+      "seconds": 240.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744445,
+      "name": "Python 3.12 / shard 8",
+      "conclusion": "failure",
+      "seconds": 2012.0,
+      "summary_lines": 21,
+      "pytest_tail": "36 failed, 2983 passed, 1 skipped, 318 warnings in 1979.06s (0:32:59)"
+    },
+    {
+      "id": 131745744492,
+      "name": "Python 3.12 / offline audit and finalization",
+      "conclusion": "success",
+      "seconds": 673.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744535,
+      "name": "Python 3.12 / API case routing-regate",
+      "conclusion": "success",
+      "seconds": 660.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744539,
+      "name": "Python 3.12 / SG2 case sg2-conventional",
+      "conclusion": "success",
+      "seconds": 800.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744542,
+      "name": "Python 3.12 / API case routing-portable",
+      "conclusion": "success",
+      "seconds": 1381.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744553,
+      "name": "Python 3.12 / API case routing-dispatch",
+      "conclusion": "success",
+      "seconds": 730.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744629,
+      "name": "Python 3.12 / SG2 case sg2-explicit",
+      "conclusion": "success",
+      "seconds": 806.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744639,
+      "name": "Python 3.12 / offline canary controls",
+      "conclusion": "success",
+      "seconds": 1225.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744682,
+      "name": "Python 3.12 / SG2 case sg2-none",
+      "conclusion": "success",
+      "seconds": 788.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744713,
+      "name": "Python 3.12 / shard 10",
+      "conclusion": "cancelled",
+      "seconds": 2718.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744720,
+      "name": "Python 3.12 / shard 6",
+      "conclusion": "failure",
+      "seconds": 2126.0,
+      "summary_lines": 5,
+      "pytest_tail": "6 failed, 2203 passed, 11 skipped, 13 warnings in 2094.73s (0:34:54)"
+    },
+    {
+      "id": 131745744735,
+      "name": "Python 3.12 / shard 1",
+      "conclusion": "success",
+      "seconds": 895.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744737,
+      "name": "Python 3.12 / shard 4",
+      "conclusion": "success",
+      "seconds": 1683.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744750,
+      "name": "Python 3.12 / shard 7",
+      "conclusion": "failure",
+      "seconds": 1904.0,
+      "summary_lines": 1,
+      "pytest_tail": "1 failed, 1981 passed, 4 skipped, 10 warnings in 1876.79s (0:31:16)"
+    },
+    {
+      "id": 131745744799,
+      "name": "Python 3.12 / API case routing-default-layout",
+      "conclusion": "success",
+      "seconds": 621.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744844,
+      "name": "Python 3.12 / shard 3",
+      "conclusion": "cancelled",
+      "seconds": 2716.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745744892,
+      "name": "Python 3.12 / shard 5",
+      "conclusion": "failure",
+      "seconds": 1352.0,
+      "summary_lines": 1,
+      "pytest_tail": "1 failed, 2059 passed, 11 skipped, 57 warnings in 1322.50s (0:22:02)"
+    },
+    {
+      "id": 131745744921,
+      "name": "Python 3.12 / shard 12",
+      "conclusion": "failure",
+      "seconds": 2278.0,
+      "summary_lines": 1,
+      "pytest_tail": "1 failed, 2484 passed, 6 skipped, 23 warnings in 2247.12s (0:37:27)"
+    },
+    {
+      "id": 131745745011,
+      "name": "Python 3.12 / shard 2",
+      "conclusion": "failure",
+      "seconds": 1633.0,
+      "summary_lines": 2,
+      "pytest_tail": "2 failed, 1547 passed, 1 skipped, 310 warnings in 1594.42s (0:26:34)"
+    },
+    {
+      "id": 131745745117,
+      "name": "Python 3.12 / shard 11",
+      "conclusion": "failure",
+      "seconds": 1680.0,
+      "summary_lines": 3,
+      "pytest_tail": "3 failed, 2415 passed, 40 skipped, 8 warnings in 1636.66s (0:27:16)"
+    },
+    {
+      "id": 131745745994,
+      "name": "Python 3.12 / shard 9",
+      "conclusion": "success",
+      "seconds": 1698.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131745747044,
+      "name": "schema-examples",
+      "conclusion": "skipped",
+      "seconds": 0.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131763230752,
+      "name": "test",
+      "conclusion": "failure",
+      "seconds": 3.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    }
+  ],
+  "failures": [
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_required_checks_match_actual_workflow_jobs_and_event_matrix[pull_request]",
+      "message": "AssertionError: assert {'Python 3.12...xplicit', ...} == {'Python 3.12...xplicit', ...}",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_required_checks_match_actual_workflow_jobs_and_event_matrix[push]",
+      "message": "AssertionError: assert {'Python 3.12...xplicit', ...} == {'Python 3.12...xplicit', ...}",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_required_checks_match_actual_workflow_jobs_and_event_matrix[workflow_dispatch]",
+      "message": "AssertionError: assert {'Python 3.12...xplicit', ...} == {'Python 3.12...xplicit', ...}",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_complete_current_event_inventory_is_accepted_without_writes[pull_request]",
+      "message": "ValueError: v2 CI check roster differs from the exact required event roster",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_complete_current_event_inventory_is_accepted_without_writes[push]",
+      "message": "ValueError: v2 CI check roster differs from the exact required event roster",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_complete_current_event_inventory_is_accepted_without_writes[workflow_dispatch]",
+      "message": "ValueError: v2 CI check roster differs from the exact required event roster",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_current_workflow_digest_cannot_hide_different_source_bytes[.github/workflows/main.yaml]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_current_workflow_digest_cannot_hide_different_source_bytes[.github/workflows/large-files.yaml]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_pr_workflow_map_cannot_hide_different_tested_merge_bytes[.github/workflows/main.yaml]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_pr_workflow_map_cannot_hide_different_tested_merge_bytes[.github/workflows/large-files.yaml]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/synthetic/native-u3a-tests/actions/runs/1?anything=true]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/synthetic/native-u3a-tests/actions/runs/1#fragment]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/synthetic/native-u3a-tests/actions/runs/1/foreign]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/synthetic/native-u3a-tests/actions/SYNTHETIC-NOT-A-RUN]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/synthetic/native-u3a-tests-foreign/actions/runs/1]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/foreign/repo/actions/runs/1]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com.evil.invalid/synthetic/native-u3a-tests/actions/runs/1]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/synthetic/native-u3a-tests/actions/runs/0]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[None]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[True]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_d128_scanner_comparison.py",
+      "node": "test_d128_final_composition_has_only_the_finite_approved_scanner_differences",
+      "message": "ValueError: D128 requires the exact approved scanner assets",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_producer_integration.py",
+      "node": "test_historical_discriminators_keep_pre_hook_instruction_and_only_d76_recorder_delta[{\"kind\":\"unrelated\"}]",
+      "message": "assert (0 == 1)",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_producer_integration.py",
+      "node": "test_historical_discriminators_keep_pre_hook_instruction_and_only_d76_recorder_delta[{\"kind\":\"d4d_native_u4b_runtime_basis_extra\"}]",
+      "message": "assert (0 == 1)",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_producer_integration.py",
+      "node": "test_d126_in_checkout_manifest_pins_every_native_instruction_delta[historical-runtime]",
+      "message": "AssertionError: assert 0 == 1",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_producer_integration.py",
+      "node": "test_d126_in_checkout_manifest_pins_every_native_instruction_delta[u4b-runtime]",
+      "message": "AssertionError: assert 0 == 1",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_execution.py",
+      "node": "test_actual_public_correction_three_workers_and_saved_completion",
+      "message": "ValueError: subscription observation is stale or future-dated",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3c_round4_helpers.py",
+      "node": "test_current_integrated_c_and_d_graphs_are_accepted",
+      "message": "RuntimeError: current C/D census roster differs from the closed A roster",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 5",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round3_v2.py",
+      "node": "test_source_in_rows_accepts_github_shaped_check_runs",
+      "message": "ValueError: v2 CI check roster differs from the exact required event roster",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 12",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_execution_variant.py",
+      "node": "test_actual_public_merged_omissions_and_all_chunk_statuses",
+      "message": "ValueError: subscription pre-reservation freshness margin is insufficient",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3d_round9_boundaries.py",
+      "node": "test_all_29_actual_merged_consumers_pass_the_unmodified_guard",
+      "message": "AssertionError: assert 30 == 29",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_consumer_census.py",
+      "node": "test_census_roster_covers_exactly_the_current_c_and_d_consumer_layers",
+      "message": "AssertionError: assert frozenset({'d...y_wire', ...}) == frozenset({'d...apture', ...})",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 11",
+      "kind": "FAILED",
+      "file": "tests/test_native_incomplete_retention.py",
+      "node": "test_public_failed_attempt_retains_records_and_reads_back_exactly[False]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 11",
+      "kind": "FAILED",
+      "file": "tests/test_native_incomplete_retention.py",
+      "node": "test_public_finalization_after_injected_final_floor_failure",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 11",
+      "kind": "FAILED",
+      "file": "tests/test_native_incomplete_retention.py",
+      "node": "test_public_failed_attempt_retains_records_and_reads_back_exactly[True]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    }
+  ]
+}

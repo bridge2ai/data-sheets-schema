@@ -1,0 +1,1884 @@
+{
+  "source": {
+    "primary_repository": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema",
+    "branch": "agy/native-amendment-n1-20261108",
+    "commit": "754fbfdae10dbe9fe3f4443725cf0fa2a696b49e",
+    "path": "notes/generic_v10_analysis_plan_amendment_n1_2026-11-08.md",
+    "checked_out_worktree_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-amendment/notes/generic_v10_analysis_plan_amendment_n1_2026-11-08.md",
+    "blob_sha1": "3f265479d5d87d4bc7ffde4cc21c92524ab608bc",
+    "file_sha256": "741677373008237020d409a7f79365b3e2d0f188a16d996b5defb3a14af050aa",
+    "line_count": 412,
+    "extraction_method": "git show 754fbfdae10dbe9fe3f4443725cf0fa2a696b49e:notes/generic_v10_analysis_plan_amendment_n1_2026-11-08.md (with GIT_CONFIG_GLOBAL=/dev/null; verified byte-identical to .git/objects blob)",
+    "status_md_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md"
+  },
+  "counts": {
+    "total_ratification_items": 24,
+    "items_with_proposed_clause": 24,
+    "items_without_proposed_clause": 0,
+    "items_naming_recorded_decision_item_or_clause": 16,
+    "items_naming_no_decision_item_or_clause": 8,
+    "letters_naming_recorded_decision_item_or_clause": [
+      "b",
+      "c",
+      "d",
+      "e",
+      "f",
+      "g",
+      "h",
+      "k",
+      "l",
+      "m",
+      "p",
+      "s",
+      "t",
+      "v",
+      "w",
+      "x"
+    ],
+    "letters_naming_no_decision_item_or_clause": [
+      "a",
+      "i",
+      "j",
+      "n",
+      "o",
+      "q",
+      "r",
+      "u"
+    ],
+    "items_naming_recorded_decision_including_enclosing": 18,
+    "items_naming_no_decision_including_enclosing": 6,
+    "letters_naming_no_decision_including_enclosing": [
+      "a",
+      "j",
+      "n",
+      "o",
+      "q",
+      "r"
+    ],
+    "items_naming_only_d107_default_subbullet_decisions": [
+      "f",
+      "g",
+      "p",
+      "s"
+    ],
+    "items_naming_standalone_recorded_decision_item_or_clause": 12,
+    "total_proposed_lines_in_amendment": 24,
+    "total_proposed_occurrences_in_amendment": 26,
+    "total_distinct_decisions_named": 23
+  },
+  "ratification_items": [
+    {
+      "letter": "a",
+      "line_number": 346,
+      "full_line": "- **(a)** No auxiliary models, accepting that an auxiliary call stops the attempt (N1.2).",
+      "item_text": "No auxiliary models, accepting that an auxiliary call stops the attempt (N1.2).",
+      "matching_section": "N1.2",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        136
+      ],
+      "matching_clause_line_numbers": [
+        136,
+        137,
+        138,
+        139
+      ],
+      "enclosing_clause_line_numbers": [
+        136,
+        137,
+        138,
+        139
+      ],
+      "decisions_in_item_text": [],
+      "decisions_in_immediate_subclause": [],
+      "decisions_in_matching_clause_lines": [],
+      "decisions_named_item_or_clause": [],
+      "decisions_named_including_enclosing_block": [],
+      "names_any_decision_in_item_or_clause": false,
+      "names_any_recorded_decision_in_item_or_clause": false,
+      "names_any_standalone_recorded_decision_in_item_or_clause": false,
+      "names_any_decision_including_enclosing": false,
+      "names_any_recorded_decision_including_enclosing": false
+    },
+    {
+      "letter": "b",
+      "line_number": 347,
+      "full_line": "- **(b)** The pinned executable is a durable copy outside the auto-updater's path (N1.2, D11).",
+      "item_text": "The pinned executable is a durable copy outside the auto-updater's path (N1.2, D11).",
+      "matching_section": "N1.2",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        150
+      ],
+      "matching_clause_line_numbers": [
+        149,
+        150,
+        151
+      ],
+      "enclosing_clause_line_numbers": [
+        149,
+        150,
+        151,
+        410
+      ],
+      "decisions_in_item_text": [
+        "D11"
+      ],
+      "decisions_in_immediate_subclause": [
+        "D11",
+        "D107"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D11",
+        "D107"
+      ],
+      "decisions_named_item_or_clause": [
+        "D11",
+        "D107"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D11",
+        "D107"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": true,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "c",
+      "line_number": 348,
+      "full_line": "- **(c)** D13: the literal launch argv recorded verbatim (#4162).",
+      "item_text": "D13: the literal launch argv recorded verbatim (#4162).",
+      "matching_section": "N1.3",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        159
+      ],
+      "matching_clause_line_numbers": [
+        159
+      ],
+      "enclosing_clause_line_numbers": [
+        159
+      ],
+      "decisions_in_item_text": [
+        "D13"
+      ],
+      "decisions_in_immediate_subclause": [],
+      "decisions_in_matching_clause_lines": [
+        "D13",
+        "D114"
+      ],
+      "decisions_named_item_or_clause": [
+        "D13",
+        "D114"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D13",
+        "D114"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": true,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "d",
+      "line_number": 349,
+      "full_line": "- **(d)** D13: any change to a pinned item is a new registration.",
+      "item_text": "D13: any change to a pinned item is a new registration.",
+      "matching_section": "N1.3",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        159
+      ],
+      "matching_clause_line_numbers": [
+        159
+      ],
+      "enclosing_clause_line_numbers": [
+        159
+      ],
+      "decisions_in_item_text": [
+        "D13"
+      ],
+      "decisions_in_immediate_subclause": [],
+      "decisions_in_matching_clause_lines": [
+        "D13",
+        "D114"
+      ],
+      "decisions_named_item_or_clause": [
+        "D13",
+        "D114"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D13",
+        "D114"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": true,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "e",
+      "line_number": 350,
+      "full_line": "- **(e)** D13: the transcript-based receipt origin is the \"receipt origin\" D107 names (N1.1).",
+      "item_text": "D13: the transcript-based receipt origin is the \"receipt origin\" D107 names (N1.1).",
+      "matching_section": "N1.1",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        121
+      ],
+      "matching_clause_line_numbers": [
+        121
+      ],
+      "enclosing_clause_line_numbers": [
+        117,
+        118,
+        119,
+        120,
+        121
+      ],
+      "decisions_in_item_text": [
+        "D13",
+        "D107"
+      ],
+      "decisions_in_immediate_subclause": [
+        "D107",
+        "D13"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D107",
+        "D13"
+      ],
+      "decisions_named_item_or_clause": [
+        "D13",
+        "D107"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D13",
+        "D107",
+        "D105"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": true,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "f",
+      "line_number": 351,
+      "full_line": "- **(f)** D18: its old meaning (the #4354 offline time box) is closed.",
+      "item_text": "D18: its old meaning (the #4354 offline time box) is closed.",
+      "matching_section": "N1.3",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        161
+      ],
+      "matching_clause_line_numbers": [
+        161
+      ],
+      "enclosing_clause_line_numbers": [
+        161
+      ],
+      "decisions_in_item_text": [
+        "D18"
+      ],
+      "decisions_in_immediate_subclause": [
+        "D18"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D18"
+      ],
+      "decisions_named_item_or_clause": [
+        "D18"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D18"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": false,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "g",
+      "line_number": 352,
+      "full_line": "- **(g)** D18: the registration is valid for two weeks from its registration commit's author date.",
+      "item_text": "D18: the registration is valid for two weeks from its registration commit's author date.",
+      "matching_section": "N1.3",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        161
+      ],
+      "matching_clause_line_numbers": [
+        161
+      ],
+      "enclosing_clause_line_numbers": [
+        161
+      ],
+      "decisions_in_item_text": [
+        "D18"
+      ],
+      "decisions_in_immediate_subclause": [
+        "D18"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D18"
+      ],
+      "decisions_named_item_or_clause": [
+        "D18"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D18"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": false,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "h",
+      "line_number": 353,
+      "full_line": "- **(h)** Schema 3.2.0 for the native arm, superseding D71(a) for that arm only (N1.1).",
+      "item_text": "Schema 3.2.0 for the native arm, superseding D71(a) for that arm only (N1.1).",
+      "matching_section": "N1.1 / N1.7",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        110,
+        341
+      ],
+      "matching_clause_line_numbers": [
+        110,
+        111,
+        341
+      ],
+      "enclosing_clause_line_numbers": [
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        341
+      ],
+      "decisions_in_item_text": [
+        "D71"
+      ],
+      "decisions_in_immediate_subclause": [
+        "D98",
+        "D99",
+        "D108",
+        "D71"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D98",
+        "D99",
+        "D108",
+        "D71"
+      ],
+      "decisions_named_item_or_clause": [
+        "D71",
+        "D98",
+        "D99",
+        "D108"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D71",
+        "D98",
+        "D99",
+        "D108"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": true,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "i",
+      "line_number": 354,
+      "full_line": "- **(i)** The N1.4(B) row set, B0–B7.",
+      "item_text": "The N1.4(B) row set, B0–B7.",
+      "matching_section": "N1.4(B)",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        178
+      ],
+      "matching_clause_line_numbers": [
+        178
+      ],
+      "enclosing_clause_line_numbers": [
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        224
+      ],
+      "decisions_in_item_text": [],
+      "decisions_in_immediate_subclause": [],
+      "decisions_in_matching_clause_lines": [],
+      "decisions_named_item_or_clause": [],
+      "decisions_named_including_enclosing_block": [
+        "D109",
+        "D43",
+        "D53",
+        "D56",
+        "D36"
+      ],
+      "names_any_decision_in_item_or_clause": false,
+      "names_any_recorded_decision_in_item_or_clause": false,
+      "names_any_standalone_recorded_decision_in_item_or_clause": false,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "j",
+      "line_number": 355,
+      "full_line": "- **(j)** B3: the typed-protocol ordering mapping, with `receipt_chunks_unopened` reported only.",
+      "item_text": "B3: the typed-protocol ordering mapping, with `receipt_chunks_unopened` reported only.",
+      "matching_section": "N1.4(B) B3",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        199
+      ],
+      "matching_clause_line_numbers": [
+        199,
+        200,
+        201,
+        202,
+        203,
+        204
+      ],
+      "enclosing_clause_line_numbers": [
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        411
+      ],
+      "decisions_in_item_text": [],
+      "decisions_in_immediate_subclause": [],
+      "decisions_in_matching_clause_lines": [],
+      "decisions_named_item_or_clause": [],
+      "decisions_named_including_enclosing_block": [],
+      "names_any_decision_in_item_or_clause": false,
+      "names_any_recorded_decision_in_item_or_clause": false,
+      "names_any_standalone_recorded_decision_in_item_or_clause": false,
+      "names_any_decision_including_enclosing": false,
+      "names_any_recorded_decision_including_enclosing": false
+    },
+    {
+      "letter": "k",
+      "line_number": 356,
+      "full_line": "- **(k)** B4: the native clean checks and their evidence.",
+      "item_text": "B4: the native clean checks and their evidence.",
+      "matching_section": "N1.4(B) B4",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        205
+      ],
+      "matching_clause_line_numbers": [
+        205,
+        206,
+        207,
+        208,
+        209,
+        210
+      ],
+      "enclosing_clause_line_numbers": [
+        205,
+        206,
+        207,
+        208,
+        209,
+        210
+      ],
+      "decisions_in_item_text": [],
+      "decisions_in_immediate_subclause": [
+        "D43",
+        "D53",
+        "D56"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D43",
+        "D53",
+        "D56"
+      ],
+      "decisions_named_item_or_clause": [
+        "D43",
+        "D53",
+        "D56"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D43",
+        "D53",
+        "D56"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": true,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "l",
+      "line_number": 357,
+      "full_line": "- **(l)** Admission: starting seven-day utilisation ≤ 0.50. D118's record restates this value; a \"no\" here supersedes D118's restated 0.50 for this amendment.",
+      "item_text": "Admission: starting seven-day utilisation ≤ 0.50. D118's record restates this value; a \"no\" here supersedes D118's restated 0.50 for this amendment.",
+      "matching_section": "N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        250
+      ],
+      "matching_clause_line_numbers": [
+        250
+      ],
+      "enclosing_clause_line_numbers": [
+        236,
+        250,
+        383
+      ],
+      "decisions_in_item_text": [
+        "D118"
+      ],
+      "decisions_in_immediate_subclause": [],
+      "decisions_in_matching_clause_lines": [],
+      "decisions_named_item_or_clause": [
+        "D118"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D118"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": true,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "m",
+      "line_number": 358,
+      "full_line": "- **(m)** Admission: a window is allowed when its utilisation is a finite non-boolean number with 0 ≤ u < 1 and its reset is after capture and dispatch. D118 sets the five-hour bound, and presence of both windows is implied by it.",
+      "item_text": "Admission: a window is allowed when its utilisation is a finite non-boolean number with 0 ≤ u < 1 and its reset is after capture and dispatch. D118 sets the five-hour bound, and presence of both windows is implied by it.",
+      "matching_section": "N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        252
+      ],
+      "matching_clause_line_numbers": [
+        251,
+        252
+      ],
+      "enclosing_clause_line_numbers": [
+        251,
+        252,
+        383
+      ],
+      "decisions_in_item_text": [
+        "D118"
+      ],
+      "decisions_in_immediate_subclause": [
+        "D118"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D118"
+      ],
+      "decisions_named_item_or_clause": [
+        "D118"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D118"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": true,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "n",
+      "line_number": 359,
+      "full_line": "- **(n)** Admission: a further window judged by the same rule when it carries `utilization`, and recorded but not refused otherwise.",
+      "item_text": "Admission: a further window judged by the same rule when it carries `utilization`, and recorded but not refused otherwise.",
+      "matching_section": "N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        253
+      ],
+      "matching_clause_line_numbers": [
+        253
+      ],
+      "enclosing_clause_line_numbers": [
+        253
+      ],
+      "decisions_in_item_text": [],
+      "decisions_in_immediate_subclause": [],
+      "decisions_in_matching_clause_lines": [],
+      "decisions_named_item_or_clause": [],
+      "decisions_named_including_enclosing_block": [],
+      "names_any_decision_in_item_or_clause": false,
+      "names_any_recorded_decision_in_item_or_clause": false,
+      "names_any_standalone_recorded_decision_in_item_or_clause": false,
+      "names_any_decision_including_enclosing": false,
+      "names_any_recorded_decision_including_enclosing": false
+    },
+    {
+      "letter": "o",
+      "line_number": 360,
+      "full_line": "- **(o)** Freshness, one rule with two values: `captured_at` ≥ the word's `authorized_at`, and `max_age_seconds` = 300.",
+      "item_text": "Freshness, one rule with two values: `captured_at` ≥ the word's `authorized_at`, and `max_age_seconds` = 300.",
+      "matching_section": "N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        255
+      ],
+      "matching_clause_line_numbers": [
+        255
+      ],
+      "enclosing_clause_line_numbers": [
+        237,
+        255
+      ],
+      "decisions_in_item_text": [],
+      "decisions_in_immediate_subclause": [],
+      "decisions_in_matching_clause_lines": [],
+      "decisions_named_item_or_clause": [],
+      "decisions_named_including_enclosing_block": [],
+      "names_any_decision_in_item_or_clause": false,
+      "names_any_recorded_decision_in_item_or_clause": false,
+      "names_any_standalone_recorded_decision_in_item_or_clause": false,
+      "names_any_decision_including_enclosing": false,
+      "names_any_recorded_decision_including_enclosing": false
+    },
+    {
+      "letter": "p",
+      "line_number": 361,
+      "full_line": "- **(p)** Deadline: 21,600 s.",
+      "item_text": "Deadline: 21,600 s.",
+      "matching_section": "N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        279
+      ],
+      "matching_clause_line_numbers": [
+        279
+      ],
+      "enclosing_clause_line_numbers": [
+        235,
+        279
+      ],
+      "decisions_in_item_text": [],
+      "decisions_in_immediate_subclause": [
+        "D14"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D14"
+      ],
+      "decisions_named_item_or_clause": [
+        "D14"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D14"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": false,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "q",
+      "line_number": 362,
+      "full_line": "- **(q)** Host: keep-awake `macos_iokit_ims_v1` on AC power, accepting that mid-run loss is undetected.",
+      "item_text": "Host: keep-awake `macos_iokit_ims_v1` on AC power, accepting that mid-run loss is undetected.",
+      "matching_section": "N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        276
+      ],
+      "matching_clause_line_numbers": [
+        276,
+        278
+      ],
+      "enclosing_clause_line_numbers": [
+        239,
+        276,
+        278
+      ],
+      "decisions_in_item_text": [],
+      "decisions_in_immediate_subclause": [],
+      "decisions_in_matching_clause_lines": [],
+      "decisions_named_item_or_clause": [],
+      "decisions_named_including_enclosing_block": [],
+      "names_any_decision_in_item_or_clause": false,
+      "names_any_recorded_decision_in_item_or_clause": false,
+      "names_any_standalone_recorded_decision_in_item_or_clause": false,
+      "names_any_decision_including_enclosing": false,
+      "names_any_recorded_decision_including_enclosing": false
+    },
+    {
+      "letter": "r",
+      "line_number": 363,
+      "full_line": "- **(r)** Host: the quiet-window lock held by the operator for the attempt.",
+      "item_text": "Host: the quiet-window lock held by the operator for the attempt.",
+      "matching_section": "N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        277
+      ],
+      "matching_clause_line_numbers": [
+        277
+      ],
+      "enclosing_clause_line_numbers": [
+        277
+      ],
+      "decisions_in_item_text": [],
+      "decisions_in_immediate_subclause": [],
+      "decisions_in_matching_clause_lines": [],
+      "decisions_named_item_or_clause": [],
+      "decisions_named_including_enclosing_block": [],
+      "names_any_decision_in_item_or_clause": false,
+      "names_any_recorded_decision_in_item_or_clause": false,
+      "names_any_standalone_recorded_decision_in_item_or_clause": false,
+      "names_any_decision_including_enclosing": false,
+      "names_any_recorded_decision_including_enclosing": false
+    },
+    {
+      "letter": "s",
+      "line_number": 364,
+      "full_line": "- **(s)** The owner may stop the attempt manually, as operator.",
+      "item_text": "The owner may stop the attempt manually, as operator.",
+      "matching_section": "N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        287
+      ],
+      "matching_clause_line_numbers": [
+        287
+      ],
+      "enclosing_clause_line_numbers": [
+        287
+      ],
+      "decisions_in_item_text": [],
+      "decisions_in_immediate_subclause": [
+        "D12"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D12"
+      ],
+      "decisions_named_item_or_clause": [
+        "D12"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D12"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": false,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "t",
+      "line_number": 365,
+      "full_line": "- **(t)** D107's stop rule read as in N1.5: usage is a live stop, and acceptance-row failures are judged after the attempt.",
+      "item_text": "D107's stop rule read as in N1.5: usage is a live stop, and acceptance-row failures are judged after the attempt.",
+      "matching_section": "N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        288
+      ],
+      "matching_clause_line_numbers": [
+        288
+      ],
+      "enclosing_clause_line_numbers": [
+        288
+      ],
+      "decisions_in_item_text": [
+        "D107"
+      ],
+      "decisions_in_immediate_subclause": [
+        "D107"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D107"
+      ],
+      "decisions_named_item_or_clause": [
+        "D107"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D107"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": true,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "u",
+      "line_number": 366,
+      "full_line": "- **(u)** Freshness margin: at least 90 s left at the pre-reservation check.",
+      "item_text": "Freshness margin: at least 90 s left at the pre-reservation check.",
+      "matching_section": "N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        256
+      ],
+      "matching_clause_line_numbers": [
+        256
+      ],
+      "enclosing_clause_line_numbers": [
+        237,
+        256,
+        262,
+        263,
+        264,
+        384
+      ],
+      "decisions_in_item_text": [],
+      "decisions_in_immediate_subclause": [],
+      "decisions_in_matching_clause_lines": [],
+      "decisions_named_item_or_clause": [],
+      "decisions_named_including_enclosing_block": [
+        "D115",
+        "D113"
+      ],
+      "names_any_decision_in_item_or_clause": false,
+      "names_any_recorded_decision_in_item_or_clause": false,
+      "names_any_standalone_recorded_decision_in_item_or_clause": false,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "v",
+      "line_number": 367,
+      "full_line": "- **(v)** After three failed captures: a new word for the same registration within its validity window, with no attempt consumed. This extends D115, and the newer word supersedes the earlier one.",
+      "item_text": "After three failed captures: a new word for the same registration within its validity window, with no attempt consumed. This extends D115, and the newer word supersedes the earlier one.",
+      "matching_section": "N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        265
+      ],
+      "matching_clause_line_numbers": [
+        265,
+        266,
+        267
+      ],
+      "enclosing_clause_line_numbers": [
+        265,
+        266,
+        267
+      ],
+      "decisions_in_item_text": [
+        "D115"
+      ],
+      "decisions_in_immediate_subclause": [
+        "D115"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D115"
+      ],
+      "decisions_named_item_or_clause": [
+        "D115"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D115"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": true,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "w",
+      "line_number": 368,
+      "full_line": "- **(w)** The owner statement is how the word states D110's and D111's terms, bound through the review bundle.",
+      "item_text": "The owner statement is how the word states D110's and D111's terms, bound through the review bundle.",
+      "matching_section": "N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        233
+      ],
+      "matching_clause_line_numbers": [
+        233
+      ],
+      "enclosing_clause_line_numbers": [
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        397,
+        398,
+        399,
+        400,
+        401,
+        402
+      ],
+      "decisions_in_item_text": [
+        "D110",
+        "D111"
+      ],
+      "decisions_in_immediate_subclause": [
+        "D110",
+        "D111"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D110",
+        "D111"
+      ],
+      "decisions_named_item_or_clause": [
+        "D110",
+        "D111"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D110",
+        "D111",
+        "D118",
+        "D115"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": true,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    },
+    {
+      "letter": "x",
+      "line_number": 369,
+      "full_line": "- **(x)** Every capture's limits are cross-checked, not only the first (stricter than D117).",
+      "item_text": "Every capture's limits are cross-checked, not only the first (stricter than D117).",
+      "matching_section": "N1.2 / N1.5",
+      "marks_matching_clause_proposed": true,
+      "proposed_clause_line_numbers": [
+        130
+      ],
+      "matching_clause_line_numbers": [
+        130,
+        131,
+        132
+      ],
+      "enclosing_clause_line_numbers": [
+        130,
+        131,
+        132,
+        257,
+        385
+      ],
+      "decisions_in_item_text": [
+        "D117"
+      ],
+      "decisions_in_immediate_subclause": [
+        "D117"
+      ],
+      "decisions_in_matching_clause_lines": [
+        "D117"
+      ],
+      "decisions_named_item_or_clause": [
+        "D117"
+      ],
+      "decisions_named_including_enclosing_block": [
+        "D117"
+      ],
+      "names_any_decision_in_item_or_clause": true,
+      "names_any_recorded_decision_in_item_or_clause": true,
+      "names_any_standalone_recorded_decision_in_item_or_clause": true,
+      "names_any_decision_including_enclosing": true,
+      "names_any_recorded_decision_including_enclosing": true
+    }
+  ],
+  "decisions_in_status_md": {
+    "D11": {
+      "decision": "D11",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "d107_amendment_default_subbullet",
+      "has_standalone_heading_or_bullet": false,
+      "has_d107_default_subbullet": true,
+      "status_primary_lines": [
+        805,
+        815,
+        817
+      ],
+      "status_heading_matches": [],
+      "status_standalone_bullet_matches": [],
+      "status_d107_default_subbullet_matches": [
+        {
+          "line": 817,
+          "text": "  - D11: the binary and hash are pinned at registration;"
+        }
+      ],
+      "grep_command": "grep -n -E '\\bD11\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 3,
+      "named_by_items_in_item_or_clause": [
+        "b"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D12": {
+      "decision": "D12",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "d107_amendment_default_subbullet",
+      "has_standalone_heading_or_bullet": false,
+      "has_d107_default_subbullet": true,
+      "status_primary_lines": [
+        805,
+        815,
+        818
+      ],
+      "status_heading_matches": [],
+      "status_standalone_bullet_matches": [],
+      "status_d107_default_subbullet_matches": [
+        {
+          "line": 818,
+          "text": "  - D12: the owner is operator, claude orchestrates, and a Claude-plus-codex review pair reviews;"
+        }
+      ],
+      "grep_command": "grep -n -E '\\bD12\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 1,
+      "named_by_items_in_item_or_clause": [
+        "s"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D13": {
+      "decision": "D13",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "d107_amendment_default_subbullet",
+      "has_standalone_heading_or_bullet": false,
+      "has_d107_default_subbullet": true,
+      "status_primary_lines": [
+        805,
+        815,
+        819
+      ],
+      "status_heading_matches": [],
+      "status_standalone_bullet_matches": [],
+      "status_d107_default_subbullet_matches": [
+        {
+          "line": 819,
+          "text": "  - D13: the toolchain exposure, launch flags, runtime-closure fix and receipt origin are pinned;"
+        }
+      ],
+      "grep_command": "grep -n -E '\\bD13\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 1,
+      "named_by_items_in_item_or_clause": [
+        "c",
+        "d",
+        "e"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D14": {
+      "decision": "D14",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "d107_amendment_default_subbullet",
+      "has_standalone_heading_or_bullet": false,
+      "has_d107_default_subbullet": true,
+      "status_primary_lines": [
+        805,
+        815,
+        820
+      ],
+      "status_heading_matches": [],
+      "status_standalone_bullet_matches": [],
+      "status_d107_default_subbullet_matches": [
+        {
+          "line": 820,
+          "text": "  - D14: the old spend package is re-validated against subscription usage;"
+        }
+      ],
+      "grep_command": "grep -n -E '\\bD14\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 3,
+      "named_by_items_in_item_or_clause": [
+        "p"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D18": {
+      "decision": "D18",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "d107_amendment_default_subbullet",
+      "has_standalone_heading_or_bullet": false,
+      "has_d107_default_subbullet": true,
+      "status_primary_lines": [
+        805,
+        815,
+        821
+      ],
+      "status_heading_matches": [],
+      "status_standalone_bullet_matches": [],
+      "status_d107_default_subbullet_matches": [
+        {
+          "line": 821,
+          "text": "  - D18: a two-week time box from registration;"
+        }
+      ],
+      "grep_command": "grep -n -E '\\bD18\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 3,
+      "named_by_items_in_item_or_clause": [
+        "f",
+        "g"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D36": {
+      "decision": "D36",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        132
+      ],
+      "status_heading_matches": [],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 132,
+          "text": "- **D36 (D23 + D19, acceptance review): \"Models review; you sign; seed (Recommended)\".**"
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD36\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 4,
+      "named_by_items_in_item_or_clause": [],
+      "named_by_items_in_enclosing_only": [
+        "i"
+      ]
+    },
+    "D43": {
+      "decision": "D43",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        186
+      ],
+      "status_heading_matches": [],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 186,
+          "text": "- **D43 (re-canary operator): \"You launch it (Recommended)\".** This amends D41's operator clause."
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD43\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 18,
+      "named_by_items_in_item_or_clause": [
+        "k"
+      ],
+      "named_by_items_in_enclosing_only": [
+        "i"
+      ]
+    },
+    "D53": {
+      "decision": "D53",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        262
+      ],
+      "status_heading_matches": [],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 262,
+          "text": "- **D53 (no-touch rule and the 10-22a archive): \"Rule now; ratify now\".**"
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD53\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 10,
+      "named_by_items_in_item_or_clause": [
+        "k"
+      ],
+      "named_by_items_in_enclosing_only": [
+        "i"
+      ]
+    },
+    "D56": {
+      "decision": "D56",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        277
+      ],
+      "status_heading_matches": [],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 277,
+          "text": "- **D56 (override semantics): \"No: terminal ends the run (Recommended)\".**"
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD56\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 10,
+      "named_by_items_in_item_or_clause": [
+        "k"
+      ],
+      "named_by_items_in_enclosing_only": [
+        "i"
+      ]
+    },
+    "D71": {
+      "decision": "D71",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        416
+      ],
+      "status_heading_matches": [
+        {
+          "line": 416,
+          "text": "### Performed by the owner, 2026-10-31T03:05:51Z: D71, the P4a amendment 1 word"
+        }
+      ],
+      "status_standalone_bullet_matches": [],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD71\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 9,
+      "named_by_items_in_item_or_clause": [
+        "h"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D98": {
+      "decision": "D98",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        552,
+        553
+      ],
+      "status_heading_matches": [
+        {
+          "line": 552,
+          "text": "### Decided by the owner, 2026-11-08T02:05Z: D98–D100, the schema release before final generation (asked by claude after checking the owner-pasted publication sign-off list against the repository)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 553,
+          "text": "- **D98. Issue H (#5471): Option A, in the next schema release.**"
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD98\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 8,
+      "named_by_items_in_item_or_clause": [
+        "h"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D99": {
+      "decision": "D99",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        552,
+        559
+      ],
+      "status_heading_matches": [
+        {
+          "line": 552,
+          "text": "### Decided by the owner, 2026-11-08T02:05Z: D98–D100, the schema release before final generation (asked by claude after checking the owner-pasted publication sign-off list against the repository)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 559,
+          "text": "- **D99. `LicenseAndUseTerms.data_use_permission`: restore `multivalued: true`.**"
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD99\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 8,
+      "named_by_items_in_item_or_clause": [
+        "h"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D105": {
+      "decision": "D105",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        717,
+        805,
+        806
+      ],
+      "status_heading_matches": [
+        {
+          "line": 717,
+          "text": "### Decided by the owner, 2026-11-09T03:40Z: D123, which secondary transformation measure D105 means (asked by claude after `plans/reviews/pr5620_claude_review_2026-11-09.md` P2-2)"
+        },
+        {
+          "line": 805,
+          "text": "### Decided by the owner, 2026-11-08T05:30Z: D105–D107, receipts v5, D29 and the native amendment (asked by claude; memo `d4d-executions/plans/decision_memo_v5_d29_native_amendment_2026-11-08.md`)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 806,
+          "text": "- **D105. Receipts v5 is not activated for final generation.** v4 stays the registered instrument (plan §3a, D64 item 11)."
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD105\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 22,
+      "named_by_items_in_item_or_clause": [],
+      "named_by_items_in_enclosing_only": [
+        "e"
+      ]
+    },
+    "D107": {
+      "decision": "D107",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        805,
+        815
+      ],
+      "status_heading_matches": [
+        {
+          "line": 805,
+          "text": "### Decided by the owner, 2026-11-08T05:30Z: D105–D107, receipts v5, D29 and the native amendment (asked by claude; memo `d4d-executions/plans/decision_memo_v5_d29_native_amendment_2026-11-08.md`)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 815,
+          "text": "- **D107 (plan item 43, option i). A dated native amendment,** drafted by claude with the plan's proposals as defaults, independently reviewed, then ratified by the owner before the native registration. None of it blocks A21. Its defaults:"
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD107\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 5,
+      "named_by_items_in_item_or_clause": [
+        "b",
+        "e",
+        "t"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D108": {
+      "decision": "D108",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        797,
+        798
+      ],
+      "status_heading_matches": [
+        {
+          "line": 797,
+          "text": "### Decided by the owner, 2026-11-08T06:30Z: D108, the #5531 schema prefixes (asked by claude after the independent review `d4d-executions/plans/reviews/pr5531_claude_review_2026-11-08.md`, P1-3)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 798,
+          "text": "- **D108. Drop the five new schema prefixes** (GO, MESH, MeSH, EFO and NCIT) from `D4D_Base_import.yaml`."
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD108\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 10,
+      "named_by_items_in_item_or_clause": [
+        "h"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D109": {
+      "decision": "D109",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        787,
+        788
+      ],
+      "status_heading_matches": [
+        {
+          "line": 787,
+          "text": "### Decided by the owner, 2026-11-08T07:20Z: D109–D111, native amendment N1 terms (asked by claude after the independent review `d4d-executions/plans/reviews/pr5542_claude_review_2026-11-08.md`, P1-3 and P1-5)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 788,
+          "text": "- **D109. The native receipt floor for the CHORUS n=1 canary stays `{state: pending, mode: diagnostic_pilot}`.**"
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD109\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 3,
+      "named_by_items_in_item_or_clause": [],
+      "named_by_items_in_enclosing_only": [
+        "i"
+      ]
+    },
+    "D110": {
+      "decision": "D110",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        787,
+        792
+      ],
+      "status_heading_matches": [
+        {
+          "line": 787,
+          "text": "### Decided by the owner, 2026-11-08T07:20Z: D109–D111, native amendment N1 terms (asked by claude after the independent review `d4d-executions/plans/reviews/pr5542_claude_review_2026-11-08.md`, P1-3 and P1-5)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 792,
+          "text": "- **D110. `budget_guard_usd` = 90** (`--max-budget-usd 90`), the sources' recommendation in the 2026-10-25 owner packet §4.6. It's a backstop, and it's a stop trigger the launch word states."
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD110\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 4,
+      "named_by_items_in_item_or_clause": [
+        "w"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D111": {
+      "decision": "D111",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        787,
+        794
+      ],
+      "status_heading_matches": [
+        {
+          "line": 787,
+          "text": "### Decided by the owner, 2026-11-08T07:20Z: D109–D111, native amendment N1 terms (asked by claude after the independent review `d4d-executions/plans/reviews/pr5542_claude_review_2026-11-08.md`, P1-3 and P1-5)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 794,
+          "text": "- **D111. Extra usage (overage) stays disabled on the account for the canary's whole duration.** The owner confirms that state in the launch word. The dollar guard is a second backstop."
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD111\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 4,
+      "named_by_items_in_item_or_clause": [
+        "w"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D113": {
+      "decision": "D113",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        776,
+        780
+      ],
+      "status_heading_matches": [
+        {
+          "line": 776,
+          "text": "### Decided by the owner, 2026-11-08T08:05Z: D112–D114, native amendment N1 second round (asked by claude after the re-reviews `plans/reviews/n1v2_bc53c1ce_claude_review_2026-11-08.md` and `n1v2_bc53c1ce_codex_review_2026-11-08.md`)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 780,
+          "text": "- **D113 (A13 and D07 for the native cell).** A rule-level rejection of the native canary ends the **native shared-v1 cell only,** not the API arm's generic_v10."
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD113\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 3,
+      "named_by_items_in_item_or_clause": [],
+      "named_by_items_in_enclosing_only": [
+        "u"
+      ]
+    },
+    "D114": {
+      "decision": "D114",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        776,
+        784
+      ],
+      "status_heading_matches": [
+        {
+          "line": 776,
+          "text": "### Decided by the owner, 2026-11-08T08:05Z: D112–D114, native amendment N1 second round (asked by claude after the re-reviews `plans/reviews/n1v2_bc53c1ce_claude_review_2026-11-08.md` and `n1v2_bc53c1ce_codex_review_2026-11-08.md`)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 784,
+          "text": "- **D114 (#4019). Narrow `toolchain()` to the generation agents,** so the native run sees no study-specific agent files. It's a code change in U4/U5, before the registration."
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD114\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 15,
+      "named_by_items_in_item_or_clause": [
+        "c",
+        "d"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D115": {
+      "decision": "D115",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        765,
+        766
+      ],
+      "status_heading_matches": [
+        {
+          "line": 765,
+          "text": "### Decided by the owner, 2026-11-08T09:05Z: D115–D116, native amendment N1 third round (asked by claude after `plans/reviews/n1v3_e8b475c4_claude_review_2026-11-08.md` P1-2/P1-3/P2-1 and the Codex v3 review R1)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 766,
+          "text": "- **D115. `AUTHORIZE_ONE_NATIVE_ATTEMPT` also authorizes up to three admission-capture calls for that attempt.**"
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD115\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 4,
+      "named_by_items_in_item_or_clause": [
+        "v"
+      ],
+      "named_by_items_in_enclosing_only": [
+        "u",
+        "w"
+      ]
+    },
+    "D117": {
+      "decision": "D117",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        755,
+        756
+      ],
+      "status_heading_matches": [
+        {
+          "line": 755,
+          "text": "### Decided by the owner, 2026-11-08T09:20Z: D117–D118, native amendment N1 fourth round (asked by claude after `plans/reviews/n1v4_9edff5b9_claude_review_2026-11-08.md` P1-1 and P2-2)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 756,
+          "text": "- **D117. One separate real-binary probe authorization covers two probe runs,** both against the scripted local provider, with no account usage:"
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD117\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 2,
+      "named_by_items_in_item_or_clause": [
+        "x"
+      ],
+      "named_by_items_in_enclosing_only": []
+    },
+    "D118": {
+      "decision": "D118",
+      "recorded_in_status_as_owner_decided": true,
+      "record_kind": "standalone_owner_decision",
+      "has_standalone_heading_or_bullet": true,
+      "has_d107_default_subbullet": false,
+      "status_primary_lines": [
+        755,
+        762
+      ],
+      "status_heading_matches": [
+        {
+          "line": 755,
+          "text": "### Decided by the owner, 2026-11-08T09:20Z: D117–D118, native amendment N1 fourth round (asked by claude after `plans/reviews/n1v4_9edff5b9_claude_review_2026-11-08.md` P1-1 and P2-2)"
+        }
+      ],
+      "status_standalone_bullet_matches": [
+        {
+          "line": 762,
+          "text": "- **D118. Admission also requires five-hour utilisation ≤ 0.25,** alongside seven-day ≤ 0.50. The amendment still discloses that a mid-run five-hour exhaustion is possible, and that it is a usage stop that counts as an attempt."
+        }
+      ],
+      "status_d107_default_subbullet_matches": [],
+      "grep_command": "grep -n -E '\\bD118\\b' /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/STATUS.md",
+      "total_grep_matches_in_status": 3,
+      "named_by_items_in_item_or_clause": [
+        "l",
+        "m"
+      ],
+      "named_by_items_in_enclosing_only": [
+        "w"
+      ]
+    }
+  },
+  "proposed_lines": [
+    {
+      "line_number": 24,
+      "occurrences_on_line": 1,
+      "first_200_chars": "- **Values marked [proposed]** are the lead's choices. They take effect only through N1.8. Unmarked rules are the owner's decisions or the plan's own text, each cited.",
+      "is_full_line": true,
+      "full_line_length": 167
+    },
+    {
+      "line_number": 110,
+      "occurrences_on_line": 1,
+      "first_200_chars": "- **Schema** [proposed]: the released 3.2.0 (content: D98, D99, D108), once it has merged and the native integration has been re-validated on it.",
+      "is_full_line": true,
+      "full_line_length": 145
+    },
+    {
+      "line_number": 121,
+      "occurrences_on_line": 1,
+      "first_200_chars": "  - [proposed] The transcript-based receipt origin is the \"receipt origin\" that D107's D13 default pins: one measurement, named twice.",
+      "is_full_line": true,
+      "full_line_length": 134
+    },
+    {
+      "line_number": 130,
+      "occurrences_on_line": 1,
+      "first_200_chars": "  - [proposed] **every** live capture's terminal `modelUsage` limits must equal the registered limits. D117 names the first, and checking each one is the stricter reading.",
+      "is_full_line": true,
+      "full_line_length": 171
+    },
+    {
+      "line_number": 136,
+      "occurrences_on_line": 1,
+      "first_200_chars": "- **Auxiliary models** [proposed]: none.",
+      "is_full_line": true,
+      "full_line_length": 40
+    },
+    {
+      "line_number": 150,
+      "occurrences_on_line": 1,
+      "first_200_chars": "  - [proposed] The pinned executable is a **durable copy** outside the auto-updater's path, so that an update inside the validity window can't change the pinned sha. This was the 2026-10-25 packet's s",
+      "is_full_line": false,
+      "full_line_length": 227
+    },
+    {
+      "line_number": 159,
+      "occurrences_on_line": 2,
+      "first_200_chars": "| **D13** | The registration pins:<br>• the **toolchain exposure**, narrowed to the generation agents under D114 (#4019);<br>• the **tool allow-list**;<br>• [proposed] the **literal launch argv, recor",
+      "is_full_line": false,
+      "full_line_length": 455
+    },
+    {
+      "line_number": 161,
+      "occurrences_on_line": 2,
+      "first_200_chars": "| **D18** | [proposed] D18's original subject, a time box for #4354's offline acceptance, is closed by this amendment.<br>[proposed] D18 now means a **two-week validity window** for the native registr",
+      "is_full_line": false,
+      "full_line_length": 412
+    },
+    {
+      "line_number": 178,
+      "occurrences_on_line": 1,
+      "first_200_chars": "[proposed] **The row set.** Plan §5 defers the native rows to this amendment. These are taken from the plan and generation plan N10, not from #4354.",
+      "is_full_line": true,
+      "full_line_length": 148
+    },
+    {
+      "line_number": 199,
+      "occurrences_on_line": 1,
+      "first_200_chars": "3. **Tool history**, generation plan N10 mapped to the typed protocol [proposed]:",
+      "is_full_line": true,
+      "full_line_length": 81
+    },
+    {
+      "line_number": 205,
+      "occurrences_on_line": 1,
+      "first_200_chars": "4. **Clean.** The attempt is clean: an assisted attempt is evidence only and never accepted (D43; plan §1 item 1, §5 row 7, §10). [proposed] The native clean checks, with how each is evidenced:",
+      "is_full_line": true,
+      "full_line_length": 193
+    },
+    {
+      "line_number": 233,
+      "occurrences_on_line": 1,
+      "first_200_chars": "  2. **The owner writes the statement of launch terms.** [proposed] This statement is what D110 and D111 mean by \"the launch word states\" and \"confirms … in the launch word\": the coded word's closed f",
+      "is_full_line": false,
+      "full_line_length": 284
+    },
+    {
+      "line_number": 250,
+      "occurrences_on_line": 1,
+      "first_200_chars": "     - **[proposed] the seven-day utilisation is ≤ 0.50.** It's stricter than the sources' 0.80 because the window was exhausted on 2026-10-24, the 1M context spends faster, and a canary stopped by th",
+      "is_full_line": false,
+      "full_line_length": 222
+    },
+    {
+      "line_number": 252,
+      "occurrences_on_line": 1,
+      "first_200_chars": "     - **[proposed] both windows are allowed.** A nested window is allowed when its `utilization` is a finite JSON number, not a boolean, with 0 ≤ utilisation < 1, and its `resetsAt` is after both cap",
+      "is_full_line": false,
+      "full_line_length": 267
+    },
+    {
+      "line_number": 253,
+      "occurrences_on_line": 1,
+      "first_200_chars": "     - **[proposed] a further window type is judged by the same rule when it carries `utilization`, and is recorded but not refused when it doesn't;**",
+      "is_full_line": true,
+      "full_line_length": 150
+    },
+    {
+      "line_number": 255,
+      "occurrences_on_line": 1,
+      "first_200_chars": "     - **[proposed] One freshness rule with two values:** `captured_at` is no earlier than the word's `authorized_at`, and dispatch occurs within `max_age_seconds` = 300 of `captured_at`. 300 is the c",
+      "is_full_line": false,
+      "full_line_length": 412
+    },
+    {
+      "line_number": 256,
+      "occurrences_on_line": 1,
+      "first_200_chars": "     - **[proposed] a margin at the reservation:** at the pre-reservation check, `captured_at + max_age_seconds − now` is at least 90 s. That covers what runs after the reservation and before dispatch",
+      "is_full_line": false,
+      "full_line_length": 322
+    },
+    {
+      "line_number": 265,
+      "occurrences_on_line": 1,
+      "first_200_chars": "  - [proposed] **After three failed captures,** the capture reservation refuses a fourth. The path is a new word for the same registration, if it's still within its validity window. A new word gets th",
+      "is_full_line": false,
+      "full_line_length": 245
+    },
+    {
+      "line_number": 276,
+      "occurrences_on_line": 1,
+      "first_200_chars": "  - [proposed] the registered keep-awake policy `macos_iokit_ims_v1` (idle, disk and system sleep), on AC power;",
+      "is_full_line": true,
+      "full_line_length": 112
+    },
+    {
+      "line_number": 277,
+      "occurrences_on_line": 1,
+      "first_200_chars": "  - [proposed] the operator holds the quiet-window lock for the attempt. That's a coordination protocol, not a controller gate, and not proof of a quiet host.",
+      "is_full_line": true,
+      "full_line_length": 158
+    },
+    {
+      "line_number": 279,
+      "occurrences_on_line": 1,
+      "first_200_chars": "- **Deadline** [proposed]: 21,600 s (6 h) of wall time from dispatch. That's the sources' value, re-validated in D14.",
+      "is_full_line": true,
+      "full_line_length": 117
+    },
+    {
+      "line_number": 287,
+      "occurrences_on_line": 1,
+      "first_200_chars": "  - [proposed] **The owner, as operator (D12),** may stop the attempt manually at any time, by the signal and cleanup procedure the launch packet names.",
+      "is_full_line": true,
+      "full_line_length": 152
+    },
+    {
+      "line_number": 288,
+      "occurrences_on_line": 1,
+      "first_200_chars": "  - [proposed] **D107's stop rule is read as follows.** The usage limit is the live stop above. \"any acceptance-row failure\" is judged after the attempt on the saved result, because the rows are prope",
+      "is_full_line": false,
+      "full_line_length": 282
+    },
+    {
+      "line_number": 341,
+      "occurrences_on_line": 1,
+      "first_200_chars": "- D71(a)'s schema, under N1.1 [proposed];",
+      "is_full_line": true,
+      "full_line_length": 41
+    }
+  ]
+}

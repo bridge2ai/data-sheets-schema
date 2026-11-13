@@ -1,0 +1,817 @@
+{
+  "run_id": "43367502045",
+  "head": "7b851213f3492144cfd5b83d6bbd9a8a040e9132",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 131695397418,
+      "name": "Python 3.12 / shard 9",
+      "conclusion": "success",
+      "seconds": 983.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397647,
+      "name": "Python 3.12 / API case routing-portable",
+      "conclusion": "success",
+      "seconds": 2003.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397666,
+      "name": "Python 3.12 / API case routing-dispatch",
+      "conclusion": "success",
+      "seconds": 837.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397671,
+      "name": "Python 3.12 / SG2 case sg2-none",
+      "conclusion": "success",
+      "seconds": 987.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397674,
+      "name": "Python 3.12 / shard 11",
+      "conclusion": "failure",
+      "seconds": 1224.0,
+      "summary_lines": 3,
+      "pytest_tail": "3 failed, 2415 passed, 40 skipped, 8 warnings in 1193.64s (0:19:53)"
+    },
+    {
+      "id": 131695397707,
+      "name": "Python 3.12 / SG2 case sg2-explicit",
+      "conclusion": "success",
+      "seconds": 977.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397717,
+      "name": "Python 3.12 / API case routing-default-layout",
+      "conclusion": "success",
+      "seconds": 594.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397770,
+      "name": "Python 3.12 / shard 7",
+      "conclusion": "failure",
+      "seconds": 1877.0,
+      "summary_lines": 30,
+      "pytest_tail": "2 failed, 1951 passed, 4 skipped, 10 warnings, 29 errors in 1849.09s (0:30:49)"
+    },
+    {
+      "id": 131695397773,
+      "name": "Python 3.12 / API case routing-regate",
+      "conclusion": "success",
+      "seconds": 705.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397790,
+      "name": "Python 3.12 / shard 12",
+      "conclusion": "cancelled",
+      "seconds": 2715.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397799,
+      "name": "Python 3.12 / shard 1",
+      "conclusion": "success",
+      "seconds": 875.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397822,
+      "name": "Python 3.12 / offline evaluation",
+      "conclusion": "success",
+      "seconds": 293.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397825,
+      "name": "Python 3.12 / shard 4",
+      "conclusion": "success",
+      "seconds": 1216.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397826,
+      "name": "Python 3.12 / SG2 case sg2-conventional",
+      "conclusion": "success",
+      "seconds": 806.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397829,
+      "name": "Python 3.12 / shard 10",
+      "conclusion": "cancelled",
+      "seconds": 2716.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397859,
+      "name": "Python 3.12 / offline audit and finalization",
+      "conclusion": "success",
+      "seconds": 643.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397878,
+      "name": "Python 3.12 / shard 6",
+      "conclusion": "failure",
+      "seconds": 2182.0,
+      "summary_lines": 5,
+      "pytest_tail": "6 failed, 2203 passed, 11 skipped, 13 warnings in 2141.91s (0:35:41)"
+    },
+    {
+      "id": 131695397897,
+      "name": "Python 3.12 / offline canary controls",
+      "conclusion": "success",
+      "seconds": 786.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131695397898,
+      "name": "Python 3.12 / shard 5",
+      "conclusion": "failure",
+      "seconds": 1262.0,
+      "summary_lines": 7,
+      "pytest_tail": "7 failed, 2053 passed, 11 skipped, 57 warnings in 1231.04s (0:20:31)"
+    },
+    {
+      "id": 131695397912,
+      "name": "Python 3.12 / shard 3",
+      "conclusion": "failure",
+      "seconds": 2438.0,
+      "summary_lines": 1,
+      "pytest_tail": "1 failed, 2511 passed, 1 skipped, 19 warnings in 2409.54s (0:40:09)"
+    },
+    {
+      "id": 131695397940,
+      "name": "Python 3.12 / shard 8",
+      "conclusion": "failure",
+      "seconds": 1145.0,
+      "summary_lines": 21,
+      "pytest_tail": "36 failed, 2983 passed, 1 skipped, 318 warnings in 1114.45s (0:18:34)"
+    },
+    {
+      "id": 131695398042,
+      "name": "Python 3.12 / shard 2",
+      "conclusion": "failure",
+      "seconds": 1526.0,
+      "summary_lines": 10,
+      "pytest_tail": "2 failed, 1538 passed, 1 skipped, 310 warnings, 8 errors in 1487.01s (0:24:47)"
+    },
+    {
+      "id": 131695398551,
+      "name": "schema-examples",
+      "conclusion": "skipped",
+      "seconds": 0.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    },
+    {
+      "id": 131711206126,
+      "name": "test",
+      "conclusion": "failure",
+      "seconds": 4.0,
+      "summary_lines": 0,
+      "pytest_tail": null
+    }
+  ],
+  "failures": [
+    {
+      "job": "Python 3.12 / shard 11",
+      "kind": "FAILED",
+      "file": "tests/test_native_incomplete_retention.py",
+      "node": "test_public_failed_attempt_retains_records_and_reads_back_exactly[False]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 11",
+      "kind": "FAILED",
+      "file": "tests/test_native_incomplete_retention.py",
+      "node": "test_public_failed_attempt_retains_records_and_reads_back_exactly[True]",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 11",
+      "kind": "FAILED",
+      "file": "tests/test_native_incomplete_retention.py",
+      "node": "test_public_finalization_after_injected_final_floor_failure",
+      "message": "ValueError: native controller dependency imported from another origin: prepare_registration",
+      "class": "import origin: native controller dependency imported from another origin"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3c_round4_helpers.py",
+      "node": "test_current_integrated_c_and_d_graphs_are_accepted",
+      "message": "RuntimeError: current C/D census roster differs from the closed A roster",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_probe_sequence.py",
+      "node": "test_bound_phase_runs_genuine_saved_verifier_after_mocked_child_boundary",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_unknown_expectation_kind_refuses_before_probe_read_or_producer[d4d_native_permission_expected]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_unknown_expectation_kind_refuses_before_probe_read_or_producer[7]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_rehashed_account_choice_cannot_change_selected_intent[extra-unknown]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_rehashed_account_choice_cannot_change_selected_intent[effort-default]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_rehashed_account_choice_cannot_change_selected_intent[receipt_instrument-5]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_rehashed_account_choice_cannot_change_selected_intent[receipt_instrument-True]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_rehashed_account_choice_cannot_change_selected_intent[subject_sha256-0000000000000000000000000000000000000000000000000000000000000000]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_rehashed_account_choice_cannot_change_selected_intent[runtime_sha256-0000000000000000000000000000000000000000000000000000000000000000]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_rehashed_account_choice_cannot_change_selected_intent[decisions-value10]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_missing_account_choice_field_refuses",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_saved_tampering_reaches_genuine_verifier_and_refuses",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_verified_inputs_are_reread_before_success_output[expectation]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_verified_inputs_are_reread_before_success_output[probe]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_verified_inputs_are_reread_before_success_output[account-choice]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_prepare_guard_preserves_exact_join_and_never_dispatches",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_v4_choice_cannot_bless_rehashed_v5_registration_metadata",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_guard_refusal_does_not_create_output[stale]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_guard_refusal_does_not_create_output[overage]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_guard_refusal_does_not_create_output[missing_word]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_guard_refusal_does_not_create_output[account_changed]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_guard_refusal_does_not_create_output[replaced_word]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_read_final_routes_offline_without_launch",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_validate_probe_uses_saved_bytes_and_never_runs_a_producer",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_unknown_expectation_kind_refuses_before_probe_read_or_producer[None]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_rehashed_account_choice_cannot_change_selected_intent[kind-other]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_rehashed_account_choice_cannot_change_selected_intent[version-True]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_unknown_expectation_kind_refuses_before_probe_read_or_producer[legacy]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 7",
+      "kind": "ERROR",
+      "file": "tests/test_native_generation_frontdoor.py",
+      "node": "test_rehashed_account_choice_cannot_change_selected_intent[version-2]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_producer_integration.py",
+      "node": "test_historical_discriminators_keep_pre_hook_instruction_and_only_d76_recorder_delta[{\"kind\":\"unrelated\"}]",
+      "message": "assert (0 == 1)",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_producer_integration.py",
+      "node": "test_historical_discriminators_keep_pre_hook_instruction_and_only_d76_recorder_delta[{\"kind\":\"d4d_native_u4b_runtime_basis_extra\"}]",
+      "message": "assert (0 == 1)",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_producer_integration.py",
+      "node": "test_d126_in_checkout_manifest_pins_every_native_instruction_delta[historical-runtime]",
+      "message": "AssertionError: assert 0 == 1",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_u4b_a5_producer_integration.py",
+      "node": "test_d126_in_checkout_manifest_pins_every_native_instruction_delta[u4b-runtime]",
+      "message": "AssertionError: assert 0 == 1",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 6",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_execution.py",
+      "node": "test_actual_public_correction_three_workers_and_saved_completion",
+      "message": "ValueError: subscription pre-reservation freshness margin is insufficient",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 5",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_round3_v2.py",
+      "node": "test_source_in_rows_accepts_github_shaped_check_runs",
+      "message": "ValueError: v2 CI check roster differs from the exact required event roster",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 5",
+      "kind": "FAILED",
+      "file": "tests/test_native_lexical_ancestry.py",
+      "node": "test_actual_reservations_preserve_physical_checks_and_first_errors[none]",
+      "message": "AssertionError: assert 'raised' == 'returned'",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 5",
+      "kind": "FAILED",
+      "file": "tests/test_native_lexical_ancestry.py",
+      "node": "test_actual_reservations_preserve_physical_checks_and_first_errors[protected_below]",
+      "message": "AssertionError: assert ('raised', <class 'KeyError'>) == ('raised', <c...'ValueError'>)",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 5",
+      "kind": "FAILED",
+      "file": "tests/test_native_lexical_ancestry.py",
+      "node": "test_actual_reservations_preserve_physical_checks_and_first_errors[equal_reserved]",
+      "message": "AssertionError: assert ('raised', <class 'KeyError'>) == ('raised', <c...'ValueError'>)",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 5",
+      "kind": "FAILED",
+      "file": "tests/test_native_lexical_ancestry.py",
+      "node": "test_actual_reservations_preserve_physical_checks_and_first_errors[nested_reserved]",
+      "message": "AssertionError: assert ('raised', <class 'KeyError'>) == ('raised', <c...'ValueError'>)",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 5",
+      "kind": "FAILED",
+      "file": "tests/test_native_lexical_ancestry.py",
+      "node": "test_actual_reservations_preserve_physical_checks_and_first_errors[missing_parent]",
+      "message": "AssertionError: assert ('raised', <class 'KeyError'>) == ('raised', <c...'ValueError'>)",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 5",
+      "kind": "FAILED",
+      "file": "tests/test_native_lexical_ancestry.py",
+      "node": "test_actual_reservations_preserve_physical_checks_and_first_errors[physical_alias]",
+      "message": "AssertionError: assert ('raised', <class 'KeyError'>) == ('raised', <c...'ValueError'>)",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 3",
+      "kind": "FAILED",
+      "file": "tests/test_native_pending_public_completion.py",
+      "node": "test_pending_floor_public_completion_retains_diagnostic_reading",
+      "message": "AssertionError: {",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_required_checks_match_actual_workflow_jobs_and_event_matrix[pull_request]",
+      "message": "AssertionError: assert {'Python 3.12...xplicit', ...} == {'Python 3.12...xplicit', ...}",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_required_checks_match_actual_workflow_jobs_and_event_matrix[push]",
+      "message": "AssertionError: assert {'Python 3.12...xplicit', ...} == {'Python 3.12...xplicit', ...}",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_complete_current_event_inventory_is_accepted_without_writes[pull_request]",
+      "message": "ValueError: v2 CI check roster differs from the exact required event roster",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_complete_current_event_inventory_is_accepted_without_writes[push]",
+      "message": "ValueError: v2 CI check roster differs from the exact required event roster",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_complete_current_event_inventory_is_accepted_without_writes[workflow_dispatch]",
+      "message": "ValueError: v2 CI check roster differs from the exact required event roster",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_required_checks_match_actual_workflow_jobs_and_event_matrix[workflow_dispatch]",
+      "message": "AssertionError: assert {'Python 3.12...xplicit', ...} == {'Python 3.12...xplicit', ...}",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_current_workflow_digest_cannot_hide_different_source_bytes[.github/workflows/main.yaml]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_current_workflow_digest_cannot_hide_different_source_bytes[.github/workflows/large-files.yaml]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_pr_workflow_map_cannot_hide_different_tested_merge_bytes[.github/workflows/main.yaml]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_pr_workflow_map_cannot_hide_different_tested_merge_bytes[.github/workflows/large-files.yaml]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/synthetic/native-u3a-tests/actions/runs/1?anything=true]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/synthetic/native-u3a-tests/actions/runs/1#fragment]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/synthetic/native-u3a-tests/actions/runs/1/foreign]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/synthetic/native-u3a-tests/actions/SYNTHETIC-NOT-A-RUN]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/synthetic/native-u3a-tests-foreign/actions/runs/1]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/foreign/repo/actions/runs/1]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com.evil.invalid/synthetic/native-u3a-tests/actions/runs/1]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[https://github.com/synthetic/native-u3a-tests/actions/runs/0]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[None]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_execution_ci_v2.py",
+      "node": "test_ci_run_url_is_exact_configured_repository_run[True]",
+      "message": "AssertionError: Regex pattern did not match.",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 8",
+      "kind": "FAILED",
+      "file": "tests/test_native_d128_scanner_comparison.py",
+      "node": "test_d128_final_composition_has_only_the_finite_approved_scanner_differences",
+      "message": "ValueError: D128 requires the exact approved scanner assets",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_u3d_round9_boundaries.py",
+      "node": "test_all_29_actual_merged_consumers_pass_the_unmodified_guard",
+      "message": "AssertionError: assert 30 == 29",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "FAILED",
+      "file": "tests/test_native_shared_consumer_census.py",
+      "node": "test_census_roster_covers_exactly_the_current_c_and_d_consumer_layers",
+      "message": "AssertionError: assert frozenset({'d...y_wire', ...}) == frozenset({'d...apture', ...})",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_permission_probe.py",
+      "node": "test_shared_producer_actual_capture_paths_with_mocked_native_events",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_permission_probe.py",
+      "node": "test_capture_requires_main_thread_before_loading",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_permission_probe.py",
+      "node": "test_owner_runtime_choice_refuses_conflicting_declarations[effort]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_permission_probe.py",
+      "node": "test_owner_runtime_choice_refuses_conflicting_declarations[max]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_permission_probe.py",
+      "node": "test_owner_runtime_choice_refuses_conflicting_declarations[key]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_permission_probe.py",
+      "node": "test_owner_runtime_choice_refuses_conflicting_declarations[provider]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_permission_probe.py",
+      "node": "test_owner_runtime_choice_refuses_conflicting_declarations[login]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    },
+    {
+      "job": "Python 3.12 / shard 2",
+      "kind": "ERROR",
+      "file": "tests/test_native_permission_probe.py",
+      "node": "test_owner_runtime_choice_refuses_conflicting_declarations[auth_method]",
+      "message": "ValueError: PYSTOW_HOME must be the registered attempt helper-cache",
+      "class": "other"
+    }
+  ]
+}

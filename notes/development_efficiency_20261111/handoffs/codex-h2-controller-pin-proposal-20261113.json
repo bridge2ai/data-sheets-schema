@@ -1,0 +1,61 @@
+{
+  "status": "proposal only; requires approval",
+  "source_head": "916ad3af0adf278ab3bbde78be7c9fb3c4cc92f0",
+  "module_mismatches": [
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "native_control",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+      "declared_sha256": "e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36",
+      "actual_sha256": "25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "module": "run_native_canary",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+      "declared_sha256": "7496a3ddb94ce480332efb7faeb3522f08aa3d3de724f9faa4662575802358e0",
+      "actual_sha256": "f1c4cfac150eed2bd440e3ad6b18bd6e0b2633fcd24e40a00fe7af2935549857"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "native_control",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+      "declared_sha256": "e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36",
+      "actual_sha256": "25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488"
+    },
+    {
+      "manifest": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "module": "run_native_canary",
+      "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+      "declared_sha256": "7496a3ddb94ce480332efb7faeb3522f08aa3d3de724f9faa4662575802358e0",
+      "actual_sha256": "f1c4cfac150eed2bd440e3ad6b18bd6e0b2633fcd24e40a00fe7af2935549857"
+    }
+  ],
+  "files": [
+    {
+      "path": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "before_sha256": "e55f332b2cc4d679c2ffa9cba5d40acb8a333fd821e3b6d0f2746b8cba7f3971",
+      "proposed_sha256": "6cc0a4d0e5d0790e86bebd0da9e6184c0029077dec008f444fa4961c3278b10e"
+    },
+    {
+      "path": "src/data_sheets_schema/native_attribution_controller.py",
+      "before_sha256": "f9dcd36939ed4897d961849c2b1f7ba15b494765e815215448b1bb04dcd0c4aa",
+      "proposed_sha256": "0547b4789fb755f85cd563f554cf4b5c401d19fc558cd7783582013a9a50de7b"
+    },
+    {
+      "path": "src/data_sheets_schema/native_controller_sources_v2.json",
+      "before_sha256": "58d9be00007719d2bc1247c7524256a60522d3d7bfedf39409341973c88c0a6c",
+      "proposed_sha256": "1b9c06a985f278d9f91d9535d7755bdf961484477abadcb587e9c090ae13e8ad"
+    },
+    {
+      "path": "src/data_sheets_schema/native_attribution_controller_v2.py",
+      "before_sha256": "1e1cc08057523bb6d6c0d2da660af6a1b68a43b5b08bf9e43993c0b17ee75722",
+      "proposed_sha256": "3629c90eb3a693f85292d3c32d26a85961666f1d8ed03ed4f6d7fe3cf85d82eb"
+    },
+    {
+      "path": "src/data_sheets_schema/native_shared_authority_wire.py",
+      "before_sha256": "5dd183aa1ffcf65fe9784918b25b0e3b69a12b6c1539ab207fbaff0ca8a3c63f",
+      "proposed_sha256": "298d219c7a2b3f4d7dd46647d594397cdfac8b3a5afe9dce2ba113a4194ab963"
+    }
+  ]
+}

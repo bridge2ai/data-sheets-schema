@@ -1,0 +1,803 @@
+{
+  "artifact_sha256": {
+    "outcome.json": "93df5577086a52df06c8be323d8accda4ead0ec3b6c3b9e4ec3879b15c249f50",
+    "plan.json": "81601b1f712a2980c52d31204e9e6e19ee0aecebb59f2f1a290ea11e4091e919",
+    "pytest.xml": "1caa6de33b195d388338c5939bff366a26ac5d04b7d5612217317ccde30765d2"
+  },
+  "cause_counts": {
+    "pre_existing_native_authority_scanner_pin_drift": 96
+  },
+  "classification_evidence": [
+    "Every negative is classified by its own JUnit message and traceback, never aggregate counts.",
+    "Scanner source contracts compare raw authority bytes at scan.py lines 13408-13415.",
+    "The native parent already contains the changed authority bytes and old scanner pin.",
+    "Expected integrated authority SHA256 is bfdb5c86feb4c071ebf17e6ececa8fd60f1bc23bda98fefd42c0c211ecd7511a.",
+    "All three neutrality test files, schema_digest.py and profiles.py compare identical to both pinned main7ad8 and native1a137 by Git object diff.",
+    "An earlier scanner refusal masks later assertions; no claim is made that all96 would pass after a pin repair.",
+    "A separate full scanner exit2 is incomplete derivation, not clean output or empty accepted arrays."
+  ],
+  "cohort": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/tests/g07-scanner-cohort",
+  "counts": {
+    "error": 52,
+    "failure": 44,
+    "passed": 399,
+    "skipped": 9
+  },
+  "execution": {
+    "cleanup_verified": true,
+    "returncode": 1,
+    "seconds": 1244.3667910420336,
+    "source_origin_checks_passed": true
+  },
+  "helper_sha256": "b08abeb10a7e3473f294028736902cb0b5947dfd9c099a1049ad25224004af09",
+  "kind": "g07_scanner_neutrality_retained_result_classification",
+  "module_counts": {
+    "tests/test_external_dataset_onboarding.py": {
+      "passed": 26
+    },
+    "tests/test_generation_specificity_skill.py": {
+      "error": 52,
+      "failure": 44,
+      "passed": 285
+    },
+    "tests/test_neutral_generation_schema.py": {
+      "passed": 7
+    },
+    "tests/test_profiles.py": {
+      "passed": 81,
+      "skipped": 9
+    }
+  },
+  "negative_count": 96,
+  "negatives": [
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestTheExitStatus::test_violations_are_exit_1",
+      "outcome": "failure",
+      "trace_sha256": "efae856c5cd5c4282327af8bc62d882565b7b03e9dc30084759f2cf2f47b57af"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_no_registered_launch_is_shown_to_switch_the_session_off",
+      "outcome": "error",
+      "trace_sha256": "d81397fef909a7b54f9343fd725642c04f76dc5c766b691b3c5677ddc84ca8d5"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_the_deterministic_arms_are_derived_from_the_code",
+      "outcome": "error",
+      "trace_sha256": "d81397fef909a7b54f9343fd725642c04f76dc5c766b691b3c5677ddc84ca8d5"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_the_live_controllers_are_discovered",
+      "outcome": "error",
+      "trace_sha256": "d81397fef909a7b54f9343fd725642c04f76dc5c766b691b3c5677ddc84ca8d5"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_the_monolithic_verdict_lists_every_monolithic_script",
+      "outcome": "error",
+      "trace_sha256": "d81397fef909a7b54f9343fd725642c04f76dc5c766b691b3c5677ddc84ca8d5"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestTheScannerSees::test_a_comment_is_reported_but_does_not_fail",
+      "outcome": "failure",
+      "trace_sha256": "73bb1ef0706e4d468bdb19057f16a0c4d38cd81d30507d9f257dccbea5175fab"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_the_project_settings_and_the_hooks_they_run_are_session_surfaces",
+      "outcome": "error",
+      "trace_sha256": "d81397fef909a7b54f9343fd725642c04f76dc5c766b691b3c5677ddc84ca8d5"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_the_schema_extract_generator_is_a_monolithic_legacy_surface",
+      "outcome": "error",
+      "trace_sha256": "d81397fef909a7b54f9343fd725642c04f76dc5c766b691b3c5677ddc84ca8d5"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_the_toolchain_hands_native_runs_no_python_file",
+      "outcome": "error",
+      "trace_sha256": "d81397fef909a7b54f9343fd725642c04f76dc5c766b691b3c5677ddc84ca8d5"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_the_upstream_input_is_what_the_download_group_imports",
+      "outcome": "error",
+      "trace_sha256": "d81397fef909a7b54f9343fd725642c04f76dc5c766b691b3c5677ddc84ca8d5"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestModelFacingDerivation::test_rereceipt_gates_by_the_derivation_alone",
+      "outcome": "failure",
+      "trace_sha256": "26184b0cc7d1a956cf05418a7066e98643e37b9d99aeddf33d9ac26fcd3ff1ce"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestTheScannerSees::test_a_controller_function_that_renders_model_text_is_model_facing",
+      "outcome": "failure",
+      "trace_sha256": "0ed01fda111c8c0a21729dc67ac2562468fff93c5d9d7f699ec02b2e8b6282d0"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestModelFacingDerivation::test_the_requests_and_the_model_input_writes_are_derived",
+      "outcome": "failure",
+      "trace_sha256": "820e0b1077b988cc5ea80ee424a9675ca0301b999bbd209f4cf6eb14af4510a7"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestTheScannerSees::test_a_gc_token_planted_in_a_playbook_is_a_violation",
+      "outcome": "failure",
+      "trace_sha256": "884ce015e97411af74ad643e1579a68ceae5f9f6f85465dcc6d870c93dfa85e5"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestModelFacingDerivation::test_this_checkouts_derivation_and_the_hand_kept_list_agree",
+      "outcome": "failure",
+      "trace_sha256": "128d8bb14efb7ccf17be1b2620aaa6d8a01e72bd55c4e44df5a6953e69003236"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestTheScannerSees::test_a_gc_token_planted_in_an_agent_a_playbook_names_by_bare_name_is_a_violation",
+      "outcome": "failure",
+      "trace_sha256": "c40a7dfd4f116babf2f9b4f87433668fe91565c9c968b991495245abed164bc3"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestTheScannerSees::test_a_gc_token_planted_in_claude_md_is_an_interactive_session_violation",
+      "outcome": "failure",
+      "trace_sha256": "fcc01e9546baeec9cc420b3fcebb61b035fa527012d76b154f250ccc2d2f234b"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_a_condition_the_workflow_chooses_when_it_runs_is_not_derived",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_a_continuation_or_setter_that_could_continue_an_api_run_is_a_possible_hybrid",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_a_gated_continuation_or_an_agentic_generation_is_not_a_hybrid",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_a_monolithic_runner_is_reported_monolithic",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_an_api_path_that_selects_the_floor_is_reported_not_a_hybrid",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestTheScannerSees::test_a_project_branch_planted_in_runner_code_is_a_violation",
+      "outcome": "failure",
+      "trace_sha256": "d3091a8de87db9923947fa7b0948a0dc427ec2607f477487cb12e8fc11f63375"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_execute_refuses_what_the_scan_reports",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_legacy_cli_without_renderer_selection_remains_below_the_floor",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_native_shared_parent_guard_is_required_by_hybrid_proof",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_no_api_condition_is_a_runtime_hybrid",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_only_a_gate_that_refuses_every_non_agentic_parent_counts",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_optional_receipt_completion_matches_real_spec_plan_and_registration",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_optional_repair_matches_real_spec_and_plan_without_changing_defaults",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_renderer_values_are_read_in_any_spelling",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_shape_of_needs_one_call_no_turn_and_the_full_schema",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_shared_request_builders_are_discovered_as_model_text",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_the_audit_floor_is_where_build_phase_refuses_the_audit",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_the_cli_default_condition_is_what_the_cli_runs",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_the_default_renderers_are_what_the_runtime_uses",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_the_follow_up_turns_follow_the_runner",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_the_github_assistant_condition_follows_the_workflow",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_the_shape_follows_the_runner_phase_tables",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestApiMeaning::test_the_tuned_condition_inserts_its_component_and_never_its_prompt",
+      "outcome": "error",
+      "trace_sha256": "5f67ad8564056ab32592752489a30bdab4952b063f4a71c1334db2116202e152"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDerivationsFailLoudly::test_the_cli_default_is_read_in_either_form_or_not_at_all",
+      "outcome": "failure",
+      "trace_sha256": "d1d7893c174fdccaabfefebd162289c4941f2cee41e89c9e36000bcdeb98b7a3"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestTheScannerSees::test_controller_text_a_model_receives_by_data_flow_is_model_facing",
+      "outcome": "failure",
+      "trace_sha256": "9d08e6efad0010dbb19b30f7d3067084d909aeee235c4b0b283266add2dd5801"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestProjectKeyedCode::test_or_defaults_wrapped_values_arguments_and_tests_gate",
+      "outcome": "failure",
+      "trace_sha256": "9edd0bccd0eaa38e7e22d79fa8403bf3edd8bf9df288f8a20ebdf410b2c2cc3a"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestWhatTextsRun::test_a_code_table_in_what_a_run_script_imports_is_a_violation",
+      "outcome": "error",
+      "trace_sha256": "016cb44b4a646963544ca7d8d0d3326023fe9151984cdd42cc316989211551ea"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestWhatTextsRun::test_a_run_script_imports_from_its_directory_and_stops_at_the_cli",
+      "outcome": "error",
+      "trace_sha256": "016cb44b4a646963544ca7d8d0d3326023fe9151984cdd42cc316989211551ea"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestWhatTextsRun::test_discover_model_commands_scans_module_and_package_targets_and_imports_5666",
+      "outcome": "error",
+      "trace_sha256": "016cb44b4a646963544ca7d8d0d3326023fe9151984cdd42cc316989211551ea"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestWhatTextsRun::test_every_cli_group_a_playbook_or_agent_runs_is_followed",
+      "outcome": "error",
+      "trace_sha256": "016cb44b4a646963544ca7d8d0d3326023fe9151984cdd42cc316989211551ea"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestWhatTextsRun::test_model_command_tables_r1_r2_r3_and_m_forms_5681_5683",
+      "outcome": "error",
+      "trace_sha256": "016cb44b4a646963544ca7d8d0d3326023fe9151984cdd42cc316989211551ea"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestWhatTextsRun::test_model_command_tables_starred_multi_prefix_and_param_shadowing_5725",
+      "outcome": "error",
+      "trace_sha256": "016cb44b4a646963544ca7d8d0d3326023fe9151984cdd42cc316989211551ea"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestWhatTextsRun::test_module_m_imported_helper_prose_known_gap_f3e_5682",
+      "outcome": "error",
+      "trace_sha256": "016cb44b4a646963544ca7d8d0d3326023fe9151984cdd42cc316989211551ea"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestWhatTextsRun::test_module_m_targets_and_f3d_fixture_are_model_facing_5666",
+      "outcome": "error",
+      "trace_sha256": "016cb44b4a646963544ca7d8d0d3326023fe9151984cdd42cc316989211551ea"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestWhatTextsRun::test_the_renderer_behind_the_shim_the_instructions_run_is_a_surface",
+      "outcome": "error",
+      "trace_sha256": "016cb44b4a646963544ca7d8d0d3326023fe9151984cdd42cc316989211551ea"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestSessionDescriptions::test_a_token_in_a_description_is_an_interactive_session_violation",
+      "outcome": "failure",
+      "trace_sha256": "092867df7ad18c3df75c367d3c8c665f13f58b7c9e8e3d48ea9533f5b23fa053"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestProjectKeyedCode::test_project_keyed_code_in_a_run_shaping_file_is_a_violation",
+      "outcome": "failure",
+      "trace_sha256": "6417028a437048a0d8a539f9a991c29f8be1f27f558967173a9e97831a4cc24c"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestSessionDescriptions::test_every_command_agent_and_skill_lists_its_description_in_a_session",
+      "outcome": "failure",
+      "trace_sha256": "ead544c14ebef13265f3b93efe386d40dbf18c2772192454e3b2dfe2e5df830c"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestProjectKeyedCode::test_the_failed_extraction_table_gates_whole",
+      "outcome": "failure",
+      "trace_sha256": "7429d4bea850a14b74fce71b951d5f79475066cad04e9880fe50777afd5ab5d2"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestRawYamlComments::test_a_yaml_comment_counts_where_a_text_names_the_file_for_reading",
+      "outcome": "failure",
+      "trace_sha256": "317fa8cba866b91ce7e1208c239c29a85bdda0ed377cf829e0f075a4225b2764"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestRunShapingYamlAndShell::test_a_json_hook_command_with_escapes_is_read_as_shell",
+      "outcome": "failure",
+      "trace_sha256": "14673cf4e17ecb7daf496dc51196831ae017edd16afcebbd0e2d9439225abbf1"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_a_launcher_under_scripts_or_src_is_a_controller",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_a_module_the_healthsheet_arm_imports_is_a_surface",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_a_new_controller_directory_needs_no_glob_edit",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_a_text_names_files_by_path_module_and_memory",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_an_agent_script_is_a_surface_only_where_something_runs_or_imports_it",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_an_evaluator_a_generation_closure_reaches_gates",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_bare_names_and_slash_commands_name_a_playbook_or_agent",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_controller_text_found_by_data_flow",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_data_flow_follows_a_system_prompt_through_calls_and_constants",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_evaluation_and_probes_are_listed_but_never_gate",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_every_model_facing_module_is_in_a_discovered_closure",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_every_module_that_calls_a_model_client_is_a_surface",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "failed on setup with \"d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\"",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestDiscovery::test_files_the_assistant_tells_the_model_to_run_are_surfaces",
+      "outcome": "error",
+      "trace_sha256": "eb755cc6f2e465af0224479cc6004e32fa03af8a2bcea34f65295180bd0c2306"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestAssistantInstructions::test_an_instruction_file_nothing_loads_is_not_a_surface",
+      "outcome": "failure",
+      "trace_sha256": "b1fee0f14eb7f4a0502277a2689c9e3de13816bd763741a2d1d60babcd3861b4"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestRunShapingYamlAndShell::test_a_membership_test_on_a_fromjson_list_is_a_branch",
+      "outcome": "failure",
+      "trace_sha256": "b889df245948f9d9316b7e26372869fdc6287b07fcf80568d47c654103149d7f"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestAssistantInstructions::test_an_instruction_file_the_workflow_loads_is_the_assistants",
+      "outcome": "failure",
+      "trace_sha256": "d187ca5ae71cd92a70e25a579ad34a011bac817b7574bf51500e9687485c1005"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestRunShapingYamlAndShell::test_project_branches_planted_in_the_workflow_config_and_shell_gate",
+      "outcome": "failure",
+      "trace_sha256": "edd93b6a2ea63269524cb110ab6b8dcae23d603c765f662227cc31f7a4bb623d"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestControllerRuns::test_a_main_block_in_a_module_a_controller_only_imports_does_not_gate",
+      "outcome": "failure",
+      "trace_sha256": "be406714ba0269cb8051f9df7a8f431e5aedddb91a80b4d1c38cb0e4ca714ee1"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestRunShapingYamlAndShell::test_run_shaping_json_is_read_as_code",
+      "outcome": "failure",
+      "trace_sha256": "88c56111d08a63a314d207cf6804a7c481faa505ad8708c64b03b78adc3e5c0e"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestControllerRuns::test_the_registered_launchers_run_as_scripts",
+      "outcome": "failure",
+      "trace_sha256": "b92e9f14f1da4133d1d16dde6870f61072922c0ff1cb437143e77f03151bed31"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestLaunchFlags::test_a_launch_without_the_flag_makes_the_session_surfaces_run_controllers",
+      "outcome": "failure",
+      "trace_sha256": "b39bb3e580ac419bb59e11124d1e4ac5f09d328d6b20d31813d8e4fbaf3777cb"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestHookText::test_a_project_name_in_a_deny_reason_is_a_violation",
+      "outcome": "failure",
+      "trace_sha256": "d0b950947ce24c3c2132bf5a085ed31b54038e6ba3c79d48522b05541b48c31b"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestLaunchFlags::test_a_registered_launch_whose_annotated_argv_is_shortened_is_not_shown",
+      "outcome": "failure",
+      "trace_sha256": "0f423f076d4841d69109032895c0196aa4d33587cdacaa380d802c318e716ec4"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestHookText::test_hook_output_rewritten_by_item_assignment_keeps_its_model_text",
+      "outcome": "failure",
+      "trace_sha256": "31f96e87fd52619d8bae298cc136439625c927abc1a20155bd6f6e23459a8bb2"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestLaunchFlags::test_bare_switches_off_the_memory_and_the_hooks_but_not_the_descriptions",
+      "outcome": "failure",
+      "trace_sha256": "d1aa1cb0510fa27a2ef4c01d604a2915ab779573289a95b121048871f11b07b9"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestModelFacingAssets::test_planted_tokens_gate_in_every_real_asset",
+      "outcome": "failure",
+      "trace_sha256": "ef2d4634c0a0f52310d6a14b6f2d58d49044d54fb389fd266a80b421cee12f04"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestLaunchFlags::test_codex_conditional_argv_keeps_the_session_surfaces_in_run_controllers",
+      "outcome": "failure",
+      "trace_sha256": "7d70d8dd7a7f3806a970f0d78f16c44ba6b2f55e0487c8325a3e5595c468363f"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestModelFacingAssets::test_real_bundle_adds_exactly_three_asset_surfaces",
+      "outcome": "failure",
+      "trace_sha256": "c2d26933743ffd24757531fb93ac82b3627eb595e422e80ebb6c9383032366f8"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestLaunchFlags::test_codex_reproduction_and_a_concatenation_are_not_shown",
+      "outcome": "failure",
+      "trace_sha256": "7375e1ade4a096dd76d09ebb059261f359995e1e4b78d25b16ffec3df3f6defd"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestTheWholeAudit::test_claude_md_and_the_agent_script_demo_are_judged_as_they_run",
+      "outcome": "failure",
+      "trace_sha256": "811ab5d8e6564230c11b6e15433274f061425d3f9607ba453b2b1a8881050d15"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestLaunchFlags::test_where_every_launch_is_shown_the_session_is_interactive_only",
+      "outcome": "failure",
+      "trace_sha256": "d8f160d7e6dde211864a05381d379870460e28436d9d6e287e301bd00394b655"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestTheWholeAudit::test_generalized_review_examples_and_grouping_remove_the_old_hits",
+      "outcome": "failure",
+      "trace_sha256": "1a37b7fb002e4bdf41b745ca27800d2472d25fc63119234f18c8189a1537afdd"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestConstantText::test_a_constant_an_assigned_append_fills_gates",
+      "outcome": "failure",
+      "trace_sha256": "4dac61c7fdd4580e94c486d7e4bde0b45f2068b748bb272653b219e1d9464ffa"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestConstantText::test_codex_reproduction_a_constant_a_top_level_setdefault_fills_gates",
+      "outcome": "failure",
+      "trace_sha256": "b750f14687f2aabb0f8ddfec0742bcc0ea871f20ec72c612dd9d653ce7c7889d"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestConstantText::test_codex_reproduction_a_sentence_in_a_constant_system_is_built_from_gates",
+      "outcome": "failure",
+      "trace_sha256": "b0a34fd19c0939e417537fc51ede468d2889082c85cacab75a8bbafab177fcdf"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestTheWholeAudit::test_the_audit_runs_and_every_approach_has_a_surface",
+      "outcome": "failure",
+      "trace_sha256": "65187541f26c21e251f8aedf6b0d89e742ec9a2202ad168bd19becf612a74aa6"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestTheWholeAudit::test_the_skills_own_description_has_a_recorded_reason",
+      "outcome": "failure",
+      "trace_sha256": "b436e4537a5be3a684f054fdcec74d5e554c1823a87b5dec9879726f909bcb0c"
+    },
+    {
+      "classification": "pre_existing_native_authority_scanner_pin_drift",
+      "message": "d4d_specificity_scan.ConfigError: api meaning not derived: separate native shared render route (v2 envelope authority source changed: src/data_sheets_schema/native_execution_authority_v2.py). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)",
+      "nodeid": "tests/test_generation_specificity_skill.py::TestOfflineDraftSurface::test_declared_offline_prompt_is_scanned_without_live_delivery_claim",
+      "outcome": "failure",
+      "trace_sha256": "ba21a97467026ced9523a6054a4b8955d81920036afe5570c37f2370f6956d2e"
+    }
+  ],
+  "neutrality_negative_count": 0,
+  "skips": [
+    {
+      "message": "the tracked crate-only output is not in this checkout",
+      "nodeid": "tests/test_profiles.py::TestRoundThree::test_the_recorder_with_no_manifest_option_follows_the_runners_rule",
+      "outcome": "skipped",
+      "reason": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/tree/tests/test_profiles.py:558: the tracked crate-only output is not in this checkout",
+      "trace_sha256": "a71f5c24f1235f83f7bc010f5c4ba18f83d1957ee1275d4dbe8ce2afe7d26470"
+    },
+    {
+      "message": "the study's healthsheet record is not in this checkout",
+      "nodeid": "tests/test_profiles.py::TestRoundFour::test_own_record_under_another_project_gets_its_own_file",
+      "outcome": "skipped",
+      "reason": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/tree/tests/test_profiles.py:702: the study's healthsheet record is not in this checkout",
+      "trace_sha256": "8eb19e8f7f5b488afc6fd82dc65a6cd0e8cd48b0c7527b1c94ad4ea1aae805ac"
+    },
+    {
+      "message": "the study's healthsheet record or bundle is not in this checkout",
+      "nodeid": "tests/test_profiles.py::TestRoundFive::test_the_studys_own_bundle_reproduces_the_tracked_bytes",
+      "outcome": "skipped",
+      "reason": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/tree/tests/test_profiles.py:760: the study's healthsheet record or bundle is not in this checkout",
+      "trace_sha256": "fd5330cc821a4776920ee7e8b3a2973e142d8f03c31c63adbd9e412f6a574002"
+    },
+    {
+      "message": "the study's healthsheet record is not in this checkout",
+      "nodeid": "tests/test_profiles.py::TestRoundSix::test_the_default_healthsheet_invocation_works_from_a_subdirectory",
+      "outcome": "skipped",
+      "reason": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/tree/tests/test_profiles.py:1007: the study's healthsheet record is not in this checkout",
+      "trace_sha256": "0520d2af14c1a2880bb5ee0c7301139fb96445c7abb46c8fde8ec529b6dc1836"
+    },
+    {
+      "message": "the tracked crate-only output is not in this checkout",
+      "nodeid": "tests/test_profiles.py::TestRoundSix::test_the_recorder_honours_a_no_manifest_selected_header",
+      "outcome": "skipped",
+      "reason": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/tree/tests/test_profiles.py:870: the tracked crate-only output is not in this checkout",
+      "trace_sha256": "b44eb55752ec553696a2d61abd18b9c7b7f465038acb29f53f28add73972dbe7"
+    },
+    {
+      "message": "the tracked crate-only output is not in this checkout",
+      "nodeid": "tests/test_profiles.py::TestRoundSix::test_the_recorder_with_no_manifest_option_follows_the_runners_rule",
+      "outcome": "skipped",
+      "reason": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/tree/tests/test_profiles.py:903: the tracked crate-only output is not in this checkout",
+      "trace_sha256": "4bda77f795bf4fe095ecdcd27fbb2b4ad348983228ec90a77ce675356ea4b600"
+    },
+    {
+      "message": "the study's healthsheet record is not in this checkout",
+      "nodeid": "tests/test_profiles.py::TestRoundSix::test_the_tracked_bundle_name_is_reserved_under_every_profile",
+      "outcome": "skipped",
+      "reason": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/tree/tests/test_profiles.py:994: the study's healthsheet record is not in this checkout",
+      "trace_sha256": "ba8daca7e1ae12df80876381b213d5d0db8c0cfdaafaeb36236bfce4fbc6abcd"
+    },
+    {
+      "message": "the study's healthsheet record is not in this checkout",
+      "nodeid": "tests/test_profiles.py::TestRoundTen::test_the_healthsheet_cli_default_works_from_a_subdirectory",
+      "outcome": "skipped",
+      "reason": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/tree/tests/test_profiles.py:1420: the study's healthsheet record is not in this checkout",
+      "trace_sha256": "f6fd714f210e0c918c4b47b1556ae1ece567f83a45905dd11e0aa6adf37bf72c"
+    },
+    {
+      "message": "the tracked record is not in this checkout",
+      "nodeid": "tests/test_profiles.py::TestRoundTwelve::test_runs_check_fails_strict_on_a_profile_disagreement",
+      "outcome": "skipped",
+      "reason": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/tree/tests/test_profiles.py:1575: the tracked record is not in this checkout",
+      "trace_sha256": "118e08eaf89c404ab53903157b2ea511d7bb16503a29b992d6b2148f611ac624"
+    }
+  ],
+  "source_commit": "7e4ec62c28226b595e91565f0f0bc3ce47b7bc0d",
+  "source_file_sha256": {
+    ".claude/skills/d4d-generation-specificity-audit/scan.py": "312f2b5893b3ee74dd9519e619b1e210b558c53306e90a3e237cac165c513fdf",
+    "src/data_sheets_schema/native_execution_authority_v2.py": "b2189db86428b5977bfcbaa72adc5f504f3449c31b583359555b074916a95558",
+    "src/data_sheets_schema/profiles.py": "a36848bfbad70c5a42ad1d8a94b213b8019b222ae686ebd7e12b125782ad67fd",
+    "src/data_sheets_schema/schema_digest.py": "c30d59fe48ee9bed78bd24bc89366e926e88dbefeba228ff132335066c0af54c",
+    "tests/test_external_dataset_onboarding.py": "eb8ebd890285a82342784208a3565ec041663ca47cca1f1f2206d5b0ca74c8e6",
+    "tests/test_neutral_generation_schema.py": "59701e7e8cd1e9c3a2a89374230c9bf8a31b3da88de3499364c6fcc43f5b8840",
+    "tests/test_profiles.py": "f71ccfa3e6d282c409cb7b3f77cf7288d993c73f178e018b0d1a6c43533f31bd"
+  },
+  "source_root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-main-integration-20261112/g07-c/tree"
+}

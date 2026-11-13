@@ -1,0 +1,2137 @@
+{
+  "candidate": "f7f8e8bff6ea14006957d8631f66346d91bcddcd",
+  "branches": {
+    "cache": {
+      "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-helper-cache-home-20261112",
+      "branch": "codex/native-helper-cache-home-20261112",
+      "head": "9d743c87755030ddf687e3a5dd8a7a2b3b762437",
+      "candidate_is_ancestor": true,
+      "protected_equal_candidate": {
+        "src/data_sheets_schema/shared_generation.py": true,
+        "src/data_sheets_schema/api_runner.py": true,
+        "src/download/prompts/canonical_hashes.yaml": true,
+        "tests/utils/run_spec_boundary_contracts.json": true,
+        "src/data_sheets_schema/native_subscription_guard.py": true
+      },
+      "dirty": "",
+      "diff_check": "",
+      "commits": [
+        "9d743c87755030ddf687e3a5dd8a7a2b3b762437 Fix #6172: derive local native installation and evidence paths at runtime",
+        "9c1ebeabc9c65d2958ae65ffdb30004e5d1907da Merge published candidate for helper 2 review fixes"
+      ],
+      "personal_path_search": {
+        "includes_hidden_ignored": true,
+        "paths": [
+          "scripts/adhoc/run_cache_gaps_tests_20261113.py",
+          "scripts/adhoc/reconcile_cache_ci_12_shards_20261113.py"
+        ],
+        "returncode": 1,
+        "matches": ""
+      }
+    },
+    "limits": {
+      "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-production-run-limits-20261112",
+      "branch": "codex/native-production-run-limits-20261112",
+      "head": "0df39c077fb8125dc381302046f4cf7f92a60592",
+      "candidate_is_ancestor": true,
+      "protected_equal_candidate": {
+        "src/data_sheets_schema/shared_generation.py": true,
+        "src/data_sheets_schema/api_runner.py": true,
+        "src/download/prompts/canonical_hashes.yaml": true,
+        "tests/utils/run_spec_boundary_contracts.json": true,
+        "src/data_sheets_schema/native_subscription_guard.py": true
+      },
+      "dirty": "",
+      "diff_check": "",
+      "commits": [
+        "0df39c077fb8125dc381302046f4cf7f92a60592 Fix #6171: document candidate freshness margin and recorder digest transport",
+        "94378cd6240df3c2996ab3b370db5a862f8ead04 Fix #6169: prove provisional refusals depend on the registered pair check",
+        "8ba6285fad42e8a809bb0f65afcf1f849ca9ed74 Merge published candidate for helper 2 review fixes",
+        "31fc33c1c72f06f219810841e3cc683da8068b1c Retain offline D143 and cache-fixture composition provenance",
+        "ffaac90a32d1b01a08e50864e9e4c9e98994c49d Accept exactly the two declared D143 native run-limit pairs"
+      ]
+    },
+    "power": {
+      "root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-host-power-20261113",
+      "branch": "codex/native-host-power-20261113",
+      "head": "916ad3af0adf278ab3bbde78be7c9fb3c4cc92f0",
+      "candidate_is_ancestor": true,
+      "protected_equal_candidate": {
+        "src/data_sheets_schema/shared_generation.py": true,
+        "src/data_sheets_schema/api_runner.py": true,
+        "src/download/prompts/canonical_hashes.yaml": true,
+        "tests/utils/run_spec_boundary_contracts.json": true,
+        "src/data_sheets_schema/native_subscription_guard.py": true
+      },
+      "dirty": "",
+      "diff_check": "scripts/adhoc/run_host_power_tests_20261113.py:420: new blank line at EOF.\n",
+      "commits": [
+        "916ad3af0adf278ab3bbde78be7c9fb3c4cc92f0 Fix #6172: use runtime installation paths and synthetic sleep-log evidence",
+        "a4f45bb93eeb843ae85bb5b5bc283a50ac0329c7 Address #6094: retain controller dispatch, helper and turn timing sidecars",
+        "feb1de3250bdefd6fd05bcc57ef513f63de0e9a7 Fix #6170: count suspension from child dispatch and recheck AC admission",
+        "f377dba1d94fbd84a146de729d0f6cfdd7b22087 Fix #6168: require recognized sleep-log coverage before reporting no sleep",
+        "2c158ddfce23285546b248a0b200437ad1feb2a7 Fix #6167: isolate supplemental host observation failures from publication",
+        "aa26bb7ad6173fb113736d95aaed39f19ff5abef Merge published candidate for helper 2 review fixes",
+        "7c1d972a1d92286bc791cca96f8dace0c18875e8 Require observed AC for launch sequences and retain host sleep evidence"
+      ],
+      "personal_path_search": {
+        "includes_hidden_ignored": true,
+        "paths": [
+          "scripts/adhoc/run_cache_gaps_tests_20261113.py",
+          "scripts/adhoc/reconcile_cache_ci_12_shards_20261113.py",
+          "scripts/adhoc/run_host_power_tests_20261113.py"
+        ],
+        "returncode": 1,
+        "matches": ""
+      }
+    }
+  },
+  "cohorts": {
+    "canary": {
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "host_observation": "not collected: offline review fixtures only",
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            3757,
+            1794555415.577484
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 1,
+        "seconds": 2.487635416997364,
+        "worker": {
+          "returncode": 1,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 1
+      },
+      "outcome_pin": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/canary/outcome.json",
+        "sha256": "1d4151a0616dea71a114d4d1d36fdc065a55ad67e74a9ba9ae6ad79c571ab5cc",
+        "bytes": 554
+      },
+      "plan": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/canary/network-denied.sb",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/canary/venv/bin/python",
+          "-P",
+          "-B",
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/run_h2_review_fixes_20261113.py",
+          "--worker",
+          "--tree",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/fixed",
+          "--out",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/canary",
+          "--workers",
+          "0",
+          "--timeout-seconds",
+          "3600",
+          "tests/test_native_attempt_deadline.py::test_admission_time_is_excluded_from_child_deadline"
+        ],
+        "deadline_seconds": 3600,
+        "environment": {
+          "GIT_CONFIG_GLOBAL": "/dev/null",
+          "GIT_CONFIG_SYSTEM": "/dev/null",
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0",
+          "HOME": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/canary/home",
+          "LANG": "en_US.UTF-8",
+          "PATH": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/canary/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+          "PIP_NO_INDEX": "1",
+          "PYTEST_ADDOPTS": "",
+          "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONNOUSERSITE": "1",
+          "PYTHONPATH": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/fixed/src:/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc",
+          "PYTHONSAFEPATH": "1",
+          "TMPDIR": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/canary/tmp",
+          "UV_OFFLINE": "1"
+        },
+        "quiet_window_lock": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/native_quiet_window.lock",
+        "runner_sha256": "a767edbeac6f6999aaad9e2c0d1ec68296c35a3c755ff29d9823621602ac7925",
+        "sandbox_sha256": "3b6a75eeb494dec9864b1151973631c2fe6286dd406665884c98aee3a48ac255",
+        "scope": "offline synthetic validation; no native binary/provider permission",
+        "scratch_root": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests",
+        "source_commit": "e351bb4e199573a528e901dc0d46695b3ef937bb",
+        "source_root": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/fixed",
+        "workers": 0
+      },
+      "counts_by_file": {
+        "tests.test_native_attempt_deadline": {
+          "failure": 1
+        }
+      },
+      "failures": [
+        {
+          "class": "tests.test_native_attempt_deadline",
+          "name": "test_admission_time_is_excluded_from_child_deadline",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        }
+      ],
+      "junit_pin": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/canary/pytest.xml",
+        "sha256": "5e7ff571015f42b1ef2d59abb63b800a7b6af69c5fc894f9c4851602b07fb135",
+        "bytes": 1971
+      }
+    },
+    "power-canary": {
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "host_observation": "not collected: offline review fixtures only",
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            33413,
+            1794555554.904837
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 0,
+        "seconds": 0.5559391670030891,
+        "worker": {
+          "returncode": 0,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 0
+      },
+      "outcome_pin": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/power-canary/outcome.json",
+        "sha256": "2a14d9685d6a2479dce1ce1597455964771e9ff85e2349f24fb107ad5b58e5a7",
+        "bytes": 556
+      },
+      "plan": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/power-canary/network-denied.sb",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/power-canary/venv/bin/python",
+          "-P",
+          "-B",
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/run_h2_review_fixes_20261113.py",
+          "--worker",
+          "--tree",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/fixed",
+          "--out",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/power-canary",
+          "--workers",
+          "0",
+          "--timeout-seconds",
+          "3600",
+          "tests/test_native_host_power.py::test_synthetic_pmset_fixture_pairs_sleep_and_wake"
+        ],
+        "deadline_seconds": 3600,
+        "environment": {
+          "GIT_CONFIG_GLOBAL": "/dev/null",
+          "GIT_CONFIG_SYSTEM": "/dev/null",
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0",
+          "HOME": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/power-canary/home",
+          "LANG": "en_US.UTF-8",
+          "PATH": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/power-canary/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+          "PIP_NO_INDEX": "1",
+          "PYTEST_ADDOPTS": "",
+          "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONNOUSERSITE": "1",
+          "PYTHONPATH": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/fixed/src:/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc",
+          "PYTHONSAFEPATH": "1",
+          "TMPDIR": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/power-canary/tmp",
+          "UV_OFFLINE": "1"
+        },
+        "quiet_window_lock": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/native_quiet_window.lock",
+        "runner_sha256": "a767edbeac6f6999aaad9e2c0d1ec68296c35a3c755ff29d9823621602ac7925",
+        "sandbox_sha256": "3b6a75eeb494dec9864b1151973631c2fe6286dd406665884c98aee3a48ac255",
+        "scope": "offline synthetic validation; no native binary/provider permission",
+        "scratch_root": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests",
+        "source_commit": "229a3d3e7f72cbe72601344bceed465ddecee2a4",
+        "source_root": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/fixed",
+        "workers": 0
+      },
+      "counts_by_file": {
+        "tests.test_native_host_power": {
+          "passed": 1
+        }
+      },
+      "failures": [],
+      "junit_pin": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/power-canary/pytest.xml",
+        "sha256": "96123ecc830fb34ea7a0a9e23efce09986a701d2815c7ac1ad2c214c79557929",
+        "bytes": 358
+      }
+    },
+    "scanner": {
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "host_observation": "not collected: offline review fixtures only",
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            57294,
+            1794555735.036
+          ],
+          [
+            57301,
+            1794555735.255278
+          ],
+          [
+            71093,
+            1794555839.771463
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 1,
+        "seconds": 109.57777545799763,
+        "worker": {
+          "returncode": 1,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 1
+      },
+      "outcome_pin": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner/outcome.json",
+        "sha256": "3d2b207b68fbb0c28517628d842a1c9ec0686d0d61aabbbfd36fdfda96ac176a",
+        "bytes": 653
+      },
+      "plan": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner/network-denied.sb",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner/venv/bin/python",
+          "-P",
+          "-B",
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/run_h2_review_fixes_20261113.py",
+          "--worker",
+          "--tree",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/fixed",
+          "--out",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner",
+          "--workers",
+          "0",
+          "--timeout-seconds",
+          "3600",
+          "--scanner"
+        ],
+        "deadline_seconds": 3600,
+        "environment": {
+          "GIT_CONFIG_GLOBAL": "/dev/null",
+          "GIT_CONFIG_SYSTEM": "/dev/null",
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0",
+          "HOME": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner/home",
+          "LANG": "en_US.UTF-8",
+          "PATH": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+          "PIP_NO_INDEX": "1",
+          "PYTEST_ADDOPTS": "",
+          "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONNOUSERSITE": "1",
+          "PYTHONPATH": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/fixed/src:/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc",
+          "PYTHONSAFEPATH": "1",
+          "TMPDIR": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner/tmp",
+          "UV_OFFLINE": "1"
+        },
+        "quiet_window_lock": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/native_quiet_window.lock",
+        "runner_sha256": "1dd0ac60745b7813b73fd9d7265d8d27022019497dc1f9274ac8a5ab31496f17",
+        "sandbox_sha256": "3b6a75eeb494dec9864b1151973631c2fe6286dd406665884c98aee3a48ac255",
+        "scope": "offline synthetic validation; no native binary/provider permission",
+        "scratch_root": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests",
+        "source_commit": "229a3d3e7f72cbe72601344bceed465ddecee2a4",
+        "source_root": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/fixed",
+        "workers": 0
+      }
+    },
+    "scanner-unaffected": {
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "host_observation": "not collected: offline review fixtures only",
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            871,
+            1794556112.103839
+          ],
+          [
+            79308,
+            1794555922.881016
+          ],
+          [
+            79313,
+            1794555923.188594
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 1,
+        "seconds": 195.27051600000414,
+        "worker": {
+          "returncode": 1,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 1
+      },
+      "outcome_pin": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner-unaffected/outcome.json",
+        "sha256": "75cd91c578310087bdd150213524c64f74641a2ced3f63c3f12110c315925af1",
+        "bytes": 654
+      },
+      "plan": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner-unaffected/network-denied.sb",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner-unaffected/venv/bin/python",
+          "-P",
+          "-B",
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/run_h2_review_fixes_20261113.py",
+          "--worker",
+          "--tree",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/unaffected",
+          "--out",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner-unaffected",
+          "--workers",
+          "0",
+          "--timeout-seconds",
+          "3600",
+          "--scanner"
+        ],
+        "deadline_seconds": 3600,
+        "environment": {
+          "GIT_CONFIG_GLOBAL": "/dev/null",
+          "GIT_CONFIG_SYSTEM": "/dev/null",
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0",
+          "HOME": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner-unaffected/home",
+          "LANG": "en_US.UTF-8",
+          "PATH": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner-unaffected/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+          "PIP_NO_INDEX": "1",
+          "PYTEST_ADDOPTS": "",
+          "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONNOUSERSITE": "1",
+          "PYTHONPATH": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/unaffected/src:/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc",
+          "PYTHONSAFEPATH": "1",
+          "TMPDIR": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner-unaffected/tmp",
+          "UV_OFFLINE": "1"
+        },
+        "quiet_window_lock": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/native_quiet_window.lock",
+        "runner_sha256": "1dd0ac60745b7813b73fd9d7265d8d27022019497dc1f9274ac8a5ab31496f17",
+        "sandbox_sha256": "3c47eac818c3ec95c8b182caf75e3d713c199589994adf0fd0849ef6639d486b",
+        "scope": "offline synthetic validation; no native binary/provider permission",
+        "scratch_root": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests",
+        "source_commit": "991c9b7f43d6daad93af11a20fc4d8a3c2a1f0e8",
+        "source_root": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/unaffected",
+        "workers": 0
+      }
+    },
+    "touched-files": {
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "host_observation": "not collected: offline review fixtures only",
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            36761,
+            1794555572.019763
+          ],
+          [
+            36769,
+            1794555572.460987
+          ],
+          [
+            36772,
+            1794555572.653347
+          ],
+          [
+            36818,
+            1794555577.469348
+          ],
+          [
+            36843,
+            1794555578.124127
+          ],
+          [
+            36851,
+            1794555578.476541
+          ],
+          [
+            36892,
+            1794555579.173237
+          ],
+          [
+            39751,
+            1794555604.170604
+          ],
+          [
+            39819,
+            1794555604.648073
+          ],
+          [
+            40825,
+            1794555613.873127
+          ],
+          [
+            40862,
+            1794555614.717805
+          ],
+          [
+            40864,
+            1794555614.723376
+          ],
+          [
+            40887,
+            1794555615.07481
+          ],
+          [
+            40888,
+            1794555615.077474
+          ],
+          [
+            40903,
+            1794555615.395359
+          ],
+          [
+            40904,
+            1794555615.418625
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 1,
+        "seconds": 44.40671962500346,
+        "worker": {
+          "returncode": 1,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 1
+      },
+      "outcome_pin": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/touched-files/outcome.json",
+        "sha256": "f54b410c04d1d2a8b2212d64357feb117ebcb631299276180373291aac29cd41",
+        "bytes": 1304
+      },
+      "plan": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/touched-files/network-denied.sb",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/touched-files/venv/bin/python",
+          "-P",
+          "-B",
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/run_h2_review_fixes_20261113.py",
+          "--worker",
+          "--tree",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/fixed",
+          "--out",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/touched-files",
+          "--workers",
+          "2",
+          "--timeout-seconds",
+          "3600",
+          "tests/test_native_host_power.py",
+          "tests/test_native_run_limits.py",
+          "tests/test_native_failure_publication.py",
+          "tests/test_native_shared_live_capture.py",
+          "tests/test_native_attempt_deadline.py",
+          "tests/test_native_attempt_timing.py",
+          "tests/test_native_execution_registration_v2.py"
+        ],
+        "deadline_seconds": 3600,
+        "environment": {
+          "GIT_CONFIG_GLOBAL": "/dev/null",
+          "GIT_CONFIG_SYSTEM": "/dev/null",
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0",
+          "HOME": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/touched-files/home",
+          "LANG": "en_US.UTF-8",
+          "PATH": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/touched-files/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+          "PIP_NO_INDEX": "1",
+          "PYTEST_ADDOPTS": "",
+          "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONNOUSERSITE": "1",
+          "PYTHONPATH": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/fixed/src:/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc",
+          "PYTHONSAFEPATH": "1",
+          "TMPDIR": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/touched-files/tmp",
+          "UV_OFFLINE": "1"
+        },
+        "quiet_window_lock": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/native_quiet_window.lock",
+        "runner_sha256": "a767edbeac6f6999aaad9e2c0d1ec68296c35a3c755ff29d9823621602ac7925",
+        "sandbox_sha256": "3b6a75eeb494dec9864b1151973631c2fe6286dd406665884c98aee3a48ac255",
+        "scope": "offline synthetic validation; no native binary/provider permission",
+        "scratch_root": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests",
+        "source_commit": "229a3d3e7f72cbe72601344bceed465ddecee2a4",
+        "source_root": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/fixed",
+        "workers": 2
+      },
+      "counts_by_file": {
+        "tests.test_native_host_power": {
+          "passed": 21
+        },
+        "tests.test_native_run_limits": {
+          "passed": 21
+        },
+        "tests.test_native_attempt_deadline": {
+          "failure": 9,
+          "passed": 1
+        },
+        "tests.test_native_failure_publication": {
+          "passed": 5,
+          "failure": 4
+        },
+        "tests.test_native_attempt_timing": {
+          "failure": 1,
+          "passed": 2
+        },
+        "tests.test_native_execution_registration_v2": {
+          "passed": 27,
+          "failure": 2,
+          "error": 36
+        },
+        "tests.test_native_shared_live_capture": {
+          "error": 4,
+          "passed": 3
+        }
+      },
+      "failures": [
+        {
+          "class": "tests.test_native_attempt_deadline",
+          "name": "test_suspension_expires_every_registered_deadline[False-43200]",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_attempt_deadline",
+          "name": "test_suspension_expires_every_registered_deadline[True-900]",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_attempt_deadline",
+          "name": "test_suspension_expires_every_registered_deadline[True-21600]",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_attempt_deadline",
+          "name": "test_suspension_expires_every_registered_deadline[True-43200]",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_attempt_deadline",
+          "name": "test_admission_time_is_excluded_from_child_deadline",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_attempt_deadline",
+          "name": "test_unplug_after_sequence_start_refuses_public_dispatch[Battery Power]",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_failure_publication",
+          "name": "test_public_declared_runtime_failure_publishes_exact_readback[None]",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_attempt_deadline",
+          "name": "test_unplug_after_sequence_start_refuses_public_dispatch[unrecognized]",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_attempt_timing",
+          "name": "test_real_inert_controller_records_dispatch_helper_and_turns",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_prepare_rederives_real_native26_and_all_pins_without_effects",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_current_preparation_rejects_tampered_contract[extra]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_current_preparation_rejects_tampered_contract[kind]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_failure_publication",
+          "name": "test_public_declared_runtime_failure_publishes_exact_readback[start]",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_current_preparation_rejects_tampered_contract[job]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_failure_publication",
+          "name": "test_public_declared_runtime_failure_publishes_exact_readback[end]",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_failure_publication",
+          "name": "test_publication_pins_consumed_lifecycle_and_reports_later_change",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_current_preparation_rejects_tampered_contract[selection_pin]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_current_preparation_rejects_tampered_contract[runtime_pin]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_shared_live_capture",
+          "name": "test_actual_reserved_genesis_then_observed_init_and_no_premature_stage",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_current_preparation_rejects_tampered_contract[code_pin]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_shared_live_capture",
+          "name": "test_binding_cannot_use_foreign_init_or_changed_actual_attempt",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_current_preparation_rejects_tampered_contract[missing_pin]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_shared_live_capture",
+          "name": "test_actual_session_publication_records_host_stage_clock[False]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_current_preparation_rejects_tampered_contract[render]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_current_preparation_rejects_tampered_contract[instruction]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_current_preparation_rejects_tampered_contract[input_identity]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_current_preparation_rejects_tampered_contract[outputs]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_shared_live_capture",
+          "name": "test_actual_session_publication_records_host_stage_clock[True]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_attempt_deadline",
+          "name": "test_suspension_expires_every_registered_deadline[False-900]",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_attempt_deadline",
+          "name": "test_suspension_expires_every_registered_deadline[False-21600]",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_current_preparation_rejects_tampered_contract[draft_bool]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_preparation_does_not_cache_admission_after_live_drift[source]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_v1_refuses_v2_execution_envelope_and_inner_join_prefix",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_preparation_does_not_cache_admission_after_live_drift[selection]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_refuses_until_fixed_shared_consumer_exists",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_preparation_does_not_cache_admission_after_live_drift[runtime]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_runtime_changed_after_preparer_verification_refuses_before_consumer",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_preparation_does_not_cache_admission_after_live_drift[executable]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_same_origin_module_cannot_substitute_for_absent_committed_consumer",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_v1_execution_and_v2_envelope_cross_refuse",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_complete_valid_v1_execution_refused_by_v2_without_reservation",
+          "status": "failure",
+          "message": "ValueError: frozen native controller bytes changed: native_control",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[gates]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[preparation_digest]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[dependencies]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[working_directory]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[budget]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[composition_digest]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[runtime_digest]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[composition]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[draft_bool]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[composition_instruction]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[draft_count]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[composition_selection]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[selection]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[composition_runtime]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        },
+        {
+          "class": "tests.test_native_execution_registration_v2",
+          "name": "test_execution_prefix_must_match_rederived_preparation_before_consumer[instruction]",
+          "status": "error",
+          "message": "failed on setup with \"ValueError: frozen native controller bytes changed: native_control\"",
+          "controller_pin_refusal": true
+        }
+      ],
+      "junit_pin": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/touched-files/pytest.xml",
+        "sha256": "e193016cafcbef340a04de629a69b3b9a65afcc227b808a056aa673266753de8",
+        "bytes": 142444
+      }
+    },
+    "unaffected-canary": {
+      "outcome": {
+        "cleanup_scope": "observed descendants by PID and creation time; no proof about never-observed orphans",
+        "cleanup_verified": true,
+        "forced_cleanup": false,
+        "host_observation": "not collected: offline review fixtures only",
+        "interrupted": null,
+        "observation_errors": [],
+        "observed_processes": [
+          [
+            104,
+            1794556108.364169
+          ],
+          [
+            201,
+            1794556109.436691
+          ],
+          [
+            264,
+            1794556109.947707
+          ],
+          [
+            311,
+            1794556110.193357
+          ],
+          [
+            373,
+            1794556110.575613
+          ],
+          [
+            460,
+            1794556111.068098
+          ],
+          [
+            733,
+            1794556111.732773
+          ],
+          [
+            858,
+            1794556112.013116
+          ],
+          [
+            879,
+            1794556112.271616
+          ],
+          [
+            937,
+            1794556112.553187
+          ],
+          [
+            1057,
+            1794556113.425645
+          ],
+          [
+            1076,
+            1794556114.012372
+          ],
+          [
+            1364,
+            1794556114.585673
+          ],
+          [
+            1832,
+            1794556116.022993
+          ],
+          [
+            2212,
+            1794556120.331421
+          ],
+          [
+            2255,
+            1794556124.394773
+          ],
+          [
+            2306,
+            1794556126.659271
+          ],
+          [
+            2311,
+            1794556126.974479
+          ],
+          [
+            2347,
+            1794556127.811264
+          ],
+          [
+            2362,
+            1794556128.086369
+          ],
+          [
+            2380,
+            1794556128.366609
+          ],
+          [
+            2394,
+            1794556128.622541
+          ],
+          [
+            2416,
+            1794556128.898022
+          ],
+          [
+            2431,
+            1794556129.14391
+          ],
+          [
+            2702,
+            1794556132.29632
+          ],
+          [
+            2711,
+            1794556132.649674
+          ],
+          [
+            2727,
+            1794556133.298706
+          ],
+          [
+            2736,
+            1794556133.682086
+          ],
+          [
+            2743,
+            1794556133.937414
+          ],
+          [
+            2749,
+            1794556134.569354
+          ],
+          [
+            2753,
+            1794556135.438649
+          ],
+          [
+            2755,
+            1794556135.683664
+          ],
+          [
+            2756,
+            1794556135.979023
+          ],
+          [
+            2765,
+            1794556136.966772
+          ],
+          [
+            2775,
+            1794556137.320013
+          ],
+          [
+            2780,
+            1794556137.699951
+          ],
+          [
+            2798,
+            1794556138.464111
+          ],
+          [
+            2832,
+            1794556141.413231
+          ],
+          [
+            2850,
+            1794556142.001285
+          ],
+          [
+            3319,
+            1794556145.214065
+          ],
+          [
+            3335,
+            1794556145.502336
+          ],
+          [
+            3358,
+            1794556145.753909
+          ],
+          [
+            3401,
+            1794556147.231331
+          ],
+          [
+            3409,
+            1794556147.518827
+          ],
+          [
+            3414,
+            1794556147.739164
+          ],
+          [
+            3417,
+            1794556147.981031
+          ],
+          [
+            3419,
+            1794556148.365898
+          ],
+          [
+            3424,
+            1794556148.889134
+          ],
+          [
+            3429,
+            1794556149.112189
+          ],
+          [
+            3502,
+            1794556152.630159
+          ],
+          [
+            3511,
+            1794556153.778335
+          ],
+          [
+            3514,
+            1794556154.121954
+          ],
+          [
+            3901,
+            1794556157.996355
+          ],
+          [
+            4036,
+            1794556158.588903
+          ],
+          [
+            4055,
+            1794556159.152686
+          ],
+          [
+            4110,
+            1794556161.758405
+          ],
+          [
+            4303,
+            1794556165.00098
+          ],
+          [
+            4540,
+            1794556166.140287
+          ],
+          [
+            4544,
+            1794556166.621651
+          ],
+          [
+            4580,
+            1794556167.998437
+          ],
+          [
+            4589,
+            1794556168.531771
+          ],
+          [
+            4640,
+            1794556170.940769
+          ],
+          [
+            4641,
+            1794556171.284051
+          ],
+          [
+            4648,
+            1794556171.872042
+          ],
+          [
+            51760,
+            1794555690.962884
+          ],
+          [
+            52689,
+            1794555700.819703
+          ],
+          [
+            53987,
+            1794555703.533996
+          ],
+          [
+            54034,
+            1794555704.17549
+          ],
+          [
+            54841,
+            1794555715.550777
+          ],
+          [
+            54869,
+            1794555716.505182
+          ],
+          [
+            55673,
+            1794555724.99552
+          ],
+          [
+            57299,
+            1794555735.159621
+          ],
+          [
+            57305,
+            1794555735.501637
+          ],
+          [
+            57355,
+            1794555736.053115
+          ],
+          [
+            57412,
+            1794555736.253534
+          ],
+          [
+            57795,
+            1794555740.183461
+          ],
+          [
+            57820,
+            1794555741.32909
+          ],
+          [
+            57829,
+            1794555742.926551
+          ],
+          [
+            57845,
+            1794555745.113318
+          ],
+          [
+            57849,
+            1794555745.38625
+          ],
+          [
+            60723,
+            1794555761.652286
+          ],
+          [
+            61159,
+            1794555762.525825
+          ],
+          [
+            61314,
+            1794555762.810324
+          ],
+          [
+            61693,
+            1794555763.907529
+          ],
+          [
+            61904,
+            1794555766.687081
+          ],
+          [
+            62466,
+            1794555770.622186
+          ],
+          [
+            62501,
+            1794555770.818584
+          ],
+          [
+            64185,
+            1794555782.928387
+          ],
+          [
+            64903,
+            1794555787.062918
+          ],
+          [
+            65615,
+            1794555788.445285
+          ],
+          [
+            65821,
+            1794555789.199309
+          ],
+          [
+            66579,
+            1794555792.069403
+          ],
+          [
+            66985,
+            1794555795.75766
+          ],
+          [
+            67526,
+            1794555805.166092
+          ],
+          [
+            67541,
+            1794555805.692257
+          ],
+          [
+            67549,
+            1794555805.933319
+          ],
+          [
+            67589,
+            1794555808.415884
+          ],
+          [
+            67941,
+            1794555813.168387
+          ],
+          [
+            67968,
+            1794555813.382781
+          ],
+          [
+            68011,
+            1794555813.955466
+          ],
+          [
+            68074,
+            1794555814.222508
+          ],
+          [
+            70264,
+            1794555824.7001
+          ],
+          [
+            70294,
+            1794555830.268843
+          ],
+          [
+            70335,
+            1794555830.924529
+          ],
+          [
+            70340,
+            1794555831.897226
+          ],
+          [
+            70360,
+            1794555832.846051
+          ],
+          [
+            70549,
+            1794555835.541134
+          ],
+          [
+            70597,
+            1794555835.826953
+          ],
+          [
+            70638,
+            1794555836.0035
+          ],
+          [
+            71080,
+            1794555838.833946
+          ],
+          [
+            71083,
+            1794555839.171228
+          ],
+          [
+            71092,
+            1794555839.631261
+          ],
+          [
+            71108,
+            1794555840.076973
+          ],
+          [
+            71123,
+            1794555840.329271
+          ],
+          [
+            71130,
+            1794555840.580649
+          ],
+          [
+            71137,
+            1794555840.916537
+          ],
+          [
+            71185,
+            1794555841.78035
+          ],
+          [
+            71251,
+            1794555842.594658
+          ],
+          [
+            71302,
+            1794555843.235725
+          ],
+          [
+            71417,
+            1794555843.802638
+          ],
+          [
+            71842,
+            1794555847.318533
+          ],
+          [
+            71884,
+            1794555847.835553
+          ],
+          [
+            71919,
+            1794555848.451535
+          ],
+          [
+            72373,
+            1794555851.823093
+          ],
+          [
+            72389,
+            1794555852.132326
+          ],
+          [
+            72409,
+            1794555853.859182
+          ],
+          [
+            72453,
+            1794555854.323201
+          ],
+          [
+            72846,
+            1794555857.387622
+          ],
+          [
+            72997,
+            1794555859.823906
+          ],
+          [
+            73002,
+            1794555860.226514
+          ],
+          [
+            73078,
+            1794555864.270644
+          ],
+          [
+            73178,
+            1794555864.837164
+          ],
+          [
+            73189,
+            1794555865.456165
+          ],
+          [
+            73371,
+            1794555869.096814
+          ],
+          [
+            73372,
+            1794555869.426252
+          ],
+          [
+            73394,
+            1794555872.496968
+          ],
+          [
+            73396,
+            1794555872.65652
+          ],
+          [
+            74518,
+            1794555879.106257
+          ],
+          [
+            75749,
+            1794555886.971663
+          ],
+          [
+            75868,
+            1794555891.144251
+          ],
+          [
+            75895,
+            1794555896.788326
+          ],
+          [
+            75898,
+            1794555897.077163
+          ],
+          [
+            75917,
+            1794555898.022926
+          ],
+          [
+            75918,
+            1794555898.120774
+          ],
+          [
+            76679,
+            1794555901.372318
+          ],
+          [
+            76692,
+            1794555901.699404
+          ],
+          [
+            76723,
+            1794555901.98288
+          ],
+          [
+            76812,
+            1794555902.66678
+          ],
+          [
+            76991,
+            1794555903.379944
+          ],
+          [
+            77198,
+            1794555903.829444
+          ],
+          [
+            77898,
+            1794555906.268581
+          ],
+          [
+            77948,
+            1794555906.821788
+          ],
+          [
+            77956,
+            1794555907.097257
+          ],
+          [
+            78779,
+            1794555914.070967
+          ],
+          [
+            78790,
+            1794555914.708423
+          ],
+          [
+            79198,
+            1794555919.76693
+          ],
+          [
+            79213,
+            1794555920.160821
+          ],
+          [
+            79229,
+            1794555921.07963
+          ],
+          [
+            79277,
+            1794555921.634615
+          ],
+          [
+            79302,
+            1794555922.777396
+          ],
+          [
+            79318,
+            1794555923.893633
+          ],
+          [
+            79321,
+            1794555924.359019
+          ],
+          [
+            79437,
+            1794555926.429857
+          ],
+          [
+            79855,
+            1794555928.284915
+          ],
+          [
+            81277,
+            1794555934.769957
+          ],
+          [
+            81788,
+            1794555938.528501
+          ],
+          [
+            82042,
+            1794555940.496569
+          ],
+          [
+            82059,
+            1794555941.252027
+          ],
+          [
+            82191,
+            1794555942.648994
+          ],
+          [
+            82897,
+            1794555944.980028
+          ],
+          [
+            83707,
+            1794555950.612713
+          ],
+          [
+            83890,
+            1794555952.443187
+          ],
+          [
+            83917,
+            1794555952.623724
+          ],
+          [
+            83992,
+            1794555953.274192
+          ],
+          [
+            84396,
+            1794555956.851834
+          ],
+          [
+            84446,
+            1794555957.120822
+          ],
+          [
+            84482,
+            1794555957.210684
+          ],
+          [
+            84977,
+            1794555960.167743
+          ],
+          [
+            84994,
+            1794555960.589786
+          ],
+          [
+            85012,
+            1794555960.88018
+          ],
+          [
+            85026,
+            1794555960.995131
+          ],
+          [
+            85036,
+            1794555961.362076
+          ],
+          [
+            85264,
+            1794555963.295516
+          ],
+          [
+            85314,
+            1794555963.59099
+          ],
+          [
+            85726,
+            1794555967.257656
+          ],
+          [
+            85733,
+            1794555967.469902
+          ],
+          [
+            85750,
+            1794555967.67717
+          ],
+          [
+            85881,
+            1794555968.853518
+          ],
+          [
+            86506,
+            1794555976.046071
+          ],
+          [
+            86894,
+            1794555981.058753
+          ],
+          [
+            86924,
+            1794555981.372431
+          ],
+          [
+            87044,
+            1794555982.993584
+          ],
+          [
+            87066,
+            1794555983.3855
+          ],
+          [
+            87095,
+            1794555983.929598
+          ],
+          [
+            88690,
+            1794555991.065028
+          ],
+          [
+            89053,
+            1794555992.488588
+          ],
+          [
+            89097,
+            1794555992.754913
+          ],
+          [
+            89204,
+            1794555993.149989
+          ],
+          [
+            89340,
+            1794555994.003057
+          ],
+          [
+            89386,
+            1794555994.208707
+          ],
+          [
+            89459,
+            1794555994.570868
+          ],
+          [
+            89826,
+            1794555996.621766
+          ],
+          [
+            90285,
+            1794556000.295331
+          ],
+          [
+            90294,
+            1794556001.116411
+          ],
+          [
+            97605,
+            1794556077.751178
+          ],
+          [
+            97648,
+            1794556078.023853
+          ],
+          [
+            97756,
+            1794556079.004371
+          ],
+          [
+            97785,
+            1794556079.217702
+          ],
+          [
+            97874,
+            1794556080.420826
+          ],
+          [
+            97885,
+            1794556080.720787
+          ],
+          [
+            97937,
+            1794556081.384897
+          ],
+          [
+            98036,
+            1794556082.203152
+          ],
+          [
+            98333,
+            1794556084.578971
+          ],
+          [
+            98400,
+            1794556084.993254
+          ],
+          [
+            98473,
+            1794556085.535959
+          ],
+          [
+            98482,
+            1794556085.891
+          ],
+          [
+            98702,
+            1794556090.478269
+          ],
+          [
+            98713,
+            1794556090.823879
+          ],
+          [
+            98723,
+            1794556091.106407
+          ],
+          [
+            98734,
+            1794556091.428267
+          ],
+          [
+            98842,
+            1794556095.509418
+          ],
+          [
+            98869,
+            1794556095.854744
+          ],
+          [
+            99007,
+            1794556098.580956
+          ],
+          [
+            99023,
+            1794556098.977175
+          ],
+          [
+            99048,
+            1794556099.554665
+          ],
+          [
+            99062,
+            1794556100.188884
+          ],
+          [
+            99077,
+            1794556100.512587
+          ],
+          [
+            99097,
+            1794556100.751466
+          ],
+          [
+            99156,
+            1794556101.196447
+          ],
+          [
+            99209,
+            1794556101.581903
+          ],
+          [
+            99252,
+            1794556101.892806
+          ],
+          [
+            99284,
+            1794556102.403464
+          ],
+          [
+            99343,
+            1794556103.200418
+          ],
+          [
+            99379,
+            1794556103.465035
+          ],
+          [
+            99425,
+            1794556104.004698
+          ],
+          [
+            99451,
+            1794556104.354807
+          ],
+          [
+            99481,
+            1794556104.629557
+          ],
+          [
+            99663,
+            1794556105.50091
+          ],
+          [
+            99697,
+            1794556105.86579
+          ],
+          [
+            99731,
+            1794556106.208011
+          ]
+        ],
+        "observed_surviving_pids": [],
+        "returncode": 0,
+        "seconds": 488.07623504200455,
+        "worker": {
+          "returncode": 0,
+          "source_origin_checks_passed": true
+        },
+        "worker_returncode": 0
+      },
+      "outcome_pin": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/unaffected-canary/outcome.json",
+        "sha256": "64ed285d93f8f2cc2f329f988b26b0b03401c83d67061410b3b096a385d4b902",
+        "bytes": 12404
+      },
+      "plan": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/unaffected-canary/network-denied.sb",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/unaffected-canary/venv/bin/python",
+          "-P",
+          "-B",
+          "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/run_h2_review_fixes_20261113.py",
+          "--worker",
+          "--tree",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/unaffected",
+          "--out",
+          "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/unaffected-canary",
+          "--workers",
+          "0",
+          "--timeout-seconds",
+          "3600",
+          "tests/test_native_failure_publication.py::test_public_declared_runtime_failure_publishes_exact_readback[end]"
+        ],
+        "deadline_seconds": 3600,
+        "environment": {
+          "GIT_CONFIG_GLOBAL": "/dev/null",
+          "GIT_CONFIG_SYSTEM": "/dev/null",
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0",
+          "HOME": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/unaffected-canary/home",
+          "LANG": "en_US.UTF-8",
+          "PATH": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/unaffected-canary/venv/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+          "PIP_NO_INDEX": "1",
+          "PYTEST_ADDOPTS": "",
+          "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONNOUSERSITE": "1",
+          "PYTHONPATH": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/unaffected/src:/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc",
+          "PYTHONSAFEPATH": "1",
+          "TMPDIR": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/unaffected-canary/tmp",
+          "UV_OFFLINE": "1"
+        },
+        "quiet_window_lock": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/native_quiet_window.lock",
+        "runner_sha256": "1dd0ac60745b7813b73fd9d7265d8d27022019497dc1f9274ac8a5ab31496f17",
+        "sandbox_sha256": "3c47eac818c3ec95c8b182caf75e3d713c199589994adf0fd0849ef6639d486b",
+        "scope": "offline synthetic validation; no native binary/provider permission",
+        "scratch_root": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests",
+        "source_commit": "991c9b7f43d6daad93af11a20fc4d8a3c2a1f0e8",
+        "source_root": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/unaffected",
+        "workers": 0
+      },
+      "counts_by_file": {
+        "tests.test_native_failure_publication": {
+          "passed": 1
+        }
+      },
+      "failures": [],
+      "junit_pin": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/unaffected-canary/pytest.xml",
+        "sha256": "e0f5735f80d05977682b119b525d8e609276c083f434f7bf94064838d8f7413f",
+        "bytes": 388
+      }
+    }
+  },
+  "scanner_comparison": {
+    "scanner": {
+      "report": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner/scanner.md",
+        "sha256": "8f734a12d7aca180d8df234e37a220580b101c68d47c8a652db970e1ad0be819",
+        "bytes": 174213
+      },
+      "violation_rows": [
+        "| `notes/claudecode_direct/prepare_direct.py:348` | run_controllers | live | code_table | `CHORUS` | parser.add_argument(\"--project\", default=\"CHORUS\") |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:19` | run_controllers | live | code_table | `CHORUS` | DEFAULT_CANARY_ORDER = \"CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1\" |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:19` | run_controllers | live | code_table | `CHORUS` | DEFAULT_CANARY_ORDER = \"CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1\" |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `CHORUS` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `AI_READI` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `CM4AI` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `VOICE` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `VOICE_PEDIATRIC` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:104` | run_controllers | live | code_branch | `CHORUS` | \"canary\": replicate == 1 and case[\"project\"] in {\"CHORUS\", \"KIDS_FIRST\"}, |"
+      ]
+    },
+    "scanner-unaffected": {
+      "report": {
+        "path": "/Users/marcin/agent-work/data-sheets-schema/helper2-review-fixes-20261113/tests/scanner-unaffected/scanner.md",
+        "sha256": "4065e7db1daaba850238c2a4a1462fa878eff4707644a1573d58c1b5b203e530",
+        "bytes": 174218
+      },
+      "violation_rows": [
+        "| `notes/claudecode_direct/prepare_direct.py:348` | run_controllers | live | code_table | `CHORUS` | parser.add_argument(\"--project\", default=\"CHORUS\") |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:19` | run_controllers | live | code_table | `CHORUS` | DEFAULT_CANARY_ORDER = \"CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1\" |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:19` | run_controllers | live | code_table | `CHORUS` | DEFAULT_CANARY_ORDER = \"CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1\" |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `CHORUS` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `AI_READI` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `CM4AI` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `VOICE` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:20` | run_controllers | live | code_table | `VOICE_PEDIATRIC` | PROJECTS = [\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\"] |",
+        "| `notes/matched_cborg_2026-09-13/prepare_registration.py:104` | run_controllers | live | code_branch | `CHORUS` | \"canary\": replicate == 1 and case[\"project\"] in {\"CHORUS\", \"KIDS_FIRST\"}, |"
+      ]
+    },
+    "identical_violation_rows": true
+  },
+  "clock": {
+    "interface": "mach_continuous_time with mach_timebase_info integer conversion",
+    "documentation": {
+      "path": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/mach/mach_time.h",
+      "sha256": "d690e304ea595ca216ed51e20aa9747e0b3bcb07446d996abe0080a231c7065f",
+      "bytes": 2590
+    },
+    "excerpt": [
+      {
+        "line": 58,
+        "text": "/*"
+      },
+      {
+        "line": 59,
+        "text": " * like mach_absolute_time, but advances during sleep"
+      },
+      {
+        "line": 60,
+        "text": " */"
+      },
+      {
+        "line": 61,
+        "text": "__OSX_AVAILABLE(10.12) __IOS_AVAILABLE(10.0) __TVOS_AVAILABLE(10.0) __WATCHOS_AVAILABLE(3.0)"
+      },
+      {
+        "line": 62,
+        "text": "uint64_t                        mach_continuous_time(void);"
+      }
+    ],
+    "source": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-host-power-20261113/src/data_sheets_schema/native_elapsed.py",
+      "sha256": "df4225ee504541825f6d1de5932379cd5d75f61be1f6476ff841cfb334cdfd5c",
+      "bytes": 1392
+    },
+    "linux_interface": "clock_gettime_ns(CLOCK_BOOTTIME)",
+    "fallback": "none; unavailable clock refuses"
+  },
+  "scope": "offline only; no pin changes, native execution or public completion"
+}

@@ -1,0 +1,586 @@
+/dev/ttys002
+, all37 metadata tests pass; native now runs one fresh diagnostic, so your
+  work stays source-only. Independent review notes preparation.pinned_files omits later
+  composition/system/permission/capture inputs; guard.before_reservation alone omits joins.
+  Preserve actual clock/type, fresh capture chronology/bytes, source identity and word lock
+  through mkdir with no nested lock. Please save a concise preliminary concrete design now,
+  including unresolved points, so lead can review while you finish; avoid expanding the
+  framework or unrelated scanner scope.
+
+○ Thought for 1m 35s (Confirming File Existence)
+● Edited 1 file (agy3-post-acceptance.md)
+● Explored 1 file (agy3-post-acceptance.md) (ctrl+o to expand)
+
+  Saved the preliminary concrete post-acceptance live-check design, callgraph, unresolved
+  review points, and affected refusal/ordering selectors to agy3-post-acceptance.md.
+  ### Summary of Preliminary Design (WP3 Stage 3B / Gate 3B-S / U3K-F1)
+  1. Four Post-Acceptance shared_registration.verified Cascades (_launch):
+      • Cascade 1 & Cascade 2: _join_subscription_authority(..., current_launch=True) ->
+      context(..., current=True) -> read_capture_for_event calls _authority ->
+      registration.verified at line 676 (Cascade 1), and then calls read_capture on line 694,
+      which calls _authority -> registration.verified a second time on the identical
+      (registration_raw, review_bundle_raw, launch_word_raw, root) tuple (Cascade 2).
+      • Cascade 3: Post-acceptance _unchanged(value, registration_raw, authorization) calls
+      registration.verified(raw) != value at line 38 (Cascade 3).
+      • Cascade 4: capture_admission_lease calls _current_authority -> _authority ->
+      registration.verified(registration_raw) (Cascade 4).
+  2. Cheap Live-Check Replacement (No Verdict/Flag Caching, No Dropped Checks, No Nested
+  Locks):
+      • Deduplicate inner slot readback (Cascade 2): Extract _read_capture_with_authority in
+      native_subscription_capture.py:587-699 so read_capture_for_event reuses its just-
+      computed authority tuple when reading matching slots while preserving full slot
+      manifest/claim/stdout/stderr/observations/chronology/terminal/journal verification and
+      keeping public read_capture unchanged.
+      • Live Verified-Registration Check (Cascades 1, 3, 4): Add
+      require_live_verified_registration(raw, value) in
+      native_shared_registration_orchestration.py to verify against live state without cold
+      RunSpec/helper-compilation rebuilds:
+          • Canonical outer wire (authority_version == 2, controller_sources_sha256,
+          registration == value), _closed_execution(value), preparation_sha256, 
+	  composition_sha256, working_directory, and host platform;
+  	  • Live source and Git commitment (authority.dependency_identity(), authority.
+	  require_committed(value['dependencies'])
+          file:///Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-
+          u1u3/src/data_sheets_schema/native_execution_authority_v2.py#L945-L983, and
+          controller_sources());
+          • All preparation['pinned_files'] on disk plus the execution-stage files omitted
+          from pinned_files (selected['instruction_path'], value['composition'],
+          value['system_path'], value['permission_probe']),
+          _require_runtime_observation(value) (validate_prepared_runtime +
+          validate_bound_probe), and execution_paths_v2(value, fresh=True, ...) (falling back
+          to registration.verified(raw) when monkeypatched in component-isolation fixtures).
+      • Preserve Joins, Clock/Type, and Single Non-Nested Lock: _join_subscription_authority
+      still runs full capture slot readback, SubscriptionGuard type/version/clock checks
+      (guard._clock is module._now), and check_freshness=True; capture_admission_lease still
+      acquires the single words.locked flock after join/unchanged and holds it across
+      controls.require_complete(), launch_guard.before_reservation(), attempt.
+      mkdir(mode=0o700), and _sync_directory(attempt.parent).
+  3. **Open Review Points in agy3-post-acceptance.md:84-96**:
+      • Whether pre-admission _unchanged keeps cold registration.verified(raw) while post-
+      acceptance line 371 uses require_live_verified_registration(raw, value), or whether
+      _unchanged uses require_live_verified_registration at both sites (since admission.admit
+      at line 352 still performs two full execution_v2.verified reconstructions).
+      • Confirming optional verified_value=None keyword forwarding through context and
+      capture_admission_lease (compatible with traced_lease(**kwargs) in
+      test_native_u4b_a3_reservation.py:202-218).
+
+
+  Standing by for lead review before any source edits.
+
+────────────────────────────────────────────────────────────
+> Lead review: preliminary design not approved as written; findings filed5836,5837 and
+  capture-recheck issue linked shortly. B exposes caller verified_value without proving
+  reconstruction; public capture/context/lease APIs must stay fully verifying. C must preserve
+  pre-admission unchanged. Remove all monkeypatch-detection production fallbacks; tests must
+  exercise actual new path. _closed_execution returns None. A also drops fresh
+  preparation/source/runtime checks between outer authority and selected-slot validation; retain
+  that boundary with a private invocation-local check tied to genuine initial derivation, and
+  add mutation + unchanged witnesses. Revise plan, then implement ONLY smallest A slice in your
+  own clean worktree on a new branch from458887766effe38207a77fea2d8033f1f3e1c7f3; preserve old
+  branch/evidence. No public optional verdict, no new framework, protected/scanner changes or
+  edits to frozen native. Prepare source/tests first; runtime slot currently owned by native
+  diagnostic, so no test runs yet. Report draft diff for focused review.
+
+○ Thought for 5m 27s (Analyzing Wire Format)
+● Ran (GIT_CONFIG_GLOBAL=/dev/null git -C /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d...)
+● Explored 1 file (lead-results.md)
+● Ran 2 commands (find /Users/marcin/D... ×2)
+● Explored 5 files (review-post-acceptance-design.md, test_native_subsc...) (ctrl+o to expand)
+
+────────────────────────────────────────────────────────────
+> Clarification for A: passing the genuine _authority tuple directly to a PRIVATE helper within
+  the same read_capture_for_event invocation is allowed; it is not a persistent cached verdict
+  or public bypass. Preserve fresh source/input/runtime checks at the old inner boundary, and
+  public read_capture still performs genuine _authority first. Do not grow an attestation
+  framework. Issue5838 is the capture-recheck finding. B/C are assigned to a separate
+  source-only reviewer; focus on implementing A. If Git permission blocks branch creation,
+  report the exact command for lead execution instead of repeated retries.
+
+──────────────────────────────────── Conversation compacted ────────────────────────────────────
+
+○ Thought for 18m 38s (Comparing Production Source Files)
+● Explored 3 files (native_launch_review.py, native_shared_controller.py, agy3-post-acceptan...)
+● Ran (GIT_CONFIG_GLOBAL=/dev/null git -C /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d...)
+… 72 more actions (61 reads, 5 edits, 6 commands: 1 failed) …
+● Edited 1 file (agy3-post-acceptance.md)
+● Ran (GIT_CONFIG_GLOBAL=/dev/null git -C /Users/marcin/Documents/VIMSS...) (ctrl+o to expand)
+
+  The revised design handoff and the Slice A (#5838) source-and-test implementation are ready
+  for focused review (with zero test execution while the native diagnostic owns the runtime
+  slot).
+  ### 1. Revised Handoff & Branch State
+  • Revised Handoff: agy3-post-acceptance.md (addresses #5836, #5837, #5838, and records that
+  B/C are assigned to a separate source-only reviewer while AGY3 implements Slice A).
+  • Worker Worktree & Branch: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-
+  executions/agy-native-path-alias-parity-20261111 on branch agy/native-capture-recheck-5838-
+  20261111 (created from 458887766effe38207a77fea2d8033f1f3e1c7f3; prior branches agy/native-
+  path-alias-parity-20261111 at f0f5b353d31786804eaddce11e60e925af27d8cd and agy/native-
+  observer-adoption-20261111 at 48e095ce32b913946d2cd730ef235e89529097ac and all tmp/
+  artifacts are preserved).
+  ──────
+  ### 2. Draft Diff Summary for Slice A (#5838)
+  1. **native_shared_registration_orchestration.py:142-269 — _recheck_verified**:
+      • Private live-recheck helper for a value genuinely derived earlier in the same
+      invocation by verified (zero monkeypatch-detection fallbacks per #5837;
+      execution_v2._closed_execution called as a statement per #5836):
+          • Re-verifies canonical v2 outer envelope, closed execution body shape, and c.
+          canonical(value) == c.canonical(body).
+          • Re-verifies live authority.dependency_identity(), authority.
+	  require_committed(dependencies), consumer.controller_sources(), Path.cwd().resolve()
+	  == authority.ROOT, and consumer.validate_arguments(...).
+	  • Re-reads and verifies preparation wire, selection and runtime pins,
+	  validate_runtime (streaming executable SHA-256), and every file in
+	  preparation['pinned_files'] on disk.
+	  • Re-reads and verifies execution-stage files (composition, instruction_path,
+	  system_path, permission_probe), execution_paths_v2(body, fresh=False,
+	  extra_protected=()), and _require_runtime_observation.
+
+  2. **native_subscription_capture.py:98-158 — _authority_from_value, _recheck_authority,
+  _read_capture_with_authority, read_capture, and read_capture_for_event**:
+      • Public read_capture and read_capture_for_event keep their exact signatures and
+      docstrings (#5836).
+      • Public read_capture still runs genuine _authority (registration.
+      verified(registration_raw)) first before _read_capture_records.
+      • read_capture_for_event computes authority = _authority(...) at the outer boundary
+      (line 720), scans _read_root, _claims, and candidate slot capture.json files (lines 721-
+      736), and validates each matching slot via private _read_capture_with_authority, which
+      runs _recheck_authority (registration._recheck_verified + _authority_from_value +
+      authority == initial_authority) at the old inner boundary before slot _read_root,
+      _claims, and evidence verification (#5838).
+  3. test_native_subscription_capture.py:96-115 — Explicit Fixture Seam & Witnesses (#5837,
+  #5838):
+      • component: registers explicit monkeypatch.setattr(registration, '_recheck_verified',
+      fixture_recheck) seam alongside registration.verified.
+      •
+      test_read_capture_for_event_rechecks_authority_after_slot_scan_without_repeating_full_ve
+      rified: unchanged witness proving read_capture_for_event executes ['verified', 'outer-
+      claims', 'recheck_verified', 'inner-claims'] while read_capture executes ['verified',
+      'inner-claims'].
+      •
+      test_read_capture_for_event_refuses_mutations_between_outer_authority_and_inner_slot_rec
+      heck: between-boundary mutation witness (binary, observation_probe, review_document,
+      registration_recheck, initial_value, overlap_input mutated during outer _claims).
+      • test_recheck_verified_validates_live_pins_and_refuses_drift_without_rebuild: exercises
+      the real registration._recheck_verified on unchanged state and live mutations of
+      pinned_input, selection, runtime_declaration, executable, composition, instruction,
+      system, permission_probe, bound_probe, dependency, and initial_value with execution_v2.
+      verified and consumer.rebuild_v2_body trapped.
+
+
+────────────────────────────────────────────────────────────
+> Runtime slot released: diagnostic finished with genuine stale-capture refusal, no
+  reservation/effects; outer cleanup true and config restored. It passed loader5834 but not
+  freshness. Continue A. Once source/test draft is ready, one focused offline positive canary
+  capped30s is allowed during implementation; no need another lead permission for that unit.
+  Preserve failures, no broad cohorts until small positive + review pass. Independent trace
+  analysis will locate the remaining cost. Keep all production changes isolated from458887.
+  Lead review finding #5847: stage_root can change from absent to a regular file during _claims
+  slot discovery; old inner verified calls selection.capture and refuses, new _recheck_verified
+  uses fresh=False and misses it. Current tests mock recheck or fabricate initial body; add one
+  genuine valid-registration differential witness. No broad cohorts yet. Preserve all live
+  selection semantics; fix this bounded issue first. AST canary failed immediately and runtime
+  slot is free. You may run one tiny positive node after correction, cap30s. Report source/test
+  hashes and evidence.
+──────────────────────────────────── Conversation compacted ────────────────────────────────────
+
+○ Thought for 5m 39s (Executing Tiny Positive Canary)
+● Explored 3 files (native_shared_permissions.py, native_synthetic_evidence.py, test_native_...)
+● Edited 1 file (native_shared_registration_orchestration.py)
+… 16 more actions (10 reads, 2 edits, 4 commands: 2 failed) …
+● Ran (GIT_CONFIG_GLOBAL=/dev/null git -C /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d...)
+● Ran (PYTHONPATH=/Users/marcin/Documents/VIMSS/ontology/bridge2...) failed (ctrl+o to expand)
+▸ Thought for 4s, 81 tokens
+
+  Committed the #5847 live selection.capture recheck and genuine registration differential
+  witness on agy/native-capture-recheck-5838-20261111 (459e56bf8) and launched the single
+  positive canary node
+  test_genuine_registration_read_capture_for_event_rechecks_live_selection_and_stage_root.
+  Waiting for the task notification to verify the artifacts and report hashes.
+
+○ Thought for 58.5s (Testing new canary configurations)
+● Explored 2 files (canary-pass.log, native_supervisor_authority_v2.py)
+● Ran (cp /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-path-al...)
+● Explored 5 files (resources.py, test_native_shared_execution.py, native_shared_fixture.py, +2)
+● Ran (GIT_CONFIG_GLOBAL=/dev/null PYTHONPATH=/Users/marcin/Documents/V...) (ctrl+o to expand)
+
+  Preserved the attempt-2 GIT_CONFIG_GLOBAL failure artifacts (canary-attempt2-gitconfig.log
+  and canary-attempt2-gitconfig.junit.xml) and re-launched the single positive canary node
+  with GIT_CONFIG_GLOBAL=/dev/null. Waiting for completion notification.
+
+○ Thought for 3m 36s (Calculating Unique Identifiers)
+● Explored 6 files (canary-pass.log, canary-pass.junit.xml, native_execution_authority_v2.py...)
+● Ran (GIT_CONFIG_GLOBAL=/dev/null git -C /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d...)
+● Explored 1 file (agy3-post-acceptance.md)
+● Edited 1 file (agy3-post-acceptance.md)
+● Ran (shasum -a 256 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d...) (ctrl+o to expand)
+
+  ### #5847 & #5838 Correction, Commit Stack, and Canary Evidence
+  1. Live Selection & stage_root Recheck (#5847):
+      • In _recheck_verified (lines 193-194), replaced the raw selection['path'] file read
+      with captured_selection = execution_v2.selection.
+      capture(preparation['selection']['path']).
+      • This preserves all live selection.capture semantics at the inner recheck boundary
+      inside read_capture_for_event: stage_root non-file check (ValueError('native stage root
+      is not a directory')), _Reads single-link (st_nlink == 1), inode non-aliasing, aggregate
+      byte bounds, reader.stable(), ASSET_HASHES/installed schema/profile pins, and warm
+      _SCHEMA_DERIVATIONS reuse.
+      • Replaced the fabricated-body test with the genuine v2 registration differential
+      witness
+      test_genuine_registration_read_capture_for_event_rechecks_live_selection_and_stage_root,
+      which constructs a real v2 registration via make_case((tmp_path / 'case').resolve()),
+      verifies read_capture_for_event equivalence against read_capture with trace ['verified',
+      'outer-claims', 'recheck_verified', 'inner-claims'], and proves that mutating stage_root
+      from absent to a regular file during outer _claims slot discovery refuses with
+      ValueError('native stage root is not a directory') and trace ['verified', 'outer-claims',
+      'recheck_verified'] (matching both real_verified(raw) and real_recheck(raw,
+      deepcopy(value))).
+  2. Commit & Source/Test SHA-256 Hashes:
+      • Worktree: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-
+      path-alias-parity-20261111
+      • Branch: agy/native-capture-recheck-5838-20261111 (base
+      458887766effe38207a77fea2d8033f1f3e1c7f3)
+      • HEAD Commit: 459e56bf896a29d854c5d250ce8632d7e2564427 (Keep live selection capture
+      recheck in read_capture_for_event (#5838, #5847))
+      • native_shared_registration_orchestration.py:142-267:
+      c674f2bea05d20d744871fe8839ee634527045e8fef23c027548afbc1b6ce233
+      • native_subscription_capture.py:469-735:
+      b2e0f065a7a21b36bf015d558b8ca4e8aba15b01b8ffa8ab4359827b68cfad16
+      • test_native_subscription_capture.py:316-450:
+      5c07a3858e74adbc73d504a9caa68381bcbf93816a410584de57d0715fa23639
+      • agy3-post-acceptance.md:1-74:
+      a09e4bd7846bad4c99987a5939e585539b7b963421f01512580b1cccfb968f33
+  3. Canary Evidence (Runtime Slot Free Now):
+      • Passing Node (1 passed, 31 deselected):
+          • canary-pass.log: cdb2ceea4b56f572b16c9a89342822686be43a5972ce576f443f9def0557d393
+	  • canary-pass.junit.xml:
+	  9191266e3ec67bd9f9c1cb23d67a84fe998f807058bfdec67a962b829133b791
+      • Preserved Earlier Attempts:
+	  • canary-attempt1-mkdir.log:
+	  68809707296cea5f24105e5c7ab94253ca260d53119ebf54dd48e7d46bfe6358
+	  • canary-attempt1-mkdir.junit.xml:
+	  99e7aead6cdd9f183e35824e7352e2ee13f8f96904e836f786e115eec59cb6da
+	  • canary-attempt2-gitconfig.log:
+	  a5cbb3a3f06d0dae32d2344f0f6ec13b978c1102c5fba91196cd53069f01fb76
+	  • canary-attempt2-gitconfig.junit.xml:
+	  d3abfa707472e5e88fe027ea52fec4938c8e4c47e2bd20f5bd9e67b1a65e8e2a
+
+────────────────────────────────────────────────────────────
+> Stop fixture retries, preserve the failed evidence, freeze the draft and report its hashes for
+  lead review.
+
+▸ Thought for 4s
+  All execution and fixture retries are stopped; the draft is frozen at commit
+  459e56bf896a29d854c5d250ce8632d7e2564427 on branch agy/native-capture-recheck-5838-20261111
+  (base 458887766effe38207a77fea2d8033f1f3e1c7f3) in
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-native-path-alias-
+  parity-20261111, and the runtime slot is free.
+  ### Frozen Draft & Handoff Hashes
+
+  • HEAD Commit: 459e56bf896a29d854c5d250ce8632d7e2564427
+  • native_shared_registration_orchestration.py:142-267:
+  c674f2bea05d20d744871fe8839ee634527045e8fef23c027548afbc1b6ce233
+  • native_subscription_capture.py:469-735:
+  b2e0f065a7a21b36bf015d558b8ca4e8aba15b01b8ffa8ab4359827b68cfad16
+  • test_native_subscription_capture.py:316-450:
+  5c07a3858e74adbc73d504a9caa68381bcbf93816a410584de57d0715fa23639
+  • agy3-post-acceptance.md:1-74:
+  a09e4bd7846bad4c99987a5939e585539b7b963421f01512580b1cccfb968f33
+
+  ### Preserved Evidence (/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy-
+  native-path-alias-parity-20261111/tmp/capture_recheck_5838_5847/)
+  • Failed Attempt 1 (FileExistsError on existing tmp_path):
+      • canary-attempt1-mkdir.log:
+      68809707296cea5f24105e5c7ab94253ca260d53119ebf54dd48e7d46bfe6358
+      • canary-attempt1-mkdir.junit.xml:
+      99e7aead6cdd9f183e35824e7352e2ee13f8f96904e836f786e115eec59cb6da
+  • Failed Attempt 2 (missing GIT_CONFIG_GLOBAL=/dev/null on sandboxed git rev-parse HEAD):
+      • canary-attempt2-gitconfig.log:
+      a5cbb3a3f06d0dae32d2344f0f6ec13b978c1102c5fba91196cd53069f01fb76
+      • canary-attempt2-gitconfig.junit.xml:
+      d3abfa707472e5e88fe027ea52fec4938c8e4c47e2bd20f5bd9e67b1a65e8e2a
+  • Completed Attempt 3 (1 passed, 31 deselected in 188.04s — exceeded 30s target due to
+  repeated cold make_case/verified calls):
+      • canary-pass.log: cdb2ceea4b56f572b16c9a89342822686be43a5972ce576f443f9def0557d393
+      • canary-pass.junit.xml:
+      9191266e3ec67bd9f9c1cb23d67a84fe998f807058bfdec67a962b829133b791
+
+
+────────────────────────────────────────────────────────────
+> Lead reassignment: reconcile the API-only final D4D critical path from current saved
+  coordination/owner packets and repo evidence, including ignored files where needed. Determine
+  the exact protected API postimage and D128 scanner decisions still needed, any existing human
+  approval that already resolves them, and the next concrete step. Native freshness, broader
+  schema/Core/RO-Crate work must not become prerequisites. No edits, tests, scanner execution,
+  generation, provider calls, pushes or merges. AGY2 reviews PR5808; exclude its code review.
+  Return evidence paths and a short genuine-blocker versus deferred table. Acknowledge then
+  report to lead.
+
+──────────────────────────────────── Conversation compacted ────────────────────────────────────
+
+○ Thought for 2m 29s (Verifying API D4D Status)
+● Explored 1 file (FINAL_GENERATION_ACCEPTANCE_GUIDE_2026-11-10.md)
+● Ran 3 commands (find /Users/marcin/D... ×2 · rg --no-ignore --hid...: failed)
+… 33 more actions (20 reads, 13 commands: 1 failed) …
+● Explored 3 files (OWNER_REVIEW.md, P3-1_DECISION.md, STATUS.md)
+● Listed tasks (ctrl+o to expand)
+
+────────────────────────────────────────────────────────────
+> Scope reminder: use known plans/reviews, coordination notes and owner packet paths; avoid
+  repository-wide walks of execution trees or large binary evidence. Stop any broad search you
+  launched if it is still running and narrow it to those text locations. An approval not located
+  is unverified, not absent. Return the best supported short blocker table with uncertainties;
+  do not expand this into a new historical audit.
+
+▸ Thought for 5s
+  Acknowledged. No background tasks remain running (manage_task list: 0 active tasks), and
+  this reconciliation was restricted to the known coordination notes, owner packets, and
+  review/handoff files (including gitignored paths under scratch-native-u1u3/owner-packets/
+  and d4d-executions/plans/). No edits, tests, scanner runs, generation, provider calls,
+  pushes, or merges were executed, and PR #5808 code review is excluded (AGY2 owns that
+  review). Any approval not located in those targeted paths is treated as unverified, not
+  absent.
+  ──────
+  ### 1. Evidence Paths Inspected
+
+  • Current Lead & Worker Coordination (Tracked + Worktree Handoffs):
+      • EXECUTION.md
+      • lead-results.md
+      • agy1-native-publication.md
+      • agy4-prerequisites.md
+      • README.md (notes/reviews/generation_eta_2026-11-10/README.md)
+      • docs/final-generation-acceptance.md on codex/final-generation-readiness-20261110
+      (6792947ea6558d10c85106065b023cb57838835a, PR #5808)
+  • Saved Coordination Ledger & Issue Bodies:
+      • STATUS.md (D07, D22, D43, D58, D64, D65, D76, D88–D93, D101–D105, D123, D127–D129 at
+      lines 593–1048, plus 2026-11-10 status entries)
+      • 5670-comment-d128.md
+  • Gitignored Owner Packets & Reviews (scratch-native-u1u3/ and d4d-executions/plans/):
+      • README.md
+      • OWNER_REVIEW.md & P3-1_DECISION.md
+      • FACTS.json & api_runner_companion.json
+      • native_u3m_2026-11-09.md
+      • native_u3m_scanner_instrument_review_2026-11-10.rejected-v1.md
+      • u1u3_pr_map_2026-11-10.md
+      • a21_launch_packet_2026-11-05.md
+  ──────
+  ### 2. Protected API Postimage (D127 / U3-M) & D128 Scanner Decisions vs. Existing Approvals
+  #### A. Protected API Postimage (src/data_sheets_schema/api_runner.py & Companion Packets)
+  • What D127 Already Approved (2026-11-09T19:55Z, STATUS.md:601-609, OWNER_REVIEW.md:39-46):
+      • src/data_sheets_schema/shared_generation.py: preimage
+      94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d → approved postimage
+      2ec18e60316423035f88a2a30263c56385bfbbc587303e84e805a8349ab4f781 (patch
+      22b81b6cd63a708d82bfbd038b7e1d9aaf340bf1d86828f138b56dd9ef4756c5).
+      • src/data_sheets_schema/api_runner.py: preimage
+      db9a0f67ba7ace06bc8b39f90a00a3fe98ee72a34e553be6d48f97bff5e6d848 → approved D127
+      postimage 3e8b7e5d3cc13c5ebc508e33f865e9ac484056fde16126118719d740656a4fb7 (patch
+      996bd9bce74d509033a1daf340ea2a6edfc2a820316e798459892738a989475f).
+      • src/download/prompts/canonical_hashes.yaml: preimage
+      39b93c009457681a1d8d8b8afee5a869bbd6f5e70b6f4332522db5d7e22d0584 → approved postimage
+      543e5cd6dc0da0f622ba2cd11a16a90732e9302a1ed0a4700efb61971299d252 (patch
+      34db8dfd6e925b114d2df2b74d3de8d39b57482b21603241e1a568815e791ff8).
+      • tests/utils/run_spec_boundary_contracts.json: preimage
+      a7f96a253a37e994f0c62c7d9b2ab21b0a94d4f342975f84103cd274ef11af72 → approved postimage
+      b1e0cbd14c533a51b88eacb84b974cb93963e18d8f1fb71ae4ed3228f784d1ce (patch
+      dc58e99f73fe5de1a4f6179639dd2cfd2215c0dd665319e8d15b148b1824509f).
+  • What Changed on main (U3-M, FACTS.json:28-55, api_runner_companion.json:1-32,
+  native_u3m_2026-11-09.md:27-61):
+      • main (2cfc4666c, unchanged through 925d726d6) updated _multivalued_of in
+      src/data_sheets_schema/api_runner.py below line 833, changing its main preimage to
+      b109cb918a3079a384937ccfad7ab9b195a55713a355f11f848da98fab59596a.
+      • Applying the identical D127-approved patch
+      (996bd9bce74d509033a1daf340ea2a6edfc2a820316e798459892738a989475f: removing if not self.
+      native_shared_generation_version: around select_shared(self) at lines 833–839) yields
+      postimage 830eec1e12e96f807fa76ea26e066a1923b60380013c424cfa99f0012af0a881. The other
+      three D127 packets retain their exact D127-approved preimages, patches, and postimages.
+  • API-Only vs. Native U1+U3 Relevance:
+      • On unmodified main (b109cb91...), API-only runs (native_shared_generation_version=0,
+      shared_generation_version=1) already execute select_shared(self) because not self.
+      native_shared_generation_version is True; 14/14 API parity checks are byte-identical (7,
+      191 bytes, d30ccf8e7e9821662e8fa4a72f38484aa539e6fbdd81e7f345d05a744e733b5b,
+      native_u3m_2026-11-09.md:65-70).
+      • Thus, postimage 830eec1e... is only needed if the D127 packets / native U1+U3 selector
+      foundation are installed on main before the API-only run (under D89/D93/D129 sequencing);
+      it is not needed for API-only execution if the owner authorizes running the API-only
+      path on main without first merging U1+U3. No owner approval of postimage 830eec1e... was
+      located in the inspected files (unverified / pending if D127 is installed).
+  #### B. D128 Scanner Decisions
+  • What D128 Already Approved (2026-11-09T19:55Z, STATUS.md:610-614, P3-1_DECISION.md:17-40):
+      • Approved replacing the historical d258611c5 whole-array equality gate with the
+      itemized comparison between saved main (cf50d9a1c059f3b5030103378ccef33619475dde) and
+      private composition (660b2d884c3032f0eca61fcfd3ae523fcbbe9614): 5,229 exact matches, 57
+      line-only relocations, 6 listed field changes, 1 non-violation addition, 0 removals, 9
+      identical violation objects, and 2 added test-dependency objects (101 → 103), with "any
+      other difference needs fresh review."
+  • What Remains Unapproved on the Native U1+U3 Branch (native_u3m_2026-11-09.md:79-112,
+  native_u3m_scanner_instrument_review_2026-11-10.rejected-v1.md:12-54):
+      1. Scanner instrument asset pins (1.10.2 → 1.10.3 on U3-L e4985c1af): .
+      claude/skills/d4d-generation-specificity-audit/scan.py (41b8c6fd... →
+      61f8dfad72bd5a23b1c2d06f4039779017e56db26f5adbc9a621dd7596a97c80) and SKILL.md
+      (9f14598a... → 8bad15189dfba9cdc837d6b6ce1e81d05ec6ee3b83c14485cdd333e3c3703c31) to
+      support integrated native v2 prepare/prepare_synthetic/verify_preparer.
+      2. Coordinate shift in 16 of 57 api_runner.py relocation pairs (+1 line) on fixed main
+      (2cfc4666c → 672bcdb45) caused by main's _multivalued_of insertion.
+      3. Background main drift (cf50d9a1c → current main 925d726d6 / PR #5808 6792947ea): 21
+      added / 6 removed model-facing ontology/DUO hits (exception 9, 0 new violations), 22 3-
+      line relocations in tests/test_profiles.py, plus PR #5665 scanner alias fixes (scan.py
+      1.9.4 on main).
+  • API-Only vs. Native U1+U3 Relevance:
+      • tests/test_native_d128_scanner_comparison.py exists only on the unmerged native U1+U3
+      branch (codex/native-u1u3-combined-20261108), not on main or PR #5808. On PR #5808
+      (6792947ea), the repository specificity scan already passes (evidence/specificity- 
+      summary.json). Thus, the D128 delta approvals are only required if native U1+U3 is
+      merged into main first.
+
+  ──────
+  ### 3. Genuine Blocker vs. Deferred / Non-Prerequisite Table (API-Only Critical Path)
+
+   Item                   │ Classification          │ Evidence & Current Status / Uncertainty
+  ────────────────────────┼─────────────────────────┼─────────────────────────────────────────
+   1. Merge PR #5808      │ Genuine Blocker (Pre-   │ Materializes 3.2.1 (#2975 scalar
+   (6792947ea) to main    │ Freeze Code/Schema      │ FileCollection.collection_type), SSSOM,
+   (925d726d6)            │ Gate)                   │ release_history.yaml, docs/final-
+                          │                         │ generation-acceptance.md, and G1/G2
+                          │                         │ checks. CI is green (EXECUTION.md:5);
+                          │                         │ awaits AGY2 review completion and
+                          │                         │ explicit human merge approval.
+   2. Owner Sequencing    │ Genuine Blocker (Owner  │ D89/D93/D129 (STATUS.md:594-600) held
+   Decision on D129 / D89 │ Sequencing Choice)      │ A21 behind native U1+U3. In
+   / D93 ("native comes   │                         │ lead-results.md:90 and EXECUTION.md:47,
+   first" vs. decoupled   │                         │ lead states native freshness must not
+   API-only launch)       │                         │ block the API-only path; explicit owner
+                          │                         │ confirmation decoupling A21 from native
+                          │                         │ U1+U3 merge is unverified in STATUS.md
+                          │                         │ and resolves whether D127/D128 are
+                          │                         │ needed at all.
+   3. Rebuild A21 CHORUS  │ Genuine Blocker         │ Existing A21 registration
+   generic_v10 (BC1)      │ (Technical Preflight)   │ (799c00772a3225753d2911ef9b13d6d04ff2c2
+   Registration &         │                         │ 40a070062e96f130ed4c06d2e4) was pinned
+   shared_generation_batc │                         │ to M4 (673838c51,
+   h_roster_v1 on Post-   │                         │ a21_launch_packet_2026-11-05.md:5-34)
+   #5808 main + Offline - │                         │ before 3.2.0/3.2.1, #5532 (D101–D104),
+   -check                 │                         │ #5620 (D105/D123), #5677, and #5678
+                          │                         │ landed on main
+                          │                         │ (agy4-prerequisites.md:91-103). Must be
+                          │                         │ re-pinned on frozen post-#5808 main and
+                          │                         │ pass offline --check /
+                          │                         │ check_final_generation_products_2026111
+                          │                         │ 0.py.
+   4. Explicit Human      │ Genuine Blocker (Per-   │ Required before any live CBORG API call
+   Launch Word (D07, D22, │ Action Human Spend      │ (gpt-5 / claude-opus-4-6, 4 projects ×
+   D43, D58, D64) for A21 │ Gate)                   │ 2 methods × 2 profiles = 16 API runs,
+   ($60 slice, $51 stop,  │                         │ ~12–16h at 2–3 workers, ~$450–$650,
+   3h cap, no --canary-   │                         │ README.md:33-45). Unverified / not yet
+   baseline), then 15-Run │                         │ granted for the rebuilt post-#5808
+   Batch                  │                         │ registration hash.
+   5. Protected           │ Deferred (Native U1+U3  │ Patch 996bd9bc... and 3 companion
+   api_runner.py          │ Only; Non-Prerequisite  │ postimages are approved under D127; new
+   Postimage 830eec1e...  │ if API-Only Runs on     │ postimage 830eec1e... on main preimage
+   (D127 / U3-M)          │ main)                   │ b109cb91... only enables
+                          │                         │ native_shared_generation_version=1 in
+                          │                         │ api_runner.py. API-only runs
+                          │                         │ (native_shared_generation_version=0)
+                          │                         │ are 14/14 byte-identical without it
+                          │                         │ (native_u3m_2026-11-09.md:56-70).
+   6. D128 Scanner Asset  │ Deferred (Native U1+U3  │ Structural delta approved under D128
+   Pins (61f8dfad...,     │ Branch Gate Only)       │ (STATUS.md:610-614); 1.10.3 native v2
+   8bad1518...), 16 +1-   │                         │ scanner assets and 16 +1-line
+   Line Relocation Shifts │                         │ api_runner.py relocation shifts apply
+   & Baseline Re-Pin      │                         │ only to
+                          │                         │ tests/test_native_d128_scanner_comparis
+                          │                         │ on.py on codex/native-u1u3-combined-
+                          │                         │ 20261108, not to main or PR #5808.
+   7. Native Pre-         │ Deferred / Non-         │ Explicitly decoupled from the API-only
+   Reservation Freshness  │ Prerequisite            │ critical path (lead-results.md:90,
+   (U3K-F1 / 210s Gate /  │                         │ EXECUTION.md:47).
+   WP3 / WP4 / U3-M       │                         │
+   Cohorts)               │                         │
+   8. Broader Schema /    │ Deferred / Non-         │ Explicitly non-blocking for final API
+   Core / RO-Crate /      │ Prerequisite            │ generation (docs/final-generation-
+   FAIRSCAPE / SSSOM /    │                         │ acceptance.md §7, EXECUTION.md:19).
+   Receipt-v5 / 28-       │                         │
+   Criterion Rubric       │                         │
+   (D105, #4034, #3972,   │                         │
+   #3025, #4044, #2973,   │                         │
+   #5786–#5790)           │                         │
+  ──────
+  ### 4. Next Concrete Step on the API-Only Critical Path
+
+  1. Complete AGY2's review of PR #5808 (6792947ea6558d10c85106065b023cb57838835a) and obtain
+  explicit human approval to merge PR #5808 into main
+  (925d726d67cdd03fe28fdeafdde60fa27df57205) while confirming that A21 + the 15-run API batch
+  will proceed directly on post-#5808 main without waiting for the native U1+U3 branch merge
+  (D129).
+  2. Immediately after PR #5808 merges to main, rebuild and freeze the A21 CHORUS generic_v10
+  (BC1) registration and shared_generation_batch_roster_v1 against that exact post-#5808 main
+  commit, run the offline --check / dry-run preflight, and present the single-line A21 launch
+  command and new registration SHA-256 for the user's explicit launch word ($60 slice, $51
+  stop trigger, 3h wall-clock cap, no --canary-baseline).
+
+────────────────────────────────────────────────────────────
+> User has transferred lead responsibility to a new Claude session; this Codex lead becomes a
+  helper. Finish only your currently assigned bounded read-only task, preserve source/evidence,
+  and give the completed handoff to the incoming Claude lead. Do not start follow-ups, tests,
+  edits, pushes, merge or generation. Transfer prompt is
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-2
+  0261111/notes/development_efficiency_20261111/handoffs/claude-lead-handoff-20261111.md.
+  New lead will refresh your tab; no need to repeat completed work.
+
+▸ Thought for 6s
+
+  Acknowledged. My bounded read-only reconciliation of the API-only final D4D critical path is
+  complete (delivered in the preceding message), and no follow-ups, tests, edits, pushes,
+  merges, or generation runs have been started (0 active background tasks).
+  ### Completed Handoff Summary for Incoming Claude Lead (claude-lead-handoff-20261111.md)
+  1. API-Only Final D4D Critical Path Reconciliation (Read-Only, Completed Above):
+      • Genuine Blockers on API-Only Path (main at 925d726d67cdd03fe28fdeafdde60fa27df57205 +
+      PR #5808 at 6792947ea6558d10c85106065b023cb57838835a):
+	  1. Complete AGY2 review of PR #5808 (6792947ea) and obtain explicit human merge
+	  approval to land 3.2.1 (#2975), SSSOM, release_history.yaml,
+	  final-generation-acceptance.md, and G1/G2 checks on main.
+	  2. Confirm owner sequencing release of D129/D89/D93 (STATUS.md:594-600) so A21 and
+	  the 15-run API batch proceed directly on post-#5808 main without waiting for native
+	  U1+U3 branch merge.
+	  3. Rebuild A21 CHORUS generic_v10 (BC1) registration and
+	  shared_generation_batch_roster_v1 on frozen post-#5808 main (updating from M4
+	  673838c51, a21_launch_packet_2026-11-05.md:5-34) + offline --check / dry-run
+	  preflight.
+	  4. Explicit per-action human launch word (D07, D22, D43, D58, D64) for the rebuilt
+	  A21 registration SHA-256 ($60 slice, $51 stop, 3h cap, no --canary-baseline),
+	  followed after A21 acceptance by a separate human launch word for the remaining 15
+	  API runs.
+      • Deferred / Non-Prerequisite for API-Only on main:
+	  • Protected src/data_sheets_schema/api_runner.py postimage
+	  830eec1e12e96f807fa76ea26e066a1923b60380013c424cfa99f0012af0a881 (FACTS.json:28-55,
+	  api_runner_companion.json:1-32) and D128 scanner asset/relocation updates
+	  (native_u3m_2026-11-09.md:79-112, P3-1_DECISION.md:17-40) are needed only when
+	  merging native U1+U3 (codex/native-u1u3-combined-20261108); API-only
+	  (native_shared_generation_version=0) is 14/14 byte-identical (d30ccf8e...) on
+	  unmodified main.
+	  • Native pre-reservation freshness (U3K-F1 / 210s gate / WP3 / WP4) and broader
+	  schema/Core/RO-Crate/rubric items (lead-results.md:90, EXECUTION.md:19).
+
+  2. Preserved Frozen Worktrees, Commits & Evidence From Earlier in Session (AGY3):
+      • PR #5808 (G3 acceptance guide + #5804/#5805/#5807 product checker): integrated at
+      6792947ea6558d10c85106065b023cb57838835a on codex/final-generation-readiness-20261110.
+      • WP1 #5746 cleanup assessment: agy3-cleanup.md.
+      • WP2 #5815 (_native_path_state posixpath.os alias) & #5745/#5825 (launch_case CPython 
+      3.13 guarded monitoring routing): committed at f0f5b353d31786804eaddce11e60e925af27d8cd
+      and 48e095ce32b913946d2cd730ef235e89529097ac (integrated into 
+      7ee4cd8ba4fa591b03fbea69824d4364709766b1).
+      • WP3 Stage 3B Slice A (#5836, #5837, #5838, #5847 capture recheck): frozen on
+      agy/native-capture-recheck-5838-20261111 at 459e56bf896a29d854c5d250ce8632d7e2564427 in
+      /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/agy3-capture-recheck-
+      5838-20261111 (Draft PR #5851, integrated into 382f0dfd1ce863fdf257a77e2bbb2637dbe2f67b
+      / Draft PR #5857), with preserved canary pass/failure logs in 
+      /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/wp3-
+      slice-a-5838-20261111/ and design note agy3-post-acceptance.md.
+
+
+  Standing by for the incoming Claude lead.
+
+─────────────────────────────────────────────────────────────────────────────────────────────────
+>
+─────────────────────────────────────────────────────────────────────────────────────────────────
+? for shortcuts                                                             Gemini 4 Argon · high
+
+

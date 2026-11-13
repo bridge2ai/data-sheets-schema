@@ -1,0 +1,500 @@
+{
+  "date": "2026-11-12",
+  "assignment": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/notes/development_efficiency_20261111/assignments/claude-lead-agy4-freshness-value-table-20261112.md",
+  "script": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-development-efficiency-20261111/scripts/adhoc/native_freshness_value_table_20261112.py",
+  "pre_reservation_margin_seconds": 90,
+  "runs": [
+    {
+      "source_short": "458887766eff",
+      "source_commit": "458887766effe38207a77fea2d8033f1f3e1c7f3",
+      "run_directory": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-458887766eff-cpu-monitoring-post-5834-20261111",
+      "diagnostic_json": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-458887766eff-cpu-monitoring-post-5834-20261111/phase-metrics/34474-diagnostic.json",
+      "measurement_json": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-458887766eff-cpu-monitoring-post-5834-20261111/phase-metrics/34474-measurement.json",
+      "host_load_json": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-458887766eff-cpu-monitoring-post-5834-20261111/host-load.json",
+      "outer_json": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-458887766eff-cpu-monitoring-post-5834-20261111.outer.json",
+      "pid": 34474,
+      "captured_at": "2026-11-11T04:41:41.803810Z",
+      "launch_start_utc": "2026-11-11T04:42:05.753863+00:00",
+      "capture_to_launch_gap_seconds": 23.950053,
+      "freshness_checks_reached": [
+        {
+          "check_order": 1,
+          "call_index": 455,
+          "phase": "fixture",
+          "enclosing_call": "public_fixture(make_case)",
+          "label": "freshness_before_dispatch",
+          "name": "before_dispatch",
+          "kind": "dispatch check only",
+          "entered_utc": "2026-11-11T04:42:05.733394+00:00",
+          "left_utc": "2026-11-11T04:42:05.741396+00:00",
+          "capture_age_entered_seconds": 23.929584,
+          "capture_age_left_seconds": 23.937586,
+          "outcome": "return",
+          "margin_seconds_required_at_check": 0,
+          "min_max_age_continuous_entered_seconds": 23.929584,
+          "min_max_age_continuous_left_seconds": 23.937586,
+          "min_max_age_seconds_int": 24,
+          "inner_fresh_row": {
+            "call_index": 456,
+            "label": "freshness_check",
+            "name": "_fresh",
+            "entered_utc": "2026-11-11T04:42:05.733454+00:00",
+            "left_utc": "2026-11-11T04:42:05.741389+00:00",
+            "capture_age_entered_seconds": 23.929644,
+            "capture_age_left_seconds": 23.937579,
+            "outcome": "return"
+          }
+        },
+        {
+          "check_order": 2,
+          "call_index": 502,
+          "phase": "launch",
+          "enclosing_call": "public_launch(synthetic_launch)",
+          "label": "freshness_before_dispatch",
+          "name": "before_dispatch",
+          "kind": "dispatch check only",
+          "entered_utc": "2026-11-11T04:42:52.858966+00:00",
+          "left_utc": "2026-11-11T04:42:52.864633+00:00",
+          "capture_age_entered_seconds": 71.055156,
+          "capture_age_left_seconds": 71.060823,
+          "outcome": "return",
+          "margin_seconds_required_at_check": 0,
+          "min_max_age_continuous_entered_seconds": 71.055156,
+          "min_max_age_continuous_left_seconds": 71.060823,
+          "min_max_age_seconds_int": 72,
+          "inner_fresh_row": {
+            "call_index": 503,
+            "label": "freshness_check",
+            "name": "_fresh",
+            "entered_utc": "2026-11-11T04:42:52.859044+00:00",
+            "left_utc": "2026-11-11T04:42:52.864622+00:00",
+            "capture_age_entered_seconds": 71.055234,
+            "capture_age_left_seconds": 71.060812,
+            "outcome": "return"
+          }
+        },
+        {
+          "check_order": 3,
+          "call_index": 992,
+          "phase": "launch",
+          "enclosing_call": "accept_saved_capture(load_current)",
+          "label": "freshness_before_dispatch",
+          "name": "before_dispatch",
+          "kind": "dispatch check only",
+          "entered_utc": "2026-11-11T04:47:16.661395+00:00",
+          "left_utc": "2026-11-11T04:47:16.668933+00:00",
+          "capture_age_entered_seconds": 334.857585,
+          "capture_age_left_seconds": 334.865123,
+          "outcome": "exception:ValueError",
+          "margin_seconds_required_at_check": 0,
+          "min_max_age_continuous_entered_seconds": 334.857585,
+          "min_max_age_continuous_left_seconds": 334.865123,
+          "min_max_age_seconds_int": 335,
+          "inner_fresh_row": {
+            "call_index": 993,
+            "label": "freshness_check",
+            "name": "_fresh",
+            "entered_utc": "2026-11-11T04:47:16.661465+00:00",
+            "left_utc": "2026-11-11T04:47:16.668925+00:00",
+            "capture_age_entered_seconds": 334.857655,
+            "capture_age_left_seconds": 334.865115,
+            "outcome": "exception:ValueError"
+          }
+        }
+      ],
+      "phases": {
+        "fixture": {
+          "process_cpu_seconds": 119.921989,
+          "wall_monotonic_seconds": 183.040185
+        },
+        "launch": {
+          "process_cpu_seconds": 237.958053,
+          "wall_monotonic_seconds": 310.922975
+        }
+      },
+      "freshness_threshold_analysis": {
+        "configured_max_age_seconds": 300,
+        "configured_pre_reservation_margin_seconds": 90,
+        "reached_pre_reservation": false,
+        "reached_post_reservation_dispatch": false,
+        "refused_at_check_order": 3,
+        "refused_at_check_kind": "dispatch check only",
+        "refused_at_enclosing_call": "accept_saved_capture(load_current)",
+        "pre_reservation_age_entered_seconds": null,
+        "pre_reservation_age_left_seconds": null,
+        "pre_reservation_age_status": "unknown (never reached before_reservation)",
+        "smallest_passing_max_age_seconds_with_90s_margin": 335,
+        "smallest_passing_max_age_continuous_entered_seconds_with_90s_margin": 334.857585,
+        "smallest_passing_max_age_continuous_left_seconds_with_90s_margin": 334.865123,
+        "smallest_passing_max_age_seconds_fresh_only_without_margin": 335,
+        "note": "Refused at check #3 (dispatch check only in accept_saved_capture(load_current)); pre-reservation age is unknown because the run never reached before_reservation()."
+      },
+      "host_load_one_minute_per_cpu": {
+        "logical_cpus": 10,
+        "start_load1_raw": 15.328125,
+        "start_load1_per_cpu": 1.532812,
+        "max_during_run_load1_per_cpu": 2.865332,
+        "during_run_samples": 481,
+        "after_load1_raw": 23.669434,
+        "after_load1_per_cpu": 2.366943
+      }
+    },
+    {
+      "source_short": "3cc113e2606c",
+      "source_commit": "3cc113e2606c563236d9c06098c5329ddd027a38",
+      "run_directory": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-3cc113e2606c-cpu-monitoring-e1-observer-baseline-20261111",
+      "diagnostic_json": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-3cc113e2606c-cpu-monitoring-e1-observer-baseline-20261111/phase-metrics/7351-diagnostic.json",
+      "measurement_json": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-3cc113e2606c-cpu-monitoring-e1-observer-baseline-20261111/phase-metrics/7351-measurement.json",
+      "host_load_json": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-3cc113e2606c-cpu-monitoring-e1-observer-baseline-20261111/host-load.json",
+      "outer_json": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-3cc113e2606c-cpu-monitoring-e1-observer-baseline-20261111.outer.json",
+      "pid": 7351,
+      "captured_at": "2026-11-11T03:29:14.415406Z",
+      "launch_start_utc": "2026-11-11T03:29:30.849894+00:00",
+      "capture_to_launch_gap_seconds": 16.434488,
+      "freshness_checks_reached": [
+        {
+          "check_order": 1,
+          "call_index": 476,
+          "phase": "fixture",
+          "enclosing_call": "public_fixture(make_case)",
+          "label": "freshness_before_dispatch",
+          "name": "before_dispatch",
+          "kind": "dispatch check only",
+          "entered_utc": "2026-11-11T03:29:30.841396+00:00",
+          "left_utc": "2026-11-11T03:29:30.846295+00:00",
+          "capture_age_entered_seconds": 16.42599,
+          "capture_age_left_seconds": 16.430889,
+          "outcome": "return",
+          "margin_seconds_required_at_check": 0,
+          "min_max_age_continuous_entered_seconds": 16.42599,
+          "min_max_age_continuous_left_seconds": 16.430889,
+          "min_max_age_seconds_int": 17,
+          "inner_fresh_row": {
+            "call_index": 477,
+            "label": "freshness_check",
+            "name": "_fresh",
+            "entered_utc": "2026-11-11T03:29:30.841448+00:00",
+            "left_utc": "2026-11-11T03:29:30.846289+00:00",
+            "capture_age_entered_seconds": 16.426042,
+            "capture_age_left_seconds": 16.430883,
+            "outcome": "return"
+          }
+        },
+        {
+          "check_order": 2,
+          "call_index": 1011,
+          "phase": "launch",
+          "enclosing_call": "accept_saved_capture(load_current)",
+          "label": "freshness_before_dispatch",
+          "name": "before_dispatch",
+          "kind": "dispatch check only",
+          "entered_utc": "2026-11-11T03:34:33.305586+00:00",
+          "left_utc": "2026-11-11T03:34:33.311044+00:00",
+          "capture_age_entered_seconds": 318.89018,
+          "capture_age_left_seconds": 318.895638,
+          "outcome": "exception:ValueError",
+          "margin_seconds_required_at_check": 0,
+          "min_max_age_continuous_entered_seconds": 318.89018,
+          "min_max_age_continuous_left_seconds": 318.895638,
+          "min_max_age_seconds_int": 319,
+          "inner_fresh_row": {
+            "call_index": 1012,
+            "label": "freshness_check",
+            "name": "_fresh",
+            "entered_utc": "2026-11-11T03:34:33.305642+00:00",
+            "left_utc": "2026-11-11T03:34:33.311038+00:00",
+            "capture_age_entered_seconds": 318.890236,
+            "capture_age_left_seconds": 318.895632,
+            "outcome": "exception:ValueError"
+          }
+        }
+      ],
+      "phases": {
+        "fixture": {
+          "process_cpu_seconds": 149.126013,
+          "wall_monotonic_seconds": 160.9957
+        },
+        "launch": {
+          "process_cpu_seconds": 275.663033,
+          "wall_monotonic_seconds": 302.462816
+        }
+      },
+      "freshness_threshold_analysis": {
+        "configured_max_age_seconds": 300,
+        "configured_pre_reservation_margin_seconds": 90,
+        "reached_pre_reservation": false,
+        "reached_post_reservation_dispatch": false,
+        "refused_at_check_order": 2,
+        "refused_at_check_kind": "dispatch check only",
+        "refused_at_enclosing_call": "accept_saved_capture(load_current)",
+        "pre_reservation_age_entered_seconds": null,
+        "pre_reservation_age_left_seconds": null,
+        "pre_reservation_age_status": "unknown (never reached before_reservation)",
+        "smallest_passing_max_age_seconds_with_90s_margin": 319,
+        "smallest_passing_max_age_continuous_entered_seconds_with_90s_margin": 318.89018,
+        "smallest_passing_max_age_continuous_left_seconds_with_90s_margin": 318.895638,
+        "smallest_passing_max_age_seconds_fresh_only_without_margin": 319,
+        "note": "Refused at check #2 (dispatch check only in accept_saved_capture(load_current)); pre-reservation age is unknown because the run never reached before_reservation()."
+      },
+      "host_load_one_minute_per_cpu": {
+        "logical_cpus": 10,
+        "start_load1_raw": 8.001465,
+        "start_load1_per_cpu": 0.800146,
+        "max_during_run_load1_per_cpu": 1.576367,
+        "during_run_samples": 449,
+        "after_load1_raw": 14.036621,
+        "after_load1_per_cpu": 1.403662
+      }
+    },
+    {
+      "source_short": "382f0dfd1ce8",
+      "source_commit": "382f0dfd1ce863fdf257a77e2bbb2637dbe2f67b",
+      "run_directory": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-382f0dfd1ce8-cpu-monitoring-lead-rerun-20261111",
+      "diagnostic_json": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-382f0dfd1ce8-cpu-monitoring-lead-rerun-20261111/phase-metrics/67941-diagnostic.json",
+      "measurement_json": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-382f0dfd1ce8-cpu-monitoring-lead-rerun-20261111/phase-metrics/67941-measurement.json",
+      "host_load_json": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-382f0dfd1ce8-cpu-monitoring-lead-rerun-20261111/host-load.json",
+      "outer_json": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1u3/u3m/wp1-382f0dfd1ce8-cpu-monitoring-lead-rerun-20261111.outer.json",
+      "pid": 67941,
+      "captured_at": "2026-11-11T16:40:32.438672Z",
+      "launch_start_utc": "2026-11-11T16:40:43.240963+00:00",
+      "capture_to_launch_gap_seconds": 10.802291,
+      "freshness_checks_reached": [
+        {
+          "check_order": 1,
+          "call_index": 455,
+          "phase": "fixture",
+          "enclosing_call": "public_fixture(make_case)",
+          "label": "freshness_before_dispatch",
+          "name": "before_dispatch",
+          "kind": "dispatch check only",
+          "entered_utc": "2026-11-11T16:40:43.229364+00:00",
+          "left_utc": "2026-11-11T16:40:43.234351+00:00",
+          "capture_age_entered_seconds": 10.790692,
+          "capture_age_left_seconds": 10.795679,
+          "outcome": "return",
+          "margin_seconds_required_at_check": 0,
+          "min_max_age_continuous_entered_seconds": 10.790692,
+          "min_max_age_continuous_left_seconds": 10.795679,
+          "min_max_age_seconds_int": 11,
+          "inner_fresh_row": {
+            "call_index": 456,
+            "label": "freshness_check",
+            "name": "_fresh",
+            "entered_utc": "2026-11-11T16:40:43.229430+00:00",
+            "left_utc": "2026-11-11T16:40:43.234340+00:00",
+            "capture_age_entered_seconds": 10.790758,
+            "capture_age_left_seconds": 10.795668,
+            "outcome": "return"
+          }
+        },
+        {
+          "check_order": 2,
+          "call_index": 502,
+          "phase": "launch",
+          "enclosing_call": "public_launch(synthetic_launch)",
+          "label": "freshness_before_dispatch",
+          "name": "before_dispatch",
+          "kind": "dispatch check only",
+          "entered_utc": "2026-11-11T16:41:10.964930+00:00",
+          "left_utc": "2026-11-11T16:41:10.970551+00:00",
+          "capture_age_entered_seconds": 38.526258,
+          "capture_age_left_seconds": 38.531879,
+          "outcome": "return",
+          "margin_seconds_required_at_check": 0,
+          "min_max_age_continuous_entered_seconds": 38.526258,
+          "min_max_age_continuous_left_seconds": 38.531879,
+          "min_max_age_seconds_int": 39,
+          "inner_fresh_row": {
+            "call_index": 503,
+            "label": "freshness_check",
+            "name": "_fresh",
+            "entered_utc": "2026-11-11T16:41:10.965026+00:00",
+            "left_utc": "2026-11-11T16:41:10.970538+00:00",
+            "capture_age_entered_seconds": 38.526354,
+            "capture_age_left_seconds": 38.531866,
+            "outcome": "return"
+          }
+        },
+        {
+          "check_order": 3,
+          "call_index": 964,
+          "phase": "launch",
+          "enclosing_call": "accept_saved_capture(load_current)",
+          "label": "freshness_before_dispatch",
+          "name": "before_dispatch",
+          "kind": "dispatch check only",
+          "entered_utc": "2026-11-11T16:44:51.834699+00:00",
+          "left_utc": "2026-11-11T16:44:51.840534+00:00",
+          "capture_age_entered_seconds": 259.396027,
+          "capture_age_left_seconds": 259.401862,
+          "outcome": "return",
+          "margin_seconds_required_at_check": 0,
+          "min_max_age_continuous_entered_seconds": 259.396027,
+          "min_max_age_continuous_left_seconds": 259.401862,
+          "min_max_age_seconds_int": 260,
+          "inner_fresh_row": {
+            "call_index": 965,
+            "label": "freshness_check",
+            "name": "_fresh",
+            "entered_utc": "2026-11-11T16:44:51.834767+00:00",
+            "left_utc": "2026-11-11T16:44:51.840526+00:00",
+            "capture_age_entered_seconds": 259.396095,
+            "capture_age_left_seconds": 259.401854,
+            "outcome": "return"
+          }
+        },
+        {
+          "check_order": 4,
+          "call_index": 1044,
+          "phase": "launch",
+          "enclosing_call": "launch_engine(_launch)",
+          "label": "freshness_before_dispatch",
+          "name": "before_dispatch",
+          "kind": "dispatch check only",
+          "entered_utc": "2026-11-11T16:45:11.995242+00:00",
+          "left_utc": "2026-11-11T16:45:12.002039+00:00",
+          "capture_age_entered_seconds": 279.55657,
+          "capture_age_left_seconds": 279.563367,
+          "outcome": "return",
+          "margin_seconds_required_at_check": 0,
+          "min_max_age_continuous_entered_seconds": 279.55657,
+          "min_max_age_continuous_left_seconds": 279.563367,
+          "min_max_age_seconds_int": 280,
+          "inner_fresh_row": {
+            "call_index": 1045,
+            "label": "freshness_check",
+            "name": "_fresh",
+            "entered_utc": "2026-11-11T16:45:11.995379+00:00",
+            "left_utc": "2026-11-11T16:45:12.002032+00:00",
+            "capture_age_entered_seconds": 279.556707,
+            "capture_age_left_seconds": 279.56336,
+            "outcome": "return"
+          }
+        },
+        {
+          "check_order": 5,
+          "call_index": 1120,
+          "phase": "launch",
+          "enclosing_call": "launch_engine(_launch)",
+          "label": "freshness_before_reservation",
+          "name": "before_reservation",
+          "kind": "pre-reservation",
+          "entered_utc": "2026-11-11T16:45:38.972375+00:00",
+          "left_utc": "2026-11-11T16:45:38.979105+00:00",
+          "capture_age_entered_seconds": 306.533703,
+          "capture_age_left_seconds": 306.540433,
+          "outcome": "exception:ValueError",
+          "margin_seconds_required_at_check": 90,
+          "min_max_age_continuous_entered_seconds": 396.533703,
+          "min_max_age_continuous_left_seconds": 396.540433,
+          "min_max_age_seconds_int": 397,
+          "inner_fresh_row": {
+            "call_index": 1121,
+            "label": "freshness_check",
+            "name": "_fresh",
+            "entered_utc": "2026-11-11T16:45:38.972431+00:00",
+            "left_utc": "2026-11-11T16:45:38.979091+00:00",
+            "capture_age_entered_seconds": 306.533759,
+            "capture_age_left_seconds": 306.540419,
+            "outcome": "exception:ValueError"
+          }
+        }
+      ],
+      "phases": {
+        "fixture": {
+          "process_cpu_seconds": 110.88049,
+          "wall_monotonic_seconds": 138.84294
+        },
+        "launch": {
+          "process_cpu_seconds": 243.398143,
+          "wall_monotonic_seconds": 295.745893
+        }
+      },
+      "freshness_threshold_analysis": {
+        "configured_max_age_seconds": 300,
+        "configured_pre_reservation_margin_seconds": 90,
+        "reached_pre_reservation": true,
+        "reached_post_reservation_dispatch": false,
+        "refused_at_check_order": 5,
+        "refused_at_check_kind": "pre-reservation",
+        "refused_at_enclosing_call": "launch_engine(_launch)",
+        "pre_reservation_age_entered_seconds": 306.533703,
+        "pre_reservation_age_left_seconds": 306.540433,
+        "pre_reservation_age_status": "measured",
+        "smallest_passing_max_age_seconds_with_90s_margin": 397,
+        "smallest_passing_max_age_continuous_entered_seconds_with_90s_margin": 396.533703,
+        "smallest_passing_max_age_continuous_left_seconds_with_90s_margin": 396.540433,
+        "smallest_passing_max_age_seconds_fresh_only_without_margin": 307,
+        "note": "Reached before_reservation() at check #5 (capture age 306.533703 s entered / 306.540433 s left) and was refused there; requires max_age_seconds >= 397 s (>= 396.533703 s entered / 396.540433 s left) with the 90 s pre-reservation margin unchanged (_fresh() alone without the 90 s margin would require 307 s); post-reservation dispatch age is unknown because the run was refused at before_reservation()."
+      },
+      "host_load_one_minute_per_cpu": {
+        "logical_cpus": 10,
+        "start_load1_raw": 13.770508,
+        "start_load1_per_cpu": 1.377051,
+        "max_during_run_load1_per_cpu": 2.743604,
+        "during_run_samples": 417,
+        "after_load1_raw": 19.110352,
+        "after_load1_per_cpu": 1.911035
+      }
+    }
+  ],
+  "production_steps_between_capture_and_launch_at_382f0dfd1ce8": [
+    {
+      "step_order": 1,
+      "step": "Timestamping captured_at on the rate_limit_event line during capture-subscription-event",
+      "measured": "yes (timestamp boundary); no (live child process execution before rate_limit_event)",
+      "production_source_ref": "382f0dfd1ce8:src/data_sheets_schema/native_subscription_capture.py lines 202-245 (_supervise spawns the registered native executable and records captured_at = _utc() when a rate_limit_event stdout line is read at lines 241-245)",
+      "diagnostic_source_ref": "382f0dfd1ce8:tests/utils/native_synthetic_evidence.py lines 144-163 (authority_for sets capture_now = datetime.now(timezone.utc) and capture_stamp at lines 144-145 and builds synthetic observations with captured_at = capture_stamp at lines 162-163)"
+    },
+    {
+      "step_order": 2,
+      "step": "Remaining capture subprocess execution through terminal result line and process-group cleanup (_cleanup) inside _supervise()",
+      "measured": "no",
+      "production_source_ref": "382f0dfd1ce8:src/data_sheets_schema/native_subscription_capture.py lines 186-199 (_cleanup) and lines 218-270 (_supervise drains stdout/stderr through process exit and reaps the process group)",
+      "diagnostic_source_ref": "382f0dfd1ce8:tests/utils/native_synthetic_evidence.py lines 150-163 (authority_for constructs the 3-line stdout byte string in memory without spawning a process)"
+    },
+    {
+      "step_order": 3,
+      "step": "Post-supervise capture authority recheck (_authority), terminal modelUsage limits check (_observed_limits_mismatch and _terminal), durable file creation (_new with os.fsync and _sync), and capture-subscription-event CLI exit",
+      "measured": "yes (for _event, _terminal, and writing stdout.jsonl, stderr.txt, observations.json, and capture.json via Path.write_bytes); no (for the post-supervise _authority reconstruction at line 548, _observed_limits_mismatch scan, _new/_sync os.fsync calls, and CLI _unchanged/_emit)",
+      "production_source_ref": "382f0dfd1ce8:src/data_sheets_schema/native_subscription_capture.py lines 547-587 (_perform_capture) and 382f0dfd1ce8:src/data_sheets_schema/native_generation.py lines 233-235, 248",
+      "diagnostic_source_ref": "382f0dfd1ce8:tests/utils/native_synthetic_evidence.py lines 164-175 (authority_for calls capture._event and capture._terminal and writes the 4 files via Path.write_bytes without re-running _authority or os.fsync)"
+    },
+    {
+      "step_order": 4,
+      "step": "Operator/shell turnaround between capture-subscription-event and prepare-subscription-guard-v2, plus prepare-subscription-guard-v2 CLI startup and front-door verification (registration.verified, validate_metadata, require_u4_runtime, _account_choice, validate_prepared_runtime, review.validate_bundle, _unchanged)",
+      "measured": "no",
+      "production_source_ref": "382f0dfd1ce8:src/data_sheets_schema/native_generation.py lines 125-128, 153, 206-228, and 236 (separate CLI command runs registration.verified at line 209, validate_metadata at line 213, require_u4_runtime at line 214, _account_choice at line 215, validate_prepared_runtime at line 223, and review.validate_bundle at line 225 before read_capture)",
+      "diagnostic_source_ref": "382f0dfd1ce8:tests/utils/native_synthetic_evidence.py lines 174-178 (authority_for calls capture.read_capture in-process immediately on line 176 after writing capture.json on line 175)"
+    },
+    {
+      "step_order": 5,
+      "step": "Saved capture readback (capture.read_capture) and guard v2 preparation (guard_v2.prepare_guard, including freshness check #1 SubscriptionGuard.__init__ -> before_dispatch(check_only=True))",
+      "measured": "yes (for capture.read_capture, guard.prepare_guard, and Path.write_bytes in the fixture phase); no (for CLI _unchanged, _new_file os.fsync, and _emit at native_generation.py lines 245-248)",
+      "production_source_ref": "382f0dfd1ce8:src/data_sheets_schema/native_generation.py lines 237-248; 382f0dfd1ce8:src/data_sheets_schema/native_subscription_capture.py lines 685-701 (read_capture); 382f0dfd1ce8:src/data_sheets_schema/native_subscription_guard_v2.py lines 383-399 and 677-704 (prepare_guard)",
+      "diagnostic_source_ref": "382f0dfd1ce8:tests/utils/native_synthetic_evidence.py lines 176-190 (executed inside make_case during the fixture phase at 382f0dfd1ce8:tests/test_native_u3k_profile.py lines 208-209, producing the 16.434488 s, 23.950053 s, and 10.802291 s capture-to-launch gaps)"
+    },
+    {
+      "step_order": 6,
+      "step": "Operator/shell turnaround between prepare-subscription-guard-v2 exit and launch CLI invocation, plus launch CLI Python interpreter startup and module imports",
+      "measured": "no",
+      "production_source_ref": "382f0dfd1ce8:src/data_sheets_schema/native_generation.py lines 1-24, 129-141, 153, and 274-275",
+      "diagnostic_source_ref": "382f0dfd1ce8:tests/test_native_u3k_profile.py lines 208-248 (launch phase starts in-process immediately after fixture phase completes)"
+    },
+    {
+      "step_order": 7,
+      "step": "native_generation.py launch CLI front-door verification before native_shared_execution_orchestration.launch() is called (registration.verified, validate_metadata, require_u4_runtime, _account_choice, _unchanged)",
+      "measured": "no",
+      "production_source_ref": "382f0dfd1ce8:src/data_sheets_schema/native_generation.py lines 206-217 and 259-265 (main runs registration.verified at line 209, validate_metadata at line 213, require_u4_runtime at line 214, _account_choice at line 215, and _unchanged at line 261 before calling native_shared_execution_orchestration.launch at line 262)",
+      "diagnostic_source_ref": "382f0dfd1ce8:tests/test_native_u3k_profile.py line 248 (test_neutral_pre_reservation_diagnostic calls execute.synthetic_launch directly, bypassing native_generation.main)"
+    },
+    {
+      "step_order": 8,
+      "step": "Orchestration launch execution from native_shared_execution_orchestration.launch() / synthetic_launch() through launch_guard.before_reservation()",
+      "measured": "yes",
+      "production_source_ref": "382f0dfd1ce8:src/data_sheets_schema/native_shared_execution_orchestration.py lines 70-95 (launch); 382f0dfd1ce8:src/data_sheets_schema/native_execution_orchestration.py lines 253-276 (launch) and lines 315-385 (_launch through launch_guard.before_reservation())",
+      "diagnostic_source_ref": "382f0dfd1ce8:src/data_sheets_schema/native_shared_execution_orchestration.py lines 97-129 (synthetic_launch); 382f0dfd1ce8:src/data_sheets_schema/native_execution_orchestration.py lines 278-296 (synthetic_launch) and lines 315-385 (_launch through launch_guard.before_reservation(), measured in phases[1] launch)"
+    }
+  ],
+  "markdown_table": "| Source commit / Run | 1. Capture time, launch start, and gap | 2. Freshness checks reached (in order: kind, capture age, outcome) | 3. Fixture and launch process CPU and wall time | 4. Smallest max_age_seconds to pass reached checks (90 s margin unchanged) | 5. 1-min load per CPU (start / max during run) |\n|---|---|---|---|---|---|\n| 458887766eff (458887766effe38207a77fea2d8033f1f3e1c7f3)<br>PID 34474 | Capture: 2026-11-11T04:41:41.803810Z<br>Launch start: 2026-11-11T04:42:05.753863+00:00<br>Gap: 23.950053 s | 1. dispatch check only (fixture/public_fixture(make_case), call 455): age 23.929584 s entered / 23.937586 s left -> return<br>2. dispatch check only (launch/public_launch(synthetic_launch), call 502): age 71.055156 s entered / 71.060823 s left -> return<br>3. dispatch check only (launch/accept_saved_capture(load_current), call 992): age 334.857585 s entered / 334.865123 s left -> exception:ValueError | Fixture: CPU 119.921989 s, wall 183.040185 s<br>Launch: CPU 237.958053 s, wall 310.922975 s | **335 s** (continuous >= 334.857585 s entered / >= 334.865123 s left). Refused at check #3 (dispatch check only in accept_saved_capture(load_current)); pre-reservation age is unknown because the run never reached before_reservation(). | Start: 1.532812 (15.328125 / 10 CPUs)<br>Max during run: 2.865332 (481 samples) |\n| 3cc113e2606c (3cc113e2606c563236d9c06098c5329ddd027a38)<br>PID 7351 | Capture: 2026-11-11T03:29:14.415406Z<br>Launch start: 2026-11-11T03:29:30.849894+00:00<br>Gap: 16.434488 s | 1. dispatch check only (fixture/public_fixture(make_case), call 476): age 16.425990 s entered / 16.430889 s left -> return<br>2. dispatch check only (launch/accept_saved_capture(load_current), call 1011): age 318.890180 s entered / 318.895638 s left -> exception:ValueError | Fixture: CPU 149.126013 s, wall 160.995700 s<br>Launch: CPU 275.663033 s, wall 302.462816 s | **319 s** (continuous >= 318.890180 s entered / >= 318.895638 s left). Refused at check #2 (dispatch check only in accept_saved_capture(load_current)); pre-reservation age is unknown because the run never reached before_reservation(). | Start: 0.800146 (8.001465 / 10 CPUs)<br>Max during run: 1.576367 (449 samples) |\n| 382f0dfd1ce8 (382f0dfd1ce863fdf257a77e2bbb2637dbe2f67b)<br>PID 67941 | Capture: 2026-11-11T16:40:32.438672Z<br>Launch start: 2026-11-11T16:40:43.240963+00:00<br>Gap: 10.802291 s | 1. dispatch check only (fixture/public_fixture(make_case), call 455): age 10.790692 s entered / 10.795679 s left -> return<br>2. dispatch check only (launch/public_launch(synthetic_launch), call 502): age 38.526258 s entered / 38.531879 s left -> return<br>3. dispatch check only (launch/accept_saved_capture(load_current), call 964): age 259.396027 s entered / 259.401862 s left -> return<br>4. dispatch check only (launch/launch_engine(_launch), call 1044): age 279.556570 s entered / 279.563367 s left -> return<br>5. pre-reservation (launch/launch_engine(_launch), call 1120): age 306.533703 s entered / 306.540433 s left -> exception:ValueError | Fixture: CPU 110.880490 s, wall 138.842940 s<br>Launch: CPU 243.398143 s, wall 295.745893 s | **397 s** (continuous >= 396.533703 s entered / >= 396.540433 s left). Reached before_reservation() at check #5 (capture age 306.533703 s entered / 306.540433 s left) and was refused there; requires max_age_seconds >= 397 s (>= 396.533703 s entered / 396.540433 s left) with the 90 s pre-reservation margin unchanged (_fresh() alone without the 90 s margin would require 307 s); post-reservation dispatch age is unknown because the run was refused at before_reservation(). | Start: 1.377051 (13.770508 / 10 CPUs)<br>Max during run: 2.743604 (417 samples) |"
+}

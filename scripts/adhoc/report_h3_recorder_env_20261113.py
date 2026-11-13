@@ -1,0 +1,156 @@
+"""Write the 6065/pin-comparison handoff from saved local evidence, 2026-11-13.
+Inputs: source Git history, owned test XML/logs and replay manifest. Outputs:
+the assigned Markdown/JSON handoff, with computed pins. No external actions.
+"""
+from pathlib import Path
+import hashlib
+import json
+import subprocess
+import tarfile
+import xml.etree.ElementTree as ET
+
+R = Path(__file__).resolve().parents[2]
+E = R.parent
+W = E / 'codex-native-recorder-env-20261113'
+S = E / 'scratch-h3-recorder-20261113'
+OUT = R / 'notes/development_efficiency_20261111/handoffs/codex-h3-recorder-env-and-pin-comparison-20261113'
+def sha(raw): return hashlib.sha256(raw).hexdigest()
+def pin(path):
+    raw = path.read_bytes()
+    return {'path': str(path), 'bytes': len(raw), 'sha256': sha(raw)}
+def git(*args): return subprocess.check_output(['git', '-C', str(W), *args], text=True).strip()
+cohorts = {}
+for folder in sorted((S / 'tests').iterdir()):
+    if not folder.is_dir(): continue
+    row = {'path': str(folder), 'complete': (folder / 'outcome.json').is_file()}
+    for name in ('plan.json', 'outcome.json', 'pytest.xml', 'pytest.log'):
+        if (folder / name).is_file(): row[name] = pin(folder / name)
+    if row['complete']: row['outcome'] = json.loads((folder / 'outcome.json').read_bytes())
+    if (folder / 'pytest.xml').is_file():
+        cases = ET.parse(folder / 'pytest.xml').findall('.//testcase')
+        row['counts'] = {'tests': len(cases), 'failed': sum(c.find('failure') is not None for c in cases),
+            'errors': sum(c.find('error') is not None for c in cases), 'skipped': sum(c.find('skipped') is not None for c in cases)}
+    cohorts[folder.name] = row
+line_path = next((S / 'tests/recorder-bound-digest-01/cases').glob('*/recorder-line.txt'))
+line = line_path.read_text().removesuffix('\n')
+protected = {}
+for path in ('src/data_sheets_schema/shared_generation.py', 'src/data_sheets_schema/api_runner.py',
+        'src/download/prompts/canonical_hashes.yaml', 'tests/utils/run_spec_boundary_contracts.json',
+        'src/data_sheets_schema/native_subscription_guard.py'):
+    before = subprocess.check_output(['git', '-C', str(W), 'show', '8760de5ef:' + path])
+    actual = (W / path).read_bytes()
+    assert actual == before
+    protected[path] = sha(actual)
+report = {'status': 'Partial handoff: recorder code committed; full-path/replay validation held; Part 2 requires design ruling; Part 3 not started',
+    'review': pin(E / 'plans/reviews/native_equivalence_e82c36ab_codex_review_2026-11-13.md'),
+    'branch': git('branch', '--show-current'), 'head': git('rev-parse', 'HEAD'),
+    'base': git('rev-parse', '8760de5ef'), 'fetch': 'Attempted as assigned; GitHub DNS resolution failed. No publication.',
+    'commits': git('log', '--reverse', '--format=%H %s', '8760de5ef..HEAD').splitlines(),
+    'part1_commit': git('rev-parse', 'c577c0eff'), 'recorder_line': line,
+    'part1_initial_commit': git('rev-parse', 'f57ac61da'),
+    'review_finding': {'id': 'H3-RE1', 'status': 'fixed in c577c0eff; GitHub filing left to lead',
+        'finding': 'Environment-only render spec could change a non-model-visible field without changing instruction.',
+        'repair': 'Bind canonical specification SHA-256 into recorder line; refuse changed environment bytes and coherent value-plus-command rehash against original saved instruction.'},
+    'recorder_line_characters': len(line), 'recorder_line_bytes': len(line.encode()),
+    'recorder_line_evidence': pin(line_path), 'line_scope': 'Exact synthetic native26 model-facing line from the saved test; production paths remain registration-specific.',
+    'model_facing_changes': ['recorder command in initial instruction', 'registered helper command table',
+        'recorder command in tool policy and Bash allow rules', 'command guidance appended to the base system instructions',
+        'derived instruction/system/command hashes in stage requests and dependent history/receipt carriers',
+        'recorder refusal feedback for the deliberately missing-environment helper case'],
+    'supporting_changes': ['permission expectation recorder command and environment', 'production source pins'],
+    'part2': {'status': 'design ruling requested; no gate implemented',
+        'conflict': 'Existing production verified() reconstructs through pinned source execution and requires its exact checkout; data-only parsing is not equivalent validation.',
+        'evidence': ['native_execution_registration_v2.py:_wire,verify_preparer,verified,_consumer',
+            'native_execution_authority_v2.py:verified_source_module', 'native_shared_registration_orchestration.py:verified'],
+        'choices': ['Add separately reviewed data-only production packet validation', 'Permit isolated existing production validation before data-only comparison'],
+        'dependency_registry_gap': 'The emitted dependency identity pins repository modules/package sources and interpreter bytes/version, but not third-party helper distribution contents. native_shared_render invokes LinkML modules from that environment. A separately bound closed dependency registry is needed; it cannot be inferred from identical current packet pins.',
+        'script_sha256': None, 'data_sha256': None, 'demonstrations': 'Not run; no equivalence claim.'},
+    'part3': {'status': 'not started; ordered after Part 2'}, 'cohorts': cohorts,
+    'protected_and_guard_v1_sha256': protected,
+    'limitations': ['No real native binary, provider, model, permission probe, capture or launch was run.',
+        'Only assigned CI groups investigated; the remaining CI failures and timed-out shards are not cleared.',
+        'fixture-fixes cohort is non-acceptance: HEAD changed during a genuine registration test; fixed-ci-export replaces it.',
+        'First merged export omitted Git metadata; merged-failure-git replaces its publication results.']}
+assert report['review']['sha256'] == '47af856a4aa36c672ca25d2aa6d6f58b9bfbabbfa93c460fc0ee0a51c3c52918'
+public_root = S / 'tests/recorder-public-native26/cases/test_actual_public_correction_0/native26'
+final_path = public_root / 'native-evidence/final.json'
+if final_path.exists():
+    final = json.loads(final_path.read_bytes())
+    controls = [json.loads(line) for line in (public_root / 'native-attempt/control.jsonl').read_text().splitlines()]
+    calls = [row.get('request', {}).get('request', {}).get('input', {}).get('tool_input', {}).get('command', '') for row in controls]
+    recorder_calls = [line for line in calls if ' -m data_sheets_schema.cli provenance record ' in line]
+    report['public_path_finding'] = {'id': 'H3-RE2', 'status': 'unresolved validation finding; lead filing required',
+        'state': final['state'], 'first_stop': final['first_stop'], 'recorder_calls': recorder_calls,
+        'runtime_gates_passed': final['runtime_gates_passed'], 'final': pin(final_path),
+        'controls': pin(public_root / 'native-attempt/control.jsonl'),
+        'basis': 'Declared synthetic deadline was not increased. No matching full-path baseline was run, so attribution to the recorder change is unresolved. Successful native26 public recording is not established.'}
+for name in ('recorder-replay-01', 'recorder-replay-02'):
+    p = S / name / 'manifest.json'
+    if p.exists():
+        row = {'pin': pin(p), 'value': json.loads(p.read_bytes()), 'archives': {}}
+        for side in ('before', 'after'):
+            archive = p.parent / (side + '.tar')
+            with tarfile.open(archive) as stream:
+                row['archives'][side] = {**pin(archive), 'commit': stream.pax_headers.get('comment')}
+        report.setdefault('replay', {})[name] = row
+exposure = S / 'recorder-replay-02/exposure-check.json'
+if exposure.exists(): report['exposure_check'] = {'pin': pin(exposure), 'value': json.loads(exposure.read_bytes())}
+OUT.with_suffix('.json').write_text(json.dumps(report, indent=2) + '\n')
+text = f'''# Helper 3 recorder environment and pin comparison
+
+Part 1 commit: `{report['part1_commit']}` on `{report['branch']}`. Status: {report['status']}.
+
+The exact saved synthetic model-facing recorder line is {len(line)} characters ({len(line.encode())} UTF-8 bytes), excluding its newline:
+
+```bash
+{line}
+```
+
+The new ending is `--render-spec-env D4D_RENDER_SPEC --render-spec-sha256 <registered digest> --prompt-text-env D4D_LAUNCH_INSTRUCTION`. The controller supplies the JSON. The recorder admits only the literal variable name, rejects missing/empty values and conflicting options, verifies the specification digest and retains the existing reconstruction and exact instruction checks. The historical JSON option remains supported.
+
+Local review finding H3-RE1: initial commit f57ac61da lacked the digest anchor, allowing a changed non-model-visible specification field to leave the instruction unchanged. Final commit c577c0eff fixes that. Do not take f57ac61da alone. The lead must file H3-RE1 externally if required; no GitHub write was authorized. The latest whole focused cohort has 59 passes, including coherent value-plus-command rehash refusal.
+
+The 2282 notes show a literal environment-variable name was admitted while shell expansion was refused. This command uses no expansion and no inline JSON; an apostrophe inside the specification therefore never enters the command. Other independently supplied command paths still retain their existing spelling constraints. No runtime-permission admission is claimed without a real authorized probe.
+
+Changed model-facing artifacts: {', '.join(report['model_facing_changes'])}. Permission expectation/environment and source pins are supporting changes. Replay confirmation is pending unless the companion JSON contains completed replay evidence; no claim is made from an unproduced snapshot.
+
+## CI triage and launch carry
+
+The baseline readback file passed 15 tests. The merged export reproduced all eight closed-wire failures: the component fixture was intentionally incomplete, and the new diagnostic preflight checks that shape. The repair supplies the closed wire with explicit placeholders; all production checks and existing assertions remain intact. The failure-publication file did not exist at the baseline. At the merged head, its seven tests pass in isolation once local Git metadata is supplied; the chosen historical collection-import pair also passed. Thus the exact CI foreign-origin failure was not locally reproduced. The isolation repair uses the established fixture to remove the conflicting bare aliases before each case, directly addressing the CI-reported condition without relaxing origin checks. The fixed export passed all 23 cases, including both whole failing files and the historical collection import; this does not certify the full CI collection order or its platform.
+
+Preserved original repairs `48cb2d1f494add9903851af3c3babce31213af79` and `ef193e4eabc65a1c7ab39ecc64ad2945889f3416`; added H3-LR1 as `a22c51a9d082cad64eccb64c2de900b32e8e2630`, without rewriting. Their carried hashes and the two separate CI fixture commits are below. Fetch was attempted but failed to resolve GitHub; base is the locally available published `8760de5efe88b5af62e9d77e6335fa7e248017b6`.
+
+'''
+text += '\n'.join('- `' + item + '`' for item in report['commits']) + '\n\n## Saved checks\n\n'
+for name, row in cohorts.items():
+    text += '- ' + name + ': ' + json.dumps(row.get('counts', {'complete': row['complete']})) + '\n'
+text += '''
+The initial merged publication reproduction lacked Git metadata. The working-tree fixture run changed HEAD during registration reconstruction and is not acceptance. Both are retained, not relabelled as passes. The stable fixed export is the acceptance rerun.
+
+H3-RE2 is an unresolved validation finding: the full synthetic native26 public-path test failed at its declared 900-second deadline before the recorder was called (the other test in that file passed). The failure publication and verified cleanup are retained. No limit or assertion was weakened, and no corresponding full-path baseline was run; attribution to this recorder change is unresolved. The focused public CLI recorder test succeeds, but the requested complete native26 public-path success is NOT established. The lead must file this finding externally if required; no GitHub write was authorized.
+
+## Part 2 decision required
+
+No pin-comparison gate or allowlist is presented. The existing production verifier loads the pinned consumer source through `_consumer` and `verified_source_module`, rederives preparation, and requires its exact checkout. Calling it violates the requested prohibition on executing either input tree; substituting a structural parser would silently weaken validation. A ruling was requested: add separately reviewed data-only production packet validation, or permit isolated existing production validation before a data-only comparison. No self/other-project/prompt/binary/floor equivalence demonstrations are claimed. Script/data hashes are therefore absent.
+
+There is also a missing registry boundary: the emitted `native_supervisor_authority_v2.dependency_identity` and `native_execution_authority_v2.dependency_identity` pin repository modules/package sources and interpreter bytes/version, but no third-party distribution contents. The rendered LinkML helper commands execute those external modules. The requested closed dependency registry needs an explicit packet binding; identical existing pins cannot establish it. The producer return shapes were inspected directly, and an ignore-independent package search found no relevant external distribution-content registry field. Recommendation: define a versioned closed-registry binding and a data-only packet validation interface first; then implement the comparison against that fixed contract. This is a design stop under the context instruction, not a request to weaken the gate.
+
+Part 3 has not started; it follows Part 2. The four protected files and guard v1 match the base byte for byte (computed hashes in JSON). No real native binary, provider/model call, probe, capture, reservation, push or GitHub write. Synthetic tests write only their own evidence. Other CI failures and cancelled shards remain untriaged here.
+
+The stop follows the helper context rule: "If a task needs a design decision, stop there and report the choice with your recommendation." The concrete recommendations above preserve the assignment's prohibition on executing input source trees and its demand for a closed dependency registry.
+'''
+if 'exposure_check' in report:
+    check = report['exposure_check']['value']
+    text += '\n## Development replay reading\n\n'
+    text += ('The accepted aid produced both snapshots but retained cannot_decide because its old inventory lacks four merged support modules. '
+        'That hold is preserved. The focused expected-change assertion reports ' + check['status'] + ', '
+        + str(check['unchanged']) + ' byte-identical artifacts, and model-unresolved artifacts ' + json.dumps(check['model_unresolved']) + '. '
+        'It verifies the exact recorder substitution, lossless Bash rule spelling, source-byte hash preimages and dependent hash propagation. '
+        'The deliberately missing-environment recorder fixture changes its expected refusal message; successful recording is tested separately. '
+        'The permission expectation remains supporting evidence and its remaining metadata differences are retained explicitly. '
+        'Five helper cases on each side retain uncaught exceptions under the accepted aid (6073), so the full requested unchanged-exposure confirmation is NOT established. '
+        'The focused check explains captured bytes only and remains a hold because those intended helper observations are unavailable. '
+        'It is not registration equivalence or an exhaustive behavioral proof.\n')
+assert '@' not in text
+OUT.with_suffix('.md').write_text(text)
+print(json.dumps({suffix: pin(OUT.with_suffix(suffix)) for suffix in ('.md', '.json')}, indent=2))
