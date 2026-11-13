@@ -426,6 +426,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         attempt.mkdir(mode=0o700)  # Even a partial reservation consumes the identity.
         _sync_directory(attempt.parent)
         pre_timing.record('attempt_reserved')
+    pre_timing.finish()
     durable_new(attempt/'registration.json', registration_raw)
     if launch_guard is not None:
         durable_new(attempt/'subscription-guard.json', launch_guard.raw)

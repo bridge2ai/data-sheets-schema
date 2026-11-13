@@ -55,7 +55,8 @@ text = replace_once(text, '    adapter = contract.make_controller(value, registr
 text = replace_once(text, '    with reservation_lease():',
     "    with pre_timing.step('reservation'), reservation_lease():")
 text = replace_once(text, '        _sync_directory(attempt.parent)\n    durable_new',
-    "        _sync_directory(attempt.parent)\n        pre_timing.record('attempt_reserved')\n    durable_new")
+    "        _sync_directory(attempt.parent)\n        pre_timing.record('attempt_reserved')\n"
+    "    pre_timing.finish()\n    durable_new")
 p.write_text(text)
 
 p = root / 'src/data_sheets_schema/native_subscription_capture.py'

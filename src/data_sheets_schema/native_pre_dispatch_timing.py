@@ -112,6 +112,14 @@ def record(boundary, **fields):
         trace.record(boundary, **fields)
 
 
+def finish():
+    """End this launch's diagnostic window after the reservation span closes."""
+    trace = _active.get()
+    if trace is not None:
+        trace.disabled = True
+        trace.pending.clear()
+
+
 @contextmanager
 def step(name):
     trace = _active.get()

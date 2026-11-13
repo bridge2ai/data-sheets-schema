@@ -31,6 +31,9 @@ def test_capture_and_later_launch_share_file_and_continuous_clock(tmp_path, monk
             pass
         with timing.step('reservation'):
             timing.record('attempt_reserved')
+        timing.finish()
+        with timing.step('registration.verified after reservation'):
+            pass
     assert capture.path == launch.path
     saved = rows(launch.path)
     assert saved[0]['boundary'] == 'capture_observed'
@@ -40,6 +43,7 @@ def test_capture_and_later_launch_share_file_and_continuous_clock(tmp_path, monk
     assert starts.keys() == ends.keys() and len(starts) == 6
     assert all(starts[key]['elapsed_ns'] < ends[key]['elapsed_ns'] for key in starts)
     assert not (tmp_path / 'attempt').exists()
+    assert not any('after reservation' in row['boundary'] for row in saved)
 
 
 def test_failure_end_records_original_exception_and_readback_has_no_scope(tmp_path):
