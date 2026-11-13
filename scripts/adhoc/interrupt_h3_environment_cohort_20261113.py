@@ -7,7 +7,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 parser = argparse.ArgumentParser()
-parser.add_argument('--cohort', choices=['focused-01', 'final-boundaries-01'], default='focused-01')
+parser.add_argument('--cohort', choices=['focused-01', 'final-boundaries-01', 'final-boundaries-02'], default='focused-01')
 options = parser.parse_args()
 OUT = ROOT.parent / 'scratch-h3-environment-manifest-20261113/tests' / options.cohort
 sys.path.append('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages')
