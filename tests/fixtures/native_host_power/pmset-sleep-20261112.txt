@@ -1,4 +1,5 @@
-2026-11-12 15:26:23 -0800 Sleep               	Entering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:2%) 1252 secs 
-2026-11-12 15:47:15 -0800 Wake                	Wake from Deep Idle [CDNVA] : due to smc.sysState.Wake(0x70070000) lid SMC.OutboxNotEmpty/HID Activity Using BATT (Charge:2%) 209 secs  
-2026-11-12 15:50:44 -0800 Sleep               	Entering Sleep state due to 'Low Power Sleep':TCPKeepAlive=inactive Using Batt (Charge:1%) 7034 secs 
-2026-11-12 17:47:58 -0800 Wake                	Wake from Hibernate [CDNVA] : due to lid/UserActivity Assertion Using AC (Charge:1%)           
+# Entirely synthetic parser fixture; no host activity, charge or timezone data.
+2000-01-01 00:06:23 +0000 Sleep                Entering Sleep state due to 'Synthetic Fixture':TCPKeepAlive=active Using AC (Charge:50%) 1252 secs
+2000-01-01 00:27:15 +0000 Wake                 Wake from Deep Idle [SYNTHETIC] : due to Fixture Using AC (Charge:50%) 209 secs
+2000-01-01 00:30:44 +0000 Sleep                Entering Sleep state due to 'Synthetic Fixture':TCPKeepAlive=inactive Using AC (Charge:50%) 7034 secs
+2000-01-01 02:27:58 +0000 Wake                 Wake from Hibernate [SYNTHETIC] : due to Fixture Using AC (Charge:50%)

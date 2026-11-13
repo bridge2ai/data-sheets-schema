@@ -16,6 +16,7 @@ import json
 import os
 from pathlib import Path
 import signal
+import shutil
 import socket
 import subprocess
 import sys
@@ -43,14 +44,11 @@ SCRATCH_BASE = EXECUTIONS / "scratch-h2-cache-gaps-20261113"
 SCRATCH = SCRATCH_BASE / "tests"
 LOCK = EXECUTIONS / "plans/native_quiet_window.lock"
 DEFAULT_DEADLINE = 3600
-NATIVE_PATHS = (
-    "/Users/marcin/.local/bin/claude", "/Users/marcin/.local/bin/agy",
-    "/Users/marcin/.nvm/versions/node/v22.16.0/bin/codex",
-    "/Users/marcin/.nvm/versions/node/v22.16.0/bin/gemini",
-    "/opt/homebrew/bin/claude", "/opt/homebrew/bin/codex",
-    "/opt/homebrew/bin/gemini", "/usr/local/bin/claude",
-    "/usr/local/bin/codex", "/usr/local/bin/gemini",
-)
+NATIVE_PATHS = tuple(str(path) for name in ('claude', 'codex', 'gemini', 'agy')
+    for path in [Path.home() / '.local/bin' / name,
+                 Path('/opt/homebrew/bin') / name, Path('/usr/local/bin') / name,
+                 *Path.home().glob('.nvm/versions/node/*/bin/' + name),
+                 *([Path(shutil.which(name))] if shutil.which(name) else [])])
 
 
 def sandbox_profile():

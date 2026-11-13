@@ -55,13 +55,14 @@ def test_ac_closed_lid_admitted_and_start_is_exclusive(tmp_path, monkeypatch):
     assert path.read_bytes() == before
 
 
-def test_saved_pmset_excerpt_pairs_sleep_and_wake():
+def test_synthetic_pmset_fixture_pairs_sleep_and_wake():
     raw = (Path(__file__).parent / 'fixtures/native_host_power/pmset-sleep-20261112.txt').read_text()
     stamp = lambda text: int(datetime.fromisoformat(text).timestamp() * 1e9)
-    result = power.parse_sleep_events(raw, stamp('2026-11-12T15:20:00-08:00'), stamp('2026-11-12T18:00:00-08:00'))
+    assert raw.startswith('# Entirely synthetic parser fixture')
+    result = power.parse_sleep_events(raw, stamp('2000-01-01T00:00:00+00:00'), stamp('2000-01-01T03:00:00+00:00'))
     assert [row['overlap_ns'] / 1e9 for row in result['intervals']] == [1252, 7034]
     assert [row['event'] for row in result['events']] == ['Sleep', 'Wake', 'Sleep', 'Wake']
-    result = power.parse_sleep_events(raw, stamp('2026-11-12T17:00:00-08:00'), stamp('2026-11-12T17:30:00-08:00'))
+    result = power.parse_sleep_events(raw, stamp('2000-01-01T01:40:00+00:00'), stamp('2000-01-01T02:10:00+00:00'))
     assert result['intervals'][0]['overlap_ns'] / 1e9 == 1800
 
 
