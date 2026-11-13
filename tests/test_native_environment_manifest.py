@@ -17,7 +17,12 @@ class Distribution:
         self.files = [Path('synthetic.dist-info/RECORD')]
         target = root / self.files[0]
         target.parent.mkdir(parents=True)
-        target.write_bytes(record)
+        target.write_bytes(record + b'synthetic.dist-info/RECORD,,\n')
+
+    def add_file(self, item):
+        self.files.append(item)
+        with self.locate_file(self.files[0]).open('ab') as stream:
+            stream.write((str(item) + ',,\n').encode())
 
     def locate_file(self, item):
         return self.root / item
@@ -118,7 +123,8 @@ def test_rehashed_altered_manifest_still_refuses(installed, tmp_path):
 def test_stale_manifest_refuses(installed, tmp_path, monkeypatch, change):
     pin = m.write(tmp_path / 'manifest.json')
     if change == 'record':
-        installed.locate_file(installed.files[0]).write_bytes(b'changed synthetic RECORD\n')
+        record = installed.locate_file(installed.files[0])
+        record.write_bytes(record.read_bytes() + b'changed-synthetic.py,,\n')
     elif change == 'version':
         installed.metadata.replace_header('Version', '2.0.0')
     else:
@@ -156,7 +162,7 @@ def test_namespace_portion_needs_its_own_record_entry(installed):
     namespace.mkdir()
     good = Path('shared_namespace/registered.py')
     (installed.root / good).write_text('SYNTHETIC = True\n')
-    installed.files.append(good)
+    installed.add_file(good)
     assert m.generate()
     (namespace / 'unregistered.py').write_text('SYNTHETIC = False\n')
     with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
@@ -198,14 +204,14 @@ def test_duplicate_and_empty_import_path_entries(installed, monkeypatch):
         return [installed]
     monkeypatch.setattr(m.metadata, 'distributions', discover)
     assert m.generate()
-    assert observed == [str(installed.root)]
+    assert observed == [str(installed.root), str(installed.root)]
 
 
 @pytest.mark.parametrize('optimization', ['', '.opt-1', '.opt-2'])
 def test_standard_bytecode_cache_uses_owned_source(installed, optimization):
     source = Path('registered.py')
     (installed.root / source).write_text('SYNTHETIC = True\n')
-    installed.files.append(source)
+    installed.add_file(source)
     cache = installed.root / '__pycache__'
     cache.mkdir()
     (cache / ('registered.' + m.sys.implementation.cache_tag + optimization + '.pyc')).write_bytes(b'synthetic cache')
@@ -230,5 +236,76 @@ def test_standard_cache_without_owned_source_refuses(installed):
     cache = installed.root / '__pycache__'
     cache.mkdir()
     (cache / ('unregistered.' + m.sys.implementation.cache_tag + '.pyc')).write_bytes(b'synthetic cache')
+    with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
+        m.generate()
+
+
+def test_record_changes_during_census_refuse_registered_pin(installed, tmp_path, monkeypatch):
+    pin = m.write(tmp_path / 'manifest.json')
+    census = m._require_owned_import_roots
+    def change_record(paths, captures):
+        snapshots = census(paths, captures)
+        record = installed.locate_file(installed.files[0])
+        record.write_bytes(record.read_bytes() + b'changed-during-census.py,,\n')
+        return snapshots
+    monkeypatch.setattr(m, '_require_owned_import_roots', change_record)
+    with pytest.raises(ValueError, match='changed during environment census'):
+        m.verify(pin)
+
+
+def test_duplicate_distribution_appears_during_census_refuses(installed, tmp_path, monkeypatch):
+    duplicate = Distribution(tmp_path / 'duplicate', name='synthetic-package')
+    roster = [installed]
+    monkeypatch.setattr(m.metadata, 'distributions', lambda **kwargs: list(roster))
+    census = m._require_owned_import_roots
+    def change_roster(paths, captures):
+        snapshots = census(paths, captures)
+        roster.append(duplicate)
+        return snapshots
+    monkeypatch.setattr(m, '_require_owned_import_roots', change_roster)
+    with pytest.raises(ValueError, match='sorted and unique'):
+        m.generate()
+
+
+def test_metadata_changes_during_census_refuse(installed, monkeypatch):
+    census = m._require_owned_import_roots
+    def change_metadata(paths, captures):
+        snapshots = census(paths, captures)
+        installed.metadata.replace_header('Version', '2.0.0')
+        return snapshots
+    monkeypatch.setattr(m, '_require_owned_import_roots', change_metadata)
+    with pytest.raises(ValueError, match='changed during environment census'):
+        m.generate()
+
+
+def test_import_paths_change_during_census_refuse(installed, tmp_path, monkeypatch):
+    new_root = tmp_path / 'new-import-root'
+    new_root.mkdir()
+    census = m._require_owned_import_roots
+    def change_paths(paths, captures):
+        snapshots = census(paths, captures)
+        m.sys.path.append(str(new_root))
+        return snapshots
+    monkeypatch.setattr(m, '_require_owned_import_roots', change_paths)
+    with pytest.raises(ValueError, match='changed during environment census'):
+        m.generate()
+
+
+def test_unowned_code_added_to_scanned_directory_refuses(installed, monkeypatch):
+    census = m._require_owned_import_roots
+    def add_code(paths, captures):
+        snapshots = census(paths, captures)
+        (installed.root / 'late_unowned.py').write_text('SYNTHETIC = True\n')
+        return snapshots
+    monkeypatch.setattr(m, '_require_owned_import_roots', add_code)
+    with pytest.raises(ValueError, match='directory changed during environment census'):
+        m.generate()
+
+
+def test_ownership_comes_from_hashed_record_not_second_files_read(installed):
+    code = Path('unrecorded.py')
+    (installed.root / code).write_text('SYNTHETIC = True\n')
+    # An inconsistent distribution API must not expand the hashed ownership.
+    installed.files.append(code)
     with pytest.raises(ValueError, match='missing distribution RECORD ownership'):
         m.generate()

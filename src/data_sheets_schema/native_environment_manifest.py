@@ -7,6 +7,8 @@ Repository sources are bound separately by the preparation's source pins.
 """
 from __future__ import annotations
 
+import csv
+import io
 from importlib import metadata
 from importlib.machinery import EXTENSION_SUFFIXES
 from importlib.util import source_from_cache
@@ -70,16 +72,19 @@ def validate(value):
     return value
 
 
-def _metadata_field(distribution, key):
-    values = distribution.metadata.get_all(key, [])
+def _metadata_field(message, key):
+    values = message.get_all(key, [])
     if len(values) != 1:
         raise ValueError('distribution has missing or ambiguous ' + key + ' metadata')
     return c._text(values[0], 'distribution ' + key)
 
 
-def _distribution_row(distribution):
-    name = _name(_metadata_field(distribution, 'Name'))
-    version = _metadata_field(distribution, 'Version')
+def _capture_distribution(distribution):
+    # Keep Name and Version from one metadata read, and derive ownership only
+    # from the exact RECORD bytes whose digest is registered.
+    message = distribution.metadata
+    name = _name(_metadata_field(message, 'Name'))
+    version = _metadata_field(message, 'Version')
     files = distribution.files
     if files is None:
         raise ValueError('distribution is missing installed RECORD metadata: ' + name)
@@ -90,7 +95,54 @@ def _distribution_row(distribution):
     raw = read_regular(str(path), 'distribution_record', max_bytes=MAX_RECORD_BYTES).captured.raw
     if not raw:
         raise ValueError('distribution has empty installed RECORD: ' + name)
-    return {'name': name, 'version': version, 'record_sha256': c.sha(raw)}
+    owned = set()
+    for row in csv.reader(io.StringIO(raw.decode('utf-8'), newline=''), strict=True):
+        if len(row) != 3 or not row[0] or '\x00' in row[0]:
+            raise ValueError('distribution has malformed installed RECORD: ' + name)
+        target = Path(distribution.locate_file(row[0])).resolve(strict=False)
+        if target in owned:
+            raise ValueError('distribution has duplicate installed RECORD paths: ' + name)
+        owned.add(target)
+    if path not in owned:
+        raise ValueError('distribution RECORD must identify itself: ' + name)
+    return {'row': {'name': name, 'version': version, 'record_sha256': c.sha(raw)},
+            'record_path': str(path), 'metadata': tuple(message.items()),
+            'owned': tuple(sorted(str(item) for item in owned))}
+
+
+def _capture_environment(paths):
+    captures = []
+    for distribution in metadata.distributions(path=paths):
+        captures.append(_capture_distribution(distribution))
+        if len(captures) > MAX_DISTRIBUTIONS:
+            raise ValueError('environment exceeds its distribution count bound')
+    captures.sort(key=lambda item: (item['row']['name'], item['record_path']))
+    names = [item['row']['name'] for item in captures]
+    if names != sorted(set(names)):
+        raise ValueError('environment distributions must be sorted and unique')
+    return captures
+
+
+def _import_paths():
+    return list(dict.fromkeys(str(Path(p or os.getcwd()).resolve(strict=True))
+                             for p in sys.path if Path(p or os.getcwd()).exists()))
+
+
+def _interpreter_identity():
+    return {'implementation': sys.implementation.name,
+            'version': platform.python_version(), 'build': list(platform.python_build())}
+
+
+def _directory_identity(path):
+    info = path.stat(follow_symlinks=False)
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_nlink,
+            info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+
+def _require_stable_directories(snapshots):
+    for path, expected in snapshots.items():
+        if _directory_identity(path) != expected:
+            raise ValueError('third-party import directory changed during environment census: ' + str(path))
 
 
 def _first_party_roots():
@@ -105,14 +157,8 @@ def _stdlib_roots():
     return roots | {root / 'lib-dynload' for root in roots}
 
 
-def _owned_files(distributions):
-    owned = set()
-    for distribution in distributions:
-        # _distribution_row already required complete discoverable RECORD data.
-        for item in distribution.files:
-            path = Path(distribution.locate_file(item)).resolve(strict=False)
-            owned.add(path)
-    return owned
+def _owned_files(captures):
+    return {Path(path) for capture in captures for path in capture['owned']}
 
 
 def _requires_owner(path):
@@ -121,7 +167,7 @@ def _requires_owner(path):
             or any(name.endswith(suffix) for suffix in EXTENSION_SUFFIXES))
 
 
-def _require_owned_import_roots(paths, distributions):
+def _require_owned_import_roots(paths, captures):
     """Hold for code with no installation metadata, including namespace portions.
 
     Every importable code file in a third-party root needs a RECORD entry;
@@ -131,8 +177,9 @@ def _require_owned_import_roots(paths, distributions):
     have their own interpreter/source authority and are excluded explicitly.
     """
     exempt = _first_party_roots() | _stdlib_roots()
-    owned = _owned_files(distributions)
+    owned = _owned_files(captures)
     visited = set()
+    snapshots = {}
     count = 0
     pending = [Path(path) for path in paths if Path(path) not in exempt]
     while pending:
@@ -142,6 +189,7 @@ def _require_owned_import_roots(paths, distributions):
         visited.add(directory)
         if not directory.is_dir():
             raise ValueError('unsupported archive or non-directory third-party import root: ' + str(directory))
+        snapshots[directory] = _directory_identity(directory)
         with os.scandir(directory) as iterator:
             entries = sorted(iterator, key=lambda entry: entry.name)
         for entry in entries:
@@ -176,6 +224,8 @@ def _require_owned_import_roots(paths, distributions):
                     if source in owned:
                         continue
                 raise ValueError('importable code has missing distribution RECORD ownership: ' + str(path))
+    _require_stable_directories(snapshots)
+    return snapshots
 
 
 def generate():
@@ -186,24 +236,20 @@ def generate():
     duplicate normalized names and non-file RECORDs are refusal conditions.
     """
     try:
-        rows = []
-        # De-duplicate identical path spellings only. Two distinct distributions
-        # with the same name must still refuse, even if Python shadows one.
-        paths = list(dict.fromkeys(str(Path(p or os.getcwd()).resolve(strict=True))
-                                  for p in sys.path if Path(p or os.getcwd()).exists()))
-        distributions = list(metadata.distributions(path=paths))
-        for distribution in distributions:
-            rows.append(_distribution_row(distribution))
-            if len(rows) > MAX_DISTRIBUTIONS:
-                raise ValueError('environment exceeds its distribution count bound')
-        _require_owned_import_roots(paths, distributions)
-        value = {'kind': KIND, 'version': VERSION,
-                 'interpreter': {'implementation': sys.implementation.name,
-                                 'version': platform.python_version(),
-                                 'build': list(platform.python_build())},
-                 'distributions': sorted(rows, key=lambda row: row['name'])}
+        paths = _import_paths()
+        identity = _interpreter_identity()
+        captures = _capture_environment(paths)
+        directories = _require_owned_import_roots(paths, captures)
+        # The census may be long. Re-discover the roster, metadata and RECORDs;
+        # cached rows from before the census must never establish current state.
+        if (_import_paths() != paths or _interpreter_identity() != identity
+                or _capture_environment(paths) != captures):
+            raise ValueError('interpreter or distribution metadata changed during environment census')
+        _require_stable_directories(directories)
+        value = {'kind': KIND, 'version': VERSION, 'interpreter': identity,
+                 'distributions': [capture['row'] for capture in captures]}
         return validate(value)
-    except (OSError, UnicodeError, TypeError, AttributeError) as exc:
+    except (OSError, UnicodeError, TypeError, AttributeError, csv.Error) as exc:
         raise ValueError('environment metadata is missing, ambiguous or unreadable') from exc
 
 
