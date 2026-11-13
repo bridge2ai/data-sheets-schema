@@ -10,6 +10,15 @@ Your comparison handoff is accepted as work done (`handoffs/codex-h3-equivalence
 
 **An independent review of the comparison** (`E/plans/reviews/native_equivalence_e82c36ab_codex_review_2026-11-13.md`, SHA-256 `47af856a4aa36c672ca25d2aa6d6f58b9bfbabbfa93c460fc0ee0a51c3c52918`) says it is a useful synthetic regression comparator but does not establish registration equivalence: it never sees the actual registrations, the executable dependency boundary is open, and five more findings (filed as #6066 to #6073). **The lead's decision:** the stratum's gate becomes a comparison of pins, not a replay. Your inventory already treats every module-level object of the package as rule-bearing, so any substantive package change is "not equal" anyway; the replay adds little to byte identity of what the registration pins, and costs most of the review findings. The replay stays as a development aid.
 
+## Part 0, first: CI failures that point at your merged stack
+
+Added by the lead before delivery. CI on the integrated head `8760de5efe88b5af62e9d77e6335fa7e248017b6` (run 43349937412; inventory `R/notes/development_efficiency_20261111/handoffs/lead-ci-run-43349937412-failures-20261113.json`) failed with 112 ids; shards 1, 5 and 8 were cancelled at the 45-minute limit, so more may be hidden. Two groups point at code from your stack (the head's first parent after `6561dac3c` is the lead's merge `672057484` of your retention head `4db154f88`):
+
+- `tests/test_native_u4b_readback.py`, 8 ids: `ValueError: v2 execution body keys mismatch` (raised in `native_execution_registration_v2.py:453` and `native_shared_authority_wire.py:34`). Most likely the child-input digests of #5991 or the failure record of #5967 added a key the readback's closed key set does not admit.
+- `tests/test_native_failure_publication.py::test_public_declared_runtime_failure_publishes_exact_readback`: `native controller dependency imported from another origin: prepare_registration`: your new test needs the import-origin isolation the other native test files have (`f25230fe1`).
+
+Confirm each by running the failing file at `6561dac3c3af50cbfce1ba3c8b6ad21d9cd4b834` and at `672057484` in a CI-like export (outside every `d4d-executions` path, as helper 3 did before), fix what is yours, one commit per cause on `codex/native-launch-sequence-hardening-20261112` or a new branch from the published head (say which), and tell the lead which failures turned out not to be yours.
+
 ## Part 1: the recorder line (#6065), before anything else in this file
 
 On a new branch `codex/native-recorder-env-20261113` from the published head (`git fetch origin`; at least `8760de5efe88b5af62e9d77e6335fa7e248017b6`, plus your #6047 and #6048 commits if they are not yet there: say how you carried them).
