@@ -48,7 +48,15 @@ def summarize(out):
         spans = [{'capture': cap, 'reservation': end,
                   'elapsed_ns': end['elapsed_ns'] - cap['elapsed_ns']}
                  for end in reserved for cap in captures[-1:]]
-        result['sidecars'].append({'path': str(path), 'rows': len(rows), 'spans': spans})
+        intervals = [{'before': {key: before.get(key) for key in ('boundary', 'phase', 'trace_id', 'elapsed_ns', 'wall_ns')},
+                      'after': {key: after.get(key) for key in ('boundary', 'phase', 'trace_id', 'elapsed_ns', 'wall_ns')},
+                      'elapsed_ns': after['elapsed_ns'] - before['elapsed_ns'],
+                      'wall_ns': after['wall_ns'] - before['wall_ns']}
+                     for before, after in zip(rows, rows[1:])
+                     if all(isinstance(row.get(key), int) for row in (before, after)
+                            for key in ('elapsed_ns', 'wall_ns'))]
+        result['sidecars'].append({'path': str(path), 'rows': len(rows), 'spans': spans,
+            'longest_adjacent_intervals': sorted(intervals, key=lambda item: item['elapsed_ns'], reverse=True)[:5]})
     result['outcome'] = json.loads((out / 'outcome.json').read_bytes()) if (out / 'outcome.json').exists() else None
     (out / 'summary.json').write_text(json.dumps(result, indent=2) + '\n')
     return result
@@ -92,6 +100,8 @@ if __name__ == '__main__':
             command.append(PUBLIC[cohort])
         elif cohort in ('unit-canary', 'parallel-canary'):
             command.append('tests/test_native_admission_timer.py::test_existing_signal_state_is_refused_and_preserved[pending]')
+        elif cohort == 'admission-retry':
+            command.append('tests/test_native_admission_failure.py::test_shared_engine_stalled_admission_publishes_and_stops_timing')
         elif cohort in ('budget', 'native', 'audit'):
             command += ['--lane', cohort]
         elif cohort == 'scanner':

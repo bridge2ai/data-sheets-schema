@@ -35,6 +35,8 @@ def cohort(path):
             **{t: sum(c.find(t) is not None for c in cases) for t in ('failure', 'error', 'skipped')}}
         record['failures'] = [dict(c.attrib, detail=ET.tostring(c, encoding='unicode')) for c in cases
                               if c.find('failure') is not None or c.find('error') is not None]
+        record['skipped_cases'] = [dict(c.attrib, detail=ET.tostring(c, encoding='unicode')) for c in cases
+                                   if c.find('skipped') is not None]
     for name in ('pytest.log', 'scanner.json', 'scanner.md'):
         if (path / name).exists():
             record[name + '_pin'] = pin(path / name)
@@ -121,7 +123,7 @@ def main(label):
     lines += ['', 'These are synthetic software results. A complete public result is not scientific acceptance or authorization for a native launch.', '',
               '## Outstanding validation', '', 'Required cohorts without verified completion: ' + (', '.join(not_run) if not_run else 'none') + '.',
               'Required cohorts with a nonzero result: ' + (', '.join(failed) if failed else 'none') + '.',
-              'The full repository suite is left to the lead’s CI, as assigned. No CPU-monitoring diagnostic was run.', '',
+              'The full repository suite is left to the lead’s CI, as assigned. Exact skipped case names and reasons are retained under skipped_cases in each JSON cohort. No CPU-monitoring diagnostic was run.', '',
               '## Evidence', '', f"- Scratch evidence: `{BASE}`.",
               f"- Compatibility proof: `{BASE / 'checkpoint-compatibility.json'}`.",
               f"- Source and protected-file audit: `{BASE / 'source-audit-final.json'}`.",
