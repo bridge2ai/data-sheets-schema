@@ -1,4 +1,4 @@
-# Assignment to Codex helper 2: two review findings on the cache repair, the three failure cases that did not pass, then the second set of run limits the owner decided
+# Assignment to Codex helper 2: two review findings on the cache repair, the three failure cases that did not pass, the run limits (on hold), and a power check before a launch
 
 From the Claude lead, 2026-11-12. Short names and rules are in `claude-lead-helper-context-20261112.md` beside this file. This follows `claude-lead-helper2-helper-cache-home-20261112.md`; do it after that one's repair and re-canary.
 
@@ -51,10 +51,25 @@ Added by the lead before this file was delivered. Do it after cases A and B. **T
 
 Keep the two sets' values in one place.
 
+## Case D: a power check before a launch sequence, and a host sleep recorded (issue #6046)
+
+Added by the lead on 2026-11-13, before delivery. Do it after cases 0, A and B; it does not wait for case C.
+
+**Why.** On 2026-11-12 this machine ran on battery and slept four times, the last a hibernation of about two hours at 1% (`pmset -g log`, 15:50:44 to 17:47:58 local). Every helper paused; your two stale-observation cases (case A) fall in that period. A native run lasts hours and each attempt is one-use. The registered keep-awake policy (`macos_iokit_ims_v1`) holds power assertions against idle sleep; it does not stop a lid-closed sleep without an external display, nor hibernation on an empty battery.
+
+**Write it** on its own branch `codex/native-host-power-20261113` from the published head `8760de5efe88b5af62e9d77e6335fa7e248017b6` (helper 3's launch-sequence hardening and your cache repair are both in it):
+
+1. **A read-only host power probe** in a new module: the power source (AC or battery), the battery level, and the lid state if the host reports it, from local system interfaces only (IOKit power-source information or `pmset -g batt`, and `ioreg` for `AppleClamshellState`); no network; bounded output; a clear "unknown" when a value cannot be read.
+2. **The launch sequence refuses to start on battery power,** and refuses when the power source is unknown. It records the probe's reading in its start evidence. The lid state is recorded, not refused (a closed lid on AC power with an external display does not sleep). Keep the change to the sequence module as small as one call, because helper 3 is repairing #6047 and #6048 in the same module; name every line you touch so that the lead can order the merge.
+3. **A sleep during a run is detected and recorded.** At the points the controller already records (start, each stage, end), record wall-clock and monotonic time; at the end, read the system's sleep and wake events for the run's interval. A run during which the host slept is recorded as such, with the intervals. What that means for acceptance is not decided here: the existing cause classes (a host stop) apply.
+4. **The same check in the offline proof runs** of your scratch harness, so that a stale-observation stop on a machine that slept is reported as that.
+
+If any of this needs a change to a registered document's kind or version (the runtime declaration, the registration, the review bundle, the owner terms), stop and propose. Guard v1 stays byte-identical. Tests: AC admitted, battery refused, unknown refused, the reading in the start evidence; a simulated wall-clock jump against the monotonic clock recorded as a suspension; the event reader parsing a saved `pmset -g log` excerpt.
+
 ## Bounds
 
 As before. Offline; no provider, model or native-binary execution; nothing pushed; no GitHub write; protected files equal to main on every branch.
 
 ## Handoff
 
-Update `R/notes/development_efficiency_20261111/handoffs/codex-h2-public-path-proof-20261112.md` and its JSON: the cause of case A with the times, the rerun's result, the slack figure; case B's commit and what changed; the count of the seventeen that now pass; and for case C the branch head, the list of places that assumed one value, and whether any registered document's version has to move.
+Update `R/notes/development_efficiency_20261111/handoffs/codex-h2-public-path-proof-20261112.md` and its JSON: the cause of case A with the times, the rerun's result, the slack figure; case B's commit and what changed; the count of the seventeen that now pass; for case C, if it was released, the branch head, the list of places that assumed one value, and whether any registered document's version has to move; and for case D the branch head, the lines touched in the sequence module and the test counts.

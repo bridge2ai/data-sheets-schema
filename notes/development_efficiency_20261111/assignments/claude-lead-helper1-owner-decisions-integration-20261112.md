@@ -13,9 +13,11 @@ From the Claude lead, 2026-11-12. Short names and rules are in `claude-lead-help
 
 ## What the lead has already done
 
-The four approved post-images are applied and published: commit `6561dac3c3af50cbfce1ba3c8b6ad21d9cd4b834`, one commit on top of your `ba1f56e4a9460fe87c1e0ea3cb35ed2d7405cfa0`, made in the lead's worktree `E/claude-native-candidate-20261112` and pushed to `codex/native-main-integration-20261112` (draft PR #5968). Each file was copied from your verified packet composition after checking the pre-image and the approved sha256. A real CI run on that head is in progress.
+The four approved post-images are applied and published: commit `6561dac3c3af50cbfce1ba3c8b6ad21d9cd4b834`, one commit on top of your `ba1f56e4a9460fe87c1e0ea3cb35ed2d7405cfa0`, made in the lead's worktree `E/claude-native-candidate-20261112` and pushed to `codex/native-main-integration-20261112` (draft PR #5968). Each file was copied from your verified packet composition after checking the pre-image and the approved sha256.
 
-**First step for you:** fast-forward your local branch to the lead's local head `a23ebf753` (see Part 3), which contains `6561dac3c`. If you have local commits after `ba1f56e4a`, do not merge or rebase by guesswork: list them and stop for the lead's order.
+**Since then (2026-11-13, added before delivery):** the lead merged the reviewed work of helpers 2 and 3 onto that head in its worktree `E/claude-native-integration-20261113` and published it: merge `672057484` of helper 3's stack (launch-sequence hardening, failure record, incomplete-capture retention; head `4db154f88`) and merge `8760de5efe88b5af62e9d77e6335fa7e248017b6` of helper 2's cache repair `e079e2f3a` (#5966). Both merged without conflicts, and the four protected files still equal the approved post-images. **The published head is `8760de5ef`.** A CI run on it is in progress; the lead sends its inventory when it finishes.
+
+**First step for you:** your local branch has your commit `767eca31e` after `ba1f56e4a`. Keep it: `git fetch origin`, then `git merge --no-ff origin/codex/native-main-integration-20261112` into your local branch. Resolve nothing by guesswork: if the merge conflicts, abort it, list the conflicts and stop for the lead. Record the merge hash. Do not rebase.
 
 ## What happens to the CI triage: CI has answered, five tests are left
 
@@ -29,7 +31,7 @@ Real CI ran on `6561dac3c` with the four post-images applied (run 43319698046; i
 
 **Shard time.** Shards 1 and 4 were cancelled at the 45-minute limit, and shards 5, 8 and 3 took 42.6, 42.3 and 39.9 minutes. The lead is asking the owner for more shards. Say which test files dominate shards 1 and 4, from the weights and from this run's logs.
 
-You have a local commit `767eca31e` after `ba1f56e4a`, so your branch and the lead's have diverged. Do not rebase the lead's commits (the registry pin names `a23ebf753` by hash). List your local commits in the handoff; the lead will order the integration, most likely by cherry-picking yours onto its head.
+When the lead's inventory of the run on `8760de5ef` arrives, check each of the five against it and add any new failure to this list.
 
 ## Part 1: the margin (D138, item (u))
 
@@ -46,9 +48,7 @@ Changed by the lead before this file was delivered. The lead made the asset chan
 - Local commit `a23ebf75391170de924cf023727ae103d60fc13d` on the lead's branch `claude/native-candidate-20261112`, one commit on top of `6561dac3c`, **not pushed**: the asset `src/download/prompts/native_shared_receipt_policy_v1.md` with its last paragraph's two sentences changed (the owner's sentence of D142, and the lead's sentence for the at-receipt basis), and `native_shared_selection.RECEIPT_POLICY_SHA256` moved to the asset's new sha256 `8b0695212d94380949ddc523963021b1edcb3ebb9b6a52291d36238a92779f1c` (2,510 bytes).
 - The successor post-image of the protected `canonical_hashes.yaml`, made by `d4d api prompts pin` at that commit and kept in `E/scratch-lead-policy-packet-20261112/` (`canonical_hashes.postimage`, sha256 `d0de85f3da4bfa29a4bfc7ad6158abad5b3373a937a4e7e3b360217fa4eaf57f`; its `README.md` says how it was made). One registry entry changes. `d4d api prompts check --strict` reports 28 prompt files, 0 not at their pin, with it applied. It is **not** on any branch: the owner has to approve that sha256 first.
 
-Your first step therefore becomes: fast-forward your local branch to `a23ebf753` (the lead's local branch is visible from your worktree; `git merge --ff-only claude/native-candidate-20261112`).
-
-Then validate, in a scratch composition with the successor post-image applied (copy its exact bytes; do not re-run the pin command, which writes the day's date):
+Do **not** bring `a23ebf753` onto your branch: the owner has not approved the registry hash, and the lead applies both together once it is approved. Validate it in a scratch composition of your merged head with `a23ebf753` cherry-picked and the successor post-image copied in (its exact bytes; do not re-run the pin command, which writes the day's date):
 
 1. every other pin or derived identity that names the asset and must move in the same change. The lead found one in source (`RECEIPT_POLICY_SHA256`) and one stale copy in `scripts/adhoc/native_u1_packets/canonical_hashes.patch`, which is historical. Your earlier inventory named more (the receipt registration and selection identities, the render and execution authority, scanner evidence): say for each whether it is a stored value that must be edited or a value derived at run time;
 2. the test files that read the asset, its hash or a registration built from it: run them whole and report from saved output. Fix fixtures that embed the old identity, in their own commit, without weakening what they assert;
@@ -56,7 +56,7 @@ Then validate, in a scratch composition with the successor post-image applied (c
 
 ## Part 4: integration, when the lead names the commits
 
-Still not yet. Waiting for review or repair: helper 2's cache repair `e079e2f3a` (#5966) and its run-limits change (D143); helper 3's hardening (after #5992 and #5993), failure record (after #6015) and retention (after #6016). The lead sends each when it is reviewed.
+The lead has done this for helper 2's cache repair and helper 3's stack (see above). Still to come, and the lead sends each when it is reviewed: helper 3's repairs of #6047 and #6048 (a re-check found #5992 and #5993 not closed); helper 2's two cache test gaps (#6030, #6031); and the run-limits change, which waits for the owner's answer on whether the limits are one set or two.
 
 ## Then
 
@@ -68,4 +68,4 @@ As before. Offline; no provider, model or native-binary execution; nothing pushe
 
 ## Handoff
 
-`R/notes/development_efficiency_20261111/handoffs/codex-h1-owner-decisions-integration-20261112.md` with its JSON. Answer first: your branch head after the fast-forward and each part's commit; the successor packet's numbers (Part 3) in a block the lead can show the owner; the tests from saved output. Write a first version when Part 3's validation is done, since the lead applies the successor post-image as soon as the owner approves its hash.
+`R/notes/development_efficiency_20261111/handoffs/codex-h1-owner-decisions-integration-20261112.md` with its JSON. Answer first: your merge hash and each part's commit; the successor packet's numbers (Part 3) in a block the lead can show the owner; the tests from saved output. Write a first version when Part 3's validation is done, since the lead applies the successor post-image as soon as the owner approves its hash.
