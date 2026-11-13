@@ -13011,12 +13011,15 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     **_NATIVE_V2_RENDER_SOURCES,
     # U3-L: one integrated authority version, coupled to the complete producer
     # family below. The older contracts retain their original source identity.
-    'src/data_sheets_schema/native_execution_authority_v2.py': 'b2189db86428b5977bfcbaa72adc5f504f3449c31b583359555b074916a95558',
-    # validate_runtime_v2 and the profile guards form a closed two-module
-    # dispatcher. Pin their complete bodies, imports, constants and callees;
-    # neither a profile label nor a function's spelling authenticates it.
-    'src/data_sheets_schema/native_shared_runtime_values.py': '751724f8be39c450a0b4e4f10fe56c797085e0323512aaaab6d0e995a5477985',
-    'src/data_sheets_schema/native_runtime_profiles.py': '33d6893d53bc8951ac93a063c156e088b5b84da56b98f75006a35feb3cadb778',
+    'src/data_sheets_schema/native_execution_authority_v2.py': '00b0f717bc0398b905cfcb81de47c4434f70c2909bbbffb0b92789dbf867047c',
+    # The reviewed #5966 v2 dispatcher adds a required, attempt-local
+    # PYSTOW_HOME declaration. Include its path validator in the closed
+    # three-module source contract; a new callee cannot inherit the prior
+    # two-module summary merely because its caller retains the same name.
+    # Pin complete bodies, imports and constants, not just the receiving call.
+    'src/data_sheets_schema/native_shared_runtime_values.py': 'a0cffc3994ac38aa6879b3f710d1df40fd903f16093f7e35af841e59f2a027e3',
+    'src/data_sheets_schema/native_runtime_profiles.py': 'e8a24b22475f4529aa372dfa67681fdab74dc73d1ac401f9420454e1bafed672',
+    'src/data_sheets_schema/native_helper_cache.py': '0934f71630ab45e4670ffa0d14f90c1cfbb23a132a23ca8c6ccfcc0c58a52a95',
 }
 
 

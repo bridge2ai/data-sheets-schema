@@ -38,8 +38,9 @@ def _assert_complete_partition(tmp_path, weighted, total, lanes=False):
     # Include both pytest filename conventions, classes, parameterization,
     # a corpus marker and a skip. Assignment must not depend on worker ID.
     (tmp_path / "pytest.ini").write_text("[pytest]\nmarkers = corpus: corpus check\n")
-    # Twenty-one files populate every hash bucket at both D81 partition sizes.
-    for number in range(21):
+    # Forty-three files populate every hash bucket at both D147 partition sizes
+    # (twenty-one filled only eleven of twelve).
+    for number in range(43):
         name = f"test_{number}.py" if number % 2 else f"{number}_test.py"
         (tmp_path / name).write_text(
             "import pytest\n"
@@ -56,12 +57,12 @@ def _assert_complete_partition(tmp_path, weighted, total, lanes=False):
     whole = _run(tmp_path, "--junitxml=all.xml")
     assert whole.returncode == 0, whole.stdout + whole.stderr
     expected = _cases(tmp_path / "all.xml")
-    assert sum(expected.values()) == (97 if lanes else 84)
+    assert sum(expected.values()) == (185 if lanes else 172)
     flags = []
     if weighted:
         # Only about half the files have timings. Untimed files must still run;
         # obsolete timing entries must never become collected tests.
-        weights = {f"{number}_test.py": number + 1 for number in range(0, 21, 2)}
+        weights = {f"{number}_test.py": number + 1 for number in range(0, 43, 2)}
         weights["test_removed.py"] = 10000
         timing = tmp_path / "timings.json"
         timing.write_text(json.dumps({"schema_version": 1, "file_seconds": weights}))
@@ -91,12 +92,12 @@ def _assert_complete_partition(tmp_path, weighted, total, lanes=False):
 
 @pytest.mark.parametrize("weighted", [False, True])
 def test_shards_cover_the_real_collection_exactly_once_with_xdist(tmp_path, weighted):
-    _assert_complete_partition(tmp_path, weighted, 8)
+    _assert_complete_partition(tmp_path, weighted, 12)
 
 
 @pytest.mark.parametrize("weighted", [False, True])
 def test_main_shards_retain_the_same_complete_collection(tmp_path, weighted):
-    _assert_complete_partition(tmp_path, weighted, 6)
+    _assert_complete_partition(tmp_path, weighted, 8)
 
 
 def test_one_long_case_starts_before_a_file_with_many_short_cases(tmp_path):
@@ -291,7 +292,7 @@ def _lane_fixture(root, *, body="assert True", decorator="", fixture="", target=
     return path
 
 
-@pytest.mark.parametrize("total", [6, 8])
+@pytest.mark.parametrize("total", [8, 12])
 @pytest.mark.parametrize("weighted", [False, True])
 def test_explicit_lanes_and_real_shards_equal_full_default_collection(tmp_path, total, weighted):
     _assert_complete_partition(tmp_path, weighted, total, lanes=True)
@@ -400,8 +401,8 @@ def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job
     ordinary = jobs["python-tests"]["steps"][3]["run"]
     assert shlex.split(ordinary).count("--ci-lane=ordinary") == 1
     assert jobs["python-tests"]["strategy"]["matrix"]["shard"] == (
-        "${{ fromJSON(github.event_name == 'pull_request' && '[1, 2, 3, 4, 5, 6, 7, 8]' || '[1, 2, 3, 4, 5, 6]') }}")
-    assert "--ci-shard=${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 8 || 6 }}" in ordinary
+        "${{ fromJSON(github.event_name == 'pull_request' && '[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]' || '[1, 2, 3, 4, 5, 6, 7, 8]') }}")
+    assert "--ci-shard=${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 12 || 8 }}" in ordinary
 
 
 

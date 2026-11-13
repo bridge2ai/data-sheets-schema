@@ -304,6 +304,20 @@ class Journal:
             'capture_path': str(capture_path), 'registered_limits': self.runtime['limits'],
             'observed_limits': limits}, now)
 
+    def require_start(self, word_raw, expected, now=None):
+        """Check the parent's exact current start while holding the capture lock."""
+        self.require(word_raw, now)
+        if (type(expected) is not dict or set(expected) != {'path', 'sha256'}
+                or type(expected['path']) is not str or type(expected['sha256']) is not str):
+            raise ValueError('sequence capture requires an exact start-event pin')
+        events = self.events()
+        event = events[-1]
+        path = self.root / 'events' / f"{event['index']:06d}.json"
+        if (event['type'] != 'sequence_start' or event['word_sha256'] != sha(word_raw)
+                or expected['path'] != str(path) or expected['sha256'] != sha(canonical(event))):
+            raise ValueError('sequence capture lacks its matching current start event')
+        return event
+
 
 @contextmanager
 def locked(value, registration_raw, *, create=False, historical=False):

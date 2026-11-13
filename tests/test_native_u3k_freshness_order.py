@@ -248,7 +248,7 @@ def test_callback_prewarm_closes_scope_without_activation(monkeypatch, refuse):
     assert '_classifier_scope' not in adapter.__dict__
 
 
-@pytest.mark.parametrize('remaining,allows_mkdir', [(89, False), (90, True)])
+@pytest.mark.parametrize('remaining,allows_mkdir', [(299, False), (300, True)])
 def test_cold_controller_work_precedes_original_margin_and_real_reservation(
         tmp_path, monkeypatch, remaining, allows_mkdir):
     invoke, args, value, watched, trace, active = reservation_case(

@@ -371,6 +371,11 @@ def _generated_date(text: str) -> str | None:
 @click.option('--render-spec-json', default=None,
               help='Exact registered native renderer-9-or-newer specification as JSON. Requires --prompt-text; '
                    'the recorder must reproduce its exact bytes before writing provenance.')
+@click.option('--render-spec-env', default=None,
+              help='Read the exact registered specification from D4D_RENDER_SPEC. '
+                   'Exclusive with --render-spec-json; the recorder reads the variable itself.')
+@click.option('--render-spec-sha256', default=None,
+              help='SHA-256 of the environment specification bytes, bound into the registered recorder line.')
 @click.option('--arm', type=click.Choice(sorted(_ARMS)), default='baseline',
               show_default=True,
               help='Arm the instruction was rendered for. Expanded to the same '
@@ -428,7 +433,8 @@ def _generated_date(text: str) -> str | None:
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
            reasoning_effort, phase_specs, phases_skipped, manifest, chunk_manifest, receipt_expected,
-           stated_profile=None, render_spec_json=None, prompt_text_env=None, run_date=None):
+           stated_profile=None, render_spec_json=None, prompt_text_env=None, run_date=None,
+           render_spec_env=None, render_spec_sha256=None):
     """Write a LIVE provenance record for a run just produced.
 
     Refuses to run from anywhere but the repository root — see
@@ -457,6 +463,23 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     restored spec remains local to that verification, not an execution authority.
     """
     _require_repo_root_cwd("d4d provenance record")
+    if render_spec_sha256 is not None and render_spec_env is None:
+        raise click.ClickException('--render-spec-sha256 requires --render-spec-env')
+    if render_spec_env is not None:
+        if render_spec_json is not None:
+            raise click.ClickException('--render-spec-json and --render-spec-env are exclusive')
+        if render_spec_env != 'D4D_RENDER_SPEC':
+            raise click.ClickException('--render-spec-env accepts only D4D_RENDER_SPEC')
+        render_spec_json = os.environ.get(render_spec_env, '')
+        if not render_spec_json.strip():
+            raise click.ClickException('--render-spec-env: D4D_RENDER_SPEC is not set; '
+                                       'the launcher supplies the exact registered specification')
+        import hashlib
+        import re
+        if (not isinstance(render_spec_sha256, str)
+                or re.fullmatch(r'[0-9a-f]{64}', render_spec_sha256) is None
+                or hashlib.sha256(render_spec_json.encode('utf-8')).hexdigest() != render_spec_sha256):
+            raise click.ClickException('environment render specification differs from --render-spec-sha256')
     recording_cwd = Path.cwd()
     from datetime import date, timedelta
     import hashlib

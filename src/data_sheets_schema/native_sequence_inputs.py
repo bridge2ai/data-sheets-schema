@@ -15,7 +15,8 @@ def capture_expected(args):
         return None
     value=wire.strict_json(encoded.encode())
     names=set(BASE)
-    if args.command=='prepare-subscription-guard-v2': names.add('capture')
+    if args.command=='capture-subscription-event': names.add('sequence_start')
+    elif args.command=='prepare-subscription-guard-v2': names.add('capture')
     elif args.command=='launch': names.add('subscription_guard')
     if type(value) is not dict or set(value)!=names:
         raise ValueError('sequence input pins must contain the exact command roster')

@@ -328,9 +328,9 @@ def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
     return invoke, arguments, value, watched, trace, active
 
 
-def test_registered_90_second_margin_permits_first_real_reservation_only(tmp_path, monkeypatch):
+def test_registered_300_second_margin_permits_first_real_reservation_only(tmp_path, monkeypatch):
     invoke, arguments, value, watched, trace, active = reservation_case(
-        tmp_path, monkeypatch, remaining=90)
+        tmp_path, monkeypatch, remaining=300)
     with pytest.raises(FirstReservationObserved):
         invoke()
     assert Path(value['attempt_directory']).is_dir()
@@ -345,8 +345,8 @@ def test_registered_90_second_margin_permits_first_real_reservation_only(tmp_pat
             arguments['launch_word_raw'])
 
 
-def test_registered_89_second_margin_refuses_before_any_attempt_directory(tmp_path, monkeypatch):
-    invoke, _, value, watched, trace, active = reservation_case(tmp_path, monkeypatch, remaining=89)
+def test_registered_299_second_margin_refuses_before_any_attempt_directory(tmp_path, monkeypatch):
+    invoke, _, value, watched, trace, active = reservation_case(tmp_path, monkeypatch, remaining=299)
     with pytest.raises(ValueError, match='pre-reservation freshness margin'):
         invoke()
     assert not Path(value['attempt_directory']).exists()
@@ -356,8 +356,8 @@ def test_registered_89_second_margin_refuses_before_any_attempt_directory(tmp_pa
     assert 'margin-passed' not in trace and 'first-mkdir-fsynced' not in trace
 
 
-@pytest.mark.parametrize('remaining,permits_reservation', [(90, False), (91, True)],
-                         ids=['90-refuse', '91-reserve'])
+@pytest.mark.parametrize('remaining,permits_reservation', [(300, False), (301, True)],
+                         ids=['300-refuse', '301-reserve'])
 def test_source_recapture_time_is_charged_before_measuring_reservation_margin(
         tmp_path, monkeypatch, remaining, permits_reservation):
     """One synthetic second models source recapture; no sleeping or native call."""
@@ -386,7 +386,7 @@ def test_source_recapture_time_is_charged_before_measuring_reservation_margin(
 def test_admission_changes_after_initial_join_refuse_before_attempt_reservation(
         tmp_path, monkeypatch, change, reason):
     invoke, _, value, watched, trace, active = reservation_case(
-        tmp_path, monkeypatch, remaining=90, change_at_admit=change)
+        tmp_path, monkeypatch, remaining=300, change_at_admit=change)
     with pytest.raises(ValueError, match=reason):
         invoke()
     assert not Path(value['attempt_directory']).exists()
@@ -401,7 +401,7 @@ def test_admission_changes_after_initial_join_refuse_before_attempt_reservation(
 def test_deferred_capture_acceptance_exact_order_to_real_reservation(tmp_path, monkeypatch):
     """Only controller/source/CI prerequisites are isolated; all quota gates run."""
     invoke, arguments, value, watched, trace, active = reservation_case(
-        tmp_path, monkeypatch, remaining=90, deferred_selection=True)
+        tmp_path, monkeypatch, remaining=300, deferred_selection=True)
     with pytest.raises(FirstReservationObserved):
         invoke()
     expected = [
@@ -430,7 +430,7 @@ def test_deferred_capture_acceptance_exact_order_to_real_reservation(tmp_path, m
                          ids=['superseded', 'poison'])
 def test_deferred_capture_late_load_refuses_admission_mutation(tmp_path, monkeypatch, change, reason):
     invoke, _, value, watched, trace, active = reservation_case(
-        tmp_path, monkeypatch, remaining=90, deferred_selection=True, change_at_admit=change)
+        tmp_path, monkeypatch, remaining=300, deferred_selection=True, change_at_admit=change)
     with pytest.raises(ValueError, match=reason):
         invoke()
     assert trace[-1] == 'load-current-enter'
@@ -445,7 +445,7 @@ def test_deferred_capture_late_load_refuses_admission_mutation(tmp_path, monkeyp
 def test_fused_lease_compares_original_current_and_fresh_execution(tmp_path, monkeypatch, mutation):
     """The producer is isolated; both equal changed values must still refuse."""
     invoke, _, value, watched, trace, active = reservation_case(
-        tmp_path, monkeypatch, remaining=90, deferred_selection=True, mutate_values=mutation)
+        tmp_path, monkeypatch, remaining=300, deferred_selection=True, mutate_values=mutation)
     with pytest.raises(ValueError, match='selection changed before reservation'):
         invoke()
     assert value['permission_probe_sha256'] == '2' * 64
@@ -460,7 +460,7 @@ def test_fused_lease_compares_original_current_and_fresh_execution(tmp_path, mon
 
 def test_fused_lease_refuses_engine_mutation_during_authorization_read(tmp_path, monkeypatch):
     invoke, _, value, watched, trace, active = reservation_case(
-        tmp_path, monkeypatch, remaining=90, deferred_selection=True, mutate_values='during-read')
+        tmp_path, monkeypatch, remaining=300, deferred_selection=True, mutate_values='during-read')
     with pytest.raises(ValueError, match='selection changed before reservation'):
         invoke()
     assert trace.index('input-tail-enter') < trace.index('engine-mutated-during-read')
@@ -478,7 +478,7 @@ def test_fused_lease_refuses_engine_mutation_during_authorization_read(tmp_path,
 ], ids=['changed-bytes', 'read-failure', 'platform'])
 def test_fused_lease_uses_actual_shared_input_checks(tmp_path, monkeypatch, failure, error, reason):
     invoke, _, value, watched, trace, active = reservation_case(
-        tmp_path, monkeypatch, remaining=90, deferred_selection=True, tail_failure=failure)
+        tmp_path, monkeypatch, remaining=300, deferred_selection=True, tail_failure=failure)
     with pytest.raises(error, match=reason):
         invoke()
     assert trace[-2:] == ['input-tail-enter', 'isolated-committed-source']
@@ -489,8 +489,8 @@ def test_fused_lease_uses_actual_shared_input_checks(tmp_path, monkeypatch, fail
     assert not watched.dispatched and not active[0]
 
 
-@pytest.mark.parametrize('remaining,permits_reservation', [(90, False), (91, True)],
-                         ids=['90-refuse', '91-reserve'])
+@pytest.mark.parametrize('remaining,permits_reservation', [(300, False), (301, True)],
+                         ids=['300-refuse', '301-reserve'])
 def test_fused_lease_charges_controls_before_margin(tmp_path, monkeypatch, remaining, permits_reservation):
     """Synthetic clock cost checks order, not measured elapsed freshness."""
     invoke, _, value, watched, trace, active = reservation_case(

@@ -14,7 +14,7 @@ from .native_shared_runtime_values import _json, _closed, _text
 TERM_VALUES = {'max_starting_weekly_utilization': 0.50,
                'max_starting_five_hour_utilization': 0.25,
                'max_age_seconds': 1200,
-               'pre_reservation_margin_seconds': 90}
+               'pre_reservation_margin_seconds': 300}
 POLICY_KEYS = {*TERM_VALUES, 'capture_state_directory', 'valid_from', 'valid_until'}
 N1_VALIDITY_SECONDS = 14 * 24 * 60 * 60
 

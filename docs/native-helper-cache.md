@@ -34,6 +34,7 @@ HOME names or speculative library variables are introduced.
 | Identity | Why it changes |
 | --- | --- |
 | Source commit and package-source/dependency map | New cache module and changed environment, runtime, permission and lifecycle sources; the cache module is an explicitly consumer-owned source |
+| Scanner integrated-render source contract | Authority, runtime and profile source pins change; the runtime dispatcher adds native_helper_cache as a callee. Helper 1 must review the expanded finite contract before updating instrument pins; this repair does not restamp them |
 | Runtime declaration R | New exact environment entry, bound to one attempt |
 | Runtime observation/probe sequence and bound permission sequence | Their runtime/source/expectation joins must bind the new R and code |
 | Preparation A and its dependency/runtime pins | New source closure and R bytes |
