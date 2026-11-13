@@ -240,7 +240,8 @@ def test_receipt_policy_cannot_import_api_caps_or_boolean_floors():
     with pytest.raises(ValueError, match="closed"):
         c.parse_receipt_policy(c.canonical(bad))
     bad = copy.deepcopy(good)
-    bad["coverage_floor"] = {"state": "registered", "numerator": True, "denominator": 1}
+    bad["coverage_floor"] = {"state": "registered", "numerator": True, "denominator": 1,
+                            "basis": "receipted_part"}
     with pytest.raises(ValueError, match="nonnegative"):
         c.parse_receipt_policy(c.canonical(bad))
     with pytest.raises(ValueError, match="differs"):

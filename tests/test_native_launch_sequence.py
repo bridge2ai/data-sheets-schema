@@ -4,6 +4,7 @@ The subprocess witness copies only the sequence and pure wire helper into an
 isolated test package with a fabricated native_generation module.
 """
 from pathlib import Path
+import builtins
 import json
 import os
 import subprocess
@@ -12,9 +13,14 @@ import sys
 import pytest
 
 from data_sheets_schema import native_launch_sequence as seq
+from data_sheets_schema import native_launch_entry as entry
 from data_sheets_schema import native_subscription_guard as guard
 
 REAL_RUN = subprocess.run
+
+
+def run_sequence(arguments):
+    return entry.main(arguments)
 
 
 @pytest.fixture(autouse=True)
@@ -22,6 +28,12 @@ def deny_real_commands(monkeypatch):
     def refuse(*args, **kwargs):
         pytest.fail('test must not execute native_generation or any native binary')
     monkeypatch.setattr(seq.subprocess, 'run', refuse)
+    # Test-only clock substitution AFTER the entry verifies and compiles the
+    # real fixture-pinned bytes. Production has no clock/verification bypass.
+    def fixture_exec(code, namespace):
+        builtins.exec(code, namespace)
+        namespace['_utc_now'] = seq._utc_now
+    monkeypatch.setattr(entry, 'exec', fixture_exec, raising=False)
 
 
 def paths(tmp_path):
@@ -30,6 +42,32 @@ def paths(tmp_path):
               ('registration', 'review', 'launch-word', 'account-choice', 'ci')}
     for path in result.values():
         path.write_bytes(b'{}\n')
+    digest=guard.sha(Path(seq.__file__).read_bytes())
+    result['registration'].write_bytes(guard.canonical({'registration': {
+        'attempt_directory': str(base / 'NEVER-RESERVED-ATTEMPT'),
+        'evidence_directory': str(base / 'NEVER-RESERVED-EVIDENCE'),
+        'attempt_id': 'sequence-fixture',
+        'runtime': {'deadline_seconds': 21600, 'model': 'fixture-model',
+            'limits': {'contextWindow': 100, 'maxOutputTokens': 10},
+            'keep_awake': {'policy': 'macos_iokit_ims_v1', 'host_platform': 'darwin', 'basis': 'offline fixture'},
+            'limits_basis': json.dumps({'kind': 'd4d_native_u4b_runtime_basis', 'version': 3,
+                'admission': {'capture_state_directory': str(base / 'word-state'),
+                    'valid_from': '2026-11-05T00:00:00Z', 'valid_until': '2026-11-19T00:00:00Z',
+                    'max_starting_weekly_utilization': 0.5, 'max_starting_five_hour_utilization': 0.25,
+                    'max_age_seconds': 1200, 'pre_reservation_margin_seconds': 300}})},
+        'dependencies': {'base': {'package_sources': {'src/data_sheets_schema/native_launch_sequence.py': digest}}}}}))
+    result['review'].write_bytes(guard.canonical({'kind': 'd4d_native_execution_review_bundle_v3',
+        'version': 3, 'registration_sha256': guard.sha(result['registration'].read_bytes()),
+        'sequence_script_sha256': digest}))
+    from data_sheets_schema import native_capture_words as words
+    reg_raw = result['registration'].read_bytes()
+    value = guard.strict_json(reg_raw)['registration']
+    word = {'authorized_at': '2026-11-11T00:00:00Z', 'attempt_id': value['attempt_id'],
+            'registration_sha256': guard.sha(reg_raw), 'review_sha256': guard.sha(result['review'].read_bytes())}
+    result['launch-word'].write_bytes(guard.canonical(word))
+    with words.locked(value, reg_raw, create=True) as journal:
+        journal.activate(result['launch-word'].read_bytes(), result['review'].read_bytes(), value,
+                         now=words._timestamp(word['authorized_at'], 'fixture word'))
     result.update({'output-directory': base / 'captures', 'subscription-guard': base / 'guard.json',
                    'packet-directory': base / 'packet'})
     return result
@@ -58,6 +96,14 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
         assert kwargs['cwd'] == seq.SOURCE_ROOT
         assert kwargs['env'] == seq.CHILD_ENV
         assert kwargs['stdout'].name is not None and kwargs['stderr'].name is not None
+        pins = guard.strict_json(command[command.index('--sequence-inputs') + 1].encode())
+        names = {'registration', 'review', 'launch_word', 'account_choice', 'ci'}
+        if name == seq.COMMANDS[0]: names.add('sequence_start')
+        if name == seq.COMMANDS[1]: names.add('capture')
+        if name == seq.COMMANDS[2]: names.add('subscription_guard')
+        assert set(pins) == names
+        for key, pin in pins.items():
+            assert guard.sha(Path(pin['path']).read_bytes()) == pin['sha256']
         if fail_exception == name:
             raise OSError('PRIVATE sentinel must not be printed')
         if name == seq.COMMANDS[0]:
@@ -89,7 +135,7 @@ def test_order_files_bytes_hashes_times_and_no_environment_input(tmp_path, monke
     monkeypatch.setenv('ANTHROPIC_API_KEY', 'PRIVATE')
     monkeypatch.setenv('D4D_OUTPUT', '/foreign/output')
     calls = fake_commands(monkeypatch, p)
-    assert seq.main(argv(p)) == 0
+    assert run_sequence(argv(p)) == 0
     doc = record(p)
     assert doc['status'] == 'completed' and len(calls) == 3
     assert doc['capture_manifest'] == str(manifest(p))
@@ -111,7 +157,7 @@ def test_order_files_bytes_hashes_times_and_no_environment_input(tmp_path, monke
 def test_nonzero_or_spawn_error_stops_without_retry(tmp_path, monkeypatch, capsys, step, exception):
     p = paths(tmp_path)
     calls = fake_commands(monkeypatch, p, **({'fail_exception': step} if exception else {'fail': step}))
-    assert seq.main(argv(p)) == 1
+    assert run_sequence(argv(p)) == 1
     expected = seq.COMMANDS.index(step) + 1
     assert len(calls) == expected and len(record(p)['steps']) == expected
     assert record(p)['status'] == 'stopped'
@@ -136,7 +182,7 @@ def test_bad_response_stops_before_next_command(tmp_path, monkeypatch, step, bad
         if bad == 'result_missing': doc.pop('result')
         if bad == 'result_empty': doc['result'] = {}
     calls = fake_commands(monkeypatch, p, mutate=mutate)
-    assert seq.main(argv(p)) == 1
+    assert run_sequence(argv(p)) == 1
     assert len(calls) == seq.COMMANDS.index(step) + 1
 
 
@@ -156,14 +202,14 @@ def test_required_result_values_fail_closed(tmp_path, monkeypatch, step, key, va
             if value is None: doc['result'].pop(key)
             else: doc['result'][key] = value
     calls = fake_commands(monkeypatch, p, mutate=mutate)
-    assert seq.main(argv(p)) == 1
+    assert run_sequence(argv(p)) == 1
     assert len(calls) == step + 1
 
 
 def test_latest_capture_refusal_is_terminal(tmp_path, monkeypatch):
     p = paths(tmp_path)
     calls = fake_commands(monkeypatch, p, fail=seq.COMMANDS[1])
-    assert seq.main(argv(p)) == 1
+    assert run_sequence(argv(p)) == 1
     assert len(calls) == 2
     assert record(p)['steps'][-1]['return_code'] == 17
 
@@ -179,16 +225,16 @@ def test_existing_outputs_never_overwritten_or_dispatched(tmp_path, name, symlin
         target.symlink_to(tmp_path / 'missing')
     else:
         target.write_bytes(b'unchanged')
-    assert seq.main(argv(p)) == 1
+    assert run_sequence(argv(p)) == 1
     assert target.is_symlink() if symlink else target.read_bytes() == b'unchanged'
 
 
 def test_repeated_packet_cannot_recapture(tmp_path, monkeypatch):
     p = paths(tmp_path)
     calls = fake_commands(monkeypatch, p)
-    assert seq.main(argv(p)) == 0
+    assert run_sequence(argv(p)) == 0
     before = {f.name: f.read_bytes() for f in p['packet-directory'].iterdir()}
-    assert seq.main(argv(p)) == 1
+    assert run_sequence(argv(p)) == 1
     assert len(calls) == 3
     assert {f.name: f.read_bytes() for f in p['packet-directory'].iterdir()} == before
 
@@ -199,7 +245,7 @@ def test_mutated_inputs_stop_before_later_command(tmp_path, monkeypatch, after):
     def mutate(name, doc):
         if name == seq.COMMANDS[after]: p['review'].write_bytes(b'changed')
     calls = fake_commands(monkeypatch, p, mutate=mutate)
-    assert seq.main(argv(p)) == 1
+    assert run_sequence(argv(p)) == 1
     assert len(calls) == after + 1
 
 
@@ -209,7 +255,7 @@ def test_returned_old_capture_is_refused(tmp_path, monkeypatch):
     m.parent.mkdir(parents=True)
     m.write_bytes(b'previous capture')
     calls = fake_commands(monkeypatch, p)
-    assert seq.main(argv(p)) == 1
+    assert run_sequence(argv(p)) == 1
     assert len(calls) == 1
 
 
@@ -221,13 +267,13 @@ def test_preflight_refusal_starts_no_command(tmp_path, change):
     if change == 'symlink_input':
         p['ci'].unlink(); p['ci'].symlink_to(p['registration'])
     if change == 'guard_collision': p['subscription-guard'] = p['packet-directory'] / seq.OUTPUTS[0]
-    assert seq.main(argv(p)) == 1
+    assert run_sequence(argv(p)) == 1
 
 
 @pytest.mark.parametrize('flag', ['--skip', '--resume', '--reuse-capture', '--continue-on-error'])
 def test_no_retry_or_skip_flags(tmp_path, flag):
     with pytest.raises(SystemExit):
-        seq.main([*argv(paths(tmp_path)), flag])
+        run_sequence([*argv(paths(tmp_path)), flag])
 
 
 def test_saved_output_exists_before_parse(tmp_path, monkeypatch):
@@ -236,22 +282,27 @@ def test_saved_output_exists_before_parse(tmp_path, monkeypatch):
     seen = []
     def parsed(raw):
         doc = original(raw)
+        if 'command' not in doc:
+            return doc
         path = p['packet-directory'] / seq.OUTPUTS[seq.COMMANDS.index(doc['command'])]
         assert path.read_bytes() == raw
         seen.append(path)
         return doc
     monkeypatch.setattr(guard, 'strict_json', parsed)
     fake_commands(monkeypatch, p)
-    assert seq.main(argv(p)) == 0 and len(seen) == 3
+    assert run_sequence(argv(p)) == 0 and len(seen) == 3
 
 
-def test_isolated_real_subprocess_uses_only_copied_fake_command(tmp_path):
+@pytest.mark.parametrize('entry_module', ['native_launch_sequence', 'native_launch_entry'])
+def test_isolated_real_subprocess_uses_only_copied_fake_command(tmp_path, entry_module):
     p = paths(tmp_path)
     root = tmp_path / 'isolated'
     package = root / 'src/data_sheets_schema'
     package.mkdir(parents=True)
     (package / '__init__.py').write_bytes(b'')
-    for name in ('native_launch_sequence', 'native_subscription_guard'):
+    for name in ('native_launch_sequence', 'native_subscription_guard', 'native_sequence_start', 'native_launch_entry',
+                 'native_capture_words', 'native_subscription_guard_v2', 'native_u4b_policy',
+                 'native_shared_runtime_values', 'native_runtime_profiles'):
         (package / (name + '.py')).write_bytes((seq.SOURCE_ROOT / 'src/data_sheets_schema' / (name + '.py')).read_bytes())
     (package / 'native_generation.py').write_text('''import json, hashlib, os, sys
 from pathlib import Path
@@ -276,8 +327,8 @@ def main():
     print(json.dumps({'command': name, 'result': body}))
     return 0
 ''')
-    bootstrap = 'import sys; sys.path.insert(0, sys.argv.pop(1)); from data_sheets_schema.native_launch_sequence import main; raise SystemExit(main())'
-    result = REAL_RUN([sys.executable, '-I', '-B', '-c', bootstrap, str(root / 'src'), *argv(p)],
+    bootstrap = "import sys,runpy; sys.path.insert(0,sys.argv.pop(1)); name=sys.argv.pop(1); runpy.run_module(name,run_name='__main__',alter_sys=True)"
+    result = REAL_RUN([sys.executable, '-I', '-B', '-c', bootstrap, str(root / 'src'), 'data_sheets_schema.' + entry_module, *argv(p)],
                       env={'PRIVATE_TOKEN': 'secret', 'PYTHONPATH': '/foreign'},
                       cwd=root, capture_output=True, timeout=20)
     assert result.returncode == 0, result.stderr
@@ -300,7 +351,7 @@ def test_own_script_bytes_saved_before_any_command_without_self_hash(tmp_path, m
         assert saved.read_bytes() == running_bytes
         seen.append(name)
     fake_commands(monkeypatch, p, mutate=inspect)
-    assert seq.main(argv(p)) == 0
+    assert run_sequence(argv(p)) == 0
     doc = record(p)
     assert len(seen) == 3
     assert Path(doc['script_path']).read_bytes() == running_bytes
@@ -328,7 +379,7 @@ def test_delegated_start_requires_both_independent_windows(tmp_path, monkeypatch
     arguments = argv(p)
     if direction is not None: arguments += ['--direction-recorded-at', direction]
     if confirmation is not None: arguments += ['--host-confirmed-at', confirmation]
-    assert seq.main(arguments) == (0 if accepted else 1)
+    assert run_sequence(arguments) == (0 if accepted else 1)
     assert len(calls) == (3 if accepted else 0)
     doc = record(p)
     assert doc['direction_recorded_at'] == direction and doc['host_confirmed_at'] == confirmation
@@ -346,7 +397,7 @@ def test_delegated_start_requires_both_independent_windows(tmp_path, monkeypatch
 def test_delegation_refuses_non_strict_utc_without_commands(tmp_path, monkeypatch, timestamp):
     p = paths(tmp_path)
     monkeypatch.setattr(seq, '_utc_now', lambda: '2026-11-12T12:00:00Z')
-    assert seq.main([*argv(p), '--direction-recorded-at', timestamp,
+    assert run_sequence([*argv(p), '--direction-recorded-at', timestamp,
                      '--host-confirmed-at', '2026-11-12T11:59:00Z']) == 1
     assert record(p)['steps'] == []
 
@@ -355,7 +406,7 @@ def test_elapsed_preflight_cannot_cross_delegation_limit(tmp_path, monkeypatch):
     p = paths(tmp_path)
     times = iter(['2026-11-12T12:00:00Z', '2026-11-12T12:00:01Z', '2026-11-12T12:00:01Z'])
     monkeypatch.setattr(seq, '_utc_now', lambda: next(times))
-    assert seq.main([*argv(p), '--direction-recorded-at', '2026-11-12T11:30:00Z',
+    assert run_sequence([*argv(p), '--direction-recorded-at', '2026-11-12T11:30:00Z',
                      '--host-confirmed-at', '2026-11-12T11:30:00Z']) == 1
     assert record(p)['steps'] == []
     assert record(p)['delegation_checked_at'] == '2026-11-12T12:00:01Z'
@@ -366,5 +417,5 @@ def test_existing_saved_script_refuses_without_overwrite_or_command(tmp_path):
     p['packet-directory'].mkdir()
     saved = p['packet-directory'] / seq.SCRIPT_FILENAME
     saved.write_bytes(b'prior script')
-    assert seq.main(argv(p)) == 1
+    assert run_sequence(argv(p)) == 1
     assert saved.read_bytes() == b'prior script'

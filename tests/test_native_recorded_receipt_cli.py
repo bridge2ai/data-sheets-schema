@@ -34,6 +34,7 @@ from tests.test_receipts import BUNDLE, FULL, _manifest_and_texts, _receipt
 
 PENDING = {'state': 'pending', 'mode': 'diagnostic_pilot'}
 REGISTERED = {'state': 'registered', 'numerator': 1, 'denominator': 1}
+NATIVE_REGISTERED = {**REGISTERED, 'basis': 'receipted_part'}
 
 
 @pytest.fixture
@@ -203,8 +204,8 @@ def native_recorded_case(declaration, monkeypatch, route_spies):
 @pytest.mark.parametrize('case,floor,structural_failure,uncovered,exit_code,state,passed', [
     ('pending', PENDING, False, False, 0, 'pending', False),
     ('pending-structural-failure', PENDING, True, False, 1, 'pending', False),
-    ('registered-pass', REGISTERED, False, False, 0, 'passed', True),
-    ('registered-fail', REGISTERED, False, True, 1, 'failed', False),
+    ('registered-pass', NATIVE_REGISTERED, False, False, 0, 'passed', True),
+    ('registered-fail', NATIVE_REGISTERED, False, True, 1, 'failed', False),
 ], ids=['pending', 'pending-structural-failure', 'registered-pass', 'registered-fail'])
 def test_recorded_native_cli_uses_selected_final_floors(native_recorded_case, with_selection,
         case, floor, structural_failure, uncovered, exit_code, state, passed):
@@ -282,7 +283,7 @@ def api_recorded_case(api_disk, tmp_path, monkeypatch, route_spies):
         monkeypatch.setattr(capture, 'live_receipt_block', forbidden_native)
         # The planned recorded companion must stay unreachable from API too;
         # this negative sentinel does not provide a fake successful companion.
-        monkeypatch.setattr(capture, 'recorded_receipt_assessment', forbidden_native, raising=False)
+        monkeypatch.setattr(capture, '_recorded_receipt_assessment', forbidden_native, raising=False)
         preserved = {path: path.read_bytes() for path in
             (paths['full'], paths['receipt'], paths['provenance'], api_disk['bundle'], api_disk['manifest'])}
 
@@ -428,7 +429,7 @@ def test_explicit_selection_must_equal_fresh_recorded_selection(native_recorded_
 def test_recorded_companion_returns_independent_blocks_from_one_reconstruction(native_recorded_case):
     case_data = native_recorded_case()
     saved_record = yaml.safe_load(case_data.paths['provenance'].read_text())
-    result = capture.recorded_receipt_assessment(record=saved_record,
+    result = capture._recorded_receipt_assessment(record=saved_record,
         full_path=case_data.paths['full'], receipt_path=case_data.paths['receipt'])
     assert result.selection is case_data.selected
     original_raw = result.raw

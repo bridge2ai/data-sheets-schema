@@ -397,14 +397,17 @@ def _reserve(directory, value, statement, word, binding):
         os.close(descriptor)
 
 
-def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw, directory):
+def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw, directory,
+                         sequence_start=None):
     """Consume the next of three word-bound slots; never overwrite prior evidence.
 
     RunSpec boundary: validated-caller
 
     RunSpec precondition: Caller supplies serialized registration/review/word
     and a capture path; _authority reconstructs guarded preparation before
-    any capture reservation or process.
+    any capture reservation or process. Sequence dispatch requires its pinned
+    start in existing current state; it never initializes or activates state.
+    Standalone explicit capture retains word activation and the three-slot cap.
     """
     directory = _path(directory)
     from .native_launch_review import registration_fields, validate_bundle
@@ -420,8 +423,12 @@ def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw
     from . import native_capture_words as words
     words.validate_window(value['runtime'], launch_word_raw)
     words.require_unspent(value)
-    with words.locked(value, registration_raw, create=True) as journal:
-        journal.activate(launch_word_raw, review_bundle_raw, value)
+    with words.locked(value, registration_raw, create=sequence_start is None) as journal:
+        words.require_unspent(value)
+        if sequence_start is None:
+            journal.activate(launch_word_raw, review_bundle_raw, value)
+        else:
+            journal.require_start(launch_word_raw, sequence_start)
         word_directory = directory / 'captures' / sha(launch_word_raw)
         with _reserve(word_directory, value, statement, word, binding) as (slot, claim, bound):
             return _perform_capture(slot, claim, bound, authority, word_directory,
@@ -509,7 +516,8 @@ def _require_latest_guard_claim(guard_raw, authority, journal, launch_word_raw):
 
 
 @contextmanager
-def current_guard_preparation(manifest_path, *, registration_raw, review_bundle_raw, launch_word_raw):
+def current_guard_preparation(manifest_path, *, registration_raw, review_bundle_raw, launch_word_raw,
+                              expected_manifest_sha256=None):
     """Prepare current guard bytes while retaining the word lock through publication.
 
     RunSpec boundary: validated-caller
@@ -531,7 +539,7 @@ def current_guard_preparation(manifest_path, *, registration_raw, review_bundle_
         journal.require(launch_word_raw)
         capture_root = root / 'captures' / sha(launch_word_raw)
         saved = _read_capture_records_at_root(path, directory, authority, capture_root,
-                                             require_latest=True)
+                                             require_latest=True, expected_manifest_sha256=expected_manifest_sha256)
         selection = _checked_claim_selection(capture_root, authority, saved['capture_index'])
         event = saved['selected_event']
         yield guard.prepare_guard(registration_raw=registration_raw, runtime=value['runtime'],
@@ -666,7 +674,7 @@ def _read_root(authority, registration_raw, launch_word_raw, require_current):
     root = _path(statement['quota_capture']['directory'])
     if statement['quota_capture']['kind'] == REQUEST_KIND:
         from . import native_capture_words as words
-        with words.locked(value, registration_raw) as journal:
+        with words.locked(value, registration_raw, historical=not require_current) as journal:
             journal.require(launch_word_raw, current=require_current)
         return root / 'captures' / sha(launch_word_raw)
     if require_current:
@@ -694,7 +702,8 @@ def _read_capture_records(path, directory, authority, *, registration_raw, launc
                                          require_latest=require_current)
 
 
-def _read_capture_records_at_root(path, directory, authority, root, *, require_latest=False):
+def _read_capture_records_at_root(path, directory, authority, root, *, require_latest=False,
+                                  expected_manifest_sha256=None):
     """Reconstruct saved bytes after the caller validates the word/root authority.
 
     Current guard preparation holds words.locked across this call and guard
@@ -717,7 +726,10 @@ def _read_capture_records_at_root(path, directory, authority, root, *, require_l
         journal_claim = claims[index - 1]
     elif directory != root:
         raise ValueError('historical capture readback differs from its registered directory')
-    result = strict_json(_read(path, MAX_EVIDENCE_BYTES))
+    manifest_raw = _read(path, MAX_EVIDENCE_BYTES)
+    if expected_manifest_sha256 is not None and sha(manifest_raw) != expected_manifest_sha256:
+        raise ValueError('capture manifest differs from parent digest')
+    result = strict_json(manifest_raw)
     claim_raw = _read(directory / 'claim.json', MAX_EVIDENCE_BYTES)
     claim = strict_json(claim_raw)
     expected_claim = _claim(directory, statement['quota_capture'], value['runtime'], binding,

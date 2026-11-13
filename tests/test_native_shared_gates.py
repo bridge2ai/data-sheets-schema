@@ -86,7 +86,7 @@ def captured_run(declaration, inputs, tmp_path, request):
     policy_path = Path(declaration['receipt_policy']['path'])
     policy = c.strict_json(policy_path.read_bytes())
     policy['coverage_floor'] = getattr(request, 'param',
-        {'state': 'registered', 'numerator': 1, 'denominator': 1})
+        {'state': 'registered', 'numerator': 1, 'denominator': 1, 'basis': 'receipted_part'})
     policy_path.write_bytes(c.canonical(policy))
     declaration['receipt_policy'] = pin(policy_path, policy_path.read_bytes())
     for kind, cls in (('full', 'Dataset'), ('core', 'CoreDataset')):
@@ -339,7 +339,7 @@ def test_final_evidence_rechecks_identical_bytes_after_earlier_result(captured_r
 
 
 @pytest.mark.parametrize('mutation', ['original_changed', 'effective_changed', 'unreconstructed', 'final_changed'])
-def test_receipt_gate_refuses_split_original_effective_or_incomplete_basis(receipt_prepared, mutation, monkeypatch):
+def test_receipt_gate_binds_original_effective_and_preserves_snapshot_basis(receipt_prepared, mutation, monkeypatch):
     prepared, calls = receipt_prepared
     run = prepared['run']
     if mutation == 'unreconstructed':
@@ -362,7 +362,12 @@ def test_receipt_gate_refuses_split_original_effective_or_incomplete_basis(recei
         result = gates.receipt_gate(prepared)
         assert result['receipts']['slots']['receiptable'] == 2
         assert result['receipts']['slots']['with_receipt'] == 1
-        assert result['passed'] is False and result['floors']['registered receipt coverage'] == 1
+        # D140 gates the sealed phase-1 record under the effective receipt.
+        # The new unreceipted final leaf stays visible without changing that basis.
+        assert result['receipts']['slots']['receiptable_at_receipt'] == 1
+        assert result['receipts']['slots']['with_receipt_at_receipt'] == 1
+        assert result['receipts']['coverage_floor']['basis'] == 'receipted_part'
+        assert result['passed'] is True and not any(result['floors'].values())
     else:
         with pytest.raises(ValueError): gates.receipt_gate(prepared)
     if mutation == 'original_changed': assert calls == []

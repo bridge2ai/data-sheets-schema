@@ -138,6 +138,8 @@ def parser():
                     prepare, capture, prepare_v2, launch, readback):
         command.add_argument("--account-choice", required=True,
             help="Closed D105/D106 selected-intent document bound to exact subject/runtime bytes")
+    for command in (capture, prepare_v2, launch):
+        command.add_argument('--sequence-inputs', help='Closed parent input path/SHA256 mapping; invocation data only')
     return result
 
 
@@ -151,6 +153,8 @@ def main(argv=None):
     constructing RunSpec.
     """
     args = parser().parse_args(argv)
+    from .native_sequence_inputs import capture_expected, check_raw
+    sequence_inputs = capture_expected(args)
     from . import native_permission_probe as probe
     if args.command in ('observation-probe', 'bound-permission-probe', 'validate-probe-sequence'):
         from . import native_u4b_probe_sequence as sequence
@@ -206,6 +210,7 @@ def main(argv=None):
     from . import native_shared_registration_orchestration as registration
     from .native_shared_render import validate_metadata
     subject_raw = _read(args.registration)
+    check_raw(sequence_inputs, 'registration', subject_raw)
     value = registration.verified(subject_raw)
     # E verification already reconstructs this exact metadata through A/C.
     # Retain an explicit current-contract v4 check here too: the account-choice
@@ -213,6 +218,7 @@ def main(argv=None):
     validate_metadata(value["selection"]["render_spec"])
     probe.require_u4_runtime(value["runtime"])
     choice_raw = _account_choice(args.account_choice, subject_raw, value["runtime"])
+    check_raw(sequence_inputs, 'account_choice', choice_raw)
     captures = [(args.registration, subject_raw, SUBJECT_LIMIT),
                 (args.account_choice, choice_raw, CHOICE_LIMIT)]
     if args.command in ("capture-subscription-event", "prepare-subscription-guard-v2", 'record-capture-word'):
@@ -221,6 +227,8 @@ def main(argv=None):
         from .native_u4b_runtime import validate_prepared_runtime
         validate_prepared_runtime(value['runtime'])
         bundle_raw, word_raw = _read(args.review), _read(args.launch_word)
+        check_raw(sequence_inputs, 'review', bundle_raw)
+        check_raw(sequence_inputs, 'launch_word', word_raw)
         review.validate_bundle(subject_raw, bundle_raw, word_raw, require_current=True)
         captures.extend([(args.review, bundle_raw, SUBJECT_LIMIT),
                          (args.launch_word, word_raw, SUBJECT_LIMIT)])
@@ -229,12 +237,17 @@ def main(argv=None):
             result = capture.activate_capture_word(registration_raw=subject_raw,
                 review_bundle_raw=bundle_raw, launch_word_raw=word_raw)
         elif args.command == "capture-subscription-event":
+            dispatched = {} if sequence_inputs is None else {
+                'sequence_start': sequence_inputs['sequence_start']}
             path = capture.capture_subscription(registration_raw=subject_raw,
-                review_bundle_raw=bundle_raw, launch_word_raw=word_raw, directory=args.output_directory)
+                review_bundle_raw=bundle_raw, launch_word_raw=word_raw, directory=args.output_directory,
+                **dispatched)
             result = {"capture_manifest": str(path), "sha256": guard.sha(_read(path))}
         else:
+            bound_capture = {} if sequence_inputs is None else {
+                'expected_manifest_sha256': sequence_inputs['capture']['sha256']}
             with capture.current_guard_preparation(args.capture, registration_raw=subject_raw,
-                    review_bundle_raw=bundle_raw, launch_word_raw=word_raw) as raw:
+                    review_bundle_raw=bundle_raw, launch_word_raw=word_raw, **bound_capture) as raw:
                 _unchanged(*captures)
                 _new_file(args.output, raw)
             result = {"guard_sha256": guard.sha(raw), "path": args.output}
@@ -252,9 +265,11 @@ def main(argv=None):
     elif args.command == "launch":
         from .native_shared_execution_orchestration import launch
         _unchanged(*captures)
+        bound_authority = {} if sequence_inputs is None else {'expected_authority_sha256': {
+            key: sequence_inputs[key]['sha256'] for key in ('review', 'ci', 'launch_word')}}
         result = launch(subject_raw, review_path=args.review, ci_path=args.ci,
             launch_word_path=args.launch_word, subscription_guard_path=args.subscription_guard,
-            subscription_guard_sha256=args.subscription_guard_sha256)
+            subscription_guard_sha256=args.subscription_guard_sha256, **bound_authority)
         _emit(result, choice_raw, command=args.command)
     else:
         from .native_shared_execution_orchestration import read_final
