@@ -10,6 +10,8 @@ Invoke with the dependency venv Python -S -P -B. The caller runs cohorts seriall
 from __future__ import annotations
 
 import argparse
+import base64
+import csv
 import errno
 import hashlib
 import json
@@ -184,6 +186,25 @@ def make_test_venv(out, dependencies):
     # Plain .pth path entries do not recursively process that site's .pth files.
     custom = site / "sitecustomize.py"
     custom.write_text("# Native integration test environment; no external site hooks.\n", encoding="utf-8")
+    # Install explicit metadata for this synthetic harness's bootstrap. The
+    # borrowed virtualenv bootstrap is not executed (dependency .pth is inert),
+    # but it remains importable and must not evade the ownership census. This
+    # test-only distribution does not alter or repair the primary environment.
+    metadata = site / "h3_offline_bootstrap-1.dist-info"
+    metadata.mkdir()
+    manifest = metadata / "METADATA"
+    manifest.write_text("Metadata-Version: 2.1\nName: h3-offline-bootstrap\nVersion: 1\n")
+    record = metadata / "RECORD"
+    bootstrap = [pth, custom, manifest]
+    bootstrap += [dependencies / name for name in ("_virtualenv.py", "_virtualenv.pth")
+                  if (dependencies / name).is_file()]
+    with record.open("w", newline="") as stream:
+        writer = csv.writer(stream)
+        for path in bootstrap:
+            raw = path.read_bytes()
+            digest64 = base64.urlsafe_b64encode(hashlib.sha256(raw).digest()).decode().rstrip("=")
+            writer.writerow([os.path.relpath(path, site), "sha256=" + digest64, len(raw)])
+        writer.writerow([str(record.relative_to(site)), "", ""])
     python = location / "bin/python"
     save(out / "bootstrap.json", {
         "dependency_site": str(dependencies), "test_python": str(python),
@@ -191,7 +212,7 @@ def make_test_venv(out, dependencies):
         "underlying_python_sha256": digest(python.resolve()),
         "paths": [str(path) for path in paths],
         "files": {str(path): digest(path) for path in
-                  (location / "pyvenv.cfg", pth, custom)},
+                  (location / "pyvenv.cfg", pth, custom, manifest, record)},
         "scope": "same underlying interpreter, new test-only prefix and registered interpreter path; dependency .pth files are not executed"})
     return python
 
