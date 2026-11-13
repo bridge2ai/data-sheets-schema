@@ -113,7 +113,7 @@ def test_real_evidence_binding_preserves_closed_runtime_and_original(inputs):
     assert runtime == original
     assert set(result) == set(runtime) == historical.RUNTIME_KEYS
     assert subject.is_prepared_runtime(result)
-    assert historical.validate_runtime(result) == result
+    assert historical.validate_runtime_v2(result) == result
     assert subject.validate_prepared_runtime(result) == result
     basis = json.loads(result['limits_basis'])
     assert basis['version'] == 3
@@ -436,7 +436,12 @@ def test_registered_basis_refuses_mutation(inputs, mutation):
 
 def test_historical_basis_is_unchanged_but_never_satisfies_new_profile(inputs):
     runtime, _ = inputs
-    assert historical.validate_runtime(runtime) == runtime
+    legacy = deepcopy(runtime)
+    legacy['environment'].pop('PYSTOW_HOME')
+    assert historical.validate_runtime(legacy) == legacy
+    with pytest.raises(ValueError, match='environment'):
+        historical.validate_runtime(runtime)
+    assert historical.validate_runtime_v2(runtime) == runtime
     assert subject.is_prepared_runtime(runtime) is False
     with pytest.raises(ValueError):
         subject.validate_prepared_runtime(runtime)

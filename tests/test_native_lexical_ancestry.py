@@ -143,7 +143,9 @@ def test_actual_reservations_preserve_physical_checks_and_first_errors(tmp_path,
              "evidence_directory": str(root / "evidence"),
              "composition": str(root / "composition"), "system_path": str(root / "system"),
              "permission_probe": str(root / "probe"),
-             "runtime": {"executable": {"path": str(root / "executable")}}}
+             "runtime": {"executable": {"path": str(root / "executable")},
+                         "environment": {"HOME": str(root / "home"),
+                                         "PYSTOW_HOME": str(root / "attempt" / "helper-cache")}}}
     if change == "protected_below":
         selected["policy"]["readonly_lookups"]["inputs"] = [str(root / "attempt" / "input")]
     elif change == "equal_reserved":

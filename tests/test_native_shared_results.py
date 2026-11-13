@@ -136,3 +136,31 @@ def test_response_intent_requires_completed_read_before_both_native_announcement
     else:
         with pytest.raises(ValueError, match='complete current request Read'):
             cap._require_completed_read_before_write(write, read)
+
+
+def test_capture_excludes_hidden_helper_cache_member(started, monkeypatch):
+    """Issue 6030: run actual named-file capture, stopping before semantic replay."""
+    from types import SimpleNamespace
+    from data_sheets_schema import native_shared_results_orchestration as host
+    from tests.native_helper_cache_assertions import assert_cache_excluded
+    live, _ = initial(started)
+    value = live.value
+    attempt = Path(value['attempt_directory'])
+    cache = attempt / 'helper-cache'; cache.mkdir()
+    hidden = cache / '.dependency-private'; hidden.write_bytes(b'private-hidden-cache-sentinel')
+    for name in ('runtime-observation.json', 'stderr.txt'):
+        (attempt / name).write_bytes(b'{}')
+    for path in (*live.spec._agentic_artifact_paths.values(),
+                 live.composition['policy']['post_final_recorder']['destination']):
+        target = Path(path); target.parent.mkdir(parents=True, exist_ok=True)
+        if not target.exists(): target.write_bytes(b'{}')
+    monkeypatch.setattr(host.capture_host, '_load', lambda path: live)
+    monkeypatch.setattr(host.capture_api, 'current_artifact',
+        lambda run, role, path: evidence.read_regular(str(path), role, max_bytes=1024).captured)
+    monkeypatch.setattr(host, 'prepare', lambda pool, value, controls, snapshot: (pool, snapshot))
+    pool, snapshot = host.capture(value, SimpleNamespace(require_complete=lambda: None),
+        authority_inputs={}, registration_raw=started[3])
+    assert snapshot.sealed
+    assert str(Path(live.spec._agentic_artifact_paths['full'])) in snapshot.identity()
+    assert_cache_excluded(cache, snapshot, pool)
+    assert hidden.read_bytes() == b'private-hidden-cache-sentinel'
