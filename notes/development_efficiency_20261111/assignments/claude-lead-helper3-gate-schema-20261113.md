@@ -2,6 +2,15 @@
 
 From the Claude lead, 2026-11-13. Short names and rules are in `claude-lead-helper-context-20261112.md` beside this file. This comes after `claude-lead-helper3-recorder-env-and-pin-comparison-20261113.md`, and refines its Part 2.
 
+## The lead's ruling on your Part 2 stop (added at 04:21Z, read this first)
+
+Your stop was right. Both questions are answered here:
+
+1. **Validation may run, from the reference's source only.** "Nothing executed" meant that no code from either tree is run to produce what the model reads (the replay). Validating the two packets with the existing production validators is allowed, on one condition: they run from the **reference run's own source export**, read-only, in an isolated subprocess, never from the candidate's tree. The candidate's code is never executed. If the candidate's pinned files are byte-identical to the reference's, the validators are the same code; if they are not, the result is "not equal" from the pins alone and no candidate validation is needed. Then the data-only comparison runs. Do not write a separate structural parser that validates less than production does.
+2. **Third-party distributions: add an environment manifest.** For every third-party distribution the native interpreter can import (at least everything the controller and the registered helpers import or execute: LinkML, the term validator, oaklib, PyStow and their dependencies), record its name, version and a sha256 over its installed `RECORD` file, plus the interpreter's own identity; write it as one file at registration time and pin it in the registration packet as an artifact, if the packet admits one more pinned artifact without changing a registered document's kind or version. If it does not, stop and propose the smallest versioned change. The gate treats the manifest as must-equal.
+
+Your other results are accepted: the short recorder line (`c577c0eff`, 1,806 characters in the synthetic case) and the CI fixes. Do not take `f57ac61da` alone, as you say.
+
 ## Why
 
 Both reviews of the production amendment's draft v9 (`E/plans/reviews/np1v9_7946deca_codex_review_2026-11-13.md` P1-1, `E/plans/reviews/np1v9_7946deca_claude_review_2026-11-13.md` P1-1) found that a short list of per-run fields cannot work: every fresh registration also differs in its project and label, in the separate attempt, evidence, output and stage roots, in the registration, instruction and probe paths, in its probe evidence and validity dates, in fingerprints of host files (device and inode numbers, the checkout and interpreter paths), and in every embedded document and hash derived from those. With a short list, the AI_READI pilot and every production cell would come out "cannot decide", and the defect would only show after the reference run, when it can no longer be fixed inside the stratum. Draft v10 (being written) adopts the following; build the gate to it.
