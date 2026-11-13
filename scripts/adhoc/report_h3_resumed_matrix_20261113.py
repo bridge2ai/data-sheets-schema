@@ -51,6 +51,7 @@ def branch(root):
         'files_from_common_base': ['diff', '--name-status', '4b1463bc7...HEAD'],
         'files_against_candidate': ['diff', '--name-status', '4b1463bc7', 'HEAD'],
         'protected': ['diff', '--exit-code', '4b1463bc7', 'HEAD', '--', *PROTECTED],
+        'protected_worktree': ['diff', '--exit-code', '4b1463bc7', '--', *PROTECTED],
     }
     return {key: git(root, *args) for key, args in commands.items()}
 
@@ -110,7 +111,33 @@ def fresh_bounds():
             rows.append(api['project_row'](project, role, adopted))
     return dict(helper=pin(helper), packets_root=str(api['PACKETS']), rows=rows,
                 complete=len(rows) == len(api['PROJECTS']),
-                within_threshold=all(row['within_lead_threshold'] for row in rows))
+                within_threshold=bool(rows) and all(row['within_lead_threshold'] for row in rows))
+
+
+def verify_terminal(stage, demonstration):
+    """Do not promote an aggregate before cleanup and postflight finish."""
+    outcome = read(stage / 'outcome.json')
+    if (outcome.get('status') != 'passed' or outcome.get('returncode') != 0
+            or outcome.get('cleanup_verified') is not True
+            or any(outcome.get(k) for k in ('proof_error', 'postflight_error', 'interrupted',
+                                          'forced_cleanup', 'observed_surviving_pids', 'observation_errors'))):
+        raise ValueError('full stage lacks successful cleanup/postflight')
+    result_pin = pin(stage / 'result.json')
+    if outcome.get('result') != result_pin or outcome.get('demonstration_proof') != pin(demonstration):
+        raise ValueError('full outcome/result/demonstration pins differ')
+    result = read(stage / 'result.json')
+    if (result.get('status') != 'passed' or result.get('action') != 'full' or result.get('role') is not None
+            or result.get('outputs') != {'demonstration': pin(demonstration)}
+            or result.get('config') != pin(stage.parent.parent / 'stage-config.json')
+            or result.get('side_effects') != dict(native_executions=0, model_calls=0, probes_executed=0, captures=0, reservations=0)):
+        raise ValueError('full result configuration or outputs differ')
+    return dict(status='verified', outcome=pin(stage / 'outcome.json'), result=result_pin)
+
+
+def command_text(result, empty):
+    if result['returncode']:
+        return 'INSPECTION FAILED: ' + result['stderr']
+    return result['stdout'].strip() or empty
 
 
 def table(headers, rows):
@@ -130,6 +157,11 @@ def main():
     namespace = dict(__name__='resumed_report_verifier', __file__=str(reporter))
     exec(compile(reporter.read_bytes(), str(reporter), 'exec'), namespace)
     final, verification, accepted = namespace['assess_final'](demonstration if demonstration.exists() else None)
+    try:
+        terminal = verify_terminal(OLD / 'tests/final-format-06/stages/full', demonstration)
+    except (OSError, ValueError, KeyError) as error:
+        terminal = dict(status='held', error=str(error))
+        accepted = False
     actual = {row['name']: row for row in (final or {}).get('cases', [])}
     cases = [dict(name=row['name'], expected=row['expected'], actual=actual.get(row['name'], {}).get('status', 'not_run'),
                   accepted=accepted and actual.get(row['name'], {}).get('status') == row['expected']) for row in plan['cases']]
@@ -143,7 +175,7 @@ def main():
         counts = {key: sum(int(s.get(key, 0)) for s in suites) for key in ('tests', 'failures', 'errors', 'skipped')}
         tests.append(dict(name=name, xml=pin(xml), counts=counts, pinned_xml_matches=pin(xml) == item['xml']))
     value = dict(answer=dict(cases_accepted=sum(row['accepted'] for row in cases), total_cases=len(cases),
-                            verifier=verification, branch_readiness='reviewable; integration acceptance pending'),
+                            verifier=verification, terminal=terminal, branch_readiness='reviewable; integration acceptance pending'),
                  cases=cases, case_plan=pin(plan_path), reporter=pin(reporter), bounds=bounds(), fresh_bounds=fresh_bounds(), branches=audit,
                  cohorts={name: cohort(name) for name in ('final-format-04', 'final-format-05', 'final-format-06')},
                  saved_manifest_tests=tests, manifest_test_report=pin(bytecode),
@@ -171,6 +203,7 @@ def main():
                  'Fresh final-format-06 uses the existing network-denied builder/validator sandboxes through an escalated outer launch. '
                  'No native binary, provider, model, probe, capture, reservation or GitHub operation was performed.', '',
                  'Verifier readback: ' + json.dumps(verification, sort_keys=True), '',
+                 'Terminal cohort readback: ' + json.dumps(terminal, sort_keys=True), '',
                  table(['Case', 'Expected', 'Actual', 'Accepted'], [[r[k] for k in ('name', 'expected', 'actual', 'accepted')] for r in cases]), '',
                  'Selection authority totals below conservatively add the manifest once: its pin is held by preparation. '
                  'All referenced authority, preparation, registration, selection, builder-report and manifest bytes were reread. '
@@ -183,12 +216,14 @@ def main():
                  'Restart and branch evidence:', '']
         for name, info in audit.items():
             lines += [name + ': ' + info['head']['stdout'].strip(), '',
-                      'Commits since the prior handoff:', '```text', info['commits_after_handoff']['stdout'].strip() or '(none)', '```', '',
-                      'Working-tree state (untracked files included):', '```text', info['status']['stdout'].strip() or '(clean)', '```', '',
+                      'Commits since the prior handoff:', '```text', command_text(info['commits_after_handoff'], '(none)'), '```', '',
+                      'Working-tree state (untracked files included):', '```text', command_text(info['status'], '(clean)'), '```', '',
                       'Changes against the candidate, from their common ancestor:', '```text', info['files_from_common_base']['stdout'].strip(), '```', '']
         lines += ['Both branches diverge from the candidate at ' + audit['gate']['merge_base']['stdout'].strip() +
                   '. Integrate commits, not whole trees: direct candidate-to-branch diffs also remove candidate-only changes. '
-                  'The JSON twin retains both diff forms. The four protected files match the candidate on both branches; controller pins were not rotated.', '',
+                  'The JSON twin retains both diff forms. Protected HEAD and worktree checks all pass: ' +
+                  str(all(info[key]['returncode'] == 0 for info in audit.values() for key in ('protected', 'protected_worktree'))) +
+                  '. No controller pins were rotated in this resume.', '',
                   'For canary registration, the environment branch supplies v3 preparation/execution and manifest propagation '
                   '(a3a79c06f), stability/ownership fixes (6a4f1ece8, eba669867), manifest CLI (972789574), restored import paths '
                   '(ecb628c68), payload verification followed by the version-1 correction (89aec8288 then 1ecab7ef1), '
@@ -206,7 +241,8 @@ def main():
                         [[r['name'], *[r['counts'][k] for k in ('tests', 'failures', 'errors', 'skipped')], r['pinned_xml_matches']] for r in tests]), '',
                   'The prior retention-prefix timeout remains nonacceptance. Capture/finalization controls remain unexecuted '
                   'under the assignment restriction. No full CI or integrated-candidate acceptance is claimed.', '',
-                  'Every table is generated from the JSON evidence by:', '```bash',
+                  'Every table was generated from the JSON evidence by this recorded command (exclusive output; '
+                  'choose a new output filename for a rerun):', '```bash',
                   f'{E.parent / "data-sheets-schema/.venv/bin/python"} -I -S -B {Path(__file__)} --output {args.output} --publish-handoff', '```', '',
                   'Evidence: ' + str(args.output), '']
         raw = '\n'.join(lines)

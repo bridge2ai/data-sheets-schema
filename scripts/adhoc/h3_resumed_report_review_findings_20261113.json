@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-13",
+  "assignment": "codex197 resume gate matrix",
+  "publication": "Local issue ledger for the lead; assignment prohibits helper GitHub writes.",
+  "findings": [
+    {"id": "H3-RESUME-1", "priority": "P1", "finding": "Complete aggregate could be accepted before terminal cleanup and postflight.", "disposition": "Require successful full-stage outcome and result, configuration and demonstration pins, zero side effects; negative controls cover missing outcome, cleanup/postflight failure and changed aggregate."},
+    {"id": "H3-RESUME-2", "priority": "P2", "finding": "Git inspection failure could render clean and protected-file match was unconditional.", "disposition": "Render inspection errors explicitly; committed and live protected-file claims depend on saved exit codes."},
+    {"id": "H3-RESUME-3", "priority": "P2", "finding": "Bounds statement was unconditional and only covered interrupted cohort.", "disposition": "Derive historical condition from byte readback and threshold; separately measure fresh completed packets with existing packing-free authority reader."},
+    {"id": "H3-RESUME-4", "priority": "P3", "finding": "Exact reproduction command names an already existing exclusive output.", "disposition": "Label it as the recorded generating command and require a fresh output filename for rerun."}
+  ]
+}
