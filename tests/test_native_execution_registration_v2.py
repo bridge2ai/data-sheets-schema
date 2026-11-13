@@ -64,6 +64,9 @@ def inputs(native_spec, isolated_modules, tmp_path, monkeypatch):
         source = selection.capture(c.strict_json(
             native_spec.native_shared_generation_registration.encode())['registration_path'])
     selection_path = Path(source.registration.pin.path)
+    from data_sheets_schema import native_environment_manifest
+    environment_path = tmp_path.resolve() / "environment-manifest.json"
+    native_environment_manifest.write(environment_path)
     calls = []
     original = subprocess.Popen
 
@@ -77,7 +80,7 @@ def inputs(native_spec, isolated_modules, tmp_path, monkeypatch):
     monkeypatch.setattr(subprocess, 'Popen', local_git_only)
     return {'spec': native_spec, 'selection': selection_path, 'runtime_path': runtime_path,
         'runtime': runtime, 'executable': executable, 'root': tmp_path.resolve(), 'calls': calls,
-        'kwargs': {'job_id': 'synthetic_native_rep1', 'run_date': '2026-11-07', 'max_draft_checks': 2}}
+        'kwargs': {'environment_manifest_path': environment_path, 'job_id': 'synthetic_native_rep1', 'run_date': '2026-11-07', 'max_draft_checks': 2}}
 
 
 def _files(root):
@@ -153,7 +156,7 @@ def test_prepare_rederives_real_native26_and_all_pins_without_effects(inputs, is
     body = envelope['registration']
     assert envelope['authority_version'] == 2
     assert envelope['controller_sources_sha256'] == controller.SOURCES_SHA256
-    assert body['kind'] == 'd4d_native_shared_preparation_v2'
+    assert body['kind'] == 'd4d_native_shared_preparation_v3'
     assert body['execution'] == 'offline_inputs_only_not_permission_or_launch_authority'
     assert body['render_spec']['render_version'] == 26
     assert body['render_spec']['native_shared_generation_version'] == 1
@@ -203,7 +206,7 @@ def test_bad_authority_envelope_refuses_before_input_capture(isolated_modules, m
     monkeypatch.setattr(subprocess, 'Popen', lambda *a, **k: pytest.fail('invalid envelope spawned a process'))
     monkeypatch.setattr(registration.authority, 'loaded_dependencies',
                         lambda *a, **k: pytest.fail('invalid envelope compiled or loaded helpers'))
-    with pytest.raises(ValueError, match='v2 authority envelope'):
+    with pytest.raises(ValueError, match='current registration requires v3'):
         registration.verify_preparer(c.canonical(value), job_id='synthetic')
 
 
@@ -298,6 +301,9 @@ def test_complete_valid_v1_execution_refused_by_v2_without_reservation(
     previous = {name: sys.modules.pop(name, absent) for name in names}
     old_path = list(sys.path)
     original = subprocess.Popen
+    from data_sheets_schema import native_environment_manifest
+    environment_path = tmp_path.resolve() / "environment-manifest.json"
+    native_environment_manifest.write(environment_path)
     calls = []
 
     def local_git_only(argv, *args, **kwargs):
@@ -351,7 +357,7 @@ def _execution_prefix(inputs, preparation):
         'selection_sha256': body['selection']['sha256'], 'runtime_sha256': body['runtime']['sha256']}
     composition_raw = c.canonical(composition)
     return {'authority_version': 2, 'controller_sources_sha256': controller.SOURCES_SHA256,
-        'registration': {'kind': registration.EXECUTION_KIND, 'schema_version': 2,
+        'registration': {'kind': registration.EXECUTION_KIND, 'schema_version': 3,
             'execution': registration.EXECUTION_SCOPE, 'execution_gates': list(registration.EXECUTION_GATES),
             'preparation_raw_json': prepared_raw.decode(), 'preparation_sha256': c.sha(prepared_raw),
             'job_id': body['job_id'], 'dependencies': body['dependencies'],
@@ -378,7 +384,7 @@ def test_v1_refuses_v2_execution_envelope_and_inner_join_prefix(prepared):
     inputs, preparation = prepared
     envelope = _execution_prefix(inputs, preparation)
     assert envelope['registration']['kind'] == registration.EXECUTION_KIND
-    assert envelope['registration']['schema_version'] == 2
+    assert envelope['registration']['schema_version'] == 3
     before_files, before_entries = _files(inputs['root']), _entries(inputs['root'])
     for value in (envelope, envelope['registration']):
         with pytest.raises(ValueError, match='not a supported explicit native execution registration'):
