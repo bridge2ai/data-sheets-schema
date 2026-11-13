@@ -83,9 +83,10 @@ def _append(selection, execution, history, kind, payload):
 
 def _host_stage_clock(execution, journal_sha256):
     from .native_shared_controller import captured_execution_body
-    from .native_host_power import checkpoint
+    from .native_host_power import checkpoint, observe
     value = captured_execution_body(execution.execution.raw)
-    checkpoint(value['attempt_directory'], 'stage-' + journal_sha256)
+    observe(value['attempt_directory'], 'stage-' + journal_sha256,
+            checkpoint, value['attempt_directory'], 'stage-' + journal_sha256)
 
 
 def activate(selection, execution_raw, started_raw):

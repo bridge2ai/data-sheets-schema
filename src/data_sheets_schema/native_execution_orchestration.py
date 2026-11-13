@@ -448,7 +448,7 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         if first_stop is None:
             first_stop = str(message)
     from . import native_host_power as host_power
-    host_power.start_run(attempt)
+    host_power.observe(attempt, 'start', host_power.start_run, attempt)
     with _signals(signals):
         proxy = controls['run_direct_canary'].NoProxy()
         guard = None

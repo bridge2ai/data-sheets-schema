@@ -119,7 +119,8 @@ def test_observation_catalog_is_bounded_closed_namespace(case, tmp_path, kind):
 from tests.test_native_shared_stages import case, supplied
 
 
-def test_actual_session_publication_records_host_stage_clock(started, monkeypatch):
+@pytest.mark.parametrize('persistence_failure', [False, True])
+def test_actual_session_publication_records_host_stage_clock(started, monkeypatch, persistence_failure):
     """Issue 6046: an actual controller journal publication gets both clocks."""
     from data_sheets_schema import native_host_power as power
     selected, value, composition, _, _ = started
@@ -127,11 +128,24 @@ def test_actual_session_publication_records_host_stage_clock(started, monkeypatc
     monkeypatch.setattr(power, 'probe', lambda: {'source': 'ac', 'battery_percent': 90, 'lid': 'open'})
     monkeypatch.setattr(power, 'sleep_events', lambda *a: {'status': 'read', 'events': [], 'intervals': []})
     power.start_run(attempt)
+    if persistence_failure:
+        write = power._write_new
+        def broken_stage(path, record):
+            if path.name.startswith('host-clock-stage-'):
+                raise OSError('synthetic stage persistence failure')
+            return write(path, record)
+        monkeypatch.setattr(power, '_write_new', broken_stage)
     transcript, control = native_init(selected, value, composition)
     live_capture.initialize(selected.registration.pin.path, transcript_bytes=len(transcript),
         control_bytes=len(control), **stream_capture(value))
     journal = Path(selected.role('journal')).read_bytes()
     clock_path = attempt / ('host-clock-stage-' + c.sha(journal) + '.json')
+    if persistence_failure:
+        assert not clock_path.exists()
+        diagnostic = attempt / ('host-observation-error-stage-' + c.sha(journal) + '.json')
+        assert json.loads(diagnostic.read_bytes())['error_type'] == 'OSError'
+        assert Path(selected.role('journal')).read_bytes() == journal
+        return
     clock = json.loads(clock_path.read_bytes())
     assert clock['wall_ns'] > 0 and clock['monotonic_ns'] > 0
     result = power.finish_run(attempt)

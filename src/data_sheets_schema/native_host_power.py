@@ -121,6 +121,28 @@ def start_run(directory, *, require_ac_power=False):
     return record
 
 
+def observe(directory, boundary, action, *args):
+    """Supplemental writes never change the outcome of the observed operation."""
+    try:
+        return action(*args)
+    except Exception as exc:
+        observation_error(directory, boundary, exc)
+        return None
+
+
+def observation_error(directory, boundary, exc):
+    # Exception messages can contain sensitive subprocess arguments. Retain the
+    # boundary and class only; stderr remains available if the disk write fails.
+    record = {'boundary': boundary, 'error_type': type(exc).__name__}
+    try:
+        _write_new(Path(directory) / ('host-observation-error-' + boundary + '.json'), record)
+    except Exception:
+        try:
+            print('host observation unavailable: ' + boundary + ': ' + type(exc).__name__, file=sys.stderr)
+        except Exception:
+            pass
+
+
 def checkpoint(directory, label):
     directory = Path(directory)
     if not (directory / 'host-clock-start.json').exists():
@@ -217,7 +239,7 @@ def finish_run(directory):
 
 @contextmanager
 def finishing_run(directory):
-    """End observation after existing cleanup, preserving an earlier exception."""
+    """End observation cannot replace active or previously caught failures."""
     try:
         yield
     finally:
@@ -225,7 +247,7 @@ def finishing_run(directory):
         try:
             finish_run(directory)
         except Exception as exc:
-            if original is None:
-                raise
-            original.__notes__ = [*getattr(original, '__notes__', []),
-                                  'host observation could not be persisted: ' + type(exc).__name__]
+            observation_error(directory, 'end', exc)
+            if original is not None:
+                original.__notes__ = [*getattr(original, '__notes__', []),
+                                      'host observation could not be persisted: ' + type(exc).__name__]

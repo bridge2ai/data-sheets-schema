@@ -75,10 +75,20 @@ def test_successful_readback_still_requires_fresh_verification(tmp_path, monkeyp
     assert caught.value is sentinel
 
 
-def test_public_declared_runtime_failure_publishes_exact_readback(tmp_path, monkeypatch):
+@pytest.mark.parametrize('observation_failure', [None, 'start', 'end'])
+def test_public_declared_runtime_failure_publishes_exact_readback(tmp_path, monkeypatch, observation_failure):
     from tests.test_native_shared_execution import make_case
     from data_sheets_schema import native_shared_execution_orchestration as execute
     from data_sheets_schema import native_execution_authority_v2 as authority
+    from data_sheets_schema import native_host_power as power
+    monkeypatch.setattr(power, 'probe', lambda: {'source': 'ac'})
+    if observation_failure:
+        write = power._write_new
+        def broken_sidecar(path, value):
+            if path.name == 'host-clock-' + observation_failure + '.json':
+                raise OSError('synthetic persistence failure')
+            return write(path, value)
+        monkeypatch.setattr(power, '_write_new', broken_sidecar)
     monkeypatch.chdir(authority.ROOT)
     case = make_case(tmp_path / 'runtime-validation-failure')
     def invalidate_runtime(value):
@@ -91,6 +101,10 @@ def test_public_declared_runtime_failure_publishes_exact_readback(tmp_path, monk
     (case['root'] / 'actual-failed-result.json').write_bytes(c.canonical(result))
     assert result['state'] == 'failed' and result['runtime_gates_passed'] is False
     assert result['gates']['first_stop']['passed'] is False
+    assert result['first_stop'] == 'launch or runtime failed: RuntimeError'
+    if observation_failure:
+        diagnostic = Path(case['value']['attempt_directory']) / ('host-observation-error-' + observation_failure + '.json')
+        assert c.strict_json(diagnostic.read_bytes()) == {'boundary': observation_failure, 'error_type': 'OSError'}
     assert result['publication_validation_failure']['stage'] == 'subscription_admission.context'
     assert 'synthetic HOME' in result['publication_validation_failure']['reason']
     assert execute.read_final(case['raw']) == result
