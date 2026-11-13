@@ -53,7 +53,8 @@ def saved_case(tmp_path_factory):
             selected = capture.document()
             expected = registration.permission_expectation(runtime, composed, replay,
                 "Fabricated offline observations, never account or launch evidence."
-                + command_guidance(composed["policy"]), root / "future-config",
+                + command_guidance(composed["policy"]),
+                Path(runtime['environment']['PYSTOW_HOME']).parent / 'cli_config',
                 authority.dependency_identity())
             manifest = fabricated_manifest(expected, selected, root / "isolated-probes",
                 capture.raw(selected["inputs"]["bundle"]["path"]))
