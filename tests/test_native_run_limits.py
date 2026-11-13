@@ -12,6 +12,7 @@ from data_sheets_schema import native_u4b_runtime as runtime
 from data_sheets_schema import native_u4b_probe_sequence as sequence
 from data_sheets_schema import native_launch_review as review
 from data_sheets_schema import native_subscription_guard as wire
+from data_sheets_schema import native_shared_runtime_values as generic
 from tests.test_native_u4b_runtime import runtime_inputs
 from tests.test_native_launch_review import evidence
 from tests.utils.native_u4b_observation import mint_observation
@@ -42,8 +43,26 @@ def test_mixed_third_and_missing_values_refused_at_each_boundary(tmp_path, pair)
     for key in ('budget_guard_usd', 'deadline_seconds'):
         if value[key] is None: del value[key]
     for check in (limits.require_registered_pair, runtime._profile,
-                  policy.validate_runtime_terms, sequence.validate_provisional_runtime):
+                  policy.validate_runtime_terms):
         with pytest.raises(ValueError): check(value)
+
+
+@pytest.mark.parametrize('pair', [('90', 43200), ('400', 21600), ('100', 21600),
+                                 ('400', 43201), ('90.0', 21600)])
+def test_provisional_refusal_depends_on_registered_pair_check(tmp_path, monkeypatch, pair):
+    value, args = runtime_inputs(tmp_path)
+    mint_observation(value, args['probe_init_path'], args['native_request_path'])
+    provisional = json.loads((Path(args['observation_probe_path']).parent.parent / 'provisional-runtime.json').read_bytes())
+    assert sequence.validate_provisional_runtime(provisional) == provisional
+    mutated = deepcopy(provisional)
+    mutated.update(zip(('budget_guard_usd', 'deadline_seconds'), pair))
+    assert generic.validate_runtime_v2(mutated) == mutated
+    with pytest.raises(ValueError, match='registered budget/deadline as one complete pair'):
+        sequence.validate_provisional_runtime(mutated)
+    # Removing only this check must admit these otherwise valid documents.
+    # This makes the regression sensitivity executable, not an inferred claim.
+    monkeypatch.setattr(limits, 'require_registered_pair', lambda value: None)
+    assert sequence.validate_provisional_runtime(mutated) == mutated
 
 
 @pytest.mark.parametrize('pair', limits.REGISTERED_PAIRS)
