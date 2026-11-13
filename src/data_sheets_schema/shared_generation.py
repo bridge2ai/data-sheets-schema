@@ -267,6 +267,10 @@ def select(spec) -> dict | None:
     registration = getattr(spec, "shared_generation_registration", None)
     from .source_heading_runtime import MODES
     if not version:
+        if getattr(spec, 'native_shared_generation_version', 0):
+            from .native_shared_render import validate_spec
+            validate_spec(spec)
+            return None
         if (spec.condition in MODES.values() or spec.render_version == 27
                 or spec.api_playbook_version == 3 or spec.receipt_completion_version == 3
                 or registration is not None or spec.condition == "generic_v10"

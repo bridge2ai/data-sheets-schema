@@ -32,7 +32,9 @@ def environment(runtime, selected, spec, config_directory):
     """
     from .api_runner import _require_registered_input_spellings
     _require_registered_input_spellings(spec)
-    return {**runtime['environment'], **POLICY_ENV,
+    from .native_helper_cache import for_attempt
+    cache = for_attempt(runtime['environment'], Path(config_directory).parent)
+    return {**runtime['environment'], **POLICY_ENV, 'PYSTOW_HOME': str(cache),
         'CLAUDE_CONFIG_DIR': str(config_directory),
         'PYTHONPATH': str(ROOT / 'src'), 'VIRTUAL_ENV': sys.prefix,
         'D4D_LAUNCH_INSTRUCTION': selected['instruction_path'],
@@ -188,7 +190,12 @@ def _paths(value, selected, *, fresh, extra_protected=()):
     outputs = sorted({Path(p) for p in selected['policy']['readonly_lookups']['output_directories']})
     reserved = [Path(value[k]) for k in ('attempt_directory', 'evidence_directory')] + outputs
     protected = [Path(value[k]) for k in ('composition', 'system_path', 'permission_probe')]
-    protected += [Path(selected['runtime_path']), Path(value['runtime']['executable']['path'])]
+    protected += [Path(selected['runtime_path']), Path(value['runtime']['executable']['path']),
+                  Path(value['runtime']['environment']['HOME'])]
+    from .native_helper_cache import for_attempt
+    cache = for_attempt(value['runtime']['environment'], value['attempt_directory'])
+    if cache == ROOT or ROOT in cache.parents or cache in ROOT.parents:
+        raise ValueError('helper cache must be outside the source repository')
     protected += [Path(p) for p in selected['policy']['readonly_lookups']['inputs']]
     protected += [ROOT / p for p in ('src', 'notes', 'scripts', 'tests', 'project', '.git', '.github', '.claude')]
     protected += [Path(p).resolve() for p in extra_protected]

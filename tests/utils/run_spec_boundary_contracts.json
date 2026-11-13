@@ -22,9 +22,9 @@
     },
     {
       "function_bytes": 395,
-      "function_end_line": 640,
+      "function_end_line": 644,
       "function_sha256": "2298c8d0249741c5f4ba937004c177b34e6e463a0ac7d42eef7273b69be3a3e9",
-      "function_start_line": 633,
+      "function_start_line": 637,
       "identity": "data_sheets_schema.shared_generation.assert_current",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -33,9 +33,9 @@
     },
     {
       "function_bytes": 3350,
-      "function_end_line": 565,
+      "function_end_line": 569,
       "function_sha256": "1e05645afa0e7c9c54d5d51d79554ce052f865c50334d107e965821adb63d2b7",
-      "function_start_line": 511,
+      "function_start_line": 515,
       "identity": "data_sheets_schema.shared_generation.capture",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -44,9 +44,9 @@
     },
     {
       "function_bytes": 434,
-      "function_end_line": 988,
+      "function_end_line": 992,
       "function_sha256": "ff7172da041bb3546977b0f5d31bb4448b2cfda030087d4de89e28f93235156e",
-      "function_start_line": 981,
+      "function_start_line": 985,
       "identity": "data_sheets_schema.shared_generation.core_inventory",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -55,9 +55,9 @@
     },
     {
       "function_bytes": 409,
-      "function_end_line": 999,
+      "function_end_line": 1003,
       "function_sha256": "2335da9f9f51ca5198a0b8e97993efce771a016039b504c7fe7989b45b939316",
-      "function_start_line": 991,
+      "function_start_line": 995,
       "identity": "data_sheets_schema.shared_generation.core_text",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -66,9 +66,9 @@
     },
     {
       "function_bytes": 818,
-      "function_end_line": 958,
+      "function_end_line": 962,
       "function_sha256": "80c6558997cb36b58cf94c162caad9533ca63ace431b8599f78f301de5de2aa0",
-      "function_start_line": 947,
+      "function_start_line": 951,
       "identity": "data_sheets_schema.shared_generation.digest_text",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -77,9 +77,9 @@
     },
     {
       "function_bytes": 1088,
-      "function_end_line": 723,
+      "function_end_line": 727,
       "function_sha256": "b975d659c3e05871e786f4fde706c0bd0dbc8acf76438b31b6e20ac73a887690",
-      "function_start_line": 704,
+      "function_start_line": 708,
       "identity": "data_sheets_schema.shared_generation.generation_context",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -88,9 +88,9 @@
     },
     {
       "function_bytes": 64,
-      "function_end_line": 630,
+      "function_end_line": 634,
       "function_sha256": "ea97e6e1c0bcf64e91f141f68df1fa73714b1e6b4b2cbe5501efb6d625beee71",
-      "function_start_line": 629,
+      "function_start_line": 633,
       "identity": "data_sheets_schema.shared_generation.identity",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -99,9 +99,9 @@
     },
     {
       "function_bytes": 965,
-      "function_end_line": 978,
+      "function_end_line": 982,
       "function_sha256": "256a11cc502a6dec9c8ea2cd00d5d1bdb70379769d235e0a826c37e0aa0d2820",
-      "function_start_line": 961,
+      "function_start_line": 965,
       "identity": "data_sheets_schema.shared_generation.marked_bundle",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -110,9 +110,9 @@
     },
     {
       "function_bytes": 762,
-      "function_end_line": 923,
+      "function_end_line": 927,
       "function_sha256": "232322a43878bcc95a9743513d618bdcd2e1401798d019a0ea5c996fac1dea8d",
-      "function_start_line": 908,
+      "function_start_line": 912,
       "identity": "data_sheets_schema.shared_generation.memo",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -121,9 +121,9 @@
     },
     {
       "function_bytes": 3229,
-      "function_end_line": 899,
+      "function_end_line": 903,
       "function_sha256": "b47ce82a2548d992131d7257b8e2845a70a11f37aa8fcbe19c658497310c6717",
-      "function_start_line": 863,
+      "function_start_line": 867,
       "identity": "data_sheets_schema.shared_generation.plan",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -132,9 +132,9 @@
     },
     {
       "function_bytes": 2535,
-      "function_end_line": 689,
+      "function_end_line": 693,
       "function_sha256": "126c3f4061d55233197c3b9950184dbbc957cde504ea4765f527cee0d74db438",
-      "function_start_line": 649,
+      "function_start_line": 653,
       "identity": "data_sheets_schema.shared_generation.preflight",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -143,9 +143,9 @@
     },
     {
       "function_bytes": 376,
-      "function_end_line": 860,
+      "function_end_line": 864,
       "function_sha256": "4426e4aa34ea959b32997a501175bdb64240a0c8697b1884ea4438bf9c562b24",
-      "function_start_line": 855,
+      "function_start_line": 859,
       "identity": "data_sheets_schema.shared_generation.require_client",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -154,9 +154,9 @@
     },
     {
       "function_bytes": 748,
-      "function_end_line": 736,
+      "function_end_line": 740,
       "function_sha256": "f4920b7e4fdc0bc71600447fe924f72a40a66ca658c0a313be37f8dfef099fd7",
-      "function_start_line": 726,
+      "function_start_line": 730,
       "identity": "data_sheets_schema.shared_generation.require_generation_context",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -165,9 +165,9 @@
     },
     {
       "function_bytes": 679,
-      "function_end_line": 1053,
+      "function_end_line": 1057,
       "function_sha256": "e868972c26c30573d8b5d8aefb97faae21ddc20fed5854343a4693592144e647",
-      "function_start_line": 1043,
+      "function_start_line": 1047,
       "identity": "data_sheets_schema.shared_generation.require_routing_context",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -176,9 +176,9 @@
     },
     {
       "function_bytes": 598,
-      "function_end_line": 1040,
+      "function_end_line": 1044,
       "function_sha256": "e453c93f3140b5a92cabe38544fa67397fda4c1eba147a849add0d6d31dc376a",
-      "function_start_line": 1030,
+      "function_start_line": 1034,
       "identity": "data_sheets_schema.shared_generation.routing_context",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -187,9 +187,9 @@
     },
     {
       "function_bytes": 1400,
-      "function_end_line": 759,
+      "function_end_line": 763,
       "function_sha256": "bccf7936e222e6328c3b20679c7708eece109bdc78bb5f3d62827de2dd1f0a45",
-      "function_start_line": 739,
+      "function_start_line": 743,
       "identity": "data_sheets_schema.shared_generation.schema_context",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -197,9 +197,9 @@
       "source_path": "src/data_sheets_schema/shared_generation.py"
     },
     {
-      "function_bytes": 2242,
-      "function_end_line": 293,
-      "function_sha256": "5db1c42cf69227e278988020bf07636fd24a9b60e9147d1aa4d869b71c2211d2",
+      "function_bytes": 2423,
+      "function_end_line": 297,
+      "function_sha256": "7c9fe28bf00c4a9a8029fdfea95576c8470bb84c7cb1f9c7de8162e1b8887c1c",
       "function_start_line": 261,
       "identity": "data_sheets_schema.shared_generation.select",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
@@ -209,9 +209,9 @@
     },
     {
       "function_bytes": 327,
-      "function_end_line": 1027,
+      "function_end_line": 1031,
       "function_sha256": "6384d8ab776028f3aed4bf8786c3ca23b22a8ad2690e91065b127537dae82404",
-      "function_start_line": 1022,
+      "function_start_line": 1026,
       "identity": "data_sheets_schema.shared_generation.source_chunks",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -220,9 +220,9 @@
     },
     {
       "function_bytes": 173,
-      "function_end_line": 929,
+      "function_end_line": 933,
       "function_sha256": "f6985449abf06843595c711cf88498bccad87674b62fef2ff21fadde7b53e25d",
-      "function_start_line": 926,
+      "function_start_line": 930,
       "identity": "data_sheets_schema.shared_generation.source_raw",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -231,9 +231,9 @@
     },
     {
       "function_bytes": 539,
-      "function_end_line": 944,
+      "function_end_line": 948,
       "function_sha256": "7e9f9cc9e31cdb098d6944b4483d454e10650757930bfa2ab5078a00ddf8ddae",
-      "function_start_line": 932,
+      "function_start_line": 936,
       "identity": "data_sheets_schema.shared_generation.source_registry",
       "pin_basis": "Exact complete source lines from first decorator/def through end_lineno, including docstring and terminal newline.",
       "proposed_mode": "validated-caller",
@@ -247,11 +247,11 @@
     "A new public protected function remains an unresolved inventory candidate.",
     "The latch function pin includes its docstring; unrelated latch documentation changes do not change that pin."
   ],
-  "producer_sha256": "573be1eed536349e802907c9c8884cdcd98dbbb33c6d8547b23bd9e77a52bf12",
-  "shared_generation_sha256": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",
-  "source": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-5213-stack-preview",
+  "producer_sha256": "ba27089846a7bfa6af3ac9fd8baf667d0a42af7ab704febc062ec21247e070e3",
+  "shared_generation_sha256": "2ec18e60316423035f88a2a30263c56385bfbbc587303e84e805a8349ab4f781",
+  "source": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u1/composed-41b7169f6",
   "source_sha256": {
-    "src/data_sheets_schema/shared_generation.py": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",
+    "src/data_sheets_schema/shared_generation.py": "2ec18e60316423035f88a2a30263c56385bfbbc587303e84e805a8349ab4f781",
     "src/data_sheets_schema/latch_journal.py": "37d63689277b4870f43ae2973e415f1e46f77e32cd1ecd11e3997cdb89b0d472"
   },
   "status": "approved exact-function validated-caller contracts; not runtime guard evidence",
@@ -274,6 +274,391 @@
         "src/data_sheets_schema/shared_generation.py": "8c799066df941dd80d65ffdc23eee225f875383e046bbc1f88656f9897d01e47"
       },
       "shared_generation_sha256": "8c799066df941dd80d65ffdc23eee225f875383e046bbc1f88656f9897d01e47"
+    },
+    "pre_native_u1": {
+      "schema_version": 1,
+      "approval": {
+        "authorized": true,
+        "recorded_date": "2026-11-03",
+        "authority": "Explicit human ruling relayed by the lead during round four",
+        "scope": "Exactly these 21 protected helper contracts may live beside the inventory; shared_generation.py and latch_journal.refuse_legacy_execution, including its docstring, remain unchanged.",
+        "new_public_functions": "No exemption: newly discovered functions require their own reviewed contract.",
+        "proposal_sha256": "83fbdee141b291086f3d4289bbcf83d381e1a98fd9562163f9608d5220c6eab1"
+      },
+      "limits": [
+        "No protected source is edited; acceptance is limited to the explicit approved contracts and exact source pins.",
+        "Each exception binds its exact function; there is no file-wide waiver.",
+        "A new public protected function remains an unresolved inventory candidate.",
+        "The latch function pin includes its docstring; unrelated latch documentation changes do not change that pin."
+      ],
+      "producer_sha256": "573be1eed536349e802907c9c8884cdcd98dbbb33c6d8547b23bd9e77a52bf12",
+      "shared_generation_sha256": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",
+      "source": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-5213-stack-preview",
+      "source_sha256": {
+        "src/data_sheets_schema/shared_generation.py": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",
+        "src/data_sheets_schema/latch_journal.py": "37d63689277b4870f43ae2973e415f1e46f77e32cd1ecd11e3997cdb89b0d472"
+      },
+      "status": "approved exact-function validated-caller contracts; not runtime guard evidence",
+      "round5_rebind": {
+        "authority": "Lead ruling for the exact approved round-five variant",
+        "ruling_path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/coordination/2026-11-03-codex-5213-stack-preview-ruling.md",
+        "ruling_sha256": "b12186255583dae0adf5dfc40cc68645f7c7aafb14138f49a42d10ef32212c59",
+        "merge_commit": "5ee008a65f0f4abfb60cda8b13bdff91be6cbd18",
+        "baseline_sidecar_sha256": "90c31790efb2d8e1068f910551da747bfaf3a495b1d037560331e42323750566",
+        "producer_commit": "04c40b5177c6d7f876aaed444bf59fa46e21028d",
+        "helper_path": "scripts/adhoc/rebind_d76_round5_protected_contracts_20261103.py",
+        "helper_sha256": "573be1eed536349e802907c9c8884cdcd98dbbb33c6d8547b23bd9e77a52bf12",
+        "checker_sha256": "a379e93a0065dc927835b1417cabcb926e33eeb333416c768237bc50d2dc6237",
+        "current_module_sha256": {
+          "src/data_sheets_schema/shared_generation.py": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",
+          "src/data_sheets_schema/latch_journal.py": "37d63689277b4870f43ae2973e415f1e46f77e32cd1ecd11e3997cdb89b0d472"
+        },
+        "changed_function_identities": [
+          "data_sheets_schema.shared_generation.plan",
+          "data_sheets_schema.shared_generation.schema_context",
+          "data_sheets_schema.shared_generation.select"
+        ],
+        "function_pin_updates": [
+          {
+            "identity": "data_sheets_schema.latch_journal.refuse_legacy_execution",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 132,
+              "function_end_line": 141,
+              "function_bytes": 566,
+              "function_sha256": "192d8d24e7a36478c987b4168c260ba0d7312a74cc26ff28fdb822dedaea0dcd"
+            },
+            "after": {
+              "function_start_line": 132,
+              "function_end_line": 141,
+              "function_bytes": 566,
+              "function_sha256": "192d8d24e7a36478c987b4168c260ba0d7312a74cc26ff28fdb822dedaea0dcd"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.assert_current",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 626,
+              "function_end_line": 633,
+              "function_bytes": 395,
+              "function_sha256": "2298c8d0249741c5f4ba937004c177b34e6e463a0ac7d42eef7273b69be3a3e9"
+            },
+            "after": {
+              "function_start_line": 633,
+              "function_end_line": 640,
+              "function_bytes": 395,
+              "function_sha256": "2298c8d0249741c5f4ba937004c177b34e6e463a0ac7d42eef7273b69be3a3e9"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.capture",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 504,
+              "function_end_line": 558,
+              "function_bytes": 3350,
+              "function_sha256": "1e05645afa0e7c9c54d5d51d79554ce052f865c50334d107e965821adb63d2b7"
+            },
+            "after": {
+              "function_start_line": 511,
+              "function_end_line": 565,
+              "function_bytes": 3350,
+              "function_sha256": "1e05645afa0e7c9c54d5d51d79554ce052f865c50334d107e965821adb63d2b7"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.core_inventory",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 966,
+              "function_end_line": 973,
+              "function_bytes": 434,
+              "function_sha256": "ff7172da041bb3546977b0f5d31bb4448b2cfda030087d4de89e28f93235156e"
+            },
+            "after": {
+              "function_start_line": 981,
+              "function_end_line": 988,
+              "function_bytes": 434,
+              "function_sha256": "ff7172da041bb3546977b0f5d31bb4448b2cfda030087d4de89e28f93235156e"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.core_text",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 976,
+              "function_end_line": 984,
+              "function_bytes": 409,
+              "function_sha256": "2335da9f9f51ca5198a0b8e97993efce771a016039b504c7fe7989b45b939316"
+            },
+            "after": {
+              "function_start_line": 991,
+              "function_end_line": 999,
+              "function_bytes": 409,
+              "function_sha256": "2335da9f9f51ca5198a0b8e97993efce771a016039b504c7fe7989b45b939316"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.digest_text",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 932,
+              "function_end_line": 943,
+              "function_bytes": 818,
+              "function_sha256": "80c6558997cb36b58cf94c162caad9533ca63ace431b8599f78f301de5de2aa0"
+            },
+            "after": {
+              "function_start_line": 947,
+              "function_end_line": 958,
+              "function_bytes": 818,
+              "function_sha256": "80c6558997cb36b58cf94c162caad9533ca63ace431b8599f78f301de5de2aa0"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.generation_context",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 697,
+              "function_end_line": 716,
+              "function_bytes": 1088,
+              "function_sha256": "b975d659c3e05871e786f4fde706c0bd0dbc8acf76438b31b6e20ac73a887690"
+            },
+            "after": {
+              "function_start_line": 704,
+              "function_end_line": 723,
+              "function_bytes": 1088,
+              "function_sha256": "b975d659c3e05871e786f4fde706c0bd0dbc8acf76438b31b6e20ac73a887690"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.identity",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 622,
+              "function_end_line": 623,
+              "function_bytes": 64,
+              "function_sha256": "ea97e6e1c0bcf64e91f141f68df1fa73714b1e6b4b2cbe5501efb6d625beee71"
+            },
+            "after": {
+              "function_start_line": 629,
+              "function_end_line": 630,
+              "function_bytes": 64,
+              "function_sha256": "ea97e6e1c0bcf64e91f141f68df1fa73714b1e6b4b2cbe5501efb6d625beee71"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.marked_bundle",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 946,
+              "function_end_line": 963,
+              "function_bytes": 965,
+              "function_sha256": "256a11cc502a6dec9c8ea2cd00d5d1bdb70379769d235e0a826c37e0aa0d2820"
+            },
+            "after": {
+              "function_start_line": 961,
+              "function_end_line": 978,
+              "function_bytes": 965,
+              "function_sha256": "256a11cc502a6dec9c8ea2cd00d5d1bdb70379769d235e0a826c37e0aa0d2820"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.memo",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 893,
+              "function_end_line": 908,
+              "function_bytes": 762,
+              "function_sha256": "232322a43878bcc95a9743513d618bdcd2e1401798d019a0ea5c996fac1dea8d"
+            },
+            "after": {
+              "function_start_line": 908,
+              "function_end_line": 923,
+              "function_bytes": 762,
+              "function_sha256": "232322a43878bcc95a9743513d618bdcd2e1401798d019a0ea5c996fac1dea8d"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.plan",
+            "body_changed": true,
+            "before": {
+              "function_start_line": 852,
+              "function_end_line": 884,
+              "function_bytes": 3054,
+              "function_sha256": "6f9e090e1d2f0412580bce6b46460d59ac55e3c65304f12bbf4466cec008c4d3"
+            },
+            "after": {
+              "function_start_line": 863,
+              "function_end_line": 899,
+              "function_bytes": 3229,
+              "function_sha256": "b47ce82a2548d992131d7257b8e2845a70a11f37aa8fcbe19c658497310c6717"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.preflight",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 642,
+              "function_end_line": 682,
+              "function_bytes": 2535,
+              "function_sha256": "126c3f4061d55233197c3b9950184dbbc957cde504ea4765f527cee0d74db438"
+            },
+            "after": {
+              "function_start_line": 649,
+              "function_end_line": 689,
+              "function_bytes": 2535,
+              "function_sha256": "126c3f4061d55233197c3b9950184dbbc957cde504ea4765f527cee0d74db438"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.require_client",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 844,
+              "function_end_line": 849,
+              "function_bytes": 376,
+              "function_sha256": "4426e4aa34ea959b32997a501175bdb64240a0c8697b1884ea4438bf9c562b24"
+            },
+            "after": {
+              "function_start_line": 855,
+              "function_end_line": 860,
+              "function_bytes": 376,
+              "function_sha256": "4426e4aa34ea959b32997a501175bdb64240a0c8697b1884ea4438bf9c562b24"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.require_generation_context",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 719,
+              "function_end_line": 729,
+              "function_bytes": 748,
+              "function_sha256": "f4920b7e4fdc0bc71600447fe924f72a40a66ca658c0a313be37f8dfef099fd7"
+            },
+            "after": {
+              "function_start_line": 726,
+              "function_end_line": 736,
+              "function_bytes": 748,
+              "function_sha256": "f4920b7e4fdc0bc71600447fe924f72a40a66ca658c0a313be37f8dfef099fd7"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.require_routing_context",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 1028,
+              "function_end_line": 1038,
+              "function_bytes": 679,
+              "function_sha256": "e868972c26c30573d8b5d8aefb97faae21ddc20fed5854343a4693592144e647"
+            },
+            "after": {
+              "function_start_line": 1043,
+              "function_end_line": 1053,
+              "function_bytes": 679,
+              "function_sha256": "e868972c26c30573d8b5d8aefb97faae21ddc20fed5854343a4693592144e647"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.routing_context",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 1015,
+              "function_end_line": 1025,
+              "function_bytes": 598,
+              "function_sha256": "e453c93f3140b5a92cabe38544fa67397fda4c1eba147a849add0d6d31dc376a"
+            },
+            "after": {
+              "function_start_line": 1030,
+              "function_end_line": 1040,
+              "function_bytes": 598,
+              "function_sha256": "e453c93f3140b5a92cabe38544fa67397fda4c1eba147a849add0d6d31dc376a"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.schema_context",
+            "body_changed": true,
+            "before": {
+              "function_start_line": 732,
+              "function_end_line": 748,
+              "function_bytes": 1198,
+              "function_sha256": "91791d9b08154daaa37282bf59a79ea378e57422beed16e434b61efd764c814f"
+            },
+            "after": {
+              "function_start_line": 739,
+              "function_end_line": 759,
+              "function_bytes": 1400,
+              "function_sha256": "bccf7936e222e6328c3b20679c7708eece109bdc78bb5f3d62827de2dd1f0a45"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.select",
+            "body_changed": true,
+            "before": {
+              "function_start_line": 260,
+              "function_end_line": 290,
+              "function_bytes": 2163,
+              "function_sha256": "065deb33763ff3c87985e9d7cea400d4eaeb80c3365cf06fb535c7da0d1ea053"
+            },
+            "after": {
+              "function_start_line": 261,
+              "function_end_line": 293,
+              "function_bytes": 2242,
+              "function_sha256": "5db1c42cf69227e278988020bf07636fd24a9b60e9147d1aa4d869b71c2211d2"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.source_chunks",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 1007,
+              "function_end_line": 1012,
+              "function_bytes": 327,
+              "function_sha256": "6384d8ab776028f3aed4bf8786c3ca23b22a8ad2690e91065b127537dae82404"
+            },
+            "after": {
+              "function_start_line": 1022,
+              "function_end_line": 1027,
+              "function_bytes": 327,
+              "function_sha256": "6384d8ab776028f3aed4bf8786c3ca23b22a8ad2690e91065b127537dae82404"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.source_raw",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 911,
+              "function_end_line": 914,
+              "function_bytes": 173,
+              "function_sha256": "f6985449abf06843595c711cf88498bccad87674b62fef2ff21fadde7b53e25d"
+            },
+            "after": {
+              "function_start_line": 926,
+              "function_end_line": 929,
+              "function_bytes": 173,
+              "function_sha256": "f6985449abf06843595c711cf88498bccad87674b62fef2ff21fadde7b53e25d"
+            }
+          },
+          {
+            "identity": "data_sheets_schema.shared_generation.source_registry",
+            "body_changed": false,
+            "before": {
+              "function_start_line": 917,
+              "function_end_line": 929,
+              "function_bytes": 539,
+              "function_sha256": "7e9f9cc9e31cdb098d6944b4483d454e10650757930bfa2ab5078a00ddf8ddae"
+            },
+            "after": {
+              "function_start_line": 932,
+              "function_end_line": 944,
+              "function_bytes": 539,
+              "function_sha256": "7e9f9cc9e31cdb098d6944b4483d454e10650757930bfa2ab5078a00ddf8ddae"
+            }
+          }
+        ],
+        "latch_hash_scope": "The whole-module hash is snapshot metadata only. The exact refuse_legacy_execution function pin remains unchanged.",
+        "limits": "Proposal only; writes no sidecar/checker/protected source. All 21 identities and caller preconditions remain unchanged; no new exemption."
+      }
     }
   },
   "round5_rebind": {
@@ -635,5 +1020,352 @@
     ],
     "latch_hash_scope": "The whole-module hash is snapshot metadata only. The exact refuse_legacy_execution function pin remains unchanged.",
     "limits": "Proposal only; writes no sidecar/checker/protected source. All 21 identities and caller preconditions remain unchanged; no new exemption."
+  },
+  "native_u1_rebind": {
+    "status": "proposal only; scratch testing is not protected-file approval",
+    "baseline_sidecar_sha256": "a7f96a253a37e994f0c62c7d9b2ab21b0a94d4f342975f84103cd274ef11af72",
+    "checker_sha256": "a379e93a0065dc927835b1417cabcb926e33eeb333416c768237bc50d2dc6237",
+    "helper_path": "scripts/adhoc/native_u1_round2_20261106.py",
+    "helper_sha256": "ba27089846a7bfa6af3ac9fd8baf667d0a42af7ab704febc062ec21247e070e3",
+    "u1_commit": "41b7169f6296c69201fc46389082c441e7d7165c",
+    "function_pin_updates": [
+      {
+        "identity": "data_sheets_schema.latch_journal.refuse_legacy_execution",
+        "before": {
+          "function_start_line": 132,
+          "function_end_line": 141,
+          "function_bytes": 566,
+          "function_sha256": "192d8d24e7a36478c987b4168c260ba0d7312a74cc26ff28fdb822dedaea0dcd"
+        },
+        "after": {
+          "function_start_line": 132,
+          "function_end_line": 141,
+          "function_bytes": 566,
+          "function_sha256": "192d8d24e7a36478c987b4168c260ba0d7312a74cc26ff28fdb822dedaea0dcd"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.assert_current",
+        "before": {
+          "function_start_line": 633,
+          "function_end_line": 640,
+          "function_bytes": 395,
+          "function_sha256": "2298c8d0249741c5f4ba937004c177b34e6e463a0ac7d42eef7273b69be3a3e9"
+        },
+        "after": {
+          "function_start_line": 637,
+          "function_end_line": 644,
+          "function_bytes": 395,
+          "function_sha256": "2298c8d0249741c5f4ba937004c177b34e6e463a0ac7d42eef7273b69be3a3e9"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.capture",
+        "before": {
+          "function_start_line": 511,
+          "function_end_line": 565,
+          "function_bytes": 3350,
+          "function_sha256": "1e05645afa0e7c9c54d5d51d79554ce052f865c50334d107e965821adb63d2b7"
+        },
+        "after": {
+          "function_start_line": 515,
+          "function_end_line": 569,
+          "function_bytes": 3350,
+          "function_sha256": "1e05645afa0e7c9c54d5d51d79554ce052f865c50334d107e965821adb63d2b7"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.core_inventory",
+        "before": {
+          "function_start_line": 981,
+          "function_end_line": 988,
+          "function_bytes": 434,
+          "function_sha256": "ff7172da041bb3546977b0f5d31bb4448b2cfda030087d4de89e28f93235156e"
+        },
+        "after": {
+          "function_start_line": 985,
+          "function_end_line": 992,
+          "function_bytes": 434,
+          "function_sha256": "ff7172da041bb3546977b0f5d31bb4448b2cfda030087d4de89e28f93235156e"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.core_text",
+        "before": {
+          "function_start_line": 991,
+          "function_end_line": 999,
+          "function_bytes": 409,
+          "function_sha256": "2335da9f9f51ca5198a0b8e97993efce771a016039b504c7fe7989b45b939316"
+        },
+        "after": {
+          "function_start_line": 995,
+          "function_end_line": 1003,
+          "function_bytes": 409,
+          "function_sha256": "2335da9f9f51ca5198a0b8e97993efce771a016039b504c7fe7989b45b939316"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.digest_text",
+        "before": {
+          "function_start_line": 947,
+          "function_end_line": 958,
+          "function_bytes": 818,
+          "function_sha256": "80c6558997cb36b58cf94c162caad9533ca63ace431b8599f78f301de5de2aa0"
+        },
+        "after": {
+          "function_start_line": 951,
+          "function_end_line": 962,
+          "function_bytes": 818,
+          "function_sha256": "80c6558997cb36b58cf94c162caad9533ca63ace431b8599f78f301de5de2aa0"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.generation_context",
+        "before": {
+          "function_start_line": 704,
+          "function_end_line": 723,
+          "function_bytes": 1088,
+          "function_sha256": "b975d659c3e05871e786f4fde706c0bd0dbc8acf76438b31b6e20ac73a887690"
+        },
+        "after": {
+          "function_start_line": 708,
+          "function_end_line": 727,
+          "function_bytes": 1088,
+          "function_sha256": "b975d659c3e05871e786f4fde706c0bd0dbc8acf76438b31b6e20ac73a887690"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.identity",
+        "before": {
+          "function_start_line": 629,
+          "function_end_line": 630,
+          "function_bytes": 64,
+          "function_sha256": "ea97e6e1c0bcf64e91f141f68df1fa73714b1e6b4b2cbe5501efb6d625beee71"
+        },
+        "after": {
+          "function_start_line": 633,
+          "function_end_line": 634,
+          "function_bytes": 64,
+          "function_sha256": "ea97e6e1c0bcf64e91f141f68df1fa73714b1e6b4b2cbe5501efb6d625beee71"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.marked_bundle",
+        "before": {
+          "function_start_line": 961,
+          "function_end_line": 978,
+          "function_bytes": 965,
+          "function_sha256": "256a11cc502a6dec9c8ea2cd00d5d1bdb70379769d235e0a826c37e0aa0d2820"
+        },
+        "after": {
+          "function_start_line": 965,
+          "function_end_line": 982,
+          "function_bytes": 965,
+          "function_sha256": "256a11cc502a6dec9c8ea2cd00d5d1bdb70379769d235e0a826c37e0aa0d2820"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.memo",
+        "before": {
+          "function_start_line": 908,
+          "function_end_line": 923,
+          "function_bytes": 762,
+          "function_sha256": "232322a43878bcc95a9743513d618bdcd2e1401798d019a0ea5c996fac1dea8d"
+        },
+        "after": {
+          "function_start_line": 912,
+          "function_end_line": 927,
+          "function_bytes": 762,
+          "function_sha256": "232322a43878bcc95a9743513d618bdcd2e1401798d019a0ea5c996fac1dea8d"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.plan",
+        "before": {
+          "function_start_line": 863,
+          "function_end_line": 899,
+          "function_bytes": 3229,
+          "function_sha256": "b47ce82a2548d992131d7257b8e2845a70a11f37aa8fcbe19c658497310c6717"
+        },
+        "after": {
+          "function_start_line": 867,
+          "function_end_line": 903,
+          "function_bytes": 3229,
+          "function_sha256": "b47ce82a2548d992131d7257b8e2845a70a11f37aa8fcbe19c658497310c6717"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.preflight",
+        "before": {
+          "function_start_line": 649,
+          "function_end_line": 689,
+          "function_bytes": 2535,
+          "function_sha256": "126c3f4061d55233197c3b9950184dbbc957cde504ea4765f527cee0d74db438"
+        },
+        "after": {
+          "function_start_line": 653,
+          "function_end_line": 693,
+          "function_bytes": 2535,
+          "function_sha256": "126c3f4061d55233197c3b9950184dbbc957cde504ea4765f527cee0d74db438"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.require_client",
+        "before": {
+          "function_start_line": 855,
+          "function_end_line": 860,
+          "function_bytes": 376,
+          "function_sha256": "4426e4aa34ea959b32997a501175bdb64240a0c8697b1884ea4438bf9c562b24"
+        },
+        "after": {
+          "function_start_line": 859,
+          "function_end_line": 864,
+          "function_bytes": 376,
+          "function_sha256": "4426e4aa34ea959b32997a501175bdb64240a0c8697b1884ea4438bf9c562b24"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.require_generation_context",
+        "before": {
+          "function_start_line": 726,
+          "function_end_line": 736,
+          "function_bytes": 748,
+          "function_sha256": "f4920b7e4fdc0bc71600447fe924f72a40a66ca658c0a313be37f8dfef099fd7"
+        },
+        "after": {
+          "function_start_line": 730,
+          "function_end_line": 740,
+          "function_bytes": 748,
+          "function_sha256": "f4920b7e4fdc0bc71600447fe924f72a40a66ca658c0a313be37f8dfef099fd7"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.require_routing_context",
+        "before": {
+          "function_start_line": 1043,
+          "function_end_line": 1053,
+          "function_bytes": 679,
+          "function_sha256": "e868972c26c30573d8b5d8aefb97faae21ddc20fed5854343a4693592144e647"
+        },
+        "after": {
+          "function_start_line": 1047,
+          "function_end_line": 1057,
+          "function_bytes": 679,
+          "function_sha256": "e868972c26c30573d8b5d8aefb97faae21ddc20fed5854343a4693592144e647"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.routing_context",
+        "before": {
+          "function_start_line": 1030,
+          "function_end_line": 1040,
+          "function_bytes": 598,
+          "function_sha256": "e453c93f3140b5a92cabe38544fa67397fda4c1eba147a849add0d6d31dc376a"
+        },
+        "after": {
+          "function_start_line": 1034,
+          "function_end_line": 1044,
+          "function_bytes": 598,
+          "function_sha256": "e453c93f3140b5a92cabe38544fa67397fda4c1eba147a849add0d6d31dc376a"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.schema_context",
+        "before": {
+          "function_start_line": 739,
+          "function_end_line": 759,
+          "function_bytes": 1400,
+          "function_sha256": "bccf7936e222e6328c3b20679c7708eece109bdc78bb5f3d62827de2dd1f0a45"
+        },
+        "after": {
+          "function_start_line": 743,
+          "function_end_line": 763,
+          "function_bytes": 1400,
+          "function_sha256": "bccf7936e222e6328c3b20679c7708eece109bdc78bb5f3d62827de2dd1f0a45"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.select",
+        "before": {
+          "function_start_line": 261,
+          "function_end_line": 293,
+          "function_bytes": 2242,
+          "function_sha256": "5db1c42cf69227e278988020bf07636fd24a9b60e9147d1aa4d869b71c2211d2"
+        },
+        "after": {
+          "function_start_line": 261,
+          "function_end_line": 297,
+          "function_bytes": 2423,
+          "function_sha256": "7c9fe28bf00c4a9a8029fdfea95576c8470bb84c7cb1f9c7de8162e1b8887c1c"
+        },
+        "body_changed": true
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.source_chunks",
+        "before": {
+          "function_start_line": 1022,
+          "function_end_line": 1027,
+          "function_bytes": 327,
+          "function_sha256": "6384d8ab776028f3aed4bf8786c3ca23b22a8ad2690e91065b127537dae82404"
+        },
+        "after": {
+          "function_start_line": 1026,
+          "function_end_line": 1031,
+          "function_bytes": 327,
+          "function_sha256": "6384d8ab776028f3aed4bf8786c3ca23b22a8ad2690e91065b127537dae82404"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.source_raw",
+        "before": {
+          "function_start_line": 926,
+          "function_end_line": 929,
+          "function_bytes": 173,
+          "function_sha256": "f6985449abf06843595c711cf88498bccad87674b62fef2ff21fadde7b53e25d"
+        },
+        "after": {
+          "function_start_line": 930,
+          "function_end_line": 933,
+          "function_bytes": 173,
+          "function_sha256": "f6985449abf06843595c711cf88498bccad87674b62fef2ff21fadde7b53e25d"
+        },
+        "body_changed": false
+      },
+      {
+        "identity": "data_sheets_schema.shared_generation.source_registry",
+        "before": {
+          "function_start_line": 932,
+          "function_end_line": 944,
+          "function_bytes": 539,
+          "function_sha256": "7e9f9cc9e31cdb098d6944b4483d454e10650757930bfa2ab5078a00ddf8ddae"
+        },
+        "after": {
+          "function_start_line": 936,
+          "function_end_line": 948,
+          "function_bytes": 539,
+          "function_sha256": "7e9f9cc9e31cdb098d6944b4483d454e10650757930bfa2ab5078a00ddf8ddae"
+        },
+        "body_changed": false
+      }
+    ],
+    "limits": "All 21 identities, modes, preconditions and original approval retained; only select body changes; offsets recomputed; checker unchanged."
   }
 }

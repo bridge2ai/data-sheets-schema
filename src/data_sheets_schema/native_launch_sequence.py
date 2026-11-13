@@ -132,7 +132,11 @@ def parser():
     return result
 
 
-def main(argv=None):
+def _run_verified(argv, *, verified_script, entry_inputs):
+    invocation = globals().get('_entry_invocation')
+    if not callable(invocation):
+        raise ValueError('sequence body requires a live verified entry namespace')
+    invocation(globals(), argv, verified_script, entry_inputs)
     args = parser().parse_args(argv)
     started = _utc_now()
     record = {'kind': SEQUENCE_KIND, 'version': SEQUENCE_VERSION, 'started_at': started,
@@ -166,11 +170,13 @@ def main(argv=None):
         _write_new(packet / START_FILENAME, guard.canonical({'started_at': started}))
         sequence = sequence_candidate
         script_path = packet / SCRIPT_FILENAME
-        _write_new(script_path, guard.read_regular(Path(__file__).resolve(), limit=MAX_COMMAND_OUTPUT_BYTES))
+        _write_new(script_path, verified_script)
         record['script_path'] = str(script_path)
         _delegation(args.direction_recorded_at, args.host_confirmed_at, started)
         for path in inputs:
             inputs[path] = guard.read_regular(path, limit=MAX_COMMAND_OUTPUT_BYTES)
+        if any(inputs.get(path) != raw for path, raw in entry_inputs.items()):
+            raise ValueError('sequence entry inputs changed before use')
         if capture_root.exists() and (not capture_root.is_dir() or capture_root.resolve() != capture_root):
             raise ValueError('capture root must be a resolved directory')
         word_raw = inputs[Path(args.launch_word)]
@@ -179,10 +185,23 @@ def main(argv=None):
         existed = {path for path in slots if os.path.lexists(path)}
         common = ['--registration', args.registration, '--review', args.review,
                   '--launch-word', args.launch_word, '--account-choice', args.account_choice]
+        pins = {name: {'path': str(_path(getattr(args, name))),
+                      'sha256': guard.sha(inputs[_path(getattr(args, name))])}
+                for name in ('registration', 'review', 'launch_word', 'account_choice', 'ci')}
+        def bound(extra=None):
+            return [*common, '--sequence-inputs', guard.canonical({**pins, **(extra or {})}).decode()]
         _unchanged(inputs)
         record['delegation_checked_at'] = _utc_now()
         _delegation(args.direction_recorded_at, args.host_confirmed_at, record['delegation_checked_at'])
-        captured = _run_step(COMMANDS[0], [*common, '--output-directory', str(capture_root)],
+        from .native_sequence_start import claim
+        record['start_claim'] = claim(inputs[Path(args.registration)], launch_word_raw=word_raw,
+            direction=args.direction_recorded_at, confirmation=args.host_confirmed_at,
+            packet=packet, started_at=record['delegation_checked_at'])
+        # Durable claiming is preflight too; it must not carry a start across
+        # either delegated deadline before the first child dispatch.
+        record['delegation_checked_at'] = _utc_now()
+        _delegation(args.direction_recorded_at, args.host_confirmed_at, record['delegation_checked_at'])
+        captured = _run_step(COMMANDS[0], [*bound(), '--output-directory', str(capture_root)],
                              outputs[0], record['steps'])
         manifest_value = captured.get('capture_manifest')
         if type(manifest_value) is not str:
@@ -195,7 +214,7 @@ def main(argv=None):
             raise ValueError('capture output digest differs from saved manifest')
         record['capture_manifest'] = str(manifest)
         _unchanged(inputs)
-        prepared = _run_step(COMMANDS[1], [*common, '--capture', str(manifest), '--output', str(guard_path)],
+        prepared = _run_step(COMMANDS[1], [*bound({'capture': {'path': str(manifest), 'sha256': guard.sha(manifest_raw)}}), '--capture', str(manifest), '--output', str(guard_path)],
                              outputs[1], record['steps'])
         if prepared.get('path') != str(guard_path):
             raise ValueError('guard output lacks the requested path')
@@ -206,7 +225,7 @@ def main(argv=None):
         _unchanged(inputs)
         if guard.read_regular(manifest, limit=MAX_COMMAND_OUTPUT_BYTES) != manifest_raw:
             raise ValueError('capture manifest changed before launch')
-        final = _run_step(COMMANDS[2], [*common, '--ci', args.ci, '--subscription-guard', str(guard_path),
+        final = _run_step(COMMANDS[2], [*bound({'subscription_guard': {'path': str(guard_path), 'sha256': digest}}), '--ci', args.ci, '--subscription-guard', str(guard_path),
                          '--subscription-guard-sha256', digest], outputs[2], record['steps'])
         if (final.get('state') != 'completed_pending_independent_review'
                 or final.get('runtime_gates_passed') is not True):
@@ -225,6 +244,13 @@ def main(argv=None):
                 record['status'] = 'stopped'
                 print('native launch sequence could not save its record', file=sys.stderr)
     return 0 if record['status'] == 'completed' else 1
+
+
+def main(argv=None):
+    # Compatibility route; the documented trusted entry avoids importing this
+    # implementation until after its byte check.
+    from .native_launch_entry import main as entry
+    return entry(argv)
 
 
 if __name__ == '__main__':
