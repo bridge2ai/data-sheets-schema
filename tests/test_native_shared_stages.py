@@ -315,8 +315,13 @@ def test_even_consistently_rehashed_admission_cannot_drop_scope_context(case):
 
 
 def test_receipt_floor_never_certifies_pending_or_empty_scope(case):
-    assert nr.floor({'receiptable': 1, 'with_receipt': 0}, case[0])['passed']
-    assert nr.floor({'receiptable': 0, 'with_receipt': 0}, case[0])['state'] == 'not_applicable'
+    missing = nr.floor({'receiptable': 1, 'with_receipt': 0}, case[0])
+    assert missing['passed'] is False and missing['state'] == 'unmeasurable'
+    assert nr.floor({'receiptable': 1, 'with_receipt': 0,
+                     'receiptable_at_receipt': 1, 'with_receipt_at_receipt': 0}, case[0])['passed']
+    empty = nr.floor({'receiptable': 0, 'with_receipt': 0,
+                      'receiptable_at_receipt': 0, 'with_receipt_at_receipt': 0}, case[0])
+    assert empty['state'] == 'not_applicable' and empty['passed'] is False
     for bad in ({'receiptable': True, 'with_receipt': 0}, {'receiptable': 1, 'with_receipt': 2},
                 {'receiptable': 1, 'with_receipt': 0, 'populated': 3, 'exempt': 1}):
         with pytest.raises(ValueError):
