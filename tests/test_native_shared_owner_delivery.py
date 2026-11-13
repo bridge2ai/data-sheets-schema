@@ -1,5 +1,6 @@
 """Invented C histories exercise real B reuse; they are not execution admission."""
 from functools import wraps
+import json
 
 import pytest
 
@@ -75,6 +76,22 @@ def test_replay_owner_reuses_catalog_and_unknown_initialization_is_fresh(case, m
     assert events.counters()['documents'] > before
     assert typed.check_worker(fresh.packet, worker, valid, **fresh.options)['passed']
     assert not typed.check_worker(fresh.packet, worker, invalid, **fresh.options)['passed']
+
+
+@pytest.mark.parametrize('case', [{'schema_raw': STANDALONE_SCHEMA}], indirect=True)
+def test_owner_delivery_isolated_from_changed_parent_json_encoder(case, monkeypatch):
+    """A prior worker-local dependency change must not poison this scenario."""
+    original = json.JSONEncoder.default
+
+    def changed_default(self, value):
+        return original(self, value)
+
+    monkeypatch.setattr(json.JSONEncoder, 'default', changed_default)
+    # The production guard must keep refusing this unfamiliar binding.
+    assert catalogs.runtime_token() is None
+    test_replay_owner_reuses_catalog_and_unknown_initialization_is_fresh(case, monkeypatch)
+    assert json.JSONEncoder.default is changed_default
+    assert catalogs.runtime_token() is None
 
 
 def test_complete_replay_threads_owner_to_every_typed_call_and_rechecks_final(case, monkeypatch):
