@@ -8,9 +8,11 @@ import argparse,hashlib,json,re,subprocess
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--output', type=Path, required=True)
 parser.add_argument('--source-root', type=Path, help='Explicit combined source checkout; never changes that checkout.')
+parser.add_argument('--controller-root', type=Path, help='Separate controller packet, when integration is pending.')
 args=parser.parse_args()
 DEST=Path(__file__).resolve().parents[2]
 W=(args.source_root or DEST).resolve(strict=True);S=args.output
+CONTROLLER=(args.controller_root or W).resolve(strict=True)
 items=[
  ('native_run_limits.py','CANARY =','Changed: sole pair definitions and strict whole-pair validator.'),
  ('native_u4b_runtime.py','require_registered_pair(result)','Changed: final runtime profile admits only the declared pair.'),
@@ -36,7 +38,7 @@ for filename,anchor,finding in items:
  matches=[i for i,line in enumerate(p.read_text().splitlines(),1) if anchor in line]
  if not matches:raise ValueError((filename,anchor))
  rows.append({'path':str(p.relative_to(W)),'lines':matches,'finding':finding})
-p=W/'notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py'
+p=CONTROLLER/'notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py'
 for anchor,finding in [
  ('dispatch_ns = elapsed_ns()', 'Child runtime starts immediately before process creation on the continuous clock; admission is excluded.'),
  ('deadline = dispatch_ns + int(deadline_seconds * 1_000_000_000)', 'The declared 900, 21600 or 43200 seconds are measured from dispatch, including host suspension.'),
@@ -44,14 +46,14 @@ for anchor,finding in [
 ]:
  matches=[i for i,line in enumerate(p.read_text().splitlines(),1) if anchor in line]
  if len(matches)!=1:raise ValueError(('required combined timer anchor',anchor,matches))
- rows.append({'path':str(p.relative_to(W)),'lines':matches,'finding':finding})
+ rows.append({'path':str(p.relative_to(CONTROLLER)),'lines':matches,'finding':finding})
 S.mkdir(parents=True,exist_ok=False)
 search=subprocess.run(['rg','--hidden','--no-ignore','-n','21600|21,600|43200|43,200|six.hour|six hours|budget_guard_usd|pre_reservation_margin_seconds|elapsed_ns|ADMISSION_SECONDS','src/data_sheets_schema'],cwd=W,capture_output=True,text=True)
 (S/'run-limit-source-search.txt').write_text(search.stdout)
 draft=subprocess.check_output(['/usr/bin/git','show','c289eed19:notes/generic_v10_analysis_plan_amendment_n1_2026-11-08.md'],cwd=W)
 (S/'amendment-n1-v12.md').write_bytes(draft)
 references=[{'line':i,'text':line} for i,line in enumerate(draft.decode().splitlines(),1) if re.search(r'21,600|21600|6 h|six.hours|six.hour',line)]
-record={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=W,text=True).strip(),'source_inventory':rows,'draft_v12_sha256':hashlib.sha256(draft).hexdigest(),'draft_v12_six_hour_references':references,'search_includes_hidden_ignored':True}
+record={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=W,text=True).strip(),'controller_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=CONTROLLER,text=True).strip(),'source_inventory':rows,'draft_v12_sha256':hashlib.sha256(draft).hexdigest(),'draft_v12_six_hour_references':references,'search_includes_hidden_ignored':True}
 (S/'run-limit-audit.json').write_text(json.dumps(record,indent=2)+'\n')
 lines=['# Two registered native run-limit sets','',
  'D143 retains the canary shakedown pair and the production pair, defined only in `native_run_limits.py`. A caller supplies both fields explicitly. No project, label or bundle selects a pair. Mixed pairs, alternate decimal spellings, third values, missing values and boolean/float deadlines refuse. The separately declared synthetic profile is unchanged.','',
