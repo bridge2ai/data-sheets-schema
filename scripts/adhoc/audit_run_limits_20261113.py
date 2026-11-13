@@ -4,8 +4,13 @@ Inputs current native source and local draft-v12 object; outputs JSON evidence
 and a line-addressed review document. Includes ignored/hidden source files.
 """
 from pathlib import Path
-import hashlib,json,re,subprocess
-W=Path(__file__).resolve().parents[2];S=W.parent/'scratch-h2-run-limits-review-6171-20261113';S.mkdir(exist_ok=False)
+import argparse,hashlib,json,re,subprocess
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--output', type=Path, required=True)
+parser.add_argument('--source-root', type=Path, help='Explicit combined source checkout; never changes that checkout.')
+args=parser.parse_args()
+DEST=Path(__file__).resolve().parents[2]
+W=(args.source_root or DEST).resolve(strict=True);S=args.output
 items=[
  ('native_run_limits.py','CANARY =','Changed: sole pair definitions and strict whole-pair validator.'),
  ('native_u4b_runtime.py','require_registered_pair(result)','Changed: final runtime profile admits only the declared pair.'),
@@ -32,13 +37,21 @@ for filename,anchor,finding in items:
  if not matches:raise ValueError((filename,anchor))
  rows.append({'path':str(p.relative_to(W)),'lines':matches,'finding':finding})
 p=W/'notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py'
-rows.append({'path':str(p.relative_to(W)),'lines':[i for i,line in enumerate(p.read_text().splitlines(),1) if 'deadline = time.monotonic() + deadline_seconds' in line], 'finding':'Unchanged: actual native child timer uses the declared seconds with monotonic time, not the synthetic supervisor.'})
-search=subprocess.run(['rg','--hidden','--no-ignore','-n','21600|21,600|43200|43,200|six.hour|six hours|budget_guard_usd|pre_reservation_margin_seconds|monotonic.*deadline|deadline.*monotonic','src/data_sheets_schema'],cwd=W,capture_output=True,text=True)
+for anchor,finding in [
+ ('dispatch_ns = elapsed_ns()', 'Child runtime starts immediately before process creation on the continuous clock; admission is excluded.'),
+ ('deadline = dispatch_ns + int(deadline_seconds * 1_000_000_000)', 'The declared 900, 21600 or 43200 seconds are measured from dispatch, including host suspension.'),
+ ('admission = AdmissionTimer(entry_ns, seconds=ADMISSION_SECONDS, clock=elapsed_ns)', 'Separate 900-second admission bound begins at execute_child entry, before setup and verification.'),
+]:
+ matches=[i for i,line in enumerate(p.read_text().splitlines(),1) if anchor in line]
+ if len(matches)!=1:raise ValueError(('required combined timer anchor',anchor,matches))
+ rows.append({'path':str(p.relative_to(W)),'lines':matches,'finding':finding})
+S.mkdir(parents=True,exist_ok=False)
+search=subprocess.run(['rg','--hidden','--no-ignore','-n','21600|21,600|43200|43,200|six.hour|six hours|budget_guard_usd|pre_reservation_margin_seconds|elapsed_ns|ADMISSION_SECONDS','src/data_sheets_schema'],cwd=W,capture_output=True,text=True)
 (S/'run-limit-source-search.txt').write_text(search.stdout)
 draft=subprocess.check_output(['/usr/bin/git','show','c289eed19:notes/generic_v10_analysis_plan_amendment_n1_2026-11-08.md'],cwd=W)
 (S/'amendment-n1-v12.md').write_bytes(draft)
 references=[{'line':i,'text':line} for i,line in enumerate(draft.decode().splitlines(),1) if re.search(r'21,600|21600|6 h|six.hours|six.hour',line)]
-record={'source_inventory':rows,'draft_v12_sha256':hashlib.sha256(draft).hexdigest(),'draft_v12_six_hour_references':references,'search_includes_hidden_ignored':True}
+record={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=W,text=True).strip(),'source_inventory':rows,'draft_v12_sha256':hashlib.sha256(draft).hexdigest(),'draft_v12_six_hour_references':references,'search_includes_hidden_ignored':True}
 (S/'run-limit-audit.json').write_text(json.dumps(record,indent=2)+'\n')
 lines=['# Two registered native run-limit sets','',
  'D143 retains the canary shakedown pair and the production pair, defined only in `native_run_limits.py`. A caller supplies both fields explicitly. No project, label or bundle selects a pair. Mixed pairs, alternate decimal spellings, third values, missing values and boolean/float deadlines refuse. The separately declared synthetic profile is unchanged.','',
@@ -48,11 +61,12 @@ for row in rows:lines.append('| `'+row['path']+':'+','.join(map(str,row['lines']
 lines+=['','## Operational differences','',
  'A twelve-hour attempt spans more five-hour usage-window boundaries than a six-hour attempt: for fixed aligned five-hour windows, two or three rather than one or two, depending on dispatch phase. This is arithmetic, not a claim about provider reset scheduling. A weekly boundary may occur during either; the longer run has more exposure to one. Starting utilization is not a guarantee of twelve hours of available quota. Overage remains disabled and observed rate/quota stops remain sticky.','',
  'The candidate retains a 1200-second maximum observation age and a 300-second pre-reservation margin (57bcc018b): reservation is allowed through age 900 seconds and dispatch through age 1200 seconds. They bound evidence age at launch, not evidence freshness throughout the attempt; a twelve-hour deadline does not turn them into twelve-hour authority or refresh a consumed capture. The fourteen-day registered validity interval and exact owner-word joins remain unchanged.','',
- 'The three IOKit assertions must remain acquired through the longer attempt and released through the same cleanup. Idle-sleep assertions do not guarantee protection from lid sleep, power exhaustion or host interruption. Issue 6046 adds separately reviewed host-power evidence; this branch does not merge that change. The production dispatch passes the registered deadline into the existing monotonic timer; the separate local synthetic supervisor keeps its own one-hour bound. On hosts whose monotonic clock pauses in sleep, the existing timer can allow more wall time than the declaration describes. This pre-existing timer/wording discrepancy is retained for lead review, not silently changed by this pair-policy patch.','',
+ 'The three IOKit assertions remain acquired through the attempt and released through the same cleanup. Idle-sleep assertions do not prevent lid sleep, power exhaustion or host interruption. The combined implementation checks AC power immediately before dispatch and records supplemental host-power observations. The child deadline begins immediately before process creation on mach_continuous_time on macOS or CLOCK_BOOTTIME on Linux; both include suspension. There is no adjustable-wall-clock fallback. The separate synthetic fixture supervisor retains its one-hour bound.','',
+ 'Admission has its own 900-second continuous-clock bound from execute_child entry through the dispatch origin. It includes controller setup and launch verification, consumes none of the declared child runtime, and does not extend subscription freshness. A periodic POSIX alarm raises through interruptible Python system calls; expiry refuses dispatch and takes the existing failure-publication and keep-awake cleanup path. It cannot preempt uninterruptible kernel calls or C extensions that do not service signals. Earlier capture-to-reservation verification lies outside this admission bound.','',
  'Canary and production instructions differ through runtime-dependent render metadata and its digest. On the candidate (c577c0eff), the recorder uses --render-spec-env D4D_RENDER_SPEC plus --render-spec-sha256. The command contains the digest instead of embedded runtime JSON; changing the pair changes that model-visible digest and exact-command policy. The runtime declaration remains a registered readable input. The canary is therefore a shakedown, not the frozen production reference. The later reference pilot must use production terms.','',
  'Same-input compatibility is checked against exact source from the published base: prepared canary runtime bytes remain identical, and the unchanged saved canary registration/review/word bytes validate with equal derived terms. That saved-registration fixture is deliberately parser-scoped. A newly built complete registration binds package-source identities, so its bytes necessarily change when code changes; this test does not claim fresh full-registration byte identity across source revisions. No source pins are restamped to manufacture that identity.','',
  '## Frozen draft v12 references requiring production qualification','',
  'The historical draft is retained unchanged. The lead must qualify its universal six-hour statements for production; historical D14 source recommendations remain historical. The matching lines below are derived from the local frozen draft, not edited here.','']
 for row in references:lines.append('- Line '+str(row['line'])+': '+row['text'])
-(W/'docs/native-run-limits.md').write_text('\n'.join(lines)+'\n')
+(DEST/'docs/native-run-limits.md').write_text('\n'.join(lines)+'\n')
 print(S/'run-limit-audit.json')
