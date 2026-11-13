@@ -1,9 +1,7 @@
 # Launch re-check follow-up: helper 3
 
-Issue 6048: 48cb2d1f494add9903851af3c3babce31213af79.
-Issue 6047: ef193e4eabc65a1c7ab39ecc64ad2945889f3416.
-
-COMMIT PACKAGING PENDING: the two hashes above are provisional and do not contain H3-LR1. Do not cherry-pick them as the final repair. The corrected source and regressions are tested but uncommitted. The user has been asked whether to rewrite only these two new unpublished commits to retain one commit per issue, or preserve them and add a follow-up. No existing history has been rewritten.
+Issue 6048: 48cb2d1f494add9903851af3c3babce31213af79, a22c51a9d082cad64eccb64c2de900b32e8e2630.
+Issue 6047: ef193e4eabc65a1c7ab39ecc64ad2945889f3416, a22c51a9d082cad64eccb64c2de900b32e8e2630.
 
 A sequence-dispatched capture now requires the existing current word journal and the exact parent-pinned, current sequence_start event under the capture lock. It opens with create=False and never activates a word on that route. The body now calls data_sheets_schema.native_launch_entry._require_invocation through an absolute local import; no callback or validator is accepted from the sequence namespace.
 
