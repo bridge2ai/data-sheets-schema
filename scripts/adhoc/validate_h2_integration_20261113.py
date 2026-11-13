@@ -34,7 +34,15 @@ def summarize(out):
     result['public_results'] = [{'path': str(p), 'result': json.loads(p.read_bytes())} for p in paths]
     result['sidecars'] = []
     for path in (out / 'cases').rglob('host-pre-dispatch-*.jsonl'):
-        rows = [json.loads(line) for line in path.read_bytes().splitlines()]
+        if path.is_symlink():
+            result['sidecars'].append({'path': str(path), 'skipped': 'symlink fixture', 'spans': []})
+            continue
+        try:
+            rows = [json.loads(line) for line in path.read_bytes().splitlines()]
+            assert all(isinstance(row, dict) and 'boundary' in row for row in rows)
+        except (ValueError, AssertionError) as exc:
+            result['sidecars'].append({'path': str(path), 'parse_error': type(exc).__name__, 'spans': []})
+            continue
         captures = [r for r in rows if r['boundary'] in ('capture_observed', 'synthetic_capture_minted')]
         reserved = [r for r in rows if r['boundary'] == 'attempt_reserved']
         spans = [{'capture': cap, 'reservation': end,
@@ -52,7 +60,14 @@ if __name__ == '__main__':
     parser.add_argument('cohorts', nargs='+')
     parser.add_argument('--after', help='Wait for the named prior cohort cleanup receipt; never overlap public tests.')
     parser.add_argument('--stop-on-failure', action='store_true')
+    parser.add_argument('--summarize-only', action='store_true', help='Read completed artifacts without launching tests.')
     args = parser.parse_args()
+    if args.summarize_only:
+        for name in args.cohorts:
+            summary = summarize(BASE / 'tests' / (args.export + '-' + name))
+            print(json.dumps({'cohort': name, 'junit': summary.get('junit'),
+                              'outcome': summary.get('outcome', {}).get('returncode')}))
+        raise SystemExit(0)
     if args.after:
         receipt = BASE / 'tests' / args.after / 'outcome.json'
         while not receipt.exists():
@@ -76,7 +91,7 @@ if __name__ == '__main__':
         if cohort in PUBLIC:
             command.append(PUBLIC[cohort])
         elif cohort in ('unit-canary', 'parallel-canary'):
-            command.append('tests/test_native_admission_timer.py::test_expiry_does_not_interrupt_slow_nested_cleanup')
+            command.append('tests/test_native_admission_timer.py::test_existing_signal_state_is_refused_and_preserved[pending]')
         elif cohort in ('budget', 'native', 'audit'):
             command += ['--lane', cohort]
         elif cohort == 'scanner':
