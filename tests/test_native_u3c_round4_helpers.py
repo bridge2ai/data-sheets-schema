@@ -90,7 +90,7 @@ def test_current_integrated_c_and_d_graphs_are_accepted(tmp_path, isolated_modul
     }
     expected = set(module.C_CONSUMERS) | set(module.D_CONSUMERS) | set(module.D_SUPPORT)
     assert set(result['outcomes']) == expected
-    assert len(result['outcomes']) == 29
+    assert len(result['outcomes']) == 30
     assert set(result['A_closed_owned_roster']) == {'data_sheets_schema.' + name for name in expected}
     assert result['rosters'] == {'C': list(module.C_CONSUMERS),
                                 'D': list(module.D_CONSUMERS), 'D_support': list(module.D_SUPPORT)}
