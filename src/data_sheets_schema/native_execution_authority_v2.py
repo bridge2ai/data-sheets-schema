@@ -1295,6 +1295,13 @@ def loaded_dependencies(expected):
             path, _, digest, _ = sources[name]
             if (identity['path'], identity['sha256']) != (str(path), digest):
                 raise ValueError('loaded helper differs from verified source bytes')
+        # Frozen helper imports may prepend their historical source directories.
+        # All declared helpers are now loaded and the exact byte finder remains
+        # active for later imports, so those broad path additions are unnecessary.
+        # Restore the caller's path before verification: otherwise unrelated
+        # historical scripts become importable and correctly fail the installed
+        # environment's ownership census. Never exempt that unpinned directory.
+        sys.path[:] = old_path
         yield {name: modules[name] for name in sorted(EXPOSED_CONTROLS)}
         for module in modules.values():
             module_source_identity(module)
