@@ -1,0 +1,16 @@
+{
+  "kind": "SYNTHETIC-native-gate-stage-roles",
+  "version": 1,
+  "scope_projects": ["CHORUS", "AI_READI", "CM4AI", "VOICE", "VOICE_PEDIATRIC"],
+  "synthetic_probe_branch": "i",
+  "roles": [
+    {"role":"reference","project":"CHORUS","run_date":"2026-11-13","valid_from":"2026-11-12T00:00:00Z","coverage_floor":null},
+    {"role":"later","project":"CHORUS","run_date":"2026-11-14","valid_from":"2026-11-13T00:00:00Z","coverage_floor":null},
+    {"role":"AI_READI","project":"AI_READI","run_date":"2026-11-14","valid_from":"2026-11-13T00:00:00Z","coverage_floor":null},
+    {"role":"CM4AI","project":"CM4AI","run_date":"2026-11-14","valid_from":"2026-11-13T00:00:00Z","coverage_floor":null},
+    {"role":"VOICE","project":"VOICE","run_date":"2026-11-14","valid_from":"2026-11-13T00:00:00Z","coverage_floor":null},
+    {"role":"VOICE_PEDIATRIC","project":"VOICE_PEDIATRIC","run_date":"2026-11-14","valid_from":"2026-11-13T00:00:00Z","coverage_floor":null},
+    {"role":"registered","project":"AI_READI","run_date":"2026-11-15","valid_from":"2026-11-13T00:00:00Z","coverage_floor":{"state":"registered","numerator":1,"denominator":2,"basis":"receipted_part"}},
+    {"role":"expired","project":"CHORUS","run_date":"2026-10-02","valid_from":"2026-10-01T00:00:00Z","coverage_floor":null}
+  ]
+}
