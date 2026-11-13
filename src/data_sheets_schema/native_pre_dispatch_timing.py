@@ -2,8 +2,10 @@
 
 Buffer throughout each capture, preparation or launch operation. Persist only
 when its outer scope exits, after its outcome and freshness decisions and after
-registration locks have unwound. Never write into the closed capture tree or
-consume an attempt. Missing records mean unknown durations.
+registration locks have unwound, through a bounded nonblocking handoff to a
+daemon writer. Never write into the closed capture tree or consume an attempt.
+Queue contention, capacity, I/O failure or process exit may drop diagnostics;
+missing records mean unknown durations. Callers never join the writer.
 """
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -12,7 +14,9 @@ import hashlib
 import json
 import os
 from pathlib import Path
+from collections import deque
 import stat
+import threading
 import time
 
 from .native_elapsed import elapsed_ns
@@ -20,6 +24,71 @@ from .native_elapsed import elapsed_ns
 _active = ContextVar('native_pre_dispatch_timing', default=None)
 MAX_BYTES = 8 * 1024 * 1024
 MAX_BUFFER = 256
+MAX_QUEUED_TRACES = 8
+_pending = deque()
+_writer_lock = threading.Lock()
+_writer = None
+
+
+def _drop(trace):
+    trace.disabled = True
+    trace.pending.clear()
+    trace._persisted.set()
+
+
+def _drain():
+    global _writer
+    try:
+        while True:
+            with _writer_lock:
+                if not _pending:
+                    _writer = None
+                    return
+                trace = _pending.popleft()
+            trace.flush()
+    except BaseException:
+        # InterruptedError remains an exception, including in a direct flush.
+        # A failed diagnostic worker has no authority over the completed run.
+        with _writer_lock:
+            for trace in _pending:
+                _drop(trace)
+            _pending.clear()
+            _writer = None
+        raise
+
+
+def _handoff(trace):
+    """No file I/O or wait for persistence on the operation's return path."""
+    global _writer
+    trace.sealed = True
+    if trace.disabled or trace.path is None or not trace.pending:
+        _drop(trace)
+        return
+    acquired = False
+    try:
+        acquired = _writer_lock.acquire(blocking=False)
+        if not acquired or len(_pending) >= MAX_QUEUED_TRACES:
+            _drop(trace)
+            return
+        _pending.append(trace)
+        if _writer is None:
+            writer = threading.Thread(target=_drain, name='native-timing-writer', daemon=True)
+            _writer = writer
+            try:
+                writer.start()
+            except BaseException:
+                if not writer.is_alive():
+                    _writer = None
+                    _pending.remove(trace)
+                raise
+    except InterruptedError:
+        _drop(trace)
+        raise
+    except Exception:
+        _drop(trace)
+    finally:
+        if acquired:
+            _writer_lock.release()
 
 
 class Trace:
@@ -31,6 +100,7 @@ class Trace:
         self.sealed = False
         self.sequence = 0
         self.trace_id = f'{os.getpid()}-{time.monotonic_ns()}'
+        self._persisted = threading.Event()  # Tests may wait after the outcome; production never does.
 
     def record(self, boundary, **fields):
         if self.disabled or self.sealed:
@@ -71,6 +141,7 @@ class Trace:
     def flush(self):
         """After the operation's outcome only; failures drop diagnostic rows."""
         if self.disabled or self.path is None or not self.pending:
+            self._persisted.set()
             return
         try:
             parent = self.path.parent
@@ -97,6 +168,7 @@ class Trace:
             self.disabled = True
         finally:
             self.pending.clear()
+            self._persisted.set()
 
 
 @contextmanager
@@ -119,7 +191,7 @@ def scope(registration_raw):
         yield trace
     finally:
         _active.reset(token)
-        trace.flush()
+        _handoff(trace)
 
 
 def bind(value):

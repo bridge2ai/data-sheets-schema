@@ -51,7 +51,8 @@ def main(out):
     record = {'base': BASE, 'head': git('rev-parse', 'HEAD').decode().strip(),
         'protected': protected, 'manifests': manifests,
         'pin_proposal_required': any(not entry['matches'] for m in manifests for entry in m['modules']),
-        'syntax_checked': syntax, 'changed': changed}
+        'syntax_checked': syntax, 'changed': changed,
+        'changed_file_hashes': {name: sha((ROOT / name).read_bytes()) for name in changed if (ROOT / name).is_file()}}
     with out.open('x') as stream:
         json.dump(record, stream, indent=2); stream.write('\n')
     print(json.dumps({'output': str(out), 'sha256': sha(out.read_bytes()),

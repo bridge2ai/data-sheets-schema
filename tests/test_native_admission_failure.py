@@ -66,6 +66,7 @@ def test_shared_engine_stalled_admission_publishes_and_stops_timing(tmp_path, mo
     from data_sheets_schema import native_shared_execution_orchestration as execute
     from data_sheets_schema import native_execution_orchestration as engine
     from data_sheets_schema import native_execution_authority_v2 as authority
+    from data_sheets_schema import native_pre_dispatch_timing as timing
     from data_sheets_schema.native_elapsed import elapsed_ns
     monkeypatch.chdir(authority.ROOT)
     case = make_case(tmp_path / 'shared-stalled-admission')
@@ -73,11 +74,21 @@ def test_shared_engine_stalled_admission_publishes_and_stops_timing(tmp_path, mo
     os.mkfifo(fifo)
     original = engine._execute_child
     entered = []
+    traces = []
+    handoff = timing._handoff
+    def remember(trace):
+        traces.append(trace)
+        handoff(trace)
+    monkeypatch.setattr(timing, '_handoff', remember)
     def stalled(controls, *args, **kwargs):
         runner = controls['run_native_canary']
         advance = [0]
+        original_verify = kwargs['verify_launch']
         def verify():
             entered.append(True)
+            # Exercise the actual late registration.verified call sites. If
+            # finish() stops sealing the trace, these rows violate the check.
+            original_verify()
             advance[0] = 901 * 10**9
             fd = os.open(fifo, os.O_RDONLY)
             os.close(fd)
@@ -94,6 +105,8 @@ def test_shared_engine_stalled_admission_publishes_and_stops_timing(tmp_path, mo
     assert result['first_stop'] == 'native admission deadline elapsed; child was not dispatched'
     assert (case['root'] / 'native-attempt/transcript.jsonl').read_bytes() == b''
     assert execute.read_final(case['raw']) == result
+    assert len(traces) == 1
+    assert traces[0]._persisted.wait(5)  # Only after outcome and readback.
     path = case['root'] / ('host-pre-dispatch-' + execute.c.sha(case['raw']) + '.jsonl')
     rows = [json.loads(line) for line in path.read_bytes().splitlines()]
     reserved = next(i for i, row in enumerate(rows) if row['boundary'] == 'attempt_reserved')

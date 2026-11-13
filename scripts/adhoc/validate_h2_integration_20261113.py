@@ -59,13 +59,23 @@ if __name__ == '__main__':
             time.sleep(.5)
         previous = json.loads(receipt.read_bytes())
         assert previous['cleanup_verified'], 'prior cohort cleanup is not verified'
-    for cohort in args.cohorts:
+    cohorts = list(args.cohorts)
+    parallel = {'focused', 'dependents', 'guards'}
+    if any(name in parallel for name in cohorts):
+        prior_canary = BASE / 'tests' / (args.export + '-unit-canary')
+        plan = json.loads((prior_canary / 'plan.json').read_bytes()) if (prior_canary / 'plan.json').exists() else {}
+        outcome = json.loads((prior_canary / 'outcome.json').read_bytes()) if (prior_canary / 'outcome.json').exists() else {}
+        if not (plan.get('workers') == 2 and outcome.get('cleanup_verified') and outcome.get('returncode') == 0):
+            cohorts.insert(next(i for i, name in enumerate(cohorts) if name in parallel), 'parallel-canary')
+    for cohort in cohorts:
         out = BASE / 'tests' / (args.export + '-' + cohort)
         command = [sys.executable, '-S', '-P', '-B', str(ROOT / 'scripts/adhoc/run_h2_integration_20261113.py'),
                    '--tree', str(BASE / args.export), '--out', str(out), '--timeout-seconds', '14400']
+        if cohort in ('unit-canary', 'parallel-canary', 'focused', 'dependents', 'guards'):
+            command += ['--workers', '2']
         if cohort in PUBLIC:
             command.append(PUBLIC[cohort])
-        elif cohort == 'unit-canary':
+        elif cohort in ('unit-canary', 'parallel-canary'):
             command.append('tests/test_native_admission_timer.py::test_expiry_does_not_interrupt_slow_nested_cleanup')
         elif cohort in ('budget', 'native', 'audit'):
             command += ['--lane', cohort]
@@ -94,5 +104,5 @@ if __name__ == '__main__':
         summary = summarize(out)
         print(json.dumps({'cohort': cohort, 'returncode': code, 'junit': summary.get('junit'),
                           'directory': str(out)}), flush=True)
-        if code and args.stop_on_failure:
+        if code and (args.stop_on_failure or cohort == 'parallel-canary'):
             raise SystemExit(code)
