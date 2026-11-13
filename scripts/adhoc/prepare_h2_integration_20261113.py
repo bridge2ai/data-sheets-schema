@@ -56,6 +56,7 @@ def make_runner():
         os.chdir(previous)
 ''' + raw[end:]
     raw = raw.replace('network_witness())', 'network_witness(out, allow_loopback=bool(args.lane)))')
+    raw = raw.replace('def parent(args):\n', "def parent(args):\n    hold = ROOT.with_name(ROOT.name + '.hold.json')\n    if hold.exists():\n        raise SystemExit('validation export held before launch: ' + str(hold))\n")
     raw = raw.replace('codex-development-efficiency-20261111', ROOT.name)
     raw = raw.replace('helper2-pins-admission-20261113', BASE.name)
     raw = raw.replace("tree.name not in ('before', 'after', 'fixed', 'unaffected')", "not tree.name.replace('-', '').isalnum()")

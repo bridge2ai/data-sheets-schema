@@ -309,6 +309,9 @@ class QuietWindow:
 
 
 def parent(args):
+    hold = ROOT.with_name(ROOT.name + '.hold.json')
+    if hold.exists():
+        raise SystemExit('validation export held before launch: ' + str(hold))
     if LOCK.exists():
         raise SystemExit("quiet window active; no tests started")
     dependencies = dependency_site()
