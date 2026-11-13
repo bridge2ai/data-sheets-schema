@@ -479,7 +479,7 @@ Each issue stays open until a re-check of v9 confirms the answer. "Claude" and "
   - amendment N1's item (ah), ratified by D138, requires that this amendment be ratified before the canary's word (NP1.5).
 
 ## NP1.10 Ratification: the owner names this file's sha256 at a commit, and answers each lettered item
-Each letter is one decision, and a "yes" adopts exactly the value given. The cells themselves are D135's scope and are not a lettered item. "Amendment N1's item" always means a letter of N1, never one of these. A note after an item says how it differs from v8; an item with no note is unchanged from v8. The letters are v8's: (aj) is retired, and (ab), (ad), (al), (ao), (s) and (z) are rewritten.
+Each letter is one decision, and a "yes" adopts exactly the value given. The cells themselves are D135's scope and are not a lettered item. "Amendment N1's item" always means a letter of N1, never one of these. A note after an item says how it differs from v8; an item with no note is unchanged from v8. The letters are v8's: (aj) is retired; (ad), (al), (ao), (s) and (z) are rewritten; (aa), (ab), (ak), (n) and (r) are changed.
 
 **Answered in advance.** On 2026-11-12 the owner answered three items and gave one direction (D140, D141, D143, D145; Authority): (r) at-receipt, (n) keep, (ab) B, and (am) delegated starts allowed for production runs. They are marked "Answered" below. Their written alternatives are kept as the record of what was offered. Ratification records them as answered and does not ask them again. The lead's later recommendation to change (ab) to A was withdrawn on 2026-11-13 (Authority), so no answer is reopened. Those answers did not ratify this amendment: the record says "no ratification of amendment NP1, which is still in review".
 
