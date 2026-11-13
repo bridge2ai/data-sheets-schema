@@ -33,7 +33,10 @@ EXECUTION_SCOPE = 'requires_exact_independent_review_ci_permission_and_owner_lau
 MAX_WIRE_BYTES = c.HARD_LIMITS['request_bytes']
 _COMMON_CHECKS = tuple('Python 3.12 / API case ' + name for name in (
     'routing-dispatch', 'routing-portable', 'routing-regate', 'routing-default-layout')) + tuple(
-    'Python 3.12 / SG2 case ' + name for name in ('sg2-none', 'sg2-conventional', 'sg2-explicit')) + (
+    'Python 3.12 / SG2 case ' + name for name in ('sg2-none', 'sg2-conventional', 'sg2-explicit')) + tuple(
+    # #6191 (2026-11-13): each complete synthetic native launch has its own job.
+    'Python 3.12 / native public case ' + name for name in (
+        'native-public-correction', 'native-public-variant', 'native-public-pending')) + (
     'Python 3.12 / offline canary controls', 'Python 3.12 / offline audit and finalization',
     'Python 3.12 / offline evaluation', 'test')
 EXECUTION_GATES = ('terminal', 'shutdown', 'first_stop', 'live_attribution',
