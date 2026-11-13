@@ -176,11 +176,21 @@ def main():
         suites = [doc] if doc.tag == 'testsuite' else list(doc.findall('testsuite'))
         counts = {key: sum(int(s.get(key, 0)) for s in suites) for key in ('tests', 'failures', 'errors', 'skipped')}
         tests.append(dict(name=name, xml=pin(xml), counts=counts, pinned_xml_matches=pin(xml) == item['xml']))
+    resume_tests = []
+    for name in ('reporter-tests', 'barrier-tests'):
+        path = S / (name + '.xml')
+        doc = ET.fromstring(path.read_bytes())
+        suites = [doc] if doc.tag == 'testsuite' else list(doc.findall('testsuite'))
+        resume_tests.append(dict(name=name, xml=pin(path), log=pin(S / (name + '.log')),
+            counts={key: sum(int(s.get(key, 0)) for s in suites) for key in ('tests', 'failures', 'errors', 'skipped')}))
     value = dict(answer=dict(cases_accepted=sum(row['accepted'] for row in cases), total_cases=len(cases),
                             verifier=verification, terminal=terminal, branch_readiness='reviewable; integration acceptance pending'),
                  cases=cases, case_plan=pin(plan_path), reporter=pin(reporter), bounds=bounds(), fresh_bounds=fresh_bounds(), branches=audit,
                  cohorts={name: cohort(name) for name in ('final-format-04', 'final-format-05', 'final-format-06', CURRENT)},
                  saved_manifest_tests=tests, manifest_test_report=pin(bytecode),
+                 resume_tests=resume_tests, review_findings=read(N / 'scripts/adhoc/h3_resumed_report_review_findings_20261113.json'),
+                 bounds_barrier_readbacks=[pin(S / ('barrier-readback-' + role + '.json')) for role in
+                     ('reference', 'AI_READI', 'CM4AI', 'VOICE', 'VOICE_PEDIATRIC')],
                  script=pin(Path(__file__)), fresh_runner=pin(N / 'scripts/adhoc/resume_h3_matrix_20261113.py'),
                  duplication_check=git(G, 'diff', '--exit-code', 'codex/native-environment-manifest-20261113', 'HEAD', '--',
                      'src/data_sheets_schema/native_environment_manifest.py', 'tests/test_native_environment_manifest.py',
@@ -243,6 +253,12 @@ def main():
                   'Saved manifest validation (historical selections, not summed and not integrated-candidate validation):', '',
                   table(['Cohort', 'Tests', 'Failures', 'Errors', 'Skipped', 'Pinned XML matches'],
                         [[r['name'], *[r['counts'][k] for k in ('tests', 'failures', 'errors', 'skipped')], r['pinned_xml_matches']] for r in tests]), '',
+                  'Resume-tooling tests (overlapping selections, not summed):', '',
+                  table(['Cohort', 'Tests', 'Failures', 'Errors', 'Skipped'],
+                        [[r['name'], *[r['counts'][k] for k in ('tests', 'failures', 'errors', 'skipped')]] for r in resume_tests]), '',
+                  'Local review findings for the lead to file under the no-GitHub-write assignment:', '',
+                  table(['Finding', 'Priority', 'Problem', 'Disposition'],
+                        [[r['id'], r['priority'], r['finding'], r['disposition']] for r in value['review_findings']['findings']]), '',
                   'The prior retention-prefix timeout remains nonacceptance. Capture/finalization controls remain unexecuted '
                   'under the assignment restriction. No full CI or integrated-candidate acceptance is claimed.', '',
                   'Every table was generated from the JSON evidence by this recorded command (exclusive output; '
