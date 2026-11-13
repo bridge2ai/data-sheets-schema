@@ -98,6 +98,7 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
         assert kwargs['stdout'].name is not None and kwargs['stderr'].name is not None
         pins = guard.strict_json(command[command.index('--sequence-inputs') + 1].encode())
         names = {'registration', 'review', 'launch_word', 'account_choice', 'ci'}
+        if name == seq.COMMANDS[0]: names.add('sequence_start')
         if name == seq.COMMANDS[1]: names.add('capture')
         if name == seq.COMMANDS[2]: names.add('subscription_guard')
         assert set(pins) == names

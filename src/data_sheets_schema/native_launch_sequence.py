@@ -201,7 +201,9 @@ def _run_verified(argv, *, verified_script, entry_inputs):
         # either delegated deadline before the first child dispatch.
         record['delegation_checked_at'] = _utc_now()
         _delegation(args.direction_recorded_at, args.host_confirmed_at, record['delegation_checked_at'])
-        captured = _run_step(COMMANDS[0], [*bound(), '--output-directory', str(capture_root)],
+        start_pin = {'path': record['start_claim'],
+                     'sha256': guard.sha(guard.read_regular(record['start_claim'], limit=MAX_COMMAND_OUTPUT_BYTES))}
+        captured = _run_step(COMMANDS[0], [*bound({'sequence_start': start_pin}), '--output-directory', str(capture_root)],
                              outputs[0], record['steps'])
         manifest_value = captured.get('capture_manifest')
         if type(manifest_value) is not str:

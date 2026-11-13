@@ -397,14 +397,17 @@ def _reserve(directory, value, statement, word, binding):
         os.close(descriptor)
 
 
-def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw, directory):
+def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw, directory,
+                         sequence_start=None):
     """Consume the next of three word-bound slots; never overwrite prior evidence.
 
     RunSpec boundary: validated-caller
 
     RunSpec precondition: Caller supplies serialized registration/review/word
     and a capture path; _authority reconstructs guarded preparation before
-    any capture reservation or process.
+    any capture reservation or process. Sequence dispatch requires its pinned
+    start in existing current state; it never initializes or activates state.
+    Standalone explicit capture retains word activation and the three-slot cap.
     """
     directory = _path(directory)
     from .native_launch_review import registration_fields, validate_bundle
@@ -420,8 +423,11 @@ def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw
     from . import native_capture_words as words
     words.validate_window(value['runtime'], launch_word_raw)
     words.require_unspent(value)
-    with words.locked(value, registration_raw, create=True) as journal:
-        journal.activate(launch_word_raw, review_bundle_raw, value)
+    with words.locked(value, registration_raw, create=sequence_start is None) as journal:
+        if sequence_start is None:
+            journal.activate(launch_word_raw, review_bundle_raw, value)
+        else:
+            journal.require_start(launch_word_raw, sequence_start)
         word_directory = directory / 'captures' / sha(launch_word_raw)
         with _reserve(word_directory, value, statement, word, binding) as (slot, claim, bound):
             return _perform_capture(slot, claim, bound, authority, word_directory,
