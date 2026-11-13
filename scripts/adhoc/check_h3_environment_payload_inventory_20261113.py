@@ -57,11 +57,14 @@ def test_one_real_installed_distribution_canary(tmp_path):
 
 def test_primary_dependency_root_payload_inventory(tmp_path, monkeypatch):
     # Keep source/stdlib/borrowed primary dependency roots, but remove the
-    # harness-only site containing its SYNTHETIC bootstrap metadata. No files
-    # or primary configuration are changed; this is a read-only census.
+    # harness-only site containing its SYNTHETIC bootstrap metadata, and the
+    # helper directory pytest inserts when explicitly collecting this adhoc
+    # diagnostic. Neither is a primary dependency root. No files or primary
+    # configuration are changed; this is a read-only census.
     prefix = Path(sys.prefix).resolve(strict=True)
+    helper = Path(__file__).resolve().parent
     actual_paths = manifest._import_paths()
-    selected = [path for path in actual_paths if not Path(path).is_relative_to(prefix)]
+    selected = [path for path in actual_paths if not Path(path).is_relative_to(prefix) and Path(path) != helper]
     assert selected and selected != actual_paths
     monkeypatch.setattr(manifest.sys, 'path', selected)
     captured = {}
@@ -82,6 +85,9 @@ def test_primary_dependency_root_payload_inventory(tmp_path, monkeypatch):
         'complete': value is not None, 'hold': error, 'totals': totals(rows),
         'distributions_checked_before_hold' if value is None else 'distributions': rows,
         'import_roots': selected, 'omitted_test_bootstrap_roots': sorted(set(actual_paths) - set(selected)),
+        'omitted_root_reasons': {path: 'pytest diagnostic helper import root' if Path(path) == helper
+                                else 'isolated SYNTHETIC bootstrap prefix'
+                                for path in sorted(set(actual_paths) - set(selected))},
         'interpreter': manifest._interpreter_identity(), 'executing_python': sys.executable,
         'executing_prefix': sys.prefix, 'manifest_source': pin(manifest.__file__),
         'scope': 'Primary dependency-root bytes read from an isolated offline process, with SYNTHETIC harness metadata excluded. No primary startup, environment modification, registration, probe or native execution.'}
