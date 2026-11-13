@@ -53,7 +53,8 @@ def inputs(native_spec, isolated_modules, tmp_path, monkeypatch):
     runtime['executable'].update(path=str(executable), sha256=c.sha(executable.read_bytes()))
     runtime['auth'] = {'loggedIn': True, 'authMethod': 'claude.ai', 'apiProvider': 'firstParty',
         'subscriptionType': 'historical-software-test', 'expected_api_key_source': 'none'}
-    runtime['environment'] = {'PATH': '/usr/bin:/bin', 'HOME': str(tmp_path.resolve()),
+    runtime['environment'] = {'PATH': '/usr/bin:/bin', 'HOME': str(tmp_path.resolve() / 'runtime-home'),
+        'PYSTOW_HOME': str(tmp_path.resolve() / 'attempt' / 'helper-cache'),
         'CLAUDE_SECURESTORAGE_CONFIG_DIR': '', 'CLAUDE_CODE_DISABLE_1M_CONTEXT': '1'}
     runtime['keep_awake']['host_platform'] = sys.platform
     runtime_path = Path(native_spec._native_shared_runtime_capture.pin.path)

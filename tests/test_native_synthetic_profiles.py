@@ -48,6 +48,7 @@ def runtime(tmp_path):
             'apiProvider': profiles.SYNTHETIC_PROVIDER, 'subscriptionType': profiles.SYNTHETIC_PROFILE,
             'expected_api_key_source': 'none'},
         'environment': {'PATH': '/usr/bin:/bin', 'HOME': str(home),
+            'PYSTOW_HOME': str(root / 'attempt' / 'helper-cache'),
             'CLAUDE_SECURESTORAGE_CONFIG_DIR': '', 'CLAUDE_CODE_DISABLE_1M_CONTEXT': '0'},
         'deadline_seconds': 900, 'budget_guard_usd': '1.0',
         'keep_awake': {'policy': 'not_applicable', 'host_platform': sys.platform,
@@ -223,11 +224,15 @@ def test_legacy_production_validation_and_profile_bytes_unchanged(runtime):
         'subscriptionType': 'max', 'expected_api_key_source': 'none'}
     old['deadline_seconds'] = 21600
     old['budget_guard_usd'] = '90'
+    current = deepcopy(old)
+    old['environment'].pop('PYSTOW_HOME')
     before = values._encoded(old)
     assert profiles.profile_name(old) == profiles.PRODUCTION_PROFILE
     assert profiles.require_production(old) is old
     assert values._encoded(values.validate_runtime(old)) == before
-    assert values._encoded(values.validate_runtime_v2(old)) == before
+    with pytest.raises(ValueError, match='environment'):
+        values.validate_runtime_v2(old)
+    assert values.validate_runtime_v2(current) == current
 
 
 def test_real_preparation_refuses_synthetic_before_constructing_selection(runtime, tmp_path, monkeypatch):

@@ -26,6 +26,8 @@ RUNTIME_KEYS = {'route', 'executable', 'model', 'auxiliary_models', 'effort', 'l
 BASE_ENV_KEYS = {'PATH', 'HOME', 'USER', 'SHELL', 'TMPDIR', 'LANG', 'LC_ALL', 'TERM',
                 'CLAUDE_SECURESTORAGE_CONFIG_DIR', 'CLAUDE_CODE_DISABLE_1M_CONTEXT'}
 ENV_REQUIRED = {'PATH', 'HOME', 'CLAUDE_SECURESTORAGE_CONFIG_DIR', 'CLAUDE_CODE_DISABLE_1M_CONTEXT'}
+V2_BASE_ENV_KEYS = BASE_ENV_KEYS | {'PYSTOW_HOME'}
+V2_ENV_REQUIRED = ENV_REQUIRED | {'PYSTOW_HOME'}
 POLICY_ENV = {'DISABLE_NON_ESSENTIAL_MODEL_CALLS': '1',
               'CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC': '1',
               'DISABLE_TELEMETRY': '1', 'CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS': '1',
@@ -95,7 +97,7 @@ def executable_identity(path):
     return {'path': str(path), 'sha256': digest.hexdigest(), 'bytes': after.st_size}
 
 
-def validate_runtime(value):
+def validate_runtime(value, *, helper_cache=False):
     """Apply the frozen runtime refusals and return its exact JSON-roundtrip copy."""
     _closed(value, RUNTIME_KEYS, 'runtime declaration')
     if value['route'] != ROUTE:
@@ -128,7 +130,9 @@ def validate_runtime(value):
         raise ValueError('this direct adapter requires an explicitly selected first-party subscription login, not provider keys')
     _text(auth['subscriptionType'], 'auth.subscriptionType')
     env = value['environment']
-    if type(env) is not dict or set(env) - BASE_ENV_KEYS or not ENV_REQUIRED <= set(env):
+    allowed = V2_BASE_ENV_KEYS if helper_cache else BASE_ENV_KEYS
+    required = V2_ENV_REQUIRED if helper_cache else ENV_REQUIRED
+    if type(env) is not dict or set(env) - allowed or not required <= set(env):
         raise ValueError('environment must explicitly supply required base names and no credential, redirect or override names')
     for key, item in env.items():
         if type(item) is not str or len(item) > 16384 or any(c in item for c in ('\x00', '\r', '\n')):
@@ -137,6 +141,9 @@ def validate_runtime(value):
             raise ValueError('only the explicitly selected secure-storage config value may be empty')
     if not Path(env['HOME']).is_absolute() or any(not Path(p).is_absolute() for p in env['PATH'].split(os.pathsep)):
         raise ValueError('HOME and every PATH component must be explicit absolute paths')
+    if helper_cache:
+        from .native_helper_cache import declared_path
+        declared_path(env)
     if env['CLAUDE_CODE_DISABLE_1M_CONTEXT'] not in ('0', '1'):
         raise ValueError('the context-mode environment selection must be explicit 0 or 1')
     if env['CLAUDE_SECURESTORAGE_CONFIG_DIR'] and not Path(env['CLAUDE_SECURESTORAGE_CONFIG_DIR']).is_absolute():
@@ -163,4 +170,4 @@ def validate_runtime_v2(value):
     from . import native_runtime_profiles as profiles
     if profiles.profile_name(value) == profiles.SYNTHETIC_PROFILE:
         return profiles.require_synthetic(value)
-    return validate_runtime(value)
+    return validate_runtime(value, helper_cache=True)

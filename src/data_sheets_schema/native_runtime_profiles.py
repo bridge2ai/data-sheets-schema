@@ -99,7 +99,7 @@ def require_synthetic_declarations(runtime):
         raise ValueError('synthetic executable requires explicit software-test labels')
     v._text(binary['path'], 'synthetic executable path')
     env = runtime['environment']
-    if type(env) is not dict or set(env) - v.BASE_ENV_KEYS or not v.ENV_REQUIRED <= set(env):
+    if type(env) is not dict or set(env) - v.V2_BASE_ENV_KEYS or not v.V2_ENV_REQUIRED <= set(env):
         raise ValueError('synthetic environment has missing or forbidden names')
     for key, value in env.items():
         if (type(value) is not str or len(value) > 16384
@@ -111,6 +111,8 @@ def require_synthetic_declarations(runtime):
             or not Path(env['HOME']).is_absolute()
             or any(not Path(x).is_absolute() for x in env['PATH'].split(os.pathsep))):
         raise ValueError('synthetic environment must select isolated home/storage and explicit context')
+    from .native_helper_cache import declared_path
+    declared_path(env)
     awake = runtime['keep_awake']
     v._closed(awake, {'policy', 'host_platform', 'basis'}, 'synthetic keep-awake')
     if awake['policy'] != 'not_applicable' or awake['host_platform'] != sys.platform:

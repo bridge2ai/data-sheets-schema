@@ -665,7 +665,7 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
         *expected["policy"]["readonly_lookups"]["inputs"],
         *expected["policy"]["readonly_lookups"]["output_directories"]]
     protected += [value for key, value in expected["permission_environment"].items()
-                  if key in ("CLAUDE_CONFIG_DIR", "D4D_LAUNCH_INSTRUCTION") and value.startswith("/")]
+                  if key in ("CLAUDE_CONFIG_DIR", "D4D_LAUNCH_INSTRUCTION", "PYSTOW_HOME") and value.startswith("/")]
     protected += [expected["selection"]["path"], selected["stage_root"]]
     for value in protected:
         if overlaps(directory, value):
