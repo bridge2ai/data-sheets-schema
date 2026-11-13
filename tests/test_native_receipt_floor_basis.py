@@ -1,10 +1,10 @@
-"""PROPOSAL ONLY: optional native registered at-receipt coverage basis.
+"""D140: mandatory native registered at-receipt coverage basis.
 
 Pure receipt arithmetic and selected-policy tests; no RunSpec, executable,
 provider, public completion or scientific acceptance. The deletion trap uses
 real v4 receipt checking. The API evaluator is an unchanged comparison oracle.
-The policy asset and protected pins deliberately remain unchanged pending a
-separate owner decision; these tests do not authorize using the proposal.
+The policy asset and protected pins are a separate approved-packet integration;
+these arithmetic tests do not establish public completion or authorize a launch.
 """
 from copy import deepcopy
 from pathlib import Path
@@ -80,8 +80,8 @@ def test_real_receipt_deletion_trap_gates_one_of_two_not_final_one_of_one(select
     assert (result['with_receipt_at_receipt'], result['receiptable_at_receipt']) == (1, 2)
     gated = selected_block(captured, slots)
     assert native.final_receipt_floors(gated, captured)['registered receipt coverage'] == 1
-    legacy = selected(REGISTERED)
-    assert native.floor(slots, legacy)['passed'] is True
+    with pytest.raises(ValueError, match='coverage floor fields differ'):
+        selected(REGISTERED)
 
 
 def test_completed_receipt_additions_count_against_unchanged_original_snapshot(selected):
@@ -193,21 +193,33 @@ def test_registered_invalid_snapshot_refuses_like_api(selected, changes):
         api_policy.evaluate_floor(slots, api_selected_policy(BASIS))
 
 
-@pytest.mark.parametrize('snapshot', [
-    {}, {'with_receipt_at_receipt': 0, 'receiptable_at_receipt': 100},
-    {'with_receipt_at_receipt': None, 'receiptable_at_receipt': None},
-    {'with_receipt_at_receipt': True, 'receiptable_at_receipt': 'historically ignored'},
-])
-def test_absent_registered_basis_preserves_legacy_bytes_and_interpretation(selected, snapshot):
-    captured = selected(REGISTERED, pretty=True)
-    raw = captured.receipt_policy.raw
-    expected = {'with_receipt': 2, 'receiptable': 3,
-                'floor': c.strict_json(raw)['coverage_floor'], 'passed': True,
-                'registration_sha256': c.sha(raw), 'state': 'passed'}
-    result = native.floor({'with_receipt': 2, 'receiptable': 3, **snapshot}, captured)
-    assert json.dumps(result) == json.dumps(expected)
-    assert captured.receipt_policy.raw == raw
-    assert 'basis' not in c.parse_receipt_policy(raw)['coverage_floor']
+@pytest.mark.parametrize('numerator', [0, 2])
+@pytest.mark.parametrize('pretty', [False, True])
+def test_missing_registered_basis_refuses_without_rewriting_bytes(selected, declaration, numerator, pretty):
+    # Even a zero threshold requires an explicit registered basis. Reconstruct
+    # genuine policy/selection files; no post-capture identity is fabricated.
+    floor = {**REGISTERED, 'numerator': numerator}
+    with pytest.raises(ValueError, match='coverage floor fields differ'):
+        selected(floor, pretty=pretty)
+    path = Path(declaration['receipt_policy']['path'])
+    raw = path.read_bytes()
+    assert c.strict_json(raw)['coverage_floor'] == floor
+    assert 'basis' not in floor
+    with pytest.raises(ValueError, match='coverage floor fields differ'):
+        c.parse_receipt_policy(raw)
+    assert path.read_bytes() == raw
+
+
+def test_api_without_basis_keeps_final_record_semantics():
+    slots = {'with_receipt': 2, 'receiptable': 3,
+             'with_receipt_at_receipt': 0, 'receiptable_at_receipt': 100}
+    chosen = api_selected_policy(REGISTERED)
+    before = deepcopy(chosen)
+    result = api_policy.evaluate_floor(slots, chosen)
+    assert result['passed'] is True and result['state'] == 'passed'
+    assert result['floor'] == REGISTERED and 'basis' not in result
+    assert 'with_receipt_at_receipt' not in result and 'receiptable_at_receipt' not in result
+    assert chosen == before
 
 
 @pytest.mark.parametrize('basis', [None, False, 1, [], {}, 'final_record', 'at_receipt', ''])

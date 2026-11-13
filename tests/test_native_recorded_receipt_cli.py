@@ -34,6 +34,7 @@ from tests.test_receipts import BUNDLE, FULL, _manifest_and_texts, _receipt
 
 PENDING = {'state': 'pending', 'mode': 'diagnostic_pilot'}
 REGISTERED = {'state': 'registered', 'numerator': 1, 'denominator': 1}
+NATIVE_REGISTERED = {**REGISTERED, 'basis': 'receipted_part'}
 
 
 @pytest.fixture
@@ -203,8 +204,8 @@ def native_recorded_case(declaration, monkeypatch, route_spies):
 @pytest.mark.parametrize('case,floor,structural_failure,uncovered,exit_code,state,passed', [
     ('pending', PENDING, False, False, 0, 'pending', False),
     ('pending-structural-failure', PENDING, True, False, 1, 'pending', False),
-    ('registered-pass', REGISTERED, False, False, 0, 'passed', True),
-    ('registered-fail', REGISTERED, False, True, 1, 'failed', False),
+    ('registered-pass', NATIVE_REGISTERED, False, False, 0, 'passed', True),
+    ('registered-fail', NATIVE_REGISTERED, False, True, 1, 'failed', False),
 ], ids=['pending', 'pending-structural-failure', 'registered-pass', 'registered-fail'])
 def test_recorded_native_cli_uses_selected_final_floors(native_recorded_case, with_selection,
         case, floor, structural_failure, uncovered, exit_code, state, passed):

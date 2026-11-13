@@ -312,22 +312,20 @@ def floor(coverage, selection):
                 raise ValueError('with_receipt_at_receipt exceeds receiptable_at_receipt')
             result.update(snapshot)
         return {**result, 'state': 'pending', 'reason': 'diagnostic pilot; coverage floor not registered'}
-    if chosen.get('basis') == 'receipted_part':
-        # Match the released API arithmetic and missing/zero semantics, but the
-        # native registration alone selects this explicit optional basis. Old
-        # registrations keep final-record counters and their old result shape.
-        at_eligible = coverage.get('receiptable_at_receipt')
-        at_covered = coverage.get('with_receipt_at_receipt')
-        result.update(basis='receipted_part', receiptable_at_receipt=at_eligible,
-                      with_receipt_at_receipt=at_covered)
-        if at_eligible is None or at_covered is None:
-            return {**result, 'state': 'unmeasurable',
-                    'reason': "receipted-part floor needs the phase-1 snapshot's coverage "
-                              '(receiptable_at_receipt, with_receipt_at_receipt)'}
-        eligible = _coverage_integer(at_eligible, 'receiptable_at_receipt')
-        covered = _coverage_integer(at_covered, 'with_receipt_at_receipt')
-        if covered > eligible:
-            raise ValueError('with_receipt_at_receipt exceeds receiptable_at_receipt')
+    # The native parser requires this registered basis. Final-record counters
+    # remain diagnostic context; they never replace a missing phase-1 snapshot.
+    at_eligible = coverage.get('receiptable_at_receipt')
+    at_covered = coverage.get('with_receipt_at_receipt')
+    result.update(basis=chosen['basis'], receiptable_at_receipt=at_eligible,
+                  with_receipt_at_receipt=at_covered)
+    if at_eligible is None or at_covered is None:
+        return {**result, 'state': 'unmeasurable',
+                'reason': "receipted-part floor needs the phase-1 snapshot's coverage "
+                          '(receiptable_at_receipt, with_receipt_at_receipt)'}
+    eligible = _coverage_integer(at_eligible, 'receiptable_at_receipt')
+    covered = _coverage_integer(at_covered, 'with_receipt_at_receipt')
+    if covered > eligible:
+        raise ValueError('with_receipt_at_receipt exceeds receiptable_at_receipt')
     if eligible == 0:
         return {**result, 'state': 'not_applicable', 'reason': 'no eligible leaves; coverage unmeasurable'}
     passed = covered * chosen['denominator'] >= eligible * chosen['numerator']

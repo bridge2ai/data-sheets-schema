@@ -202,7 +202,8 @@ def build_native_fixture(root: Path, *, registered_python: str) -> dict:
             'sources': [{'name': str(name), **_pin(path, raw)} for name, path, raw in snapshot.sources]}
     synthetic = {'purpose': 'ordinary-Python software fixture; no scientific or execution acceptance',
         'variant': 'three_candidates_two_merged_one_dropped_negative_and_redundant_chunks',
-        'coverage_floor': {'state': 'registered', 'numerator': 0, 'denominator': 1},
+        'coverage_floor': {'state': 'registered', 'numerator': 0, 'denominator': 1,
+                           'basis': 'receipted_part'},
         'max_draft_checks': 3, 'runtime_limits': {'contextWindow': 900000, 'maxOutputTokens': 4000},
         'bounds': {**dict(c.BOUND_CEILINGS), 'max_paths_per_worker': 3, 'max_workers': 16}}
     receipt_policy = {'kind': c.KINDS['receipt_policy'], 'version': 1,

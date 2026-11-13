@@ -95,7 +95,7 @@ def build_native_fixture(root: Path, *, registered_python: str, coverage_floor=N
     A supplied floor is copied before any policy bytes or identities are minted.
     """
     selected_coverage_floor = deepcopy(coverage_floor) if coverage_floor is not None else {
-        'state': 'registered', 'numerator': 0, 'denominator': 1}
+        'state': 'registered', 'numerator': 0, 'denominator': 1, 'basis': 'receipted_part'}
     from data_sheets_schema import api_runner as api
     from data_sheets_schema import native_shared_contract as c
     from data_sheets_schema import native_shared_selection as selected

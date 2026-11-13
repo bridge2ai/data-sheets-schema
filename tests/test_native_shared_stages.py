@@ -53,7 +53,8 @@ def case(supplied, request):
     receipt_policy = authority('receipt_policy', c.canonical({'kind': c.KINDS['receipt_policy'], 'version': 1,
         'registration_id': 'native-test-floor', 'condition': c.CONDITION,
         'runtime_policy_sha256': policy.pin.sha256, 'receipt_instrument_version': 4,
-        'coverage_floor': {'state': 'registered', 'numerator': 0, 'denominator': 1}}))
+        'coverage_floor': {'state': 'registered', 'numerator': 0, 'denominator': 1,
+                           'basis': 'receipted_part'}}))
     descriptor_raw = c.canonical({'protocol': c.NAME,
         'receipt_policy': {'path': 'src/download/prompts/native_fixture.md', 'sha256': policy.pin.sha256},
         'assets': {name: pin['sha256'] for name, pin in assets.items()}})
