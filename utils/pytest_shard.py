@@ -3,7 +3,7 @@
 Opt in with ``python -m pytest -p utils.pytest_shard --ci-shard=1/4``.
 Every collected file belongs to exactly one shard; new tests need no CI edit.
 Keeping a file together avoids multiplying its module/class fixture setup.
-Explicit ``--ci-lane`` isolates ten slow offline API, SG2 and native public-path
+Explicit ``--ci-lane`` isolates twenty-seven slow offline API, SG2 and native
 cases while retaining the complete collected suite across the ordinary shards
 and case lanes.
 """
@@ -44,7 +44,28 @@ NATIVE_PUBLIC_CASE_LANES = {
     "native-public-pending": "tests/test_native_pending_public_completion.py::"
     "test_pending_floor_public_completion_retains_diagnostic_reading",
 }
-DEDICATED_CASE_LANES = {**API_CASE_LANES, **SG2_CASE_LANES, **NATIVE_PUBLIC_CASE_LANES}
+# Failure cases share the expensive native fixture and each need their own lane.
+NATIVE_FAILURE_CASE_LANES = {
+    'native-failure-01': 'tests/test_native_shared_execution_failure.py::test_missing_external_gate_refuses_before_reservation_or_probe[review_path]',
+    'native-failure-02': 'tests/test_native_shared_execution_failure.py::test_missing_external_gate_refuses_before_reservation_or_probe[ci_path]',
+    'native-failure-03': 'tests/test_native_shared_execution_failure.py::test_missing_external_gate_refuses_before_reservation_or_probe[launch_word_path]',
+    'native-failure-04': 'tests/test_native_shared_execution_failure.py::test_public_pre_dispatch_failure_is_readable_and_cannot_resume',
+    'native-failure-05': 'tests/test_native_shared_execution_failure.py::test_v2_partial_reservation_stays_spent_without_probe[attempt_parent]',
+    'native-failure-06': 'tests/test_native_shared_execution_failure.py::test_v2_partial_reservation_stays_spent_without_probe[registration.json]',
+    'native-failure-07': 'tests/test_native_shared_execution_failure.py::test_v2_partial_reservation_stays_spent_without_probe[started.json]',
+    'native-failure-08': 'tests/test_native_shared_execution_failure.py::test_v2_partial_reservation_stays_spent_without_probe[evidence_parent]',
+    'native-failure-09': 'tests/test_native_shared_execution_failure.py::test_subscription_expiring_during_admission_refuses_before_reservation',
+    'native-failure-10': 'tests/test_native_shared_execution_failure.py::test_v2_signal_is_sticky_and_previous_handlers_are_restored',
+    'native-failure-11': 'tests/test_native_shared_execution_failure.py::test_v2_injected_transport_timeout_keeps_registered_limit_and_failure',
+    'native-failure-12': 'tests/test_native_shared_execution_failure.py::test_v2_publication_failure_preserves_first_error[final.json]',
+    'native-failure-13': 'tests/test_native_shared_execution_failure.py::test_v2_publication_failure_preserves_first_error[published.json]',
+    'native-failure-14': 'tests/test_native_shared_execution_failure.py::test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read[runtime-observation.json]',
+    'native-failure-15': 'tests/test_native_shared_execution_failure.py::test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read[keep-awake.json]',
+    'native-failure-16': 'tests/test_native_shared_execution_failure.py::test_saved_readback_revalidates_consumed_v2_approvals[review-independent v2 approval]',
+    'native-failure-17': 'tests/test_native_shared_execution_failure.py::test_saved_readback_revalidates_consumed_v2_approvals[ci-full v2 required CI]',
+}
+NATIVE_CASE_LANES = {**NATIVE_PUBLIC_CASE_LANES, **NATIVE_FAILURE_CASE_LANES}
+DEDICATED_CASE_LANES = {**API_CASE_LANES, **SG2_CASE_LANES, **NATIVE_CASE_LANES}
 
 
 def partition_lanes(nodeids):
