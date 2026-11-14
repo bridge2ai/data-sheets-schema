@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Build the offline prefix of a manifest-declared native packet (G13).
 
-Explicit repository inputs -> validated receipt policy, selection and byte pins.
+Explicit repository inputs -> validated receipt policy, selection, environment
+manifest and byte pins for version 3 preparation/registration (D148 NP1 item as).
 Exit 2 is an expected dependency stop, 1 a refusal, 0 is reserved for completion.
 This command NEVER probes, captures, authorizes, reserves, or launches. It only
 writes a NEW output directory. Downstream human documents are not templates
@@ -100,6 +101,8 @@ def build(args):
     from native_packet_review_inputs import source_contract
     from data_sheets_schema import api_runner, chunking, native_shared_contract as c
     from data_sheets_schema import native_shared_selection as selection
+    from data_sheets_schema import native_environment_manifest as environment
+    from data_sheets_schema import native_shared_authority_wire as wire
     from data_sheets_schema.profiles import declared_profile, profile_named
     from data_sheets_schema.registry import load_registry
     from data_sheets_schema.schema_snapshot import capture_schema
@@ -154,9 +157,18 @@ def build(args):
     c.parse_selection(raw)
     write_new(selection_path, raw)
     captured = selection.capture(selection_path)
+    # D148: capture this interpreter's complete environment through the same
+    # fresh census that preparation and registration recheck. This is evidence,
+    # not a cached admission. Saved steps must run in this import environment.
+    environment_pin = environment.write(args.output / 'environment-manifest.json')
+    registration_contract = {'authority_version': wire.AUTHORITY_VERSION,
+        'schema_version': wire.VERSION, 'preparation_kind': wire.PREPARATION_KIND,
+        'execution_kind': wire.EXECUTION_KIND,
+        'environment_manifest': environment_pin}
     # Full production capture rereads all exact pins and validates schema/context/assets.
     snapshot = {'scope': 'DRAFT OFFLINE INPUTS ONLY; NOT REGISTRATION OR AUTHORIZATION',
         'running_source_contract': source_contract(),
+        'registration_contract': registration_contract,
         'selection': pin(selection_path), 'receipt_policy': pin(receipt_path),
         'descriptor_sha256': captured.descriptor.sha256,
         'schema_sources': {role: value['sources'] for role, value in schemas.items()},
@@ -165,7 +177,10 @@ def build(args):
             'native_shared_generation_version' in inspect.signature(api_runner.RunSpec).parameters}
     write_new(args.output / 'input-inventory.json', c.canonical(snapshot))
     return {'status': 'dependency_stop', 'scope': snapshot['scope'],
-        'completed': ['receipt-policy.json', 'selection.json', 'input-inventory.json'],
+        'completed': ['receipt-policy.json', 'selection.json', 'environment-manifest.json', 'input-inventory.json'],
+        'registration_contract': registration_contract,
+        'preparation_arguments': {'selection_path': str(selection_path),
+            'environment_manifest_path': environment_pin['path']},
         'needed': 'Owner-approved provisional-runtime.json and D117 authorization.json, then actual saved observation manifest/transcript/request; no final runtime can be prepared without them.',
         'producer_command': 'python -m data_sheets_schema.native_generation observation-probe --authorization /ABS/authorization.json --runtime /ABS/provisional-runtime.json --account-choice /ABS/observation-account-choice.json',
         'producer_authorization': 'Owner AUTHORIZE_TWO_SCRIPTED_NATIVE_PROBES required. Command is documented only, never run by this builder.',

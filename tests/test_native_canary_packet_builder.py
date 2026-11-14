@@ -57,6 +57,20 @@ def test_real_chorus_prefix(tmp_path):
         'max_evidence_bytes':256000000,'max_history_bytes':48000000,
         'max_request_bytes':32000000,'max_response_bytes':4000000}
     assert 'AUTHORIZE_TWO_SCRIPTED_NATIVE_PROBES' in status['producer_authorization']
+    from data_sheets_schema import native_environment_manifest as environment
+    from data_sheets_schema import native_shared_authority_wire as wire
+    contract = status['registration_contract']
+    assert contract == {'authority_version': 2, 'schema_version': 3,
+        'preparation_kind': wire.PREPARATION_KIND, 'execution_kind': wire.EXECUTION_KIND,
+        'environment_manifest': builder.pin(out/'environment-manifest.json')}
+    inventory = json.loads((out/'input-inventory.json').read_bytes())
+    assert inventory['registration_contract'] == contract
+    assert status['preparation_arguments'] == {'selection_path': str(out/'selection.json'),
+        'environment_manifest_path': str(out/'environment-manifest.json')}
+    # The CLI has its own import roots. Validate its saved shape here; the CLI's
+    # environment.write already performs the full fresh census comparison.
+    manifest = environment.validate(json.loads((out/'environment-manifest.json').read_bytes()))
+    assert manifest['distributions']
     assert not (tmp_path/'never-reserved-attempt').exists()
     assert all((out/name).stat().st_size for name in status['completed'])
 
