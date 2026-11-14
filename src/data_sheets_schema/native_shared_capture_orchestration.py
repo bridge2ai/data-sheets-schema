@@ -375,7 +375,6 @@ def observe_request_read(run, identity):
     for item in run.observations:
         prior = _document(item.raw, 'current read observation')
         if (prior['observation_type'] == 'request_read'
-                and prior['payload']['history_sha256'] == run.history.journal.pin.sha256
                 and prior['payload']['request'] == c.pin_dict(current.request.pin)):
             return
     _persist_observation(run, 'request_read', {'call': call_document(actual.call),
