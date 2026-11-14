@@ -8,6 +8,7 @@ No function here resolves paths, reads files, or proves observed tool delivery.
 from __future__ import annotations
 
 from pathlib import PurePosixPath
+import posixpath
 import shlex
 
 from data_sheets_schema.native_shared_contract import (
@@ -103,7 +104,23 @@ def governs_stage_effect(view, *, tool_name, tool_input):
         command = tool_input['command']
         # The exact helper owns its S path outside stage_root; altered module
         # spellings or shell paths inside stage_root cannot fall through.
-        return command == view.stage_command or MODULE in command or view.stage_root in command
+        if command == view.stage_command or MODULE in command or view.stage_root in command:
+            return True
+        # This is restrictive routing only: the frozen ordinary shell grammar
+        # still decides admission. Inspect every lexical word conservatively
+        # so quoted fragments, relative operands and pipe-adjacent operands
+        # cannot hide stage paths. Never resolve against the live filesystem.
+        # Bash removes backslash-newline before reading an unquoted word.
+        # Removing it inside single quotes too can only add a restriction here.
+        lexer = shlex.shlex(command.replace('\\\n', ''), posix=True, punctuation_chars=True)
+        lexer.whitespace_split = True
+        lexer.commenters = ''
+        try:
+            words = list(lexer)
+        except ValueError:
+            return True  # malformed shell text cannot bypass the overlay
+        return any(_within('/' + posixpath.normpath(posixpath.join(view.working_directory, word)).lstrip('/'),
+                           view.stage_root) for word in words)
     return False
 
 

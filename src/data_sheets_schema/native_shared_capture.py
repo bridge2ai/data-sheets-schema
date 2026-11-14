@@ -312,135 +312,6 @@ def _observation_paths(selection):
 
 
 
-def _extend_trace(prev, transcript, control, runtime):
-    if (prev is None or transcript.stream != 'transcript' or control.stream != 'control'
-            or transcript.bytes < prev.transcript.bytes or control.bytes < prev.control.bytes
-            or not transcript.raw.startswith(prev.transcript.raw)
-            or not control.raw.startswith(prev.control.raw)):
-        return None
-    if transcript == prev.transcript and control == prev.control:
-        return prev
-    t_tail = transcript.raw[prev.transcript.bytes:]
-    c_tail = control.raw[prev.control.bytes:]
-    native_tail = []
-    if t_tail:
-        for offset_line, part in enumerate(t_tail.split(b'\n')[:-1], prev.transcript.lines + 1):
-            raw = part + b'\n'
-            if not raw.endswith(b'\n') or not raw.strip():
-                return None
-            value = c.strict_json(raw, 'native observed row', 16 * 1024 * 1024)
-            if type(value) is not dict or value.get('type') == 'control_response' or (
-                    value.get('type') == 'system' and value.get('subtype') == 'init'):
-                return None
-            native_tail.append((offset_line, raw, value))
-    parent_tail = []
-    if c_tail:
-        for offset_line, part in enumerate(c_tail.split(b'\n')[:-1], prev.control.lines + 1):
-            raw = part + b'\n'
-            if not raw.endswith(b'\n') or not raw.strip():
-                return None
-            value = c.strict_json(raw, 'native observed row', 16 * 1024 * 1024)
-            if type(value) is not dict or value.get('kind') in ('initialize_sent', 'initialize_ack'):
-                return None
-            parent_tail.append((offset_line, raw, value))
-    sub = object.__new__(observed.Trace)
-    sub.transcript, sub.control = transcript, control
-    sub.session, sub.policy = prev.session, prev.policy
-    sub.calls = dict(prev.calls)
-    sub.callbacks = dict(prev.callbacks)
-    sub.results = dict(prev.results)
-    sub.decisions = dict(prev.decisions)
-    sub.frames = dict(prev.frames)
-    sub.terminal = prev.terminal
-    sub._req_cache = dict(getattr(prev, '_req_cache', {}))
-    sub._adm_cache = dict(getattr(prev, '_adm_cache', {}))
-    sub._set_cache = dict(getattr(prev, '_set_cache', {}))
-    callback_ids = {v.get('request_id') for _, v in sub.callbacks.values()}
-    policy = sub.policy
-    session_id = sub.session
-    for number, raw, value in native_tail:
-        sub.frames[number] = value
-        kind = value.get('type')
-        if value.get('parent_tool_use_id') is not None:
-            return None
-        if kind in ('assistant', 'user', 'result'):
-            message = value.get('message')
-            if value.get('model', runtime['model']) != runtime['model'] or (
-                    type(message) is dict and message.get('model', runtime['model']) != runtime['model']):
-                return None
-        if sub.terminal is not None or kind == 'control_cancel_request':
-            return None
-        if kind == 'result':
-            if value.get('session_id') != session_id or value.get('parent_tool_use_id') is not None:
-                return None
-            sub.terminal = number
-        if kind in ('assistant', 'user'):
-            message = value.get('message')
-            if (value.get('session_id') != session_id or value.get('parent_tool_use_id') is not None
-                    or type(message) is not dict or message.get('role', kind) != kind):
-                return None
-            content = message.get('content')
-            if type(content) is not list:
-                return None
-            for offset, item in enumerate(content):
-                if type(item) is not dict:
-                    return None
-                identity = item.get('id') if item.get('type') == 'tool_use' else item.get('tool_use_id')
-                if item.get('type') == 'tool_use':
-                    if (kind != 'assistant' or type(identity) is not str or not identity or identity in sub.calls
-                            or item.get('name') not in ('Read', 'Write', 'Bash') or type(item.get('input')) is not dict):
-                        return None
-                    sub.calls[identity] = (number, offset, item)
-                elif item.get('type') == 'tool_result':
-                    if (kind != 'user' or identity not in sub.calls or identity in sub.results
-                            or sub.calls[identity][0] >= number):
-                        return None
-                    sub.results[identity] = (number, offset, item)
-        if kind == 'control_request':
-            request = value.get('request')
-            data = request.get('input') if type(request) is dict else None
-            if type(data) is not dict:
-                return None
-            identity = data.get('tool_use_id')
-            callback = value.get('request_id')
-            if (identity not in sub.calls or identity in sub.callbacks or identity in sub.results
-                    or type(callback) is not str or not callback or callback in callback_ids
-                    or request.get('subtype') != 'hook_callback'
-                    or request.get('callback_id') != policy['pretool_control']['callback_id']
-                    or request.get('tool_use_id') not in (None, identity)
-                    or data.get('hook_event_name') != policy['pretool_control']['event']
-                    or data.get('cwd') != policy['readonly_lookups']['repository']
-                    or data.get('session_id', session_id) != session_id):
-                return None
-            call = sub.calls[identity]
-            if (call[0] >= number or data.get('tool_name') != call[2]['name']
-                    or not observed._same(data.get('tool_input'), call[2]['input'])):
-                return None
-            sub.callbacks[identity] = (number, value)
-            callback_ids.add(callback)
-    for number, raw, value in parent_tail:
-        if value.get('kind') != 'decision':
-            continue
-        request = value.get('request')
-        data = request.get('request', {}).get('input', {}) if type(request) is dict else {}
-        identity = data.get('tool_use_id')
-        if (identity not in sub.callbacks or identity in sub.decisions
-                or not observed._same(request, sub.callbacks[identity][1])
-                or value.get('classification') not in ('prescribed', 'not_prescribed')
-                or type(value.get('basis')) is not str):
-            return None
-        classification, basis = value['classification'], value['basis']
-        output = {} if classification == 'prescribed' else {'hookSpecificOutput': {
-            'hookEventName': 'PreToolUse', 'permissionDecision': 'deny',
-            'permissionDecisionReason': 'Outside the registered tool policy: ' + basis}}
-        expected = {'type': 'control_response', 'response': {'subtype': 'success',
-            'request_id': request['request_id'], 'response': output}}
-        if not observed._same(value.get('response'), expected):
-            return None
-        sub.decisions[identity] = (number, value)
-    return sub
-
-
 @dataclass
 class _CapturedRun:
     selection: c.NativeSelectionCapture
@@ -904,6 +775,25 @@ def _chronology(run):
     return result
 
 
+def _require_initial_seal_identity(run, report, full, receipt):
+    """Bind the checked helper result to the exact original bytes, live or saved."""
+    from .native_shared_phase import initial_input_identity
+    checks = [row for row in report['checks']
+              if row['helper'] == 'phase1_receipts' and row['exit_code'] == 0]
+    if not checks:
+        raise ValueError('original seal lacks a successful initial receipt helper')
+    trace = run.trace()
+    actual = trace.settled(checks[-1]['tool_use_id'])
+    block = evidence.event(trace.transcript, actual.result)
+    value = _document(block['content'].encode('utf-8'), 'initial receipt helper result')
+    observed.helper_result(trace, actual, value)
+    identity = initial_input_identity(value.get('native_initial_inputs'))
+    expected = {'selection_sha256': run.selection.registration.pin.sha256,
+                'full_sha256': c.sha(full.raw), 'receipt_sha256': c.sha(receipt.raw)}
+    if identity != expected:
+        raise ValueError('original seal bytes differ from checked initial receipt inputs')
+
+
 def phase_replay(run, *, complete=False):
     """Freshly run the actual phase machine over observed journal visibility."""
     from .native_shared_phase import PhaseState
@@ -963,6 +853,9 @@ def phase_replay(run, *, complete=False):
                                             if needed == 'seal_phase1' else {'derive_core', 'core_schema', 'pair'})]
             if payload['helper_calls'] != expected:
                 raise ValueError('seal helper identities differ from actual phase observations')
+            if kind == 'phase1_sealed':
+                _require_initial_seal_identity(run, phase.report(),
+                    run.reader.pinned(payload['full']), run.reader.pinned(payload['original_receipt']))
     if complete and set(visible) != {item.pin.sha256 for item in run.history.records}:
         raise ValueError('completed history has unpublished or unobserved stage records')
     return phase.report(complete=complete), actions

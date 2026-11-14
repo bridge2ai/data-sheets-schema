@@ -35,6 +35,7 @@ from .native_shared_capture import (
     _provenance_block,
     _receipt_assessment,
     _require_completed_read_before_write,
+    _require_initial_seal_identity,
     _streams,
     _through,
     call_document,
@@ -65,7 +66,15 @@ def _create(selection, role, raw, *, ordinal=None):
             or not root.is_dir() or root.is_symlink() or root.resolve() != root):
         raise ValueError('native publication is not one new physical S-owned destination')
     _mkdir_durable(target.parent)
-    durable_new(target, raw)
+    if role == 'observation':
+        # Failed partial bytes are evidence, but not observation ordinals.
+        staging = target.parent.with_name(target.parent.name + '.pending')
+        if staging.resolve() != staging or staging.is_symlink():
+            raise ValueError('observation staging is not a physical sibling directory')
+        _mkdir_durable(staging)
+        durable_new(target, raw, staging_directory=staging)
+    else:
+        durable_new(target, raw)
     item = evidence.read_regular(path, role, max_bytes=limit).captured
     if item.raw != raw:
         raise ValueError('published native artifact differs from its intended bytes')
@@ -332,6 +341,8 @@ def seal_originals(run, kind):
         helpers = {'derive_core', 'core_schema', 'pair'}
     captured = {source: evidence.read_regular(paths[source], role,
         max_bytes=min(c.HARD_LIMITS['original_full_bytes'], run.selection.bounds()['max_input_bytes'])).captured for source, role in inputs}
+    if kind == 'seal_phase1':
+        _require_initial_seal_identity(run, report, captured['full'], captured['receipt'])
     for source, role in inputs:
         _create(run.selection, role, captured[source].raw)
     sealed = {source: _captured(role, run.selection.role(role), captured[source].raw) for source, role in inputs}
@@ -375,7 +386,6 @@ def observe_request_read(run, identity):
     for item in run.observations:
         prior = _document(item.raw, 'current read observation')
         if (prior['observation_type'] == 'request_read'
-                and prior['payload']['history_sha256'] == run.history.journal.pin.sha256
                 and prior['payload']['request'] == c.pin_dict(current.request.pin)):
             return
     _persist_observation(run, 'request_read', {'call': call_document(actual.call),

@@ -1,0 +1,10 @@
+--- a/src/data_sheets_schema/native_shared_controls.py
++++ b/src/data_sheets_schema/native_shared_controls.py
+@@ -136 +136 @@
+-                                          f'{problem}. This refusal does not disqualify the attempt; quote each '
++                                          f'{problem}. This refusal disqualifies the attempt; in a new attempt, quote each '
+--- a/src/data_sheets_schema/native_shared_results_orchestration.py
++++ b/src/data_sheets_schema/native_shared_results_orchestration.py
+@@ -164 +164 @@
+-            + problem + '. This refusal does not disqualify the attempt; quote each '
++            + problem + '. This refusal disqualifies the attempt; in a new attempt, quote each '

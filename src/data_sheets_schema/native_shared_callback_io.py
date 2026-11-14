@@ -19,16 +19,29 @@ def _sync_directory(path):
         os.close(handle)
 
 
-def durable_new(path, raw):
+def durable_new(path, raw, *, staging_directory=None):
     path = Path(path)
-    fd, temporary = tempfile.mkstemp(prefix='.' + path.name + '.pending-', dir=path.parent)
+    staging = path.parent if staging_directory is None else Path(staging_directory)
+    fd, temporary = tempfile.mkstemp(prefix='.' + path.name + '.pending-', dir=staging)
     with os.fdopen(fd, 'wb') as stream:
         stream.write(raw)
         stream.flush()
         os.fsync(stream.fileno())
     os.link(temporary, path)
-    _sync_directory(path.parent)
+    try:
+        _sync_directory(path.parent)
+    except BaseException:
+        # The final name already retains the complete bytes. Remove only its
+        # redundant link so the evidence reader can still inspect that file.
+        # Cleanup must not replace the original publication failure.
+        try:
+            os.unlink(temporary)
+            _sync_directory(staging)
+        except OSError:
+            pass
+        raise
     os.unlink(temporary)
+    _sync_directory(staging)
 
 
 def _mkdir_durable(path):
