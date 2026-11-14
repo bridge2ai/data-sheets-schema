@@ -166,33 +166,37 @@ def _base(selection_path, *, _catalogs=None, _admission=None):
     from . import native_execution_registration_v2 as registration
     from . import native_shared_controls_orchestration as controls_orchestration
     from .native_shared_controller_orchestration import reconstruct_composition
-    selection = selected.capture(selection_path)
-    reader = _Reader(selection)
-    e = reader.read('execution_capture', selection.role('execution_capture'))
-    # Never turn an earlier successful E/C check into current admission. The
-    # fixed U3-D consumer must exist and freshly reconstruct every execution.
-    with controls_orchestration.loaded_controls() as controls:
-        value = registration.verified(e.raw, classifier_projection=controls)
-    composition, spec, captured_selection = reconstruct_composition(
-        value['composition_raw_json'].encode('utf-8'))
-    doc = captured_selection.document()
-    if (captured_selection != selection or doc['registration_path'] != selection_path
-            or composition['selection_raw_json'].encode('utf-8') != selection.registration.raw
-            or value['selection_sha256'] != selection.registration.pin.sha256):
-        raise ValueError('actual E/C/S binding differs from the caller-selected registration')
-    for filename, role in (('registration.json', 'execution_capture'), ('started.json', 'started_capture')):
-        actual = evidence.read_regular(str(Path(value['attempt_directory']) / filename), role,
-            max_bytes=c.HARD_LIMITS['request_bytes']).captured
-        saved = reader.read(role, selection.role(role))
-        if actual.raw != saved.raw:
-            raise ValueError('stage binding differs from actual one-use attempt records')
-    started = _document(reader.read('started_capture', selection.role('started_capture')).raw, 'started identity')
-    if (started.get('state') != 'started' or started.get('attempt_id') != value['attempt_id']
-            or started.get('registration_sha256') != e.pin.sha256
-            or started.get('composition_sha256') != value['composition_sha256']
-            or type(started.get('dispatch_limit')) is not int or started['dispatch_limit'] != 1):
-        raise ValueError('selected stage does not have its actual one-use started identity')
-    return selection, reader, value, composition, spec
+    # Standalone helpers need the same bounded, byte-keyed schema derivation
+    # lifetime as launch. This shares only pure metadata across verified loader
+    # copies; every call below still reads and verifies current authority.
+    with registration.authority.launch_derivations():
+        selection = selected.capture(selection_path)
+        reader = _Reader(selection)
+        e = reader.read('execution_capture', selection.role('execution_capture'))
+        # Never turn an earlier successful E/C check into current admission. The
+        # fixed U3-D consumer must exist and freshly reconstruct every execution.
+        with controls_orchestration.loaded_controls() as controls:
+            value = registration.verified(e.raw, classifier_projection=controls)
+        composition, spec, captured_selection = reconstruct_composition(
+            value['composition_raw_json'].encode('utf-8'))
+        doc = captured_selection.document()
+        if (captured_selection != selection or doc['registration_path'] != selection_path
+                or composition['selection_raw_json'].encode('utf-8') != selection.registration.raw
+                or value['selection_sha256'] != selection.registration.pin.sha256):
+            raise ValueError('actual E/C/S binding differs from the caller-selected registration')
+        for filename, role in (('registration.json', 'execution_capture'), ('started.json', 'started_capture')):
+            actual = evidence.read_regular(str(Path(value['attempt_directory']) / filename), role,
+                max_bytes=c.HARD_LIMITS['request_bytes']).captured
+            saved = reader.read(role, selection.role(role))
+            if actual.raw != saved.raw:
+                raise ValueError('stage binding differs from actual one-use attempt records')
+        started = _document(reader.read('started_capture', selection.role('started_capture')).raw, 'started identity')
+        if (started.get('state') != 'started' or started.get('attempt_id') != value['attempt_id']
+                or started.get('registration_sha256') != e.pin.sha256
+                or started.get('composition_sha256') != value['composition_sha256']
+                or type(started.get('dispatch_limit')) is not int or started['dispatch_limit'] != 1):
+            raise ValueError('selected stage does not have its actual one-use started identity')
+        return selection, reader, value, composition, spec
 
 
 def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files, observed_prefixes, _admission=None):

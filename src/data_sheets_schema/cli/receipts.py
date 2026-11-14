@@ -116,6 +116,11 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     if native_shared_selection is not None:
         if receipt_completion_registration is not None:
             raise click.BadParameter('native and API receipt registrations are mutually exclusive')
+        from data_sheets_schema import native_execution_authority_v2 as authority
+        # Paths and assessment each freshly reconstruct execution authority.
+        # Retain only the existing byte-keyed derivations across those calls;
+        # Click closes the scope on success, refusal, or command failure.
+        click.get_current_context().with_resource(authority.launch_derivations())
         from data_sheets_schema import native_shared_selection as native
         try:
             native_capture = native.capture(native_shared_selection)
