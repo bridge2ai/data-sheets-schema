@@ -161,8 +161,11 @@ def cohorts(scratch):
         xml = directory / 'pytest.xml'
         counts = dict(passed=0, failed=0, errors=0, skipped=0)
         cases = []
+        junit_seconds = None
         if xml.exists():
-            for case in ET.parse(xml).iter('testcase'):
+            tree = ET.parse(xml)
+            junit_seconds = sum(float(suite.get('time', '0')) for suite in tree.iter('testsuite'))
+            for case in tree.iter('testcase'):
                 child = next((n for n in case if n.tag in ('failure', 'error', 'skipped')), None)
                 status = {'failure': 'failed', 'error': 'errors', 'skipped': 'skipped'}.get(
                     child.tag if child is not None else None, 'passed')
@@ -173,6 +176,7 @@ def cohorts(scratch):
                                   'detail': child.text or ''})
         results[directory.name] = {'path': str(directory), 'counts': counts, 'outcome': outcome,
                                    'junit_available': xml.exists(),
+                                   'junit_seconds': junit_seconds,
                                    'nonpassing': cases,
                                    'source_commit': plan['source_commit'], 'workers': plan['workers']}
     return results
@@ -189,10 +193,18 @@ def markdown(data, results, scratch):
                      'test_d128_final_composition_has_only_the_finite_approved_scanner_differences')
     unexpected = [case for row in acceptance_rows if row for case in row['nonpassing']
                   if case['status'] != 'skipped' and case['case'] != expected_d128]
+    retention = final['retention']
+    stale_retention = [case for case in retention['nonpassing']
+                       if case['status'] == 'failed' and case['message'] ==
+                       'ValueError: subscription observation is stale or future-dated'] if retention else []
     verdict = ('Required verification is still incomplete.' if pending else
-               'Required verification has additional failures; see the case ledger.' if unexpected else
+               'All required stages were rerun; verification has additional failures.' if unexpected else
                'All required cases completed; the inherited D128 approval hold and the initial registration timeout remain recorded.'
                if resume else 'All required stages completed; only the inherited D128 approval hold remains.')
+    if stale_retention:
+        verdict += (f" Retention has {retention['counts']['passed']} passes and "
+                    f"{len(stale_retention)} failures at the existing capture-freshness check; "
+                    'timing refresh remains excluded.')
     lines = ['Continuation — the accepted merge remains the base (2 resolved conflicts). '
              'The v3 CLI/preparer structural proof and its separate identity update are committed. '
              'The isolated prefix canary now persists the manifest and reaches the intended dependency stop. '
@@ -211,8 +223,8 @@ def markdown(data, results, scratch):
              'Parent and ordinary child origin witnesses, OS network denial and observed-descendant '
              'cleanup are recorded per cohort. The primary environment was not modified. '
              'These are offline synthetic checks, not production registration or launch approval.', '',
-             '| Stage/cohort | Workers | Passed | Failed | Errors | Skipped | Seconds | Cleanup verified | Evidence |',
-             '| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |']
+             '| Stage/cohort | Workers | Passed | Failed | Errors | Skipped | Parent seconds | JUnit seconds | Cleanup verified | Evidence |',
+             '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |']
     for name, row in results.items():
         c, out = row['counts'], row['outcome']
         shown = [str(c[k]) if row['junit_available'] else 'unrecorded' for k in ('passed', 'failed', 'errors', 'skipped')]
@@ -222,8 +234,28 @@ def markdown(data, results, scratch):
             evidence = 'partial pytest log; deadline, exit 124'
         elif name == 'registration-collection':
             evidence = 'collection only; no test execution'
+        junit_time = f"{row['junit_seconds']:.2f}" if row['junit_seconds'] is not None else 'unrecorded'
         lines.append(f"| {name} | {row['workers']} | " + ' | '.join(shown) + ' | '
-                     f"{out['seconds']:.2f} | {out['cleanup_verified']} | {evidence} |")
+                     f"{out['seconds']:.2f} | {junit_time} | {out['cleanup_verified']} | {evidence} |")
+    lines += ['', 'Parent elapsed time and pytest’s JUnit duration are preserved separately from their '
+              'respective saved outputs. They are not interchangeable timing measurements; no performance '
+              'comparison is inferred from their differences.']
+    if stale_retention:
+        preflight = sum('in preflight_current_selection' in case['detail'] for case in stale_retention)
+        later = sum('in accept_current_selection' in case['detail'] for case in stale_retention)
+        lines += ['', f"Retention finding: {len(stale_retention)} public-finalization cases raise "
+                  '`ValueError: subscription observation is stale or future-dated`. '
+                  f'{preflight} stop at `preflight_current_selection`; {later} reaches the later '
+                  '`accept_current_selection` check after admission/controller preparation. '
+                  'Their intended retention assertions are therefore not verified by this cohort. '
+                  'The refusal remains intact. The saved synthetic guards and host pre-dispatch traces '
+                  'record the observation times and the verification work preceding each refusal; '
+                  'the exact stacks are retained in the JUnit and case ledger. '
+                  'This is an additional unresolved finding for the lead’s issue filing, separate from D128. '
+                  'The earlier instruction to leave timing refresh out still applies; no timestamp, '
+                  'freshness limit or assertion was changed to obtain a pass. '
+                  'Recommendation: handle verification/capture lifetime in a separate reviewed follow-up '
+                  'before treating these public-finalization paths as verified.']
     if 'prefix-canary-builder-serial' in results:
         lines += ['', 'Builder verification uses one worker after a matching one-worker prefix canary. '
                   'Its subprocess checks retain their fixed timeouts, and its module-scoped full-chain '
