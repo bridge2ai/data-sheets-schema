@@ -459,13 +459,20 @@ class CallbackAdapter:
             run, decision = self._phase_state(endpoints)
             content = event.get('message', {}).get('content', [])
             content = content if type(content) is list else ()
+            denials = run.trace().terminal_denials() if event.get('type') == 'result' else {}
+            for block in content:
+                if type(block) is dict and block.get('type') == 'tool_result':
+                    identity = block.get('tool_use_id')
+                    denial = run.trace().denial(identity)
+                    if denial is not None:
+                        denials[identity] = denial
             # Validate actual advance effects before the phase checker can
             # credit a tool result's claimed post-state.
             for block in content:
                 if type(block) is not dict or block.get('type') != 'tool_result':
                     continue
                 call = run.trace().calls.get(block.get('tool_use_id'))
-                if call and call[2].get('input', {}).get('command') == self.policy['native_shared_helpers']['advance']:
+                if call and block.get('tool_use_id') not in denials and call[2].get('input', {}).get('command') == self.policy['native_shared_helpers']['advance']:
                     run = self._run(endpoints)
                     capture.observe_advance_settled(run, block['tool_use_id'])
                     run, decision = self._phase_state(endpoints, refresh=True)
@@ -493,7 +500,7 @@ class CallbackAdapter:
                     if target.exists() or target.is_symlink():
                         raise ValueError('recorder destination already exists; never overwrite')
                     self._final_unchanged(run)
-            actions = self.phase.observe(event, stage_decision=decision)
+            actions = self.phase.observe(event, stage_decision=decision, denials=denials)
             preserved = set()
             for block in content:
                 if type(block) is not dict:
@@ -519,6 +526,8 @@ class CallbackAdapter:
                             preserved.add(command)
                 elif block.get('type') == 'tool_result':
                     identity = block['tool_use_id']; trace = run.trace(); call = trace.calls[identity][2]
+                    if identity in denials:
+                        continue
                     inputs = call['input']
                     if call['name'] == 'Read' and decision is not None and decision.request is not None and inputs.get('file_path') == decision.request.pin.path:
                         capture.observe_request_read(run, identity)

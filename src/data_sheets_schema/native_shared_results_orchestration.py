@@ -77,7 +77,9 @@ def capture(value, controls, *, authority_inputs, registration_raw):
     inputs = set(live.composition['policy']['readonly_lookups']['inputs'])
     outputs = tuple(Path(p) for p in live.composition['policy']['readonly_lookups']['output_directories'])
     trace = live.trace()
-    for _, _, call in trace.calls.values():
+    for identity, (_, _, call) in trace.calls.items():
+        if trace.denial(identity) is not None:
+            continue
         if call['name'] in ('Read', 'Write'):
             literal = call['input'].get('file_path')
             c.canonical_path(literal, 'observed file target')
@@ -151,7 +153,8 @@ def _classify_saved(command, policy, snapshot, controls):
             return policy_consumer.classify_bash(command, policy['python'], set(), policy,
                                                 classifier_projection=classifier_projection)
     if not _readonly(command, policy, snapshot, controls):
-        raise ValueError('saved history has an unsupported ordinary Bash command')
+        return controls['native_command_policy'].classify_program_command(
+            command, policy['python'], set(), policy)
     native = controls['run_native_canary']
     problem = native._too_complex(command) or (
         'an argument naming a process environment, which the runtime refuses'
@@ -198,11 +201,17 @@ def prepare(pool, value, controls, *, snapshot=None, _catalogs=None):
     events = [row for _, _, row in observed.rows(run.transcript)]
     records = [row for _, _, row in observed.rows(run.control)]
     policy = run.composition['policy']
-    for _, _, call in run.trace().calls.values():
+    trace = run.trace()
+    for identity, (_, _, call) in trace.calls.items():
+        if trace.denial(identity) is not None:
+            continue
         if call['name'] != 'Bash':
             continue
         command = call['input'].get('command')
-        _classify_saved(command, policy, snapshot, controls)
+        if ((command not in policy['native_shared_helpers'].values()
+                and not _readonly(command, policy, snapshot, controls))
+                or _classify_saved(command, policy, snapshot, controls)[0] != 'prescribed'):
+            raise ValueError('saved history has an unsupported ordinary Bash command')
     final_result = gates.current_evidence(run)
     phase, _ = capture_api.phase_replay(run, complete=True)
     record = _mapping(snapshot.read(policy['post_final_recorder']['destination'], 'provenance'), 'native provenance')
@@ -213,7 +222,7 @@ def prepare(pool, value, controls, *, snapshot=None, _catalogs=None):
         'composition_raw': value['composition_raw_json'].encode(), 'composition': run.composition,
         'events': events, 'records': records, 'policy': policy,
         'record': record, 'final_result': final_result, 'phase_report': phase,
-        'replay_complete': True}
+        'replay_complete': True, 'denied_tool_ids': sorted(trace.denied_ids())}
     prepared['saved_result'] = check_capture(prepared, controls=controls)
     return prepared
 
@@ -262,12 +271,30 @@ def check_capture(prepared, *, controls):
     if trace.pending() or trace.terminal is None:
         problems.append('native saved tool history is not terminal and settled')
     terminals = [e for e in prepared['events'] if e.get('type') == 'result']
-    if len(terminals) != 1 or terminals[0].get('permission_denials') != []:
-        problems.append('completed selected history contains denials or lacks explicit empty denial accounting')
+    denials = []
+    if len(terminals) != 1 or type(terminals[0].get('permission_denials')) is not list:
+        problems.append('completed selected history lacks explicit denial accounting')
+    else:
+        raw_denials = terminals[0]['permission_denials']
+        denials = inherited.classify_denials(raw_denials, policy, classify, controls,
+            prepared['snapshot'].read(run.composition['instruction_path'], 'instruction').decode('utf-8'))
+        problems.extend(controls['run_native_canary'].denial_problems(denials))
+        identities = []
+        for row in raw_denials:
+            identity = row.get('tool_use_id') if type(row) is dict else None
+            identity = identity if type(identity) is str else None
+            call = trace.calls.get(identity)
+            if (call is None or row.get('tool_name') != call[2]['name']
+                    or c.canonical(row.get('tool_input')) != c.canonical(call[2]['input'])):
+                problems.append('terminal denial differs from its observed call')
+            identities.append(identity)
+        if len(set(identities)) != len(identities) or set(identities) != trace.denied_ids():
+            problems.append('terminal denial inventory differs from observed refusals')
     return {'checked': True, 'passed': not problems and draft['draft_gate_passed'] and recorder,
         'additional_gate_passed': not problems and draft['draft_gate_passed'] and recorder,
         'recorder_completed_in_trace': recorder, 'problems': problems, 'draft': draft,
         'control': control, 'lifecycle': lifecycle, 'phase': prepared['phase_report'],
+        'denial_classification': denials,
         'scope': 'Captured native stage/control completion, not scientific support or authenticated provider evidence.'}
 
 

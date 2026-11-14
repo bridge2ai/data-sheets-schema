@@ -313,10 +313,17 @@ class PhaseState:
                      and value['passed'] is success and type(value.get('protocol_version')) is int
                      and value['protocol_version'] == 7, 'draft result is unusable or disagrees with its exit status')
 
-    def _result(self, event, item, decision):
+    def _result(self, event, item, decision, denials):
         identity = item.get('tool_use_id')
         _require(type(identity) is str and identity in self._pending, 'tool result has no unique pending call')
         row = self._pending.pop(identity)
+        if identity in denials:
+            denial = denials[identity]
+            _require(item.get('is_error') is True, 'denied tool has a successful result')
+            _require(denial['classification'] == 'not_prescribed',
+                     'denied {} call ({}): {}'.format(denial['classification'],
+                         row['name'], denial['basis']))
+            return ()
         # Native file results omit is_error on success. Their complete result
         # metadata is checked by the observation layer; an explicitly supplied
         # flag must still be boolean. Bash keeps its explicit outcome contract.
@@ -385,7 +392,7 @@ class PhaseState:
             actions.append('seal_core')
         return tuple(actions)
 
-    def observe(self, event, *, stage_decision=None):
+    def observe(self, event, *, stage_decision=None, denials=None):
         """Consume one original native event; errors remain sticky in reports."""
         self._index += 1
         actions = []
@@ -400,6 +407,10 @@ class PhaseState:
             if 'session_id' in event:
                 _require(event['session_id'] == self._session, 'native event belongs to another session')
             if event.get('type') == 'result':
+                for denial in (denials or {}).values():
+                    _require(denial['classification'] == 'not_prescribed',
+                        'denied {} call ({}): {}'.format(denial['classification'],
+                            denial['tool'], denial['basis']))
                 _require(not self._native_terminal and self._session is not None and not self._pending,
                          'native terminal precedes settled history or repeats')
                 _require(self._has('recorder') and not self._problems, 'native terminal precedes all final obligations')
@@ -423,7 +434,7 @@ class PhaseState:
                     self._call(item, stage_decision)
                 else:
                     _require(event.get('type') == 'user', 'tool result is not a user event')
-                    actions.extend(self._result(event, item, stage_decision))
+                    actions.extend(self._result(event, item, stage_decision, denials or {}))
         except (ValueError, TypeError, KeyError) as error:
             self._problems.append('event {}: {}'.format(self._index, error))
             raise ValueError(self._problems[-1]) from error
