@@ -46,8 +46,7 @@ def main():
         step = next(s for s in flow['jobs'][job]['steps'] if s.get('name', '').startswith(prefix))
         env.update({k: str(v) for k, v in step.get('env', {}).items()})
         env.pop('PYTHONPYCACHEPREFIX', None)
-        if args.cohort == 'budget':
-            env.pop('PYTHONPATH', None)
+        # Supplemental budget uses local src instead of the primary editable checkout.
         argv = [a for a in shlex.split(step['run'])[5:] if not a.startswith('--junitxml=')]
         (out / 'ci-step.json').write_text(json.dumps(step, indent=2) + '\n')
     if args.workers:
