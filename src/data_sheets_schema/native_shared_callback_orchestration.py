@@ -6,7 +6,8 @@ This is a source contract, not a sandbox against arbitrary Python reflection.
 """
 from contextlib import contextmanager, ExitStack
 from dataclasses import asdict, dataclass
-from inspect import isfunction
+from inspect import isfunction, ismethod
+from types import ModuleType
 import sys
 from threading import current_thread, main_thread, RLock
 
@@ -15,6 +16,106 @@ from . import native_shared_controls_orchestration as loading
 from . import native_execution_registration_v2 as registration
 from . import native_shared_contract as c
 from .native_shared_callback_capture import FrozenSpec
+
+
+# Closed verified observation/stage graph, including deferred pure utilities.
+VALIDATOR_MODULES = frozenset('data_sheets_schema.' + name for name in (
+    'agentic_runtime', 'audit_batch_format', 'audit_batches', 'audit_grammar',
+    'audit_omissions', 'audit_protocol', 'cache_dependencies', 'canary',
+    'chunking', 'corpus', 'duplicate_keys', 'evidence_assertions', 'grounding',
+    'native_catalog_initialization', 'native_catalog_reuse', 'native_model_aliases',
+    'native_schema_event_reuse', 'native_shared_authority_wire',
+    'native_shared_capture', 'native_shared_contract', 'native_shared_controller',
+    'native_shared_controls', 'native_shared_current', 'native_shared_effects',
+    'native_shared_evidence', 'native_shared_observations', 'native_shared_phase',
+    'native_shared_policy', 'native_shared_receipts', 'native_shared_render',
+    'native_shared_selection', 'native_shared_stage', 'native_shared_streams',
+    'profiles', 'receipt_completion_policy', 'receipts', 'registry', 'resources',
+    'schema_snapshot', 'schema_view', 'support_targets', 'typed_audit',
+    'source_metadata', 'source_review', 'bc1_context'))
+
+
+def _binding_identity(value):
+    if isinstance(value, (ModuleType, type)) or isfunction(value) or ismethod(value):
+        return id(value), type(value)
+    return None
+
+
+def _effective_bindings(modules):
+    """Attest imported aliases and callable environments, without retaining runs."""
+    result = []
+    for module in modules:
+        functions = []
+        for name, value in sorted(vars(module).items()):
+            identity = _binding_identity(value)
+            if identity is None:
+                continue
+            result.append((module.__name__, name, identity))
+            if isinstance(value, ModuleType) and value.__name__.startswith('data_sheets_schema.'):
+                if value.__name__ not in VALIDATOR_MODULES:
+                    raise ValueError('validator binding reaches a module outside its closed graph')
+            if isfunction(value) or ismethod(value):
+                functions.append((name, value.__func__ if ismethod(value) else value))
+            elif isinstance(value, type) and value.__module__ == module.__name__:
+                for member, function in sorted(vars(value).items()):
+                    if isinstance(function, (staticmethod, classmethod)):
+                        function = function.__func__
+                    if isfunction(function):
+                        functions.append((name + '.' + member, function))
+        for name, function in functions:
+            environments = (function.__defaults__ or (),
+                tuple(sorted((function.__kwdefaults__ or {}).items())),
+                tuple(cell.cell_contents for cell in (function.__closure__ or ())))
+            result.append((module.__name__, name, id(function), id(function.__code__),
+                id(function.__defaults__), id(function.__kwdefaults__),
+                tuple(_binding_identity(value) for value in environments[0]),
+                tuple((key, _binding_identity(value)) for key, value in environments[1]),
+                tuple(_binding_identity(value) for value in environments[2])))
+    return tuple(result)
+
+
+class _ValidatorGuard:
+    def __init__(self, modules, source_check, admission_bytes):
+        self.modules = tuple(modules)
+        self.source_check = source_check
+        self.admission_bytes = admission_bytes
+        self.disabled = False
+        self.baseline = self.snapshot()
+
+    def snapshot(self):
+        constants = []
+        for module in self.modules:
+            for name, value in sorted(vars(module).items()):
+                if name.isupper() and not name.startswith('_') and _binding_identity(value) is None:
+                    constants.append((module.__name__, name, _constant_value(value)))
+        return (_effective_bindings(self.modules), tuple(constants),
+            self.admission_bytes, sys.executable, sys.version, sys.implementation.cache_tag)
+
+    def reusable(self):
+        if self.disabled:
+            return False
+        try:
+            same = self.snapshot() == self.baseline
+        except (ValueError, TypeError, AttributeError, RuntimeError):
+            same = False
+        if not same:
+            self.disabled = True
+        return same
+
+
+def _constant_value(value):
+    if value is None or type(value) in (str, bytes, int, float, bool):
+        return value
+    if type(value) is dict:
+        return ('dict', tuple(sorted((key, _constant_value(item)) for key, item in value.items())))
+    if type(value) in (tuple, list):
+        return (type(value).__name__, tuple(_constant_value(item) for item in value))
+    if type(value) in (set, frozenset):
+        return ('set', frozenset(_constant_value(item) for item in value))
+    # Compiled grammar patterns are immutable, but identity alone omits flags.
+    if hasattr(value, 'pattern') and hasattr(value, 'flags'):
+        return (type(value), value.pattern, value.flags)
+    raise ValueError('validator constant cannot be represented')
 
 
 def require_main_thread():
@@ -288,6 +389,14 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
         stack.callback(capture_inputs._ADMISSIONS.pop, admitted, None)
         # Reconstruct once before the first possible publication, too.
         admitted.reconstruct()
+        validator_modules = {}
+        for name in sorted(VALIDATOR_MODULES):
+            validator_modules[name] = stack.enter_context(authority.loaded_verified_package_module(
+                name, package_sources=pins))
+        guard = _ValidatorGuard(validator_modules.values(), source_check,
+            (composition_raw, preparation_raw, c.canonical(arguments)))
+        capture_inputs._PREFIX_OWNERS[admitted] = capture_inputs._PrefixOwner(guard)
+        stack.callback(capture_inputs._PREFIX_OWNERS.pop, admitted, None)
         paths = frozen._agentic_artifact_paths
         phase = modules['native_shared_phase'].PhaseState(rendered_commands,
             full_path=paths['full'], core_path=paths['core'], report_path=paths['report'],

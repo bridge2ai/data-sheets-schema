@@ -53,6 +53,7 @@ class FrozenSpec:
 
 
 _ADMISSIONS = WeakKeyDictionary()
+_PREFIX_OWNERS = WeakKeyDictionary()
 _ADMISSION_MEMBERS = ('registration_raw', 'execution_json', 'composition_json',
     'preparation_raw', 'rebuild_arguments_json', 'selection', 'spec', 'rebuild',
     'controls', 'check_sources')
@@ -66,6 +67,81 @@ def require_admission(value):
                    for name, original in _ADMISSIONS[value])):
         raise ValueError('captured callback admission reference changed')
     return value
+
+
+class _PrefixOwner:
+    """One admission's bounded semantic checkpoints and irreversible byte anchors."""
+    def __init__(self, guard):
+        self.guard = guard
+        self.records = ()
+        self.observations = ()
+        self.streams = ()
+        self.artifacts = {}
+        self.semantic = {}
+        self.observation_state = None
+
+    def begin(self, run):
+        records = tuple(item.pin for item in run.history.records)
+        observations = tuple(item.pin for item in run.observations)
+        if (records[:len(self.records)] != self.records
+                or observations[:len(self.observations)] != self.observations):
+            raise ValueError('callback history replaced its verified prefix')
+        for role, length, digest in self.streams:
+            raw = getattr(run, role).raw
+            if len(raw) < length or c.sha(raw[:length]) != digest:
+                raise ValueError('callback stream replaced its verified prefix')
+        for pin in self.artifacts.values():
+            run.reader.read(pin.role, pin.path, pin)
+        reusable = self.guard.reusable()
+        if not reusable:
+            self.semantic.clear()
+            self.observation_state = None
+        return _PrefixTransaction(self, run, reusable)
+
+
+class _PrefixTransaction:
+    """Uncommitted suffix; exceptions cannot publish partial semantic state."""
+    def __init__(self, owner, run, reusable):
+        self.owner, self.run, self.reusable = owner, run, reusable
+        self.pending = {}
+        self.observation_state = owner.observation_state if reusable else None
+
+    def get(self, key):
+        if not self.reusable:
+            return None
+        if not self.owner.guard.reusable():
+            self.owner.semantic.clear()
+            self.owner.observation_state = None
+            self.pending.clear()
+            raise ValueError('validator changed during callback semantic reuse')
+        return self.pending.get(key, self.owner.semantic.get(key))
+
+    def put(self, key, value):
+        if self.reusable:
+            self.pending[key] = value
+
+    def commit(self):
+        run, owner = self.run, self.owner
+        if self.reusable and not owner.guard.reusable():
+            owner.semantic.clear()
+            owner.observation_state = None
+            raise ValueError('validator changed during callback verification')
+        owner.records = tuple(item.pin for item in run.history.records)
+        owner.observations = tuple(item.pin for item in run.observations)
+        owner.streams = tuple((role, len(getattr(run, role).raw), c.sha(getattr(run, role).raw))
+                              for role in ('transcript', 'control'))
+        for member in run.reader.members.values():
+            pin = member.captured.pin
+            if pin.role != 'journal':
+                owner.artifacts[(pin.role, pin.path)] = pin
+        if self.reusable:
+            owner.semantic.update(self.pending)
+            owner.observation_state = self.observation_state
+
+
+def prefix_owner(admission):
+    require_admission(admission)
+    return _PREFIX_OWNERS.get(admission)
 
 
 @dataclass(frozen=True, slots=True, weakref_slot=True, eq=False)

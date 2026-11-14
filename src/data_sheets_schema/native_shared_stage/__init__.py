@@ -206,12 +206,13 @@ def _envelope(raw):
 
 
 class _Replay:
-    def __init__(self, selection, execution, phase1, history, *, _catalogs=None):
+    def __init__(self, selection, execution, phase1, history, *, _catalogs=None, _prefix=None):
         # U3-B owns bounded catalog/derivation reuse only. Every replay derives
         # requests, responses and verdicts again; no admission or completion
         # cache is stored on that owner. This deliberately trades speed for a
         # closed owner interface and fresh validation of each captured history.
         self.catalogs = nr._catalog_context(_catalogs)
+        self.prefix = _prefix
         self.s, self.e, self.p, self.h = selection, execution, phase1, history
         self.rows, self.artifacts = _history(selection, execution, history)
         self.at = 0
@@ -277,6 +278,17 @@ class _Replay:
                 self._output('receipt_result', value.result_json), self._output('receipt_carry', value.carry_json))
 
     def _packet(self):
+        key = ('packet', self.p.core.pin, c.sha(self.receipt.effective_receipt))
+        if self.prefix is not None:
+            cached = self.prefix.get(key)
+            if cached is not None:
+                return cached
+        packet = self._packet_uncached()
+        if self.prefix is not None:
+            self.prefix.put(key, packet)
+        return packet
+
+    def _packet_uncached(self):
         inputs, limits = self.s.document()['inputs'], self.s.bounds()
         schema = nr.schema_snapshot(self.s)
         packet = typed._prepare(protocol='typed_audit_protocol_v1', original_full=self.p.full.raw,
@@ -304,6 +316,20 @@ class _Replay:
         return self.index
 
     def _request(self, cursor, predecessor):
+        key = ('request', cursor, predecessor)
+        if self.prefix is not None:
+            cached = self.prefix.get(key)
+            if cached is not None:
+                result, index = cached
+                if cursor.kind == 'integration':
+                    self.index = index
+                return result
+        result = self._request_uncached(cursor, predecessor)
+        if self.prefix is not None:
+            self.prefix.put(key, (result, self.index if cursor.kind == 'integration' else None))
+        return result
+
+    def _request_uncached(self, cursor, predecessor):
         inner = self._inner(cursor)
         # Receipt precedes core. Replaying it after a genuine core has been
         # sealed must retain the original request's then-absent core context.
@@ -375,6 +401,38 @@ class _Replay:
         return envelope, outputs
 
     def _stage(self, cursor):
+        # A completed stage stores only its delta, never an entire replay or
+        # journal prefix. Fresh _history and owner byte anchors precede reuse.
+        key = ('stage', cursor, self.h.records[self.at - 1].pin)
+        cached = None if self.prefix is None else self.prefix.get(key)
+        if cached is not None:
+            end, last, receipt, worker, omission, assembly, outputs, origin = cached
+            if end <= len(self.h.records) and self.h.records[end - 1].pin == last:
+                self.at = end
+                if cursor.kind == 'receipt':
+                    self.receipt = receipt
+                elif cursor.kind == 'worker':
+                    self.workers[cursor.target_id] = worker
+                elif cursor.kind == 'omission':
+                    self.omission = omission
+                else:
+                    self.assembly = assembly
+                self.checked_outputs.update(outputs)
+                self.origins.append(origin)
+                return True
+        before = set(self.checked_outputs)
+        result = self._stage_uncached(cursor)
+        if result and self.prefix is not None:
+            self.prefix.put(key, (self.at, self.h.records[self.at - 1].pin,
+                self.receipt if cursor.kind == 'receipt' else None,
+                self.workers.get(cursor.target_id) if cursor.kind == 'worker' else None,
+                self.omission if cursor.kind == 'omission' else None,
+                self.assembly if cursor.kind == 'integration' else None,
+                {role: item for role, item in self.checked_outputs.items() if role not in before},
+                self.origins[-1]))
+        return result
+
+    def _stage_uncached(self, cursor):
         predecessor = self._prefix()
         request, destination, inner, request_hash, auxiliary = self._request(cursor, predecessor)
         if self.at == len(self.rows):
@@ -530,8 +588,22 @@ def prepare_next(selection, execution, phase1, history):
     return _prepare_next(selection, execution, phase1, history, nr._ReceiptCatalogContext())
 
 
-def _prepare_next(selection, execution, phase1, history, catalogs):
-    replay = _Replay(selection, execution, phase1, history, _catalogs=catalogs).run()
+def _prepare_next(selection, execution, phase1, history, catalogs, *, _prefix=None):
+    if history.records and c.strict_json(history.records[-1].raw)['record_type'] == 'assembly_checked':
+        # Completion never inherits controller-process semantic authority.
+        _prefix = None
+    key = ('decision', history.journal.pin, phase1.core_seal.pin if phase1.core_seal else None)
+    cached = None if _prefix is None else _prefix.get(key)
+    if cached is not None:
+        return cached
+    result = _prepare_next_uncached(selection, execution, phase1, history, catalogs, _prefix=_prefix)
+    if _prefix is not None and result.state not in ('failed', 'assembly_complete'):
+        _prefix.put(key, result)
+    return result
+
+
+def _prepare_next_uncached(selection, execution, phase1, history, catalogs, *, _prefix=None):
+    replay = _Replay(selection, execution, phase1, history, _catalogs=catalogs, _prefix=_prefix).run()
     state, cursor, request, destination, publications, predecessor = 'assembly_complete', None, None, None, (), None
     failure = None
     completion = None

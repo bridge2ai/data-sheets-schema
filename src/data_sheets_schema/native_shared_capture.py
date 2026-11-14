@@ -332,6 +332,7 @@ class _CapturedRun:
     _prefixes: dict = field(default_factory=dict, init=False, compare=False, repr=False)
     _chronology_cache: object = field(default=None, init=False, compare=False, repr=False)
     _callback_state_cache: dict = field(default_factory=dict, init=False, compare=False, repr=False)
+    _prefix: object = field(default=None, init=False, compare=False, repr=False)
 
     def trace(self, transcript=None, control=None):
         if (transcript is None or transcript == self.transcript) and (control is None or control == self.control):
@@ -347,7 +348,7 @@ class _CapturedRun:
 
     def decision(self):
         return None if self.phase1 is None else stage._prepare_next(
-            self.selection, self.binding, self.phase1, self.history, self._catalogs)
+            self.selection, self.binding, self.phase1, self.history, self._catalogs, _prefix=self._prefix)
 
 
 def _binding_document(selection, value, composition, execution, started, observation_item, session):
@@ -503,7 +504,7 @@ def _decision_at(run, digest):
     phase1 = _phase1(run.selection, run.binding, history, run.reader)
     if phase1 is None:
         raise ValueError('stage observation precedes actual phase1 seal')
-    return stage._prepare_next(run.selection, run.binding, phase1, history, run._catalogs)
+    return stage._prepare_next(run.selection, run.binding, phase1, history, run._catalogs, _prefix=run._prefix)
 
 
 def _require_completed_read_before_write(request, read):
@@ -589,6 +590,14 @@ def _checked_observations(run):
     base_attempted = False
     init_lines = None
     settled_cache = {}
+    start = 0
+    if run._prefix is not None and run._prefix.observation_state is not None:
+        state = run._prefix.observation_state
+        start, prior, reads, intents, writes, advances, settled, init_lines = state
+        previous = dict(prior)
+        seen_reads, seen_intents = dict(reads), dict(intents)
+        seen_writes, seen_advances = set(writes), dict(advances)
+        settled_advances = set(settled)
 
     def decision_at(digest):
         # This invocation owns one immutable captured run. Reuse only the
@@ -618,6 +627,8 @@ def _checked_observations(run):
         return run.trace(transcript, control)
 
     for index, artifact in enumerate(run.observations):
+        if index < start:
+            continue
         doc, transcript, control = observation(artifact, run.selection, run.binding, run.pool)
         for prefix in (transcript, control):
             if prefix.bytes < previous[prefix.stream]:
@@ -707,13 +718,16 @@ def _checked_observations(run):
         else:
             raise ValueError('unsupported durable native observation')
         checked.append((artifact, doc, transcript, control))
+    if run._prefix is not None:
+        run._prefix.observation_state = (len(run.observations), previous,
+            seen_reads, seen_intents, seen_writes, seen_advances, settled_advances, init_lines)
     return tuple(checked)
 
 
 
 
 
-def _loaded(base, streams, prefixes, *, _catalogs=None):
+def _loaded(base, streams, prefixes, *, _catalogs=None, _prefix_owner=None):
     selection, reader, value, composition, spec = base
     transcript, control = prefixes
     observations = tuple(reader.read('observation', path) for path in _observation_paths(selection))
@@ -728,7 +742,11 @@ def _loaded(base, streams, prefixes, *, _catalogs=None):
                        transcript, control, binding, history, observations, phase1)
     if _catalogs is not None:
         run._catalogs = receipt_api._catalog_context(_catalogs)
+    if _prefix_owner is not None:
+        run._prefix = _prefix_owner.begin(run)
     _checked_observations(run)
+    if run._prefix is not None:
+        run._prefix.commit()
     return run
 
 
