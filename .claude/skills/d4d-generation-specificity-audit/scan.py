@@ -13011,7 +13011,11 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     **_NATIVE_V2_RENDER_SOURCES,
     # U3-L: one integrated authority version, coupled to the complete producer
     # family below. The older contracts retain their original source identity.
-    'src/data_sheets_schema/native_execution_authority_v2.py': '00b0f717bc0398b905cfcb81de47c4434f70c2909bbbffb0b92789dbf867047c',
+    # Rotation authorized by the lead, 2026-11-14 (D148 manifest integration).
+    # Against 00b0f717, the loader restores the caller's import path after the
+    # verified helpers load and before yielding; the exact byte finder stays
+    # active. This prevents historical helper paths entering the fresh census.
+    'src/data_sheets_schema/native_execution_authority_v2.py': 'f865fea7736d4c1531742ab5081bfa19b1c43ba123f3d233dc4816d7d5d2b79e',
     # The reviewed #5966 v2 dispatcher adds a required, attempt-local
     # PYSTOW_HOME declaration. Include its path validator in the closed
     # three-module source contract; a new callee cannot inherit the prior
@@ -13038,10 +13042,13 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
 
 _NATIVE_V3_RENDER_SOURCES = {
     **_NATIVE_V2_INTEGRATED_RENDER_SOURCES,
-    # New v3 callees need complete source identities. Zero pins deliberately
-    # refuse until the separate, reviewed identity-update commit is applied.
-    'src/data_sheets_schema/native_shared_authority_wire.py': '0000000000000000000000000000000000000000000000000000000000000000',
-    'src/data_sheets_schema/native_environment_manifest.py': '0000000000000000000000000000000000000000000000000000000000000000',
+    # New v3 summaries authorized by the lead, 2026-11-14 (D148), after the
+    # structural proof. Bind the complete v3 wire vocabulary and fresh v1
+    # environment census, including payload verification and unowned files.
+    # The v2 summaries retain their separate source closure. These identities
+    # establish source structure, never a successful census or launch approval.
+    'src/data_sheets_schema/native_shared_authority_wire.py': 'f0a21bb711b8b39e38350addf42627e338d1a17cacf1f653b56c6613098fdd6c',
+    'src/data_sheets_schema/native_environment_manifest.py': '13d4d45e0bd375608d3b8c4808af6ea51cb6489d1053e0415fa799e443f46e7c',
 }
 
 
