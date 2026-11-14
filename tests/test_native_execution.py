@@ -389,16 +389,21 @@ def test_observation_persistence_failure_always_releases_acquired_assertions(
     auth_error=RuntimeError('synthetic auth failure')
     real_write=execute.durable_new
     from data_sheets_schema import native_attempt_supervisor as durable
-    real_sync=durable._sync_directory
+    from data_sheets_schema import native_shared_callback_io as callback_io
+    # #6237: durable_new is the shared callback-IO writer, which syncs through
+    # its own module; inject the after-link failure wherever a sync can run.
+    real_syncs={durable:durable._sync_directory,callback_io:callback_io._sync_directory}
     observation_link_failed=False
-    def sync(path):
-        nonlocal observation_link_failed
-        target=case['root']/'native-attempt/runtime-observation.json'
-        if after_link and target.exists() and not observation_link_failed:
-            observation_link_failed=True
-            events.append(('observation_link_fsync',));raise observation_error
-        return real_sync(path)
-    monkeypatch.setattr(durable,'_sync_directory',sync)
+    def failing_sync(module):
+        def sync(path):
+            nonlocal observation_link_failed
+            target=case['root']/'native-attempt/runtime-observation.json'
+            if after_link and target.exists() and not observation_link_failed:
+                observation_link_failed=True
+                events.append(('observation_link_fsync',));raise observation_error
+            return real_syncs[module](path)
+        return sync
+    for module in real_syncs:monkeypatch.setattr(module,'_sync_directory',failing_sync(module))
     def interrupted(path,raw):
         if Path(path).name=='runtime-observation.json' and not after_link:
             events.append(('observation_write',));raise observation_error
