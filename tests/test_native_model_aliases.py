@@ -142,6 +142,8 @@ def current_stream(tmp_path):
         'limits': {'contextWindow': 1_000_000, 'maxOutputTokens': 64_000},
         'attempt_directory': str(tmp_path), 'budget_guard_usd': '90'}
     prepared['events'][0]['model'] = subject.REQUESTED
+    prepared['events'][0]['permissionMode'] = 'dontAsk'
+    prepared['events'][-1]['subtype'] = 'success'
     prepared['events'][1]['message']['model'] = subject.RETURNED
     prepared['events'][-1].update(total_cost_usd=0.01,
         usage={'input_tokens': 1, 'output_tokens': 1, 'cache_read_input_tokens': 0,
@@ -178,6 +180,18 @@ def test_real_terminal_and_accounting_gates_keep_alias_roles_separate(tmp_path, 
         assert refused['terminal']['passed'] is False, location
         if location in ('terminal_usage', 'auxiliary_usage', 'basis'):
             assert refused['accounting']['passed'] is False, location
+
+
+@pytest.mark.parametrize('frame,key', [(0, 'permissionMode'), (-1, 'subtype')])
+@pytest.mark.parametrize('value', ['missing', None, '', False, 'wrong'])
+def test_terminal_requires_explicit_permission_and_success(tmp_path, pure_gate_members, frame, key, value):
+    prepared, chosen, projections = current_stream(tmp_path)
+    assert gate_result(prepared, chosen, projections, pure_gate_members)['terminal']['passed']
+    if value == 'missing':
+        del prepared['events'][frame][key]
+    else:
+        prepared['events'][frame][key] = value
+    assert not gate_result(prepared, chosen, projections, pure_gate_members)['terminal']['passed']
 
 
 @pytest.mark.parametrize('fixture', ['u4b_aliases'], indirect=True)

@@ -429,6 +429,47 @@ def test_bound_phase_failure_is_spent_and_cannot_publish_completion(prepared, fi
         sequence.produce_bound_probe(prepared['authorization'], expected)
     assert (prepared['root'] / 'bound-claim.json').exists()
     assert not (prepared['root'] / 'sequence.json').exists()
+    failure_path = prepared['root'] / 'bound-failure.json'
+    failure_raw = failure_path.read_bytes()
+    assert sequence.strict_json(failure_raw) == {
+        'error_type': 'ValueError', 'message': 'invented failed permission transcript',
+        'authorization_sha256': sequence.sha(prepared['authorization']),
+        'permission_directory_exists': False}
     with pytest.raises(FileExistsError):
         sequence.produce_bound_probe(prepared['authorization'], expected)
+    assert failure_path.read_bytes() == failure_raw
     assert calls == [True]
+
+
+@pytest.mark.parametrize('created', [False, True])
+def test_bound_failure_record_preserves_claim_without_runtime_fixture(tmp_path, monkeypatch, created):
+    """Invented admission data isolates the durable failure boundary."""
+    from data_sheets_schema import native_runtime_profiles as profiles
+    raw = b'invented authorization'
+    runtime = {'limits_basis': sequence.canonical({
+        'observation_probe': {'path': 'invented'}, 'probe': {'path': 'invented'},
+        'request': {'path': 'invented'}}).decode()}
+    observed = {'sequence_directory': str(tmp_path), 'authorization_sha256': sequence.sha(raw),
+                'provisional_runtime': {}, 'pin': {}}
+    monkeypatch.setattr(profiles, 'require_production', lambda *a: None)
+    monkeypatch.setattr(runtime_module, 'validate_prepared_runtime', lambda value: value)
+    monkeypatch.setattr(sequence, 'validate_observation', lambda *a, **k: observed)
+    monkeypatch.setattr(sequence, 'authorization', lambda *a: {'permission_deadline_seconds': 30})
+    monkeypatch.setattr(sequence, '_bound_claim', lambda *a: {'kind': 'invented claim'})
+    monkeypatch.setattr(producer, 'require_u4_expectation', lambda *a: None)
+    def refused(expected, directory, **kwargs):
+        if created:
+            directory.mkdir()
+        raise InterruptedError('invented stop')
+    monkeypatch.setattr(producer, 'produce_saved_probe', refused)
+    with pytest.raises(InterruptedError, match='invented stop'):
+        sequence.produce_bound_probe(raw, {'runtime': runtime})
+    failure = (tmp_path / 'bound-failure.json').read_bytes()
+    assert sequence.strict_json(failure) == {
+        'error_type': 'InterruptedError', 'message': 'invented stop',
+        'authorization_sha256': sequence.sha(raw), 'permission_directory_exists': created}
+    assert (tmp_path / 'bound-claim.json').is_file()
+    assert not (tmp_path / 'sequence.json').exists()
+    with pytest.raises(FileExistsError):
+        sequence.produce_bound_probe(raw, {'runtime': runtime})
+    assert (tmp_path / 'bound-failure.json').read_bytes() == failure

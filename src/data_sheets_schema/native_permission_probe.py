@@ -33,6 +33,34 @@ U4_EFFORT = 'high'
 U4_RECEIPT_INSTRUMENT = 4
 
 
+@contextmanager
+def _probe_signals():
+    """Turn the first stop into unwinding; subsequent stops cannot abort it."""
+    previous = {}
+    def stop(signum, frame):
+        for number in previous:
+            signal.signal(number, signal.SIG_IGN)
+        raise InterruptedError("permission probe stopped by signal " + str(signum))
+    try:
+        for number in (signal.SIGINT, signal.SIGTERM):
+            previous[number] = signal.signal(number, stop)
+        yield
+    finally:
+        for number, handler in previous.items():
+            signal.signal(number, handler)
+
+
+@contextmanager
+def _cleanup_signals():
+    previous = {number: signal.signal(number, signal.SIG_IGN)
+                for number in (signal.SIGINT, signal.SIGTERM)}
+    try:
+        yield
+    finally:
+        for number, handler in previous.items():
+            signal.signal(number, handler)
+
+
 def require_u4_runtime(runtime):
     """Validate D106's saved selection, without querying an account or binary.
 
@@ -384,15 +412,40 @@ def _version(expected, deadline, directory):
             raise ValueError("observed native version differs from registration")
         return raw
     finally:
-        try:
-            _terminate(process)
-        finally:
-            if process is not None:
-                for stream in (process.stdout, process.stderr):
-                    if stream is not None:
-                        stream.close()
-            _write_new(directory / "version.stdout", bytes(outputs["stdout"]))
-            _write_new(directory / "version.stderr", bytes(outputs["stderr"]))
+        with _cleanup_signals():
+            try:
+                _terminate(process)
+            finally:
+                if process is not None:
+                    for stream in (process.stdout, process.stderr):
+                        if stream is not None:
+                            stream.close()
+                _write_new(directory / "version.stdout", bytes(outputs["stdout"]))
+                _write_new(directory / "version.stderr", bytes(outputs["stderr"]))
+
+
+def _pipe_tail(stream, limit, deadline):
+    """Retain raw shutdown bytes without parsing or dispatching callbacks."""
+    output = bytearray()
+    if stream is None or stream.closed:
+        return b"", "unavailable"
+    try:
+        os.set_blocking(stream.fileno(), False)
+        while time.monotonic() < deadline:
+            try:
+                raw = os.read(stream.fileno(), min(65536, limit - len(output) + 1))
+            except BlockingIOError:
+                time.sleep(0.001)
+                continue
+            if not raw:
+                return bytes(output), "eof"
+            remaining = limit - len(output)
+            output.extend(raw[:remaining])
+            if len(raw) > remaining:
+                return bytes(output), "byte_limit"
+        return bytes(output), "time_limit"
+    except OSError as exc:
+        return bytes(output), type(exc).__name__
 
 
 def _run_native(expected, launch, policy, observer, classifier, transport, server, deadline):
@@ -401,7 +454,8 @@ def _run_native(expected, launch, policy, observer, classifier, transport, serve
     control = transport.control(policy, classifier, launch["config_root"], event_observer=observer)
     process = None
     transcript, journal, stderr = io.BytesIO(), io.StringIO(), bytearray()
-    stopped = False
+    stopped, stderr_closed = False, False
+    tail, drainage = b"", {}
     try:
         _identity(expected)
         if time.monotonic() >= deadline:
@@ -411,13 +465,14 @@ def _run_native(expected, launch, policy, observer, classifier, transport, serve
         os.set_blocking(process.stderr.fileno(), False)
         control.start(process, _Bounded(transcript, MAX_STREAM), _Bounded(journal, MAX_STREAM),
                       "Execute the scripted local permission cases in order, then finish.")
-        while process.poll() is None or not control.stdout_closed:
+        while process.poll() is None or not control.stdout_closed or not stderr_closed:
             if time.monotonic() >= deadline:
                 raise TimeoutError("permission probe deadline elapsed")
             if server.failure is not None:
                 raise ValueError("scripted permission provider failed") from server.failure
             try:
                 raw = os.read(process.stderr.fileno(), 65536)
+                stderr_closed = not raw
             except BlockingIOError:
                 raw = b""
             stderr.extend(raw)
@@ -433,22 +488,38 @@ def _run_native(expected, launch, policy, observer, classifier, transport, serve
         else:
             raise
     finally:
-        try:
-            _terminate(process)
-        finally:
+        with _cleanup_signals():
             try:
-                control.close()
+                _terminate(process)
             finally:
-                if process is not None:
-                    for stream in (process.stdin, process.stdout, process.stderr):
-                        if stream is not None and not stream.closed:
-                            stream.close()
-                # Preserve even timeout/refusal/overflow traces. Publication
-                # still requires a full independently verified manifest.
-                evidence = Path(launch["config_root"]).parent
-                _write_new(evidence / "transcript.jsonl", transcript.getvalue())
-                _write_new(evidence / "control.jsonl", journal.getvalue().encode())
-                _write_new(evidence / "stderr.txt", bytes(stderr))
+                try:
+                    if process is not None:
+                        drain_deadline = time.monotonic() + 1
+                        tail, drainage['stdout'] = _pipe_tail(process.stdout, MAX_STREAM, drain_deadline)
+                        extra, drainage['stderr'] = _pipe_tail(
+                            process.stderr, max(0, MAX_STREAM - len(stderr)), drain_deadline)
+                        stderr.extend(extra)
+                    control.close()
+                finally:
+                    if process is not None:
+                        for stream in (process.stdin, process.stdout, process.stderr):
+                            if stream is not None and not stream.closed:
+                                stream.close()
+                    # Preserve even timeout/refusal/overflow traces. Publication
+                    # still requires a full independently verified manifest.
+                    evidence = Path(launch["config_root"]).parent
+                    _write_new(evidence / "transcript.jsonl", transcript.getvalue())
+                    _write_new(evidence / "control.jsonl", journal.getvalue().encode())
+                    _write_new(evidence / "stderr.txt", bytes(stderr))
+                    _write_new(evidence / "stdout.unprocessed", tail)
+                    _write_new(evidence / "cleanup.json", canonical({
+                        'drainage': drainage, 'child_reaped': process is not None and process.poll() is not None,
+                        'control_shutdown_complete': control.control_shutdown_complete,
+                        'unfinished_control_workers': control.unfinished_control_workers}))
+    if any(status != 'eof' for status in drainage.values()):
+        raise ValueError("permission pipe drainage was incomplete")
+    if tail and not stopped:
+        raise ValueError("permission process left unprocessed stdout")
     if (not control.control_shutdown_complete or control.unfinished_control_workers != 0
             or process is None or process.poll() is None):
         raise ValueError("permission probe cleanup was incomplete")
@@ -493,13 +564,28 @@ def _inventory(p, expected, selected, launch, session):
     return shape
 
 
+class _RetainedMembers(dict):
+    """Persist captured bytes before making them available for publication."""
+    def __init__(self, root):
+        super().__init__()
+        self.root = Path(root)
+
+    def __setitem__(self, name, raw):
+        _write_new(self.root / name, raw)
+        super().__setitem__(name, raw)
+
+    def update(self, values):
+        for name, raw in values.items():
+            self[name] = raw
+
+
 class _SharedObserver:
     def __init__(self, p, expected, selected, launch, trace, controls, transport):
         self.p, self.expected, self.selected, self.launch = p, expected, selected, launch
         self.trace, self.controls = trace, controls
         self.transport = transport
         self.session = None
-        self.cases, self.members = [], {}
+        self.cases, self.members = [], _RetainedMembers(launch["evidence_root"])
         self.calls = {}
         self.expected_stop = False
         self.policy = p.projected_policy(expected, selected, launch["effect_root"])
@@ -552,8 +638,6 @@ class _SharedObserver:
                     "kind": "native_shared_permission_parent_stop", "version": 1,
                     "outcome": "observer_stopped", "effect_stop_sha256": sha(canonical(stop)),
                     "reason_code": "prohibited_file_effect", "error_type": "BudgetStop"})
-                for name in ("effect-stop.json", "parent-stop.json"):
-                    _write_new(Path(self.launch["evidence_root"]) / name, self.members[name])
                 self.expected_stop = True
                 raise self.transport.budget_stop("prohibited_file_effect")
 
@@ -598,6 +682,7 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
                 "PYTHONPATH": launch["stub_root"], "ANTHROPIC_BASE_URL": url,
                 "ANTHROPIC_API_KEY": "d4d-local-permission-probe-token"},
             argv=p.probe_argv(expected, policy))
+        _write_new(directory / "launch.before.json", canonical(launch))
         result = _run_native(expected, launch, policy, observer, classifier, transport, server, deadline)
         if server.failure is not None:
             raise ValueError("scripted permission provider failed") from server.failure
@@ -619,6 +704,8 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
         "mode": "settled" if trace == "settled" else "observer_stopped",
         "session_id": observer.session, "terminal_sha256": terminal_hash,
         "parent_stop_sha256": parent_hash})
+    for name, raw in members.items():
+        _write_new(directory / "completed" / name, raw)
     return members
 
 
@@ -641,7 +728,7 @@ def produce_saved_probe(expected, directory, *, deadline_seconds):
     if deadline_seconds > expected['runtime']['deadline_seconds']:
         raise ValueError("permission probe deadline exceeds selected runtime deadline")
     deadline = time.monotonic() + deadline_seconds
-    with _loaded_probe_inputs(expected) as inputs:
+    with _probe_signals(), _loaded_probe_inputs(expected) as inputs:
         return _produce_captured(expected, directory, deadline, *inputs)
 
 
@@ -649,6 +736,7 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
                       transport, selected, selection_raw):
     """Host-only producer using already captured, live source-bound inputs."""
     sources = {row["module"]: row for row in expected["production_sources"]}
+    transport_source = None
     for name in ("native_permission_probe", "native_probe_provider", "native_subscription_guard"):
         path = Path(__file__).with_name(name + ".py")
         pin = sources.get("data_sheets_schema." + name)
@@ -656,6 +744,8 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
         if pin != {"module": "data_sheets_schema." + name, "path": str(path.resolve()),
                    "sha256": sha(raw), "bytes": len(raw)}:
             raise ValueError("permission producer source is absent from selected production closure: " + name)
+        if name == "native_probe_provider":
+            transport_source = raw
     _identity(expected)
     directory = Path(directory)
     if not directory.is_absolute() or directory.parent.resolve(strict=True) != directory.parent:
@@ -672,43 +762,47 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
             raise ValueError("permission evidence directory overlaps protected authority")
     _remaining(deadline)
     directory.mkdir(mode=0o700)
-    (directory / "version-config").mkdir(mode=0o700)
-    source = read_regular(expected["source"]["path"], limit=p.MAX_MEMBER)
-    if sha(source) != expected["source"]["sha256"]:
-        raise ValueError("permission source differs from selected source")
-    files = {"policy.json": canonical(expected["policy"]), "source.before": source,
-             "version.txt": _version(expected, deadline, directory)}
-    files["selection.json"] = selection_raw
-    files.update({name: text.encode() for name, text in p.recipe_sources().items()})
-    for trace in p.TRACES:
-        rows = _trace(expected, directory / trace, deadline, controls, p, selected, transport, trace)
-        roster = rows.pop("cases.json")
-        if trace == "settled":
-            files["cases.json"] = roster
-        files.update({"traces/" + trace + "/" + name: raw for name, raw in rows.items()})
-    files["source.after"] = read_regular(expected["source"]["path"], limit=len(source) + 1)
-    _remaining(deadline)
-    _identity(expected)
-    manifest = {"kind": p.KIND, "version": p.VERSION, "origin": p.ORIGIN,
-                "binding": deepcopy(expected), "members": {}}
-    for name, raw in files.items():
-        _write_new(directory / "captured" / name, raw)
-        row = {"text": raw.decode("utf-8"), "sha256": sha(raw), "bytes": len(raw)}
-        manifest["members"][name] = row
-    raw_manifest = canonical(manifest)
-    reading = p.verify_saved_probe(raw_manifest, expected=expected, controls=controls,
-                                   controller_sources=controller_sources)
-    _remaining(deadline)
-    if reading.get("checked") is not True or reading.get("passed") is not True:
-        raise ValueError("actual permission observation did not pass its verifier")
-    _write_new(directory / "verification.json", canonical(reading))
-    transport = Path(__file__).with_name("native_probe_provider.py").read_bytes()
-    _write_new(directory / "transport-provider.py", transport)
-    _write_new(directory / "producer-evidence.json", canonical({
-        "kind": "d4d_native_probe_producer_evidence", "version": 1,
-        "manifest_sha256": sha(raw_manifest), "transport_source_sha256": sha(transport),
-        "selector_source_sha256": sha(files["recipe/provider.py"]),
-        "basis": "Actual transport source and fixed selector are distinct; no simulator or fallback."}))
-    output = directory / "permission-probe.json"
-    _write_new(output, raw_manifest)
-    return output
+    try:
+        _write_new(directory / "transport-provider.py", transport_source)
+        (directory / "version-config").mkdir(mode=0o700)
+        source = read_regular(expected["source"]["path"], limit=p.MAX_MEMBER)
+        if sha(source) != expected["source"]["sha256"]:
+            raise ValueError("permission source differs from selected source")
+        files = _RetainedMembers(directory / "captured")
+        files.update({"policy.json": canonical(expected["policy"]), "source.before": source})
+        files["selection.json"] = selection_raw
+        files.update({name: text.encode() for name, text in p.recipe_sources().items()})
+        files["version.txt"] = _version(expected, deadline, directory)
+        for trace in p.TRACES:
+            rows = _trace(expected, directory / trace, deadline, controls, p, selected, transport, trace)
+            roster = rows.pop("cases.json")
+            if trace == "settled":
+                files["cases.json"] = roster
+            files.update({"traces/" + trace + "/" + name: raw for name, raw in rows.items()})
+        files["source.after"] = read_regular(expected["source"]["path"], limit=len(source) + 1)
+        _remaining(deadline)
+        _identity(expected)
+        manifest = {"kind": p.KIND, "version": p.VERSION, "origin": p.ORIGIN,
+                    "binding": deepcopy(expected), "members": {}}
+        for name, raw in files.items():
+            row = {"text": raw.decode("utf-8"), "sha256": sha(raw), "bytes": len(raw)}
+            manifest["members"][name] = row
+        raw_manifest = canonical(manifest)
+        reading = p.verify_saved_probe(raw_manifest, expected=expected, controls=controls,
+                                       controller_sources=controller_sources)
+        _remaining(deadline)
+        if reading.get("checked") is not True or reading.get("passed") is not True:
+            raise ValueError("actual permission observation did not pass its verifier")
+        _write_new(directory / "verification.json", canonical(reading))
+        _write_new(directory / "producer-evidence.json", canonical({
+            "kind": "d4d_native_probe_producer_evidence", "version": 1,
+            "manifest_sha256": sha(raw_manifest), "transport_source_sha256": sha(transport_source),
+            "selector_source_sha256": sha(files["recipe/provider.py"]),
+            "basis": "Actual transport source and fixed selector are distinct; no simulator or fallback."}))
+        output = directory / "permission-probe.json"
+        _write_new(output, raw_manifest)
+        return output
+    except BaseException as exc:
+        _write_new(directory / 'failure.json', canonical({
+            'error_type': type(exc).__name__, 'message': str(exc)}))
+        raise

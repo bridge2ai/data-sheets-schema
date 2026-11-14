@@ -21,6 +21,22 @@ from tests.test_native_generation_frontdoor import saved_case
 _REAL_POPEN = probe.subprocess.Popen
 
 
+def test_permission_stop_unwinds_and_restores_handlers():
+    before = {number: probe.signal.getsignal(number)
+              for number in (probe.signal.SIGINT, probe.signal.SIGTERM)}
+    cleaned = []
+    with pytest.raises(InterruptedError, match="permission probe stopped"):
+        with probe._probe_signals():
+            try:
+                probe.signal.raise_signal(probe.signal.SIGTERM)
+            finally:
+                probe.signal.raise_signal(probe.signal.SIGTERM)
+                probe.signal.raise_signal(probe.signal.SIGINT)
+                cleaned.append(True)
+    assert cleaned == [True]
+    assert {number: probe.signal.getsignal(number) for number in before} == before
+
+
 def retained_binary(tmp_path):
     """Invented Mach-O-format bytes; tests never execute this file."""
     target = tmp_path / "claude-retained"
@@ -373,7 +389,8 @@ def test_unknown_or_legacy_producer_never_falls_back(tmp_path, monkeypatch, kind
     assert not out.exists()
 
 
-def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_case, tmp_path, monkeypatch):
+@pytest.mark.parametrize('fail_later', [False, True])
+def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_case, tmp_path, monkeypatch, fail_later):
     from data_sheets_schema import native_shared_permissions as p
     from data_sheets_schema import native_shared_permission_orchestration as verify
     expected = deepcopy(saved_case["expected"])
@@ -385,6 +402,13 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
     monkeypatch.setattr(probe, "_version", lambda expected, deadline, directory:
                         (expected["runtime"]["executable"]["version"] + "\n").encode())
     monkeypatch.setattr(probe, "local_provider", mock_provider)
+    transport_source = Path(provider.__file__).read_bytes()
+    actual_read_bytes = Path.read_bytes
+    def refuse_late_transport_read(path):
+        if path == Path(provider.__file__) and (directory / 'transport-provider.py').exists():
+            pytest.fail('transport source was reopened after its checked capture')
+        return actual_read_bytes(path)
+    monkeypatch.setattr(Path, 'read_bytes', refuse_late_transport_read)
     def git_only(argv, *args, **kwargs):
         if (not isinstance(argv, (list, tuple)) or Path(argv[0]).name != 'git'
                 or kwargs.get('shell')):
@@ -398,6 +422,8 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
         for event in events:
             try:
                 observer(event)
+                if fail_later and observer.trace != 'settled' and observer.session:
+                    raise TimeoutError('later trace failed')
             except transport.budget_stop:
                 assert observer.expected_stop
                 break
@@ -417,16 +443,27 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
             "shutdown": {"control_initialized": True, "control_shutdown_complete": True,
                          "unfinished_control_workers": 0, "child_reaped": True}}
     monkeypatch.setattr(probe, "_run_native", synthetic_run)
+    if fail_later:
+        with pytest.raises(TimeoutError, match='later trace failed'):
+            probe.produce_saved_probe(expected, directory, deadline_seconds=60)
+        assert (directory / 'captured/source.before').read_bytes() == source_raw
+        assert (directory / 'captured/traces/settled/outcome.json').is_file()
+        assert (directory / p.TRACES[1] / 'evidence_root/neutral.before.json').is_file()
+        assert (directory / p.TRACES[1] / 'launch.before.json').is_file()
+        assert guard.strict_json((directory / 'failure.json').read_bytes())['error_type'] == 'TimeoutError'
+        assert not (directory / 'permission-probe.json').exists()
+        return
     output = probe.produce_saved_probe(expected, directory, deadline_seconds=60)
     reading = verify.verify_saved_probe(output.read_bytes(), expected=expected)
     assert reading["passed"]
     assert len(reading["cases"]) == len(json.loads(manifest['members']['cases.json']['text']))
     assert len(reading["traces"]) == len(p.TRACES)
-    assert (directory / "transport-provider.py").read_bytes() == Path(provider.__file__).read_bytes()
+    assert (directory / "transport-provider.py").read_bytes() == transport_source
     assert all((directory / trace / "evidence_root" / "parent-stop.json").is_file()
                for trace in p.TRACES if trace != "settled")
     sidecar = guard.strict_json((directory / 'producer-evidence.json').read_bytes())
     assert sidecar['manifest_sha256'] == guard.sha(output.read_bytes())
+    assert sidecar['transport_source_sha256'] == guard.sha(transport_source)
     monkeypatch.setattr(probe, '_version', lambda *a: pytest.fail('spent path started another probe'))
     with pytest.raises(FileExistsError):
         probe.produce_saved_probe(expected, directory, deadline_seconds=60)
@@ -437,7 +474,27 @@ class FakePipe(io.BytesIO):
         return 123
 
 
-@pytest.mark.parametrize("mode", ["complete", "timeout", "control_start_error", "overflow"])
+@pytest.mark.parametrize('limit', [3, 100])
+def test_shutdown_tail_retains_bytes_and_explicitly_marks_truncation(limit):
+    read_fd, write_fd = os.pipe()
+    os.write(write_fd, b'last diagnostic')
+    os.close(write_fd)
+    with os.fdopen(read_fd, 'rb') as stream:
+        raw, status = probe._pipe_tail(stream, limit, time.monotonic() + 1)
+    assert raw == b'last diagnostic'[:limit]
+    assert status == ('byte_limit' if limit == 3 else 'eof')
+
+
+def test_shutdown_tail_times_out_on_inherited_open_pipe():
+    read_fd, write_fd = os.pipe()
+    try:
+        with os.fdopen(read_fd, 'rb') as stream:
+            assert probe._pipe_tail(stream, 100, time.monotonic() + .01) == (b'', 'time_limit')
+    finally:
+        os.close(write_fd)
+
+
+@pytest.mark.parametrize("mode", ["complete", "timeout", "control_start_error", "overflow", "sigterm"])
 def test_native_boundary_reaps_closes_and_retains_failed_evidence(tmp_path, monkeypatch, mode):
     class BudgetStop(Exception):
         pass
@@ -464,6 +521,8 @@ def test_native_boundary_reaps_closes_and_retains_failed_evidence(tmp_path, monk
             if mode == "control_start_error":
                 raise ValueError("injected start failure")
         def service(self):
+            if mode == "sigterm":
+                probe.signal.raise_signal(probe.signal.SIGTERM)
             if mode == "timeout":
                 raise TimeoutError("injected deadline")
             self.stdout_closed, process.returncode = True, 0
@@ -487,8 +546,9 @@ def test_native_boundary_reaps_closes_and_retains_failed_evidence(tmp_path, monk
         result = call()
         assert result["shutdown"]["child_reaped"]
     else:
-        with pytest.raises((ValueError, TimeoutError)):
-            call()
+        with pytest.raises((ValueError, TimeoutError, InterruptedError)):
+            with probe._probe_signals():
+                call()
     assert process.poll() is not None and len(signals) == 2
     assert all(stream.closed for stream in (process.stdin, process.stdout, process.stderr))
     assert b"synthetic-start" in (root / "transcript.jsonl").read_bytes()
@@ -632,3 +692,57 @@ def test_provider_stopping_closes_active_connection_without_socket():
     assert server.active_connection is None
     server.close_active_request()
     assert len(calls) == 2
+
+
+@pytest.mark.parametrize('fail_later', [False, True])
+def test_captured_inputs_survive_later_failure_without_authority_fixture(tmp_path, monkeypatch, fail_later):
+    """Mock process/consumer boundaries; exercise real incremental disk writes."""
+    source = tmp_path / 'source'
+    source.write_bytes(b'original source')
+    directory = tmp_path / 'evidence'
+    sources = []
+    for name in ('native_permission_probe', 'native_probe_provider', 'native_subscription_guard'):
+        path = Path(probe.__file__).with_name(name + '.py')
+        raw = path.read_bytes()
+        sources.append({'module': 'data_sheets_schema.' + name, 'path': str(path.resolve()),
+                        'bytes': len(raw), 'sha256': guard.sha(raw)})
+    expected = {'production_sources': sources, 'source': {'path': str(source), 'sha256': guard.sha(source.read_bytes())},
+        'runtime': {'executable': {'path': str(tmp_path / 'binary')}},
+        'selection': {'path': str(tmp_path / 'selection')}, 'permission_environment': {},
+        'policy': {'readonly_lookups': {'repository': str(tmp_path / 'repository'),
+                                     'inputs': [], 'output_directories': []}}}
+    selected = {'stage_root': str(tmp_path / 'stage')}
+    consumer = SimpleNamespace(MAX_MEMBER=probe.MAX_STREAM, TRACES=('settled', 'later'),
+        KIND='invented', VERSION=1, ORIGIN='invented', recipe_sources=lambda: {'recipe/provider.py': '# fixed'},
+        verify_saved_probe=lambda *a, **k: {'checked': True, 'passed': True})
+    transport_raw = Path(provider.__file__).read_bytes()
+    real_read = Path.read_bytes
+    def read(path):
+        if path == Path(provider.__file__):
+            pytest.fail('checked transport source reopened with Path.read_bytes')
+        return real_read(path)
+    monkeypatch.setattr(Path, 'read_bytes', read)
+    monkeypatch.setattr(probe, '_identity', lambda *a: None)
+    def version(*args):
+        assert (directory / 'captured/source.before').read_bytes() == b'original source'
+        assert (directory / 'captured/selection.json').read_bytes() == b'{}'
+        assert (directory / 'transport-provider.py').read_bytes() == transport_raw
+        return b'version\n'
+    monkeypatch.setattr(probe, '_version', version)
+    def trace(*args):
+        if args[-1] == 'later':
+            assert (directory / 'captured/traces/settled/outcome.json').read_bytes() == b'{}'
+            if fail_later:
+                raise TimeoutError('injected later failure')
+        return {'cases.json': b'[]', 'outcome.json': b'{}'}
+    monkeypatch.setattr(probe, '_trace', trace)
+    call = lambda: probe._produce_captured(expected, directory, time.monotonic() + 60,
+        consumer, {}, {}, object(), selected, b'{}')
+    if fail_later:
+        with pytest.raises(TimeoutError, match='injected later failure'):
+            call()
+        assert not (directory / 'permission-probe.json').exists()
+        assert guard.strict_json((directory / 'failure.json').read_bytes())['error_type'] == 'TimeoutError'
+    else:
+        assert call().is_file()
+        assert guard.strict_json((directory / 'producer-evidence.json').read_bytes())['transport_source_sha256'] == guard.sha(transport_raw)
